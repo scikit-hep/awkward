@@ -38,9 +38,11 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
         or isinstance(where, str)
         or (isinstance(where, Iterable) and all(isinstance(x, str) for x in where))
     ):
-        raise TypeError(
-            "New fields may only be assigned by field name(s) "
-            "or as a new integer slot by passing None for 'where'"
+        raise ak._v2._util.error(
+            TypeError(
+                "New fields may only be assigned by field name(s) "
+                "or as a new integer slot by passing None for 'where'"
+            )
         )
     if (
         not isinstance(where, str)
@@ -72,7 +74,9 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
         )
 
         if len(base.fields) == 0:
-            raise ValueError("no tuples or records in array; cannot add a new field")
+            raise ak._v2._util.error(
+                ValueError("no tuples or records in array; cannot add a new field")
+            )
 
         what = ak._v2.operations.convert.to_layout(
             what, allow_record=True, allow_other=True

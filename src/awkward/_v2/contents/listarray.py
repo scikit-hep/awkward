@@ -23,25 +23,35 @@ class ListArray(Content):
             np.dtype(np.uint32),
             np.dtype(np.int64),
         ):
-            raise TypeError(
-                "{} 'starts' must be an Index with dtype in (int32, uint32, int64), "
-                "not {}".format(type(self).__name__, repr(starts))
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'starts' must be an Index with dtype in (int32, uint32, int64), "
+                    "not {}".format(type(self).__name__, repr(starts))
+                )
             )
         if not (isinstance(stops, Index) and starts.dtype == stops.dtype):
-            raise TypeError(
-                "{} 'stops' must be an Index with the same dtype as 'starts' ({}), "
-                "not {}".format(type(self).__name__, repr(starts.dtype), repr(stops))
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'stops' must be an Index with the same dtype as 'starts' ({}), "
+                    "not {}".format(
+                        type(self).__name__, repr(starts.dtype), repr(stops)
+                    )
+                )
             )
         if not isinstance(content, Content):
-            raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'content' must be a Content subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if starts.length > stops.length:
-            raise ValueError(
-                "{} len(starts) ({}) must be <= len(stops) ({})".format(
-                    type(self).__name__, starts.length, stops.length
+            raise ak._v2._util.error(
+                ValueError(
+                    "{} len(starts) ({}) must be <= len(stops) ({})".format(
+                        type(self).__name__, starts.length, stops.length
+                    )
                 )
             )
         if nplike is None:
@@ -483,9 +493,11 @@ class ListArray(Content):
                     self._nplike,
                 )
             else:
-                raise AssertionError(
-                    "expected ListOffsetArray from ListArray._getitem_next_jagged, got {}".format(
-                        type(out).__name__
+                raise ak._v2._util.error(
+                    AssertionError(
+                        "expected ListOffsetArray from ListArray._getitem_next_jagged, got {}".format(
+                            type(out).__name__
+                        )
                     )
                 )
 
@@ -493,9 +505,11 @@ class ListArray(Content):
             return self
 
         else:
-            raise AssertionError(
-                "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {}".format(
-                    type(slicecontent).__name__
+            raise ak._v2._util.error(
+                AssertionError(
+                    "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {}".format(
+                        type(slicecontent).__name__
+                    )
                 )
             )
 
@@ -817,7 +831,7 @@ class ListArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -924,12 +938,14 @@ class ListArray(Content):
             elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                 pass
             else:
-                raise ValueError(
-                    "cannot merge "
-                    + type(self).__name__
-                    + " with "
-                    + type(array).__name__
-                    + "."
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot merge "
+                        + type(self).__name__
+                        + " with "
+                        + type(array).__name__
+                        + "."
+                    )
                 )
 
         tail_contents = contents[1:]
@@ -1393,7 +1409,7 @@ class ListArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         return self.toListOffsetArray64(True).packed()

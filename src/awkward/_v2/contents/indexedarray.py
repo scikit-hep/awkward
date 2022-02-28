@@ -25,14 +25,18 @@ class IndexedArray(Content):
                 np.dtype(np.int64),
             )
         ):
-            raise TypeError(
-                "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
-                "not {}".format(type(self).__name__, repr(index))
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                    "not {}".format(type(self).__name__, repr(index))
+                )
             )
         if not isinstance(content, Content):
-            raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'content' must be a Content subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if nplike is None:
@@ -256,20 +260,22 @@ class IndexedArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def project(self, mask=None):
         if mask is not None:
             if self._index.length != mask.length:
-                raise ValueError(
-                    "mask length ({}) is not equal to {} length ({})".format(
-                        mask.length(), type(self).__name__, self._index.length
+                raise ak._v2._util.error(
+                    ValueError(
+                        "mask length ({}) is not equal to {} length ({})".format(
+                            mask.length(), type(self).__name__, self._index.length
+                        )
                     )
                 )
             nextindex = ak._v2.index.Index64.empty(self._index.length, self._nplike)
@@ -414,7 +420,7 @@ class IndexedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise np.AxisError(self, "axis=0 not allowed for flatten")
+            raise ak._v2._util.error(np.AxisError("axis=0 not allowed for flatten"))
 
         else:
             return self.project()._offsets_and_flattened(posaxis, depth)
@@ -449,8 +455,10 @@ class IndexedArray(Content):
 
     def _merging_strategy(self, others):
         if len(others) == 0:
-            raise ValueError(
-                "to merge this array with 'others', at least one other must be provided"
+            raise ak._v2._util.error(
+                ValueError(
+                    "to merge this array with 'others', at least one other must be provided"
+                )
             )
 
         head = [self]
@@ -617,13 +625,17 @@ class IndexedArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-        raise NotImplementedError(
-            "not implemented: " + type(self).__name__ + " ::mergemany"
+        raise ak._v2._util.error(
+            NotImplementedError(
+                "not implemented: " + type(self).__name__ + " ::mergemany"
+            )
         )
 
     def fillna(self, value):
         if value.length != 1:
-            raise ValueError(f"fillna value length ({value.length}) is not equal to 1")
+            raise ak._v2._util.error(
+                ValueError(f"fillna value length ({value.length}) is not equal to 1")
+            )
 
         return IndexedArray(
             self._index,
@@ -803,10 +815,12 @@ class IndexedArray(Content):
 
             elif isinstance(unique, ak._v2.contents.ListOffsetArray):
                 if starts.length > 0 and starts[0] != 0:
-                    raise AssertionError(
-                        "reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray64 whose offsets start at zero ({})".format(
-                            starts[0]
+                    raise ak._v2._util.error(
+                        AssertionError(
+                            "reduce_next with unbranching depth > negaxis expects a "
+                            "ListOffsetArray64 whose offsets start at zero ({})".format(
+                                starts[0]
+                            )
                         )
                     )
 
@@ -857,7 +871,7 @@ class IndexedArray(Content):
 
                 return out
 
-        raise NotImplementedError
+        raise ak._v2._util.error(NotImplementedError)
 
     def _argsort_next(
         self,
@@ -984,10 +998,12 @@ class IndexedArray(Content):
 
             elif isinstance(out, ak._v2.contents.ListOffsetArray):
                 if starts.length > 0 and starts[0] != 0:
-                    raise AssertionError(
-                        "reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray64 whose offsets start at zero ({})".format(
-                            starts[0]
+                    raise ak._v2._util.error(
+                        AssertionError(
+                            "reduce_next with unbranching depth > negaxis expects a "
+                            "ListOffsetArray64 whose offsets start at zero ({})".format(
+                                starts[0]
+                            )
                         )
                     )
 
@@ -1025,10 +1041,12 @@ class IndexedArray(Content):
                 )
 
             else:
-                raise AssertionError(
-                    "reduce_next with unbranching depth > negaxis is only "
-                    "expected to return RegularArray or ListOffsetArray64; "
-                    "instead, it returned " + out.classname
+                raise ak._v2._util.error(
+                    AssertionError(
+                        "reduce_next with unbranching depth > negaxis is only "
+                        "expected to return RegularArray or ListOffsetArray64; "
+                        "instead, it returned " + out.classname
+                    )
                 )
 
     def _validityerror(self, path):
@@ -1183,7 +1201,7 @@ class IndexedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         return self.project().packed()

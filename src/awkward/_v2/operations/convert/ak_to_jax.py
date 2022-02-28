@@ -6,7 +6,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def to_jax(array):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
 
 #     """
@@ -25,12 +25,12 @@ def to_jax(array):
 #     try:
 #         import jax
 #     except ImportError:
-#         raise ImportError(
+#         raise ak._v2._util.error(ImportError(
 #             """to use {0}, you must install jax:
 
 #                 pip install jax jaxlib
 #             """
-#         )
+#         ))
 
 #     if isinstance(array, (bool, numbers.Number)):
 #         return jax.numpy.array([array])[0]
@@ -45,10 +45,10 @@ def to_jax(array):
 #         return to_jax(array.layout)
 
 #     elif isinstance(array, ak._v2.highlevel.Record):
-#         raise ValueError(
+#         raise ak._v2._util.error(ValueError(
 #             "JAX does not support record structures"
 #
-#         )
+#         ))
 
 #     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
 #         return to_jax(array.snapshot().layout)
@@ -60,10 +60,10 @@ def to_jax(array):
 #         ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring"
 #         or ak._v2.operations.describe.parameters(array).get("__array__") == "string"
 #     ):
-#         raise ValueError(
+#         raise ak._v2._util.error(ValueError(
 #             "JAX does not support arrays of strings"
 #
-#         )
+#         ))
 
 #     elif isinstance(array, ak.partition.PartitionedArray):   # NO PARTITIONED ARRAY
 #         return jax.numpy.concatenate([to_jax(x) for x in array.partitions])
@@ -80,10 +80,10 @@ def to_jax(array):
 #     elif isinstance(array, ak._v2._util.uniontypes):
 #         array = array.simplify()
 #         if isinstance(array, ak._v2._util.uniontypes):
-#             raise ValueError(
+#             raise ak._v2._util.error(ValueError(
 #                 "cannot convert {0} into jax.numpy.array".format(array)
 #
-#             )
+#             ))
 #         return to_jax(array)
 
 #     elif isinstance(array, ak._v2.contents.UnmaskedArray):
@@ -96,10 +96,9 @@ def to_jax(array):
 #         shape[0] = len(array)
 #         mask0 = jax.numpy.asarray(array.bytemask()).view(np.bool_)
 #         if mask0.any():
-#             raise ValueError(
+#             raise ak._v2._util.error(ValueError(
 #                 "JAX does not support masked arrays"
-#
-#             )
+#             ))
 #         else:
 #             return content
 
@@ -113,25 +112,22 @@ def to_jax(array):
 #         return to_jax(array.toRegularArray())
 
 #     elif isinstance(array, ak._v2._util.recordtypes):
-#         raise ValueError(
+#         raise ak._v2._util.error(ValueError(
 #             "JAX does not support record structures"
-#
-#         )
+#         ))
 
 #     elif isinstance(array, ak._v2.contents.NumpyArray):
 #         return array.to_jax()
 
 #     elif isinstance(array, ak._v2.contents.Content):
-#         raise AssertionError(
+#         raise ak._v2._util.error(AssertionError(
 #             "unrecognized Content type: {0}".format(type(array))
-#
-#         )
+#         ))
 
 #     elif isinstance(array, Iterable):
 #         return jax.numpy.asarray(array)
 
 #     else:
-#         raise ValueError(
+#         raise ak._v2._util.error(ValueError(
 #             "cannot convert {0} into jax.numpy.array".format(array)
-#
-#         )
+#         ))

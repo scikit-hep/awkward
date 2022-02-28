@@ -91,7 +91,7 @@ def to_json(
         out = array
 
     else:
-        raise TypeError(f"unrecognized array type: {repr(array)}")
+        raise ak._v2._util.error(TypeError(f"unrecognized array type: {repr(array)}"))
 
     if complex_record_fields is None:
         complex_real_string = None

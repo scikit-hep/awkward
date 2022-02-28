@@ -28,18 +28,22 @@ class RecordArray(Content):
         nplike=None,
     ):
         if not isinstance(contents, Iterable):
-            raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'contents' must be iterable, not {}".format(
+                        type(self).__name__, repr(contents)
+                    )
                 )
             )
         if not isinstance(contents, list):
             contents = list(contents)
 
         if len(contents) == 0 and length is None:
-            raise TypeError(
-                "{} if len(contents) == 0, a 'length' must be specified".format(
-                    type(self).__name__
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} if len(contents) == 0, a 'length' must be specified".format(
+                        type(self).__name__
+                    )
                 )
             )
         elif length is None:
@@ -47,22 +51,28 @@ class RecordArray(Content):
         if not isinstance(length, ak._v2._typetracer.UnknownLengthType) and not (
             ak._util.isint(length) and length >= 0
         ):
-            raise TypeError(
-                "{} 'length' must be a non-negative integer or None, not {}".format(
-                    type(self).__name__, repr(length)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'length' must be a non-negative integer or None, not {}".format(
+                        type(self).__name__, repr(length)
+                    )
                 )
             )
         for content in contents:
             if not isinstance(content, Content):
-                raise TypeError(
-                    "{} all 'contents' must be Content subclasses, not {}".format(
-                        type(self).__name__, repr(content)
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} all 'contents' must be Content subclasses, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
                     )
                 )
             if content.length < length:
-                raise ValueError(
-                    "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
-                        type(self).__name__, content.length, length
+                raise ak._v2._util.error(
+                    ValueError(
+                        "{} len(content) ({}) must be >= length ({}) for all 'contents'".format(
+                            type(self).__name__, content.length, length
+                        )
                     )
                 )
 
@@ -70,21 +80,27 @@ class RecordArray(Content):
             if not isinstance(fields, list):
                 fields = list(fields)
             if not all(ak._util.isstr(x) for x in fields):
-                raise TypeError(
-                    "{} 'fields' must all be strings, not {}".format(
-                        type(self).__name__, repr(fields)
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} 'fields' must all be strings, not {}".format(
+                            type(self).__name__, repr(fields)
+                        )
                     )
                 )
             if not len(contents) == len(fields):
-                raise ValueError(
-                    "{} len(contents) ({}) must be equal to len(fields) ({})".format(
-                        type(self).__name__, len(contents), len(fields)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "{} len(contents) ({}) must be equal to len(fields) ({})".format(
+                            type(self).__name__, len(contents), len(fields)
+                        )
                     )
                 )
         elif fields is not None:
-            raise TypeError(
-                "{} 'fields' must be iterable or None, not {}".format(
-                    type(self).__name__, repr(fields)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'fields' must be iterable or None, not {}".format(
+                        type(self).__name__, repr(fields)
+                    )
                 )
             )
         if nplike is None:
@@ -93,11 +109,13 @@ class RecordArray(Content):
                     nplike = content.nplike
                     break
                 elif nplike is not content.nplike:
-                    raise TypeError(
-                        "{} 'contents' must use the same array library (nplike): {} vs {}".format(
-                            type(self).__name__,
-                            type(nplike).__name__,
-                            type(content.nplike).__name__,
+                    raise ak._v2._util.error(
+                        TypeError(
+                            "{} 'contents' must use the same array library (nplike): {} vs {}".format(
+                                type(self).__name__,
+                                type(nplike).__name__,
+                                type(content.nplike).__name__,
+                            )
                         )
                     )
         if nplike is None:
@@ -436,11 +454,13 @@ class RecordArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise np.AxisError(self, "axis=0 not allowed for flatten")
+            raise ak._v2._util.error(np.AxisError("axis=0 not allowed for flatten"))
 
         elif posaxis == depth + 1:
-            raise ValueError(
-                "arrays of records cannot be flattened (but their contents can be; try a different 'axis')"
+            raise ak._v2._util.error(
+                ValueError(
+                    "arrays of records cannot be flattened (but their contents can be; try a different 'axis')"
+                )
             )
 
         else:
@@ -449,8 +469,10 @@ class RecordArray(Content):
                 trimmed = content._getitem_range(slice(0, self.length))
                 offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
                 if offsets.length != 0:
-                    raise AssertionError(
-                        "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
+                    raise ak._v2._util.error(
+                        AssertionError(
+                            "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
+                        )
                     )
                 contents.append(flattened)
             offsets = ak._v2.index.Index64.zeros(1, self._nplike, dtype=np.int64)
@@ -544,19 +566,25 @@ class RecordArray(Content):
                                 field = array[self.index_to_field(i)]
                                 for_each_field[i].append(field[0 : array.length])
                         else:
-                            raise ValueError(
-                                "cannot merge tuples with different numbers of fields"
+                            raise ak._v2._util.error(
+                                ValueError(
+                                    "cannot merge tuples with different numbers of fields"
+                                )
                             )
                     else:
-                        raise ValueError("cannot merge tuple with non-tuple record")
+                        raise ak._v2._util.error(
+                            ValueError("cannot merge tuple with non-tuple record")
+                        )
                 elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                     pass
                 else:
-                    raise AssertionError(
-                        "cannot merge "
-                        + type(self).__name__
-                        + " with "
-                        + type(array).__name__
+                    raise ak._v2._util.error(
+                        AssertionError(
+                            "cannot merge "
+                            + type(self).__name__
+                            + " with "
+                            + type(array).__name__
+                        )
                     )
 
         else:
@@ -576,20 +604,26 @@ class RecordArray(Content):
                                 trimmed = field[0 : array.length]
                                 for_each_field[i].append(trimmed)
                         else:
-                            raise AssertionError(
-                                "cannot merge records with different sets of field names"
+                            raise ak._v2._util.error(
+                                AssertionError(
+                                    "cannot merge records with different sets of field names"
+                                )
                             )
                     else:
-                        raise AssertionError("cannot merge non-tuple record with tuple")
+                        raise ak._v2._util.error(
+                            AssertionError("cannot merge non-tuple record with tuple")
+                        )
 
                 elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                     pass
                 else:
-                    raise AssertionError(
-                        "cannot merge "
-                        + type(self).__name__
-                        + " with "
-                        + type(array).__name__
+                    raise ak._v2._util.error(
+                        AssertionError(
+                            "cannot merge "
+                            + type(self).__name__
+                            + " with "
+                            + type(array).__name__
+                        )
                     )
 
         nextcontents = []
@@ -621,8 +655,10 @@ class RecordArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-        raise NotImplementedError(
-            "not implemented: " + type(self).__name__ + " ::mergemany"
+        raise ak._v2._util.error(
+            NotImplementedError(
+                "not implemented: " + type(self).__name__ + " ::mergemany"
+            )
         )
 
     def fillna(self, value):
@@ -675,7 +711,7 @@ class RecordArray(Content):
         return True
 
     def _unique(self, negaxis, starts, parents, outlength):
-        raise NotImplementedError
+        raise ak._v2._util.error(NotImplementedError)
 
     def _argsort_next(
         self,
@@ -694,7 +730,7 @@ class RecordArray(Content):
                 self._nplike.empty(0, np.int64), None, None, self._nplike
             )
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
@@ -854,7 +890,9 @@ class RecordArray(Content):
             return self._nplike.empty(self.length, dtype=[])
         contents = [x._to_numpy(allow_missing) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
-            raise ValueError(f"cannot convert {self} into np.ndarray")
+            raise ak._v2._util.error(
+                ValueError(f"cannot convert {self} into np.ndarray")
+            )
         out = self._nplike.empty(
             contents[0].shape[0],
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
@@ -885,9 +923,11 @@ class RecordArray(Content):
             in_function = ""
             if options["function_name"] is not None:
                 in_function = " in " + options["function_name"]
-            raise TypeError(
-                "cannot combine record fields{} unless flatten_records=True".format(
-                    in_function
+            raise ak._v2._util.error(
+                TypeError(
+                    "cannot combine record fields{} unless flatten_records=True".format(
+                        in_function
+                    )
                 )
             )
 
@@ -941,7 +981,7 @@ class RecordArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         return RecordArray(

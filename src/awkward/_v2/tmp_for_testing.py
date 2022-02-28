@@ -8,7 +8,7 @@ def v1v2_id_equal(v1, v2):
     if v1 is None and v2 is None:
         return True
     else:
-        raise NotImplementedError("Identities/Identifier equality")
+        raise ak._v2._util.error(NotImplementedError("Identities/Identifier equality"))
 
 
 def v1v2_equal(v1, v2):
@@ -160,17 +160,17 @@ def v1v2_equal(v1, v2):
     elif isinstance(v1, ak.layout.VirtualArray) and isinstance(
         v2, ak._v2.contents.VirtualArray
     ):
-        raise AssertionError("VirtualArray is v1 only")
+        raise ak._v2._util.error(AssertionError("VirtualArray is v1 only"))
 
     else:
-        raise AssertionError(f"{type(v1)} vs {type(v2)}")
+        raise ak._v2._util.error(AssertionError(f"{type(v1)} vs {type(v2)}"))
 
 
 def v1_to_v2_id(v1):
     if v1 is None:
         return None
     else:
-        raise NotImplementedError("Identities to Identifier")
+        raise ak._v2._util.error(NotImplementedError("Identities to Identifier"))
 
 
 def fix(array):
@@ -332,17 +332,17 @@ def v1_to_v2(v1):
         )
 
     elif isinstance(v1, ak.layout.VirtualArray):
-        raise AssertionError("VirtualArray is v1 only")
+        raise ak._v2._util.error(AssertionError("VirtualArray is v1 only"))
 
     else:
-        raise AssertionError(type(v1))
+        raise ak._v2._util.error(AssertionError(type(v1)))
 
 
 def v2_to_v1_id(v1):
     if v1 is None:
         return None
     else:
-        raise NotImplementedError("Identifier to Identities")
+        raise ak._v2._util.error(NotImplementedError("Identifier to Identities"))
 
 
 def v2_to_v1(v2):
@@ -492,7 +492,7 @@ def v2_to_v1(v2):
         )
 
     else:
-        raise AssertionError(type(v2))
+        raise ak._v2._util.error(AssertionError(type(v2)))
 
 
 def v1_to_v2_index(v1):
@@ -523,4 +523,4 @@ def v1_to_v2_index(v1):
         return ak._v2.index.Index64(np.asarray(v1))
 
     else:
-        raise AssertionError(type(v1))
+        raise ak._v2._util.error(AssertionError(type(v1)))

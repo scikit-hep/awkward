@@ -56,8 +56,10 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
             elif posaxis == depth and layout.is_ListType:
                 return layout
             elif posaxis == 0:
-                raise np.AxisError(
-                    f"axis={axis} exceeds the depth of this array ({depth})"
+                raise ak._v2._util.error(
+                    np.AxisError(
+                        f"axis={axis} exceeds the depth of this array ({depth})"
+                    )
                 )
 
             depth_context["posaxis"] = posaxis

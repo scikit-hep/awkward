@@ -249,11 +249,13 @@ def cartesian(
 
     posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
     if posaxis < 0:
-        raise ValueError("negative axis depth is ambiguous")
+        raise ak._v2._util.error(ValueError("negative axis depth is ambiguous"))
     for x in new_arrays_values[1:]:
         if x.axis_wrap_if_negative(axis) != posaxis:
-            raise ValueError(
-                "arrays to cartesian-product do not have the same depth for negative axis"
+            raise ak._v2._util.error(
+                ValueError(
+                    "arrays to cartesian-product do not have the same depth for negative axis"
+                )
             )
 
     if posaxis == 0:
@@ -264,9 +266,11 @@ def cartesian(
             if nested is True:
                 nested = list(new_arrays.keys())  # last key is ignored below
             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
-                raise ValueError(
-                    "the 'nested' parameter of cartesian must be dict keys "
-                    "for a dict of arrays"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "the 'nested' parameter of cartesian must be dict keys "
+                        "for a dict of arrays"
+                    )
                 )
             fields = []
             layouts = []
@@ -285,9 +289,11 @@ def cartesian(
                 not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                 for x in nested
             ):
-                raise ValueError(
-                    "the 'nested' prarmeter of cartesian must be integers in "
-                    "[0, len(arrays) - 1) for an iterable of arrays"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "the 'nested' prarmeter of cartesian must be integers in "
+                        "[0, len(arrays) - 1) for an iterable of arrays"
+                    )
                 )
             fields = None
             layouts = []
@@ -338,9 +344,11 @@ def cartesian(
                         layout.parameter("__array__") == "string"
                         or layout.parameter("__array__") == "bytestring"
                     ):
-                        raise ValueError(
-                            "ak.cartesian does not compute combinations of the "
-                            "characters of a string; please split it into lists"
+                        raise ak._v2._util.error(
+                            ValueError(
+                                "ak.cartesian does not compute combinations of the "
+                                "characters of a string; please split it into lists"
+                            )
                         )
                     nextlayout = layout.recursively_apply(getgetfunction1(inside))
                     return newaxis(nextlayout, outside)
@@ -363,9 +371,11 @@ def cartesian(
             if nested is True:
                 nested = list(new_arrays.keys())  # last key is ignored below
             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
-                raise ValueError(
-                    "the 'nested' parameter of cartesian must be dict keys "
-                    "for a dict of arrays"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "the 'nested' parameter of cartesian must be dict keys "
+                        "for a dict of arrays"
+                    )
                 )
             fields = []
             layouts = []
@@ -382,9 +392,11 @@ def cartesian(
                 not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                 for x in nested
             ):
-                raise ValueError(
-                    "the 'nested' parameter of cartesian must be integers in "
-                    "[0, len(arrays) - 1) for an iterable of arrays"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "the 'nested' parameter of cartesian must be integers in "
+                        "[0, len(arrays) - 1) for an iterable of arrays"
+                    )
                 )
             fields = None
             layouts = []

@@ -135,7 +135,7 @@ class EmptyArray(Content):
             raise ak._v2._util.indexerror(self, head, "array is empty")
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -153,7 +153,9 @@ class EmptyArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise np.AxisError(self, "axis=0 not allowed for flatten")
+            raise ak._v2._util.error(
+                np.AxisError(self, "axis=0 not allowed for flatten")
+            )
         else:
             offsets = ak._v2.index.Index64.zeros(1, self._nplike)
             return (offsets, EmptyArray(None, self._parameters, self._nplike))
@@ -262,7 +264,9 @@ class EmptyArray(Content):
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
+            raise ak._v2._util.error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
+            )
         else:
             return self.rpad_axis0(target, True)
 
@@ -325,7 +329,7 @@ class EmptyArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         return self

@@ -25,6 +25,6 @@ def validity_error(array, exception=False):
     out = layout.validityerror(path="highlevel")
 
     if out not in (None, "") and exception:
-        raise ValueError(out)
+        raise ak._v2._util.error(ValueError(out))
     else:
         return out

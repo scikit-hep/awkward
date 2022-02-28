@@ -25,22 +25,28 @@ class Content:
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
         ):
-            raise TypeError(
-                "{} 'identifier' must be an Identifier or None, not {}".format(
-                    type(self).__name__, repr(identifier)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'identifier' must be an Identifier or None, not {}".format(
+                        type(self).__name__, repr(identifier)
+                    )
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{} 'parameters' must be a dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'parameters' must be a dict or None, not {}".format(
+                        type(self).__name__, repr(parameters)
+                    )
                 )
             )
 
         if nplike is not None and not isinstance(nplike, ak.nplike.NumpyLike):
-            raise TypeError(
-                "{} 'nplike' must be an ak.nplike.NumpyLike or None, not {}".format(
-                    type(self).__name__, repr(nplike)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'nplike' must be an ak.nplike.NumpyLike or None, not {}".format(
+                        type(self).__name__, repr(nplike)
+                    )
                 )
             )
 
@@ -95,9 +101,11 @@ class Content:
                 return out
 
         else:
-            raise TypeError(
-                "form_key must be None, a string, or a callable, not {}".format(
-                    type(form_key)
+            raise ak._v2._util.error(
+                TypeError(
+                    "form_key must be None, a string, or a callable, not {}".format(
+                        type(form_key)
+                    )
                 )
             )
 
@@ -116,8 +124,8 @@ class Content:
         if nplike is None:
             nplike = self._nplike
         if not nplike.known_data:
-            raise TypeError(
-                "cannot call 'to_buffers' on an array without concrete data"
+            raise ak._v2._util.error(
+                TypeError("cannot call 'to_buffers' on an array without concrete data")
             )
 
         if ak._v2._util.isstr(buffer_key):
@@ -136,15 +144,19 @@ class Content:
                 )
 
         else:
-            raise TypeError(
-                "buffer_key must be a string or a callable, not {}".format(
-                    type(buffer_key)
+            raise ak._v2._util.error(
+                TypeError(
+                    "buffer_key must be a string or a callable, not {}".format(
+                        type(buffer_key)
+                    )
                 )
             )
 
         if form_key is None:
-            raise TypeError(
-                "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
+            raise ak._v2._util.error(
+                TypeError(
+                    "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
+                )
             )
 
         form = self.form_with_key(form_key=form_key, id_start=id_start)
@@ -184,7 +196,7 @@ class Content:
             message = error.str.decode(errors="surrogateescape")
 
             if error.pass_through:
-                raise ValueError(message + filename)
+                raise ak._v2._util.error(ValueError(message + filename))
 
             else:
                 if error.id != ak._util.kSliceNone and self._identifier is not None:
@@ -197,7 +209,7 @@ class Content:
                 message += filename
 
                 if slicer is None:
-                    raise ValueError(message)
+                    raise ak._v2._util.error(ValueError(message))
                 else:
                     raise ak._v2._util.indexerror(self, slicer, message)
 
@@ -214,7 +226,7 @@ class Content:
             message = error.str.decode(errors="surrogateescape")
 
             if error.pass_through:
-                raise ValueError(message + filename)
+                raise ak._v2._util.error(ValueError(message + filename))
 
             else:
                 if error.attempt != ak._util.kSliceNone:
@@ -222,26 +234,34 @@ class Content:
 
                 message += filename
 
-                raise ValueError(message)
+                raise ak._v2._util.error(ValueError(message))
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        raise TypeError(
-            "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+        raise ak._v2._util.error(
+            TypeError(
+                "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+            )
         )
 
     def __array_function__(self, func, types, args, kwargs):
-        raise TypeError(
-            "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+        raise ak._v2._util.error(
+            TypeError(
+                "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+            )
         )
 
     def __array__(self, **kwargs):
-        raise TypeError(
-            "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak._v2.highlevel.Array"
+        raise ak._v2._util.error(
+            TypeError(
+                "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak._v2.highlevel.Array"
+            )
         )
 
     def __iter__(self):
         if not self._nplike.known_data:
-            raise TypeError("cannot iterate on an array without concrete data")
+            raise ak._v2._util.error(
+                TypeError("cannot iterate on an array without concrete data")
+            )
 
         for i in range(len(self)):
             yield self._getitem_at(i)
@@ -397,7 +417,9 @@ class Content:
 
         if isinstance(head.content, ak._v2.contents.listoffsetarray.ListOffsetArray):
             if self.nplike.known_shape and self.length != 1:
-                raise NotImplementedError("reached a not-well-considered code path")
+                raise ak._v2._util.error(
+                    NotImplementedError("reached a not-well-considered code path")
+                )
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
         if isinstance(head.content, ak._v2.contents.numpyarray.NumpyArray):
@@ -425,9 +447,11 @@ class Content:
                         )
                     )
                 else:
-                    raise NotImplementedError(
-                        "FIXME: unhandled case of SliceMissing with RecordArray containing {}".format(
-                            content
+                    raise ak._v2._util.error(
+                        NotImplementedError(
+                            "FIXME: unhandled case of SliceMissing with RecordArray containing {}".format(
+                                content
+                            )
                         )
                     )
 
@@ -441,9 +465,15 @@ class Content:
             )
 
         else:
-            raise NotImplementedError(
-                f"FIXME: unhandled case of SliceMissing with {nextcontent}"
+            raise ak._v2._util.error(
+                NotImplementedError(
+                    f"FIXME: unhandled case of SliceMissing with {nextcontent}"
+                )
             )
+
+    def __getitem__(self, where):
+        with ak._v2._util.SlicingErrorContext(self, where):
+            return self._getitem(where)
 
     def _getitem(self, where):
         if ak._util.isint(where):
@@ -523,9 +553,11 @@ class Content:
                     wheres = self._nplike.nonzero(where.data)
                     return self._getitem(wheres)
             else:
-                raise TypeError(
-                    "array slice must be an array of integers or booleans, not\n\n    {}".format(
-                        repr(where.data).replace("\n", "\n    ")
+                raise ak._v2._util.error(
+                    TypeError(
+                        "array slice must be an array of integers or booleans, not\n\n    {}".format(
+                            repr(where.data).replace("\n", "\n    ")
+                        )
                     )
                 )
 
@@ -554,17 +586,15 @@ class Content:
                 )
 
         else:
-            raise TypeError(
-                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-                "integer/boolean arrays (possibly with variable-length nested "
-                "lists or missing values), field name (str) or names (non-tuple "
-                "iterable of str) are valid indices for slicing, not\n\n    "
-                + repr(where).replace("\n", "\n    ")
+            raise ak._v2._util.error(
+                TypeError(
+                    "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                    "integer/boolean arrays (possibly with variable-length nested "
+                    "lists or missing values), field name (str) or names (non-tuple "
+                    "iterable of str) are valid indices for slicing, not\n\n    "
+                    + repr(where).replace("\n", "\n    ")
+                )
             )
-
-    def __getitem__(self, where):
-        with ak._v2._util.SlicingErrorContext(self, where):
-            return self._getitem(where)
 
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak._v2.index.Index)
@@ -588,7 +618,7 @@ class Content:
             elif carry.length < self.length:
                 return self._getitem_range(slice(0, carry.length))
             else:
-                raise IndexError
+                raise ak._v2._util.error(IndexError)
         else:
             return None
 
@@ -596,31 +626,31 @@ class Content:
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def _range_identifier(self, start, stop):
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def _field_identifier(self, field):
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def _fields_identifier(self, fields):
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def _carry_identifier(self, carry):
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def axis_wrap_if_negative(self, axis):
         if axis is None or axis >= 0:
@@ -631,15 +661,19 @@ class Content:
         if mindepth == depth and maxdepth == depth:
             posaxis = depth + axis
             if posaxis < 0:
-                raise np.AxisError(
-                    f"axis={axis} exceeds the depth ({depth}) of this array"
+                raise ak._v2._util.error(
+                    np.AxisError(
+                        f"axis={axis} exceeds the depth ({depth}) of this array"
+                    )
                 )
             return posaxis
 
         elif mindepth + axis == 0:
-            raise np.AxisError(
-                "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
-                    axis, depth
+            raise ak._v2._util.error(
+                np.AxisError(
+                    "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
+                        axis, depth
+                    )
                 )
             )
 
@@ -694,8 +728,10 @@ class Content:
 
     def _merging_strategy(self, others):
         if len(others) == 0:
-            raise ValueError(
-                "to merge this array with 'others', at least one other must be provided"
+            raise ak._v2._util.error(
+                ValueError(
+                    "to merge this array with 'others', at least one other must be provided"
+                )
             )
 
         head = [self]
@@ -747,31 +783,37 @@ class Content:
 
     def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
         if axis is None:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
         negaxis = -axis
         branch, depth = self.branch_depth
 
         if branch:
             if negaxis <= 0:
-                raise ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves of "
-                    "the tree; non-negative from the root)"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves of "
+                        "the tree; non-negative from the root)"
+                    )
                 )
             if negaxis > depth:
-                raise ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} "
-                    "from the leaves".format(axis, depth)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} "
+                        "from the leaves".format(axis, depth)
+                    )
                 )
         else:
             if negaxis <= 0:
                 negaxis += depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "axis={} exceeds the depth of the nested list structure "
+                        "(which is {})".format(axis, depth)
+                    )
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -825,25 +867,31 @@ class Content:
         branch, depth = self.branch_depth
         if branch:
             if negaxis <= 0:
-                raise ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves "
-                    "of the tree; non-negative from the root)"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves "
+                        "of the tree; non-negative from the root)"
+                    )
                 )
             if negaxis > depth:
-                raise ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} from the leaves".format(
-                        axis, depth
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} from the leaves".format(
+                            axis, depth
+                        )
                     )
                 )
         else:
             if negaxis <= 0:
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "axis={} exceeds the depth of the nested list structure "
+                        "(which is {})".format(axis, depth)
+                    )
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -865,25 +913,31 @@ class Content:
         branch, depth = self.branch_depth
         if branch:
             if negaxis <= 0:
-                raise ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves "
-                    "of the tree; non-negative from the root)"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves "
+                        "of the tree; non-negative from the root)"
+                    )
                 )
             if negaxis > depth:
-                raise ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} from the leaves".format(
-                        axis, depth
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} from the leaves".format(
+                            axis, depth
+                        )
                     )
                 )
         else:
             if negaxis <= 0:
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "axis={} exceeds the depth of the nested list structure "
+                        "(which is {})".format(axis, depth)
+                    )
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -961,13 +1015,17 @@ class Content:
 
     def combinations(self, n, replacement=False, axis=1, fields=None, parameters=None):
         if n < 1:
-            raise ValueError("in combinations, 'n' must be at least 1")
+            raise ak._v2._util.error(
+                ValueError("in combinations, 'n' must be at least 1")
+            )
 
         recordlookup = None
         if fields is not None:
             recordlookup = fields
             if len(recordlookup) != n:
-                raise ValueError("if provided, the length of 'fields' must be 'n'")
+                raise ak._v2._util.error(
+                    ValueError("if provided, the length of 'fields' must be 'n'")
+                )
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
     def validityerror_parameters(self, path):
@@ -1093,25 +1151,31 @@ class Content:
                 branch, depth = self.branch_depth
                 if branch:
                     if negaxis <= 0:
-                        raise np.AxisError(
-                            "cannot use non-negative axis on a nested list structure "
-                            "of variable depth (negative axis counts from the leaves "
-                            "of the tree; non-negative from the root)"
+                        raise ak._v2._util.error(
+                            np.AxisError(
+                                "cannot use non-negative axis on a nested list structure "
+                                "of variable depth (negative axis counts from the leaves "
+                                "of the tree; non-negative from the root)"
+                            )
                         )
                     if negaxis > depth:
-                        raise np.AxisError(
-                            "cannot use axis={} on a nested list structure that splits into "
-                            "different depths, the minimum of which is depth={} from the leaves".format(
-                                axis, depth
+                        raise ak._v2._util.error(
+                            np.AxisError(
+                                "cannot use axis={} on a nested list structure that splits into "
+                                "different depths, the minimum of which is depth={} from the leaves".format(
+                                    axis, depth
+                                )
                             )
                         )
                 else:
                     if negaxis <= 0:
                         negaxis = negaxis + depth
                     if not (0 < negaxis and negaxis <= depth):
-                        raise np.AxisError(
-                            "axis={} exceeds the depth of this array ({})".format(
-                                axis, depth
+                        raise ak._v2._util.error(
+                            np.AxisError(
+                                "axis={} exceeds the depth of this array ({})".format(
+                                    axis, depth
+                                )
                             )
                         )
 
@@ -1120,9 +1184,11 @@ class Content:
 
             return self._unique(negaxis, starts, parents, 1)
 
-        raise np.AxisError(
-            "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
-                axis
+        raise ak._v2._util.error(
+            np.AxisError(
+                "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
+                    axis
+                )
             )
         )
 

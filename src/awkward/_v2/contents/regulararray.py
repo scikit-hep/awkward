@@ -25,25 +25,31 @@ class RegularArray(Content):
         nplike=None,
     ):
         if not isinstance(content, Content):
-            raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'content' must be a Content subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if not isinstance(size, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(size) and size >= 0):
-                raise TypeError(
-                    "{} 'size' must be a non-negative integer, not {}".format(
-                        type(self).__name__, size
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} 'size' must be a non-negative integer, not {}".format(
+                            type(self).__name__, size
+                        )
                     )
                 )
             else:
                 size = int(size)
         if not isinstance(zeros_length, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(zeros_length) and zeros_length >= 0):
-                raise TypeError(
-                    "{} 'zeros_length' must be a non-negative integer, not {}".format(
-                        type(self).__name__, zeros_length
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} 'zeros_length' must be a non-negative integer, not {}".format(
+                            type(self).__name__, zeros_length
+                        )
                     )
                 )
         if nplike is None:
@@ -260,16 +266,20 @@ class RegularArray(Content):
 
     def _broadcast_tooffsets64(self, offsets):
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
-            raise AssertionError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
-                    "(empty)" if offsets.length == 0 else str(offsets[0])
+            raise ak._v2._util.error(
+                AssertionError(
+                    "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
+                        "(empty)" if offsets.length == 0 else str(offsets[0])
+                    )
                 )
             )
 
         if offsets.nplike.known_shape and offsets.length - 1 != self._length:
-            raise AssertionError(
-                "cannot broadcast RegularArray of length {} to length {}".format(
-                    self._length, offsets.length - 1
+            raise ak._v2._util.error(
+                AssertionError(
+                    "cannot broadcast RegularArray of length {} to length {}".format(
+                        self._length, offsets.length - 1
+                    )
                 )
             )
 
@@ -589,7 +599,7 @@ class RegularArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -829,8 +839,10 @@ class RegularArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ValueError(
-                    "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
+                    )
                 )
 
             size = self._size
@@ -1172,7 +1184,7 @@ class RegularArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         length = self._length * self._size

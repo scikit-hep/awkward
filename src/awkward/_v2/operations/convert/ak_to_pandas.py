@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def to_pandas(
     array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
 ):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
 
 #     """
@@ -124,7 +124,7 @@ def to_pandas(
 #     try:
 #         import pandas
 #     except ImportError:
-#         raise ImportError(
+#         raise ak._v2._util.error(ImportError(
 #             """install the 'pandas' package with:
 
 #     pip install pandas --upgrade
@@ -132,7 +132,7 @@ def to_pandas(
 # or
 
 #     conda install pandas"""
-#         )
+#         ))
 
 #     if how is not None:
 #         out = None

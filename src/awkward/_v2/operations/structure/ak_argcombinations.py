@@ -57,7 +57,9 @@ def argcombinations(
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ValueError("the 'axis' for argcombinations must be non-negative")
+        raise ak._v2._util.error(
+            ValueError("the 'axis' for argcombinations must be non-negative")
+        )
     else:
         layout = ak._v2.operations.convert.to_layout(
             array, allow_record=False, allow_other=False

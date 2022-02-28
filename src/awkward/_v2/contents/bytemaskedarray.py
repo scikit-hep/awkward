@@ -20,27 +20,35 @@ class ByteMaskedArray(Content):
         self, mask, content, valid_when, identifier=None, parameters=None, nplike=None
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
-            raise TypeError(
-                "{} 'mask' must be an Index with dtype=int8, not {}".format(
-                    type(self).__name__, repr(mask)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'mask' must be an Index with dtype=int8, not {}".format(
+                        type(self).__name__, repr(mask)
+                    )
                 )
             )
         if not isinstance(content, Content):
-            raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'content' must be a Content subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if not isinstance(valid_when, bool):
-            raise TypeError(
-                "{} 'valid_when' must be boolean, not {}".format(
-                    type(self).__name__, repr(valid_when)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'valid_when' must be boolean, not {}".format(
+                        type(self).__name__, repr(valid_when)
+                    )
                 )
             )
         if mask.length > content.length:
-            raise ValueError(
-                "{} len(mask) ({}) must be <= len(content) ({})".format(
-                    type(self).__name__, mask.length, content.length
+            raise ak._v2._util.error(
+                ValueError(
+                    "{} len(mask) ({}) must be <= len(content) ({})".format(
+                        type(self).__name__, mask.length, content.length
+                    )
                 )
             )
         if nplike is None:
@@ -363,7 +371,7 @@ class ByteMaskedArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def project(self, mask=None):
         mask_length = self._mask.length
@@ -371,9 +379,11 @@ class ByteMaskedArray(Content):
 
         if mask is not None:
             if mask_length != mask.length:
-                raise ValueError(
-                    "mask length ({}) is not equal to {} length ({})".format(
-                        mask.length, type(self).__name__, mask_length
+                raise ak._v2._util.error(
+                    ValueError(
+                        "mask length ({}) is not equal to {} length ({})".format(
+                            mask.length, type(self).__name__, mask_length
+                        )
                     )
                 )
 
@@ -481,7 +491,7 @@ class ByteMaskedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise np.AxisError(self, "axis=0 not allowed for flatten")
+            raise ak._v2._util.error(np.AxisError("axis=0 not allowed for flatten"))
         else:
             numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
@@ -651,7 +661,9 @@ class ByteMaskedArray(Content):
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         if n < 1:
-            raise ValueError("in combinations, 'n' must be at least 1")
+            raise ak._v2._util.error(
+                ValueError("in combinations, 'n' must be at least 1")
+            )
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
@@ -823,10 +835,12 @@ class ByteMaskedArray(Content):
                 )
 
             else:
-                raise ValueError(
-                    "reduce_next with unbranching depth > negaxis is only "
-                    "expected to return RegularArray or ListOffsetArray64; "
-                    "instead, it returned " + out
+                raise ak._v2._util.error(
+                    ValueError(
+                        "reduce_next with unbranching depth > negaxis is only "
+                        "expected to return RegularArray or ListOffsetArray64; "
+                        "instead, it returned " + out
+                    )
                 )
 
     def _validityerror(self, path):
@@ -972,7 +986,7 @@ class ByteMaskedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         if self._content.is_RecordType:

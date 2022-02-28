@@ -65,9 +65,11 @@ def getitem_broadcast(items):
                         for w in nplike.nonzero(x):
                             out.append(ak._v2.index.Index64(w))
                 else:
-                    raise TypeError(
-                        "array slice must be an array of integers or booleans, not\n\n    {}".format(
-                            repr(x).replace("\n", "\n    ")
+                    raise ak._v2._util.error(
+                        TypeError(
+                            "array slice must be an array of integers or booleans, not\n\n    {}".format(
+                                repr(x).replace("\n", "\n    ")
+                            )
                         )
                     )
 
@@ -124,12 +126,14 @@ def prepare_tuple_item(item):
             return as_array
 
     else:
-        raise TypeError(
-            "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-            "integer/boolean arrays (possibly with variable-length nested "
-            "lists or missing values), field name (str) or names (non-tuple "
-            "iterable of str) are valid indices for slicing, not\n\n    "
-            + repr(item).replace("\n", "\n    ")
+        raise ak._v2._util.error(
+            TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(item).replace("\n", "\n    ")
+            )
         )
 
 
@@ -148,7 +152,7 @@ def prepare_tuple_RegularArray_toListOffsetArray64(item):
         return item
 
     else:
-        raise AssertionError(type(item))
+        raise ak._v2._util.error(AssertionError(type(item)))
 
 
 def prepare_tuple_nested(item):
@@ -271,15 +275,19 @@ def prepare_tuple_nested(item):
 
     elif isinstance(item, ak._v2.contents.UnionArray):
         # needs simplify_uniontype
-        raise NotImplementedError("FIXME: need to implement UnionArray as a slice")
+        raise ak._v2._util.error(
+            NotImplementedError("FIXME: need to implement UnionArray as a slice")
+        )
 
     else:
-        raise TypeError(
-            "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-            "integer/boolean arrays (possibly with variable-length nested "
-            "lists or missing values), field name (str) or names (non-tuple "
-            "iterable of str) are valid indices for slicing, not\n\n    "
-            + repr(item).replace("\n", "\n    ")
+        raise ak._v2._util.error(
+            TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(item).replace("\n", "\n    ")
+            )
         )
 
 
@@ -432,7 +440,7 @@ def prepare_tuple_bool_to_int(item):
         return item
 
     else:
-        raise AssertionError(type(item))
+        raise ak._v2._util.error(AssertionError(type(item)))
 
 
 def getitem_next_array_wrap(outcontent, shape):

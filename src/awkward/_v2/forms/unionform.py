@@ -19,28 +19,36 @@ class UnionForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(tags):
-            raise TypeError(
-                "{} 'tags' must be of type str, not {}".format(
-                    type(self).__name__, repr(tags)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'tags' must be of type str, not {}".format(
+                        type(self).__name__, repr(tags)
+                    )
                 )
             )
         if not ak._util.isstr(index):
-            raise TypeError(
-                "{} 'index' must be of type str, not {}".format(
-                    type(self).__name__, repr(index)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'index' must be of type str, not {}".format(
+                        type(self).__name__, repr(index)
+                    )
                 )
             )
         if not isinstance(contents, Iterable):
-            raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'contents' must be iterable, not {}".format(
+                        type(self).__name__, repr(contents)
+                    )
                 )
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} all 'contents' must be Form subclasses, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
                     )
                 )
 
@@ -164,7 +172,7 @@ class UnionForm(Form):
         )
 
     def simplify_uniontype(self, merge=True, mergebool=False):
-        raise NotImplementedError
+        raise ak._v2._util.error(NotImplementedError)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

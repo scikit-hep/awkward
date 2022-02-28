@@ -152,11 +152,15 @@ def from_iter(input):
         )
 
     elif input["class"] == "VirtualArray":
-        raise ValueError("Awkward 1.x VirtualArrays are not supported")
+        raise ak._v2._util.error(
+            ValueError("Awkward 1.x VirtualArrays are not supported")
+        )
 
     else:
-        raise ValueError(
-            "Input class: {} was not recognised".format(repr(input["class"]))
+        raise ak._v2._util.error(
+            ValueError(
+                "Input class: {} was not recognised".format(repr(input["class"]))
+            )
         )
 
 
@@ -220,21 +224,27 @@ class Form:
 
     def _init(self, has_identifier, parameters, form_key):
         if not isinstance(has_identifier, bool):
-            raise TypeError(
-                "{} 'has_identifier' must be of type bool, not {}".format(
-                    type(self).__name__, repr(has_identifier)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'has_identifier' must be of type bool, not {}".format(
+                        type(self).__name__, repr(has_identifier)
+                    )
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'parameters' must be of type dict or None, not {}".format(
+                        type(self).__name__, repr(parameters)
+                    )
                 )
             )
         if form_key is not None and not ak._util.isstr(form_key):
-            raise TypeError(
-                "{} 'form_key' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(form_key)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'form_key' must be of type string or None, not {}".format(
+                        type(self).__name__, repr(form_key)
+                    )
                 )
             )
 

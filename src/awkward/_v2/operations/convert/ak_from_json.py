@@ -80,7 +80,9 @@ def from_json(
                         node._nplike.asarray(real) + node._nplike.asarray(imag) * 1j
                     )
                 else:
-                    raise ValueError("Complex number fields must be numbers")
+                    raise ak._v2._util.error(
+                        ValueError("Complex number fields must be numbers")
+                    )
                 return ak._v2.contents.NumpyArray(real + imag * 1j)
 
     layout = (

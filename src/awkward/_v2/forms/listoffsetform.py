@@ -12,9 +12,11 @@ class ListOffsetForm(Form):
         self, offsets, content, has_identifier=False, parameters=None, form_key=None
     ):
         if not ak._util.isstr(offsets):
-            raise TypeError(
-                "{} 'offsets' must be of type str, not {}".format(
-                    type(self).__name__, repr(offsets)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'offsets' must be of type str, not {}".format(
+                        type(self).__name__, repr(offsets)
+                    )
                 )
             )
 

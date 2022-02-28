@@ -64,7 +64,9 @@ def to_list(array):
             ak.layout.Record,
         ),
     ):
-        raise TypeError("do not use ak._v2.operations.convert.to_list on v1 arrays")
+        raise ak._v2._util.error(
+            TypeError("do not use ak._v2.operations.convert.to_list on v1 arrays")
+        )
 
     elif hasattr(array, "tolist"):
         return array.tolist()

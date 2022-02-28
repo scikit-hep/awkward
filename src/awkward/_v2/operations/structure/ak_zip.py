@@ -125,7 +125,7 @@ def zip(
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
     """
     if depth_limit is not None and depth_limit <= 0:
-        raise ValueError("depth_limit must be None or at least 1")
+        raise ak._v2._util.error(ValueError("depth_limit must be None or at least 1"))
 
     if isinstance(arrays, dict):
         behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)

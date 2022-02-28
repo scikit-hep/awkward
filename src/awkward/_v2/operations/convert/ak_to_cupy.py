@@ -38,7 +38,7 @@ def to_cupy(array):
         return to_cupy(array.layout)
 
     elif isinstance(array, ak._v2.highlevel.Record):
-        raise ValueError("CuPy does not support record structures")
+        raise ak._v2._util.error(ValueError("CuPy does not support record structures"))
 
     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
         return to_cupy(array.snapshot().layout)
@@ -50,7 +50,7 @@ def to_cupy(array):
         ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring"
         or ak._v2.operations.describe.parameters(array).get("__array__") == "string"
     ):
-        raise ValueError("CuPy does not support arrays of strings")
+        raise ak._v2._util.error(ValueError("CuPy does not support arrays of strings"))
 
     elif isinstance(array, ak._v2.contents.EmptyArray):
         return cupy.array([])
@@ -78,7 +78,7 @@ def to_cupy(array):
         shape[0] = len(array)
         mask0 = cupy.asarray(array.bytemask()).view(np.bool_)
         if mask0.any():
-            raise ValueError("CuPy does not support masked arrays")
+            raise ak._v2._util.error(ValueError("CuPy does not support masked arrays"))
         else:
             return content
 
@@ -94,16 +94,18 @@ def to_cupy(array):
         return to_cupy(array.toRegularArray())
 
     elif isinstance(array, ak._v2.contents.recordarray.RecordArray):
-        raise ValueError("CuPy does not support record structures")
+        raise ak._v2._util.error(ValueError("CuPy does not support record structures"))
 
     elif isinstance(array, ak._v2.contents.NumpyArray):
         return array.to_cupy()
 
     elif isinstance(array, ak._v2.contents.Content):
-        raise AssertionError(f"unrecognized Content type: {type(array)}")
+        raise ak._v2._util.error(
+            AssertionError(f"unrecognized Content type: {type(array)}")
+        )
 
     elif isinstance(array, Iterable):
         return cupy.asarray(array)
 
     else:
-        raise ValueError(f"cannot convert {array} into cp.ndarray")
+        raise ak._v2._util.error(ValueError(f"cannot convert {array} into cp.ndarray"))

@@ -63,7 +63,9 @@ def where(condition, *args, **kwargs):
             return tuple(ak._v2.contents.NumpyArray(x) for x in out)
 
     elif len(args) == 1:
-        raise ValueError("either both or neither of x and y should be given")
+        raise ak._v2._util.error(
+            ValueError("either both or neither of x and y should be given")
+        )
 
     elif len(args) == 2:
         left, right = (
@@ -103,7 +105,9 @@ def where(condition, *args, **kwargs):
         return ak._v2._util.wrap(out[0], behavior, highlevel)
 
     else:
-        raise TypeError(
-            "where() takes from 1 to 3 positional arguments but {} were "
-            "given".format(len(args) + 1)
+        raise ak._v2._util.error(
+            TypeError(
+                "where() takes from 1 to 3 positional arguments but {} were "
+                "given".format(len(args) + 1)
+            )
         )

@@ -22,9 +22,11 @@ class NumpyArray(Content):
 
         ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
-            raise TypeError(
-                "{} 'data' must be an array, not {}".format(
-                    type(self).__name__, repr(data)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'data' must be an array, not {}".format(
+                        type(self).__name__, repr(data)
+                    )
                 )
             )
 
@@ -336,7 +338,7 @@ class NumpyArray(Content):
             return next._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -357,7 +359,9 @@ class NumpyArray(Content):
             i += 1
             depth += 1
         if posaxis > depth:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            raise ak._v2._util.error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
+            )
 
         tonum = ak._v2.index.Index64.empty(reps, self._nplike)
         assert tonum.nplike is self._nplike
@@ -373,13 +377,13 @@ class NumpyArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise np.AxisError(self, "axis=0 not allowed for flatten")
+            raise ak._v2._util.error(np.AxisError("axis=0 not allowed for flatten"))
 
         elif len(self.shape) != 1:
             return self.toRegularArray()._offsets_and_flattened(posaxis, depth)
 
         else:
-            raise np.AxisError(self, "axis out of range for flatten")
+            raise ak._v2._util.error(np.AxisError("axis out of range for flatten"))
 
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
@@ -461,11 +465,13 @@ class NumpyArray(Content):
             elif isinstance(array, ak._v2.contents.numpyarray.NumpyArray):
                 contiguous_arrays.append(array.data)
             else:
-                raise AssertionError(
-                    "cannot merge "
-                    + type(self).__name__
-                    + " with "
-                    + type(array).__name__
+                raise ak._v2._util.error(
+                    AssertionError(
+                        "cannot merge "
+                        + type(self).__name__
+                        + " with "
+                        + type(array).__name__
+                    )
                 )
 
         contiguous_arrays = self._nplike.concatenate(contiguous_arrays)
@@ -489,7 +495,7 @@ class NumpyArray(Content):
         if posaxis == depth:
             return self._localindex_axis0()
         elif len(self.shape) <= 1:
-            raise np.AxisError(self, "'axis' out of range for localindex")
+            raise ak._v2._util.error(np.AxisError("'axis' out of range for localindex"))
         else:
             return self.toRegularArray()._localindex(posaxis, depth)
 
@@ -862,7 +868,9 @@ class NumpyArray(Content):
             )
 
         if len(self.shape) == 0:
-            raise TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
+            raise ak._v2._util.error(
+                TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
+            )
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._argsort_next(
@@ -970,7 +978,9 @@ class NumpyArray(Content):
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         if len(self.shape) == 0:
-            raise TypeError(f"{type(self).__name__} attempting to sort a scalar ")
+            raise ak._v2._util.error(
+                TypeError(f"{type(self).__name__} attempting to sort a scalar ")
+            )
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
@@ -1052,7 +1062,9 @@ class NumpyArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:
-            raise np.AxisError("'axis' out of range for combinations")
+            raise ak._v2._util.error(
+                np.AxisError("'axis' out of range for combinations")
+            )
         else:
             return self.toRegularArray()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
@@ -1176,12 +1188,14 @@ class NumpyArray(Content):
 
     def _rpad(self, target, axis, depth, clip):
         if len(self.shape) == 0:
-            raise ValueError("cannot rpad a scalar")
+            raise ak._v2._util.error(ValueError("cannot rpad a scalar"))
         elif len(self.shape) > 1 or not self.is_contiguous:
             return self.toRegularArray()._rpad(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
+            raise ak._v2._util.error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
+            )
         if not clip:
             if target < self.length:
                 return self
@@ -1267,7 +1281,7 @@ class NumpyArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         return self.contiguous().toRegularArray()
@@ -1327,9 +1341,11 @@ class NumpyArray(Content):
         else:
             if self.dtype == np.complex128:
                 if complex_real_string is None or complex_imag_string is None:
-                    raise ValueError(
-                        "Complex numbers can't be converted to JSON without"
-                        " setting 'complex_record_fields' "
+                    raise ak._v2._util.error(
+                        ValueError(
+                            "Complex numbers can't be converted to JSON without"
+                            " setting 'complex_record_fields' "
+                        )
                     )
 
                 return ak._v2.operations.structure.zip(

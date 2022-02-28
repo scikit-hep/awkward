@@ -91,8 +91,11 @@ def type(array):
             try:
                 out = ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype.type]
             except KeyError:
-                raise TypeError(
-                    "numpy array type is unrecognized by awkward: %r" % array.dtype.type
+                raise ak._v2._util.error(
+                    TypeError(
+                        "numpy array type is unrecognized by awkward: %r"
+                        % array.dtype.type
+                    )
                 )
             out = ak._v2.types.NumpyType(out)
             for x in array.shape[-1:0:-1]:
@@ -115,7 +118,9 @@ def type(array):
             ak.layout.Record,
         ),
     ):
-        raise TypeError("do not use ak._v2.operations.describe.type on v1 arrays")
+        raise ak._v2._util.error(
+            TypeError("do not use ak._v2.operations.describe.type on v1 arrays")
+        )
 
     else:
-        raise TypeError(f"unrecognized array type: {array!r}")
+        raise ak._v2._util.error(TypeError(f"unrecognized array type: {array!r}"))

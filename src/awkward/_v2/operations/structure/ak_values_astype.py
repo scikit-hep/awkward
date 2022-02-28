@@ -56,8 +56,10 @@ def values_astype(array, to, highlevel=True, behavior=None):
         if to_dtype.name.startswith("datetime64"):
             to_str = to_dtype.name
         else:
-            raise ValueError(
-                f"cannot use {to_dtype} to cast the numeric type of an array"
+            raise ak._v2._util.error(
+                ValueError(
+                    f"cannot use {to_dtype} to cast the numeric type of an array"
+                )
             )
 
     layout = ak._v2.operations.convert.to_layout(

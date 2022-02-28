@@ -201,7 +201,9 @@ class Sum(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         if array.dtype.kind == "M":
-            raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+            raise ak._v2._util.error(
+                ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+            )
         else:
             dtype = cls.maybe_other_type(array.dtype)
         result = array.nplike.empty(
@@ -244,7 +246,7 @@ class Sum(Reducer):
                     )
                 )
             else:
-                raise NotImplementedError
+                raise ak._v2._util.error(NotImplementedError)
         elif array.dtype.type in (np.complex128, np.complex64):
             assert parents.nplike is array.nplike
             array._handle_error(
@@ -294,7 +296,9 @@ class Prod(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         if array.dtype.kind.upper() == "M":
-            raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
+            raise ak._v2._util.error(
+                ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
+            )
         result = array.nplike.empty(
             cls.maybe_double_length(array.dtype.type, outlength),
             dtype=cls.return_dtype(array.dtype),

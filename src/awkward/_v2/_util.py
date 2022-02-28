@@ -39,7 +39,7 @@ def regularize_backend(backend):
     if backend in _backends:
         return _backends[backend].instance()
     else:
-        raise ValueError("The available backends for now are `cpu` and `cuda`.")
+        raise error(ValueError("The available backends for now are `cpu` and `cuda`."))
 
 
 def parse_version(version):
@@ -118,8 +118,8 @@ class ErrorContext:
             self._slate.__dict__.clear()
 
 
-def error(error_class, error_message):
-    return error_class(error_message)
+def error(exception):
+    return exception
 
 
 class SlicingErrorContext(ErrorContext):
@@ -653,9 +653,9 @@ def extra(args, kwargs, defaults):
 #             attempt = m.group(0)
 
 #     if attempt is None:
-#         raise ValueError(
+#         raise error(ValueError(
 #             "key {0} not found in record".format(repr(key))
-#         )
+#         ))
 #     else:
 #         return attempt
 
@@ -671,7 +671,7 @@ def extra(args, kwargs, defaults):
 #     elif isinstance(index, ak._v2.index.Index64):
 #         return ak._v2.contents.UnionArray8_64(tags, index, contents, identities, parameters)
 #     else:
-#         raise AssertionError(index)
+#         raise error(AssertionError(index))
 
 
 # def union_to_record(unionarray, anonymous):

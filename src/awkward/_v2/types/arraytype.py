@@ -8,15 +8,19 @@ from awkward._v2.forms.form import _parameters_equal
 class ArrayType:
     def __init__(self, content, length):
         if not isinstance(content, awkward._v2.types.type.Type):
-            raise TypeError(
-                "{} all 'contents' must be Type subclasses, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} all 'contents' must be Type subclasses, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if not ak._util.isint(length) or length < 0:
-            raise ValueError(
-                "{} 'length' must be of a positive integer, not {}".format(
-                    type(self).__name__, repr(length)
+            raise ak._v2._util.error(
+                ValueError(
+                    "{} 'length' must be of a positive integer, not {}".format(
+                        type(self).__name__, repr(length)
+                    )
                 )
             )
         self._content = content

@@ -60,8 +60,10 @@ def from_iter(
                 resize=resize,
             )[0]
         else:
-            raise ValueError(
-                "cannot produce an array from a single dict (that would be a record)"
+            raise ak._v2._util.error(
+                ValueError(
+                    "cannot produce an array from a single dict (that would be a record)"
+                )
             )
 
     builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
