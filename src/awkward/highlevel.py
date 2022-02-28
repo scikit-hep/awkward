@@ -2229,7 +2229,7 @@ class ArrayBuilder(Iterable, Sized):
                 this ArrayBuilder.
 
         Wraps a low-level #ak.layout.ArrayBuilder as a high-level
-        #ak.ArrayBulider.
+        #ak.ArrayBuilder.
 
         The #ak.ArrayBuilder constructor creates a new #ak.layout.ArrayBuilder
         with no accumulated data, but Numba needs to wrap existing data
