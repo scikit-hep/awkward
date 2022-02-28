@@ -446,176 +446,126 @@ class Content:
                 f"FIXME: unhandled case of SliceMissing with {nextcontent}"
             )
 
-    def __getitem__(self, where):
-        try:
-            if ak._util.isint(where):
-                return self._getitem_at(where)
+    def _getitem(self, where):
+        if ak._util.isint(where):
+            return self._getitem_at(where)
 
-            elif isinstance(where, slice) and where.step is None:
-                return self._getitem_range(where)
+        elif isinstance(where, slice) and where.step is None:
+            return self._getitem_range(where)
 
-            elif isinstance(where, slice):
-                return self.__getitem__((where,))
+        elif isinstance(where, slice):
+            return self._getitem((where,))
 
-            elif ak._util.isstr(where):
-                return self._getitem_field(where)
+        elif ak._util.isstr(where):
+            return self._getitem_field(where)
 
-            elif where is np.newaxis:
-                return self.__getitem__((where,))
+        elif where is np.newaxis:
+            return self._getitem((where,))
 
-            elif where is Ellipsis:
-                return self.__getitem__((where,))
+        elif where is Ellipsis:
+            return self._getitem((where,))
 
-            elif isinstance(where, tuple):
-                if len(where) == 0:
-                    return self
+        elif isinstance(where, tuple):
+            if len(where) == 0:
+                return self
 
-                items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
+            items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
 
-                nextwhere = ak._v2._slicing.getitem_broadcast(items)
+            nextwhere = ak._v2._slicing.getitem_broadcast(items)
 
-                next = ak._v2.contents.RegularArray(
-                    self,
-                    self.length if self._nplike.known_shape else 1,
-                    1,
-                    None,
-                    None,
-                    self._nplike,
-                )
+            next = ak._v2.contents.RegularArray(
+                self,
+                self.length if self._nplike.known_shape else 1,
+                1,
+                None,
+                None,
+                self._nplike,
+            )
 
-                out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
+            out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
-                if out.length == 0:
-                    return out._getitem_nothing()
-                else:
-                    return out._getitem_at(0)
+            if out.length == 0:
+                return out._getitem_nothing()
+            else:
+                return out._getitem_at(0)
 
-            elif isinstance(where, ak.highlevel.Array):
-                return self.__getitem__(where.layout)
+        elif isinstance(where, ak.highlevel.Array):
+            return self._getitem(where.layout)
 
-            elif isinstance(where, ak.layout.Content):
-                return self.__getitem__(v1_to_v2(where))
+        elif isinstance(where, ak.layout.Content):
+            return self._getitem(v1_to_v2(where))
 
-            elif isinstance(where, ak._v2.highlevel.Array):
-                return self.__getitem__(where.layout)
+        elif isinstance(where, ak._v2.highlevel.Array):
+            return self._getitem(where.layout)
 
-            elif (
-                isinstance(where, Content)
-                and where._parameters is not None
-                and (where._parameters.get("__array__") in ("string", "bytestring"))
-            ):
-                return self._getitem_fields(ak._v2.operations.convert.to_list(where))
+        elif (
+            isinstance(where, Content)
+            and where._parameters is not None
+            and (where._parameters.get("__array__") in ("string", "bytestring"))
+        ):
+            return self._getitem_fields(ak._v2.operations.convert.to_list(where))
 
-            elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
-                return where.toNumpyArray(np.int64)
+        elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
+            return where.toNumpyArray(np.int64)
 
-            elif isinstance(where, ak._v2.contents.numpyarray.NumpyArray):
-                if issubclass(where.dtype.type, np.int64):
-                    carry = ak._v2.index.Index64(where.data.reshape(-1))
-                    allow_lazy = True
-                elif issubclass(where.dtype.type, np.integer):
-                    carry = ak._v2.index.Index64(
-                        where.data.astype(np.int64).reshape(-1)
-                    )
+        elif isinstance(where, ak._v2.contents.numpyarray.NumpyArray):
+            if issubclass(where.dtype.type, np.int64):
+                carry = ak._v2.index.Index64(where.data.reshape(-1))
+                allow_lazy = True
+            elif issubclass(where.dtype.type, np.integer):
+                carry = ak._v2.index.Index64(where.data.astype(np.int64).reshape(-1))
+                allow_lazy = "copied"  # True, but also can be modified in-place
+            elif issubclass(where.dtype.type, (np.bool_, bool)):
+                if len(where.data.shape) == 1:
+                    where = self._nplike.nonzero(where.data)[0]
+                    carry = ak._v2.index.Index64(where)
                     allow_lazy = "copied"  # True, but also can be modified in-place
-                elif issubclass(where.dtype.type, (np.bool_, bool)):
-                    if len(where.data.shape) == 1:
-                        where = self._nplike.nonzero(where.data)[0]
-                        carry = ak._v2.index.Index64(where)
-                        allow_lazy = "copied"  # True, but also can be modified in-place
-                    else:
-                        wheres = self._nplike.nonzero(where.data)
-                        return self.__getitem__(wheres)
                 else:
-                    raise TypeError(
-                        "array slice must be an array of integers or booleans, not\n\n    {}".format(
-                            repr(where.data).replace("\n", "\n    ")
-                        )
-                    )
-
-                out = ak._v2._slicing.getitem_next_array_wrap(
-                    self._carry(carry, allow_lazy), where.shape
-                )
-                if out.length == 0:
-                    return out._getitem_nothing()
-                else:
-                    return out._getitem_at(0)
-
-            elif isinstance(where, Content):
-                return self.__getitem__((where,))
-
-            elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
-                return self._getitem_fields(where)
-
-            elif isinstance(where, Iterable):
-                layout = ak._v2.operations.convert.to_layout(where)
-                as_array = layout.maybe_to_array(layout.nplike)
-                if as_array is None:
-                    return self.__getitem__(layout)
-                else:
-                    return self.__getitem__(
-                        ak._v2.contents.NumpyArray(as_array, None, None, layout.nplike)
-                    )
-
+                    wheres = self._nplike.nonzero(where.data)
+                    return self._getitem(wheres)
             else:
                 raise TypeError(
-                    "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-                    "integer/boolean arrays (possibly with variable-length nested "
-                    "lists or missing values), field name (str) or names (non-tuple "
-                    "iterable of str) are valid indices for slicing, not\n\n    "
-                    + repr(where).replace("\n", "\n    ")
+                    "array slice must be an array of integers or booleans, not\n\n    {}".format(
+                        repr(where.data).replace("\n", "\n    ")
+                    )
                 )
 
-        except NestedIndexError as err:
-
-            def format_slice(x):
-                if isinstance(x, slice):
-                    if x.step is None:
-                        return "{}:{}".format(
-                            "" if x.start is None else x.start,
-                            "" if x.stop is None else x.stop,
-                        )
-                    else:
-                        return "{}:{}:{}".format(
-                            "" if x.start is None else x.start,
-                            "" if x.stop is None else x.stop,
-                            x.step,
-                        )
-                elif isinstance(x, tuple):
-                    return "(" + ", ".join(format_slice(y) for y in x) + ")"
-                elif isinstance(x, ak._v2.index.Index64):
-                    return str(x.data)
-                elif isinstance(x, Content):
-                    return str(ak._v2.highlevel.Array(x))
-                else:
-                    return repr(x)
-
-            try:
-                tmp = "    " + repr(ak._v2.highlevel.Array(self))
-            except Exception:
-                tmp = self._repr("    ", "", "")
-            raise IndexError(
-                """cannot slice
-
-{}
-
-with
-
-    {}
-
-at inner {} of length {}, using sub-slice {}.{}""".format(
-                    tmp,
-                    format_slice(where),
-                    type(err.array).__name__,
-                    err.array.length,
-                    format_slice(err.slicer),
-                    ""
-                    if err.details is None
-                    else "\n\n{} error: {}.".format(
-                        type(err.array).__name__, err.details
-                    ),
-                )
+            out = ak._v2._slicing.getitem_next_array_wrap(
+                self._carry(carry, allow_lazy), where.shape
             )
+            if out.length == 0:
+                return out._getitem_nothing()
+            else:
+                return out._getitem_at(0)
+
+        elif isinstance(where, Content):
+            return self._getitem((where,))
+
+        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
+            return self._getitem_fields(where)
+
+        elif isinstance(where, Iterable):
+            layout = ak._v2.operations.convert.to_layout(where)
+            as_array = layout.maybe_to_array(layout.nplike)
+            if as_array is None:
+                return self._getitem(layout)
+            else:
+                return self._getitem(
+                    ak._v2.contents.NumpyArray(as_array, None, None, layout.nplike)
+                )
+
+        else:
+            raise TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(where).replace("\n", "\n    ")
+            )
+
+    def __getitem__(self, where):
+        with ak._v2._slicing.SlicingErrorContext(self, where):
+            return self._getitem(where)
 
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak._v2.index.Index)

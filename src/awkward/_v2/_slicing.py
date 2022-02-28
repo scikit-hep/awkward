@@ -452,32 +452,6 @@ def getitem_next_array_wrap(outcontent, shape):
     return out
 
 
-class NestedIndexError(IndexError):
-    def __init__(self, array, slicer, details=None):
-        self._array = array
-        self._slicer = slicer
-        self._details = details
-
-    @property
-    def array(self):
-        return self._array
-
-    @property
-    def slicer(self):
-        return self._slicer
-
-    @property
-    def details(self):
-        return self._details
-
-    def __str__(self):
-        return "cannot slice {} with {}{}".format(
-            type(self._array).__name__,
-            repr(self._slicer),
-            "" if self._details is None else ": " + self._details,
-        )
-
-
 class SlicingErrorContext(ErrorContext):
     def __init__(self, array, where):
         super().__init__(array=array, where=where)
