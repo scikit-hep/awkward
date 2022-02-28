@@ -187,10 +187,10 @@ def test_getitem():
     assert array2.typetracer["y", :, 1:].form == array2["y", :, 1:].form
     with pytest.raises(IndexError) as err:
         array2[:, 1:, "y"]
-    assert str(err.value).startswith("cannot slice")
+    assert "cannot slice" in str(err.value)
     with pytest.raises(IndexError) as err:
         array2["z"]
-    assert str(err.value).startswith("no field 'z'")
+    assert "no field 'z'" in str(err.value)
 
     array3 = ak._v2.contents.UnionArray(tags, index, [content3, content2])
     array4 = ak._v2.contents.UnionArray(

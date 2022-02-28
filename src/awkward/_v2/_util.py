@@ -119,6 +119,45 @@ class ErrorContext:
 
 
 def error(exception):
+    if isinstance(exception, type):
+        assert issubclass(exception, Exception)
+        exception = exception()
+
+    if isinstance(exception, (NotImplementedError, AssertionError)):
+        return type(exception)(
+            str(exception)
+            + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward-1.0/issues"
+        )
+
+    error_context = ErrorContext.primary()
+
+    if isinstance(error_context, SlicingErrorContext):
+        if isinstance(error_context.array, ak._v2.contents.Content):
+            try:
+                arraystr = "    " + repr(ak._v2.highlevel.Array(error_context.array))
+            except Exception:
+                arraystr = error_context.array._repr("    ", "", "")
+        elif isinstance(error_context.array, ak._v2.record.Record):
+            try:
+                arraystr = "    " + repr(ak._v2.highlevel.Record(error_context.array))
+            except Exception:
+                arraystr = error_context.array._repr("    ", "", "")
+        else:
+            arraystr = repr(error_context.array)
+
+        # Note: returns an error for the caller to raise!
+        return type(exception)(
+            f"""cannot slice
+
+{arraystr}
+
+with
+
+    {format_slice(error_context.where)}
+
+Error details: {str(exception)}"""
+        )
+
     return exception
 
 
@@ -209,8 +248,7 @@ with
 
     {format_slice(error_context.where)}
 
-at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {format_slice(slicer)}.{detailsstr}
-        """
+at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {format_slice(slicer)}.{detailsstr}"""
         )
 
 
