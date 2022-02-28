@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.numpyform import NumpyForm
 from awkward._v2.forms.form import _parameters_equal
@@ -216,7 +215,7 @@ class NumpyArray(Content):
         try:
             out = self._data[where]
         except IndexError as err:
-            raise nested_indexerror(self, where, str(err))
+            raise ak._v2._util.indexerror(self, where, str(err))
 
         if hasattr(out, "shape") and len(out.shape) != 0:
             return NumpyArray(out, None, None, self._nplike)
@@ -233,7 +232,7 @@ class NumpyArray(Content):
         try:
             out = self._data[where]
         except IndexError as err:
-            raise nested_indexerror(self, where, str(err))
+            raise ak._v2._util.indexerror(self, where, str(err))
 
         return NumpyArray(
             out,
@@ -243,19 +242,19 @@ class NumpyArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        raise nested_indexerror(self, where, "not an array of records")
+        raise ak._v2._util.indexerror(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
         if len(where) == 0:
             return self._getitem_range(slice(0, 0))
-        raise nested_indexerror(self, where, "not an array of records")
+        raise ak._v2._util.indexerror(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
         try:
             nextdata = self._data[carry.data]
         except IndexError as err:
-            raise nested_indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err))
         return NumpyArray(
             nextdata,
             self._carry_identifier(carry),
@@ -265,7 +264,7 @@ class NumpyArray(Content):
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         if self._data.ndim == 1:
-            raise nested_indexerror(
+            raise ak._v2._util.indexerror(
                 self,
                 ak._v2.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -288,7 +287,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise nested_indexerror(self, (head,) + tail, str(err))
+                raise ak._v2._util.indexerror(self, (head,) + tail, str(err))
 
             if hasattr(out, "shape") and len(out.shape) != 0:
                 return NumpyArray(out, None, None, self._nplike)
@@ -300,7 +299,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise nested_indexerror(self, (head,) + tail, str(err))
+                raise ak._v2._util.indexerror(self, (head,) + tail, str(err))
             out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 
@@ -319,7 +318,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise nested_indexerror(self, (head,) + tail, str(err))
+                raise ak._v2._util.indexerror(self, (head,) + tail, str(err))
 
             return NumpyArray(out, None, self._parameters, self._nplike)
 
@@ -328,7 +327,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise nested_indexerror(self, (head,) + tail, str(err))
+                raise ak._v2._util.indexerror(self, (head,) + tail, str(err))
             out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 

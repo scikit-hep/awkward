@@ -5,7 +5,6 @@ from collections.abc import Iterable
 
 import awkward as ak
 import awkward._v2._reducers
-from awkward._v2._slicing import nested_indexerror
 from awkward._v2.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -200,7 +199,7 @@ class Content:
                 if slicer is None:
                     raise ValueError(message)
                 else:
-                    raise nested_indexerror(self, slicer, message)
+                    raise ak._v2._util.indexerror(self, slicer, message)
 
     @staticmethod
     def _selfless_handle_error(error):
@@ -286,7 +285,7 @@ class Content:
             return self._getitem_next(nexthead, nexttail, advanced)
 
         elif dimlength in {mindepth - 1, maxdepth - 1}:
-            raise nested_indexerror(
+            raise ak._v2._util.indexerror(
                 self,
                 Ellipsis,
                 "ellipsis (`...`) can't be used on data with different numbers of dimensions",
@@ -336,7 +335,7 @@ class Content:
         index = ak._v2.index.Index64(head._index)
         content = that._getitem_at(0)
         if content.length < index.length and self._nplike.known_shape:
-            raise nested_indexerror(
+            raise ak._v2._util.indexerror(
                 self,
                 head,
                 "cannot fit masked jagged slice with length {} into {} of size {}".format(
@@ -390,7 +389,7 @@ class Content:
         assert isinstance(head, ak._v2.contents.IndexedOptionArray)
 
         if advanced is not None:
-            raise nested_indexerror(
+            raise ak._v2._util.indexerror(
                 self,
                 head,
                 "cannot mix missing values in slice with NumPy-style advanced indexing",
@@ -564,7 +563,7 @@ class Content:
             )
 
     def __getitem__(self, where):
-        with ak._v2._slicing.SlicingErrorContext(self, where):
+        with ak._v2._util.SlicingErrorContext(self, where):
             return self._getitem(where)
 
     def _carry_asrange(self, carry):

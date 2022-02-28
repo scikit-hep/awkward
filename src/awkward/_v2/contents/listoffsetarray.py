@@ -4,7 +4,6 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.listoffsetform import ListOffsetForm
 from awkward._v2.forms.form import _parameters_equal
@@ -182,7 +181,7 @@ class ListOffsetArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise nested_indexerror(self, where)
+            raise ak._v2._util.indexerror(self, where)
         start, stop = self._offsets[where], self._offsets[where + 1]
         return self._content._getitem_range(slice(start, stop))
 
@@ -227,7 +226,7 @@ class ListOffsetArray(Content):
             nextstarts = self.starts[carry.data]
             nextstops = self.stops[carry.data]
         except IndexError as err:
-            raise nested_indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err))
 
         return ak._v2.contents.listarray.ListArray(
             nextstarts,

@@ -100,22 +100,118 @@ class ErrorContext:
 
     @classmethod
     def primary(cls):
-        return cls._slate.__dict__.get("context")
+        return cls._slate.__dict__.get("__primary_context__")
 
     def __init__(self, **kwargs):
         self._kwargs = kwargs
 
     def __enter__(self):
-        # Make it strictly non-reenterant. Only one ErrorContext is primary.
+        # Make it strictly non-reenterant. Only one ErrorContext (per thread) is primary.
         if self.primary() is None:
             self._slate.__dict__.clear()
             self._slate.__dict__.update(self._kwargs)
-            self._slate.context = self
+            self._slate.__dict__["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
-        # Allow another ErrorContext to be primary.
+        # Step out of the way so that another ErrorContext can become primary.
         if self.primary() is self:
             self._slate.__dict__.clear()
+
+
+def error(error_class, error_message):
+    return error_class(error_message)
+
+
+class SlicingErrorContext(ErrorContext):
+    def __init__(self, array, where):
+        super().__init__(array=array, where=where)
+
+    @property
+    def array(self):
+        return self._kwargs["array"]
+
+    @property
+    def where(self):
+        return self._kwargs["where"]
+
+
+def format_slice(x):
+    if isinstance(x, slice):
+        if x.step is None:
+            return "{}:{}".format(
+                "" if x.start is None else x.start,
+                "" if x.stop is None else x.stop,
+            )
+        else:
+            return "{}:{}:{}".format(
+                "" if x.start is None else x.start,
+                "" if x.stop is None else x.stop,
+                x.step,
+            )
+
+    elif isinstance(x, tuple):
+        return "(" + ", ".join(format_slice(y) for y in x) + ")"
+
+    elif isinstance(x, ak._v2.index.Index64):
+        return str(x.data)
+
+    elif isinstance(x, ak._v2.contents.Content):
+        try:
+            return str(ak._v2.highlevel.Array(x))
+        except Exception:
+            return x._repr("    ", "", "")
+
+    elif isinstance(x, ak._v2.record.Record):
+        try:
+            return str(ak._v2.highlevel.Record(x))
+        except Exception:
+            return x._repr("    ", "", "")
+
+    else:
+        return repr(x)
+
+
+def indexerror(subarray, slicer, details=None):
+    detailsstr = ""
+    if details is not None:
+        detailsstr = f"""
+
+Error details: {details}."""
+
+    error_context = ErrorContext.primary()
+    if not isinstance(error_context, SlicingErrorContext):
+        # Note: returns an error for the caller to raise!
+        return IndexError(
+            f"cannot slice {type(subarray).__name__} with {format_slice(slicer)}{detailsstr}"
+        )
+
+    else:
+        if isinstance(error_context.array, ak._v2.contents.Content):
+            try:
+                arraystr = "    " + repr(ak._v2.highlevel.Array(error_context.array))
+            except Exception:
+                arraystr = error_context.array._repr("    ", "", "")
+        elif isinstance(error_context.array, ak._v2.record.Record):
+            try:
+                arraystr = "    " + repr(ak._v2.highlevel.Record(error_context.array))
+            except Exception:
+                arraystr = error_context.array._repr("    ", "", "")
+        else:
+            arraystr = repr(error_context.array)
+
+        # Note: returns an error for the caller to raise!
+        return IndexError(
+            f"""cannot slice
+
+{arraystr}
+
+with
+
+    {format_slice(error_context.where)}
+
+at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {format_slice(slicer)}.{detailsstr}
+        """
+        )
 
 
 ###############################################################################

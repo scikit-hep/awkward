@@ -11,7 +11,6 @@ import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.index import Index8
 from awkward._v2.index import Index64
-from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.unionform import UnionForm
 from awkward._v2.forms.form import _parameters_equal
@@ -182,7 +181,7 @@ class UnionArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise nested_indexerror(self, where)
+            raise ak._v2._util.indexerror(self, where)
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
 
@@ -228,7 +227,7 @@ class UnionArray(Content):
             nexttags = self._tags[carry.data]
             nextindex = self._index[: self._tags.length][carry.data]
         except IndexError as err:
-            raise nested_indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err))
 
         return UnionArray(
             nexttags,
@@ -366,7 +365,7 @@ class UnionArray(Content):
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         simplified = self.simplify_uniontype()
         if isinstance(simplified, ak._v2.contents.UnionArray):
-            raise nested_indexerror(
+            raise ak._v2._util.indexerror(
                 self,
                 ak._v2.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
