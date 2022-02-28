@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2._slicing import NestedIndexError
+from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.emptyform import EmptyForm
 from awkward._v2.forms.form import _parameters_equal
@@ -83,18 +83,18 @@ class EmptyArray(Content):
         return self
 
     def _getitem_at(self, where):
-        raise NestedIndexError(self, where, "array is empty")
+        raise nested_indexerror(self, where, "array is empty")
 
     def _getitem_range(self, where):
         return self
 
     def _getitem_field(self, where, only_fields=()):
-        raise NestedIndexError(self, where, "not an array of records")
+        raise nested_indexerror(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
         if len(where) == 0:
             return self._getitem_range(slice(0, 0))
-        raise NestedIndexError(self, where, "not an array of records")
+        raise nested_indexerror(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
@@ -102,17 +102,17 @@ class EmptyArray(Content):
         if carry.length == 0 or not carry.nplike.known_shape:
             return self
         else:
-            raise NestedIndexError(self, carry.data, "array is empty")
+            raise nested_indexerror(self, carry.data, "array is empty")
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
         elif isinstance(head, int):
-            raise NestedIndexError(self, head, "array is empty")
+            raise nested_indexerror(self, head, "array is empty")
 
         elif isinstance(head, slice):
-            raise NestedIndexError(self, head, "array is empty")
+            raise nested_indexerror(self, head, "array is empty")
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -127,13 +127,13 @@ class EmptyArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            raise NestedIndexError(self, head, "array is empty")
+            raise nested_indexerror(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NestedIndexError(self, head, "array is empty")
+            raise nested_indexerror(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NestedIndexError(self, head, "array is empty")
+            raise nested_indexerror(self, head, "array is empty")
 
         else:
             raise AssertionError(repr(head))

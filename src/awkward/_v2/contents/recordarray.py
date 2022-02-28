@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._v2.record import Record
-from awkward._v2._slicing import NestedIndexError
+from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.recordform import RecordForm
 from awkward._v2.forms.form import _parameters_equal
@@ -236,7 +236,7 @@ class RecordArray(Content):
             where += self.length
 
         if where < 0 or where >= self.length:
-            raise NestedIndexError(self, where)
+            raise nested_indexerror(self, where)
         return Record(self, where)
 
     def _getitem_range(self, where):
@@ -323,7 +323,7 @@ class RecordArray(Content):
                 where[negative] += self._length
 
             if self._nplike.any(where >= self._length, prefer=False):
-                raise NestedIndexError(self, where)
+                raise nested_indexerror(self, where)
 
             nextindex = ak._v2.index.Index64(where)
             return ak._v2.contents.indexedarray.IndexedArray(

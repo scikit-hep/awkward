@@ -6,7 +6,7 @@ import math
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2._slicing import NestedIndexError
+from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
 from awkward._v2.forms.bitmaskedform import BitMaskedForm
@@ -252,7 +252,7 @@ class BitMaskedArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise NestedIndexError(self, where)
+            raise nested_indexerror(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
         else:

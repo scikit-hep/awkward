@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2._slicing import NestedIndexError
+from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.indexedform import IndexedForm
 from awkward._v2.forms.form import _parameters_equal
@@ -131,7 +131,7 @@ class IndexedArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise NestedIndexError(self, where)
+            raise nested_indexerror(self, where)
         return self._content._getitem_at(self._index[where])
 
     def _getitem_range(self, where):
@@ -172,7 +172,7 @@ class IndexedArray(Content):
         try:
             nextindex = self._index[carry.data]
         except IndexError as err:
-            raise NestedIndexError(self, carry.data, str(err))
+            raise nested_indexerror(self, carry.data, str(err))
 
         return IndexedArray(
             nextindex,
@@ -184,7 +184,7 @@ class IndexedArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         if slicestarts.length != self.length and self._nplike.known_shape:
-            raise NestedIndexError(
+            raise nested_indexerror(
                 self,
                 ak._v2.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike

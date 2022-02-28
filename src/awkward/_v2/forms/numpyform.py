@@ -2,7 +2,7 @@
 
 from collections.abc import Iterable
 
-from awkward._v2.contents.content import NestedIndexError
+from awkward._v2.contents.content import nested_indexerror
 from awkward._v2.forms.form import Form, _parameters_equal
 
 import awkward as ak
@@ -157,10 +157,10 @@ class NumpyForm(Form):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        raise NestedIndexError(self, where, "not an array of records")
+        raise nested_indexerror(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
-        raise NestedIndexError(self, where, "not an array of records")
+        raise nested_indexerror(self, where, "not an array of records")
 
     def _carry(self, allow_lazy):
         return NumpyForm(

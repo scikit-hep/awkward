@@ -3,7 +3,7 @@
 import copy
 
 import awkward as ak
-from awkward._v2._slicing import NestedIndexError
+from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.regularform import RegularForm
 from awkward._v2.forms.form import _parameters_equal
@@ -158,7 +158,7 @@ class RegularArray(Content):
             where += self.length
 
         if where < 0 or where >= self.length:
-            raise NestedIndexError(self, where)
+            raise nested_indexerror(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))
 
@@ -217,7 +217,7 @@ class RegularArray(Content):
             where[negative] += self._length
 
         if self._nplike.any(where >= self._length, prefer=False):
-            raise NestedIndexError(self, where)
+            raise nested_indexerror(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(
             where.shape[0] * self._size, self._nplike
@@ -539,14 +539,14 @@ class RegularArray(Content):
             head = head._to_nplike(self.nplike)
 
             if advanced is not None:
-                raise NestedIndexError(
+                raise nested_indexerror(
                     self,
                     head,
                     "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
             if head.length != self._size and self._nplike.known_shape:
-                raise NestedIndexError(
+                raise nested_indexerror(
                     self,
                     head,
                     "cannot fit jagged slice with length {} into {} of size {}".format(

@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2._slicing import NestedIndexError
+from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.indexedoptionform import IndexedOptionForm
 from awkward._v2.forms.form import _parameters_equal
@@ -141,7 +141,7 @@ class IndexedOptionArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise NestedIndexError(self, where)
+            raise nested_indexerror(self, where)
         if self._index[where] < 0:
             return None
         else:
@@ -185,7 +185,7 @@ class IndexedOptionArray(Content):
         try:
             nextindex = self._index[carry.data]
         except IndexError as err:
-            raise NestedIndexError(self, carry.data, str(err))
+            raise nested_indexerror(self, carry.data, str(err))
 
         return IndexedOptionArray(
             nextindex,
@@ -242,7 +242,7 @@ class IndexedOptionArray(Content):
         slicestops = slicestops._to_nplike(self.nplike)
 
         if slicestarts.length != self.length and self._nplike.known_shape:
-            raise NestedIndexError(
+            raise nested_indexerror(
                 self,
                 ak._v2.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike

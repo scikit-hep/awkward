@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2._slicing import NestedIndexError
+from awkward._v2._slicing import nested_indexerror
 from awkward._v2.contents.content import Content
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
@@ -166,7 +166,7 @@ class ListArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise NestedIndexError(self, where)
+            raise nested_indexerror(self, where)
         start, stop = self._starts[where], self._stops[where]
         return self._content._getitem_range(slice(start, stop))
 
@@ -212,7 +212,7 @@ class ListArray(Content):
             nextstarts = self._starts[carry.data]
             nextstops = self._stops[: self._starts.length][carry.data]
         except IndexError as err:
-            raise NestedIndexError(self, carry.data, str(err))
+            raise nested_indexerror(self, carry.data, str(err))
 
         return ListArray(
             nextstarts,
@@ -253,7 +253,7 @@ class ListArray(Content):
         slicestarts = slicestarts._to_nplike(self.nplike)
         slicestops = slicestops._to_nplike(self.nplike)
         if slicestarts.length != self.length and self._nplike.known_shape:
-            raise NestedIndexError(
+            raise nested_indexerror(
                 self,
                 ak._v2.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -376,7 +376,7 @@ class ListArray(Content):
             slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray
         ):
             if self._starts.length < slicestarts.length and self._nplike.known_shape:
-                raise NestedIndexError(
+                raise nested_indexerror(
                     self,
                     ak._v2.contents.ListArray(
                         slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -766,7 +766,7 @@ class ListArray(Content):
             headlength = head.length
             head = head._to_nplike(self.nplike)
             if advanced is not None:
-                raise NestedIndexError(
+                raise nested_indexerror(
                     self,
                     head,
                     "cannot mix jagged slice with NumPy-style advanced indexing",
