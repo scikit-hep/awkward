@@ -289,9 +289,9 @@ class BitMaskedArray(Content):
             self._nplike,
         ).simplify_optiontype()
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
-        return self.toByteMaskedArray()._carry(carry, allow_lazy, exception)
+        return self.toByteMaskedArray()._carry(carry, allow_lazy)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         return self.toByteMaskedArray()._getitem_next_jagged(

@@ -221,23 +221,20 @@ class UnionArray(Content):
             self._nplike,
         )
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
 
         try:
             nexttags = self._tags[carry.data]
             nextindex = self._index[: self._tags.length][carry.data]
         except IndexError as err:
-            if issubclass(exception, NestedIndexError):
-                raise exception(self, carry.data, str(err))
-            else:
-                raise exception(str(err))
+            raise NestedIndexError(self, carry.data, str(err))
 
         return UnionArray(
             nexttags,
             nextindex,
             self._contents,
-            self._carry_identifier(carry, exception),
+            self._carry_identifier(carry),
             self._parameters,
             self._nplike,
         )
@@ -270,7 +267,7 @@ class UnionArray(Content):
             )
         )
         nextcarry = ak._v2.index.Index64(tmpcarry.data[: lenout[0]], self._nplike)
-        return self._contents[index]._carry(nextcarry, False, NestedIndexError)
+        return self._contents[index]._carry(nextcarry, False)
 
     @staticmethod
     def regular_index(tags, IndexClass=Index64, nplike=None):
@@ -607,7 +604,7 @@ class UnionArray(Content):
             )
 
         if len(contents) == 1:
-            return contents[0]._carry(index, True, NestedIndexError)
+            return contents[0]._carry(index, True)
 
         else:
             return UnionArray(
@@ -1265,7 +1262,7 @@ class UnionArray(Content):
             index = self._index[self._tags.data == i]
             out.extend(
                 self._contents[i]
-                ._carry(index, False, NestedIndexError)
+                ._carry(index, False)
                 ._completely_flatten(nplike, options)
             )
         return out

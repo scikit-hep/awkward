@@ -250,18 +250,15 @@ class NumpyArray(Content):
             return self._getitem_range(slice(0, 0))
         raise NestedIndexError(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
         try:
             nextdata = self._data[carry.data]
         except IndexError as err:
-            if issubclass(exception, NestedIndexError):
-                raise exception(self, carry.data, str(err))
-            else:
-                raise exception(str(err))
+            raise NestedIndexError(self, carry.data, str(err))
         return NumpyArray(
             nextdata,
-            self._carry_identifier(carry, exception),
+            self._carry_identifier(carry),
             self._parameters,
             self._nplike,
         )

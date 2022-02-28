@@ -220,23 +220,20 @@ class ListOffsetArray(Content):
             self._nplike,
         )
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
 
         try:
             nextstarts = self.starts[carry.data]
             nextstops = self.stops[carry.data]
         except IndexError as err:
-            if issubclass(exception, NestedIndexError):
-                raise exception(self, carry.data, str(err))
-            else:
-                raise exception(str(err))
+            raise NestedIndexError(self, carry.data, str(err))
 
         return ak._v2.contents.listarray.ListArray(
             nextstarts,
             nextstops,
             self._content,
-            self._carry_identifier(carry, exception),
+            self._carry_identifier(carry),
             self._parameters,
             self._nplike,
         )
@@ -300,7 +297,7 @@ class ListOffsetArray(Content):
             )
         )
 
-        nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+        nextcontent = self._content._carry(nextcarry, True)
 
         return ListOffsetArray(
             offsets, nextcontent, identifier, self._parameters, self._nplike
@@ -348,7 +345,7 @@ class ListOffsetArray(Content):
                     head,
                 )
             )
-            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
@@ -416,7 +413,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, True)
 
             if advanced is None or advanced.length == 0:
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
@@ -519,7 +516,7 @@ class ListOffsetArray(Content):
                     ),
                     head,
                 )
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                nextcontent = self._content._carry(nextcarry, True)
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
@@ -562,7 +559,7 @@ class ListOffsetArray(Content):
                     ),
                     head,
                 )
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                nextcontent = self._content._carry(nextcarry, True)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
@@ -955,7 +952,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nextcontent = self._content._carry(nextcarry, False, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, False)
             outcontent = nextcontent._unique(
                 negaxis - 1,
                 nextstarts,
@@ -979,7 +976,7 @@ class ListOffsetArray(Content):
 
             return ak._v2.contents.ListOffsetArray(
                 outcontent._compact_offsets64(True),
-                outcontent._content._carry(outcarry, False, NestedIndexError),
+                outcontent._content._carry(outcarry, False),
                 None,
                 self._parameters,
                 self._nplike,
@@ -1215,7 +1212,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nextcontent = self._content._carry(nextcarry, False, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, False)
             outcontent = nextcontent._argsort_next(
                 negaxis - 1,
                 nextstarts,
@@ -1243,7 +1240,7 @@ class ListOffsetArray(Content):
             )
 
             out_offsets = self._compact_offsets64(True)
-            out = outcontent._carry(outcarry, False, NestedIndexError)
+            out = outcontent._carry(outcarry, False)
             return ak._v2.contents.ListOffsetArray(
                 out_offsets,
                 out,
@@ -1340,7 +1337,7 @@ class ListOffsetArray(Content):
                         False,
                     )
                 )
-                return self._carry(nextcarry, False, NestedIndexError)
+                return self._carry(nextcarry, False)
 
         if not branch and (negaxis == depth):
             if (
@@ -1428,7 +1425,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            nextcontent = self._content._carry(nextcarry, False, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, False)
             outcontent = nextcontent._sort_next(
                 negaxis - 1,
                 nextstarts,
@@ -1456,7 +1453,7 @@ class ListOffsetArray(Content):
 
             return ak._v2.contents.ListOffsetArray(
                 self._compact_offsets64(True),
-                outcontent._carry(outcarry, False, NestedIndexError),
+                outcontent._carry(outcarry, False),
                 None,
                 self._parameters,
                 self._nplike,
@@ -1586,7 +1583,7 @@ class ListOffsetArray(Content):
             contents = []
 
             for ptr in tocarry:
-                contents.append(self._content._carry(ptr, True, NestedIndexError))
+                contents.append(self._content._carry(ptr, True))
 
             recordarray = ak._v2.contents.recordarray.RecordArray(
                 contents, recordlookup, None, None, parameters, self._nplike
@@ -1790,7 +1787,7 @@ class ListOffsetArray(Content):
             else:
                 nextshifts = None
 
-            nextcontent = self._content._carry(nextcarry, False, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, False)
             outcontent = nextcontent._reduce_next(
                 reducer,
                 negaxis - 1,

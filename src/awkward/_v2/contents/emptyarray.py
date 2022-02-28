@@ -96,16 +96,13 @@ class EmptyArray(Content):
             return self._getitem_range(slice(0, 0))
         raise NestedIndexError(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
 
         if carry.length == 0 or not carry.nplike.known_shape:
             return self
         else:
-            if issubclass(exception, NestedIndexError):
-                raise exception(self, carry.data, "array is empty")
-            else:
-                raise exception("array is empty")
+            raise NestedIndexError(self, carry.data, "array is empty")
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():

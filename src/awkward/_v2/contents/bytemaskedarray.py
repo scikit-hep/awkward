@@ -211,22 +211,19 @@ class ByteMaskedArray(Content):
             self._nplike,
         ).simplify_optiontype()
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
 
         try:
             nextmask = self._mask[carry.data]
         except IndexError as err:
-            if issubclass(exception, NestedIndexError):
-                raise exception(self, carry.data, str(err))
-            else:
-                raise exception(str(err))
+            raise NestedIndexError(self, carry.data, str(err))
 
         return ByteMaskedArray(
             nextmask,
-            self._content._carry(carry, allow_lazy, exception),
+            self._content._carry(carry, allow_lazy),
             self._valid_when,
-            self._carry_identifier(carry, exception),
+            self._carry_identifier(carry),
             self._parameters,
             self._nplike,
         )
@@ -315,7 +312,7 @@ class ByteMaskedArray(Content):
             )
         )
 
-        next = self._content._carry(nextcarry, True, NestedIndexError)
+        next = self._content._carry(nextcarry, True)
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
 
         out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
@@ -337,7 +334,7 @@ class ByteMaskedArray(Content):
             numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-            next = self._content._carry(nextcarry, True, NestedIndexError)
+            next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
@@ -445,7 +442,7 @@ class ByteMaskedArray(Content):
                 )
             )
 
-            return self._content._carry(nextcarry, False, NestedIndexError)
+            return self._content._carry(nextcarry, False)
 
     def simplify_optiontype(self):
         if isinstance(
@@ -474,7 +471,7 @@ class ByteMaskedArray(Content):
             numnull = ak._v2.index.Index64.empty(1, self._nplike, dtype=np.int64)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-            next = self._content._carry(nextcarry, False, NestedIndexError)
+            next = self._content._carry(nextcarry, False)
             out = next.num(posaxis, depth)
 
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
@@ -490,7 +487,7 @@ class ByteMaskedArray(Content):
             numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-            next = self._content._carry(nextcarry, False, NestedIndexError)
+            next = self._content._carry(nextcarry, False)
 
             offsets, flattened = next._offsets_and_flattened(posaxis, depth)
 
@@ -575,7 +572,7 @@ class ByteMaskedArray(Content):
             numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-            next = self._content._carry(nextcarry, False, NestedIndexError)
+            next = self._content._carry(nextcarry, False)
             out = next._localindex(posaxis, depth)
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
@@ -663,7 +660,7 @@ class ByteMaskedArray(Content):
             numnull = ak._v2.index.Index64.empty(1, self._nplike, dtype=np.int64)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
-            next = self._content._carry(nextcarry, True, NestedIndexError)
+            next = self._content._carry(nextcarry, True)
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
@@ -773,7 +770,7 @@ class ByteMaskedArray(Content):
         else:
             nextshifts = None
 
-        next = self._content._carry(nextcarry, False, NestedIndexError)
+        next = self._content._carry(nextcarry, False)
         if isinstance(next, ak._v2.contents.RegularArray):
             next = next.toListOffsetArray64(True)
 

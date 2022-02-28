@@ -534,7 +534,7 @@ class Content:
                     )
 
                 out = ak._v2._slicing.getitem_next_array_wrap(
-                    self._carry(carry, allow_lazy, NestedIndexError), where.shape
+                    self._carry(carry, allow_lazy), where.shape
                 )
                 if out.length == 0:
                     return out._getitem_nothing()
@@ -667,7 +667,7 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         else:
             raise NotImplementedError
 
-    def _carry_identifier(self, carry, exception):
+    def _carry_identifier(self, carry):
         if self._identifier is None:
             return None
         else:

@@ -93,6 +93,7 @@ def little_endian(array):
 
 ###############################################################################
 
+
 class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
@@ -115,6 +116,7 @@ class ErrorContext:
         # Allow another ErrorContext to be primary.
         if self.primary() is self:
             self._slate.__dict__.clear()
+
 
 ###############################################################################
 

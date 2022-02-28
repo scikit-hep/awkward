@@ -309,7 +309,7 @@ class RecordArray(Content):
             self._nplike,
         )
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
 
         if allow_lazy:
@@ -323,23 +323,20 @@ class RecordArray(Content):
                 where[negative] += self._length
 
             if self._nplike.any(where >= self._length, prefer=False):
-                if issubclass(exception, NestedIndexError):
-                    raise exception(self, where)
-                else:
-                    raise exception("index out of range")
+                raise NestedIndexError(self, where)
 
             nextindex = ak._v2.index.Index64(where)
             return ak._v2.contents.indexedarray.IndexedArray(
                 nextindex,
                 self,
-                self._carry_identifier(carry, exception),
+                self._carry_identifier(carry),
                 None,
                 self._nplike,
             )
 
         else:
             contents = [
-                self.content(i)._carry(carry, allow_lazy, exception)
+                self.content(i)._carry(carry, allow_lazy)
                 for i in range(len(self._contents))
             ]
 
@@ -354,7 +351,7 @@ class RecordArray(Content):
                 contents,
                 self._fields,
                 length,
-                self._carry_identifier(carry, exception),
+                self._carry_identifier(carry),
                 self._parameters,
                 self._nplike,
             )

@@ -231,9 +231,7 @@ def prepare_tuple_nested(item):
         nextindex = item.index.data.astype(np.int64)  # this ALWAYS copies
         nonnull = nextindex >= 0
 
-        projected = item.content._carry(
-            ak._v2.index.Index64(nextindex[nonnull]), False, NestedIndexError
-        )
+        projected = item.content._carry(ak._v2.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
         nextindex[nonnull] = item.nplike.arange(projected.length, dtype=np.int64)
@@ -257,7 +255,7 @@ def prepare_tuple_nested(item):
         positions_where_valid = item.nplike.nonzero(is_valid)[0]
 
         nextcontent = prepare_tuple_nested(item.content)._carry(
-            ak._v2.index.Index64(positions_where_valid), False, NestedIndexError
+            ak._v2.index.Index64(positions_where_valid), False
         )
 
         nextindex = item.nplike.full(is_valid.shape[0], -1, np.int64)
@@ -540,7 +538,7 @@ Error details: {details}."""
     if not isinstance(error_context, SlicingErrorContext):
         # Note: returns an error for the caller to raise!
         return IndexError(
-            f"cannot slice {type(subarray).__name__} with {repr(slicer)}{detailsstr}"
+            f"cannot slice {type(subarray).__name__} with {format_slice(slicer)}{detailsstr}"
         )
 
     else:
@@ -565,7 +563,7 @@ Error details: {details}."""
 
 with
 
-    {format_slice(where)}
+    {format_slice(error_context.where)}
 
 at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {format_slice(slicer)}.{detailsstr}
         """

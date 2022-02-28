@@ -205,23 +205,20 @@ class ListArray(Content):
             self._nplike,
         )
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
 
         try:
             nextstarts = self._starts[carry.data]
             nextstops = self._stops[: self._starts.length][carry.data]
         except IndexError as err:
-            if issubclass(exception, NestedIndexError):
-                raise exception(self, carry.data, str(err))
-            else:
-                raise exception(str(err))
+            raise NestedIndexError(self, carry.data, str(err))
 
         return ListArray(
             nextstarts,
             nextstops,
             self._content,
-            self._carry_identifier(carry, exception),
+            self._carry_identifier(carry),
             self._parameters,
             self._nplike,
         )
@@ -367,7 +364,7 @@ class ListArray(Content):
                 )
             )
 
-            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, True)
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
 
@@ -453,7 +450,7 @@ class ListArray(Content):
                 slicecontent._content,
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ):
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                nextcontent = self._content._carry(nextcarry, True)
                 next = ak._v2.contents.listoffsetarray.ListOffsetArray(
                     smalloffsets, nextcontent, None, self._parameters, self._nplike
                 )
@@ -531,7 +528,7 @@ class ListArray(Content):
                     head,
                 )
             )
-            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
@@ -606,7 +603,7 @@ class ListArray(Content):
                 )
             )
 
-            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, True)
 
             if advanced is None or advanced.length == 0:
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
@@ -718,7 +715,7 @@ class ListArray(Content):
                     ),
                     head,
                 )
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                nextcontent = self._content._carry(nextcarry, True)
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
@@ -761,7 +758,7 @@ class ListArray(Content):
                         self._content.length,
                     )
                 )
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                nextcontent = self._content._carry(nextcarry, True)
 
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
@@ -808,7 +805,7 @@ class ListArray(Content):
                     length,
                 ),
             )
-            carried = self._content._carry(nextcarry, True, NestedIndexError)
+            carried = self._content._carry(nextcarry, True)
             down = carried._getitem_next_jagged(
                 multistarts, multistops, head._content, tail
             )

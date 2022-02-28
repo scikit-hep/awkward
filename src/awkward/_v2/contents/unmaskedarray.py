@@ -147,10 +147,10 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         return UnmaskedArray(
-            self._content._carry(carry, allow_lazy, exception),
-            self._carry_identifier(carry, exception),
+            self._content._carry(carry, allow_lazy),
+            self._carry_identifier(carry),
             self._parameters,
             self._nplike,
         )
