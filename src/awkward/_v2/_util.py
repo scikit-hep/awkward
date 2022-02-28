@@ -9,6 +9,7 @@
 import setuptools
 import os
 import numbers
+import threading
 
 from collections.abc import Mapping
 
@@ -89,6 +90,31 @@ def tobytes(array):
 def little_endian(array):
     return array.astype(array.dtype.newbyteorder("<"), copy=False)
 
+
+###############################################################################
+
+class ErrorContext:
+    # Any other threads should get a completely independent _slate.
+    _slate = threading.local()
+
+    @classmethod
+    def primary(cls):
+        return cls._slate.__dict__.get("context")
+
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+
+    def __enter__(self):
+        # Make it strictly non-reenterant. Only one ErrorContext is primary.
+        if self.primary() is None:
+            self._slate.__dict__.clear()
+            self._slate.__dict__.update(self._kwargs)
+            self._slate.context = self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        # Allow another ErrorContext to be primary.
+        if self.primary() is self:
+            self._slate.__dict__.clear()
 
 ###############################################################################
 
