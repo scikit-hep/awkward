@@ -61,7 +61,7 @@ def _impl(x, axis, keepdims, mask_identity, flatten_records):
     with np.errstate(invalid="ignore"):
         nplike = ak.nplike.of(x)
         expx = nplike.exp(x)
-        denom = ak._v2.operations.reducers.sum(
-            expx, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+        denom = ak._v2.operations.reducers.ak_sum._impl(
+            expx, axis, keepdims, mask_identity, flatten_records
         )
         return nplike.true_divide(expx, denom)

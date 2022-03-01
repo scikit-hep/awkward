@@ -76,18 +76,20 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
     )
 
     if axis is None:
-        out = ak._v2.operations.reducers.max(array) - ak._v2.operations.reducers.min(
-            array
+        out = ak._v2.operations.reducers.ak_max._impl(
+            array, axis, keepdims, None, mask_identity, flatten_records
+        ) - ak._v2.operations.reducers.ak_min._impl(
+            array, axis, keepdims, None, mask_identity, flatten_records
         )
         if not mask_identity and out is None:
             out = 0
 
     else:
-        maxi = ak._v2.operations.reducers.max(
-            array, axis=axis, mask_identity=True, keepdims=True
+        maxi = ak._v2.operations.reducers.ak_max._impl(
+            array, axis, True, None, mask_identity, flatten_records
         )
-        mini = ak._v2.operations.reducers.min(
-            array, axis=axis, mask_identity=True, keepdims=True
+        mini = ak._v2.operations.reducers.ak_min._impl(
+            array, axis, True, None, True, flatten_records
         )
 
         if maxi is None or mini is None:

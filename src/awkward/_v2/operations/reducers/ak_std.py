@@ -86,12 +86,13 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records):
 
     with np.errstate(invalid="ignore"):
         return ak.nplike.of(x, weight).sqrt(
-            ak._v2.operations.reducers.var(
+            ak._v2.operations.reducers.ak_var._impl(
                 x,
-                weight=weight,
-                ddof=ddof,
-                axis=axis,
-                keepdims=keepdims,
-                mask_identity=mask_identity,
+                weight,
+                ddof,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
             )
         )
