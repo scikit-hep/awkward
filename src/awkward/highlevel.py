@@ -2168,7 +2168,6 @@ class ArrayBuilder(Iterable, Sized):
          #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
          When filling from #ak.Array or #ak.Record, the output holds references
          to the original data, rather than copying.
-       * #extend: appends all the items from an #ak.Array (by reference).
        * #list: context manager for #begin_list and #end_list.
        * #tuple: context manager for #begin_tuple and #end_tuple.
        * #record: context manager for #begin_record and #end_record.
