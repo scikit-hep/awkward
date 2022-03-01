@@ -10,6 +10,7 @@ import setuptools
 import os
 import numbers
 import threading
+import traceback
 
 from collections.abc import Mapping
 
@@ -118,10 +119,46 @@ class ErrorContext:
             self._slate.__dict__.clear()
 
 
+class OperationErrorContext(ErrorContext):
+    def __init__(self, name, arguments):
+        super().__init__(
+            name=name,
+            arguments=arguments,
+            traceback=traceback.extract_stack(limit=3)[0],
+        )
+
+    @property
+    def name(self):
+        return self._kwargs["name"]
+
+    @property
+    def arguments(self):
+        return self._kwargs["arguments"]
+
+    @property
+    def traceback(self):
+        return self._kwargs["traceback"]
+
+
+class SlicingErrorContext(ErrorContext):
+    def __init__(self, array, where):
+        super().__init__(array=array, where=where)
+
+    @property
+    def array(self):
+        return self._kwargs["array"]
+
+    @property
+    def where(self):
+        return self._kwargs["where"]
+
+
 def error(exception):
-    if isinstance(exception, type):
-        assert issubclass(exception, Exception)
-        exception = exception()
+    if isinstance(exception, type) and issubclass(exception, Exception):
+        try:
+            exception = exception()
+        except Exception:
+            return exception
 
     if isinstance(exception, (NotImplementedError, AssertionError)):
         return type(exception)(
@@ -131,7 +168,33 @@ def error(exception):
 
     error_context = ErrorContext.primary()
 
-    if isinstance(error_context, SlicingErrorContext):
+    if isinstance(error_context, OperationErrorContext):
+        tb = error_context.traceback
+        try:
+            location = f" (from {tb.filename}, line {tb.lineno})"
+        except Exception:
+            location = ""
+
+        arguments = []
+        for name, value in error_context.arguments.items():
+            try:
+                valuestr = repr(value)
+            except Exception:
+                valuestr = "???"
+            if len(valuestr) > 80:
+                valuestr = valuestr[:77] + "..."
+            arguments.append(f"\n        {name} = {valuestr}")
+
+        extra_line = "" if len(arguments) == 0 else "\n    "
+        return type(exception)(
+            f"""while calling{location}
+
+    {error_context.name}({",".join(arguments)}{extra_line})
+
+Error details: {str(exception)}"""
+        )
+
+    elif isinstance(error_context, SlicingErrorContext):
         if isinstance(error_context.array, ak._v2.contents.Content):
             try:
                 arraystr = "    " + repr(ak._v2.highlevel.Array(error_context.array))
@@ -159,19 +222,6 @@ Error details: {str(exception)}"""
         )
 
     return exception
-
-
-class SlicingErrorContext(ErrorContext):
-    def __init__(self, array, where):
-        super().__init__(array=array, where=where)
-
-    @property
-    def array(self):
-        return self._kwargs["array"]
-
-    @property
-    def where(self):
-        return self._kwargs["where"]
 
 
 def format_slice(x):
