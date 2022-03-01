@@ -430,13 +430,12 @@ class RecordArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            single = ak._v2.index.Index64.empty(1, self._nplike)
-            single[0] = self.length
+            npsingle = self._nplike.full((1,), self.length, np.int64)
+            single = ak._v2.index.Index64(npsingle, nplike=self._nplike)
             singleton = ak._v2.contents.numpyarray.NumpyArray(
                 single, None, None, self._nplike
             )
             contents = [singleton] * len(self._contents)
-
             record = ak._v2.contents.recordarray.RecordArray(
                 contents, self._fields, 1, None, self._parameters, self._nplike
             )
