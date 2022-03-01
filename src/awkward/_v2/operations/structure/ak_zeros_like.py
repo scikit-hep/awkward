@@ -35,9 +35,9 @@ def zeros_like(array, highlevel=True, behavior=None, dtype=None):
 
 def _impl(array, highlevel, behavior, dtype):
     if dtype is not None:
-        return ak._v2.operations.structure.full_like(
-            array, 0, highlevel=highlevel, behavior=behavior, dtype=dtype
+        return ak._v2.operations.structure.ak_full_like._impl(
+            array, 0, highlevel, behavior, dtype
         )
-    return ak._v2.operations.structure.full_like(
-        array, _ZEROS, highlevel=highlevel, behavior=behavior, dtype=dtype
+    return ak._v2.operations.structure.ak_full_like._impl(
+        array, _ZEROS, highlevel, behavior, dtype
     )

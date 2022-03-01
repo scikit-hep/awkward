@@ -83,10 +83,10 @@ def _impl(array):
         return array.to_list()
 
     elif isinstance(array, Mapping):
-        return {k: to_list(v) for k, v in array.items()}
+        return {k: _impl(v) for k, v in array.items()}
 
     elif isinstance(array, Iterable):
-        return [to_list(x) for x in array]
+        return [_impl(x) for x in array]
 
     else:
         return array

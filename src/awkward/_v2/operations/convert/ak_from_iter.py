@@ -67,12 +67,13 @@ def from_iter(
 def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     if isinstance(iterable, dict):
         if allow_record:
-            return from_iter(
+            return _impl(
                 [iterable],
-                highlevel=highlevel,
-                behavior=behavior,
-                initial=initial,
-                resize=resize,
+                highlevel,
+                behavior,
+                False,
+                initial,
+                resize,
             )[0]
         else:
             raise ak._v2._util.error(

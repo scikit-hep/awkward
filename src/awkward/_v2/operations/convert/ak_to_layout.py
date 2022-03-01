@@ -66,12 +66,13 @@ def _impl(array, allow_record, allow_other, numpytype):
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
             raise ak._v2._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
-        return to_layout(
+        return _impl(
             ak._v2.operations.convert.from_numpy(
                 array, regulararray=True, recordarray=True, highlevel=False
             ),
-            allow_record=allow_record,
-            allow_other=allow_other,
+            allow_record,
+            allow_other,
+            numpytype,
         )
 
     elif (
@@ -79,26 +80,29 @@ def _impl(array, allow_record, allow_other, numpytype):
     ):
         if not issubclass(array.dtype.type, numpytype):
             raise ak._v2._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
-        return to_layout(
+        return _impl(
             ak._v2.operations.convert.from_cupy(
                 array, regulararray=True, highlevel=False
             ),
-            allow_record=allow_record,
-            allow_other=allow_other,
+            allow_record,
+            allow_other,
+            numpytype,
         )
 
     elif isinstance(array, (str, bytes)):
-        return to_layout(
+        return _impl(
             ak._v2.operations.convert.from_iter([array], highlevel=False),
-            allow_record=allow_record,
-            allow_other=allow_other,
+            allow_record,
+            allow_other,
+            numpytype,
         )
 
     elif isinstance(array, Iterable):
-        return to_layout(
+        return _impl(
             ak._v2.operations.convert.from_iter(array, highlevel=False),
-            allow_record=allow_record,
-            allow_other=allow_other,
+            allow_record,
+            allow_other,
+            numpytype,
         )
 
     elif not allow_other:

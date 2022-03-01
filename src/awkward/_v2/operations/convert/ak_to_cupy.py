@@ -43,16 +43,16 @@ def _impl(array):
         return cupy.asarray(array)
 
     elif isinstance(array, ak._v2.highlevel.Array):
-        return to_cupy(array.layout)
+        return _impl(array.layout)
 
     elif isinstance(array, ak._v2.highlevel.Record):
         raise ak._v2._util.error(ValueError("CuPy does not support record structures"))
 
     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
-        return to_cupy(array.snapshot().layout)
+        return _impl(array.snapshot().layout)
 
     elif isinstance(array, ak.layout.ArrayBuilder):
-        return to_cupy(array.snapshot())
+        return _impl(array.snapshot())
 
     elif (
         ak._v2.operations.describe.parameters(array).get("__array__") == "bytestring"
@@ -64,10 +64,10 @@ def _impl(array):
         return cupy.array([])
 
     elif isinstance(array, ak._v2.contents.IndexedArray):
-        return to_cupy(array.project())
+        return _impl(array.project())
 
     elif isinstance(array, ak._v2.contents.UnionArray):
-        contents = [to_cupy(array.project(i)) for i in range(len(array.contents))]
+        contents = [_impl(array.project(i)) for i in range(len(array.contents))]
         out = cupy.concatenate(contents)
 
         tags = cupy.asarray(array.tags)
@@ -77,10 +77,10 @@ def _impl(array):
         return out
 
     elif isinstance(array, ak._v2.contents.UnmaskedArray):
-        return to_cupy(array.content)
+        return _impl(array.content)
 
     elif isinstance(array, ak._v2.contents.IndexedOptionArray):
-        content = to_cupy(array.project())
+        content = _impl(array.project())
 
         shape = list(content.shape)
         shape[0] = len(array)
@@ -91,7 +91,7 @@ def _impl(array):
             return content
 
     elif isinstance(array, ak._v2.contents.RegularArray):
-        out = to_cupy(array.content)
+        out = _impl(array.content)
         head, tail = out.shape[0], out.shape[1:]
         shape = (head // array.size, array.size) + tail
         return out[: shape[0] * array.size].reshape(shape)
@@ -99,13 +99,13 @@ def _impl(array):
     elif isinstance(
         array, (ak._v2.contents.ListArray, ak._v2.contents.ListOffsetArray)
     ):
-        return to_cupy(array.toRegularArray())
+        return _impl(array.toRegularArray())
 
     elif isinstance(array, ak._v2.contents.recordarray.RecordArray):
         raise ak._v2._util.error(ValueError("CuPy does not support record structures"))
 
     elif isinstance(array, ak._v2.contents.NumpyArray):
-        return array.to_cupy()
+        return array._impl()
 
     elif isinstance(array, ak._v2.contents.Content):
         raise ak._v2._util.error(

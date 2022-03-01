@@ -16,7 +16,6 @@ def combinations(
     highlevel=True,
     behavior=None,
 ):
-
     """
     Args:
         array: Array from which to choose `n` items without replacement.

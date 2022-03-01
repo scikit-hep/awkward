@@ -56,18 +56,18 @@ def _impl(base, what, where, highlevel, behavior):
         and all(isinstance(x, str) for x in where)
         and len(where) > 1
     ):
-        return with_field(
+        return _impl(
             base,
-            with_field(
+            _impl(
                 base[where[0]],
                 what,
-                where=where[1:],
-                highlevel=highlevel,
-                behavior=behavior,
+                where[1:],
+                highlevel,
+                behavior,
             ),
-            where=where[0],
-            highlevel=highlevel,
-            behavior=behavior,
+            where[0],
+            highlevel,
+            behavior,
         )
     else:
 

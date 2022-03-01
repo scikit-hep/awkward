@@ -93,7 +93,7 @@ def _impl(array):
 
     elif isinstance(array, np.ndarray):
         if len(array.shape) == 0:
-            return type(array.reshape((1,))[0])
+            return _impl(array.reshape((1,))[0])
         else:
             try:
                 out = ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype.type]

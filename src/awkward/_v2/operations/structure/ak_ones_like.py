@@ -7,7 +7,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("ones_like")
 def ones_like(array, highlevel=True, behavior=None, dtype=None):
-
     """
     Args:
         array: Array to use as a model for a replacement that contains only `1`.
@@ -32,6 +31,6 @@ def ones_like(array, highlevel=True, behavior=None, dtype=None):
 
 
 def _impl(array, highlevel, behavior, dtype):
-    return ak._v2.operations.structure.full_like(
-        array, 1, highlevel=highlevel, behavior=behavior, dtype=dtype
+    return ak._v2.operations.structure.ak_full_like._impl(
+        array, 1, highlevel, behavior, dtype
     )

@@ -14,7 +14,6 @@ def cartesian(
     highlevel=True,
     behavior=None,
 ):
-
     """
     Args:
         arrays (dict or iterable of arrays): Arrays on which to compute the
