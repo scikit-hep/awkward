@@ -155,6 +155,36 @@ def combinations(
     The #ak.argcombinations form can be particularly useful as nested indexing
     in #ak.Array.__getitem__.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.combinations",
+        dict(
+            array=array,
+            n=n,
+            replacement=replacement,
+            axis=axis,
+            fields=fields,
+            parameters=parameters,
+            with_name=with_name,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(
+            array,
+            n,
+            replacement,
+            axis,
+            fields,
+            parameters,
+            with_name,
+            highlevel,
+            behavior,
+        )
+
+
+def _impl(
+    array, n, replacement, axis, fields, parameters, with_name, highlevel, behavior
+):
     if parameters is None:
         parameters = {}
     else:

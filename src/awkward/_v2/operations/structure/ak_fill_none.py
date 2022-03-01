@@ -10,7 +10,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data in which to replace None with a given value.
@@ -51,6 +50,16 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
     The values could be floating-point numbers or strings.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.fill_none",
+        dict(
+            array=array, value=value, axis=axis, highlevel=highlevel, behavior=behavior
+        ),
+    ):
+        return _impl(array, value, axis, highlevel, behavior)
+
+
+def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak._v2.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )

@@ -71,6 +71,22 @@ def argcartesian(
     All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
     so see the #ak.cartesian documentation for a more complete description.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.argcartesian",
+        dict(
+            arrays=arrays,
+            axis=axis,
+            nested=nested,
+            parameters=parameters,
+            with_name=with_name,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
+
+
+def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
         behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)
         layouts = {

@@ -31,6 +31,19 @@ def from_arrow(array, conservative_optiontype=False, highlevel=True, behavior=No
 
     See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_arrow",
+        dict(
+            array=array,
+            conservative_optiontype=conservative_optiontype,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(array, conservative_optiontype, highlevel, behavior)
+
+
+def _impl(array, conservative_optiontype, highlevel, behavior):
     import awkward._v2._connect.pyarrow
 
     out = awkward._v2._connect.pyarrow.handle_arrow(

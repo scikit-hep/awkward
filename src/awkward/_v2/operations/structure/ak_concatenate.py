@@ -35,7 +35,21 @@ def concatenate(
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.concatenate",
+        dict(
+            arrays=arrays,
+            axis=axis,
+            merge=merge,
+            mergebool=mergebool,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(arrays, axis, merge, mergebool, highlevel, behavior)
 
+
+def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     contents = [
         ak._v2.operations.convert.to_layout(
             x, allow_record=False if axis == 0 else True, allow_other=True

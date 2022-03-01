@@ -32,6 +32,14 @@ def backend(*arrays):
 
     See #ak.to_backend.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.backend",
+        {"*arrays": arrays},
+    ):
+        return _impl(arrays)
+
+
+def _impl(arrays):
     backends = set()
     for array in arrays:
         layout = ak._v2.operations.convert.to_layout(

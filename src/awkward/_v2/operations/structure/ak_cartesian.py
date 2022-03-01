@@ -215,6 +215,22 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.cartesian",
+        dict(
+            arrays=arrays,
+            axis=axis,
+            nested=nested,
+            parameters=parameters,
+            with_name=with_name,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior)
+
+
+def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
         behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)
         nplike = ak.nplike.of(*arrays.values())

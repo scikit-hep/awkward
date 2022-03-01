@@ -58,6 +58,22 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_buffers",
+        dict(
+            form=form,
+            length=length,
+            container=container,
+            buffer_key=buffer_key,
+            nplike=nplike,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(form, length, container, buffer_key, nplike, highlevel, behavior)
+
+
+def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
     if ak._v2._util.isstr(form):
         if ak._v2.types.numpytype.is_primitive(form):
             form = ak._v2.forms.NumpyForm(form)
