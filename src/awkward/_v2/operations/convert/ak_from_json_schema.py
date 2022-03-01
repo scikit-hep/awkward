@@ -60,6 +60,35 @@ def from_json_schema(
 
     See also #ak.from_json and #ak.to_json.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_json_schema",
+        dict(
+            source=source,
+            schema=schema,
+            highlevel=highlevel,
+            behavior=behavior,
+            output_initial_size=output_initial_size,
+            output_resize_factor=output_resize_factor,
+        ),
+    ):
+        return _impl(
+            source,
+            schema,
+            highlevel,
+            behavior,
+            output_initial_size,
+            output_resize_factor,
+        )
+
+
+def _impl(
+    source,
+    schema,
+    highlevel,
+    behavior,
+    output_initial_size,
+    output_resize_factor,
+):
     if not isinstance(source, bytes) and not ak._v2._util.isstr(source):
         raise ak._v2._util.error(
             NotImplementedError("for now, 'source' must be bytes or str")

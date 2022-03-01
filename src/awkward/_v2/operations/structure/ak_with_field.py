@@ -9,7 +9,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def with_field(base, what, where=None, highlevel=True, behavior=None):
-
     """
     Args:
         base: Data containing records or tuples.
@@ -32,7 +31,14 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
     #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.with_field",
+        dict(base=base, what=what, where=where, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(base, what, where, highlevel, behavior)
 
+
+def _impl(base, what, where, highlevel, behavior):
     if not (
         where is None
         or isinstance(where, str)

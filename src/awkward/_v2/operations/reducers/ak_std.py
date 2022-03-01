@@ -58,6 +58,22 @@ def std(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.std",
+        dict(
+            x=x,
+            weight=weight,
+            ddof=ddof,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records):
     x = ak._v2.highlevel.Array(
         ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=False)
     )

@@ -24,6 +24,14 @@ def ones_like(array, highlevel=True, behavior=None, dtype=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.ones_like",
+        dict(array=array, highlevel=highlevel, behavior=behavior, dtype=dtype),
+    ):
+        return _impl(array, highlevel, behavior, dtype)
+
+
+def _impl(array, highlevel, behavior, dtype):
     return ak._v2.operations.structure.full_like(
         array, 1, highlevel=highlevel, behavior=behavior, dtype=dtype
     )

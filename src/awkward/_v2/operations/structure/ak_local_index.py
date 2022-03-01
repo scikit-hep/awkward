@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def local_index(array, axis=-1, highlevel=True, behavior=None):
-
     """
     Args:
         array: Array to index.
@@ -72,6 +71,14 @@ def local_index(array, axis=-1, highlevel=True, behavior=None):
                        2               8.8
                        3               9.9
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.local_index",
+        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, axis, highlevel, behavior)
+
+
+def _impl(array, axis, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )

@@ -56,6 +56,41 @@ def from_json_file(
 
     See also #ak.from_json_schema and #ak.to_json.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_json_file",
+        dict(
+            source=source,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+            complex_record_fields=complex_record_fields,
+            highlevel=highlevel,
+            behavior=behavior,
+            buffersize=buffersize,
+        ),
+    ):
+        return _impl(
+            source,
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_record_fields,
+            highlevel,
+            behavior,
+            buffersize,
+        )
+
+
+def _impl(
+    source,
+    nan_string,
+    infinity_string,
+    minus_infinity_string,
+    complex_record_fields,
+    highlevel,
+    behavior,
+    buffersize,
+):
     if complex_record_fields is None:
         complex_real_string = None
         complex_imag_string = None

@@ -55,6 +55,41 @@ def to_json(
 
     See also #ak.from_json and #ak.Array.tojson.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_json",
+        dict(
+            array=array,
+            pretty=pretty,
+            verbose=verbose,
+            maxdecimals=maxdecimals,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+            complex_record_fields=complex_record_fields,
+        ),
+    ):
+        return _impl(
+            array,
+            pretty,
+            verbose,
+            maxdecimals,
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_record_fields,
+        )
+
+
+def _impl(
+    array,
+    pretty,
+    verbose,
+    maxdecimals,
+    nan_string,
+    infinity_string,
+    minus_infinity_string,
+    complex_record_fields,
+):
     if array is None or isinstance(array, (bool, str, bytes, Number)):
         return json.dumps(array)
 

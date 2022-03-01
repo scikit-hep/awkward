@@ -33,6 +33,14 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
 
     See also #ak.to_regular.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_regular",
+        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, axis, highlevel, behavior)
+
+
+def _impl(array, axis, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(array)
     posaxis = layout.axis_wrap_if_negative(axis)
 

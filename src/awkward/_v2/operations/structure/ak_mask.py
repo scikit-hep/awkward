@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data to mask, rather than filter.
@@ -86,7 +85,20 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 
     (which is 5 characters away from simply filtering the `array`).
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.mask",
+        dict(
+            array=array,
+            mask=mask,
+            valid_when=valid_when,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(array, mask, valid_when, highlevel, behavior)
 
+
+def _impl(array, mask, valid_when, highlevel, behavior):
     def action(inputs, **kwargs):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak._v2.contents.NumpyArray):

@@ -22,6 +22,14 @@ def to_cupy(array):
 
     See also #ak.from_cupy and #ak.to_numpy.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_cupy",
+        dict(array=array),
+    ):
+        return _impl(array)
+
+
+def _impl(array):
     cupy = ak.nplike.Cupy.instance()
     np = ak.nplike.NumpyMetadata.instance()
 

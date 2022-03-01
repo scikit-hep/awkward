@@ -19,6 +19,14 @@ def validity_error(array, exception=False):
 
     See also #ak.is_valid.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.validity_error",
+        dict(array=array, exception=exception),
+    ):
+        return _impl(array, exception)
+
+
+def _impl(array, exception):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )

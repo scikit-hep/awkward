@@ -61,6 +61,41 @@ def to_arrow(
 
     See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet, #ak.from_arrow_schema.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_arrow",
+        dict(
+            array=array,
+            list_to32=list_to32,
+            string_to32=string_to32,
+            bytestring_to32=bytestring_to32,
+            emptyarray_to=emptyarray_to,
+            categorical_as_dictionary=categorical_as_dictionary,
+            extensionarray=extensionarray,
+            count_nulls=count_nulls,
+        ),
+    ):
+        return _impl(
+            array,
+            list_to32,
+            string_to32,
+            bytestring_to32,
+            emptyarray_to,
+            categorical_as_dictionary,
+            extensionarray,
+            count_nulls,
+        )
+
+
+def _impl(
+    array,
+    list_to32,
+    string_to32,
+    bytestring_to32,
+    emptyarray_to,
+    categorical_as_dictionary,
+    extensionarray,
+    count_nulls,
+):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )

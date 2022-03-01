@@ -8,7 +8,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def type(array):
-
     """
     The high-level type of an `array` (many types supported, including all
     Awkward Arrays and Records) as #ak.types.Type objects.
@@ -54,6 +53,14 @@ def type(array):
     similar to existing type-constructors, so it's a plausible addition
     to the language.)
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.type",
+        dict(array=array),
+    ):
+        return _impl(array)
+
+
+def _impl(array):
     if array is None:
         return ak._v2.types.UnknownType()
 

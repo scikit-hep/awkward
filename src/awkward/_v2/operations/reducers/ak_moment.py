@@ -57,6 +57,22 @@ def moment(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.moment",
+        dict(
+            x=x,
+            n=n,
+            weight=weight,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(x, n, weight, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(x, n, weight, axis, keepdims, mask_identity, flatten_records):
     x = ak._v2.highlevel.Array(
         ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=False)
     )

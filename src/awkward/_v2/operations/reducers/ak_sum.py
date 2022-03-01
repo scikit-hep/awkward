@@ -180,6 +180,20 @@ def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     the identity of addition, but it is reduced to None if
     `mask_identity=True`.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.sum",
+        dict(
+            array=array,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )

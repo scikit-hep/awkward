@@ -32,6 +32,19 @@ def to_layout(
     would rarely be used in a data analysis because #ak.layout.Content and
     #ak.layout.Record are lower-level than #ak.Array.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_layout",
+        dict(
+            array=array,
+            allow_record=allow_record,
+            allow_other=allow_other,
+            numpytype=numpytype,
+        ),
+    ):
+        return _impl(array, allow_record, allow_other, numpytype)
+
+
+def _impl(array, allow_record, allow_other, numpytype):
     if isinstance(array, ak._v2.contents.Content):
         return array
 

@@ -32,6 +32,14 @@ def to_list(array):
 
     See also #ak.from_iter and #ak.Array.tolist.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_list",
+        dict(array=array),
+    ):
+        return _impl(array)
+
+
+def _impl(array):
     if isinstance(
         array,
         (

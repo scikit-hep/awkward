@@ -71,6 +71,21 @@ def mean(
     See #ak.sum for a complete description of handling nested lists and
     missing values (None) in reducers.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.mean",
+        dict(
+            x=x,
+            weight=weight,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(x, weight, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
     x = ak._v2.highlevel.Array(
         ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=False)
     )

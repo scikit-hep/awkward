@@ -68,6 +68,22 @@ def linear_fit(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.linear_fit",
+        dict(
+            x=x,
+            y=y,
+            weight=weight,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
     x = ak._v2.highlevel.Array(
         ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=False)
     )

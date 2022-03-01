@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def with_parameter(array, parameter, value, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data convertible into an Awkward Array.
@@ -26,6 +25,20 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
     You can also remove a single parameter with this function, since setting
     a parameter to None is equivalent to removing it.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.with_parameter",
+        dict(
+            array=array,
+            parameter=parameter,
+            value=value,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(array, parameter, value, highlevel, behavior)
+
+
+def _impl(array, parameter, value, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
