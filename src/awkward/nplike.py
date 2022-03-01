@@ -130,9 +130,6 @@ class NumpyLike(Singleton):
         # data[, dtype=[, copy=]]
         return self._module.array(*args, **kwargs)
 
-    def raw(self, *args, **kwargs):
-        return self._module.raw(*args, **kwargs)
-
     def asarray(self, *args, **kwargs):
         # array[, dtype=][, order=]
         return self._module.asarray(*args, **kwargs)

@@ -59,7 +59,11 @@ class UnionArray(Content):
                     )
                 )
 
-        if tags.length > index.length:
+        if (
+            tags.nplike.known_shape
+            and index.nplike.known_shape
+            and tags.length > index.length
+        ):
             raise ValueError(
                 "{} len(tags) ({}) must be <= len(index) ({})".format(
                     type(self).__name__, tags.length, index.length
@@ -132,12 +136,22 @@ class UnionArray(Content):
             [x.typetracer for x in self._contents],
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._tags.length
+
+    def _forget_length(self):
+        return UnionArray(
+            self._tags.forget_length(),
+            self._index,
+            self._contents,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -181,7 +195,7 @@ class UnionArray(Content):
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._nplike.known_shape:
+        if self._nplike.known_shape and not 0 <= where < self.length:
             raise NestedIndexError(self, where)
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
@@ -427,7 +441,7 @@ class UnionArray(Content):
             raise AssertionError(repr(head))
 
     def simplify_uniontype(self, merge=True, mergebool=False):
-        if self._index.length < self._tags.length:
+        if self._nplike.known_shape and self._index.length < self._tags.length:
             raise ValueError("invalid UnionArray: len(index) < len(tags)")
 
         length = self._tags.length
@@ -1098,7 +1112,7 @@ class UnionArray(Content):
                 return "{} contains {}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
                     type(self), type(self.contents[i])
                 )
-            if self.index.length < self.tags.length:
+            if self._nplike.known_shape and self.index.length < self.tags.length:
                 return f'at {path} ("{type(self)}"): len(index) < len(tags)'
 
             lencontents = self._nplike.empty(len(self.contents), dtype=np.int64)

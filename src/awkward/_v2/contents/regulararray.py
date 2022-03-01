@@ -84,18 +84,29 @@ class RegularArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return RegularArray(
             self._content.typetracer,
             self._size,
             self._length,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._length
+
+    def _forget_length(self):
+        return RegularArray(
+            self._content._forget_length(),
+            self._size,
+            ak._v2._typetracer.UnknownLength,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -545,7 +556,7 @@ class RegularArray(Content):
                     "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
-            if head.length != self._size and self._nplike.known_shape:
+            if self._nplike.known_shape and head.length != self._size:
                 raise NestedIndexError(
                     self,
                     head,

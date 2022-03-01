@@ -33,15 +33,15 @@ class EmptyArray(Content):
 
     @property
     def typetracer(self):
-        return EmptyArray(
-            self._typetracer_identifier(),
-            self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
-        )
+        tt = ak._v2._typetracer.TypeTracer.instance()
+        return EmptyArray(self._typetracer_identifier(), self._parameters, tt)
 
     @property
     def length(self):
         return 0
+
+    def _forget_length(self):
+        return EmptyArray(self._identifier, self._parameters, self._nplike)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -99,7 +99,7 @@ class EmptyArray(Content):
     def _carry(self, carry, allow_lazy, exception):
         assert isinstance(carry, ak._v2.index.Index)
 
-        if carry.length == 0 or not carry.nplike.known_shape:
+        if not carry.nplike.known_shape or carry.length == 0:
             return self
         else:
             if issubclass(exception, NestedIndexError):

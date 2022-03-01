@@ -104,6 +104,12 @@ class Content:
 
         return self._form_with_key(getkey)
 
+    def forget_length(self):
+        if not isinstance(self._nplike, ak._v2._typetracer.TypeTracer):
+            return self.typetracer._forget_length()
+        else:
+            return self._forget_length()
+
     def to_buffers(
         self,
         container=None,
@@ -335,7 +341,7 @@ class Content:
 
         index = ak._v2.index.Index64(head._index)
         content = that._getitem_at(0)
-        if content.length < index.length and self._nplike.known_shape:
+        if self._nplike.known_shape and content.length < index.length:
             raise NestedIndexError(
                 self,
                 head,
@@ -1203,7 +1209,9 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
     def rpad_axis0(self, target, clip):
         if not clip and target < self.length:
-            index = ak._v2.index.Index64(self._nplike.arange(self.length))
+            index = ak._v2.index.Index64(
+                self._nplike.arange(self.length, dtype=np.int64)
+            )
 
         else:
             index = ak._v2.index.Index64.empty(target, self._nplike)

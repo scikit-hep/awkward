@@ -86,6 +86,14 @@ class Index:
     def length(self):
         return self._data.shape[0]
 
+    def forget_length(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
+        if isinstance(self._nplike, type(tt)):
+            data = self._data
+        else:
+            data = self.raw(tt)
+        return type(self)(data.forget_length(), self._metadata, tt)
+
     def raw(self, nplike):
         return self.nplike.raw(self.data, nplike)
 

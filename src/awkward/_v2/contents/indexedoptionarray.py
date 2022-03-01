@@ -75,16 +75,25 @@ class IndexedOptionArray(Content):
     def typetracer(self):
         tt = ak._v2._typetracer.TypeTracer.instance()
         return IndexedOptionArray(
-            ak._v2.index.Index(self._index.raw(tt), nplike=tt),
+            ak._v2.index.Index(self._index.raw(tt)),
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._index.length
+
+    def _forget_length(self):
+        return IndexedOptionArray(
+            self._index.forget_length(),
+            self._content,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -140,7 +149,7 @@ class IndexedOptionArray(Content):
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._nplike.known_shape:
+        if self._nplike.known_shape and not 0 <= where < self.length:
             raise NestedIndexError(self, where)
         if self._index[where] < 0:
             return None
@@ -244,7 +253,7 @@ class IndexedOptionArray(Content):
         slicestarts = slicestarts._to_nplike(self.nplike)
         slicestops = slicestops._to_nplike(self.nplike)
 
-        if slicestarts.length != self.length and self._nplike.known_shape:
+        if self._nplike.known_shape and slicestarts.length != self.length:
             raise NestedIndexError(
                 self,
                 ak._v2.contents.ListArray(
@@ -335,7 +344,7 @@ class IndexedOptionArray(Content):
 
     def project(self, mask=None):
         if mask is not None:
-            if self._index.length != mask.length:
+            if self._nplike.known_shape and self._index.length != mask.length:
                 raise ValueError(
                     "mask length ({}) is not equal to {} length ({})".format(
                         mask.length(), type(self).__name__, self._index.length
@@ -729,7 +738,7 @@ class IndexedOptionArray(Content):
         )
 
     def fillna(self, value):
-        if value.length != 1:
+        if value.nplike.known_shape and value.length != 1:
             raise ValueError(f"fillna value length ({value.length}) is not equal to 1")
 
         contents = [self._content, value]
@@ -1250,8 +1259,8 @@ class IndexedOptionArray(Content):
             if isinstance(out, ak._v2.contents.RegularArray):
                 out = out.toListOffsetArray64(True)
             if isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts.length > 0 and starts[0] != 0:
-                    raise RuntimeError(
+                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
+                    raise AssertionError(
                         "sort_next with unbranching depth > negaxis expects a "
                         "ListOffsetArray64 whose offsets start at zero"
                     )
@@ -1292,7 +1301,7 @@ class IndexedOptionArray(Content):
             if isinstance(out, ak._v2.contents.IndexedOptionArray):
                 return out
             else:
-                raise RuntimeError(
+                raise AssertionError(
                     "argsort_next with unbranching depth > negaxis is only "
                     "expected to return RegularArray or ListOffsetArray or "
                     "IndexedOptionArray; "
@@ -1416,8 +1425,8 @@ class IndexedOptionArray(Content):
             if isinstance(out, ak._v2.contents.RegularArray):
                 out = out.toListOffsetArray64(True)
             if isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts.length > 0 and starts[0] != 0:
-                    raise RuntimeError(
+                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
+                    raise AssertionError(
                         "sort_next with unbranching depth > negaxis expects a "
                         "ListOffsetArray64 whose offsets start at zero"
                     )
@@ -1460,7 +1469,7 @@ class IndexedOptionArray(Content):
             if isinstance(out, ak._v2.contents.IndexedOptionArray):
                 return out
             else:
-                raise RuntimeError(
+                raise AssertionError(
                     "sort_next with unbranching depth > negaxis is only "
                     "expected to return RegularArray or ListOffsetArray or "
                     "IndexedOptionArray; "
