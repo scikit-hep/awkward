@@ -281,7 +281,7 @@ class IndexedArray(Content):
         if mask is not None:
             if self._nplike.known_shape and self._index.length != mask.length:
                 raise ak._v2._util.error(
-                        ValueError(
+                    ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
                             mask.length(), type(self).__name__, self._index.length
                         )
@@ -824,7 +824,7 @@ class IndexedArray(Content):
             elif isinstance(unique, ak._v2.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise ak._v2._util.error(
-                            AssertionError(
+                        AssertionError(
                             "reduce_next with unbranching depth > negaxis expects a "
                             "ListOffsetArray64 whose offsets start at zero ({})".format(
                                 starts[0]
@@ -1007,7 +1007,7 @@ class IndexedArray(Content):
             elif isinstance(out, ak._v2.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise ak._v2._util.error(
-                            AssertionError(
+                        AssertionError(
                             "reduce_next with unbranching depth > negaxis expects a "
                             "ListOffsetArray64 whose offsets start at zero ({})".format(
                                 starts[0]

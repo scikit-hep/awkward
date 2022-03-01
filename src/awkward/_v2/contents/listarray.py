@@ -52,7 +52,7 @@ class ListArray(Content):
             and starts.length > stops.length
         ):
             raise ak._v2._util.error(
-                    ValueError(
+                ValueError(
                     "{} len(starts) ({}) must be <= len(stops) ({})".format(
                         type(self).__name__, starts.length, stops.length
                     )
@@ -277,15 +277,13 @@ class ListArray(Content):
         slicestops = slicestops._to_nplike(self.nplike)
         if self._nplike.known_shape and slicestarts.length != self.length:
             raise ak._v2._util.indexerror(
-                NestedIndexError(
-                    self,
-                    ak._v2.contents.ListArray(
-                        slicestarts, slicestops, slicecontent, None, None, self._nplike
-                    ),
-                    "cannot fit jagged slice with length {} into {} of size {}".format(
-                        slicestarts.length, type(self).__name__, self.length
-                    ),
-                )
+                self,
+                ak._v2.contents.ListArray(
+                    slicestarts, slicestops, slicecontent, None, None, self._nplike
+                ),
+                "cannot fit jagged slice with length {} into {} of size {}".format(
+                    slicestarts.length, type(self).__name__, self.length
+                ),
             )
 
         if isinstance(slicecontent, ak._v2.contents.listoffsetarray.ListOffsetArray):
@@ -402,13 +400,11 @@ class ListArray(Content):
         ):
             if self._nplike.known_shape and self._starts.length < slicestarts.length:
                 raise ak._v2._util.indexerror(
-                    NestedIndexError(
-                        self,
-                        ak._v2.contents.ListArray(
-                            slicestarts, slicestops, slicecontent, None, None, self._nplike
-                        ),
-                        "jagged slice length differs from array length",
-                    )
+                    self,
+                    ak._v2.contents.ListArray(
+                        slicestarts, slicestops, slicecontent, None, None, self._nplike
+                    ),
+                    "jagged slice length differs from array length",
                 )
 
             missing = ak._v2.index.Index64(slicecontent._index)

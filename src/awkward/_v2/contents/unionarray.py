@@ -72,7 +72,7 @@ class UnionArray(Content):
             and tags.length > index.length
         ):
             raise ak._v2._util.error(
-                    ValueError(
+                ValueError(
                     "{} len(tags) ({}) must be <= len(index) ({})".format(
                         type(self).__name__, tags.length, index.length
                     )

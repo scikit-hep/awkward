@@ -346,7 +346,7 @@ class IndexedOptionArray(Content):
         if mask is not None:
             if self._nplike.known_shape and self._index.length != mask.length:
                 raise ak._v2._util.error(
-                        ValueError(
+                    ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
                             mask.length(), type(self).__name__, self._index.length
                         )
@@ -1269,7 +1269,7 @@ class IndexedOptionArray(Content):
             if isinstance(out, ak._v2.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise ak._v2._util.error(
-                            AssertionError(
+                        AssertionError(
                             "sort_next with unbranching depth > negaxis expects a "
                             "ListOffsetArray64 whose offsets start at zero"
                         )
@@ -1312,7 +1312,7 @@ class IndexedOptionArray(Content):
                 return out
             else:
                 raise ak._v2._util.error(
-                        AssertionError(
+                    AssertionError(
                         "argsort_next with unbranching depth > negaxis is only "
                         "expected to return RegularArray or ListOffsetArray or "
                         "IndexedOptionArray; "
@@ -1439,7 +1439,7 @@ class IndexedOptionArray(Content):
             if isinstance(out, ak._v2.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise ak._v2._util.error(
-                            AssertionError(
+                        AssertionError(
                             "sort_next with unbranching depth > negaxis expects a "
                             "ListOffsetArray64 whose offsets start at zero"
                         )
@@ -1484,7 +1484,7 @@ class IndexedOptionArray(Content):
                 return out
             else:
                 raise ak._v2._util.error(
-                        AssertionError(
+                    AssertionError(
                         "sort_next with unbranching depth > negaxis is only "
                         "expected to return RegularArray or ListOffsetArray or "
                         "IndexedOptionArray; "

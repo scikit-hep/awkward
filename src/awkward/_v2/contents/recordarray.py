@@ -487,7 +487,7 @@ class RecordArray(Content):
                 offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
                 if self._nplike.known_shape and offsets.length != 0:
                     raise ak._v2._util.error(
-                            AssertionError(
+                        AssertionError(
                             "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
                         )
                     )

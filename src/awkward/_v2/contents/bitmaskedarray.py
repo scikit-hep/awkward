@@ -56,7 +56,7 @@ class BitMaskedArray(Content):
         if not isinstance(length, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(length) and length >= 0):
                 raise ak._v2._util.error(
-                        TypeError(
+                    TypeError(
                         "{} 'length' must be a non-negative integer, not {}".format(
                             type(self).__name__, length
                         )

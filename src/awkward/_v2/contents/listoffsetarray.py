@@ -37,7 +37,7 @@ class ListOffsetArray(Content):
             )
         if offsets.nplike.known_shape and not offsets.length >= 1:
             raise ak._v2._util.error(
-                    ValueError(
+                ValueError(
                     "{} len(offsets) ({}) must be >= 1".format(
                         type(self).__name__, offsets.length
                     )

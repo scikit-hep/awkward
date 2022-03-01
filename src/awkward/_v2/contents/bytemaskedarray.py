@@ -48,7 +48,7 @@ class ByteMaskedArray(Content):
             and content.nplike.known_shape
             and mask.length > content.length
         ):
-            raise raise ak._v2._util.error(
+            raise ak._v2._util.error(
                 ValueError(
                     "{} len(mask) ({}) must be <= len(content) ({})".format(
                         type(self).__name__, mask.length, content.length
@@ -397,7 +397,7 @@ class ByteMaskedArray(Content):
         if mask is not None:
             if self._nplike.known_shape and mask_length != mask.length:
                 raise ak._v2._util.error(
-                        ValueError(
+                    ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
                             mask.length, type(self).__name__, mask_length
                         )
