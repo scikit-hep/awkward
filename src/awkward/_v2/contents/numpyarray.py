@@ -77,16 +77,25 @@ class NumpyArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return NumpyArray(
-            self.raw(ak._v2._typetracer.TypeTracer.instance()),
+            self.raw(tt),
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._data.shape[0]
+
+    def _forget_length(self):
+        return NumpyArray(
+            self._data.forget_length(),
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")

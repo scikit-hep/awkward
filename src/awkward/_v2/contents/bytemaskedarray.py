@@ -43,8 +43,12 @@ class ByteMaskedArray(Content):
                     )
                 )
             )
-        if mask.length > content.length:
-            raise ak._v2._util.error(
+        if (
+            mask.nplike.known_shape
+            and content.nplike.known_shape
+            and mask.length > content.length
+        ):
+            raise raise ak._v2._util.error(
                 ValueError(
                     "{} len(mask) ({}) must be <= len(content) ({})".format(
                         type(self).__name__, mask.length, content.length
@@ -94,20 +98,29 @@ class ByteMaskedArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return ByteMaskedArray(
-            ak._v2.index.Index(
-                self._mask.raw(ak._v2._typetracer.TypeTracer.instance())
-            ),
+            ak._v2.index.Index(self._mask.raw(tt)),
             self._content.typetracer,
             self._valid_when,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._mask.length
+
+    def _forget_length(self):
+        return ByteMaskedArray(
+            self._mask.forget_length(),
+            self._content,
+            self._valid_when,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -176,7 +189,7 @@ class ByteMaskedArray(Content):
 
         if where < 0:
             where += self.length
-        if not (0 <= where < self.length) and self._nplike.known_shape:
+        if self._nplike.known_shape and not 0 <= where < self.length:
             raise ak._v2._util.indexerror(self, where)
         if self._mask[where] == self._valid_when:
             return self._content._getitem_at(where)
@@ -273,7 +286,11 @@ class ByteMaskedArray(Content):
         return nextcarry, outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        if slicestarts.length != self.length:
+        if (
+            slicestarts.nplike.known_shape
+            and self._nplike.known_shape
+            and slicestarts.length != self.length
+        ):
             raise ak._v2._util.indexerror(
                 self,
                 ak._v2.contents.ListArray(
@@ -378,9 +395,9 @@ class ByteMaskedArray(Content):
         numnull = ak._v2.index.Index64.zeros(1, self._nplike)
 
         if mask is not None:
-            if mask_length != mask.length:
+            if self._nplike.known_shape and mask_length != mask.length:
                 raise ak._v2._util.error(
-                    ValueError(
+                        ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
                             mask.length, type(self).__name__, mask_length
                         )
@@ -844,7 +861,7 @@ class ByteMaskedArray(Content):
                 )
 
     def _validityerror(self, path):
-        if self._content.length < self.mask.length:
+        if self._nplike.known_shape and self._content.length < self.mask.length:
             return f'at {path} ("{type(self)}"): len(content) < len(mask)'
         elif isinstance(
             self._content,

@@ -33,11 +33,6 @@ ak.layout.ArrayBuilder.__repr__
 
 .. py:method:: ak.layout.ArrayBuilder.__repr__()
 
-ak.layout.ArrayBuilder.append
-=============================
-
-.. py:method:: ak.layout.ArrayBuilder.append(arg0, arg1)
-
 ak.layout.ArrayBuilder.beginlist
 ================================
 
@@ -83,10 +78,6 @@ ak.layout.ArrayBuilder.endtuple
 
 .. py:method:: ak.layout.ArrayBuilder.endtuple()
 
-ak.layout.ArrayBuilder.extend
-=============================
-
-.. py:method:: ak.layout.ArrayBuilder.extend(arg0)
 
 ak.layout.ArrayBuilder.field
 ============================

@@ -132,7 +132,7 @@ def all_same_offsets(nplike, inputs):
             if x.size == 0:
                 my_offsets = nplike.empty(0, dtype=np.int64)
             else:
-                my_offsets = nplike.arange(0, x.content.length, x.size)
+                my_offsets = nplike.arange(0, x.content.length, x.size, dtype=np.int64)
 
             if offsets is None:
                 offsets = my_offsets
@@ -329,7 +329,9 @@ def apply_step(
                 for tag, combo in enumerate(all_combos):
                     mask = combos == combo
                     tags[mask] = tag
-                    index[mask] = nplike.arange(nplike.count_nonzero(mask))
+                    index[mask] = nplike.arange(
+                        nplike.count_nonzero(mask), dtype=np.int64
+                    )
                     nextinputs = []
                     i = 0
                     for x in inputs:

@@ -2168,7 +2168,6 @@ class ArrayBuilder(Iterable, Sized):
          #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
          When filling from #ak.Array or #ak.Record, the output holds references
          to the original data, rather than copying.
-       * #extend: appends all the items from an #ak.Array (by reference).
        * #list: context manager for #begin_list and #end_list.
        * #tuple: context manager for #begin_tuple and #end_tuple.
        * #record: context manager for #begin_record and #end_record.
@@ -2229,7 +2228,7 @@ class ArrayBuilder(Iterable, Sized):
                 this ArrayBuilder.
 
         Wraps a low-level #ak.layout.ArrayBuilder as a high-level
-        #ak.ArrayBulider.
+        #ak.ArrayBuilder.
 
         The #ak.ArrayBuilder constructor creates a new #ak.layout.ArrayBuilder
         with no accumulated data, but Numba needs to wrap existing data

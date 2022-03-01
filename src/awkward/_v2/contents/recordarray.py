@@ -47,7 +47,13 @@ class RecordArray(Content):
                 )
             )
         elif length is None:
-            length = min(x.length for x in contents)
+            lengths = [x.length for x in contents]
+            if any(
+                isinstance(x, ak._v2._typetracer.UnknownLengthType) for x in contents
+            ):
+                length = ak._v2._typetracer.UnknownLength
+            else:
+                length = min(lengths)
         if not isinstance(length, ak._v2._typetracer.UnknownLengthType) and not (
             ak._util.isint(length) and length >= 0
         ):
@@ -175,18 +181,29 @@ class RecordArray(Content):
 
     @property
     def typetracer(self):
+        tt = ak._v2._typetracer.TypeTracer.instance()
         return RecordArray(
             [x.typetracer for x in self._contents],
             self._fields,
             self._length,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._length
+
+    def _forget_length(self):
+        return RecordArray(
+            [x._forget_length() for x in self._contents],
+            self._fields,
+            ak._v2._typetracer.UnknownLength,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -468,9 +485,9 @@ class RecordArray(Content):
             for content in self._contents:
                 trimmed = content._getitem_range(slice(0, self.length))
                 offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
-                if offsets.length != 0:
+                if self._nplike.known_shape and offsets.length != 0:
                     raise ak._v2._util.error(
-                        AssertionError(
+                            AssertionError(
                             "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
                         )
                     )

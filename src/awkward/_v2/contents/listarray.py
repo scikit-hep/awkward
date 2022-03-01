@@ -46,9 +46,13 @@ class ListArray(Content):
                     )
                 )
             )
-        if starts.length > stops.length:
+        if (
+            starts.nplike.known_shape
+            and stops.nplike.known_shape
+            and starts.length > stops.length
+        ):
             raise ak._v2._util.error(
-                ValueError(
+                    ValueError(
                     "{} len(starts) ({}) must be <= len(stops) ({})".format(
                         type(self).__name__, starts.length, stops.length
                     )
@@ -106,12 +110,22 @@ class ListArray(Content):
             self._content.typetracer,
             self._typetracer_identifier(),
             self._parameters,
-            ak._v2._typetracer.TypeTracer.instance(),
+            tt,
         )
 
     @property
     def length(self):
         return self._starts.length
+
+    def _forget_length(self):
+        return ListArray(
+            self._starts.forget_length(),
+            self._stops,
+            self._content,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -261,15 +275,17 @@ class ListArray(Content):
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         slicestarts = slicestarts._to_nplike(self.nplike)
         slicestops = slicestops._to_nplike(self.nplike)
-        if slicestarts.length != self.length and self._nplike.known_shape:
+        if self._nplike.known_shape and slicestarts.length != self.length:
             raise ak._v2._util.indexerror(
-                self,
-                ak._v2.contents.ListArray(
-                    slicestarts, slicestops, slicecontent, None, None, self._nplike
-                ),
-                "cannot fit jagged slice with length {} into {} of size {}".format(
-                    slicestarts.length, type(self).__name__, self.length
-                ),
+                NestedIndexError(
+                    self,
+                    ak._v2.contents.ListArray(
+                        slicestarts, slicestops, slicecontent, None, None, self._nplike
+                    ),
+                    "cannot fit jagged slice with length {} into {} of size {}".format(
+                        slicestarts.length, type(self).__name__, self.length
+                    ),
+                )
             )
 
         if isinstance(slicecontent, ak._v2.contents.listoffsetarray.ListOffsetArray):
@@ -384,13 +400,15 @@ class ListArray(Content):
         elif isinstance(
             slicecontent, ak._v2.contents.indexedoptionarray.IndexedOptionArray
         ):
-            if self._starts.length < slicestarts.length and self._nplike.known_shape:
+            if self._nplike.known_shape and self._starts.length < slicestarts.length:
                 raise ak._v2._util.indexerror(
-                    self,
-                    ak._v2.contents.ListArray(
-                        slicestarts, slicestops, slicecontent, None, None, self._nplike
-                    ),
-                    "jagged slice length differs from array length",
+                    NestedIndexError(
+                        self,
+                        ak._v2.contents.ListArray(
+                            slicestarts, slicestops, slicecontent, None, None, self._nplike
+                        ),
+                        "jagged slice length differs from array length",
+                    )
                 )
 
             missing = ak._v2.index.Index64(slicecontent._index)
@@ -1192,7 +1210,7 @@ class ListArray(Content):
         )
 
     def _validityerror(self, path):
-        if self.stops.length < self.starts.length:
+        if self._nplike.known_shape and self.stops.length < self.starts.length:
             return f'at {path} ("{type(self)}"): len(stops) < len(starts)'
         assert self.starts.nplike is self._nplike and self.stops.nplike is self._nplike
         error = self._nplike[

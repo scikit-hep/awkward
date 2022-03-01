@@ -103,8 +103,7 @@ if(PYBUILD)
   target_link_libraries(_ext PRIVATE awkward-static)
 
   install(
-    TARGETS awkward-static awkward awkward-parent awkward-cpu-kernels awkward-cpu-kernels-static
-            _ext
+    TARGETS awkward awkward-parent awkward-cpu-kernels _ext
     LIBRARY DESTINATION awkward
     ARCHIVE DESTINATION awkward)
 
