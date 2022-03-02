@@ -10,23 +10,33 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Future:
-    def __init__(self, task):
+    def __init__(self, task, worker):
         # called by the main thread
         self._task = task
+        self._worker = worker
         self._finished = threading.Event()
         self._result = None
         self._exc_info = None
         self._error_context = ak._v2._util.ErrorContext.primary()
 
     @property
+    def task(self):
+        return self._task
+
+    @property
+    def worker(self):
+        return self._worker
+
+    @property
     def is_exception(self):
-        return self.exc_info is not None
+        return self._exc_info is not None
 
     def __repr__(self):
-        return f"Future({self._task})"
+        return f"Future({self._task}, {self._worker})"
 
     def run(self):
         # on the Worker thread
+        # TO DO: set the ErrorContext to self._error_context
         try:
             self._result = self._task()
         except Exception:
@@ -39,10 +49,7 @@ class Future:
         self._finished.wait()
         if self.is_exception:
             exception_class, exception_value, traceback = self._exc_info
-            raise ak._v2._util.error(
-                exception_value.with_traceback(traceback),
-                error_context=self._error_context,
-            )
+            exception_value.with_traceback(traceback)
         else:
             return self._result
 
@@ -51,27 +58,37 @@ class Worker(threading.Thread):
     def __init__(self):
         # called by the main thread
         super().__init__(daemon=True)
-        self._tasks = queue.Queue()
+        self._futures = queue.Queue()
 
     def run(self):
         # on the Worker thread
         while True:
-            task = self._tasks.get()
-            if not isinstance(task, Future):
+            future = self._futures.get()
+            if not isinstance(future, Future):
                 break
-            task.run()
-            if task.is_exception:
+            future.run()
+            if future.is_exception:
                 break
+
+    def schedule(self, task):
+        # called by the main thread
+        if not self.is_alive():
+            raise RuntimeError("background Worker is not running")
+        future = Future(task, self)
+        self._futures.put(future)
+        return future
 
 
 class DelayedArray:
-    def __init__(self, shape, dtype, future):
+    def __init__(self, shape, ndim, is_contiguous, dtype, future):
         self._shape = shape
+        self._ndim = ndim
+        self._is_contiguous = is_contiguous
         self._dtype = np.dtype(dtype)
         self._future = future
 
     def __repr__(self):
-        return f"DelayedArray({self._shape}, {self._dtype}, {self._future})"
+        return f"DelayedArray({self._shape}, {self._ndim}, {self._is_contiguous}, {self._dtype}, {self._future})"
 
     @property
     def dtype(self):
@@ -79,14 +96,17 @@ class DelayedArray:
 
     @property
     def shape(self):
-        if self._shape is not None:
-            return self._shape
+        if isinstance(self._shape, Future):
+            return self._shape.result()
         else:
-            return self._future.result().shape
+            return self._shape
 
     @property
     def strides(self):
-        return self._future.result().strides
+        if self._is_contiguous:
+            return (self._dtype.itemsize,)
+        else:
+            return self._future.result().strides
 
     @property
     def nplike(self):
@@ -94,13 +114,13 @@ class DelayedArray:
 
     @property
     def ndim(self):
-        return len(self.shape)
+        return self._ndim
 
     def __iter__(self):
-        raise NotImplementedError
+        yield from self.nplike.next_nplike.asarray(self._future.result())
 
     def __array__(self, *args, **kwargs):
-        raise NotImplementedError
+        return self.nplike.next_nplike.asarray(self._future.result())
 
     def itemsize(self):
         return self._dtype.itemsize
@@ -113,7 +133,7 @@ class DelayedArray:
         raise NotImplementedError
 
     def __len__(self):
-        raise NotImplementedError
+        return self.shape[0]
 
     def __setitem__(self, where, what):
         raise NotImplementedError
