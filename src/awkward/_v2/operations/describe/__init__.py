@@ -9,3 +9,4 @@ from awkward._v2.operations.describe.ak_parameters import parameters  # noqa: F4
 from awkward._v2.operations.describe.ak_fields import fields  # noqa: F401
 from awkward._v2.operations.describe.ak_backend import backend  # noqa: F401
 from awkward._v2.operations.describe.ak_to_backend import to_backend  # noqa: F401
+from awkward._v2.operations.describe.ak_is_simplified import is_simplified  # noqa: F401
