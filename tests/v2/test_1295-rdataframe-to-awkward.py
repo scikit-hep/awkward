@@ -73,13 +73,23 @@ def test_array_builder_root():
     assert ak.to_list(builder.snapshot()) == [[1, 2, 3], 3.3]
 
 
-@pytest.mark.skip(reason="Failed to instantiate 'Foreach(function)'")
 def test_as_ak_array():
     builder = ak.ArrayBuilder()
     func = ak._v2._connect.rdataframe._from_rdataframe.connect_ArrayBuilder(
         compiler, builder
     )
 
-    rdf = ROOT.RDataFrame(100)
-    rdf_x = rdf.Define("x", "gRandom->Rndm()")
-    rdf_x.Foreach(lambda x: getattr(ROOT, func["real"])(x))
+    rdf = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
+    rdf.Display("x").Print()
+    rdf_x = rdf.Foreach["std::function<uint8_t(double)>"](
+        getattr(ROOT, func["real"]), ["x"]
+    )
+    assert (
+        str(builder.snapshot().layout.form)
+        == """{
+    "class": "NumpyArray",
+    "itemsize": 8,
+    "format": "d",
+    "primitive": "float64"
+}"""
+    )
