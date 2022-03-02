@@ -121,6 +121,9 @@ namespace awkward {
       return start_ == stop_;
     }
 
+    Iterator<ssize_t> begin() { return Iterator<ssize_t>(&ptrs_[0]); }
+    Iterator<ssize_t> end()   { return Iterator<ssize_t>(&ptrs_[stop_ - start_]); }
+
   protected:
     ssize_t start_;
     ssize_t stop_;
