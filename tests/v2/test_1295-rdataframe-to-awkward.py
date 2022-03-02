@@ -93,3 +93,25 @@ def test_as_ak_array():
     "primitive": "float64"
 }"""
     )
+
+    builder2 = ak.ArrayBuilder()
+    func2 = ak._v2._connect.rdataframe._from_rdataframe.connect_ArrayBuilder(
+        compiler, builder2
+    )
+    getattr(ROOT, func2["clear"])()
+    getattr(ROOT, func2["beginrecord"])()
+    getattr(ROOT, func2["field_fast"])("one")
+    rdf.Display("x").Print()
+    rdf_xx = rdf.Foreach["std::function<uint8_t(double)>"](
+        getattr(ROOT, func2["real"]), ["x"]
+    )
+    getattr(ROOT, func2["endrecord"])()
+    assert (
+        str(builder2.snapshot().layout.form)
+        == """{
+    "class": "RecordArray",
+    "contents": {
+        "one": "float64"
+    }
+}"""
+    )
