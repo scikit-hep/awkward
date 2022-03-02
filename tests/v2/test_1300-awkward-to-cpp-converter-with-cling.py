@@ -168,8 +168,29 @@ def test_ListArray_NumpyArray(flatlist_as_rvec):
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
-    ROOT.gInterpreter.Declare(
-        f"""
+    if flatlist_as_rvec:
+        ROOT.gInterpreter.Declare(
+            f"""
+void roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)};
+  out[0] = obj.size();
+  out[1] = obj[0].size();
+  int i = 2;
+  for(auto const& it: obj[0]) {{
+      out[i++] = it;
+    }}
+  out[5] = obj[1].size();
+  out[6] = obj[2].size();
+  i = 7;
+  for(auto const& it: obj[2]) {{
+      out[i++] = it;
+    }}
+}}
+"""
+        )
+    else:
+        ROOT.gInterpreter.Declare(
+            f"""
 void roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)};
   out[0] = obj.size();
@@ -183,7 +204,8 @@ void roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t l
   out[8] = obj[2][1];
 }}
 """
-    )
+        )
+
     out = np.zeros(9, dtype=np.float64)
     getattr(ROOT, f"roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}")(
         out, len(layout), lookup.arrayptrs
