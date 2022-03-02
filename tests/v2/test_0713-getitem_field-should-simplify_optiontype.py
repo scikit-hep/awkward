@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 to_list = ak._v2.operations.convert.to_list
 
 
+@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.is_none not implemented")
 def test():
     arr1 = ak._v2.highlevel.Array({"a": [1, 2], "b": [1, None]})
     arr2 = ak._v2.operations.structure.mask(arr1, [True, True])

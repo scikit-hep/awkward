@@ -2877,50 +2877,36 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
     False otherwise (at a given `axis` depth).
     """
 
-    def transform_inner(layout, depth, user=None):
-        nplike = ak.nplike.of(layout)
-        if isinstance(layout, ak._util.optiontypes):
-            if not isinstance(layout, ak.layout.IndexedOptionArray64):
-                layout = layout.toIndexedOptionArray64()
-
-            # Convert the option type into a union, using the mask
-            # as a tag.
-            tag = nplike.asarray(layout.bytemask())
-            index = nplike.where(tag, 0, nplike.asarray(layout.index))
-
-            return ak.layout.UnionArray8_64(
-                ak.layout.Index8(tag),
-                ak.layout.Index64(index),
-                [
-                    transform_inner(layout.content, depth),
-                    ak.layout.NumpyArray(nplike.array([True], dtype=np.bool_)),
-                ],
-            ).simplify()
-        elif isinstance(
-            layout,
-            (
-                ak._util.unknowntypes,
-                ak._util.listtypes,
-                ak._util.recordtypes,
-                ak.layout.NumpyArray,
-            ),
-        ):
-            return ak.layout.NumpyArray(nplike.zeros(len(layout), dtype=np.bool_))
-        else:
-            return ak._util.transform_child_layouts(transform_inner, layout, depth)
-
-    def transform_outer(layout, depth, posaxis):
+    def getfunction(layout, depth, posaxis):
         posaxis = layout.axis_wrap_if_negative(posaxis)
-        if posaxis != depth - 1:
-            return ak._util.transform_child_layouts(
-                transform_outer, layout, depth, posaxis
-            )
+        if posaxis == depth - 1:
+            nplike = ak.nplike.of(layout)
+            if isinstance(layout, ak._util.optiontypes):
+                return lambda: ak.layout.NumpyArray(
+                    nplike.asarray(layout.bytemask()).view(np.bool_)
+                )
+            elif isinstance(
+                layout,
+                (
+                    ak._util.unknowntypes,
+                    ak._util.listtypes,
+                    ak._util.recordtypes,
+                    ak.layout.NumpyArray,
+                ),
+            ):
+                return lambda: ak.layout.NumpyArray(
+                    nplike.zeros(len(layout), dtype=np.bool_)
+                )
+            else:
+                return posaxis
         else:
-            return transform_inner(layout, depth)
+            return posaxis
 
     layout = ak.operations.convert.to_layout(array)
 
-    out = transform_outer(layout, 1, axis)
+    out = ak._util.recursively_apply(
+        layout, getfunction, pass_depth=True, pass_user=True, user=axis
+    )
 
     return ak._util.maybe_wrap_like(out, array, behavior, highlevel)
 
