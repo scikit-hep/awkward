@@ -29,7 +29,7 @@ class ParquetDataset:
         if value is None or isinstance(value, Mapping):
             self._behavior = value
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise ak._v2._util.error(TypeError("behavior must be None or a dict"))
 
     @property
     def schema(self):

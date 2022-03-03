@@ -321,8 +321,8 @@ class Form:
 
         for item in specifier:
             if not ak._v2._util.isstr(item):
-                raise TypeError(
-                    "a column-selection specifier must be a list of strings"
+                raise ak._v2._util.error(
+                    TypeError("a column-selection specifier must be a list of strings")
                 )
 
         if expand_braces:
