@@ -7,7 +7,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("broadcast_arrays")
 def broadcast_arrays(*arrays, **kwargs):
-    raise NotImplementedError
+    raise NotImplementedError()
 
 
 #     """

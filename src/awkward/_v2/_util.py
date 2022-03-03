@@ -40,7 +40,9 @@ def regularize_backend(backend):
     if backend in _backends:
         return _backends[backend].instance()
     else:
-        raise error(ValueError("The available backends for now are `cpu` and `cuda`."))
+        raise error(  # noqa: AK101
+            ValueError("The available backends for now are `cpu` and `cuda`.")
+        )
 
 
 def parse_version(version):
