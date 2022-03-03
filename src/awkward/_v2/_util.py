@@ -103,20 +103,23 @@ class ErrorContext:
     def primary(cls):
         return cls._slate.__dict__.get("__primary_context__")
 
+    @classmethod
+    def override(cls, primary):
+        # Forcibly override the primary ErrorContext. (Only do this in ak._v2._delayed Workers!)
+        cls._slate.__dict__["__primary_context__"] = primary
+
     def __init__(self, **kwargs):
         self._kwargs = kwargs
 
     def __enter__(self):
         # Make it strictly non-reenterant. Only one ErrorContext (per thread) is primary.
         if self.primary() is None:
-            self._slate.__dict__.clear()
-            self._slate.__dict__.update(self._kwargs)
             self._slate.__dict__["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
         # Step out of the way so that another ErrorContext can become primary.
         if self.primary() is self:
-            self._slate.__dict__.clear()
+            self._slate.__dict__["__primary_context__"] = None
 
 
 class OperationErrorContext(ErrorContext):

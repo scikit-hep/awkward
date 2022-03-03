@@ -36,7 +36,7 @@ class Future:
 
     def run(self):
         # on the Worker thread
-        # TO DO: set the ErrorContext to self._error_context
+        ak._v2._util.ErrorContext.override(self._error_context)
         try:
             self._result = self._task()
         except Exception:
@@ -49,7 +49,7 @@ class Future:
         self._finished.wait()
         if self.is_exception:
             exception_class, exception_value, traceback = self._exc_info
-            exception_value.with_traceback(traceback)
+            raise exception_value.with_traceback(traceback)
         else:
             return self._result
 
