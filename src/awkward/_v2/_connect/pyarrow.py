@@ -43,9 +43,37 @@ def import_pyarrow_parquet(name):
     if pyarrow is None:
         raise ImportError(error_message.format(name))
 
-    import pyarrow.parquet
+    import pyarrow.parquet as out
 
-    return pyarrow.parquet
+    return out
+
+
+def import_pyarrow_dataset(name):
+    if pyarrow is None:
+        raise ImportError(error_message.format(name))
+
+    import pyarrow.dataset as out
+
+    return out
+
+
+def import_fsspec(name):
+    try:
+        import fsspec
+
+    except ModuleNotFoundError:
+        raise ImportError(
+            f"""to use {name}, you must install pyarrow:
+
+    pip install fsspec
+
+or
+
+    conda install -c conda-forge fsspec
+"""
+        )
+
+    return fsspec
 
 
 if pyarrow is not None:
