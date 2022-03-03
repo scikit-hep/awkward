@@ -8,6 +8,8 @@ import numbers
 import os
 import re
 import setuptools
+import threading
+import traceback
 
 from collections.abc import Mapping
 
@@ -37,7 +39,9 @@ def regularize_backend(backend):
     if backend in _backends:
         return _backends[backend].instance()
     else:
-        raise ValueError("The available backends for now are `cpu` and `cuda`.")
+        raise error(  # noqa: AK101
+            ValueError("The available backends for now are `cpu` and `cuda`.")
+        )
 
 
 def parse_version(version):
@@ -87,6 +91,216 @@ def tobytes(array):
 
 def little_endian(array):
     return array.astype(array.dtype.newbyteorder("<"), copy=False)
+
+
+###############################################################################
+
+
+class ErrorContext:
+    # Any other threads should get a completely independent _slate.
+    _slate = threading.local()
+
+    @classmethod
+    def primary(cls):
+        return cls._slate.__dict__.get("__primary_context__")
+
+    def __init__(self, **kwargs):
+        self._kwargs = kwargs
+
+    def __enter__(self):
+        # Make it strictly non-reenterant. Only one ErrorContext (per thread) is primary.
+        if self.primary() is None:
+            self._slate.__dict__.clear()
+            self._slate.__dict__.update(self._kwargs)
+            self._slate.__dict__["__primary_context__"] = self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        # Step out of the way so that another ErrorContext can become primary.
+        if self.primary() is self:
+            self._slate.__dict__.clear()
+
+
+class OperationErrorContext(ErrorContext):
+    def __init__(self, name, arguments):
+        super().__init__(
+            name=name,
+            arguments=arguments,
+            traceback=traceback.extract_stack(limit=3)[0],
+        )
+
+    @property
+    def name(self):
+        return self._kwargs["name"]
+
+    @property
+    def arguments(self):
+        return self._kwargs["arguments"]
+
+    @property
+    def traceback(self):
+        return self._kwargs["traceback"]
+
+
+class SlicingErrorContext(ErrorContext):
+    def __init__(self, array, where):
+        super().__init__(array=array, where=where)
+
+    @property
+    def array(self):
+        return self._kwargs["array"]
+
+    @property
+    def where(self):
+        return self._kwargs["where"]
+
+
+def error(exception):
+    if isinstance(exception, type) and issubclass(exception, Exception):
+        try:
+            exception = exception()
+        except Exception:
+            return exception
+
+    if isinstance(exception, (NotImplementedError, AssertionError)):
+        return type(exception)(
+            str(exception)
+            + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward-1.0/issues"
+        )
+
+    error_context = ErrorContext.primary()
+
+    if isinstance(error_context, OperationErrorContext):
+        tb = error_context.traceback
+        try:
+            location = f" (from {tb.filename}, line {tb.lineno})"
+        except Exception:
+            location = ""
+
+        arguments = []
+        for name, value in error_context.arguments.items():
+            try:
+                valuestr = repr(value)
+            except Exception:
+                valuestr = "???"
+            if len(valuestr) > 80:
+                valuestr = valuestr[:77] + "..."
+            arguments.append(f"\n        {name} = {valuestr}")
+
+        extra_line = "" if len(arguments) == 0 else "\n    "
+        return type(exception)(
+            f"""while calling{location}
+
+    {error_context.name}({",".join(arguments)}{extra_line})
+
+Error details: {str(exception)}"""
+        )
+
+    elif isinstance(error_context, SlicingErrorContext):
+        if isinstance(error_context.array, ak._v2.contents.Content):
+            try:
+                arraystr = "    " + repr(ak._v2.highlevel.Array(error_context.array))
+            except Exception:
+                arraystr = error_context.array._repr("    ", "", "")
+        elif isinstance(error_context.array, ak._v2.record.Record):
+            try:
+                arraystr = "    " + repr(ak._v2.highlevel.Record(error_context.array))
+            except Exception:
+                arraystr = error_context.array._repr("    ", "", "")
+        else:
+            arraystr = repr(error_context.array)
+
+        # Note: returns an error for the caller to raise!
+        return type(exception)(
+            f"""cannot slice
+
+{arraystr}
+
+with
+
+    {format_slice(error_context.where)}
+
+Error details: {str(exception)}"""
+        )
+
+    return exception
+
+
+def format_slice(x):
+    if isinstance(x, slice):
+        if x.step is None:
+            return "{}:{}".format(
+                "" if x.start is None else x.start,
+                "" if x.stop is None else x.stop,
+            )
+        else:
+            return "{}:{}:{}".format(
+                "" if x.start is None else x.start,
+                "" if x.stop is None else x.stop,
+                x.step,
+            )
+
+    elif isinstance(x, tuple):
+        return "(" + ", ".join(format_slice(y) for y in x) + ")"
+
+    elif isinstance(x, ak._v2.index.Index64):
+        return str(x.data)
+
+    elif isinstance(x, ak._v2.contents.Content):
+        try:
+            return str(ak._v2.highlevel.Array(x))
+        except Exception:
+            return x._repr("    ", "", "")
+
+    elif isinstance(x, ak._v2.record.Record):
+        try:
+            return str(ak._v2.highlevel.Record(x))
+        except Exception:
+            return x._repr("    ", "", "")
+
+    else:
+        return repr(x)
+
+
+def indexerror(subarray, slicer, details=None):
+    detailsstr = ""
+    if details is not None:
+        detailsstr = f"""
+
+Error details: {details}."""
+
+    error_context = ErrorContext.primary()
+    if not isinstance(error_context, SlicingErrorContext):
+        # Note: returns an error for the caller to raise!
+        return IndexError(
+            f"cannot slice {type(subarray).__name__} with {format_slice(slicer)}{detailsstr}"
+        )
+
+    else:
+        if isinstance(error_context.array, ak._v2.contents.Content):
+            try:
+                arraystr = "    " + repr(ak._v2.highlevel.Array(error_context.array))
+            except Exception:
+                arraystr = error_context.array._repr("    ", "", "")
+        elif isinstance(error_context.array, ak._v2.record.Record):
+            try:
+                arraystr = "    " + repr(ak._v2.highlevel.Record(error_context.array))
+            except Exception:
+                arraystr = error_context.array._repr("    ", "", "")
+        else:
+            arraystr = repr(error_context.array)
+
+        # Note: returns an error for the caller to raise!
+        return IndexError(
+            f"""cannot slice
+
+{arraystr}
+
+with
+
+    {format_slice(error_context.where)}
+
+at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {format_slice(slicer)}.{detailsstr}"""
+        )
 
 
 ###############################################################################
@@ -528,9 +742,9 @@ def extra(args, kwargs, defaults):
 #             attempt = m.group(0)
 
 #     if attempt is None:
-#         raise ValueError(
+#         raise error(ValueError(
 #             "key {0} not found in record".format(repr(key))
-#         )
+#         ))
 #     else:
 #         return attempt
 
@@ -546,7 +760,7 @@ def extra(args, kwargs, defaults):
 #     elif isinstance(index, ak._v2.index.Index64):
 #         return ak._v2.contents.UnionArray8_64(tags, index, contents, identities, parameters)
 #     else:
-#         raise AssertionError(index)
+#         raise error(AssertionError(index))
 
 
 # def union_to_record(unionarray, anonymous):

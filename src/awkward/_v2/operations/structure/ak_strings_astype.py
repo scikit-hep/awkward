@@ -7,7 +7,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def strings_astype(array, to, highlevel=True, behavior=None):
-
     """
     Args:
         array: Array whose strings should be converted to a new numeric type.
@@ -40,6 +39,14 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 
     See also #ak.numbers_astype.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.strings_astype",
+        dict(array=array, to=to, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, to, highlevel, behavior)
+
+
+def _impl(array, to, highlevel, behavior):
     to_dtype = np.dtype(to)
 
     def action(layout, **kwargs):

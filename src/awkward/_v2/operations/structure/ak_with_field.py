@@ -9,7 +9,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def with_field(base, what, where=None, highlevel=True, behavior=None):
-
     """
     Args:
         base: Data containing records or tuples.
@@ -32,15 +31,24 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
     #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.with_field",
+        dict(base=base, what=what, where=where, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(base, what, where, highlevel, behavior)
 
+
+def _impl(base, what, where, highlevel, behavior):
     if not (
         where is None
         or isinstance(where, str)
         or (isinstance(where, Iterable) and all(isinstance(x, str) for x in where))
     ):
-        raise TypeError(
-            "New fields may only be assigned by field name(s) "
-            "or as a new integer slot by passing None for 'where'"
+        raise ak._v2._util.error(
+            TypeError(
+                "New fields may only be assigned by field name(s) "
+                "or as a new integer slot by passing None for 'where'"
+            )
         )
     if (
         not isinstance(where, str)
@@ -48,18 +56,18 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
         and all(isinstance(x, str) for x in where)
         and len(where) > 1
     ):
-        return with_field(
+        return _impl(
             base,
-            with_field(
+            _impl(
                 base[where[0]],
                 what,
-                where=where[1:],
-                highlevel=highlevel,
-                behavior=behavior,
+                where[1:],
+                highlevel,
+                behavior,
             ),
-            where=where[0],
-            highlevel=highlevel,
-            behavior=behavior,
+            where[0],
+            highlevel,
+            behavior,
         )
     else:
 
@@ -72,7 +80,9 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
         )
 
         if len(base.fields) == 0:
-            raise ValueError("no tuples or records in array; cannot add a new field")
+            raise ak._v2._util.error(
+                ValueError("no tuples or records in array; cannot add a new field")
+            )
 
         what = ak._v2.operations.convert.to_layout(
             what, allow_record=True, allow_other=True

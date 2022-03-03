@@ -7,7 +7,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("argsort")
 def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data for which to get a sorting index, possibly within nested
@@ -43,6 +42,21 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavio
         >>> data[index]
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.argsort",
+        dict(
+            array=array,
+            axis=axis,
+            ascending=ascending,
+            stable=stable,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(array, axis, ascending, stable, highlevel, behavior)
+
+
+def _impl(array, axis, ascending, stable, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )

@@ -32,6 +32,14 @@ def to_list(array):
 
     See also #ak.from_iter and #ak.Array.tolist.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_list",
+        dict(array=array),
+    ):
+        return _impl(array)
+
+
+def _impl(array):
     if isinstance(
         array,
         (
@@ -64,7 +72,9 @@ def to_list(array):
             ak.layout.Record,
         ),
     ):
-        raise TypeError("do not use ak._v2.operations.convert.to_list on v1 arrays")
+        raise ak._v2._util.error(
+            TypeError("do not use ak._v2.operations.convert.to_list on v1 arrays")
+        )
 
     elif hasattr(array, "tolist"):
         return array.tolist()
@@ -73,10 +83,10 @@ def to_list(array):
         return array.to_list()
 
     elif isinstance(array, Mapping):
-        return {k: to_list(v) for k, v in array.items()}
+        return {k: _impl(v) for k, v in array.items()}
 
     elif isinstance(array, Iterable):
-        return [to_list(x) for x in array]
+        return [_impl(x) for x in array]
 
     else:
         return array

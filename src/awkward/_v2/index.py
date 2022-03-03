@@ -23,7 +23,7 @@ class Index:
         self._metadata = metadata
         self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
         if len(self._data.shape) != 1:
-            raise TypeError("Index data must be one-dimensional")
+            raise ak._v2._util.error(TypeError("Index data must be one-dimensional"))
 
         if self._expected_dtype is None:
             if self._data.dtype == np.dtype(np.int8):
@@ -37,15 +37,19 @@ class Index:
             elif self._data.dtype == np.dtype(np.int64):
                 self.__class__ = Index64
             else:
-                raise TypeError(
-                    "Index data must be int8, uint8, int32, uint32, int64, not "
-                    + repr(self._data.dtype)
+                raise ak._v2._util.error(
+                    TypeError(
+                        "Index data must be int8, uint8, int32, uint32, int64, not "
+                        + repr(self._data.dtype)
+                    )
                 )
         else:
             if self._data.dtype != self._expected_dtype:
                 # self._data = self._data.astype(self._expected_dtype)   # copy/convert
-                raise NotImplementedError(
-                    "while developing, we want to catch these errors"
+                raise ak._v2._util.error(
+                    NotImplementedError(
+                        "while developing, we want to catch these errors"
+                    )
                 )
 
     @classmethod

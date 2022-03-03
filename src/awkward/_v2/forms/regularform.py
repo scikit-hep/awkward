@@ -12,15 +12,19 @@ class RegularForm(Form):
         self, content, size, has_identifier=False, parameters=None, form_key=None
     ):
         if not isinstance(content, Form):
-            raise TypeError(
-                "{} all 'contents' must be Form subclasses, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} all 'contents' must be Form subclasses, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if not ak._util.isint(size):
-            raise TypeError(
-                "{} 'size' must be of type int, not {}".format(
-                    type(self).__name__, repr(size)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'size' must be of type int, not {}".format(
+                        type(self).__name__, repr(size)
+                    )
                 )
             )
 

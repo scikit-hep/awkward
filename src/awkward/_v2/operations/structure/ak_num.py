@@ -66,6 +66,14 @@ def num(array, axis=1, highlevel=True, behavior=None):
         >>> ak.mask(array, ak.num(array) > 0)[:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.num",
+        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, axis, highlevel, behavior)
+
+
+def _impl(array, axis, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )

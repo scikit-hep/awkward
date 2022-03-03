@@ -18,7 +18,7 @@ def from_parquet(  # this will be going through Awkward-Dask
     behavior=None,
     **options
 ):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
 
 #     """

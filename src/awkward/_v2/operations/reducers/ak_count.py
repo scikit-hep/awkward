@@ -76,6 +76,20 @@ def count(array, axis=None, keepdims=False, mask_identity=False, flatten_records
     If it is desirable to include None values in #ak.count, use #ak.fill_none
     to turn the None values into something that would be counted.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.count",
+        dict(
+            array=array,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )

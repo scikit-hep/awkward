@@ -21,7 +21,14 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
     Returns an array whose value is True where an element of `array` is None;
     False otherwise (at a given `axis` depth).
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.is_none",
+        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, axis, highlevel, behavior)
 
+
+def _impl(array, axis, highlevel, behavior):
     # Determine the (potentially nested) bytemask
     def getfunction_inner(layout, depth, **kwargs):
         if not isinstance(layout, ak._v2.contents.Content):

@@ -152,8 +152,8 @@ def test_NumpyArray():
         ak._v2.operations.structure.argsort(
             array2, axis=2, ascending=True, stable=False
         )
-    assert str(err.value).startswith(
-        "axis=2 exceeds the depth of the nested list structure (which is 2)"
+    assert "axis=2 exceeds the depth of the nested list structure (which is 2)" in str(
+        err.value
     )
 
 

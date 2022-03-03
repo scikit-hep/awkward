@@ -83,10 +83,10 @@
 
 #     def register(method):
 #         if not isinstance(rhs, (set, type(None))):
-#             raise ValueError(
+#             raise ak._v2._util.error(ValueError(
 #                 "expected a set of right-hand-side argument types"
 #
-#             )
+#             ))
 #         if transpose and rhs is not None:
 
 #             def transposed(left, right):

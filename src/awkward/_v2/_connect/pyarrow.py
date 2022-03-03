@@ -376,8 +376,10 @@ def popbuffers(
     ### Beginning of the big if-elif-elif chain!
 
     if isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+        raise ak._v2._util.error(
+            ValueError(
+                "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+            )
         )
 
     elif isinstance(storage_type, pyarrow.lib.ExtensionType):
@@ -473,15 +475,17 @@ def popbuffers(
     elif isinstance(storage_type, pyarrow.lib.MapType):
         # FIXME: make a ListOffsetArray of 2-tuples with __array__ == "sorted_map".
         # (Make sure the keys are sorted).
-        raise NotImplementedError
+        raise ak._v2._util.error(NotImplementedError)
 
     elif isinstance(
         storage_type, (pyarrow.lib.Decimal128Type, pyarrow.lib.Decimal256Type)
     ):
         # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType.
         # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+        raise ak._v2._util.error(
+            ValueError(
+                "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+            )
         )
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeBinaryType):
@@ -667,15 +671,19 @@ def popbuffers(
         )
 
     else:
-        raise TypeError(f"unrecognized Arrow array type: {storage_type!r}")
+        raise ak._v2._util.error(
+            TypeError(f"unrecognized Arrow array type: {storage_type!r}")
+        )
 
 
 def form_popbuffers(awkwardarrow_type, storage_type):
     ### Beginning of the big if-elif-elif chain!
 
     if isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+        raise ak._v2._util.error(
+            ValueError(
+                "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+            )
         )
 
     elif isinstance(storage_type, pyarrow.lib.ExtensionType):
@@ -693,8 +701,8 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         elif index_type is np.int32:
             index = "i32"
         else:
-            raise TypeError(
-                f"unrecognized Arrow DictionaryType index type: {index_type}"
+            raise ak._v2._util.error(
+                TypeError(f"unrecognized Arrow DictionaryType index type: {index_type}")
             )
 
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
@@ -746,15 +754,17 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.MapType):
-        raise NotImplementedError
+        raise ak._v2._util.error(NotImplementedError)
 
     elif isinstance(
         storage_type, (pyarrow.lib.Decimal128Type, pyarrow.lib.Decimal256Type)
     ):
         # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType.
         # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
-        raise ValueError(
-            "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+        raise ak._v2._util.error(
+            ValueError(
+                "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
+            )
         )
 
     elif isinstance(storage_type, pyarrow.lib.FixedSizeBinaryType):
@@ -857,7 +867,9 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     else:
-        raise TypeError(f"unrecognized Arrow array type: {storage_type!r}")
+        raise ak._v2._util.error(
+            TypeError(f"unrecognized Arrow array type: {storage_type!r}")
+        )
 
 
 def to_awkwardarrow_type(storage_type, use_extensionarray, mask, node):
@@ -939,8 +951,10 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
         if len(layouts) == 1:
             return layouts[0]
         else:
-            raise NotImplementedError(
-                "FIXME: need ak._v2.operations.structure.concatenate"
+            raise ak._v2._util.error(
+                NotImplementedError(
+                    "FIXME: need ak._v2.operations.structure.concatenate"
+                )
             )
             return ak._v2.operations.structure.concatenate(layouts, highlevel=False)
 
@@ -966,7 +980,7 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
         batches = obj.combine_chunks().to_batches()
         if len(batches) == 0:
             # zero-length array with the right type
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
         elif len(batches) == 1:
             out = handle_arrow(batches[0], conservative_optiontype, pass_empty_field)
         else:
@@ -975,8 +989,10 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
                 for batch in batches
                 if len(batch) > 0
             ]
-            raise NotImplementedError(
-                "FIXME: need ak._v2.operations.structure.concatenate"
+            raise ak._v2._util.error(
+                NotImplementedError(
+                    "FIXME: need ak._v2.operations.structure.concatenate"
+                )
             )
             out = ak._v2.operations.structure.concatenate(arrays, highlevel=False)
 
@@ -1020,8 +1036,10 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
         if len(chunks) == 1:
             return chunks[0]
         else:
-            raise NotImplementedError(
-                "FIXME: need ak._v2.operations.structure.concatenate"
+            raise ak._v2._util.error(
+                NotImplementedError(
+                    "FIXME: need ak._v2.operations.structure.concatenate"
+                )
             )
             return ak._v2.operations.structure.concatenate(chunks, highlevel=False)
 
@@ -1029,7 +1047,7 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
         return ak._v2.contents.RecordArray([], [], length=0)
 
     else:
-        raise TypeError(f"unrecognized Arrow type: {type(obj)}")
+        raise ak._v2._util.error(TypeError(f"unrecognized Arrow type: {type(obj)}"))
 
 
 def form_handle_arrow(schema, pass_empty_field=False):

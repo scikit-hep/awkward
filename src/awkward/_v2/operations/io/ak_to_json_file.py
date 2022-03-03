@@ -58,6 +58,44 @@ def to_json_file(
 
     See also #ak.from_json and #ak.Array.tojson.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_json_file",
+        dict(
+            array=array,
+            destination=destination,
+            pretty=pretty,
+            maxdecimals=maxdecimals,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+            complex_record_fields=complex_record_fields,
+            buffersize=buffersize,
+        ),
+    ):
+        return _impl(
+            array,
+            destination,
+            pretty,
+            maxdecimals,
+            nan_string,
+            infinity_string,
+            minus_infinity_string,
+            complex_record_fields,
+            buffersize,
+        )
+
+
+def _impl(
+    array,
+    destination,
+    pretty,
+    maxdecimals,
+    nan_string,
+    infinity_string,
+    minus_infinity_string,
+    complex_record_fields,
+    buffersize,
+):
     if array is None or isinstance(array, (bool, str, bytes, Number)):
         return json.dump(array)
 
@@ -94,7 +132,7 @@ def to_json_file(
         out = array
 
     else:
-        raise TypeError(f"unrecognized array type: {repr(array)}")
+        raise ak._v2._util.error(TypeError(f"unrecognized array type: {repr(array)}"))
 
     if complex_record_fields is None:
         complex_real_string = None

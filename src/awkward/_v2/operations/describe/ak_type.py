@@ -8,7 +8,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def type(array):
-
     """
     The high-level type of an `array` (many types supported, including all
     Awkward Arrays and Records) as #ak.types.Type objects.
@@ -54,6 +53,14 @@ def type(array):
     similar to existing type-constructors, so it's a plausible addition
     to the language.)
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.type",
+        dict(array=array),
+    ):
+        return _impl(array)
+
+
+def _impl(array):
     if array is None:
         return ak._v2.types.UnknownType()
 
@@ -86,13 +93,16 @@ def type(array):
 
     elif isinstance(array, np.ndarray):
         if len(array.shape) == 0:
-            return type(array.reshape((1,))[0])
+            return _impl(array.reshape((1,))[0])
         else:
             try:
                 out = ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype.type]
             except KeyError:
-                raise TypeError(
-                    "numpy array type is unrecognized by awkward: %r" % array.dtype.type
+                raise ak._v2._util.error(
+                    TypeError(
+                        "numpy array type is unrecognized by awkward: %r"
+                        % array.dtype.type
+                    )
                 )
             out = ak._v2.types.NumpyType(out)
             for x in array.shape[-1:0:-1]:
@@ -115,7 +125,9 @@ def type(array):
             ak.layout.Record,
         ),
     ):
-        raise TypeError("do not use ak._v2.operations.describe.type on v1 arrays")
+        raise ak._v2._util.error(
+            TypeError("do not use ak._v2.operations.describe.type on v1 arrays")
+        )
 
     else:
-        raise TypeError(f"unrecognized array type: {array!r}")
+        raise ak._v2._util.error(TypeError(f"unrecognized array type: {array!r}"))

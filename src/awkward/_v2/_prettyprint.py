@@ -234,4 +234,4 @@ def valuestr(data, limit_rows, limit_cols):
         return "\n".join(out)
 
     else:
-        raise AssertionError(type(data))
+        raise ak._v2._util.error(AssertionError(type(data)))

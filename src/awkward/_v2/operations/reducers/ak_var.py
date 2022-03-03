@@ -64,6 +64,22 @@ def var(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.var",
+        dict(
+            x=x,
+            weight=weight,
+            ddof=ddof,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records):
     x = ak._v2.highlevel.Array(
         ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=False)
     )
@@ -75,31 +91,34 @@ def var(
         )
 
     with np.errstate(invalid="ignore"):
-        xmean = ak._v2.operations.reducers.mean(
-            x, weight=weight, axis=axis, keepdims=False, mask_identity=mask_identity
+        xmean = ak._v2.operations.reducers.ak_mean._impl(
+            x, weight, axis, False, mask_identity, flatten_records
         )
         if weight is None:
-            sumw = ak._v2.operations.reducers.count(
-                x, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            sumw = ak._v2.operations.reducers.ak_count._impl(
+                x, axis, keepdims, mask_identity, flatten_records
             )
-            sumwxx = ak._v2.operations.reducers.sum(
+            sumwxx = ak._v2.operations.reducers.ak_sum._impl(
                 (x - xmean) ** 2,
-                axis=axis,
-                keepdims=keepdims,
-                mask_identity=mask_identity,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
             )
         else:
-            sumw = ak._v2.operations.reducers.sum(
+            sumw = ak._v2.operations.reducers.ak_sum._impl(
                 x * 0 + weight,
-                axis=axis,
-                keepdims=keepdims,
-                mask_identity=mask_identity,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
             )
-            sumwxx = ak._v2.operations.reducers.sum(
+            sumwxx = ak._v2.operations.reducers.ak_sum._impl(
                 (x - xmean) ** 2 * weight,
-                axis=axis,
-                keepdims=keepdims,
-                mask_identity=mask_identity,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
             )
         if ddof != 0:
             return ak.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw) * ak.nplike.of(

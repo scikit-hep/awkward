@@ -27,6 +27,22 @@ def isclose(
     Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
     for Awkward Arrays.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.isclose",
+        dict(
+            a=a,
+            b=b,
+            rtol=rtol,
+            atol=atol,
+            equal_nan=equal_nan,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(a, b, rtol, atol, equal_nan, highlevel, behavior)
+
+
+def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
     one = ak._v2.operations.convert.to_layout(a)
     two = ak._v2.operations.convert.to_layout(b)
 

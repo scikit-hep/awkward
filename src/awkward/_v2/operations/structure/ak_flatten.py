@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def flatten(array, axis=1, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data containing nested lists to flatten.
@@ -91,6 +90,14 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
     However, it is important to keep in mind that this is a special case:
     #ak.flatten and `content` are not interchangeable!
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.flatten",
+        dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, axis, highlevel, behavior)
+
+
+def _impl(array, axis, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
@@ -98,8 +105,9 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 
     if axis is None:
         out = layout.completely_flatten(function_name="ak.flatten")
-        assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
-
+        assert isinstance(out, tuple) and all(
+            isinstance(x, nplike.ndarray) for x in out
+        )
         out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
 
     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:

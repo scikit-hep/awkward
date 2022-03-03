@@ -248,9 +248,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 if length is None:
                     length = len(contents[-1])
                 elif length != len(contents[-1]):
-                    raise ValueError(
-                        "dict of arrays in ak.Array constructor must have arrays "
-                        "of equal length ({} vs {})".format(length, len(contents[-1]))
+                    raise ak._v2._util.error(
+                        ValueError(
+                            "dict of arrays in ak.Array constructor must have arrays "
+                            "of equal length ({} vs {})".format(
+                                length, len(contents[-1])
+                            )
+                        )
                     )
             layout = ak._v2.contents.RecordArray(contents, fields)
 
@@ -263,7 +267,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
 
         if not isinstance(layout, ak._v2.contents.Content):
-            raise TypeError("could not convert data into an ak.Array")
+            raise ak._v2._util.error(
+                TypeError("could not convert data into an ak.Array")
+            )
 
         if with_name is not None:
             layout = ak._v2.operations.structure.with_name(
@@ -337,7 +343,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError("layout must be a subclass of ak._v2.contents.Content")
+            raise ak._v2._util.error(
+                TypeError("layout must be a subclass of ak._v2.contents.Content")
+            )
 
     @property
     def behavior(self):
@@ -364,7 +372,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self.__class__ = ak._v2._util.arrayclass(self._layout, behavior)
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise ak._v2._util.error(TypeError("behavior must be None or a dict"))
 
     #     class Mask(object):
     #         def __init__(self, array, valid_when):
@@ -1076,7 +1084,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             ak._v2._util.isstr(where)
             or (isinstance(where, tuple) and all(ak._v2._util.isstr(x) for x in where))
         ):
-            raise TypeError("only fields may be assigned in-place (by field name)")
+            raise ak._v2._util.error(
+                TypeError("only fields may be assigned in-place (by field name)")
+            )
 
         self._layout = ak._v2.operations.structure.with_field(
             self._layout, what, where, highlevel=False
@@ -1129,12 +1139,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 try:
                     return self[where]
                 except Exception as err:
-                    raise AttributeError(
-                        "while trying to get field {}, an exception "
-                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                    raise ak._v2._util.error(
+                        AttributeError(
+                            "while trying to get field {}, an exception "
+                            "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                        )
                     )
             else:
-                raise AttributeError(f"no field named {where!r}")
+                raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
 
     def __dir__(self):
         """
@@ -1425,8 +1437,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
-            raise ValueError(
-                "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
+            raise ak._v2._util.error(
+                ValueError(
+                    "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
+                )
             )
         else:
             form, length, container, behavior = state
@@ -1465,9 +1479,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if len(self) == 1:
             return bool(self[0])
         else:
-            raise ValueError(
-                "the truth value of an array whose length is not 1 is ambiguous; "
-                "use ak.any() or ak.all()"
+            raise ak._v2._util.error(
+                ValueError(
+                    "the truth value of an array whose length is not 1 is ambiguous; "
+                    "use ak.any() or ak.all()"
+                )
             )
 
     def __contains__(self, element):
@@ -1532,15 +1548,17 @@ class Record(NDArrayOperatorsMixin):
             layout = ak._v2.operations.convert.from_iter([data], highlevel=False)[0]
 
         elif isinstance(data, Iterable):
-            raise TypeError(
-                "could not convert non-dict into an ak.Record; try ak.Array"
+            raise ak._v2._util.error(
+                TypeError("could not convert non-dict into an ak.Record; try ak.Array")
             )
 
         else:
             layout = None
 
         if not isinstance(layout, ak._v2.record.Record):
-            raise TypeError("could not convert data into an ak.Record")
+            raise ak._v2._util.error(
+                TypeError("could not convert data into an ak.Record")
+            )
 
         if with_name is not None:
             layout = ak._v2.operations.structure.with_name(
@@ -1608,7 +1626,9 @@ class Record(NDArrayOperatorsMixin):
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError("layout must be a subclass of ak._v2.record.Record")
+            raise ak._v2._util.error(
+                TypeError("layout must be a subclass of ak._v2.record.Record")
+            )
 
     @property
     def behavior(self):
@@ -1635,7 +1655,7 @@ class Record(NDArrayOperatorsMixin):
             self.__class__ = ak._v2._util.recordclass(self._layout, behavior)
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise ak._v2._util.error(TypeError("behavior must be None or a dict"))
 
     def tolist(self):
         """
@@ -1765,7 +1785,9 @@ class Record(NDArrayOperatorsMixin):
             ak._v2._util.isstr(where)
             or (isinstance(where, tuple) and all(ak._v2._util.isstr(x) for x in where))
         ):
-            raise TypeError("only fields may be assigned in-place (by field name)")
+            raise ak._v2._util.error(
+                TypeError("only fields may be assigned in-place (by field name)")
+            )
 
         self._layout = ak._v2.operations.structure.with_field(
             self._layout, what, where, highlevel=False
@@ -1807,12 +1829,14 @@ class Record(NDArrayOperatorsMixin):
                 try:
                     return self[where]
                 except Exception as err:
-                    raise AttributeError(
-                        "while trying to get field {}, an exception "
-                        "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                    raise ak._v2._util.error(
+                        AttributeError(
+                            "while trying to get field {}, an exception "
+                            "occurred:\n{}: {}".format(repr(where), type(err), str(err))
+                        )
                     )
             else:
-                raise AttributeError(f"no field named {where!r}")
+                raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
 
     def __dir__(self):
         """
@@ -2033,8 +2057,10 @@ class Record(NDArrayOperatorsMixin):
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
-            raise ValueError(
-                "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
+            raise ak._v2._util.error(
+                ValueError(
+                    "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
+                )
             )
         else:
             form, length, container, behavior, at = state
@@ -2071,9 +2097,11 @@ class Record(NDArrayOperatorsMixin):
     #         return Record(self._layout.deep_copy(), behavior=self._behavior)
 
     def __bool__(self):
-        raise ValueError(
-            "the truth value of a record is ambiguous; "
-            "use ak.any() or ak.all() or pick a field"
+        raise ak._v2._util.error(
+            ValueError(
+                "the truth value of a record is ambiguous; "
+                "use ak.any() or ak.all() or pick a field"
+            )
         )
 
     def __contains__(self, element):
@@ -2254,7 +2282,7 @@ class ArrayBuilder(Sized):
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise ak._v2._util.error(TypeError("behavior must be None or a dict"))
 
     def tolist(self):
         """
@@ -2371,9 +2399,11 @@ class ArrayBuilder(Sized):
         if len(self) == 1:
             return bool(self[0])
         else:
-            raise ValueError(
-                "the truth value of an array whose length is not 1 is ambiguous; "
-                "use ak.any() or ak.all()"
+            raise ak._v2._util.error(
+                ValueError(
+                    "the truth value of an array whose length is not 1 is ambiguous; "
+                    "use ak.any() or ak.all()"
+                )
             )
 
     def snapshot(self):

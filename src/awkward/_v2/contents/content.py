@@ -5,7 +5,6 @@ from collections.abc import Iterable
 
 import awkward as ak
 import awkward._v2._reducers
-from awkward._v2._slicing import NestedIndexError
 from awkward._v2.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -26,22 +25,28 @@ class Content:
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
         ):
-            raise TypeError(
-                "{} 'identifier' must be an Identifier or None, not {}".format(
-                    type(self).__name__, repr(identifier)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'identifier' must be an Identifier or None, not {}".format(
+                        type(self).__name__, repr(identifier)
+                    )
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{} 'parameters' must be a dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'parameters' must be a dict or None, not {}".format(
+                        type(self).__name__, repr(parameters)
+                    )
                 )
             )
 
         if nplike is not None and not isinstance(nplike, ak.nplike.NumpyLike):
-            raise TypeError(
-                "{} 'nplike' must be an ak.nplike.NumpyLike or None, not {}".format(
-                    type(self).__name__, repr(nplike)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'nplike' must be an ak.nplike.NumpyLike or None, not {}".format(
+                        type(self).__name__, repr(nplike)
+                    )
                 )
             )
 
@@ -96,9 +101,11 @@ class Content:
                 return out
 
         else:
-            raise TypeError(
-                "form_key must be None, a string, or a callable, not {}".format(
-                    type(form_key)
+            raise ak._v2._util.error(
+                TypeError(
+                    "form_key must be None, a string, or a callable, not {}".format(
+                        type(form_key)
+                    )
                 )
             )
 
@@ -123,8 +130,8 @@ class Content:
         if nplike is None:
             nplike = self._nplike
         if not nplike.known_data:
-            raise TypeError(
-                "cannot call 'to_buffers' on an array without concrete data"
+            raise ak._v2._util.error(
+                TypeError("cannot call 'to_buffers' on an array without concrete data")
             )
 
         if ak._v2._util.isstr(buffer_key):
@@ -143,15 +150,19 @@ class Content:
                 )
 
         else:
-            raise TypeError(
-                "buffer_key must be a string or a callable, not {}".format(
-                    type(buffer_key)
+            raise ak._v2._util.error(
+                TypeError(
+                    "buffer_key must be a string or a callable, not {}".format(
+                        type(buffer_key)
+                    )
                 )
             )
 
         if form_key is None:
-            raise TypeError(
-                "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
+            raise ak._v2._util.error(
+                TypeError(
+                    "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
+                )
             )
 
         form = self.form_with_key(form_key=form_key, id_start=id_start)
@@ -191,7 +202,7 @@ class Content:
             message = error.str.decode(errors="surrogateescape")
 
             if error.pass_through:
-                raise ValueError(message + filename)
+                raise ak._v2._util.error(ValueError(message + filename))
 
             else:
                 if error.id != ak._util.kSliceNone and self._identifier is not None:
@@ -204,9 +215,9 @@ class Content:
                 message += filename
 
                 if slicer is None:
-                    raise ValueError(message)
+                    raise ak._v2._util.error(ValueError(message))
                 else:
-                    raise NestedIndexError(self, slicer, message)
+                    raise ak._v2._util.indexerror(self, slicer, message)
 
     @staticmethod
     def _selfless_handle_error(error):
@@ -221,7 +232,7 @@ class Content:
             message = error.str.decode(errors="surrogateescape")
 
             if error.pass_through:
-                raise ValueError(message + filename)
+                raise ak._v2._util.error(ValueError(message + filename))
 
             else:
                 if error.attempt != ak._util.kSliceNone:
@@ -229,26 +240,34 @@ class Content:
 
                 message += filename
 
-                raise ValueError(message)
+                raise ak._v2._util.error(ValueError(message))
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        raise TypeError(
-            "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+        raise ak._v2._util.error(
+            TypeError(
+                "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+            )
         )
 
     def __array_function__(self, func, types, args, kwargs):
-        raise TypeError(
-            "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+        raise ak._v2._util.error(
+            TypeError(
+                "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak._v2.highlevel.Array"
+            )
         )
 
     def __array__(self, **kwargs):
-        raise TypeError(
-            "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak._v2.highlevel.Array"
+        raise ak._v2._util.error(
+            TypeError(
+                "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak._v2.highlevel.Array"
+            )
         )
 
     def __iter__(self):
         if not self._nplike.known_data:
-            raise TypeError("cannot iterate on an array without concrete data")
+            raise ak._v2._util.error(
+                TypeError("cannot iterate on an array without concrete data")
+            )
 
         for i in range(len(self)):
             yield self._getitem_at(i)
@@ -292,7 +311,7 @@ class Content:
             return self._getitem_next(nexthead, nexttail, advanced)
 
         elif dimlength in {mindepth - 1, maxdepth - 1}:
-            raise NestedIndexError(
+            raise ak._v2._util.indexerror(
                 self,
                 Ellipsis,
                 "ellipsis (`...`) can't be used on data with different numbers of dimensions",
@@ -342,7 +361,7 @@ class Content:
         index = ak._v2.index.Index64(head._index)
         content = that._getitem_at(0)
         if self._nplike.known_shape and content.length < index.length:
-            raise NestedIndexError(
+            raise ak._v2._util.indexerror(
                 self,
                 head,
                 "cannot fit masked jagged slice with length {} into {} of size {}".format(
@@ -396,7 +415,7 @@ class Content:
         assert isinstance(head, ak._v2.contents.IndexedOptionArray)
 
         if advanced is not None:
-            raise NestedIndexError(
+            raise ak._v2._util.indexerror(
                 self,
                 head,
                 "cannot mix missing values in slice with NumPy-style advanced indexing",
@@ -404,7 +423,9 @@ class Content:
 
         if isinstance(head.content, ak._v2.contents.listoffsetarray.ListOffsetArray):
             if self.nplike.known_shape and self.length != 1:
-                raise NotImplementedError("reached a not-well-considered code path")
+                raise ak._v2._util.error(
+                    NotImplementedError("reached a not-well-considered code path")
+                )
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
         if isinstance(head.content, ak._v2.contents.numpyarray.NumpyArray):
@@ -432,9 +453,11 @@ class Content:
                         )
                     )
                 else:
-                    raise NotImplementedError(
-                        "FIXME: unhandled case of SliceMissing with RecordArray containing {}".format(
-                            content
+                    raise ak._v2._util.error(
+                        NotImplementedError(
+                            "FIXME: unhandled case of SliceMissing with RecordArray containing {}".format(
+                                content
+                            )
                         )
                     )
 
@@ -448,178 +471,134 @@ class Content:
             )
 
         else:
-            raise NotImplementedError(
-                f"FIXME: unhandled case of SliceMissing with {nextcontent}"
+            raise ak._v2._util.error(
+                NotImplementedError(
+                    f"FIXME: unhandled case of SliceMissing with {nextcontent}"
+                )
             )
 
     def __getitem__(self, where):
-        try:
-            if ak._util.isint(where):
-                return self._getitem_at(where)
+        with ak._v2._util.SlicingErrorContext(self, where):
+            return self._getitem(where)
 
-            elif isinstance(where, slice) and where.step is None:
-                return self._getitem_range(where)
+    def _getitem(self, where):
+        if ak._util.isint(where):
+            return self._getitem_at(where)
 
-            elif isinstance(where, slice):
-                return self.__getitem__((where,))
+        elif isinstance(where, slice) and where.step is None:
+            return self._getitem_range(where)
 
-            elif ak._util.isstr(where):
-                return self._getitem_field(where)
+        elif isinstance(where, slice):
+            return self._getitem((where,))
 
-            elif where is np.newaxis:
-                return self.__getitem__((where,))
+        elif ak._util.isstr(where):
+            return self._getitem_field(where)
 
-            elif where is Ellipsis:
-                return self.__getitem__((where,))
+        elif where is np.newaxis:
+            return self._getitem((where,))
 
-            elif isinstance(where, tuple):
-                if len(where) == 0:
-                    return self
+        elif where is Ellipsis:
+            return self._getitem((where,))
 
-                items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
+        elif isinstance(where, tuple):
+            if len(where) == 0:
+                return self
 
-                nextwhere = ak._v2._slicing.getitem_broadcast(items)
+            items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
 
-                next = ak._v2.contents.RegularArray(
-                    self,
-                    self.length if self._nplike.known_shape else 1,
-                    1,
-                    None,
-                    None,
-                    self._nplike,
-                )
+            nextwhere = ak._v2._slicing.getitem_broadcast(items)
 
-                out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
+            next = ak._v2.contents.RegularArray(
+                self,
+                self.length if self._nplike.known_shape else 1,
+                1,
+                None,
+                None,
+                self._nplike,
+            )
 
-                if out.length == 0:
-                    return out._getitem_nothing()
-                else:
-                    return out._getitem_at(0)
+            out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
-            elif isinstance(where, ak.highlevel.Array):
-                return self.__getitem__(where.layout)
+            if out.length == 0:
+                return out._getitem_nothing()
+            else:
+                return out._getitem_at(0)
 
-            elif isinstance(where, ak.layout.Content):
-                return self.__getitem__(v1_to_v2(where))
+        elif isinstance(where, ak.highlevel.Array):
+            return self._getitem(where.layout)
 
-            elif isinstance(where, ak._v2.highlevel.Array):
-                return self.__getitem__(where.layout)
+        elif isinstance(where, ak.layout.Content):
+            return self._getitem(v1_to_v2(where))
 
-            elif (
-                isinstance(where, Content)
-                and where._parameters is not None
-                and (where._parameters.get("__array__") in ("string", "bytestring"))
-            ):
-                return self._getitem_fields(ak._v2.operations.convert.to_list(where))
+        elif isinstance(where, ak._v2.highlevel.Array):
+            return self._getitem(where.layout)
 
-            elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
-                return where.toNumpyArray(np.int64)
+        elif (
+            isinstance(where, Content)
+            and where._parameters is not None
+            and (where._parameters.get("__array__") in ("string", "bytestring"))
+        ):
+            return self._getitem_fields(ak._v2.operations.convert.to_list(where))
 
-            elif isinstance(where, ak._v2.contents.numpyarray.NumpyArray):
-                if issubclass(where.dtype.type, np.int64):
-                    carry = ak._v2.index.Index64(where.data.reshape(-1))
-                    allow_lazy = True
-                elif issubclass(where.dtype.type, np.integer):
-                    carry = ak._v2.index.Index64(
-                        where.data.astype(np.int64).reshape(-1)
-                    )
+        elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
+            return where.toNumpyArray(np.int64)
+
+        elif isinstance(where, ak._v2.contents.numpyarray.NumpyArray):
+            if issubclass(where.dtype.type, np.int64):
+                carry = ak._v2.index.Index64(where.data.reshape(-1))
+                allow_lazy = True
+            elif issubclass(where.dtype.type, np.integer):
+                carry = ak._v2.index.Index64(where.data.astype(np.int64).reshape(-1))
+                allow_lazy = "copied"  # True, but also can be modified in-place
+            elif issubclass(where.dtype.type, (np.bool_, bool)):
+                if len(where.data.shape) == 1:
+                    where = self._nplike.nonzero(where.data)[0]
+                    carry = ak._v2.index.Index64(where)
                     allow_lazy = "copied"  # True, but also can be modified in-place
-                elif issubclass(where.dtype.type, (np.bool_, bool)):
-                    if len(where.data.shape) == 1:
-                        where = self._nplike.nonzero(where.data)[0]
-                        carry = ak._v2.index.Index64(where)
-                        allow_lazy = "copied"  # True, but also can be modified in-place
-                    else:
-                        wheres = self._nplike.nonzero(where.data)
-                        return self.__getitem__(wheres)
                 else:
-                    raise TypeError(
+                    wheres = self._nplike.nonzero(where.data)
+                    return self._getitem(wheres)
+            else:
+                raise ak._v2._util.error(
+                    TypeError(
                         "array slice must be an array of integers or booleans, not\n\n    {}".format(
                             repr(where.data).replace("\n", "\n    ")
                         )
                     )
-
-                out = ak._v2._slicing.getitem_next_array_wrap(
-                    self._carry(carry, allow_lazy, NestedIndexError), where.shape
                 )
-                if out.length == 0:
-                    return out._getitem_nothing()
-                else:
-                    return out._getitem_at(0)
 
-            elif isinstance(where, Content):
-                return self.__getitem__((where,))
-
-            elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
-                return self._getitem_fields(where)
-
-            elif isinstance(where, Iterable):
-                layout = ak._v2.operations.convert.to_layout(where)
-                as_array = layout.maybe_to_array(layout.nplike)
-                if as_array is None:
-                    return self.__getitem__(layout)
-                else:
-                    return self.__getitem__(
-                        ak._v2.contents.NumpyArray(as_array, None, None, layout.nplike)
-                    )
-
+            out = ak._v2._slicing.getitem_next_array_wrap(
+                self._carry(carry, allow_lazy), where.shape
+            )
+            if out.length == 0:
+                return out._getitem_nothing()
             else:
-                raise TypeError(
+                return out._getitem_at(0)
+
+        elif isinstance(where, Content):
+            return self._getitem((where,))
+
+        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
+            return self._getitem_fields(where)
+
+        elif isinstance(where, Iterable):
+            layout = ak._v2.operations.convert.to_layout(where)
+            as_array = layout.maybe_to_array(layout.nplike)
+            if as_array is None:
+                return self._getitem(layout)
+            else:
+                return self._getitem(
+                    ak._v2.contents.NumpyArray(as_array, None, None, layout.nplike)
+                )
+
+        else:
+            raise ak._v2._util.error(
+                TypeError(
                     "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
                     "integer/boolean arrays (possibly with variable-length nested "
                     "lists or missing values), field name (str) or names (non-tuple "
                     "iterable of str) are valid indices for slicing, not\n\n    "
                     + repr(where).replace("\n", "\n    ")
-                )
-
-        except NestedIndexError as err:
-
-            def format_slice(x):
-                if isinstance(x, slice):
-                    if x.step is None:
-                        return "{}:{}".format(
-                            "" if x.start is None else x.start,
-                            "" if x.stop is None else x.stop,
-                        )
-                    else:
-                        return "{}:{}:{}".format(
-                            "" if x.start is None else x.start,
-                            "" if x.stop is None else x.stop,
-                            x.step,
-                        )
-                elif isinstance(x, tuple):
-                    return "(" + ", ".join(format_slice(y) for y in x) + ")"
-                elif isinstance(x, ak._v2.index.Index64):
-                    return str(x.data)
-                elif isinstance(x, Content):
-                    return str(ak._v2.highlevel.Array(x))
-                else:
-                    return repr(x)
-
-            try:
-                tmp = "    " + repr(ak._v2.highlevel.Array(self))
-            except Exception:
-                tmp = self._repr("    ", "", "")
-            raise IndexError(
-                """cannot slice
-
-{}
-
-with
-
-    {}
-
-at inner {} of length {}, using sub-slice {}.{}""".format(
-                    tmp,
-                    format_slice(where),
-                    type(err.array).__name__,
-                    err.array.length,
-                    format_slice(err.slicer),
-                    ""
-                    if err.details is None
-                    else "\n\n{} error: {}.".format(
-                        type(err.array).__name__, err.details
-                    ),
                 )
             )
 
@@ -645,7 +624,7 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
             elif carry.length < self.length:
                 return self._getitem_range(slice(0, carry.length))
             else:
-                raise IndexError
+                raise ak._v2._util.error(IndexError)
         else:
             return None
 
@@ -653,31 +632,31 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def _range_identifier(self, start, stop):
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def _field_identifier(self, field):
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def _fields_identifier(self, fields):
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
-    def _carry_identifier(self, carry, exception):
+    def _carry_identifier(self, carry):
         if self._identifier is None:
             return None
         else:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
     def axis_wrap_if_negative(self, axis):
         if axis is None or axis >= 0:
@@ -688,15 +667,19 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         if mindepth == depth and maxdepth == depth:
             posaxis = depth + axis
             if posaxis < 0:
-                raise np.AxisError(
-                    f"axis={axis} exceeds the depth ({depth}) of this array"
+                raise ak._v2._util.error(
+                    np.AxisError(
+                        f"axis={axis} exceeds the depth ({depth}) of this array"
+                    )
                 )
             return posaxis
 
         elif mindepth + axis == 0:
-            raise np.AxisError(
-                "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
-                    axis, depth
+            raise ak._v2._util.error(
+                np.AxisError(
+                    "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
+                        axis, depth
+                    )
                 )
             )
 
@@ -751,8 +734,10 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
     def _merging_strategy(self, others):
         if len(others) == 0:
-            raise ValueError(
-                "to merge this array with 'others', at least one other must be provided"
+            raise ak._v2._util.error(
+                ValueError(
+                    "to merge this array with 'others', at least one other must be provided"
+                )
             )
 
         head = [self]
@@ -804,31 +789,37 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
     def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
         if axis is None:
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
         negaxis = -axis
         branch, depth = self.branch_depth
 
         if branch:
             if negaxis <= 0:
-                raise ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves of "
-                    "the tree; non-negative from the root)"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves of "
+                        "the tree; non-negative from the root)"
+                    )
                 )
             if negaxis > depth:
-                raise ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} "
-                    "from the leaves".format(axis, depth)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} "
+                        "from the leaves".format(axis, depth)
+                    )
                 )
         else:
             if negaxis <= 0:
                 negaxis += depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "axis={} exceeds the depth of the nested list structure "
+                        "(which is {})".format(axis, depth)
+                    )
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -882,25 +873,31 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         branch, depth = self.branch_depth
         if branch:
             if negaxis <= 0:
-                raise ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves "
-                    "of the tree; non-negative from the root)"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves "
+                        "of the tree; non-negative from the root)"
+                    )
                 )
             if negaxis > depth:
-                raise ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} from the leaves".format(
-                        axis, depth
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} from the leaves".format(
+                            axis, depth
+                        )
                     )
                 )
         else:
             if negaxis <= 0:
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "axis={} exceeds the depth of the nested list structure "
+                        "(which is {})".format(axis, depth)
+                    )
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -922,25 +919,31 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
         branch, depth = self.branch_depth
         if branch:
             if negaxis <= 0:
-                raise ValueError(
-                    "cannot use non-negative axis on a nested list structure "
-                    "of variable depth (negative axis counts from the leaves "
-                    "of the tree; non-negative from the root)"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves "
+                        "of the tree; non-negative from the root)"
+                    )
                 )
             if negaxis > depth:
-                raise ValueError(
-                    "cannot use axis={} on a nested list structure that splits into "
-                    "different depths, the minimum of which is depth={} from the leaves".format(
-                        axis, depth
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} from the leaves".format(
+                            axis, depth
+                        )
                     )
                 )
         else:
             if negaxis <= 0:
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ValueError(
-                    "axis={} exceeds the depth of the nested list structure "
-                    "(which is {})".format(axis, depth)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "axis={} exceeds the depth of the nested list structure "
+                        "(which is {})".format(axis, depth)
+                    )
                 )
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
@@ -1018,13 +1021,17 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
     def combinations(self, n, replacement=False, axis=1, fields=None, parameters=None):
         if n < 1:
-            raise ValueError("in combinations, 'n' must be at least 1")
+            raise ak._v2._util.error(
+                ValueError("in combinations, 'n' must be at least 1")
+            )
 
         recordlookup = None
         if fields is not None:
             recordlookup = fields
             if len(recordlookup) != n:
-                raise ValueError("if provided, the length of 'fields' must be 'n'")
+                raise ak._v2._util.error(
+                    ValueError("if provided, the length of 'fields' must be 'n'")
+                )
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
     def validityerror_parameters(self, path):
@@ -1150,25 +1157,31 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
                 branch, depth = self.branch_depth
                 if branch:
                     if negaxis <= 0:
-                        raise np.AxisError(
-                            "cannot use non-negative axis on a nested list structure "
-                            "of variable depth (negative axis counts from the leaves "
-                            "of the tree; non-negative from the root)"
+                        raise ak._v2._util.error(
+                            np.AxisError(
+                                "cannot use non-negative axis on a nested list structure "
+                                "of variable depth (negative axis counts from the leaves "
+                                "of the tree; non-negative from the root)"
+                            )
                         )
                     if negaxis > depth:
-                        raise np.AxisError(
-                            "cannot use axis={} on a nested list structure that splits into "
-                            "different depths, the minimum of which is depth={} from the leaves".format(
-                                axis, depth
+                        raise ak._v2._util.error(
+                            np.AxisError(
+                                "cannot use axis={} on a nested list structure that splits into "
+                                "different depths, the minimum of which is depth={} from the leaves".format(
+                                    axis, depth
+                                )
                             )
                         )
                 else:
                     if negaxis <= 0:
                         negaxis = negaxis + depth
                     if not (0 < negaxis and negaxis <= depth):
-                        raise np.AxisError(
-                            "axis={} exceeds the depth of this array ({})".format(
-                                axis, depth
+                        raise ak._v2._util.error(
+                            np.AxisError(
+                                "axis={} exceeds the depth of this array ({})".format(
+                                    axis, depth
+                                )
                             )
                         )
 
@@ -1177,9 +1190,11 @@ at inner {} of length {}, using sub-slice {}.{}""".format(
 
             return self._unique(negaxis, starts, parents, 1)
 
-        raise np.AxisError(
-            "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
-                axis
+        raise ak._v2._util.error(
+            np.AxisError(
+                "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
+                    axis
+                )
             )
         )
 

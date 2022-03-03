@@ -17,15 +17,19 @@ class IndexedOptionForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(index):
-            raise TypeError(
-                "{} 'index' must be of type str, not {}".format(
-                    type(self).__name__, repr(index)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'index' must be of type str, not {}".format(
+                        type(self).__name__, repr(index)
+                    )
                 )
             )
         if not isinstance(content, Form):
-            raise TypeError(
-                "{} all 'contents' must be Form subclasses, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} all 'contents' must be Form subclasses, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
 

@@ -50,18 +50,36 @@ def from_iter(
 
     See also #ak.to_list.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_iter",
+        dict(
+            iterable=iterable,
+            highlevel=highlevel,
+            behavior=behavior,
+            allow_record=allow_record,
+            initial=initial,
+            resize=resize,
+        ),
+    ):
+        return _impl(iterable, highlevel, behavior, allow_record, initial, resize)
+
+
+def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     if isinstance(iterable, dict):
         if allow_record:
-            return from_iter(
+            return _impl(
                 [iterable],
-                highlevel=highlevel,
-                behavior=behavior,
-                initial=initial,
-                resize=resize,
+                highlevel,
+                behavior,
+                False,
+                initial,
+                resize,
             )[0]
         else:
-            raise ValueError(
-                "cannot produce an array from a single dict (that would be a record)"
+            raise ak._v2._util.error(
+                ValueError(
+                    "cannot produce an array from a single dict (that would be a record)"
+                )
             )
 
     builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)

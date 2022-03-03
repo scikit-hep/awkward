@@ -3,7 +3,6 @@
 import copy
 
 import awkward as ak
-from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.regularform import RegularForm
 from awkward._v2.forms.form import _parameters_equal
@@ -26,25 +25,31 @@ class RegularArray(Content):
         nplike=None,
     ):
         if not isinstance(content, Content):
-            raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'content' must be a Content subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if not isinstance(size, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(size) and size >= 0):
-                raise TypeError(
-                    "{} 'size' must be a non-negative integer, not {}".format(
-                        type(self).__name__, size
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} 'size' must be a non-negative integer, not {}".format(
+                            type(self).__name__, size
+                        )
                     )
                 )
             else:
                 size = int(size)
         if not isinstance(zeros_length, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(zeros_length) and zeros_length >= 0):
-                raise TypeError(
-                    "{} 'zeros_length' must be a non-negative integer, not {}".format(
-                        type(self).__name__, zeros_length
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} 'zeros_length' must be a non-negative integer, not {}".format(
+                            type(self).__name__, zeros_length
+                        )
                     )
                 )
         if nplike is None:
@@ -169,7 +174,7 @@ class RegularArray(Content):
             where += self.length
 
         if where < 0 or where >= self.length:
-            raise NestedIndexError(self, where)
+            raise ak._v2._util.indexerror(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))
 
@@ -210,7 +215,7 @@ class RegularArray(Content):
             self._nplike,
         )
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
 
         where = carry.data
@@ -228,7 +233,7 @@ class RegularArray(Content):
             where[negative] += self._length
 
         if self._nplike.any(where >= self._length, prefer=False):
-            raise NestedIndexError(self, where)
+            raise ak._v2._util.indexerror(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(
             where.shape[0] * self._size, self._nplike
@@ -250,10 +255,10 @@ class RegularArray(Content):
         )
 
         return RegularArray(
-            self._content._carry(nextcarry, allow_lazy, exception),
+            self._content._carry(nextcarry, allow_lazy),
             self._size,
             where.shape[0],
-            self._carry_identifier(carry, exception),
+            self._carry_identifier(carry),
             self._parameters,
             self._nplike,
         )
@@ -272,16 +277,20 @@ class RegularArray(Content):
 
     def _broadcast_tooffsets64(self, offsets):
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
-            raise AssertionError(
-                "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
-                    "(empty)" if offsets.length == 0 else str(offsets[0])
+            raise ak._v2._util.error(
+                AssertionError(
+                    "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
+                        "(empty)" if offsets.length == 0 else str(offsets[0])
+                    )
                 )
             )
 
         if offsets.nplike.known_shape and offsets.length - 1 != self._length:
-            raise AssertionError(
-                "cannot broadcast RegularArray of length {} to length {}".format(
-                    self._length, offsets.length - 1
+            raise ak._v2._util.error(
+                AssertionError(
+                    "cannot broadcast RegularArray of length {} to length {}".format(
+                        self._length, offsets.length - 1
+                    )
                 )
             )
 
@@ -305,7 +314,7 @@ class RegularArray(Content):
                     offsets.length,
                 )
             )
-            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, True)
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 offsets, nextcontent, identifier, self._parameters, self._nplike
             )
@@ -355,7 +364,7 @@ class RegularArray(Content):
                 ),
                 head,
             )
-            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
@@ -393,7 +402,7 @@ class RegularArray(Content):
                 head,
             )
 
-            nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+            nextcontent = self._content._carry(nextcarry, True)
 
             if advanced is None or advanced.length == 0:
                 return RegularArray(
@@ -498,7 +507,7 @@ class RegularArray(Content):
                     ),
                     head,
                 )
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                nextcontent = self._content._carry(nextcarry, True)
 
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
@@ -511,7 +520,7 @@ class RegularArray(Content):
             elif self._size == 0:
                 nextcarry = ak._v2.index.Index64.empty(0, self._nplike)
                 nextadvanced = ak._v2.index.Index64.empty(0, self._nplike)
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                nextcontent = self._content._carry(nextcarry, True)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
             else:
@@ -542,7 +551,7 @@ class RegularArray(Content):
                     ),
                     head,
                 )
-                nextcontent = self._content._carry(nextcarry, True, NestedIndexError)
+                nextcontent = self._content._carry(nextcarry, True)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
@@ -550,14 +559,14 @@ class RegularArray(Content):
             head = head._to_nplike(self.nplike)
 
             if advanced is not None:
-                raise NestedIndexError(
+                raise ak._v2._util.indexerror(
                     self,
                     head,
                     "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
             if self._nplike.known_shape and head.length != self._size:
-                raise NestedIndexError(
+                raise ak._v2._util.indexerror(
                     self,
                     head,
                     "cannot fit jagged slice with length {} into {} of size {}".format(
@@ -601,16 +610,16 @@ class RegularArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self._nplike)
-            out[0] = self.length
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
-                0
-            ]
+            out = self.length
+            if ak._v2._util.isint(out):
+                return np.int64(out)
+            else:
+                return out
         elif posaxis == depth + 1:
             tonum = ak._v2.index.Index64.empty(self.length, self._nplike)
             assert tonum.nplike is self._nplike
@@ -841,8 +850,10 @@ class RegularArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ValueError(
-                    "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
+                raise ak._v2._util.error(
+                    ValueError(
+                        "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
+                    )
                 )
 
             size = self._size
@@ -897,7 +908,7 @@ class RegularArray(Content):
             contents = []
             length = None
             for ptr in tocarry:
-                contents.append(self._content._carry(ptr, True, NestedIndexError))
+                contents.append(self._content._carry(ptr, True))
                 length = contents[-1].length
             assert length is not None
             recordarray = ak._v2.contents.recordarray.RecordArray(
@@ -1184,7 +1195,7 @@ class RegularArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         length = self._length * self._size
