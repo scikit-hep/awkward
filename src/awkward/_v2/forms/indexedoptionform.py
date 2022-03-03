@@ -179,3 +179,14 @@ class IndexedOptionForm(Form):
     @property
     def dimension_optiontype(self):
         return True
+
+    def _select_columns(self, index, specifier, matches, path, output, list_indicator):
+        return IndexedOptionForm(
+            self._index,
+            self._content._select_columns(
+                index, specifier, matches, path, output, list_indicator
+            ),
+            self._has_identifier,
+            self._parameters,
+            self._form_key,
+        )

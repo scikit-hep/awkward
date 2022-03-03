@@ -186,3 +186,17 @@ class ListForm(Form):
     @property
     def dimension_optiontype(self):
         return False
+
+    def _select_columns(self, index, specifier, matches, path, output, list_indicator):
+        if list_indicator is not None:
+            path = path + (list_indicator,)
+        return ListForm(
+            self._starts,
+            self._stops,
+            self._content._select_columns(
+                index, specifier, matches, path, output, list_indicator
+            ),
+            self._has_identifier,
+            self._parameters,
+            self._form_key,
+        )

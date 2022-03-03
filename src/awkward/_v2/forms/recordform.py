@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import glob
 from collections.abc import Iterable
 
 import awkward as ak
@@ -291,3 +292,33 @@ class RecordForm(Form):
     @property
     def dimension_optiontype(self):
         return False
+
+    def _select_columns(self, index, specifier, matches, path, output, list_indicator):
+        contents = []
+        fields = []
+        for content, field in zip(self._contents, self.fields):
+            next_matches = [
+                matches[i] and glob.fnmatch.fnmatchcase(field, item[index])
+                for i, item in enumerate(specifier)
+            ]
+            if any(next_matches):
+                len_output = len(output)
+                next_content = content._select_columns(
+                    index + 1,
+                    specifier,
+                    next_matches,
+                    path + (field,),
+                    output,
+                    list_indicator,
+                )
+                if len_output != len(output):
+                    contents.append(next_content)
+                    fields.append(field)
+
+        return RecordForm(
+            contents,
+            fields,
+            self._has_identifier,
+            self._parameters,
+            self._form_key,
+        )

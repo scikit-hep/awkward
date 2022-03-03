@@ -201,3 +201,8 @@ class NumpyForm(Form):
     @property
     def dimension_optiontype(self):
         return False
+
+    def _select_columns(self, index, specifier, matches, path, output, list_indicator):
+        if any(match and len(item) == index for item, match in zip(specifier, matches)):
+            output.append(".".join(path))
+        return self
