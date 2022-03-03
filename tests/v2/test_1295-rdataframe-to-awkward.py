@@ -10,6 +10,9 @@ import awkward._v2._connect.rdataframe._from_rdataframe  # noqa: E402
 ROOT = pytest.importorskip("ROOT")
 
 compiler = ROOT.gInterpreter.Declare
+ROOT.RDF.RInterface(
+    "ROOT::Detail::RDF::RLoopManager", "void"
+).AsAwkward = ak._v2._connect.rdataframe._from_rdataframe._as_awkward
 
 
 def test_array_builder():
@@ -80,12 +83,10 @@ def test_as_ak_array():
     )
 
     rdf = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
-    rdf.Display("x").Print()
-    rdf_x = rdf.Foreach["std::function<uint8_t(double)>"](
-        getattr(ROOT, func["real"]), ["x"]
-    )
+    rdf.Foreach["std::function<uint8_t(double)>"](getattr(ROOT, func["real"]), ["x"])
+    array = builder.snapshot()
     assert (
-        str(builder.snapshot().layout.form)
+        str(array.layout.form)
         == """{
     "class": "NumpyArray",
     "itemsize": 8,
@@ -93,21 +94,33 @@ def test_as_ak_array():
     "primitive": "float64"
 }"""
     )
+    assert len(array.layout) == 10
 
-    builder2 = ak.ArrayBuilder()
-    func2 = ak._v2._connect.rdataframe._from_rdataframe.connect_ArrayBuilder(
-        compiler, builder2
+
+def test_as_ak_array2():
+    rdf = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
+
+    builder = ak._v2.highlevel.ArrayBuilder()
+    func = ak._v2._connect.rdataframe._from_rdataframe.connect_ArrayBuilder(
+        compiler, builder
     )
-    getattr(ROOT, func2["clear"])()
-    getattr(ROOT, func2["beginrecord"])()
-    getattr(ROOT, func2["field_fast"])("one")
-    rdf.Display("x").Print()
-    rdf_xx = rdf.Foreach["std::function<uint8_t(double)>"](
-        getattr(ROOT, func2["real"]), ["x"]
+    compiler(
+        f"""
+    uint8_t
+    my_x_record(double x) {{
+        {func["beginrecord"]}();
+        {func["field_fast"]}("one");
+        {func["real"]}(x);
+        return {func["endrecord"]}();
+    }}
+    """
     )
-    getattr(ROOT, func2["endrecord"])()
+
+    rdf.Foreach["std::function<uint8_t(double)>"](ROOT.my_x_record, ["x"])
+
+    array = builder.snapshot()
     assert (
-        str(builder2.snapshot().layout.form)
+        str(array.layout.form)
         == """{
     "class": "RecordArray",
     "contents": {
@@ -115,3 +128,14 @@ def test_as_ak_array():
     }
 }"""
     )
+    assert len(array.layout) == 10
+
+
+def test_as_awkward():
+    rdf = (
+        ROOT.RDataFrame(10)
+        .Define("x", "gRandom->Rndm()")
+        .Define("xx", "gRandom->Rndm()")
+    )
+    array = rdf.AsAwkward(compiler, columns_as_records=True)
+    print(array.layout.form)
