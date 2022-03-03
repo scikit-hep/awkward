@@ -48,7 +48,7 @@ def ravel(array, highlevel=True, behavior=None):
     nplike = ak.nplike.of(layout)
 
     out = layout.completely_flatten(function_name="ak.ravel")
-    assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
+    assert isinstance(out, tuple) and all(isinstance(x, nplike.ndarray) for x in out)
 
     if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
         out = ak._v2.contents.NumpyArray(nplike.ma.concatenate(out))
