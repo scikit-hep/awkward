@@ -840,11 +840,11 @@ class ListArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self._nplike)
-            out[0] = self.length
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
-                0
-            ]
+            out = self.length
+            if ak._v2._util.isint(out):
+                return np.int64(out)
+            else:
+                return out
         elif posaxis == depth + 1:
             tonum = ak._v2.index.Index64.empty(self.length, self._nplike)
             assert (

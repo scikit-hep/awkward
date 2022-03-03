@@ -482,11 +482,11 @@ class ByteMaskedArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self._nplike)
-            out[0] = self.length
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
-                0
-            ]
+            out = self.length
+            if ak._v2._util.isint(out):
+                return np.int64(out)
+            else:
+                return out
         else:
             numnull = ak._v2.index.Index64.empty(1, self._nplike, dtype=np.int64)
             nextcarry, outindex = self._nextcarry_outindex(numnull)

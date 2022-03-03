@@ -480,11 +480,11 @@ class IndexedOptionArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            out = ak._v2.index.Index64.empty(1, self._nplike)
-            out[0] = self.length
-            return ak._v2.contents.numpyarray.NumpyArray(out, None, None, self._nplike)[
-                0
-            ]
+            out = self.length
+            if ak._v2._util.isint(out):
+                return np.int64(out)
+            else:
+                return out
         _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
         next = self._content._carry(nextcarry, False, NestedIndexError)
         out = next.num(posaxis, depth)
