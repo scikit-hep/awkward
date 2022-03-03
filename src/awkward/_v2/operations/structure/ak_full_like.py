@@ -8,7 +8,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("full_like")
 def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
-
     """
     Args:
         array: Array to use as a model for a replacement that contains only
@@ -71,6 +70,20 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.full_like",
+        dict(
+            array=array,
+            fill_value=fill_value,
+            highlevel=highlevel,
+            behavior=behavior,
+            dtype=dtype,
+        ),
+    ):
+        return _impl(array, fill_value, highlevel, behavior, dtype)
+
+
+def _impl(array, fill_value, highlevel, behavior, dtype):
     if dtype is not None:
         # In the case of strings and byte strings,
         # converting the fill avoids a ValueError.

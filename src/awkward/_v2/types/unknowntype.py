@@ -8,15 +8,19 @@ from awkward._v2.forms.form import _parameters_equal
 class UnknownType(Type):
     def __init__(self, parameters=None, typestr=None):
         if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'parameters' must be of type dict or None, not {}".format(
+                        type(self).__name__, repr(parameters)
+                    )
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'typestr' must be of type string or None, not {}".format(
+                        type(self).__name__, repr(typestr)
+                    )
                 )
             )
         self._parameters = parameters

@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def parameters(array):
-
     """
     Extracts parameters from the outermost array node of `array` (many types
     supported, including all Awkward Arrays and Records).
@@ -19,6 +18,14 @@ def parameters(array):
     See #ak.Array and #ak.behavior for a more complete description of
     behaviors.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.parameters",
+        dict(array=array),
+    ):
+        return _impl(array)
+
+
+def _impl(array):
     if isinstance(array, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
         return array.layout.parameters
 

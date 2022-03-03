@@ -65,9 +65,11 @@ def getitem_broadcast(items):
                         for w in nplike.nonzero(x):
                             out.append(ak._v2.index.Index64(w))
                 else:
-                    raise TypeError(
-                        "array slice must be an array of integers or booleans, not\n\n    {}".format(
-                            repr(x).replace("\n", "\n    ")
+                    raise ak._v2._util.error(
+                        TypeError(
+                            "array slice must be an array of integers or booleans, not\n\n    {}".format(
+                                repr(x).replace("\n", "\n    ")
+                            )
                         )
                     )
 
@@ -124,12 +126,14 @@ def prepare_tuple_item(item):
             return as_array
 
     else:
-        raise TypeError(
-            "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-            "integer/boolean arrays (possibly with variable-length nested "
-            "lists or missing values), field name (str) or names (non-tuple "
-            "iterable of str) are valid indices for slicing, not\n\n    "
-            + repr(item).replace("\n", "\n    ")
+        raise ak._v2._util.error(
+            TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(item).replace("\n", "\n    ")
+            )
         )
 
 
@@ -148,7 +152,7 @@ def prepare_tuple_RegularArray_toListOffsetArray64(item):
         return item
 
     else:
-        raise AssertionError(type(item))
+        raise ak._v2._util.error(AssertionError(type(item)))
 
 
 def prepare_tuple_nested(item):
@@ -230,9 +234,7 @@ def prepare_tuple_nested(item):
         nextindex = item.index.data.astype(np.int64)  # this ALWAYS copies
         nonnull = nextindex >= 0
 
-        projected = item.content._carry(
-            ak._v2.index.Index64(nextindex[nonnull]), False, NestedIndexError
-        )
+        projected = item.content._carry(ak._v2.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
         nextindex[nonnull] = item.nplike.arange(projected.length, dtype=np.int64)
@@ -256,7 +258,7 @@ def prepare_tuple_nested(item):
         positions_where_valid = item.nplike.nonzero(is_valid)[0]
 
         nextcontent = prepare_tuple_nested(item.content)._carry(
-            ak._v2.index.Index64(positions_where_valid), False, NestedIndexError
+            ak._v2.index.Index64(positions_where_valid), False
         )
 
         nextindex = item.nplike.full(is_valid.shape[0], -1, np.int64)
@@ -273,15 +275,19 @@ def prepare_tuple_nested(item):
 
     elif isinstance(item, ak._v2.contents.UnionArray):
         # needs simplify_uniontype
-        raise NotImplementedError("FIXME: need to implement UnionArray as a slice")
+        raise ak._v2._util.error(
+            NotImplementedError("FIXME: need to implement UnionArray as a slice")
+        )
 
     else:
-        raise TypeError(
-            "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-            "integer/boolean arrays (possibly with variable-length nested "
-            "lists or missing values), field name (str) or names (non-tuple "
-            "iterable of str) are valid indices for slicing, not\n\n    "
-            + repr(item).replace("\n", "\n    ")
+        raise ak._v2._util.error(
+            TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(item).replace("\n", "\n    ")
+            )
         )
 
 
@@ -434,7 +440,7 @@ def prepare_tuple_bool_to_int(item):
         return item
 
     else:
-        raise AssertionError(type(item))
+        raise ak._v2._util.error(AssertionError(type(item)))
 
 
 def getitem_next_array_wrap(outcontent, shape):
@@ -451,29 +457,3 @@ def getitem_next_array_wrap(outcontent, shape):
             size = 1
         out = ak._v2.contents.RegularArray(out, size, length, None, None)
     return out
-
-
-class NestedIndexError(IndexError):
-    def __init__(self, array, slicer, details=None):
-        self._array = array
-        self._slicer = slicer
-        self._details = details
-
-    @property
-    def array(self):
-        return self._array
-
-    @property
-    def slicer(self):
-        return self._slicer
-
-    @property
-    def details(self):
-        return self._details
-
-    def __str__(self):
-        return "cannot slice {} with {}{}".format(
-            type(self._array).__name__,
-            repr(self._slicer),
-            "" if self._details is None else ": " + self._details,
-        )

@@ -29,7 +29,19 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
 
     See also #ak.to_cupy, #ak.from_numpy and #ak.from_jax.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_cupy",
+        dict(
+            array=array,
+            regulararray=regulararray,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(array, regulararray, highlevel, behavior)
 
+
+def _impl(array, regulararray, highlevel, behavior):
     def recurse(array):
         if regulararray and len(array.shape) > 1:
             return ak._v2.contents.RegularArray(

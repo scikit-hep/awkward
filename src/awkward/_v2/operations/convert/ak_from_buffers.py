@@ -58,6 +58,22 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_buffers",
+        dict(
+            form=form,
+            length=length,
+            container=container,
+            buffer_key=buffer_key,
+            nplike=nplike,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(form, length, container, buffer_key, nplike, highlevel, behavior)
+
+
+def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
     if ak._v2._util.isstr(form):
         if ak._v2.types.numpytype.is_primitive(form):
             form = ak._v2.forms.NumpyForm(form)
@@ -67,11 +83,15 @@ def from_buffers(
         form = ak._v2.forms.from_iter(form)
 
     if not (ak._v2._util.isint(length) and length >= 0):
-        raise TypeError("'length' argument must be a non-negative integer")
+        raise ak._v2._util.error(
+            TypeError("'length' argument must be a non-negative integer")
+        )
 
     if not isinstance(form, ak._v2.forms.Form):
-        raise TypeError(
-            "'form' argument must be a Form or its Python dict/JSON string representation"
+        raise ak._v2._util.error(
+            TypeError(
+                "'form' argument must be a Form or its Python dict/JSON string representation"
+            )
         )
 
     if ak._v2._util.isstr(buffer_key):
@@ -85,8 +105,10 @@ def from_buffers(
             return buffer_key(form_key=form.form_key, attribute=attribute, form=form)
 
     else:
-        raise TypeError(
-            f"buffer_key must be a string or a callable, not {type(buffer_key)}"
+        raise ak._v2._util.error(
+            TypeError(
+                f"buffer_key must be a string or a callable, not {type(buffer_key)}"
+            )
         )
 
     out = reconstitute(form, length, container, getkey, nplike)
@@ -104,13 +126,17 @@ _index_to_dtype = {
 
 def reconstitute(form, length, container, getkey, nplike):
     if form.has_identifier:
-        raise NotImplementedError("ak.from_buffers for an array with an Identifier")
+        raise ak._v2._util.error(
+            NotImplementedError("ak.from_buffers for an array with an Identifier")
+        )
     else:
         identifier = None
 
     if isinstance(form, ak._v2.forms.EmptyForm):
         if length != 0:
-            raise ValueError(f"EmptyForm node, but the expected length is {length}")
+            raise ak._v2._util.error(
+                ValueError(f"EmptyForm node, but the expected length is {length}")
+            )
         return ak._v2.contents.EmptyArray(identifier, form.parameters)
 
     elif isinstance(form, ak._v2.forms.NumpyForm):
@@ -268,4 +294,6 @@ def reconstitute(form, length, container, getkey, nplike):
         )
 
     else:
-        raise AssertionError("unexpected form node type: " + str(type(form)))
+        raise ak._v2._util.error(
+            AssertionError("unexpected form node type: " + str(type(form)))
+        )

@@ -40,7 +40,20 @@ def from_numpy(
 
     See also #ak.to_numpy and #ak.from_cupy.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_numpy",
+        dict(
+            array=array,
+            regulararray=regulararray,
+            recordarray=recordarray,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(array, regulararray, recordarray, highlevel, behavior)
 
+
+def _impl(array, regulararray, recordarray, highlevel, behavior):
     def recurse(array, mask):
         if regulararray and len(array.shape) > 1:
             return ak._v2.contents.RegularArray(

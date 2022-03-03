@@ -6,7 +6,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def unzip(array, highlevel=True, behavior=None):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
     # """
     # Args:
@@ -62,7 +62,7 @@ def unzip(array, highlevel=True, behavior=None):
     #     ):
     #         for content in layout.contents:
     #             if set(ak.operations.describe.fields(content)) != set(fields):
-    #                 raise ValueError("union of different sets of fields, cannot ak.unzip")
+    #                 raise ak._v2._util.error(ValueError("union of different sets of fields, cannot ak.unzip"))
 
     #     elif hasattr(layout, "content"):
     #         check_for_union(layout.content)

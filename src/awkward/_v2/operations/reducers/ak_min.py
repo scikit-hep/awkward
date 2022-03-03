@@ -49,6 +49,21 @@ def min(
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.min",
+        dict(
+            array=array,
+            axis=axis,
+            keepdims=keepdims,
+            initial=initial,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
+
+
+def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )

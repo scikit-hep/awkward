@@ -6,7 +6,6 @@ import math
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
 from awkward._v2.forms.bitmaskedform import BitMaskedForm
@@ -31,46 +30,60 @@ class BitMaskedArray(Content):
         nplike=None,
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
-            raise TypeError(
-                "{} 'mask' must be an Index with dtype=uint8, not {}".format(
-                    type(self).__name__, repr(mask)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'mask' must be an Index with dtype=uint8, not {}".format(
+                        type(self).__name__, repr(mask)
+                    )
                 )
             )
         if not isinstance(content, Content):
-            raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'content' must be a Content subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if not isinstance(valid_when, bool):
-            raise TypeError(
-                "{} 'valid_when' must be boolean, not {}".format(
-                    type(self).__name__, repr(valid_when)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'valid_when' must be boolean, not {}".format(
+                        type(self).__name__, repr(valid_when)
+                    )
                 )
             )
         if not isinstance(length, ak._v2._typetracer.UnknownLengthType):
             if not (ak._util.isint(length) and length >= 0):
-                raise TypeError(
-                    "{} 'length' must be a non-negative integer, not {}".format(
-                        type(self).__name__, length
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} 'length' must be a non-negative integer, not {}".format(
+                            type(self).__name__, length
+                        )
                     )
                 )
         if not isinstance(lsb_order, bool):
-            raise TypeError(
-                "{} 'lsb_order' must be boolean, not {}".format(
-                    type(self).__name__, repr(lsb_order)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'lsb_order' must be boolean, not {}".format(
+                        type(self).__name__, repr(lsb_order)
+                    )
                 )
             )
         if length > mask.length * 8:
-            raise ValueError(
-                "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
-                    type(self).__name__, length, mask.length * 8
+            raise ak._v2._util.error(
+                ValueError(
+                    "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
+                        type(self).__name__, length, mask.length * 8
+                    )
                 )
             )
         if length > content.length:
-            raise ValueError(
-                "{} 'length' ({}) must be <= len(content) ({})".format(
-                    type(self).__name__, length, content.length
+            raise ak._v2._util.error(
+                ValueError(
+                    "{} 'length' ({}) must be <= len(content) ({})".format(
+                        type(self).__name__, length, content.length
+                    )
                 )
             )
         if nplike is None:
@@ -264,7 +277,7 @@ class BitMaskedArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise NestedIndexError(self, where)
+            raise ak._v2._util.indexerror(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
         else:
@@ -301,9 +314,9 @@ class BitMaskedArray(Content):
             self._nplike,
         ).simplify_optiontype()
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
-        return self.toByteMaskedArray()._carry(carry, allow_lazy, exception)
+        return self.toByteMaskedArray()._carry(carry, allow_lazy)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         return self.toByteMaskedArray()._getitem_next_jagged(
@@ -336,7 +349,7 @@ class BitMaskedArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def project(self, mask=None):
         return self.toByteMaskedArray().project(mask)
@@ -580,7 +593,7 @@ class BitMaskedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         if self._content.is_RecordType:

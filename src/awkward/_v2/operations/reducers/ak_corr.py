@@ -55,6 +55,22 @@ def corr(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.corr",
+        dict(
+            x=x,
+            y=y,
+            weight=weight,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
     x = ak._v2.highlevel.Array(
         ak._v2.operations.convert.to_layout(x, allow_record=False, allow_other=False)
     )
@@ -69,42 +85,45 @@ def corr(
         )
 
     with np.errstate(invalid="ignore"):
-        xmean = ak._v2.operations.reducers.mean(
-            x, weight=weight, axis=axis, keepdims=False, mask_identity=mask_identity
+        xmean = ak._v2.operations.reducers.ak_mean._impl(
+            x, weight, axis, False, mask_identity, flatten_records
         )
-        ymean = ak._v2.operations.reducers.mean(
-            y, weight=weight, axis=axis, keepdims=False, mask_identity=mask_identity
+        ymean = ak._v2.operations.reducers.ak_mean._impl(
+            y, weight, axis, False, mask_identity, flatten_records
         )
         xdiff = x - xmean
         ydiff = y - ymean
         if weight is None:
-            sumwxx = ak._v2.operations.reducers.sum(
-                xdiff**2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            sumwxx = ak._v2.operations.reducers.ak_sum._impl(
+                xdiff**2, axis, keepdims, mask_identity, flatten_records
             )
-            sumwyy = ak._v2.operations.reducers.sum(
-                ydiff**2, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            sumwyy = ak._v2.operations.reducers.ak_sum._impl(
+                ydiff**2, axis, keepdims, mask_identity, flatten_records
             )
-            sumwxy = ak._v2.operations.reducers.sum(
-                xdiff * ydiff, axis=axis, keepdims=keepdims, mask_identity=mask_identity
+            sumwxy = ak._v2.operations.reducers.ak_sum._impl(
+                xdiff * ydiff, axis, keepdims, mask_identity, flatten_records
             )
         else:
-            sumwxx = ak._v2.operations.reducers.sum(
+            sumwxx = ak._v2.operations.reducers.ak_sum._impl(
                 (xdiff**2) * weight,
-                axis=axis,
-                keepdims=keepdims,
-                mask_identity=mask_identity,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
             )
-            sumwyy = ak._v2.operations.reducers.sum(
+            sumwyy = ak._v2.operations.reducers.ak_sum._impl(
                 (ydiff**2) * weight,
-                axis=axis,
-                keepdims=keepdims,
-                mask_identity=mask_identity,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
             )
-            sumwxy = ak._v2.operations.reducers.sum(
+            sumwxy = ak._v2.operations.reducers.ak_sum._impl(
                 (xdiff * ydiff) * weight,
-                axis=axis,
-                keepdims=keepdims,
-                mask_identity=mask_identity,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
             )
         nplike = ak.nplike.of(sumwxy, sumwxx, sumwyy)
         return nplike.true_divide(sumwxy, nplike.sqrt(sumwxx * sumwyy))

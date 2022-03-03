@@ -7,7 +7,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 # @ak._v2._connect.numpy.implements("ravel")
 def ravel(array, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data containing nested lists to flatten
@@ -42,6 +41,14 @@ def ravel(array, highlevel=True, behavior=None):
     Missing values are eliminated by flattening: there is no distinction
     between an empty list and a value of None at the level of flattening.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.ravel",
+        dict(array=array, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, highlevel, behavior)
+
+
+def _impl(array, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )

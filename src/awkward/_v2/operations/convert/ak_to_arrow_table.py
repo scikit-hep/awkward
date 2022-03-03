@@ -62,6 +62,41 @@ def to_arrow_table(
 
     See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_arrow_table",
+        dict(
+            array=array,
+            list_to32=list_to32,
+            string_to32=string_to32,
+            bytestring_to32=bytestring_to32,
+            emptyarray_to=emptyarray_to,
+            categorical_as_dictionary=categorical_as_dictionary,
+            extensionarray=extensionarray,
+            count_nulls=count_nulls,
+        ),
+    ):
+        return _impl(
+            array,
+            list_to32,
+            string_to32,
+            bytestring_to32,
+            emptyarray_to,
+            categorical_as_dictionary,
+            extensionarray,
+            count_nulls,
+        )
+
+
+def _impl(
+    array,
+    list_to32,
+    string_to32,
+    bytestring_to32,
+    emptyarray_to,
+    categorical_as_dictionary,
+    extensionarray,
+    count_nulls,
+):
     from awkward._v2._connect.pyarrow import pyarrow
 
     layout = ak._v2.operations.convert.to_layout(

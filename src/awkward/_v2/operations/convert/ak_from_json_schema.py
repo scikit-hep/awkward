@@ -60,21 +60,56 @@ def from_json_schema(
 
     See also #ak.from_json and #ak.to_json.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_json_schema",
+        dict(
+            source=source,
+            schema=schema,
+            highlevel=highlevel,
+            behavior=behavior,
+            output_initial_size=output_initial_size,
+            output_resize_factor=output_resize_factor,
+        ),
+    ):
+        return _impl(
+            source,
+            schema,
+            highlevel,
+            behavior,
+            output_initial_size,
+            output_resize_factor,
+        )
+
+
+def _impl(
+    source,
+    schema,
+    highlevel,
+    behavior,
+    output_initial_size,
+    output_resize_factor,
+):
     if not isinstance(source, bytes) and not ak._v2._util.isstr(source):
-        raise NotImplementedError("for now, 'source' must be bytes or str")
+        raise ak._v2._util.error(
+            NotImplementedError("for now, 'source' must be bytes or str")
+        )
 
     if isinstance(schema, bytes) or ak._v2._util.isstr(schema):
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
-        raise TypeError(f"malformed JSONSchema: expected dict, got {schema!r}")
+        raise ak._v2._util.error(
+            TypeError(f"malformed JSONSchema: expected dict, got {schema!r}")
+        )
 
     container = {}
     instructions = []
 
     if schema.get("type") == "array":
         if "items" not in schema:
-            raise TypeError("JSONSchema type is not concrete: array without items")
+            raise ak._v2._util.error(
+                TypeError("JSONSchema type is not concrete: array without items")
+            )
 
         instructions.append(["TopLevelArray"])
         form = build_assembly(schema["items"], container, instructions)
@@ -83,8 +118,10 @@ def from_json_schema(
         form = build_assembly(schema, container, instructions)
 
     else:
-        raise TypeError(
-            "only 'array' and 'object' types supported at the JSONSchema root"
+        raise ak._v2._util.error(
+            TypeError(
+                "only 'array' and 'object' types supported at the JSONSchema root"
+            )
         )
 
     specializedjson = ak._ext.SpecializedJSON(
@@ -106,9 +143,11 @@ def from_json_schema(
             after = after.decode("ascii", errors="surrogateescape")
         if position + 30 < len(source):
             after = after + "..."
-        raise ValueError(
-            "JSON is invalid or does not fit schema at position {}:\n\n    {}\n    {}".format(
-                position, before + after, "-" * len(before) + "^"
+        raise ak._v2._util.error(
+            ValueError(
+                "JSON is invalid or does not fit schema at position {}:\n\n    {}\n    {}".format(
+                    position, before + after, "-" * len(before) + "^"
+                )
             )
         )
 
@@ -131,10 +170,14 @@ def from_json_schema(
 
 def build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
-        raise TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
+        raise ak._v2._util.error(
+            TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
+        )
 
     if "type" not in schema is None:
-        raise TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
+        raise ak._v2._util.error(
+            TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
+        )
 
     tpe = schema["type"]
 
@@ -259,7 +302,9 @@ def build_assembly(schema, container, instructions):
         # https://json-schema.org/understanding-json-schema/reference/array.html
 
         if "items" not in schema:
-            raise TypeError("JSONSchema type is not concrete: array without 'items'")
+            raise ak._v2._util.error(
+                TypeError("JSONSchema type is not concrete: array without 'items'")
+            )
 
         if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
             assert ak._v2._util.isint(schema.get("minItems"))
@@ -305,8 +350,10 @@ def build_assembly(schema, container, instructions):
         # https://json-schema.org/understanding-json-schema/reference/object.html
 
         if "properties" not in schema:
-            raise TypeError(
-                "JSONSchema type is not concrete: object without 'properties'"
+            raise ak._v2._util.error(
+                TypeError(
+                    "JSONSchema type is not concrete: object without 'properties'"
+                )
             )
 
         names = []
@@ -339,7 +386,9 @@ def build_assembly(schema, container, instructions):
             return out
 
     elif isinstance(tpe, list):
-        raise NotImplementedError("arbitrary unions of types are not yet supported")
+        raise ak._v2._util.error(
+            NotImplementedError("arbitrary unions of types are not yet supported")
+        )
 
     else:
-        raise TypeError(f"unrecognized JSONSchema: {tpe!r}")
+        raise ak._v2._util.error(TypeError(f"unrecognized JSONSchema: {tpe!r}"))

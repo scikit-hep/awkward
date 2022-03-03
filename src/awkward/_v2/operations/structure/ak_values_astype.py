@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def values_astype(array, to, highlevel=True, behavior=None):
-
     """
     Args:
         array: Array whose numbers should be converted to a new numeric type.
@@ -48,7 +47,14 @@ def values_astype(array, to, highlevel=True, behavior=None):
 
     See also #ak.strings_astype.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.values_astype",
+        dict(array=array, to=to, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, to, highlevel, behavior)
 
+
+def _impl(array, to, highlevel, behavior):
     to_dtype = np.dtype(to)
     to_str = ak._v2.types.numpytype._dtype_to_primitive_dict.get(to_dtype)
 
@@ -56,8 +62,10 @@ def values_astype(array, to, highlevel=True, behavior=None):
         if to_dtype.name.startswith("datetime64"):
             to_str = to_dtype.name
         else:
-            raise ValueError(
-                f"cannot use {to_dtype} to cast the numeric type of an array"
+            raise ak._v2._util.error(
+                ValueError(
+                    f"cannot use {to_dtype} to cast the numeric type of an array"
+                )
             )
 
     layout = ak._v2.operations.convert.to_layout(

@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def with_name(array, name, highlevel=True, behavior=None):
-
     """
     Args:
         base: Data containing records or tuples.
@@ -28,7 +27,14 @@ def with_name(array, name, highlevel=True, behavior=None):
     to the data; see #ak.Array and #ak.behavior for a more complete
     description.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.with_name",
+        dict(array=array, name=name, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, name, highlevel, behavior)
 
+
+def _impl(array, name, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(array)
 
     def action(layout, **ignore):

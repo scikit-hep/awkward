@@ -16,7 +16,6 @@ def argcombinations(
     highlevel=True,
     behavior=None,
 ):
-
     """
     Args:
         array: Array from which to choose `n` items without replacement.
@@ -49,6 +48,36 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.argcombinations",
+        dict(
+            array=array,
+            n=n,
+            replacement=replacement,
+            axis=axis,
+            fields=fields,
+            parameters=parameters,
+            with_name=with_name,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(
+            array,
+            n,
+            replacement,
+            axis,
+            fields,
+            parameters,
+            with_name,
+            highlevel,
+            behavior,
+        )
+
+
+def _impl(
+    array, n, replacement, axis, fields, parameters, with_name, highlevel, behavior
+):
     if parameters is None:
         parameters = {}
     else:
@@ -57,7 +86,9 @@ def argcombinations(
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ValueError("the 'axis' for argcombinations must be non-negative")
+        raise ak._v2._util.error(
+            ValueError("the 'axis' for argcombinations must be non-negative")
+        )
     else:
         layout = ak._v2.operations.convert.to_layout(
             array, allow_record=False, allow_other=False

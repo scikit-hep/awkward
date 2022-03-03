@@ -35,7 +35,21 @@ def concatenate(
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.concatenate",
+        dict(
+            arrays=arrays,
+            axis=axis,
+            merge=merge,
+            mergebool=mergebool,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(arrays, axis, merge, mergebool, highlevel, behavior)
 
+
+def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     contents = [
         ak._v2.operations.convert.to_layout(
             x, allow_record=False if axis == 0 else True, allow_other=True
@@ -43,7 +57,7 @@ def concatenate(
         for x in arrays
     ]
     if not any(isinstance(x, (ak._v2.contents.Content,)) for x in contents):
-        raise ValueError("need at least one array to concatenate")
+        raise ak._v2._util.error(ValueError("need at least one array to concatenate"))
 
     first_content = [x for x in contents if isinstance(x, (ak._v2.contents.Content,))][
         0
@@ -59,16 +73,20 @@ def concatenate(
         )
     )
     if not 0 <= posaxis < maxdepth:
-        raise ValueError(
-            "axis={} is beyond the depth of this array or the depth of this array "
-            "is ambiguous".format(axis)
+        raise ak._v2._util.error(
+            ValueError(
+                "axis={} is beyond the depth of this array or the depth of this array "
+                "is ambiguous".format(axis)
+            )
         )
     for x in contents:
         if isinstance(x, ak._v2.contents.Content):
             if x.axis_wrap_if_negative(axis) != posaxis:
-                raise ValueError(
-                    "arrays to concatenate do not have the same depth for negative "
-                    "axis={}".format(axis)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "arrays to concatenate do not have the same depth for negative "
+                        "axis={}".format(axis)
+                    )
                 )
 
     if posaxis == 0:
@@ -177,9 +195,11 @@ def concatenate(
                 for x in inputs
                 if isinstance(x, ak._v2.contents.Content)
             ):
-                raise ValueError(
-                    "at least one array is not deep enough to concatenate at "
-                    "axis={}".format(axis)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "at least one array is not deep enough to concatenate at "
+                        "axis={}".format(axis)
+                    )
                 )
 
             else:

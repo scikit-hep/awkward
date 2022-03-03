@@ -14,7 +14,7 @@ def to_parquet(  # this will be going through Awkward-Dask
     bytestring_to32=True,
     **options
 ):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
 
 #     """

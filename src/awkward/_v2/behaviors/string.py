@@ -40,13 +40,13 @@ class ByteBehavior(Array):
 #         if isinstance(other, (bytes, ByteBehavior)):
 #             return bytes(self) + bytes(other)
 #         else:
-#             raise TypeError("can only concatenate bytes to bytes")
+#             raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
 
 #     def __radd__(self, other):
 #         if isinstance(other, (bytes, ByteBehavior)):
 #             return bytes(other) + bytes(self)
 #         else:
-#             raise TypeError("can only concatenate bytes to bytes")
+#             raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
 
 
 class CharBehavior(Array):
@@ -83,13 +83,13 @@ class CharBehavior(Array):
 #         if isinstance(other, (str, CharBehavior)):
 #             return str(self) + str(other)
 #         else:
-#             raise TypeError("can only concatenate str to str")
+#             raise ak._v2._util.error(TypeError("can only concatenate str to str"))
 
 #     def __radd__(self, other):
 #         if isinstance(other, (str, CharBehavior)):
 #             return str(other) + str(self)
 #         else:
-#             raise TypeError("can only concatenate str to str")
+#             raise ak._v2._util.error(TypeError("can only concatenate str to str"))
 
 
 # class ByteStringBehavior(ak._v2.highlevel.Array):

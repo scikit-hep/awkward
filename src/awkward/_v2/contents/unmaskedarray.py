@@ -15,9 +15,11 @@ class UnmaskedArray(Content):
 
     def __init__(self, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(content, Content):
-            raise TypeError(
-                "{} 'content' must be a Content subtype, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'content' must be a Content subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if nplike is None:
@@ -156,10 +158,10 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         return UnmaskedArray(
-            self._content._carry(carry, allow_lazy, exception),
-            self._carry_identifier(carry, exception),
+            self._content._carry(carry, allow_lazy),
+            self._carry_identifier(carry),
             self._parameters,
             self._nplike,
         )
@@ -189,13 +191,13 @@ class UnmaskedArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NotImplementedError
+            raise ak._v2._util.error(NotImplementedError)
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def project(self, mask=None):
         if mask is not None:
@@ -241,7 +243,7 @@ class UnmaskedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise np.AxisError(self, "axis=0 not allowed for flatten")
+            raise ak._v2._util.error(np.AxisError("axis=0 not allowed for flatten"))
         else:
             offsets, flattened = self._content._offsets_and_flattened(posaxis, depth)
             if offsets.length == 0:
@@ -539,7 +541,7 @@ class UnmaskedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         return UnmaskedArray(

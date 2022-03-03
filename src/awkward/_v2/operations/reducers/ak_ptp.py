@@ -55,6 +55,20 @@ def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=Fa
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.ptp",
+        dict(
+            array=array,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+
+
+def _impl(array, axis, keepdims, mask_identity, flatten_records):
     array = ak._v2.highlevel.Array(
         ak._v2.operations.convert.to_layout(
             array, allow_record=False, allow_other=False
@@ -62,18 +76,20 @@ def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=Fa
     )
 
     if axis is None:
-        out = ak._v2.operations.reducers.max(array) - ak._v2.operations.reducers.min(
-            array
+        out = ak._v2.operations.reducers.ak_max._impl(
+            array, axis, keepdims, None, mask_identity, flatten_records
+        ) - ak._v2.operations.reducers.ak_min._impl(
+            array, axis, keepdims, None, mask_identity, flatten_records
         )
         if not mask_identity and out is None:
             out = 0
 
     else:
-        maxi = ak._v2.operations.reducers.max(
-            array, axis=axis, mask_identity=True, keepdims=True
+        maxi = ak._v2.operations.reducers.ak_max._impl(
+            array, axis, True, None, mask_identity, flatten_records
         )
-        mini = ak._v2.operations.reducers.min(
-            array, axis=axis, mask_identity=True, keepdims=True
+        mini = ak._v2.operations.reducers.ak_min._impl(
+            array, axis, True, None, True, flatten_records
         )
 
         if maxi is None or mini is None:

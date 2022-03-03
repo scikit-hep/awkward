@@ -86,13 +86,15 @@ def checklength(inputs, options):
     length = inputs[0].length
     for x in inputs[1:]:
         if x.length != length:
-            raise ValueError(
-                "cannot broadcast {} of length {} with {} of length {}{}".format(
-                    type(inputs[0]).__name__,
-                    length,
-                    type(x).__name__,
-                    x.length,
-                    in_function(options),
+            raise ak._v2._util.error(
+                ValueError(
+                    "cannot broadcast {} of length {} with {} of length {}{}".format(
+                        type(inputs[0]).__name__,
+                        length,
+                        type(x).__name__,
+                        x.length,
+                        in_function(options),
+                    )
                 )
             )
 
@@ -298,10 +300,14 @@ def apply_step(
                         if length is None:
                             length = tagslist[-1].shape[0]
                         elif length != tagslist[-1].shape[0]:
-                            raise ValueError(
-                                "cannot broadcast UnionArray of length {} "
-                                "with UnionArray of length {}{}".format(
-                                    length, tagslist[-1].shape[0], in_function(options)
+                            raise ak._v2._util.error(
+                                ValueError(
+                                    "cannot broadcast UnionArray of length {} "
+                                    "with UnionArray of length {}{}".format(
+                                        length,
+                                        tagslist[-1].shape[0],
+                                        in_function(options),
+                                    )
                                 )
                             )
                 assert length is not None
@@ -454,10 +460,12 @@ def apply_step(
                             elif x.size == maxsize:
                                 nextinputs.append(x.content[: x.length * x.size])
                             else:
-                                raise ValueError(
-                                    "cannot broadcast RegularArray of size "
-                                    "{} with RegularArray of size {} {}".format(
-                                        x.size, maxsize, in_function(options)
+                                raise ak._v2._util.error(
+                                    ValueError(
+                                        "cannot broadcast RegularArray of size "
+                                        "{} with RegularArray of size {} {}".format(
+                                            x.size, maxsize, in_function(options)
+                                        )
                                     )
                                 )
                         else:
@@ -573,9 +581,11 @@ def apply_step(
                         for x in outcontent
                     )
                 else:
-                    raise AssertionError(
-                        "unexpected offsets, starts: {}, {}".format(
-                            type(offsets), type(starts)
+                    raise ak._v2._util.error(
+                        AssertionError(
+                            "unexpected offsets, starts: {}, {}".format(
+                                type(offsets), type(starts)
+                            )
                         )
                     )
 
@@ -641,7 +651,9 @@ def apply_step(
         # Any RecordArrays?
         elif any(isinstance(x, RecordArray) for x in inputs):
             if not options["allow_records"]:
-                raise ValueError(f"cannot broadcast records{in_function(options)}")
+                raise ak._v2._util.error(
+                    ValueError(f"cannot broadcast records{in_function(options)}")
+                )
 
             fields, length, istuple = None, None, True
             for x in inputs:
@@ -649,21 +661,25 @@ def apply_step(
                     if fields is None:
                         fields = x.fields
                     elif set(fields) != set(x.fields):
-                        raise ValueError(
-                            "cannot broadcast records because fields don't "
-                            "match{}:\n    {}\n    {}".format(
-                                in_function(options),
-                                ", ".join(sorted(fields)),
-                                ", ".join(sorted(x.fields)),
+                        raise ak._v2._util.error(
+                            ValueError(
+                                "cannot broadcast records because fields don't "
+                                "match{}:\n    {}\n    {}".format(
+                                    in_function(options),
+                                    ", ".join(sorted(fields)),
+                                    ", ".join(sorted(x.fields)),
+                                )
                             )
                         )
                     if length is None:
                         length = x.length
                     elif length != x.length:
-                        raise ValueError(
-                            "cannot broadcast RecordArray of length {} "
-                            "with RecordArray of length {}{}".format(
-                                length, x.length, in_function(options)
+                        raise ak._v2._util.error(
+                            ValueError(
+                                "cannot broadcast RecordArray of length {} "
+                                "with RecordArray of length {}{}".format(
+                                    length, x.length, in_function(options)
+                                )
                             )
                         )
                     if not x.is_tuple:
@@ -695,9 +711,11 @@ def apply_step(
             )
 
         else:
-            raise ValueError(
-                "cannot broadcast: {}{}".format(
-                    ", ".join(repr(type(x)) for x in inputs), in_function(options)
+            raise ak._v2._util.error(
+                ValueError(
+                    "cannot broadcast: {}{}".format(
+                        ", ".join(repr(type(x)) for x in inputs), in_function(options)
+                    )
                 )
             )
 
@@ -717,7 +735,7 @@ def apply_step(
     elif result is None:
         return continuation()
     else:
-        raise AssertionError(result)
+        raise ak._v2._util.error(AssertionError(result))
 
 
 def broadcast_and_apply(

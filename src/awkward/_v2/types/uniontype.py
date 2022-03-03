@@ -10,30 +10,38 @@ from awkward._v2.forms.form import _parameters_equal
 class UnionType(Type):
     def __init__(self, contents, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
-            raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'contents' must be iterable, not {}".format(
+                        type(self).__name__, repr(contents)
+                    )
                 )
             )
         if not isinstance(contents, list):
             contents = list(contents)
         for content in contents:
             if not isinstance(content, Type):
-                raise TypeError(
-                    "{} all 'contents' must be Type subclasses, not {}".format(
-                        type(self).__name__, repr(content)
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} all 'contents' must be Type subclasses, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
                     )
                 )
         if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'parameters' must be of type dict or None, not {}".format(
+                        type(self).__name__, repr(parameters)
+                    )
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'typestr' must be of type string or None, not {}".format(
+                        type(self).__name__, repr(typestr)
+                    )
                 )
             )
         self._contents = contents

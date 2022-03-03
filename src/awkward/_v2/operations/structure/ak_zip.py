@@ -15,7 +15,6 @@ def zip(
     right_broadcast=False,
     optiontype_outside_record=False,
 ):
-
     """
     Args:
         arrays (dict or iterable of arrays): Arrays to combine into a
@@ -124,8 +123,43 @@ def zip(
         >>> ak.zip([one, two], optiontype_outside_record=True)
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.zip",
+        dict(
+            arrays=arrays,
+            depth_limit=depth_limit,
+            parameters=parameters,
+            with_name=with_name,
+            highlevel=highlevel,
+            behavior=behavior,
+            right_broadcast=right_broadcast,
+            optiontype_outside_record=optiontype_outside_record,
+        ),
+    ):
+        return _impl(
+            arrays,
+            depth_limit,
+            parameters,
+            with_name,
+            highlevel,
+            behavior,
+            right_broadcast,
+            optiontype_outside_record,
+        )
+
+
+def _impl(
+    arrays,
+    depth_limit,
+    parameters,
+    with_name,
+    highlevel,
+    behavior,
+    right_broadcast,
+    optiontype_outside_record,
+):
     if depth_limit is not None and depth_limit <= 0:
-        raise ValueError("depth_limit must be None or at least 1")
+        raise ak._v2._util.error(ValueError("depth_limit must be None or at least 1"))
 
     if isinstance(arrays, dict):
         behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)

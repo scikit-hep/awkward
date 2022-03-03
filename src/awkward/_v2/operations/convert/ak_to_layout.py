@@ -32,6 +32,19 @@ def to_layout(
     would rarely be used in a data analysis because #ak.layout.Content and
     #ak.layout.Record are lower-level than #ak.Array.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_layout",
+        dict(
+            array=array,
+            allow_record=allow_record,
+            allow_other=allow_other,
+            numpytype=numpytype,
+        ),
+    ):
+        return _impl(array, allow_record, allow_other, numpytype)
+
+
+def _impl(array, allow_record, allow_other, numpytype):
     if isinstance(array, ak._v2.contents.Content):
         return array
 
@@ -52,44 +65,50 @@ def to_layout(
 
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
-            raise ValueError(f"dtype {array.dtype!r} not allowed")
-        return to_layout(
+            raise ak._v2._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
+        return _impl(
             ak._v2.operations.convert.from_numpy(
                 array, regulararray=True, recordarray=True, highlevel=False
             ),
-            allow_record=allow_record,
-            allow_other=allow_other,
+            allow_record,
+            allow_other,
+            numpytype,
         )
 
     elif (
         type(array).__module__.startswith("cupy.") and type(array).__name__ == "ndarray"
     ):
         if not issubclass(array.dtype.type, numpytype):
-            raise ValueError(f"dtype {array.dtype!r} not allowed")
-        return to_layout(
+            raise ak._v2._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
+        return _impl(
             ak._v2.operations.convert.from_cupy(
                 array, regulararray=True, highlevel=False
             ),
-            allow_record=allow_record,
-            allow_other=allow_other,
+            allow_record,
+            allow_other,
+            numpytype,
         )
 
     elif isinstance(array, (str, bytes)):
-        return to_layout(
+        return _impl(
             ak._v2.operations.convert.from_iter([array], highlevel=False),
-            allow_record=allow_record,
-            allow_other=allow_other,
+            allow_record,
+            allow_other,
+            numpytype,
         )
 
     elif isinstance(array, Iterable):
-        return to_layout(
+        return _impl(
             ak._v2.operations.convert.from_iter(array, highlevel=False),
-            allow_record=allow_record,
-            allow_other=allow_other,
+            allow_record,
+            allow_other,
+            numpytype,
         )
 
     elif not allow_other:
-        raise TypeError(f"{array} cannot be converted into an Awkward Array")
+        raise ak._v2._util.error(
+            TypeError(f"{array} cannot be converted into an Awkward Array")
+        )
 
     else:
         return array

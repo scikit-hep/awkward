@@ -6,7 +6,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def firsts(array, axis=1, highlevel=True, behavior=None):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
 
 #     """
@@ -41,10 +41,10 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
 #             if posaxis is None:
 #                 posaxis = x.axis_wrap_if_negative(axis)
 #             elif posaxis != x.axis_wrap_if_negative(axis):
-#                 raise ValueError(
+#                 raise ak._v2._util.error(ValueError(
 #                     "ak.firsts for partitions with different axis depths"
 #
-#                 )
+#                 ))
 #     else:
 #         posaxis = layout.axis_wrap_if_negative(axis)
 
@@ -55,10 +55,10 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
 #             out = layout[0]
 #     else:
 #         if posaxis < 0:
-#             raise NotImplementedError(
+#             raise ak._v2._util.error(NotImplementedError(
 #                 "ak.firsts with ambiguous negative axis"
 #
-#             )
+#             ))
 #         toslice = (slice(None, None, None),) * posaxis + (0,)
 #         out = ak.mask(layout, ak.num(layout, axis=posaxis) > 0, highlevel=False)[
 #             toslice

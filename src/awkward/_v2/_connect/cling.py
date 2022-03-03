@@ -118,7 +118,7 @@ def togenerator(form):
         return UnionArrayGenerator.from_form(form)
 
     else:
-        raise AssertionError(f"unrecognized Form: {type(form)}")
+        raise ak._v2._util.error(AssertionError(f"unrecognized Form: {type(form)}"))
 
 
 class Generator:
@@ -127,7 +127,7 @@ class Generator:
         if not form.has_identifier:
             return None
         else:
-            raise NotImplementedError("TODO: identifiers in C++")
+            raise ak._v2._util.error(NotImplementedError("TODO: identifiers in C++"))
 
     def class_type_suffix(self, key):
         return (
@@ -393,7 +393,7 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise AssertionError(index_type)
+            raise ak._v2._util.error(AssertionError(index_type))
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
@@ -529,7 +529,7 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise AssertionError(index_type)
+            raise ak._v2._util.error(AssertionError(index_type))
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
@@ -604,7 +604,7 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise AssertionError(index_type)
+            raise ak._v2._util.error(AssertionError(index_type))
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
@@ -1061,7 +1061,7 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise AssertionError(index_type)
+            raise ak._v2._util.error(AssertionError(index_type))
         self.contents = tuple(contents)
         self.identifier = identifier
         self.parameters = parameters

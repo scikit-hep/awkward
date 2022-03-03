@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def without_parameters(array, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data convertible into an Awkward Array.
@@ -21,6 +20,14 @@ def without_parameters(array, highlevel=True, behavior=None):
     Note that a "new array" is a lightweight shallow copy, not a duplication
     of large data buffers.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.without_parameters",
+        dict(array=array, highlevel=highlevel, behavior=behavior),
+    ):
+        return _impl(array, highlevel, behavior)
+
+
+def _impl(array, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )

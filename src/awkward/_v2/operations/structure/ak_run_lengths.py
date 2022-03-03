@@ -6,7 +6,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def run_lengths(array, highlevel=True, behavior=None):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
 
 #     """
@@ -121,11 +121,11 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 return lambda: ak._v2.contents.NumpyArray(nextcontent)
 
 #             if not isinstance(layout, (ak._v2.contents.NumpyArray, ak._v2.contents.EmptyArray)):
-#                 raise NotImplementedError(
+#                 raise ak._v2._util.error(NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
 #
-#                 )
+#                 ))
 
 #             nextcontent, _ = lengths_of(nplike.asarray(layout), None)
 #             return lambda: ak._v2.contents.NumpyArray(nextcontent)
@@ -135,11 +135,11 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 layout = layout.project()
 
 #             if not isinstance(layout, ak._v2._util.listtypes):
-#                 raise NotImplementedError(
+#                 raise ak._v2._util.error(NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
 #
-#                 )
+#                 ))
 
 #             if (
 #                 layout.content.parameter("__array__") == "string"
@@ -167,13 +167,13 @@ def run_lengths(array, highlevel=True, behavior=None):
 #                 content = content.project()
 
 #             if not isinstance(content, (ak._v2.contents.NumpyArray, ak._v2.contents.EmptyArray)):
-#                 raise NotImplementedError(
+#                 raise ak._v2._util.error(NotImplementedError(
 #                     "run_lengths on "
 #                     + type(layout).__name__
 #                     + " with content "
 #                     + type(content).__name__
 #
-#                 )
+#                 ))
 
 #             nextcontent, nextoffsets = lengths_of(
 #                 nplike.asarray(content), offsets - offsets[0]

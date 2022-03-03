@@ -6,7 +6,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
 
 #     """
@@ -84,17 +84,17 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             counts = ak._v2.operations.convert.to_cupy(counts)
 #             mask = False
 #         else:
-#             raise AssertionError(
+#             raise ak._v2._util.error(AssertionError(
 #                 "unrecognized kernels lib"
-#             )
+#             ))
 #         if counts.ndim != 1:
-#             raise ValueError(
+#             raise ak._v2._util.error(ValueError(
 #                 "counts must be one-dimensional"
-#             )
+#             ))
 #         if not issubclass(counts.dtype.type, np.integer):
-#             raise ValueError(
+#             raise ak._v2._util.error(ValueError(
 #                 "counts must be integers"
-#             )
+#             ))
 #         current_offsets = [nplike.empty(len(counts) + 1, np.int64)]
 #         current_offsets[0][0] = 0
 #         nplike.cumsum(counts, out=current_offsets[0][1:])
@@ -102,10 +102,10 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #     def doit(layout):
 #         if isinstance(counts, (numbers.Integral, np.integer)):
 #             if counts < 0 or counts > len(layout):
-#                 raise ValueError(
+#                 raise ak._v2._util.error(ValueError(
 #                     "too large counts for array or negative counts"
 #
-#                 )
+#                 ))
 #             out = ak._v2.contents.RegularArray(layout, counts)
 
 #         else:
@@ -118,10 +118,10 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #             if position >= len(current_offsets[0]) or current_offsets[0][
 #                 position
 #             ] != len(layout):
-#                 raise ValueError(
+#                 raise ak._v2._util.error(ValueError(
 #                     "structure imposed by 'counts' does not fit in the array or partition "
 #                     "at axis={0}".format(axis)
-#                 )
+#                 ))
 
 #             offsets = current_offsets[0][: position + 1]
 #             current_offsets[0] = current_offsets[0][position:] - len(layout)
@@ -170,10 +170,10 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #                     nplike.searchsorted(inneroffsets, outeroffsets, side="right") - 1
 #                 )
 #                 if not nplike.array_equal(inneroffsets[positions], outeroffsets):
-#                     raise ValueError(
+#                     raise ak._v2._util.error(ValueError(
 #                         "structure imposed by 'counts' does not fit in the array or partition "
 #                         "at axis={0}".format(axis)
-#                     )
+#                     ))
 #                 positions[0] = 0
 
 #                 return ak._v2.contents.ListOffsetArray64(
@@ -196,9 +196,9 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 #     if current_offsets is not None and not (
 #         len(current_offsets[0]) == 1 and current_offsets[0][0] == 0
 #     ):
-#         raise ValueError(
+#         raise ak._v2._util.error(ValueError(
 #             "structure imposed by 'counts' does not fit in the array or partition "
 #             "at axis={0}".format(axis)
-#         )
+#         ))
 
 #     return ak._v2._util.maybe_wrap_like(out, array, behavior, highlevel)

@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2._slicing import NestedIndexError
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.emptyform import EmptyForm
 from awkward._v2.forms.form import _parameters_equal
@@ -83,39 +82,36 @@ class EmptyArray(Content):
         return self
 
     def _getitem_at(self, where):
-        raise NestedIndexError(self, where, "array is empty")
+        raise ak._v2._util.indexerror(self, where, "array is empty")
 
     def _getitem_range(self, where):
         return self
 
     def _getitem_field(self, where, only_fields=()):
-        raise NestedIndexError(self, where, "not an array of records")
+        raise ak._v2._util.indexerror(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
         if len(where) == 0:
             return self._getitem_range(slice(0, 0))
-        raise NestedIndexError(self, where, "not an array of records")
+        raise ak._v2._util.indexerror(self, where, "not an array of records")
 
-    def _carry(self, carry, allow_lazy, exception):
+    def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
 
         if not carry.nplike.known_shape or carry.length == 0:
             return self
         else:
-            if issubclass(exception, NestedIndexError):
-                raise exception(self, carry.data, "array is empty")
-            else:
-                raise exception("array is empty")
+            raise ak._v2._util.indexerror(self, carry.data, "array is empty")
 
     def _getitem_next(self, head, tail, advanced):
         if head == ():
             return self
 
         elif isinstance(head, int):
-            raise NestedIndexError(self, head, "array is empty")
+            raise ak._v2._util.indexerror(self, head, "array is empty")
 
         elif isinstance(head, slice):
-            raise NestedIndexError(self, head, "array is empty")
+            raise ak._v2._util.indexerror(self, head, "array is empty")
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -130,16 +126,16 @@ class EmptyArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            raise NestedIndexError(self, head, "array is empty")
+            raise ak._v2._util.indexerror(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise NestedIndexError(self, head, "array is empty")
+            raise ak._v2._util.indexerror(self, head, "array is empty")
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise NestedIndexError(self, head, "array is empty")
+            raise ak._v2._util.indexerror(self, head, "array is empty")
 
         else:
-            raise AssertionError(repr(head))
+            raise ak._v2._util.error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -157,7 +153,9 @@ class EmptyArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise np.AxisError(self, "axis=0 not allowed for flatten")
+            raise ak._v2._util.error(
+                np.AxisError(self, "axis=0 not allowed for flatten")
+            )
         else:
             offsets = ak._v2.index.Index64.zeros(1, self._nplike)
             return (offsets, EmptyArray(None, self._parameters, self._nplike))
@@ -266,7 +264,9 @@ class EmptyArray(Content):
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
+            raise ak._v2._util.error(
+                np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
+            )
         else:
             return self.rpad_axis0(target, True)
 
@@ -329,7 +329,7 @@ class EmptyArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise AssertionError(result)
+            raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
         return self

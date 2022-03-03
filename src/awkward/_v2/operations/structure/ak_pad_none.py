@@ -6,7 +6,6 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
-
     """
     Args:
         array: Data containing nested lists to pad to a target length.
@@ -122,7 +121,21 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
         >>> ak.type(ak.pad_none(array, 2, axis=2, clip=True))
         3 * var *   2 * ?float64
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.pad_none",
+        dict(
+            array=array,
+            target=target,
+            axis=axis,
+            clip=clip,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        return _impl(array, target, axis, clip, highlevel, behavior)
 
+
+def _impl(array, target, axis, clip, highlevel, behavior):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
