@@ -31,12 +31,21 @@ class Future:
     def is_exception(self):
         return self._exc_info is not None
 
+    @property
+    def exc_info(self):
+        return self._exc_info
+
     def __repr__(self):
         return f"Future({self._task}, {self._worker})"
 
     def run(self):
+<<<<<<< HEAD
         # on the Shadow thread
         # TO DO: set the ErrorContext to self._error_context
+=======
+        # on the Worker thread
+        ak._v2._util.ErrorContext.override(self._error_context)
+>>>>>>> 22b8184da46bc50b35a8b31dc4166c16bad76cf2
         try:
             self._result = self._task()
         except Exception:
@@ -44,37 +53,61 @@ class Future:
         finally:
             self._finished.set()
 
+    def giveup(self, exc_info):
+        # on the Worker thread
+        self._exc_info = exc_info
+        self._finished.set()
+
     def result(self):
         # called by the main thread
         self._finished.wait()
+
         if self.is_exception:
             exception_class, exception_value, traceback = self._exc_info
-            exception_value.with_traceback(traceback)
+            raise exception_value.with_traceback(traceback)
         else:
             return self._result
 
 
+<<<<<<< HEAD
 # Hide in plain sight
 class Shadow(threading.Thread):
+=======
+class DeadQueue:
+    def __init__(self, exc_info):
+        self._exc_info = exc_info
+
+    def put(self, future):
+        exception_class, exception_value, traceback = self._exc_info
+        raise exception_value.with_traceback(traceback)
+
+
+class Worker(threading.Thread):
+>>>>>>> 22b8184da46bc50b35a8b31dc4166c16bad76cf2
     def __init__(self):
         # called by the main thread
         super().__init__(daemon=True)
-        self._futures = queue.Queue()
+        self._futures = getattr(queue, "SimpleQueue", queue.Queue)()
 
     def run(self):
         # on the Worker thread
         while True:
             future = self._futures.get()
-            if not isinstance(future, Future):
-                break
             future.run()
             if future.is_exception:
+                remaining = self._futures
+                exc_info = future.exc_info
+                # worker.schedule() will raise that exception henceforth
+                self._futures = DeadQueue(exc_info)
                 break
+
+        # future.result() will raise that exception for all futures after the one that failed
+        while not remaining.empty():
+            future = remaining.get()
+            future.giveup(exc_info)
 
     def schedule(self, task):
         # called by the main thread
-        if not self.is_alive():
-            raise RuntimeError("background Worker is not running")
         future = Future(task, self)
         self._futures.put(future)
         return future
