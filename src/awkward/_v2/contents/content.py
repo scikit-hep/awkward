@@ -1341,6 +1341,8 @@ class Content:
         if self.nplike is ak._v2._util.regularize_backend(backend):
             return self
         else:
+            if(isinstance(ak._v2._util.regularize_backend(backend), ak.nplike.Cupy)):
+                return self._to_nplike(ak._v2._delayed.CupyDelayed.instance())   
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
 
     def _to_json_custom(self):

@@ -476,6 +476,10 @@ class Numpy(NumpyLike):
             return ak._v2._typetracer.TypeTracerArray(
                 dtype=array.dtype, shape=array.shape
             )
+        elif isinstance(nplike, ak._v2._delayed.CupyDelayed):
+            cupy = ak._v2._connect.cuda.import_cupy("Awkward CUDA")
+            future = ak._v2._connect.cuda.shadow_cuda_dict[cupy.cuda.get_current_stream().ptr].schedule(nplike.raw)
+            return DelayedArray(shape=array.shape, ndim=array.ndim, dtype=array.dtype, future=future)
         else:
             raise TypeError(
                 "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
@@ -500,19 +504,16 @@ class Cupy(NumpyLike):
             )
 
     def __init__(self):
-        try:
-            import cupy
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                """to use CUDA arrays in Python, install the 'cupy' package with:
+        import awkward._v2._connect.cuda
 
-    pip install cupy --upgrade
+        self._module = awkward._v2._connect.cuda.import_cupy("Awkward CUDA")
 
-or
+        from awkward._v2._delayed import Shadow
 
-    conda install cupy"""
-            ) from None
-        self._module = cupy
+        shadow_thread = Shadow()
+        shadow_thread.start()
+
+        awkward._v2._connect.cuda.shadow_cuda_dict[self._module.cuda.get_current_stream().ptr] = shadow_thread
 
     @property
     def ma(self):

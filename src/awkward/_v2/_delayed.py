@@ -35,7 +35,7 @@ class Future:
         return f"Future({self._task}, {self._worker})"
 
     def run(self):
-        # on the Worker thread
+        # on the Shadow thread
         # TO DO: set the ErrorContext to self._error_context
         try:
             self._result = self._task()
@@ -54,7 +54,8 @@ class Future:
             return self._result
 
 
-class Worker(threading.Thread):
+# Hide in plain sight
+class Shadow(threading.Thread):
     def __init__(self):
         # called by the main thread
         super().__init__(daemon=True)
@@ -167,7 +168,7 @@ class Delayed(ak.nplike.NumpyLike):
     known_data = True  # eventually known
     known_shape = True  # eventually known
 
-    next_nplike = ak.nplike.Numpy.instance()
+    next_nplike = None
 
     def to_rectilinear(self, array, *args, **kwargs):
         raise NotImplementedError
@@ -189,7 +190,6 @@ class Delayed(ak.nplike.NumpyLike):
 
     def raw(self, array, nplike):
         raise NotImplementedError
-
     ############################ array creation
 
     def array(self, data, dtype=unset, **kwargs):
@@ -423,3 +423,9 @@ class Delayed(ak.nplike.NumpyLike):
 
     def datetime_as_string(self, *args, **kwargs):
         raise NotImplementedError
+
+class NumpyDelayed(Delayed):
+    next_nplike = ak.nplike.Numpy.instance()
+
+class CupyDelayed(Delayed):
+    next_nplike = ak.nplike.Cupy.instance() 
