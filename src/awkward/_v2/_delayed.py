@@ -39,13 +39,8 @@ class Future:
         return f"Future({self._task}, {self._worker})"
 
     def run(self):
-<<<<<<< HEAD
-        # on the Shadow thread
-        # TO DO: set the ErrorContext to self._error_context
-=======
         # on the Worker thread
         ak._v2._util.ErrorContext.override(self._error_context)
->>>>>>> 22b8184da46bc50b35a8b31dc4166c16bad76cf2
         try:
             self._result = self._task()
         except Exception:
@@ -69,10 +64,6 @@ class Future:
             return self._result
 
 
-<<<<<<< HEAD
-# Hide in plain sight
-class Shadow(threading.Thread):
-=======
 class DeadQueue:
     def __init__(self, exc_info):
         self._exc_info = exc_info
@@ -82,8 +73,7 @@ class DeadQueue:
         raise exception_value.with_traceback(traceback)
 
 
-class Worker(threading.Thread):
->>>>>>> 22b8184da46bc50b35a8b31dc4166c16bad76cf2
+class Shadow(threading.Thread):
     def __init__(self):
         # called by the main thread
         super().__init__(daemon=True)
@@ -223,6 +213,7 @@ class Delayed(ak.nplike.NumpyLike):
 
     def raw(self, array, nplike):
         raise NotImplementedError
+
     ############################ array creation
 
     def array(self, data, dtype=unset, **kwargs):
@@ -457,8 +448,10 @@ class Delayed(ak.nplike.NumpyLike):
     def datetime_as_string(self, *args, **kwargs):
         raise NotImplementedError
 
+
 class NumpyDelayed(Delayed):
     next_nplike = ak.nplike.Numpy.instance()
 
+
 class CupyDelayed(Delayed):
-    next_nplike = ak.nplike.Cupy.instance() 
+    next_nplike = ak.nplike.Cupy.instance()

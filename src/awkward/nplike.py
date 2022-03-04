@@ -478,8 +478,12 @@ class Numpy(NumpyLike):
             )
         elif isinstance(nplike, ak._v2._delayed.CupyDelayed):
             cupy = ak._v2._connect.cuda.import_cupy("Awkward CUDA")
-            future = ak._v2._connect.cuda.shadow_cuda_dict[cupy.cuda.get_current_stream().ptr].schedule(nplike.raw)
-            return DelayedArray(shape=array.shape, ndim=array.ndim, dtype=array.dtype, future=future)
+            future = ak._v2._connect.cuda.shadow_cuda_dict[
+                cupy.cuda.get_current_stream().ptr
+            ].schedule(nplike.raw)
+            return ak._v2._delayed.DelayedArray(
+                shape=array.shape, ndim=array.ndim, dtype=array.dtype, future=future
+            )
         else:
             raise TypeError(
                 "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
@@ -513,7 +517,9 @@ class Cupy(NumpyLike):
         shadow_thread = Shadow()
         shadow_thread.start()
 
-        awkward._v2._connect.cuda.shadow_cuda_dict[self._module.cuda.get_current_stream().ptr] = shadow_thread
+        awkward._v2._connect.cuda.shadow_cuda_dict[
+            self._module.cuda.get_current_stream().ptr
+        ] = shadow_thread
 
     @property
     def ma(self):
