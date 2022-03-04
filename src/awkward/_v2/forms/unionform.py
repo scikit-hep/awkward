@@ -241,6 +241,10 @@ class UnionForm(Form):
                 return True
         return False
 
+    def _columns(self, path, output, list_indicator):
+        for content, field in zip(self._contents, self.fields):
+            content._columns(path + (field,), output, list_indicator)
+
     def _select_columns(self, index, specifier, matches, path, output, list_indicator):
         contents = []
         for content in self._contents:

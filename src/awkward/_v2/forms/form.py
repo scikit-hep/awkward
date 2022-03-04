@@ -315,6 +315,11 @@ class Form:
     def simplify_uniontype(self, merge=True, mergebool=False):
         return self
 
+    def columns(self, list_indicator=None):
+        output = []
+        self._columns((), output, list_indicator)
+        return output
+
     def select_columns(self, specifier, expand_braces=True, list_indicator=None):
         if ak._v2._util.isstr(specifier):
             specifier = [specifier]

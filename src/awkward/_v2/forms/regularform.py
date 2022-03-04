@@ -165,6 +165,11 @@ class RegularForm(Form):
     def dimension_optiontype(self):
         return False
 
+    def _columns(self, path, output, list_indicator):
+        if list_indicator is not None:
+            path = path + (list_indicator,)
+        self._content._columns(path, output, list_indicator)
+
     def _select_columns(self, index, specifier, matches, path, output, list_indicator):
         if list_indicator is not None:
             path = path + (list_indicator,)

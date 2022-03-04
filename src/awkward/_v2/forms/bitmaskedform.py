@@ -223,6 +223,9 @@ class BitMaskedForm(Form):
     def dimension_optiontype(self):
         return True
 
+    def _columns(self, path, output, list_indicator):
+        self._content._columns(path, output, list_indicator)
+
     def _select_columns(self, index, specifier, matches, path, output, list_indicator):
         return BitMaskedForm(
             self._mask,

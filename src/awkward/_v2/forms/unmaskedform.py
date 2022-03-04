@@ -150,6 +150,9 @@ class UnmaskedForm(Form):
     def dimension_optiontype(self):
         return True
 
+    def _columns(self, path, output, list_indicator):
+        self._content._columns(path, output, list_indicator)
+
     def _select_columns(self, index, specifier, matches, path, output, list_indicator):
         return UnmaskedForm(
             self._content._select_columns(

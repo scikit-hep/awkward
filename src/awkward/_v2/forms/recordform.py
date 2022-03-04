@@ -305,12 +305,17 @@ class RecordForm(Form):
     def dimension_optiontype(self):
         return False
 
+    def _columns(self, path, output, list_indicator):
+        for content, field in zip(self._contents, self.fields):
+            content._columns(path + (field,), output, list_indicator)
+
     def _select_columns(self, index, specifier, matches, path, output, list_indicator):
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
             next_matches = [
-                matches[i] and glob.fnmatch.fnmatchcase(field, item[index])
+                matches[i]
+                and (index >= len(item) or glob.fnmatch.fnmatchcase(field, item[index]))
                 for i, item in enumerate(specifier)
             ]
             if any(next_matches):

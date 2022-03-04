@@ -94,7 +94,10 @@ class EmptyForm(Form):
     def dimension_optiontype(self):
         return False
 
+    def _columns(self, path, output, list_indicator):
+        output.append(".".join(path))
+
     def _select_columns(self, index, specifier, matches, path, output, list_indicator):
-        if any(match and len(item) == index for item, match in zip(specifier, matches)):
+        if any(match and index >= len(item) for item, match in zip(specifier, matches)):
             output.append(".".join(path))
         return self
