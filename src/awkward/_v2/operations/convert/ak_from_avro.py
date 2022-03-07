@@ -33,7 +33,5 @@ def from_avro(file_name, read_data=True):
     """
     import awkward._v2._connect.pyarrow
 
-    temp_class = awkward._v2._connect.avro.read_avro(
-        file_name
-    )
+    temp_class = awkward._v2._connect.avro.read_avro(file_name)
     return ak._v2._util.wrap(temp_class.outarr)
