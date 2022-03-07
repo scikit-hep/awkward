@@ -1417,6 +1417,23 @@ def broadcast_arrays(*arrays, **kwargs):
     for all elements). This distinction is can be accessed through the
     #ak.Array.type, but it is lost when converting an array into JSON or
     Python objects.
+
+    If arrays have the same depth but different lengths of nested
+    lists, attempting to broadcast them together is a broadcasting error.
+
+        >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
+        >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
+        >>> ak.broadcast_arrays(one, two)
+        ValueError: in ListArray64, cannot broadcast nested list
+
+    For this, one can set the `depth_limit` to prevent the operation from
+    attempting to broadcast what can't be broadcasted.
+
+        >>> this, that = ak.broadcast_arrays(one, two, depth_limit=1)
+        >>> ak.to_list(this)
+        [[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]]
+        >>> ak.to_list(that)
+        [[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]]
     """
     (highlevel, depth_limit, left_broadcast, right_broadcast) = ak._util.extra(
         (),
