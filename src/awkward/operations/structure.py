@@ -908,6 +908,8 @@ def with_name(array, name, highlevel=True, behavior=None):
     def getfunction2(layout):
         if isinstance(layout, ak._util.uniontypes):
             return lambda: layout.simplify(merge=True, mergebool=False)
+        elif isinstance(layout, ak.layout.RecordArray):
+            return lambda: layout
         else:
             return None
 
