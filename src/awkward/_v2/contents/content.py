@@ -1342,6 +1342,8 @@ class Content:
             return self
         else:
             if isinstance(ak._v2._util.regularize_backend(backend), ak.nplike.Cupy):
+                import awkward._v2._delayed  # noqa: F401
+
                 return self._to_nplike(ak._v2._delayed.CupyDelayed.instance())
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
 

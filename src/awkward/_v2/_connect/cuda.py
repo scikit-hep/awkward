@@ -2,6 +2,8 @@
 
 import awkward as ak
 
+from awkward._v2._worker import Worker
+
 np = ak.nplike.NumpyMetadata.instance()
 
 try:
@@ -26,7 +28,11 @@ or
 #         pyarrow = None
 #         error_message = "pyarrow 6.0.0 or later required for {0}"
 #
-shadow_cuda_dict = {}
+cuda_worker_threads = {}
+
+worker_thread = Worker()
+worker_thread.start()
+cuda_worker_threads[cupy.cuda.get_current_stream().ptr] = worker_thread
 
 
 def import_cupy(name):

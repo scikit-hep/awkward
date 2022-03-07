@@ -8,6 +8,8 @@ import ctypes
 
 from collections.abc import Iterable
 
+from functools import partial
+
 import numpy
 
 import awkward as ak
@@ -472,17 +474,23 @@ class Numpy(NumpyLike):
         elif isinstance(nplike, Cupy):
             cupy = Cupy.instance()
             return cupy.asarray(array, dtype=array.dtype, order="C")
+        elif isinstance(nplike, ak._v2._delayed.CupyDelayed):
+            cupy = ak._v2._connect.cuda.import_cupy("Awkward CUDA")
+            nested_nplike = ak.nplike.Cupy.instance()
+            future = ak._v2._connect.cuda.cuda_worker_threads[
+                cupy.cuda.get_current_stream().ptr
+            ].schedule(partial(nested_nplike.raw, array=array, nplike=nested_nplike))
+            return ak._v2._delayed.DelayedArray(
+                shape=array.shape,
+                ndim=array.ndim,
+                is_contiguous=None,
+                dtype=array.dtype,
+                nplike=ak._v2._delayed.CupyDelayed.instance(),
+                future=future,
+            )
         elif isinstance(nplike, ak._v2._typetracer.TypeTracer):
             return ak._v2._typetracer.TypeTracerArray(
                 dtype=array.dtype, shape=array.shape
-            )
-        elif isinstance(nplike, ak._v2._delayed.CupyDelayed):
-            cupy = ak._v2._connect.cuda.import_cupy("Awkward CUDA")
-            future = ak._v2._connect.cuda.shadow_cuda_dict[
-                cupy.cuda.get_current_stream().ptr
-            ].schedule(nplike.raw)
-            return ak._v2._delayed.DelayedArray(
-                shape=array.shape, ndim=array.ndim, dtype=array.dtype, future=future
             )
         else:
             raise TypeError(
@@ -508,18 +516,9 @@ class Cupy(NumpyLike):
             )
 
     def __init__(self):
-        import awkward._v2._connect.cuda
+        import awkward._v2._connect.cuda  # noqa: F401
 
-        self._module = awkward._v2._connect.cuda.import_cupy("Awkward CUDA")
-
-        from awkward._v2._delayed import Shadow
-
-        shadow_thread = Shadow()
-        shadow_thread.start()
-
-        awkward._v2._connect.cuda.shadow_cuda_dict[
-            self._module.cuda.get_current_stream().ptr
-        ] = shadow_thread
+        self._module = ak._v2._connect.cuda.import_cupy("Awkward CUDA")
 
     @property
     def ma(self):
