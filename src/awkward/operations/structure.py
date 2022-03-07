@@ -1328,6 +1328,10 @@ def broadcast_arrays(*arrays, **kwargs):
             right-broadcasting, as described below.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
+        depth_limit (None or int, default is None): If None, attempt to fully
+            broadcast the `arrays` to all levels. If an int, limit the number
+            of dimensions that get broadcasted. The minimum value is `1`,
+            for no broadcasting.
 
     Like NumPy's
     [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
@@ -1421,11 +1425,22 @@ def broadcast_arrays(*arrays, **kwargs):
     #ak.Array.type, but it is lost when converting an array into JSON or
     Python objects.
     """
-    (highlevel, left_broadcast, right_broadcast) = ak._util.extra(
+    (highlevel, depth_limit, left_broadcast, right_broadcast) = ak._util.extra(
         (),
         kwargs,
-        [("highlevel", True), ("left_broadcast", True), ("right_broadcast", True)],
+        [
+            ("highlevel", True),
+            ("depth_limit", None),
+            ("left_broadcast", True),
+            ("right_broadcast", True),
+        ],
     )
+
+    if depth_limit is not None and depth_limit <= 0:
+        raise ValueError(
+            "depth_limit must be None or at least 1"
+            + ak._util.exception_suffix(__file__)
+        )
 
     inputs = []
     for x in arrays:
@@ -1436,8 +1451,11 @@ def broadcast_arrays(*arrays, **kwargs):
             y = ak.layout.NumpyArray(ak.nplike.of(*arrays).array([y]))
         inputs.append(y)
 
-    def getfunction(inputs):
-        if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
+    def getfunction(inputs, depth):
+        if depth == depth_limit or (
+            depth_limit is None
+            and all(isinstance(x, ak.layout.NumpyArray) for x in inputs)
+        ):
             return lambda: tuple(inputs)
         else:
             return None
@@ -1449,7 +1467,6 @@ def broadcast_arrays(*arrays, **kwargs):
         behavior,
         left_broadcast=left_broadcast,
         right_broadcast=right_broadcast,
-        pass_depth=False,
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
