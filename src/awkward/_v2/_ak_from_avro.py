@@ -18,21 +18,28 @@ class _read_avro_py:
         pos = self.decode_block(pos)
         tempos = pos
         ind = 2
-        _exec_code = ["data = np.memmap(\"{}\", np.uint8)\npos=0\n".format(self.file_name), '''def decode_varint(pos, data):\n\tshift = 0\n\tresult = 0\n\twhile True:\n\t\ti = data[pos]\n\t\tpos += 1\n\t\tresult |= (i & 0x7f) << shift\n\t\tshift += 7\n\t\tif not (i & 0x80):\n\t\t\tbreak\n\treturn pos, result\ndef decode_zigzag(n):\n\treturn (n >> 1) ^ (-(n & 1))\n\n''',
-                      "field = {}\n".format(str(self.field)), "for i in range({}):\n".format(len(self.field)), "    fields = data[field[i][0]:field[i][1]]\n".format(self.field[0][0]), "    while pos != len(fields):"]
+        _exec_code = [
+            f'data = np.memmap("{self.file_name}", np.uint8)\npos=0\n',
+            """def decode_varint(pos, data):\n\tshift = 0\n\tresult = 0\n\twhile True:\n\t\ti = data[pos]\n\t\tpos += 1\n\t\tresult |= (i & 0x7f) << shift\n\t\tshift += 7\n\t\tif not (i & 0x80):\n\t\t\tbreak\n\treturn pos, result\ndef decode_zigzag(n):\n\treturn (n >> 1) ^ (-(n & 1))\n\n""",
+            f"field = {str(self.field)}\n",
+            f"for i in range({len(self.field)}):\n",
+            f"    fields = data[field[i][0]:field[i][1]]\n",
+            "    while pos != len(fields):",
+        ]
         aform = []
-        dec = ["import struct\nimport numpy \n", 'con = {']
+        dec = ["import struct\nimport numpy \n", "con = {"]
         self.form, self._exec_code, self.count, dec = self.rec_exp_json_code(
-            self.schema, _exec_code, ind, aform, 0, dec)
+            self.schema, _exec_code, ind, aform, 0, dec
+        )
         dec.append("}")
         dec.append("\n")
         head = "".join(dec)
         body = "".join(self._exec_code)
         # print("".join(head+body))
         loc = {}
-        exec("".join(head+body), globals(), loc)
+        exec("".join(head + body), globals(), loc)
         self.form = json.loads("".join(self.form)[:-2])
-        con = loc['con']
+        con = loc["con"]
         for key in con.keys():
             con[key] = np.array(con[key])
         self.outarr = ak.from_buffers(self.form, 2, con)
@@ -43,16 +50,16 @@ class _read_avro_py:
         while True:
             print(pos)
             # The byte is random at this position
-            pos, info = self.decode_varint(pos+17, self._data)
+            pos, info = self.decode_varint(pos + 17, self._data)
             info = self.decode_zigzag(info)
             self.blocks.append((count, int(info)))
             print(pos)
             pos, info = self.decode_varint(pos, self._data)
             info = self.decode_zigzag(info)
             # print(pos,info)
-            self.field.append([pos, pos+int(info)])
-            pos = pos+info
-            if pos+16 == len(self._data):
+            self.field.append([pos, pos + int(info)])
+            pos = pos + info
+            if pos + 16 == len(self._data):
                 break
         return pos
 
@@ -61,22 +68,22 @@ class _read_avro_py:
         while aa != 2:
             pos, dat = self.decode_varint(pos, self._data)
             dat = self.decode_zigzag(dat)
-            val = self.ret_str(pos, pos+int(dat))
-            pos = pos+int(dat)
+            val = self.ret_str(pos, pos + int(dat))
+            pos = pos + int(dat)
             aa = self.check_special(val)
             if aa == 0:
                 pos, dat = self.decode_varint(pos, self._data)
                 dat = self.decode_zigzag(dat)
-                val = self.ret_str(pos, pos+int(dat))
+                val = self.ret_str(pos, pos + int(dat))
                 self.codec = val
-                pos = pos+int(dat)
+                pos = pos + int(dat)
             elif aa == 1:
 
                 pos, dat = self.decode_varint(pos, self._data)
                 dat = self.decode_zigzag(dat)
-                val = self.ret_str(pos, pos+int(dat))
+                val = self.ret_str(pos, pos + int(dat))
                 self.schema = json.loads(val)
-                pos = pos+int(dat)
+                pos = pos + int(dat)
                 return pos
 
     def check_special(self, val):
@@ -104,7 +111,7 @@ class _read_avro_py:
         while True:
             i = self._data[pos]
             pos += 1
-            result |= (i & 0x7f) << shift
+            result |= (i & 0x7F) << shift
             shift += 7
             if not (i & 0x80):
                 break
@@ -114,17 +121,17 @@ class _read_avro_py:
         return (n >> 1) ^ (-(n & 1))
 
     def dum_dat(self, dtype):
-        if dtype['type'] == 'int':
+        if dtype["type"] == "int":
             return "np.int32(0)"
-        if dtype['type'] == 'long':
+        if dtype["type"] == "long":
             return "np.int64(0)"
-        if dtype['type'] == 'float':
+        if dtype["type"] == "float":
             return "np.float32(0)"
-        if dtype['type'] == 'double':
+        if dtype["type"] == "double":
             return "np.float64(0)"
-        if dtype['type'] == 'boolean':
+        if dtype["type"] == "boolean":
             return "0"
-        if dtype['type'] == 'bytes':
+        if dtype["type"] == "bytes":
             return "b'a'"
 
     def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
@@ -137,245 +144,330 @@ class _read_avro_py:
             aform.append('{"class" : "RecordArray",')
             aform.append('"contents": {\n')
             for elem in file["fields"]:
-                aform.append('"'+elem["name"]+'"'+": ")
+                aform.append('"' + elem["name"] + '"' + ": ")
                 aform, _exec_code, count, dec = self.rec_exp_json_code(
-                    elem, _exec_code, ind, aform, count+1, dec)
-            aform.append('}},"form_key": "node{}"}},\n'.format(temp))
+                    elem, _exec_code, ind, aform, count + 1, dec
+                )
+            aform.append(f'}},"form_key": "node{temp}"}},\n')
             return aform, _exec_code, count, dec
 
         elif file["type"] == "string":
             # print(file["name"])
             # print(file["type"],count)
-            aform.append('{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray","primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{}"}},"parameters": {{"__array__": "string"}},"form_key": "node{}"}},\n'.format(count+1, count))
-            var1 = " 'part0-node{}-offsets'".format(count)
-            var2 = " 'part0-node{}-data'".format(count+1)
+            aform.append(
+                f'{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray","primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{count+1}"}},"parameters": {{"__array__": "string"}},"form_key": "node{count}"}},\n'
+            )
+            var1 = f" 'part0-node{count}-offsets'"
+            var2 = f" 'part0-node{count+1}-data'"
             dec.append(var1)
             dec.append(": [0],")
             dec.append(var2)
             dec.append(": [],")
             _exec_code.append(
-                "\n"+"    "*ind+"pos, inn = decode_varint(pos,fields)")
-            _exec_code.append("\n"+"    "*ind+"out = decode_zigzag(inn)")
+                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            )
+            _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-offsets'].append(np.uint8(out+con['part0-node{}-offsets'][-1]))".format(count, count))
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-offsets'].append(np.uint8(out+con['part0-node{count}-offsets'][-1]))"
+            )
             # print(pos,abs(out))
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-data'].append(fields[pos:pos+abs(out)].tobytes().decode(errors=\"surrogateescape\"))".format(count+1))
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count+1}-data'].append(fields[pos:pos+abs(out)].tobytes().decode(errors=\"surrogateescape\"))"
+            )
             _exec_code.append(
-                "\n"+"    "*ind+"print(fields[pos:pos+abs(out)].tobytes().decode(errors=\"surrogateescape\") )")
-            _exec_code.append("\n"+"    "*ind+"pos = pos + abs(out)")
-            return aform, _exec_code, count+1, dec
+                "\n"
+                + "    " * ind
+                + 'print(fields[pos:pos+abs(out)].tobytes().decode(errors="surrogateescape") )'
+            )
+            _exec_code.append("\n" + "    " * ind + "pos = pos + abs(out)")
+            return aform, _exec_code, count + 1, dec
 
         elif file["type"] == "int":
             # print(file["name"])
             # print(file["type"],count)
             aform.append(
-                '{{"class" : "NumpyArray", "primitive": "int32", "form_key": "node{}"}},\n'.format(count))
-            var1 = " 'part0-node{}-data'".format(count)
+                f'{{"class" : "NumpyArray", "primitive": "int32", "form_key": "node{count}"}},\n'
+            )
+            var1 = f" 'part0-node{count}-data'"
             dec.append(var1)
             dec.append(": [],")
             _exec_code.append(
-                "\n"+"    "*ind+"pos, inn = decode_varint(pos,fields)")
-            _exec_code.append("\n"+"    "*ind+"out = decode_zigzag(inn)")
+                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            )
+            _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-data'].append(np.int32(out))".format(count))
-            _exec_code.append("\n"+"    "*ind+"print(out)")
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-data'].append(np.int32(out))"
+            )
+            _exec_code.append("\n" + "    " * ind + "print(out)")
             return aform, _exec_code, count, dec
 
         elif file["type"] == "long":
             # print(file["name"])
             # print(file["type"],count)
             aform.append(
-                '{{"class" : "NumpyArray", "primitive": "int64", "form_key": "node{}"}},\n'.format(count))
-            var1 = " 'part0-node{}-data'".format(count)
+                f'{{"class" : "NumpyArray", "primitive": "int64", "form_key": "node{count}"}},\n'
+            )
+            var1 = f" 'part0-node{count}-data'"
             dec.append(var1)
             dec.append(": [],")
             _exec_code.append(
-                "\n"+"    "*ind+"pos, inn = decode_varint(pos,fields)")
-            _exec_code.append("\n"+"    "*ind+"out = decode_zigzag(inn)")
-            _exec_code.append("\n"+"    "*ind+"print(out)")
+                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            )
+            _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
+            _exec_code.append("\n" + "    " * ind + "print(out)")
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-data'].append(np.int64(out))".format(count))
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-data'].append(np.int64(out))"
+            )
             return aform, _exec_code, count, dec
 
         elif file["type"] == "float":
             # print(file["name"])
             # print(file["type"],count)
             aform.append(
-                '{{"class" : "NumpyArray", "primitive": "float32", "form_key": "node{}"}},\n'.format(count))
-            var1 = " 'part0-node{}-data'".format(count)
+                f'{{"class" : "NumpyArray", "primitive": "float32", "form_key": "node{count}"}},\n'
+            )
+            var1 = f" 'part0-node{count}-data'"
             dec.append(var1)
             dec.append(": [],")
             _exec_code.append(
-                "\n"+"    "*ind+"print(struct.Struct(\"<f\").unpack(fields[pos:pos+4].tobytes())[0])")
+                "\n"
+                + "    " * ind
+                + 'print(struct.Struct("<f").unpack(fields[pos:pos+4].tobytes())[0])'
+            )
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-data'].append(np.float32(struct.Struct(\"<f\").unpack(fields[pos:pos+4].tobytes())[0]))".format(count))
-            _exec_code.append("\n"+"    "*ind+"pos = pos+4")
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-data'].append(np.float32(struct.Struct(\"<f\").unpack(fields[pos:pos+4].tobytes())[0]))"
+            )
+            _exec_code.append("\n" + "    " * ind + "pos = pos+4")
             return aform, _exec_code, count, dec
 
         elif file["type"] == "double":
             # print(file["name"])
             # print(file["type"],count)
             aform.append(
-                '{{"class" : "NumpyArray", "primitive": "float64", "form_key": "node{}"}},\n'.format(count))
-            var1 = " 'part0-node{}-data'".format(count)
+                f'{{"class" : "NumpyArray", "primitive": "float64", "form_key": "node{count}"}},\n'
+            )
+            var1 = f" 'part0-node{count}-data'"
             dec.append(var1)
             dec.append(": [],")
             _exec_code.append(
-                "\n"+"    "*ind+"print(struct.Struct(\"<d\").unpack(fields[pos:pos+8].tobytes())[0])")
+                "\n"
+                + "    " * ind
+                + 'print(struct.Struct("<d").unpack(fields[pos:pos+8].tobytes())[0])'
+            )
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-data'].append(np.float64(struct.Struct(\"<d\").unpack(fields[pos:pos+8].tobytes())[0]))".format(count))
-            _exec_code.append("\n"+"    "*ind+"pos = pos+8")
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-data'].append(np.float64(struct.Struct(\"<d\").unpack(fields[pos:pos+8].tobytes())[0]))"
+            )
+            _exec_code.append("\n" + "    " * ind + "pos = pos+8")
             return aform, _exec_code, count, dec
 
         elif file["type"] == "boolean":
             # print(file["name"])
             # print(file["type"],count)
             aform.append(
-                '{{"class" : "NumpyArray", "primitive": "bool", "form_key": "node{}"}},\n'.format(count))
-            var1 = " 'part0-node{}-data'".format(count)
+                f'{{"class" : "NumpyArray", "primitive": "bool", "form_key": "node{count}"}},\n'
+            )
+            var1 = f" 'part0-node{count}-data'"
             dec.append(var1)
             dec.append(": [],")
-            _exec_code.append("\n"+"    "*ind+"print(fields[pos])")
+            _exec_code.append("\n" + "    " * ind + "print(fields[pos])")
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-data'].append(fields[pos])".format(count))
-            _exec_code.append("\n"+"    "*ind+"pos = pos+1")
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-data'].append(fields[pos])"
+            )
+            _exec_code.append("\n" + "    " * ind + "pos = pos+1")
             return aform, _exec_code, count, dec
 
         elif file["type"] == "bytes":
             # print(file["name"])
             # print(file["type"],count)
             astring = '{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray", "primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{}"}},"parameters": {{"__array__": "string"}},"form_key": "node{}"}},\n'.format(
-                count+1, count)
-            var1 = " 'part0-node{}-data'".format(count+1)
-            var2 = " 'part0-node{}-offsets'".format(count)
+                count + 1, count
+            )
+            var1 = f" 'part0-node{count+1}-data'"
+            var2 = f" 'part0-node{count}-offsets'"
             dec.append(var2)
             dec.append(": [0],")
             dec.append(var1)
             dec.append(": [],")
-            aform .append(astring)
+            aform.append(astring)
             _exec_code.append(
-                "\n"+"    "*ind+"pos, inn = decode_varint(pos,fields)")
-            _exec_code.append("\n"+"    "*ind+"out = decode_zigzag(inn)")
+                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            )
+            _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-offsets'].append(out+con['part0-node{}-offsets'][-1])".format(count, count))
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-offsets'].append(out+con['part0-node{count}-offsets'][-1])"
+            )
             _exec_code.append(
-                "\n"+"    "*ind+"print(fields[pos:pos+out].tobytes())")
+                "\n" + "    " * ind + "print(fields[pos:pos+out].tobytes())"
+            )
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-data'].append(fields[pos:pos+out].tobytes())".format(count+1))
-            _exec_code.append("\n"+"    "*ind+"pos = pos+out")
-            return aform, _exec_code, count+1, dec
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count+1}-data'].append(fields[pos:pos+out].tobytes())"
+            )
+            _exec_code.append("\n" + "    " * ind + "pos = pos+out")
+            return aform, _exec_code, count + 1, dec
 
         elif isinstance(file["type"], list):
             # print(file["name"])
             temp = count
             _exec_code.append(
-                "\n"+"    "*ind+"pos, inn = decode_varint(pos,fields)")
-            _exec_code.append("\n"+"    "*ind+"out = abs(decode_zigzag(inn))")
-            _exec_code.append("\n"+"    "*ind+"print(\"index :\",out)")
+                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            )
+            _exec_code.append("\n" + "    " * ind + "out = abs(decode_zigzag(inn))")
+            _exec_code.append("\n" + "    " * ind + 'print("index :",out)')
             out = len(file["type"])
             if out == 2:
                 if "null" in file["type"]:
                     aform.append(
-                        '{"class": "ByteMaskedArray","mask": "i8","content":\n')
-                    var1 = " 'part0-node{}-mask'".format(count)
+                        '{"class": "ByteMaskedArray","mask": "i8","content":\n'
+                    )
+                    var1 = f" 'part0-node{count}-mask'"
                     dec.append(var1)
                     dec.append(": [],")
             temp = count
-            idxx = file['type'].index('null')
+            idxx = file["type"].index("null")
             for i in range(out):
                 if file["type"][i] == "null":
-                    _exec_code.append("\n"+"    "*(ind) +
-                                      "if out == {}:".format(i))
+                    _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
                     _exec_code.append(
-                        "\n"+"    "*(ind+1)+"con['part0-node{}-mask'].append(np.int8(False))".format(temp))
-                    _exec_code.append("\n"+"    "*(ind+1)+"con['part0-node{}-data'].append({})".format(
-                        temp+1, self.dum_dat({'type': file['type'][1-idxx]})))
+                        "\n"
+                        + "    " * (ind + 1)
+                        + f"con['part0-node{temp}-mask'].append(np.int8(False))"
+                    )
+                    _exec_code.append(
+                        "\n"
+                        + "    " * (ind + 1)
+                        + "con['part0-node{}-data'].append({})".format(
+                            temp + 1, self.dum_dat({"type": file["type"][1 - idxx]})
+                        )
+                    )
                 else:
-                    _exec_code.append("\n"+"    "*(ind) +
-                                      "if out == {}:".format(i))
+                    _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
                     _exec_code.append(
-                        "\n"+"    "*(ind+1)+"con['part0-node{}-mask'].append(np.int8(True))".format(count))
+                        "\n"
+                        + "    " * (ind + 1)
+                        + f"con['part0-node{count}-mask'].append(np.int8(True))"
+                    )
                     aform, _exec_code, count, dec = self.rec_exp_json_code(
-                        {"type": file["type"][i]}, _exec_code, ind+1, aform, count+1, dec)
-            aform.append(
-                '"valid_when": true,"form_key": "node{}"}}\n'.format(temp))
+                        {"type": file["type"][i]},
+                        _exec_code,
+                        ind + 1,
+                        aform,
+                        count + 1,
+                        dec,
+                    )
+            aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
             return aform, _exec_code, count, dec
 
         elif isinstance(file["type"], dict):
             # print(file["name"])
             # print(file["type"],count)
             aform, _exec_code, count, dec = self.rec_exp_json_code(
-                file["type"], _exec_code, ind, aform, count, dec)
+                file["type"], _exec_code, ind, aform, count, dec
+            )
             return aform, _exec_code, count, dec
 
         elif file["type"] == "fixed":
             # print(file["type"],count)
-            var1 = " 'part0-node{}-data'".format(count+1)
+            var1 = f" 'part0-node{count+1}-data'"
             dec.append(var1)
             dec.append(": [],")
-            aform.append('{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{}"}},"size": {},"form_key": "node{}"}},\n'.format(
-                count+1, file["size"], count))
-            _exec_code.append("\n"+"    "*ind+"lenn = {}".format(file["size"]))
+            aform.append(
+                '{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{}"}},"size": {},"form_key": "node{}"}},\n'.format(
+                    count + 1, file["size"], count
+                )
+            )
+            _exec_code.append("\n" + "    " * ind + "lenn = {}".format(file["size"]))
             _exec_code.append(
-                "\n"+"    "*ind+"print(fields[pos:pos+lenn].tobytes())")
-            _exec_code.append("\n"+"    "*ind+"for i in range(lenn):")
+                "\n" + "    " * ind + "print(fields[pos:pos+lenn].tobytes())"
+            )
+            _exec_code.append("\n" + "    " * ind + "for i in range(lenn):")
             _exec_code.append(
-                "\n"+"    "*(ind+1)+"con['part0-node{}-data'].append(np.uint8(fields[i]))".format(count+1))
-            _exec_code.append("\n"+"    "*ind+"pos = pos+lenn")
-            return aform, _exec_code, count+1, dec
+                "\n"
+                + "    " * (ind + 1)
+                + f"con['part0-node{count+1}-data'].append(np.uint8(fields[i]))"
+            )
+            _exec_code.append("\n" + "    " * ind + "pos = pos+lenn")
+            return aform, _exec_code, count + 1, dec
 
         elif file["type"] == "enum":
             # print(file["name"])
             # print(file["type"],count)
-            aform.append('{{"class": "IndexedArray64","index": "i64","content": {{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray","primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{}"}},"parameters": {{"__array__": "string"}},"form_key": "node{}"}}, "parameters": {{"__array__": "categorical"}}, "form_key": "node{}"}},\n'.format(count+2, count+1, count))
-            var1 = " 'part0-node{}-index'".format(count)
+            aform.append(
+                f'{{"class": "IndexedArray64","index": "i64","content": {{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray","primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{count+2}"}},"parameters": {{"__array__": "string"}},"form_key": "node{count+1}"}}, "parameters": {{"__array__": "categorical"}}, "form_key": "node{count}"}},\n'
+            )
+            var1 = f" 'part0-node{count}-index'"
             dec.append(var1)
             dec.append(": [],")
-            tempar = file['symbols']
+            tempar = file["symbols"]
             offset, dat = [0], []
             prev = 0
             for i in range(len(tempar)):
-                offset.append(len(tempar[i])+prev)
+                offset.append(len(tempar[i]) + prev)
                 prev = offset[-1]
             for i in range(len(tempar)):
                 for elem in range(len(tempar[i])):
                     dat.append(elem)
-            var2 = " 'part0-node{}-offsets': {},".format(count+1, str(offset))
+            var2 = f" 'part0-node{count+1}-offsets': {str(offset)},"
             dec.append(var2)
-            var2 = " 'part0-node{}-data': {},".format(count+2, str(dat))
+            var2 = f" 'part0-node{count+2}-data': {str(dat)},"
             dec.append(var2)
             _exec_code.append(
-                "\n"+"    "*ind+"pos, inn = decode_varint(pos,fields)")
-            _exec_code.append("\n"+"    "*ind+"out = decode_zigzag(inn)")
+                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            )
+            _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-index'].append(np.int64(out))".format(count))
-            _exec_code.append("\n"+"    "*ind+"print(out)")
-            return aform, _exec_code, count+2, dec
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-index'].append(np.int64(out))"
+            )
+            _exec_code.append("\n" + "    " * ind + "print(out)")
+            return aform, _exec_code, count + 2, dec
 
         elif file["type"] == "array":
             # print(file["name"])
             temp = count
-            var1 = " 'part0-node{}-offsets'".format(count)
+            var1 = f" 'part0-node{count}-offsets'"
             dec.append(var1)
             dec.append(": [0],")
-            aform.append(
-                '{"class": "ListOffsetArray64","offsets": "i64","content": ')
+            aform.append('{"class": "ListOffsetArray64","offsets": "i64","content": ')
             _exec_code.append(
-                "\n"+"    "*ind+"pos, inn = decode_varint(pos,fields)")
-            _exec_code.append("\n"+"    "*ind+"out = decode_zigzag(inn)")
-            _exec_code.append("\n"+"    "*ind+"print(\"length\",out)")
+                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            )
+            _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
+            _exec_code.append("\n" + "    " * ind + 'print("length",out)')
             _exec_code.append(
-                "\n"+"    "*ind+"con['part0-node{}-offsets'].append(out+con['part0-node{}-offsets'][-1])".format(count, count))
-            _exec_code.append("\n"+"    "*ind+"for i in range(out):")
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-offsets'].append(out+con['part0-node{count}-offsets'][-1])"
+            )
+            _exec_code.append("\n" + "    " * ind + "for i in range(out):")
             aform, _exec_code, count, dec = self.rec_exp_json_code(
-                {"type": file["items"]}, _exec_code, ind+1, aform, count+1, dec)
+                {"type": file["items"]}, _exec_code, ind + 1, aform, count + 1, dec
+            )
             _exec_code.append(
-                "\n"+"    "*ind+"pos, inn = decode_varint(pos,fields)")
-            _exec_code.append("\n"+"    "*ind+"out = decode_zigzag(inn)")
-            _exec_code.append("\n"+"    "*ind+'''if out != 0:''')
-            _exec_code.append("\n"+"    "*(ind+1)+"raise")
-            aform.append('"form_key": "node{}"}},\n'.format(temp))
+                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            )
+            _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
+            _exec_code.append("\n" + "    " * ind + """if out != 0:""")
+            _exec_code.append("\n" + "    " * (ind + 1) + "raise")
+            aform.append(f'"form_key": "node{temp}"}},\n')
             return aform, _exec_code, count, dec
 
         elif file["type"] == "map":
@@ -405,4 +497,5 @@ class _read_avro_py:
             #         _exec_code = _exec_code+jj
             #         _exec_code = _exec_code+kk
             raise NotImplementedError
+
     #        return aform,_exec_code,count
