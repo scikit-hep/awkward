@@ -29,7 +29,7 @@ def _impl(array):
             return visitor(layout.content)
         elif layout.is_UnionType:
             return all(visitor(x) for x in layout.contents)
-        elif layout.is_NumpyType:
+        elif layout.is_NumpyType or layout.is_UnknownType:
             return False
         else:
             raise ak._v2._util.error(
