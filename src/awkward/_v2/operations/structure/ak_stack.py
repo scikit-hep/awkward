@@ -90,16 +90,17 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                     )
                 )
 
-        tags = nplike.repeat(nplike.arange(len(nextinputs)), length)
-        index = nplike.broadcast_to(
-            nplike.arange(length), (len(nextinputs), length)
-        ).ravel()
+        lengths = [len(x) for x in nextinputs]
+        tags = nplike.repeat(nplike.arange(len(nextinputs)), lengths)
+        index = nplike.concatenate([nplike.arange(x) for x in lengths])
 
         inner = ak._v2.contents.UnionArray(
             ak._v2.index.Index8(tags), ak._v2.index.Index64(index), nextinputs
-        ).simplify_uniontype(merge=merge, mergebool=mergebool)
+        ).simplify_optiontype(merge=merge, mergebool=mergebool)
 
-        offset = nplike.arange(0, len(index) + 1, length)
+        offset = nplike.empty(len(lengths) + 1, dtype=np.int64)
+        offset[0] = 0
+        nplike.cumsum(lengths, out=offset[1:])
         out = ak._v2.contents.ListOffsetArray(ak._v2.index.Index64(offset), inner)
 
     else:
