@@ -3,12 +3,11 @@ import awkward as ak
 import json
 
 
-class read_avro_py:
+class read_avro:
     def __init__(self, file_name):
         self.file_name = file_name
         self._data = np.memmap(file_name, np.uint8)
         self.field = []
-        # _data = self._data
         if not self.check_valid():
             raise
         pos, self.pairs = self.decode_varint(4, self._data)
@@ -46,12 +45,10 @@ class read_avro_py:
         self.blocks = []
         count = 0
         while True:
-            # print(pos)
             # The byte is random at this position
             pos, info = self.decode_varint(pos + 17, self._data)
             info = self.decode_zigzag(info)
             self.blocks.append((count, int(info)))
-            # print(pos)
             pos, info = self.decode_varint(pos, self._data)
             info = self.decode_zigzag(info)
             # print(pos,info)
@@ -94,7 +91,6 @@ class read_avro_py:
 
     def check_valid(self):
         init = self.ret_str(0, 4)
-        # print(init)
         if init == "Obj\x01":
             return True
         else:
@@ -133,6 +129,8 @@ class read_avro_py:
             return "b'a'"
 
     def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
+        if isinstance(file, str):
+            file = {"type": file}
         if file["type"] == "null":
             return aform, _exec_code, count, dec
 
@@ -344,7 +342,7 @@ class read_avro_py:
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
-                        + f"con['part0-node{temp}-mask'].append(np.int8(False))".format()
+                        + f"con['part0-node{temp}-mask'].append(np.int8(False))"
                     )
                     _exec_code.append(
                         "\n"
@@ -385,7 +383,8 @@ class read_avro_py:
             aform.append(
                 f'{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{count+1}"}},"size": {file["size"]},"form_key": "node{count}"}},\n'
             )
-            _exec_code.append("\n" + "    " * ind + "lenn = {}".format(file["size"]))
+            temp = file["size"]
+            _exec_code.append("\n" + "    " * ind + f"lenn = {temp}")
             _exec_code.append(
                 "\n" + "    " * ind + "print(fields[pos:pos+lenn].tobytes())"
             )
