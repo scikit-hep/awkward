@@ -131,6 +131,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         nextinputs.append(x)
                 inputs = nextinputs
 
+            # New axis above existing
             if depth == posaxis and all(
                 isinstance(x, ak._v2.contents.Content)
                 and x.is_ListType
