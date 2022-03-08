@@ -12,7 +12,9 @@ def test():
     )
 
     assert to_list(
-        ak._v2.operations.structure.nan_to_num(array, nan=999, posinf=float("-inf"), neginf=float("inf"))
+        ak._v2.operations.structure.nan_to_num(
+            array, nan=999, posinf=float("-inf"), neginf=float("inf")
+        )
     ) == [[1.1, 2.2], [], [3.3, 999.0], [float("inf"), float("-inf"), 7.7]]
 
     assert to_list(
