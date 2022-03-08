@@ -90,13 +90,19 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                     )
                 )
 
-        lengths = [len(x) for x in nextinputs]
-        tags = nplike.repeat(nplike.arange(len(nextinputs)), lengths)
-        index = nplike.concatenate([nplike.arange(x) for x in lengths])
+        batch = [nextinputs[0]]
+        for x in nextinputs[1:]:
+            if batch[-1].mergeable(x, mergebool=mergebool):
+                batch.append(x)
+            else:
+                collapsed = batch[0].mergemany(batch[1:])
+                batch = [collapsed.merge_as_union(x)]
 
-        inner = ak._v2.contents.UnionArray(
-            ak._v2.index.Index8(tags), ak._v2.index.Index64(index), nextinputs
-        ).simplify_uniontype(merge=merge, mergebool=mergebool)
+        inner = batch[0].mergemany(batch[1:])
+        if inner.is_UnionType:
+            inner = inner.simplify_uniontype(merge=merge, mergebool=mergebool)
+
+        lengths = [len(x) for x in nextinputs]
 
         offset = nplike.empty(len(lengths) + 1, dtype=np.int64)
         offset[0] = 0
