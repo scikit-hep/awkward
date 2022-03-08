@@ -23,6 +23,7 @@ from awkward._v2.operations.structure.ak_broadcast_arrays import (  # noqa: F401
     broadcast_arrays,
 )
 from awkward._v2.operations.structure.ak_concatenate import concatenate  # noqa: F401
+from awkward._v2.operations.structure.ak_stack import stack  # noqa: F401
 from awkward._v2.operations.structure.ak_where import where  # noqa: F401
 from awkward._v2.operations.structure.ak_flatten import flatten  # noqa: F401
 from awkward._v2.operations.structure.ak_unflatten import unflatten  # noqa: F401
