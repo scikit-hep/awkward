@@ -3,7 +3,7 @@ import awkward as ak
 import json
 
 
-class read_avro:
+class read_avro_py:
     def __init__(self, file_name):
         self.file_name = file_name
         self._data = np.memmap(file_name, np.uint8)

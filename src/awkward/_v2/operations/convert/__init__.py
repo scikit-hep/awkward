@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from awkward._v2.operations.convert.ak_from_numpy import from_numpy  # noqa: F401
+from awkward._v2.operations.convert.ak_from_avro import from_avro  # noqa: F401
 from awkward._v2.operations.convert.ak_to_numpy import to_numpy  # noqa: F401
 from awkward._v2.operations.convert.ak_from_cupy import from_cupy  # noqa: F401
 from awkward._v2.operations.convert.ak_to_cupy import to_cupy  # noqa: F401
