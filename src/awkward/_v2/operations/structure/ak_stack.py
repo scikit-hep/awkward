@@ -77,21 +77,26 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         )
 
     if posaxis == 0:
-        layouts = [
-            x
-            if isinstance(x, ak._v2.contents.Content)
-            else ak._v2.operations.convert.to_layout([x])
-            for x in contents
-        ]
-        length = len(layouts[0])
+        length = max(len(x) for x in contents)
 
-        tags = nplike.repeat(nplike.arange(len(layouts)), length)
+        nextinputs = []
+        for x in layouts:
+            if isinstance(x, ak._v2.contents.Content):
+                nextinputs.append(x)
+            else:
+                nextinputs.append(
+                    ak._v2.contents.NumpyArray(
+                        nplike.broadcast_to(nplike.array([x]), (length,))
+                    )
+                )
+
+        tags = nplike.repeat(nplike.arange(len(nextinputs)), length)
         index = nplike.broadcast_to(
-            nplike.arange(length), (len(layouts), length)
+            nplike.arange(length), (len(nextinputs), length)
         ).ravel()
 
         inner = ak._v2.contents.UnionArray(
-            ak._v2.index.Index8(tags), ak._v2.index.Index64(index), layouts
+            ak._v2.index.Index8(tags), ak._v2.index.Index64(index), nextinputs
         ).simplify_uniontype(merge=merge, mergebool=mergebool)
 
         offset = nplike.arange(0, len(index) + 1, length)
