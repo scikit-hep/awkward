@@ -96,7 +96,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
         inner = ak._v2.contents.UnionArray(
             ak._v2.index.Index8(tags), ak._v2.index.Index64(index), nextinputs
-        ).simplify_optiontype(merge=merge, mergebool=mergebool)
+        ).simplify_uniontype(merge=merge, mergebool=mergebool)
 
         offset = nplike.empty(len(lengths) + 1, dtype=np.int64)
         offset[0] = 0
