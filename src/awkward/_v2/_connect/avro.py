@@ -1,29 +1,27 @@
 import numpy as np
-import pandas as pd
 import awkward as ak
-import struct
+import json
 
 
-class _read_avro_py:
+class read_avro:
     def __init__(self, file_name):
         self.file_name = file_name
         self._data = np.memmap(file_name, np.uint8)
         self.field = []
-        _data = self._data
+        # _data = self._data
         if not self.check_valid():
             raise
         pos, self.pairs = self.decode_varint(4, self._data)
         self.pairs = self.decode_zigzag(self.pairs)
         pos = self.cont_spec(pos)
         pos = self.decode_block(pos)
-        tempos = pos
         ind = 2
         _exec_code = [
             f'data = np.memmap("{self.file_name}", np.uint8)\npos=0\n',
             """def decode_varint(pos, data):\n\tshift = 0\n\tresult = 0\n\twhile True:\n\t\ti = data[pos]\n\t\tpos += 1\n\t\tresult |= (i & 0x7f) << shift\n\t\tshift += 7\n\t\tif not (i & 0x80):\n\t\t\tbreak\n\treturn pos, result\ndef decode_zigzag(n):\n\treturn (n >> 1) ^ (-(n & 1))\n\n""",
             f"field = {str(self.field)}\n",
             f"for i in range({len(self.field)}):\n",
-            f"    fields = data[field[i][0]:field[i][1]]\n",
+            "    fields = data[field[i][0]:field[i][1]]\n",
             "    while pos != len(fields):",
         ]
         aform = []
@@ -48,12 +46,12 @@ class _read_avro_py:
         self.blocks = []
         count = 0
         while True:
-            print(pos)
+            # print(pos)
             # The byte is random at this position
             pos, info = self.decode_varint(pos + 17, self._data)
             info = self.decode_zigzag(info)
             self.blocks.append((count, int(info)))
-            print(pos)
+            # print(pos)
             pos, info = self.decode_varint(pos, self._data)
             info = self.decode_zigzag(info)
             # print(pos,info)
@@ -96,7 +94,7 @@ class _read_avro_py:
 
     def check_valid(self):
         init = self.ret_str(0, 4)
-        print(init)
+        # print(init)
         if init == "Obj\x01":
             return True
         else:
@@ -293,9 +291,7 @@ class _read_avro_py:
         elif file["type"] == "bytes":
             # print(file["name"])
             # print(file["type"],count)
-            astring = '{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray", "primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{}"}},"parameters": {{"__array__": "string"}},"form_key": "node{}"}},\n'.format(
-                count + 1, count
-            )
+            astring = f'{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray", "primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{count+1}"}},"parameters": {{"__array__": "string"}},"form_key": "node{count}"}},\n'
             var1 = f" 'part0-node{count+1}-data'"
             var2 = f" 'part0-node{count}-offsets'"
             dec.append(var2)
@@ -348,14 +344,12 @@ class _read_avro_py:
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
-                        + f"con['part0-node{temp}-mask'].append(np.int8(False))"
+                        + f"con['part0-node{temp}-mask'].append(np.int8(False))".format()
                     )
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
-                        + "con['part0-node{}-data'].append({})".format(
-                            temp + 1, self.dum_dat({"type": file["type"][1 - idxx]})
-                        )
+                        + f"con['part0-node{temp+1}-data'].append({self.dum_dat({'type': file['type'][1-idxx]})})"
                     )
                 else:
                     _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
@@ -389,9 +383,7 @@ class _read_avro_py:
             dec.append(var1)
             dec.append(": [],")
             aform.append(
-                '{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{}"}},"size": {},"form_key": "node{}"}},\n'.format(
-                    count + 1, file["size"], count
-                )
+                f'{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{count+1}"}},"size": {file["size"]},"form_key": "node{count}"}},\n'
             )
             _exec_code.append("\n" + "    " * ind + "lenn = {}".format(file["size"]))
             _exec_code.append(
