@@ -12,21 +12,18 @@ def test_record():
     array = ak.Array(record)
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
 
 def test_tuple():
     array = ak.Array(tuple)
 
     assert ak.is_tuple(array)
-    assert array.layout.istuple
 
 
 def test_numpy():
     array = ak.Array(ak.layout.NumpyArray(np.arange(10)))
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
 
 def test_list():
@@ -39,7 +36,6 @@ def test_list():
     )
 
     assert ak.is_tuple(array)
-    assert array.layout.istuple
 
     array = ak.Array(
         ak.layout.ListArray64(
@@ -50,7 +46,6 @@ def test_list():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
 
 def test_listoffset():
@@ -62,7 +57,6 @@ def test_listoffset():
     )
 
     assert ak.is_tuple(array)
-    assert array.layout.istuple
 
     array = ak.Array(
         ak.layout.ListOffsetArray64(
@@ -71,7 +65,6 @@ def test_listoffset():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
 
 def test_indexed():
@@ -82,7 +75,6 @@ def test_indexed():
     )
 
     assert ak.is_tuple(array)
-    assert array.layout.istuple
 
     array = ak.Array(
         ak.layout.IndexedArray64(
@@ -91,19 +83,16 @@ def test_indexed():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
 
 def test_regular():
     array = ak.Array(ak.layout.RegularArray(tuple, 5))
 
     assert ak.is_tuple(array)
-    assert array.layout.istuple
 
     array = ak.Array(ak.layout.RegularArray(record, 5))
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
 
 def test_bytemasked():
@@ -116,7 +105,6 @@ def test_bytemasked():
     )
 
     assert ak.is_tuple(array)
-    assert array.layout.istuple
 
     array = ak.Array(
         ak.layout.ByteMaskedArray(
@@ -127,7 +115,6 @@ def test_bytemasked():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
 
 def test_bitmasked():
@@ -142,7 +129,6 @@ def test_bitmasked():
     )
 
     assert ak.is_tuple(array)
-    assert array.layout.istuple
 
     array = ak.Array(
         ak.layout.BitMaskedArray(
@@ -155,7 +141,6 @@ def test_bitmasked():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
 
 def test_union():
@@ -168,7 +153,6 @@ def test_union():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
     array = ak.Array(
         ak.layout.UnionArray8_64(
@@ -179,7 +163,6 @@ def test_union():
     )
 
     assert ak.is_tuple(array)
-    assert array.layout.istuple
 
     array = ak.Array(
         ak.layout.UnionArray8_64(
@@ -190,7 +173,6 @@ def test_union():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
     array = ak.Array(
         ak.layout.UnionArray8_64(
@@ -201,7 +183,6 @@ def test_union():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
 
     array = ak.Array(
         ak.layout.UnionArray8_64(
@@ -212,4 +193,3 @@ def test_union():
     )
 
     assert not ak.is_tuple(array)
-    assert not array.layout.istuple
