@@ -774,6 +774,33 @@ class RecordArray(Content):
             contents, self._fields, self._length, None, self._parameters, self._nplike
         )
 
+    def _cumsum_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if self._fields is None or len(self._fields) == 0:
+            # FIXME: return proper type here
+            return ak._v2.contents.NumpyArray(
+                self._nplike.instance().empty(0, np.int64), None, None, self._nplike
+            )
+
+        contents = []
+        for content in self._contents:
+            contents.append(
+                content._cumsum_next(
+                    negaxis,
+                    starts,
+                    parents,
+                    outlength,
+                    ascending,
+                    stable,
+                    kind,
+                    order,
+                )
+            )
+        return RecordArray(
+            contents, self._fields, self._length, None, self._parameters, self._nplike
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

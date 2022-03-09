@@ -407,6 +407,40 @@ class UnmaskedArray(Content):
         else:
             return out
 
+    def _cumsum_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        out = self._content._cumsum_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
+        if isinstance(out, ak._v2.contents.RegularArray):
+            tmp = ak._v2.contents.UnmaskedArray(
+                out._content,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            ).simplify_optiontype()
+
+            return ak._v2.contents.RegularArray(
+                tmp,
+                out._size,
+                out._length,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
+
+        else:
+            return out
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

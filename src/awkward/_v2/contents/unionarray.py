@@ -1104,6 +1104,25 @@ class UnionArray(Content):
             negaxis, starts, parents, outlength, ascending, stable, kind, order
         )
 
+    def _cumsum_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if self.length == 0:
+            return self
+
+        simplified = self.simplify_uniontype(mergebool=True)
+        if simplified.length == 0:
+            return simplified
+
+        if isinstance(simplified, ak._v2.contents.UnionArray):
+            raise ak._v2._util.error(
+                ValueError("cannot cumsum an irreducible UnionArray")
+            )
+
+        return simplified._cumsum_next(
+            negaxis, starts, parents, outlength, ascending, stable, kind, order
+        )
+
     def _reduce_next(
         self,
         reducer,
