@@ -4,28 +4,19 @@ import pytest  # noqa: F401
 import awkward as ak  # noqa: F401
 import numpy as np
 
+tuple = ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], None)
+record = ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], ["x"])
+
 
 def test_record():
-    array = ak.Array(
-        [
-            {"x": 10},
-            {"x": 11},
-            {"x": 12},
-        ]
-    )
+    array = ak.Array(record)
 
     assert not ak.is_tuple(array)
     assert not array.layout.istuple
 
 
 def test_tuple():
-    array = ak.Array(
-        [
-            (10,),
-            (11,),
-            (12,),
-        ]
-    )
+    array = ak.Array(tuple)
 
     assert ak.is_tuple(array)
     assert array.layout.istuple
@@ -39,128 +30,135 @@ def test_numpy():
 
 
 def test_list():
-    tuple = ak.Array(
+    array = ak.Array(
         ak.layout.ListArray64(
             ak.layout.Index64(np.array([0, 2], dtype=np.int64)),
             ak.layout.Index64(np.array([2, 4], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], None),
+            tuple,
         )
     )
 
-    assert ak.is_tuple(tuple)
-    assert tuple.layout.istuple
+    assert ak.is_tuple(array)
+    assert array.layout.istuple
 
-    record = ak.Array(
+    array = ak.Array(
         ak.layout.ListArray64(
             ak.layout.Index64(np.array([0, 2], dtype=np.int64)),
             ak.layout.Index64(np.array([2, 4], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], ["x"]),
+            record,
         )
     )
 
-    assert not ak.is_tuple(record)
-    assert not record.layout.istuple
+    assert not ak.is_tuple(array)
+    assert not array.layout.istuple
 
 
 def test_listoffset():
-    tuple = ak.Array(
+    array = ak.Array(
         ak.layout.ListOffsetArray64(
             ak.layout.Index64(np.array([0, 2, 4], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], None),
+            tuple,
         )
     )
 
-    assert ak.is_tuple(tuple)
-    assert tuple.layout.istuple
+    assert ak.is_tuple(array)
+    assert array.layout.istuple
 
-    record = ak.Array(
+    array = ak.Array(
         ak.layout.ListOffsetArray64(
-            ak.layout.Index64(np.array([0, 2, 4], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], ["x"]),
+            ak.layout.Index64(np.array([0, 2, 4], dtype=np.int64)), record
         )
     )
 
-    assert not ak.is_tuple(record)
-    assert not record.layout.istuple
+    assert not ak.is_tuple(array)
+    assert not array.layout.istuple
 
 
-def test_layouted():
-    tuple = ak.Array(
+def test_indexed():
+    array = ak.Array(
         ak.layout.IndexedArray64(
-            ak.layout.Index64(np.array([0, 1, 3], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], None),
+            ak.layout.Index64(np.array([0, 1, 3], dtype=np.int64)), tuple
         )
     )
 
-    assert ak.is_tuple(tuple)
-    assert tuple.layout.istuple
+    assert ak.is_tuple(array)
+    assert array.layout.istuple
 
-    record = ak.Array(
+    array = ak.Array(
         ak.layout.IndexedArray64(
-            ak.layout.Index64(np.array([0, 1, 3], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], ["x"]),
+            ak.layout.Index64(np.array([0, 1, 3], dtype=np.int64)), record
         )
     )
 
-    assert not ak.is_tuple(record)
-    assert not record.layout.istuple
+    assert not ak.is_tuple(array)
+    assert not array.layout.istuple
+
+
+def test_regular():
+    array = ak.Array(ak.layout.RegularArray(tuple, 5))
+
+    assert ak.is_tuple(array)
+    assert array.layout.istuple
+
+    array = ak.Array(ak.layout.RegularArray(record, 5))
+
+    assert not ak.is_tuple(array)
+    assert not array.layout.istuple
 
 
 def test_bytemasked():
-    tuple = ak.Array(
+    array = ak.Array(
         ak.layout.ByteMaskedArray(
             ak.layout.Index8(np.array([0, 1, 0, 1], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], None),
+            tuple,
             valid_when=True,
         )
     )
 
-    assert ak.is_tuple(tuple)
-    assert tuple.layout.istuple
+    assert ak.is_tuple(array)
+    assert array.layout.istuple
 
-    record = ak.Array(
+    array = ak.Array(
         ak.layout.ByteMaskedArray(
             ak.layout.Index8(np.array([0, 1, 0, 1], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], ["x"]),
+            record,
             valid_when=True,
         )
     )
 
-    assert not ak.is_tuple(record)
-    assert not record.layout.istuple
+    assert not ak.is_tuple(array)
+    assert not array.layout.istuple
 
 
 def test_bitmasked():
-    tuple = ak.Array(
+    array = ak.Array(
         ak.layout.BitMaskedArray(
             ak.layout.IndexU8(np.array([0, 1, 0, 1], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], None),
+            tuple,
             valid_when=True,
             length=4,
             lsb_order=True,
         )
     )
 
-    assert ak.is_tuple(tuple)
-    assert tuple.layout.istuple
+    assert ak.is_tuple(array)
+    assert array.layout.istuple
 
-    record = ak.Array(
+    array = ak.Array(
         ak.layout.BitMaskedArray(
             ak.layout.IndexU8(np.array([0, 1, 0, 1], dtype=np.int64)),
-            ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], ["x"]),
+            record,
             valid_when=True,
             length=4,
             lsb_order=True,
         )
     )
 
-    assert not ak.is_tuple(record)
-    assert not record.layout.istuple
+    assert not ak.is_tuple(array)
+    assert not array.layout.istuple
 
 
 def test_union():
-    tuple = ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], None)
-
     array = ak.Array(
         ak.layout.UnionArray8_64(
             ak.layout.Index8([0, 0, 1, 1]),
@@ -182,8 +180,6 @@ def test_union():
 
     assert ak.is_tuple(array)
     assert array.layout.istuple
-
-    record = ak.layout.RecordArray([ak.layout.NumpyArray(np.arange(10))], ["x"])
 
     array = ak.Array(
         ak.layout.UnionArray8_64(
