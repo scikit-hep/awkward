@@ -236,7 +236,7 @@ class UnionForm(Form):
 
     @property
     def is_tuple(self):
-        return all(x.is_tuple for x in self._contents)
+        return all(x.is_tuple for x in self._contents) and (len(self._contents) > 0)
 
     @property
     def dimension_optiontype(self):
