@@ -1,12 +1,126 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+import ctypes
 import ROOT
 
 # C++17 is required for invoke
 headers = "functional"
 f_cache = {}
 f_type = {}
+cache = {}
+
+
+def generate_ArrayBuilder(compiler, builder, use_cached=True):
+    key = "ArrayBuilderShim"
+
+    # get it from cling cash???
+    if use_cached:
+        out = cache.get(key)
+    else:
+        out = None
+
+    if out is None:
+        out = f"""namespace awkward {{
+
+    class ArrayBuilderShim {{
+    public:
+        typedef uint8_t (*FuncPtr)(void*);
+        typedef uint8_t (*FuncPtr_Int)(void*, int64_t);
+        typedef uint8_t (*FuncPtr_Bool)(void*, bool);
+        typedef uint8_t (*FuncPtr_Dbl)(void*, double);
+        typedef uint8_t (*FuncPtr_CharPtr)(void*, const char*);
+
+        ArrayBuilderShim(void* ptr)
+            : ptr_(ptr) {{ }}
+
+        uint8_t
+        beginlist() {{
+            return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_beginlist, ctypes.c_voidp).value})), ptr_);
+        }}
+
+        uint8_t
+        beginrecord() {{
+            return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord, ctypes.c_voidp).value})), ptr_);
+        }}
+
+        uint8_t
+        beginrecord_check(const char* name) {{
+            return std::invoke(reinterpret_cast<FuncPtr_CharPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord_check, ctypes.c_voidp).value})), ptr_, name);
+        }}
+
+        uint8_t
+        beginrecord_fast(const char* name) {{
+            return std::invoke(reinterpret_cast<FuncPtr_CharPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord_fast, ctypes.c_voidp).value})), ptr_, name);
+        }}
+
+        uint8_t
+        begintuple(int64_t numfields) {{
+            return std::invoke(reinterpret_cast<FuncPtr_Int>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_begintuple, ctypes.c_voidp).value})), ptr_, numfields);
+        }}
+
+        uint8_t
+        boolean(bool x) {{
+            return std::invoke(reinterpret_cast<FuncPtr_Bool>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_boolean, ctypes.c_void_p).value})), ptr_, x);
+        }}
+
+        uint8_t
+        clear() {{
+            return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_clear, ctypes.c_void_p).value})), ptr_);
+        }}
+
+        uint8_t
+        endlist() {{
+            return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_endlist, ctypes.c_void_p).value})), ptr_);
+        }}
+
+        uint8_t
+        endrecord() {{
+            return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_endrecord, ctypes.c_void_p).value})), ptr_);
+        }}
+
+        uint8_t
+        endtuple() {{
+            return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_endtuple, ctypes.c_void_p).value})), ptr_);
+        }}
+
+        uint8_t
+        field_check(const char* key) {{
+            return std::invoke(reinterpret_cast<FuncPtr_CharPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_field_check, ctypes.c_void_p).value})), ptr_, key);
+        }}
+
+        uint8_t
+        field_fast(const char* key) {{
+            return std::invoke(reinterpret_cast<FuncPtr_CharPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_field_fast, ctypes.c_void_p).value})), ptr_, key);
+        }}
+
+        uint8_t
+        index(int64_t index) {{
+            return std::invoke(reinterpret_cast<FuncPtr_Int>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_index, ctypes.c_void_p).value})), ptr_, index);
+        }}
+
+        uint8_t
+        integer(int64_t x) {{
+            return std::invoke(reinterpret_cast<FuncPtr_Int>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_integer, ctypes.c_void_p).value})), ptr_, x);
+        }}
+
+        uint8_t
+        null() {{
+            return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_null, ctypes.c_void_p).value})), ptr_);
+        }}
+
+        uint8_t
+        real(double x) {{
+            return std::invoke(reinterpret_cast<FuncPtr_Dbl>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_real, ctypes.c_void_p).value})), ptr_, x);
+        }}
+
+    private:
+        void* ptr_;
+}};
+}}
+""".strip()
+    compiler(out)
+    return out
 
 
 def connect_ArrayBuilder(compiler, builder):
@@ -141,25 +255,31 @@ def _as_awkward(
     columns = [x for x in columns if x not in exclude]
 
     builder = ak.ArrayBuilder()
-    func = ak._v2._connect.rdataframe._from_rdataframe.connect_ArrayBuilder(
-        compiler, builder
-    )
+    b = ROOT.awkward.ArrayBuilderShim(ctypes.cast(builder._layout._ptr, ctypes.c_voidp))
+    #
+    # func = ak._v2._connect.rdataframe._from_rdataframe.connect_ArrayBuilder(
+    #     compiler, builder
+    # )
 
     if columns_as_records:
         result_ptrs = {}
-        getattr(ROOT, func["beginlist"])()
+        # getattr(ROOT, func["beginlist"])()
+        b.beginlist()
         for col in columns:
-            getattr(ROOT, func["beginrecord_check"])(col)
+            # getattr(ROOT, func["beginrecord_check"])(col)
+            b.beginrecord_check(col)
             column_type = data_frame.GetColumnType(col)
-            print(column_type)
+            # print(column_type)
             result_ptrs[col] = data_frame.Take[column_type](col)
             # data_frame.Foreach["std::function<uint8_t(double)>"](
             #     getattr(ROOT, func["real"]), [col]
             # )
             # getattr(ROOT, func["real"])(result_ptrs[col][0])
-            getattr(ROOT, func["endrecord"])()
-            print("yey", col)
-        getattr(ROOT, func["endlist"])()
+            # getattr(ROOT, func["endrecord"])()
+            b.endrecord()
+            # print("yey", col)
+        # getattr(ROOT, func["endlist"])()
+        b.endlist()
 
     # if len(columns) == 0:
     #     return ak._v2.contents.EmptyArray()
@@ -182,5 +302,11 @@ def _as_awkward(
     #     return ak._v2.contents.recordarray.RecordArray(
     #         list(contents.values()), list(contents.keys())
     #     )
-    print(builder.snapshot())
+    # print(builder.snapshot())
     return builder.snapshot()
+
+
+def from_rdataframe(
+    data_frame, builder_name="ArrayBuilder", function_for_foreach="default"
+):
+    pass
