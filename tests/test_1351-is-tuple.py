@@ -79,3 +79,17 @@ def test_tuple_record():
 
     assert ak.is_tuple(array)
     assert array.layout.istuple
+
+
+def test_union_tuple_int():
+    array = ak.Array([(10,), 20])
+
+    assert not ak.is_tuple(array)
+    assert not array.layout.istuple
+
+
+def test_union_tuple_tuple():
+    array = ak.Array([(10,), (20, 30)])
+
+    assert ak.is_tuple(array)
+    assert array.layout.istuple
