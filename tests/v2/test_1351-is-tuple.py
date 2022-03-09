@@ -2,6 +2,7 @@
 
 import pytest  # noqa: F401
 import awkward as ak  # noqa: F401
+import numpy as np
 
 
 def test_record():
@@ -93,3 +94,31 @@ def test_union_tuple_tuple():
 
     assert ak._v2.is_tuple(array)
     assert array.layout.is_tuple
+
+
+def test_indexed_tuple():
+    array = ak._v2.Array(
+        ak._v2.contents.IndexedArray(
+            ak._v2.index.Index64(np.array([0, 1, 3], dtype=np.int64)),
+            ak._v2.contents.RecordArray(
+                [ak._v2.contents.NumpyArray(np.arange(10))], None
+            ),
+        )
+    )
+
+    assert ak._v2.is_tuple(array)
+    assert array.layout.is_tuple
+
+
+def test_indexed_record():
+    array = ak._v2.Array(
+        ak._v2.contents.IndexedArray(
+            ak._v2.index.Index64(np.array([0, 1, 3], dtype=np.int64)),
+            ak._v2.contents.RecordArray(
+                [ak._v2.contents.NumpyArray(np.arange(10))], ["x"]
+            ),
+        )
+    )
+
+    assert not ak._v2.is_tuple(array)
+    assert not array.layout.is_tuple
