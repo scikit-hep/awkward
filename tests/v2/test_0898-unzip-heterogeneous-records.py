@@ -57,5 +57,3 @@ def test_zip_and_unzip():
     ]
     assert to_list(xx) == [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
     assert to_list(yy) == [1.1, 2.2, 3.3, 4.4, 5.5]
-
-
