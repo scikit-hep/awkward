@@ -279,7 +279,7 @@ def is_tuple(array):
     layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
-    return layout.istuple()
+    return layout.istuple
 
 
 __all__ = [
