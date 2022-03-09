@@ -272,11 +272,12 @@ namespace awkward {
 
   bool
   UnionForm::istuple() const {
-  bool is_tuple = false;
+    bool all_contents_are_tuple = true;
     for (auto content : contents_) {
-        is_tuple = is_tuple && content.get()->istuple();
+        all_contents_are_tuple = all_contents_are_tuple && content.get()->istuple();
     }
-    return is_tuple;
+    //
+    return all_contents_are_tuple && (!contents_.empty());
   }
 
   bool
@@ -1456,11 +1457,12 @@ namespace awkward {
   template <typename T, typename I>
   bool
   UnionArrayOf<T, I>::istuple() const {
-  bool is_tuple = false;
+    bool all_contents_are_tuple = true;
     for (auto content : contents_) {
-        is_tuple = is_tuple && content.get()->istuple();
+        all_contents_are_tuple = all_contents_are_tuple && content.get()->istuple();
     }
-    return is_tuple;
+    //
+    return all_contents_are_tuple && (!contents_.empty());
   }
 
   template <typename T, typename I>
