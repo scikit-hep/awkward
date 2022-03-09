@@ -276,7 +276,6 @@ namespace awkward {
     for (auto content : contents_) {
         all_contents_are_tuple = all_contents_are_tuple && content.get()->istuple();
     }
-    //
     return all_contents_are_tuple && (!contents_.empty());
   }
 
@@ -1461,7 +1460,6 @@ namespace awkward {
     for (auto content : contents_) {
         all_contents_are_tuple = all_contents_are_tuple && content.get()->istuple();
     }
-    //
     return all_contents_are_tuple && (!contents_.empty());
   }
 
