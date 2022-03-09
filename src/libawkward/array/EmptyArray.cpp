@@ -120,6 +120,11 @@ namespace awkward {
   }
 
   bool
+  EmptyForm::istuple() const {
+    return false;
+  }
+
+  bool
   EmptyForm::equal(const FormPtr& other,
                    bool check_identities,
                    bool check_parameters,
@@ -425,6 +430,11 @@ namespace awkward {
   const std::vector<std::string>
   EmptyArray::keys() const {
     return std::vector<std::string>();
+  }
+
+  bool
+  EmptyArray::istuple() const {
+    return false;
   }
 
   const std::string

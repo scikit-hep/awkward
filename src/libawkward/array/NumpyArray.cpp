@@ -251,6 +251,11 @@ namespace awkward {
   }
 
   bool
+  NumpyForm::istuple() const {
+    return false;
+  }
+
+  bool
   NumpyForm::equal(const FormPtr& other,
                    bool check_identities,
                    bool check_parameters,
@@ -1538,6 +1543,11 @@ namespace awkward {
   const std::vector<std::string>
   NumpyArray::keys() const {
     return std::vector<std::string>();
+  }
+
+  bool
+  NumpyArray::istuple() const {
+    return false;
   }
 
   const std::string

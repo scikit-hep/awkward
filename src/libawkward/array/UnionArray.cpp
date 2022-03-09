@@ -271,6 +271,15 @@ namespace awkward {
   }
 
   bool
+  UnionForm::istuple() const {
+  bool is_tuple = false;
+    for (auto content : contents_) {
+        is_tuple = is_tuple && content.get()->istuple();
+    }
+    return is_tuple;
+  }
+
+  bool
   UnionForm::equal(const FormPtr& other,
                    bool check_identities,
                    bool check_parameters,
@@ -1442,6 +1451,16 @@ namespace awkward {
       }
     }
     return out;
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::istuple() const {
+  bool is_tuple = false;
+    for (auto content : contents_) {
+        is_tuple = is_tuple && content.get()->istuple();
+    }
+    return is_tuple;
   }
 
   template <typename T, typename I>

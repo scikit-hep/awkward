@@ -169,6 +169,11 @@ namespace awkward {
   }
 
   bool
+  RegularForm::istuple() const {
+    return content_.get()->istuple();
+  }
+
+  bool
   RegularForm::equal(const FormPtr& other,
                      bool check_identities,
                      bool check_parameters,
@@ -781,6 +786,11 @@ namespace awkward {
   const std::vector<std::string>
   RegularArray::keys() const {
     return content_.get()->keys();
+  }
+
+  bool
+  RegularArray::istuple() const {
+    return content_.get()->istuple();
   }
 
   const std::string

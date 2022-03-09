@@ -156,6 +156,10 @@ namespace awkward {
     const std::vector<std::string>
       keys() const override;
 
+    /// @exception std::runtime_error is always thrown
+    bool
+      istuple() const override;
+
     // operations
 
     /// @exception std::runtime_error is always thrown
