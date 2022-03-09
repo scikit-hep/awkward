@@ -163,6 +163,11 @@ namespace awkward {
   }
 
   bool
+  ByteMaskedForm::istuple() const {
+    return content_.get()->istuple();
+  }
+
+  bool
   ByteMaskedForm::equal(const FormPtr& other,
                         bool check_identities,
                         bool check_parameters,
@@ -819,6 +824,11 @@ namespace awkward {
   const std::vector<std::string>
   ByteMaskedArray::keys() const {
     return content_.get()->keys();
+  }
+
+  bool
+  ByteMaskedArray::istuple() const {
+    return content_.get()->istuple();
   }
 
   const std::string

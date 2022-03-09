@@ -238,6 +238,13 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  bool
+  None::istuple() const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::istuple")
+      + FILENAME(__LINE__));
+  }
+
   const std::string
   None::validityerror(const std::string& path) const {
     throw std::runtime_error(
