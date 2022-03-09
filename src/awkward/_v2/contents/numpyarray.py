@@ -1066,6 +1066,107 @@ class NumpyArray(Content):
                 self._nplike.asarray(out, self.dtype), None, None, self._nplike
             )
 
+    def _cumsum_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        if len(self.shape) == 0:
+            raise ak._v2._util.error(
+                TypeError(f"{type(self).__name__} attempting to cumsum a scalar ")
+            )
+
+        elif len(self.shape) != 1 or not self.is_contiguous:
+            contiguous_self = self if self.is_contiguous else self.contiguous()
+            return contiguous_self.toRegularArray()._cumsum_next(
+                negaxis,
+                starts,
+                parents,
+                outlength,
+                ascending,
+                stable,
+                kind,
+                order,
+            )
+
+        else:
+            parents_length = parents.length
+            offsets_length = ak._v2.index.Index64.empty(1, self._nplike)
+            assert (
+                offsets_length.nplike is self._nplike and parents.nplike is self._nplike
+            )
+            self._handle_error(
+                self._nplike[
+                    "awkward_sorting_ranges_length",
+                    offsets_length.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets_length.data,
+                    parents.data,
+                    parents_length,
+                )
+            )
+
+            offsets = ak._v2.index.Index64.empty(offsets_length[0], self._nplike)
+
+            assert offsets.nplike is self._nplike and parents.nplike is self._nplike
+            self._handle_error(
+                self._nplike[
+                    "awkward_sorting_ranges",
+                    offsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    offsets.data,
+                    offsets_length[0],
+                    parents.data,
+                    parents_length,
+                )
+            )
+
+            if self._data.dtype.kind.upper() == "M":
+                raise ak._v2._util.error(TypeError("Cannot call cumsum on datetime"))
+            elif self._data.dtype in (np.complex64, np.complex128):
+                raise ak._v2._util.error(
+                    NotImplementedError("cumsum not implemented for complex arrays")
+                )
+
+            if self._data.dtype == np.bool_:
+                out_dtype = np.int32 if (ak._util.win or ak._util.bits32) else np.int64
+                out = self._nplike.empty(self.length, dtype=out_dtype)
+                assert offsets.nplike is self._nplike
+                self._handle_error(
+                    self._nplike[  # noqa: E231
+                        "awkward_cumsum_bool",
+                        out_dtype,
+                        self._data.dtype.type,
+                        offsets.dtype.type,
+                    ](
+                        out,
+                        self._data,
+                        self.shape[0],
+                        offsets.data,
+                        offsets_length[0],
+                        parents_length,
+                    )
+                )
+            else:
+                out = self._nplike.empty(self.length, self._data.dtype)
+                assert offsets.nplike is self._nplike
+                self._handle_error(
+                    self._nplike[  # noqa: E231
+                        "awkward_cumsum",
+                        out.dtype.type,
+                        self._data.dtype.type,
+                        offsets.dtype.type,
+                    ](
+                        out,
+                        self._data,
+                        self.shape[0],
+                        offsets.data,
+                        offsets_length[0],
+                        parents_length,
+                    )
+                )
+            return ak._v2.contents.NumpyArray(out, None, None, self._nplike)
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:

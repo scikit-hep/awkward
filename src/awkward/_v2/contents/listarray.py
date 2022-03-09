@@ -1178,6 +1178,20 @@ class ListArray(Content):
             order,
         )
 
+    def _cumsum_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        return self.toListOffsetArray64(True)._cumsum_next(
+            negaxis,
+            starts,
+            parents,
+            outlength,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ListOffsetArray._combinations(
             self, n, replacement, recordlookup, parameters, axis, depth

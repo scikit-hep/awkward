@@ -1198,6 +1198,51 @@ class Content:
             )
         )
 
+    def cumsum(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+        negaxis = -axis
+        branch, depth = self.branch_depth
+        if branch:
+            if negaxis <= 0:
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use non-negative axis on a nested list structure "
+                        "of variable depth (negative axis counts from the leaves "
+                        "of the tree; non-negative from the root)"
+                    )
+                )
+            if negaxis > depth:
+                raise ak._v2._util.error(
+                    ValueError(
+                        "cannot use axis={} on a nested list structure that splits into "
+                        "different depths, the minimum of which is depth={} from the leaves".format(
+                            axis, depth
+                        )
+                    )
+                )
+        else:
+            if negaxis <= 0:
+                negaxis = negaxis + depth
+            if not (0 < negaxis and negaxis <= depth):
+                raise ak._v2._util.error(
+                    ValueError(
+                        "axis={} exceeds the depth of the nested list structure "
+                        "(which is {})".format(axis, depth)
+                    )
+                )
+
+        starts = ak._v2.index.Index64.zeros(1, self._nplike)
+        parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
+        return self._cumsum_next(
+            negaxis,
+            starts,
+            parents,
+            1,
+            ascending,
+            stable,
+            kind,
+            order,
+        )
+
     @property
     def purelist_isregular(self):
         return self.Form.purelist_isregular.__get__(self)
