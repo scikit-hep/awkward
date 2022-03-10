@@ -1231,7 +1231,7 @@ class IndexedOptionArray(Content):
         )
 
         return self._prepare_out(
-            inject_nones, out, branch, negaxis, depth, parents, starts, outindex
+            inject_nones, out, branch, negaxis, depth, starts, outindex
         )
 
     def _sort_next(
@@ -1284,13 +1284,16 @@ class IndexedOptionArray(Content):
         inject_nones = True if not branch and negaxis != depth else False
 
         return self._prepare_out(
-            inject_nones, out, branch, negaxis, depth, parents, starts, outindex
+            inject_nones, out, branch, negaxis, depth, starts, outindex
         )
 
-    def _prepare_out(
-        self, inject_nones, out, branch, negaxis, depth, parents, starts, outindex
-    ):
-        if inject_nones:
+    def _prepare_out(self, inject_nones, out, branch, negaxis, depth, starts, outindex):
+        # If we are rearranging (e.g sorting) the contents of this layout,
+        # then we do NOT want to return an optional layout
+        if not branch and negaxis == depth:
+            return out
+        # Otherwise, create an option type layout
+        elif inject_nones:
             return ak._v2.contents.IndexedOptionArray(
                 outindex,
                 out,
@@ -1298,10 +1301,7 @@ class IndexedOptionArray(Content):
                 self._parameters,
                 self._nplike,
             ).simplify_optiontype()
-
-        elif not branch and negaxis == depth:
-            assert not inject_nones
-            return out
+        # Otherwise
         else:
             if isinstance(out, ak._v2.contents.RegularArray):
                 out = out.toListOffsetArray64(True)
@@ -1407,9 +1407,7 @@ class IndexedOptionArray(Content):
             keepdims,
         )
 
-        return self._prepare_out(
-            False, out, branch, negaxis, depth, parents, starts, outindex
-        )
+        return self._prepare_out(False, out, branch, negaxis, depth, starts, outindex)
 
     def _validityerror(self, path):
         assert self.index.nplike is self._nplike
