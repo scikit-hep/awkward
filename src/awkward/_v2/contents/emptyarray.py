@@ -225,6 +225,11 @@ class EmptyArray(Content):
     ):
         return self
 
+    def _cumsum_next(
+        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
+    ):
+        return self
+
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ak._v2.contents.emptyarray.EmptyArray(
             self._identifier, self._parameters, self._nplike
