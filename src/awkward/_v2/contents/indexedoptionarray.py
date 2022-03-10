@@ -1272,7 +1272,6 @@ class IndexedOptionArray(Content):
                 nextparents.length,
             )
         )
-
         out = ak._v2.contents.IndexedOptionArray(
             nextoutindex,
             out,
@@ -1292,7 +1291,9 @@ class IndexedOptionArray(Content):
         # then we do NOT want to return an optional layout
         if not branch and negaxis == depth:
             return out
-        # Otherwise, create an option type layout
+        # Otherwise, we want the None's to be in the right place.
+        # Here, we index the dense ([x y z None None]) content with an index
+        # that maps the values to the correct locations
         elif inject_nones:
             return ak._v2.contents.IndexedOptionArray(
                 outindex,
@@ -1301,7 +1302,7 @@ class IndexedOptionArray(Content):
                 self._parameters,
                 self._nplike,
             ).simplify_optiontype()
-        # Otherwise
+        # Otherwise branching?
         else:
             if isinstance(out, ak._v2.contents.RegularArray):
                 out = out.toListOffsetArray64(True)
