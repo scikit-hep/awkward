@@ -978,7 +978,11 @@ class IndexedOptionArray(Content):
             )
 
         if isinstance(out, ak._v2.contents.NumpyArray):
-            nextoutindex = ak._v2.index.Index64.empty(out.length, self._nplike)
+            # We do not pass None values to the content, so it will have computed
+            # the unique _non null_ values. We therefore need to account for None
+            # values in the result. We do this by creating an IndexedOptionArray
+            # and tacking the index -1 onto the end
+            nextoutindex = ak._v2.index.Index64.empty(out.length + 1, self._nplike)
             assert nextoutindex.nplike is self._nplike
             self._handle_error(
                 self._nplike[
@@ -1052,6 +1056,11 @@ class IndexedOptionArray(Content):
             order,
         )
 
+        # Find concrete index of Nones
+        # `next._argsort_next` is given the non-None values. We choose to
+        # sort None values to the end of the list, meaning we need to grow `out`
+        # to account for these None values. First, we locate these nones within
+        # their sublists
         nulls_merged = False
         nulls_index = ak._v2.index.Index64.empty(numnull[0], self._nplike)
         assert (
@@ -1075,11 +1084,13 @@ class IndexedOptionArray(Content):
                 starts.data,
             )
         )
-
-        ind = ak._v2.contents.NumpyArray(nulls_index, None, None, self._nplike)
-
-        if out.mergeable(ind, True):
-            out = out.merge(ind)
+        # Now, build these indices into a content, and try to concatenate
+        # them at the end of the next._argsort_next result
+        nulls_index_content = ak._v2.contents.NumpyArray(
+            nulls_index, None, None, self._nplike
+        )
+        if out.mergeable(nulls_index_content, True):
+            out = out.merge(nulls_index_content)
             nulls_merged = True
 
         nextoutindex = ak._v2.index.Index64.empty(parents.length, self._nplike)
@@ -1108,7 +1119,9 @@ class IndexedOptionArray(Content):
 
         if nulls_merged:
             # awkward_IndexedArray_local_preparenext_64 uses -1 to indicate None values
-            # We don't want to return None, instead we want to return their locations
+            # If we managed to actually store the None indices in the content (out)
+            # i.e. if nulls_merged, then we want to make these -1 indices point into
+            # the `None` region of out.
             # We can do this by mapping the -1 values to monotonic increasing values
             # after the maximum index.
             assert nextoutindex.nplike is self._nplike
