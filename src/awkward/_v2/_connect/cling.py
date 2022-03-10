@@ -1,9 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import base64
+import ctypes
 import struct
 import json
 import re
+import threading
 
 import awkward as ak
 
@@ -1134,3 +1136,89 @@ namespace awkward {{
 """.strip()
             cache[key] = out
             compiler(out)
+
+
+class CppStatements:
+    def __init__(self, cppcode, **kwargs):
+        compiler = RawCppCompiler.instance()
+        # compiler_declare = compiler.declare
+        compiler_declare = print  # noqa: T002
+
+        self._cppcode = cppcode
+        self._funcname = f"awkward_function_{compiler.next_number()}"
+        self._funcargs = []
+        self._assignments = []
+        self._generators = []
+        for argname, argval in kwargs.items():
+            if isinstance(argval, (ak._v2.Array, ak._v2.forms.Form)):
+                if isinstance(argval, ak._v2.Array):
+                    form = argval.layout.form
+                else:
+                    form = argval
+                number = compiler.next_number()
+                length = f"awkward_argument_{number}_length"
+                ptrs = f"awkward_argument_{number}_ptrs"
+                self._funcargs.append(f"ssize_t {length}, ssize_t {ptrs}")
+                generator = togenerator(form)
+                generator.generate(compiler_declare)
+                self._assignments.append(
+                    f"auto {argname} = {generator.entry(length, ptrs)};"
+                )
+                self._generators.append(generator)
+
+            else:
+                raise ak._v2._util.error(
+                    TypeError(f"can't compile objects of type {type(argval)}")
+                )
+
+        eoln = "\n"
+        compiler_declare(
+            f"""
+void {self._funcname}({", ".join(self._funcargs)}) {{
+{eoln.join(self._assignments)}
+{self._cppcode}
+}}
+"""
+        )
+
+    def call(self, **kwargs):
+        raise ak._v2._util.error(NotImplementedError)
+
+
+class RawCppCompiler(ak.nplike.Singleton):
+    # only called once; this is a Singleton
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._number = 0
+
+        self._libAArrayclangInterpreter = ctypes.CDLL("../libAArrayclangInterpreter.so")
+
+        self._Clang_LookupName = self._libAArrayclangInterpreter.Clang_LookupName
+        self._Clang_LookupName.argtypes = [ctypes.c_char_p]
+        self._Clang_LookupName.restype = ctypes.c_size_t
+
+        self._Clang_GetFunctionAddress = (
+            self._libAArrayclangInterpreter.Clang_GetFunctionAddress
+        )
+        self._Clang_GetFunctionAddress.argtypes = [ctypes.c_size_t]
+        self._Clang_GetFunctionAddress.restype = ctypes.c_void_p
+
+        self._Clang_Parse = self._libAArrayclangInterpreter.Clang_Parse
+        self._Clang_Parse.argtypes = [ctypes.c_char_p]
+        self._Clang_Parse.restype = ctypes.c_size_t
+
+    def next_number(self):
+        with self._lock:
+            out = self._number
+            self._number += 1
+        return out
+
+    def declare(self, cppcode):
+        if self._Clang_Parse(cppcode.encode("ascii")) != 0:
+            raise ak._v2._util.error(SyntaxError("invalid C++ code"))
+
+    def call(self, name, *args):
+        fn_handle = self._Clang_LookupName(name.encode("ascii"))
+        fn_proto = ctypes.CFUNCTYPE(*([None] + [ctypes.c_ssize_t] * len(args)))
+        fn_pointer = fn_proto(self._Clang_GetFunctionAddress(fn_handle))
+        return fn_pointer(*args)
