@@ -870,7 +870,6 @@ class IndexedOptionArray(Content):
         )
 
         index_length = self._index.length
-        parents_length = parents.length
 
         next, nextparents, numnull, outindex = self._rearrange_next(parents)
 
@@ -882,7 +881,7 @@ class IndexedOptionArray(Content):
         )
 
         if branch or (negaxis is not None and negaxis != depth):
-            nextoutindex = ak._v2.index.Index64.empty(parents_length, self._nplike)
+            nextoutindex = ak._v2.index.Index64.empty(parents.length, self._nplike)
             assert (
                 nextoutindex.nplike is self._nplike
                 and starts.nplike is self._nplike
@@ -900,7 +899,7 @@ class IndexedOptionArray(Content):
                     nextoutindex.data,
                     starts.data,
                     parents.data,
-                    parents_length,
+                    parents.length,
                     nextparents.data,
                     nextparents.length,
                 )
@@ -1029,7 +1028,6 @@ class IndexedOptionArray(Content):
             )
 
         branch, depth = self.branch_depth
-        parents_length = parents.length
 
         next, nextparents, numnull, outindex = self._rearrange_next(parents)
 
@@ -1084,7 +1082,7 @@ class IndexedOptionArray(Content):
             out = out.merge(ind)
             nulls_merged = True
 
-        nextoutindex = ak._v2.index.Index64.empty(parents_length, self._nplike)
+        nextoutindex = ak._v2.index.Index64.empty(parents.length, self._nplike)
         assert (
             nextoutindex.nplike is self._nplike
             and starts.nplike is self._nplike
@@ -1102,7 +1100,7 @@ class IndexedOptionArray(Content):
                 nextoutindex.data,
                 starts.data,
                 parents.data,
-                parents_length,
+                parents.length,
                 nextparents.data,
                 nextparents.length,
             )
@@ -1220,8 +1218,6 @@ class IndexedOptionArray(Content):
     ):
         branch, depth = self.branch_depth
 
-        parents_length = parents.length
-
         next, nextparents, numnull, outindex = self._rearrange_next(parents)
 
         inject_nones = True if not branch and negaxis != depth else False
@@ -1237,7 +1233,7 @@ class IndexedOptionArray(Content):
             order,
         )
 
-        nextoutindex = ak._v2.index.Index64.empty(parents_length, self._nplike)
+        nextoutindex = ak._v2.index.Index64.empty(parents.length, self._nplike)
         assert (
             nextoutindex.nplike is self._nplike
             and starts.nplike is self._nplike
@@ -1255,7 +1251,7 @@ class IndexedOptionArray(Content):
                 nextoutindex.data,
                 starts.data,
                 parents.data,
-                parents_length,
+                parents.length,
                 nextparents.data,
                 nextparents.length,
             )
