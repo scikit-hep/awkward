@@ -1029,52 +1029,13 @@ class IndexedOptionArray(Content):
             )
 
         branch, depth = self.branch_depth
-
         index_length = self._index.length
         parents_length = parents.length
 
         next, nextparents, numnull, outindex = self._prepare_next(index_length, parents)
 
         if (not branch) and negaxis == depth:
-            nextshifts = ak._v2.index.Index64.empty(
-                nextparents.length,
-                self._nplike,
-            )
-            if shifts is None:
-                assert (
-                    nextshifts.nplike is self._nplike
-                    and self._index.nplike is self._nplike
-                )
-                self._handle_error(
-                    self._nplike[
-                        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
-                        nextshifts.dtype.type,
-                        self._index.dtype.type,
-                    ](
-                        nextshifts.data,
-                        self._index.data,
-                        self._index.length,
-                    )
-                )
-            else:
-                assert (
-                    nextshifts.nplike is self._nplike
-                    and self._index.nplike is self._nplike
-                    and shifts.nplike is self._nplike
-                )
-                self._handle_error(
-                    self._nplike[
-                        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
-                        nextshifts.dtype.type,
-                        self._index.dtype.type,
-                        shifts.dtype.type,
-                    ](
-                        nextshifts.data,
-                        self._index.data,
-                        self._index.length,
-                        shifts.data,
-                    )
-                )
+            nextshifts = self._prepare_nextshifts(nextparents, shifts)
         else:
             nextshifts = None
 
@@ -1168,6 +1129,47 @@ class IndexedOptionArray(Content):
         return self._prepare_out(
             inject_nones, out, branch, negaxis, depth, parents, starts, outindex
         )
+
+    def _prepare_nextshifts(self, nextparents, shifts):
+        nextshifts = ak._v2.index.Index64.empty(
+            nextparents.length,
+            self._nplike,
+        )
+        if shifts is None:
+            assert (
+                nextshifts.nplike is self._nplike and self._index.nplike is self._nplike
+            )
+            self._handle_error(
+                self._nplike[
+                    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+                    nextshifts.dtype.type,
+                    self._index.dtype.type,
+                ](
+                    nextshifts.data,
+                    self._index.data,
+                    self._index.length,
+                )
+            )
+        else:
+            assert (
+                nextshifts.nplike is self._nplike
+                and self._index.nplike is self._nplike
+                and shifts.nplike is self._nplike
+            )
+            self._handle_error(
+                self._nplike[
+                    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+                    nextshifts.dtype.type,
+                    self._index.dtype.type,
+                    shifts.dtype.type,
+                ](
+                    nextshifts.data,
+                    self._index.data,
+                    self._index.length,
+                    shifts.data,
+                )
+            )
+        return nextshifts
 
     def _prepare_next(self, index_length, parents):
         numnull = ak._v2.index.Index64.empty(1, self._nplike)
@@ -1373,47 +1375,12 @@ class IndexedOptionArray(Content):
         keepdims,
     ):
         branch, depth = self.branch_depth
-
         index_length = self._index.length
 
         next, nextparents, numnull, outindex = self._prepare_next(index_length, parents)
 
         if reducer.needs_position and (not branch and negaxis == depth):
-            nextshifts = ak._v2.index.Index64.empty(nextparents.length, self._nplike)
-            if shifts is None:
-                assert (
-                    nextshifts.nplike is self._nplike
-                    and self.index.nplike is self._nplike
-                )
-                self._handle_error(
-                    self._nplike[
-                        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
-                        nextshifts.dtype.type,
-                        self.index.dtype.type,
-                    ](
-                        nextshifts.data,
-                        self.index.data,
-                        self.index.length,
-                    )
-                )
-            else:
-                assert (
-                    nextshifts.nplike is self._nplike
-                    and self.index.nplike is self._nplike
-                )
-                self._handle_error(
-                    self._nplike[
-                        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
-                        nextshifts.dtype.type,
-                        self.index.dtype.type,
-                        shifts.dtype.type,
-                    ](
-                        nextshifts.data,
-                        self.index.data,
-                        self.index.length,
-                        shifts.data,
-                    )
-                )
+            nextshifts = self._prepare_nextshifts(nextparents, shifts)
         else:
             nextshifts = None
 
