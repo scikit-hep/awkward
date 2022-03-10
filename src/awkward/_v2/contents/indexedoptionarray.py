@@ -1056,7 +1056,6 @@ class IndexedOptionArray(Content):
             order,
         )
 
-        # Find concrete index of Nones
         # `next._argsort_next` is given the non-None values. We choose to
         # sort None values to the end of the list, meaning we need to grow `out`
         # to account for these None values. First, we locate these nones within
@@ -1084,8 +1083,11 @@ class IndexedOptionArray(Content):
                 starts.data,
             )
         )
-        # Now, build these indices into a content, and try to concatenate
-        # them at the end of the next._argsort_next result
+        # If we wrap a NumpyArray (i.e., axis=-1), then we want `argmax` to return
+        # the indices of each `None` value, rather than `None` itself.
+        # We can test for this condition by seeing whether the NumpyArray of indices
+        # is mergeable with our content (`out = next._argsort_next result`).
+        # If so, try to concatenate them at the end of `out`.`
         nulls_index_content = ak._v2.contents.NumpyArray(
             nulls_index, None, None, self._nplike
         )
@@ -1118,12 +1120,11 @@ class IndexedOptionArray(Content):
         )
 
         if nulls_merged:
-            # awkward_IndexedArray_local_preparenext_64 uses -1 to indicate None values
-            # If we managed to actually store the None indices in the content (out)
-            # i.e. if nulls_merged, then we want to make these -1 indices point into
-            # the `None` region of out.
-            # We can do this by mapping the -1 values to monotonic increasing values
-            # after the maximum index.
+            # awkward_IndexedArray_local_preparenext_64 uses -1 to
+            # indicate `None` values. Given that this code-path runs
+            # only when the `None` value indices are explicitly stored in out,
+            # we need to mapping the -1 values to their corresponding indices
+            # in `out`
             assert nextoutindex.nplike is self._nplike
             self._handle_error(
                 self._nplike["awkward_Index_nones_as_index", nextoutindex.dtype.type](
