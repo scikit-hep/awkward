@@ -872,7 +872,7 @@ class IndexedOptionArray(Content):
         index_length = self._index.length
         parents_length = parents.length
 
-        next, nextparents, numnull, outindex = self._prepare_next(index_length, parents)
+        next, nextparents, numnull, outindex = self._rearrange_next(parents)
 
         out = next._unique(
             negaxis,
@@ -1029,13 +1029,12 @@ class IndexedOptionArray(Content):
             )
 
         branch, depth = self.branch_depth
-        index_length = self._index.length
         parents_length = parents.length
 
-        next, nextparents, numnull, outindex = self._prepare_next(index_length, parents)
+        next, nextparents, numnull, outindex = self._rearrange_next(parents)
 
         if (not branch) and negaxis == depth:
-            nextshifts = self._prepare_nextshifts(nextparents, shifts)
+            nextshifts = self._rearrange_nextshifts(nextparents, shifts)
         else:
             nextshifts = None
 
@@ -1130,7 +1129,7 @@ class IndexedOptionArray(Content):
             inject_nones, out, branch, negaxis, depth, parents, starts, outindex
         )
 
-    def _prepare_nextshifts(self, nextparents, shifts):
+    def _rearrange_nextshifts(self, nextparents, shifts):
         nextshifts = ak._v2.index.Index64.empty(
             nextparents.length,
             self._nplike,
@@ -1171,7 +1170,8 @@ class IndexedOptionArray(Content):
             )
         return nextshifts
 
-    def _prepare_next(self, index_length, parents):
+    def _rearrange_next(self, parents):
+        index_length = self._index.length
         numnull = ak._v2.index.Index64.empty(1, self._nplike)
         assert numnull.nplike is self._nplike and self._index.nplike is self._nplike
         self._handle_error(
@@ -1220,10 +1220,9 @@ class IndexedOptionArray(Content):
     ):
         branch, depth = self.branch_depth
 
-        index_length = self._index.length
         parents_length = parents.length
 
-        next, nextparents, numnull, outindex = self._prepare_next(index_length, parents)
+        next, nextparents, numnull, outindex = self._rearrange_next(parents)
 
         inject_nones = True if not branch and negaxis != depth else False
 
@@ -1375,12 +1374,11 @@ class IndexedOptionArray(Content):
         keepdims,
     ):
         branch, depth = self.branch_depth
-        index_length = self._index.length
 
-        next, nextparents, numnull, outindex = self._prepare_next(index_length, parents)
+        next, nextparents, numnull, outindex = self._rearrange_next(parents)
 
         if reducer.needs_position and (not branch and negaxis == depth):
-            nextshifts = self._prepare_nextshifts(nextparents, shifts)
+            nextshifts = self._rearrange_nextshifts(nextparents, shifts)
         else:
             nextshifts = None
 
