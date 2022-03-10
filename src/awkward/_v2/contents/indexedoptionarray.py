@@ -1107,6 +1107,10 @@ class IndexedOptionArray(Content):
         )
 
         if nulls_merged:
+            # awkward_IndexedArray_local_preparenext_64 uses -1 to indicate None values
+            # We don't want to return None, instead we want to return their locations
+            # We can do this by mapping the -1 values to monotonic increasing values
+            # after the maximum index.
             assert nextoutindex.nplike is self._nplike
             self._handle_error(
                 self._nplike["awkward_Index_nones_as_index", nextoutindex.dtype.type](
