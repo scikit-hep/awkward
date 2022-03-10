@@ -1078,7 +1078,7 @@ class IndexedOptionArray(Content):
 
         ind = ak._v2.contents.NumpyArray(nulls_index, None, None, self._nplike)
 
-        if self.mergeable(ind, True):
+        if out.mergeable(ind, True):
             out = out.merge(ind)
             nulls_merged = True
 
