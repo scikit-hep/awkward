@@ -26,6 +26,9 @@ def generate_ArrayView(compiler, use_cached=True):
 
     if out is None:
         out = """
+#include<sys/types.h>
+extern "C" int printf(const char*, ...);
+
 namespace awkward {
   class ArrayView {
   public:
@@ -141,29 +144,31 @@ class Generator:
         )
 
     def _generate_common(self):
-        params = [
-            f"if (parameter == {json.dumps(name)}) return {json.dumps(json.dumps(value))};\n      "
-            for name, value in self.parameters.items()
-        ]
+        return ""
 
-        return f"""
-    const std::string parameter(const std::string& parameter) const noexcept {{
-      {"" if len(params) == 0 else "".join(x for x in params)}return "null";
-    }}
+        # params = [
+        #     f"if (parameter == {json.dumps(name)}) return {json.dumps(json.dumps(value))};\n      "
+        #     for name, value in self.parameters.items()
+        # ]
 
-    value_type at(size_t at) const {{
-      if (at >= stop_ - start_) {{
-        throw std::out_of_range(std::to_string(at) + " is out of range");
-      }}
-      else {{
-        return (*this)[at];
-      }}
-    }}
-""".strip()
+        # return f"""
+        # const std::string parameter(const std::string& parameter) const noexcept {{
+        #   {"" if len(params) == 0 else "".join(x for x in params)}return "null";
+        # }}
+
+        # value_type at(size_t at) const {{
+        #   if (at >= stop_ - start_) {{
+        #     throw std::out_of_range(std::to_string(at) + " is out of range");
+        #   }}
+        #   else {{
+        #     return (*this)[at];
+        #   }}
+        # }}
+        # """.strip()
 
     def entry(self, length="length", ptrs="ptrs", flatlist_as_rvec=False):
         key = (self, flatlist_as_rvec)
-        return f"awkward::{self.class_type(key[1:])}(0, {length}, 0, {ptrs})"
+        return f"awkward::{self.class_type(key[1:])}(0, {length}, 0, reinterpret_cast<ssize_t*>({ptrs}))"
 
 
 class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
@@ -1141,13 +1146,15 @@ namespace awkward {{
 class CppStatements:
     def __init__(self, cppcode, **kwargs):
         compiler = RawCppCompiler.instance()
-        # compiler_declare = compiler.declare
-        compiler_declare = print  # noqa: T002
+        compiler_declare = compiler.declare
+        # compiler_declare = print  # noqa: T002
 
         self._cppcode = cppcode
         self._funcname = f"awkward_function_{compiler.next_number()}"
         self._funcargs = []
         self._assignments = []
+        self._argname_to_index = {}
+        self._forms = []
         self._generators = []
         for argname, argval in kwargs.items():
             if isinstance(argval, (ak._v2.Array, ak._v2.forms.Form)):
@@ -1164,6 +1171,8 @@ class CppStatements:
                 self._assignments.append(
                     f"auto {argname} = {generator.entry(length, ptrs)};"
                 )
+                self._argname_to_index[argname] = len(self._forms)
+                self._forms.append(form)
                 self._generators.append(generator)
 
             else:
@@ -1181,8 +1190,45 @@ void {self._funcname}({", ".join(self._funcargs)}) {{
 """
         )
 
-    def call(self, **kwargs):
-        raise ak._v2._util.error(NotImplementedError)
+    def __call__(self, **kwargs):
+        compiler = RawCppCompiler.instance()
+
+        if set(kwargs) != set(self._argname_to_index):
+            raise ak._v2._util.error(
+                TypeError(
+                    f"expected arguments {', '.join(self._argname_to_index)}, not {', '.join(kwargs)}"
+                )
+            )
+
+        # must be kept in scope while the C++ runs
+        lookups = []
+
+        arguments = []
+        for argname, argval in kwargs.items():
+            if isinstance(argval, ak._v2.Array):
+                index = self._argname_to_index[argname]
+
+                if argval.layout.form != self._forms[index]:
+                    raise ak._v2._util.error(
+                        TypeError(
+                            f"argument {argname} has a different Form (concrete type) from the one used in the declaration"
+                        )
+                    )
+
+                lookup = ak._v2._lookup.Lookup(argval.layout)
+                lookups.append(lookup)
+                arguments.append(len(argval.layout))
+                arguments.append(lookup.arrayptrs.ctypes.data)
+
+            else:
+                raise ak._v2._util.error(
+                    TypeError(
+                        f"argument {argname} does not match the type used in the declaration"
+                    )
+                )
+
+        # call it (no return value)
+        compiler.call(self._funcname, *arguments)
 
 
 class RawCppCompiler(ak.nplike.Singleton):
@@ -1220,5 +1266,6 @@ class RawCppCompiler(ak.nplike.Singleton):
     def call(self, name, *args):
         fn_handle = self._Clang_LookupName(name.encode("ascii"))
         fn_proto = ctypes.CFUNCTYPE(*([None] + [ctypes.c_ssize_t] * len(args)))
+
         fn_pointer = fn_proto(self._Clang_GetFunctionAddress(fn_handle))
         return fn_pointer(*args)

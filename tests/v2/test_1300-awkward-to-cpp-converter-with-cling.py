@@ -35,7 +35,7 @@ void roottest_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
   auto obj = {generator.entry()};
   out[0] = obj.size();
   out[1] = obj[1];
-  out[2] = obj.at(3);
+  out[2] = obj[3];
 }}
 """
     )
@@ -865,7 +865,7 @@ void roottest_nested_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t leng
   auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[1];
-  out[2] = obj.at(3);
+  out[2] = obj[3];
 }}
 """
     )
