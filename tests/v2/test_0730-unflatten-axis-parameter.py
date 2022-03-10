@@ -9,14 +9,18 @@ import awkward as ak  # noqa: F401
 def test():
     original = ak._v2.Array([[1, 2, 3, 4], [], [5, 6, 7], [8, 9]])
 
-    assert ak._v2.operations.structure.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1).tolist() == [
+    assert ak._v2.operations.structure.unflatten(
+        original, [2, 2, 1, 2, 1, 1], axis=1
+    ).tolist() == [
         [[1, 2], [3, 4]],
         [],
         [[5], [6, 7]],
         [[8], [9]],
     ]
 
-    assert ak._v2.operations.structure.unflatten(original, [1, 3, 1, 2, 1, 1], axis=1).tolist() == [
+    assert ak._v2.operations.structure.unflatten(
+        original, [1, 3, 1, 2, 1, 1], axis=1
+    ).tolist() == [
         [[1], [2, 3, 4]],
         [],
         [[5], [6, 7]],
@@ -26,7 +30,9 @@ def test():
     with pytest.raises(ValueError):
         ak._v2.operations.structure.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1)
 
-    assert ak._v2.operations.structure.unflatten(original, [2, 0, 2, 1, 2, 1, 1], axis=1).tolist() == [
+    assert ak._v2.operations.structure.unflatten(
+        original, [2, 0, 2, 1, 2, 1, 1], axis=1
+    ).tolist() == [
         [[1, 2], [], [3, 4]],
         [],
         [[5], [6, 7]],
@@ -35,7 +41,9 @@ def test():
 
 
 def test_issue742():
-    assert ak._v2.operations.structure.unflatten(ak._v2.Array(["a", "b", "c"]), [1, 2, 0]).tolist() == [
+    assert ak._v2.operations.structure.unflatten(
+        ak._v2.Array(["a", "b", "c"]), [1, 2, 0]
+    ).tolist() == [
         ["a"],
         ["b", "c"],
         [],

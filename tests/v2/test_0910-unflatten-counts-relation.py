@@ -16,5 +16,9 @@ def test():
     )
 
     assert ak._v2.operations.structure.unflatten(
-        layout, ak._v2.operations.structure.flatten(ak._v2.operations.structure.run_lengths(layout)), axis=1
+        layout,
+        ak._v2.operations.structure.flatten(
+            ak._v2.operations.structure.run_lengths(layout)
+        ),
+        axis=1,
     ).tolist() == [[[3, 3, 3]], [[1, 1, 1]], [[0, 0, 0]], [[2, 2], [3]]]

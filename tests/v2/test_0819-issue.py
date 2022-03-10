@@ -12,4 +12,7 @@ def test():
         [[1, 2], [3, 4]],
         [[5, 6], [7, 8]],
     ]
-    assert ak._v2.operations.structure.unflatten(a, 2, axis=1).tolist() == [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
+    assert ak._v2.operations.structure.unflatten(a, 2, axis=1).tolist() == [
+        [[1, 2], [3, 4]],
+        [[5, 6], [7, 8]],
+    ]

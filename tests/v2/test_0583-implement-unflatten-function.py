@@ -8,7 +8,10 @@ import awkward as ak  # noqa: F401
 
 def test():
     array = ak._v2.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    assert ak._v2.operations.structure.unflatten(array, 5).tolist() == [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]]
+    assert ak._v2.operations.structure.unflatten(array, 5).tolist() == [
+        [0, 1, 2, 3, 4],
+        [5, 6, 7, 8, 9],
+    ]
     assert ak._v2.operations.structure.unflatten(array, [3, 0, 2, 1, 4]).tolist() == [
         [0, 1, 2],
         [],
@@ -16,7 +19,9 @@ def test():
         [5],
         [6, 7, 8, 9],
     ]
-    assert ak._v2.operations.structure.unflatten(array, [3, None, 2, 1, 4]).tolist() == [
+    assert ak._v2.operations.structure.unflatten(
+        array, [3, None, 2, 1, 4]
+    ).tolist() == [
         [0, 1, 2],
         None,
         [3, 4],
