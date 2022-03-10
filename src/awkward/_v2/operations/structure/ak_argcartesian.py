@@ -95,6 +95,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             for n, x in arrays.items()
         }
     else:
+        arrays = list(arrays)
         behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
         layouts = [
             ak._v2.operations.convert.to_layout(
