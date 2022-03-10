@@ -1115,6 +1115,11 @@ class IndexedOptionArray(Content):
         kind,
         order,
     ):
+        assert (
+            starts.nplike is self._nplike
+            and parents.nplike is self._nplike
+            and self._index.nplike is self._nplike
+        )
         if self._index.length == 0:
             return ak._v2.contents.NumpyArray(
                 self._nplike.empty(0, np.int64), None, None, self._nplike
@@ -1128,10 +1133,6 @@ class IndexedOptionArray(Content):
             nextshifts = self._rearrange_nextshifts(nextparents, shifts)
         else:
             nextshifts = None
-
-        inject_nones = (
-            True if (numnull[0] > 0 and not branch and negaxis != depth) else False
-        )
 
         out = next._argsort_next(
             negaxis,
@@ -1151,12 +1152,7 @@ class IndexedOptionArray(Content):
         # their sublists
         nulls_merged = False
         nulls_index = ak._v2.index.Index64.empty(numnull[0], self._nplike)
-        assert (
-            nulls_index.nplike is self._nplike
-            and self._index.nplike is self._nplike
-            and parents.nplike is self._nplike
-            and starts.nplike is self._nplike
-        )
+        assert nulls_index.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_IndexedArray_index_of_nulls",
@@ -1230,6 +1226,10 @@ class IndexedOptionArray(Content):
             self._nplike,
         ).simplify_optiontype()
 
+        inject_nones = (
+            True if (numnull[0] > 0 and not branch and negaxis != depth) else False
+        )
+
         return self._prepare_out(
             inject_nones, out, branch, negaxis, depth, parents, starts, outindex
         )
@@ -1241,8 +1241,6 @@ class IndexedOptionArray(Content):
         branch, depth = self.branch_depth
 
         next, nextparents, numnull, outindex = self._rearrange_next(parents)
-
-        inject_nones = True if not branch and negaxis != depth else False
 
         out = next._sort_next(
             negaxis,
@@ -1282,6 +1280,8 @@ class IndexedOptionArray(Content):
             self._parameters,
             self._nplike,
         ).simplify_optiontype()
+
+        inject_nones = True if not branch and negaxis != depth else False
 
         return self._prepare_out(
             inject_nones, out, branch, negaxis, depth, parents, starts, outindex
