@@ -407,19 +407,8 @@ class UnmaskedArray(Content):
         else:
             return out
 
-    def _cumsum_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
-        out = self._content._cumsum_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+    def _cumsum_next(self, negaxis, starts, parents, outlength):
+        out = self._content._cumsum_next(negaxis, starts, parents, outlength)
 
         if isinstance(out, ak._v2.contents.RegularArray):
             tmp = ak._v2.contents.UnmaskedArray(

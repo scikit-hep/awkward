@@ -479,18 +479,9 @@ class BitMaskedArray(Content):
             order,
         )
 
-    def _cumsum_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _cumsum_next(self, negaxis, starts, parents, outlength):
         return self.toIndexedOptionArray64()._cumsum_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, parents, outlength
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):

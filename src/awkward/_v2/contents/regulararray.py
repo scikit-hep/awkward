@@ -841,18 +841,9 @@ class RegularArray(Content):
 
         return out
 
-    def _cumsum_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _cumsum_next(self, negaxis, starts, parents, outlength):
         out = self.toListOffsetArray64(True)._cumsum_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+            negaxis, starts, parents, outlength
         )
 
         # FIXME

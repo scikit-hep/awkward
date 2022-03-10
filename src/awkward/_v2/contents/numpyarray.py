@@ -1066,9 +1066,7 @@ class NumpyArray(Content):
                 self._nplike.asarray(out, self.dtype), None, None, self._nplike
             )
 
-    def _cumsum_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _cumsum_next(self, negaxis, starts, parents, outlength):
         if len(self.shape) == 0:
             raise ak._v2._util.error(
                 TypeError(f"{type(self).__name__} attempting to cumsum a scalar ")
@@ -1077,14 +1075,7 @@ class NumpyArray(Content):
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
             return contiguous_self.toRegularArray()._cumsum_next(
-                negaxis,
-                starts,
-                parents,
-                outlength,
-                ascending,
-                stable,
-                kind,
-                order,
+                negaxis, starts, parents, outlength
             )
 
         else:

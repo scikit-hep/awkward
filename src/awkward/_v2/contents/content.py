@@ -1232,16 +1232,7 @@ class Content:
 
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
         parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
-        return self._cumsum_next(
-            negaxis,
-            starts,
-            parents,
-            1,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+        return self._cumsum_next(negaxis, starts, parents, 1)
 
     @property
     def purelist_isregular(self):

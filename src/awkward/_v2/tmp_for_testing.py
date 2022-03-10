@@ -197,6 +197,9 @@ def fix(array):
 
 
 def v1_to_v2(v1):
+    if isinstance(v1, ak.layout.Record):
+        return ak._v2.record.Record(v1_to_v2(v1.array), v1.at)
+
     assert isinstance(v1, ak.layout.Content)
 
     if isinstance(v1, ak.layout.EmptyArray):

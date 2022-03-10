@@ -774,9 +774,7 @@ class RecordArray(Content):
             contents, self._fields, self._length, None, self._parameters, self._nplike
         )
 
-    def _cumsum_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _cumsum_next(self, negaxis, starts, parents, outlength):
         if self._fields is None or len(self._fields) == 0:
             # FIXME: return proper type here
             return ak._v2.contents.NumpyArray(
@@ -785,18 +783,7 @@ class RecordArray(Content):
 
         contents = []
         for content in self._contents:
-            contents.append(
-                content._cumsum_next(
-                    negaxis,
-                    starts,
-                    parents,
-                    outlength,
-                    ascending,
-                    stable,
-                    kind,
-                    order,
-                )
-            )
+            contents.append(content._cumsum_next(negaxis, starts, parents, outlength))
         return RecordArray(
             contents, self._fields, self._length, None, self._parameters, self._nplike
         )

@@ -934,28 +934,9 @@ class IndexedArray(Content):
             order,
         )
 
-    def _cumsum_next(
-        self,
-        negaxis,
-        starts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
+    def _cumsum_next(self, negaxis, starts, parents, outlength):
         next = self._content._carry(self._index, False)
-        return next._cumsum_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+        return next._cumsum_next(negaxis, starts, parents, outlength)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)

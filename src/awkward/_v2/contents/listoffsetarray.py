@@ -1326,9 +1326,7 @@ class ListOffsetArray(Content):
                 self._nplike,
             )
 
-    def _cumsum_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
+    def _cumsum_next(self, negaxis, starts, parents, outlength):
         branch, depth = self.branch_depth
 
         if (
@@ -1428,14 +1426,7 @@ class ListOffsetArray(Content):
 
             nextcontent = self._content._carry(nextcarry, False)
             outcontent = nextcontent._cumsum_next(
-                negaxis - 1,
-                nextstarts,
-                nextparents,
-                maxnextparents[0] + 1,
-                ascending,
-                stable,
-                kind,
-                order,
+                negaxis - 1, nextstarts, nextparents, maxnextparents[0] + 1
             )
 
             outcarry = ak._v2.index.Index64.empty(nextlen, self._nplike)
@@ -1482,14 +1473,7 @@ class ListOffsetArray(Content):
 
             trimmed = self._content[self._offsets[0] : self._offsets[-1]]
             outcontent = trimmed._cumsum_next(
-                negaxis,
-                self._offsets[:-1],
-                nextparents,
-                self._offsets.length - 1,
-                ascending,
-                stable,
-                kind,
-                order,
+                negaxis, self._offsets[:-1], nextparents, self._offsets.length - 1
             )
             outoffsets = self._compact_offsets64(True)
             return ak._v2.contents.ListOffsetArray(
