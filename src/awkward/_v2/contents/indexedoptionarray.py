@@ -1291,16 +1291,16 @@ class IndexedOptionArray(Content):
         self, inject_nones, out, branch, negaxis, depth, parents, starts, outindex
     ):
         if inject_nones:
-            out = ak._v2.contents.RegularArray(
+            return ak._v2.contents.IndexedOptionArray(
+                outindex,
                 out,
-                parents.length if self._nplike.known_shape else 1,
-                0,
                 None,
                 self._parameters,
                 self._nplike,
-            )
+            ).simplify_optiontype()
 
-        if not branch and negaxis == depth:
+        elif not branch and negaxis == depth:
+            assert not inject_nones
             return out
         else:
             if isinstance(out, ak._v2.contents.RegularArray):
@@ -1337,9 +1337,6 @@ class IndexedOptionArray(Content):
                     self._parameters,
                     self._nplike,
                 ).simplify_optiontype()
-
-                if inject_nones:
-                    return tmp
 
                 return ak._v2.contents.ListOffsetArray(
                     outoffsets,
