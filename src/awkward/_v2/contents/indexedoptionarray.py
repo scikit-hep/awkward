@@ -1014,6 +1014,95 @@ class IndexedOptionArray(Content):
 
         return out
 
+    def _rearrange_nextshifts(self, nextparents, shifts):
+        nextshifts = ak._v2.index.Index64.empty(
+            nextparents.length,
+            self._nplike,
+        )
+        assert nextshifts.nplike is self._nplike
+
+        if shifts is None:
+            assert (
+                nextshifts.nplike is self._nplike and self._index.nplike is self._nplike
+            )
+            self._handle_error(
+                self._nplike[
+                    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+                    nextshifts.dtype.type,
+                    self._index.dtype.type,
+                ](
+                    nextshifts.data,
+                    self._index.data,
+                    self._index.length,
+                )
+            )
+        else:
+            assert (
+                nextshifts.nplike is self._nplike
+                and self._index.nplike is self._nplike
+                and shifts.nplike is self._nplike
+            )
+            self._handle_error(
+                self._nplike[
+                    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+                    nextshifts.dtype.type,
+                    self._index.dtype.type,
+                    shifts.dtype.type,
+                ](
+                    nextshifts.data,
+                    self._index.data,
+                    self._index.length,
+                    shifts.data,
+                )
+            )
+        return nextshifts
+
+    def _rearrange_next(self, parents):
+        assert self._index.nplike is self._nplike and parents.nplike is self._nplike
+        index_length = self._index.length
+        numnull = ak._v2.index.Index64.empty(1, self._nplike)
+        assert numnull.nplike is self._nplike
+
+        self._handle_error(
+            self._nplike[
+                "awkward_IndexedArray_numnull",
+                numnull.dtype.type,
+                self._index.dtype.type,
+            ](
+                numnull.data,
+                self._index.data,
+                index_length,
+            )
+        )
+        next_length = index_length - numnull[0]
+        nextparents = ak._v2.index.Index64.empty(next_length, self._nplike)
+        nextcarry = ak._v2.index.Index64.empty(next_length, self._nplike)
+        outindex = ak._v2.index.Index64.empty(index_length, self._nplike)
+        assert (
+            nextcarry.nplike is self._nplike
+            and nextparents.nplike is self._nplike
+            and outindex.nplike is self._nplike
+        )
+        self._handle_error(
+            self._nplike[
+                "awkward_IndexedArray_reduce_next_64",
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
+                outindex.dtype.type,
+                self._index.dtype.type,
+                parents.dtype.type,
+            ](
+                nextcarry.data,
+                nextparents.data,
+                outindex.data,
+                self._index.data,
+                parents.data,
+                index_length,
+            )
+        )
+        next = self._content._carry(nextcarry, False)
+        return next, nextparents, numnull, outindex
+
     def _argsort_next(
         self,
         negaxis,
@@ -1144,93 +1233,6 @@ class IndexedOptionArray(Content):
         return self._prepare_out(
             inject_nones, out, branch, negaxis, depth, parents, starts, outindex
         )
-
-    def _rearrange_nextshifts(self, nextparents, shifts):
-        nextshifts = ak._v2.index.Index64.empty(
-            nextparents.length,
-            self._nplike,
-        )
-        if shifts is None:
-            assert (
-                nextshifts.nplike is self._nplike and self._index.nplike is self._nplike
-            )
-            self._handle_error(
-                self._nplike[
-                    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
-                    nextshifts.dtype.type,
-                    self._index.dtype.type,
-                ](
-                    nextshifts.data,
-                    self._index.data,
-                    self._index.length,
-                )
-            )
-        else:
-            assert (
-                nextshifts.nplike is self._nplike
-                and self._index.nplike is self._nplike
-                and shifts.nplike is self._nplike
-            )
-            self._handle_error(
-                self._nplike[
-                    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
-                    nextshifts.dtype.type,
-                    self._index.dtype.type,
-                    shifts.dtype.type,
-                ](
-                    nextshifts.data,
-                    self._index.data,
-                    self._index.length,
-                    shifts.data,
-                )
-            )
-        return nextshifts
-
-    def _rearrange_next(self, parents):
-        assert self._index.nplike is self._nplike and parents.nplike is self._nplike
-        index_length = self._index.length
-        numnull = ak._v2.index.Index64.empty(1, self._nplike)
-        assert numnull.nplike is self._nplike
-
-        self._handle_error(
-            self._nplike[
-                "awkward_IndexedArray_numnull",
-                numnull.dtype.type,
-                self._index.dtype.type,
-            ](
-                numnull.data,
-                self._index.data,
-                index_length,
-            )
-        )
-        next_length = index_length - numnull[0]
-        nextparents = ak._v2.index.Index64.empty(next_length, self._nplike)
-        nextcarry = ak._v2.index.Index64.empty(next_length, self._nplike)
-        outindex = ak._v2.index.Index64.empty(index_length, self._nplike)
-        assert (
-            nextcarry.nplike is self._nplike
-            and nextparents.nplike is self._nplike
-            and outindex.nplike is self._nplike
-        )
-        self._handle_error(
-            self._nplike[
-                "awkward_IndexedArray_reduce_next_64",
-                nextcarry.dtype.type,
-                nextparents.dtype.type,
-                outindex.dtype.type,
-                self._index.dtype.type,
-                parents.dtype.type,
-            ](
-                nextcarry.data,
-                nextparents.data,
-                outindex.data,
-                self._index.data,
-                parents.data,
-                index_length,
-            )
-        )
-        next = self._content._carry(nextcarry, False)
-        return next, nextparents, numnull, outindex
 
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
