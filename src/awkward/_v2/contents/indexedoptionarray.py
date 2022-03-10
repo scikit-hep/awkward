@@ -978,6 +978,7 @@ class IndexedOptionArray(Content):
             )
 
         if isinstance(out, ak._v2.contents.NumpyArray):
+            # Overallocate nextoutindex to support typetracer 0-sized arrays
             nextoutindex = ak._v2.index.Index64.empty(out.length + 1, self._nplike)
             assert nextoutindex.nplike is self._nplike
             self._handle_error(
@@ -1001,7 +1002,7 @@ class IndexedOptionArray(Content):
         if inject_nones:
             out = ak._v2.contents.RegularArray(
                 out,
-                nextoutindex.length,
+                out.length,
                 0,
                 None,
                 self._parameters,
