@@ -50,3 +50,4 @@ from awkward._v2.operations.structure.ak_values_astype import (  # noqa: F401
 from awkward._v2.operations.structure.ak_strings_astype import (  # noqa: F401
     strings_astype,
 )
+from awkward._v2.operations.structure.ak_cumsum import cumsum  # noqa: F401
