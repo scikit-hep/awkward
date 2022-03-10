@@ -5,8 +5,26 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-def from_avro(file_name, read_data=True):
+# formfromavro: bool; showcode: bool; readerlang: bool;
+def from_avro_file(file_name, show_code=False, reader_lang="ft"):
     import awkward._v2._connect.avro
 
-    temp_class = awkward._v2._connect.avro.read_avro_py(file_name)
-    return ak._v2._util.wrap(temp_class.outarr)
+    if reader_lang == "py":
+        temp_class = awkward._v2._connect.avro.read_avro_py(file_name)
+        if show_code:
+            print("".join(temp_class.head + temp_class.body))  # noqa
+        return temp_class.outarr
+    elif reader_lang == "ft":
+        pass
+
+
+def form_from_avro_file(file_name, show_code=False, reader_lang="ft"):
+    import awkward._v2._connect.avro
+
+    if reader_lang == "py":
+        temp_class = awkward._v2._connect.avro.read_avro_py(file_name)
+        if show_code:
+            print("".join(temp_class.head + temp_class.body))  # noqa
+        return temp_class.form
+    elif reader_lang == "ft":
+        pass

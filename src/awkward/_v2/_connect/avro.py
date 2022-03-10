@@ -3,13 +3,16 @@ import awkward as ak
 import json
 
 
-class read_avro:
+class read_avro_py:
     def __init__(self, file_name):
         self.file_name = file_name
         self._data = np.memmap(file_name, np.uint8)
         self.field = []
-        if not self.check_valid():
-            raise
+        try:
+            if self.check_valid:
+                raise
+        except Exception as error:
+            raise TypeError("Not a valid avro." + repr(error))
         pos, self.pairs = self.decode_varint(4, self._data)
         self.pairs = self.decode_zigzag(self.pairs)
         pos = self.cont_spec(pos)
@@ -30,11 +33,11 @@ class read_avro:
         )
         dec.append("}")
         dec.append("\n")
-        head = "".join(dec)
-        body = "".join(self._exec_code)
+        self.head = "".join(dec)
+        self.body = "".join(self._exec_code)
         # print("".join(head+body))
         loc = {}
-        exec("".join(head + body), globals(), loc)
+        exec("".join(self.head + self.body), globals(), loc)
         self.form = json.loads("".join(self.form)[:-2])
         con = loc["con"]
         for key in con.keys():
