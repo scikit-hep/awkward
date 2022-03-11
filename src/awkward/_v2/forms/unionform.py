@@ -235,6 +235,10 @@ class UnionForm(Form):
         return list(set.intersection(*[set(x) for x in fieldslists]))
 
     @property
+    def is_tuple(self):
+        return all(x.is_tuple for x in self._contents) and (len(self._contents) > 0)
+
+    @property
     def dimension_optiontype(self):
         for content in self._contents:
             if content.dimension_optiontype:

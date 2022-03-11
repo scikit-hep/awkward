@@ -181,6 +181,10 @@ class IndexedOptionForm(Form):
         return self._content.fields
 
     @property
+    def is_tuple(self):
+        return self._content.is_tuple
+
+    @property
     def dimension_optiontype(self):
         return True
 

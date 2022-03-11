@@ -611,6 +611,7 @@ def zip(
             layouts.append(layout)
 
     else:
+        arrays = list(arrays)
         behavior = ak._util.behaviorof(*arrays, behavior=behavior)
         recordlookup = None
         layouts = []
@@ -908,6 +909,8 @@ def with_name(array, name, highlevel=True, behavior=None):
     def getfunction2(layout):
         if isinstance(layout, ak._util.uniontypes):
             return lambda: layout.simplify(merge=True, mergebool=False)
+        elif isinstance(layout, ak.layout.RecordArray):
+            return lambda: layout
         else:
             return None
 
@@ -953,6 +956,10 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
             "or as a new integer slot by passing None for 'where'"
             + ak._util.exception_suffix(__file__)
         )
+
+    if not isinstance(where, str) and isinstance(where, Iterable):
+        where = list(where)
+
     if (
         not isinstance(where, str)
         and isinstance(where, Iterable)
@@ -3289,6 +3296,7 @@ def cartesian(
             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
                 is_partitioned = True
     else:
+        arrays = list(arrays)
         behavior = ak._util.behaviorof(*arrays, behavior=behavior)
         nplike = ak.nplike.of(*arrays)
         new_arrays = []
@@ -3611,6 +3619,7 @@ def argcartesian(
                 for n, x in arrays.items()
             }
         else:
+            arrays = list(arrays)
             behavior = ak._util.behaviorof(*arrays, behavior=behavior)
             layouts = [
                 ak.operations.convert.to_layout(

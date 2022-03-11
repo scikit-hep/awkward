@@ -200,6 +200,10 @@ class NumpyForm(Form):
         return []
 
     @property
+    def is_tuple(self):
+        return False
+
+    @property
     def dimension_optiontype(self):
         return False
 

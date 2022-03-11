@@ -1219,6 +1219,10 @@ class Content:
         return self.Form.fields.__get__(self)
 
     @property
+    def is_tuple(self):
+        return self.Form.is_tuple.__get__(self)
+
+    @property
     def dimension_optiontype(self):
         return self.Form.dimension_optiontype.__get__(self)
 

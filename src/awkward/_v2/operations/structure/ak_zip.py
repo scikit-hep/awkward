@@ -180,6 +180,7 @@ def _impl(
             layouts.append(layout)
 
     else:
+        arrays = list(arrays)
         behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
         recordlookup = None
         layouts = []

@@ -100,44 +100,48 @@ class CharBehavior(Array):
 #             yield x.__bytes__()
 
 
-# class StringBehavior(ak._v2.highlevel.Array):
-#     __name__ = "Array"
+class StringBehavior(Array):
+    __name__ = "Array"
 
-#     def __iter__(self):
-#         for x in super(StringBehavior, self).__iter__():
-#             yield x.__str__()
-
-
-# def _string_equal(one, two):
-#     nplike = ak.nplike.of(one, two)
-#     behavior = ak._v2._util.behaviorof(one, two)
-
-#     one, two = ak.without_parameters(one).layout, ak.without_parameters(two).layout
-
-#     # first condition: string lengths must be the same
-#     counts1 = nplike.asarray(one.count(axis=-1))
-#     counts2 = nplike.asarray(two.count(axis=-1))
-
-#     out = counts1 == counts2
-
-#     # only compare characters in strings that are possibly equal (same length)
-#     possible = nplike.logical_and(out, counts1)
-#     possible_counts = counts1[possible]
-
-#     if len(possible_counts) > 0:
-#         onepossible = one[possible]
-#         twopossible = two[possible]
-
-#         reduced = ak.all(ak.Array(onepossible) == ak.Array(twopossible), axis=-1).layout
-
-#         # update same-length strings with a verdict about their characters
-#         out[possible] = reduced
-
-#     return ak._v2._util.wrap(ak._v2.contents.NumpyArray(out), behavior)
+    def __iter__(self):
+        for x in super().__iter__():
+            yield x.__str__()
 
 
-# def _string_notequal(one, two):
-#     return ~_string_equal(one, two)
+def _string_equal(one, two):
+    nplike = ak.nplike.of(one, two)
+    behavior = ak._v2._util.behavior_of(one, two)
+
+    one, two = (
+        ak._v2.operations.structure.without_parameters(one).layout,
+        ak._v2.operations.structure.without_parameters(two).layout,
+    )
+
+    # first condition: string lengths must be the same
+    counts1 = nplike.asarray(one.count(axis=-1))
+    counts2 = nplike.asarray(two.count(axis=-1))
+
+    out = counts1 == counts2
+
+    # only compare characters in strings that are possibly equal (same length)
+    possible = nplike.logical_and(out, counts1)
+    possible_counts = counts1[possible]
+
+    if len(possible_counts) > 0:
+        onepossible = one[possible]
+        twopossible = two[possible]
+
+        reduced = ak._v2.operations.reducers.all(
+            ak._v2.Array(onepossible) == ak._v2.Array(twopossible), axis=-1
+        ).layout
+        # update same-length strings with a verdict about their characters
+        out[possible] = reduced.data
+
+    return ak._v2._util.wrap(ak._v2.contents.NumpyArray(out), behavior)
+
+
+def _string_notequal(one, two):
+    return ~_string_equal(one, two)
 
 
 # def _string_broadcast(layout, offsets):
@@ -250,7 +254,7 @@ def register(behavior):
     # behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
     # behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
     # behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
-    # behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
+    behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
 
     # behavior["__broadcast__", "bytestring"] = _string_broadcast
     # behavior["__broadcast__", "string"] = _string_broadcast
