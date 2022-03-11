@@ -9,7 +9,7 @@ class read_avro_py:
         self._data = np.memmap(file_name, np.uint8)
         self.field = []
         try:
-            if self.check_valid:
+            if not self.check_valid:
                 raise
         except Exception as error:
             raise TypeError("Not a valid avro." + repr(error))
