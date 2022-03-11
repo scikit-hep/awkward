@@ -422,6 +422,11 @@ class NumpyKernel:
         )
 
 
+class CupyKernel(NumpyKernel):
+    def __call__(self, *args):
+        return self._kernel(args)
+
+
 class Numpy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, numpy.ndarray):
@@ -492,7 +497,7 @@ class Cupy(NumpyLike):
 
         func = ak._cuda_kernels.kernel[name_and_types]
         if func is not None:
-            return NumpyKernel(func, name_and_types)
+            return CupyKernel(func, name_and_types)
         else:
             raise NotImplementedError(
                 f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "

@@ -256,7 +256,7 @@ def by_signature(lib):
     f.dir = [{}]
     out[{}] = f
 """.format(
-                        childfunc["name"],
+                        str(childfunc["name"]),
                         ", ".join(arglist),
                         ", ".join(dirlist),
                         ", ".join(special),
@@ -291,24 +291,8 @@ def kernel_signatures_cuda_py(specification):
 
 # fmt: off
 
-from ctypes import (
-    POINTER,
-    Structure,
-    c_bool,
-    c_int8,
-    c_uint8,
-    c_int16,
-    c_uint16,
-    c_int32,
-    c_uint32,
-    c_int64,
-    c_uint64,
-    c_float,
-    c_double,
-    c_char_p,
-)
-
 import numpy as np
+from awkward.cuda_kernels import cupy_kernels
 
 from numpy import (
     bool_,
@@ -344,21 +328,17 @@ def by_signature(lib):
         for spec in specification["kernels"]:
             for childfunc in spec["specializations"]:
                 special = [repr(spec["name"])]
-                arglist = [
-                    type_to_pytype(x["type"], special) for x in childfunc["args"]
-                ]
+                [type_to_pytype(x["type"], special) for x in childfunc["args"]]
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
                 if spec["name"] in cuda_kernels_impl:
                     file.write(
                         """
-    f = lib.{}
-    f.argtypes = [{}]
+    f = lambda: cupy_kernels.cuda_kernel_template.get_function(cupy_kernels.kernel_specializations[{}])
     f.restype = ERROR
     f.dir = [{}]
     out[{}] = f
 """.format(
-                            childfunc["name"],
-                            ", ".join(arglist),
+                            repr(childfunc["name"]),
                             ", ".join(dirlist),
                             ", ".join(special),
                         )
