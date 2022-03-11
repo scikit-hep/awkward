@@ -249,13 +249,11 @@ class UnionForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns(path + (field,), output, list_indicator)
 
-    def _select_columns(self, index, specifier, matches, path, output, list_indicator):
+    def _select_columns(self, index, specifier, matches, output):
         contents = []
         for content in self._contents:
             len_output = len(output)
-            next_content = content._select_columns(
-                index, specifier, matches, path, output, list_indicator
-            )
+            next_content = content._select_columns(index, specifier, matches, output)
             if len_output != len(output):
                 contents.append(next_content)
 

@@ -116,9 +116,8 @@ def _impl(
             form = ak._v2._connect.pyarrow.form_handle_arrow(
                 parquetfile_for_metadata.schema_arrow, pass_empty_field=True
             )
-            _, parquet_columns = form.select_columns(
-                columns, list_indicator=list_indicator
-            )
+            subform = form.select_columns(columns)
+            parquet_columns = subform.columns(list_indicator=list_indicator)
 
     arrays = []
     for i, x in enumerate(all_paths):

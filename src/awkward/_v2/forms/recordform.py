@@ -309,7 +309,7 @@ class RecordForm(Form):
         for content, field in zip(self._contents, self.fields):
             content._columns(path + (field,), output, list_indicator)
 
-    def _select_columns(self, index, specifier, matches, path, output, list_indicator):
+    def _select_columns(self, index, specifier, matches, output):
         contents = []
         fields = []
         for content, field in zip(self._contents, self.fields):
@@ -321,12 +321,7 @@ class RecordForm(Form):
             if any(next_matches):
                 len_output = len(output)
                 next_content = content._select_columns(
-                    index + 1,
-                    specifier,
-                    next_matches,
-                    path + (field,),
-                    output,
-                    list_indicator,
+                    index + 1, specifier, next_matches, output
                 )
                 if len_output != len(output):
                     contents.append(next_content)

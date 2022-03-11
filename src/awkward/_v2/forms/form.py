@@ -320,7 +320,7 @@ class Form:
         self._columns((), output, list_indicator)
         return output
 
-    def select_columns(self, specifier, expand_braces=True, list_indicator=None):
+    def select_columns(self, specifier, expand_braces=True):
         if ak._v2._util.isstr(specifier):
             specifier = [specifier]
 
@@ -341,5 +341,4 @@ class Form:
         matches = [True] * len(specifier)
 
         output = []
-        form = self._select_columns(0, specifier, matches, (), output, list_indicator)
-        return form, output
+        return self._select_columns(0, specifier, matches, output)
