@@ -1226,9 +1226,7 @@ class IndexedOptionArray(Content):
             self._nplike,
         ).simplify_optiontype()
 
-        inject_nones = (
-            True if (numnull[0] > 0 and not branch and negaxis != depth) else False
-        )
+        inject_nones = True if (not branch and negaxis != depth) else False
 
         return self._prepare_out(
             inject_nones, out, branch, negaxis, depth, starts, outindex
