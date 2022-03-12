@@ -1246,6 +1246,7 @@ class IndexedOptionArray(Content):
         # Otherwise branching?
         else:
             assert isinstance(out, ak._v2.contents.IndexedOptionArray)
+            return out
 
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
