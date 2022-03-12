@@ -1315,8 +1315,6 @@ class IndexedOptionArray(Content):
             return out
 
     def _cumsum_next(self, negaxis, starts, parents, outlength):
-        branch, depth = self.branch_depth
-
         next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
         # We always want to inject `None` with cumsum
