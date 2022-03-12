@@ -821,7 +821,7 @@ class IndexedArray(Content):
             if isinstance(unique, ak._v2.contents.RegularArray):
                 unique = unique.toListOffsetArray64(True)
 
-            elif isinstance(unique, ak._v2.contents.ListOffsetArray):
+            if isinstance(unique, ak._v2.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
                     raise ak._v2._util.error(
                         AssertionError(
