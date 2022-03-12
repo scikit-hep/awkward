@@ -1361,10 +1361,19 @@ class IndexedOptionArray(Content):
                 out = out.toListOffsetArray64(True)
 
             # If the result of `_reduce_next` is a list, and we're not applying at this
-            # depth,  then it will have offsets given by the boundaries in parents.
+            # depth, then it will have offsets given by the boundaries in parents.
             # This means that we need to look at the _contents_ to which the `outindex`
             # belongs to add the option type
             if isinstance(out, ak._v2.contents.ListOffsetArray):
+                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
+                    raise ak._v2._util.error(
+                        AssertionError(
+                            "reduce_next with unbranching depth > negaxis expects a "
+                            "ListOffsetArray whose offsets start at zero ({})".format(
+                                starts[0]
+                            )
+                        )
+                    )
                 outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
                 assert (
                     outoffsets.nplike is self._nplike and starts.nplike is self._nplike
@@ -1400,8 +1409,6 @@ class IndexedOptionArray(Content):
                     self._nplike,
                 )
 
-            if isinstance(out, ak._v2.contents.IndexedOptionArray):
-                return out
             else:
                 raise ak._v2._util.error(
                     AssertionError(
