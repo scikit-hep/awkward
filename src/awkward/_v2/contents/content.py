@@ -1198,7 +1198,7 @@ class Content:
             )
         )
 
-    def cumsum(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+    def cumsum(self, axis=-1):
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:
