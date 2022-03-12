@@ -1314,6 +1314,20 @@ class IndexedOptionArray(Content):
         else:
             return out
 
+    def _cumsum_next(self, negaxis, starts, parents, outlength):
+        branch, depth = self.branch_depth
+
+        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
+
+        # We always want to inject `None` with cumsum
+        return ak._v2.contents.IndexedOptionArray(
+            outindex,
+            next._cumsum_next(negaxis, starts, nextparents, outlength),
+            None,
+            self._parameters,
+            self._nplike,
+        ).simplify_optiontype()
+
     def _reduce_next(
         self,
         reducer,
