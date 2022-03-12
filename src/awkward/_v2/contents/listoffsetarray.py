@@ -1329,12 +1329,6 @@ class ListOffsetArray(Content):
     def _cumsum_next(self, negaxis, starts, parents, outlength):
         branch, depth = self.branch_depth
 
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-        ):
-            raise ak._v2._util.error(NotImplementedError)
-
         if not branch and (negaxis == depth):
             if (
                 self.parameter("__array__") == "string"
