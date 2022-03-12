@@ -871,7 +871,7 @@ class IndexedOptionArray(Content):
 
         index_length = self._index.length
 
-        next, nextparents, numnull, outindex = self._rearrange_next(parents)
+        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
         out = next._unique(
             negaxis,
@@ -1057,7 +1057,7 @@ class IndexedOptionArray(Content):
             )
         return nextshifts
 
-    def _rearrange_next(self, parents):
+    def _rearrange_prepare_next(self, parents):
         assert self._index.nplike is self._nplike and parents.nplike is self._nplike
         index_length = self._index.length
         numnull = ak._v2.index.Index64.empty(1, self._nplike)
@@ -1127,7 +1127,7 @@ class IndexedOptionArray(Content):
 
         branch, depth = self.branch_depth
 
-        next, nextparents, numnull, outindex = self._rearrange_next(parents)
+        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
         if (not branch) and negaxis == depth:
             nextshifts = self._rearrange_nextshifts(nextparents, shifts)
@@ -1228,14 +1228,11 @@ class IndexedOptionArray(Content):
 
         inject_nones = True if (not branch and negaxis != depth) else False
 
-        # If we are rearranging (e.g sorting) the contents of this layout,
-        # then we do NOT want to return an optional layout
-        if not branch and negaxis == depth:
-            return out
-        # Otherwise, we want the None's to be in the right place.
-        # Here, we index the dense ([x y z None None]) content with an index
+        # If we want the None's at this depth to be injected
+        # into the dense ([x y z None None]) rearranger result.
+        # Here, we index the dense content with an index
         # that maps the values to the correct locations
-        elif inject_nones:
+        if inject_nones:
             return ak._v2.contents.IndexedOptionArray(
                 outindex,
                 out,
@@ -1243,7 +1240,11 @@ class IndexedOptionArray(Content):
                 self._parameters,
                 self._nplike,
             ).simplify_optiontype()
-        # Otherwise branching?
+        # Otherwise, if we are rearranging (e.g sorting) the contents of this layout,
+        # then we do NOT want to return an optional layout
+        elif not branch and negaxis == depth:
+            return out
+        # Otherwise branching
         else:
             assert isinstance(out, ak._v2.contents.IndexedOptionArray)
             return out
@@ -1254,7 +1255,7 @@ class IndexedOptionArray(Content):
         assert starts.nplike is self._nplike and parents.nplike is self._nplike
         branch, depth = self.branch_depth
 
-        next, nextparents, numnull, outindex = self._rearrange_next(parents)
+        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
         out = next._sort_next(
             negaxis,
@@ -1296,14 +1297,11 @@ class IndexedOptionArray(Content):
 
         inject_nones = True if not branch and negaxis != depth else False
 
-        # If we are rearranging (e.g sorting) the contents of this layout,
-        # then we do NOT want to return an optional layout
-        if not branch and negaxis == depth:
-            return out
-        # Otherwise, we want the None's to be in the right place.
-        # Here, we index the dense ([x y z None None]) content with an index
+        # If we want the None's at this depth to be injected
+        # into the dense ([x y z None None]) rearranger result.
+        # Here, we index the dense content with an index
         # that maps the values to the correct locations
-        elif inject_nones:
+        if inject_nones:
             return ak._v2.contents.IndexedOptionArray(
                 outindex,
                 out,
@@ -1311,9 +1309,14 @@ class IndexedOptionArray(Content):
                 self._parameters,
                 self._nplike,
             ).simplify_optiontype()
-        # Otherwise branching?
+        # Otherwise, if we are rearranging (e.g sorting) the contents of this layout,
+        # then we do NOT want to return an optional layout
+        elif not branch and negaxis == depth:
+            return out
+        # Otherwise branching
         else:
             assert isinstance(out, ak._v2.contents.IndexedOptionArray)
+            return out
 
     def _reduce_next(
         self,
@@ -1328,7 +1331,7 @@ class IndexedOptionArray(Content):
     ):
         branch, depth = self.branch_depth
 
-        next, nextparents, numnull, outindex = self._rearrange_next(parents)
+        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
 
         if reducer.needs_position and (not branch and negaxis == depth):
             nextshifts = self._rearrange_nextshifts(nextparents, shifts)
