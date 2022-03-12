@@ -1228,9 +1228,24 @@ class IndexedOptionArray(Content):
 
         inject_nones = True if (not branch and negaxis != depth) else False
 
-        return self._prepare_out(
-            inject_nones, out, branch, negaxis, depth, starts, outindex
-        )
+        # If we are rearranging (e.g sorting) the contents of this layout,
+        # then we do NOT want to return an optional layout
+        if not branch and negaxis == depth:
+            return out
+        # Otherwise, we want the None's to be in the right place.
+        # Here, we index the dense ([x y z None None]) content with an index
+        # that maps the values to the correct locations
+        elif inject_nones:
+            return ak._v2.contents.IndexedOptionArray(
+                outindex,
+                out,
+                None,
+                self._parameters,
+                self._nplike,
+            ).simplify_optiontype()
+        # Otherwise branching?
+        else:
+            assert isinstance(out, ak._v2.contents.IndexedOptionArray)
 
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
@@ -1280,11 +1295,6 @@ class IndexedOptionArray(Content):
 
         inject_nones = True if not branch and negaxis != depth else False
 
-        return self._prepare_out(
-            inject_nones, out, branch, negaxis, depth, starts, outindex
-        )
-
-    def _prepare_out(self, inject_nones, out, branch, negaxis, depth, starts, outindex):
         # If we are rearranging (e.g sorting) the contents of this layout,
         # then we do NOT want to return an optional layout
         if not branch and negaxis == depth:
@@ -1302,75 +1312,7 @@ class IndexedOptionArray(Content):
             ).simplify_optiontype()
         # Otherwise branching?
         else:
-            if isinstance(out, ak._v2.contents.RegularArray):
-                out = out.toListOffsetArray64(True)
-            if isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                    raise ak._v2._util.error(
-                        AssertionError(
-                            "sort_next with unbranching depth > negaxis expects a "
-                            "ListOffsetArray64 whose offsets start at zero"
-                        )
-                    )
-                outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
-                assert (
-                    outoffsets.nplike is self._nplike and starts.nplike is self._nplike
-                )
-                self._handle_error(
-                    self._nplike[
-                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
-                        outoffsets.dtype.type,
-                        starts.dtype.type,
-                    ](
-                        outoffsets.data,
-                        starts.data,
-                        starts.length,
-                        outindex.length,
-                    )
-                )
-
-                tmp = ak._v2.contents.IndexedOptionArray(
-                    outindex,
-                    out._content,
-                    None,
-                    self._parameters,
-                    self._nplike,
-                ).simplify_optiontype()
-
-                return ak._v2.contents.ListOffsetArray(
-                    outoffsets,
-                    tmp,
-                    None,
-                    self._parameters,
-                    self._nplike,
-                )
-
-            if isinstance(out, ak._v2.contents.IndexedOptionArray):
-                return out
-            else:
-                raise ak._v2._util.error(
-                    AssertionError(
-                        "sort_next with unbranching depth > negaxis is only "
-                        "expected to return RegularArray or ListOffsetArray or "
-                        "IndexedOptionArray; "
-                        "instead, it returned " + out
-                    )
-                )
-
-    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        posaxis = self.axis_wrap_if_negative(axis)
-        if posaxis == depth:
-            return self._combinations_axis0(n, replacement, recordlookup, parameters)
-        else:
-            _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
-            next = self._content._carry(nextcarry, True)
-            out = next._combinations(
-                n, replacement, recordlookup, parameters, posaxis, depth
-            )
-            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-                outindex, out, None, parameters, self._nplike
-            )
-            return out2.simplify_optiontype()
+            assert isinstance(out, ak._v2.contents.IndexedOptionArray)
 
     def _reduce_next(
         self,
@@ -1406,7 +1348,80 @@ class IndexedOptionArray(Content):
             keepdims,
         )
 
-        return self._prepare_out(False, out, branch, negaxis, depth, starts, outindex)
+        # If we are reducing the contents of this layout,
+        # then we do NOT want to return an optional layout
+        if not branch and negaxis == depth:
+            return out
+        else:
+            if isinstance(out, ak._v2.contents.RegularArray):
+                out = out.toListOffsetArray64(True)
+
+            # If the result of `_reduce_next` is a list, and we're not applying at this
+            # depth,  then it will have offsets given by the boundaries in parents.
+            # This means that we need to look at the _contents_ to which the `outindex`
+            # belongs to add the option type
+            if isinstance(out, ak._v2.contents.ListOffsetArray):
+                outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
+                assert (
+                    outoffsets.nplike is self._nplike and starts.nplike is self._nplike
+                )
+                self._handle_error(
+                    self._nplike[
+                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                        outoffsets.dtype.type,
+                        starts.dtype.type,
+                    ](
+                        outoffsets.data,
+                        starts.data,
+                        starts.length,
+                        outindex.length,
+                    )
+                )
+
+                # Apply `outindex` to appropriate content
+                inner = ak._v2.contents.IndexedOptionArray(
+                    outindex,
+                    out._content,
+                    None,
+                    self._parameters,
+                    self._nplike,
+                ).simplify_optiontype()
+
+                # Re-wrap content
+                return ak._v2.contents.ListOffsetArray(
+                    outoffsets,
+                    inner,
+                    None,
+                    self._parameters,
+                    self._nplike,
+                )
+
+            if isinstance(out, ak._v2.contents.IndexedOptionArray):
+                return out
+            else:
+                raise ak._v2._util.error(
+                    AssertionError(
+                        "reduce_next with unbranching depth > negaxis is only "
+                        "expected to return RegularArray or ListOffsetArray or "
+                        "IndexedOptionArray; "
+                        "instead, it returned " + out
+                    )
+                )
+
+    def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
+        posaxis = self.axis_wrap_if_negative(axis)
+        if posaxis == depth:
+            return self._combinations_axis0(n, replacement, recordlookup, parameters)
+        else:
+            _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
+            next = self._content._carry(nextcarry, True)
+            out = next._combinations(
+                n, replacement, recordlookup, parameters, posaxis, depth
+            )
+            out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+                outindex, out, None, parameters, self._nplike
+            )
+            return out2.simplify_optiontype()
 
     def _validityerror(self, path):
         assert self.index.nplike is self._nplike
