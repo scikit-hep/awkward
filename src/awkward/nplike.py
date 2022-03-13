@@ -522,8 +522,6 @@ class Cupy(NumpyLike):
             )
 
     def __init__(self):
-        import awkward._cuda_kernels
-
         self._module = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
 
     @property
