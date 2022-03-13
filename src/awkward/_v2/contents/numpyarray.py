@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import copy
 import awkward as ak
 from awkward._v2.contents.content import Content
 from awkward._v2.forms.numpyform import NumpyForm
@@ -114,6 +115,7 @@ class NumpyArray(Content):
         arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
             "\n"
         )
+
         if len(extra) != 0 or len(arraystr_lines) > 1:
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
@@ -1395,3 +1397,11 @@ class NumpyArray(Content):
                 return out
 
             return self._data.tolist()
+
+    def __deepcopy__(self, memodict=None):
+        return ak._v2.contents.NumpyArray(
+            copy.deepcopy(self._data),
+            copy.deepcopy(self._identifier),
+            copy.deepcopy(self._parameters),
+            self._nplike,
+        )
