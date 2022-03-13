@@ -3,6 +3,7 @@
 import pytest  # noqa: F401
 
 
+@pytest.mark.skip("We don't use shared library for accessing CUDA Kernels anymore.")
 def test_import_and_loading_shared_lib():
     try:
         import awkward_cuda_kernels
