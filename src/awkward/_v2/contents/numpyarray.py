@@ -1398,7 +1398,7 @@ class NumpyArray(Content):
 
             return self._data.tolist()
 
-    def __deepcopy__(self, memodict=None):
+    def __deepcopy__(self, memo=None):
         return ak._v2.contents.NumpyArray(
             copy.deepcopy(self._data),
             copy.deepcopy(self._identifier),
