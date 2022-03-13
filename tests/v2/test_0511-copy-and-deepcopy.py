@@ -29,7 +29,9 @@ def test():
     assert to_list(four) == [0.0, 999, 2.2, 123, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert to_list(five) == [0.0, 999, 2.2, 123, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
-    assert to_list(copy.deepcopy(ak._v2.Array([[1, 2, 3], [], [4, 5]]))) == to_list(ak._v2.operations.structure.copy(ak._v2.Array([[1, 2, 3], [], [4, 5]])))
+    assert to_list(copy.deepcopy(ak._v2.Array([[1, 2, 3], [], [4, 5]]))) == to_list(
+        ak._v2.operations.structure.copy(ak._v2.Array([[1, 2, 3], [], [4, 5]]))
+    )
     assert to_list(copy.deepcopy(ak._v2.Record({"one": 1, "two": 2.2}))) == to_list(
         ak._v2.operations.structure.copy(ak._v2.Record({"one": 1, "two": 2.2}))
     )
@@ -38,13 +40,17 @@ def test():
     wrapper = ak._v2.Array(underlying_array)
     duplicate = ak._v2.operations.structure.copy(wrapper)
     underlying_array[2] = 123
-    
-    assert to_list(underlying_array) == [1.1, 2.2, 123., 4.4, 5.5]
+
+    assert to_list(underlying_array) == [1.1, 2.2, 123.0, 4.4, 5.5]
     assert to_list(wrapper) == [1.1, 2.2, 123, 4.4, 5.5]
     assert to_list(duplicate) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
     original = ak._v2.Array([{"x": 1}, {"x": 2}, {"x": 3}])
     shallow_copy = copy.copy(original)
     shallow_copy["y"] = original.x**2
-    assert to_list(shallow_copy) == [{"x": 1, "y": 1}, {"x": 2, "y": 4}, {"x": 3, "y": 9}]
+    assert to_list(shallow_copy) == [
+        {"x": 1, "y": 1},
+        {"x": 2, "y": 4},
+        {"x": 3, "y": 9},
+    ]
     assert to_list(original) == [{"x": 1}, {"x": 2}, {"x": 3}]
