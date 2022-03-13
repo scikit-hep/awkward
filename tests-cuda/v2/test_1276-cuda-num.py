@@ -40,7 +40,7 @@ def test_num_3():
         ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]))
     )
     cuda_array = ak.to_backend(array, "cuda")
-    ak.num(cuda_array, 0)
+    assert ak.num(cuda_array, 0) == ak.num(array, 0)
 
 
 def test_num_4():

@@ -2,8 +2,6 @@
 
 # v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
 
-import sys
-
 import ctypes
 
 from collections.abc import Iterable
@@ -11,6 +9,7 @@ from collections.abc import Iterable
 import numpy
 
 import awkward as ak
+import awkward._cuda_kernels
 
 
 def of(*arrays):
@@ -423,8 +422,22 @@ class NumpyKernel:
 
 
 class CupyKernel(NumpyKernel):
+    cupy = awkward._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+
+    def check_errors(self, err_code):
+        import awkward._kernel_signatures_cuda
+
+        with self.cupy.cuda.Stream():
+            if err_code[0] == 0:
+                return awkward._kernel_signatures_cuda.success()
+
     def __call__(self, *args):
-        return self._kernel(args)
+        err_code = self.cupy.zeros(1, dtype=self.cupy.int8)
+        assert len(args) == len(self._kernel.dir)
+        args = list(args)
+        args.append(err_code)
+        self._kernel()((1, 1, 1), (1024, 1, 1), tuple(args))
+        return self.check_errors(err_code)
 
 
 class Numpy(NumpyLike):
@@ -492,10 +505,14 @@ class Cupy(NumpyLike):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
-        if "awkward._cuda_kernels" not in sys.modules:
-            import awkward._cuda_kernels  # noqa: F401
+        import awkward._cuda_kernels
 
-        func = ak._cuda_kernels.kernel[name_and_types]
+        cupy = awkward._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+        _cuda_kernels = awkward._cuda_kernels.initialize_cuda_kernels(
+            cupy
+        )  # noqa: F401
+
+        func = _cuda_kernels[name_and_types]
         if func is not None:
             return CupyKernel(func, name_and_types)
         else:
@@ -505,19 +522,9 @@ class Cupy(NumpyLike):
             )
 
     def __init__(self):
-        try:
-            import cupy
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                """to use CUDA arrays in Python, install the 'cupy' package with:
+        import awkward._cuda_kernels
 
-    pip install cupy --upgrade
-
-or
-
-    conda install cupy"""
-            ) from None
-        self._module = cupy
+        self._module = awkward._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
 
     @property
     def ma(self):

@@ -12,61 +12,61 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 cuda_kernels_impl = [
     "awkward_ListArray_num",
-    "awkward_new_Identities",
-    "awkward_Identities32_to_Identities64",
+    # "awkward_new_Identities",
+    # "awkward_Identities32_to_Identities64",
     "awkward_RegularArray_num",
-    "awkward_ListOffsetArray_flatten_offsets",
-    "awkward_IndexedArray_overlay_mask",
-    "awkward_IndexedArray_mask",
-    "awkward_ByteMaskedArray_mask",
-    "awkward_zero_mask",
-    "awkward_RegularArray_compact_offsets",
-    "awkward_IndexedArray_fill_count",
-    "awkward_UnionArray_fillna",
-    "awkward_localindex",
-    "awkward_content_reduce_zeroparents_64",
-    "awkward_ListOffsetArray_reduce_global_startstop_64",
-    "awkward_IndexedArray_reduce_next_fix_offsets_64",
-    "awkward_Index_to_Index64",
-    "awkward_carry_arange",
-    "awkward_index_carry_nocheck",
-    "awkward_NumpyArray_contiguous_init",
-    "awkward_NumpyArray_getitem_next_array_advanced",
-    "awkward_NumpyArray_getitem_next_at",
-    "awkward_RegularArray_getitem_next_array_advanced",
-    "awkward_ByteMaskedArray_toIndexedOptionArray",
-    "awkward_combinations",  # ?
-    "awkward_IndexedArray_simplify",
-    "awkward_ListArray_validity",
-    "awkward_UnionArray_validity",
-    "awkward_index_carry",
-    "awkward_ByteMaskedArray_getitem_carry",
-    "awkward_IndexedArray_validity",
-    "awkward_ByteMaskedArray_overlay_mask",
-    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
-    "awkward_RegularArray_getitem_carry",
-    "awkward_NumpyArray_getitem_next_array",
-    "awkward_RegularArray_localindex",
-    "awkward_NumpyArray_contiguous_next",
-    "awkward_NumpyArray_getitem_next_range",
-    "awkward_NumpyArray_getitem_next_range_advanced",
-    "awkward_RegularArray_getitem_next_range",
-    "awkward_RegularArray_getitem_next_range_spreadadvanced",
-    "awkward_RegularArray_getitem_next_array",
-    "awkward_missing_repeat",
-    "awkward_Identities_getitem_carry",
-    "awkward_RegularArray_getitem_jagged_expand",
-    "awkward_ListArray_getitem_jagged_expand",
-    "awkward_ListArray_getitem_next_array",
-    "awkward_RegularArray_broadcast_tooffsets",
-    "awkward_NumpyArray_fill_tobool",
-    "awkward_NumpyArray_reduce_adjust_starts_64",
-    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
-    "awkward_regularize_arrayslice",
-    "awkward_RegularArray_getitem_next_at",
-    # "awkward_ListOffsetArray_compact_offsets", Need to tune tests
+    # "awkward_ListOffsetArray_flatten_offsets",
+    # "awkward_IndexedArray_overlay_mask",
+    # "awkward_IndexedArray_mask",
+    # "awkward_ByteMaskedArray_mask",
+    # "awkward_zero_mask",
+    # "awkward_RegularArray_compact_offsets",
+    # "awkward_IndexedArray_fill_count",
+    # "awkward_UnionArray_fillna",
+    # "awkward_localindex",
+    # "awkward_content_reduce_zeroparents_64",
+    # "awkward_ListOffsetArray_reduce_global_startstop_64",
+    # "awkward_IndexedArray_reduce_next_fix_offsets_64",
+    # "awkward_Index_to_Index64",
+    # "awkward_carry_arange",
+    # "awkward_index_carry_nocheck",
+    # "awkward_NumpyArray_contiguous_init",
+    # "awkward_NumpyArray_getitem_next_array_advanced",
+    # "awkward_NumpyArray_getitem_next_at",
+    # "awkward_RegularArray_getitem_next_array_advanced",
+    # "awkward_ByteMaskedArray_toIndexedOptionArray",
+    # "awkward_combinations",  # ?
+    # "awkward_IndexedArray_simplify",
+    # "awkward_ListArray_validity",
+    # "awkward_UnionArray_validity",
+    # "awkward_index_carry",
+    # "awkward_ByteMaskedArray_getitem_carry",
+    # "awkward_IndexedArray_validity",
+    # "awkward_ByteMaskedArray_overlay_mask",
+    # "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+    # "awkward_RegularArray_getitem_carry",
+    # "awkward_NumpyArray_getitem_next_array",
+    # "awkward_RegularArray_localindex",
+    # "awkward_NumpyArray_contiguous_next",
+    # "awkward_NumpyArray_getitem_next_range",
+    # "awkward_NumpyArray_getitem_next_range_advanced",
+    # "awkward_RegularArray_getitem_next_range",
+    # "awkward_RegularArray_getitem_next_range_spreadadvanced",
+    # "awkward_RegularArray_getitem_next_array",
+    # "awkward_missing_repeat",
+    # "awkward_Identities_getitem_carry",
+    # "awkward_RegularArray_getitem_jagged_expand",
+    # "awkward_ListArray_getitem_jagged_expand",
+    # "awkward_ListArray_getitem_next_array",
+    # "awkward_RegularArray_broadcast_tooffsets",
+    # "awkward_NumpyArray_fill_tobool",
+    # "awkward_NumpyArray_reduce_adjust_starts_64",
+    # "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+    # "awkward_regularize_arrayslice",
+    # "awkward_RegularArray_getitem_next_at",
+    # # "awkward_ListOffsetArray_compact_offsets", Need to tune tests
     "awkward_BitMaskedArray_to_ByteMaskedArray",
-    "awkward_BitMaskedArray_to_IndexedOptionArray",
+    # "awkward_BitMaskedArray_to_IndexedOptionArray",
 ]
 
 
@@ -291,8 +291,22 @@ def kernel_signatures_cuda_py(specification):
 
 # fmt: off
 
-import numpy as np
-from awkward.cuda_kernels import cupy_kernels
+from ctypes import (
+    POINTER,
+    Structure,
+    c_bool,
+    c_int8,
+    c_uint8,
+    c_int16,
+    c_uint16,
+    c_int32,
+    c_uint32,
+    c_int64,
+    c_uint64,
+    c_float,
+    c_double,
+    c_char_p,
+)
 
 from numpy import (
     bool_,
@@ -317,8 +331,16 @@ class ERROR(Structure):
         ("pass_through", c_bool),
     ]
 
+def success():
+    err = ERROR()
+    err.str = c_char_p()
+    err.filename = c_char_p()
+    err.id = 9223372036854775806 + 1
+    err.attempt = 9223372036854775806 + 1
+    err.pass_through = c_bool(False)
+    return err
 
-def by_signature(lib):
+def by_signature(cuda_kernel_templates, kernel_specializations):
     out = {{}}
 """.format(
                 reproducible_datetime()
@@ -333,7 +355,7 @@ def by_signature(lib):
                 if spec["name"] in cuda_kernels_impl:
                     file.write(
                         """
-    f = lambda: cupy_kernels.cuda_kernel_template.get_function(cupy_kernels.kernel_specializations[{}])
+    f = lambda: cuda_kernel_templates.get_function(kernel_specializations[{}])
     f.restype = ERROR
     f.dir = [{}]
     out[{}] = f

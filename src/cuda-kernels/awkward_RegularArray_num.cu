@@ -6,13 +6,11 @@
 
 // #include "awkward/kernels.h"
 #include <cstdint>
-template <typename T, typename C>
+template <typename T>
 __global__ void
-cuda_ListArray_num(C* tonum, const T* fromstarts, const T* fromstops, int64_t length, int8_t* err_code) {
+cuda_RegularArray_num(T* tonum, int64_t size, int64_t length, int8_t* err_code) {
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
   if (thread_id < length) {
-    int64_t start = fromstarts[thread_id];
-    int64_t stop = fromstops[thread_id];
-    tonum[thread_id] = (C)(stop - start);
+    tonum[thread_id] = size;
   }
 }
