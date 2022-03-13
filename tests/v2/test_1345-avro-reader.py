@@ -34,42 +34,112 @@ def test_long():
 
 
 def test_float():
-    data = [12.456, 57.1234, 798.23, 345.687, 908.23,
-            65.89, 43.57, 745.79, 532.68, 3387.684]
+    data = [
+        12.456,
+        57.1234,
+        798.23,
+        345.687,
+        908.23,
+        65.89,
+        43.57,
+        745.79,
+        532.68,
+        3387.684,
+    ]
     assert (
-        pytest.approx(ak.from_avro_file(
-            file_name="tests/samples/float_test_data.avro", reader_lang="py"
-        ).to_list())
+        pytest.approx(
+            ak.from_avro_file(
+                file_name="tests/samples/float_test_data.avro", reader_lang="py"
+            ).to_list()
+        )
         == data
     )
 
 
 def test_double():
-    data = [12.456, 57.1234, 798.23, 345.687, 908.23,
-            65.89, 43.57, 745.79, 532.68, 3387.684]
+    data = [
+        12.456,
+        57.1234,
+        798.23,
+        345.687,
+        908.23,
+        65.89,
+        43.57,
+        745.79,
+        532.68,
+        3387.684,
+    ]
     assert (
-        pytest.approx(ak.from_avro_file(
-            file_name="tests/samples/double_test_data.avro", reader_lang="py"
-        ).to_list())
+        pytest.approx(
+            ak.from_avro_file(
+                file_name="tests/samples/double_test_data.avro", reader_lang="py"
+            ).to_list()
+        )
         == data
     )
 
 
 def test_bytes():
-    data = [bytes("hello", 'utf-8'), bytes("hii", 'utf-8'), bytes("byee", 'utf-8'), bytes("pink", 'utf-8'),
-            bytes("blue", 'utf-8'), bytes("red", 'utf-8'), bytes("chrome",
-                                                                 'utf-8'), bytes("green", 'utf-8'),
-            bytes("black", 'utf-8'), bytes("peach", 'utf-8')]
+    data = [
+        bytes("hello", "utf-8"),
+        bytes("hii", "utf-8"),
+        bytes("byee", "utf-8"),
+        bytes("pink", "utf-8"),
+        bytes("blue", "utf-8"),
+        bytes("red", "utf-8"),
+        bytes("chrome", "utf-8"),
+        bytes("green", "utf-8"),
+        bytes("black", "utf-8"),
+        bytes("peach", "utf-8"),
+    ]
     assert (
-        pytest.approx(ak.from_avro_file(
-            file_name="tests/samples/bytes_test_data.avro", reader_lang="py"
-        ).to_list())
+        pytest.approx(
+            ak.from_avro_file(
+                file_name="tests/samples/bytes_test_data.avro", reader_lang="py"
+            ).to_list()
+        )
         == data
     )
 
 
 def test_string():
-    raise NotImplementedError
+    data = [
+        "Hello",
+        "what",
+        "should",
+        "we",
+        "do",
+        "for",
+        "this",
+        "period",
+        "of",
+        "time",
+    ]
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/string_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data
+    )
+
+
+def test_fixed():
+    data = [
+        b"like this one",
+        b"like this one",
+        b"like this one",
+        b"like this one",
+        b"like this one",
+        b"like this one",
+        b"like this one",
+        b"like this one",
+    ]
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/fixed_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data
+    )
 
 
 def test_null():
