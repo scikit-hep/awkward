@@ -422,17 +422,19 @@ class NumpyKernel:
 
 
 class CupyKernel(NumpyKernel):
-    cupy = awkward._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
-
     def check_errors(self, err_code):
+        cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+
         import awkward._kernel_signatures_cuda
 
-        with self.cupy.cuda.Stream():
+        with cupy.cuda.Stream():
             if err_code[0] == 0:
                 return awkward._kernel_signatures_cuda.success()
 
     def __call__(self, *args):
-        err_code = self.cupy.zeros(1, dtype=self.cupy.int8)
+        cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+
+        err_code = cupy.zeros(1, dtype=cupy.int8)
         assert len(args) == len(self._kernel.dir)
         args = list(args)
         args.append(err_code)
@@ -505,9 +507,7 @@ class Cupy(NumpyLike):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
-        import awkward._cuda_kernels
-
-        cupy = awkward._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+        cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
         _cuda_kernels = awkward._cuda_kernels.initialize_cuda_kernels(
             cupy
         )  # noqa: F401
@@ -524,7 +524,7 @@ class Cupy(NumpyLike):
     def __init__(self):
         import awkward._cuda_kernels
 
-        self._module = awkward._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+        self._module = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
 
     @property
     def ma(self):
