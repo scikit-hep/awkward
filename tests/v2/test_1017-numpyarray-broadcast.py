@@ -12,7 +12,8 @@ def test():
         ak._v2.contents.NumpyArray(np.arange(8 * 8).reshape(8, -1)),
     )
     y = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 2, 2, 4, 6])), ak._v2.contents.NumpyArray(np.arange(8))
+        ak._v2.index.Index64(np.array([0, 2, 2, 4, 6])),
+        ak._v2.contents.NumpyArray(np.arange(8)),
     )
     u, v = ak._v2.operations.structure.broadcast_arrays(x, y)
     assert u.ndim == v.ndim

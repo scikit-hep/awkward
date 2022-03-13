@@ -9,6 +9,7 @@ to_list = ak._v2.operations.convert.to_list
 
 numexpr = pytest.importorskip("numexpr")
 
+
 @pytest.mark.skip(reason="FIXME: ak.numexpr")
 def test_numexpr():
     # NumExpr's interface pulls variables from the surrounding scope,
