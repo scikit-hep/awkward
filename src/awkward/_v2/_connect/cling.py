@@ -1267,3 +1267,39 @@ class RawCppCompiler(ak.nplike.Singleton):
 
         fn_pointer = fn_proto(self._Clang_GetFunctionAddress(fn_handle))
         return fn_pointer(*args)
+
+
+def testy():
+    compiler = RawCppCompiler.instance()
+
+    builder = ak.layout.ArrayBuilder()
+    builder.real(3.14)
+    builder.real(2.71)
+    builder.real(9.87)
+
+    code = f'''
+#include <sys/types.h>
+extern "C" int printf(const char*, ...);
+
+typedef unsigned char (*FuncPtr_length)(void*, int64_t*);
+
+void testy(ssize_t ptr) {{
+  printf("BEGIN\\n");
+
+  int64_t result;
+  result = -999;
+
+  if (reinterpret_cast<FuncPtr_length>({ctypes.cast(ak._libawkward.ArrayBuilder_length, ctypes.c_voidp).value})(reinterpret_cast<void*>(ptr), &result) != 0) {{
+    printf("ERROR!\\n");
+  }}
+
+  printf("END %ld\\n", result);
+}}
+'''.strip()
+    print("------------------------")
+    print(code)
+    print("------------------------")
+
+    compiler.declare(code)
+
+    compiler.call("testy", builder._ptr)
