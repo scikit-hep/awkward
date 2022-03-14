@@ -89,6 +89,198 @@ namespace awkward {
     return out
 
 
+def generate_ArrayBuilder(compiler, use_cached=True):
+    key = "ArrayBuilder"
+    if use_cached:
+        out = cache.get(key)
+    else:
+        out = None
+
+    if out is None:
+        out = f"""
+namespace awkward {{
+  typedef unsigned char ArrayBuilderError;
+  const ArrayBuilderError SUCCESS = 0;
+  const ArrayBuilderError FAILURE = 1;
+
+  typedef ArrayBuilderError (*ArrayBuilderMethod_length)(void*, int64_t*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_clear)(void*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_null)(void*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_boolean)(void*, bool);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_integer)(void*, int64_t);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_real)(void*, double);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_complex)(void*, double, double);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_datetime)(void*, int64_t, const char*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_timedelta)(void*, int64_t, const char*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_bytestring)(void*, const char*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_bytestring_length)(void*, const char*, int64_t);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_string)(void*, const char*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_string_length)(void*, const char*, int64_t);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_begin_list)(void*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_end_list)(void*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_begin_tuple)(void*, int64_t);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_index)(void*, int64_t);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_end_tuple)(void*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_begin_record)(void*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_begin_record_fast)(void*, const char*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_begin_record_check)(void*, const char*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_field_fast)(void*, const char*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_field_check)(void*, const char*);
+  typedef ArrayBuilderError (*ArrayBuilderMethod_end_record)(void*);
+
+  class ArrayBuilder {{
+    public:
+      ArrayBuilder(void* ptr) : ptr_(ptr) {{ }}
+
+      ArrayBuilderError length(int64_t* out) const {{
+        return reinterpret_cast<ArrayBuilderMethod_length>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_length, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), out);
+      }}
+
+      ArrayBuilderError clear() const {{
+        return reinterpret_cast<ArrayBuilderMethod_clear>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_clear, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_));
+      }}
+
+      ArrayBuilderError boolean(bool x) const {{
+        return reinterpret_cast<ArrayBuilderMethod_boolean>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_boolean, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x);
+      }}
+
+      ArrayBuilderError integer(int64_t x) const {{
+        return reinterpret_cast<ArrayBuilderMethod_integer>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_integer, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x);
+      }}
+
+      ArrayBuilderError real(double x) const {{
+        return reinterpret_cast<ArrayBuilderMethod_real>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_real, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x);
+      }}
+
+      ArrayBuilderError complex(double real, double imag) const {{
+        return reinterpret_cast<ArrayBuilderMethod_complex>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_complex, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), real, imag);
+      }}
+
+      ArrayBuilderError datetime(int64_t x, const char* unit) const {{
+        return reinterpret_cast<ArrayBuilderMethod_datetime>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_datetime, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x, unit);
+      }}
+
+      ArrayBuilderError timedelta(int64_t x, const char* unit) const {{
+        return reinterpret_cast<ArrayBuilderMethod_timedelta>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_timedelta, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x, unit);
+      }}
+
+      ArrayBuilderError bytestring(const char* x) const {{
+        return reinterpret_cast<ArrayBuilderMethod_bytestring>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_bytestring, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x);
+      }}
+
+      ArrayBuilderError bytestring_length(const char* x, int64_t length) const {{
+        return reinterpret_cast<ArrayBuilderMethod_bytestring_length>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_bytestring_length, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x, length);
+      }}
+
+      ArrayBuilderError string(const char* x) const {{
+        return reinterpret_cast<ArrayBuilderMethod_string>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_string, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x);
+      }}
+
+      ArrayBuilderError string_length(const char* x, int64_t length) const {{
+        return reinterpret_cast<ArrayBuilderMethod_string_length>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_string_length, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), x, length);
+      }}
+
+      ArrayBuilderError begin_list() const {{
+        return reinterpret_cast<ArrayBuilderMethod_begin_list>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_beginlist, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_));
+      }}
+
+      ArrayBuilderError end_list() const {{
+        return reinterpret_cast<ArrayBuilderMethod_end_list>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_endlist, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_));
+      }}
+
+      ArrayBuilderError begin_tuple(int64_t length) const {{
+        return reinterpret_cast<ArrayBuilderMethod_begin_tuple>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_begintuple, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), length);
+      }}
+
+      ArrayBuilderError index(int64_t length) const {{
+        return reinterpret_cast<ArrayBuilderMethod_index>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_index, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), length);
+      }}
+
+      ArrayBuilderError end_tuple() const {{
+        return reinterpret_cast<ArrayBuilderMethod_end_tuple>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_endtuple, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_));
+      }}
+
+      ArrayBuilderError begin_record() const {{
+        return reinterpret_cast<ArrayBuilderMethod_begin_record>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_));
+      }}
+
+      ArrayBuilderError begin_record_fast(const char* name) const {{
+        return reinterpret_cast<ArrayBuilderMethod_begin_record_fast>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord_fast, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), name);
+      }}
+
+      ArrayBuilderError begin_record_check(const char* name) const {{
+        return reinterpret_cast<ArrayBuilderMethod_begin_record_check>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord_check, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), name);
+      }}
+
+      ArrayBuilderError field_fast(const char* name) const {{
+        return reinterpret_cast<ArrayBuilderMethod_field_fast>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_field_fast, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), name);
+      }}
+
+      ArrayBuilderError field_check(const char* name) const {{
+        return reinterpret_cast<ArrayBuilderMethod_field_check>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_field_check, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_), name);
+      }}
+
+      ArrayBuilderError end_record() const {{
+        return reinterpret_cast<ArrayBuilderMethod_end_record>(
+             {ctypes.cast(ak._libawkward.ArrayBuilder_endrecord, ctypes.c_voidp).value}
+        )(reinterpret_cast<void*>(ptr_));
+      }}
+
+    private:
+      void* ptr_;
+  }};
+}}
+""".strip()
+        cache[key] = out
+        compiler(out)
+
+    return out
+
+
 def togenerator(form):
     if isinstance(form, ak._v2.forms.EmptyForm):
         return togenerator(form.toNumpyForm(np.dtype(np.float64)))
@@ -1267,39 +1459,3 @@ class RawCppCompiler(ak.nplike.Singleton):
 
         fn_pointer = fn_proto(self._Clang_GetFunctionAddress(fn_handle))
         return fn_pointer(*args)
-
-
-def testy():
-    compiler = RawCppCompiler.instance()
-
-    builder = ak.layout.ArrayBuilder()
-    builder.real(3.14)
-    builder.real(2.71)
-    builder.real(9.87)
-
-    code = f"""
-#include <sys/types.h>
-extern "C" int printf(const char*, ...);
-
-typedef unsigned char (*FuncPtr_length)(void*, int64_t*);
-
-void testy(ssize_t ptr) {{
-  printf("BEGIN\\n");
-
-  int64_t result;
-  result = -999;
-
-  if (reinterpret_cast<FuncPtr_length>({ctypes.cast(ak._libawkward.ArrayBuilder_length, ctypes.c_voidp).value})(reinterpret_cast<void*>(ptr), &result) != 0) {{
-    printf("ERROR!\\n");
-  }}
-
-  printf("END %ld\\n", result);
-}}
-""".strip()
-    print("------------------------")
-    print(code)
-    print("------------------------")
-
-    compiler.declare(code)
-
-    compiler.call("testy", builder._ptr)
