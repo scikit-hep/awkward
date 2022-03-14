@@ -4,14 +4,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-import awkward._v2._connect.rdataframe._to_rdataframe  # noqa: E402
-
 
 ROOT = pytest.importorskip("ROOT")
 
 import awkward._v2._lookup  # noqa: E402
 import awkward._v2._connect.cling  # noqa: E402
-import awkward._v2._connect.rdataframe._to_rdataframe  # noqa: E402
+import awkward._v2._connect.rdataframe.to_rdataframe  # noqa: E402
 
 compiler = ROOT.gInterpreter.Declare
 
@@ -55,11 +53,11 @@ void roottest_NumpyArray_v2a(ssize_t length, ssize_t* ptrs) {{
             [{"x": 3, "y": [3.0, 0.3, 3.3]}],
         ]
     )
-    generator = ak._v2._connect.rdataframe._to_rdataframe.togenerator(array.layout.form)
-    rdf = generator.generate(
-        generator, compiler=compiler, array=array, name="c++func_name"
-    )
-    # ak._v2._connect.rdataframe._to_rdataframe.generate_RAwkwardArrayDS(
+    generator = ak._v2._connect.rdataframe.to_rdataframe.togenerator(array.layout.form)
+    # rdf = generator.generate(
+    #     generator, compiler=compiler, array=array, name="c++func_name"
+    # )
+    # ak._v2._connect.rdataframe.to_rdataframe.generate_RAwkwardArrayDS(
     #     compiler, array, name="c++func_name"
     # )
     ROOT.roottest_NumpyArray_v2a(len(layout), lookup.arrayptrs)
@@ -78,21 +76,27 @@ def test_nested_array_1():
     ak_array_2 = array["y"]
     # print("x:", ak_array_1.to_list(), "y:", ak_array_2.to_list())
 
-    generator = ak._v2._connect.rdataframe._to_rdataframe.togenerator(array.layout.form)
-    rdf = generator.generate(
-        generator, compiler=compiler, array=array, name="c++func_name"
+    rdf_source = ak._v2._connect.rdataframe.to_rdataframe.togenerator(array.layout.form)
+    rdf = rdf_source.generate(
+        rdf_source, compiler=compiler, array=array, name="c++func_name"
     )
+    rdf.Display().Print()
+
     # both jitted
     ### rdf = ak._v2.to_rdataframe({"col1": ak_array_1, "col2": ak_array_2})
 
     # array = ak._v2.from_rdataframe(
     #     rdf, "builder_name", function_for_foreach="my_function"
     # )
+    layout = array.layout
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    # lookup = ak._v2._lookup.Lookup(layout)
 
-    rdf = ROOT.MakeAwkwardDataFrame(
-        columns={"col1_name": ak_array_1, "col2_name": ak_array_2}
-    )
-    rdf.Display().Print()
+    generator.generate(compiler)
+
+    columns = {"col1_name": ak_array_1, "col2_name": ak_array_2}
+    rdf1 = ak._v2._connect.rdataframe.to_rdataframe.to_rdataframe(columns)
+    rdf1.Display().Print()
     # FIXME:
     # rdf_x = rdf.Define("z", lookup.arrayptrs)
 
