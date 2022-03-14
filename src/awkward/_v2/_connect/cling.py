@@ -1277,7 +1277,7 @@ def testy():
     builder.real(2.71)
     builder.real(9.87)
 
-    code = f'''
+    code = f"""
 #include <sys/types.h>
 extern "C" int printf(const char*, ...);
 
@@ -1295,7 +1295,7 @@ void testy(ssize_t ptr) {{
 
   printf("END %ld\\n", result);
 }}
-'''.strip()
+""".strip()
     print("------------------------")
     print(code)
     print("------------------------")
