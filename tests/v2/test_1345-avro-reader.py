@@ -144,3 +144,55 @@ def test_fixed():
 
 def test_null():
     raise NotImplementedError
+
+
+def test_enum():
+    data = ["TWO", "ONE", "FOUR", "THREE", "TWO", "ONE", "FOUR", "THREE", "TWO", "ONE"]
+    raise NotImplementedError
+
+
+def test_arrays_int():
+    data = [
+        [34, 556, 12],
+        [34, 556, 12],
+        [34, 532, 657],
+        [236, 568, 12],
+        [34, 556, 12],
+        [34, 54, 967],
+        [34, 556, 12],
+        [34, 647, 12],
+    ]
+    raise NotImplementedError
+
+
+def test_array_string():
+    raise NotImplementedError
+
+
+def test_array_enum():
+    raise NotImplementedError
+
+
+def test_Unions_x_null():
+    raise NotImplementedError
+
+
+def test_Unions_record_null():
+    raise NotImplementedError
+
+
+def test_null_X_Y():
+    raise NotImplementedError
+
+
+def test_records():
+    data = [
+        {"name": "Pierre-Simon Laplace", "age": 77, "Numbers": "TWO"},
+        {"name": "Henry", "age": 36, "Numbers": "THREE"},
+        {"name": "Harry", "age": 769, "Numbers": "ONE"},
+        {"name": "Jim", "age": 3215, "Numbers": "FOUR"},
+        {"name": "Lindsey", "age": 658, "Numbers": "TWO"},
+        {"name": "Eduardo", "age": 25, "Numbers": "THREE"},
+        {"name": "Aryan", "age": 6478, "Numbers": "FOUR"},
+    ]
+    raise NotImplementedError
