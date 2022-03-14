@@ -129,7 +129,6 @@ def array_builder(builder):
 
 
 def connect_ArrayBuilder(compiler, builder):
-    import ctypes
 
     tag = hex(builder._layout._ptr)
 

@@ -10,12 +10,6 @@ import awkward._v2._lookup  # noqa: E402
 cache = {}
 
 
-class CodeParsingError(Exception):
-    """Raised when C++ input code cannot be parsed"""
-
-    pass
-
-
 class AwkwardArrayDSGenerator:
     @classmethod
     def from_form(cls, form):
