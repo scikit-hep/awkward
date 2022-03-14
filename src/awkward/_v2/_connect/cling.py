@@ -15,8 +15,8 @@ np = ak.nplike.NumpyMetadata.instance()
 cache = {}
 
 
-def generate_ArrayView(compiler, use_cached=True):
-    key = "ArrayView"
+def generate_headers(compiler, use_cached=True):
+    key = "headers"
     if use_cached:
         out = cache.get(key)
     else:
@@ -32,7 +32,25 @@ def generate_ArrayView(compiler, use_cached=True):
 #include <chrono>
 
 extern "C" int printf(const char*, ...);
+""".strip()
+        cache[key] = out
+        compiler(out)
 
+    return out
+
+
+def generate_ArrayView(compiler, use_cached=True):
+    key = "ArrayView"
+    if use_cached:
+        out = cache.get(key)
+    else:
+        out = None
+
+    if not use_cached or "headers" not in cache:
+        generate_headers(compiler, use_cached=use_cached)
+
+    if out is None:
+        out = """
 namespace awkward {
   class ArrayView {
   public:
@@ -68,6 +86,9 @@ def generate_RecordView(compiler, use_cached=True):
     else:
         out = None
 
+    if not use_cached or "headers" not in cache:
+        generate_headers(compiler, use_cached=use_cached)
+
     if out is None:
         out = """
 namespace awkward {
@@ -95,6 +116,9 @@ def generate_ArrayBuilder(compiler, use_cached=True):
         out = cache.get(key)
     else:
         out = None
+
+    if not use_cached or "headers" not in cache:
+        generate_headers(compiler, use_cached=use_cached)
 
     if out is None:
         out = f"""
@@ -132,139 +156,139 @@ namespace awkward {{
     public:
       ArrayBuilder(void* ptr) : ptr_(ptr) {{ }}
 
-      ArrayBuilderError length(int64_t* out) const {{
+      ArrayBuilderError length(int64_t* out) const noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_length>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_length, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), out);
       }}
 
-      ArrayBuilderError clear() const {{
+      ArrayBuilderError clear() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_clear>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_clear, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
-      ArrayBuilderError boolean(bool x) const {{
+      ArrayBuilderError boolean(bool x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_boolean>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_boolean, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
-      ArrayBuilderError integer(int64_t x) const {{
+      ArrayBuilderError integer(int64_t x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_integer>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_integer, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
-      ArrayBuilderError real(double x) const {{
+      ArrayBuilderError real(double x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_real>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_real, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
-      ArrayBuilderError complex(double real, double imag) const {{
+      ArrayBuilderError complex(double real, double imag) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_complex>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_complex, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), real, imag);
       }}
 
-      ArrayBuilderError datetime(int64_t x, const char* unit) const {{
+      ArrayBuilderError datetime(int64_t x, const char* unit) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_datetime>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_datetime, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, unit);
       }}
 
-      ArrayBuilderError timedelta(int64_t x, const char* unit) const {{
+      ArrayBuilderError timedelta(int64_t x, const char* unit) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_timedelta>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_timedelta, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, unit);
       }}
 
-      ArrayBuilderError bytestring(const char* x) const {{
+      ArrayBuilderError bytestring(const char* x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_bytestring>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_bytestring, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
-      ArrayBuilderError bytestring_length(const char* x, int64_t length) const {{
+      ArrayBuilderError bytestring_length(const char* x, int64_t length) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_bytestring_length>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_bytestring_length, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, length);
       }}
 
-      ArrayBuilderError string(const char* x) const {{
+      ArrayBuilderError string(const char* x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_string>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_string, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
-      ArrayBuilderError string_length(const char* x, int64_t length) const {{
+      ArrayBuilderError string_length(const char* x, int64_t length) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_string_length>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_string_length, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, length);
       }}
 
-      ArrayBuilderError begin_list() const {{
+      ArrayBuilderError begin_list() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_list>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_beginlist, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
-      ArrayBuilderError end_list() const {{
+      ArrayBuilderError end_list() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_end_list>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_endlist, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
-      ArrayBuilderError begin_tuple(int64_t length) const {{
+      ArrayBuilderError begin_tuple(int64_t length) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_tuple>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_begintuple, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), length);
       }}
 
-      ArrayBuilderError index(int64_t length) const {{
+      ArrayBuilderError index(int64_t length) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_index>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_index, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), length);
       }}
 
-      ArrayBuilderError end_tuple() const {{
+      ArrayBuilderError end_tuple() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_end_tuple>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_endtuple, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
-      ArrayBuilderError begin_record() const {{
+      ArrayBuilderError begin_record() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_record>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
-      ArrayBuilderError begin_record_fast(const char* name) const {{
+      ArrayBuilderError begin_record_fast(const char* name) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_record_fast>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord_fast, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), name);
       }}
 
-      ArrayBuilderError begin_record_check(const char* name) const {{
+      ArrayBuilderError begin_record_check(const char* name) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_record_check>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord_check, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), name);
       }}
 
-      ArrayBuilderError field_fast(const char* name) const {{
+      ArrayBuilderError field_fast(const char* name) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_field_fast>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_field_fast, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), name);
       }}
 
-      ArrayBuilderError field_check(const char* name) const {{
+      ArrayBuilderError field_check(const char* name) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_field_check>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_field_check, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), name);
       }}
 
-      ArrayBuilderError end_record() const {{
+      ArrayBuilderError end_record() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_end_record>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_endrecord, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
@@ -347,8 +371,8 @@ class Generator:
 
         return f"""
         const std::string parameter(const std::string& parameter) const noexcept {{
-          {"" if len(params) == 0 else "".join(x for x in params)}return "null";
-        }}
+      {"" if len(params) == 0 else "".join(x for x in params)}return "null";
+    }}
         """.strip()
 
     def dataset(self, length="length", ptrs="ptrs", flatlist_as_rvec=False):
@@ -1343,10 +1367,12 @@ class CppStatements:
         self._funcname = f"awkward_function_{compiler.next_number()}"
         self._funcargs = []
         self._assignments = []
+        self._order = []
         self._argname_to_index = {}
         self._forms = []
         self._generators = []
         for argname, argval in kwargs.items():
+            self._order.append(argname)
             if isinstance(argval, (ak._v2.Array, ak._v2.forms.Form)):
                 if isinstance(argval, ak._v2.Array):
                     form = argval.layout.form
@@ -1364,6 +1390,16 @@ class CppStatements:
                 self._argname_to_index[argname] = len(self._forms)
                 self._forms.append(form)
                 self._generators.append(generator)
+
+            elif isinstance(argval, ak._v2.ArrayBuilder):
+                generate_ArrayBuilder(compiler.declare)
+                number = compiler.next_number()
+                ptr = f"awkward_argument_{number}_ptr"
+                self._funcargs.append(f"ssize_t {ptr}")
+                self._assignments.append(
+                    f"auto {argname} = awkward::ArrayBuilder(reinterpret_cast<void*>({ptr}));"
+                )
+                self._argname_to_index[argname] = "ArrayBuilder"
 
             else:
                 raise ak._v2._util.error(
@@ -1383,10 +1419,10 @@ void {self._funcname}({", ".join(self._funcargs)}) {{
     def __call__(self, **kwargs):
         compiler = RawCppCompiler.instance()
 
-        if set(kwargs) != set(self._argname_to_index):
+        if set(kwargs) != set(self._order):
             raise ak._v2._util.error(
                 TypeError(
-                    f"expected arguments {', '.join(self._argname_to_index)}, not {', '.join(kwargs)}"
+                    f"expected arguments [{', '.join(self._order)}], not [{', '.join(kwargs)}]"
                 )
             )
 
@@ -1394,7 +1430,8 @@ void {self._funcname}({", ".join(self._funcargs)}) {{
         lookups = []
 
         arguments = []
-        for argname, argval in kwargs.items():
+        for argname in self._order:
+            argval = kwargs[argname]
             if isinstance(argval, ak._v2.Array):
                 index = self._argname_to_index[argname]
 
@@ -1409,6 +1446,18 @@ void {self._funcname}({", ".join(self._funcargs)}) {{
                 lookups.append(lookup)
                 arguments.append(len(argval.layout))
                 arguments.append(lookup.arrayptrs.ctypes.data)
+
+            elif isinstance(argval, ak._v2.ArrayBuilder):
+                index = self._argname_to_index[argname]
+
+                if index != "ArrayBuilder":
+                    raise ak._v2._util.error(
+                        TypeError(
+                            f"argument {argname} is an ArrayBuilder but was not declared as such"
+                        )
+                    )
+
+                arguments.append(argval._layout._ptr)
 
             else:
                 raise ak._v2._util.error(
