@@ -12,8 +12,6 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# C++17 is required for optional, variant
-headers = ("stdexcept", "string", "optional", "variant", "complex", "chrono")
 cache = {}
 
 
@@ -26,7 +24,13 @@ def generate_ArrayView(compiler, use_cached=True):
 
     if out is None:
         out = """
-#include<sys/types.h>
+#include <sys/types.h>
+#include <string>
+#include <optional>  // C++17
+#include <variant>  // C++17
+#include <complex>
+#include <chrono>
+
 extern "C" int printf(const char*, ...);
 
 namespace awkward {
@@ -144,27 +148,16 @@ class Generator:
         )
 
     def _generate_common(self):
-        return ""
+        params = [
+            f"if (parameter == {json.dumps(name)}) return {json.dumps(json.dumps(value))};\n      "
+            for name, value in self.parameters.items()
+        ]
 
-        # params = [
-        #     f"if (parameter == {json.dumps(name)}) return {json.dumps(json.dumps(value))};\n      "
-        #     for name, value in self.parameters.items()
-        # ]
-
-        # return f"""
-        # const std::string parameter(const std::string& parameter) const noexcept {{
-        #   {"" if len(params) == 0 else "".join(x for x in params)}return "null";
-        # }}
-
-        # value_type at(size_t at) const {{
-        #   if (at >= stop_ - start_) {{
-        #     throw std::out_of_range(std::to_string(at) + " is out of range");
-        #   }}
-        #   else {{
-        #     return (*this)[at];
-        #   }}
-        # }}
-        # """.strip()
+        return f"""
+        const std::string parameter(const std::string& parameter) const noexcept {{
+          {"" if len(params) == 0 else "".join(x for x in params)}return "null";
+        }}
+        """.strip()
 
     def dataset(self, length="length", ptrs="ptrs", flatlist_as_rvec=False):
         key = (self, flatlist_as_rvec)
@@ -1153,8 +1146,6 @@ namespace awkward {{
 class CppStatements:
     def __init__(self, cppcode, **kwargs):
         compiler = RawCppCompiler.instance()
-        compiler_declare = compiler.declare
-        # compiler_declare = print  # noqa: T002
 
         self._cppcode = cppcode
         self._funcname = f"awkward_function_{compiler.next_number()}"
@@ -1174,7 +1165,7 @@ class CppStatements:
                 ptrs = f"awkward_argument_{number}_ptrs"
                 self._funcargs.append(f"ssize_t {length}, ssize_t {ptrs}")
                 generator = togenerator(form)
-                generator.generate(compiler_declare)
+                generator.generate(compiler.declare)
                 self._assignments.append(
                     f"auto {argname} = {generator.dataset(length, ptrs)};"
                 )
@@ -1188,7 +1179,7 @@ class CppStatements:
                 )
 
         eoln = "\n"
-        compiler_declare(
+        compiler.declare(
             f"""
 void {self._funcname}({", ".join(self._funcargs)}) {{
 {eoln.join(self._assignments)}
