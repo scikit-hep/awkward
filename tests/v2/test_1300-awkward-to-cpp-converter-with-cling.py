@@ -32,7 +32,7 @@ def test_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[1];
   out[2] = obj[3];
@@ -55,7 +55,7 @@ def test_EmptyArray():
     ROOT.gInterpreter.Declare(
         f"""
 size_t roottest_EmptyArray_v2a(ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   return obj.size();
 }}
 """
@@ -76,7 +76,7 @@ def test_NumpyArray_shape():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_NumpyArray_shape_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0].size();
@@ -109,7 +109,7 @@ def test_RegularArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
+  auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)};
   out[0] = obj.size();
   out[1] = obj[0][0];
   out[2] = obj[0][1];
@@ -141,7 +141,7 @@ def test_RegularArray_NumpyArray_v2b():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[1].size();
@@ -171,7 +171,7 @@ def test_ListArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
+  auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -206,7 +206,7 @@ def test_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ListOffsetArray_NumpyArray_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
+  auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -248,7 +248,7 @@ def test_RecordArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   auto rec1 = obj[1];
   auto rec4 = obj[4];
@@ -281,7 +281,7 @@ void roottest_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* p
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   auto rec1 = obj[1];
   auto rec4 = obj[4];
@@ -306,7 +306,7 @@ void roottest_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* p
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   obj[5];
 }}
@@ -326,7 +326,7 @@ void roottest_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* p
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RecordArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   obj[5];
 }}
@@ -351,7 +351,7 @@ def test_IndexedArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_IndexedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0];
   out[2] = obj[1];
@@ -382,7 +382,7 @@ def test_IndexedOptionArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_IndexedOptionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -414,7 +414,7 @@ def test_ByteMaskedArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -442,7 +442,7 @@ void roottest_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ByteMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -499,7 +499,7 @@ def test_BitMaskedArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -577,7 +577,7 @@ void roottest_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -658,7 +658,7 @@ void roottest_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -739,7 +739,7 @@ void roottest_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -790,7 +790,7 @@ def test_UnmaskedArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_UnmaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[1].has_value() ? obj[1].value() : 999.0;
   out[2] = obj[3].has_value() ? obj[3].value() : 999.0;
@@ -820,7 +820,7 @@ def test_UnionArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].index();
   out[2] = obj[1].index();
@@ -862,7 +862,7 @@ def test_nested_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
+  auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[1];
   out[2] = obj[3];
@@ -893,7 +893,7 @@ def test_nested_NumpyArray_shape():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_NumpyArray_shape_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0].size();
@@ -931,7 +931,7 @@ def test_nested_RegularArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
+  auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[0][0];
   out[2] = obj[0][1];
@@ -964,7 +964,7 @@ void roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out,
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[1].size();
@@ -997,7 +997,7 @@ def test_nested_ListArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
+  auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -1035,7 +1035,7 @@ def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ListOffsetArray_NumpyArray_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
+  auto obj = {generator.dataset(flatlist_as_rvec=flatlist_as_rvec)}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -1082,7 +1082,7 @@ def test_nested_RecordArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   auto rec1 = obj[1];
   auto rec4 = obj[4];
@@ -1120,7 +1120,7 @@ void roottest_nested_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssi
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   auto rec1 = obj[1];
   auto rec4 = obj[4];
@@ -1148,7 +1148,7 @@ void roottest_nested_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssi
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   obj[5];
 }}
@@ -1171,7 +1171,7 @@ void roottest_nested_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssi
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RecordArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   obj[5];
 }}
@@ -1201,7 +1201,7 @@ def test_nested_IndexedArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_IndexedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0];
   out[2] = obj[1];
@@ -1237,7 +1237,7 @@ def test_nested_IndexedOptionArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_IndexedOptionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1276,7 +1276,7 @@ def test_nested_ByteMaskedArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1311,7 +1311,7 @@ void roottest_nested_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length,
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ByteMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1390,7 +1390,7 @@ def test_nested_BitMaskedArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1490,7 +1490,7 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1593,7 +1593,7 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1696,7 +1696,7 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1752,7 +1752,7 @@ def test_nested_UnmaskedArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_UnmaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[1].has_value() ? obj[1].value() : 999.0;
   out[2] = obj[3].has_value() ? obj[3].value() : 999.0;
@@ -1789,7 +1789,7 @@ def test_nested_UnionArray_NumpyArray():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].index();
   out[2] = obj[1].index();
@@ -1825,7 +1825,7 @@ def test_ListArray_strings():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ListArray_strings(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = (obj[0] == "one");
   out[2] = (obj[1] == "two");
@@ -1856,7 +1856,7 @@ def test_RegularArray_strings():
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RegularArray_strings(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = (obj[0] == "onexx");
   out[2] = (obj[1] == "twoxx");
