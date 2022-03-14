@@ -246,7 +246,7 @@ def connect_ArrayBuilder(compiler, builder):
     return f_cache
 
 
-def _as_awkward(
+def to_awkward_array(
     data_frame, compiler, columns=None, exclude=None, columns_as_records=True
 ):
     import ROOT
@@ -262,51 +262,21 @@ def _as_awkward(
 
     builder = ak.ArrayBuilder()
     b = ROOT.awkward.ArrayBuilderShim(ctypes.cast(builder._layout._ptr, ctypes.c_voidp))
-    #
-    # func = ak._v2._connect.rdataframe._from_rdataframe.connect_ArrayBuilder(
-    #     compiler, builder
-    # )
 
     if columns_as_records:
         result_ptrs = {}
-        # getattr(ROOT, func["beginlist"])()
         b.beginlist()
         for col in columns:
-            # getattr(ROOT, func["beginrecord_check"])(col)
             b.beginrecord_check(col)
             column_type = data_frame.GetColumnType(col)
-            # print(column_type)
             result_ptrs[col] = data_frame.Take[column_type](col)
-            # data_frame.Foreach["std::function<uint8_t(double)>"](
-            #     getattr(ROOT, func["real"]), [col]
-            # )
-            # getattr(ROOT, func["real"])(result_ptrs[col][0])
-            # getattr(ROOT, func["endrecord"])()
+            cpp_reference = result_ptrs[col].GetValue()
+            if column_type == "double":
+                # FIXME: one thread, sequential???
+                # data_frame.Foreach["std::function<uint8_t(double)>"](b.real, [col])
+                for x in cpp_reference:
+                    b.real(x)
             b.endrecord()
-            # print("yey", col)
-        # getattr(ROOT, func["endlist"])()
         b.endlist()
 
-    # if len(columns) == 0:
-    #     return ak._v2.contents.EmptyArray()
-    # else:
-    #     # Register Take action for each column
-    #     result_ptrs = {}
-    #     for col in columns:
-    #         column_type = data_frame.GetColumnType(col)
-    #         result_ptrs[col] = data_frame.Take[column_type](col)
-    #
-    #     # Convert the C++ vectors to Awkward arrays
-    #     contents = {}
-    #     for col in columns:
-    #         cpp_reference = result_ptrs[col].GetValue()
-    #         tmp = numpy.asarray(
-    #             cpp_reference
-    #         )  # This adopts the memory of the C++ object.
-    #         contents[col] = ak._v2.contents.numpyarray.NumpyArray(tmp)
-    #
-    #     return ak._v2.contents.recordarray.RecordArray(
-    #         list(contents.values()), list(contents.keys())
-    #     )
-    # print(builder.snapshot())
     return builder.snapshot()

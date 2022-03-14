@@ -24,8 +24,6 @@ def from_rdataframe(
 
     See also #ak.to_rdataframe.
     """
-    raise NotImplementedError
-
     import ROOT
 
     compiler = ROOT.gInterpreter.Declare

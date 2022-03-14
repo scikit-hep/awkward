@@ -18,7 +18,7 @@ builder_name = ak._v2._connect.rdataframe.from_rdataframe.generate_ArrayBuilder(
 
 ROOT.RDF.RInterface(
     "ROOT::Detail::RDF::RLoopManager", "void"
-).AsAwkward = ak._v2._connect.rdataframe.from_rdataframe._as_awkward
+).AsAwkward = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array
 
 
 def test_array_builder_shim():
@@ -137,8 +137,13 @@ def test_as_ak_array():
     )
     ROOT.my_function(b, 1.1)
 
+    # // store a call to a member function
+    # std::function<uint8_t(const awkward::ArrayBuilderShim&, double)> f_real = &awkward::ArrayBuilderShim::real;
+
     rdf = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
-    rdf.Foreach("my_function", ["x"])
+    rdf.Foreach[
+        "std::function<uint8_t(const ROOT::awkward::ArrayBuilderShim&, double)>"
+    ](ROOT.my_function, ["x"])
     array = builder.snapshot()
     assert (
         str(array.layout.form)
