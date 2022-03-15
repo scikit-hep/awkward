@@ -158,7 +158,7 @@ or
         return out
 
     def recurse(layout, row_arrays, col_names):
-        if layout.is_IndexedType:
+        if layout.is_IndexedType and not layout.is_OptionType:
             return recurse(layout.project(), row_arrays, col_names)
 
         elif layout.parameter("__array__") in ("string", "bytestring"):

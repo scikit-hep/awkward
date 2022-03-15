@@ -769,7 +769,7 @@ def union_to_record(unionarray, anonymous):
 
     contents = []
     for layout in unionarray.contents:
-        if layout.is_IndexedType:
+        if layout.is_IndexedType and not layout.is_OptionType:
             contents.append(layout.project())
         elif layout.is_UnionType:
             contents.append(union_to_record(layout, anonymous))
