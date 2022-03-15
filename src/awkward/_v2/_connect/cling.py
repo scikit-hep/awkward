@@ -55,45 +55,57 @@ namespace awkward {
   template <typename ARRAY, typename VALUE>
   class Iterator {
   public:
-    Iterator(const ARRAY array, ssize_t at) : array_(array), at_(at) { }
+    Iterator(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : start_(start), stop_(stop), which_(which), ptrs_(ptrs) { }
 
     VALUE operator*() const noexcept {
-      return array_[at_];
+      return ARRAY(start_, stop_, which_, ptrs_)[0];
     }
 
     void operator++() noexcept {
-      at_++;
+      start_++;
     }
 
     bool operator!=(Iterator<ARRAY, VALUE> other) const noexcept {
-      return array_ != other.array_  ||  at_ != other.at_;
+      return start_ != other.start_   ||
+             stop_ != other.stop_   ||
+             which_ != other.which_   ||
+             ptrs_ != other.ptrs_;
     }
 
   private:
-    const ARRAY array_;
-    ssize_t at_;
+    ssize_t start_;
+    ssize_t stop_;
+    ssize_t which_;
+    ssize_t* ptrs_;
   };
 
   template <typename ARRAY, typename VALUE>
   class RIterator {
   public:
-    RIterator(const ARRAY array, ssize_t at) : array_(array), at_(at) { }
+    RIterator(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+      : start_(start), stop_(stop), which_(which), ptrs_(ptrs) { }
 
     VALUE operator*() const noexcept {
-      return array_[at_];
+      return ARRAY(start_, stop_, which_, ptrs_)[0];
     }
 
     void operator++() noexcept {
-      at_--;
+      start_--;
     }
 
     bool operator!=(RIterator<ARRAY, VALUE> other) const noexcept {
-      return array_ != other.array_  ||  at_ != other.at_;
+      return start_ != other.start_   ||
+             stop_ != other.stop_   ||
+             which_ != other.which_   ||
+             ptrs_ != other.ptrs_;
     }
 
   private:
-    const ARRAY array_;
-    ssize_t at_;
+    ssize_t start_;
+    ssize_t stop_;
+    ssize_t which_;
+    ssize_t* ptrs_;
   };
 
   class ArrayView {
@@ -466,27 +478,19 @@ class Generator:
     }}
 
     Iterator<{self.class_type(key[1:])}, value_type> begin() const noexcept {{
-      return Iterator<{self.class_type(key[1:])}, value_type>(
-        {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
-        0);
+      return Iterator<{self.class_type(key[1:])}, value_type>(start_, stop_, which_, ptrs_);
     }}
 
     Iterator<{self.class_type(key[1:])}, value_type> end() const noexcept {{
-      return Iterator<{self.class_type(key[1:])}, value_type>(
-        {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
-        stop_ - start_);
+      return Iterator<{self.class_type(key[1:])}, value_type>(stop_, stop_, which_, ptrs_);
     }}
 
     RIterator<{self.class_type(key[1:])}, value_type> rbegin() const noexcept {{
-      return RIterator<{self.class_type(key[1:])}, value_type>(
-        {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
-        stop_ - start_ - 1);
+      return RIterator<{self.class_type(key[1:])}, value_type>(stop_ - 1, stop_, which_, ptrs_);
     }}
 
     RIterator<{self.class_type(key[1:])}, value_type> rend() const noexcept {{
-      return RIterator<{self.class_type(key[1:])}, value_type>(
-        {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
-        -1);
+      return RIterator<{self.class_type(key[1:])}, value_type>(start_ - 1, stop_, which_, ptrs_);
     }}
         """.strip()
 
