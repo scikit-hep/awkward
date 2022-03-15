@@ -3,6 +3,7 @@
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 def from_parquet(
@@ -13,13 +14,39 @@ def from_parquet(
     max_gap=64_000,
     max_block=256_000_000,
     footer_sample_size=1_000_000,
-    list_indicator="list.item",
     conservative_optiontype=False,
     highlevel=True,
     behavior=None,
 ):
     """
-    Some awesome documentation!
+    Args:
+        path (str): Local filename or remote URL, passed to fsspec for resolution.
+            May contain glob patterns.
+        columns (None, str, or list of str): Glob pattern(s) with bash-like curly
+            brackets for matching column names. Nested records are separated by dots.
+            If a list of patterns, the logical-or is matched. If None, all columns
+            are read.
+        row_groups (None or set of int): Row groups to read; must be non-negative.
+            Order is ignored: the output array is presented in the order specified by
+            Parquet metadata. If None, all row groups/all rows are read.
+        storage_options: Passed to `fsspec.parquet.open_parquet_file`.
+        max_gap (int): Passed to `fsspec.parquet.open_parquet_file`.
+        max_block (int): Passed to `fsspec.parquet.open_parquet_file`.
+        footer_sample_size (int): Passed to `fsspec.parquet.open_parquet_file`.
+        conservative_optiontype (bool): Passed to `ak.from_arrow`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Reads data from a local or remote Parquet file or collection of files.
+
+    The data are eagerly (not lazily) read and must fit into memory. Use `columns`
+    and/or `row_groups` to select and filter manageable subsets of the data, and
+    use #ak.metadata_from_parquet to find column names and the range of row groups
+    that a dataset has.
+
+    See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.from_parquet",
@@ -31,7 +58,6 @@ def from_parquet(
             max_gap=max_gap,
             max_block=max_block,
             footer_sample_size=footer_sample_size,
-            list_indicator=list_indicator,
             conservative_optiontype=conservative_optiontype,
             highlevel=highlevel,
             behavior=behavior,
@@ -45,7 +71,6 @@ def from_parquet(
             max_gap,
             max_block,
             footer_sample_size,
-            list_indicator,
             conservative_optiontype,
             highlevel,
             behavior,
@@ -60,7 +85,6 @@ def _impl(
     max_gap,
     max_block,
     footer_sample_size,
-    list_indicator,
     conservative_optiontype,
     highlevel,
     behavior,
@@ -73,34 +97,23 @@ def _impl(
 
     import fsspec.parquet
 
+    if row_groups is not None:
+        if not all(ak._v2._util.isint(x) and x >= 0 for x in row_groups):
+            raise ak._v2._util.error(
+                TypeError("row_groups must be a set of non-negative integers")
+            )
+
     fs, _, paths = fsspec.get_fs_token_paths(
         path, mode="rb", storage_options=storage_options
     )
 
     all_paths, path_for_metadata = _all_and_metadata_paths(path, fs, paths)
 
-    if row_groups is not None:
-        if len(all_paths) == 1:
-            row_groups = [row_groups]
-        else:
-            if len(row_groups) != len(all_paths):
-                matched_paths = "\n    ".join(all_paths)
-                raise ak._v2._util.error(
-                    ValueError(
-                        f"""length of row_groups ({len(row_groups)}) does not match length of matched paths (len(all_paths)):
-
-    {matched_paths}"""
-                    )
-                )
-        if not all(all(ak._v2._util.isint(y) for y in x) for x in row_groups):
-            raise ak._v2._util.error(
-                TypeError("row_groups must be a list of lists of int")
-            )
-
-    if columns is None:
-        parquet_columns = None
-
-    else:
+    parquet_columns = None
+    subform = None
+    subrg = [None] * len(all_paths)
+    actual_paths = all_paths
+    if columns is not None or row_groups is not None:
         with fsspec.parquet.open_parquet_file(
             path_for_metadata,
             fs=fs,
@@ -113,25 +126,69 @@ def _impl(
         ) as file_for_metadata:
             parquetfile_for_metadata = pyarrow_parquet.ParquetFile(file_for_metadata)
 
-            form = ak._v2._connect.pyarrow.form_handle_arrow(
-                parquetfile_for_metadata.schema_arrow, pass_empty_field=True
-            )
-            subform = form.select_columns(columns)
-            parquet_columns = subform.columns(list_indicator=list_indicator)
+            if columns is not None:
+                # FIXME: get this from parquetfile_for_metadata
+                list_indicator = "list.item"
+
+                form = ak._v2._connect.pyarrow.form_handle_arrow(
+                    parquetfile_for_metadata.schema_arrow, pass_empty_field=True
+                )
+                subform = form.select_columns(columns)
+                parquet_columns = subform.columns(list_indicator=list_indicator)
+
+            if row_groups is not None:
+                metadata = parquetfile_for_metadata.metadata
+                if any(not 0 <= rg < metadata.num_row_groups for rg in row_groups):
+                    raise ak._v2._util.error(
+                        ValueError(
+                            f"one of the requested row_groups is out of range (must be less than {metadata.num_row_groups})"
+                        )
+                    )
+
+                split_paths = [p.split("/") for p in all_paths]
+                prev_index = None
+                prev_i = 0
+                actual_paths = []
+                subrg = []
+                for i in range(metadata.num_row_groups):
+                    split_path = metadata.row_group(i).column(0).file_path.split("/")
+                    index = None
+                    for j, compare in enumerate(split_paths):
+                        if split_path == compare[-len(split_path) :]:
+                            index = j
+                            break
+                    if index is None:
+                        eoln = "\n    "
+                        raise ak._v2._util.error(
+                            LookupError(
+                                f"""path {'/'.join(split_path)!r} from metadata not found in path matches:
+
+    {eoln.join(all_paths)}"""
+                            )
+                        )
+
+                    if prev_index != index:
+                        prev_index = index
+                        prev_i = i
+                        actual_paths.append(all_paths[index])
+                        subrg.append([])
+
+                    if i in row_groups:
+                        subrg[-1].append(i - prev_i)
+
+                for k in range(len(subrg) - 1, -1, -1):
+                    if len(subrg[k]) == 0:
+                        del actual_paths[k]
+                        del subrg[k]
 
     arrays = []
-    for i, x in enumerate(all_paths):
-        if row_groups is None:
-            rg = None
-        else:
-            rg = row_groups[i]
-
+    for i, p in enumerate(actual_paths):
         with fsspec.parquet.open_parquet_file(
-            x,
+            p,
             fs=fs,
             engine="pyarrow",
             columns=parquet_columns,
-            row_groups=rg,
+            row_groups=subrg[i],
             storage_options=storage_options,
             max_gap=max_gap,
             max_block=max_block,
@@ -139,22 +196,37 @@ def _impl(
         ) as file:
             parquetfile = pyarrow_parquet.ParquetFile(file)
 
-            if rg is None:
+            if subform is None:
+                subform = ak._v2._connect.pyarrow.form_handle_arrow(
+                    parquetfile.schema_arrow, pass_empty_field=True
+                )
+
+            if row_groups is None:
                 arrow_table = parquetfile.read(parquet_columns)
             else:
-                arrow_table = parquetfile.read_row_groups(rg, parquet_columns)
+                arrow_table = parquetfile.read_row_groups(subrg[i], parquet_columns)
 
-            arrays.append(
-                ak._v2._connect.pyarrow.handle_arrow(
-                    arrow_table,
-                    conservative_optiontype=conservative_optiontype,
-                    pass_empty_field=True,
-                )
+        arrays.append(
+            ak._v2._connect.pyarrow.handle_arrow(
+                arrow_table,
+                conservative_optiontype=conservative_optiontype,
+                pass_empty_field=True,
             )
+        )
 
-    return ak._v2.operations.structure.ak_concatenate._impl(
-        arrays, 0, True, True, highlevel, behavior
-    )
+    if len(arrays) == 0:
+        return ak._v2.operations.convert.ak_from_buffers._impl(
+            subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
+        )
+    else:
+        return ak._v2.operations.structure.ak_concatenate._impl(
+            arrays, 0, True, True, highlevel, behavior
+        )
+
+
+class _DictOfEmptyBuffers:
+    def __getitem__(self, where):
+        return b"\x00\x00\x00\x00\x00\x00\x00\x00"
 
 
 def _all_and_metadata_paths(path, fs, paths):

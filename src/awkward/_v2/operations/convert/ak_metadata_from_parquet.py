@@ -21,7 +21,26 @@ def metadata_from_parquet(
     footer_sample_size=1_000_000,
 ):
     """
-    Some awesome documentation!
+    Args:
+        path (str): Local filename or remote URL, passed to fsspec for resolution.
+            May contain glob patterns.
+        storage_options: Passed to `fsspec.parquet.open_parquet_file`.
+        max_gap (int): Passed to `fsspec.parquet.open_parquet_file`.
+        max_block (int): Passed to `fsspec.parquet.open_parquet_file`.
+        footer_sample_size (int): Passed to `fsspec.parquet.open_parquet_file`.
+
+    Returns a named tuple containing
+
+      * `form`: an Awkward Form representing the low-level type of the data
+         (use `.type` to get a high-level type),
+      * `fs`: the fsspec filesystem object,
+      * `paths`: a list of matching path names,
+      * `metadata`: the Parquet metadata, which includes `.num_rows` for the length
+         of the array that would be read by #ak.from_parquet and `.num_row_groups`
+         for the units that can be filtered (for the #ak.from_parquet `row_groups`
+         argument).
+
+    See also #ak.from_parquet, #ak.to_parquet.
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.metadata_from_parquet",
