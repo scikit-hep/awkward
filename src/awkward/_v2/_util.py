@@ -3,12 +3,11 @@
 # First, transition all the _v2 code to start using implementations in this file.
 # Then build up the high-level replacements.
 
-# import re
-# import os.path
-# import warnings
-import setuptools
-import os
+import itertools
 import numbers
+import os
+import re
+import setuptools
 import threading
 import traceback
 
@@ -859,7 +858,6 @@ def direct_Content_subclass_name(node):
 
 
 def merge_parameters(one, two, merge_equal=False):
-
     if one is None and two is None:
         return None
 
@@ -883,3 +881,26 @@ def merge_parameters(one, two, merge_equal=False):
             if v is not None:
                 out[k] = v
         return out
+
+
+def expand_braces(text, seen=None):
+    if seen is None:
+        seen = set()
+
+    spans = [m.span() for m in expand_braces.regex.finditer(text)][::-1]
+    alts = [text[start + 1 : stop - 1].split(",") for start, stop in spans]
+
+    if len(spans) == 0:
+        if text not in seen:
+            yield text
+        seen.add(text)
+
+    else:
+        for combo in itertools.product(*alts):
+            replaced = list(text)
+            for (start, stop), replacement in zip(spans, combo):
+                replaced[start:stop] = replacement
+            yield from expand_braces("".join(replaced), seen)
+
+
+expand_braces.regex = re.compile(r"\{[^\{\}]*\}")

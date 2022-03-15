@@ -168,3 +168,20 @@ class RegularForm(Form):
     @property
     def dimension_optiontype(self):
         return False
+
+    def _columns(self, path, output, list_indicator):
+        if (
+            self.parameter("__array__") not in ("string", "bytestring")
+            and list_indicator is not None
+        ):
+            path = path + (list_indicator,)
+        self._content._columns(path, output, list_indicator)
+
+    def _select_columns(self, index, specifier, matches, output):
+        return RegularForm(
+            self._content._select_columns(index, specifier, matches, output),
+            self._size,
+            self._has_identifier,
+            self._parameters,
+            self._form_key,
+        )
