@@ -143,6 +143,17 @@ def test_fixed():
 
 
 def test_null():
+    data = [
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    ]
     raise NotImplementedError
 
 
@@ -166,10 +177,24 @@ def test_arrays_int():
 
 
 def test_array_string():
+    data = [
+        ["afsdfd", "sgrh"],
+        ["afsdfd", "sgrh"],
+        ["afsdfd", "sgrh"],
+        ["afsdfd", "sgrh"],
+        ["afsdfd", "sgrh"],
+    ]
     raise NotImplementedError
 
 
 def test_array_enum():
+    data = [
+        ["ONE", "FOUR"],
+        ["THREE", "ONE"],
+        ["THREE", "FOUR"],
+        ["TWO", "ONE"],
+        ["FOUR", "THREE"],
+    ]
     raise NotImplementedError
 
 
@@ -181,7 +206,7 @@ def test_Unions_record_null():
     raise NotImplementedError
 
 
-def test_null_X_Y():
+def test_Unions_null_X_Y():
     raise NotImplementedError
 
 
