@@ -1,8 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import collections
+
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
+
+
+ParquetMetadata = collections.namedtuple(
+    "ParquetMetadata",
+    ["form", "fs", "paths", "metadata"],
+)
 
 
 def metadata_from_parquet(
@@ -54,7 +62,7 @@ def _impl(
     )
 
     (
-        _,
+        all_paths,
         path_for_metadata,
     ) = ak._v2.operations.convert.ak_from_parquet._all_and_metadata_paths(
         path, fs, paths
@@ -76,4 +84,4 @@ def _impl(
             parquetfile_for_metadata.schema_arrow, pass_empty_field=True
         )
 
-        return form, parquetfile_for_metadata.metadata
+        return ParquetMetadata(form, fs, all_paths, parquetfile_for_metadata.metadata)
