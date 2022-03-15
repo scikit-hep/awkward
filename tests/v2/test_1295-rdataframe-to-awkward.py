@@ -267,10 +267,10 @@ def test_as_awkward():
     )
 
 
-@pytest.mark.skip(reason="FIXME: test root file is not in git yet")
 def test_rvec_snapshot():
     treeName = "t"
-    fileName = "tests/samples/snapshot_nestedrvecs.root"  # "snapshot_nestedrvecs.root"
+    # fileName = "tests/samples/snapshot_nestedrvecs.root"
+    fileName = "tests/samples/snapshot_rvecs.root"
 
     ROOT.gInterpreter.ProcessLine(
         """
@@ -288,9 +288,8 @@ struct TwoInts {
     )
     rdf = ROOT.RDataFrame(treeName, fileName)
 
-    array = rdf.AsAwkward(
-        compiler, columns={"vv", "vvv", "vvti"}, columns_as_records=True
-    )
+    # array = rdf.AsAwkward(compiler, columns={"vv", "vvv", "vvti"}, columns_as_records=True)
+    array = rdf.AsAwkward(compiler, columns_as_records=True)
     assert (
         str(array.layout.form)
         == """{
@@ -366,4 +365,6 @@ struct TwoInts {
     ]
 }"""
     )
+    print(array.layout)
+
     print(array.to_list())
