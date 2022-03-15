@@ -1399,3 +1399,16 @@ class Content:
         out._parameters = parameters
 
         return out
+
+    def deep_copy(self, memo=None):
+        cls = self.__class__
+        new_instance = cls.__new__(cls)
+        memo = {"id(self)": new_instance}
+        for k, v in self.__dict__.items():
+            if k == "_nplike":
+                setattr(new_instance, k, v)
+            # elif isinstance(v, ak._v2.index.Index):
+            #     setattr(new_instance, k, copy.copy(v))
+            else:
+                setattr(new_instance, k, copy.deepcopy(v, memo))
+        return new_instance
