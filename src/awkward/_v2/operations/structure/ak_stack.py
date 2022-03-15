@@ -59,7 +59,13 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     if not contents:
         raise ak._v2._util.error(ValueError("need at least one array to concatenate"))
 
-    posaxis = contents[0].axis_wrap_if_negative(axis)
+    def normalise_axis(layout, axis):
+        if axis >= 0:
+            return axis
+        else:
+            return layout.axis_wrap_if_negative(axis) + 1
+
+    posaxis = normalise_axis(contents[0], axis)
     maxdepth = max(x.minmax_depth[1] for x in contents)
     if not 0 <= posaxis <= maxdepth:
         raise ak._v2._util.error(
@@ -68,7 +74,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 "is ambiguous".format(axis)
             )
         )
-    if any(x.axis_wrap_if_negative(axis) != posaxis for x in contents):
+    if any(normalise_axis(x, axis) != posaxis for x in contents):
         raise ak._v2._util.error(
             ValueError(
                 "arrays to concatenate do not have the same depth for negative "
@@ -186,18 +192,6 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                             )
                         )
                 return (stack_contents(nextinputs, length),)
-
-            elif any(
-                x.purelist_depth == 1
-                for x in inputs
-                if isinstance(x, ak._v2.contents.Content)
-            ):
-                raise ak._v2._util.error(
-                    ValueError(
-                        "at least one array is not deep enough to concatenate at "
-                        "axis={}".format(axis)
-                    )
-                )
 
             else:
                 return None
