@@ -81,7 +81,7 @@ def test_nested_array_1():
     rdf = rdf_source.generate(
         rdf_source, compiler=compiler, array=array, name="c++func_name"
     )
-    rdf.Display().Print()
+    rdf.Count().Print()
 
     # both jitted
     ### rdf = ak._v2.to_rdataframe({"col1": ak_array_1, "col2": ak_array_2})

@@ -30,7 +30,6 @@ class AwkwardArrayDSGenerator:
     def generate(self, compiler, array, name=None, use_cached=True):
         layout = array.layout
         generator = ak._v2._connect.cling.togenerator(layout.form)
-        # lookup = ak._v2._lookup.Lookup(layout)
 
         generator.generate(compiler)
         key = generator.entry_type()

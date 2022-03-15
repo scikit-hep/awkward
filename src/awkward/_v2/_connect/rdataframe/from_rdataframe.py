@@ -246,11 +246,28 @@ def connect_ArrayBuilder(compiler, builder):
     return f_cache
 
 
+def count_dimentions(column_type):
+    rvec_count = column_type.count("RVec<")
+    v_count = column_type.count("vector<")
+    rvec_count = 0 if rvec_count == -1 else rvec_count
+    v_count = 0 if v_count == -1 else v_count
+    return rvec_count + v_count
+
+
+def type_of_nested_data(column_type):
+    t1 = column_type.rfind("<")
+    t2 = column_type.find(">")
+    return column_type if t1 == -1 and t2 == -1 else column_type[t1 + 1 : t2]
+
+
+def func_real(builder, cpp_reference, n):
+    for x in cpp_reference:
+        builder.real(x) if n <= 0 else func_real(builder, x, n - 1)
+
+
 def to_awkward_array(
     data_frame, compiler, columns=None, exclude=None, columns_as_records=True
 ):
-    import ROOT
-
     # Find all column names in the dataframe
     if not columns:
         columns = [str(x) for x in data_frame.GetColumnNames()]
@@ -261,22 +278,41 @@ def to_awkward_array(
     columns = [x for x in columns if x not in exclude]
 
     builder = ak.ArrayBuilder()
-    b = ROOT.awkward.ArrayBuilderShim(ctypes.cast(builder._layout._ptr, ctypes.c_voidp))
 
     if columns_as_records:
         result_ptrs = {}
-        b.beginlist()
         for col in columns:
-            b.beginrecord_check(col)
+            builder.begin_record(col)
+            builder.field(col)
+
             column_type = data_frame.GetColumnType(col)
             result_ptrs[col] = data_frame.Take[column_type](col)
             cpp_reference = result_ptrs[col].GetValue()
-            if column_type == "double":
+
+            # check if the column type is either ROOT::VecOps::RVec or
+            # std::vector, possibly nested
+            result = count_dimentions(column_type)
+
+            for _ in range(result):
+                builder.begin_list()
+
+            type = type_of_nested_data(column_type)
+            if type == "double":
+
                 # FIXME: one thread, sequential???
                 # data_frame.Foreach["std::function<uint8_t(double)>"](b.real, [col])
-                for x in cpp_reference:
-                    b.real(x)
-            b.endrecord()
-        b.endlist()
+
+                if result > 0:
+                    func_real(builder, cpp_reference, result)
+                else:
+                    builder.begin_list()
+                    for x in cpp_reference:
+                        builder.real(x)
+                    builder.end_list()
+
+            for _ in range(result):
+                builder.end_list()
+
+            builder.end_record()
 
     return builder.snapshot()

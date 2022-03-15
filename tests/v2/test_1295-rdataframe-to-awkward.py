@@ -232,45 +232,133 @@ def test_as_awkward():
     assert (
         str(array.layout.form)
         == """{
-    "class": "ListOffsetArray64",
-    "offsets": "i64",
-    "content": {
-        "class": "UnionArray8_64",
-        "tags": "i8",
-        "index": "i64",
-        "contents": [
-            {
-                "class": "RecordArray",
-                "contents": {},
-                "parameters": {
-                    "__record__": "x"
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        {
+            "class": "RecordArray",
+            "contents": {
+                "x": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": "float64"
                 }
             },
-            {
-                "class": "RecordArray",
-                "contents": {},
-                "parameters": {
-                    "__record__": "xx"
-                }
+            "parameters": {
+                "__record__": "x"
             }
-        ]
-    }
+        },
+        {
+            "class": "RecordArray",
+            "contents": {
+                "xx": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": "float64"
+                }
+            },
+            "parameters": {
+                "__record__": "xx"
+            }
+        }
+    ]
 }"""
     )
 
+@pytest.mark.skip(reason="FIXME: test root file is not in git yet")
+def test_rvec_snapshot():
+    treeName = "t"
+    fileName = "tests/samples/snapshot_nestedrvecs.root" #"snapshot_nestedrvecs.root"
 
-@pytest.mark.skip(reason="FIXME: NotImplementedError")
-def test_highlevel():
-    rdf = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
-    array = ak._v2.from_rdataframe(
-        rdf, "builder_name", function_for_foreach="my_function"
-    )
+    ROOT.gInterpreter.ProcessLine("""
+#include <ROOT/RVec.hxx>
+
+struct TwoInts {
+   int a, b;
+};
+
+#pragma link C++ class TwoInts+;
+#pragma link C++ class ROOT::VecOps::RVec<TwoInts>+;
+#pragma link C++ class ROOT::VecOps::RVec<ROOT::VecOps::RVec<TwoInts>>+;
+
+    """)
+    rdf = ROOT.RDataFrame(treeName, fileName)
+
+    array = rdf.AsAwkward(compiler, columns={"vv", "vvv", "vvti"}, columns_as_records=True)
     assert (
         str(array.layout.form)
         == """{
-    "class": "RecordArray",
-    "contents": {
-        "one": "float64"
-    }
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        {
+            "class": "RecordArray",
+            "contents": {
+                "NumpyArray_array": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": "float64"
+                }
+            },
+            "parameters": {
+                "__record__": "NumpyArray_array"
+            }
+        },
+        {
+            "class": "RecordArray",
+            "contents": {
+                "px": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": "float64"
+                }
+            },
+            "parameters": {
+                "__record__": "px"
+            }
+        },
+        {
+            "class": "RecordArray",
+            "contents": {
+                "py": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": "float64"
+                }
+            },
+            "parameters": {
+                "__record__": "py"
+            }
+        },
+        {
+            "class": "RecordArray",
+            "contents": {
+                "E": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": "float64"
+                }
+            },
+            "parameters": {
+                "__record__": "E"
+            }
+        },
+        {
+            "class": "RecordArray",
+            "contents": {
+                "pt": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": "float64"
+                }
+            },
+            "parameters": {
+                "__record__": "pt"
+            }
+        }
+    ]
 }"""
     )
+    print(array.to_list())
