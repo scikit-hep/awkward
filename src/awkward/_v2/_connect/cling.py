@@ -74,6 +74,28 @@ namespace awkward {
     ssize_t at_;
   };
 
+  template <typename ARRAY, typename VALUE>
+  class RIterator {
+  public:
+    RIterator(const ARRAY array, ssize_t at) : array_(array), at_(at) { }
+
+    VALUE operator*() const noexcept {
+      return array_[at_];
+    }
+
+    void operator++() noexcept {
+      at_--;
+    }
+
+    bool operator!=(RIterator<ARRAY, VALUE> other) const noexcept {
+      return array_ != other.array_  ||  at_ != other.at_;
+    }
+
+  private:
+    const ARRAY array_;
+    ssize_t at_;
+  };
+
   class ArrayView {
   public:
     ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
@@ -413,6 +435,18 @@ class Generator:
       return Iterator<{self.class_type(key[1:])}, value_type>(
         {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
         stop_ - start_);
+    }}
+
+    RIterator<{self.class_type(key[1:])}, value_type> rbegin() const noexcept {{
+      return RIterator<{self.class_type(key[1:])}, value_type>(
+        {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
+        stop_ - start_ - 1);
+    }}
+
+    RIterator<{self.class_type(key[1:])}, value_type> rend() const noexcept {{
+      return RIterator<{self.class_type(key[1:])}, value_type>(
+        {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
+        -1);
     }}
         """.strip()
 
