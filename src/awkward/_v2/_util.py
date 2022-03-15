@@ -752,7 +752,7 @@ def extra(args, kwargs, defaults):
 # key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 
-# def make_union(tags, index, contents, identities, parameters):
+# def make_union(tags, index, contents, identifier, parameters):
 #     if isinstance(index, ak._v2.contents.Index32):
 #         return ak._v2.contents.UnionArray8_32(tags, index, contents, identities, parameters)
 #     elif isinstance(index, ak._v2.contents.IndexU32):
@@ -763,82 +763,80 @@ def extra(args, kwargs, defaults):
 #         raise error(AssertionError(index))
 
 
-# def union_to_record(unionarray, anonymous):
-#     nplike = ak.nplike.of(unionarray)
+def union_to_record(unionarray, anonymous):
+    nplike = ak.nplike.of(unionarray)
 
-#     contents = []
-#     for layout in unionarray.contents:
-#         if isinstance(layout, virtualtypes):
-#             contents.append(layout.array)
-#         elif isinstance(layout, indexedtypes):
-#             contents.append(layout.project())
-#         elif isinstance(layout, uniontypes):
-#             contents.append(union_to_record(layout, anonymous))
-#         elif isinstance(layout, optiontypes):
-#             contents.append(
-#                 ak._v2.operations.structure.fill_none(
-#                     layout, np.nan, axis=0, highlevel=False
-#                 )
-#             )
-#         else:
-#             contents.append(layout)
+    contents = []
+    for layout in unionarray.contents:
+        if layout.is_IndexedType and not layout.is_OptionType:
+            contents.append(layout.project())
+        elif layout.is_UnionType:
+            contents.append(union_to_record(layout, anonymous))
+        elif layout.is_OptionType:
+            contents.append(
+                ak._v2.operations.structure.fill_none(
+                    layout, np.nan, axis=0, highlevel=False
+                )
+            )
+        else:
+            contents.append(layout)
 
-#     if not any(isinstance(x, ak._v2.contents.RecordArray) for x in contents):
-#         return make_union(
-#             unionarray.tags,
-#             unionarray.index,
-#             contents,
-#             unionarray.identities,
-#             unionarray.parameters,
-#         )
+    if not any(isinstance(x, ak._v2.contents.RecordArray) for x in contents):
+        return ak._v2.contents.UnionArray(
+            unionarray.tags,
+            unionarray.index,
+            contents,
+            unionarray.identifier,
+            unionarray.parameters,
+        )
 
-#     else:
-#         seen = set()
-#         all_names = []
-#         for layout in contents:
-#             if isinstance(layout, ak._v2.contents.RecordArray):
-#                 for key in layout.keys():
-#                     if key not in seen:
-#                         seen.add(key)
-#                         all_names.append(key)
-#             else:
-#                 if anonymous not in seen:
-#                     seen.add(anonymous)
-#                     all_names.append(anonymous)
+    else:
+        seen = set()
+        all_names = []
+        for layout in contents:
+            if isinstance(layout, ak._v2.contents.RecordArray):
+                for field in layout.fields:
+                    if field not in seen:
+                        seen.add(field)
+                        all_names.append(field)
+            else:
+                if anonymous not in seen:
+                    seen.add(anonymous)
+                    all_names.append(anonymous)
 
-#         missingarray = ak._v2.contents.IndexedOptionArray64(
-#             ak._v2.index.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
-#             ak._v2.contents.EmptyArray(),
-#         )
+        missingarray = ak._v2.contents.IndexedOptionArray(
+            ak._v2.index.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
+            ak._v2.contents.EmptyArray(),
+        )
 
-#         all_fields = []
-#         for name in all_names:
-#             union_contents = []
-#             for layout in contents:
-#                 if isinstance(layout, ak._v2.contents.RecordArray):
-#                     for key in layout.keys():
-#                         if name == key:
-#                             union_contents.append(layout.field(key))
-#                             break
-#                     else:
-#                         union_contents.append(missingarray)
-#                 else:
-#                     if name == anonymous:
-#                         union_contents.append(layout)
-#                     else:
-#                         union_contents.append(missingarray)
+        all_fields = []
+        for name in all_names:
+            union_contents = []
+            for layout in contents:
+                if isinstance(layout, ak._v2.contents.RecordArray):
+                    for field in layout.fields:
+                        if name == field:
+                            union_contents.append(layout._getitem_field(field))
+                            break
+                    else:
+                        union_contents.append(missingarray)
+                else:
+                    if name == anonymous:
+                        union_contents.append(layout)
+                    else:
+                        union_contents.append(missingarray)
 
-#             all_fields.append(
-#                 make_union(
-#                     unionarray.tags,
-#                     unionarray.index,
-#                     union_contents,
-#                     unionarray.identities,
-#                     unionarray.parameters,
-#                 ).simplify()
-#             )
+            all_fields.append(
+                ak._v2.contents.UnionArray(
+                    unionarray.tags,
+                    unionarray.index,
+                    union_contents,
+                    unionarray.identifier,
+                    unionarray.parameters,
+                ).simplify_uniontype()
+            )
 
-#         return ak._v2.contents.RecordArray(all_fields, all_names, len(unionarray))
+        return ak._v2.contents.RecordArray(all_fields, all_names, len(unionarray))
 
 
 def direct_Content_subclass(node):
