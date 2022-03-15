@@ -262,7 +262,7 @@ def type_of_nested_data(column_type):
 
 def func_real(builder, cpp_reference, n):
     for x in cpp_reference:
-        builder.real(x) if n <= 0 else func_real(builder, x, n - 1)
+        return builder.real(x) if n <= 0 else func_real(builder, x, n - 1)
 
 
 def to_awkward_array(

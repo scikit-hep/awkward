@@ -121,9 +121,6 @@ namespace awkward {
       return start_ == stop_;
     }
 
-    Iterator<ssize_t> begin() { return Iterator<ssize_t>(&ptrs_[0]); }
-    Iterator<ssize_t> end()   { return Iterator<ssize_t>(&ptrs_[stop_ - start_]); }
-
   protected:
     ssize_t start_;
     ssize_t stop_;
@@ -500,13 +497,6 @@ class Generator:
     def dataset(self, length="length", ptrs="ptrs", flatlist_as_rvec=False):
         key = (self, flatlist_as_rvec)
         return f"awkward::{self.class_type(key[1:])}(0, {length}, 0, reinterpret_cast<ssize_t*>({ptrs}))"
-
-    def entry_type(self, flatlist_as_rvec=False):
-        key = (self, flatlist_as_rvec)
-        return self.value_type(key[1:])
-
-    def entry(self, length="length", ptrs="ptrs", entry="i", flatlist_as_rvec=False):
-        return f"{self.dataset(length=length, ptrs=ptrs, flatlist_as_rvec=flatlist_as_rvec)}[{entry}]"
 
     def entry_type(self, flatlist_as_rvec=False):
         key = (self, flatlist_as_rvec)
