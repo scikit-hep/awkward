@@ -218,10 +218,18 @@ namespace awkward {{
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
+      ArrayBuilderError append(bool x) noexcept {{
+        return boolean(x);
+      }}
+
       ArrayBuilderError integer(int64_t x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_integer>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_integer, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
+      }}
+
+      ArrayBuilderError append(int64_t x) noexcept {{
+        return integer(x);
       }}
 
       ArrayBuilderError real(double x) noexcept {{
@@ -230,17 +238,29 @@ namespace awkward {{
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
-      ArrayBuilderError complex(double real, double imag) noexcept {{
+      ArrayBuilderError append(double x) noexcept {{
+        return real(x);
+      }}
+
+      ArrayBuilderError complex(std::complex<double> x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_complex>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_complex, ctypes.c_voidp).value}
-        )(reinterpret_cast<void*>(ptr_), real, imag);
+        )(reinterpret_cast<void*>(ptr_), x.real(), x.imag());
       }}
+
+      ArrayBuilderError append(std::complex<double> x) noexcept {{
+        return complex(x);
+      }}
+
+      // TODO: recognize std::chrono::time_point (what about units?)
 
       ArrayBuilderError datetime(int64_t x, const char* unit) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_datetime>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_datetime, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, unit);
       }}
+
+      // TODO: recognize std::chrono::duration (what about units?)
 
       ArrayBuilderError timedelta(int64_t x, const char* unit) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_timedelta>(
@@ -260,6 +280,10 @@ namespace awkward {{
         )(reinterpret_cast<void*>(ptr_), x, length);
       }}
 
+      ArrayBuilderError bytestring(std::string x) noexcept {{
+        return bytestring_length(x.c_str(), x.length());
+      }}
+
       ArrayBuilderError string(const char* x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_string>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_string, ctypes.c_voidp).value}
@@ -270,6 +294,22 @@ namespace awkward {{
         return reinterpret_cast<ArrayBuilderMethod_string_length>(
              {ctypes.cast(ak._libawkward.ArrayBuilder_string_length, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, length);
+      }}
+
+      ArrayBuilderError string(std::string x) noexcept {{
+        return string_length(x.c_str(), x.length());
+      }}
+
+      ArrayBuilderError append(const char* x) noexcept {{
+        return string(x);
+      }}
+
+      ArrayBuilderError append(const char* x, int64_t length) noexcept {{
+        return string_length(x, length);
+      }}
+
+      ArrayBuilderError append(std::string x) noexcept {{
+        return string(x);
       }}
 
       ArrayBuilderError begin_list() noexcept {{
