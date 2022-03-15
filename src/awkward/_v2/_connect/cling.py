@@ -52,18 +52,40 @@ def generate_ArrayView(compiler, use_cached=True):
     if out is None:
         out = """
 namespace awkward {
+  template <typename ARRAY, typename VALUE>
+  class Iterator {
+  public:
+    Iterator(const ARRAY array, ssize_t at) : array_(array), at_(at) { }
+
+    VALUE operator*() const noexcept {
+      return array_[at_];
+    }
+
+    void operator++() noexcept {
+      at_++;
+    }
+
+    bool operator!=(Iterator<ARRAY, VALUE> other) const noexcept {
+      return array_ != other.array_  ||  at_ != other.at_;
+    }
+
+  private:
+    const ARRAY array_;
+    ssize_t at_;
+  };
+
   class ArrayView {
   public:
     ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : start_(start), stop_(stop), which_(which), ptrs_(ptrs) { }
 
-    size_t size() const noexcept {{
+    size_t size() const noexcept {
       return stop_ - start_;
-    }}
+    }
 
-    bool empty() const noexcept {{
+    bool empty() const noexcept {
       return start_ == stop_;
-    }}
+    }
 
   protected:
     ssize_t start_;
@@ -363,7 +385,7 @@ class Generator:
             .decode("ascii")
         )
 
-    def _generate_common(self):
+    def _generate_common(self, key):
         params = [
             f"if (parameter == {json.dumps(name)}) return {json.dumps(json.dumps(value))};\n      "
             for name, value in self.parameters.items()
@@ -372,6 +394,25 @@ class Generator:
         return f"""
         const std::string parameter(const std::string& parameter) const noexcept {{
       {"" if len(params) == 0 else "".join(x for x in params)}return "null";
+    }}
+
+    bool operator!=({self.class_type(key[1:])} other) const noexcept {{
+      return start_ != other.start_  ||
+             stop_ != other.stop_  ||
+             which_ != other.which_  ||
+             ptrs_ != other.ptrs_;
+    }}
+
+    Iterator<{self.class_type(key[1:])}, value_type> begin() const noexcept {{
+      return Iterator<{self.class_type(key[1:])}, value_type>(
+        {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
+        0);
+    }}
+
+    Iterator<{self.class_type(key[1:])}, value_type> end() const noexcept {{
+      return Iterator<{self.class_type(key[1:])}, value_type>(
+        {self.class_type(key[1:])}(start_, stop_, which_, ptrs_),
+        stop_ - start_);
     }}
         """.strip()
 
@@ -453,7 +494,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       return reinterpret_cast<{self.value_type(key[1:])}*>(ptrs_[which_ + {self.ARRAY}])[start_ + at];
@@ -533,7 +574,7 @@ namespace awkward {{
 
     typedef std::string value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = (start_ + at) * {self.size};
@@ -557,7 +598,7 @@ namespace awkward {{
 
     typedef {value_type} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = (start_ + at) * {self.size};
@@ -579,7 +620,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = (start_ + at) * {self.size};
@@ -674,7 +715,7 @@ namespace awkward {{
 
     typedef std::string value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[start_ + at];
@@ -698,7 +739,7 @@ namespace awkward {{
 
     typedef {value_type} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[start_ + at];
@@ -720,7 +761,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[start_ + at];
@@ -798,7 +839,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
@@ -873,7 +914,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
@@ -948,7 +989,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       int8_t mask = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.MASK}])[start_ + at];
@@ -1026,7 +1067,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       size_t startat = start_ + at;
@@ -1095,7 +1136,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       return value_type{{ {self.content.class_type(key[1:])}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
@@ -1254,7 +1295,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       return value_type(start_ + at, which_, ptrs_);
@@ -1341,7 +1382,7 @@ namespace awkward {{
 
     typedef {self.value_type(key[1:])} value_type;
 
-    {self._generate_common()}
+    {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       int8_t tag = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.TAGS}])[start_ + at];

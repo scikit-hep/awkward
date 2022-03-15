@@ -1869,3 +1869,61 @@ void roottest_RegularArray_strings(double* out, ssize_t length, ssize_t* ptrs) {
     out = np.zeros(6, dtype=np.float64)
     ROOT.roottest_RegularArray_strings(out, len(layout), lookup.arrayptrs)
     assert out.tolist() == [5.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+
+def test_NumpyArray_iterator():
+    v2a = ak._v2.contents.numpyarray.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3]),
+        parameters={"some": "stuff", "other": [1, 2, "three"]},
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_NumpyArray_iterator_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.dataset()};
+
+  size_t i = 0;
+  for (auto it = obj.begin();  it != obj.end();  ++it) {{
+    out[i] = *it;
+    i++;
+  }}
+}}
+"""
+    )
+    out = np.zeros(4, dtype=np.float64)
+    ROOT.roottest_NumpyArray_iterator_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [0.0, 1.1, 2.2, 3.3]
+
+
+def test_NumpyArray_iterator2():
+    v2a = ak._v2.contents.numpyarray.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3]),
+        parameters={"some": "stuff", "other": [1, 2, "three"]},
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_NumpyArray_iterator2_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.dataset()};
+
+  size_t i = 0;
+  for (auto x : obj) {{
+    out[i] = x;
+    i++;
+  }}
+}}
+"""
+    )
+    out = np.zeros(4, dtype=np.float64)
+    ROOT.roottest_NumpyArray_iterator2_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [0.0, 1.1, 2.2, 3.3]
