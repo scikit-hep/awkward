@@ -10,6 +10,7 @@ import threading
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 cache = {}
@@ -25,6 +26,7 @@ def generate_headers(compiler, use_cached=True):
     if out is None:
         out = """
 #include <sys/types.h>
+#include <vector>
 #include <string>
 #include <optional>  // C++17
 #include <variant>  // C++17
@@ -1479,6 +1481,19 @@ namespace awkward {{
 
 
 class CppStatements:
+    dtype_to_cpp = {
+        np.dtype(np.int8): "char",
+        np.dtype(np.int16): "int16_t",
+        np.dtype(np.int32): "int32_t",
+        np.dtype(np.int64): "int64_t",
+        np.dtype(np.uint8): "unsigned char",
+        np.dtype(np.uint16): "uint16_t",
+        np.dtype(np.uint32): "uint32_t",
+        np.dtype(np.uint64): "uint64_t",
+        np.dtype(np.float32): "float",
+        np.dtype(np.float64): "double",
+    }
+
     def __init__(self, cppcode, **kwargs):
         compiler = RawCppCompiler.instance()
 
@@ -1520,6 +1535,25 @@ class CppStatements:
                 )
                 self._argname_to_index[argname] = "ArrayBuilder"
 
+            elif isinstance(argval, (numpy.ndarray, np.dtype)):
+                if isinstance(argval, numpy.ndarray):
+                    dtype = argval.dtype
+                else:
+                    dtype = argval
+                if dtype not in self.dtype_to_cpp:
+                    raise ak._v2._util.error(
+                        TypeError(f"arrays of {dtype} not allowed")
+                    )
+
+                number = compiler.next_number()
+                ptr = f"awkward_argument_{number}_ptr"
+                self._funcargs.append(f"ssize_t {ptr}")
+                self._assignments.append(
+                    f"auto {argname} = reinterpret_cast<{self.dtype_to_cpp[dtype]}*>({ptr});"
+                )
+                self._argname_to_index[argname] = len(self._forms)
+                self._forms.append(dtype)
+
             else:
                 raise ak._v2._util.error(
                     TypeError(f"can't compile objects of type {type(argval)}")
@@ -1528,9 +1562,11 @@ class CppStatements:
         eoln = "\n"
         compiler.declare(
             f"""
-void {self._funcname}({", ".join(self._funcargs)}) {{
+ssize_t {self._funcname}({", ".join(self._funcargs)}) {{
 {eoln.join(self._assignments)}
 {self._cppcode}
+
+return 0;
 }}
 """
         )
@@ -1578,6 +1614,18 @@ void {self._funcname}({", ".join(self._funcargs)}) {{
 
                 arguments.append(argval._layout._ptr)
 
+            elif isinstance(argval, numpy.ndarray):
+                index = self._argname_to_index[argname]
+
+                if argval.dtype != self._forms[index]:
+                    raise ak._v2._util.error(
+                        TypeError(
+                            f"argument {argname} has a different dtype from the one used in the declaration"
+                        )
+                    )
+
+                arguments.append(argval.ctypes.data)
+
             else:
                 raise ak._v2._util.error(
                     TypeError(
@@ -1623,7 +1671,7 @@ class RawCppCompiler(ak.nplike.Singleton):
 
     def call(self, name, *args):
         fn_handle = self._Clang_LookupName(name.encode("ascii"))
-        fn_proto = ctypes.CFUNCTYPE(*([None] + [ctypes.c_ssize_t] * len(args)))
+        fn_proto = ctypes.CFUNCTYPE(*([ctypes.c_ssize_t] * (1 + len(args))))
 
         fn_pointer = fn_proto(self._Clang_GetFunctionAddress(fn_handle))
         return fn_pointer(*args)

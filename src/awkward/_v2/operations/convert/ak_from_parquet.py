@@ -137,6 +137,7 @@ def _impl(
                 parquet_columns = subform.columns(list_indicator=list_indicator)
 
             if row_groups is not None:
+                eoln = "\n    "
                 metadata = parquetfile_for_metadata.metadata
                 if any(not 0 <= rg < metadata.num_row_groups for rg in row_groups):
                     raise ak._v2._util.error(
@@ -151,21 +152,34 @@ def _impl(
                 actual_paths = []
                 subrg = []
                 for i in range(metadata.num_row_groups):
-                    split_path = metadata.row_group(i).column(0).file_path.split("/")
-                    index = None
-                    for j, compare in enumerate(split_paths):
-                        if split_path == compare[-len(split_path) :]:
-                            index = j
-                            break
-                    if index is None:
-                        eoln = "\n    "
-                        raise ak._v2._util.error(
-                            LookupError(
-                                f"""path {'/'.join(split_path)!r} from metadata not found in path matches:
+                    unsplit_path = metadata.row_group(i).column(0).file_path
+                    if unsplit_path == "":
+                        if len(all_paths) == 1:
+                            index = 0
+                        else:
+                            raise ak._v2._util.error(
+                                LookupError(
+                                    f"""path from metadata is {unsplit_path!r} but more than one path matches:
 
-    {eoln.join(all_paths)}"""
+        {eoln.join(all_paths)}"""
+                                )
                             )
-                        )
+
+                    else:
+                        split_path = unsplit_path.split("/")
+                        index = None
+                        for j, compare in enumerate(split_paths):
+                            if split_path == compare[-len(split_path) :]:
+                                index = j
+                                break
+                        if index is None:
+                            raise ak._v2._util.error(
+                                LookupError(
+                                    f"""path {'/'.join(split_path)!r} from metadata not found in path matches:
+
+        {eoln.join(all_paths)}"""
+                                )
+                            )
 
                     if prev_index != index:
                         prev_index = index
