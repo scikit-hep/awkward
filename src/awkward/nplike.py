@@ -7,6 +7,7 @@ import ctypes
 from collections.abc import Iterable
 
 import numpy
+import numpy as np
 
 import awkward as ak
 import awkward._cuda_kernels
@@ -422,24 +423,55 @@ class NumpyKernel:
 
 
 class CupyKernel(NumpyKernel):
-    def check_errors(self, err_code):
+    def max_length(self, args):
         cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+        max_length = np.iinfo(np.int64).min
+        for array in args:
+            if isinstance(array, cupy.ndarray):
+                max_length = max(max_length, len(array))
+        return max_length
 
-        import awkward._kernel_signatures_cuda
+    def calc_grid(self, length):
+        if length > 1024:
+            return -(length // -1024), 1, 1
+        return 1, 1, 1
 
-        with cupy.cuda.Stream():
-            if err_code[0] == 0:
-                return awkward._kernel_signatures_cuda.success()
+    def calc_blocks(self, length):
+        if length > 1024:
+            return 1024, 1, 1
+        return length, 1, 1
 
     def __call__(self, *args):
         cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+        maxlength = self.max_length(args)
+        cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
 
-        err_code = cupy.zeros(1, dtype=cupy.int8)
+        if cupy_stream_ptr not in awkward._cuda_kernels.cuda_streamptr_to_contexts:
+            awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr] = [
+                cupy.zeros(1, dtype=cupy.int64)
+            ]
+
         assert len(args) == len(self._kernel.dir)
+        # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
+        # The second arg is the error_code.
         args = list(args)
-        args.append(err_code)
-        self._kernel()((1, 1, 1), (1024, 1, 1), tuple(args))
-        return self.check_errors(err_code)
+        args.extend(
+            [
+                len(awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr])
+                - 1,
+                awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
+            ]
+        )
+        awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr].append(
+            awkward._cuda_kernels.Invocation(
+                name=self._name_and_types[0],
+                error_context=ak._v2._util.ErrorContext.primary(),
+            )
+        )
+
+        self._kernel()(
+            self.calc_grid(maxlength), self.calc_blocks(maxlength), tuple(args)
+        )
 
 
 class Numpy(NumpyLike):

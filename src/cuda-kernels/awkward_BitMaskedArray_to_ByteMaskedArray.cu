@@ -12,7 +12,8 @@ cuda_BitMaskedArray_to_ByteMaskedArray(int8_t* tobytemask,
   int64_t bitmasklength,
   bool validwhen,
   bool lsb_order,
-  int8_t* err_code) {
+  int64_t invocation_index,
+  int64_t* err_code) {
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
   if (thread_id < bitmasklength) {
     if (lsb_order) {

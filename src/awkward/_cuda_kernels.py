@@ -31,6 +31,14 @@ or
     conda install -c conda-forge cupy
 """
 
+cuda_streamptr_to_contexts = {}
+
+
+class Invocation:
+    def __init__(self, name, error_context):
+        self.name = name
+        self.error_context = error_context
+
 
 def import_cupy(name):
     if cupy is None:
@@ -41,6 +49,7 @@ def import_cupy(name):
 def initialize_cuda_kernels(cupy):
     if cupy is not None:
         global kernel
+        global invocation_code
 
         if kernel is None:
             import awkward._kernel_signatures_cuda
@@ -48,7 +57,7 @@ def initialize_cuda_kernels(cupy):
             cuda_src = ""
             for filename in glob.glob(
                 os.path.join(
-                    "/home/swish/projects/awkward-1.0/src/cuda-kernels", "*.cu"
+                    "/home/swish/projects/awkward-1.0/src/cuda-kernels", "awkward_*.cu"
                 )
             ):
                 with open(filename, encoding="utf-8") as cu_file:
@@ -63,6 +72,11 @@ def initialize_cuda_kernels(cupy):
             kernel = awkward._kernel_signatures_cuda.by_signature(
                 cuda_kernel_templates, kernel_specializations
             )
+            # First element of the list always contains the invocation code.
+            cuda_streamptr_to_contexts[cupy.cuda.get_current_stream().ptr] = [
+                cupy.zeros(1, dtype=cupy.int64)
+            ]
+
         return kernel
     else:
         raise ImportError(error_message.format("Awkward Arrays with CUDA"))
