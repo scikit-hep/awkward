@@ -7,7 +7,6 @@ import ctypes
 from collections.abc import Iterable
 
 import numpy
-import numpy as np
 
 import awkward as ak
 import awkward._cuda_kernels
@@ -425,7 +424,7 @@ class NumpyKernel:
 class CupyKernel(NumpyKernel):
     def max_length(self, args):
         cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
-        max_length = np.iinfo(np.int64).min
+        max_length = numpy.iinfo(numpy.int64).min
         for array in args:
             if isinstance(array, cupy.ndarray):
                 max_length = max(max_length, len(array))

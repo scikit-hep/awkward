@@ -11,9 +11,18 @@ kernel_specializations = {
     "awkward_ListArray64_num_64": "cuda_ListArray_num<int64_t, int64_t>",
     "awkward_RegularArray_num_64": "cuda_RegularArray_num<int64_t>",
     "awkward_BitMaskedArray_to_ByteMaskedArray": "cuda_BitMaskedArray_to_ByteMaskedArray",
+    "awkward_ListArray32_validity": "cuda_ListArray_validity<int32_t>",
+    "awkward_ListArrayU32_validity": "cuda_ListArray_validity<uint32_t>",
+    "awkward_ListArray64_validity": "cuda_ListArray_validity<int64_t>",
 }
 
-error_codes = {0: "Success", 1: "awkward_list_array_num:Success()"}
+kernel_errors = {
+    "awkward_ListArray_validity": [
+        "start[i] > stop[i]",
+        "start[i] < 0",
+        "stop[i] > len(content)",
+    ]
+}
 
 kernel = None
 
@@ -89,10 +98,11 @@ def synchronize_cuda(stream):
     stream.synchronize()
     contexts = cuda_streamptr_to_contexts[stream.ptr]
     invocation_index = contexts[0]
-    if invocation_index % 8 != 0:
-        invoked_kernel = contexts[invocation_index // 8]
+    if invocation_index != 0:
+        invoked_kernel = contexts[-(invocation_index // -8)]
         cuda_streamptr_to_contexts[stream.ptr] = [cupy.zeros(1, dtype=cupy.int64)]
         raise awkward._v2._util.error(
-            ValueError(f"{invoked_kernel.name} raised the following error: "),
-            invoked_kernel.error_context,
+            ValueError(
+                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][invocation_index % 8 - 1]}"
+            ),
         )

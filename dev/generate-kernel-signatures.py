@@ -37,7 +37,7 @@ cuda_kernels_impl = [
     # "awkward_ByteMaskedArray_toIndexedOptionArray",
     # "awkward_combinations",  # ?
     # "awkward_IndexedArray_simplify",
-    # "awkward_ListArray_validity",
+    "awkward_ListArray_validity",
     # "awkward_UnionArray_validity",
     # "awkward_index_carry",
     # "awkward_ByteMaskedArray_getitem_carry",
@@ -291,23 +291,6 @@ def kernel_signatures_cuda_py(specification):
 
 # fmt: off
 
-from ctypes import (
-    POINTER,
-    Structure,
-    c_bool,
-    c_int8,
-    c_uint8,
-    c_int16,
-    c_uint16,
-    c_int32,
-    c_uint32,
-    c_int64,
-    c_uint64,
-    c_float,
-    c_double,
-    c_char_p,
-)
-
 from numpy import (
     bool_,
     int8,
@@ -321,24 +304,6 @@ from numpy import (
     float32,
     float64,
 )
-
-class ERROR(Structure):
-    _fields_ = [
-        ("str", c_char_p),
-        ("filename", c_char_p),
-        ("id", c_int64),
-        ("attempt", c_int64),
-        ("pass_through", c_bool),
-    ]
-
-def success():
-    err = ERROR()
-    err.str = c_char_p()
-    err.filename = c_char_p()
-    err.id = 9223372036854775806 + 1
-    err.attempt = 9223372036854775806 + 1
-    err.pass_through = c_bool(False)
-    return err
 
 def by_signature(cuda_kernel_templates, kernel_specializations):
     out = {{}}
@@ -356,7 +321,6 @@ def by_signature(cuda_kernel_templates, kernel_specializations):
                     file.write(
                         """
     f = lambda: cuda_kernel_templates.get_function(kernel_specializations[{}])
-    f.restype = ERROR
     f.dir = [{}]
     out[{}] = f
 """.format(
