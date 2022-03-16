@@ -265,6 +265,11 @@ def func_real(builder, cpp_reference, n):
         _ = builder.real(x) if n <= 0 else func_real(builder, x, n - 1)
 
 
+def func_integer(builder, cpp_reference, n):
+    for x in cpp_reference:
+        _ = builder.integer(x) if n <= 0 else func_integer(builder, x, n - 1)
+
+
 def to_awkward_array(
     data_frame, compiler, columns=None, exclude=None, columns_as_records=True
 ):
@@ -285,6 +290,7 @@ def to_awkward_array(
             builder.begin_record(col)
             builder.field(col)
 
+            # FIXME: not stable???
             column_type = data_frame.GetColumnType(col)
             result_ptrs[col] = data_frame.Take[column_type](col)
             cpp_reference = result_ptrs[col].GetValue()
@@ -297,6 +303,7 @@ def to_awkward_array(
                 builder.begin_list()
 
             type = type_of_nested_data(column_type)
+            # FIXME: workaround for data_frame.Foreach
             if type == "double":
 
                 # FIXME: one thread, sequential???
@@ -309,6 +316,16 @@ def to_awkward_array(
                     for x in cpp_reference:
                         builder.real(x)
                     builder.end_list()
+            elif type == "int":
+                if result > 0:
+                    func_integer(builder, cpp_reference, result)
+                else:
+                    builder.begin_list()
+                    for x in cpp_reference:
+                        builder.integer(x)
+                    builder.end_list()
+            else:
+                pass
 
             for _ in range(result):
                 builder.end_list()

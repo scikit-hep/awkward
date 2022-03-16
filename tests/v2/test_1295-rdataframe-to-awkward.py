@@ -16,10 +16,6 @@ builder_name = ak._v2._connect.rdataframe.from_rdataframe.generate_ArrayBuilder(
     compiler
 )
 
-ROOT.RDF.RInterface(
-    "ROOT::Detail::RDF::RLoopManager", "void"
-).AsAwkward = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array
-
 
 def test_array_builder_shim():
 
@@ -228,7 +224,9 @@ def test_as_awkward():
         .Define("x", "gRandom->Rndm()")
         .Define("xx", "gRandom->Rndm()")
     )
-    array = rdf.AsAwkward(compiler, columns_as_records=True)
+    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(
+        rdf, compiler, columns_as_records=True
+    )
     assert (
         str(array.layout.form)
         == """{
@@ -269,27 +267,13 @@ def test_as_awkward():
 
 def test_rvec_snapshot():
     treeName = "t"
-    # fileName = "tests/samples/snapshot_nestedrvecs.root"
     fileName = "tests/samples/snapshot_rvecs.root"
 
-    ROOT.gInterpreter.ProcessLine(
-        """
-#include <ROOT/RVec.hxx>
-
-struct TwoInts {
-   int a, b;
-};
-
-#pragma link C++ class TwoInts+;
-#pragma link C++ class ROOT::VecOps::RVec<TwoInts>+;
-#pragma link C++ class ROOT::VecOps::RVec<ROOT::VecOps::RVec<TwoInts>>+;
-
-    """
-    )
     rdf = ROOT.RDataFrame(treeName, fileName)
 
-    # array = rdf.AsAwkward(compiler, columns={"vv", "vvv", "vvti"}, columns_as_records=True)
-    array = rdf.AsAwkward(compiler, columns_as_records=True)
+    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(
+        rdf, compiler, columns_as_records=True
+    )
     assert (
         str(array.layout.form)
         == """{
@@ -360,6 +344,104 @@ struct TwoInts {
             },
             "parameters": {
                 "__record__": "pt"
+            }
+        }
+    ]
+}"""
+    )
+    print(array.layout)
+    print(array.to_list())
+
+
+@pytest.mark.skip(reason="FIXME: a test root file is not in a github yet")
+def test_rvec_snapshot_nestedrvecs():
+    treeName = "t"
+    fileName = "tests/samples/snapshot_nestedrvecs.root"
+
+    ROOT.gInterpreter.ProcessLine(
+        """
+#include <ROOT/RVec.hxx>
+
+struct TwoInts {
+   int a, b;
+};
+
+#pragma link C++ class TwoInts+;
+#pragma link C++ class ROOT::VecOps::RVec<TwoInts>+;
+#pragma link C++ class ROOT::VecOps::RVec<ROOT::VecOps::RVec<TwoInts>>+;
+
+    """
+    )
+    rdf = ROOT.RDataFrame(treeName, fileName)
+
+    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(
+        rdf, compiler, columns={"vvti", "vv", "vvv"}, columns_as_records=True
+    )
+    # FIXME: SystemError: <cppyy.CPPOverload object at 0x139f80f40> returned a result with an exception set
+    # for column `vv.fData`
+    # array = rdf.AsAwkward(compiler, columns_as_records=True)
+    assert (
+        str(array.layout.form)
+        == """{
+    "class": "UnionArray8_64",
+    "tags": "i8",
+    "index": "i64",
+    "contents": [
+        {
+            "class": "RecordArray",
+            "contents": {
+                "vvti": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": {
+                        "class": "ListOffsetArray64",
+                        "offsets": "i64",
+                        "content": {
+                            "class": "EmptyArray"
+                        }
+                    }
+                }
+            },
+            "parameters": {
+                "__record__": "vvti"
+            }
+        },
+        {
+            "class": "RecordArray",
+            "contents": {
+                "vvv": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": {
+                        "class": "ListOffsetArray64",
+                        "offsets": "i64",
+                        "content": {
+                            "class": "ListOffsetArray64",
+                            "offsets": "i64",
+                            "content": "int64"
+                        }
+                    }
+                }
+            },
+            "parameters": {
+                "__record__": "vvv"
+            }
+        },
+        {
+            "class": "RecordArray",
+            "contents": {
+                "vv": {
+                    "class": "ListOffsetArray64",
+                    "offsets": "i64",
+                    "content": {
+                        "class": "ListOffsetArray64",
+                        "offsets": "i64",
+                        "content": "int64"
+                    }
+                }
+            },
+            "parameters": {
+                "__record__": "vv"
             }
         }
     ]
