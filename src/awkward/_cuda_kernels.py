@@ -3,6 +3,8 @@
 import os
 import glob
 
+import awkward
+
 kernel_specializations = {
     "awkward_ListArray32_num_64": "cuda_ListArray_num<int32_t, int64_t>",
     "awkward_ListArrayU32_num_64": "cuda_ListArray_num<uint32_t, int64_t>",
@@ -49,7 +51,6 @@ def import_cupy(name):
 def initialize_cuda_kernels(cupy):
     if cupy is not None:
         global kernel
-        global invocation_code
 
         if kernel is None:
             import awkward._kernel_signatures_cuda
@@ -80,3 +81,18 @@ def initialize_cuda_kernels(cupy):
         return kernel
     else:
         raise ImportError(error_message.format("Awkward Arrays with CUDA"))
+
+
+def synchronize_cuda(stream):
+    cupy = import_cupy("Awkward Arrays with CUDA")
+
+    stream.synchronize()
+    contexts = cuda_streamptr_to_contexts[stream.ptr]
+    invocation_index = contexts[0]
+    if invocation_index % 8 != 0:
+        invoked_kernel = contexts[invocation_index // 8]
+        cuda_streamptr_to_contexts[stream.ptr] = [cupy.zeros(1, dtype=cupy.int64)]
+        raise awkward._v2._util.error(
+            ValueError(f"{invoked_kernel.name} raised the following error: "),
+            invoked_kernel.error_context,
+        )
