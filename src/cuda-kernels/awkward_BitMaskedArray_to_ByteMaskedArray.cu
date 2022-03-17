@@ -1,11 +1,5 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line)          \
-  FILENAME_FOR_EXCEPTIONS_CUDA( \
-      "src/cuda-kernels/manual_awkward_ListArray_num.cu", line)
-
-// #include "awkward/kernels.h"
-#include <cstdint>
 __global__ void
 cuda_BitMaskedArray_to_ByteMaskedArray(int8_t* tobytemask,
   const uint8_t* frombitmask,
@@ -15,7 +9,7 @@ cuda_BitMaskedArray_to_ByteMaskedArray(int8_t* tobytemask,
   int64_t invocation_index,
   int64_t* err_code) {
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-  if (thread_id < bitmasklength && !err_code[0]) {
+  if (thread_id < bitmasklength && err_code[0] == MAX_NUMPY_INT) {
     if (lsb_order) {
       uint8_t byte = frombitmask[thread_id];
       tobytemask[thread_id*8 + 0] = ((byte & ((uint8_t)1)) != validwhen);

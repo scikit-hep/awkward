@@ -2,6 +2,9 @@
 
 import os
 import glob
+import math
+
+import numpy
 
 import awkward
 
@@ -43,6 +46,24 @@ or
 """
 
 cuda_streamptr_to_contexts = {}
+error_bits = 8
+
+
+def populate_kernel_errors(kernel_name, cu_file):
+    import re
+
+    pattern_errstring = "// message:"
+
+    result_errstring = [_.start() for _ in re.finditer(pattern_errstring, cu_file)]
+
+    err_strings = list()
+    for index in result_errstring:
+        error = cu_file[index:]
+        error = error[error.find('"') : error.find("\n")]
+        error = error.replace('"', "")
+        err_strings.append(error)
+
+    kernel_errors[kernel_name] = err_strings
 
 
 class Invocation:
@@ -64,29 +85,33 @@ def initialize_cuda_kernels(cupy):
         if kernel is None:
             import awkward._kernel_signatures_cuda
 
-            cuda_src = ""
+            cuda_src = f"#define ERROR_BITS {error_bits}\n #define MAX_NUMPY_INT {numpy.iinfo(numpy.int64).max}"
+            with open(
+                "/home/swish/projects/awkward-1.0/src/cuda-kernels/cuda_common.cu",
+                encoding="utf-8",
+            ) as header_file:
+                cuda_src = cuda_src + "\n" + header_file.read()
             for filename in glob.glob(
                 os.path.join(
                     "/home/swish/projects/awkward-1.0/src/cuda-kernels", "awkward_*.cu"
                 )
             ):
                 with open(filename, encoding="utf-8") as cu_file:
-                    cuda_src = cuda_src + "\n" + cu_file.read()
+                    cu_code = cu_file.read()
+                    populate_kernel_errors(
+                        filename[filename.find("awkward_") : filename.find(".cu")],
+                        cu_code,
+                    )
+                    cuda_src = cuda_src + "\n" + cu_code
 
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
                 options=("--std=c++11",),
-                jitify=True,
                 name_expressions=list(kernel_specializations.values()),
             )
             kernel = awkward._kernel_signatures_cuda.by_signature(
                 cuda_kernel_templates, kernel_specializations
             )
-            # First element of the list always contains the invocation code.
-            cuda_streamptr_to_contexts[cupy.cuda.get_current_stream().ptr] = [
-                cupy.zeros(1, dtype=cupy.int64)
-            ]
-
         return kernel
     else:
         raise ImportError(error_message.format("Awkward Arrays with CUDA"))
@@ -96,13 +121,18 @@ def synchronize_cuda(stream):
     cupy = import_cupy("Awkward Arrays with CUDA")
 
     stream.synchronize()
-    contexts = cuda_streamptr_to_contexts[stream.ptr]
-    invocation_index = contexts[0]
-    if invocation_index != 0:
-        invoked_kernel = contexts[-(invocation_index // -8)]
-        cuda_streamptr_to_contexts[stream.ptr] = [cupy.zeros(1, dtype=cupy.int64)]
+    invocation_index = cuda_streamptr_to_contexts[stream.ptr][0]
+    contexts = cuda_streamptr_to_contexts[stream.ptr][1]
+
+    if invocation_index != numpy.iinfo(numpy.int64).max:
+        invoked_kernel = contexts[invocation_index // math.pow(2, error_bits)]
+        cuda_streamptr_to_contexts[stream.ptr] = (
+            cupy.array([numpy.iinfo(numpy.int64).max], dtype=cupy.int64),
+            list(),
+        )
         raise awkward._v2._util.error(
             ValueError(
-                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][invocation_index % 8 - 1]}"
+                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][invocation_index % math.pow(2, error_bits)]}"
             ),
+            invoked_kernel.error_context,
         )

@@ -446,9 +446,10 @@ class CupyKernel(NumpyKernel):
         cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
 
         if cupy_stream_ptr not in awkward._cuda_kernels.cuda_streamptr_to_contexts:
-            awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr] = [
-                cupy.zeros(1, dtype=cupy.int64)
-            ]
+            awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
+                cupy.array([numpy.iinfo(numpy.int64).max], dtype=numpy.int64),
+                list(),
+            )
 
         assert len(args) == len(self._kernel.dir)
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
@@ -456,12 +457,13 @@ class CupyKernel(NumpyKernel):
         args = list(args)
         args.extend(
             [
-                len(awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr])
-                - 1,
+                len(
+                    awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr][1]
+                ),
                 awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
             ]
         )
-        awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr].append(
+        awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             awkward._cuda_kernels.Invocation(
                 name=self._name_and_types[0],
                 error_context=ak._v2._util.ErrorContext.primary(),
