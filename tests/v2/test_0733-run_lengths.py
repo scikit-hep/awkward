@@ -21,7 +21,6 @@ def test():
     ]
 
 
-@pytest.mark.skip(reason="ak.unflatten unimplemented")
 def test_groupby():
     array = ak._v2.Array(
         [
@@ -36,7 +35,7 @@ def test_groupby():
     sorted = array[ak._v2.operations.structure.argsort(array.x)]
     assert sorted.x.tolist() == [1, 1, 1, 2, 2, 3]
     assert ak._v2.operations.structure.run_lengths(sorted.x).tolist() == [3, 2, 1]
-    assert ak.unflatten(
+    assert ak._v2.operations.structure.unflatten(
         sorted, ak._v2.operations.structure.run_lengths(sorted.x)
     ).tolist() == [
         [{"x": 1, "y": 1.1}, {"x": 1, "y": 1.1}, {"x": 1, "y": 1.1}],
@@ -59,7 +58,7 @@ def test_groupby():
     counts = ak._v2.operations.structure.flatten(
         ak._v2.operations.structure.run_lengths(sorted.x), axis=None
     )
-    assert ak.unflatten(sorted, counts, axis=-1).tolist() == [
+    assert ak._v2.operations.structure.unflatten(sorted, counts, axis=-1).tolist() == [
         [[{"x": 1, "y": 1.1}, {"x": 1, "y": 1.1}], [{"x": 2, "y": 2.2}]],
         [[{"x": 1, "y": 1.1}], [{"x": 2, "y": 2.2}], [{"x": 3, "y": 3.3}]],
     ]
