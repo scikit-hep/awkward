@@ -247,7 +247,7 @@ def connect_ArrayBuilder(compiler, builder):
 
 
 def to_awkward_array(
-    data_frame, compiler, columns=None, exclude=None, columns_as_records=True
+    data_frame, columns=None, exclude=None, columns_as_records=True
 ):
     builder = ak.ArrayBuilder()
 
@@ -300,11 +300,13 @@ def to_awkward_array(
         result_ptrs = {}
         for col in columns:
             # FIXME: not stable???
+            # `GetColumnType` fails occasionally with a `SystemError`
             column_type[col] = data_frame.GetColumnType(col)
             type[col] = type_of_nested_data(column_type[col])
             result_ptrs[col] = data_frame.Take[column_type[col]](col)
 
-        # event loop
+        # separate it from the above for performance reasons: `GetValue()` triggers
+        # an RDF event loop.
         cpp_reference = {}
         for col in columns:
             cpp_reference[col] = result_ptrs[col].GetValue()
@@ -313,8 +315,9 @@ def to_awkward_array(
             builder.begin_record(col)
             builder.field(col)
 
-            # check if the column type is either ROOT::VecOps::RVec or
-            # std::vector, possibly nested
+            # check if the column type is either `ROOT::VecOps::RVec` or
+            # `std::vector`, possibly nested,
+            # for example, `RVec<RVec<int>>`
             result = count_dimentions(column_type[col])
 
             for _ in range(result):

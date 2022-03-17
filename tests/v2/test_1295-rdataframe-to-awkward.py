@@ -224,9 +224,7 @@ def test_as_awkward():
         .Define("x", "gRandom->Rndm()")
         .Define("xx", "gRandom->Rndm()")
     )
-    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(
-        rdf, compiler, columns_as_records=True
-    )
+    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(rdf, columns_as_records=True)
     assert (
         str(array.layout.form)
         == """{
@@ -264,16 +262,13 @@ def test_as_awkward():
 }"""
     )
 
-
 def test_rvec_snapshot():
     treeName = "t"
     fileName = "tests/samples/snapshot_rvecs.root"
 
     rdf = ROOT.RDataFrame(treeName, fileName)
 
-    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(
-        rdf, compiler, columns_as_records=True
-    )
+    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(rdf, columns_as_records=True)
     assert (
         str(array.layout.form)
         == """{
@@ -352,14 +347,12 @@ def test_rvec_snapshot():
     print(array.layout)
     print(array.to_list())
 
-
-@pytest.mark.skip(reason="FIXME: a test root file is not in a github yet")
+@pytest.mark.skip(reason="FIXME: SystemError: <cppyy.CPPOverload object at 0x139f80f40> returned a result with an exception set")
 def test_rvec_snapshot_nestedrvecs():
     treeName = "t"
     fileName = "tests/samples/snapshot_nestedrvecs.root"
 
-    ROOT.gInterpreter.ProcessLine(
-        """
+    ROOT.gInterpreter.ProcessLine("""
 #include <ROOT/RVec.hxx>
 
 struct TwoInts {
@@ -370,16 +363,12 @@ struct TwoInts {
 #pragma link C++ class ROOT::VecOps::RVec<TwoInts>+;
 #pragma link C++ class ROOT::VecOps::RVec<ROOT::VecOps::RVec<TwoInts>>+;
 
-    """
-    )
+    """)
     rdf = ROOT.RDataFrame(treeName, fileName)
 
-    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(
-        rdf, compiler, columns={"vvti", "vv", "vvv"}, columns_as_records=True
-    )
-    # FIXME: SystemError: <cppyy.CPPOverload object at 0x139f80f40> returned a result with an exception set
-    # for column `vv.fData`
-    # array = rdf.AsAwkward(compiler, columns_as_records=True)
+    # FIXME: the following can be expressed as:
+    # array = rdf.AsAwkward(columns_as_records=True)
+    array = ak._v2._connect.rdataframe.from_rdataframe.to_awkward_array(rdf, columns={"vvti", "vv", "vvv"}, columns_as_records=True)
     assert (
         str(array.layout.form)
         == """{
