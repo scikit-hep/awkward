@@ -244,3 +244,31 @@ class UnionForm(Form):
             if content.dimension_optiontype:
                 return True
         return False
+
+    def _columns(self, path, output, list_indicator):
+        for content, field in zip(self._contents, self.fields):
+            content._columns(path + (field,), output, list_indicator)
+
+    def _select_columns(self, index, specifier, matches, output):
+        contents = []
+        for content in self._contents:
+            len_output = len(output)
+            next_content = content._select_columns(index, specifier, matches, output)
+            if len_output != len(output):
+                contents.append(next_content)
+
+        if len(contents) == 0:
+            return ak._v2.forms.EmptyForm(
+                self._has_identifier, self._parameters, self._form_key
+            )
+        elif len(contents) == 1:
+            return contents[0]
+        else:
+            return UnionForm(
+                self._tags,
+                self._index,
+                contents,
+                self._has_identifier,
+                self._parameters,
+                self._form_key,
+            )

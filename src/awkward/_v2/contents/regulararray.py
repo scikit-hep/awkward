@@ -1076,6 +1076,10 @@ class RegularArray(Content):
             )
 
     def _to_numpy(self, allow_missing):
+        array_param = self.parameter("__array__")
+        if array_param in {"bytestring", "string"}:
+            return self._nplike.array(self.to_list())
+
         out = ak._v2.operations.convert.to_numpy(
             self.content, allow_missing=allow_missing
         )

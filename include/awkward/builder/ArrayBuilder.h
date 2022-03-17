@@ -273,6 +273,24 @@ extern "C" {
     awkward_ArrayBuilder_real(void* arraybuilder,
                               double x);
 
+  /// @brief C interface to {@link awkward::ArrayBuilder#complex ArrayBuilder::complex}.
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
+    awkward_ArrayBuilder_complex(void* arraybuilder,
+                                 double real,
+                                 double imag);
+
+  /// @brief C interface to {@link awkward::ArrayBuilder#datetime ArrayBuilder::datetime}.
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
+    awkward_ArrayBuilder_datetime(void* arraybuilder,
+                                  int64_t x,
+                                  const char* unit);
+
+  /// @brief C interface to {@link awkward::ArrayBuilder#timedelta ArrayBuilder::timedelta}.
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
+    awkward_ArrayBuilder_timedelta(void* arraybuilder,
+                                   int64_t x,
+                                   const char* unit);
+
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#bytestring ArrayBuilder::bytestring}.
   LIBAWKWARD_EXPORT_SYMBOL uint8_t

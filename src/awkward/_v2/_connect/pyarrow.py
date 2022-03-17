@@ -43,9 +43,30 @@ def import_pyarrow_parquet(name):
     if pyarrow is None:
         raise ImportError(error_message.format(name))
 
-    import pyarrow.parquet
+    import pyarrow.parquet as out
 
-    return pyarrow.parquet
+    return out
+
+
+def import_fsspec(name):
+    try:
+        import fsspec
+
+    except ModuleNotFoundError:
+        raise ImportError(
+            f"""to use {name}, you must install fsspec:
+
+    pip install fsspec
+
+or
+
+    conda install -c conda-forge fsspec
+"""
+        )
+
+    import_pyarrow_parquet(name)
+
+    return fsspec
 
 
 if pyarrow is not None:
@@ -946,7 +967,9 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
         if pass_empty_field and list(obj.schema.names) == [""]:
             return child_array[0]
         else:
-            return ak._v2.contents.RecordArray(child_array, obj.schema.names)
+            return ak._v2.contents.RecordArray(
+                child_array, obj.schema.names, length=len(obj)
+            )
 
     elif isinstance(obj, pyarrow.lib.Table):
         batches = obj.combine_chunks().to_batches()

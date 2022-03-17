@@ -286,7 +286,7 @@ class UnmaskedArray(Content):
     def _reverse_merge(self, other):
         return self.toIndexedOptionArray64()._reverse_merge(other)
 
-    def _mergemany(self, others):
+    def mergemany(self, others):
         if len(others) == 0:
             return self
         return self.toIndexedOptionArray64().mergemany(others)
