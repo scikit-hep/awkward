@@ -19,16 +19,6 @@ kernel_specializations = {
     "awkward_ListArray64_validity": "cuda_ListArray_validity<int64_t>",
 }
 
-kernel_errors = {
-    "awkward_ListArray_validity": [
-        "start[i] > stop[i]",
-        "start[i] < 0",
-        "stop[i] > len(content)",
-    ]
-}
-
-kernel = None
-
 try:
     import cupy
 
@@ -47,6 +37,10 @@ or
 
 cuda_streamptr_to_contexts = {}
 error_bits = 8
+
+kernel_errors = {}
+
+kernel = None
 
 
 def populate_kernel_errors(kernel_name, cu_file):

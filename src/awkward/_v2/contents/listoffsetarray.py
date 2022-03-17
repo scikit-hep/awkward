@@ -1932,7 +1932,7 @@ class ListOffsetArray(Content):
             self.starts.length,
             self._content.length,
         )
-        if error is not None and error.str is not None:
+        if error.str is not None:
             if error.filename is None:
                 filename = ""
             else:
@@ -1943,20 +1943,7 @@ class ListOffsetArray(Content):
             return 'at {} ("{}"): {} at i={}{}'.format(
                 path, type(self), message, error.id, filename
             )
-        elif error is not None and error.str is None:
-            if (
-                self.parameter("__array__") == "string"
-                or self.parameter("__array__") == "bytestring"
-            ):
-                return ""
-            else:
-                return self._content.validityerror(path + ".content")
-        elif error is None:
-            import awkward._cuda_kernels
-
-            cupy = awkward._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
-            awkward._cuda_kernels.synchronize_cuda(cupy.cuda.get_current_stream())
-
+        else:
             if (
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
