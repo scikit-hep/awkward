@@ -321,13 +321,9 @@ def to_awkward_array(
                 builder.begin_list()
 
             if type[col] == "double":
-                func_real(
-                    cpp_reference[col], result
-                ) if result > 0 else list_of_doubles(cpp_reference[col])
+                _ = func_real(cpp_reference[col], result) if result > 0 else list_of_doubles(cpp_reference[col])
             elif type[col] == "int":
-                func_integer(
-                    cpp_reference[col], result
-                ) if result > 0 else list_of_integers(cpp_reference[col])
+                _ = func_integer(cpp_reference[col], result) if result > 0 else list_of_integers(cpp_reference[col])
             else:
                 raise ak._v2._util.error(NotImplementedError)
 
