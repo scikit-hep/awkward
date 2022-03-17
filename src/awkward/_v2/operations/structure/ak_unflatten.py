@@ -94,7 +94,7 @@ def _impl(array, counts, axis, highlevel, behavior):
         elif counts.is_NumpyType or counts.is_UnkownType:
             counts = counts.to_numpy(allow_missing=False)
             mask = False
-    
+
         if counts.ndim != 1:
             raise ak._v2._util.error(ValueError("counts must be one-dimensional"))
         if not issubclass(counts.dtype.type, np.integer):
