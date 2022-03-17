@@ -87,24 +87,19 @@ def _impl(array, counts, axis, highlevel, behavior):
             counts, allow_record=False, allow_other=False
         )
 
-        # FIXME
-        # ptr_lib = ak._v2.operations.convert.kernels(array)
-        # counts = ak._v2.operations.convert.to_kernels(counts, ptr_lib, highlevel=False)
-
-        ptr_lib = "cpu"
-        if ptr_lib == "cpu":
-            counts = ak._v2.operations.convert.to_numpy(counts, allow_missing=True)
-            mask = ak.nplike.numpy.ma.getmask(counts)
+        if counts.is_OptionType:
+            mask = counts.mask_as_bool(valid_when=False)
+            counts = counts.to_numpy(allow_missing=True)
             counts = ak.nplike.numpy.ma.filled(counts, 0)
-        elif ptr_lib == "cuda":
-            counts = ak._v2.operations.convert.to_cupy(counts)
+        elif counts.is_NumpyType or counts.is_UnkownType:
+            counts = counts.to_numpy(allow_missing=False)
             mask = False
-        else:
-            raise ak._v2._util.error(AssertionError("unrecognized kernels lib"))
+    
         if counts.ndim != 1:
             raise ak._v2._util.error(ValueError("counts must be one-dimensional"))
         if not issubclass(counts.dtype.type, np.integer):
             raise ak._v2._util.error(ValueError("counts must be integers"))
+
         current_offsets = [nplike.empty(len(counts) + 1, np.int64)]
         current_offsets[0][0] = 0
         nplike.cumsum(counts, out=current_offsets[0][1:])
