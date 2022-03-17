@@ -246,33 +246,45 @@ def connect_ArrayBuilder(compiler, builder):
     return f_cache
 
 
-def count_dimentions(column_type):
-    rvec_count = column_type.count("RVec<")
-    v_count = column_type.count("vector<")
-    rvec_count = 0 if rvec_count == -1 else rvec_count
-    v_count = 0 if v_count == -1 else v_count
-    return rvec_count + v_count
-
-
-def type_of_nested_data(column_type):
-    t1 = column_type.rfind("<")
-    t2 = column_type.find(">")
-    return column_type if t1 == -1 and t2 == -1 else column_type[t1 + 1 : t2]
-
-
-def func_real(builder, cpp_reference, n):
-    for x in cpp_reference:
-        _ = builder.real(x) if n <= 0 else func_real(builder, x, n - 1)
-
-
-def func_integer(builder, cpp_reference, n):
-    for x in cpp_reference:
-        _ = builder.integer(x) if n <= 0 else func_integer(builder, x, n - 1)
-
-
 def to_awkward_array(
     data_frame, compiler, columns=None, exclude=None, columns_as_records=True
 ):
+    builder = ak.ArrayBuilder()
+
+    def list_of_doubles(data):
+        builder.begin_list()
+        for x in data:
+            builder.real(x)
+        builder.end_list()
+
+    def list_of_integers(data):
+        builder.begin_list()
+        for x in data:
+            builder.integer(x)
+        builder.end_list()
+
+    def count_dimentions(column_type):
+        rvec_count = column_type.count("RVec<")
+        v_count = column_type.count("vector<")
+        rvec_count = 0 if rvec_count == -1 else rvec_count
+        v_count = 0 if v_count == -1 else v_count
+        return rvec_count + v_count
+
+    def type_of_nested_data(column_type):
+        t1 = column_type.rfind("<")
+        t2 = column_type.find(">")
+        return column_type if t1 == -1 and t2 == -1 else column_type[t1 + 1 : t2]
+
+    # FIXME:
+    def func_real(data, n):
+        for x in data:
+            _ = builder.real(x) if n <= 0 else func_real(x, n - 1)
+
+    # FIXME:
+    def func_integer(data, n):
+        for x in data:
+            _ = builder.integer(x) if n <= 0 else func_integer(x, n - 1)
+
     # Find all column names in the dataframe
     if not columns:
         columns = [str(x) for x in data_frame.GetColumnNames()]
@@ -282,54 +294,48 @@ def to_awkward_array(
         exclude = []
     columns = [x for x in columns if x not in exclude]
 
-    builder = ak.ArrayBuilder()
-
     if columns_as_records:
+        column_type = {}
+        type = {}
         result_ptrs = {}
+        for col in columns:
+            # FIXME: not stable???
+            column_type[col] = data_frame.GetColumnType(col)
+            type[col] = type_of_nested_data(column_type[col])
+            result_ptrs[col] = data_frame.Take[column_type[col]](col)
+
+        # event loop
+        cpp_reference = {}
+        for col in columns:
+            cpp_reference[col] = result_ptrs[col].GetValue()
+
         for col in columns:
             builder.begin_record(col)
             builder.field(col)
 
-            # FIXME: not stable???
-            column_type = data_frame.GetColumnType(col)
-            result_ptrs[col] = data_frame.Take[column_type](col)
-            cpp_reference = result_ptrs[col].GetValue()
-
             # check if the column type is either ROOT::VecOps::RVec or
             # std::vector, possibly nested
-            result = count_dimentions(column_type)
+            result = count_dimentions(column_type[col])
 
             for _ in range(result):
                 builder.begin_list()
 
-            type = type_of_nested_data(column_type)
-            # FIXME: workaround for data_frame.Foreach
-            if type == "double":
-
-                # FIXME: one thread, sequential???
-                # data_frame.Foreach["std::function<uint8_t(double)>"](b.real, [col])
-
-                if result > 0:
-                    func_real(builder, cpp_reference, result)
-                else:
-                    builder.begin_list()
-                    for x in cpp_reference:
-                        builder.real(x)
-                    builder.end_list()
-            elif type == "int":
-                if result > 0:
-                    func_integer(builder, cpp_reference, result)
-                else:
-                    builder.begin_list()
-                    for x in cpp_reference:
-                        builder.integer(x)
-                    builder.end_list()
+            if type[col] == "double":
+                func_real(
+                    cpp_reference[col], result
+                ) if result > 0 else list_of_doubles(cpp_reference[col])
+            elif type[col] == "int":
+                func_integer(
+                    cpp_reference[col], result
+                ) if result > 0 else list_of_integers(cpp_reference[col])
             else:
-                pass
+                raise ak._v2._util.error(NotImplementedError)
 
             for _ in range(result):
                 builder.end_list()
 
             builder.end_record()
+    else:
+        raise ak._v2._util.error(NotImplementedError)
 
     return builder.snapshot()

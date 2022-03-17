@@ -290,7 +290,7 @@ auto Array_{key}(ssize_t length, ssize_t* ptrs) {{
 
     # print(rdf_columns)
 
-    return ROOT.RDF.MakeAwkwardDataFrame(rdf_columns)
+    return ROOT.RDF.MakeAwkwardDataFrame[...](rdf_columns)
 
 
 # # Let's create some data in numpy arrays
