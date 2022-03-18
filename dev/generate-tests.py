@@ -290,7 +290,17 @@ def gettypeval(typename):
 
 def getcudakernelslist():
     cudakernels = []
-    for f in os.listdir(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels")):
+    for f in os.listdir(
+        os.path.join(
+            os.path.dirname(CURRENT_DIR),
+            "src",
+            "awkward",
+            "_v2",
+            "_connect",
+            "cuda",
+            "cuda_kernels",
+        )
+    ):
         if os.path.isfile(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels", f)):
             if f.startswith("awkward_") and f.endswith(".cu"):
                 cudakernels.append(f[:-3])

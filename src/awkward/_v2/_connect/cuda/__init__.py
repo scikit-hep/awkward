@@ -78,7 +78,7 @@ def initialize_cuda_kernels(cupy):
         global kernel
 
         if kernel is None:
-            import awkward._connect._cuda._kernel_signatures
+            import awkward._v2._connect.cuda._kernel_signatures
 
             cuda_src = f"#define ERROR_BITS {error_bits}\n #define MAX_NUMPY_INT {numpy.iinfo(numpy.int64).max}"
 
@@ -90,7 +90,7 @@ def initialize_cuda_kernels(cupy):
                 import importlib.resources
 
                 cuda_kernels_path = importlib.resources.path(
-                    "awkward._connect._cuda", "cuda_kernels"
+                    "awkward._v2._connect.cuda", "cuda_kernels"
                 )
 
             with open(
@@ -112,7 +112,7 @@ def initialize_cuda_kernels(cupy):
                 options=("--std=c++11",),
                 name_expressions=list(kernel_specializations.values()),
             )
-            kernel = awkward._connect._cuda._kernel_signatures.by_signature(
+            kernel = awkward._v2._connect.cuda._kernel_signatures.by_signature(
                 cuda_kernel_templates, kernel_specializations
             )
 
