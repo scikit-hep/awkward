@@ -3,6 +3,7 @@
 import os
 import glob
 import math
+import sys
 
 import numpy
 
@@ -77,19 +78,27 @@ def initialize_cuda_kernels(cupy):
         global kernel
 
         if kernel is None:
-            import awkward._kernel_signatures_cuda
+            import awkward._connect._cuda._kernel_signatures
 
             cuda_src = f"#define ERROR_BITS {error_bits}\n #define MAX_NUMPY_INT {numpy.iinfo(numpy.int64).max}"
+
+            if sys.version_info.major == 3 and sys.version_info.minor < 7:
+                cuda_kernels_path = os.path.join(
+                    os.path.dirname(os.path.realpath(__file__)), "cuda_kernels"
+                )
+            else:
+                import importlib.resources
+
+                cuda_kernels_path = importlib.resources.path(
+                    "awkward._connect._cuda", "cuda_kernels"
+                )
+
             with open(
-                "/home/swish/projects/awkward-1.0/src/cuda-kernels/cuda_common.cu",
+                os.path.join(cuda_kernels_path, "cuda_common.cu"),
                 encoding="utf-8",
             ) as header_file:
                 cuda_src = cuda_src + "\n" + header_file.read()
-            for filename in glob.glob(
-                os.path.join(
-                    "/home/swish/projects/awkward-1.0/src/cuda-kernels", "awkward_*.cu"
-                )
-            ):
+            for filename in glob.glob(os.path.join(cuda_kernels_path, "awkward_*.cu")):
                 with open(filename, encoding="utf-8") as cu_file:
                     cu_code = cu_file.read()
                     populate_kernel_errors(
@@ -103,9 +112,10 @@ def initialize_cuda_kernels(cupy):
                 options=("--std=c++11",),
                 name_expressions=list(kernel_specializations.values()),
             )
-            kernel = awkward._kernel_signatures_cuda.by_signature(
+            kernel = awkward._connect._cuda._kernel_signatures.by_signature(
                 cuda_kernel_templates, kernel_specializations
             )
+
         return kernel
     else:
         raise ImportError(error_message.format("Awkward Arrays with CUDA"))

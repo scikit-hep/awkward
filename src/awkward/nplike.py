@@ -9,7 +9,7 @@ from collections.abc import Iterable
 import numpy
 
 import awkward as ak
-import awkward._cuda_kernels
+import awkward._connect._cuda
 
 
 def of(*arrays):
@@ -423,7 +423,7 @@ class NumpyKernel:
 
 class CupyKernel(NumpyKernel):
     def max_length(self, args):
-        cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+        cupy = ak._connect._cuda.import_cupy("Awkward Arrays with CUDA")
         max_length = numpy.iinfo(numpy.int64).min
         for array in args:
             if isinstance(array, cupy.ndarray):
@@ -441,12 +441,12 @@ class CupyKernel(NumpyKernel):
         return length, 1, 1
 
     def __call__(self, *args):
-        cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+        cupy = ak._connect._cuda.import_cupy("Awkward Arrays with CUDA")
         maxlength = self.max_length(args)
         cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
 
-        if cupy_stream_ptr not in awkward._cuda_kernels.cuda_streamptr_to_contexts:
-            awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
+        if cupy_stream_ptr not in awkward._connect._cuda.cuda_streamptr_to_contexts:
+            awkward._connect._cuda.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
                 cupy.array([numpy.iinfo(numpy.int64).max], dtype=numpy.int64),
                 list(),
             )
@@ -458,13 +458,15 @@ class CupyKernel(NumpyKernel):
         args.extend(
             [
                 len(
-                    awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr][1]
+                    awkward._connect._cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][
+                        1
+                    ]
                 ),
-                awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
+                awkward._connect._cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
             ]
         )
-        awkward._cuda_kernels.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
-            awkward._cuda_kernels.Invocation(
+        awkward._connect._cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
+            awkward._connect._cuda.Invocation(
                 name=self._name_and_types[0],
                 error_context=ak._v2._util.ErrorContext.primary(),
             )
@@ -540,8 +542,8 @@ class Cupy(NumpyLike):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
-        cupy = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
-        _cuda_kernels = awkward._cuda_kernels.initialize_cuda_kernels(
+        cupy = ak._connect._cuda.import_cupy("Awkward Arrays with CUDA")
+        _cuda_kernels = awkward._connect._cuda.initialize_cuda_kernels(
             cupy
         )  # noqa: F401
 
@@ -555,7 +557,7 @@ class Cupy(NumpyLike):
             )
 
     def __init__(self):
-        self._module = ak._cuda_kernels.import_cupy("Awkward Arrays with CUDA")
+        self._module = ak._connect._cuda.import_cupy("Awkward Arrays with CUDA")
 
     @property
     def ma(self):

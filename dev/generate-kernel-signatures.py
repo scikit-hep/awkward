@@ -273,10 +273,17 @@ def by_signature(lib):
 
 
 def kernel_signatures_cuda_py(specification):
-    print("Generating src/awkward/_kernel_signatures_cuda.py...")
+    print("Generating src/awkward/_connect/_cuda/_kernel_signatures.py...")
 
     with open(
-        os.path.join(CURRENT_DIR, "..", "src", "awkward", "_kernel_signatures_cuda.py"),
+        os.path.join(
+            os.path.dirname(CURRENT_DIR),
+            "src",
+            "awkward",
+            "_connect",
+            "_cuda",
+            "_kernel_signatures.py",
+        ),
         "w",
     ) as file:
         file.write(

@@ -9,6 +9,7 @@ docs/demos/test-program.cpp
 include/awkward/kernels.h
 src/awkward/_kernel_signatures.py
 src/awkward/_kernel_signatures_cuda.py
+src/awkward/_connect/_cuda/_kernel_signatures.py
 
 # Generated CUDA kernels
 # src/cuda-kernels/awkward_*.cu
