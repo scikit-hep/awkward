@@ -22,10 +22,12 @@ char* real_name(const char* name) {{
 
 
 def test_array_wrapper():
-    compiler(
+    ROOT.gInterpreter.Declare(
         """
 template <typename T>
-class ArrayWrapper {};
+class ArrayWrapper {
+    const char* name;
+};
 
 class NumpyArray_float64_O1I50DFDJTY;
 class ListArray_BgI9cDJVCAw;
@@ -40,8 +42,8 @@ AwkwardArrayDataSource<ColumnTypes...> MakeDS(ArrayWrapper<ColumnTypes>... wrapp
 """
     )
 
-    arr1 = ROOT.ArrayWrapper[ROOT.NumpyArray_float64_O1I50DFDJTY]()
-    arr2 = ROOT.ArrayWrapper[ROOT.ListArray_BgI9cDJVCAw]()
+    arr1 = ROOT.ArrayWrapper[ROOT.NumpyArray_float64_O1I50DFDJTY]("x")
+    arr2 = ROOT.ArrayWrapper[ROOT.ListArray_BgI9cDJVCAw]("y")
 
     f = ROOT.MakeDS(arr1, arr2)
     print("HERE:", type(f))
