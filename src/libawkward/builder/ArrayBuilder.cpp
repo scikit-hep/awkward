@@ -259,6 +259,50 @@ uint8_t awkward_ArrayBuilder_real(void* arraybuilder,
   return 0;
 }
 
+uint8_t awkward_ArrayBuilder_complex(void* arraybuilder,
+                                     double real,
+                                     double imag) {
+  awkward::ArrayBuilder* obj =
+    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+  try {
+    obj->complex(std::complex<double>(real, imag));
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_ArrayBuilder_datetime(void* arraybuilder,
+                                      int64_t x,
+                                      const char* unit) {
+  awkward::ArrayBuilder* obj =
+    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+  std::string unit_str(unit);
+  try {
+    obj->datetime(x, unit_str);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_ArrayBuilder_timedelta(void* arraybuilder,
+                                       int64_t x,
+                                       const char* unit) {
+  awkward::ArrayBuilder* obj =
+    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+  std::string unit_str(unit);
+  try {
+    obj->timedelta(x, unit_str);
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
 uint8_t awkward_ArrayBuilder_bytestring(void* arraybuilder,
                                         const char* x) {
   awkward::ArrayBuilder* obj =

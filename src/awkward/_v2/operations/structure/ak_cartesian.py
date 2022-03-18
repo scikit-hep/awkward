@@ -240,6 +240,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             )
 
     else:
+        arrays = list(arrays)
         behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
         nplike = ak.nplike.of(*arrays)
         new_arrays = []

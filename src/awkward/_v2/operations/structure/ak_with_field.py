@@ -41,8 +41,8 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 def _impl(base, what, where, highlevel, behavior):
     if not (
         where is None
-        or isinstance(where, str)
-        or (isinstance(where, Iterable) and all(isinstance(x, str) for x in where))
+        or ak._v2._util.isstr(where)
+        or (isinstance(where, Iterable) and all(ak._v2._util.isstr(x) for x in where))
     ):
         raise ak._v2._util.error(
             TypeError(
@@ -50,10 +50,14 @@ def _impl(base, what, where, highlevel, behavior):
                 "or as a new integer slot by passing None for 'where'"
             )
         )
+
+    if not ak._v2._util.isstr(where) and isinstance(where, Iterable):
+        where = list(where)
+
     if (
-        not isinstance(where, str)
+        not ak._v2._util.isstr(where)
         and isinstance(where, Iterable)
-        and all(isinstance(x, str) for x in where)
+        and all(ak._v2._util.isstr(x) for x in where)
         and len(where) > 1
     ):
         return _impl(
@@ -71,7 +75,7 @@ def _impl(base, what, where, highlevel, behavior):
         )
     else:
 
-        if not (isinstance(where, str) or where is None):
+        if not (ak._v2._util.isstr(where) or where is None):
             where = where[0]
 
         behavior = ak._v2._util.behavior_of(base, what, behavior=behavior)

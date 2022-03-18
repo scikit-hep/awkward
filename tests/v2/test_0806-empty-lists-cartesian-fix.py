@@ -45,6 +45,8 @@ def test_cartesian():
     )
     assert to_list(result) == [None, None]
 
-    one, two = ak.broadcast_arrays(candidate, ak._v2.Array([[1, 2, 3], []]))
+    one, two = ak._v2.operations.structure.broadcast_arrays(
+        candidate, ak._v2.Array([[1, 2, 3], []])
+    )
     assert to_list(one) == [None, None]
     assert to_list(two) == [None, None]

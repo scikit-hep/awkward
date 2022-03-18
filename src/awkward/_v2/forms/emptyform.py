@@ -91,5 +91,17 @@ class EmptyForm(Form):
         return []
 
     @property
+    def is_tuple(self):
+        return False
+
+    @property
     def dimension_optiontype(self):
         return False
+
+    def _columns(self, path, output, list_indicator):
+        output.append(".".join(path))
+
+    def _select_columns(self, index, specifier, matches, output):
+        if any(match and index >= len(item) for item, match in zip(specifier, matches)):
+            output.append(None)
+        return self

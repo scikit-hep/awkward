@@ -163,7 +163,13 @@ class Index:
         return Index(self._data.astype(np.int64))
 
     def __copy__(self):
-        return Index(self._data.copy())
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__)
+        return result
+
+    def __deepcopy__(self, memo=None):
+        return Index(self._data.copy(), self.metadata.copy(), self.nplike)
 
     def _nbytes_part(self):
         return self.data.nbytes

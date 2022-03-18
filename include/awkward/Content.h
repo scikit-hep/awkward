@@ -184,6 +184,10 @@ namespace awkward {
     virtual const std::vector<std::string>
       keys() const = 0;
 
+    /// @brief Returns `true` if the outermost RecordArray is a tuple
+    virtual bool
+      istuple() const = 0;
+
     /// @brief Returns a string representation of this Form (#tojson with
     /// `pretty = true` and `verbose = false`).
     virtual const std::string
@@ -622,6 +626,10 @@ namespace awkward {
     /// array does not contain a RecordArray.
     virtual const std::vector<std::string>
       keys() const = 0;
+
+    /// @brief Returns `true` if the outermost RecordArray is a tuple
+    virtual bool
+      istuple() const = 0;
 
     /// @brief Returns an error message if this array is invalid; otherwise,
     /// returns an empty string.

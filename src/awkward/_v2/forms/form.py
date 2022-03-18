@@ -314,3 +314,31 @@ class Form:
 
     def simplify_uniontype(self, merge=True, mergebool=False):
         return self
+
+    def columns(self, list_indicator=None):
+        output = []
+        self._columns((), output, list_indicator)
+        return output
+
+    def select_columns(self, specifier, expand_braces=True):
+        if ak._v2._util.isstr(specifier):
+            specifier = [specifier]
+
+        for item in specifier:
+            if not ak._v2._util.isstr(item):
+                raise ak._v2._util.error(
+                    TypeError("a column-selection specifier must be a list of strings")
+                )
+
+        if expand_braces:
+            next_specifier = []
+            for item in specifier:
+                for result in ak._v2._util.expand_braces(item):
+                    next_specifier.append(result)
+            specifier = next_specifier
+
+        specifier = [[] if item == "" else item.split(".") for item in set(specifier)]
+        matches = [True] * len(specifier)
+
+        output = []
+        return self._select_columns(0, specifier, matches, output)

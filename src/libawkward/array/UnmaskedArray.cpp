@@ -138,6 +138,11 @@ namespace awkward {
   }
 
   bool
+  UnmaskedForm::istuple() const {
+    return content_.get()->istuple();
+  }
+
+  bool
   UnmaskedForm::equal(const FormPtr& other,
                       bool check_identities,
                       bool check_parameters,
@@ -687,6 +692,11 @@ namespace awkward {
   const std::vector<std::string>
   UnmaskedArray::keys() const {
     return content_.get()->keys();
+  }
+
+  bool
+  UnmaskedArray::istuple() const {
+    return content_.get()->istuple();
   }
 
   const std::string
