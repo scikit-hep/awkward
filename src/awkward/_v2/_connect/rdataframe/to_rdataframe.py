@@ -1,11 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-import ROOT
 import base64
 import struct
 
 import awkward._v2._lookup  # noqa: E402
+
+import ROOT
 
 compiler = ROOT.gInterpreter.Declare
 

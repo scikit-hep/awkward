@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-import awkward._v2._connect.rdataframe.to_rdataframe  # noqa: F401
 
 
 def to_rdataframe(
@@ -26,4 +25,6 @@ def to_rdataframe(
 
     See also #ak.from_rdataframe.
     """
+    import awkward._v2._connect.rdataframe.to_rdataframe  # noqa: F401
+
     raise ak._v2._util.error(NotImplementedError)
