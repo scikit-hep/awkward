@@ -63,8 +63,6 @@ private:
     std::vector<PointerHolderPtrs_t> fPointerHolders;
     std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges;
 
-    std::vector<ssize_t> fLengths;
-    std::vector<ssize_t*> fPtrs;
     std::tuple<ROOT::RVec<ColumnTypes>*...> fColumns;
     const std::vector<std::string> fColNames;
     const std::map<std::string, std::string> fColTypesMap;
