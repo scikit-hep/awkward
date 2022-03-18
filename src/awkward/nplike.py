@@ -448,7 +448,7 @@ class CupyKernel(NumpyKernel):
         if cupy_stream_ptr not in awkward._connect._cuda.cuda_streamptr_to_contexts:
             awkward._connect._cuda.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
                 cupy.array([numpy.iinfo(numpy.int64).max], dtype=numpy.int64),
-                list(),
+                [],
             )
 
         assert len(args) == len(self._kernel.dir)

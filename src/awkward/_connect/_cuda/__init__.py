@@ -51,7 +51,7 @@ def populate_kernel_errors(kernel_name, cu_file):
 
     result_errstring = [_.start() for _ in re.finditer(pattern_errstring, cu_file)]
 
-    err_strings = list()
+    err_strings = []
     for index in result_errstring:
         error = cu_file[index:]
         error = error[error.find('"') : error.find("\n")]
@@ -132,7 +132,7 @@ def synchronize_cuda(stream):
         invoked_kernel = contexts[invocation_index // math.pow(2, error_bits)]
         cuda_streamptr_to_contexts[stream.ptr] = (
             cupy.array([numpy.iinfo(numpy.int64).max], dtype=cupy.int64),
-            list(),
+            [],
         )
         raise awkward._v2._util.error(
             ValueError(
