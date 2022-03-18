@@ -25,18 +25,18 @@ def test_array_wrapper():
     compiler(
         """
 template <typename T>
-class ArrayWrapper {{ }};
+class ArrayWrapper {};
 
 class NumpyArray_float64_O1I50DFDJTY;
 class ListArray_BgI9cDJVCAw;
 
 template <typename ...ColumnTypes>
-class AwkwardArrayDataSource {{ }};
+class AwkwardArrayDataSource { };
 
 template <typename ...ColumnTypes>
-AwkwardArrayDataSource<ColumnTypes...> MakeDS(Wrapper<ColumnTypes>... wrappers) {{
-    return AwkwardArrayDataSource<ColumnTypes...>{{}};
-}}
+AwkwardArrayDataSource<ColumnTypes...> MakeDS(ArrayWrapper<ColumnTypes>... wrappers) {
+    return AwkwardArrayDataSource<ColumnTypes...>{};
+}
 """
     )
 
