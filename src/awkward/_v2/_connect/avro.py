@@ -292,7 +292,7 @@ class read_avro_py:
         elif file["type"] == "bytes":
             # print(file["name"])
             # print(file["type"],count)
-            astring = f'{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray", "primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{count+1}"}},"parameters": {{"__array__": "string"}},"form_key": "node{count}"}},\n'
+            astring = f'{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray", "primitive": "uint8","parameters": {{"__array__": "byte"}}, "form_key": "node{count+1}"}},"parameters": {{"__array__": "byte"}},"form_key": "node{count}"}},\n'
             var1 = f" 'part0-node{count+1}-data'"
             var2 = f" 'part0-node{count}-offsets'"
             dec.append(var2)
@@ -326,7 +326,8 @@ class read_avro_py:
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
-            _exec_code.append("\n" + "    " * ind + "out = abs(decode_zigzag(inn))")
+            _exec_code.append("\n" + "    " * ind +
+                              "out = abs(decode_zigzag(inn))")
             _exec_code.append("\n" + "    " * ind + 'print("index :",out)')
             out = len(file["type"])
             if out == 2:
@@ -341,7 +342,8 @@ class read_avro_py:
             idxx = file["type"].index("null")
             for i in range(out):
                 if file["type"][i] == "null":
-                    _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
+                    _exec_code.append(
+                        "\n" + "    " * (ind) + f"if out == {i}:")
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
@@ -353,7 +355,8 @@ class read_avro_py:
                         + f"con['part0-node{temp+1}-data'].append({self.dum_dat({'type': file['type'][1-idxx]})})"
                     )
                 else:
-                    _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
+                    _exec_code.append(
+                        "\n" + "    " * (ind) + f"if out == {i}:")
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
@@ -440,7 +443,8 @@ class read_avro_py:
             var1 = f" 'part0-node{count}-offsets'"
             dec.append(var1)
             dec.append(": [0],")
-            aform.append('{"class": "ListOffsetArray64","offsets": "i64","content": ')
+            aform.append(
+                '{"class": "ListOffsetArray64","offsets": "i64","content": ')
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
@@ -453,7 +457,8 @@ class read_avro_py:
             )
             _exec_code.append("\n" + "    " * ind + "for i in range(out):")
             aform, _exec_code, count, dec = self.rec_exp_json_code(
-                {"type": file["items"]}, _exec_code, ind + 1, aform, count + 1, dec
+                {"type": file["items"]}, _exec_code, ind +
+                1, aform, count + 1, dec
             )
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"

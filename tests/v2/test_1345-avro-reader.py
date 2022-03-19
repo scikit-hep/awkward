@@ -154,12 +154,21 @@ def test_null():
         None,
         None,
     ]
-    raise NotImplementedError
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/null_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data)
 
 
 def test_enum():
-    data = ["TWO", "ONE", "FOUR", "THREE", "TWO", "ONE", "FOUR", "THREE", "TWO", "ONE"]
-    raise NotImplementedError
+    data = ["TWO", "ONE", "FOUR", "THREE", "TWO",
+            "ONE", "FOUR", "THREE", "TWO", "ONE"]
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/enum_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data)
 
 
 def test_arrays_int():
@@ -173,7 +182,11 @@ def test_arrays_int():
         [34, 556, 12],
         [34, 647, 12],
     ]
-    raise NotImplementedError
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/array_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data)
 
 
 def test_array_string():
@@ -204,7 +217,8 @@ def test_Unions_int_null():
 
 
 def test_Unions_string_null():
-    data = ["blue", None, "yellow", None, "Green", None, "Red"]  # string_null_test
+    data = ["blue", None, "yellow", None, "Green",
+            None, "Red"]  # string_null_test
     raise NotImplementedError
 
 
@@ -218,7 +232,8 @@ def test_Unions_record_null():
 
 
 def test_Unions_null_X_Y():
-    data = ["TWO", 5684, "ONE", None, 3154, "FOUR", 69645, "THREE"]  # int_string_null
+    data = ["TWO", 5684, "ONE", None, 3154, "FOUR",
+            69645, "THREE"]  # int_string_null
     raise NotImplementedError
 
 
