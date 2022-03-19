@@ -9,17 +9,6 @@ import numpy
 
 import awkward
 
-kernel_specializations = {
-    "awkward_ListArray32_num_64": "cuda_ListArray_num<int32_t, int64_t>",
-    "awkward_ListArrayU32_num_64": "cuda_ListArray_num<uint32_t, int64_t>",
-    "awkward_ListArray64_num_64": "cuda_ListArray_num<int64_t, int64_t>",
-    "awkward_RegularArray_num_64": "cuda_RegularArray_num<int64_t>",
-    "awkward_BitMaskedArray_to_ByteMaskedArray": "cuda_BitMaskedArray_to_ByteMaskedArray",
-    "awkward_ListArray32_validity": "cuda_ListArray_validity<int32_t>",
-    "awkward_ListArrayU32_validity": "cuda_ListArray_validity<uint32_t>",
-    "awkward_ListArray64_validity": "cuda_ListArray_validity<int64_t>",
-}
-
 try:
     import cupy
 
@@ -106,6 +95,9 @@ def initialize_cuda_kernels(cupy):
                         cu_code,
                     )
                     cuda_src = cuda_src + "\n" + cu_code
+            from awkward._v2._connect.cuda._kernel_signatures import (
+                kernel_specializations,
+            )
 
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
@@ -113,7 +105,7 @@ def initialize_cuda_kernels(cupy):
                 name_expressions=list(kernel_specializations.values()),
             )
             kernel = awkward._v2._connect.cuda._kernel_signatures.by_signature(
-                cuda_kernel_templates, kernel_specializations
+                cuda_kernel_templates
             )
 
         return kernel

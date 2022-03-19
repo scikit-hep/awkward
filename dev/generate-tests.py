@@ -533,6 +533,7 @@ def gencpukerneltests(specdict):
                     f.write(" " * 4 + f"assert funcC({args}).str\n")
                 f.write("\n")
 
+
 def genunittests():
     print("Generating Unit Tests")
     datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))

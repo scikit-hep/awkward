@@ -8,7 +8,7 @@ enum Error {
 
 template <typename C>
 __global__ void
-cuda_ListArray_validity(
+awkward_ListArray_validity(
   const C* starts,
   const C* stops,
   int64_t length,

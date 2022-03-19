@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 __global__ void
-cuda_BitMaskedArray_to_ByteMaskedArray(int8_t* tobytemask,
+awkward_BitMaskedArray_to_ByteMaskedArray(int8_t* tobytemask,
   const uint8_t* frombitmask,
   int64_t bitmasklength,
   bool validwhen,

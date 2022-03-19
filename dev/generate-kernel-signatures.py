@@ -236,7 +236,7 @@ def kernel_signatures_cuda_py(specification):
         "w",
     ) as file:
         file.write(
-            """# AUTO GENERATED ON {0}
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -261,11 +261,17 @@ from numpy import (
     float64,
 )
 
-def by_signature(cuda_kernel_templates, kernel_specializations):
-    out = {{}}
-""".format(
-                reproducible_datetime()
-            )
+kernel_specializations = {{
+"""
+        )
+        kernel_specializations = generate_kernel_specializations(specification)
+        file.write("    " + kernel_specializations[1:-1] + "\n}\n")
+
+        file.write(
+            """
+def by_signature(cuda_kernel_templates):
+    out = {}
+"""
         )
 
         for spec in specification["kernels"]:
@@ -301,6 +307,52 @@ def by_signature(cuda_kernel_templates, kernel_specializations):
         )
 
     print("Done with  src/awkward/_kernel_signatures_cuda.py...")
+
+
+def generate_kernel_specializations(specification):
+    import re
+
+    kernel_specializations = {}
+    failed_cases = []
+    for spec in specification["kernels"]:
+        if spec["name"] in cuda_kernels_impl:
+            filename = spec["name"] + ".cpp"
+            try:
+                with open(
+                    os.path.join(
+                        os.path.dirname(CURRENT_DIR), "src", "cpu-kernels", filename
+                    )
+                ) as kernel:
+                    code = kernel.read()
+                    for childfunc in spec["specializations"]:
+                        kernel_specialized_name = childfunc["name"]
+                        result_errstring = [
+                            _.start()
+                            for _ in re.finditer(kernel_specialized_name, code)
+                        ]
+                        c_specialization = code[result_errstring[0] :]
+                        if c_specialization.find(spec["name"] + "<") == -1:
+                            kernel_specializations[kernel_specialized_name] = spec[
+                                "name"
+                            ]
+                            continue
+                        c_specialization = c_specialization[
+                            c_specialization.find(
+                                spec["name"] + "<"
+                            ) : c_specialization.find(">")
+                            + 1
+                        ]
+                        kernel_specializations[
+                            kernel_specialized_name
+                        ] = c_specialization
+
+            except FileNotFoundError:
+                failed_cases.append(spec["name"])
+                pass
+
+    print("Couldn't Generate Specializations for: ", failed_cases)
+
+    return kernel_specializations.__repr__().replace(", '", ",\n    '")
 
 
 if __name__ == "__main__":

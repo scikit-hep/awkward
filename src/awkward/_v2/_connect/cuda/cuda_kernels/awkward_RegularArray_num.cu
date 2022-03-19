@@ -2,7 +2,7 @@
 
 template <typename T>
 __global__ void
-cuda_RegularArray_num(T* tonum, int64_t size, int64_t length, uint64_t invocation_index, uint64_t *err_code) {
+awkward_RegularArray_num(T* tonum, int64_t size, int64_t length, uint64_t invocation_index, uint64_t *err_code) {
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
   if(err_code[0] == NO_ERROR) {
     if (thread_id < length) {

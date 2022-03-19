@@ -2,7 +2,7 @@
 
 template <typename T, typename C>
 __global__ void
-cuda_ListArray_num(C* tonum, const T* fromstarts, const T* fromstops, int64_t length, uint64_t invocation_index, uint64_t* err_code) {
+awkward_ListArray_num(T* tonum, const C* fromstarts, const C* fromstops, int64_t length, uint64_t invocation_index, uint64_t* err_code) {
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
   if(err_code[0] == NO_ERROR) {
     if (thread_id < length) {
