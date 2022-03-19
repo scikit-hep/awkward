@@ -384,7 +384,7 @@ class read_avro_py:
             dec.append(var1)
             dec.append(": [],")
             aform.append(
-                f'{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{count+1}"}},"size": {file["size"]},"form_key": "node{count}"}},\n'
+                f'{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{count+1}", "parameters": {{"__array__": "byte"}}}},"size": {file["size"]},"form_key": "node{count}"}},\n'
             )
             temp = file["size"]
             _exec_code.append("\n" + "    " * ind + f"lenn = {temp}")

@@ -198,7 +198,18 @@ def test_array_enum():
     raise NotImplementedError
 
 
-def test_Unions_x_null():
+def test_Unions_int_null():
+    data = [2345, 65475, None, 676457, 343, 7908, None, 5768]  # int_null_test
+    raise NotImplementedError
+
+
+def test_Unions_string_null():
+    data = ["blue", None, "yellow", None, "Green", None, "Red"]  # string_null_test
+    raise NotImplementedError
+
+
+def test_Unions_enum_null():
+    dat = ["TWO", None, "ONE", None, "FOUR", None, "THREE"]  # enum_null_test
     raise NotImplementedError
 
 
@@ -207,6 +218,19 @@ def test_Unions_record_null():
 
 
 def test_Unions_null_X_Y():
+    data = ["TWO", 5684, "ONE", None, 3154, "FOUR", 69645, "THREE"]  # int_string_null
+    raise NotImplementedError
+
+
+def test_record_0():
+    data = []
+    raise NotImplementedError
+
+
+def test_record_1():
+    data = [
+        {"name": "Pierre-Simon Laplace", "age": 77, "Numbers": "TWO"},
+    ]
     raise NotImplementedError
 
 
