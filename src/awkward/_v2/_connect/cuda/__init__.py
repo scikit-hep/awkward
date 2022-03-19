@@ -37,11 +37,11 @@ or
 """
 
 cuda_streamptr_to_contexts = {}
-error_bits = 8
-
 kernel_errors = {}
-
 kernel = None
+
+ERROR_BITS = 8
+NO_ERROR = numpy.iinfo(numpy.uint64).max
 
 
 def populate_kernel_errors(kernel_name, cu_file):
@@ -80,7 +80,7 @@ def initialize_cuda_kernels(cupy):
         if kernel is None:
             import awkward._v2._connect.cuda._kernel_signatures
 
-            cuda_src = f"#define ERROR_BITS {error_bits}\n #define MAX_NUMPY_INT {numpy.iinfo(numpy.int64).max}"
+            cuda_src = f"#define ERROR_BITS {ERROR_BITS}\n#define NO_ERROR {NO_ERROR}"
 
             if sys.version_info.major == 3 and sys.version_info.minor < 7:
                 cuda_kernels_path = os.path.join(
@@ -128,15 +128,15 @@ def synchronize_cuda(stream):
     invocation_index = cuda_streamptr_to_contexts[stream.ptr][0]
     contexts = cuda_streamptr_to_contexts[stream.ptr][1]
 
-    if invocation_index != numpy.iinfo(numpy.int64).max:
-        invoked_kernel = contexts[invocation_index // math.pow(2, error_bits)]
+    if invocation_index != NO_ERROR:
+        invoked_kernel = contexts[invocation_index // math.pow(2, ERROR_BITS)]
         cuda_streamptr_to_contexts[stream.ptr] = (
-            cupy.array([numpy.iinfo(numpy.int64).max], dtype=cupy.int64),
+            cupy.array(NO_ERROR),
             [],
         )
         raise awkward._v2._util.error(
             ValueError(
-                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][invocation_index % math.pow(2, error_bits)]}"
+                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][invocation_index % math.pow(2, ERROR_BITS)]}"
             ),
             invoked_kernel.error_context,
         )

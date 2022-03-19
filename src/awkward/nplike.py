@@ -446,7 +446,7 @@ class CupyKernel(NumpyKernel):
 
         if cupy_stream_ptr not in ak._v2._connect.cuda.cuda_streamptr_to_contexts:
             ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
-                cupy.array([numpy.iinfo(numpy.int64).max], dtype=numpy.int64),
+                cupy.array(ak._v2._connect.cuda.NO_ERROR),
                 [],
             )
 

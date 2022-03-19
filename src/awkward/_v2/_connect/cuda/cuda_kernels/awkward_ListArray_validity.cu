@@ -13,21 +13,23 @@ cuda_ListArray_validity(
   const C* stops,
   int64_t length,
   int64_t lencontent,
-  int64_t invocation_index,
-  int64_t* err_code) {
+  uint64_t invocation_index,
+  uint64_t* err_code) {
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-  if (thread_id < length && err_code[0] == MAX_NUMPY_INT) {
+  if(err_code[0] == NO_ERROR) {
+    if (thread_id < length) {
     C start = starts[thread_id];
     C stop = stops[thread_id];
     if (start != stop) {
-      if (start > stop) {
-        atomicMin(err_code, invocation_index * (1 << ERROR_BITS) + ERROR_START_STOP); // failure("start[i] > stop[i]", i, kSliceNone, FILENAME(__LINE__));
-      }
-      if (start < 0) {
-        atomicMin(err_code, invocation_index * (1 << ERROR_BITS) + ERROR_START_ZERO); // failure("start[i] < 0", i, kSliceNone, FILENAME(__LINE__));
-      }
-      if (stop > lencontent) {
-        atomicMin(err_code, invocation_index * (1 << ERROR_BITS) + ERROR_STOP_CONTENT); // failure("stop[i] > len(content)", i, kSliceNone, FILENAME(__LINE__));
+        if (start > stop) {
+          RAISE_ERROR(ERROR_START_STOP)
+        }
+        if (start < 0) {
+          RAISE_ERROR(ERROR_START_ZERO)
+        }
+        if (stop > lencontent) {
+          RAISE_ERROR(ERROR_STOP_CONTENT)
+        }
       }
     }
   }

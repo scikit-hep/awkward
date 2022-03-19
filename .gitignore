@@ -11,9 +11,6 @@ src/awkward/_kernel_signatures.py
 src/awkward/_kernel_signatures_cuda.py
 src/awkward/_v2/_connect/cuda/_kernel_signatures.py
 
-# Generated CUDA kernels
-# src/cuda-kernels/awkward_*.cu
-
 # Kernel tests
 tests-cpu-kernels
 tests-cuda-kernels
