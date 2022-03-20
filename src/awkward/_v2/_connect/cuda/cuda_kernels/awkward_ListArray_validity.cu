@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-enum Error {
+enum class LISTARRAY_VALIDITY_ERRORS {
     ERROR_START_STOP,    // message: "start[i] > stop[i]"
     ERROR_START_ZERO,    // message: "start[i] < 0"
     ERROR_STOP_CONTENT   // message: "stop[i] > len(content)"
@@ -22,13 +22,13 @@ awkward_ListArray_validity(
     C stop = stops[thread_id];
     if (start != stop) {
         if (start > stop) {
-          RAISE_ERROR(ERROR_START_STOP)
+          RAISE_ERROR(LISTARRAY_VALIDITY_ERRORS::ERROR_START_STOP)
         }
         if (start < 0) {
-          RAISE_ERROR(ERROR_START_ZERO)
+          RAISE_ERROR(LISTARRAY_VALIDITY_ERRORS::ERROR_START_ZERO)
         }
         if (stop > lencontent) {
-          RAISE_ERROR(ERROR_STOP_CONTENT)
+          RAISE_ERROR(LISTARRAY_VALIDITY_ERRORS::ERROR_STOP_CONTENT)
         }
       }
     }
