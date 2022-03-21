@@ -96,44 +96,8 @@ jobs:
       with:
         path: wheelhouse/*.whl
 
-  build_cuda_wheels:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-          cuda-version: ["11.5.1", "11.4.1", "11.3.1", "11.2.1", "11.1.1", "11.0.3", "10.2"]
-
-    steps:
-      - name: Checkout repository without submodules
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
-
-      - name: Install requirements for building and testing
-        run: pip install PyYAML setuptools wheel
-
-      - name: Generate the Kernels Signatures
-        run: python dev/generate-kernel-signatures.py
-
-      - name: Generate the CUDA Kernels
-        run: python dev/generate-cuda.py
-
-      - name: Build and test the wheel
-        run: |
-          ./cuda-build.sh -c ${{ matrix.cuda-version}} -i
-          pip install pytest
-          python -m pytest -vvrs tests-cuda/test_1270-install-test.py
-
-      - name: Upload the built awkward_cuda_kernels whl for CUDA ${{ matrix.cuda-version }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: cuda-${{ matrix.cuda-version }}-artifact
-          path: dist/awkward_cuda_kernels-*.whl
-
   upload_all:
-    needs: [build_wheels, build_alt_wheels, make_sdist, build_cuda_wheels]
+    needs: [build_wheels, build_alt_wheels, make_sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:

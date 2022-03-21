@@ -290,7 +290,17 @@ def gettypeval(typename):
 
 def getcudakernelslist():
     cudakernels = []
-    for f in os.listdir(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels")):
+    for f in os.listdir(
+        os.path.join(
+            os.path.dirname(CURRENT_DIR),
+            "src",
+            "awkward",
+            "_v2",
+            "_connect",
+            "cuda",
+            "cuda_kernels",
+        )
+    ):
         if os.path.isfile(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels", f)):
             if f.startswith("awkward_") and f.endswith(".cu"):
                 cudakernels.append(f[:-3])
@@ -524,177 +534,6 @@ def gencpukerneltests(specdict):
                 f.write("\n")
 
 
-def gencudakerneltests(specdict):
-    print("Generating files for testing CUDA kernels")
-
-    tests_cuda_kernels = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels")
-    if os.path.exists(tests_cuda_kernels):
-        shutil.rmtree(tests_cuda_kernels)
-    os.mkdir(tests_cuda_kernels)
-    with open(os.path.join(tests_cuda_kernels, "__init__.py"), "w") as f:
-        f.write(
-            """# AUTO GENERATED ON {}
-# DO NOT EDIT BY HAND!
-#
-# To regenerate file, run
-#
-#     python dev/generate-tests.py
-#
-
-# fmt: off
-
-from __future__ import absolute_import
-
-import ctypes
-import platform
-
-import pkg_resources
-
-# awkward-cuda-kernels is only supported on Linux, but let's leave the placeholder.
-if platform.system() == "Windows":
-    shared_library_name = "awkward-cuda-kernels.dll"
-elif platform.system() == "Darwin":
-    shared_library_name = "libawkward-cuda-kernels.dylib"
-else:
-    shared_library_name = "libawkward-cuda-kernels.so"
-
-CUDA_KERNEL_SO = pkg_resources.resource_filename(
-    "awkward_cuda_kernels", shared_library_name
-)
-
-lib = ctypes.CDLL(CUDA_KERNEL_SO)
-
-
-class Error(ctypes.Structure):
-    _fields_ = [
-        ("str", ctypes.POINTER(ctypes.c_char)),
-        ("filename", ctypes.POINTER(ctypes.c_char)),
-        ("identity", ctypes.c_int64),
-        ("attempt", ctypes.c_int64),
-        ("pass_through", ctypes.c_bool),
-    ]
-""".format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
-            )
-        )
-
-    cudakernels = getcudakernelslist()
-    funcnames = getfuncnames()
-    cudafuncnames = {funcname: funcnames[funcname] for funcname in cudakernels}
-
-    for spec in specdict.values():
-        if (spec.name in cudakernels) or any(
-            spec.name in x for x in cudafuncnames.values()
-        ):
-            with open(
-                os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
-            ) as f:
-                f.write(
-                    """# AUTO GENERATED ON {}
-# DO NOT EDIT BY HAND!
-#
-# To regenerate file, run
-#
-#     python dev/generate-tests.py
-#
-
-# fmt: off
-
-""".format(
-                        datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
-                    )
-                )
-                f.write(
-                    "import ctypes\nimport cupy\nimport pytest\nfrom __init__ import lib, Error\n\n"
-                )
-                num = 1
-                if spec.tests == []:
-                    f.write(
-                        "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
-                    )
-                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
-                    f.write(
-                        " " * 4
-                        + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
-                    )
-                for test in spec.tests:
-                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
-                    num += 1
-                    for arg, val in test["inargs"].items():
-                        typename = remove_const(
-                            next(
-                                argument
-                                for argument in spec.args
-                                if argument.name == arg
-                            ).typename
-                        )
-                        if "List" in typename:
-                            count = typename.count(
-                                "List"
-                            )  # Might need later for ndim array
-                            typename = gettypename(typename)
-                            f.write(
-                                " " * 4
-                                + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                    arg,
-                                    str(val),
-                                    "float32" if typename == "float" else typename,
-                                )
-                            )
-                            f.write(
-                                " " * 4
-                                + "d_{0} = ctypes.cast({0}.data.ptr, ctypes.POINTER(ctypes.c_{1}))\n".format(
-                                    arg, typename
-                                )
-                            )
-                        else:
-                            f.write(" " * 4 + "d_" + arg + " = " + str(val) + "\n")
-                    f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
-                    f.write(" " * 4 + "funcC.restype = Error\n")
-                    f.write(" " * 4 + f"funcC.argtypes = {getctypelist(spec.args)}\n")
-                    args = ""
-                    count = 0
-                    for arg in spec.args:
-                        if count == 0:
-                            args += "d_" + arg.name
-                            count += 1
-                        else:
-                            args += ", d_" + arg.name
-                    if test["success"]:
-                        f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
-                        for arg, val in test["outargs"].items():
-                            f.write(
-                                " " * 4
-                                + "pytest_{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                    arg,
-                                    str(val),
-                                    gettypename(
-                                        next(
-                                            argument.typename
-                                            for argument in spec.args
-                                            if argument.name == arg
-                                        )
-                                    ),
-                                )
-                            )
-                            if isinstance(val, list):
-                                f.write(
-                                    " " * 4 + f"for x in range(len(pytest_{arg})):\n"
-                                )
-                                f.write(
-                                    " " * 8
-                                    + "assert {0}[x] == pytest_{0}[x]\n".format(arg)
-                                )
-                            else:
-                                f.write(
-                                    " " * 4 + "assert {0} == pytest_{0}\n".format(arg)
-                                )
-                        f.write(" " * 4 + "assert not ret_pass.str\n")
-                    else:
-                        f.write(" " * 4 + f"assert funcC({args}).str\n")
-                    f.write("\n")
-
-
 def genunittests():
     print("Generating Unit Tests")
     datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
@@ -738,5 +577,4 @@ if __name__ == "__main__":
     specdict = readspec()
     genspectests(specdict)
     gencpukerneltests(specdict)
-    gencudakerneltests(specdict)
     genunittests()

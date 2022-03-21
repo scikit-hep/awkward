@@ -2,8 +2,6 @@
 
 # v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
 
-import sys
-
 import ctypes
 
 from collections.abc import Iterable
@@ -422,6 +420,60 @@ class NumpyKernel:
         )
 
 
+class CupyKernel(NumpyKernel):
+    def max_length(self, args):
+        cupy = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
+        max_length = numpy.iinfo(numpy.int64).min
+        for array in args:
+            if isinstance(array, cupy.ndarray):
+                max_length = max(max_length, len(array))
+        return max_length
+
+    def calc_grid(self, length):
+        if length > 1024:
+            return -(length // -1024), 1, 1
+        return 1, 1, 1
+
+    def calc_blocks(self, length):
+        if length > 1024:
+            return 1024, 1, 1
+        return length, 1, 1
+
+    def __call__(self, *args):
+        cupy = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
+        maxlength = self.max_length(args)
+        cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
+
+        if cupy_stream_ptr not in ak._v2._connect.cuda.cuda_streamptr_to_contexts:
+            ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
+                cupy.array(ak._v2._connect.cuda.NO_ERROR),
+                [],
+            )
+
+        assert len(args) == len(self._kernel.dir)
+        # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
+        # The second arg is the error_code.
+        args = list(args)
+        args.extend(
+            [
+                len(
+                    ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1]
+                ),
+                ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
+            ]
+        )
+        ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
+            ak._v2._connect.cuda.Invocation(
+                name=self._name_and_types[0],
+                error_context=ak._v2._util.ErrorContext.primary(),
+            )
+        )
+
+        self._kernel()(
+            self.calc_grid(maxlength), self.calc_blocks(maxlength), tuple(args)
+        )
+
+
 class Numpy(NumpyLike):
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, numpy.ndarray):
@@ -487,12 +539,12 @@ class Cupy(NumpyLike):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
-        if "awkward._cuda_kernels" not in sys.modules:
-            import awkward._cuda_kernels  # noqa: F401
+        cupy = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
+        _cuda_kernels = ak._v2._connect.cuda.initialize_cuda_kernels(cupy)  # noqa: F401
 
-        func = ak._cuda_kernels.kernel[name_and_types]
+        func = _cuda_kernels[name_and_types]
         if func is not None:
-            return NumpyKernel(func, name_and_types)
+            return CupyKernel(func, name_and_types)
         else:
             raise NotImplementedError(
                 f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
@@ -500,19 +552,9 @@ class Cupy(NumpyLike):
             )
 
     def __init__(self):
-        try:
-            import cupy
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                """to use CUDA arrays in Python, install the 'cupy' package with:
+        import awkward._v2._connect.cuda  # noqa: F401
 
-    pip install cupy --upgrade
-
-or
-
-    conda install cupy"""
-            ) from None
-        self._module = cupy
+        self._module = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
 
     @property
     def ma(self):

@@ -191,7 +191,7 @@ class Content:
         return None
 
     def _handle_error(self, error, slicer=None):
-        if error.str is not None:
+        if error is not None and error.str is not None:
             if error.filename is None:
                 filename = ""
             else:

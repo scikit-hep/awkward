@@ -154,7 +154,7 @@ class SlicingErrorContext(ErrorContext):
         return self._kwargs["where"]
 
 
-def error(exception):
+def error(exception, error_context=None):
     if isinstance(exception, type) and issubclass(exception, Exception):
         try:
             exception = exception()
@@ -167,7 +167,8 @@ def error(exception):
             + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward-1.0/issues"
         )
 
-    error_context = ErrorContext.primary()
+    if error_context is None:
+        error_context = ErrorContext.primary()
 
     if isinstance(error_context, OperationErrorContext):
         tb = error_context.traceback
