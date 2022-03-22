@@ -3262,7 +3262,7 @@ kernels:
 
           j = 0
           k = 0
-          maxdistinct = -1
+          maxdistinct = -2
           lasti = -1
           for i in range(lendistincts):
               if maxdistinct < distincts[i]:
