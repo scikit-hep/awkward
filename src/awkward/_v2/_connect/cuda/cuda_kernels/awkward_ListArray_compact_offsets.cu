@@ -4,12 +4,12 @@ enum class LISTARRAY_COMPACT_OFFSETS_ERRORS {
     ERROR_START_STOP,    // message: "start[i] > stop[i]"
 };
 
-template <typename C, typename T>
+template <typename T, typename C, typename U>
 __global__ void
 awkward_ListArray_compact_offsets(
   T* tooffsets,
   const C* fromstarts,
-  const C* fromstops,
+  const U* fromstops,
   int64_t length,
   uint64_t invocation_index,
   uint64_t* err_code) {
@@ -20,7 +20,7 @@ awkward_ListArray_compact_offsets(
         tooffsets[thread_id] = 0;
       }
       C start = fromstarts[thread_id];
-      C stop = fromstops[thread_id];
+      U stop = fromstops[thread_id];
       if (stop < start) {
         RAISE_ERROR(LISTARRAY_COMPACT_OFFSETS_ERRORS::ERROR_START_STOP)
       }

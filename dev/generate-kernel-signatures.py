@@ -263,11 +263,32 @@ from numpy import (
     float64,
 )
 
-kernel_specializations = {{
+dtype_to_ctype = {{
+    bool_: "bool",
+    int8: "int8_t",
+    uint8: "uint8_t",
+    int16: "int16_t",
+    uint16: "uint16_t",
+    int32: "int32_t",
+    uint32: "uint32_t",
+    int64: "int64_t",
+    uint64: "uint64_t",
+    float32: "float",
+    float64: "double",
+}}
+
+
+def fetch_specialization(keys):
+    specialized_name = keys[0].replace("'", "") + "<"
+    keys = keys[1:]
+
+    for key in keys[:-1]:
+        specialized_name = specialized_name + dtype_to_ctype[key] + ", "
+    specialized_name = specialized_name + dtype_to_ctype[keys[-1]] + ">"
+
+    return specialized_name
 """
         )
-        kernel_specializations = generate_kernel_specializations(specification)
-        file.write("    " + kernel_specializations[1:-1] + "\n}\n")
 
         file.write(
             """
@@ -284,11 +305,11 @@ def by_signature(cuda_kernel_templates):
                 if spec["name"] in cuda_kernels_impl:
                     file.write(
                         """
-    f = lambda: cuda_kernel_templates.get_function(kernel_specializations[{}])
+    f = lambda: cuda_kernel_templates.get_function(fetch_specialization([{}]))
     f.dir = [{}]
     out[{}] = f
 """.format(
-                            repr(childfunc["name"]),
+                            ", ".join(special),
                             ", ".join(dirlist),
                             ", ".join(special),
                         )
@@ -308,53 +329,33 @@ def by_signature(cuda_kernel_templates):
 """
         )
 
-    print("Done with  src/awkward/_kernel_signatures_cuda.py...")
+        file.write(
+            """
+def fetch_specializations():
+    out = []
+"""
+        )
 
-
-def generate_kernel_specializations(specification):
-    import re
-
-    kernel_specializations = {}
-    failed_cases = []
-    for spec in specification["kernels"]:
-        if spec["name"] in cuda_kernels_impl:
-            filename = spec["name"] + ".cpp"
-            try:
-                with open(
-                    os.path.join(
-                        os.path.dirname(CURRENT_DIR), "src", "cpu-kernels", filename
+        for spec in specification["kernels"]:
+            for childfunc in spec["specializations"]:
+                special = [repr(spec["name"])]
+                [type_to_pytype(x["type"], special) for x in childfunc["args"]]
+                dirlist = [repr(x["dir"]) for x in childfunc["args"]]
+                if spec["name"] in cuda_kernels_impl:
+                    file.write(
+                        """
+    out.append(fetch_specialization([{}]))
+""".format(
+                            ", ".join(special),
+                        )
                     )
-                ) as kernel:
-                    code = kernel.read()
-                    for childfunc in spec["specializations"]:
-                        kernel_specialized_name = childfunc["name"]
-                        result_errstring = [
-                            _.start()
-                            for _ in re.finditer(kernel_specialized_name, code)
-                        ]
-                        c_specialization = code[result_errstring[0] :]
-                        if c_specialization.find(spec["name"] + "<") == -1:
-                            kernel_specializations[kernel_specialized_name] = spec[
-                                "name"
-                            ]
-                            continue
-                        c_specialization = c_specialization[
-                            c_specialization.find(
-                                spec["name"] + "<"
-                            ) : c_specialization.find(">")
-                            + 1
-                        ]
-                        kernel_specializations[
-                            kernel_specialized_name
-                        ] = c_specialization
+        file.write(
+            """
+    return out
+    """
+        )
 
-            except FileNotFoundError:
-                failed_cases.append(spec["name"])
-                pass
-
-    print("Couldn't Generate Specializations for: ", failed_cases)
-
-    return kernel_specializations.__repr__().replace(", '", ",\n    '")
+    print("Done with  src/awkward/_kernel_signatures_cuda.py...")
 
 
 if __name__ == "__main__":

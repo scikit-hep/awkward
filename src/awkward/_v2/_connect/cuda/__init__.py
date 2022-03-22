@@ -96,13 +96,13 @@ def initialize_cuda_kernels(cupy):
                     )
                     cuda_src = cuda_src + "\n" + cu_code
             from awkward._v2._connect.cuda._kernel_signatures import (
-                kernel_specializations,
+                fetch_specializations,
             )
 
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
                 options=("--std=c++11",),
-                name_expressions=list(kernel_specializations.values()),
+                name_expressions=fetch_specializations(),
             )
             kernel = awkward._v2._connect.cuda._kernel_signatures.by_signature(
                 cuda_kernel_templates

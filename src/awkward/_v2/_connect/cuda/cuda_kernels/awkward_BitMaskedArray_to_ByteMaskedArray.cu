@@ -1,8 +1,9 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+template <typename T, typename C>
 __global__ void
-awkward_BitMaskedArray_to_ByteMaskedArray(int8_t* tobytemask,
-  const uint8_t* frombitmask,
+awkward_BitMaskedArray_to_ByteMaskedArray(T* tobytemask,
+  const C* frombitmask,
   int64_t bitmasklength,
   bool validwhen,
   bool lsb_order,
