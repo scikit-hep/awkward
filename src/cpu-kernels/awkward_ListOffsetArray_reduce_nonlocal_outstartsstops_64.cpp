@@ -15,7 +15,7 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
 
   int64_t j = 0;
   int64_t k = 0;
-  int64_t maxdistinct = -1;
+  int64_t maxdistinct = -2;
   int64_t lasti = -1;
   for (int64_t i = 0;  i < lendistincts;  i++) {
     if (maxdistinct < distincts[i]) {
