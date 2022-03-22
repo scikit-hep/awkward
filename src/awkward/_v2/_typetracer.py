@@ -160,6 +160,9 @@ class MaybeNone:
     def __repr__(self):
         return f"MaybeNone({self._content!r})"
 
+    def __str__(self):
+        return f"maybe-{self._content}"
+
 
 class OneOf:
     def __init__(self, contents):
@@ -177,6 +180,11 @@ class OneOf:
 
     def __repr__(self):
         return f"OneOf({self._contents!r})"
+
+    def __str__(self):
+        return (
+            f"oneof-{'-'.join(str(x).replace('unknown-', '') for x in self._contents)}"
+        )
 
 
 def _length_after_slice(slice, original_length):
@@ -619,9 +627,51 @@ class TypeTracer(ak.nplike.NumpyLike):
             TypeTracerArray(x.dtype, [UnknownLength] + shape) for x in [first] + rest
         ]
 
-    def add(self, *args, **kwargs):
+    def add(self, x, y):
         # array1, array2[, out=]
-        raise ak._v2._util.error(NotImplementedError)
+        is_array = False
+        if isinstance(x, TypeTracerArray):
+            is_array = True
+            x = x[0]
+        if isinstance(y, TypeTracerArray):
+            is_array = True
+            y = y[0]
+        out = x + y
+        if is_array:
+            return TypeTracerArray(out.dtype)
+        else:
+            return out
+
+    def multiply(self, x, y):
+        # array1, array2[, out=]
+        return self.add(x, y)
+
+    def maximum(self, x, y):
+        # array1, array2[, out=]
+        is_array = False
+        if isinstance(x, TypeTracerArray):
+            is_array = True
+            x = x[0]
+        if isinstance(y, TypeTracerArray):
+            is_array = True
+            y = y[0]
+        is_maybenone = False
+        if isinstance(x, MaybeNone):
+            is_maybenone = True
+            x = x.content
+        if isinstance(y, MaybeNone):
+            is_maybenone = True
+            y = y.content
+        out = x + y
+        if is_array:
+            return TypeTracerArray(out.dtype)
+        elif is_maybenone:
+            return MaybeNone(out)
+        else:
+            return out
+
+    def minimum(self, x, y):
+        return self.maximum(x, y)
 
     def cumsum(self, *args, **kwargs):
         # arrays[, out=]
@@ -719,9 +769,29 @@ class TypeTracer(ak.nplike.NumpyLike):
         # array1, array2[, out=output]
         raise ak._v2._util.error(NotImplementedError)
 
-    def logical_and(self, *args, **kwargs):
+    def logical_and(self, x, y):
         # array1, array2
-        raise ak._v2._util.error(NotImplementedError)
+        is_array = False
+        if isinstance(x, TypeTracerArray):
+            is_array = True
+        if isinstance(y, TypeTracerArray):
+            is_array = True
+        if is_array:
+            return TypeTracerArray(np.dtype(np.bool_))
+        else:
+            return UnknownScalar(np.dtype(np.bool_))
+
+    def logical_or(self, x, y):
+        # array1, array2[, out=]
+        is_array = False
+        if isinstance(x, TypeTracerArray):
+            is_array = True
+        if isinstance(y, TypeTracerArray):
+            is_array = True
+        if is_array:
+            return TypeTracerArray(np.dtype(np.bool_))
+        else:
+            return UnknownScalar(np.dtype(np.bool_))
 
     def equal(self, *args, **kwargs):
         # array1, array2
