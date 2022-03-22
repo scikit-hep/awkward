@@ -117,18 +117,18 @@ def synchronize_cuda(stream):
     cupy = import_cupy("Awkward Arrays with CUDA")
 
     stream.synchronize()
-    invocation_index = cuda_streamptr_to_contexts[stream.ptr][0]
+    invocation_index = cuda_streamptr_to_contexts[stream.ptr][0].get().tolist()
     contexts = cuda_streamptr_to_contexts[stream.ptr][1]
 
     if invocation_index != NO_ERROR:
-        invoked_kernel = contexts[invocation_index // math.pow(2, ERROR_BITS)]
+        invoked_kernel = contexts[int(invocation_index // math.pow(2, ERROR_BITS))]
         cuda_streamptr_to_contexts[stream.ptr] = (
             cupy.array(NO_ERROR),
             [],
         )
         raise awkward._v2._util.error(
             ValueError(
-                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][invocation_index % math.pow(2, ERROR_BITS)]}"
+                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]}"
             ),
             invoked_kernel.error_context,
         )
