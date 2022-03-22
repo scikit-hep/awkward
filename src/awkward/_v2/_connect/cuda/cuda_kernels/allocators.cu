@@ -1,15 +1,16 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/allocators.cu", line)
+#define FILENAME(line) \
+  FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/allocators.cu", line)
 
 #include "awkward/kernel-utils.h"
 
-void* awkward_malloc(int64_t bytelength) {
+void*
+awkward_malloc(int64_t bytelength) {
   if (bytelength == 0) {
     // std::cout << "CUDA malloc at nullptr (0 bytes)" << std::endl;
     return nullptr;
-  }
-  else {
+  } else {
     void* out = nullptr;
     cudaError_t err = cudaMallocManaged(&out, bytelength);
     if (err != cudaError::cudaSuccess) {
@@ -21,7 +22,8 @@ void* awkward_malloc(int64_t bytelength) {
   }
 }
 
-void awkward_free(void const *ptr) {
+void
+awkward_free(void const* ptr) {
   // std::cout << "CUDA free   at " << ptr << std::endl;
   cudaFree((void*)ptr);
 }
