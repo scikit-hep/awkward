@@ -117,7 +117,8 @@ def test_string():
     ]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/string_test_data.avro", reader_lang="py"
+            file_name="tests/samples/string_test_data.avro",
+            reader_lang="py",
         ).to_list()
         == data
     )

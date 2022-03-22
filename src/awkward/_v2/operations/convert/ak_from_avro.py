@@ -20,7 +20,7 @@ def from_avro_file(
         pass
 
 
-def form_from_avro_file(file_name, show_code=False, reader_lang="ft"):
+def metadata_from_avro_file(file_name, show_code=False, reader_lang="ft"):
     import awkward._v2._connect.avro
 
     if reader_lang == "py":
