@@ -16,11 +16,6 @@ class Reducer:
         if given_dtype in (np.uint8, np.uint16, np.uint32):
             return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
 
-        if given_dtype == np.complex128:
-            return np.float64
-        if given_dtype == np.complex64:
-            return np.float32
-
         return given_dtype
 
     @classmethod
@@ -180,7 +175,7 @@ class CountNonzero(Reducer):
                 array.nplike[
                     "awkward_reduce_countnonzero_complex",
                     result.dtype.type,
-                    cls.return_dtype(array.dtype),
+                    np.float64 if array.dtype.type == np.complex128 else np.float32,
                     parents.dtype.type,
                 ](
                     result,
@@ -268,7 +263,7 @@ class Sum(Reducer):
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_sum_complex",
-                    result.dtype.type,
+                    np.float64 if array.dtype.type == np.complex128 else np.float32,
                     np.float64 if array.dtype.type == np.complex128 else np.float32,
                     parents.dtype.type,
                 ](
@@ -340,7 +335,7 @@ class Prod(Reducer):
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod_complex",
-                    result.dtype.type,
+                    np.float64 if array.dtype.type == np.complex128 else np.float32,
                     np.float64 if array.dtype.type == np.complex128 else np.float32,
                     parents.dtype.type,
                 ](
@@ -622,7 +617,7 @@ class Max(Reducer):
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_max_complex",
-                    dtype,
+                    result.dtype.type,
                     dtype,
                     parents.dtype.type,
                 ](

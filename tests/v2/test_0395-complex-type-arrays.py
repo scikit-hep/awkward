@@ -269,6 +269,7 @@ def test_astype_complex():
         (9.9 + 0j),
     ]
 
+    assert content_complex64.sum() == (14.25 + 0j)
     assert content_complex64.prod() == (10.828125 + 0j)
     assert content_complex64.min() == (0.25 + 0j)
     assert content_complex64.max() == (5.5 + 0j)

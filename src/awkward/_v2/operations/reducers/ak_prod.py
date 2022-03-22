@@ -54,7 +54,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
     )
 
     if axis is None:
-        if not layout.nplike.known_data or layout.nplike.known_shape:
+        if not layout.nplike.known_data or not layout.nplike.known_shape:
             reducer_cls = ak._v2._reducers.Prod
 
             def map(x):
