@@ -69,6 +69,20 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
     )
 
     if axis is None:
+        if not layout.nplike.known_data or layout.nplike.known_shape:
+            reducer_cls = ak._v2._reducers.Min
+
+            def map(x):
+                return ak._v2._typetracer.MaybeNone(
+                    ak._v2._typetracer.UnknownScalar(
+                        np.dtype(reducer_cls.return_dtype(x.dtype))
+                    )
+                )
+
+        else:
+
+            def map(x):
+                return layout.nplike.min(x)
 
         def reduce(xs):
             if len(xs) == 0:
@@ -81,7 +95,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
         tmp = layout.completely_flatten(
             function_name="ak.min", flatten_records=flatten_records
         )
-        return reduce([layout.nplike.min(x) for x in tmp if len(x) > 0])
+        return reduce([map(x) for x in tmp if not x.shape[0] <= 0])
 
     else:
         behavior = ak._v2._util.behavior_of(array)

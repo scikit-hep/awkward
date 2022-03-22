@@ -43,6 +43,10 @@ class ArgMin(Reducer):
     preferred_dtype = np.int64
 
     @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.int64
+
+    @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         dtype = cls.maybe_other_type(array.dtype)
@@ -86,6 +90,10 @@ class ArgMax(Reducer):
     name = "argmax"
     needs_position = True
     preferred_dtype = np.int64
+
+    @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -132,6 +140,10 @@ class Count(Reducer):
     preferred_dtype = np.float64
 
     @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.int64
+
+    @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         result = array.nplike.empty(outlength, dtype=np.int64)
@@ -152,6 +164,10 @@ class Count(Reducer):
 class CountNonzero(Reducer):
     name = "count_nonzero"
     preferred_dtype = np.float64
+
+    @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -362,6 +378,10 @@ class Any(Reducer):
     preferred_dtype = np.bool_
 
     @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.bool_
+
+    @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         dtype = cls.maybe_other_type(array.dtype)
@@ -404,6 +424,10 @@ class Any(Reducer):
 class All(Reducer):
     name = "all"
     preferred_dtype = np.bool_
+
+    @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.bool_
 
     @classmethod
     def apply(cls, array, parents, outlength):

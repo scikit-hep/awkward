@@ -61,6 +61,14 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
     )
 
     if axis is None:
+        if not layout.nplike.known_data or layout.nplike.known_shape:
+            reducer_cls = ak._v2._reducers.ArgMax
+            return ak._v2._typetracer.MaybeNone(
+                ak._v2._typetracer.UnknownScalar(
+                    np.dtype(reducer_cls.return_dtype(None))
+                )
+            )
+
         layout = ak._v2.operations.structure.fill_none(
             layout, -np.inf, axis=-1, highlevel=False
         )
@@ -70,11 +78,11 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         for tmp in layout.completely_flatten(
             function_name="ak.argmax", flatten_records=flatten_records
         ):
-            # FIXME: this isn't going to survive a type-tracer!
-            out = layout.nplike.argmax(tmp, axis=None)
-            if best_index is None or tmp[out] > best_value:
-                best_index = out
-                best_value = tmp[out]
+            if len(tmp) > 0:
+                out = layout.nplike.argmax(tmp, axis=None)
+                if best_index is None or tmp[out] > best_value:
+                    best_index = out
+                    best_value = tmp[out]
         return best_index
 
     else:
