@@ -1,8 +1,9 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+template <typename T, typename C>
 __global__ void
-awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(int8_t* toptr,
-                                                  const int64_t* parents,
+awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(T* toptr,
+                                                  const C* parents,
                                                   int64_t lenparents,
                                                   int64_t outlength,
                                                   uint64_t invocation_index,

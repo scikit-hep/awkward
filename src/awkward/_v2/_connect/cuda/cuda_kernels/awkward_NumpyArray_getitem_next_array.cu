@@ -17,7 +17,7 @@ awkward_NumpyArray_getitem_next_array(T* nextcarryptr,
     if (thread_id < lencarry) {
       if (thready_id < lenflathead) {
         nextcarryptr[(thread_id * lenflathead) + thready_id] =
-            (skip * carryptr[thread_id]) + flatheadptr[thready_dim];
+            (skip * carryptr[thread_id]) + flatheadptr[thready_id];
         nextadvancedptr[(thread_id * lenflathead) + thready_id] = thready_id;
       }
     }

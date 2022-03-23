@@ -1,10 +1,10 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-template <typename T, typename C>
+template <typename T, typename C, typename U>
 __global__ void
 awkward_index_carry_nocheck(T* toindex,
                             const C* fromindex,
-                            const int64_t* carry,
+                            const U* carry,
                             int64_t length,
                             uint64_t invocation_index,
                             uint64_t* err_code) {

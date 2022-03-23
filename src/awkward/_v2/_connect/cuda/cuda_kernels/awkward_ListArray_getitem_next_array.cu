@@ -20,7 +20,7 @@ awkward_ListArray_getitem_next_array(T* tocarry,
                                      uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    int64_t thready_id = blockIdx.y * blockDim.xy + threadIdx.y;
+    int64_t thready_id = blockIdx.y * blockDim.y + threadIdx.y;
     if (thread_id < lenstarts) {
       if (fromstops[thread_id] < fromstarts[thread_id]) {
         RAISE_ERROR(LISTARRAY_GETITEM_NEXT_ARRAY_ERRORS::STOP_LT_START)

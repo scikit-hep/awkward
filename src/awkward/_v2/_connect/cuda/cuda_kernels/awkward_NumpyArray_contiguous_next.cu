@@ -13,7 +13,7 @@ awkward_NumpyArray_contiguous_next(T* topos,
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     int64_t thready_id = blockIdx.y * blockDim.y + threadIdx.y;
     if (thread_id < length) {
-      if (thready_dim < skip) {
+      if (thready_id < skip) {
         topos[(thread_id * skip) + thready_id] =
             frompos[thread_id] + (thready_id * stride);
       }

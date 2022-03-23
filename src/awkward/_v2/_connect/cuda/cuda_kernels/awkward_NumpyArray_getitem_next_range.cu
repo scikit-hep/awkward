@@ -16,7 +16,7 @@ awkward_NumpyArray_getitem_next_range(T* nextcarryptr,
     int64_t thready_id = blockIdx.y * blockDim.y + threadIdx.y;
     if (thread_id < lencarry) {
       if (thready_id < lenhead) {
-        nextcarryptr[(thread_id * lenhead) + thready_dim] =
+        nextcarryptr[(thread_id * lenhead) + thready_id] =
             ((skip * carryptr[thread_id]) + start) + (thready_id * step);
       }
     }

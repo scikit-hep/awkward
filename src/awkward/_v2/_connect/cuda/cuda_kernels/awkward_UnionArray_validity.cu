@@ -1,47 +1,38 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-template <typename A>
+enum class UNIONARRAY_VALIDITY_ERRORS {
+  TAGS_LT_0,    // message: "tags[i] < 0"
+  INDEX_LT_0,   // message: "index[i] < 0"
+  TAGS_GT_LEN,  // message: "tags[i] >= len(contents)"
+  IND_GT_LEN    // message: "index[i] >= len(content[tags[i]])"
+};
+
+template <typename T, typename C, typename U>
 __global__ void
-awkward_UnionArray_validity(const int8_t* tags,
-                            const A* index,
+awkward_UnionArray_validity(const T* tags,
+                            const C* index,
                             int64_t length,
                             int64_t numcontents,
-                            const int64_t* lencontents,
+                            const U* lencontents,
                             uint64_t invocation_index,
                             uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
-      auto tag = tags[thread_id];
-      auto idx = index[thread_id];
-      if ((tag < 0)) {
-        err->str = "tags[i] < 0";
-        err->filename = FILENAME(__LINE__);
-        err->pass_through = true;
-
-      } else {
+      T tag = tags[thread_id];
+      C idx = index[thread_id];
+      if (tag < 0) {
+        RAISE_ERROR(UNIONARRAY_VALIDITY_ERRORS::TAGS_LT_0)
       }
-      if ((idx < 0)) {
-        err->str = "index[i] < 0";
-        err->filename = FILENAME(__LINE__);
-        err->pass_through = true;
-
-      } else {
+      if (idx < 0) {
+        RAISE_ERROR(UNIONARRAY_VALIDITY_ERRORS::INDEX_LT_0)
       }
-      if ((tag >= numcontents)) {
-        err->str = "tags[i] >= len(contents)";
-        err->filename = FILENAME(__LINE__);
-        err->pass_through = true;
-
-      } else {
+      if (tag >= numcontents) {
+        RAISE_ERROR(UNIONARRAY_VALIDITY_ERRORS::TAGS_GT_LEN)
       }
-      auto lencontent = lencontents[tag];
+      int64_t lencontent = lencontents[tag];
       if ((idx >= lencontent)) {
-        err->str = "index[i] >= len(content[tags[i]])";
-        err->filename = FILENAME(__LINE__);
-        err->pass_through = true;
-
-      } else {
+        RAISE_ERROR(UNIONARRAY_VALIDITY_ERRORS::IND_GT_LEN)
       }
     }
   }

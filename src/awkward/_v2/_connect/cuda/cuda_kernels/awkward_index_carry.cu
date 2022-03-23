@@ -4,11 +4,11 @@ enum class INDEX_CARRY_ERRORS {
   IND_OUT_OF_RANGE  // message: "index out of range"
 };
 
-template <typename T, typename C>
+template <typename T, typename C, typename U>
 __global__ void
 awkward_index_carry(T* toindex,
                     const C* fromindex,
-                    const int64_t* carry,
+                    const U* carry,
                     int64_t lenfromindex,
                     int64_t length,
                     uint64_t invocation_index,
@@ -16,7 +16,7 @@ awkward_index_carry(T* toindex,
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < length) {
-      T j = carry[thread_id];
+      U j = carry[thread_id];
       if (j > lenfromindex) {
         RAISE_ERROR(INDEX_CARRY_ERRORS::IND_OUT_OF_RANGE)
       }

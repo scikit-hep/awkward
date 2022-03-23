@@ -78,6 +78,13 @@ two_dim_cuda_kernels = [
     "awkward_NumpyArray_contiguous_next",
     "awkward_NumpyArray_getitem_next_array",
     "awkward_NumpyArray_getitem_next_range",
+    "awkward_RegularArray_getitem_carry",
+    "awkward_RegularArray_getitem_jagged_expand",
+    "awkward_RegularArray_getitem_next_array",
+    "awkward_RegularArray_getitem_next_range",
+    "awkward_RegularArray_getitem_next_range_spreadadvanced",
+    "awkward_RegularArray_localindex",
+    "awkward_Identities_getitem_carry",
 ]
 
 

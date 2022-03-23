@@ -1,9 +1,10 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+template <typename T, typename C, typename U>
 __global__ void
-awkward_RegularArray_getitem_next_array(int64_t* tocarry,
-                                        int64_t* toadvanced,
-                                        const int64_t* fromarray,
+awkward_RegularArray_getitem_next_array(T* tocarry,
+                                        C* toadvanced,
+                                        const U* fromarray,
                                         int64_t length,
                                         int64_t lenarray,
                                         int64_t size,
@@ -11,11 +12,12 @@ awkward_RegularArray_getitem_next_array(int64_t* tocarry,
                                         uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+    int64_t thready_id = blockIdx.y * blockDim.y + threadIdx.y;
     if (thread_id < length) {
-      if (thready_dim < lenarray) {
-        tocarry[((thread_id * lenarray) + thready_dim)] =
-            ((thread_id * size) + fromarray[thready_dim]);
-        toadvanced[((thread_id * lenarray) + thready_dim)] = thready_dim;
+      if (thready_id < lenarray) {
+        tocarry[(thread_id * lenarray) + thready_id] =
+            (thread_id * size) + fromarray[thready_id];
+        toadvanced[(thread_id * lenarray) + thready_id] = thready_id;
       }
     }
   }

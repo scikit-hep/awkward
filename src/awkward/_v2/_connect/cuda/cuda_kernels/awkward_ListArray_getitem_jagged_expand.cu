@@ -24,12 +24,12 @@ awkward_ListArray_getitem_jagged_expand(T* multistarts,
       W start = fromstarts[thread_id];
       X stop = fromstops[thread_id];
       if (stop < start) {
-        RAISE_ERROR(STOPS_LT_START)
+        RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_EXPAND_ERRORS::STOPS_LT_START)
       }
       if ((stop - start) != jaggedsize) {
-        RAISE_ERROR(FIT_ERR)
+        RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_EXPAND_ERRORS::FIT_ERR)
       }
-      if (thready_dim < jaggedsize) {
+      if (thready_id < jaggedsize) {
         multistarts[(thread_id * jaggedsize) + thready_id] =
             singleoffsets[thready_id];
         multistops[(thread_id * jaggedsize) + thready_id] =
