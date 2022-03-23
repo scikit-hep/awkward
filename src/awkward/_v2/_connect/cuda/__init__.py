@@ -151,10 +151,14 @@ def initialize_cuda_kernels(cupy):
         raise ImportError(error_message.format("Awkward Arrays with CUDA"))
 
 
-def synchronize_cuda(stream):
+def synchronize_cuda(stream=None):
     cupy = import_cupy("Awkward Arrays with CUDA")
 
+    if stream is None:
+        stream = cupy.cuda.get_current_stream()
+
     stream.synchronize()
+
     invocation_index = cuda_streamptr_to_contexts[stream.ptr][0].get().tolist()
     contexts = cuda_streamptr_to_contexts[stream.ptr][1]
 
