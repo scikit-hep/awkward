@@ -33,6 +33,41 @@ ERROR_BITS = 8
 NO_ERROR = numpy.iinfo(numpy.uint64).max
 
 
+dtype_to_ctype = {
+    numpy.bool_: "bool",
+    numpy.int8: "int8_t",
+    numpy.uint8: "uint8_t",
+    numpy.int16: "int16_t",
+    numpy.uint16: "uint16_t",
+    numpy.int32: "int32_t",
+    numpy.uint32: "uint32_t",
+    numpy.int64: "int64_t",
+    numpy.uint64: "uint64_t",
+    numpy.float32: "float",
+    numpy.float64: "double",
+}
+
+
+def fetch_specialization(keys):
+    specialized_name = keys[0].replace("'", "") + "<"
+    keys = keys[1:]
+
+    for key in keys[:-1]:
+        specialized_name = specialized_name + dtype_to_ctype[key] + ", "
+    specialized_name = specialized_name + dtype_to_ctype[keys[-1]] + ">"
+
+    return specialized_name
+
+
+def fetch_template_specializations(kernel_dict):
+    template_specializations = []
+    for keys, value in kernel_dict.items():
+        if value is not None:
+            template_specializations.append(fetch_specialization(list(keys)))
+
+    return template_specializations
+
+
 def populate_kernel_errors(kernel_name, cu_file):
     import re
 
@@ -95,14 +130,17 @@ def initialize_cuda_kernels(cupy):
                         cu_code,
                     )
                     cuda_src = cuda_src + "\n" + cu_code
-            from awkward._v2._connect.cuda._kernel_signatures import (
-                fetch_specializations,
-            )
 
+            # Pass an empty Raw Module to fetch all template specializations
+            template_specializations = fetch_template_specializations(
+                awkward._v2._connect.cuda._kernel_signatures.by_signature(
+                    cupy.RawModule(code="")
+                )
+            )
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
                 options=("--std=c++11",),
-                name_expressions=fetch_specializations(),
+                name_expressions=template_specializations,
             )
             kernel = awkward._v2._connect.cuda._kernel_signatures.by_signature(
                 cuda_kernel_templates

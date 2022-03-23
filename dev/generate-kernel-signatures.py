@@ -57,7 +57,7 @@ cuda_kernels_impl = [
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
     "awkward_missing_repeat",
-    # "awkward_Identities_getitem_carry",
+    "awkward_Identities_getitem_carry",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_next_array",
@@ -67,7 +67,7 @@ cuda_kernels_impl = [
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
-    # "awkward_ListOffsetArray_compact_offsets", Need to tune tests
+    "awkward_ListOffsetArray_compact_offsets",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
 ]
 
@@ -331,30 +331,7 @@ from numpy import (
     float64,
 )
 
-dtype_to_ctype = {{
-    bool_: "bool",
-    int8: "int8_t",
-    uint8: "uint8_t",
-    int16: "int16_t",
-    uint16: "uint16_t",
-    int32: "int32_t",
-    uint32: "uint32_t",
-    int64: "int64_t",
-    uint64: "uint64_t",
-    float32: "float",
-    float64: "double",
-}}
-
-
-def fetch_specialization(keys):
-    specialized_name = keys[0].replace("'", "") + "<"
-    keys = keys[1:]
-
-    for key in keys[:-1]:
-        specialized_name = specialized_name + dtype_to_ctype[key] + ", "
-    specialized_name = specialized_name + dtype_to_ctype[keys[-1]] + ">"
-
-    return specialized_name
+from awkward._v2._connect.cuda import fetch_specialization
 """
         )
 
@@ -397,32 +374,6 @@ def by_signature(cuda_kernel_templates):
             """
     return out
 """
-        )
-
-        file.write(
-            """
-def fetch_specializations():
-    out = []
-"""
-        )
-
-        for spec in specification["kernels"]:
-            for childfunc in spec["specializations"]:
-                special = [repr(spec["name"])]
-                [type_to_pytype(x["type"], special) for x in childfunc["args"]]
-                dirlist = [repr(x["dir"]) for x in childfunc["args"]]
-                if spec["name"] in cuda_kernels_impl:
-                    file.write(
-                        """
-    out.append(fetch_specialization([{}]))
-""".format(
-                            ", ".join(special),
-                        )
-                    )
-        file.write(
-            """
-    return out
-    """
         )
 
     print("Done with  src/awkward/_kernel_signatures_cuda.py...")
