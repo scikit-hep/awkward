@@ -11,6 +11,7 @@ import awkward._v2._connect.cling  # noqa: E402
 
 
 compiler = ROOT.gInterpreter.Declare
+cpp17 = hasattr(ROOT.std, "optional")
 
 
 def debug_compiler(code):
@@ -337,6 +338,7 @@ void roottest_RecordArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* p
     assert out.tolist() == [10.0]
 
 
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_IndexedArray_NumpyArray():
     v2a = ak._v2.contents.indexedarray.IndexedArray(
         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
@@ -399,6 +401,7 @@ void roottest_IndexedOptionArray_NumpyArray_v2a(double* out, ssize_t length, ssi
     assert out.tolist() == [7.0, 2.2, 2.2, 999.0, 1.1, 999.0, 5.5, 4.4]
 
 
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_ByteMaskedArray_NumpyArray():
     v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
@@ -457,6 +460,7 @@ void roottest_ByteMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_
     assert out.tolist() == [5.0, 1.1, 999.0, 3.3, 999.0, 5.5]
 
 
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_BitMaskedArray_NumpyArray():
     v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -777,6 +781,7 @@ void roottest_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t
     ]
 
 
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_UnmaskedArray_NumpyArray():
     v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
