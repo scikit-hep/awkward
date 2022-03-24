@@ -470,7 +470,8 @@ class CupyKernel(NumpyKernel):
             )
         )
 
-        [kernel()(grid, blocks, tuple(args)) for kernel in self._kernel.kernels]
+        for kernel in self._kernel.kernels:
+            kernel()(grid, blocks, tuple(args))
 
 
 class Numpy(NumpyLike):
