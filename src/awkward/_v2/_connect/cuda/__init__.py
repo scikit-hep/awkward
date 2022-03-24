@@ -106,16 +106,9 @@ def initialize_cuda_kernels(cupy):
 
             cuda_src = f"#define ERROR_BITS {ERROR_BITS}\n#define NO_ERROR {NO_ERROR}"
 
-            if sys.version_info.major == 3 and sys.version_info.minor < 7:
-                cuda_kernels_path = os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)), "cuda_kernels"
-                )
-            else:
-                import importlib.resources
-
-                cuda_kernels_path = importlib.resources.path(
-                    "awkward._v2._connect.cuda", "cuda_kernels"
-                )
+            cuda_kernels_path = os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), "cuda_kernels"
+            )
 
             with open(
                 os.path.join(cuda_kernels_path, "cuda_common.cu"),
