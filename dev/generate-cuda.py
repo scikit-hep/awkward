@@ -14,7 +14,6 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 KERNEL_WHITELIST = [
     "awkward_new_Identities",
     "awkward_Identities32_to_Identities64",
-    "awkward_RegularArray_num",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
     "awkward_IndexedArray_mask",
@@ -37,7 +36,6 @@ KERNEL_WHITELIST = [
     "awkward_ByteMaskedArray_toIndexedOptionArray",
     "awkward_combinations",  # ?
     "awkward_IndexedArray_simplify",
-    "awkward_ListArray_validity",
     "awkward_UnionArray_validity",
     "awkward_index_carry",
     "awkward_ByteMaskedArray_getitem_carry",
@@ -65,14 +63,13 @@ KERNEL_WHITELIST = [
     "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
     # "awkward_ListOffsetArray_compact_offsets", Need to tune tests
-    "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
 ]
 
 
 def getthread_dim(pos):
     if pos == 0:
-        code = "threadx_dim"
+        code = "thread_id"
     elif pos == 1:
         code = "thready_dim"
     elif pos == 2:
@@ -86,7 +83,7 @@ def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
     if node.__class__.__name__ == "For":
         forvars.append(traverse(node.target, args, [], declared))
         if len(forvars) == 1:
-            thread_var = "threadx_dim"
+            thread_var = "thread_id"
         elif len(forvars) == 2:
             thread_var = "thready_dim"
         elif len(forvars) == 3:
@@ -542,7 +539,11 @@ def getdecl(name, args, templatestring, parent=False):
             params += ", " + value + " " + key
     if parent:
         code += (
-            "void cuda" + name[len("awkward") :] + "(" + params + ", ERROR* err) {\n"
+            "void "
+            + name
+            + "("
+            + params
+            + ", uint64_t invocation_index, uint64_t* err_code) {\n"
         )
     else:
         code += "ERROR " + name + "(" + params + ") {\n"
@@ -586,54 +587,13 @@ def getcode(indspec):
         templatestring,
         parent=True,
     )
-    code += """  int64_t threadx_dim = blockIdx.x * blockDim.x + threadIdx.x;
-int64_t thready_dim = blockIdx.y * blockDim.y + threadIdx.y;
+    code += """  if (err_code[0] == NO_ERROR) {
+
+    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 """
     code += getbody(indspec["definition"], args)
-    code += "}\n\n"
-    for childfunc in indspec["specializations"]:
-        args = getchildargs(childfunc, indspec)
-        code += getdecl(childfunc["name"], args, "")
-        code += """  dim3 blocks_per_grid;
-dim3 threads_per_block;
+    code += "}\n}\n"
 
-if ({0} > 1024 && {1} > 1024) {{
-blocks_per_grid = dim3(ceil({0} / 1024.0), ceil({1}/1024.0), 1);
-threads_per_block = dim3(1024, 1024, 1);
-}} else if ({0} > 1024) {{
-blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
-threads_per_block = dim3(1024, {1}, 1);
-}} else if ({1} > 1024) {{
-blocks_per_grid = dim3(1, ceil({1}/1024.0), 1);
-threads_per_block = dim3({0}, 1024, 1);
-}} else {{
-blocks_per_grid = dim3(1, 1, 1);
-threads_per_block = dim3({0}, {1}, 1);
-}}""".format(
-            getxthreads(indspec["definition"]), getythreads(indspec["definition"])
-        )
-        code += " " * 2 + "ERROR h_err = success();\n"
-        code += " " * 2 + "ERROR* err = &h_err;\n"
-        code += " " * 2 + "ERROR* d_err;\n"
-        code += " " * 2 + "cudaMalloc((void**)&d_err, sizeof(ERROR));\n"
-        code += (
-            " " * 2 + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyHostToDevice);\n"
-        )
-        templatetypes = gettemplatetypes(childfunc, templateargs)
-        paramnames = getparamnames(args)
-        code += " " * 2 + "cuda" + indspec["name"][len("awkward") :]
-        if templatetypes is not None and len(templatetypes) > 0:
-            code += "<" + templatetypes + ">"
-        code += (
-            " <<<blocks_per_grid, threads_per_block>>>(" + paramnames + ", d_err);\n"
-        )
-        code += " " * 2 + "cudaDeviceSynchronize();\n"
-        code += (
-            " " * 2 + "cudaMemcpy(err, d_err, sizeof(ERROR), cudaMemcpyDeviceToHost);\n"
-        )
-        code += " " * 2 + "cudaFree(d_err);\n"
-        code += " " * 2 + "return *err;\n"
-        code += "}\n\n"
     return code
 
 
@@ -643,9 +603,7 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     kernelname = args.kernelname
 
-    code = """#include "awkward/kernels.h"
-#include <algorithm>
-#include <cstdio>
+    code = """// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 """
 
@@ -659,15 +617,15 @@ if __name__ == "__main__":
             if kernelname is None and spec["name"] in KERNEL_WHITELIST:
                 with open(
                     os.path.join(
-                        CURRENT_DIR,
-                        "..",
+                        os.path.dirname(CURRENT_DIR),
                         "src",
-                        "cuda-kernels",
+                        "awkward",
+                        "_v2",
+                        "_connect",
+                        "cuda",
+                        "cuda_kernels",
                         spec["name"] + ".cu",
                     ),
                     "w",
                 ) as outfile:
-                    err_macro = '#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/{}.cu", line)\n\n'.format(
-                        spec["name"]
-                    )
-                    outfile.write(err_macro + code + getcode(spec))
+                    outfile.write(code + getcode(spec))

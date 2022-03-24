@@ -16,7 +16,58 @@ cuda_kernels_impl = [
     "awkward_ListArray_validity",
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_compact_offsets",
+    "awkward_new_Identities",
+    "awkward_Identities32_to_Identities64",
+    "awkward_ListOffsetArray_flatten_offsets",
+    "awkward_IndexedArray_overlay_mask",
+    "awkward_IndexedArray_mask",
+    "awkward_ByteMaskedArray_mask",
+    "awkward_zero_mask",
+    "awkward_RegularArray_compact_offsets",
+    "awkward_IndexedArray_fill_count",
+    "awkward_UnionArray_fillna",
+    "awkward_localindex",
+    "awkward_content_reduce_zeroparents_64",
+    "awkward_ListOffsetArray_reduce_global_startstop_64",
+    "awkward_IndexedArray_reduce_next_fix_offsets_64",
+    "awkward_Index_to_Index64",
+    "awkward_carry_arange",
+    "awkward_index_carry_nocheck",
+    "awkward_NumpyArray_contiguous_init",
+    "awkward_NumpyArray_getitem_next_array_advanced",
+    "awkward_NumpyArray_getitem_next_at",
+    "awkward_RegularArray_getitem_next_array_advanced",
+    "awkward_ByteMaskedArray_toIndexedOptionArray",
+    "awkward_combinations",  # ?
+    "awkward_IndexedArray_simplify",
+    "awkward_UnionArray_validity",
+    "awkward_index_carry",
+    "awkward_ByteMaskedArray_getitem_carry",
+    "awkward_IndexedArray_validity",
+    "awkward_ByteMaskedArray_overlay_mask",
+    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+    "awkward_RegularArray_getitem_carry",
+    "awkward_NumpyArray_getitem_next_array",
+    "awkward_RegularArray_localindex",
+    "awkward_NumpyArray_contiguous_next",
+    "awkward_NumpyArray_getitem_next_range",
+    "awkward_NumpyArray_getitem_next_range_advanced",
+    "awkward_RegularArray_getitem_next_range",
+    "awkward_RegularArray_getitem_next_range_spreadadvanced",
+    "awkward_RegularArray_getitem_next_array",
+    "awkward_missing_repeat",
+    "awkward_Identities_getitem_carry",
+    "awkward_RegularArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_next_array",
+    "awkward_RegularArray_broadcast_tooffsets",
+    "awkward_NumpyArray_fill_tobool",
+    "awkward_NumpyArray_reduce_adjust_starts_64",
+    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+    "awkward_regularize_arrayslice",
+    "awkward_RegularArray_getitem_next_at",
     "awkward_ListOffsetArray_compact_offsets",
+    "awkward_BitMaskedArray_to_IndexedOptionArray",
 ]
 
 
@@ -263,16 +314,30 @@ from numpy import (
     float64,
 )
 
-kernel_specializations = {{
+from awkward._v2._connect.cuda import fetch_specialization
+
+class Kernel:
+    _kernels = None
+    _dir = None
+    def __init__(self, kernels, dir):
+        self._kernels = kernels
+        self._dir = dir
+
+    @property
+    def kernels(self):
+        return self._kernels
+
+    @property
+    def dir(self):
+        return self._dir
 """
         )
-        kernel_specializations = generate_kernel_specializations(specification)
-        file.write("    " + kernel_specializations[1:-1] + "\n}\n")
 
         file.write(
             """
 def by_signature(cuda_kernel_templates):
     out = {}
+
 """
         )
 
@@ -284,11 +349,10 @@ def by_signature(cuda_kernel_templates):
                 if spec["name"] in cuda_kernels_impl:
                     file.write(
                         """
-    f = lambda: cuda_kernel_templates.get_function(kernel_specializations[{}])
-    f.dir = [{}]
+    f = Kernel([lambda: cuda_kernel_templates.get_function(fetch_specialization([{}]))], [{}])
     out[{}] = f
 """.format(
-                            repr(childfunc["name"]),
+                            ", ".join(special),
                             ", ".join(dirlist),
                             ", ".join(special),
                         )
@@ -309,52 +373,6 @@ def by_signature(cuda_kernel_templates):
         )
 
     print("Done with  src/awkward/_kernel_signatures_cuda.py...")
-
-
-def generate_kernel_specializations(specification):
-    import re
-
-    kernel_specializations = {}
-    failed_cases = []
-    for spec in specification["kernels"]:
-        if spec["name"] in cuda_kernels_impl:
-            filename = spec["name"] + ".cpp"
-            try:
-                with open(
-                    os.path.join(
-                        os.path.dirname(CURRENT_DIR), "src", "cpu-kernels", filename
-                    )
-                ) as kernel:
-                    code = kernel.read()
-                    for childfunc in spec["specializations"]:
-                        kernel_specialized_name = childfunc["name"]
-                        result_errstring = [
-                            _.start()
-                            for _ in re.finditer(kernel_specialized_name, code)
-                        ]
-                        c_specialization = code[result_errstring[0] :]
-                        if c_specialization.find(spec["name"] + "<") == -1:
-                            kernel_specializations[kernel_specialized_name] = spec[
-                                "name"
-                            ]
-                            continue
-                        c_specialization = c_specialization[
-                            c_specialization.find(
-                                spec["name"] + "<"
-                            ) : c_specialization.find(">")
-                            + 1
-                        ]
-                        kernel_specializations[
-                            kernel_specialized_name
-                        ] = c_specialization
-
-            except FileNotFoundError:
-                failed_cases.append(spec["name"])
-                pass
-
-    print("Couldn't Generate Specializations for: ", failed_cases)
-
-    return kernel_specializations.__repr__().replace(", '", ",\n    '")
 
 
 if __name__ == "__main__":

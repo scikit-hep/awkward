@@ -442,6 +442,7 @@ class CupyKernel(NumpyKernel):
     def __call__(self, *args):
         cupy = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
         maxlength = self.max_length(args)
+        grid, blocks = self.calc_grid(maxlength), self.calc_blocks(maxlength)
         cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
 
         if cupy_stream_ptr not in ak._v2._connect.cuda.cuda_streamptr_to_contexts:
@@ -469,9 +470,8 @@ class CupyKernel(NumpyKernel):
             )
         )
 
-        self._kernel()(
-            self.calc_grid(maxlength), self.calc_blocks(maxlength), tuple(args)
-        )
+        for kernel in self._kernel.kernels:
+            kernel()(grid, blocks, tuple(args))
 
 
 class Numpy(NumpyLike):

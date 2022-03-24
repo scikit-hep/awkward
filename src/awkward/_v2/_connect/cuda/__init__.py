@@ -3,7 +3,6 @@
 import os
 import glob
 import math
-import sys
 
 import numpy
 
@@ -31,6 +30,41 @@ kernel = None
 
 ERROR_BITS = 8
 NO_ERROR = numpy.iinfo(numpy.uint64).max
+
+
+dtype_to_ctype = {
+    numpy.bool_: "bool",
+    numpy.int8: "int8_t",
+    numpy.uint8: "uint8_t",
+    numpy.int16: "int16_t",
+    numpy.uint16: "uint16_t",
+    numpy.int32: "int32_t",
+    numpy.uint32: "uint32_t",
+    numpy.int64: "int64_t",
+    numpy.uint64: "uint64_t",
+    numpy.float32: "float",
+    numpy.float64: "double",
+}
+
+
+def fetch_specialization(keys):
+    specialized_name = keys[0].replace("'", "") + "<"
+    keys = keys[1:]
+
+    for key in keys[:-1]:
+        specialized_name = specialized_name + dtype_to_ctype[key] + ", "
+    specialized_name = specialized_name + dtype_to_ctype[keys[-1]] + ">"
+
+    return specialized_name
+
+
+def fetch_template_specializations(kernel_dict):
+    template_specializations = []
+    for keys, value in kernel_dict.items():
+        if value is not None:
+            template_specializations.append(fetch_specialization(list(keys)))
+
+    return template_specializations
 
 
 def populate_kernel_errors(kernel_name, cu_file):
@@ -71,16 +105,9 @@ def initialize_cuda_kernels(cupy):
 
             cuda_src = f"#define ERROR_BITS {ERROR_BITS}\n#define NO_ERROR {NO_ERROR}"
 
-            if sys.version_info.major == 3 and sys.version_info.minor < 7:
-                cuda_kernels_path = os.path.join(
-                    os.path.dirname(os.path.realpath(__file__)), "cuda_kernels"
-                )
-            else:
-                import importlib.resources
-
-                cuda_kernels_path = importlib.resources.path(
-                    "awkward._v2._connect.cuda", "cuda_kernels"
-                )
+            cuda_kernels_path = os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), "cuda_kernels"
+            )
 
             with open(
                 os.path.join(cuda_kernels_path, "cuda_common.cu"),
@@ -95,14 +122,15 @@ def initialize_cuda_kernels(cupy):
                         cu_code,
                     )
                     cuda_src = cuda_src + "\n" + cu_code
-            from awkward._v2._connect.cuda._kernel_signatures import (
-                kernel_specializations,
-            )
 
+            # Pass an empty Raw Module to fetch all template specializations
+            template_specializations = fetch_template_specializations(
+                awkward._v2._connect.cuda._kernel_signatures.by_signature(None)
+            )
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
                 options=("--std=c++11",),
-                name_expressions=list(kernel_specializations.values()),
+                name_expressions=template_specializations,
             )
             kernel = awkward._v2._connect.cuda._kernel_signatures.by_signature(
                 cuda_kernel_templates
@@ -113,22 +141,26 @@ def initialize_cuda_kernels(cupy):
         raise ImportError(error_message.format("Awkward Arrays with CUDA"))
 
 
-def synchronize_cuda(stream):
+def synchronize_cuda(stream=None):
     cupy = import_cupy("Awkward Arrays with CUDA")
 
+    if stream is None:
+        stream = cupy.cuda.get_current_stream()
+
     stream.synchronize()
-    invocation_index = cuda_streamptr_to_contexts[stream.ptr][0]
+
+    invocation_index = cuda_streamptr_to_contexts[stream.ptr][0].get().tolist()
     contexts = cuda_streamptr_to_contexts[stream.ptr][1]
 
     if invocation_index != NO_ERROR:
-        invoked_kernel = contexts[invocation_index // math.pow(2, ERROR_BITS)]
+        invoked_kernel = contexts[int(invocation_index // math.pow(2, ERROR_BITS))]
         cuda_streamptr_to_contexts[stream.ptr] = (
             cupy.array(NO_ERROR),
             [],
         )
         raise awkward._v2._util.error(
             ValueError(
-                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][invocation_index % math.pow(2, ERROR_BITS)]}"
+                f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
             ),
             invoked_kernel.error_context,
         )
