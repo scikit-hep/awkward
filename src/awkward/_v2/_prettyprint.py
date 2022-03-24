@@ -180,13 +180,14 @@ def valuestr(data, limit_rows, limit_cols):
         out = front + back
         for i, val in enumerate(out):
             if i > 0:
-                out[i] = " " + val
+                val = out[i] = " " + val
             else:
-                out[i] = "[" + val
+                val = out[i] = "[" + val
             if i < len(out) - 1:
                 out[i] = val + ","
             else:
                 out[i] = val + "]"
+
         return "\n".join(out)
 
     elif isinstance(data, ak._v2.highlevel.Record):
@@ -220,11 +221,11 @@ def valuestr(data, limit_rows, limit_cols):
         out = front
         for i, val in enumerate(out):
             if i > 0:
-                out[i] = " " + val
+                val = out[i] = " " + val
             elif data.is_tuple:
-                out[i] = "(" + val
+                val = out[i] = "(" + val
             else:
-                out[i] = "{" + val
+                val = out[i] = "{" + val
             if i < len(out) - 1:
                 out[i] = val + ","
             elif data.is_tuple:
