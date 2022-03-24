@@ -133,9 +133,7 @@ def initialize_cuda_kernels(cupy):
 
             # Pass an empty Raw Module to fetch all template specializations
             template_specializations = fetch_template_specializations(
-                awkward._v2._connect.cuda._kernel_signatures.by_signature(
-                    cupy.RawModule(code="")
-                )
+                awkward._v2._connect.cuda._kernel_signatures.by_signature(None)
             )
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
