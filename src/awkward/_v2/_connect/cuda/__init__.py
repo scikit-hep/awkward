@@ -3,7 +3,6 @@
 import os
 import glob
 import math
-import sys
 
 import numpy
 
