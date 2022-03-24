@@ -39,6 +39,7 @@ class read_avro_py:
         # print("".join(head+body))
         loc = {}
         exec("".join(self.head + self.body), globals(), loc)
+        print(self.form)
         self.form = json.loads("".join(self.form)[:-2])
         con = loc["con"]
         for key in con.keys():
@@ -176,7 +177,7 @@ class read_avro_py:
             _exec_code.append(
                 "\n"
                 + "    " * ind
-                + f"con['part0-node{count+1}-data'].append(fields[pos:pos+abs(out)].tobytes().decode(errors=\"surrogateescape\"))"
+                + f"con['part0-node{count+1}-data'].extend(fields[pos:pos+abs(out)])"
             )
             _exec_code.append(
                 "\n"
@@ -316,7 +317,7 @@ class read_avro_py:
             _exec_code.append(
                 "\n"
                 + "    " * ind
-                + f"con['part0-node{count+1}-data'].append(fields[pos:pos+out].tobytes())"
+                + f"con['part0-node{count+1}-data'].extend(fields[pos:pos+out])"
             )
             _exec_code.append("\n" + "    " * ind + "pos = pos+out")
             return aform, _exec_code, count + 1, dec
@@ -416,24 +417,24 @@ class read_avro_py:
             for i in range(len(tempar)):
                 offset.append(len(tempar[i]) + prev)
                 prev = offset[-1]
-            for i in range(len(tempar)):
-                for elem in range(len(tempar[i])):
-                    dat.append(elem)
+                for elem in tempar[i]:
+                    dat.append(np.uint8(ord(elem)))
             var2 = f" 'part0-node{count+1}-offsets': {str(offset)},"
             dec.append(var2)
-            var2 = f" 'part0-node{count+2}-data': {str(dat)},"
+            var2 = (
+                f" 'part0-node{count+2}-data': np.array({str(dat)},dtype = np.uint8),"
+            )
             dec.append(var2)
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
             _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append(
-                "\n"
-                + "    " * ind
-                + f"con['part0-node{count}-index'].append(np.int64(out))"
+                "\n" + "    " * ind + f"con['part0-node{count}-index'].append(out)"
             )
             _exec_code.append("\n" + "    " * ind + "print(out)")
             return aform, _exec_code, count + 2, dec
+        # lark.Tree("indexed", [lark.Tree("listoffset", [lark.Tree("listoffset", [lark.Tree("numpy", [lark.Token("ESCAPED_STRING", '"u1"')]), lark.Tree("is_string", [])])]), lark.Tree("is_categorical", [])])
 
         elif file["type"] == "array":
             # print(file["name"])

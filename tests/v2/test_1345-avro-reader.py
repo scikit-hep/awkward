@@ -200,7 +200,9 @@ def test_array_string():
         ["afsdfd", "sgrh"],
         ["afsdfd", "sgrh"],
     ]
-    raise NotImplementedError
+    ak.from_avro_file(
+        file_name="tests/samples/array_string_test_data.avro", reader_lang="py"
+    ).to_list()
 
 
 def test_array_enum():
@@ -211,7 +213,12 @@ def test_array_enum():
         ["TWO", "ONE"],
         ["FOUR", "THREE"],
     ]
-    raise NotImplementedError
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/array_enum_test_data.avro", reader_lang="py"
+        )[0][0]
+        == data[0][0]
+    )
 
 
 def test_Unions_int_null():
@@ -265,4 +272,6 @@ def test_records():
         {"name": "Eduardo", "age": 25, "Numbers": "THREE"},
         {"name": "Aryan", "age": 6478, "Numbers": "FOUR"},
     ]
-    raise NotImplementedError
+    ak.from_avro_file(
+        file_name="tests/samples/record_test_data.avro", reader_lang="py"
+    ).to_list()
