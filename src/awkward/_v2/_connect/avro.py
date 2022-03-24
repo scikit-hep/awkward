@@ -149,6 +149,7 @@ class read_avro_py:
                 aform, _exec_code, count, dec = self.rec_exp_json_code(
                     elem, _exec_code, ind, aform, count + 1, dec
                 )
+            aform[-1] = aform[-1][:-2]
             aform.append(f'}},"form_key": "node{temp}"}},\n')
             return aform, _exec_code, count, dec
 

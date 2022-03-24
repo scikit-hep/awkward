@@ -259,7 +259,12 @@ def test_record_1():
     data = [
         {"name": "Pierre-Simon Laplace", "age": 77, "Numbers": "TWO"},
     ]
-    raise NotImplementedError
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/record_1_test_data.avro", reader_lang="py"
+        ).to_list()[0]
+        == data[0]
+    )
 
 
 def test_records():
@@ -272,6 +277,9 @@ def test_records():
         {"name": "Eduardo", "age": 25, "Numbers": "THREE"},
         {"name": "Aryan", "age": 6478, "Numbers": "FOUR"},
     ]
-    ak.from_avro_file(
-        file_name="tests/samples/record_test_data.avro", reader_lang="py"
-    ).to_list()
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/record_test_data.avro", reader_lang="py"
+        ).to_list()[0]
+        == data[0]
+    )
