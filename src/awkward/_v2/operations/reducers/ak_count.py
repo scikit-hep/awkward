@@ -95,6 +95,18 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
     )
 
     if axis is None:
+        if not layout.nplike.known_data or not layout.nplike.known_shape:
+            reducer_cls = ak._v2._reducers.Count
+
+            def map(x):
+                return ak._v2._typetracer.UnknownScalar(
+                    np.dtype(reducer_cls.return_dtype(x.dtype))
+                )
+
+        else:
+
+            def map(x):
+                return layout.nplike.size(x)
 
         def reduce(xs):
             if len(xs) == 1:
@@ -104,7 +116,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
 
         return reduce(
             [
-                layout.nplike.size(x)
+                map(x)
                 for x in layout.completely_flatten(
                     function_name="ak.count", flatten_records=flatten_records
                 )
