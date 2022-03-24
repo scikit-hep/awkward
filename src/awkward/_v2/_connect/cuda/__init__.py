@@ -170,7 +170,7 @@ def synchronize_cuda(stream=None):
         )
         raise awkward._v2._util.error(
             ValueError(
-                f"{invoked_kernel.name} raised the following error: {kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]}"
+                f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
             ),
             invoked_kernel.error_context,
         )

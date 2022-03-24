@@ -11,14 +11,11 @@ awkward_RegularArray_getitem_next_array(T* tocarry,
                                         uint64_t invocation_index,
                                         uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    int64_t thready_id = blockIdx.y * blockDim.y + threadIdx.y;
-    if (thread_id < length) {
-      if (thready_id < lenarray) {
-        tocarry[(thread_id * lenarray) + thready_id] =
-            (thread_id * size) + fromarray[thready_id];
-        toadvanced[(thread_id * lenarray) + thready_id] = thready_id;
-      }
-    }
+    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) % length;
+    int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % lenarray;
+
+    tocarry[(thread_id * lenarray) + thready_id] =
+        (thread_id * size) + fromarray[thready_id];
+    toadvanced[(thread_id * lenarray) + thready_id] = thready_id;
   }
 }

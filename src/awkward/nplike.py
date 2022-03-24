@@ -430,24 +430,14 @@ class CupyKernel(NumpyKernel):
         return max_length
 
     def calc_grid(self, length):
-        if self._kernel.dim == 1:
-            if length > 1024:
-                return -(length // -1024), 1, 1
-            return 1, 1, 1
-        elif self._kernel.dim == 2:
-            if length > 1024:
-                return -(length // -1024), -(length // -1024), 1
-            return 1, 1, 1
+        if length > 1024:
+            return -(length // -1024), 1, 1
+        return 1, 1, 1
 
     def calc_blocks(self, length):
-        if self._kernel.dim == 1:
-            if length > 1024:
-                return 1024, 1, 1
-            return length, 1, 1
-        elif self._kernel.dim == 2:
-            if length > 1024:
-                return 1024, 1024, 1
-            return length, length, 1
+        if length > 1024:
+            return 1024, 1, 1
+        return length, 1, 1
 
     def __call__(self, *args):
         cupy = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
@@ -480,7 +470,7 @@ class CupyKernel(NumpyKernel):
             )
         )
 
-        self._kernel()(grid, blocks, tuple(args))
+        [kernel()(grid, blocks, tuple(args)) for kernel in self._kernel.kernels]
 
 
 class Numpy(NumpyLike):

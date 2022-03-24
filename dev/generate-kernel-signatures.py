@@ -70,22 +70,6 @@ cuda_kernels_impl = [
     "awkward_BitMaskedArray_to_IndexedOptionArray",
 ]
 
-two_dim_cuda_kernels = [
-    "awkward_ListArray_getitem_next_array",
-    "awkward_ListArray_getitem_jagged_expand",
-    "awkward_missing_repeat",
-    "awkward_NumpyArray_contiguous_next",
-    "awkward_NumpyArray_getitem_next_array",
-    "awkward_NumpyArray_getitem_next_range",
-    "awkward_RegularArray_getitem_carry",
-    "awkward_RegularArray_getitem_jagged_expand",
-    "awkward_RegularArray_getitem_next_array",
-    "awkward_RegularArray_getitem_next_range",
-    "awkward_RegularArray_getitem_next_range_spreadadvanced",
-    "awkward_RegularArray_localindex",
-    "awkward_Identities_getitem_carry",
-]
-
 
 def reproducible_datetime():
 
@@ -331,6 +315,21 @@ from numpy import (
 )
 
 from awkward._v2._connect.cuda import fetch_specialization
+
+class Kernel:
+    _kernels = None
+    _dir = None
+    def __init__(self, kernels, dir):
+        self._kernels = kernels
+        self._dir = dir
+
+    @property
+    def kernels(self):
+        return self._kernels
+
+    @property
+    def dir(self):
+        return self._dir
 """
         )
 
@@ -338,6 +337,7 @@ from awkward._v2._connect.cuda import fetch_specialization
             """
 def by_signature(cuda_kernel_templates):
     out = {}
+
 """
         )
 
@@ -349,14 +349,11 @@ def by_signature(cuda_kernel_templates):
                 if spec["name"] in cuda_kernels_impl:
                     file.write(
                         """
-    f = lambda: cuda_kernel_templates.get_function(fetch_specialization([{}]))
-    f.dir = [{}]
-    f.dim = {}
+    f = Kernel([lambda: cuda_kernel_templates.get_function(fetch_specialization([{}]))], [{}])
     out[{}] = f
 """.format(
                             ", ".join(special),
                             ", ".join(dirlist),
-                            2 if spec["name"] in two_dim_cuda_kernels else 1,
                             ", ".join(special),
                         )
                     )
