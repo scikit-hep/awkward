@@ -1319,9 +1319,6 @@ namespace awkward {
                              int64_t outlength,
                              bool ascending,
                              bool stable) const {
-    if (length() == 0) {
-      return std::make_shared<NumpyArray>(Index64(0));
-    }
     std::shared_ptr<Content> out = toListOffsetArray64(true).get()->argsort_next(
                                        negaxis,
                                        starts,

@@ -607,18 +607,6 @@ def test_sort_zero_length_arrays():
         == []
     )
 
-    array = ak._v2.contents.RecordArray([], None, length=0)
-    assert to_list(array) == []
-    assert to_list(ak._v2.operations.structure.sort(array)) == []
-    assert (
-        to_list(
-            ak._v2.operations.structure.argsort(
-                array,
-            )
-        )
-        == []
-    )
-
     content = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )

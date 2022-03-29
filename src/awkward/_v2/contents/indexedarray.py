@@ -893,11 +893,6 @@ class IndexedArray(Content):
         kind,
         order,
     ):
-        if self._index.length == 0:
-            return ak._v2.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, None, self._nplike
-            )
-
         next = self._content._carry(self._index, False)
         return next._argsort_next(
             negaxis,

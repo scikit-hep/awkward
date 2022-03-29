@@ -1927,10 +1927,6 @@ namespace awkward {
                                            int64_t outlength,
                                            bool ascending,
                                            bool stable) const {
-    if (length() == 0 ) {
-     return shallow_copy();
-    }
-
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (parameter_equals("__array__", "\"string\"")  ||

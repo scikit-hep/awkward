@@ -1649,33 +1649,9 @@ namespace awkward {
                             int64_t outlength,
                             bool ascending,
                             bool stable) const {
-    if (length() == 0) {
-      return std::make_shared<NumpyArray>(Index64(0));
-    }
-    std::vector<ContentPtr> contents;
-    for (auto content : contents_) {
-      ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());
-      ContentPtr next = trimmed.get()->argsort_next(negaxis,
-                                                    starts,
-                                                    shifts,
-                                                    parents,
-                                                    outlength,
-                                                    ascending,
-                                                    stable);
-      next = std::make_shared<RegularArray>(
-        Identities::none(),
-        util::Parameters(),
-        next,
-        next.get()->length(),
-        next.get()->length());
-      contents.push_back(next);
-    }
-    return std::make_shared<RecordArray>(
-      Identities::none(),
-      util::Parameters(),
-      contents,
-      recordlookup_,
-      outlength).get()->getitem_at_nowrap(0);
+    throw std::runtime_error(
+          std::string("not implemented: argsort for RecordArrays")
+          + FILENAME(__LINE__));
   }
 
   const ContentPtr

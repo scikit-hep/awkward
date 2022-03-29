@@ -991,11 +991,6 @@ class ListOffsetArray(Content):
         kind,
         order,
     ):
-        if self._offsets.length - 1 == 0:
-            return ak._v2.contents.NumpyArray(
-                self.nplike.empty(0, np.int64), None, None, self._nplike
-            )
-
         branch, depth = self.branch_depth
 
         if (
