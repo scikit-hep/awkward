@@ -11,7 +11,7 @@ def test_empty_slice():
 
     electron = electron[electron.pt > 5]
 
-    id = ak.argsort(electron, axis=1)
+    id = ak.argsort(electron.pt, axis=1)
 
     assert ak.to_list(electron[id]) == [[], []]
 

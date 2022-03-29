@@ -336,11 +336,6 @@ class UnmaskedArray(Content):
         kind,
         order,
     ):
-        if self._content.length == 0:
-            return ak._v2.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, None, self._nplike
-            )
-
         out = self._content._argsort_next(
             negaxis,
             starts,

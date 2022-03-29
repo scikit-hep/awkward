@@ -645,11 +645,6 @@ class ByteMaskedArray(Content):
         kind,
         order,
     ):
-        if self._mask.length == 0:
-            return ak._v2.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, None, self._nplike
-            )
-
         return self.toIndexedOptionArray64()._argsort_next(
             negaxis,
             starts,

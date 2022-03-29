@@ -873,11 +873,6 @@ class NumpyArray(Content):
         kind,
         order,
     ):
-        if self.shape[0] == 0:
-            return ak._v2.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, None, self._nplike
-            )
-
         if len(self.shape) == 0:
             raise ak._v2._util.error(
                 TypeError(f"{type(self).__name__} attempting to argsort a scalar ")

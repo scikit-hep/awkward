@@ -415,10 +415,10 @@ def test_RecordArray():
         "y": [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5], [6, 6], [7], []],
     }
 
-    assert ak.to_list(array.layout.argsort(-1, True, False)) == {
-        "x": [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        "y": [[], [0], [0, 1], [0, 1, 2], [0, 1, 2, 3], [0, 1, 2], [0, 1], [0], []],
-    }
+    # assert ak.to_list(array.layout.argsort(-1, True, False)) == {
+    #     "x": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    #     "y": [[], [0], [0, 1], [0, 1, 2], [0, 1, 2, 3], [0, 1, 2], [0, 1], [0], []],
+    # }
 
     assert ak.to_list(array.x.layout.argsort(0, True, False)) == [
         0,
@@ -621,7 +621,6 @@ def test_sort_zero_length_arrays():
     array = ak.layout.UnionArray8_32(tags, index, [content0, content1])
     assert ak.to_list(array) == []
     assert ak.to_list(ak.sort(array)) == []
-    assert ak.to_list(ak.argsort(array)) == []
 
     content = ak.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
@@ -633,11 +632,6 @@ def test_sort_zero_length_arrays():
     assert ak.to_list(ak.argsort(array)) == []
 
     array = ak.layout.NumpyArray([])
-    assert ak.to_list(array) == []
-    assert ak.to_list(ak.sort(array)) == []
-    assert ak.to_list(ak.argsort(array)) == []
-
-    array = ak.layout.RecordArray([])
     assert ak.to_list(array) == []
     assert ak.to_list(ak.sort(array)) == []
     assert ak.to_list(ak.argsort(array)) == []
