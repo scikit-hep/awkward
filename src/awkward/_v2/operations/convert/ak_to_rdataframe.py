@@ -3,18 +3,10 @@
 import awkward as ak
 
 
-def to_rdataframe(
-    array,
-    highlevel=True,
-    behavior=None,
-):
+def to_rdataframe(arrays):
     """
     Args:
-        array : Array-like data (anything #ak.to_layout recognizes).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
+        arrays (dict): a dictionary of Array-like data (anything #ak.to_layout recognizes).
 
     Converts an Awkward Array into ROOT Data Frame columns:
 
@@ -25,6 +17,22 @@ def to_rdataframe(
 
     See also #ak.from_rdataframe.
     """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_rdataframe",
+        dict(arrays=arrays),
+    ):
+        return _impl(
+            arrays,
+        )
+
+
+def _impl(
+    arrays,
+):
     import awkward._v2._connect.rdataframe.to_rdataframe  # noqa: F401
 
-    raise ak._v2._util.error(NotImplementedError)
+    rdf = ak._v2._connect.rdataframe.to_rdataframe.to_rdataframe(
+        arrays,
+    )
+
+    return rdf
