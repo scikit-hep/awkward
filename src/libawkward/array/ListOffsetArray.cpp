@@ -1996,14 +1996,14 @@ namespace awkward {
         offsets_.length() - 1);
       util::handle_error(err2, classname(), identities_.get());
 
-      Index64 nextcarry(nextlen);
-      Index64 nextparents(nextlen);
+      Index64 tmpnextcarry(nextlen);
+      Index64 tmpnextparents(nextlen);
       int64_t maxnextparents;
       Index64 distincts(maxcount * outlength);
       struct Error err3 = kernel::ListOffsetArray_reduce_nonlocal_preparenext_64(
         kernel::lib::cpu,   // DERIVE
-        nextcarry.data(),
-        nextparents.data(),
+        tmpnextcarry.data(),
+        tmpnextparents.data(),
         nextlen,
         &maxnextparents,
         distincts.data(),
@@ -2014,6 +2014,20 @@ namespace awkward {
         parents.data(),
         maxcount);
       util::handle_error(err3, classname(), identities_.get());
+
+      // HACK: fix indices by stable-sorting nextparents (CPU only)
+      std::vector<int64_t> tmpindex(nextlen);
+      std::iota(tmpindex.begin(), tmpindex.end(), 0);
+      std::stable_sort(tmpindex.begin(), tmpindex.end(), [&tmpnextparents](int64_t i, int64_t j) {
+        return tmpnextparents.data()[i] < tmpnextparents.data()[j];
+      });
+      Index64 nextcarry(nextlen);
+      Index64 nextparents(nextlen);
+      for (size_t i=0; i < nextlen; i++) {
+        auto j = tmpindex[i];
+        nextcarry.data()[i] = tmpnextcarry.data()[j];
+        nextparents.data()[i] = tmpnextparents.data()[j];
+      }
 
       Index64 nextstarts(maxnextparents + 1);
       struct Error err4 = kernel::ListOffsetArray_reduce_nonlocal_nextstarts_64(
