@@ -59,9 +59,10 @@ def fetch_specialization(keys):
 
 
 def fetch_template_specializations(kernel_dict):
+    kernel_exclusions = ["awkward_ByteMaskedArray_getitem_nextcarry"]
     template_specializations = []
     for keys, value in kernel_dict.items():
-        if value is not None:
+        if value is not None and keys[0] not in kernel_exclusions:
             template_specializations.append(fetch_specialization(list(keys)))
 
     return template_specializations
