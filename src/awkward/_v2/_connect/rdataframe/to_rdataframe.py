@@ -41,15 +41,25 @@ def to_rdataframe(columns):
         class ArrayWrapper {
         public:
             ArrayWrapper() = delete;
-            ArrayWrapper(std::string name_,
+            ArrayWrapper(
+                const T& ak_view_,
+                std::string name_,
                 std::string type_,
                 ssize_t length_,
                 void* ptrs_) :
+            ak_view(&ak_view_),
+            view_ptr(reinterpret_cast<const void*>(&ak_view_)),
             name(name_),
             type(type_),
             length(length_),
-            ptrs(ptrs_) {}
+            ptrs(ptrs_) {
+                cout << "Constructed an ArrayWrapper for an " << name << " RDF column of an array " << ROOT::Internal::RDF::TypeID2TypeName(typeid(ak_view_))
+                    << ", size " << ak_view->size() << " at " << ak_view
+                    << "(" << view_ptr << ")"<< endl;
+            }
 
+            const T* ak_view;
+            const void* view_ptr;
             const std::string name;
             const std::string type;
             const ssize_t length;
@@ -80,17 +90,20 @@ def to_rdataframe(columns):
                     awkward_array_columns_map[ROOT::Internal::RDF::TypeID2TypeName(typeid(obj))] = &obj;
                     awkward_type_name[std::type_index(typeid(obj))] = ROOT::Internal::RDF::TypeID2TypeName(typeid(obj));
                     awkward_name_type.try_emplace(ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)), std::type_index(typeid(obj)));
+                    cout << endl << "Make an " << ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)) << " at " <<  &obj << endl;
                     return obj;
                 }}
                 """.strip()
             )
             assert done is True
 
-        getattr(ROOT, f"make_array_{generated_type}_{key}")(
+        ak_view = getattr(ROOT, f"make_array_{generated_type}_{key}")(
             len(layout), lookup.arrayptrs
         )
+        print("Pass ", type(ak_view), "to an ArrayWrapper...")  # noqa: T001
 
         arr = ROOT.ArrayWrapper[ROOT.awkward_array_columns[-1][1]](
+            ak_view,
             ROOT.awkward_array_columns[-1][0],
             ROOT.awkward_array_columns[-1][1],
             ROOT.awkward_array_columns_data[-1][0],
@@ -106,10 +119,6 @@ def to_rdataframe(columns):
 template <typename ...ColumnTypes>
 class AwkwardArrayDataSource final : public ROOT::RDF::RDataSource {
 private:
-    using PointerHolderPtrs_t = std::vector<ROOT::Internal::TDS::TPointerHolder *>;
-    const PointerHolderPtrs_t fPointerHoldersModels;
-    std::vector<PointerHolderPtrs_t> fPointerHolders;
-
     unsigned int fNSlots{0U};
     std::tuple<ROOT::RVec<ColumnTypes>*...> fColumns;
     const std::vector<std::string> fColNames;
@@ -121,8 +130,10 @@ private:
     /// type-erased vector of pointers to pointers to column values - one per slot
     Record_t
     GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {
+        cout << "#2. GetColumnReadersImpl for " << colName;
         auto colNameStr = std::string(colName);
         const auto idName = ROOT::Internal::RDF::TypeID2TypeName(id);
+        cout << " and type " << idName << endl;
         auto it = fColTypesMap.find(colNameStr);
         if (fColTypesMap.end() == it) {
             std::string err = "The specified column name, \"" + colNameStr + "\" is not known to the data source.";
@@ -140,65 +151,94 @@ private:
         const auto colEnd = fColNames.end();
         const auto namesIt = std::find(colBegin, colEnd, colName);
         const auto index = std::distance(colBegin, namesIt);
-
+        cout << "index " << index << endl;
         Record_t ret(fNSlots);
         for (auto slot : ROOT::TSeqU(fNSlots)) {
-            ret[slot] = fPointerHolders[index][slot]->GetPointerAddr();
+            cout << "slot " << slot << endl;
+            ret[slot] = fColDataPointers[index].second;
         }
         return ret;
     }
 
-    template <std::size_t... S>
-    void SetEntryHelper(unsigned int slot, ULong64_t entry, std::index_sequence<S...>) {
-        std::initializer_list<int> expander {
-            (*static_cast<ColumnTypes *>(fPointerHolders[S][slot]->GetPointer()) = (*std::get<S>(fColumns))[entry], 0)...};
-            (void)expander; // avoid unused variable warnings
+    template<typename ... Ts>
+    void output_tuple(std::tuple<Ts...> const &tpl) {
+    std::size_t length = sizeof...(Ts);
+    std::apply(
+        [length](auto const &...ps) {
+            std::cout << "[ ";
+            int k = 0;
+            ((std::cout << ps << (++k == length ? "" : "; ")), ...);
+            std::cout << " ]";
+        },
+        tpl);
     }
+
+   size_t GetEntriesNumber() { return fColNames.size(); }
 
 public:
     AwkwardArrayDataSource(ArrayWrapper<ColumnTypes>... wrappers)
-        : fColumns(std::tuple<ROOT::RVec<ColumnTypes>*...>(wrappers.ptrs...)),
+        : fColumns(std::tuple<ROOT::RVec<ColumnTypes>*...>(wrappers...)),
           fColNames({wrappers.name...}),
           fColTypeNames({wrappers.type...}),
           fColTypesMap({{wrappers.name, wrappers.type}...}),
-          fColDataPointers({{wrappers.length, wrappers.ptrs}...}),
-          fPointerHoldersModels({{new ROOT::Internal::TDS::TTypedPointerHolder<ColumnTypes>(new ColumnTypes())...}}) {
-        std::cout << std::endl << "An AwkwardArrayDataSource with column names " << std::endl;
+          fColDataPointers({{wrappers.length, wrappers.ptrs}...}) {
+        cout << endl << "An AwkwardArrayDataSource with column names " << endl;
         for (auto n : fColNames) {
-            std::cout << n << ", ";
+            cout << n << ", ";
         }
-        std::cout << std::endl << " and types " << std::endl;
+        cout << endl << " and types " << endl;
         for (auto t : fColTypeNames) {
-            std::cout << t << ", ";
+            cout << t << ", ";
         }
-        std::cout << "is constructed." << std::endl;
+        cout << "is constructed." << endl;
 
-        std::cout << "Columns map:" << std::endl;
+        cout << "Columns map:" << endl;
         int n = 0;
         for (auto it : awkward_array_columns) {
-            std::cout << it.first << ": " << it.second << " of length " << awkward_array_columns_data[n].first
-                << " and data ptrs at " << awkward_array_columns_data[n].second << std::endl;
+            cout << it.first << ": " << it.second << " of length " << awkward_array_columns_data[n].first
+                << " and data ptrs at " << awkward_array_columns_data[n].second << endl;
             auto obj = awkward_array_columns_map[it.first];
             n++;
         }
-        std::cout << "Column data poiners map:" << std::endl;
+        cout << "Column data poiners map:" << endl;
         for (auto it : fColDataPointers) {
-            std::cout << it.first << " : " << it.second << std::endl;
+            cout << it.first << " : " << it.second << endl;
         }
-        std::cout << "Type name map:" << std::endl;
+        cout << "Type name map:" << endl;
         for (auto it : awkward_type_name) {
-            std::cout << it.first.name() << " : " << it.second << std::endl;
+            cout << it.first.name() << " : " << it.second << endl;
         }
-        std::cout << "Name type map:" << std::endl;
+        cout << "Name type map:" << endl;
         for (auto it : awkward_name_type) {
-            std::cout << it.first << " : " << it.second.name() << std::endl;
+            cout << it.first << " : " << it.second.name() << endl;
         }
+        output_tuple(fColumns);
     }
 
     ~AwkwardArrayDataSource() {}
 
     void SetNSlots(unsigned int nSlots) {
+        cout << "#1. SetNSlots " << nSlots << endl;
         fNSlots = nSlots;
+        const auto nCols = fColNames.size();
+        cout << "size " << nCols << endl;
+        auto colIndex = 0U;
+        for (auto it : fColDataPointers) {
+            cout << "column index " << colIndex++ << endl;
+        }
+    }
+
+    void Initialise() {
+        cout << "#3. Initialise" << endl;
+        const auto nEntries = GetEntriesNumber();
+        cout << "nEntries " << nEntries << endl;
+        const auto nEntriesInRange = nEntries / fNSlots; // always one for now
+        cout << "nEntriesInRange " << nEntriesInRange << endl;
+        auto reminder = 1U == fNSlots ? 0 : nEntries % fNSlots;
+        cout << "reminder " << reminder << endl;
+        fEntryRanges.resize(fNSlots);
+        cout << "fEntryRanges size " << fEntryRanges.size() << endl;
+        // FIXME: define some ranges here!
     }
 
     const std::vector<std::string> &GetColumnNames() const {
@@ -219,12 +259,13 @@ public:
     }
 
     std::vector<std::pair<ULong64_t, ULong64_t>> GetEntryRanges() {
+        cout << "#4. GetEntryRanges" << endl;
         auto entryRanges(std::move(fEntryRanges)); // empty fEntryRanges
         return entryRanges;
     }
 
     bool SetEntry(unsigned int slot, ULong64_t entry) {
-        SetEntryHelper(slot, entry, std::index_sequence_for<ColumnTypes...>());
+        cout << "#5. SetEntry" << endl;
         return true;
     }
 };
