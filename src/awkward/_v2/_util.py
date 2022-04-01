@@ -266,7 +266,7 @@ class SlicingErrorContext(ErrorContext):
         else:
             message = f"Error details: {str(exception)}"
 
-        return f"""cannot slice{location}
+        return f"""while attempting to slice{location}
 
     {self.array}
 

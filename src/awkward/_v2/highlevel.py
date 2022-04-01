@@ -1018,7 +1018,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         is not a factor in choosing one over the other.)
         """
         with ak._v2._util.OperationErrorContext(
-            "ak._v2.Array.__setitem__", {"field_name": where, "field_value": what}
+            "ak._v2.Array.__setitem__",
+            dict(self=self, field_name=where, field_value=what),
         ):
             if not (
                 ak._v2._util.isstr(where)
@@ -1665,7 +1666,8 @@ class Record(NDArrayOperatorsMixin):
         is not a factor in choosing one over the other.)
         """
         with ak._v2._util.OperationErrorContext(
-            "ak._v2.Record.__setitem__", {"field_name": where, "field_value": what}
+            "ak._v2.Record.__setitem__",
+            dict(self=self, field_name=where, field_value=what),
         ):
             if not (
                 ak._v2._util.isstr(where)
