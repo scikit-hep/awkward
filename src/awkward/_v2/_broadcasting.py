@@ -652,7 +652,7 @@ def apply_step(
         elif any(isinstance(x, RecordArray) for x in inputs):
             if not options["allow_records"]:
                 raise ak._v2._util.error(
-                    ValueError(f"cannot broadcast records{in_function(options)}")
+                    ValueError(f"cannot broadcast records {in_function(options)}")
                 )
 
             fields, length, istuple = None, None, True

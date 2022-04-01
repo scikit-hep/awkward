@@ -1,29 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# TODO in Array:
-#
-#    - [ ] all docstrings are old
-#    - [ ] 'Mask' nested class and 'mask' property
-#    - [ ] `__array__`
-#    - [ ] `__array_ufunc__`
-#    - [ ] `__array_function__`
-#    - [X] `numba_type`
-#    - [x] `__copy__`
-#    - [x] `__deepcopy__`
-#    - [X] `__contains__`
-#
-# TODO in Array:
-#
-#    - [ ] all docstrings are old
-#    - [ ] `__array_ufunc__`
-#    - [X] `numba_type`
-#    - [x] `__copy__`
-#    - [x] `__deepcopy__`
-#    - [X] `__contains__`
-#
-# TODO in ArrayBuilder: everything
-
-
 import sys
 import re
 import keyword
@@ -39,14 +15,6 @@ np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
-
-
-# def _suffix(array):
-#     out = ak._v2.operations.convert.kernels(array)
-#     if out is None or out == "cpu":
-#         return ""
-#     else:
-#         return ":" + out
 
 
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
@@ -374,67 +342,32 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             raise ak._v2._util.error(TypeError("behavior must be None or a dict"))
 
-    #     class Mask(object):
-    #         def __init__(self, array, valid_when):
-    #             self._array = array
-    #             self._valid_when = valid_when
+    class Mask:
+        def __init__(self, array):
+            self._array = array
 
-    #         def __str__(self):
-    #             return self._str()
+        def __getitem__(self, where):
+            return ak._v2.operations.structure.mask(self._array, where, True)
 
-    #         def __repr__(self):
-    #             return self._repr()
+    @property
+    def mask(self):
+        """
+        Whereas
 
-    #         def _str(self, limit_value=85):
-    #             return self._array._str(limit_value=limit_value)
+            array[array_of_booleans]
 
-    #         def _repr(self, limit_value=40, limit_total=85):
-    #             suffix = _suffix(self)
-    #             limit_value -= len(suffix)
+        removes elements from `array` in which `array_of_booleans` is False,
 
-    #             value = ak._v2._util.minimally_touching_string(
-    #                 limit_value, self._array.layout, self._array._behavior
-    #             )
+            array.mask[array_of_booleans]
 
-    #             try:
-    #                 name = super(Array, self._array).__getattribute__("__name__")
-    #             except AttributeError:
-    #                 name = type(self._array).__name__
-    #             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
-    #             typestr = repr(
-    #                 str(
-    #                     ak._v2._util.highlevel_type(
-    #                         self._array.layout, self._array._behavior, True
-    #                     )
-    #                 )
-    #             )
-    #             if len(typestr) > limit_type:
-    #                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
+        returns data with the same length as the original `array` but False
+        values in `array_of_booleans` are mapped to None. Such an output
+        can be used in mathematical expressions with the original `array`
+        because they are still aligned.
 
-    #             return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
-
-    #         def __getitem__(self, where):
-    #             return ak._v2.operations.structure.mask(self._array, where, self._valid_when)
-
-    #     @property
-    #     def mask(self, valid_when=True):
-    #         """
-    #         Whereas
-
-    #             array[array_of_booleans]
-
-    #         removes elements from `array` in which `array_of_booleans` is False,
-
-    #             array.mask[array_of_booleans]
-
-    #         returns data with the same length as the original `array` but False
-    #         values in `array_of_booleans` are mapped to None. Such an output
-    #         can be used in mathematical expressions with the original `array`
-    #         because they are still aligned.
-
-    #         See <<filtering>> and #ak.mask.
-    #         """
-    #         return self.Mask(self, valid_when)
+        See <<filtering>> and #ak.mask.
+        """
+        return self.Mask(self)
 
     def tolist(self):
         """
@@ -1301,32 +1234,37 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             stream.write(out + "\n")
 
-    #     def __array__(self, *args, **kwargs):
-    #         """
-    #         Intercepts attempts to convert this Array into a NumPy array and
-    #         either performs a zero-copy conversion or raises an error.
+    def __array__(self, *args, **kwargs):
+        """
+        Intercepts attempts to convert this Array into a NumPy array and
+        either performs a zero-copy conversion or raises an error.
 
-    #         This function is also called by the
-    #         [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
-    #         family of functions, which have `copy=False` by default.
+        This function is also called by the
+        [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
+        family of functions, which have `copy=False` by default.
 
-    #             >>> np.asarray(ak.Array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
-    #             array([[1.1, 2.2, 3.3],
-    #                    [4.4, 5.5, 6.6]])
+            >>> np.asarray(ak.Array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+            array([[1.1, 2.2, 3.3],
+                   [4.4, 5.5, 6.6]])
 
-    #         If the data are numerical and regular (nested lists have equal lengths
-    #         in each dimension, as described by the #type), they can be losslessly
-    #         converted to a NumPy array and this function returns without an error.
+        If the data are numerical and regular (nested lists have equal lengths
+        in each dimension, as described by the #type), they can be losslessly
+        converted to a NumPy array and this function returns without an error.
 
-    #         Otherwise, the function raises an error. It does not create a NumPy
-    #         array with dtype `"O"` for `np.object_` (see the
-    #         [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
-    #         since silent conversions to dtype `"O"` arrays would not only be a
-    #         significant performance hit, but would also break functionality, since
-    #         nested lists in a NumPy `"O"` array are severed from the array and
-    #         cannot be sliced as dimensions.
-    #         """
-    #         return ak._v2._connect.numpy.convert_to_array(self._layout, args, kwargs)
+        Otherwise, the function raises an error. It does not create a NumPy
+        array with dtype `"O"` for `np.object_` (see the
+        [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
+        since silent conversions to dtype `"O"` arrays would not only be a
+        significant performance hit, but would also break functionality, since
+        nested lists in a NumPy `"O"` array are severed from the array and
+        cannot be sliced as dimensions.
+        """
+        arguments = {0: self}
+        for i, arg in enumerate(args):
+            arguments[i + 1] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext("numpy.asarray", arguments):
+            return ak._v2._connect.numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1385,7 +1323,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #__array_function__.
         """
-        return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
+        arguments = {}
+        for i, arg in enumerate(inputs):
+            arguments[i] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext(name, arguments):
+            return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     #     def __array_function__(self, func, types, args, kwargs):
     #         """
@@ -2022,7 +1966,13 @@ class Record(NDArrayOperatorsMixin):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
+        arguments = {}
+        for i, arg in enumerate(inputs):
+            arguments[i] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext(name, arguments):
+            return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     @property
     def numba_type(self):
@@ -2371,15 +2321,20 @@ class ArrayBuilder(Sized):
             limit_rows=limit_rows, limit_cols=limit_cols, type=type, stream=stream
         )
 
-    # def __array__(self, *args, **kwargs):
-    #     """
-    #     Intercepts attempts to convert a #snapshot of this array into a
-    #     NumPy array and either performs a zero-copy conversion or raises
-    #     an error.
+    def __array__(self, *args, **kwargs):
+        """
+        Intercepts attempts to convert a #snapshot of this array into a
+        NumPy array and either performs a zero-copy conversion or raises
+        an error.
 
-    #     See #ak.Array.__array__ for a more complete description.
-    #     """
-    #     return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
+        See #ak.Array.__array__ for a more complete description.
+        """
+        arguments = {0: self}
+        for i, arg in enumerate(args):
+            arguments[i + 1] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext("numpy.asarray", arguments):
+            return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
     @property
     def numba_type(self):

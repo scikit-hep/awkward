@@ -13,12 +13,12 @@ if not numpy_at_least("1.13.1"):
     raise ImportError("NumPy 1.13.1 or later required")
 
 
-# def convert_to_array(layout, args, kwargs):
-#     out = ak._v2.operations.convert.to_numpy(layout, allow_missing=False)
-#     if args == () and kwargs == {}:
-#         return out
-#     else:
-#         return numpy.array(out, *args, **kwargs)
+def convert_to_array(layout, args, kwargs):
+    out = ak._v2.operations.convert.to_numpy(layout, allow_missing=False)
+    if args == () and kwargs == {}:
+        return out
+    else:
+        return numpy.array(out, *args, **kwargs)
 
 
 # implemented = {}
