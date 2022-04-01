@@ -1,29 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# TODO in Array:
-#
-#    - [ ] all docstrings are old
-#    - [X] 'Mask' nested class and 'mask' property
-#    - [X] `__array__`
-#    - [ ] `__array_ufunc__`
-#    - [ ] `__array_function__`
-#    - [X] `numba_type`
-#    - [x] `__copy__`
-#    - [x] `__deepcopy__`
-#    - [X] `__contains__`
-#
-# TODO in Array:
-#
-#    - [ ] all docstrings are old
-#    - [ ] `__array_ufunc__`
-#    - [X] `numba_type`
-#    - [x] `__copy__`
-#    - [x] `__deepcopy__`
-#    - [X] `__contains__`
-#
-# TODO in ArrayBuilder: everything
-
-
 import sys
 import re
 import keyword
@@ -1287,7 +1263,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         for i, arg in enumerate(args):
             arguments[i + 1] = arg
         arguments.update(kwargs)
-        with ak._v2._util.OperationErrorContext("np.asarray", arguments):
+        with ak._v2._util.OperationErrorContext("numpy.asarray", arguments):
             return ak._v2._connect.numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
@@ -1347,7 +1323,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #__array_function__.
         """
-        return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
+        arguments = {}
+        for i, arg in enumerate(inputs):
+            arguments[i] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext(name, arguments):
+            return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     #     def __array_function__(self, func, types, args, kwargs):
     #         """
@@ -1984,7 +1966,13 @@ class Record(NDArrayOperatorsMixin):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        name = f"{type(ufunc).__module__}.{ufunc.__name__}.{str(method)}"
+        arguments = {}
+        for i, arg in enumerate(inputs):
+            arguments[i] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext(name, arguments):
+            return ak._v2._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     @property
     def numba_type(self):
@@ -2345,7 +2333,7 @@ class ArrayBuilder(Sized):
         for i, arg in enumerate(args):
             arguments[i + 1] = arg
         arguments.update(kwargs)
-        with ak._v2._util.OperationErrorContext("np.asarray", arguments):
+        with ak._v2._util.OperationErrorContext("numpy.asarray", arguments):
             return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
     @property
