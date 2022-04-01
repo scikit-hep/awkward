@@ -15,12 +15,12 @@ def to_rdataframe(columns):
         done = compiler(
             """
             std::vector<std::pair<std::string, std::string>> awkward_array_columns;
-            std::vector<std::pair<ssize_t, void*>> awkward_array_columns_data;
-            typedef std::map<std::string, std::any> awkward_array_map_type;
-            awkward_array_map_type awkward_array_columns_map;
-            std::map<std::string, void*> awkward_function_map;
-            std::map<std::type_index, std::string> awkward_type_name;
-            std::map<std::string, std::type_index> awkward_name_type;
+            std::vector<std::pair<ssize_t, ssize_t*>> awkward_array_columns_data;
+            //typedef std::map<std::string, std::any> awkward_array_map_type;
+            //awkward_array_map_type awkward_array_columns_map;
+            //std::map<std::string, void*> awkward_function_map;
+            //std::map<std::type_index, std::string> awkward_type_name;
+            //std::map<std::string, std::type_index> awkward_name_type;
             """
         )
         assert done is True
@@ -29,10 +29,10 @@ def to_rdataframe(columns):
         ROOT.awkward_array_columns_data.clear()
 
         # FIXME: the following are used for debugging only
-        ROOT.awkward_array_columns_map.clear()
-        ROOT.awkward_function_map.clear()
-        ROOT.awkward_type_name.clear()
-        ROOT.awkward_name_type.clear()
+        # ROOT.awkward_array_columns_map.clear()
+        # ROOT.awkward_function_map.clear()
+        # ROOT.awkward_type_name.clear()
+        # ROOT.awkward_name_type.clear()
 
     if not hasattr(ROOT, "ArrayWrapper"):
         done = compiler(
@@ -41,29 +41,52 @@ def to_rdataframe(columns):
         class ArrayWrapper {
         public:
             ArrayWrapper() = delete;
+            ArrayWrapper(const ArrayWrapper& wrapper) :
+                ak_view(wrapper.ak_view),
+                view_ptr(wrapper.view_ptr),
+                name(wrapper.name),
+                type(wrapper.type),
+                length(wrapper.length),
+                ptrs(wrapper.ptrs) {
+                cout << this << " is a copy of " << &wrapper << endl;
+                cout << "ptrs: " << this->ptrs << " is " << wrapper.ptrs << endl;
+                cout << "ak_view: " << this->ak_view << " is " << wrapper.ak_view << endl;
+            }
+            ArrayWrapper& operator=(ArrayWrapper const& wrapper) {
+                ak_view = wrapper.ak_view;
+                view_ptr = wrapper.view_ptr;
+                name = wrapper.name;
+                type = wrapper.type;
+                length = wrapper.length;
+                ptrs = wrapper.ptrs;
+                cout << " >>>> ArrayWrapper& operator=(ArrayWrapper const& wrapper) "
+                    << this << " is an assignment of " << &wrapper << endl;
+            }
             ArrayWrapper(
                 const T& ak_view_,
                 std::string name_,
                 std::string type_,
                 ssize_t length_,
-                void* ptrs_) :
+                ssize_t* ptrs_) :
             ak_view(&ak_view_),
             view_ptr(reinterpret_cast<const void*>(&ak_view_)),
             name(name_),
             type(type_),
             length(length_),
             ptrs(ptrs_) {
-                cout << "Constructed an ArrayWrapper for an " << name << " RDF column of an array " << ROOT::Internal::RDF::TypeID2TypeName(typeid(ak_view_))
+                cout << this << " is constructed: an ArrayWrapper for an " << name << " RDF column of an array " << ROOT::Internal::RDF::TypeID2TypeName(typeid(ak_view_))
                     << ", size " << ak_view->size() << " at " << ak_view
                     << "(" << view_ptr << ")"<< endl;
             }
+
+            ~ArrayWrapper() { cout << "........" << this << " ArrayWrapper destructed." << endl; }
 
             const T* ak_view;
             const void* view_ptr;
             const std::string name;
             const std::string type;
             const ssize_t length;
-            void* ptrs;
+            ssize_t* ptrs;
         };
         """
         )
@@ -87,9 +110,9 @@ def to_rdataframe(columns):
                     auto obj = {generator.dataset(flatlist_as_rvec=True)};
                     awkward_array_columns.push_back({{ "awkward:{key}", ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)) }});
                     awkward_array_columns_data.push_back({{length, ptrs}});
-                    awkward_array_columns_map[ROOT::Internal::RDF::TypeID2TypeName(typeid(obj))] = &obj;
-                    awkward_type_name[std::type_index(typeid(obj))] = ROOT::Internal::RDF::TypeID2TypeName(typeid(obj));
-                    awkward_name_type.try_emplace(ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)), std::type_index(typeid(obj)));
+                    //awkward_array_columns_map[ROOT::Internal::RDF::TypeID2TypeName(typeid(obj))] = &obj;
+                    //awkward_type_name[std::type_index(typeid(obj))] = ROOT::Internal::RDF::TypeID2TypeName(typeid(obj));
+                    //awkward_name_type.try_emplace(ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)), std::type_index(typeid(obj)));
                     cout << endl << "Make an " << ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)) << " at " <<  &obj << endl;
                     return obj;
                 }}
@@ -124,7 +147,7 @@ private:
     const std::vector<std::string> fColNames;
     const std::vector<std::string> fColTypeNames;
     const std::map<std::string, std::string> fColTypesMap;
-    std::vector<std::pair<ssize_t, void*>> fColDataPointers;
+    std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
     std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges;
 
     /// type-erased vector of pointers to pointers to column values - one per slot
@@ -194,24 +217,24 @@ public:
 
         cout << "Columns map:" << endl;
         int n = 0;
-        for (auto it : awkward_array_columns) {
-            cout << it.first << ": " << it.second << " of length " << awkward_array_columns_data[n].first
-                << " and data ptrs at " << awkward_array_columns_data[n].second << endl;
-            auto obj = awkward_array_columns_map[it.first];
-            n++;
-        }
+        //for (auto it : awkward_array_columns) {
+        //    cout << it.first << ": " << it.second << " of length " << awkward_array_columns_data[n].first
+        //        << " and data ptrs at " << awkward_array_columns_data[n].second << endl;
+        //    auto obj = awkward_array_columns_map[it.first];
+        //    n++;
+        //}
         cout << "Column data poiners map:" << endl;
         for (auto it : fColDataPointers) {
             cout << it.first << " : " << it.second << endl;
         }
-        cout << "Type name map:" << endl;
-        for (auto it : awkward_type_name) {
-            cout << it.first.name() << " : " << it.second << endl;
-        }
-        cout << "Name type map:" << endl;
-        for (auto it : awkward_name_type) {
-            cout << it.first << " : " << it.second.name() << endl;
-        }
+        //cout << "Type name map:" << endl;
+        //for (auto it : awkward_type_name) {
+        //    cout << it.first.name() << " : " << it.second << endl;
+        //}
+        //cout << "Name type map:" << endl;
+        //for (auto it : awkward_name_type) {
+        //    cout << it.first << " : " << it.second.name() << endl;
+        //}
         output_tuple(fColumns);
     }
 

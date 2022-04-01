@@ -129,6 +129,10 @@ namespace awkward {
     ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : start_(start), stop_(stop), which_(which), ptrs_(ptrs) { }
 
+    ~ArrayView() {
+        cout << "...ArrayView destructed!" << endl;
+    }
+
     size_t size() const noexcept {
       return stop_ - start_;
     }
