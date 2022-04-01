@@ -312,7 +312,7 @@ class ListArray(Content):
                     slicestarts.length,
                     self._starts.data,
                     self._stops.data,
-                )
+                ),
             )
 
             asListOffsetArray64 = self.toListOffsetArray64(True)
@@ -553,7 +553,8 @@ class ListArray(Content):
                     self._stops.data,
                     lenstarts,
                     head,
-                )
+                ),
+                head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)

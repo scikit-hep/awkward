@@ -119,10 +119,10 @@ def _impl(array, mask, valid_when, highlevel, behavior):
             return None
 
     layoutarray = ak._v2.operations.convert.to_layout(
-        array, allow_record=True, allow_other=False
+        array, allow_record=False, allow_other=False
     )
     layoutmask = ak._v2.operations.convert.to_layout(
-        mask, allow_record=True, allow_other=False
+        mask, allow_record=False, allow_other=False
     )
 
     behavior = ak._v2._util.behavior_of(array, mask, behavior=behavior)

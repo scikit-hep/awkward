@@ -11,7 +11,7 @@ import setuptools
 import threading
 import traceback
 
-from collections.abc import Mapping
+from collections.abc import Sequence, Mapping
 
 import awkward as ak
 
@@ -100,6 +100,8 @@ class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
 
+    _width = 80
+
     @classmethod
     def primary(cls):
         return cls._slate.__dict__.get("__primary_context__")
@@ -119,12 +121,82 @@ class ErrorContext:
         if self.primary() is self:
             self._slate.__dict__.clear()
 
+    def format_argument(self, width, value):
+        if isinstance(value, ak._v2.contents.Content):
+            return self.format_argument(width, ak._v2.highlevel.Array(value))
+        elif isinstance(value, ak._v2.record.Record):
+            return self.format_argument(width, ak._v2.highlevel.Record(value))
+
+        valuestr = None
+        if isinstance(
+            value,
+            (
+                ak._v2.highlevel.Array,
+                ak._v2.highlevel.Record,
+                ak._v2.highlevel.ArrayBuilder,
+            ),
+        ):
+            try:
+                valuestr = value._repr(width)
+            except Exception as err:
+                valuestr = f"repr-raised-{type(err).__name__}"
+
+        elif value is None or isinstance(value, (bool, int, str, bytes)):
+            try:
+                valuestr = repr(value)
+            except Exception as err:
+                valuestr = f"repr-raised-{type(err).__name__}"
+
+        elif isinstance(value, np.ndarray):
+            import numpy
+
+            if not numpy.__version__.startswith("1.13."):  # 'threshold' argument
+                prefix = f"{type(value).__module__}.{type(value).__name__}("
+                suffix = ")"
+                try:
+                    valuestr = numpy.array2string(
+                        value,
+                        max_line_width=width - len(prefix) - len(suffix),
+                        threshold=0,
+                    ).replace("\n", " ")
+                    valuestr = prefix + valuestr + suffix
+                except Exception as err:
+                    valuestr = f"array2string-raised-{type(err).__name__}"
+
+                if len(valuestr) > width and "..." in valuestr[:-1]:
+                    last = valuestr.rfind("...") + 3
+                    while last > width:
+                        last = valuestr[: last - 3].rfind("...") + 3
+                    valuestr = valuestr[:last]
+
+                if len(valuestr) > width:
+                    valuestr = valuestr[: width - 3] + "..."
+
+        elif isinstance(value, (Sequence, Mapping)) and len(value) < 10000:
+            valuestr = repr(value)
+            if len(valuestr) > width:
+                valuestr = valuestr[: width - 3] + "..."
+
+        if valuestr is None:
+            return f"{type(value).__name__}-instance"
+        else:
+            return valuestr
+
 
 class OperationErrorContext(ErrorContext):
     def __init__(self, name, arguments):
+        string_arguments = {}
+        for key, value in arguments.items():
+            if isstr(key):
+                width = self._width - 8 - len(key) - 3
+            else:
+                width = self._width - 8
+
+            string_arguments[key] = self.format_argument(width, value)
+
         super().__init__(
             name=name,
-            arguments=arguments,
+            arguments=string_arguments,
             traceback=traceback.extract_stack(limit=3)[0],
         )
 
@@ -140,10 +212,35 @@ class OperationErrorContext(ErrorContext):
     def traceback(self):
         return self._kwargs["traceback"]
 
+    def format_exception(self, exception):
+        tb = self.traceback
+        try:
+            location = f" (from {tb.filename}, line {tb.lineno})"
+        except Exception:
+            location = ""
+
+        arguments = []
+        for name, valuestr in self.arguments.items():
+            if isstr(name):
+                arguments.append(f"\n        {name} = {valuestr}")
+            else:
+                arguments.append(f"\n        {valuestr}")
+
+        extra_line = "" if len(arguments) == 0 else "\n    "
+        return f"""while calling{location}
+
+    {self.name}({"".join(arguments)}{extra_line})
+
+Error details: {str(exception)}"""
+
 
 class SlicingErrorContext(ErrorContext):
     def __init__(self, array, where):
-        super().__init__(array=array, where=where)
+        super().__init__(
+            array=self.format_argument(self._width - 4, array),
+            where=self.format_slice(where),
+            traceback=traceback.extract_stack(limit=3)[0],
+        )
 
     @property
     def array(self):
@@ -152,6 +249,68 @@ class SlicingErrorContext(ErrorContext):
     @property
     def where(self):
         return self._kwargs["where"]
+
+    @property
+    def traceback(self):
+        return self._kwargs["traceback"]
+
+    def format_exception(self, exception):
+        tb = self.traceback
+        try:
+            location = f" (from {tb.filename}, line {tb.lineno})"
+        except Exception:
+            location = ""
+
+        if isstr(exception):
+            message = exception
+        else:
+            message = f"Error details: {str(exception)}"
+
+        return f"""cannot slice{location}
+
+    {self.array}
+
+with
+
+    {self.where}
+
+{message}"""
+
+    @staticmethod
+    def format_slice(x):
+        if isinstance(x, slice):
+            if x.step is None:
+                return "{}:{}".format(
+                    "" if x.start is None else x.start,
+                    "" if x.stop is None else x.stop,
+                )
+            else:
+                return "{}:{}:{}".format(
+                    "" if x.start is None else x.start,
+                    "" if x.stop is None else x.stop,
+                    x.step,
+                )
+
+        elif isinstance(x, tuple):
+            return "(" + ", ".join(SlicingErrorContext.format_slice(y) for y in x) + ")"
+
+        elif isinstance(x, ak._v2.index.Index64):
+            return str(x.data)
+
+        elif isinstance(x, ak._v2.contents.Content):
+            try:
+                return str(ak._v2.highlevel.Array(x))
+            except Exception:
+                return x._repr("    ", "", "")
+
+        elif isinstance(x, ak._v2.record.Record):
+            try:
+                return str(ak._v2.highlevel.Record(x))
+            except Exception:
+                return x._repr("    ", "", "")
+
+        else:
+            return repr(x)
 
 
 def error(exception, error_context=None):
@@ -170,99 +329,12 @@ def error(exception, error_context=None):
     if error_context is None:
         error_context = ErrorContext.primary()
 
-    if isinstance(error_context, OperationErrorContext):
-        tb = error_context.traceback
-        try:
-            location = f" (from {tb.filename}, line {tb.lineno})"
-        except Exception:
-            location = ""
-
-        arguments = []
-        for name, value in error_context.arguments.items():
-            try:
-                valuestr = repr(value)
-            except Exception:
-                valuestr = "???"
-            if len(valuestr) > 80:
-                valuestr = valuestr[:77] + "..."
-            if isstr(name):
-                arguments.append(f"\n        {name} = {valuestr}")
-            else:
-                arguments.append(f"\n        {valuestr}")
-
-        extra_line = "" if len(arguments) == 0 else "\n    "
-        return type(exception)(
-            f"""while calling{location}
-
-    {error_context.name}({",".join(arguments)}{extra_line})
-
-Error details: {str(exception)}"""
-        )
-
-    elif isinstance(error_context, SlicingErrorContext):
-        if isinstance(error_context.array, ak._v2.contents.Content):
-            try:
-                arraystr = "    " + repr(ak._v2.highlevel.Array(error_context.array))
-            except Exception:
-                arraystr = error_context.array._repr("    ", "", "")
-        elif isinstance(error_context.array, ak._v2.record.Record):
-            try:
-                arraystr = "    " + repr(ak._v2.highlevel.Record(error_context.array))
-            except Exception:
-                arraystr = error_context.array._repr("    ", "", "")
-        else:
-            arraystr = repr(error_context.array)
-
+    if isinstance(error_context, ErrorContext):
         # Note: returns an error for the caller to raise!
-        return type(exception)(
-            f"""cannot slice
-
-{arraystr}
-
-with
-
-    {format_slice(error_context.where)}
-
-Error details: {str(exception)}"""
-        )
-
-    return exception
-
-
-def format_slice(x):
-    if isinstance(x, slice):
-        if x.step is None:
-            return "{}:{}".format(
-                "" if x.start is None else x.start,
-                "" if x.stop is None else x.stop,
-            )
-        else:
-            return "{}:{}:{}".format(
-                "" if x.start is None else x.start,
-                "" if x.stop is None else x.stop,
-                x.step,
-            )
-
-    elif isinstance(x, tuple):
-        return "(" + ", ".join(format_slice(y) for y in x) + ")"
-
-    elif isinstance(x, ak._v2.index.Index64):
-        return str(x.data)
-
-    elif isinstance(x, ak._v2.contents.Content):
-        try:
-            return str(ak._v2.highlevel.Array(x))
-        except Exception:
-            return x._repr("    ", "", "")
-
-    elif isinstance(x, ak._v2.record.Record):
-        try:
-            return str(ak._v2.highlevel.Record(x))
-        except Exception:
-            return x._repr("    ", "", "")
-
+        return type(exception)(error_context.format_exception(exception))
     else:
-        return repr(x)
+        # Note: returns an error for the caller to raise!
+        return exception
 
 
 def indexerror(subarray, slicer, details=None):
@@ -276,34 +348,15 @@ Error details: {details}."""
     if not isinstance(error_context, SlicingErrorContext):
         # Note: returns an error for the caller to raise!
         return IndexError(
-            f"cannot slice {type(subarray).__name__} with {format_slice(slicer)}{detailsstr}"
+            f"cannot slice {type(subarray).__name__} with {SlicingErrorContext.format_slice(slicer)}{detailsstr}"
         )
 
     else:
-        if isinstance(error_context.array, ak._v2.contents.Content):
-            try:
-                arraystr = "    " + repr(ak._v2.highlevel.Array(error_context.array))
-            except Exception:
-                arraystr = error_context.array._repr("    ", "", "")
-        elif isinstance(error_context.array, ak._v2.record.Record):
-            try:
-                arraystr = "    " + repr(ak._v2.highlevel.Record(error_context.array))
-            except Exception:
-                arraystr = error_context.array._repr("    ", "", "")
-        else:
-            arraystr = repr(error_context.array)
-
         # Note: returns an error for the caller to raise!
         return IndexError(
-            f"""cannot slice
-
-{arraystr}
-
-with
-
-    {format_slice(error_context.where)}
-
-at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {format_slice(slicer)}.{detailsstr}"""
+            error_context.format_exception(
+                f"at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {error_context.format_slice(slicer)}.{detailsstr}"
+            )
         )
 
 
