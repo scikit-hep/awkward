@@ -3,7 +3,7 @@
 # TODO in Array:
 #
 #    - [ ] all docstrings are old
-#    - [ ] 'Mask' nested class and 'mask' property
+#    - [X] 'Mask' nested class and 'mask' property
 #    - [ ] `__array__`
 #    - [ ] `__array_ufunc__`
 #    - [ ] `__array_function__`
@@ -39,14 +39,6 @@ np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
-
-
-# def _suffix(array):
-#     out = ak._v2.operations.convert.kernels(array)
-#     if out is None or out == "cpu":
-#         return ""
-#     else:
-#         return ":" + out
 
 
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
@@ -374,67 +366,32 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             raise ak._v2._util.error(TypeError("behavior must be None or a dict"))
 
-    #     class Mask(object):
-    #         def __init__(self, array, valid_when):
-    #             self._array = array
-    #             self._valid_when = valid_when
+    class Mask(object):
+        def __init__(self, array):
+            self._array = array
 
-    #         def __str__(self):
-    #             return self._str()
+        def __getitem__(self, where):
+            return ak._v2.operations.structure.mask(self._array, where, True)
 
-    #         def __repr__(self):
-    #             return self._repr()
+    @property
+    def mask(self):
+        """
+        Whereas
 
-    #         def _str(self, limit_value=85):
-    #             return self._array._str(limit_value=limit_value)
+            array[array_of_booleans]
 
-    #         def _repr(self, limit_value=40, limit_total=85):
-    #             suffix = _suffix(self)
-    #             limit_value -= len(suffix)
+        removes elements from `array` in which `array_of_booleans` is False,
 
-    #             value = ak._v2._util.minimally_touching_string(
-    #                 limit_value, self._array.layout, self._array._behavior
-    #             )
+            array.mask[array_of_booleans]
 
-    #             try:
-    #                 name = super(Array, self._array).__getattribute__("__name__")
-    #             except AttributeError:
-    #                 name = type(self._array).__name__
-    #             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
-    #             typestr = repr(
-    #                 str(
-    #                     ak._v2._util.highlevel_type(
-    #                         self._array.layout, self._array._behavior, True
-    #                     )
-    #                 )
-    #             )
-    #             if len(typestr) > limit_type:
-    #                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
+        returns data with the same length as the original `array` but False
+        values in `array_of_booleans` are mapped to None. Such an output
+        can be used in mathematical expressions with the original `array`
+        because they are still aligned.
 
-    #             return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
-
-    #         def __getitem__(self, where):
-    #             return ak._v2.operations.structure.mask(self._array, where, self._valid_when)
-
-    #     @property
-    #     def mask(self, valid_when=True):
-    #         """
-    #         Whereas
-
-    #             array[array_of_booleans]
-
-    #         removes elements from `array` in which `array_of_booleans` is False,
-
-    #             array.mask[array_of_booleans]
-
-    #         returns data with the same length as the original `array` but False
-    #         values in `array_of_booleans` are mapped to None. Such an output
-    #         can be used in mathematical expressions with the original `array`
-    #         because they are still aligned.
-
-    #         See <<filtering>> and #ak.mask.
-    #         """
-    #         return self.Mask(self, valid_when)
+        See <<filtering>> and #ak.mask.
+        """
+        return self.Mask(self)
 
     def tolist(self):
         """
