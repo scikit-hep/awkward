@@ -69,6 +69,8 @@ cuda_kernels_impl = [
     "awkward_ListOffsetArray_compact_offsets",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
     "awkward_ByteMaskedArray_getitem_nextcarry",
+    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+    "awkward_ByteMaskedArray_reduce_next_64",
 ]
 
 
@@ -326,7 +328,6 @@ cupy = import_cupy("Awkward Arrays with CUDA")
             """
 def by_signature(cuda_kernel_templates):
     out = {}
-
 """
         )
         with open(
@@ -347,7 +348,6 @@ def by_signature(cuda_kernel_templates):
             ]
             python_code = python_code.replace("// BEGIN PYTHON", "")
             python_code = python_code.replace("// ", "    ")
-
             file.write(python_code)
 
         for spec in specification["kernels"]:
@@ -376,7 +376,7 @@ def by_signature(cuda_kernel_templates):
     f = lambda: cuda_kernel_templates.get_function(fetch_specialization([{}]))
     f.dir = [{}]
     out[{}] = f
-    """.format(
+""".format(
                                     ", ".join(special),
                                     ", ".join(dirlist),
                                     ", ".join(special),
@@ -393,9 +393,8 @@ def by_signature(cuda_kernel_templates):
 
                             file.write(python_code)
                             file.write(
-                                """
-    out[{}] = f
-    """.format(
+                                """    out[{}] = f
+""".format(
                                     ", ".join(special)
                                 )
                             )
