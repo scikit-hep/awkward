@@ -347,7 +347,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._array = array
 
         def __getitem__(self, where):
-            return ak._v2.operations.structure.mask(self._array, where, True)
+            with ak._v2._util.OperationErrorContext(
+                "ak._v2.Array.mask", {0: self._array, 1: where}
+            ):
+                return ak._v2.operations.structure.mask(self._array, where, True)
 
     @property
     def mask(self):
@@ -948,19 +951,20 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        out = self._layout[where]
-        if isinstance(out, ak._v2.contents.NumpyArray):
-            array_param = out.parameter("__array__")
-            if array_param == "byte":
-                return ak._v2._util.tobytes(out.raw(numpy))
-            elif array_param == "char":
-                return ak._v2._util.tobytes(out.raw(numpy)).decode(
-                    errors="surrogateescape"
-                )
-        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
-            return ak._v2._util.wrap(out, self._behavior)
-        else:
-            return out
+        with ak._v2._util.SlicingErrorContext(self, where):
+            out = self._layout[where]
+            if isinstance(out, ak._v2.contents.NumpyArray):
+                array_param = out.parameter("__array__")
+                if array_param == "byte":
+                    return ak._v2._util.tobytes(out.raw(numpy))
+                elif array_param == "char":
+                    return ak._v2._util.tobytes(out.raw(numpy)).decode(
+                        errors="surrogateescape"
+                    )
+            if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+                return ak._v2._util.wrap(out, self._behavior)
+            else:
+                return out
 
     def __setitem__(self, where, what):
         """
@@ -1013,18 +1017,25 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        if not (
-            ak._v2._util.isstr(where)
-            or (isinstance(where, tuple) and all(ak._v2._util.isstr(x) for x in where))
+        with ak._v2._util.OperationErrorContext(
+            "ak._v2.Array.__setitem__",
+            dict(self=self, field_name=where, field_value=what),
         ):
-            raise ak._v2._util.error(
-                TypeError("only fields may be assigned in-place (by field name)")
-            )
+            if not (
+                ak._v2._util.isstr(where)
+                or (
+                    isinstance(where, tuple)
+                    and all(ak._v2._util.isstr(x) for x in where)
+                )
+            ):
+                raise ak._v2._util.error(
+                    TypeError("only fields may be assigned in-place (by field name)")
+                )
 
-        self._layout = ak._v2.operations.structure.with_field(
-            self._layout, what, where, highlevel=False
-        )
-        self._numbaview = None
+            self._layout = ak._v2.operations.structure.with_field(
+                self._layout, what, where, highlevel=False
+            )
+            self._numbaview = None
 
     def __getattr__(self, where):
         """
@@ -1098,114 +1109,42 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
         )
 
-    @property
-    def slot0(self):
-        """
-        Equivalent to #__getitem__ with `"0"`, which selects slot `0` from
-        all tuples.
-
-        Record fields can be accessed from #__getitem__ with strings (see
-        <<projection>>), but tuples only have slot positions, which are
-        0-indexed integers. However, they must also be quoted as strings
-        to avoid confusion with integers as array indexes. Sometimes, though,
-        interleaving integers in strings and integers outside of strings
-        can be confusing in analysis code.
-
-        Record fields can also be accessed as attributes (with limitations),
-        and the distinction between attributes (#__getattr__) and subscripts
-        (#__getitem__) shows up more clearly in dense code. But integers would
-        not be valid attribute names, so they're named #slot0 through #slot9.
-
-        (Tuples with more than 10 slots are rare and can defer to
-        #__getitem__.)
-        """
-        return self["0"]
-
-    @property
-    def slot1(self):
-        """
-        Equivalent to #__getitem__ with `"1"`. See #slot0.
-        """
-        return self["1"]
-
-    @property
-    def slot2(self):
-        """
-        Equivalent to #__getitem__ with `"2"`. See #slot0.
-        """
-        return self["2"]
-
-    @property
-    def slot3(self):
-        """
-        Equivalent to #__getitem__ with `"3"`. See #slot0.
-        """
-        return self["3"]
-
-    @property
-    def slot4(self):
-        """
-        Equivalent to #__getitem__ with `"4"`. See #slot0.
-        """
-        return self["4"]
-
-    @property
-    def slot5(self):
-        """
-        Equivalent to #__getitem__ with `"5"`. See #slot0.
-        """
-        return self["5"]
-
-    @property
-    def slot6(self):
-        """
-        Equivalent to #__getitem__ with `"6"`. See #slot0.
-        """
-        return self["6"]
-
-    @property
-    def slot7(self):
-        """
-        Equivalent to #__getitem__ with `"7"`. See #slot0.
-        """
-        return self["7"]
-
-    @property
-    def slot8(self):
-        """
-        Equivalent to #__getitem__ with `"8"`. See #slot0.
-        """
-        return self["8"]
-
-    @property
-    def slot9(self):
-        """
-        Equivalent to #__getitem__ with `"9"`. See #slot0.
-        """
-        return self["9"]
-
     def __str__(self):
         import awkward._v2._prettyprint
 
         return awkward._v2._prettyprint.valuestr(self, 1, 80)
 
     def __repr__(self):
+        return self._repr(80)
+
+    def _repr(self, limit_cols):
         import awkward._v2._prettyprint
 
         pytype = type(self).__name__
+
         if self._layout.nplike.known_shape and self._layout.nplike.known_data:
-            valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, 50)
             typestr = repr(str(self.type))[1:-1]
+            strwidth = max(
+                0, min(40, limit_cols - len(pytype) - len(" type='...'") - 3)
+            )
+            if len(pytype) - len(" type=''") - len(typestr) - 3 < limit_cols:
+                strwidth = max(
+                    0, limit_cols - len(pytype) - len(" type=''") - len(typestr) - 3
+                )
+            valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, strwidth)
+
         else:
-            valuestr = "-typetracer"
             typestr = repr(
                 "?? * " + str(self._layout.form.type_from_behavior(self._behavior))
             )[1:-1]
-        length = max(10, 80 - len(pytype) - 10 - len(valuestr))
+            valuestr = "-typetracer"
+
+        length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
+
         return f"<{pytype}{valuestr} type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
@@ -1693,19 +1632,20 @@ class Record(NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        out = self._layout[where]
-        if isinstance(out, ak._v2.contents.NumpyArray):
-            array_param = out.parameter("__array__")
-            if array_param == "byte":
-                return ak._v2._util.tobytes(out.raw(numpy))
-            elif array_param == "char":
-                return ak._v2._util.tobytes(out.raw(numpy)).decode(
-                    errors="surrogateescape"
-                )
-        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
-            return ak._v2._util.wrap(out, self._behavior)
-        else:
-            return out
+        with ak._v2._util.SlicingErrorContext(self, where):
+            out = self._layout[where]
+            if isinstance(out, ak._v2.contents.NumpyArray):
+                array_param = out.parameter("__array__")
+                if array_param == "byte":
+                    return ak._v2._util.tobytes(out.raw(numpy))
+                elif array_param == "char":
+                    return ak._v2._util.tobytes(out.raw(numpy)).decode(
+                        errors="surrogateescape"
+                    )
+            if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+                return ak._v2._util.wrap(out, self._behavior)
+            else:
+                return out
 
     def __setitem__(self, where, what):
         """
@@ -1725,18 +1665,25 @@ class Record(NDArrayOperatorsMixin):
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        if not (
-            ak._v2._util.isstr(where)
-            or (isinstance(where, tuple) and all(ak._v2._util.isstr(x) for x in where))
+        with ak._v2._util.OperationErrorContext(
+            "ak._v2.Record.__setitem__",
+            dict(self=self, field_name=where, field_value=what),
         ):
-            raise ak._v2._util.error(
-                TypeError("only fields may be assigned in-place (by field name)")
-            )
+            if not (
+                ak._v2._util.isstr(where)
+                or (
+                    isinstance(where, tuple)
+                    and all(ak._v2._util.isstr(x) for x in where)
+                )
+            ):
+                raise ak._v2._util.error(
+                    TypeError("only fields may be assigned in-place (by field name)")
+                )
 
-        self._layout = ak._v2.operations.structure.with_field(
-            self._layout, what, where, highlevel=False
-        )
-        self._numbaview = None
+            self._layout = ak._v2.operations.structure.with_field(
+                self._layout, what, where, highlevel=False
+            )
+            self._numbaview = None
 
     def __getattr__(self, where):
         """
@@ -1799,131 +1746,45 @@ class Record(NDArrayOperatorsMixin):
             )
         )
 
-    @property
-    def slot0(self):
-        """
-        Equivalent to #__getitem__ with `"0"`, which selects slot `0` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["0"]
-
-    @property
-    def slot1(self):
-        """
-        Equivalent to #__getitem__ with `"1"`, which selects slot `1` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["1"]
-
-    @property
-    def slot2(self):
-        """
-        Equivalent to #__getitem__ with `"2"`, which selects slot `2` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["2"]
-
-    @property
-    def slot3(self):
-        """
-        Equivalent to #__getitem__ with `"3"`, which selects slot `3` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["3"]
-
-    @property
-    def slot4(self):
-        """
-        Equivalent to #__getitem__ with `"4"`, which selects slot `4` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["4"]
-
-    @property
-    def slot5(self):
-        """
-        Equivalent to #__getitem__ with `"5"`, which selects slot `5` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["5"]
-
-    @property
-    def slot6(self):
-        """
-        Equivalent to #__getitem__ with `"6"`, which selects slot `6` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["6"]
-
-    @property
-    def slot7(self):
-        """
-        Equivalent to #__getitem__ with `"7"`, which selects slot `7` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["7"]
-
-    @property
-    def slot8(self):
-        """
-        Equivalent to #__getitem__ with `"8"`, which selects slot `8` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["8"]
-
-    @property
-    def slot9(self):
-        """
-        Equivalent to #__getitem__ with `"9"`, which selects slot `9` from
-        the Record as a tuple.
-
-        See #ak.Array.slot0 for a more complete description.
-        """
-        return self["9"]
-
     def __str__(self):
         import awkward._v2._prettyprint
 
         return awkward._v2._prettyprint.valuestr(self, 1, 80)
 
     def __repr__(self):
+        return self._repr(80)
+
+    def _repr(self, limit_cols):
         import awkward._v2._prettyprint
 
         pytype = type(self).__name__
+
         if (
             self._layout.array.nplike.known_shape
             and self._layout.array.nplike.known_data
         ):
-            valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, 50)
             typestr = repr(str(self.type))[1:-1]
+            strwidth = max(
+                0, min(40, limit_cols - len(pytype) - len(" type='...'") - 3)
+            )
+            if len(pytype) - len(" type=''") - len(typestr) - 3 < limit_cols:
+                strwidth = max(
+                    0, limit_cols - len(pytype) - len(" type=''") - len(typestr) - 3
+                )
+            valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, strwidth)
+
         else:
+            typestr = repr(str(self._layout.form.type_from_behavior(self._behavior)))[
+                1:-1
+            ]
             valuestr = "-typetracer"
-            typestr = repr(
-                str(self._layout.array.form.type_from_behavior(self._behavior))
-            )[1:-1]
-        length = max(10, 80 - len(pytype) - 10 - len(valuestr))
+
+        length = max(3, limit_cols - len(pytype) - len("type='...'") - len(valuestr))
         if len(typestr) > length:
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
+
         return f"<{pytype}{valuestr} type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
@@ -2293,9 +2154,12 @@ class ArrayBuilder(Sized):
         return self.__repr__()
 
     def __repr__(self):
+        return self._repr(80)
+
+    def _repr(self, limit_cols):
         typestr = repr(self.typestr)
 
-        limit_type = 80 - len("<ArrayBuilder type=>")
+        limit_type = limit_cols - len("<ArrayBuilder type=>")
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 

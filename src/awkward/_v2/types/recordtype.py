@@ -89,7 +89,15 @@ class RecordType(Type):
                     else:
                         out = name + "[" + ", ".join(children) + "]"
                 else:
-                    pairs = [k + ": " + v for k, v in zip(self._fields, children)]
+                    pairs = []
+                    for k, v in zip(self._fields, children):
+                        if ak._v2._prettyprint.is_identifier.match(k) is None:
+                            key_str = repr(k)
+                            if key_str.startswith("u"):
+                                key_str = key_str[1:]
+                        else:
+                            key_str = k
+                        pairs.append(key_str + ": " + v)
                     if name is None:
                         out = "{" + ", ".join(pairs) + "}"
                     else:

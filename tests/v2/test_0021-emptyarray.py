@@ -67,7 +67,7 @@ def test_getitem():
 
     assert to_list(a[2, 1]) == []
     assert a.typetracer[2, 1].form == a[2, 1].form
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         a[2, 1, 0]
     assert to_list(a[2, 1][()]) == []
     assert a.typetracer[2, 1][()].form == a[2, 1][()].form
@@ -102,7 +102,7 @@ def test_getitem():
 
     assert to_list(a[1:, 1:]) == [[[]], [[], []]]
     assert a.typetracer[1:, 1:].form == a[1:, 1:].form
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         a[1:, 1:, 0]
 
 
@@ -151,14 +151,14 @@ def test_from_json_getitem():
     assert a[2].tolist() == [[], [], []]
 
     assert a[2, 1].tolist() == []
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(IndexError) as excinfo:
         a[2, 1, 0]
     assert "index out of range while attempting to get index 0" in str(excinfo.value)
     assert a[2, 1][()].tolist() == []
     with pytest.raises(IndexError) as excinfo:
         a[2, 1][0]
     assert (
-        "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    0\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nError details: array is empty."
+        "<Array [] type='0 * unknown'>\n\nwith\n\n    0\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nError details: array is empty."
         in str(excinfo.value)
     )
     assert a[2, 1][100:200].tolist() == []
@@ -171,13 +171,13 @@ def test_from_json_getitem():
     with pytest.raises(IndexError) as excinfo:
         a[2, 1][100:200, 0]
     assert (
-        "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 0)\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nError details: array is empty."
+        "<Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 0)\n\nat inner EmptyArray of length 0, using sub-slice 0.\n\nError details: array is empty."
         in str(excinfo.value)
     )
     with pytest.raises(IndexError) as excinfo:
         a[2, 1][100:200, 200:300]
     assert (
-        "cannot slice\n\n    <Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 200:300)\n\nat inner EmptyArray of length 0, using sub-slice 200:300.\n\nError details: array is empty."
+        "<Array [] type='0 * unknown'>\n\nwith\n\n    (100:200, 200:300)\n\nat inner EmptyArray of length 0, using sub-slice 200:300.\n\nError details: array is empty."
         in str(excinfo.value)
     )
 
@@ -187,6 +187,6 @@ def test_from_json_getitem():
     # assert ", too many dimensions in slice" in str(excinfo.value)
 
     assert a[1:, 1:].tolist() == [[[]], [[], []]]
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(IndexError) as excinfo:
         a[1:, 1:, 0]
     assert "index out of range while attempting to get index 0" in str(excinfo.value)

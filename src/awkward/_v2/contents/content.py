@@ -478,8 +478,7 @@ class Content:
             )
 
     def __getitem__(self, where):
-        with ak._v2._util.SlicingErrorContext(self, where):
-            return self._getitem(where)
+        return self._getitem(where)
 
     def _getitem(self, where):
         if ak._util.isint(where):
