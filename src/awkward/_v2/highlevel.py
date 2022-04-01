@@ -366,7 +366,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             raise ak._v2._util.error(TypeError("behavior must be None or a dict"))
 
-    class Mask(object):
+    class Mask:
         def __init__(self, array):
             self._array = array
 
