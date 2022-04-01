@@ -63,6 +63,8 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ByteMaskedArray_getitem_nextcarry",
         "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
         "awkward_ByteMaskedArray_reduce_next_64",
+        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+        "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
     ]
     template_specializations = []
     for keys, value in kernel_dict.items():
