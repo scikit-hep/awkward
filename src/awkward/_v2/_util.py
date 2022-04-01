@@ -185,7 +185,10 @@ def error(exception, error_context=None):
                 valuestr = "???"
             if len(valuestr) > 80:
                 valuestr = valuestr[:77] + "..."
-            arguments.append(f"\n        {name} = {valuestr}")
+            if isstr(name):
+                arguments.append(f"\n        {name} = {valuestr}")
+            else:
+                arguments.append(f"\n        {valuestr}")
 
         extra_line = "" if len(arguments) == 0 else "\n    "
         return type(exception)(

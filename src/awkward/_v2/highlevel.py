@@ -4,7 +4,7 @@
 #
 #    - [ ] all docstrings are old
 #    - [X] 'Mask' nested class and 'mask' property
-#    - [ ] `__array__`
+#    - [X] `__array__`
 #    - [ ] `__array_ufunc__`
 #    - [ ] `__array_function__`
 #    - [X] `numba_type`
@@ -1258,32 +1258,37 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             stream.write(out + "\n")
 
-    #     def __array__(self, *args, **kwargs):
-    #         """
-    #         Intercepts attempts to convert this Array into a NumPy array and
-    #         either performs a zero-copy conversion or raises an error.
+    def __array__(self, *args, **kwargs):
+        """
+        Intercepts attempts to convert this Array into a NumPy array and
+        either performs a zero-copy conversion or raises an error.
 
-    #         This function is also called by the
-    #         [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
-    #         family of functions, which have `copy=False` by default.
+        This function is also called by the
+        [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
+        family of functions, which have `copy=False` by default.
 
-    #             >>> np.asarray(ak.Array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
-    #             array([[1.1, 2.2, 3.3],
-    #                    [4.4, 5.5, 6.6]])
+            >>> np.asarray(ak.Array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+            array([[1.1, 2.2, 3.3],
+                   [4.4, 5.5, 6.6]])
 
-    #         If the data are numerical and regular (nested lists have equal lengths
-    #         in each dimension, as described by the #type), they can be losslessly
-    #         converted to a NumPy array and this function returns without an error.
+        If the data are numerical and regular (nested lists have equal lengths
+        in each dimension, as described by the #type), they can be losslessly
+        converted to a NumPy array and this function returns without an error.
 
-    #         Otherwise, the function raises an error. It does not create a NumPy
-    #         array with dtype `"O"` for `np.object_` (see the
-    #         [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
-    #         since silent conversions to dtype `"O"` arrays would not only be a
-    #         significant performance hit, but would also break functionality, since
-    #         nested lists in a NumPy `"O"` array are severed from the array and
-    #         cannot be sliced as dimensions.
-    #         """
-    #         return ak._v2._connect.numpy.convert_to_array(self._layout, args, kwargs)
+        Otherwise, the function raises an error. It does not create a NumPy
+        array with dtype `"O"` for `np.object_` (see the
+        [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
+        since silent conversions to dtype `"O"` arrays would not only be a
+        significant performance hit, but would also break functionality, since
+        nested lists in a NumPy `"O"` array are severed from the array and
+        cannot be sliced as dimensions.
+        """
+        arguments = {0: self}
+        for i, arg in enumerate(args):
+            arguments[i + 1] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext("np.asarray", arguments):
+            return ak._v2._connect.numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -2328,15 +2333,20 @@ class ArrayBuilder(Sized):
             limit_rows=limit_rows, limit_cols=limit_cols, type=type, stream=stream
         )
 
-    # def __array__(self, *args, **kwargs):
-    #     """
-    #     Intercepts attempts to convert a #snapshot of this array into a
-    #     NumPy array and either performs a zero-copy conversion or raises
-    #     an error.
+    def __array__(self, *args, **kwargs):
+        """
+        Intercepts attempts to convert a #snapshot of this array into a
+        NumPy array and either performs a zero-copy conversion or raises
+        an error.
 
-    #     See #ak.Array.__array__ for a more complete description.
-    #     """
-    #     return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
+        See #ak.Array.__array__ for a more complete description.
+        """
+        arguments = {0: self}
+        for i, arg in enumerate(args):
+            arguments[i + 1] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext("np.asarray", arguments):
+            return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
     @property
     def numba_type(self):
