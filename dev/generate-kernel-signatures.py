@@ -73,6 +73,11 @@ cuda_kernels_impl = [
     "awkward_ByteMaskedArray_reduce_next_64",
     "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_index_rpad_and_clip_axis1",
+    "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_getitem_nextcarry_outindex_mask"
 ]
 
 
@@ -385,6 +390,7 @@ def by_signature(cuda_kernel_templates):
                                 )
                             )
                         else:
+
                             python_code = code[
                                 code.find("// BEGIN PYTHON") : code.find(
                                     "// END PYTHON"
@@ -393,10 +399,15 @@ def by_signature(cuda_kernel_templates):
                             python_code = python_code.replace("// BEGIN PYTHON", "")
                             python_code = python_code.replace("// ", "    ")
 
+                            if "{dtype_specializations}" in python_code:
+                                python_code = python_code.replace("{dtype_specializations}", ", ".join(special[1:]))
+
                             file.write(python_code)
                             file.write(
-                                """    out[{}] = f
+                                """    f.dir = [{}]    
+    out[{}] = f
 """.format(
+                                    ", ".join(dirlist),
                                     ", ".join(special)
                                 )
                             )
