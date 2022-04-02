@@ -1,19 +1,24 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 // BEGIN PYTHON
-// def f(grid, block, tocarry, mask, length, validwhen, invocation_index, err_code):
+// def f(grid, block, args):
+//     (tocarry, mask, length, validwhen, invocation_index, err_code) = args
 //     scan_in_array = cupy.empty(length, dtype=cupy.int64)
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_a']))(grid, block, (mask, scan_in_array, mask, validwhen, length, invocation_index, err_code))
-//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, length, invocation_index, err_code))
-//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_b']))(grid, block, (scan_in_array, tocarry, mask, validwhen, length, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_a', tocarry.dtype, mask.dtype]))(grid, block, (tocarry, mask, validwhen, length, scan_in_array, invocation_index, err_code))
+//     scan_in_array = inclusive_scan(grid, block, (scan_in_array, invocation_index, err_code))
+//     cuda_kernel_templates.get_function(fetch_specialization(['awkward_ByteMaskedArray_getitem_nextcarry_b', tocarry.dtype, mask.dtype]))(grid, block, (tocarry, mask, validwhen, length, scan_in_array, invocation_index, err_code))
+// out["awkward_ByteMaskedArray_getitem_nextcarry_a", {dtype_specializations}] = None
+// out["awkward_ByteMaskedArray_getitem_nextcarry_b", {dtype_specializations}] = None
 // END PYTHON
 
+template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_getitem_nextcarry_a(const int8_t* mask,
-                                            int64_t* scan_in_array,
+awkward_ByteMaskedArray_getitem_nextcarry_a(T* tocarry,
+                                            const C* mask,
                                             bool validwhen,
                                             int64_t length,
-                                            uint64_t* invocation_index,
+                                            int64_t* scan_in_array,
+                                            uint64_t invocation_index,
                                             uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -28,20 +33,21 @@ awkward_ByteMaskedArray_getitem_nextcarry_a(const int8_t* mask,
   }
 }
 
+template <typename T, typename C>
 __global__ void
-awkward_ByteMaskedArray_getitem_nextcarry_b(int64_t* scan_in_array,
-                                            int64_t* to_carry,
-                                            const int8_t* mask,
+awkward_ByteMaskedArray_getitem_nextcarry_b(T* tocarry,
+                                            const C* mask,
                                             bool validwhen,
                                             int64_t length,
-                                            uint64_t* invocation_index,
+                                            int64_t* scan_in_array,
+                                            uint64_t invocation_index,
                                             uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (thread_id < length) {
       if ((mask[thread_id] != 0) == validwhen) {
-        to_carry[scan_in_array[thread_id] - 1] = thread_id;
+        tocarry[scan_in_array[thread_id] - 1] = thread_id;
       }
     }
   }

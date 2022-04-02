@@ -77,7 +77,7 @@ cuda_kernels_impl = [
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
-    "awkward_IndexedArray_getitem_nextcarry_outindex_mask"
+    "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
 ]
 
 
@@ -380,7 +380,8 @@ def by_signature(cuda_kernel_templates):
                         if "// BEGIN PYTHON" not in code:
                             file.write(
                                 """
-    f = lambda: cuda_kernel_templates.get_function(fetch_specialization([{}]))
+    def f(grid, block, args):
+        cuda_kernel_templates.get_function(fetch_specialization([{}]))(grid, block, args)
     f.dir = [{}]
     out[{}] = f
 """.format(
@@ -400,15 +401,16 @@ def by_signature(cuda_kernel_templates):
                             python_code = python_code.replace("// ", "    ")
 
                             if "{dtype_specializations}" in python_code:
-                                python_code = python_code.replace("{dtype_specializations}", ", ".join(special[1:]))
+                                python_code = python_code.replace(
+                                    "{dtype_specializations}", ", ".join(special[1:])
+                                )
 
                             file.write(python_code)
                             file.write(
-                                """    f.dir = [{}]    
+                                """    f.dir = [{}]
     out[{}] = f
 """.format(
-                                    ", ".join(dirlist),
-                                    ", ".join(special)
+                                    ", ".join(dirlist), ", ".join(special)
                                 )
                             )
                 else:

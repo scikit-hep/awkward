@@ -534,6 +534,209 @@ def gencpukerneltests(specdict):
                 f.write("\n")
 
 
+cuda_kernels_tests = [
+    "awkward_ListArray_num",
+    "awkward_RegularArray_num",
+    "awkward_ListArray_validity",
+    "awkward_BitMaskedArray_to_ByteMaskedArray",
+    "awkward_ListArray_compact_offsets",
+    "awkward_new_Identities",
+    "awkward_Identities32_to_Identities64",
+    "awkward_ListOffsetArray_flatten_offsets",
+    "awkward_IndexedArray_overlay_mask",
+    "awkward_IndexedArray_mask",
+    "awkward_ByteMaskedArray_mask",
+    "awkward_zero_mask",
+    "awkward_RegularArray_compact_offsets",
+    "awkward_IndexedArray_fill_count",
+    "awkward_UnionArray_fillna",
+    "awkward_localindex",
+    "awkward_content_reduce_zeroparents_64",
+    "awkward_ListOffsetArray_reduce_global_startstop_64",
+    "awkward_IndexedArray_reduce_next_fix_offsets_64",
+    "awkward_Index_to_Index64",
+    "awkward_carry_arange",
+    "awkward_index_carry_nocheck",
+    "awkward_NumpyArray_contiguous_init",
+    "awkward_NumpyArray_getitem_next_array_advanced",
+    "awkward_NumpyArray_getitem_next_at",
+    "awkward_RegularArray_getitem_next_array_advanced",
+    "awkward_ByteMaskedArray_toIndexedOptionArray",
+    "awkward_combinations",  # ?
+    "awkward_IndexedArray_simplify",
+    "awkward_UnionArray_validity",
+    "awkward_index_carry",
+    "awkward_ByteMaskedArray_getitem_carry",
+    "awkward_IndexedArray_validity",
+    "awkward_ByteMaskedArray_overlay_mask",
+    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+    "awkward_RegularArray_getitem_carry",
+    "awkward_NumpyArray_getitem_next_array",
+    "awkward_RegularArray_localindex",
+    "awkward_NumpyArray_contiguous_next",
+    "awkward_NumpyArray_getitem_next_range",
+    "awkward_NumpyArray_getitem_next_range_advanced",
+    "awkward_RegularArray_getitem_next_range",
+    "awkward_RegularArray_getitem_next_range_spreadadvanced",
+    "awkward_RegularArray_getitem_next_array",
+    "awkward_missing_repeat",
+    "awkward_Identities_getitem_carry",
+    "awkward_RegularArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_next_array",
+    "awkward_RegularArray_broadcast_tooffsets",
+    "awkward_NumpyArray_fill_tobool",
+    "awkward_NumpyArray_reduce_adjust_starts_64",
+    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+    "awkward_regularize_arrayslice",
+    "awkward_RegularArray_getitem_next_at",
+    "awkward_ListOffsetArray_compact_offsets",
+    "awkward_BitMaskedArray_to_IndexedOptionArray",
+    "awkward_ByteMaskedArray_getitem_nextcarry",
+    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+    "awkward_ByteMaskedArray_reduce_next_64",
+    "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_index_rpad_and_clip_axis1",
+    "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
+]
+
+
+def gencudakerneltests(specdict):
+    print("Generating files for testing CUDA kernels")
+
+    tests_cuda_kernels = os.path.join(CURRENT_DIR, "..", "tests-cuda-kernels")
+    if os.path.exists(tests_cuda_kernels):
+        shutil.rmtree(tests_cuda_kernels)
+    os.mkdir(tests_cuda_kernels)
+    with open(os.path.join(tests_cuda_kernels, "__init__.py"), "w") as f:
+        f.write(
+            """# AUTO GENERATED ON {}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+""".format(
+                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+            )
+        )
+
+    for spec in specdict.values():
+        if spec.name in cuda_kernels_tests:
+            with open(
+                os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
+            ) as f:
+                f.write(
+                    """# AUTO GENERATED ON {}
+# DO NOT EDIT BY HAND!
+#
+# To regenerate file, run
+#
+#     python dev/generate-tests.py
+#
+
+# fmt: off
+
+""".format(
+                        datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                    )
+                )
+
+                f.write(
+                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._v2._connect.cuda as ak_cu\n\ncupy_nplike = ak.nplike.Cupy.instance()\n\n"
+                )
+                num = 1
+                if spec.tests == []:
+                    f.write(
+                        "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
+                    )
+                    f.write("def test_cpu" + spec.name + "_" + str(num) + "():\n")
+                    f.write(
+                        " " * 4
+                        + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
+                    )
+                for test in spec.tests:
+                    f.write("def test_cuda_" + spec.name + "_" + str(num) + "():\n")
+                    num += 1
+                    dtypes = []
+                    for arg, val in test["inargs"].items():
+                        typename = remove_const(
+                            next(
+                                argument
+                                for argument in spec.args
+                                if argument.name == arg
+                            ).typename
+                        )
+                        if "List" not in typename:
+                            f.write(" " * 4 + arg + " = " + str(val) + "\n")
+                        if "List" in typename:
+                            count = typename.count("List")
+                            typename = gettypename(typename)
+                            if count == 1:
+                                f.write(
+                                    " " * 4
+                                    + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                        arg, val, typename
+                                    )
+                                )
+                                dtypes.append("cupy." + typename)
+                            elif count == 2:
+                                raise NotImplementedError
+                                # f.write(
+                                #     " " * 4
+                                #     + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
+                                #         arg, typename
+                                #     )
+                                # )
+                    cuda_string = (
+                        "funcC = cupy_nplike['"
+                        + spec.name
+                        + "', {}]\n".format(", ".join(dtypes))
+                    )
+                    f.write(" " * 4 + cuda_string)
+                    args = ""
+                    count = 0
+                    for arg in spec.args:
+                        if count == 0:
+                            args += arg.name
+                            count += 1
+                        else:
+                            args += ", " + arg.name
+                    if test["success"]:
+                        f.write(" " * 4 + "funcC(" + args + ")\n")
+                        f.write(
+                            """
+    try:
+        ak_cu.synchronize_cuda()
+    except:
+        pytest.fail("This test case shouldn't have raised an error")
+"""
+                        )
+
+                        for arg, val in test["outargs"].items():
+                            f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
+                            if isinstance(val, list):
+                                f.write(
+                                    " " * 4
+                                    + "assert cupy.array_equal({0}[:len(pytest_{0})], cupy.array(pytest_{0}))\n".format(
+                                        arg
+                                    )
+                                )
+                            else:
+                                f.write(
+                                    " " * 4 + "assert {0} == pytest_{0}\n".format(arg)
+                                )
+                    f.write("\n")
+
+
 def genunittests():
     print("Generating Unit Tests")
     datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
@@ -575,6 +778,7 @@ def genunittests():
 
 if __name__ == "__main__":
     specdict = readspec()
-    genspectests(specdict)
-    gencpukerneltests(specdict)
-    genunittests()
+    # genspectests(specdict)
+    # gencpukerneltests(specdict)
+    # genunittests()
+    gencudakerneltests(specdict)

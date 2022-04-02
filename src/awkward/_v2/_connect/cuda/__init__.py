@@ -49,11 +49,20 @@ dtype_to_ctype = {
 
 def fetch_specialization(keys):
     specialized_name = keys[0].replace("'", "") + "<"
-    keys = keys[1:]
 
+    keys = keys[1:]
     for key in keys[:-1]:
-        specialized_name = specialized_name + dtype_to_ctype[key] + ", "
-    specialized_name = specialized_name + dtype_to_ctype[keys[-1]] + ">"
+        if dtype_to_ctype.get(key) is None:
+            dtype_string = repr(key)
+            specialized_name = specialized_name + dtype_string.split("'")[1] + "_t, "
+        else:
+            specialized_name = specialized_name + dtype_to_ctype[key] + ", "
+
+    if dtype_to_ctype.get(keys[-1]) is None:
+        dtype_string = repr(keys[-1])
+        specialized_name = specialized_name + dtype_string.split("'")[1] + "_t>"
+    else:
+        specialized_name = specialized_name + dtype_to_ctype[keys[-1]] + ">"
 
     return specialized_name
 
@@ -69,12 +78,19 @@ def fetch_template_specializations(kernel_dict):
         "awkward_IndexedArray_flatten_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry_outindex",
-        "awkward_IndexedArray_getitem_nextcarry_outindex_mask"
+        "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
     ]
     template_specializations = []
+    import re
+
     for keys, value in kernel_dict.items():
-        if value is not None and keys[0] not in kernel_exclusions:
-            template_specializations.append(fetch_specialization(list(keys)))
+        pattern = re.compile("_[a-z]$")
+        if keys[0] not in kernel_exclusions:
+            if value is None:
+                if pattern.search(keys[0]):
+                    template_specializations.append(fetch_specialization(list(keys)))
+            else:
+                template_specializations.append(fetch_specialization(list(keys)))
 
     return template_specializations
 

@@ -30,18 +30,19 @@ typedef unsigned long long uintmax_t;
 
 #define RAISE_ERROR(ERROR_KERNEL_CODE) \
   atomicMin(err_code,                  \
-            invocation_index*(1 << ERROR_BITS) + (int)(ERROR_KERNEL_CODE));
+            invocation_index*(1 << ERROR_BITS) + (int)( ERROR_KERNEL_CODE ));
 
 // BEGIN PYTHON
-// def inclusive_scan(grid, block, d_in, length, invocation_index, err_code):
+// def inclusive_scan(grid, block, args):
+//     (d_in, invocation_index, err_code) = args
 //     import math
-//     d_out = cupy.empty(length, dtype=cupy.int64)
-//     d_final = cupy.empty(length, dtype=cupy.int64)
+//     d_out = cupy.empty(len(d_in), dtype=cupy.int64)
+//     d_final = cupy.empty(len(d_in), dtype=cupy.int64)
 //     stride = 1
-//     total_steps = math.ceil(math.log2(length))
+//     total_steps = math.ceil(math.log2(len(d_in)))
 //     for curr_step in range(1, total_steps + 1):
 //         in_out_flag = (curr_step % 2) != 0
-//         cuda_kernel_templates.get_function(fetch_specialization['inclusive_scan_kernel', cupy.int64])(grid, block, (d_in, d_out, d_final, curr_step, total_steps, stride, in_out_flag, length, invocation_index, err_code))
+//         cuda_kernel_templates.get_function(fetch_specialization(['inclusive_scan_kernel', cupy.int64]))(grid, block, (d_in, d_out, d_final, curr_step, total_steps, stride, in_out_flag, len(d_in), invocation_index, err_code))
 //         stride = stride * 2
 //     return d_final
 // out['inclusive_scan_kernel', cupy.int64] = inclusive_scan
