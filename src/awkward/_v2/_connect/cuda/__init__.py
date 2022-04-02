@@ -69,7 +69,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_IndexedArray_flatten_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry_outindex",
-        "awkward_IndexedArray_getitem_nextcarry_outindex_mask"
+        "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
     ]
     template_specializations = []
     for keys, value in kernel_dict.items():
