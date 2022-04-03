@@ -30,7 +30,7 @@ typedef unsigned long long uintmax_t;
 
 #define RAISE_ERROR(ERROR_KERNEL_CODE) \
   atomicMin(err_code,                  \
-            invocation_index*(1 << ERROR_BITS) + (int)( ERROR_KERNEL_CODE ));
+            invocation_index*(1 << ERROR_BITS) + (int)(ERROR_KERNEL_CODE));
 
 // BEGIN PYTHON
 // def inclusive_scan(grid, block, args):

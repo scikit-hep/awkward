@@ -17,15 +17,14 @@ enum class INDEXEDARRAY_GETITEM_NEXTCARRY_OUTINDEX_MASK_ERRORS {
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_IndexedArray_getitem_nextcarry_outindex_mask_a(
-    T* tocarry,
-    C* toindex,
-    const U* fromindex,
-    int64_t lenindex,
-    int64_t lencontent,
-    int64_t* scan_in_array,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
+awkward_IndexedArray_getitem_nextcarry_outindex_mask_a(T* tocarry,
+                                                       C* toindex,
+                                                       const U* fromindex,
+                                                       int64_t lenindex,
+                                                       int64_t lencontent,
+                                                       int64_t* scan_in_array,
+                                                       uint64_t invocation_index,
+                                                       uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread_id < lenindex) {
@@ -44,15 +43,14 @@ awkward_IndexedArray_getitem_nextcarry_outindex_mask_a(
 
 template <typename T, typename C, typename U>
 __global__ void
-awkward_IndexedArray_getitem_nextcarry_outindex_mask_b(
-    T* tocarry,
-    C* toindex,
-    const U* fromindex,
-    int64_t lenindex,
-    int64_t lencontent,
-    int64_t* scan_in_array,
-    uint64_t invocation_index,
-    uint64_t* err_code) {
+awkward_IndexedArray_getitem_nextcarry_outindex_mask_b(T* tocarry,
+                                                       C* toindex,
+                                                       const U* fromindex,
+                                                       int64_t lenindex,
+                                                       int64_t lencontent,
+                                                       int64_t* scan_in_array,
+                                                       uint64_t invocation_index,
+                                                       uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 

@@ -15,12 +15,14 @@ awkward_Identities_getitem_carry(T* newidentitiesptr,
                                  uint64_t invocation_index,
                                  uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) % lencarry;
+    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / width;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % width;
-    if (carryptr[thread_id] >= length) {
-      RAISE_ERROR(IDENTITIES_GETITEM_CARRY::IND_OUT_OF_RANGE)
+    if (thread_id < lencarry) {
+      if (carryptr[thread_id] >= length) {
+        RAISE_ERROR(IDENTITIES_GETITEM_CARRY::IND_OUT_OF_RANGE)
+      }
+      newidentitiesptr[width * thread_id + thready_id] =
+          identitiesptr[width * carryptr[thread_id] + thready_id];
     }
-    newidentitiesptr[width * thread_id + thready_id] =
-        identitiesptr[width * carryptr[thread_id] + thready_id];
   }
 }

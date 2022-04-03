@@ -79,6 +79,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_IndexedArray_getitem_nextcarry",
         "awkward_IndexedArray_getitem_nextcarry_outindex",
         "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
+        "awkward_ListArray_compact_offsets"
     ]
     template_specializations = []
     import re

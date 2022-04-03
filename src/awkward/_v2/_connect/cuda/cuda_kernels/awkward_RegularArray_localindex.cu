@@ -8,9 +8,11 @@ awkward_RegularArray_localindex(T* toindex,
                                 uint64_t invocation_index,
                                 uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) % length;
+    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / size;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % size;
 
-    toindex[((thread_id * size) + thready_id)] = thready_id;
+    if (thread_id < length) {
+      toindex[((thread_id * size) + thready_id)] = thready_id;
+    }
   }
 }

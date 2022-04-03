@@ -10,12 +10,14 @@ awkward_RegularArray_getitem_jagged_expand(T* multistarts,
                                            uint64_t invocation_index,
                                            uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) % regularlength;
+    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / regularsize;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % regularsize;
 
-    multistarts[(thread_id * regularsize) + thready_id] =
-        singleoffsets[thready_id];
-    multistops[(thread_id * regularsize) + thready_id] =
-        singleoffsets[thready_id + 1];
+    if (thread_id < regularlength) {
+      multistarts[(thread_id * regularsize) + thready_id] =
+          singleoffsets[thready_id];
+      multistops[(thread_id * regularsize) + thready_id] =
+          singleoffsets[thready_id + 1];
+    }
   }
 }

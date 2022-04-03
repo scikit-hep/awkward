@@ -25,7 +25,8 @@ class Argument:
 
 
 class Specification:
-    def __init__(self, spec, testdata, blacklisted):
+    def __init__(self, templatized_kernel_name, spec, testdata, blacklisted):
+        self.templatized_kernel_name = templatized_kernel_name
         self.name = spec["name"]
         self.args = []
         for arg in spec["args"]:
@@ -188,6 +189,7 @@ def readspec():
             if "def " in spec["definition"]:
                 for childfunc in spec["specializations"]:
                     specdict[childfunc["name"]] = Specification(
+                        spec["name"],
                         childfunc,
                         data,
                         not spec["automatic-tests"],
@@ -630,7 +632,7 @@ def gencudakerneltests(specdict):
         )
 
     for spec in specdict.values():
-        if spec.name in cuda_kernels_tests:
+        if spec.templatized_kernel_name in cuda_kernels_tests:
             with open(
                 os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
             ) as f:
@@ -678,8 +680,11 @@ def gencudakerneltests(specdict):
                         if "List" not in typename:
                             f.write(" " * 4 + arg + " = " + str(val) + "\n")
                         if "List" in typename:
+
                             count = typename.count("List")
                             typename = gettypename(typename)
+                            if typename == "bool" or typename == "float":
+                                typename = typename + "_"
                             if count == 1:
                                 f.write(
                                     " " * 4
@@ -698,7 +703,7 @@ def gencudakerneltests(specdict):
                                 # )
                     cuda_string = (
                         "funcC = cupy_nplike['"
-                        + spec.name
+                        + spec.templatized_kernel_name
                         + "', {}]\n".format(", ".join(dtypes))
                     )
                     f.write(" " * 4 + cuda_string)
@@ -778,7 +783,7 @@ def genunittests():
 
 if __name__ == "__main__":
     specdict = readspec()
-    # genspectests(specdict)
-    # gencpukerneltests(specdict)
-    # genunittests()
+    genspectests(specdict)
+    gencpukerneltests(specdict)
+    genunittests()
     gencudakerneltests(specdict)

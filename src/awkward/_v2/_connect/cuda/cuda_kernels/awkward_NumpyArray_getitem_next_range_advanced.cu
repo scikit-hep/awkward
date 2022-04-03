@@ -14,15 +14,13 @@ awkward_NumpyArray_getitem_next_range_advanced(T* nextcarryptr,
                                                uint64_t invocation_index,
                                                uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    int64_t thready_id = blockIdx.y * blockDim.y + threadIdx.y;
+    int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x / lenhead;
+    int64_t thready_id = blockIdx.x * blockDim.x + threadIdx.x % lenhead;
     if (thread_id < lencarry) {
-      if (thready_id < lenhead) {
-        nextcarryptr[((thread_id * lenhead) + thready_id)] =
-            (((skip * carryptr[thread_id]) + start) + (thready_id * step));
-        nextadvancedptr[((thread_id * lenhead) + thready_id)] =
-            advancedptr[thread_id];
-      }
+      nextcarryptr[((thread_id * lenhead) + thready_id)] =
+          (((skip * carryptr[thread_id]) + start) + (thready_id * step));
+      nextadvancedptr[((thread_id * lenhead) + thready_id)] =
+          advancedptr[thread_id];
     }
   }
 }
