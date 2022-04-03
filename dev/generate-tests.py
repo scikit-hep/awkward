@@ -604,6 +604,10 @@ cuda_kernels_tests = [
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
     "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
+    "awkward_IndexedArray_reduce_next_64",
+    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
 ]
 
 
