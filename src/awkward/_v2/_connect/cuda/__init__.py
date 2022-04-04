@@ -99,7 +99,7 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_argmin_bool_64",
         "awkward_reduce_countnonzero",
         "awkward_reduce_max",
-        "awkward_reduce_min"
+        "awkward_reduce_min",
     ]
     template_specializations = []
     import re
