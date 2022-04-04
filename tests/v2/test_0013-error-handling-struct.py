@@ -120,16 +120,16 @@ def test_listarray_numpyarray():
     content = ak._v2.contents.NumpyArray(np.arange(10) * 1.1)
     array = ak._v2.contents.ListArray(starts, stops, content)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[2, 20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[2, -20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[1:][2, 20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[1:][2, -20]
 
     with pytest.raises(ValueError):
@@ -165,7 +165,7 @@ def test_listarray_listarray_numpyarray():
             20,
         ]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[2, 20]
 
     with pytest.raises(IndexError):
@@ -176,10 +176,10 @@ def test_listarray_listarray_numpyarray():
             -20,
         ]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[2, -20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[1, 0, 20]
 
     with pytest.raises(IndexError):
@@ -190,10 +190,10 @@ def test_listarray_listarray_numpyarray():
             20,
         ]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[2, 20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[1:][2, 20]
 
     with pytest.raises(IndexError):
@@ -204,17 +204,17 @@ def test_listarray_listarray_numpyarray():
             -20,
         ]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[2, -20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[1:][2, -20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[1, 0, 20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[1:][2, 0, 20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array2[:, 1:][3, 0, 20]

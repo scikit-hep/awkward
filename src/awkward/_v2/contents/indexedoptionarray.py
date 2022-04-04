@@ -1120,10 +1120,6 @@ class IndexedOptionArray(Content):
             and parents.nplike is self._nplike
             and self._index.nplike is self._nplike
         )
-        if self._index.length == 0:
-            return ak._v2.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, None, self._nplike
-            )
 
         branch, depth = self.branch_depth
 

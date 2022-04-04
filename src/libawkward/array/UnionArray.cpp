@@ -2141,9 +2141,6 @@ namespace awkward {
                                    int64_t outlength,
                                    bool ascending,
                                    bool stable) const {
-    if (length() == 0) {
-      return std::make_shared<NumpyArray>(Index64(0));
-    }
     ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||

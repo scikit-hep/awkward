@@ -782,11 +782,6 @@ class RegularArray(Content):
         kind,
         order,
     ):
-        if self._length == 0:
-            return ak._v2.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, None, self._nplike
-            )
-
         next = self.toListOffsetArray64(True)
         out = next._argsort_next(
             negaxis,

@@ -312,7 +312,7 @@ class ListArray(Content):
                     slicestarts.length,
                     self._starts.data,
                     self._stops.data,
-                )
+                ),
             )
 
             asListOffsetArray64 = self.toListOffsetArray64(True)
@@ -553,7 +553,8 @@ class ListArray(Content):
                     self._stops.data,
                     lenstarts,
                     head,
-                )
+                ),
+                head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
@@ -1145,11 +1146,6 @@ class ListArray(Content):
         kind,
         order,
     ):
-        if self._starts.length == 0:
-            return ak._v2.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, None, self._nplike
-            )
-
         next = self.toListOffsetArray64(True)
         out = next._argsort_next(
             negaxis,

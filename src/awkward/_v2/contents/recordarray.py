@@ -741,12 +741,7 @@ class RecordArray(Content):
         kind,
         order,
     ):
-        if self._fields is None or len(self._fields) == 0:
-            return ak._v2.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, None, self._nplike
-            )
-        else:
-            raise ak._v2._util.error(NotImplementedError)
+        raise ak._v2._util.error(NotImplementedError)
 
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order

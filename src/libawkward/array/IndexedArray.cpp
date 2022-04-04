@@ -2522,10 +2522,6 @@ namespace awkward {
                                             int64_t outlength,
                                             bool ascending,
                                             bool stable) const {
-    if (length() == 0 ) {
-      return std::make_shared<NumpyArray>(Index64(0));
-    }
-
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
 

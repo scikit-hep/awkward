@@ -48,8 +48,13 @@ def _impl(array, allow_record, allow_other, numpytype):
     if isinstance(array, ak._v2.contents.Content):
         return array
 
-    elif allow_record and isinstance(array, ak._v2.record.Record):
-        return array
+    elif isinstance(array, ak._v2.record.Record):
+        if not allow_record:
+            raise ak._v2._util.error(
+                TypeError("ak._v2.Record objects are not allowed here")
+            )
+        else:
+            return array
 
     elif isinstance(array, ak._v2.highlevel.Array):
         return array.layout
