@@ -12,10 +12,12 @@ awkward_NumpyArray_getitem_next_range(T* nextcarryptr,
                                       uint64_t invocation_index,
                                       uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) % lencarry;
+    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / lenhead;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % lenhead;
 
-    nextcarryptr[(thread_id * lenhead) + thready_id] =
-        ((skip * carryptr[thread_id]) + start) + (thready_id * step);
+    if (thread_id < lencarry) {
+      nextcarryptr[(thread_id * lenhead) + thready_id] =
+          ((skip * carryptr[thread_id]) + start) + (thready_id * step);
+    }
   }
 }

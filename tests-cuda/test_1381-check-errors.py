@@ -27,16 +27,14 @@ def test():
     with pytest.raises(ValueError) as err:
         awkward._v2._connect.cuda.synchronize_cuda(stream)
 
-    err_string = """cannot slice
+    assert isinstance(err.value, ValueError)
 
-        <Array [1, 2, 3, 4, 5] type='5 * int64'>
+    assert """<Array [1, 2, 3, 4, 5] type='5 * int64'>
 
-    with
+with
 
-        (10)
+    (10)
 
-    Error details: index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_at)"""
-
-    assert err_string.replace("\n", "").replace(" ", "") in str(err).replace(
-        "\\n", ""
-    ).replace(" ", "")
+Error details: index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_at)""" in str(
+        err.value
+    )

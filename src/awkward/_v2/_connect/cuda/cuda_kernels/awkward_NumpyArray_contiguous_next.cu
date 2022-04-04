@@ -10,10 +10,12 @@ awkward_NumpyArray_contiguous_next(T* topos,
                                    uint64_t invocation_index,
                                    uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) % length;
+    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / skip;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % skip;
 
-    topos[(thread_id * skip) + thready_id] =
-        frompos[thread_id] + (thready_id * stride);
+    if (thread_id < length) {
+      topos[(thread_id * skip) + thready_id] =
+          frompos[thread_id] + (thready_id * stride);
+    }
   }
 }

@@ -49,20 +49,69 @@ dtype_to_ctype = {
 
 def fetch_specialization(keys):
     specialized_name = keys[0].replace("'", "") + "<"
-    keys = keys[1:]
 
+    keys = keys[1:]
     for key in keys[:-1]:
-        specialized_name = specialized_name + dtype_to_ctype[key] + ", "
-    specialized_name = specialized_name + dtype_to_ctype[keys[-1]] + ">"
+        if dtype_to_ctype.get(key) is None:
+            dtype_string = repr(key)
+            specialized_name = specialized_name + dtype_string.split("'")[1] + "_t, "
+        else:
+            specialized_name = specialized_name + dtype_to_ctype[key] + ", "
+
+    if dtype_to_ctype.get(keys[-1]) is None:
+        dtype_string = repr(keys[-1])
+        specialized_name = specialized_name + dtype_string.split("'")[1] + "_t>"
+    else:
+        specialized_name = specialized_name + dtype_to_ctype[keys[-1]] + ">"
 
     return specialized_name
 
 
 def fetch_template_specializations(kernel_dict):
+    # These kernels consist of multiple kernels don't have templated specializations of the same name
+    kernel_exclusions = [
+        "awkward_ByteMaskedArray_getitem_nextcarry",
+        "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+        "awkward_ByteMaskedArray_reduce_next_64",
+        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+        "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+        "awkward_IndexedArray_flatten_nextcarry",
+        "awkward_IndexedArray_getitem_nextcarry",
+        "awkward_IndexedArray_getitem_nextcarry_outindex",
+        "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
+        "awkward_ListArray_compact_offsets",
+        "awkward_IndexedArray_reduce_next_64",
+        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+        "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+        "awkward_MaskedArray_getitem_next_jagged_project",
+        "awkward_NumpyArray_getitem_boolean_nonzero",
+        "awkward_UnionArray_project",
+        "awkward_reduce_count_64",
+        "awkward_reduce_sum",
+        "awkward_reduce_sum_int32_bool_64",
+        "awkward_reduce_sum_int64_bool_64",
+        "awkward_reduce_sum_bool",
+        "awkward_reduce_prod_bool",
+        "awkward_reduce_argmax",
+        "awkward_reduce_argmax_bool_64",
+        "awkward_reduce_argmin",
+        "awkward_reduce_argmin_bool_64",
+        "awkward_reduce_countnonzero",
+        "awkward_reduce_max",
+        "awkward_reduce_min",
+    ]
     template_specializations = []
+    import re
+
     for keys, value in kernel_dict.items():
-        if value is not None:
-            template_specializations.append(fetch_specialization(list(keys)))
+        pattern = re.compile("_[a-z]$")
+        if keys[0] not in kernel_exclusions:
+            if value is None:
+                if pattern.search(keys[0]):
+                    template_specializations.append(fetch_specialization(list(keys)))
+            else:
+                template_specializations.append(fetch_specialization(list(keys)))
 
     return template_specializations
 

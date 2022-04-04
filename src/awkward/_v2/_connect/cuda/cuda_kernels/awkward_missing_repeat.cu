@@ -10,11 +10,12 @@ awkward_missing_repeat(T* outindex,
                        uint64_t invocation_index,
                        uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
-    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) % repetitions;
+    int64_t thread_id = (blockIdx.x * blockDim.x + threadIdx.x) / indexlength;
     int64_t thready_id = (blockIdx.x * blockDim.x + threadIdx.x) % indexlength;
-
-    T base = index[thready_id];
-    outindex[thread_id * indexlength + thready_id] =
-        base + (base >= 0 ? thread_id * regularsize : 0);
+    if (thread_id < repetitions) {
+      T base = index[thready_id];
+      outindex[thread_id * indexlength + thready_id] =
+          base + (base >= 0 ? thread_id * regularsize : 0);
+    }
   }
 }

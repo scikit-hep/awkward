@@ -68,6 +68,37 @@ cuda_kernels_impl = [
     "awkward_RegularArray_getitem_next_at",
     "awkward_ListOffsetArray_compact_offsets",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
+    "awkward_ByteMaskedArray_getitem_nextcarry",
+    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+    "awkward_ByteMaskedArray_reduce_next_64",
+    "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_index_rpad_and_clip_axis1",
+    "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
+    "awkward_IndexedArray_reduce_next_64",
+    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+    "awkward_ListOffsetArray_rpad_and_clip_axis1",
+    # "awkward_ListOffsetArray_rpad_axis1",
+    "awkward_MaskedArray_getitem_next_jagged_project",
+    "awkward_NumpyArray_getitem_boolean_nonzero",
+    "awkward_UnionArray_project",
+    "awkward_reduce_argmax",
+    "awkward_reduce_argmax_bool_64",
+    "awkward_reduce_argmin",
+    "awkward_reduce_argmin_bool_64",
+    "awkward_reduce_count_64",
+    "awkward_reduce_max",
+    "awkward_reduce_min",
+    "awkward_reduce_sum",
+    "awkward_reduce_sum_int32_bool_64" "awkward_reduce_sum_int64_bool_64",
+    "awkward_reduce_sum_bool",
+    "awkward_reduce_prod_bool",
+    "awkward_reduce_countnonzero",
 ]
 
 
@@ -300,6 +331,8 @@ def kernel_signatures_cuda_py(specification):
 
 # fmt: off
 
+# pylint: skip-file
+
 from numpy import (
     bool_,
     int8,
@@ -315,21 +348,9 @@ from numpy import (
 )
 
 from awkward._v2._connect.cuda import fetch_specialization
+from awkward._v2._connect.cuda import import_cupy
 
-class Kernel:
-    _kernels = None
-    _dir = None
-    def __init__(self, kernels, dir):
-        self._kernels = kernels
-        self._dir = dir
-
-    @property
-    def kernels(self):
-        return self._kernels
-
-    @property
-    def dir(self):
-        return self._dir
+cupy = import_cupy("Awkward Arrays with CUDA")
 """
         )
 
@@ -337,9 +358,27 @@ class Kernel:
             """
 def by_signature(cuda_kernel_templates):
     out = {}
-
 """
         )
+        with open(
+            os.path.join(
+                os.path.dirname(CURRENT_DIR),
+                "src",
+                "awkward",
+                "_v2",
+                "_connect",
+                "cuda",
+                "cuda_kernels",
+                "cuda_common.cu",
+            ),
+        ) as cu_file:
+            code = cu_file.read()
+            python_code = code[
+                code.find("// BEGIN PYTHON") : code.find("// END PYTHON")
+            ]
+            python_code = python_code.replace("// BEGIN PYTHON", "")
+            python_code = python_code.replace("// ", "    ")
+            file.write(python_code)
 
         for spec in specification["kernels"]:
             for childfunc in spec["specializations"]:
@@ -347,16 +386,56 @@ def by_signature(cuda_kernel_templates):
                 [type_to_pytype(x["type"], special) for x in childfunc["args"]]
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
                 if spec["name"] in cuda_kernels_impl:
-                    file.write(
-                        """
-    f = Kernel([lambda: cuda_kernel_templates.get_function(fetch_specialization([{}]))], [{}])
+                    with open(
+                        os.path.join(
+                            os.path.dirname(CURRENT_DIR),
+                            "src",
+                            "awkward",
+                            "_v2",
+                            "_connect",
+                            "cuda",
+                            "cuda_kernels",
+                            spec["name"] + ".cu",
+                        ),
+                    ) as cu_file:
+                        code = cu_file.read()
+
+                        if "// BEGIN PYTHON" not in code:
+                            file.write(
+                                """
+    def f(grid, block, args):
+        cuda_kernel_templates.get_function(fetch_specialization([{}]))(grid, block, args)
+    f.dir = [{}]
     out[{}] = f
 """.format(
-                            ", ".join(special),
-                            ", ".join(dirlist),
-                            ", ".join(special),
-                        )
-                    )
+                                    ", ".join(special),
+                                    ", ".join(dirlist),
+                                    ", ".join(special),
+                                )
+                            )
+                        else:
+
+                            python_code = code[
+                                code.find("// BEGIN PYTHON") : code.find(
+                                    "// END PYTHON"
+                                )
+                            ]
+                            python_code = python_code.replace("// BEGIN PYTHON", "")
+                            python_code = python_code.replace("// ", "    ")
+
+                            if "{dtype_specializations}" in python_code:
+                                python_code = python_code.replace(
+                                    "{dtype_specializations}", ", ".join(special[1:])
+                                )
+
+                            file.write(python_code)
+                            file.write(
+                                """    f.dir = [{}]
+    out[{}] = f
+""".format(
+                                    ", ".join(dirlist), ", ".join(special)
+                                )
+                            )
                 else:
                     file.write(
                         """
