@@ -82,6 +82,22 @@ cuda_kernels_impl = [
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
     "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+    "awkward_ListOffsetArray_rpad_and_clip_axis1",
+    # "awkward_ListOffsetArray_rpad_axis1",
+    "awkward_MaskedArray_getitem_next_jagged_project",
+    "awkward_NumpyArray_getitem_boolean_nonzero",
+    "awkward_UnionArray_project",
+    "awkward_reduce_argmax",
+    "awkward_reduce_argmax_bool_64",
+    "awkward_reduce_argmin",
+    "awkward_reduce_argmin_bool_64",
+    "awkward_reduce_count_64",
+    "awkward_reduce_max",
+    "awkward_reduce_min",
+    "awkward_reduce_sum",
+    "awkward_reduce_sum_int32_bool_64" "awkward_reduce_sum_int64_bool_64",
+    "awkward_reduce_sum_bool",
+    "awkward_reduce_prod_bool",
 ]
 
 
