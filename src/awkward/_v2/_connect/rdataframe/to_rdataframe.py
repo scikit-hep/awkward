@@ -126,6 +126,10 @@ def to_rdataframe(columns):
 template <typename ...ColumnTypes>
 class AwkwardArrayDataSource final : public ROOT::RDF::RDataSource {
 private:
+    using PointerHolderPtrs_t = std::vector<ROOT::Internal::TDS::TPointerHolder *>;
+    const PointerHolderPtrs_t fPointerHoldersModels;
+    std::vector<PointerHolderPtrs_t> fPointerHolders;
+
     unsigned int fNSlots{0U};
     std::tuple<ArrayWrapper<ColumnTypes>*...> fColumns;
     const std::vector<std::string> fColNames;
@@ -133,6 +137,7 @@ private:
     const std::map<std::string, std::string> fColTypesMap;
     std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
     std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges;
+    std::vector<const void*> fColPtrs;
 
     /// type-erased vector of pointers to pointers to column values - one per slot
     Record_t
@@ -192,11 +197,13 @@ private:
 
 public:
     AwkwardArrayDataSource(ArrayWrapper<ColumnTypes>&&... wrappers)
-        : fColumns(std::tuple<ArrayWrapper<ColumnTypes>*...>(std::move(&wrappers)...)),
+        : fColumns(std::tuple<ArrayWrapper<ColumnTypes>*...>(&wrappers...)),
           fColNames({wrappers.name...}),
           fColTypeNames({wrappers.type...}),
           fColTypesMap({{wrappers.name, wrappers.type}...}),
-          fColDataPointers({{wrappers.length, wrappers.ptrs}...}) {
+          fColDataPointers({{wrappers.length, wrappers.ptrs}...}),
+          fPointerHoldersModels({new ROOT::Internal::TDS::TTypedPointerHolder<ColumnTypes>(new ColumnTypes())...})
+           {
         cout << endl << "An AwkwardArrayDataSource with column names " << endl;
         cout << "columns number " << std::tuple_size<decltype(fColumns)>::value << endl;
         for (auto n : fColNames) {
