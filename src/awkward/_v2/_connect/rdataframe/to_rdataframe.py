@@ -8,15 +8,6 @@ import ROOT
 
 compiler = ROOT.gInterpreter.Declare
 
-rdf_columns = {}
-rdf_list_of_columns = []
-
-rdf_layouts = {}
-rdf_generators = {}
-rdf_lookups = {}
-rdf_array_views = {}
-rdf_array_wrappers = {}
-
 
 def to_rdataframe(columns):
 
@@ -78,6 +69,13 @@ def to_rdataframe(columns):
         )
         assert done is True
 
+    rdf_list_of_columns = []
+    rdf_layouts = {}
+    rdf_generators = {}
+    rdf_lookups = {}
+    rdf_array_views = {}
+    rdf_array_wrappers = {}
+
     for key in columns:
         rdf_layouts[key] = columns[key].layout
         rdf_generators[key] = ak._v2._connect.cling.togenerator(rdf_layouts[key].form)
@@ -117,7 +115,7 @@ def to_rdataframe(columns):
             rdf_lookups[key].arrayptrs,
         )
 
-        rdf_columns[rdf_array_wrappers[key].name] = rdf_array_wrappers[key]
+        # rdf_columns[rdf_array_wrappers[key].name] = rdf_array_wrappers[key]
         rdf_list_of_columns.append(rdf_array_wrappers[key])
 
     if not hasattr(ROOT, "AwkwardArrayDataSource"):
