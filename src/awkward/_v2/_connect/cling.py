@@ -127,10 +127,12 @@ namespace awkward {
   class ArrayView {
   public:
     ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : start_(start), stop_(stop), which_(which), ptrs_(ptrs) { }
+      : start_(start), stop_(stop), which_(which), ptrs_(ptrs) {
+      cout << "...ArrayView " << this << " is constructed." << endl;
+    }
 
     ~ArrayView() {
-        cout << "...ArrayView destructed!" << endl;
+        cout << "...ArrayView " << this << " is destructed!" << endl;
     }
 
     size_t size() const noexcept {
@@ -595,7 +597,13 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{ }}
+      : ArrayView(start, stop, which, ptrs) {{
+      cout << "......{self.class_type(key[1:])} " << this << " is constructed!" << endl;
+    }}
+
+    ~{self.class_type(key[1:])}() {{
+        cout << "......{self.class_type(key[1:])} " << this << " is destructed!" << endl;
+    }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -675,7 +683,13 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{ }}
+      : ArrayView(start, stop, which, ptrs) {{
+      cout << "......{self.class_type(key[1:])} " << this << " is constructed!" << endl;
+    }}
+
+    ~{self.class_type(key[1:])}() {{
+        cout << "......{self.class_type(key[1:])} " << this << " is destructed!" << endl;
+    }}
 
     typedef std::string value_type;
 
@@ -699,7 +713,13 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{ }}
+      : ArrayView(start, stop, which, ptrs) {{
+      cout << "......{self.class_type(key[1:])} " << this << " is constructed!" << endl;
+    }}
+
+    ~{self.class_type(key[1:])}() {{
+        cout << "......{self.class_type(key[1:])} " << this << " is destructed!" << endl;
+    }}
 
     typedef {value_type} value_type;
 
@@ -721,7 +741,13 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{ }}
+      : ArrayView(start, stop, which, ptrs) {{
+      cout << "......{self.class_type(key[1:])} " << this << " is constructed!" << endl;
+    }}
+
+    ~{self.class_type(key[1:])}() {{
+        cout << "......{self.class_type(key[1:])} " << this << " is destructed!" << endl;
+    }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -816,7 +842,13 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{ }}
+      : ArrayView(start, stop, which, ptrs) {{
+      cout << "......{self.class_type(key[1:])} " << this << " is constructed!" << endl;
+    }}
+
+    ~{self.class_type(key[1:])}() {{
+        cout << "......{self.class_type(key[1:])} " << this << " is destructed!" << endl;
+    }}
 
     typedef std::string value_type;
 
@@ -840,7 +872,13 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{ }}
+      : ArrayView(start, stop, which, ptrs) {{
+      cout << "......{self.class_type(key[1:])} " << this << " is constructed!" << endl;
+    }}
+
+    ~{self.class_type(key[1:])}() {{
+        cout << "......{self.class_type(key[1:])} " << this << " is destructed!" << endl;
+    }}
 
     typedef {value_type} value_type;
 
@@ -862,7 +900,13 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{ }}
+      : ArrayView(start, stop, which, ptrs) {{
+      cout << "......{self.class_type(key[1:])} " << this << " is constructed!" << endl;
+    }}
+
+    ~{self.class_type(key[1:])}() {{
+        cout << "......{self.class_type(key[1:])} " << this << " is destructed!" << endl;
+    }}
 
     typedef {self.value_type(key[1:])} value_type;
 
