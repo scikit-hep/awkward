@@ -14,6 +14,7 @@ rdf_list_of_columns = []
 rdf_layouts = {}
 rdf_generators = {}
 rdf_lookups = {}
+rdf_array_views = {}
 rdf_array_wrappers = {}
 
 
@@ -89,41 +90,35 @@ def to_rdataframe(columns):
             done = compiler(
                 f"""
                 auto make_array_{generated_type}_{key}(ssize_t length, ssize_t* ptrs) {{
-                    auto obj = {rdf_generators[key].dataset(flatlist_as_rvec=True)};
-                    cout << endl << "Make an " << ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)) << " at " <<  &obj << endl;
-                    return std::move(obj);
+                    return {rdf_generators[key].dataset(flatlist_as_rvec=True)};
                 }}
                 """.strip()
             )
             assert done is True
 
-        print("before call function")  # noqa: T001
-        array_view = getattr(ROOT, f"make_array_{generated_type}_{key}")(
+        rdf_array_views[key] = getattr(ROOT, f"make_array_{generated_type}_{key}")(
             len(rdf_layouts[key]), rdf_lookups[key].arrayptrs
         )
-        print("after call function")  # noqa: T001
 
         print(  # noqa: T001
             "Pass ",
-            type(array_view),
-            type(array_view).__cpp_name__,
+            type(rdf_array_views[key]),
+            type(rdf_array_views[key]).__cpp_name__,
             "to an ArrayWrapper...",
         )  # noqa: T001
 
-        print("before wrapping")  # noqa: T001
-        rdf_array_wrappers[key] = ROOT.ArrayWrapper[type(array_view).__cpp_name__](
-            array_view,
+        rdf_array_wrappers[key] = ROOT.ArrayWrapper[
+            type(rdf_array_views[key]).__cpp_name__
+        ](
+            rdf_array_views[key],
             f"awkward:{key}",
-            type(array_view).__cpp_name__,
+            type(rdf_array_views[key]).__cpp_name__,
             len(rdf_layouts[key]),
             rdf_lookups[key].arrayptrs,
         )
-        print("after wrapping")  # noqa: T001
 
-        print("before mapping")  # noqa: T001
         rdf_columns[rdf_array_wrappers[key].name] = rdf_array_wrappers[key]
         rdf_list_of_columns.append(rdf_array_wrappers[key])
-        print("after mapping")  # noqa: T001
 
     if not hasattr(ROOT, "AwkwardArrayDataSource"):
         done = compiler(
