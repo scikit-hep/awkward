@@ -193,3 +193,61 @@ class Record:
 
     def deep_copy(self):
         return Record(self._array.deep_copy(), copy.deepcopy(self._at))
+
+    def recursively_apply(
+        self,
+        action,
+        depth_context=None,
+        lateral_context=None,
+        keep_parameters=True,
+        numpy_to_regular=True,
+        return_array=True,
+        function_name=None,
+    ):
+        options = {
+            "keep_parameters": keep_parameters,
+            "numpy_to_regular": numpy_to_regular,
+            "return_array": return_array,
+            "function_name": function_name,
+        }
+
+        if return_array:
+
+            def continuation():
+                return Record(
+                    self._array._recursively_apply(
+                        action,
+                        1,
+                        copy.copy(depth_context),
+                        lateral_context,
+                        options,
+                    ),
+                    self._at,
+                )
+
+        else:
+
+            def continuation():
+                self._array._recursively_apply(
+                    action,
+                    1,
+                    copy.copy(depth_context),
+                    lateral_context,
+                    options,
+                )
+
+        result = action(
+            self,
+            depth=1,
+            depth_context=depth_context,
+            lateral_context=lateral_context,
+            continuation=continuation,
+            options=options,
+        )
+
+        if isinstance(result, Record):
+            return result
+        elif result is None:
+            return continuation()
+        else:
+            raise ak._v2._util.error(AssertionError(result))
