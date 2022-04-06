@@ -17,49 +17,32 @@ def to_rdataframe(columns):
         template <typename T>
         class ArrayWrapper {
         public:
+
             ArrayWrapper() = delete;
-            ArrayWrapper(const ArrayWrapper& wrapper) :
-                array_view(wrapper.array_view),
-                view_ptr(wrapper.view_ptr),
-                name(wrapper.name),
-                type(wrapper.type),
-                length(wrapper.length),
-                ptrs(wrapper.ptrs) {
-                cout << this << " is a copy of " << &wrapper << endl;
-                cout << "ptrs: " << this->ptrs << " is " << wrapper.ptrs << endl;
-                cout << "array_view: " << this->array_view << " is " << wrapper.array_view << endl;
-            }
-            ArrayWrapper& operator=(ArrayWrapper const& wrapper) {
-                array_view = wrapper.array_view;
-                view_ptr = wrapper.view_ptr;
-                name = wrapper.name;
-                type = wrapper.type;
-                length = wrapper.length;
-                ptrs = wrapper.ptrs;
-                cout << " >>>> ArrayWrapper& operator=(ArrayWrapper const& wrapper) "
-                    << this << " is an assignment of " << &wrapper << endl;
-            }
+
+            ArrayWrapper(const ArrayWrapper& wrapper) = delete;
+
+            ArrayWrapper& operator=(ArrayWrapper const& wrapper) = delete;
+
             ArrayWrapper(
                 const T& array_view_,
                 std::string name_,
                 std::string type_,
                 ssize_t length_,
                 ssize_t* ptrs_) :
-            array_view(&array_view_),
-            view_ptr(reinterpret_cast<const void*>(&array_view_)),
+            array_view(array_view_),
             name(name_),
             type(type_),
             length(length_),
             ptrs(ptrs_) {
-                cout << "ArrayWrapper>>> " <<  this << " is constructed: an ArrayWrapper for an " << name << " RDF column of an array " << ROOT::Internal::RDF::TypeID2TypeName(typeid(array_view_))
-                    << ", size " << array_view->size() << " at " << array_view
-                    << "(" << view_ptr << ")"<< endl;
+                cout << "ArrayWrapper>>> " <<  this << " is constructed: an ArrayWrapper for an " << name << " RDF column of an array "
+                    << ROOT::Internal::RDF::TypeID2TypeName(typeid(&array_view_))
+                    << ", size " << array_view.size() << " at " << &array_view << endl;
             }
 
-            ~ArrayWrapper() { cout << "........" << this << " ArrayWrapper of " << array_view << " is destructed." << endl; }
+            ~ArrayWrapper() { cout << "........" << this << " ArrayWrapper of " << &array_view << " is destructed." << endl; }
 
-            const T* array_view;
-            const void* view_ptr;
+            const T& array_view;
             const std::string name;
             const std::string type;
             const ssize_t length;
@@ -167,7 +150,7 @@ private:
         Record_t ret(fNSlots);
         for (auto slot : ROOT::TSeqU(fNSlots)) {
             cout << "slot " << slot << " and data at ";
-            output_tuple(fColumns);
+            SetColumnPointers(fColumns);
             cout << endl << "will return " << fColDataPointers[index].second << endl;
             cout << "need " << fColDataPointers[index].second;
             cout << endl;
@@ -176,17 +159,17 @@ private:
         return ret;
     }
 
-    template<typename ... Ts>
-    void output_tuple(std::tuple<Ts...> const &tpl) {
-    std::size_t length = sizeof...(Ts);
+    template<typename ... Columns>
+    void SetColumnPointers(std::tuple<Columns...> const &columns) {
+    std::size_t length = sizeof...(Columns);
     std::apply(
-        [length](auto const &...ps) {
+        [length](auto const &...col) {
             std::cout << "[ ";
             int k = 0;
-            ((std::cout << ps << (++k == length ? "" : "; ")), ...);
+            ((std::cout << col << (++k == length ? "" : "; ")), ...);
             std::cout << " ]";
         },
-        tpl);
+        columns);
     }
 
     size_t GetEntriesNumber() {
@@ -200,8 +183,7 @@ public:
           fColTypeNames({wrappers.type...}),
           fColTypesMap({{wrappers.name, wrappers.type}...}),
           fColDataPointers({{wrappers.length, wrappers.ptrs}...}),
-          fPointerHoldersModels({new ROOT::Internal::TDS::TTypedPointerHolder<ColumnTypes>(new ColumnTypes())...})
-           {
+          fPointerHoldersModels({new ROOT::Internal::TDS::TTypedPointerHolder<ColumnTypes>(new ColumnTypes())...}) {
         cout << endl << "An AwkwardArrayDataSource with column names " << endl;
         cout << "columns number " << std::tuple_size<decltype(fColumns)>::value << endl;
         for (auto n : fColNames) {
@@ -218,7 +200,7 @@ public:
             cout << it.first << " : " << it.second << endl;
         }
         cout << "GetEntriesNumber " << GetEntriesNumber() << endl;
-        output_tuple(fColumns);
+        SetColumnPointers(fColumns);
     }
 
     ~AwkwardArrayDataSource() {
@@ -233,6 +215,7 @@ public:
         for (auto it : fColDataPointers) {
             cout << "column index " << colIndex++ << endl;
         }
+        cout << "SetNSlots done." << endl;
     }
 
     void Initialise() {
@@ -278,7 +261,7 @@ public:
 };
 
 template <typename ...ColumnTypes>
-ROOT::RDataFrame* MakeAwkwardArrayDS(ArrayWrapper<ColumnTypes>... wrappers) {
+ROOT::RDataFrame* MakeAwkwardArrayDS(ArrayWrapper<ColumnTypes>&... wrappers) {
     std::cout << "======= Make AwkwardArray Data Source!" << endl;
     return new ROOT::RDataFrame(std::make_unique<AwkwardArrayDataSource<ColumnTypes...>>(std::move(wrappers)...));
 }
