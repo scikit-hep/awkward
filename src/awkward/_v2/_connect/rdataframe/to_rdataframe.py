@@ -31,19 +31,19 @@ def to_rdataframe(columns):
                 std::string type_,
                 ssize_t length_,
                 ssize_t* ptrs_) :
-            array_view(array_view_),
+            array_view(&array_view_),
             name(name_),
             type(type_),
             length(length_),
             ptrs(ptrs_) {
                 cout << "ArrayWrapper>>> " <<  this << " is constructed: an ArrayWrapper for an " << name << " RDF column of an array "
-                    << ROOT::Internal::RDF::TypeID2TypeName(typeid(&array_view_))
-                    << ", size " << array_view.size() << " at " << &array_view << endl;
+                    << ROOT::Internal::RDF::TypeID2TypeName(typeid(array_view_))
+                    << ", size " << array_view->size() << " at " << &array_view << endl;
             }
 
-            ~ArrayWrapper() { cout << "........" << this << " ArrayWrapper of " << &array_view << " is destructed." << endl; }
+            ~ArrayWrapper() { cout << "........" << this << " ArrayWrapper of " << array_view << " is destructed." << endl; }
 
-            const T& array_view;
+            const T* array_view;
             const std::string name;
             const std::string type;
             const ssize_t length;
@@ -109,9 +109,6 @@ def to_rdataframe(columns):
 template <typename ...ColumnTypes>
 class AwkwardArrayDataSource final : public ROOT::RDF::RDataSource {
 private:
-    using PointerHolderPtrs_t = std::vector<ROOT::Internal::TDS::TPointerHolder *>;
-    const PointerHolderPtrs_t fPointerHoldersModels;
-    std::vector<PointerHolderPtrs_t> fPointerHolders;
 
     unsigned int fNSlots{0U};
     std::tuple<awkward::ArrayWrapper<ColumnTypes>*...> fColumns;
@@ -168,7 +165,7 @@ private:
         [length](auto const &...col) {
             std::cout << "[ ";
             int k = 0;
-            ((std::cout << col << (++k == length ? "" : "; ")), ...);
+            ((std::cout << &col.array_view << (++k == length ? "" : "; ")), ...);
             std::cout << " ]";
         },
         columns);
@@ -184,8 +181,7 @@ public:
           fColNames({wrappers.name...}),
           fColTypeNames({wrappers.type...}),
           fColTypesMap({{wrappers.name, wrappers.type}...}),
-          fColDataPointers({{wrappers.length, wrappers.ptrs}...}),
-          fPointerHoldersModels({new ROOT::Internal::TDS::TTypedPointerHolder<ColumnTypes>(new ColumnTypes())...}) {
+          fColDataPointers({{wrappers.length, wrappers.ptrs}...}) {
         cout << endl << "An AwkwardArrayDataSource with column names " << endl;
         cout << "columns number " << std::tuple_size<decltype(fColumns)>::value << endl;
         for (auto n : fColNames) {
@@ -212,26 +208,6 @@ public:
         cout << endl
             << "#1. SetNSlots " << nSlots << endl;
         fNSlots = nSlots;
-        const auto& nCols = fColNames.size();
-//        fPointerHolders.resize(nCols); // now we need to fill it with the slots
-//        auto colIndex = 0U;
-//        for (auto &&ptrHolderv : fPointerHolders) {
-//            for (auto slot : ROOT::TSeqI(fNSlots)) {
-//                auto ptrHolder = fPointerHoldersModels[colIndex]->GetDeepCopy();
-//                ptrHolderv.emplace_back(ptrHolder);
-//                (void)slot;
-//            }
-//        colIndex++;
-//        }
-//        for (auto &&ptrHolder : fPointerHoldersModels)
-//            delete ptrHolder;
-
-        //const auto nCols = fColNames.size();
-        //cout << "size " << nCols << endl;
-        //auto colIndex = 0U;
-        //for (auto it : fColDataPointers) {
-        //    cout << "column index " << colIndex++ << endl;
-        //}
         cout << "SetNSlots done." << endl;
     }
 
