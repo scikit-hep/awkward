@@ -139,7 +139,7 @@ class Invocation:
         self.error_context = error_context
 
 
-def import_cupy(name):
+def import_cupy(name="Awkward Arrays with CUDA"):
     if cupy is None:
         raise ImportError(error_message.format(name))
     return cupy

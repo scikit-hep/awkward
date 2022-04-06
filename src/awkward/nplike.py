@@ -518,6 +518,8 @@ class Numpy(NumpyLike):
         return self._module.ndarray
 
     def raw(self, array, nplike):
+        from awkward._v2._connect.jax.nplike import Jax
+
         if isinstance(nplike, Numpy):
             return array
         elif isinstance(nplike, Cupy):
@@ -527,9 +529,12 @@ class Numpy(NumpyLike):
             return ak._v2._typetracer.TypeTracerArray(
                 dtype=array.dtype, shape=array.shape
             )
+        elif isinstance(nplike, Jax):
+            jax = Jax.instance()
+            return jax.asarray(array, dtype=array.dtype, order="C")
         else:
             raise TypeError(
-                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
             )
 
 
@@ -592,6 +597,8 @@ class Cupy(NumpyLike):
             return self._module.asarray(array, dtype=dtype, order=order)
 
     def raw(self, array, nplike):
+        from awkward._v2._connect.jax.nplike import Jax
+
         if isinstance(nplike, Cupy):
             return array
         elif isinstance(nplike, Numpy):
@@ -601,9 +608,12 @@ class Cupy(NumpyLike):
             return ak._v2._typetracer.TypeTracerArray(
                 dtype=array.dtype, shape=array.shape
             )
+        elif isinstance(nplike, Jax):
+            jax = Jax.instance()
+            return jax.asarray(array.get(), dtype=array.dtype, order="C")
         else:
             raise TypeError(
-                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
             )
 
     def ascontiguousarray(self, array, dtype=None):
@@ -650,25 +660,8 @@ class Cupy(NumpyLike):
         else:
             return self._module.repeat(array, repeats)
 
-    def nan_to_num(self, array, copy=True, nan=0.0, posinf=None, neginf=None):
-        # https://github.com/cupy/cupy/issues/4867
-        if copy:
-            array = self._module.copy(array)
-        if posinf is None:
-            if array.dtype.kind == "f":
-                posinf = numpy.finfo(array.dtype.type).max
-            else:
-                posinf = numpy.iinfo(array.dtype.type).max
-        if neginf is None:
-            if array.dtype.kind == "f":
-                neginf = numpy.finfo(array.dtype.type).min
-            else:
-                neginf = numpy.iinfo(array.dtype.type).min
-
-        array[self._module.isnan(array)] = nan
-        array[self._module.isinf(array) & (array > 0)] = posinf
-        array[self._module.isinf(array) & (array < 0)] = neginf
-        return array
+    def nan_to_num(self, *args, **kwargs):
+        self._module.nan_to_num(*args, **kwargs)
 
     # For all reducers: https://github.com/cupy/cupy/issues/3819
 
