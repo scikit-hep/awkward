@@ -207,8 +207,23 @@ public:
     }
 
     void SetNSlots(unsigned int nSlots) {
-        cout << "#1. SetNSlots " << nSlots << endl;
+        cout << endl
+            << "#1. SetNSlots " << nSlots << endl;
         fNSlots = nSlots;
+        const auto nCols = fColNames.size();
+        fPointerHolders.resize(nCols); // now we need to fill it with the slots, all of the same type
+        auto colIndex = 0U;
+        for (auto &&ptrHolderv : fPointerHolders) {
+            for (auto slot : ROOT::TSeqI(fNSlots)) {
+                auto ptrHolder = fPointerHoldersModels[colIndex]->GetDeepCopy();
+                ptrHolderv.emplace_back(ptrHolder);
+                (void)slot;
+            }
+        colIndex++;
+        }
+        for (auto &&ptrHolder : fPointerHoldersModels)
+            delete ptrHolder;
+
         const auto nCols = fColNames.size();
         cout << "size " << nCols << endl;
         auto colIndex = 0U;
