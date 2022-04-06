@@ -11,9 +11,10 @@ compiler = ROOT.gInterpreter.Declare
 
 def to_rdataframe(columns):
 
-    if not hasattr(ROOT, "ArrayWrapper"):
+    if not hasattr(ROOT, "awkward::ArrayWrapper"):
         done = compiler(
             """
+    namespace awkward {
         template <typename T>
         class ArrayWrapper {
         public:
@@ -48,6 +49,7 @@ def to_rdataframe(columns):
             const ssize_t length;
             ssize_t* ptrs;
         };
+    }
         """
         )
         assert done is True
@@ -88,7 +90,7 @@ def to_rdataframe(columns):
             "to an ArrayWrapper...",
         )  # noqa: T001
 
-        rdf_array_wrappers[key] = ROOT.ArrayWrapper[
+        rdf_array_wrappers[key] = ROOT.awkward.ArrayWrapper[
             type(rdf_array_views[key]).__cpp_name__
         ](
             rdf_array_views[key],
@@ -112,7 +114,7 @@ private:
     std::vector<PointerHolderPtrs_t> fPointerHolders;
 
     unsigned int fNSlots{0U};
-    std::tuple<ArrayWrapper<ColumnTypes>*...> fColumns;
+    std::tuple<awkward::ArrayWrapper<ColumnTypes>*...> fColumns;
     const std::vector<std::string> fColNames;
     const std::vector<std::string> fColTypeNames;
     const std::map<std::string, std::string> fColTypesMap;
@@ -177,8 +179,8 @@ private:
     }
 
 public:
-    AwkwardArrayDataSource(ArrayWrapper<ColumnTypes>&&... wrappers)
-        : fColumns(std::tuple<ArrayWrapper<ColumnTypes>*...>(&wrappers...)),
+    AwkwardArrayDataSource(awkward::ArrayWrapper<ColumnTypes>&&... wrappers)
+        : fColumns(std::tuple<awkward::ArrayWrapper<ColumnTypes>*...>(&wrappers...)),
           fColNames({wrappers.name...}),
           fColTypeNames({wrappers.type...}),
           fColTypesMap({{wrappers.name, wrappers.type}...}),
@@ -210,26 +212,26 @@ public:
         cout << endl
             << "#1. SetNSlots " << nSlots << endl;
         fNSlots = nSlots;
-        const auto nCols = fColNames.size();
-        fPointerHolders.resize(nCols); // now we need to fill it with the slots, all of the same type
-        auto colIndex = 0U;
-        for (auto &&ptrHolderv : fPointerHolders) {
-            for (auto slot : ROOT::TSeqI(fNSlots)) {
-                auto ptrHolder = fPointerHoldersModels[colIndex]->GetDeepCopy();
-                ptrHolderv.emplace_back(ptrHolder);
-                (void)slot;
-            }
-        colIndex++;
-        }
-        for (auto &&ptrHolder : fPointerHoldersModels)
-            delete ptrHolder;
+        const auto& nCols = fColNames.size();
+//        fPointerHolders.resize(nCols); // now we need to fill it with the slots
+//        auto colIndex = 0U;
+//        for (auto &&ptrHolderv : fPointerHolders) {
+//            for (auto slot : ROOT::TSeqI(fNSlots)) {
+//                auto ptrHolder = fPointerHoldersModels[colIndex]->GetDeepCopy();
+//                ptrHolderv.emplace_back(ptrHolder);
+//                (void)slot;
+//            }
+//        colIndex++;
+//        }
+//        for (auto &&ptrHolder : fPointerHoldersModels)
+//            delete ptrHolder;
 
-        const auto nCols = fColNames.size();
-        cout << "size " << nCols << endl;
-        auto colIndex = 0U;
-        for (auto it : fColDataPointers) {
-            cout << "column index " << colIndex++ << endl;
-        }
+        //const auto nCols = fColNames.size();
+        //cout << "size " << nCols << endl;
+        //auto colIndex = 0U;
+        //for (auto it : fColDataPointers) {
+        //    cout << "column index " << colIndex++ << endl;
+        //}
         cout << "SetNSlots done." << endl;
     }
 
@@ -276,7 +278,7 @@ public:
 };
 
 template <typename ...ColumnTypes>
-ROOT::RDataFrame* MakeAwkwardArrayDS(ArrayWrapper<ColumnTypes>&... wrappers) {
+ROOT::RDataFrame* MakeAwkwardArrayDS(awkward::ArrayWrapper<ColumnTypes>&... wrappers) {
     std::cout << "======= Make AwkwardArray Data Source!" << endl;
     return new ROOT::RDataFrame(std::make_unique<AwkwardArrayDataSource<ColumnTypes...>>(std::move(wrappers)...));
 }
@@ -285,4 +287,4 @@ ROOT::RDataFrame* MakeAwkwardArrayDS(ArrayWrapper<ColumnTypes>&... wrappers) {
         assert done is True
 
     rdf = ROOT.MakeAwkwardArrayDS(*rdf_list_of_columns)
-    return rdf, rdf_array_wrappers, rdf_lookups, rdf_generators
+    return rdf, rdf_array_views, rdf_array_wrappers, rdf_lookups, rdf_generators

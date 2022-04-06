@@ -196,11 +196,7 @@ def test_two_arrays():
     data_frame = ak._v2.operations.convert.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}
     )
-    # data_frame = ak._v2.operations.convert.to_rdataframe({"x": ak_array_1})
     print("GetColumnType")
-    # array_wrappers = data_frame[-3]
-    # lookup = data_frame[-2]
-    # generator = data_frame[-1]
     column_type = data_frame[0].GetColumnType("awkward:x")
     print("column_type", column_type)
     print("Take")
