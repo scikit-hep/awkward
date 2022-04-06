@@ -204,31 +204,29 @@ class Record:
         return_array=True,
         function_name=None,
     ):
-        options = {
-            "keep_parameters": keep_parameters,
-            "numpy_to_regular": numpy_to_regular,
-            "return_array": return_array,
-            "function_name": function_name,
-        }
 
         if return_array:
             return Record(
-                self._array._recursively_apply(
+                self._array.recursively_apply(
                     action,
-                    1,
                     depth_context,
                     lateral_context,
-                    options,
+                    keep_parameters,
+                    numpy_to_regular,
+                    True,
+                    function_name,
                 ),
                 self._at,
             )
 
-        self._array._recursively_apply(
+        self._array.recursively_apply(
             action,
-            1,
             depth_context,
             lateral_context,
-            options,
+            keep_parameters,
+            numpy_to_regular,
+            False,
+            function_name,
         )
 
         return None
