@@ -212,42 +212,23 @@ class Record:
         }
 
         if return_array:
-
-            def continuation():
-                return Record(
-                    self._array._recursively_apply(
-                        action,
-                        1,
-                        copy.copy(depth_context),
-                        lateral_context,
-                        options,
-                    ),
-                    self._at,
-                )
-
-        else:
-
-            def continuation():
+            return Record(
                 self._array._recursively_apply(
                     action,
                     1,
-                    copy.copy(depth_context),
+                    depth_context,
                     lateral_context,
                     options,
-                )
+                ),
+                self._at,
+            )
 
-        result = action(
-            self,
-            depth=1,
-            depth_context=depth_context,
-            lateral_context=lateral_context,
-            continuation=continuation,
-            options=options,
+        self._array._recursively_apply(
+            action,
+            1,
+            depth_context,
+            lateral_context,
+            options,
         )
 
-        if isinstance(result, Record):
-            return result
-        elif result is None:
-            return continuation()
-        else:
-            raise ak._v2._util.error(AssertionError(result))
+        return None
