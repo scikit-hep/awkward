@@ -2,13 +2,38 @@
 
 import awkward as ak
 
+from collections.abc import Iterable
+
 
 class Jax(ak.nplike.NumpyLike):
-    # def to_rectilinear(self, array, *args, **kwargs):
+    def to_rectilinear(self, array, *args, **kwargs):
+        if isinstance(array, self._module.DeviceArray):
+            return array
+
+        elif isinstance(
+            array,
+            (
+                ak.Array,
+                ak.Record,
+                ak.ArrayBuilder,
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.layout.ArrayBuilder,
+                ak.layout.LayoutBuilder32,
+                ak.layout.LayoutBuilder64,
+            ),
+        ):
+            return ak.operations.convert.to_jax(array, *args, **kwargs)
+
+        elif isinstance(array, Iterable):
+            return [self.to_rectilinear(x, *args, **kwargs) for x in array]
+
+        else:
+            ak._v2._util.error(ValueError("to_rectilinear argument must be iterable"))
 
     def __getitem__(self, name_and_types):
-        return ak.nplike.NumpyKernel(
-            ak._cpu_kernels.kernel[name_and_types], name_and_types
+        ak._v2._util.error(
+            ValueError("__getitem__ for JAX Kernels is not implemented yet")
         )
 
     def __init__(self):

@@ -22,6 +22,10 @@ def of(*arrays):
                 nplikes.add(ak.nplike.Numpy.instance())
             elif type(array).__module__.startswith("cupy."):
                 nplikes.add(ak.nplike.Cupy.instance())
+            elif type(array).__module__.startswith("jaxlib"):
+                from awkward._v2._connect.jax.nplike import Jax
+
+                nplikes.add(Jax.instance())
 
     if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in nplikes):
         return ak._v2._typetracer.TypeTracer.instance()

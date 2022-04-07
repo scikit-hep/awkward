@@ -48,14 +48,20 @@ def _impl(arrays):
             allow_other=True,
         )
         if isinstance(layout, (ak._v2.contents.Content, ak._v2.index.Index)):
+            from awkward._v2._connect.jax.nplike import Jax
+
             if isinstance(layout.nplike, ak.nplike.Numpy):
                 backends.add("cpu")
             elif isinstance(layout.nplike, ak.nplike.Cupy):
                 backends.add("cuda")
+            elif isinstance(layout.nplike, Jax):
+                backends.add("jax")
         elif isinstance(layout, ak.nplike.numpy.ndarray):
             backends.add("cpu")
         elif type(layout).__module__.startswith("cupy."):
             backends.add("cuda")
+        elif type(layout).__module__.startswith("jaxlib"):
+            backends.add("jax")
 
     if backends == set():
         return None
@@ -63,5 +69,7 @@ def _impl(arrays):
         return "cpu"
     elif backends == {"cuda"}:
         return "cuda"
+    elif backends == {"jax"}:
+        return "jax"
     else:
         return "mixed"

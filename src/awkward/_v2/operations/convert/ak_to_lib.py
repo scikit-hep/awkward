@@ -8,41 +8,15 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-def to_jax(array):
-    """
-    Converts `array` (many types supported) into a JAX Device Array, if possible.
-
-    If the data are numerical and regular (nested lists have equal lengths
-    in each dimension, as described by the #type), they can be losslessly
-    converted to a JAX array and this function returns without an error.
-
-    Otherwise, the function raises an error.
-
-    If `array` is a scalar, it is converted into a JAX scalar.
-
-    See also #ak.from_jax and #ak.to_numpy.
-    """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_jax",
-        dict(array=array),
-    ):
-        return _impl(array)
-
-
-def _impl(array):
-    from awkward._v2._connect.jax.nplike import Jax
-
-    jax = Jax.instance()
-    np = ak.nplike.NumpyMetadata.instance()
-
+def _impl(module, array):
     if isinstance(array, (bool, numbers.Number)):
-        return jax.array(array)
+        return module.array(array)
 
-    elif isinstance(array, jax.ndarray):
+    elif isinstance(array, module.ndarray):
         return array
 
     elif isinstance(array, np.ndarray):
-        return jax.asarray(array)
+        return module.asarray(array)
 
     elif isinstance(array, ak._v2.highlevel.Array):
         return _impl(array.layout)
@@ -63,16 +37,16 @@ def _impl(array):
         raise ak._v2._util.error(ValueError("JAX does not support arrays of strings"))
 
     elif isinstance(array, ak._v2.contents.EmptyArray):
-        return jax.array([])
+        return module.array([])
 
     elif isinstance(array, ak._v2.contents.IndexedArray):
         return _impl(array.project())
 
     elif isinstance(array, ak._v2.contents.UnionArray):
         contents = [_impl(array.project(i)) for i in range(len(array.contents))]
-        out = jax.concatenate(contents)
+        out = module.concatenate(contents)
 
-        tags = jax.asarray(array.tags)
+        tags = module.asarray(array.tags)
         for tag, content in enumerate(contents):
             mask = tags == tag
             out[mask] = content
@@ -86,7 +60,7 @@ def _impl(array):
 
         shape = list(content.shape)
         shape[0] = len(array)
-        mask0 = jax.asarray(array.bytemask()).view(np.bool_)
+        mask0 = module.asarray(array.bytemask()).view(np.bool_)
         if mask0.any():
             raise ak._v2._util.error(ValueError("JAX does not support masked arrays"))
         else:
@@ -115,9 +89,55 @@ def _impl(array):
         )
 
     elif isinstance(array, Iterable):
-        return jax.asarray(array)
+        return module.asarray(array)
 
     else:
         raise ak._v2._util.error(
-            ValueError(f"cannot convert {array} into jax.numpy.DeviceArray")
+            ValueError(f"cannot convert {array} into {type(module.array([]))}")
         )
+
+
+def to_cupy(array):
+    """
+    Converts `array` (many types supported) into a CuPy array, if possible.
+
+    If the data are numerical and regular (nested lists have equal lengths
+    in each dimension, as described by the #type), they can be losslessly
+    converted to a CuPy array and this function returns without an error.
+
+    Otherwise, the function raises an error.
+
+    If `array` is a scalar, it is converted into a CuPy scalar.
+
+    See also #ak.from_cupy and #ak.to_numpy.
+    """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_cupy",
+        dict(array=array),
+    ):
+        cupy = ak.nplike.Cupy.instance()
+        return _impl(cupy, array)
+
+
+def to_jax(array):
+    """
+    Converts `array` (many types supported) into a JAX Device Array, if possible.
+
+    If the data are numerical and regular (nested lists have equal lengths
+    in each dimension, as described by the #type), they can be losslessly
+    converted to a JAX array and this function returns without an error.
+
+    Otherwise, the function raises an error.
+
+    If `array` is a scalar, it is converted into a JAX scalar.
+
+    See also #ak.from_jax and #ak.to_numpy.
+    """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.to_jax",
+        dict(array=array),
+    ):
+        from awkward._v2._connect.jax.nplike import Jax
+
+        jax = Jax.instance()
+        return _impl(jax, array)
