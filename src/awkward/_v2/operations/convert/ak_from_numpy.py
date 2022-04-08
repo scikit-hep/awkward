@@ -70,7 +70,7 @@ def _impl(array, regulararray, recordarray, highlevel, behavior):
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
             stops = starts + numpy.char.str_len(asbytes)
-            data = ak._v2.contents.ListArray64(
+            data = ak._v2.contents.ListArray(
                 ak._v2.index.Index64(starts),
                 ak._v2.index.Index64(stops),
                 ak._v2.contents.NumpyArray(
@@ -88,7 +88,7 @@ def _impl(array, regulararray, recordarray, highlevel, behavior):
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
             stops = starts + numpy.char.str_len(asbytes)
-            data = ak._v2.contents.ListArray64(
+            data = ak._v2.contents.ListArray(
                 ak._v2.index.Index64(starts),
                 ak._v2.index.Index64(stops),
                 ak._v2.contents.NumpyArray(
