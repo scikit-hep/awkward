@@ -193,3 +193,29 @@ class Record:
 
     def deep_copy(self):
         return Record(self._array.deep_copy(), copy.deepcopy(self._at))
+
+    def recursively_apply(
+        self,
+        action,
+        depth_context=None,
+        lateral_context=None,
+        keep_parameters=True,
+        numpy_to_regular=True,
+        return_array=True,
+        function_name=None,
+    ):
+
+        out = self._array.recursively_apply(
+            action,
+            depth_context,
+            lateral_context,
+            keep_parameters,
+            numpy_to_regular,
+            return_array,
+            function_name,
+        )
+
+        if return_array:
+            return Record(out, self._at)
+        else:
+            return None
