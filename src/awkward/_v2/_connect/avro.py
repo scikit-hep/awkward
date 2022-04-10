@@ -38,9 +38,13 @@ class read_avro_py:
         self.body = "".join(self._exec_code)
         # print("".join(head+body))
         loc = {}
+        print("".join(self.head + self.body))
         exec("".join(self.head + self.body), globals(), loc)
-        print(self.form)
-        self.form = json.loads("".join(self.form)[:-2])
+        print("".join(self.form)[:-2])
+        temp_json = "".join(self.form)[:-2]
+        if temp_json[-1] != "}":
+            temp_json += "}"
+        self.form = json.loads(temp_json)
         con = loc["con"]
         for key in con.keys():
             con[key] = np.array(con[key])
@@ -134,7 +138,7 @@ class read_avro_py:
             return "b'a'"
 
     def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
-        if isinstance(file, str):
+        if isinstance(file, str) or isinstance(file, list):
             file = {"type": file}
         if file["type"] == "null":
             return aform, _exec_code, count, dec
@@ -329,7 +333,8 @@ class read_avro_py:
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
-            _exec_code.append("\n" + "    " * ind + "out = abs(decode_zigzag(inn))")
+            _exec_code.append("\n" + "    " * ind +
+                              "out = abs(decode_zigzag(inn))")
             _exec_code.append("\n" + "    " * ind + 'print("index :",out)')
             out = len(file["type"])
             if out == 2:
@@ -344,7 +349,8 @@ class read_avro_py:
             idxx = file["type"].index("null")
             for i in range(out):
                 if file["type"][i] == "null":
-                    _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
+                    _exec_code.append(
+                        "\n" + "    " * (ind) + f"if out == {i}:")
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
@@ -353,10 +359,12 @@ class read_avro_py:
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
+                        # change dum_dat function to return full string
                         + f"con['part0-node{temp+1}-data'].append({self.dum_dat({'type': file['type'][1-idxx]})})"
                     )
                 else:
-                    _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
+                    _exec_code.append(
+                        "\n" + "    " * (ind) + f"if out == {i}:")
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
@@ -431,7 +439,8 @@ class read_avro_py:
             )
             _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append(
-                "\n" + "    " * ind + f"con['part0-node{count}-index'].append(out)"
+                "\n" + "    " * ind +
+                f"con['part0-node{count}-index'].append(out)"
             )
             _exec_code.append("\n" + "    " * ind + "print(out)")
             return aform, _exec_code, count + 2, dec
@@ -443,7 +452,8 @@ class read_avro_py:
             var1 = f" 'part0-node{count}-offsets'"
             dec.append(var1)
             dec.append(": [0],")
-            aform.append('{"class": "ListOffsetArray64","offsets": "i64","content": ')
+            aform.append(
+                '{"class": "ListOffsetArray64","offsets": "i64","content": ')
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
@@ -456,7 +466,8 @@ class read_avro_py:
             )
             _exec_code.append("\n" + "    " * ind + "for i in range(out):")
             aform, _exec_code, count, dec = self.rec_exp_json_code(
-                {"type": file["items"]}, _exec_code, ind + 1, aform, count + 1, dec
+                {"type": file["items"]}, _exec_code, ind +
+                1, aform, count + 1, dec
             )
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
