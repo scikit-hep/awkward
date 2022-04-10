@@ -123,19 +123,25 @@ class read_avro_py:
     def decode_zigzag(self, n):
         return (n >> 1) ^ (-(n & 1))
 
-    def dum_dat(self, dtype):
+    def dum_dat(self, dtype, count):
         if dtype["type"] == "int":
-            return "np.int32(0)"
+            return f"con['part0-node{count}-data'].append(np.int32(0))"
         if dtype["type"] == "long":
-            return "np.int64(0)"
+            return f"con['part0-node{count}-data'].append(np.int64(0))"
         if dtype["type"] == "float":
-            return "np.float32(0)"
+            return f"con['part0-node{count}-data'].append(np.float32(0))"
         if dtype["type"] == "double":
-            return "np.float64(0)"
+            return f"con['part0-node{count}-data'].append(np.float64(0))"
         if dtype["type"] == "boolean":
-            return "0"
+            return f"con['part0-node{count}-data'].append(0)"
         if dtype["type"] == "bytes":
-            return "b'a'"
+            return f"con['part0-node{count}-offsets'].append(1+con['part0-node{count}-offsets'][-1])"+f"con['part0-node{count+1}-data'].extend([b'a']])"
+        if dtype["type"] == "string":
+            # \ncon['part0-node{count+1}-data'].extend([114])"
+            code = f"con['part0-node{count}-offsets'].append(np.uint8(0+con['part0-node{count}-offsets'][-1]))"
+            return code
+        if dtype["type"]['type'] == "enum":
+            return f"con['part0-node{count}-index'].append(0)"
 
     def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
         if isinstance(file, str) or isinstance(file, list):
@@ -356,11 +362,12 @@ class read_avro_py:
                         + "    " * (ind + 1)
                         + f"con['part0-node{temp}-mask'].append(np.int8(False))"
                     )
+                    print({'type': file['type'][1-idxx]})
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
                         # change dum_dat function to return full string
-                        + f"con['part0-node{temp+1}-data'].append({self.dum_dat({'type': file['type'][1-idxx]})})"
+                        + self.dum_dat({'type': file['type'][1-idxx]}, temp+1)
                     )
                 else:
                     _exec_code.append(
