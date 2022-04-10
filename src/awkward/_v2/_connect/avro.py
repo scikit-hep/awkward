@@ -135,12 +135,15 @@ class read_avro_py:
         if dtype["type"] == "boolean":
             return f"con['part0-node{count}-data'].append(0)"
         if dtype["type"] == "bytes":
-            return f"con['part0-node{count}-offsets'].append(1+con['part0-node{count}-offsets'][-1])"+f"con['part0-node{count+1}-data'].extend([b'a']])"
+            return (
+                f"con['part0-node{count}-offsets'].append(1+con['part0-node{count}-offsets'][-1])"
+                + f"con['part0-node{count+1}-data'].extend([b'a']])"
+            )
         if dtype["type"] == "string":
             # \ncon['part0-node{count+1}-data'].extend([114])"
             code = f"con['part0-node{count}-offsets'].append(np.uint8(0+con['part0-node{count}-offsets'][-1]))"
             return code
-        if dtype["type"]['type'] == "enum":
+        if dtype["type"]["type"] == "enum":
             return f"con['part0-node{count}-index'].append(0)"
 
     def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
@@ -360,12 +363,12 @@ class read_avro_py:
                         + "    " * (ind + 1)
                         + f"con['part0-node{temp}-mask'].append(np.int8(False))"
                     )
-                    print({'type': file['type'][1-idxx]})
+                    print({"type": file["type"][1 - idxx]})
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
                         # change dum_dat function to return full string
-                        + self.dum_dat({'type': file['type'][1-idxx]}, temp+1)
+                        + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
                     )
                 else:
                     _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
