@@ -43,7 +43,10 @@ class read_avro_py:
         print("".join(self.form)[:-2])
         temp_json = "".join(self.form)[:-2]
         if temp_json[-1] != "}":
+            if temp_json[-1] != '"':
+                temp_json += '"'
             temp_json += "}"
+        print(temp_json)
         self.form = json.loads(temp_json)
         con = loc["con"]
         for key in con.keys():
@@ -135,18 +138,37 @@ class read_avro_py:
         if dtype["type"] == "boolean":
             return f"con['part0-node{count}-data'].append(0)"
         if dtype["type"] == "bytes":
-            return f"con['part0-node{count}-offsets'].append(1+con['part0-node{count}-offsets'][-1])"+f"con['part0-node{count+1}-data'].extend([b'a']])"
+            return (
+                f"con['part0-node{count}-offsets'].append(1+con['part0-node{count}-offsets'][-1])"
+                + f"con['part0-node{count+1}-data'].extend([b'a']])"
+            )
         if dtype["type"] == "string":
             # \ncon['part0-node{count+1}-data'].extend([114])"
             code = f"con['part0-node{count}-offsets'].append(np.uint8(0+con['part0-node{count}-offsets'][-1]))"
             return code
-        if dtype["type"]['type'] == "enum":
+        if dtype["type"]["type"] == "enum":
             return f"con['part0-node{count}-index'].append(0)"
 
     def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
         if isinstance(file, str) or isinstance(file, list):
             file = {"type": file}
-        if file["type"] == "null":
+        if (
+            file["type"] == "null"
+        ):  # problem is that a null array does not have any length
+            aform.append(
+                f'{{"class": "IndexedOptionArray64","index": "i64","content": {{"class": "EmptyArray","form_key": "node{count+1}"}},"form_key": "node{count}"}}'
+            )
+            var1 = f" 'part0-node{count}-index'"
+            var2 = f" 'part0-node{count+1}-data'"
+            dec.append(var1)
+            dec.append(": [],")
+            dec.append(var2)
+            dec.append(": [],")
+            _exec_code.append(
+                "\n"
+                + "    " * ind
+                + f"con['part0-node{count}-offsets'].append(np.uint8(-1))"
+            )
             return aform, _exec_code, count, dec
 
         elif file["type"] == "record":
@@ -360,12 +382,12 @@ class read_avro_py:
                         + "    " * (ind + 1)
                         + f"con['part0-node{temp}-mask'].append(np.int8(False))"
                     )
-                    print({'type': file['type'][1-idxx]})
+                    print({"type": file["type"][1 - idxx]})
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
                         # change dum_dat function to return full string
-                        + self.dum_dat({'type': file['type'][1-idxx]}, temp+1)
+                        + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
                     )
                 else:
                     _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
