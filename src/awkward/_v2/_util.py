@@ -1111,7 +1111,7 @@ def to_arraylib(module, array, allow_missing):
             tags = module.asarray(array.tags)
             for tag, content in enumerate(contents):
                 mask = tags == tag
-                if(type(out).__module__.startswith("jaxlib.")):
+                if type(out).__module__.startswith("jaxlib."):
                     out = out.at[mask].set(content)
                 else:
                     out[mask] = content

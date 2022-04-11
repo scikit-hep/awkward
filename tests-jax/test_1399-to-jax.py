@@ -26,10 +26,14 @@ def test_from_jax_1():
 
 def test_from_jax_2():
     content0 = ak._v2.Array(np.array([1, 2, 3], dtype=np.int64)).layout
-    content1 = ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int32))
+    content1 = ak._v2.contents.numpyarray.NumpyArray(
+        np.array([1, 2, 3, 4, 5], dtype=np.int32)
+    )
     tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
     index = ak._v2.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    unionarray = ak._v2.contents.unionarray.UnionArray(tags, index, [content0, content1])
+    unionarray = ak._v2.contents.unionarray.UnionArray(
+        tags, index, [content0, content1]
+    )
 
     jax_array = ak._v2.to_jax(unionarray)
 
