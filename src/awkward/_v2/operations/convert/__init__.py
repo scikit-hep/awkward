@@ -2,10 +2,10 @@
 
 from awkward._v2.operations.convert.ak_from_numpy import from_numpy  # noqa: F401
 from awkward._v2.operations.convert.ak_to_numpy import to_numpy  # noqa: F401
-from awkward._v2.operations.convert.ak_from_lib import from_cupy  # noqa: F401
-from awkward._v2.operations.convert.ak_to_lib import to_cupy  # noqa: F401
-from awkward._v2.operations.convert.ak_from_lib import from_jax  # noqa: F401
-from awkward._v2.operations.convert.ak_to_lib import to_jax  # noqa: F401
+from awkward._v2.operations.convert.ak_from_cupy import from_cupy  # noqa: F401
+from awkward._v2.operations.convert.ak_to_cupy import to_cupy  # noqa: F401
+from awkward._v2.operations.convert.ak_from_jax import from_jax  # noqa: F401
+from awkward._v2.operations.convert.ak_to_jax import to_jax  # noqa: F401
 from awkward._v2.operations.convert.ak_from_iter import from_iter  # noqa: F401
 from awkward._v2.operations.convert.ak_to_list import to_list  # noqa: F401
 from awkward._v2.operations.convert.ak_from_json import from_json  # noqa: F401

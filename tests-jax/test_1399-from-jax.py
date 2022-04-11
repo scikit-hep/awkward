@@ -2,13 +2,11 @@
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
-import cupy as cp  # noqa: F401
 import awkward as ak  # noqa: F401
-import jax
 
-import awkward._v2._connect.jax
+jax = pytest.importorskip("jax")
 
-awkward._v2._connect.jax.register_jax()
+jax.config.update("jax_enable_x64", True)
 
 
 def test_from_jax():
