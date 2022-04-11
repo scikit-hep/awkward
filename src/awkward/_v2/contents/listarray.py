@@ -386,7 +386,6 @@ class ListArray(Content):
                     self._content.length,
                 )
             )
-
             nextcontent = self._content._carry(nextcarry, True)
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
@@ -473,7 +472,17 @@ class ListArray(Content):
                 slicecontent._content,
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ):
-                nextcontent = self._content._carry(nextcarry, True)
+
+                # Generate ranges between starts and stops
+                stop = self.nplike.asarray(self._stops)
+                length = stop - self._starts
+                this_carry = self.nplike.repeat(
+                    stop - length.cumsum(), length
+                ) + self.nplike.arange(length.sum())
+                fixed_carry = ak._v2.index.Index64.empty(nextcarry.length, self._nplike)
+                fixed_carry[:] = this_carry[nextcarry]
+                nextcontent = self._content._carry(fixed_carry, True)
+
                 next = ak._v2.contents.listoffsetarray.ListOffsetArray(
                     smalloffsets, nextcontent, None, self._parameters, self._nplike
                 )
