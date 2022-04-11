@@ -197,10 +197,10 @@ def test_two_arrays():
         {"x": ak_array_1, "y": ak_array_2}
     )
     print("GetColumnType")
-    column_type = data_frame[0].GetColumnType("awkward:x")
+    column_type = data_frame.GetColumnType("awkward:x")
     print("column_type", column_type)
     print("Take")
-    result_ptrs = data_frame[0].Take[column_type]("awkward:x")
+    result_ptrs = data_frame.Take[column_type]("awkward:x")
     result_ready = result_ptrs.IsReady()
     print("result is ready?", result_ready)
 

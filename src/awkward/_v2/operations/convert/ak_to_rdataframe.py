@@ -33,6 +33,6 @@ def _impl(
 
     rdf = ak._v2._connect.rdataframe.to_rdataframe.to_rdataframe(
         arrays,
-    )
+    )[0]
 
     return rdf

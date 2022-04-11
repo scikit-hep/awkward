@@ -18,36 +18,44 @@ def to_rdataframe(columns):
         template <typename T>
         class ArrayWrapper {
         public:
-
             ArrayWrapper() = delete;
-
             ArrayWrapper(const ArrayWrapper& wrapper) = delete;
-
             ArrayWrapper& operator=(ArrayWrapper const& wrapper) = delete;
 
             ArrayWrapper(
-                const T& array_view_,
-                std::string name_,
-                std::string type_,
-                ssize_t length_,
-                ssize_t* ptrs_) :
-            array_view(&array_view_),
-            name(name_),
-            type(type_),
-            length(length_),
-            ptrs(ptrs_) {
+                const T& av,
+                std::string n,
+                std::string t,
+                ssize_t l,
+                ssize_t* p,
+                std::string f,
+                std::string et) :
+            array_view(&av),
+            name(n),
+            type(t),
+            length(l),
+            ptrs(p),
+            entry_func(f),
+            entry_type(et)
+             {
                 cout << "ArrayWrapper>>> " <<  this << " is constructed: an ArrayWrapper for an " << name << " RDF column of an array "
-                    << ROOT::Internal::RDF::TypeID2TypeName(typeid(array_view_))
+                    << ROOT::Internal::RDF::TypeID2TypeName(typeid(array_view))
                     << ", size " << array_view->size() << " at " << &array_view << endl;
             }
 
             ~ArrayWrapper() { cout << "........" << this << " ArrayWrapper of " << array_view << " is destructed." << endl; }
+
+            void* array_view_raw_ptr() {
+                return reinterpret_cast<void*>(array_view);
+            }
 
             const T* array_view;
             const std::string name;
             const std::string type;
             const ssize_t length;
             ssize_t* ptrs;
+            const std::string entry_func;
+            const std::string entry_type;
         };
     }
         """
@@ -60,6 +68,9 @@ def to_rdataframe(columns):
     rdf_lookups = {}
     rdf_array_views = {}
     rdf_array_wrappers = {}
+    rdf_array_view_entries = {}
+    rdf_entry_func = {}
+    rdf_column_readers = {}
 
     for key in columns:
         rdf_layouts[key] = columns[key].layout
@@ -73,6 +84,7 @@ def to_rdataframe(columns):
             done = compiler(
                 f"""
                 auto make_array_{generated_type}_{key}(ssize_t length, ssize_t* ptrs) {{
+                    cout << "generated type " << " {generated_type} " << " : key " << " {key} " << endl;
                     return {rdf_generators[key].dataset(flatlist_as_rvec=True)};
                 }}
                 """.strip()
@@ -90,6 +102,22 @@ def to_rdataframe(columns):
             "to an ArrayWrapper...",
         )  # noqa: T001
 
+        if not hasattr(ROOT, f"get_entry_{generated_type}_{key}"):
+            done = compiler(
+            f"""
+            auto get_entry_{generated_type}_{key}(ssize_t length, ssize_t* ptrs, int64_t i) {{
+                return {rdf_generators[key].entry(flatlist_as_rvec=True)};
+            }}
+            """.strip()
+            )
+            assert done is True
+
+        rdf_entry_func[key] = f"get_entry_{generated_type}_{key}"
+        rdf_array_view_entries[key] = getattr(ROOT, f"get_entry_{generated_type}_{key}")(
+            len(rdf_layouts[key]), rdf_lookups[key].arrayptrs, 0
+        )
+        print(type(rdf_array_view_entries[key]), rdf_array_view_entries[key][0])
+
         rdf_array_wrappers[key] = ROOT.awkward.ArrayWrapper[
             type(rdf_array_views[key]).__cpp_name__
         ](
@@ -98,31 +126,73 @@ def to_rdataframe(columns):
             type(rdf_array_views[key]).__cpp_name__,
             len(rdf_layouts[key]),
             rdf_lookups[key].arrayptrs,
+            f"get_entry_{generated_type}_{key}",
+            f"{generated_type}",
         )
 
         # rdf_columns[rdf_array_wrappers[key].name] = rdf_array_wrappers[key]
         rdf_list_of_columns.append(rdf_array_wrappers[key])
 
+        if not hasattr(ROOT, f"AwkwardArrayColumnReader_{generated_type}_{key}"):
+            done = compiler(
+                f"""
+namespace awkward {{
+
+    class AwkwardArrayColumnReader_{generated_type}_{key} : public ROOT::Detail::RDF::RColumnReaderBase {{
+    public:
+        AwkwardArrayColumnReader_{generated_type}_{key}(ssize_t length, ssize_t* ptrs, {type(rdf_array_view_entries[key]).__cpp_name__} view) :
+            length_(length),
+            ptrs_(ptrs),
+            view_(view) {{
+            cout << "CONSTRUCTED AwkwardArrayColumnReader_{generated_type}_{key} of a {type(rdf_array_view_entries[key]).__cpp_name__}" << endl;
+        }}
+
+    private:
+        void *GetImpl(Long64_t entry) {{
+            view_ = get_entry_{generated_type}_{key}(length_, ptrs_, entry);
+            return reinterpret_cast<void *>(&view_);
+        }}
+
+        {type(rdf_array_view_entries[key]).__cpp_name__} view_;
+        ssize_t length_;
+        ssize_t* ptrs_;
+    }};
+}}
+    """.strip()
+            )
+            assert done is True
+
+            rdf_column_readers[key] = getattr(ROOT, f"awkward::AwkwardArrayColumnReader_{generated_type}_{key}")(
+                len(rdf_layouts[key]), rdf_lookups[key].arrayptrs, rdf_array_view_entries[key]
+            )
+
+
     if not hasattr(ROOT, "AwkwardArrayDataSource"):
-        done = compiler(
-            """
+        cpp_code = """
 template <typename ...ColumnTypes>
 class AwkwardArrayDataSource final : public ROOT::RDF::RDataSource {
 private:
 
     unsigned int fNSlots{0U};
     std::tuple<awkward::ArrayWrapper<ColumnTypes>*...> fColumns;
+
     const std::vector<std::string> fColNames;
     const std::vector<std::string> fColTypeNames;
     const std::map<std::string, std::string> fColTypesMap;
+    const std::vector<std::pair<std::string, std::string>> fColEntryTypes;
+
     std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
     std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges;
-    std::vector<const void*> fColPtrs;
+    std::vector<std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>> fColumnReaders;
 
     /// type-erased vector of pointers to pointers to column values - one per slot
     Record_t
     GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {
         cout << "#2. GetColumnReadersImpl for " << colName;
+        const auto index = std::distance(fColNames.begin(), std::find(fColNames.begin(), fColNames.end(), colName));
+        cout << "index " << index << endl;
+
+        //return {};
         auto colNameStr = std::string(colName);
         const auto idName = ROOT::Internal::RDF::TypeID2TypeName(id);
         cout << " and type " << idName << endl;
@@ -139,12 +209,12 @@ private:
             throw std::runtime_error(err);
         }
 
-        const auto colBegin = fColNames.begin();
-        const auto colEnd = fColNames.end();
-        const auto namesIt = std::find(colBegin, colEnd, colName);
-        const auto index = std::distance(colBegin, namesIt);
+        //const auto colBegin = fColNames.begin();
+        //const auto colEnd = fColNames.end();
+        //const auto namesIt = std::find(colBegin, colEnd, colName);
+        //const auto index = std::distance(colBegin, namesIt);
 
-        cout << "index " << index << endl;
+        //cout << "index " << index << endl;
         std::size_t t = 0;
         Record_t ret(fNSlots);
         for (auto slot : ROOT::TSeqU(fNSlots)) {
@@ -162,10 +232,11 @@ private:
     void SetColumnPointers(std::tuple<Columns...> const &columns) {
     std::size_t length = sizeof...(Columns);
     std::apply(
-        [length](auto const &...col) {
+        [length, this](auto const &...col) {
             std::cout << "[ ";
             int k = 0;
-            ((std::cout << &col.array_view << (++k == length ? "" : "; ")), ...);
+            //((this->fColumnReaders.push_back(new AwkwardArrayColumnReader<decltype(col.array_view)>(&col))), ...);
+            ((std::cout << &col), ...);
             std::cout << " ]";
         },
         columns);
@@ -175,13 +246,40 @@ private:
         return std::tuple_size<decltype(fColumns)>::value;
     }
 
+    // Function to iterate through all values
+    // I equals number of values in tuple
+    template <size_t I = 0, typename... Ts>
+    typename enable_if<I == sizeof...(Ts),
+                    void>::type
+    printTuple(tuple<Ts...> tup)
+    {
+        // If iterated through all values
+        // of tuple, then simply return.
+        return;
+    }
+
+    template <size_t I = 0, typename... Ts>
+    typename enable_if<(I < sizeof...(Ts)),
+                    void>::type
+    printTuple(tuple<Ts...> tup)
+    {
+        // Print element of tuple
+        //auto obj = new AwkwardArrayColumnReader(get<I>(tup));
+        cout << "done?" << " ";
+
+        // Go to next element
+        printTuple<I + 1>(tup);
+    }
+
 public:
     AwkwardArrayDataSource(awkward::ArrayWrapper<ColumnTypes>&&... wrappers)
         : fColumns(std::tuple<awkward::ArrayWrapper<ColumnTypes>*...>(&wrappers...)),
           fColNames({wrappers.name...}),
           fColTypeNames({wrappers.type...}),
           fColTypesMap({{wrappers.name, wrappers.type}...}),
-          fColDataPointers({{wrappers.length, wrappers.ptrs}...}) {
+          fColEntryTypes({{wrappers.entry_type, wrappers.entry_func}...}),
+          fColDataPointers({{wrappers.length, wrappers.ptrs}...})
+    {
         cout << endl << "An AwkwardArrayDataSource with column names " << endl;
         cout << "columns number " << std::tuple_size<decltype(fColumns)>::value << endl;
         for (auto n : fColNames) {
@@ -198,7 +296,11 @@ public:
             cout << it.first << " : " << it.second << endl;
         }
         cout << "GetEntriesNumber " << GetEntriesNumber() << endl;
+        for (auto it: fColEntryTypes) {
+            cout << it.first << " : " << it.second << endl;
+        }
         SetColumnPointers(fColumns);
+        printTuple(fColumns);
     }
 
     ~AwkwardArrayDataSource() {
@@ -207,9 +309,17 @@ public:
     void SetNSlots(unsigned int nSlots) {
         cout << endl
             << "#1. SetNSlots " << nSlots << endl;
-        fNSlots = nSlots;
+        fNSlots = nSlots; // always 1 slot for now
         cout << "SetNSlots done." << endl;
     }
+
+    //std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
+    //GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & /*tid*/) {
+    //    cout << endl
+    //        << "#2.2. GetColumnReaders " << endl;
+    //    const auto index = std::distance(fColNames.begin(), std::find(fColNames.begin(), fColNames.end(), name));
+    //    return std::move(fColumnReaders[index]);
+  // }
 
     void Initialise() {
         cout << "#3. Initialise" << endl;
@@ -259,8 +369,161 @@ ROOT::RDataFrame* MakeAwkwardArrayDS(awkward::ArrayWrapper<ColumnTypes>&... wrap
     return new ROOT::RDataFrame(std::make_unique<AwkwardArrayDataSource<ColumnTypes...>>(std::move(wrappers)...));
 }
 """
-        )
+        done = compiler(cpp_code)
         assert done is True
 
     rdf = ROOT.MakeAwkwardArrayDS(*rdf_list_of_columns)
     return rdf, rdf_array_views, rdf_array_wrappers, rdf_lookups, rdf_generators
+
+def to_rdata_frame(columns):
+
+    rdf_layouts = {}
+    rdf_generators = {}
+    rdf_lookups = {}
+    rdf_array_views = {}
+    rdf_array_wrappers = {}
+    rdf_array_view_entries = {}
+    rdf_entry_func = {}
+
+    for key in columns:
+        rdf_layouts[key] = columns[key].layout
+        rdf_generators[key] = ak._v2._connect.cling.togenerator(rdf_layouts[key].form)
+        rdf_lookups[key] = ak._v2._lookup.Lookup(rdf_layouts[key])
+
+        rdf_generators[key].generate(compiler, flatlist_as_rvec=True)
+        generated_type = rdf_generators[key].entry_type()
+
+        if not hasattr(ROOT, f"make_array_{generated_type}_{key}"):
+            done = compiler(
+                f"""
+                auto make_array_{generated_type}_{key}(ssize_t length, ssize_t* ptrs) {{
+                    cout << "generated type " << " {generated_type} " << " : key " << " {key} " << endl;
+                    return {rdf_generators[key].dataset(flatlist_as_rvec=True)};
+                }}
+                """.strip()
+            )
+            assert done is True
+
+        rdf_array_views[key] = getattr(ROOT, f"make_array_{generated_type}_{key}")(
+            len(rdf_layouts[key]), rdf_lookups[key].arrayptrs
+        )
+
+        print(  # noqa: T001
+            "Pass ",
+            type(rdf_array_views[key]),
+            type(rdf_array_views[key]).__cpp_name__,
+            "to an ArrayWrapper...",
+        )  # noqa: T001
+
+        if not hasattr(ROOT, f"get_entry_{generated_type}_{key}"):
+            done = compiler(
+            f"""
+            auto get_entry_{generated_type}_{key}(ssize_t length, ssize_t* ptrs, int64_t i) {{
+                return {rdf_generators[key].entry(flatlist_as_rvec=True)};
+            }}
+            """.strip()
+            )
+            assert done is True
+
+        rdf_entry_func[key] = f"get_entry_{generated_type}_{key}"
+        rdf_array_view_entries[key] = getattr(ROOT, f"get_entry_{generated_type}_{key}")(
+            len(rdf_layouts[key]), rdf_lookups[key].arrayptrs, 0
+        )
+        print(type(rdf_array_view_entries[key]), rdf_array_view_entries[key][0])
+
+    if not hasattr(ROOT, "AwkwardArrayDataSource"):
+        done = compiler(
+            f"""
+class AwkwardArrayDataSource final : public ROOT::RDF::RDataSource {{
+private:
+
+    unsigned int fNSlots{{0U}};
+    const std::vector<std::string> fColNames;
+    const std::vector<std::string> fColTypeNames;
+    const std::map<std::string, std::string> fColTypesMap;
+    const std::vector<std::pair<std::string, std::string>> fColEntryTypes;
+    //std::vector<std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>> fColumnReaders;
+
+    std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges;
+
+    /// type-erased vector of pointers to pointers to column values - one per slot
+    Record_t
+    GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
+        cout << "#2. GetColumnReadersImpl for " << colName;
+        return {{}};
+    }}
+
+    size_t GetEntriesNumber() {{
+        return 2;
+    }}
+
+public:
+    AwkwardArrayDataSource(std::vector<std::pair<std::string, std::pair<ssize_t, ssize_t*>>> columns)
+    {{
+        cout << endl << "An AwkwardArrayDataSource with column names " << endl;
+    }}
+
+    ~AwkwardArrayDataSource() {{
+    }}
+
+    void SetNSlots(unsigned int nSlots) {{
+        cout << endl
+            << "#1. SetNSlots " << nSlots << endl;
+        fNSlots = nSlots; // always 1 slot for now
+        cout << "SetNSlots done." << endl;
+    }}
+
+    std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
+    GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & /*tid*/) {{
+        cout << endl
+            << "#2.2. GetColumnReaders " << endl;
+        const auto index = std::distance(fColNames.begin(), std::find(fColNames.begin(), fColNames.end(), name));
+        return std::move(fColumnReaders[index]);
+   }}
+
+    void Initialise() {{
+        cout << "#3. Initialise" << endl;
+        const auto nEntries = GetEntriesNumber();
+        cout << "nEntries " << nEntries << endl;
+        // FIXME: define some ranges here!
+    }}
+
+    const std::vector<std::string> &GetColumnNames() const {{
+        return fColNames;
+    }}
+
+    bool
+    HasColumn(std::string_view colName) const {{
+        const auto key = std::string(colName);
+        const auto endIt = fColTypesMap.end();
+        return endIt != fColTypesMap.find(key);
+    }}
+
+    std::string
+    GetTypeName(std::string_view colName) const {{
+        const auto key = std::string(colName);
+        return fColTypesMap.at(key);
+    }}
+
+    std::vector<std::pair<ULong64_t, ULong64_t>> GetEntryRanges() {{
+        cout << "#4. GetEntryRanges" << endl;
+        auto entryRanges(std::move(fEntryRanges)); // empty fEntryRanges
+        return entryRanges;
+    }}
+
+    bool SetEntry(unsigned int slot, ULong64_t entry) {{
+        cout << "#5. SetEntry" << endl;
+        return true;
+    }}
+}};
+
+ROOT::RDataFrame* MakeAwkwardArrayDS(std::vector<std::pair<std::string, std::pair<ssize_t, ssize_t*>>> columns) {{
+    return new ROOT::RDataFrame(std::make_unique<AwkwardArrayDataSource>(columns));
+}}
+"""
+        )
+        assert done is True
+
+    rdf = ROOT.MakeAwkwardArrayDS()
+    return rdf
