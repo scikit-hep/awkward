@@ -529,7 +529,7 @@ class NumpyArray(Content):
         # Alternatively, self._data.flags["C_CONTIGUOUS"], but the following assumes
         # less of the nplike.
 
-        if type(self._data).__module__.startswith("jaxlib"):
+        if type(self._data).__module__.startswith("jaxlib."):
             return True
 
         x = self._data.dtype.itemsize
