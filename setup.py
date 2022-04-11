@@ -208,9 +208,13 @@ class Install(setuptools.command.install.install):
         if platform.system() == "Windows":
             print("--- copying libraries -----------------------------------------")
             dlldir = glob.glob(
-                f"build/temp.*-{sys.version_info[0]}.{sys.version_info[1]}/Release"
+                os.path.join(
+                    "build",
+                    f"temp.*-{sys.version_info[0]}*{sys.version_info[1]}",
+                    "Release",
+                )
             )
-            assert len(dlldir) == 1
+            assert len(dlldir) == 1, f"glob returned {dlldir!r}"
             dlldir = dlldir[0]
             found = False
             for x in os.listdir(dlldir):
