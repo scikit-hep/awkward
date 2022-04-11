@@ -1,7 +1,7 @@
 exclude: ^(docs|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.1.0
+  rev: v4.2.0
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -21,7 +21,7 @@ repos:
   - id: setup-cfg-fmt
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: "v2.31.1"
+  rev: "v2.32.0"
   hooks:
   - id: pyupgrade
     args: ["--py36-plus"]
