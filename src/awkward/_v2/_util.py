@@ -982,7 +982,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
             stops = starts + numpy.char.str_len(asbytes)
-            data = ak._v2.contents.ListArray64(
+            data = ak._v2.contents.ListArray(
                 ak._v2.index.Index64(starts),
                 ak._v2.index.Index64(stops),
                 ak._v2.contents.NumpyArray(
@@ -1000,7 +1000,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
             stops = starts + numpy.char.str_len(asbytes)
-            data = ak._v2.contents.ListArray64(
+            data = ak._v2.contents.ListArray(
                 ak._v2.index.Index64(starts),
                 ak._v2.index.Index64(stops),
                 ak._v2.contents.NumpyArray(
@@ -1065,7 +1065,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
 
 
 def to_arraylib(module, array, allow_missing):
-    def _impl(module, array):
+    def _impl(array):
         if isinstance(array, (bool, numbers.Number)):
             return module.array(array)
 
@@ -1111,7 +1111,10 @@ def to_arraylib(module, array, allow_missing):
             tags = module.asarray(array.tags)
             for tag, content in enumerate(contents):
                 mask = tags == tag
-                out[mask] = content
+                if(type(out).__module__.startswith("jaxlib.")):
+                    out = out.at[mask].set(content)
+                else:
+                    out[mask] = content
             return out
 
         elif isinstance(array, ak._v2.contents.UnmaskedArray):
@@ -1120,8 +1123,6 @@ def to_arraylib(module, array, allow_missing):
         elif isinstance(array, ak._v2.contents.IndexedOptionArray):
             content = _impl(array.project())
 
-            shape = list(content.shape)
-            shape[0] = len(array)
             mask0 = module.asarray(array.bytemask()).view(np.bool_)
             if mask0.any():
                 raise ak._v2._util.error(
@@ -1163,7 +1164,7 @@ def to_arraylib(module, array, allow_missing):
             )
 
     if module.__name__.startswith("jax") or module.__name__.startswith("cupy"):
-        return _impl(module, array)
+        return _impl(array)
     elif module.__name__.startswith("numpy"):
         layout = ak._v2.operations.convert.to_layout(
             array, allow_record=True, allow_other=True

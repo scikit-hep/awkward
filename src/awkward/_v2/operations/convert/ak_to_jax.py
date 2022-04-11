@@ -23,5 +23,5 @@ def to_jax(array):
     ):
         from awkward._v2._connect.jax import import_jax
 
-        jax = import_jax()
+        jax = import_jax().numpy
         return ak._v2._util.to_arraylib(jax, array, True)
