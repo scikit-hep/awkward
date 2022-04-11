@@ -1163,9 +1163,9 @@ def to_arraylib(module, array, allow_missing):
                 ValueError(f"cannot convert {array} into {type(module.array([]))}")
             )
 
-    if module.__name__.startswith("jax") or module.__name__.startswith("cupy"):
+    if module == "jax" or module.__name__ == "cupy":
         return _impl(array)
-    elif module.__name__.startswith("numpy"):
+    elif module.__name__ == "numpy":
         layout = ak._v2.operations.convert.to_layout(
             array, allow_record=True, allow_other=True
         )
