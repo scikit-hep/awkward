@@ -16,6 +16,8 @@ project(
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
+include(CMakeDependentOption)
+
 # Defaults for properties in this directory (and below)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -93,10 +95,16 @@ if(BUILD_TESTING)
 endif()
 
 option(PYBUILD "Build Python modules")
+cmake_dependent_option(AWKWARD_EXTERNAL_PYBIND11 "Build against an external pybind11" OFF
+                       "PYBUILD" OFF)
 
 # Third tier: Python modules.
 if(PYBUILD)
-  add_subdirectory(pybind11)
+  if(AWKWARD_EXTERNAL_PYBIND11)
+    find_package(pybind11 CONFIG REQUIRED)
+  else()
+    add_subdirectory(pybind11)
+  endif()
 
   file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
   pybind11_add_module(_ext ${LAYOUT_SOURCES})
