@@ -52,10 +52,14 @@ def _impl(arrays):
                 backends.add("cpu")
             elif isinstance(layout.nplike, ak.nplike.Cupy):
                 backends.add("cuda")
+            elif isinstance(layout.nplike, ak.nplike.Jax):
+                backends.add("jax")
         elif isinstance(layout, ak.nplike.numpy.ndarray):
             backends.add("cpu")
         elif type(layout).__module__.startswith("cupy."):
             backends.add("cuda")
+        elif type(layout).__module__.startswith("jaxlib."):
+            backends.add("jax")
 
     if backends == set():
         return None
@@ -63,5 +67,7 @@ def _impl(arrays):
         return "cpu"
     elif backends == {"cuda"}:
         return "cuda"
+    elif backends == {"jax"}:
+        return "jax"
     else:
         return "mixed"

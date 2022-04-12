@@ -4,8 +4,6 @@ import numpy
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-
 
 def to_numpy(array, allow_missing=True):
     """
@@ -38,15 +36,4 @@ def to_numpy(array, allow_missing=True):
         "ak._v2.to_numpy",
         dict(array=array, allow_missing=allow_missing),
     ):
-        return _impl(array, allow_missing)
-
-
-def _impl(array, allow_missing):
-    layout = ak._v2.operations.convert.to_layout(
-        array, allow_record=True, allow_other=True
-    )
-
-    if isinstance(layout, (ak._v2.contents.Content, ak._v2.record.Record)):
-        return layout.to_numpy(allow_missing=allow_missing)
-    else:
-        return numpy.asarray(array)
+        return ak._v2._util.to_arraylib(numpy, array, allow_missing)
