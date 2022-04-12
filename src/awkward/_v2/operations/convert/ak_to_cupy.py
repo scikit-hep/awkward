@@ -22,6 +22,6 @@ def to_cupy(array):
         dict(array=array),
     ):
         from awkward._v2._connect.cuda import import_cupy
-        
+
         cupy = import_cupy()
         return ak._v2._util.to_arraylib(cupy, array, True)
