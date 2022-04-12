@@ -22,7 +22,7 @@ class read_avro_py:
         _exec_code = [
             f'data = np.memmap("{self.file_name}", np.uint8)\npos=0\n',
             """def decode_varint(pos, data):\n\tshift = 0\n\tresult = 0\n\twhile True:\n\t\ti = data[pos]\n\t\tpos += 1\n\t\tresult |= (i & 0x7f) << shift\n\t\tshift += 7\n\t\tif not (i & 0x80):\n\t\t\tbreak\n\treturn pos, result\ndef decode_zigzag(n):\n\treturn (n >> 1) ^ (-(n & 1))\n\n""",
-            f"field = {str(self.field)}\n",
+            f"field = {str(self.field)}\n\n",
             f"for i in range({len(self.field)}):\n",
             "    fields = data[field[i][0]:field[i][1]]\n",
             "    while pos != len(fields):",
@@ -361,8 +361,8 @@ class read_avro_py:
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
-            _exec_code.append("\n" + "    " * ind + "out = abs(decode_zigzag(inn))")
-            _exec_code.append("\n" + "    " * ind + 'print("index :",out)')
+            _exec_code.append("\n" + "    " * ind + "idxx = abs(decode_zigzag(inn))")
+            _exec_code.append("\n" + "    " * ind + 'print("index :",idxx)')
             out = len(file["type"])
             if out == 2:
                 if "null" in file["type"]:
@@ -376,7 +376,7 @@ class read_avro_py:
             idxx = file["type"].index("null")
             for i in range(out):
                 if file["type"][i] == "null":
-                    _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
+                    _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
@@ -390,7 +390,7 @@ class read_avro_py:
                         + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
                     )
                 else:
-                    _exec_code.append("\n" + "    " * (ind) + f"if out == {i}:")
+                    _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                     _exec_code.append(
                         "\n"
                         + "    " * (ind + 1)
