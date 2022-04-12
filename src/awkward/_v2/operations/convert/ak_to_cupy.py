@@ -84,7 +84,7 @@ def _impl(array):
 
         shape = list(content.shape)
         shape[0] = len(array)
-        mask0 = cupy.asarray(array.bytemask()).view(np.bool_)
+        mask0 = cupy.asarray(array.mask_as_bool(valid_when=False)).view(np.bool_)
         if mask0.any():
             raise ak._v2._util.error(ValueError("CuPy does not support masked arrays"))
         else:
