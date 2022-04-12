@@ -1163,7 +1163,7 @@ def to_arraylib(module, array, allow_missing):
                 ValueError(f"cannot convert {array} into {type(module.array([]))}")
             )
 
-    if module.__name__ == "jax.numpy" or module.__name__ == "cupy":
+    if module.__name__ in ("jax.numpy", "cupy"):
         return _impl(array)
     elif module.__name__ == "numpy":
         layout = ak._v2.operations.convert.to_layout(
