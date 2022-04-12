@@ -12,6 +12,43 @@ ROOT = pytest.importorskip("ROOT")
 
 compiler = ROOT.gInterpreter.Declare
 
+
+@pytest.mark.skip(reason="FIXME: the test fails when flatlist_as_rvec=True")
+def test_array_as_rvec():
+
+    array = ak._v2.Array(
+        [
+            [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
+            [],
+            [{"x": 3, "y": [3.0, 0.3, 3.3]}],
+        ]
+    )
+    layout = array.layout
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+
+    generator.generate(compiler, flatlist_as_rvec=True)
+    print(lookup.arrayptrs, "DONE!")
+
+
+# @pytest.mark.skip(reason="FIXME:")
+def test_one_array():
+
+    array = ak._v2.Array(
+        [
+            [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
+            [],
+            [{"x": 3, "y": [3.0, 0.3, 3.3]}],
+        ]
+    )
+    layout = array.layout
+    generator = ak._v2._connect.cling.togenerator(layout.form)
+    lookup = ak._v2._lookup.Lookup(layout)
+
+    generator.generate(compiler)
+    print(lookup.arrayptrs, "DONE!")
+
+
 # def test_simple_test():
 #     if not hasattr(ROOT, "AwkwardArrayDataSourceTest"):
 #         done = compiler(
