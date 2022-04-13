@@ -206,6 +206,7 @@ namespace awkward {{
 
     if not hasattr(ROOT, "AwkwardArrayDataSource"):
         cpp_code = f"""
+// {key}
 template <typename ...ColumnTypes>
 class AwkwardArrayDataSource final : public ROOT::RDF::RDataSource {{
 private:
