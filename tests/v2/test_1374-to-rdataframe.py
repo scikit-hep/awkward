@@ -83,7 +83,7 @@ def test_simple_test():
     if not hasattr(ROOT, f"AwkwardArrayDataSource_{generated_type}"):
         done = compiler(
             f"""
-auto erase_buf = []({type(array_view_entry).__cpp_name__} *p) {{ cout << "Deleter " << endl; }};
+auto erase_array_view = []({type(array_view_entry).__cpp_name__} *p) {{ cout << "Deleter " << endl; }};
 
 class AwkwardArrayDataSource_{generated_type} final : public ROOT::RDF::RDataSource {{
 private:
@@ -171,7 +171,7 @@ public:
             auto obj = get_entry_{generated_type}(column_length, column_ptrs, i);
             cout << obj[0] << "(" << &obj << ") == " << fColumn[i] << ", ";
             fColumnPtr = reinterpret_cast<void*>(&obj);
-            std::unique_ptr<{type(array_view_entry).__cpp_name__}, decltype(erase_buf)> obj_ptr(&obj, erase_buf);
+            std::unique_ptr<{type(array_view_entry).__cpp_name__}, decltype(erase_array_view)> obj_ptr(&obj, erase_array_view);
             cout << obj_ptr << endl;
             //fPointerHolders[0][0] = new ROOT::Internal::TDS::TTypedPointerHolder<{type(array_view_entry).__cpp_name__}>(&obj);
         }}
