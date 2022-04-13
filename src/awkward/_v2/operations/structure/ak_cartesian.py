@@ -446,7 +446,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         while len(toflatten) != 0:
             flatten_axis = toflatten.pop()
             result = ak._v2.operations.structure.flatten(
-                result, axis=flatten_axis, highlevel=False
+                result, axis=flatten_axis, highlevel=False, behavior=behavior
             )
 
     return ak._v2._util.wrap(result, behavior, highlevel)
