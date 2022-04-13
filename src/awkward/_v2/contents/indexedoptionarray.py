@@ -750,7 +750,7 @@ class IndexedOptionArray(Content):
             )
 
         contents = [self._content, value]
-        tags = self.mask_as_bool(valid_when=False)
+        tags = ak._v2.index.Index8(self.mask_as_bool(valid_when=False))
         index = ak._v2.index.Index64.empty(tags.length, self._nplike)
 
         assert index.nplike is self._nplike and self._index.nplike is self._nplike
@@ -1468,7 +1468,7 @@ class IndexedOptionArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
-            mask = self.mask_as_bool(valid_when=False)
+            mask = ak._v2.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak._v2.index.Index64.empty(mask.length, self._nplike)
             assert index.nplike is self._nplike and mask.nplike is self._nplike
             self._handle_error(

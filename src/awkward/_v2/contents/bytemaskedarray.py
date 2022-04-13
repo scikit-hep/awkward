@@ -883,7 +883,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
-            mask = self.mask_as_bool(valid_when=False)
+            mask = ak._v2.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak._v2.index.Index64.empty(mask.length, self._nplike)
             assert index.nplike is self._nplike and self._mask.nplike is self._nplike
             self._handle_error(
