@@ -83,7 +83,26 @@ def test_simple_test():
     if not hasattr(ROOT, f"AwkwardArrayDataSource_{generated_type}"):
         done = compiler(
             f"""
-auto erase_array_view = []({type(array_view_entry).__cpp_name__} *p) {{ cout << "Deleter " << endl; }};
+auto erase_array_view_{generated_type} = []({type(array_view_entry).__cpp_name__} *entry) {{ cout << "Adoid deleter of " << entry << endl; }};
+
+class AwkwardArrayColumnReader_{generated_type} : public ROOT::Detail::RDF::RColumnReaderBase {{
+public:
+    AwkwardArrayColumnReader_{generated_type}( ssize_t length, ssize_t* ptrs)
+        : length_(length),
+          ptrs_(ptrs),
+          view_(get_entry_{generated_type}(length, ptrs, 0)) {{
+
+          }}
+private:
+    void* GetImpl(Long64_t entry) {{
+        view_ = get_entry_{generated_type}(length_, ptrs_, entry);
+        return reinterpret_cast<void*>(&view_);
+    }}
+
+    {type(array_view_entry).__cpp_name__} view_;
+    ssize_t length_;
+    ssize_t* ptrs_;
+}};
 
 class AwkwardArrayDataSource_{generated_type} final : public ROOT::RDF::RDataSource {{
 private:
@@ -171,7 +190,7 @@ public:
             auto obj = get_entry_{generated_type}(column_length, column_ptrs, i);
             cout << obj[0] << "(" << &obj << ") == " << fColumn[i] << ", ";
             fColumnPtr = reinterpret_cast<void*>(&obj);
-            std::unique_ptr<{type(array_view_entry).__cpp_name__}, decltype(erase_array_view)> obj_ptr(&obj, erase_array_view);
+            std::unique_ptr<{type(array_view_entry).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
             cout << obj_ptr << endl;
             //fPointerHolders[0][0] = new ROOT::Internal::TDS::TTypedPointerHolder<{type(array_view_entry).__cpp_name__}>(&obj);
         }}
