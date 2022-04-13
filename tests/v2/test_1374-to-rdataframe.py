@@ -83,6 +83,8 @@ def test_simple_test():
     if not hasattr(ROOT, f"AwkwardArrayDataSource_{generated_type}"):
         done = compiler(
             f"""
+auto erase_buf = []({type(array_view_entry).__cpp_name__} *p) {{ cout << "Deleter " << endl; }};
+
 class AwkwardArrayDataSource_{generated_type} final : public ROOT::RDF::RDataSource {{
 private:
     using PointerHolderPtrs_t = std::vector<ROOT::Internal::TDS::TPointerHolder *>;
@@ -91,6 +93,7 @@ private:
     ssize_t column_length;
     ssize_t* column_ptrs;
     {type(array_view_entry).__cpp_name__} fColumn;
+    void* fColumnPtr;
 
     const std::vector<std::string> fColNames;
     const std::vector<std::string> fColTypeNames;
@@ -138,7 +141,7 @@ private:
 
 
     size_t GetEntriesNumber() {{
-    cout << "GetEntriesNumber: " << fColNames.size() << endl;
+        cout << "GetEntriesNumber: " << fColNames.size() << endl;
         return fColNames.size();
     }}
 
@@ -154,7 +157,7 @@ public:
             fColNames({{name}}),
             fColTypeNames({{column_type}}),
             fColTypesMap( {{ {{ name, column_type }} }})
-        {{
+    {{
         cout << endl << "An AwkwardArrayDataSource_{generated_type} with column names " << endl;
         for (auto n : fColNames) {{
             cout << n << ", ";
@@ -163,9 +166,14 @@ public:
         for (auto t : fColTypeNames) {{
             cout << t << ", ";
         }}
+
         for (int64_t i = 0; i < column_length; i++) {{
             auto obj = get_entry_{generated_type}(column_length, column_ptrs, i);
-            cout << obj[0] << " == " << fColumn[i] << ", ";
+            cout << obj[0] << "(" << &obj << ") == " << fColumn[i] << ", ";
+            fColumnPtr = reinterpret_cast<void*>(&obj);
+            std::unique_ptr<{type(array_view_entry).__cpp_name__}, decltype(erase_buf)> obj_ptr(&obj, erase_buf);
+            cout << obj_ptr << endl;
+            //fPointerHolders[0][0] = new ROOT::Internal::TDS::TTypedPointerHolder<{type(array_view_entry).__cpp_name__}>(&obj);
         }}
         cout << "is constructed." << endl;
     }}
@@ -174,8 +182,23 @@ public:
     }}
 
     void SetNSlots(unsigned int nSlots) {{
-        cout << "#1. SetNSlots " << nSlots << endl;
+        cout << "#1. SetNSlots " << nSlots << " (" << fColumnPtr << ")" << endl;
         fNSlots = nSlots;
+        return;
+        const auto nCols = fColNames.size();
+        fPointerHolders.resize(nCols);
+
+        auto colIndex = 0U;
+        for (auto &&ptrHolderv : fPointerHolders) {{
+            for (auto slot : ROOT::TSeqI(fNSlots)) {{
+                auto ptrHolder = fPointerHoldersModels[colIndex]->GetDeepCopy();
+                ptrHolderv.emplace_back(ptrHolder);
+                (void)slot;
+            }}
+            colIndex++;
+        }}
+        for (auto &&ptrHolder : fPointerHoldersModels)
+            delete ptrHolder;
     }}
 
     void Initialise() {{
