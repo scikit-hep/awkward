@@ -634,11 +634,12 @@ class BitMaskedArray(Content):
             return out
 
         mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)[: self._length]
-        content = self._content._to_list(behavior)
-        out = [None] * self._length
+        out = self._content._getitem_range(slice(0, self._length))._to_list(behavior)
+
         for i, isvalid in enumerate(mask):
-            if isvalid:
-                out[i] = content[i]
+            if not isvalid:
+                out[i] = None
+
         return out
 
     def _to_nplike(self, nplike):
