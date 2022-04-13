@@ -21,7 +21,7 @@ def globalstring(context, builder, pyvalue):
         context.add_dynamic_addr(builder, buf.ctypes.data, info=f"str({pyvalue!r})")
     ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
     return builder.inttoptr(
-        ptr, llvmlite.llvmpy.core.Type.pointer(llvmlite.llvmpy.core.Type.int(8))
+        ptr, llvmlite.ir.PointerType(llvmlite.ir.IntType(8))
     )
 
 
