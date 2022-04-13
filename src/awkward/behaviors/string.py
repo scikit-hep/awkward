@@ -228,9 +228,7 @@ def _string_numba_lower(
     )
     rawptr_cast = builder.inttoptr(
         rawptr,
-        llvmlite.ir.PointerType(
-            llvmlite.ir.IntType(numba.intp.bitwidth // 8)
-        ),
+        llvmlite.ir.PointerType(llvmlite.ir.IntType(numba.intp.bitwidth // 8)),
     )
     strsize = builder.sub(stop, start)
     strsize_cast = ak._connect._numba.castint(
