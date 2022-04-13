@@ -220,6 +220,13 @@ public:
             delete ptrHolder;
     }}
 
+    std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
+    GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & /*tid*/) {{
+        cout << endl
+            << "#2.2. GetColumnReaders " << endl;
+        return std::unique_ptr<AwkwardArrayColumnReader_{generated_type}>(length, ptrs);
+    }}
+
     void Initialise() {{
         cout << "#3. Initialise" << endl;
         const auto nEntries = GetEntriesNumber();
