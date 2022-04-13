@@ -31,7 +31,6 @@ def test_array_as_rvec():
     print(lookup.arrayptrs, "DONE!")
 
 
-# @pytest.mark.skip(reason="FIXME:")
 def test_one_array():
 
     array = ak._v2.Array(
@@ -128,38 +127,8 @@ private:
     Record_t
     GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
         cout << "#2. GetColumnReadersImpl for " << colName;
-        return {{}};
-
-        auto colNameStr = std::string(colName);
-        const auto idName = ROOT::Internal::RDF::TypeID2TypeName(id);
-        cout << " and type " << idName << endl;
-        auto it = fColTypesMap.find(colNameStr);
-        if (fColTypesMap.end() == it) {{
-            std::string err = "The specified column name, \"" + colNameStr + "\" is not known to the data source.";
-            throw std::runtime_error(err);
-        }}
-
-        const auto colIdName = it->second;
-        if (colIdName != idName) {{
-            std::string err = "Column " + colNameStr + " has type " + colIdName +
-                              " while the id specified is associated to type " + idName;
-            throw std::runtime_error(err);
-        }}
-
-        const auto colBegin = fColNames.begin();
-        const auto colEnd = fColNames.end();
-        const auto namesIt = std::find(colBegin, colEnd, colName);
-        const auto index = std::distance(colBegin, namesIt);
-
-        cout << "index " << index << endl;
-        Record_t ret(fNSlots);
-        for (auto slot : ROOT::TSeqU(fNSlots)) {{
-            cout << "slot " << slot << " and data at " << &fColumn << endl;
-            ret[slot] = reinterpret_cast<void*>(&fColumn);
-        }}
-        return ret;
+        return Record_t();
     }}
-
 
     size_t GetEntriesNumber() {{
         cout << "GetEntriesNumber: " << fColNames.size() << endl;
@@ -194,7 +163,6 @@ public:
             fColumnPtr = reinterpret_cast<void*>(&obj);
             std::unique_ptr<{type(array_view_entry).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
             cout << obj_ptr << endl;
-            //fPointerHolders[0][0] = new ROOT::Internal::TDS::TTypedPointerHolder<{type(array_view_entry).__cpp_name__}>(&obj);
         }}
         cout << "is constructed." << endl;
     }}
@@ -206,24 +174,10 @@ public:
         cout << "#1. SetNSlots " << nSlots << " (" << fColumnPtr << ")" << endl;
         fNSlots = nSlots;
         return;
-        const auto nCols = fColNames.size();
-        fPointerHolders.resize(nCols);
-
-        auto colIndex = 0U;
-        for (auto &&ptrHolderv : fPointerHolders) {{
-            for (auto slot : ROOT::TSeqI(fNSlots)) {{
-                auto ptrHolder = fPointerHoldersModels[colIndex]->GetDeepCopy();
-                ptrHolderv.emplace_back(ptrHolder);
-                (void)slot;
-            }}
-            colIndex++;
-        }}
-        for (auto &&ptrHolder : fPointerHoldersModels)
-            delete ptrHolder;
     }}
 
     std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
-    GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & /*tid*/) {{
+    GetColumnReaders(unsigned int /*slot*/, std::string_view /*name*/, const std::type_info & /*tid*/) {{
         cout << endl
             << "#2.2. GetColumnReaders " << endl;
         return std::unique_ptr<AwkwardArrayColumnReader_{generated_type}>(new AwkwardArrayColumnReader_{generated_type}(column_length, column_ptrs));
@@ -231,15 +185,6 @@ public:
 
     void Initialise() {{
         cout << "#3. Initialise" << endl;
-        const auto nEntries = GetEntriesNumber();
-        cout << "nEntries " << nEntries << endl;
-        const auto nEntriesInRange = nEntries / fNSlots; // always one for now
-        cout << "nEntriesInRange " << nEntriesInRange << endl;
-        auto reminder = 1U == fNSlots ? 0 : nEntries % fNSlots;
-        cout << "reminder " << reminder << endl;
-        fEntryRanges.resize(fNSlots);
-        cout << "fEntryRanges size " << fEntryRanges.size() << endl;
-        // FIXME: define some ranges here!
     }}
 
     const std::vector<std::string> &GetColumnNames() const {{
