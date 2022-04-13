@@ -128,6 +128,8 @@ private:
     Record_t
     GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
         cout << "#2. GetColumnReadersImpl for " << colName;
+        return {{}};
+
         auto colNameStr = std::string(colName);
         const auto idName = ROOT::Internal::RDF::TypeID2TypeName(id);
         cout << " and type " << idName << endl;
