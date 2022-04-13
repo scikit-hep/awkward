@@ -177,9 +177,10 @@ public:
     }}
 
     std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
-    GetColumnReaders(unsigned int /*slot*/, std::string_view /*name*/, const std::type_info & /*tid*/) {{
-        cout << endl
-            << "#2.2. GetColumnReaders " << endl;
+    GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & tid) {{
+        cout << endl << "#2.2. GetColumnReaders " << endl;
+        cout << "GetColumnReaders..." << endl;
+
         return std::unique_ptr<AwkwardArrayColumnReader_{generated_type}>(new AwkwardArrayColumnReader_{generated_type}(column_length, column_ptrs));
     }}
 
