@@ -112,7 +112,7 @@ public:
     std::vector<std::pair<ULong64_t, ULong64_t>> GetEntryRanges() {{
         cout << "#4. GetEntryRanges" << endl;
         auto entryRanges(std::move(fEntryRanges)); // empty fEntryRanges
-        return entryRanges;
+        return {{ {{0ull,1ull}} }} ;
     }}
 
     bool SetEntry(unsigned int slot, ULong64_t entry) {{
