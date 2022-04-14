@@ -1643,11 +1643,17 @@ class IndexedOptionArray(Content):
             return out
 
         index = self._index.raw(numpy)
-        content = self._content._to_list(behavior)
-        out = [None] * len(index)
-        for i, ind in enumerate(index):
-            if ind >= 0:
-                out[i] = content[ind]
+        not_missing = index >= 0
+
+        nextcontent = self._content._carry(
+            ak._v2.index.Index(index[not_missing]), False
+        )
+        out = nextcontent._to_list(behavior)
+
+        for i, isvalid in enumerate(not_missing):
+            if not isvalid:
+                out.insert(i, None)
+
         return out
 
     def _to_nplike(self, nplike):
