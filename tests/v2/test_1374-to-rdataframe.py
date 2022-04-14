@@ -31,6 +31,112 @@ def test_array_as_rvec():
     print(lookup.arrayptrs, "DONE!")
 
 
+def test_minimal_example():
+    generated_type = "whatever"
+    if not hasattr(ROOT, f"ADataSource_{generated_type}"):
+        done = compiler(
+            f"""
+class ADataSource_{generated_type} final : public ROOT::RDF::RDataSource {{
+private:
+    unsigned int fNSlots{{0U}};
+    const std::vector<std::string> fColNames;
+    const std::vector<std::string> fColTypeNames;
+    const std::map<std::string, std::string> fColTypesMap;
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{}};
+
+    /// type-erased vector of pointers to pointers to column values - one per slot
+    Record_t
+    GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
+        cout << "#2. GetColumnReadersImpl for " << colName;
+        return {{}};
+    }}
+
+    size_t GetEntriesNumber() {{
+        cout << "GetEntriesNumber: " << fColNames.size() << endl;
+        return fColNames.size();
+    }}
+
+public:
+    ADataSource_{generated_type}() :
+            fColNames({{"x"}}),
+            fColTypeNames({{"int"}}),
+            fColTypesMap( {{ {{ "x", "int" }} }})
+    {{
+        cout << endl << "An ADataSource_{generated_type} with column names " << endl;
+        for (auto n : fColNames) {{
+            cout << n << ", ";
+        }}
+        cout << endl << " and types " << endl;
+        for (auto t : fColTypeNames) {{
+            cout << t << ", ";
+        }}
+        cout << "is constructed." << endl;
+    }}
+
+    ~ADataSource_{generated_type}() {{
+    }}
+
+    void SetNSlots(unsigned int nSlots) {{
+        cout << "#1. SetNSlots " << nSlots << endl;
+        fNSlots = nSlots;
+        return;
+    }}
+
+    std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
+    GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & tid) {{
+        cout << endl << "#2.2. GetColumnReaders " << endl;
+        throw std::invalid_argument("not implemented error");
+    }}
+
+    void Initialise() {{
+        cout << "#3. Initialise" << endl;
+    }}
+
+    const std::vector<std::string> &GetColumnNames() const {{
+        return fColNames;
+    }}
+
+    bool
+    HasColumn(std::string_view colName) const {{
+        const auto key = std::string(colName);
+        const auto endIt = fColTypesMap.end();
+        return endIt != fColTypesMap.find(key);
+    }}
+
+    std::string
+    GetTypeName(std::string_view colName) const {{
+        const auto key = std::string(colName);
+        return fColTypesMap.at(key);
+    }}
+
+    std::vector<std::pair<ULong64_t, ULong64_t>> GetEntryRanges() {{
+        cout << "#4. GetEntryRanges" << endl;
+        auto entryRanges(std::move(fEntryRanges)); // empty fEntryRanges
+        return entryRanges;
+    }}
+
+    bool SetEntry(unsigned int slot, ULong64_t entry) {{
+        cout << "#5. SetEntry" << endl;
+        return true;
+    }}
+}};
+
+ROOT::RDataFrame* MakeATestDS() {{
+    return new ROOT::RDataFrame(std::make_unique<ADataSource_{generated_type}>());
+}}
+"""
+        )
+        assert done is True
+        data_frame = ROOT.MakeATestDS()
+        print("GetColumnType")
+        column_type = data_frame.GetColumnType("x")
+        print("column_type", column_type)
+        print("Take")
+        result_ptrs = data_frame.Take[column_type]("x")
+        result_ready = result_ptrs.IsReady()
+        print("result is ready?", result_ready)
+
+
 def test_one_array():
 
     array = ak._v2.Array(
@@ -90,8 +196,13 @@ public:
         : length_(length),
           ptrs_(ptrs),
           view_(get_entry_{generated_type}(length, ptrs, 0)) {{
-
+            cout << "TEST AwkwardArrayColumnReader_{generated_type} is CONSTRUCTED!" << endl;
           }}
+
+    ~AwkwardArrayColumnReader_{generated_type}() {{
+        cout << "TEST AwkwardArrayColumnReader_{generated_type} is DESTRUCTED!" << endl;
+
+    }}
 private:
     void* GetImpl(Long64_t entry) {{
         view_ = get_entry_{generated_type}(length_, ptrs_, entry);
@@ -127,7 +238,7 @@ private:
     Record_t
     GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
         cout << "#2. GetColumnReadersImpl for " << colName;
-        return Record_t();
+        return {{}};
     }}
 
     size_t GetEntriesNumber() {{
