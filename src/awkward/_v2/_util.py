@@ -1123,7 +1123,7 @@ def to_arraylib(module, array, allow_missing):
         elif isinstance(array, ak._v2.contents.IndexedOptionArray):
             content = _impl(array.project())
 
-            mask0 = module.asarray(array.bytemask()).view(np.bool_)
+            mask0 = array.mask_as_bool(valid_when=False)
             if mask0.any():
                 raise ak._v2._util.error(
                     ValueError(f"{module.__name__} does not support masked arrays")
