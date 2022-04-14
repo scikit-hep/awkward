@@ -661,7 +661,7 @@ class IndexedArray(Content):
             return self.project()._localindex(posaxis, depth)
 
     def _unique_index(self, index, sorted=True):
-        next = ak._v2.index.Index64.empty(self.length, self._nplike)
+        next = ak._v2.index.Index64.zeros(self.length, self._nplike)
         length = ak._v2.index.Index64.zeros(1, self._nplike)
 
         if not sorted:
@@ -716,7 +716,9 @@ class IndexedArray(Content):
                     length.data,
                 )
             )
-
+        #FIXME test_0404
+        out = ak._v2.index.Index64.zeros(1 + length[0], self._nplike)
+        out[1:] = next[0 : length[0]]
         return next[0 : length[0]]
 
     def numbers_to_type(self, name):

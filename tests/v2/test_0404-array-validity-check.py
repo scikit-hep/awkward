@@ -198,10 +198,10 @@ def test_subranges_equal():
     # assert array.sort(axis=-1).content._subranges_equal(starts, stops, 15) is True
 
 
-@pytest.mark.skip("FIXME: highlevel v2 to_categorical not defined")
 def test_categorical():
     array = ak._v2.highlevel.Array(["1chchc", "1chchc", "2sss", "3", "4", "5"])
     categorical = ak._v2.behaviors.categorical.to_categorical(array)
+
     assert ak._v2.operations.describe.is_valid(categorical) is True
     assert categorical.layout.is_unique() is False
 
@@ -795,8 +795,16 @@ def test_same_categories():
         "two",
     ]
 
-    # FIXME: TypeError: no numpy.equal overloads for custom types: categorical, categorical
-    # assert (array1 == array2) is False
+    assert (array1 == array2).tolist() == [
+        False,
+        False,
+        True,
+        True,
+        False,
+        True,
+        False,
+        False,
+    ]
 
 
 def test_UnionArray():

@@ -159,7 +159,6 @@ def test_0166_ByteMaskedArray():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: needs string behavioral overloads")
 def test_0167_strings():
     array = ak._v2.highlevel.Array(
         ["one", "two", "three", "two", "two", "one", "three"]
@@ -286,7 +285,6 @@ def test_0167_strings():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: needs string behavioral overloads")
 def test_0167_bytestrings():
     array = ak._v2.highlevel.Array(
         [b"one", b"two", b"three", b"two", b"two", b"one", b"three"]
