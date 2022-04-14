@@ -19,9 +19,9 @@ This part of the documentation is the most in flux, since we'll likely add featu
 
 In C++, there are three classes:
 
-   * `ForthMachineOf<T, I> <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthMachineOf.html>`__, where ``T`` is the stack type (``int32_t`` or ``int64_t``) and ``I`` is the instruction type (only ``int32_t`` has been instantiated).
-   * `ForthInputBuffer <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthInputBuffer.html>`__ is an untyped input buffer, which wraps a ``std::shared_ptr<void>``. (Note that one operation, copying multiple numbers from the input buffer to the stack (not directly to output buffers), will temporarily mutate data in the buffer if they need to be byte-swapped. This is a temporary mutation, so the buffer can be used by other functions afterward, but not at the same time as the ForthMachine. This thread-unsafety could be changed in the future.)
-   * `ForthOutputBufferOf<OUT> <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthOutputBuffer.html>`__ is a typed output buffer, specialized by ``OUT``. (The fact that the write methods are virtual is not a performance bottleneck: putting the output type information into Forth bytecodes and using a ``switch`` statement to go to specialized method calls has identical performance for small copies and is up to 2× worse for large copies. C++ vtables are hard to beat.)
+- `ForthMachineOf<T, I> <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthMachineOf.html>`__, where ``T`` is the stack type (``int32_t`` or ``int64_t``) and ``I`` is the instruction type (only ``int32_t`` has been instantiated).
+- `ForthInputBuffer <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthInputBuffer.html>`__ is an untyped input buffer, which wraps a ``std::shared_ptr<void>``. (Note that one operation, copying multiple numbers from the input buffer to the stack (not directly to output buffers), will temporarily mutate data in the buffer if they need to be byte-swapped. This is a temporary mutation, so the buffer can be used by other functions afterward, but not at the same time as the ForthMachine. This thread-unsafety could be changed in the future.)
+- `ForthOutputBufferOf<OUT> <https://awkward-array.readthedocs.io/en/latest/_static/classawkward_1_1ForthOutputBuffer.html>`__ is a typed output buffer, specialized by ``OUT``. (The fact that the write methods are virtual is not a performance bottleneck: putting the output type information into Forth bytecodes and using a ``switch`` statement to go to specialized method calls has identical performance for small copies and is up to 2× worse for large copies. C++ vtables are hard to beat.)
 
 In Python, only the two instantiations of the ForthMachine are bound through pybind11:
 
@@ -46,12 +46,12 @@ Controlling execution
 
 A ForthMachine has 3 states: "not ready," "paused," and "done." There are 6 methods that control execution of a ForthMachine:
 
-   * ``run(inputs)``: resets the state of the machine, starting in any state, and runs the main code from the beginning. If control reaches a ``pause`` word, the machine goes into the "paused" state. Otherwise, it goes into the "done" state.
-   * ``begin(inputs)``: resets the state of the machine, starting in any state, and goes into a "paused" state before the first instruction in the main code.
-   * ``resume()``: starts execution from a "paused" state and continues until the end of the main code, resulting in "done," or until the end of a user-defined word, if a word was paused while being called (see below).
-   * ``call(word)``: starting from a "paused" or "done" state, executes a user-defined word. If this operation contains a ``pause`` word, the machine will need to be resumed (see above) to reach the end of the user-defined word. When the user-defined word is finished, the state of the machine will be "paused" or "done," depending on where it started.
-   * ``step()``: executes only one instruction, starting from a "pause" state, ending in a "pause" or "done" state, depending on whether the last instruction in the main code is reached. This only exists for debugging: normal pausing and resuming should be done with ``pause`` words and ``resume()`` calls.
-   * ``reset()``: resets the state of the machine and (unlike all of the above), clears the stack, all variables, and detaches the input and output buffers (which might be significant for cleaning up memory use).
+- ``run(inputs)``: resets the state of the machine, starting in any state, and runs the main code from the beginning. If control reaches a ``pause`` word, the machine goes into the "paused" state. Otherwise, it goes into the "done" state.
+- ``begin(inputs)``: resets the state of the machine, starting in any state, and goes into a "paused" state before the first instruction in the main code.
+- ``resume()``: starts execution from a "paused" state and continues until the end of the main code, resulting in "done," or until the end of a user-defined word, if a word was paused while being called (see below).
+- ``call(word)``: starting from a "paused" or "done" state, executes a user-defined word. If this operation contains a ``pause`` word, the machine will need to be resumed (see above) to reach the end of the user-defined word. When the user-defined word is finished, the state of the machine will be "paused" or "done," depending on where it started.
+- ``step()``: executes only one instruction, starting from a "pause" state, ending in a "pause" or "done" state, depending on whether the last instruction in the main code is reached. This only exists for debugging: normal pausing and resuming should be done with ``pause`` words and ``resume()`` calls.
+- ``reset()``: resets the state of the machine and (unlike all of the above), clears the stack, all variables, and detaches the input and output buffers (which might be significant for cleaning up memory use).
 
 Here are some examples of controlling the execution state of a ForthMachine.
 
@@ -1073,19 +1073,19 @@ Type codes
 
 Inputs are untyped; their interpretation depends on the sequence of Forth commands. The letter immediately preceding the "``->``" specifies this interpretation—those letters were taken from `Python's struct module <https://docs.python.org/3/library/struct.html#format-characters>`__. The format-letters recognized by AwkwardForth are:
 
-   * ``?`` for ``bool``: 1 byte, false if exactly zero, true if nonzero;
-   * ``b`` for ``int8``: 1-byte signed integer;
-   * ``h`` for ``int16``: 2-byte signed integer;
-   * ``i`` for ``int32``: 4-byte signed integer;
-   * ``q`` for ``int64``: 8-byte signed integer;
-   * ``n`` for platform-dependent ``ssize_t``: 4 or 8 bytes, signed integer;
-   * ``B`` for ``int8``: 1-byte unsigned integer;
-   * ``H`` for ``int16``: 2-byte unsigned integer;
-   * ``I`` for ``int32``: 4-byte unsigned integer;
-   * ``Q`` for ``int64``: 8-byte unsigned integer;
-   * ``N`` for platform-dependent ``ssize_t``: 4 or 8 bytes, unsigned integer;
-   * ``f`` for ``float32``: 4-byte floating-point number;
-   * ``d`` for ``float64``: 8-byte floating-point number.
+- ``?`` for ``bool``: 1 byte, false if exactly zero, true if nonzero;
+- ``b`` for ``int8``: 1-byte signed integer;
+- ``h`` for ``int16``: 2-byte signed integer;
+- ``i`` for ``int32``: 4-byte signed integer;
+- ``q`` for ``int64``: 8-byte signed integer;
+- ``n`` for platform-dependent ``ssize_t``: 4 or 8 bytes, signed integer;
+- ``B`` for ``int8``: 1-byte unsigned integer;
+- ``H`` for ``int16``: 2-byte unsigned integer;
+- ``I`` for ``int32``: 4-byte unsigned integer;
+- ``Q`` for ``int64``: 8-byte unsigned integer;
+- ``N`` for platform-dependent ``ssize_t``: 4 or 8 bytes, unsigned integer;
+- ``f`` for ``float32``: 4-byte floating-point number;
+- ``d`` for ``float64``: 8-byte floating-point number.
 
 Since each read increments the input position, the choice of format also affects the resulting position in the file.
 
@@ -1156,9 +1156,9 @@ Input len, pos, end
 
 The following words can be written after an input name to push information about the input onto the stack:
 
-   * ``len``: length of the input (does not change);
-   * ``pos``: position in the input (changes with every read, ``seek``, and ``skip``);
-   * ``end``: true (``-1``) if the position is at the end of the input buffer; false (``0``) otherwise.
+- ``len``: length of the input (does not change);
+- ``pos``: position in the input (changes with every read, ``seek``, and ``skip``);
+- ``end``: true (``-1``) if the position is at the end of the input buffer; false (``0``) otherwise.
 
 Since input buffers are untyped, lengths and positions are expressed in number of bytes.
 
@@ -1185,8 +1185,8 @@ Input seek, skip
 
 The following words pop a value off the stack and use it to move the input buffer's position without reading:
 
-   * ``seek``: jumps to an absolute position within the file;
-   * ``skip``: moves a relative number of bytes in the file.
+- ``seek``: jumps to an absolute position within the file;
+- ``skip``: moves a relative number of bytes in the file.
 
 Since input buffers are untyped, absolute and relative positions are expressed in number of bytes.
 
@@ -1209,17 +1209,17 @@ Output types
 
 The following are allowed output buffer types:
 
-   * ``bool``: 1-byte booleans;
-   * ``int8``: 1-byte signed integers;
-   * ``int16``: 2-byte signed integers;
-   * ``int32``: 4-byte signed integers;
-   * ``int64``: 8-byte signed integers;
-   * ``uint8``: 1-byte unsigned integers;
-   * ``uint16``: 2-byte unsigned integers;
-   * ``uint32``: 4-byte unsigned integers;
-   * ``uint64``: 8-byte unsigned integers;
-   * ``float32``: 4-byte floating-point numbers;
-   * ``float64``: 8-byte floating-point numbers.
+- ``bool``: 1-byte booleans;
+- ``int8``: 1-byte signed integers;
+- ``int16``: 2-byte signed integers;
+- ``int32``: 4-byte signed integers;
+- ``int64``: 8-byte signed integers;
+- ``uint8``: 1-byte unsigned integers;
+- ``uint16``: 2-byte unsigned integers;
+- ``uint32``: 4-byte unsigned integers;
+- ``uint64``: 8-byte unsigned integers;
+- ``float32``: 4-byte floating-point numbers;
+- ``float64``: 8-byte floating-point numbers.
 
 Output write
 ************
