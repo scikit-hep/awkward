@@ -540,7 +540,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             errors="surrogateescape"
                         )
                     else:
-                        yield x
+                        yield ak._v2._util.wrap(x, self._behavior)
                 elif isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record)):
                     yield ak._v2._util.wrap(x, self._behavior)
                 else:
