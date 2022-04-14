@@ -54,10 +54,10 @@ def _impl(array, to, highlevel, behavior):
             or layout.parameter("__array__") == "bytestring"
         ):
             layout = ak._v2.operations.structure.without_parameters(
-                layout, highlevel=False
+                layout, highlevel=False, behavior=behavior
             )
             max_length = ak._v2.operations.reducers.max(
-                ak._v2.operations.structure.num(layout)
+                ak._v2.operations.structure.num(layout, behavior=behavior)
             )
             regulararray = layout.rpad(max_length, 1)
             maskedarray = ak._v2.operations.convert.to_numpy(

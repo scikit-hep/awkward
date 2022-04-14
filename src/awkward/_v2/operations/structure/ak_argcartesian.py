@@ -112,7 +112,12 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         parameters["__record__"] = with_name
 
     result = ak._v2.operations.structure.cartesian(
-        layouts, axis=axis, nested=nested, parameters=parameters, highlevel=False
+        layouts,
+        axis=axis,
+        nested=nested,
+        parameters=parameters,
+        highlevel=False,
+        behavior=behavior,
     )
 
     return ak._v2._util.wrap(result, behavior, highlevel)

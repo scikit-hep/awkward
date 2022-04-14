@@ -21,6 +21,8 @@ def where(condition, *args, **kwargs):
             buffers with distinct types (using an #ak.layout.UnionArray8_64).
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     This function has a one-argument form, `condition` without `x` or `y`, and
     a three-argument form, `condition`, `x`, and `y`. In the one-argument form,
@@ -36,8 +38,8 @@ def where(condition, *args, **kwargs):
     for all `i`. The structure of `x` and `y` do not need to be the same; if
     they are incompatible types, the output will have #ak.type.UnionType.
     """
-    mergebool, highlevel = ak._v2._util.extra(
-        (), kwargs, [("mergebool", True), ("highlevel", True)]
+    mergebool, highlevel, behavior = ak._v2._util.extra(
+        (), kwargs, [("mergebool", True), ("highlevel", True), ("behavior", None)]
     )
 
     if len(args) == 0:
@@ -45,7 +47,7 @@ def where(condition, *args, **kwargs):
             "ak._v2.where",
             dict(condition=condition, mergebool=mergebool, highlevel=highlevel),
         ):
-            return _impl1(condition, mergebool, highlevel)
+            return _impl1(condition, mergebool, highlevel, behavior)
 
     elif len(args) == 1:
         raise ak._v2._util.error(
@@ -60,7 +62,7 @@ def where(condition, *args, **kwargs):
                 condition=condition, x=x, y=y, mergebool=mergebool, highlevel=highlevel
             ),
         ):
-            return _impl3(condition, x, y, mergebool, highlevel)
+            return _impl3(condition, x, y, mergebool, highlevel, behavior)
 
     else:
         raise ak._v2._util.error(
@@ -71,7 +73,7 @@ def where(condition, *args, **kwargs):
         )
 
 
-def _impl1(condition, mergebool, highlevel):
+def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak._v2.operations.convert.to_layout(
         condition, allow_record=False, allow_other=False
     )
@@ -84,7 +86,8 @@ def _impl1(condition, mergebool, highlevel):
     if highlevel:
         return tuple(
             ak._v2._util.wrap(
-                ak._v2.contents.NumpyArray(x), ak._v2._util.behavior_of(condition)
+                ak._v2.contents.NumpyArray(x),
+                ak._v2._util.behavior_of(condition, behavior=behavior),
             )
             for x in out
         )
@@ -92,7 +95,7 @@ def _impl1(condition, mergebool, highlevel):
         return tuple(ak._v2.contents.NumpyArray(x) for x in out)
 
 
-def _impl3(condition, x, y, mergebool, highlevel):
+def _impl3(condition, x, y, mergebool, highlevel, behavior):
     akcondition = ak._v2.operations.convert.to_layout(
         condition, allow_record=False, allow_other=False
     )
@@ -122,7 +125,7 @@ def _impl3(condition, x, y, mergebool, highlevel):
         else:
             return None
 
-    behavior = ak._v2._util.behavior_of(condition, x, y)
+    behavior = ak._v2._util.behavior_of(condition, x, y, behavior=behavior)
     out = ak._v2._broadcasting.broadcast_and_apply(
         [akcondition, left, right],
         action,

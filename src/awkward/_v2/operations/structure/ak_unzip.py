@@ -51,7 +51,7 @@ def _impl(array, highlevel, behavior):
 
         elif isinstance(layout, ak._v2.contents.UnionArray):
             for content in layout.contents:
-                if set(ak.operations.describe.fields(content)) != set(fields):
+                if set(ak._v2.operations.describe.fields(content)) != set(fields):
                     raise ak._v2._util.error(
                         ValueError("union of different sets of fields, cannot ak.unzip")
                     )
