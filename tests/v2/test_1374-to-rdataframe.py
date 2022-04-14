@@ -31,6 +31,9 @@ def test_array_as_rvec():
     print(lookup.arrayptrs, "DONE!")
 
 
+@pytest.mark.skip(
+    reason="this test suppose to fail because the reader of a RColumnReaderBase type is not implemented"
+)
 def test_minimal_example():
     generated_type = "whatever"
     if not hasattr(ROOT, f"ADataSource_{generated_type}"):
@@ -42,7 +45,7 @@ private:
     const std::vector<std::string> fColNames;
     const std::vector<std::string> fColTypeNames;
     const std::map<std::string, std::string> fColTypesMap;
-    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{}};
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull,1ull}} }};
 
     /// type-erased vector of pointers to pointers to column values - one per slot
     Record_t
@@ -111,7 +114,6 @@ public:
 
     std::vector<std::pair<ULong64_t, ULong64_t>> GetEntryRanges() {{
         cout << "#4. GetEntryRanges" << endl;
-        auto entryRanges(std::move(fEntryRanges)); // empty fEntryRanges
         return {{ {{0ull,1ull}} }} ;
     }}
 
@@ -135,6 +137,12 @@ ROOT::RDataFrame* MakeATestDS() {{
         result_ptrs = data_frame.Take[column_type]("x")
         result_ready = result_ptrs.IsReady()
         print("result is ready?", result_ready)
+
+        ptr = result_ptrs.Get()
+        print(">>>pointer", ptr)
+        print("result_ptrs", result_ptrs)
+        print("GetValue")
+        result_ptrs.GetValue()
 
 
 def test_one_array():
@@ -232,7 +240,7 @@ private:
     std::vector<PointerHolderPtrs_t> fPointerHolders;
 
     std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
-    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{}};
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull,1ull}} }};
 
     /// type-erased vector of pointers to pointers to column values - one per slot
     Record_t
@@ -339,13 +347,39 @@ ROOT::RDataFrame* MakeAwkwardArrayTestDS(std::string name, std::string column_ty
     data_frame = ROOT.MakeAwkwardArrayTestDS(
         "x", type(array_view_entry).__cpp_name__, len(layout), lookup.arrayptrs
     )
+    done = compiler(
+        """
+        template<typename T>
+        struct MyFunctor_1 {
+            void operator()(const T& a) {
+            for (int64_t i = 0; i < a.size(); i++)
+                cout << a[i] << ", " << endl;
+            }
+        };
+        """
+    )
+    assert done is True
     print("GetColumnType")
     column_type = data_frame.GetColumnType("x")
     print("column_type", column_type)
-    print("Take")
-    result_ptrs = data_frame.Take[column_type]("x")
-    result_ready = result_ptrs.IsReady()
-    print("result is ready?", result_ready)
+    f = ROOT.MyFunctor_1[column_type]()
+
+    data_frame.Foreach(f, ["x"])
+
+    # print("GetColumnType")
+    # column_type = data_frame.GetColumnType("x")
+    # print("column_type", column_type)
+    # print("Take")
+    # result_ptrs = data_frame.Take[column_type]("x")
+    # result_ready = result_ptrs.IsReady()
+    # print("result is ready?", result_ready)
+    #
+    # #ptr = result_ptrs.Get()
+    # #print(">>>pointer", ptr)
+    # print("result_ptrs", result_ptrs)
+    # print("GetValue")
+    # cpp_reference = result_ptrs.GetValue()
+    # print("   check type", type(cpp_reference))
 
 
 def test_two_arrays():
