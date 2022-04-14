@@ -2062,20 +2062,36 @@ class ListOffsetArray(Content):
         )
 
     def _to_list(self, behavior):
+        starts, stops = self.starts, self.stops
+        starts_data = starts.raw(numpy)
+        stops_data = stops.raw(numpy)[: len(starts_data)]
+
+        nonempty = starts_data != stops_data
+        if numpy.count_nonzero(nonempty) == 0:
+            mini, maxi = 0, 0
+        else:
+            mini = starts_data.min()
+            maxi = stops_data.max()
+
+        starts_data = starts_data - mini
+        stops_data = stops_data - mini
+
+        nextcontent = self._content._getitem_range(slice(mini, maxi))
+
         if self.parameter("__array__") == "bytestring":
-            content = ak._v2._util.tobytes(self._content.data)
-            starts, stops = self.starts, self.stops
+            content = ak._v2._util.tobytes(nextcontent.data)
             out = [None] * starts.length
             for i in range(starts.length):
-                out[i] = content[starts[i] : stops[i]]
+                out[i] = content[starts_data[i] : stops_data[i]]
             return out
 
         elif self.parameter("__array__") == "string":
-            content = ak._v2._util.tobytes(self._content.data)
-            starts, stops = self.starts, self.stops
+            content = ak._v2._util.tobytes(nextcontent.data)
             out = [None] * starts.length
             for i in range(starts.length):
-                out[i] = content[starts[i] : stops[i]].decode(errors="surrogateescape")
+                out[i] = content[starts_data[i] : stops_data[i]].decode(
+                    errors="surrogateescape"
+                )
             return out
 
         else:
@@ -2083,12 +2099,11 @@ class ListOffsetArray(Content):
             if out is not None:
                 return out
 
-            content = self._content._to_list(behavior)
-            starts, stops = self.starts, self.stops
+            content = nextcontent._to_list(behavior)
             out = [None] * starts.length
 
             for i in range(starts.length):
-                out[i] = content[starts[i] : stops[i]]
+                out[i] = content[starts_data[i] : stops_data[i]]
             return out
 
     def _to_nplike(self, nplike):

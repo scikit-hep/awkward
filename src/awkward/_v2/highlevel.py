@@ -437,6 +437,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         return self._layout.fields
 
+    @property
+    def is_tuple(self):
+        """
+        If True, the top-most record structure has no named fields, i.e. it's a tuple.
+        """
+        return self._layout.is_tuple
+
     def _ipython_key_completions_(self):
         return self._layout.fields
 
@@ -533,7 +540,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             errors="surrogateescape"
                         )
                     else:
-                        yield x
+                        yield ak._v2._util.wrap(x, self._behavior)
                 elif isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record)):
                     yield ak._v2._util.wrap(x, self._behavior)
                 else:
@@ -1579,6 +1586,13 @@ class Record(NDArrayOperatorsMixin):
         See also #ak.fields.
         """
         return self._layout.array.fields
+
+    @property
+    def is_tuple(self):
+        """
+        If True, the top-most record structure has no named fields, i.e. it's a tuple.
+        """
+        return self._layout.array.is_tuple
 
     def _ipython_key_completions_(self):
         return self._layout.array.fields
