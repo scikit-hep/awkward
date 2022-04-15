@@ -520,6 +520,86 @@ The ``if .. else .. then`` brackets two sequences of words, pops one value off t
     >>> vm.stack
     [123]
 
+`case .. of .. endof .. endcase <https://forth-standard.org/standard/core/CASE>`__
+**********************************************************************************
+
+The ``case .. of .. endof .. endcase`` structure is an extension of ``if .. else .. then`` that allows a single expression to be matched against many possible values. It's Forth's equivalent of C's ``switch`` statement.
+
+This complex expression evaluates in the following order:
+
+.. code-block:: forth
+
+    expression-to-pop case
+      value-to-compare-1 of consequent-to-evaluate-1 endof
+      value-to-compare-2 of consequent-to-evaluate-2 endof
+      value-to-compare-3 of consequent-to-evaluate-3 endof
+                            optional-default-to-evaluate
+    endcase
+
+That is, the ``case`` word pops a value off the stack and compares it with the expressions before each ``of``. The first one that matches invokes the corresponding consequent to evaluate, which is nested between ``of`` and ``endof``. A default expression to evaluate, if none of the values match, comes after all of the ``of``-``endof`` pairs but before the ``endcase``. The ``endcase`` closes the block.
+
+If all of the values to compare are literal integers, then this structure compiles to a table-lookup. If not, then it compiles to the equivalent ``if .. else .. then`` chain. The reason this structure was added to AwkwardForth was to take advantage of this optimization.
+
+Here is a ``case .. of .. endof .. endcase`` that compiles to a table-lookup. The single item that it consumes from the stack is passed in from outside the machine.
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... case
+    ...   1 of ." one" cr endof
+    ...   2 of ." two" cr endof
+    ...   3 of ." three" cr endof
+    ...        ." something else" cr
+    ... endcase
+    ... """)
+    >>> vm.begin()
+    >>> vm.stack_push(0)
+    >>> vm.resume()
+    something else
+    >>> vm.begin()
+    >>> vm.stack_push(1)
+    >>> vm.resume()
+    one
+    >>> vm.begin()
+    >>> vm.stack_push(2)
+    >>> vm.resume()
+    two
+    >>> vm.begin()
+    >>> vm.stack_push(3)
+    >>> vm.resume()
+    three
+    >>> vm.begin()
+    >>> vm.stack_push(4)
+    >>> vm.resume()
+    something else
+
+The above is a table-lookup because all items to the left of each ``of`` is a literal integer. It still works if one of them is a runtime expression, but not as fast.
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... case
+    ...   1     of ." one" cr endof
+    ...   1 1 + of ." two" cr endof
+    ...   3     of ." three" cr endof
+    ...            ." something else" cr
+    ... endcase
+    ... """)
+    >>> vm.begin()
+    >>> vm.stack_push(1)
+    >>> vm.resume()
+    one
+    >>> vm.begin()
+    >>> vm.stack_push(2)
+    >>> vm.resume()
+    two
+    >>> vm.begin()
+    >>> vm.stack_push(3)
+    >>> vm.resume()
+    three
+
+The ``case .. of .. endof .. endcase`` construct can be used to match type codes in an input stream, in which different values precede different behavior, or even string constants (like "``{``" or "``[``" in JSON) via ``enum`` or ``enumonly``.
+
 `do .. loop <https://forth-standard.org/standard/core/DO>`__
 ************************************************************
 
@@ -1243,8 +1323,46 @@ Since input buffers are untyped, lengths and positions are expressed in number o
     >>> vm.stack
     [40, 40, -1]
 
-Input seek, skip
-****************
+Recognizing strings or constant byte-patterns
+*********************************************
+
+Some data formats have reserved words or other constant byte-patterns with special meaning. Forth operates with a stack of integers, so the ``enum`` and ``enumonly`` words convert them into integers for decision-making (e.g. with ``case .. of .. endof .. endcase``).
+
+The ``enum`` and ``enumonly`` words have the same syntax: they must follow an input name and are each followed by at least one string (opened with ``s"`` and closed by a word that ends with ``"``). These strings are the possible values to look for in the input. At runtime, they consume as many bytes from the input as are in the matching string and push one value onto the stack. If none of the strings after ``enum`` match, it pushes ``-1`` onto the stack. If none of the strings after ``enumonly`` match, it raises an exception.
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... input x
+    ... 
+    ... 5 0 do
+    ...   x skipws
+    ...   x enum s" zero" s" one" s" two" s" three"
+    ... loop
+    ... """)
+    >>> vm.run({"x": b"  zero  three two one four  "})
+    >>> vm.stack
+    [0, 3, 2, 1, -1]
+
+If we replace ``enum`` with ``enumonly``, the last token ("``four``") raises an exception.
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... input x
+    ... 
+    ... 5 0 do
+    ...   x skipws
+    ...   x enumonly s" zero" s" one" s" two" s" three"
+    ... loop
+    ... """)
+    >>> vm.run({"x": b"  zero  three two one four  "})
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    ValueError: 'enumeration missing' in AwkwardForth runtime: expected one of several enumerated values in the input text, didn't find one
+
+Input seek, skip, skipws
+************************
 
 The following words pop a value off the stack and use it to move the input buffer's position without reading:
 
@@ -1252,6 +1370,10 @@ The following words pop a value off the stack and use it to move the input buffe
 - ``skip``: moves a relative number of bytes in the file.
 
 Since input buffers are untyped, absolute and relative positions are expressed in number of bytes.
+
+The following word only moves an input buffer past any whitespace, as defined in `JSON <https://www.json.org/>`__ (space ``b" "``, linefeed ``b"\n"``, carriage return ``b"\r"``, or horizontal tab ``b"\t"``). It does not push or pop anything on the stack.
+
+- ``skipws``: moves past any whitespace in the file.
 
 Output declaration
 ******************
