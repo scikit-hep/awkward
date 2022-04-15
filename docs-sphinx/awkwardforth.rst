@@ -201,13 +201,15 @@ Here is an example of a ForthMachine with an output (``<-`` writes data from the
     >>> vm.step()
     >>> vm.stack
     [999]
-    >>> vm["x"]
-    <NumpyArray format="i" shape="0" data="" at="0x58c8c85d11c0"/>
+    >>> np.asarray(vm["x"])
+    array([], dtype=int32)
     >>> vm.step()
     >>> vm.stack
     []
-    >>> vm["x"]
-    <NumpyArray format="i" shape="1" data="999" at="0x58c8c85d11c0"/>
+    >>> np.asarray(vm["x"])
+    array([999], dtype=int32)
+
+(Note: always view outputs as NumPy arrays. In Awkward 1.x, outputs were returned as NumpyArray objects, but now they are returned as NumPy arrays. Wraping the output in ``np.asarray`` makes your code version-independent.)
 
 A ForthMachine can have an arbitrary number of variables, inputs, and outputs, and an arbitrary number of user-defined words, with index orders defined by the order of declaration (relevant for fast C++ access).
 
@@ -223,10 +225,10 @@ The bytecode instructions for an AwkwardForth program are a ListOffsetArray of 3
     >>> import awkward as ak
     >>> vm = ForthMachine32("if 123 else 321 then")
     >>> vm.bytecodes
-    <ListOffsetArray64>
-        <offsets><Index64 i="[0 3 5 7]" offset="0" length="4" at="0x58c8c859ef00"/></offsets>
-        <content><NumpyArray format="i" shape="7" data="4 60 61 0 123 0 321" at="0x58c8c84c9310"/></content>
-    </ListOffsetArray64>
+    <ListOffsetArray len='3'>
+        <offsets><Index dtype='int64' len='4'>[0 3 5 7]</Index></offsets>
+        <content><NumpyArray dtype='int32' len='7'>[  4  60  61   0 123   0 321]</NumpyArray></content>
+    </ListOffsetArray>
     >>> ak.Array(vm.bytecodes)
     <Array [[4, 60, 61], [0, 123], [0, 321]] type='3 * var * int32'>
     >>> print(vm.decompiled)
@@ -266,8 +268,6 @@ You can also get the current position in the bytecode (the position of the next 
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
     ValueError: 'is done' in AwkwardForth runtime: reached the end of the program; call 'begin' to 'step' again (note: check 'is_done')
-
-    (https://github.com/scikit-hep/awkward-1.0/blob/1.0.2/src/libawkward/forth/ForthMachine.cpp#L1302)
 
 Note that this ``current_bytecode_position`` refers to the absolute position in ``bytecodes.content``, not a position relative to the beginning of a segment. The following example illustrates that, as well as the use of ``current_recursion_depth`` (PR `#653 <https://github.com/scikit-hep/awkward-1.0/pull/653>`__ may be required):
 
@@ -332,8 +332,8 @@ There are also counters for read instructions and write instructions.
     ... loop
     ... """)
     >>> vm.run({"x": np.arange(10) * 1.1})
-    >>> vm["y"]
-    <NumpyArray format="d" shape="10" data="0 1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9" at="0x58cd85e9e340"/>
+    >>> np.asarray(vm["y"])
+    array([0. , 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     >>> vm.count_reads, vm.count_writes
     (10, 10)
     >>> vm.run({"x": np.arange(10) * 1.1})
@@ -351,8 +351,8 @@ Note that multi-read/write instructions (described below) count as one because t
     ... 10 x #d-> y
     ... """)
     >>> vm.run({"x": np.arange(10) * 1.1})
-    >>> vm["y"]
-    <NumpyArray format="d" shape="10" data="0 1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9" at="0x58cd85e9e340"/>
+    >>> np.asarray(vm["y"])
+    array([0. , 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     >>> vm.count_reads, vm.count_writes
     (1, 1)
     >>> vm.run({"x": np.arange(10) * 1.1})
@@ -414,6 +414,77 @@ Literal integers in the source code put an integer on the stack. AwkwardForth ha
     >>> vm.run()
     >>> vm.stack
     [1, 2, -3, 4, 255]
+
+Constant strings
+****************
+
+Some syntactical elements, such as ``enum`` and ``enumonly`` use constant strings as part of their syntax. Strings in Forth begin with a ``s"`` token, separated by one space from the beginning of the string itself, and continue to an unescaped closing quote, ``"``, which is not separated by whitespace from the end of the string.
+
+An escaped quote is preceded by a slash, like ``\"`` (which may be ``\\"`` or ``\\\"`` in Python strings, depending on how they, themselves, are quoted). Escaped quotes do not close a string, only an unescaped quote.
+
+Here are some examples. Strings can be extracted from the source code using ``string_at``; they are numbered by their appearance in the source code, starting at zero.
+
+.. code-block:: python
+
+    >>> source_code = r's" simple" s" two words" s" nested \"quotes\"" s"   extra space   "'
+    >>> print(source_code)
+    s" simple" s" two words" s" nested \"quotes\"" s"   extra space   "
+    >>> vm = ForthMachine32(source_code)
+    >>> print(vm.string_at(0))
+    simple
+    >>> print(vm.string_at(1))
+    two words
+    >>> print(vm.string_at(2))
+    nested "quotes"
+    >>> print(vm.string_at(3))
+      extra space   
+    >>> vm.string_at(3)
+    '  extra space   '
+
+(The escapes didn't have to be escaped in the Python string above because we used ``r'`` to start the Python string. If you need to use ``'`` or ``"``, the quoting behavior will be different. It's a good idea to print out source code with strings to be sure you're giving Forth what you think you are.)
+
+If strings are used in source code outside of a syntactic element, their behavior is to push two items onto the stack: a string address and the string length. String addresses in AwkwardForth are the sequential identifiers, starting with zero, that can be passed to ``string_at``.
+
+Continuing with the above example,
+
+.. code-block:: python
+
+    >>> vm.run()
+    >>> vm.stack
+    [0, 6, 1, 9, 2, 15, 3, 16]
+
+because
+
+- "``simple``" is string ``0`` with length ``6``,
+- "``two words``" is string ``1`` with length ``9``,
+- "``nested "quotes"``" is string ``2`` with length ``15``,
+- the string with extra spaces is string ``3`` with length ``16``.
+
+Constant strings were only include in AwkwardForth for use in syntactic elements and their runtime behavior is implemented to be consistent with Standard Forth, but it's not very useful. (Standard Forth uses pointer positions for string identifiers and has words for manipulating bytes in memory, which makes strings useful but dangerous.)
+
+Printing to standard output for debugging
+*****************************************
+
+Forth has several words for printing to standard output, and they're included in AwkwardForth for debugging.
+
+- ``."`` starts quoting a string exactly like ``s"``, but it prints that string to standard output. This is good for short messages to trace the control flow through the program. It does not print a carriage return unless the string contains one.
+- ``.`` pops an integer from the stack and prints it. If you want to peek at the top of the stack without modifying it, write ``dup .``. It does not print a carriage return.
+- ``.s`` prints the whole stack without modifying it. It does not print a carriage return.
+- ``cr`` prints a carriage return; it usually follows one of the above to make the output easier to read.
+
+Example:
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32('0 1 2 3 ." almost there" cr 4 5 dup . cr .s cr')
+    >>> vm.run()
+    almost there
+    5 
+    <6> 0 1 2 3 4 5 <- top 
+    >>> vm.stack
+    [0, 1, 2, 3, 4, 5]
+
+The number in angle brackets (``<`` and ``>``) is the size of the stack and stack print-outs always end with "``<- top``".
 
 User defined words: `: .. ; <https://forth-standard.org/standard/core/Colon>`__
 *******************************************************************************
@@ -478,7 +549,7 @@ AwkwardForth functions can call themselves for recursion, but the standard defin
     >>> vm.stack
     [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181]
 
-In this example, the word ``recurse`` could be replaced with ``fibonacci``.
+(In this example, the word ``recurse`` could be replaced with ``fibonacci`` because AwkwardForth's function table includes the function currently being defined.)
 
 `if .. then <https://forth-standard.org/standard/core/IF>`__
 ************************************************************
@@ -1060,8 +1131,6 @@ Input buffers are declared in the same way as variables. If an input has been de
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
     ValueError: AwkwardForth source code defines an input that was not provided: x
-
-    (https://github.com/scikit-hep/awkward-1.0/blob/1.0.2/src/libawkward/forth/ForthMachine.cpp#L996)
     >>> import numpy as np
     >>> vm.run({"x": np.array([1, 2, 3])})
 
@@ -1089,7 +1158,7 @@ Here's an example of reading directly to an output buffer:
     ... """)
     >>> vm.run({"x": np.array([1.1, 2.2, 3.3])})
     >>> vm["y"]
-    <NumpyArray format="d" shape="3" data="1.1 2.2 3.3" at="0x58cd86525770"/>
+    array([1.1, 2.2, 3.3])
 
 Here is an example that goes through the stack:
 
@@ -1104,8 +1173,8 @@ Here is an example that goes through the stack:
     ... x d-> stack   y <- stack
     ... """)
     >>> vm.run({"x": np.array([1.1, 2.2, 3.3])})
-    >>> vm["y"]
-    <NumpyArray format="d" shape="3" data="1 2 3" at="0x58cd8651b720"/>
+    >>> np.asarray(vm["y"])
+    array([1., 2., 3.])
 
 Since the stack of this ForthMachine32 consists of 32-bit integers, the floating-point inputs get truncated before they can be written to the floating-point output.
 
@@ -1129,8 +1198,9 @@ The following examples result in the same output:
     ... loop
     ... """)
     >>> vm.run({"x": np.arange(1000000) * 1.1})
-    >>> vm["y"]
-    <NumpyArray format="f" shape="1000000" data="0 1.1 2.2 3.3 4.4 ... 1.09999e+06 1.1e+06 1.1e+06 1.1e+06 1.1e+06" at="0x58cd86536de0"/>
+    >>> np.asarray(vm["y"])
+    array([0.0000000e+00, 1.1000000e+00, 2.2000000e+00, ..., 1.0999968e+06,
+           1.0999978e+06, 1.0999989e+06], dtype=float32)
 
 and
 
@@ -1143,8 +1213,9 @@ and
     ... 1000000 x #d-> y
     ... """)
     >>> vm.run({"x": np.arange(1000000) * 1.1})
-    >>> vm["y"]
-    <NumpyArray format="f" shape="1000000" data="0 1.1 2.2 3.3 4.4 ... 1.09999e+06 1.1e+06 1.1e+06 1.1e+06 1.1e+06" at="0x58cd8691a290"/>
+    >>> np.asarray(vm["y"])
+    array([0.0000000e+00, 1.1000000e+00, 2.2000000e+00, ..., 1.0999968e+06,
+           1.0999978e+06, 1.0999989e+06], dtype=float32)
 
 but the second is faster because it involves two Forth instructions and one ``memcpy``.
 
@@ -1197,8 +1268,8 @@ Here is the same thing with an ``int32`` output. They are still interpreted as `
     ... loop
     ... """)
     >>> vm.run({"x": np.arange(5, dtype=np.int32)})
-    >>> vm["y"]
-    <NumpyArray format="i" shape="10" data="0 0 1 0 2 0 3 0 4 0" at="0x58cd86532dd0"/>
+    >>> np.asarray(vm["y"])
+    array([0, 0, 1, 0, 2, 0, 3, 0, 4, 0], dtype=int32)
 
 Big-endian vs little-endian
 """""""""""""""""""""""""""
@@ -1270,9 +1341,27 @@ Unusual-length integers
 
 ``2bit->``, ``3bit->``, ``4bit->``, etc. for any number of bits (up to 64). This type code can be modified by "``!``". Interprets the input as unsigned integers of an arbitrary number of bytes, and if repeated with "``#``", those bits can be packed, such that boundaries between numbers don't end on byte boundaries. At the end of the sequence, however, the last full byte of input is consumed.
 
-**Example:**
+**Example:** In the following, a sequence of 8 increasing 3-bit unsigned integers is encoded in a Python number using a binary literal, ``0b_000_001_010_011_100_101_110_111``. Since 24-bit numbers are not supported by NumPy, it is loaded into an 32-bit unsigned integer (4 bytes). The Forth expression ``8 x #3bit-> y`` interprets the 8 3-bit numbers and writes them to the output. The sequence is backward because NumPy created the buffer in this example on a little-endian machine (x86). After interpreting these 8 3-bit numbers, the input position has advanced 24 bits, or 3 bytes, not the whole 4 bytes available in the input.
 
-- for ``8 #3bit->``, the sequence ``b"\x05\x39\x77"``, which is ``0b_000_001_010_011_100_101_110_111`` or ``342391`` → the 8 integer sequence ``0, 1, 2, 3, 4, 5, 6, 7``
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... input x
+    ... output y int32
+    ... 
+    ... ." begin: " x pos . cr   \\ show the starting input position
+    ... 
+    ... 8 x #3bit-> y
+    ... 
+    ... ." end:   " x pos . cr   \\ show the position after reading 8 3-bit integers
+    ... ." total: " x len . cr   \\ show the total length of the input
+    ... """)
+    >>> vm.run({"x": np.array([0b_000_001_010_011_100_101_110_111], np.uint32)})
+    begin: 0 
+    end:   3 
+    total: 4 
+    >>> np.asarray(vm["y"])
+    array([7, 6, 5, 4, 3, 2, 1, 0], dtype=int32)
 
 Numbers and strings from ASCII text
 """""""""""""""""""""""""""""""""""
@@ -1293,35 +1382,6 @@ Numbers and strings from ASCII text
 Valid `JSON <https://www.json.org/>`__ numbers are accepted. Floating point numbers sent to the stack are truncated: send this directly to a floating-point output to avoid data loss.
 
 ``quotedstr->`` interprets the input as a quoted string, which must be sent to a ``uint8`` output. The interpretation starts with a quote character, ``b"\x22"``, and continues until it reaches an unescaped quote character. Valid `JSON <https://www.json.org/>`__ string escapes are accepted.
-
-Input len, pos, end
-*******************
-
-The following words can be written after an input name to push information about the input onto the stack:
-
-- ``len``: length of the input (does not change);
-- ``pos``: position in the input (changes with every read, ``seek``, and ``skip``);
-- ``end``: true (``-1``) if the position is at the end of the input buffer; false (``0``) otherwise.
-
-Since input buffers are untyped, lengths and positions are expressed in number of bytes.
-
-.. code-block:: python
-
-    >>> vm = ForthMachine32("""
-    ... input x
-    ... 
-    ... 10 0 do
-    ...   x i-> stack
-    ...   drop
-    ... loop
-    ... 
-    ... x len
-    ... x pos
-    ... x end
-    ... """)
-    >>> vm.run({"x": np.arange(10, dtype=np.int32)})
-    >>> vm.stack
-    [40, 40, -1]
 
 Recognizing strings or constant byte-patterns
 *********************************************
@@ -1361,6 +1421,11 @@ If we replace ``enum`` with ``enumonly``, the last token ("``four``") raises an 
       File "<stdin>", line 1, in <module>
     ValueError: 'enumeration missing' in AwkwardForth runtime: expected one of several enumerated values in the input text, didn't find one
 
+Peeking at a byte
+*****************
+
+The ``peek`` word copies the next input byte onto the stack, but it does not move the input position. Syntactically, it must follow an input name.
+
 Input seek, skip, skipws
 ************************
 
@@ -1375,6 +1440,37 @@ The following word only moves an input buffer past any whitespace, as defined in
 
 - ``skipws``: moves past any whitespace in the file.
 
+Syntactically, all of the above must follow an input name.
+
+Input len, pos, end
+*******************
+
+The following words can be written after an input name to push information about the input onto the stack:
+
+- ``len``: length of the input (does not change);
+- ``pos``: position in the input (changes with every read, ``seek``, and ``skip``);
+- ``end``: true (``-1``) if the position is at the end of the input buffer; false (``0``) otherwise.
+
+Since input buffers are untyped, lengths and positions are expressed in number of bytes.
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... input x
+    ... 
+    ... 10 0 do
+    ...   x i-> stack
+    ...   drop
+    ... loop
+    ... 
+    ... x len
+    ... x pos
+    ... x end
+    ... """)
+    >>> vm.run({"x": np.arange(10, dtype=np.int32)})
+    >>> vm.stack
+    [40, 40, -1]
+
 Output declaration
 ******************
 
@@ -1386,8 +1482,8 @@ Whereas inputs must be provided as an argument to the ``run(input)`` and ``begin
 
     >>> vm = ForthMachine32("output x float64")
     >>> vm.begin()
-    >>> vm["x"]
-    <NumpyArray format="d" shape="0" data="" at="0x58cd8651b720"/>
+    >>> np.asarray(vm["x"])
+    array([], dtype=float64)
 
 Output types
 """"""""""""
@@ -1423,8 +1519,47 @@ In some cases, outputs can be directly written from the inputs (see above). This
     ... x <- stack
     ... """)
     >>> vm.run()
-    >>> vm["x"]
-    <NumpyArray format="i" shape="4" data="4 3 2 1" at="0x58cd86526ea0"/>
+    >>> np.asarray(vm["x"])
+    array([4, 3, 2, 1], dtype=int32)
+
+Output add-and-write
+********************
+
+For outputs that represent cumulative sums (such as all ListOffsetArray outputs), replacing ``<- stack`` with ``+<- stack`` writes the sum of the last output value and the stack value, rather than just the stack value.
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... output x int32
+    ... 
+    ... 100 5 5 5
+    ... x +<- stack
+    ... x +<- stack
+    ... x +<- stack
+    ... x +<- stack
+    ... """)
+    >>> vm.run()
+    >>> np.asarray(vm["x"])
+    array([  5,  10,  15, 115], dtype=int32)
+
+The alternative to this would be to maintain a running sum in a variable associated with each output, or somehow manage to keep the running sum at the right level of the stack.
+
+Output dup
+**********
+
+For outputs that need to repeat a specified number of times, an output name followed by ``dup`` duplicates the last value in the output. The number of times is a number popped from the stack.
+
+.. code-block:: python
+
+    >>> vm = ForthMachine32("""
+    ... output x int32
+    ... 
+    ... 123 x <- stack
+    ... 10 x dup
+    ... """)
+    >>> vm.run()
+    >>> np.asarray(vm["x"])
+    array([123, 123, 123, 123, 123, 123, 123, 123, 123, 123, 123], dtype=int32)
 
 Output len
 **********
@@ -1465,8 +1600,8 @@ If an output name is followed by ``rewind``, it pops a positive value off the st
     ... x len
     ... """)
     >>> vm.run()
-    >>> vm["x"]
-    <NumpyArray format="i" shape="7" data="123 123 123 123 123 123 123" at="0x58cd8653f750"/>
+    >>> np.asarray(vm["x"])
+    array([123, 123, 123, 123, 123, 123, 123], dtype=int32)
     >>> vm.stack
     [0, 10, 7]
 
