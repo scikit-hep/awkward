@@ -1151,6 +1151,69 @@ The two modifiers, "``#``" and "``!``", must be in order: "``#``" first.
     >>> vm.stack
     [0, 16777216, 33554432, 50331648, 67108864, 83886080, 100663296, 117440512, 134217728, 150994944]
 
+Special type codes
+******************
+
+In addition to the type codes that can be expressed by combining "``#``", "``!``", and a character from `Python's struct module <https://docs.python.org/3/library/struct.html#format-characters>`__, there are a few special codes for multi-byte sequences that occur in data formats fairly often.
+
+These special type codes can be modified by "``#``" (with the same meaning as above), but most cannot be modified by "``!``" (all exceptions are noted).
+
+Variable-length integers
+""""""""""""""""""""""""
+
+``varint->`` interprets the input as `variable-length unsigned integers <https://lucene.apache.org/java/3_5_0/fileformats.html#VInt>`__, in which the high bit indicates whether the next byte of input data is to be included in the calculation of this integer.
+
+**Examples:**
+
+- ``b"\x00"`` → ``0``
+- ``b"\x01"`` → ``1``
+- ``b"\x7f"`` → ``127``
+- ``b"\x80\x01"`` → ``128``
+- ``b"\x81\x01"`` → ``129``
+
+Numbers less than ``2**7`` are encoded in 1 byte, other numbers less than ``2**14`` are encoded in 2 bytes, other numbers less than ``2**21`` are encoded in 3 bytes, etc.
+
+``zigzag->`` interprets the input as `zig-zag variable-length signed integers <https://code.google.com/apis/protocolbuffers/docs/encoding.html#types>`__, which is like the above except that the unsigned ``n`` computed from a variable-length encoding is mapped to ``(n >> 1) ^ (-(n & 1))``, which are signed integers that alternate with increasing distance from zero.
+
+**Examples:**
+
+- ``b"\x00"`` → ``0``
+- ``b"\x01"`` → ``-1``
+- ``b"\x02"`` → ``1``
+- ``b"\x03"`` → ``-2``
+- ``b"\x04"`` → ``2``
+
+The closer a number is to zero (with either sign), the fewer bytes its encoding has.
+
+Unusual-length integers
+"""""""""""""""""""""""
+
+``2bit->``, ``3bit->``, ``4bit->``, etc. for any number of bits (up to 64). This type code can be modified by "``!``". Interprets the input as unsigned integers of an arbitrary number of bytes, and if repeated with "``#``", those bits can be packed, such that boundaries between numbers don't end on byte boundaries. At the end of the sequence, however, the last full byte of input is consumed.
+
+**Example:**
+
+- for ``8 #3bit->``, the sequence ``b"\x05\x39\x77"``, which is ``0b_000_001_010_011_100_101_110_111`` or ``342391`` → the 8 integer sequence ``0, 1, 2, 3, 4, 5, 6, 7``
+
+Numbers and strings from ASCII text
+"""""""""""""""""""""""""""""""""""
+
+``textint->`` interprets the input as a signed integer, written in ASCII text.
+
+**Examples:**
+
+- ``b"123"`` → ``123``
+- ``b"-999"`` → ``-999``
+
+``textfloat->`` interprets the input as a floating-point number, written in ASCII text.
+
+**Example:**
+
+- ``b"-3.14e5"`` → ``-3.14 × 10⁵``.
+
+Valid `JSON <https://www.json.org/>`__ numbers are accepted. Floating point numbers sent to the stack are truncated: send this directly to a floating-point output to avoid data loss.
+
+``quotedstr->`` interprets the input as a quoted string, which must be sent to a ``uint8`` output. The interpretation starts with a quote character, ``b"\x22"``, and continues until it reaches an unescaped quote character. Valid `JSON <https://www.json.org/>`__ string escapes are accepted.
+
 Input len, pos, end
 *******************
 
