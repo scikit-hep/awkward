@@ -475,7 +475,7 @@ class ListArray(Content):
 
                 # Generate ranges between starts and stops
                 stop = self.nplike.asarray(self._stops)
-                length = stop - self._starts
+                length = stop - self.nplike.asarray(self._starts)
                 this_carry = self.nplike.repeat(
                     stop - length.cumsum(), length
                 ) + self.nplike.arange(length.sum())
