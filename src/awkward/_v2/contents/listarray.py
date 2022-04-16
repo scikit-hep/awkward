@@ -474,15 +474,19 @@ class ListArray(Content):
             ):
 
                 # Generate ranges between starts and stops
-                stop = self.nplike.asarray(self._stops)
-                length = stop - self.nplike.asarray(self._starts)
-                this_carry = self.nplike.repeat(
-                    stop - length.cumsum(), length
-                ) + self.nplike.arange(length.sum())
-                fixed_carry = ak._v2.index.Index64.empty(nextcarry.length, self._nplike)
-                fixed_carry[:] = this_carry[nextcarry]
-                nextcontent = self._content._carry(fixed_carry, True)
-
+                if not isinstance(self._nplike, ak._v2._typetracer.TypeTracer):
+                    stop = self.nplike.asarray(self._stops)
+                    length = stop - self.nplike.asarray(self._starts)
+                    this_carry = self.nplike.repeat(
+                        stop - length.cumsum(), length
+                    ) + self.nplike.arange(length.sum())
+                    fixed_carry = ak._v2.index.Index64.empty(
+                        nextcarry.length, self._nplike
+                    )
+                    fixed_carry[:] = this_carry[nextcarry]
+                    nextcontent = self._content._carry(fixed_carry, True)
+                else:
+                    nextcontent = self._content._carry(nextcarry, True)
                 next = ak._v2.contents.listoffsetarray.ListOffsetArray(
                     smalloffsets, nextcontent, None, self._parameters, self._nplike
                 )
