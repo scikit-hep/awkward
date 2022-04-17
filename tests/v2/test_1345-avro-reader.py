@@ -143,7 +143,7 @@ def test_fixed():
     )
 
 
-def test_null():
+def test_null():  # change the while loop to for loop to fix this
     data = [
         None,
         None,
