@@ -4,15 +4,18 @@ import functools
 import awkward as ak
 
 
-def error_wrap(impl, impl_name=None):
-    impl_name = impl_name or f"{str(impl.__module__)}.{impl.__name__}"
+def error_wrap(impl_name=None):
+    def _(impl):
+        impln = impl_name or f"{str(impl.__module__)}.{impl.__name__}"
 
-    @functools.wraps(impl)
-    def fn(*args, **kwargs):
-        with ak._v2._util.OperationErrorContext(impl_name, impl):
-            return impl(*args, **kwargs)
+        @functools.wraps(impl)
+        def fn(*args, **kwargs):
+            with ak._v2._util.OperationErrorContext(impln, impl):
+                return impl(*args, **kwargs)
 
-    return fn
+        return fn
+
+    return _
 
 
 @error_wrap(impl_name="ak._v2.from_parquet")
