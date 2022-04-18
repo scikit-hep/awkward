@@ -10,7 +10,7 @@ def error_wrap(impl_name=None):
 
         @functools.wraps(impl)
         def fn(*args, **kwargs):
-            with ak._v2._util.OperationErrorContext(impln, impl):
+            with ak._v2._util.OperationErrorContext(impln, kwargs):
                 return impl(*args, **kwargs)
 
         return fn
@@ -122,7 +122,6 @@ def _metadata(
         parquetfile_for_metadata = pyarrow_parquet.ParquetFile(file_for_metadata)
 
         if columns is not None:
-            # FIXME: get this from parquetfile_for_metadata
             list_indicator = "list.item"
 
             form = ak._v2._connect.pyarrow.form_handle_arrow(
@@ -131,13 +130,14 @@ def _metadata(
             subform = form.select_columns(columns)
             parquet_columns = subform.columns(list_indicator=list_indicator)
 
+        metadata = parquetfile_for_metadata.metadata
         if row_groups is not None:
             eoln = "\n    "
-            metadata = parquetfile_for_metadata.metadata
             if any(not 0 <= rg < metadata.num_row_groups for rg in row_groups):
                 raise ak._v2._util.error(
                     ValueError(
-                        f"one of the requested row_groups is out of range (must be less than {metadata.num_row_groups})"
+                        f"one of the requested row_groups is out of range "
+                        f"(must be less than {metadata.num_row_groups})"
                     )
                 )
 
@@ -154,7 +154,8 @@ def _metadata(
                     else:
                         raise ak._v2._util.error(
                             LookupError(
-                                f"""path from metadata is {unsplit_path!r} but more than one path matches:
+                                f"""path from metadata is {unsplit_path!r} but more
+                                than one path matches:
 
     {eoln.join(all_paths)}"""
                             )
@@ -170,7 +171,8 @@ def _metadata(
                     if index is None:
                         raise ak._v2._util.error(
                             LookupError(
-                                f"""path {'/'.join(split_path)!r} from metadata not found in path matches:
+                                f"""path {'/'.join(split_path)!r} from metadata not found
+                                in path matches:
 
     {eoln.join(all_paths)}"""
                             )
@@ -260,7 +262,6 @@ def read_parquet_file(
         max_gap=max_gap,
         max_block=max_block,
         footer_sample_size=footer_sample_size,
-        metadata=metadata,
     ) as file:
         parquetfile = pyarrow_parquet.ParquetFile(file)
 
