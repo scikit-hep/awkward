@@ -878,32 +878,12 @@ class ByteMaskedArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def bytemask(self):
-        if not self._valid_when:
-            return self._mask
-        else:
-            out = ak._v2.index.Index64.empty(self.length, self._nplike)
-            assert out.nplike is self._nplike and self._mask.nplike is self._nplike
-            self._handle_error(
-                self._nplike[
-                    "awkward_ByteMaskedArray_mask",
-                    out.dtype.type,
-                    self._mask.dtype.type,
-                ](
-                    out.data,
-                    self._mask.data,
-                    self._mask.length,
-                    self._valid_when,
-                )
-            )
-            return out
-
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
-            mask = self.bytemask()
+            mask = ak._v2.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak._v2.index.Index64.empty(mask.length, self._nplike)
             assert index.nplike is self._nplike and self._mask.nplike is self._nplike
             self._handle_error(
@@ -1035,11 +1015,12 @@ class ByteMaskedArray(Content):
             return out
 
         mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)
-        content = self._content._to_list(behavior)
-        out = [None] * self._mask.length
+        out = self._content._getitem_range(slice(0, len(mask)))._to_list(behavior)
+
         for i, isvalid in enumerate(mask):
-            if isvalid:
-                out[i] = content[i]
+            if not isvalid:
+                out[i] = None
+
         return out
 
     def _to_nplike(self, nplike):

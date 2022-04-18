@@ -3886,11 +3886,12 @@ namespace awkward {
             case CODE_STRING: {
               I string_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_cannot_push()) {
+              if (stack_depth_ + 1 >= stack_max_depth_) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
               stack_push((T)string_num);
+              stack_push((T)strings_[string_num].size());
               break;
             }
 

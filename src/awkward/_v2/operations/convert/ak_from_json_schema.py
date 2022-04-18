@@ -160,7 +160,9 @@ def _impl(
     else:
         length = 1
 
-    out = ak._v2.operations.convert.from_buffers(form, length, container)
+    out = ak._v2.operations.convert.from_buffers(
+        form, length, container, highlevel=highlevel, behavior=behavior
+    )
 
     if schema.get("type") == "array":
         return out

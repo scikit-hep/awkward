@@ -68,6 +68,13 @@ namespace awkward {
       start_++;
     }
 
+    bool operator==(Iterator<ARRAY, VALUE> other) const noexcept {
+      return start_ == other.start_   &&
+             stop_ == other.stop_   &&
+             which_ == other.which_   &&
+             ptrs_ == other.ptrs_;
+    }
+
     bool operator!=(Iterator<ARRAY, VALUE> other) const noexcept {
       return start_ != other.start_   ||
              stop_ != other.stop_   ||
@@ -94,6 +101,13 @@ namespace awkward {
 
     void operator++() noexcept {
       start_--;
+    }
+
+    bool operator==(RIterator<ARRAY, VALUE> other) const noexcept {
+      return start_ == other.start_   &&
+             stop_ == other.stop_   &&
+             which_ == other.which_   &&
+             ptrs_ == other.ptrs_;
     }
 
     bool operator!=(RIterator<ARRAY, VALUE> other) const noexcept {
@@ -470,6 +484,13 @@ class Generator:
         return f"""
         const std::string parameter(const std::string& parameter) const noexcept {{
       {"" if len(params) == 0 else "".join(x for x in params)}return "null";
+    }}
+
+    bool operator==({self.class_type(key[1:])} other) const noexcept {{
+      return start_ == other.start_  &&
+             stop_ == other.stop_  &&
+             which_ == other.which_  &&
+             ptrs_ == other.ptrs_;
     }}
 
     bool operator!=({self.class_type(key[1:])} other) const noexcept {{

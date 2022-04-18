@@ -16,6 +16,8 @@ def broadcast_arrays(*arrays, **kwargs):
             right-broadcasting, as described below.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
         depth_limit (None or int, default is None): If None, attempt to fully
             broadcast the `arrays` to all levels. If an int, limit the number
             of dimensions that get broadcasted. The minimum value is `1`,
@@ -138,11 +140,18 @@ def broadcast_arrays(*arrays, **kwargs):
 
 
 def _impl(arrays, kwargs):
-    (highlevel, depth_limit, left_broadcast, right_broadcast) = ak._v2._util.extra(
+    (
+        highlevel,
+        behavior,
+        depth_limit,
+        left_broadcast,
+        right_broadcast,
+    ) = ak._v2._util.extra(
         (),
         kwargs,
         [
             ("highlevel", True),
+            ("behavior", None),
             ("depth_limit", None),
             ("left_broadcast", True),
             ("right_broadcast", True),
@@ -165,7 +174,7 @@ def _impl(arrays, kwargs):
         else:
             return None
 
-    behavior = ak._v2._util.behavior_of(*arrays)
+    behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
     out = ak._v2._broadcasting.broadcast_and_apply(
         inputs,
         action,

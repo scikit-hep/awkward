@@ -330,9 +330,11 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
                         "ak.forms.UnmaskedForm.rst",
                         "ak.forms.UnionForm.rst",
                         "ak.forms.VirtualForm.rst",
-                        "ak._io.fromjson.rst",
-                        "ak._io.fromroot_nestedvector.rst",
+                        "awkwardforth.rst",
                         ])
+
+    if modulename.startswith("awkward._") or modulename == "awkward.nplike":
+        continue  # don't show awkward._*, including _v2
 
     link = ("`{0} <https://github.com/scikit-hep/awkward-1.0/blob/"
             "{1}/{2}>`__".format(modulename, latest_commit, filename.replace("../", "")))

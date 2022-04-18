@@ -182,7 +182,7 @@ def _string_numba_lower(
     context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
 ):
     import numba
-    import llvmlite.llvmpy.core
+    import llvmlite.ir
 
     whichpos = ak._connect._numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.CONTENT
@@ -228,9 +228,7 @@ def _string_numba_lower(
     )
     rawptr_cast = builder.inttoptr(
         rawptr,
-        llvmlite.llvmpy.core.Type.pointer(
-            llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)
-        ),
+        llvmlite.ir.PointerType(llvmlite.ir.IntType(numba.intp.bitwidth // 8)),
     )
     strsize = builder.sub(stop, start)
     strsize_cast = ak._connect._numba.castint(

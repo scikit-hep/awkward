@@ -1221,11 +1221,8 @@ class IndexedArray(Content):
             return out
 
         index = self._index.raw(numpy)
-        content = self._content._to_list(behavior)
-        out = [None] * index.length
-        for i, ind in enumerate(index):
-            out[i] = content[ind]
-        return out
+        nextcontent = self._content._carry(ak._v2.index.Index(index), False)
+        return nextcontent._to_list(behavior)
 
     def _to_nplike(self, nplike):
         index = self._index._to_nplike(nplike)

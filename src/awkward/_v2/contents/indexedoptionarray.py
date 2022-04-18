@@ -750,7 +750,7 @@ class IndexedOptionArray(Content):
             )
 
         contents = [self._content, value]
-        tags = self.bytemask()
+        tags = ak._v2.index.Index8(self.mask_as_bool(valid_when=False))
         index = ak._v2.index.Index64.empty(tags.length, self._nplike)
 
         assert index.nplike is self._nplike and self._index.nplike is self._nplike
@@ -1463,22 +1463,12 @@ class IndexedOptionArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def bytemask(self):
-        out = ak._v2.index.Index8.empty(self.index.length, self._nplike)
-        assert out.nplike is self._nplike and self._index.nplike is self._nplike
-        self._handle_error(
-            self._nplike[
-                "awkward_IndexedArray_mask", out.dtype.type, self._index.dtype.type
-            ](out.data, self._index.data, self._index.length)
-        )
-        return out
-
     def _rpad(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self.rpad_axis0(target, clip)
         elif posaxis == depth + 1:
-            mask = self.bytemask()
+            mask = ak._v2.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak._v2.index.Index64.empty(mask.length, self._nplike)
             assert index.nplike is self._nplike and mask.nplike is self._nplike
             self._handle_error(
@@ -1540,7 +1530,7 @@ class IndexedOptionArray(Content):
         shape = list(content.shape)
         shape[0] = self.length
         data = numpy.empty(shape, dtype=content.dtype)
-        mask0 = numpy.asarray(self.bytemask()).view(np.bool_)
+        mask0 = numpy.asarray(self.mask_as_bool(valid_when=False)).view(np.bool_)
         if mask0.any():
             if allow_missing:
                 mask = numpy.broadcast_to(
@@ -1653,11 +1643,17 @@ class IndexedOptionArray(Content):
             return out
 
         index = self._index.raw(numpy)
-        content = self._content._to_list(behavior)
-        out = [None] * len(index)
-        for i, ind in enumerate(index):
-            if ind >= 0:
-                out[i] = content[ind]
+        not_missing = index >= 0
+
+        nextcontent = self._content._carry(
+            ak._v2.index.Index(index[not_missing]), False
+        )
+        out = nextcontent._to_list(behavior)
+
+        for i, isvalid in enumerate(not_missing):
+            if not isvalid:
+                out.insert(i, None)
+
         return out
 
     def _to_nplike(self, nplike):

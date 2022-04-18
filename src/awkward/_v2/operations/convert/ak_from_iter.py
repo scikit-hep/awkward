@@ -90,5 +90,5 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     form = ak._v2.forms.from_json(formstr)
 
     return ak._v2.operations.convert.from_buffers(
-        form, length, buffers, highlevel=highlevel
+        form, length, buffers, highlevel=highlevel, behavior=behavior
     )

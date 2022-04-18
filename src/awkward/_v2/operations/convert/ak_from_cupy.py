@@ -2,8 +2,6 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-
 
 def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
     """
@@ -38,25 +36,6 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
             behavior=behavior,
         ),
     ):
-        return _impl(array, regulararray, highlevel, behavior)
-
-
-def _impl(array, regulararray, highlevel, behavior):
-    def recurse(array):
-        if regulararray and len(array.shape) > 1:
-            return ak._v2.contents.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:])),
-                array.shape[1],
-                array.shape[0],
-            )
-
-        if len(array.shape) == 0:
-            data = ak._v2.contents.NumpyArray(array.reshape(1))
-        else:
-            data = ak._v2.contents.NumpyArray(array)
-
-        return data
-
-    layout = recurse(array)
-
-    return ak._v2._util.wrap(layout, behavior, highlevel)
+        return ak._v2._util.from_arraylib(
+            array, regulararray, False, highlevel, behavior
+        )
