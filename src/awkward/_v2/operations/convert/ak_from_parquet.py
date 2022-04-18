@@ -3,9 +3,6 @@ import functools
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
-
 
 def error_wrap(impl, impl_name=None):
     impl_name = impl_name or f"{str(impl.__module__)}.{impl.__name__}"
@@ -227,6 +224,7 @@ def _load(
         )
 
     if len(arrays) == 0:
+        numpy = ak.nplike.Numpy.instance()
         return ak._v2.operations.convert.ak_from_buffers._impl(
             subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
         )
