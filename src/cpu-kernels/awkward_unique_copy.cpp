@@ -14,7 +14,7 @@ ERROR awkward_unique_copy(
   int64_t j = 0;
   toptr[0] = fromptr[0];
   for (int64_t i = 1;  i < length;  i++) {
-    if (toptr[j] != fromptr[i]) {
+    if (fromptr[i] >= 0) {
       j++;
       toptr[j] = fromptr[i];
     }

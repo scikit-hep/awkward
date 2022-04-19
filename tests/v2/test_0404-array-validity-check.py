@@ -198,7 +198,6 @@ def test_subranges_equal():
     # assert array.sort(axis=-1).content._subranges_equal(starts, stops, 15) is True
 
 
-@pytest.mark.skip(reason="FIXME issue in indexedarray-unique-index kernel.")
 def test_categorical():
     array = ak._v2.highlevel.Array(["1chchc", "1chchc", "2sss", "3", "4", "5"])
     categorical = ak._v2.behaviors.categorical.to_categorical(array)
