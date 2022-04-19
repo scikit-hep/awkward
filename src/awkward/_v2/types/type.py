@@ -22,6 +22,9 @@ class Type:
     def typestr(self):
         return self._typestr
 
+    def __str__(self):
+        return "".join(self._str("", True))
+
     _str_parameters_exclude = ("__categorical__",)
 
     def _str_categorical_begin(self):

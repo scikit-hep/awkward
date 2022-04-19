@@ -35,7 +35,10 @@ class ArrayType:
         return self._length
 
     def __str__(self):
-        return str(self._length) + " * " + str(self._content)
+        return "".join(self._str("", True))
+
+    def _str(self, indent, compact):
+        return [str(self._length) + " * "] + self._content._str(indent, compact)
 
     def __repr__(self):
         args = [repr(self._content), repr(self._length)]
