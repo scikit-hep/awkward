@@ -182,7 +182,6 @@ def test_simple_test():
         done = compiler(
             f"""
         auto get_entry_{generated_type}(ssize_t length, ssize_t* ptrs, int64_t i) {{
-            cout << endl << "@@@@@ get entry of {generated_type}..." << endl;
             return {generator.entry()};
         }}
         """.strip()

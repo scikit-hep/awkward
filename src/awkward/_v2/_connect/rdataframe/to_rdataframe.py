@@ -22,22 +22,20 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
             ArrayWrapper(const ArrayWrapper& wrapper) = delete;
             ArrayWrapper& operator=(ArrayWrapper const& wrapper) = delete;
 
+            // An array wrapper is short-lived.
+            // It gets destructed after AwkwardArrayDataSource::SetNSlots are done.
             ArrayWrapper(
-                std::string n,
-                std::string t,
-                ssize_t l,
-                ssize_t* p) :
-            name(n),
-            type(t),
-            length(l),
-            ptrs(p) {
-                cout << "ArrayWrapper>>> " <<  this << " is constructed: an ArrayWrapper for an " << name << " RDF column of an array ";
-            }
+                const std::string_view name,
+                const std::string_view type,
+                ssize_t length,
+                ssize_t* ptrs) :
+            name(name),
+            type(type),
+            length(length),
+            ptrs(ptrs) {}
 
-            ~ArrayWrapper() { cout << "........" << this << " ArrayWrapper is destructed." << endl; }
-
-            const std::string name;
-            const std::string type;
+            const std::string_view name;
+            const std::string_view type;
             const ssize_t length;
             ssize_t* ptrs;
         };
@@ -46,6 +44,7 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
         )
         assert done is True
 
+    # FIXME: check the need for all these dictionaries
     rdf_layouts = {}
     rdf_generators = {}
     rdf_generated_types = {}
@@ -65,31 +64,11 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
         rdf_generators[key].generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
         generated_type = rdf_generators[key].entry_type()
         rdf_generated_types[key] = generated_type
+
+        # Generate a unique class name
         rdf_array_data_source_class_name = (
             rdf_array_data_source_class_name + f"""_{generated_type}_as_{key}"""
         )
-
-        # if not hasattr(ROOT, f"make_array_{generated_type}_{key}"):
-        #     done = compiler(
-        #         f"""
-        #         auto make_array_{generated_type}_{key}(ssize_t length, ssize_t* ptrs) {{
-        #             cout << "generated type " << " {generated_type} " << " : key " << " {key} " << endl;
-        #             return {rdf_generators[key].dataset(flatlist_as_rvec=flatlist_as_rvec)};
-        #         }}
-        #         """.strip()
-        #     )
-        #     assert done is True
-
-        # rdf_array_views[key] = getattr(ROOT, f"make_array_{generated_type}_{key}")(
-        #     len(rdf_layouts[key]), rdf_lookups[key].arrayptrs
-        # )
-        #
-        # print(  # noqa: T001
-        #     "Pass ",
-        #     type(rdf_array_views[key]),
-        #     type(rdf_array_views[key]).__cpp_name__,
-        #     "to an ArrayWrapper...",
-        # )  # noqa: T001
 
         if not hasattr(ROOT, f"get_entry_{generated_type}_{key}"):
             done = compiler(
@@ -105,12 +84,12 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
             rdf_array_view_entries[key] = getattr(ROOT, rdf_entry_func[key])(
                 len(rdf_layouts[key]), rdf_lookups[key].arrayptrs, 0
             )
-            print(  # noqa: T001
-                type(rdf_array_view_entries[key]), rdf_array_view_entries[key][0]
-            )
-
-            for i in range(len(rdf_layouts[key])):
-                print(rdf_array_view_entries[key][i], ",")  # noqa: T001
+            # print(  # noqa: T001
+            #     type(rdf_array_view_entries[key]), rdf_array_view_entries[key][0]
+            # )
+            #
+            # for i in range(len(rdf_layouts[key])):
+            #     print(rdf_array_view_entries[key][i], ",")  # noqa: T001
 
         rdf_array_wrappers[key] = ROOT.awkward.ArrayWrapper(
             f"awkward:{key}",
@@ -126,7 +105,8 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
                 f"""
 namespace awkward {{
     auto erase_array_view_{generated_type}_{key} = []({type(rdf_array_view_entries[key]).__cpp_name__} *entry) {{ cout << "Adoid deleter of " << entry << endl; }};
-    // std::unique_ptr<{type(rdf_array_view_entries[key]).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
+    // FIXME: need a deleter?
+    /// std::unique_ptr<{type(rdf_array_view_entries[key]).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
 
     class AwkwardArrayColumnReader_{generated_type}_{key} : public ROOT::Detail::RDF::RColumnReaderBase {{
     public:
@@ -135,8 +115,6 @@ namespace awkward {{
               ptrs_(ptrs),
               view_(get_entry_{generated_type}_{key}(length, ptrs, 0)) {{
             cout << "CONSTRUCTED AwkwardArrayColumnReader_{generated_type}_{key} of a {type(rdf_array_view_entries[key]).__cpp_name__} at " << &view_ << endl;
-            //auto obj = {rdf_entry_func[key]}(length, ptrs, 0);
-            //cout << ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)) << " at " << &obj << endl;
         }}
         ~AwkwardArrayColumnReader_{generated_type}_{key}() {{
             cout << "DESTRUCTED AwkwardArrayColumnReader_{generated_type}_{key} of a {type(rdf_array_view_entries[key]).__cpp_name__} at " << &view_ << endl;
@@ -158,31 +136,7 @@ namespace awkward {{
             )
             assert done is True
 
-            # rdf_column_readers[key] = getattr(
-            #     ROOT, f"awkward::AwkwardArrayColumnReader_{generated_type}"
-            # )(
-            #     rdf_array_view_entries[key],
-            #     f"awkward:{key}",
-            #     type(rdf_array_view_entries[key]).__cpp_name__,
-            #     len(rdf_layouts[key]),
-            #     rdf_lookups[key].arrayptrs,
-            # )
-            # print("Reader", type(rdf_column_readers[key]).__cpp_name__)  # noqa: T001
-
-        # rdf_array_wrappers[key] = ROOT.awkward.ArrayWrapper(
-        #     f"awkward:{key}",
-        #     type(
-        #         rdf_array_view_entries[key]
-        #     ).__cpp_name__,  ##type(rdf_array_views[key]).__cpp_name__,
-        #     len(rdf_layouts[key]),
-        #     rdf_lookups[key].arrayptrs,
-        #     rdf_entry_func[key],
-        #     rdf_generated_types[key],
-        # )
-        #
-        # rdf_columns[rdf_array_wrappers[key].name] = rdf_array_wrappers[key]
         rdf_list_of_wrappers.append(rdf_array_wrappers[key])
-        # rdf_list_of_column_readers.append(rdf_column_readers[key])
 
     if not hasattr(ROOT, rdf_array_data_source_class_name):
         cpp_code_begin = f"""
@@ -235,7 +189,6 @@ public:
                 cpp_code_column_names = cpp_code_column_names + ", "
 
         cpp_code_column_names = cpp_code_column_names + "}),"
-        print("CHECK:", cpp_code_column_names)  # noqa: T001
 
         # wrappers.type...
         cpp_code_wrappers_type = """fColTypeNames({""".strip()
@@ -251,7 +204,6 @@ public:
             if k < len(columns):
                 cpp_code_wrappers_type = cpp_code_wrappers_type + ", "
         cpp_code_wrappers_type = cpp_code_wrappers_type + "}),"
-        print("CHECK:", cpp_code_wrappers_type)  # noqa: T001
 
         # column type map
         cpp_code_column_types_map = """fColTypesMap({""".strip()
@@ -268,13 +220,11 @@ public:
                 cpp_code_column_types_map = cpp_code_column_types_map + ", "
 
         cpp_code_column_types_map = cpp_code_column_types_map + "}),"
-        print("CHECK:", cpp_code_column_types_map)  # noqa: T001
 
         # data pointers
         cpp_code_data_pointers = (
             """fColDataPointers({{wrappers.length, wrappers.ptrs}...})"""
         )
-        print("CHECK:", cpp_code_data_pointers)  # noqa: T001
 
         cpp_code_begin = (
             cpp_code_begin
@@ -351,7 +301,6 @@ public:
         }}
         """
         ).strip()
-        print("CHECK:", cpp_code_readers)  # noqa: T001
 
         cpp_code_end = f"""
         // Done generating code for a specific {key} in Python. Proceed with C++:
