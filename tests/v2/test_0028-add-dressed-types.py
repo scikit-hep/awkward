@@ -74,7 +74,6 @@ def test_string2():
     assert str(ak._v2.operations.describe.type(a[0])) == "3 * uint8"
     assert str(ak._v2.operations.describe.type(a[1])) == "0 * uint8"
     assert str(ak._v2.operations.describe.type(a[2])) == "5 * uint8"
-    print(repr(a))
     assert (
         repr(a)
         == "<Array [[104, 101, 121], ..., [116, 104, ..., 114, 101]] type='3 * var * uint8'>"
