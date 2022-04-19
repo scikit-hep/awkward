@@ -5,16 +5,16 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-def from_arrow(array, conservative_optiontype=False, highlevel=True, behavior=None):
+def from_arrow(array, generate_bitmasks=False, highlevel=True, behavior=None):
     """
     Args:
         array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`,
             or `pyarrow.Table`): Apache Arrow array to convert into an
             Awkward Array.
-        conservative_optiontype (bool): If enabled and the optionalness of a type
-            can't be determined (i.e. not within an `pyarrow.field` and the Arrow array
-            has no Awkward metadata), assume that it is option-type with a blank
-            BitMaskedArray.
+        generate_bitmasks (bool): If enabled and Arrow/Parquet does not have Awkward
+            metadata, `generate_bitmasks=True` creates empty bitmasks for nullable
+            types that don't have bitmasks in the Arrow/Parquet data, so that the
+            Form (BitMaskedForm vs UnmaskedForm) is predictable.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -35,21 +35,21 @@ def from_arrow(array, conservative_optiontype=False, highlevel=True, behavior=No
         "ak._v2.from_arrow",
         dict(
             array=array,
-            conservative_optiontype=conservative_optiontype,
+            generate_bitmasks=generate_bitmasks,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
-        return _impl(array, conservative_optiontype, highlevel, behavior)
+        return _impl(array, generate_bitmasks, highlevel, behavior)
 
 
-def _impl(array, conservative_optiontype, highlevel, behavior):
+def _impl(array, generate_bitmasks, highlevel, behavior):
     import awkward._v2._connect.pyarrow
 
     pyarrow = awkward._v2._connect.pyarrow.pyarrow
 
     out = awkward._v2._connect.pyarrow.handle_arrow(
-        array, conservative_optiontype=conservative_optiontype, pass_empty_field=True
+        array, generate_bitmasks=generate_bitmasks, pass_empty_field=True
     )
 
     if isinstance(array, (pyarrow.lib.Array, pyarrow.lib.ChunkedArray)):

@@ -277,7 +277,7 @@ def mask_parameters(awkwardarrow_type):
 
 
 def popbuffers_finalize(
-    out, array, validbits, awkwardarrow_type, conservative_optiontype, fix_offsets=True
+    out, array, validbits, awkwardarrow_type, generate_bitmasks, fix_offsets=True
 ):
     # Every buffer from Arrow must be offsets-corrected.
     if fix_offsets and (array.offset != 0 or len(array) != len(out)):
@@ -297,7 +297,7 @@ def popbuffers_finalize(
 
         else:
             if validbits is None:
-                if conservative_optiontype:
+                if generate_bitmasks:
                     return ak._v2.contents.BitMaskedArray(
                         # ceildiv(len(out), 8) = -(len(out) // -8)
                         ak._v2.index.IndexU8(
@@ -324,7 +324,7 @@ def popbuffers_finalize(
                 )
 
     else:
-        if validbits is None and conservative_optiontype:
+        if validbits is None and generate_bitmasks:
             # ceildiv(len(out), 8) = -(len(out) // -8)
             validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF))
 
@@ -359,9 +359,7 @@ def form_popbuffers_finalize(out, awkwardarrow_type):
         )
 
 
-def popbuffers(
-    paarray, awkwardarrow_type, storage_type, buffers, conservative_optiontype
-):
+def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitmasks):
     # Start by removing the ExtensionArray wrapper.
     if awkwardarrow_type is not None:
         paarray = paarray.storage
@@ -384,7 +382,7 @@ def popbuffers(
             awkwardarrow_type,
             storage_type.storage_type,
             buffers,
-            conservative_optiontype,
+            generate_bitmasks,
         )
 
     elif isinstance(storage_type, pyarrow.lib.DictionaryType):
@@ -393,7 +391,7 @@ def popbuffers(
             None,
             storage_type.index_type,
             buffers,
-            conservative_optiontype,
+            generate_bitmasks,
         )
         index = masked_index.content.data
 
@@ -403,7 +401,7 @@ def popbuffers(
                 index = numpy.array(index, copy=True)
                 index[mask] = -1
 
-        content = handle_arrow(paarray.dictionary, conservative_optiontype)
+        content = handle_arrow(paarray.dictionary, generate_bitmasks)
 
         parameters = ak._v2._util.merge_parameters(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
@@ -422,7 +420,7 @@ def popbuffers(
         validbits = buffers.pop(0)
 
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
-        akcontent = popbuffers(paarray.values, a, b, buffers, conservative_optiontype)
+        akcontent = popbuffers(paarray.values, a, b, buffers, generate_bitmasks)
 
         if not storage_type.value_field.nullable:
             # strip the dummy option-type node
@@ -434,7 +432,7 @@ def popbuffers(
             parameters=node_parameters(awkwardarrow_type),
         )
         return popbuffers_finalize(
-            out, paarray, validbits, awkwardarrow_type, conservative_optiontype
+            out, paarray, validbits, awkwardarrow_type, generate_bitmasks
         )
 
     elif isinstance(storage_type, (pyarrow.lib.LargeListType, pyarrow.lib.ListType)):
@@ -452,7 +450,7 @@ def popbuffers(
             )
 
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
-        akcontent = popbuffers(paarray.values, a, b, buffers, conservative_optiontype)
+        akcontent = popbuffers(paarray.values, a, b, buffers, generate_bitmasks)
 
         if not storage_type.value_field.nullable:
             # strip the dummy option-type node
@@ -462,7 +460,7 @@ def popbuffers(
             akoffsets, akcontent, parameters=node_parameters(awkwardarrow_type)
         )
         return popbuffers_finalize(
-            out, paarray, validbits, awkwardarrow_type, conservative_optiontype
+            out, paarray, validbits, awkwardarrow_type, generate_bitmasks
         )
 
     elif isinstance(storage_type, pyarrow.lib.MapType):
@@ -501,7 +499,7 @@ def popbuffers(
             parameters=parameters,
         )
         return popbuffers_finalize(
-            out, paarray, validbits, awkwardarrow_type, conservative_optiontype
+            out, paarray, validbits, awkwardarrow_type, generate_bitmasks
         )
 
     elif storage_type in _string_like:
@@ -540,7 +538,7 @@ def popbuffers(
             parameters=parameters,
         )
         return popbuffers_finalize(
-            out, paarray, validbits, awkwardarrow_type, conservative_optiontype
+            out, paarray, validbits, awkwardarrow_type, generate_bitmasks
         )
 
     elif isinstance(storage_type, pyarrow.lib.StructType):
@@ -556,7 +554,7 @@ def popbuffers(
 
             a, b = to_awkwardarrow_storage_types(field.type)
             akcontent = popbuffers(
-                paarray.field(field_name), a, b, buffers, conservative_optiontype
+                paarray.field(field_name), a, b, buffers, generate_bitmasks
             )
             if not field.nullable:
                 # strip the dummy option-type node
@@ -577,7 +575,7 @@ def popbuffers(
             paarray,
             validbits,
             awkwardarrow_type,
-            conservative_optiontype,
+            generate_bitmasks,
             fix_offsets=False,
         )
 
@@ -597,9 +595,7 @@ def popbuffers(
         for i in range(storage_type.num_fields):
             field = storage_type[i]
             a, b = to_awkwardarrow_storage_types(field.type)
-            akcontent = popbuffers(
-                paarray.field(i), a, b, buffers, conservative_optiontype
-            )
+            akcontent = popbuffers(paarray.field(i), a, b, buffers, generate_bitmasks)
 
             if not field.nullable:
                 # strip the dummy option-type node
@@ -613,7 +609,7 @@ def popbuffers(
             parameters=node_parameters(awkwardarrow_type),
         )
         return popbuffers_finalize(
-            out, paarray, None, awkwardarrow_type, conservative_optiontype
+            out, paarray, None, awkwardarrow_type, generate_bitmasks
         )
 
     elif storage_type == pyarrow.null():
@@ -640,7 +636,7 @@ def popbuffers(
             nplike=ak.nplike.Numpy.instance(),
         )
         return popbuffers_finalize(
-            out, paarray, validbits, awkwardarrow_type, conservative_optiontype
+            out, paarray, validbits, awkwardarrow_type, generate_bitmasks
         )
 
     elif isinstance(storage_type, pyarrow.lib.DataType):
@@ -660,7 +656,7 @@ def popbuffers(
             nplike=ak.nplike.Numpy.instance(),
         )
         return popbuffers_finalize(
-            out, paarray, validbits, awkwardarrow_type, conservative_optiontype
+            out, paarray, validbits, awkwardarrow_type, generate_bitmasks
         )
 
     else:
@@ -903,21 +899,19 @@ def form_remove_optiontype(akform):
         return akform.content
 
 
-def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
+def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
     if isinstance(obj, pyarrow.lib.Array):
         buffers = obj.buffers()
 
         awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(obj.type)
         out = popbuffers(
-            obj, awkwardarrow_type, storage_type, buffers, conservative_optiontype
+            obj, awkwardarrow_type, storage_type, buffers, generate_bitmasks
         )
         assert len(buffers) == 0
         return out
 
     elif isinstance(obj, pyarrow.lib.ChunkedArray):
-        layouts = [
-            handle_arrow(x, conservative_optiontype) for x in obj.chunks if len(x) > 0
-        ]
+        layouts = [handle_arrow(x, generate_bitmasks) for x in obj.chunks if len(x) > 0]
 
         if len(layouts) == 1:
             return layouts[0]
@@ -932,7 +926,7 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
     elif isinstance(obj, pyarrow.lib.RecordBatch):
         child_array = []
         for i in range(obj.num_columns):
-            layout = handle_arrow(obj.column(i), conservative_optiontype)
+            layout = handle_arrow(obj.column(i), generate_bitmasks)
             if not obj.schema.field(i).nullable:
                 child_array.append(remove_optiontype(layout))
             else:
@@ -951,10 +945,10 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
             # zero-length array with the right type
             raise ak._v2._util.error(NotImplementedError)
         elif len(batches) == 1:
-            out = handle_arrow(batches[0], conservative_optiontype, pass_empty_field)
+            out = handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:
             arrays = [
-                handle_arrow(batch, conservative_optiontype, pass_empty_field)
+                handle_arrow(batch, generate_bitmasks, pass_empty_field)
                 for batch in batches
                 if len(batch) > 0
             ]
@@ -999,7 +993,7 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
     ):
         chunks = []
         for batch in obj:
-            chunk = handle_arrow(batch, conservative_optiontype, pass_empty_field)
+            chunk = handle_arrow(batch, generate_bitmasks, pass_empty_field)
             if len(chunk) > 0:
                 chunks.append(chunk)
         if len(chunks) == 1:

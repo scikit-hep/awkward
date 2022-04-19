@@ -14,7 +14,7 @@ def from_parquet(
     max_gap=64_000,
     max_block=256_000_000,
     footer_sample_size=1_000_000,
-    conservative_optiontype=False,
+    generate_bitmasks=False,
     highlevel=True,
     behavior=None,
 ):
@@ -33,7 +33,10 @@ def from_parquet(
         max_gap (int): Passed to `fsspec.parquet.open_parquet_file`.
         max_block (int): Passed to `fsspec.parquet.open_parquet_file`.
         footer_sample_size (int): Passed to `fsspec.parquet.open_parquet_file`.
-        conservative_optiontype (bool): Passed to `ak.from_arrow`.
+        generate_bitmasks (bool): If enabled and Arrow/Parquet does not have Awkward
+            metadata, `generate_bitmasks=True` creates empty bitmasks for nullable
+            types that don't have bitmasks in the Arrow/Parquet data, so that the
+            Form (BitMaskedForm vs UnmaskedForm) is predictable.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -58,7 +61,7 @@ def from_parquet(
             max_gap=max_gap,
             max_block=max_block,
             footer_sample_size=footer_sample_size,
-            conservative_optiontype=conservative_optiontype,
+            generate_bitmasks=generate_bitmasks,
             highlevel=highlevel,
             behavior=behavior,
         ),
@@ -71,7 +74,7 @@ def from_parquet(
             max_gap,
             max_block,
             footer_sample_size,
-            conservative_optiontype,
+            generate_bitmasks,
             highlevel,
             behavior,
         )
@@ -85,7 +88,7 @@ def _impl(
     max_gap,
     max_block,
     footer_sample_size,
-    conservative_optiontype,
+    generate_bitmasks,
     highlevel,
     behavior,
 ):
@@ -223,7 +226,7 @@ def _impl(
         arrays.append(
             ak._v2._connect.pyarrow.handle_arrow(
                 arrow_table,
-                conservative_optiontype=conservative_optiontype,
+                generate_bitmasks=generate_bitmasks,
                 pass_empty_field=True,
             )
         )
