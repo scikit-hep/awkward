@@ -13,6 +13,39 @@ ROOT = pytest.importorskip("ROOT")
 compiler = ROOT.gInterpreter.Declare
 
 
+def test_two_arrays():
+
+    array = ak._v2.Array(
+        [
+            [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
+            [],
+            [{"x": 3, "y": [3.0, 0.3, 3.3]}],
+        ]
+    )
+    ak_array_1 = array["x"]
+    ak_array_2 = array["y"]
+
+    # An 'awkward' namespace will be added to the column name
+    data_frame = ak._v2.operations.convert.to_rdataframe(
+        {"x": ak_array_1, "y": ak_array_2}
+    )
+
+    done = compiler(
+        """
+        template <typename Array>
+        struct MyFunctor {
+            void operator()(const Array& a) {
+                cout << "#6. Call user function: " << a << endl;
+            }
+        };
+        """
+    )
+    assert done is True
+
+    f = ROOT.MyFunctor[data_frame.GetColumnType("awkward:x")]()
+    data_frame.Foreach(f, ["awkward:x"])
+
+
 @pytest.mark.skip(reason="FIXME: the test fails when flatlist_as_rvec=True")
 def test_array_as_rvec():
 
@@ -339,41 +372,3 @@ ROOT::RDataFrame* MakeAwkwardArrayTestDS(std::string name, std::string column_ty
     f = ROOT.MyFunctor_1[column_type]()
 
     data_frame.Foreach(f, ["x"])
-
-
-def test_two_arrays():
-
-    array = ak._v2.Array(
-        [
-            [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
-            [],
-            [{"x": 3, "y": [3.0, 0.3, 3.3]}],
-        ]
-    )
-    ak_array_1 = array["x"]
-    ak_array_2 = array["y"]
-
-    # An 'awkward' namespace will be added to the column name
-    data_frame = ak._v2.operations.convert.to_rdataframe(
-        {"x": ak_array_1, "y": ak_array_2}
-    )
-
-    column_type = data_frame.GetColumnType("awkward:x")
-    result_ptrs = data_frame.Take[column_type]("awkward:x")
-    result_ready = result_ptrs.IsReady()
-    print("result is ready?", result_ready)
-
-    done = compiler(
-        """
-        template <typename Array>
-        struct MyFunctor {
-            void operator()(const Array& a) {
-                cout << "#6. Call user function: " << a << endl;
-            }
-        };
-        """
-    )
-    assert done is True
-
-    f = ROOT.MyFunctor[column_type]()
-    data_frame.Foreach(f, ["awkward:x"])

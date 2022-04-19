@@ -127,8 +127,7 @@ namespace awkward {
   class ArrayView {
   public:
     ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : start_(start), stop_(stop), which_(which), ptrs_(ptrs) {
-    }
+      : start_(start), stop_(stop), which_(which), ptrs_(ptrs) { }
 
     size_t size() const noexcept {
       return stop_ - start_;
@@ -592,8 +591,7 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{
-    }}
+      : ArrayView(start, stop, which, ptrs) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -673,8 +671,7 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{
-    }}
+      : ArrayView(start, stop, which, ptrs) {{ }}
 
     typedef std::string value_type;
 
@@ -698,8 +695,7 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{
-    }}
+      : ArrayView(start, stop, which, ptrs) {{ }}
 
     typedef {value_type} value_type;
 
@@ -721,8 +717,7 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{
-    }}
+      : ArrayView(start, stop, which, ptrs) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -817,8 +812,7 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{
-    }}
+      : ArrayView(start, stop, which, ptrs) {{ }}
 
     typedef std::string value_type;
 
@@ -842,8 +836,7 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{
-    }}
+      : ArrayView(start, stop, which, ptrs) {{ }}
 
     typedef {value_type} value_type;
 
@@ -865,8 +858,7 @@ namespace awkward {{
   class {self.class_type(key[1:])}: public ArrayView {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : ArrayView(start, stop, which, ptrs) {{
-    }}
+      : ArrayView(start, stop, which, ptrs) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
