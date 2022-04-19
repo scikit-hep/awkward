@@ -84,12 +84,6 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
             rdf_array_view_entries[key] = getattr(ROOT, rdf_entry_func[key])(
                 len(rdf_layouts[key]), rdf_lookups[key].arrayptrs, 0
             )
-            # print(  # noqa: T001
-            #     type(rdf_array_view_entries[key]), rdf_array_view_entries[key][0]
-            # )
-            #
-            # for i in range(len(rdf_layouts[key])):
-            #     print(rdf_array_view_entries[key][i], ",")  # noqa: T001
 
         rdf_array_wrappers[key] = ROOT.awkward.ArrayWrapper(
             f"awkward:{key}",
@@ -106,7 +100,7 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
 namespace awkward {{
     auto erase_array_view_{generated_type}_{key} = []({type(rdf_array_view_entries[key]).__cpp_name__} *entry) {{ cout << "Adoid deleter of " << entry << endl; }};
     // FIXME: need a deleter?
-    /// std::unique_ptr<{type(rdf_array_view_entries[key]).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
+    // std::unique_ptr<{type(rdf_array_view_entries[key]).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
 
     class AwkwardArrayColumnReader_{generated_type}_{key} : public ROOT::Detail::RDF::RColumnReaderBase {{
     public:
@@ -149,9 +143,11 @@ private:
     const std::vector<std::string> fColTypeNames;
     const std::map<std::string, std::string> fColTypesMap;
     std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
-    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull, 1ull}} }};
 
-    /// type-erased vector of pointers to pointers to column values - one per slot
+    // FIXME: define entry ranges for each column???
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull, 3ull}} }};
+
+    // type-erased vector of pointers to pointers to column values - one per slot
     Record_t
     GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
         cout << "#2. GetColumnReadersImpl for " << colName;
@@ -234,36 +230,35 @@ public:
             + cpp_code_data_pointers
             + f"""
     {{
-        cout << endl << "An {rdf_array_data_source_class_name} with column names " << endl;
-        cout << "columns number " << GetEntriesNumber() << endl;
+        cout << endl << "Construct an {rdf_array_data_source_class_name} with ";
+        cout << GetEntriesNumber()  << " columns named:" << endl;
 
         for (int64_t i = 0; i < fColNames.size(); i++) {{
             cout << fColNames[i] << ", ";
         }}
-        cout << endl << " and types " << endl;
+        cout << endl << "column types:" << endl;
         for (auto t : fColTypeNames) {{
             cout << t << ", ";
         }}
+        cout << endl << "mapped:" << endl;
         for (auto it : fColTypesMap) {{
             cout << it.first << ": " << it.second << ", ";
         }}
-        cout << endl << "is constructed." << endl;
+        cout << endl << "." << endl;
     }}
 
     ~{rdf_array_data_source_class_name}() {{
+        // FIXME: no need for the destructor
     }}
 
     void SetNSlots(unsigned int nSlots) {{
-        cout << endl
-            << "#1. SetNSlots " << nSlots << endl;
-        fNSlots = nSlots; // always 1 slot for now
-        cout << "SetNSlots done." << endl;
+        cout << "#1. SetNSlots " << nSlots << endl;
+        fNSlots = nSlots; // FIXME: always 1 slot for now
     }}
 
     std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
     GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & /*tid*/) {{
-        cout << endl
-            << "#2.2. GetColumnReaders " << endl;
+        cout << "#2.2. GetColumnReaders" << endl;
         const auto index = std::distance(fColNames.begin(), std::find(fColNames.begin(), fColNames.end(), name));
         cout << "index " << index << endl;
         """
@@ -279,8 +274,8 @@ public:
                 cpp_code_readers
                 + f"""
             case {indx}:
-            std::cout << "here is " << {indx} << " and "
-                << fColDataPointers[{indx}].first << ":" << fColDataPointers[{indx}].second << endl;
+                cout << "index is " << {indx} << " and "
+                << fColDataPointers[{indx}].first << " length of data at " << fColDataPointers[{indx}].second << endl;
                 return std::unique_ptr<awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}>(
                     new awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}(
                         fColDataPointers[{indx}].first,
@@ -294,7 +289,7 @@ public:
         cpp_code_readers = (
             cpp_code_readers
             + f"""
-        // If the {key} reader is not defined:
+        // If {key} column reader is not defined:
         default:
             std::string err = "The specified column name, \"" + name + "\" does not have a reader defined.";
             throw std::runtime_error(err);
@@ -314,7 +309,6 @@ public:
         cout << "nEntriesInRange " << nEntriesInRange << endl;
         auto reminder = 1U == fNSlots ? 0 : nEntries % fNSlots;
         cout << "reminder " << reminder << endl;
-        //fEntryRanges.resize(fNSlots);
         cout << "fEntryRanges size " << fEntryRanges.size() << endl;
         // FIXME: define some ranges here!
     }}

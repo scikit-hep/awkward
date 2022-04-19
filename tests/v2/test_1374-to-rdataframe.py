@@ -28,7 +28,7 @@ def test_array_as_rvec():
     lookup = ak._v2._lookup.Lookup(layout)
 
     generator.generate(compiler, flatlist_as_rvec=True)
-    print(lookup.arrayptrs, "DONE!")
+    print(lookup.arrayptrs.data, "DONE!")
 
 
 @pytest.mark.skip(
@@ -368,7 +368,7 @@ def test_two_arrays():
         template <typename Array>
         struct MyFunctor {
             void operator()(const Array& a) {
-                cout << a.size() << endl;
+                cout << "#6. Call user function: " << a << endl;
             }
         };
         """
@@ -377,68 +377,3 @@ def test_two_arrays():
 
     f = ROOT.MyFunctor[column_type]()
     data_frame.Foreach(f, ["awkward:x"])
-
-
-# def test_one_array():
-#
-#     array = ak._v2.Array(
-#         [
-#             [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
-#             [],
-#             [{"x": 3, "y": [3.0, 0.3, 3.3]}],
-#         ]
-#     )
-#     ak_array_1 = array["x"]
-#
-#     # An 'awkward' namespace will be added to the column name
-#     rdf = ak._v2.operations.convert.to_rdataframe({"xxx": ak_array_1})
-#     print(rdf)
-#
-#
-# def test_rdf():
-#     array = ak._v2.Array(
-#         [
-#             [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
-#             [],
-#             [{"x": 3, "y": [3.0, 0.3, 3.3]}],
-#         ]
-#     )
-#     ak_array_1 = array["x"]
-#
-#     layout = ak_array_1.layout
-#     generator = ak._v2._connect.cling.togenerator(layout.form)
-#     lookup = ak._v2._lookup.Lookup(layout)
-#
-#     generator.generate(compiler, flatlist_as_rvec=True)
-#     generated_type = generator.entry_type()
-#     key = "x"
-#
-#     if not hasattr(ROOT, f"make_array_column_{generated_type}_{key}"):
-#         done = compiler(
-#             f"""
-#             auto make_array_column_{generated_type}_{key}(ssize_t length, ssize_t* ptrs) {{
-#                 auto obj = {generator.dataset(flatlist_as_rvec=True)};
-#                 awkward_array_columns.push_back({{ "awkward:{key}", ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)) }});
-#                 awkward_array_columns_data.push_back({{length, ptrs}});
-#                 awkward_array_columns_map[ROOT::Internal::RDF::TypeID2TypeName(typeid(obj))] = &obj;
-#                 awkward_type_name[std::type_index(typeid(obj))] = ROOT::Internal::RDF::TypeID2TypeName(typeid(obj));
-#                 awkward_name_type.try_emplace(ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)), std::type_index(typeid(obj)));
-#                 return obj;
-#             }}
-#             """.strip()
-#         )
-#         assert done is True
-#
-#     f = getattr(ROOT, f"make_array_column_{generated_type}_{key}")(
-#         len(layout), lookup.arrayptrs
-#     )
-#     # length = {len(layout)}
-#     done = compiler(
-#         f"""
-#         auto df = ROOT::RDataFrame(1)
-#             .Define("awkward.{key}", [] {{
-#                     return {f};
-#                 }});
-#         """
-#         )
-#     assert done is True
