@@ -43,6 +43,7 @@ from awkward._v2.operations.structure.ak_argcombinations import (  # noqa: F401
     argcombinations,
 )
 from awkward._v2.operations.structure.ak_nan_to_num import nan_to_num  # noqa: F401
+from awkward._v2.operations.structure.ak_nan_to_none import nan_to_none  # noqa: F401
 from awkward._v2.operations.structure.ak_isclose import isclose  # noqa: F401
 from awkward._v2.operations.structure.ak_values_astype import (  # noqa: F401
     values_astype,

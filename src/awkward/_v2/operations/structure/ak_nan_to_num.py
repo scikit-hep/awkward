@@ -25,7 +25,9 @@ def nan_to_num(
             high-level.
 
     Implements [np.nan_to_num](https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html)
-    for Awkward Arrays.
+    for Awkward Arrays, which replaces NaN ("not a number") or infinity with specified values.
+
+    See also #ak.nan_to_none to convert NaN to None, i.e. missing values with option-type.
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.nan_to_num",

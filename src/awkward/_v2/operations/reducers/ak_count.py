@@ -75,6 +75,9 @@ def count(array, axis=None, keepdims=False, mask_identity=False, flatten_records
 
     If it is desirable to include None values in #ak.count, use #ak.fill_none
     to turn the None values into something that would be counted.
+
+    If it is desirable to exclude NaN ("not a number") values from #ak.count,
+    use #ak.nan_to_none to turn them into None, which are not counted.
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.count",

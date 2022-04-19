@@ -48,6 +48,8 @@ def max(
 
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
+
+    See also #ak.nanmax.
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.max",
@@ -60,6 +62,63 @@ def max(
             flatten_records=flatten_records,
         ),
     ):
+        return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
+
+
+# @ak._v2._connect.numpy.implements("nanmax")
+def nanmax(
+    array,
+    axis=None,
+    keepdims=False,
+    initial=None,
+    mask_identity=True,
+    flatten_records=False,
+):
+    """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer decreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        initial (None or number): The minimum value of an output element, as
+            an alternative to the numeric type's natural identity (e.g. negative
+            infinity for floating-point types, a minimum integer for integer types).
+            If you use `initial`, you might also want `mask_identity=False`.
+        mask_identity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+        flatten_records (bool): If True, axis=None combines fields from different
+            records; otherwise, records raise an error.
+
+    Like #ak.max, but treating NaN ("not a number") values as missing.
+
+    Equivalent to
+
+        ak.max(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.max.
+    """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.nanmax",
+        dict(
+            array=array,
+            axis=axis,
+            keepdims=keepdims,
+            initial=initial,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        array = ak._v2.operations.structure.ak_nan_to_none._impl(array, False, None)
+
         return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
 
 
