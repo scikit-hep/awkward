@@ -74,10 +74,10 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="457.5164"
+     inkscape:cx="324.65926"
      inkscape:cy="98.261566"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -88,7 +88,7 @@
      fit-margin-bottom="5"
      inkscape:window-width="1326"
      inkscape:window-height="789"
-     inkscape:window-x="-188"
+     inkscape:window-x="0"
      inkscape:window-y="198"
      inkscape:window-maximized="0" />
   <metadata
