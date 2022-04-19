@@ -46,13 +46,10 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
         )
         assert done is True
 
-    # rdf_list_of_columns = []
-    rdf_list_of_column_readers = []
     rdf_layouts = {}
     rdf_generators = {}
     rdf_generated_types = {}
     rdf_lookups = {}
-    # rdf_array_views = {}
     rdf_list_of_wrappers = []
     rdf_array_wrappers = {}
     rdf_array_view_entries = {}
@@ -117,9 +114,7 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
 
         rdf_array_wrappers[key] = ROOT.awkward.ArrayWrapper(
             f"awkward:{key}",
-            type(
-                rdf_array_view_entries[key]
-            ).__cpp_name__,  ##type(rdf_array_views[key]).__cpp_name__,
+            type(rdf_array_view_entries[key]).__cpp_name__,
             len(rdf_layouts[key]),
             rdf_lookups[key].arrayptrs,
         )
@@ -240,7 +235,7 @@ public:
                 cpp_code_column_names = cpp_code_column_names + ", "
 
         cpp_code_column_names = cpp_code_column_names + "}),"
-        print("CHECK:", cpp_code_column_names)
+        print("CHECK:", cpp_code_column_names)  # noqa: T001
 
         # wrappers.type...
         cpp_code_wrappers_type = """fColTypeNames({""".strip()
@@ -256,7 +251,7 @@ public:
             if k < len(columns):
                 cpp_code_wrappers_type = cpp_code_wrappers_type + ", "
         cpp_code_wrappers_type = cpp_code_wrappers_type + "}),"
-        print("CHECK:", cpp_code_wrappers_type)
+        print("CHECK:", cpp_code_wrappers_type)  # noqa: T001
 
         # column type map
         cpp_code_column_types_map = """fColTypesMap({""".strip()
@@ -273,13 +268,13 @@ public:
                 cpp_code_column_types_map = cpp_code_column_types_map + ", "
 
         cpp_code_column_types_map = cpp_code_column_types_map + "}),"
-        print("CHEK:", cpp_code_column_types_map)
+        print("CHECK:", cpp_code_column_types_map)  # noqa: T001
 
         # data pointers
         cpp_code_data_pointers = (
             """fColDataPointers({{wrappers.length, wrappers.ptrs}...})"""
         )
-        print("CHECK:", cpp_code_data_pointers)
+        print("CHECK:", cpp_code_data_pointers)  # noqa: T001
 
         cpp_code_begin = (
             cpp_code_begin
@@ -356,7 +351,7 @@ public:
         }}
         """
         ).strip()
-        print("CHEK:", cpp_code_readers)
+        print("CHECK:", cpp_code_readers)  # noqa: T001
 
         cpp_code_end = f"""
         // Done generating code for a specific {key} in Python. Proceed with C++:
@@ -415,7 +410,7 @@ ROOT::RDataFrame* MakeAwkwardArrayDS(ColumnTypes&... wrappers) {{
         done = compiler(cpp_code)
         assert done is True
 
-    print("PASS IT ON>>>", rdf_list_of_wrappers)
+    print("PASS IT ON >>>", rdf_list_of_wrappers)  # noqa: T001
     rdf = ROOT.MakeAwkwardArrayDS(*rdf_list_of_wrappers)
 
     # rdf = ROOT.MakeAwkwardArrayDS(*rdf_list_of_columns)
