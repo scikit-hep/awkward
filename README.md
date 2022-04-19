@@ -91,7 +91,7 @@ conda config --add channels conda-forge
 conda update --all
 ```
 
-## Getting help
+# Getting help
 
 <table>
   <tr>
@@ -127,12 +127,11 @@ conda update --all
 </table>
 
    * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
-   * You can vote for issues by adding a "thumbs up" (👍) using the "smile/pick your reaction" menu on the top-right of the issue. See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-1.0/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+reactions%3A%3E0+).
    * If you have a "How do I...?" question, start a [GitHub Discussion](https://github.com/scikit-hep/awkward-1.0/discussions) with category "Q&A".
    * Alternatively, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
    * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) chat room.
 
-## Installation for developers
+# Installation for developers
 
 Be sure to clone this repository recursively to get the header-only C++ dependencies.
 
@@ -164,22 +163,6 @@ python -m pytest -vv -rs tests-spec
 python -m pytest -vv -rs tests-cpu-kernels
 ```
 
-Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
-
-```bash
-pip uninstall -y awkward-cuda-kernels
-python dev/generate-cuda.py
-./cuda-build.sh --install
-```
-
-The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
-
-```bash
-python dev/generate-tests.py
-python -m pytest -vv -rs tests-cuda-kernels
-python -m pytest -vv -rs tests-cuda
-```
-
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
    * [awkward-array.org](https://awkward-array.org) is hosted by [Netlify](https://www.netlify.com).
@@ -187,41 +170,11 @@ python -m pytest -vv -rs tests-cuda
    * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.
    * The [LICENSE](LICENSE) is BSD-3.
 
-## Using Awkward Array as a dependency
+# Release notes and Roadmap
 
-Python projects can simply `import awkward`.
+The [release notes/history/changelog](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) is generated as part of the documentation.
 
-# Roadmap
-
-Since [version 0.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/0.4.0), Awkward Array has been compiled with versions of pybind11 that have [ABI version 4](https://github.com/pybind/pybind11/blob/v2.6.2/include/pybind11/detail/internals.h#L152-L153).
-
-The table below indicates when interface-breaking changes are planned; each is discussed in pull requests and issues. It doesn't include new additions that don't interfere with old behavior or corrections to bugs (i.e. behaviors that were _never_ intended and fixed immediately). Each deprecated feature is announced by a `FutureWarning` that indicates the target removal version/date.
-
-See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) for a detailed changelog of past releases. See [projects](https://github.com/scikit-hep/awkward-1.0/projects) for planning and prioritizing future fixes and features.
-
-| Version number | Release date | Deprecated features removed in this version |
-|:--------------:|:------------:|:--------------------------------------------|
-| [1.0.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.0.0) | 2020-12-05 | Broadcasting NumPy ufuncs through records ([#457](https://github.com/scikit-hep/awkward-1.0/issues/457)), `lazy_cache="attach"` option in [ak.from_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_parquet.html) ([#576](https://github.com/scikit-hep/awkward-1.0/pull/576)). |
-| [1.1.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.1.0) | 2021-02-09 | Removed [ak.to_arrayset](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrayset.html)/[ak.from_arrayset](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrayset.html) in favor of [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html)/[ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) ([#592](https://github.com/scikit-hep/awkward-1.0/pull/592)). |
-| [1.2.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.2.0) | 2021-04-01 | _(none)_ |
-| [1.3.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.3.0) | 2021-06-01 | _(none)_ |
-| [1.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.4.0) | 2021-07-02 | _(none)_ |
-| [1.5.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.5.0) | 2021-09-12 | _(none)_ |
-| 1.6.0 | _(skipped)_ | A deprecation was scheduled for "1.7.0, Oct 1, 2021," but we were a version number behind when October came, so the number 1.6.0 was skipped. |
-| [1.7.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.7.0) | 2021-12-02 | [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) default `axis` will be `-1`. Until then, all uses without an explicit `axis` raise warnings. |
-
-| Version number | Target date | Deprecated features to remove in this version |
-|:--------------:|:-----------:|:----------------------------------------------|
-| 1.8.0 | 2022-01-01 | No support for Python 2 or 3.5. Minimum Python version is 3.6. |
-| 2.0.0 | _(soon thereafter)_ | |
-
-See [Discussion #1151](https://github.com/scikit-hep/awkward-1.0/discussions/1151) for details about Awkward version 2.x. Maybe also the [presentation that initiated it](https://indico.cern.ch/event/1032972/) or the [ACAT 2021 "lessons learned" presentation](https://indico.cern.ch/event/855454/contributions/4605044/).
-
-## Voting for fixes/features
-
-You can vote for issues by adding a "thumbs up" (👍) using the "smile/pick your reaction" menu on the top-right of the issue. Issues with the most "thumbs ups" will be prioritized, though this isn't the only consideration determining when an issue gets addressed. (An estimate of how long it will take is also important.)
-
-See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-1.0/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+reactions%3A%3E0+).
+The [roadmap, future version planning, issue prioritization, deprecation schedule, etc.](https://github.com/scikit-hep/awkward-1.0/wiki) are kept up-to-date on the wiki.
 
 # Papers and talks about Awkward Array
 
@@ -238,6 +191,11 @@ See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-
    * [Tutorial at PyHEP 2020](https://youtu.be/ea-zYLQBS4U) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski/2020-07-13-pyhep2020-tutorial.git/1.1?urlpath=lab/tree/tutorial.ipynb)) on July 13, 2020.
    * [Tutorial at PyHEP 2021](https://youtu.be/5aWAxvdrszw?t=9189) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski-talks/2021-07-06-pyhep-uproot-awkward-tutorial/v1.2?urlpath=lab/tree/uproot-awkward-tutorial.ipynb) on July 6, 2021.
    * [Tutorial for STAR collaboration meeting](https://youtu.be/NnU_zp5s1MY) on September 13, 2021 (video with [interactive notebook on Binder](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme)). This is the first tutorial with extensive exercises to test your understanding.
+   * [Lessons learned in Python-C++ integration](https://indico.cern.ch/event/855454/contributions/4605044/) ([video](https://videos.cern.ch/record/2295164) and [slides](https://indico.cern.ch/event/855454/contributions/4605044/attachments/2349193/4006676/main.pdf)) on December 1, 2021. This talk describes the motivation for Awkward version 2.0.
+
+### Citing Awkward Array in a publication
+
+On the [GitHub README](https://github.com/scikit-hep/awkward-1.0), see the "Cite this repository" drop-down menu on the top-right of the page.
 
 # Acknowledgements
 

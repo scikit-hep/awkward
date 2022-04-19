@@ -134,9 +134,9 @@ def _impl(array, axis, highlevel, behavior):
                         content, ak._v2.contents.UnmaskedArray
                     ):
                         bigmask[:] = False
-                        bigmask[tags == tag] = nplike.asarray(content.bytemask()).view(
-                            np.bool_
-                        )
+                        bigmask[tags == tag] = nplike.asarray(
+                            content.mask_as_bool(valid_when=False)
+                        ).view(np.bool_)
                         index[bigmask] = -1
 
                 good = index >= 0

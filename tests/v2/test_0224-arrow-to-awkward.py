@@ -60,6 +60,17 @@ def test_toarrow_ListOffsetArray64():
         [6.6],
         [7.7, 8.8, 9.9],
     ]
+    assert array[1:].to_arrow().to_pylist() == [
+        [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+    assert array[2:].to_arrow().to_pylist() == [
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
 
 
 def test_toarrow_ListOffsetArrayU32():
@@ -72,6 +83,17 @@ def test_toarrow_ListOffsetArrayU32():
     assert array.to_arrow().to_pylist() == [
         [1.1, 2.2, 3.3],
         [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+    assert array[1:].to_arrow().to_pylist() == [
+        [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+    assert array[2:].to_arrow().to_pylist() == [
         [4.4, 5.5],
         [6.6],
         [7.7, 8.8, 9.9],
@@ -107,10 +129,17 @@ def test_toarrow_ListArray_RegularArray():
         [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]],
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
     ]
+    assert listarray[1:].to_arrow().to_pylist() == [
+        [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
+    ]
 
     assert isinstance(regulararray.to_arrow().storage, pyarrow.FixedSizeListArray)
     assert regulararray.to_arrow().to_pylist() == [
         [[0.0, 1.1, 2.2], []],
+        [[3.3, 4.4], [5.5]],
+        [[6.6, 7.7, 8.8, 9.9], []],
+    ]
+    assert regulararray[1:].to_arrow().to_pylist() == [
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]

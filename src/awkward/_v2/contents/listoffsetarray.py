@@ -1435,7 +1435,9 @@ class ListOffsetArray(Content):
         mask,
         keepdims,
     ):
-        if self._offsets.nplike.known_data and self._offsets[0] != 0:
+        if self._offsets.dtype != np.dtype(np.int64) or (
+            self._offsets.nplike.known_data and self._offsets[0] != 0
+        ):
             next = self.toListOffsetArray64(True)
             return next._reduce_next(
                 reducer,
@@ -1900,6 +1902,8 @@ class ListOffsetArray(Content):
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
         if len(npoffsets) > length + 1:
             npoffsets = npoffsets[: length + 1]
+        if npoffsets[0] != 0:
+            npoffsets = npoffsets - npoffsets[0]
 
         # ArrowNotImplementedError: Lists with non-zero length null components
         # are not supported. So make the null'ed lists empty.
