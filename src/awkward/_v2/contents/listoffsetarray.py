@@ -1900,6 +1900,8 @@ class ListOffsetArray(Content):
         akcontent = self._content[npoffsets[0] : npoffsets[length]]
         if len(npoffsets) > length + 1:
             npoffsets = npoffsets[: length + 1]
+        if npoffsets[0] != 0:
+            npoffsets = npoffsets - npoffsets[0]
 
         # ArrowNotImplementedError: Lists with non-zero length null components
         # are not supported. So make the null'ed lists empty.
