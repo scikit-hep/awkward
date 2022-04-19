@@ -57,14 +57,32 @@ class UnionType(Type):
             out = [self._typestr]
 
         else:
-            children = [x._str(indent, compact) for x in self._contents]
-            with_commas = [y for x in children for y in x + [", "]][:-1]
+            if compact:
+                pre, post = "", ""
+            else:
+                pre, post = "\n" + indent + "    ", "\n" + indent
+
+            children = []
+            for i, x in enumerate(self._contents):
+                if i + 1 < len(self._contents):
+                    if compact:
+                        y = x._str(indent, compact) + [", "]
+                    else:
+                        y = x._str(indent + "    ", compact) + [",\n", indent, "    "]
+                else:
+                    if compact:
+                        y = x._str(indent, compact)
+                    else:
+                        y = x._str(indent + "    ", compact)
+                children.append(y)
+
+            flat_children = [y for x in children for y in x]
             params = self._str_parameters()
 
             if params is None:
-                out = ["union["] + with_commas + ["]"]
+                out = ["union[", pre] + flat_children + [post, "]"]
             else:
-                out = ["union["] + with_commas + [", ", params, "]"]
+                out = ["union[", pre] + flat_children + [", ", post, params, "]"]
 
         return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 

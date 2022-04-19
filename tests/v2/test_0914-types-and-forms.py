@@ -660,7 +660,7 @@ def test_RecordType():
                 {"x": 123},
             )
         )
-        == 'struct[["x", "y"], [unknown, bool], parameters={"x": 123}]'
+        == 'struct[{x: unknown, y: bool}, parameters={"x": 123}]'
     )
     assert (
         str(
@@ -876,7 +876,7 @@ def test_RecordType():
                 {"x": 123, "__categorical__": True},
             )
         )
-        == 'categorical[type=struct[["x", "y"], [unknown, bool], parameters={"x": 123}]]'
+        == 'categorical[type=struct[{x: unknown, y: bool}, parameters={"x": 123}]]'
     )
     assert (
         str(

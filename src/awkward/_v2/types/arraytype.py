@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import sys
+
 import awkward as ak
 import awkward._v2.types.type
 from awkward._v2.forms.form import _parameters_equal
@@ -36,6 +38,9 @@ class ArrayType:
 
     def __str__(self):
         return "".join(self._str("", True))
+
+    def show(self, stream=sys.stdout):
+        stream.write("".join(self._str("", False) + ["\n"]))
 
     def _str(self, indent, compact):
         return [str(self._length) + " * "] + self._content._str(indent, compact)

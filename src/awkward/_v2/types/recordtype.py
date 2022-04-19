@@ -2,8 +2,6 @@
 
 from collections.abc import Iterable
 
-import json
-
 import awkward as ak
 import awkward._v2._prettyprint
 from awkward._v2.types.type import Type
@@ -79,53 +77,73 @@ class RecordType(Type):
             out = [self._typestr]
 
         else:
-            children = [x._str(indent, compact) for x in self._contents]
+            if compact:
+                pre, post = "", ""
+            else:
+                pre, post = "\n" + indent + "    ", "\n" + indent
+
+            children = []
+            for i, x in enumerate(self._contents):
+                if i + 1 < len(self._contents):
+                    if compact:
+                        y = x._str(indent, compact) + [", "]
+                    else:
+                        y = x._str(indent + "    ", compact) + [",\n", indent, "    "]
+                else:
+                    if compact:
+                        y = x._str(indent, compact)
+                    else:
+                        y = x._str(indent + "    ", compact)
+                children.append(y)
+
             params = self._str_parameters()
             name = self.parameter("__record__")
 
+            if not self.is_tuple:
+                pairs = []
+                for k, v in zip(self._fields, children):
+                    if ak._v2._prettyprint.is_identifier.match(k) is None:
+                        key_str = repr(k)
+                        if key_str.startswith("u"):
+                            key_str = key_str[1:]
+                    else:
+                        key_str = k
+                    pairs.append([key_str, ": "] + v)
+                flat_pairs = [y for x in pairs for y in x]
+
             if params is None:
                 if self.is_tuple:
-                    with_commas = [y for x in children for y in x + [", "]][:-1]
+                    flat_children = [y for x in children for y in x]
                     if name is None:
-                        out = ["("] + with_commas + [")"]
+                        out = ["(", pre] + flat_children + [post, ")"]
                     else:
-                        out = [name, "["] + with_commas + ["]"]
+                        out = [name, "[", pre] + flat_children + [post, "]"]
                 else:
-                    pairs = []
-                    for k, v in zip(self._fields, children):
-                        if ak._v2._prettyprint.is_identifier.match(k) is None:
-                            key_str = repr(k)
-                            if key_str.startswith("u"):
-                                key_str = key_str[1:]
-                        else:
-                            key_str = k
-                        pairs.append([key_str, ": "] + v)
-                    with_commas = [y for x in pairs for y in x + [", "]][:-1]
                     if name is None:
-                        out = ["{"] + with_commas + ["}"]
+                        out = ["{", pre] + flat_pairs + [post, "}"]
                     else:
-                        out = [name, "["] + with_commas + ["]"]
+                        out = [name, "[", pre] + flat_pairs + [post, "]"]
 
             else:
                 if self.is_tuple:
-                    with_commas = [y for x in children for y in x + [", "]][:-1]
+                    flat_children = [y for x in children for y in x]
                     if name is None:
-                        out = ["tuple[["] + with_commas + ["], ", params, "]"]
-                    else:
-                        out = [name, "["] + with_commas + [", ", params, "]"]
-                else:
-                    if name is None:
-                        with_commas = [y for x in children for y in x + [", "]][:-1]
-                        fields = [json.dumps(x) for x in self._fields]
                         out = (
-                            ["struct[[", ", ".join(fields), "], ["]
-                            + with_commas
-                            + ["], ", params, "]"]
+                            ["tuple[[", pre]
+                            + flat_children
+                            + [post, "], ", params, "]"]
                         )
                     else:
-                        pairs = [[k, ": "] + v for k, v in zip(self._fields, children)]
-                        with_commas = [y for x in pairs for y in x + [", "]][:-1]
-                        out = [name, "["] + with_commas + [", ", params, "]"]
+                        out = (
+                            [name, "[", pre] + flat_children + [", ", post, params, "]"]
+                        )
+                else:
+                    if name is None:
+                        out = (
+                            ["struct[{", pre] + flat_pairs + [post, "}, ", params, "]"]
+                        )
+                    else:
+                        out = [name, "[", pre] + flat_pairs + [", ", post, params, "]"]
 
         return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
