@@ -49,10 +49,18 @@ class OptionType(Type):
         else:
             params = self._str_parameters()
             if params is None:
-                if not isinstance(self._content, (RegularType, ListType)):
-                    out = ["?"] + self._content._str(indent, compact)
-                else:
+                if isinstance(
+                    self._content, (RegularType, ListType)
+                ) and not self._content.parameter("__array__") in (
+                    "string",
+                    "bytestring",
+                    "char",
+                    "byte",
+                ):
                     out = ["option["] + self._content._str(indent, compact) + ["]"]
+                else:
+                    out = ["?"] + self._content._str(indent, compact)
+
             else:
                 out = (
                     ["option["] + self._content._str(indent, compact) + [f", {params}]"]

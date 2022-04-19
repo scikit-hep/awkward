@@ -149,7 +149,6 @@ def test_union_from_arrow():
     pa_array = original.to_arrow()
     reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert (
-        str(reconstituted.form.type)
-        == "union[?float64, option[var * int64], option[string]]"
+        str(reconstituted.form.type) == "union[?float64, option[var * int64], ?string]"
     )
     assert to_list(reconstituted) == [1.1, 2.2, None, [1, 2, 3], "hello"]
