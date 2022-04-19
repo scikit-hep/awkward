@@ -144,14 +144,14 @@ def _string_notequal(one, two):
     return ~_string_equal(one, two)
 
 
-# def _string_broadcast(layout, offsets):
-#     nplike = ak.nplike.of(offsets)
-#     offsets = nplike.asarray(offsets)
-#     counts = offsets[1:] - offsets[:-1]
-#     if ak._v2._util.win or ak._v2._util.bits32:
-#         counts = counts.astype(np.int32)
-#     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
-#     return ak._v2.contents.IndexedArray64(ak._v2.index.Index64(parents), layout).project()
+def _string_broadcast(layout, offsets):
+    nplike = ak.nplike.of(offsets)
+    offsets = nplike.asarray(offsets)
+    counts = offsets[1:] - offsets[:-1]
+    if ak._v2._util.win or ak._v2._util.bits32:
+        counts = counts.astype(np.int32)
+    parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
+    return ak._v2.contents.IndexedArray(ak._v2.index.Index64(parents), layout).project()
 
 
 def _string_numba_typer(viewtype):
@@ -249,13 +249,13 @@ def register(behavior):
     # behavior["string"] = StringBehavior
     # behavior["__typestr__", "string"] = "string"
 
-    # behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
-    # behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
-    # behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
+    behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
+    behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
+    behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
     behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
 
-    # behavior["__broadcast__", "bytestring"] = _string_broadcast
-    # behavior["__broadcast__", "string"] = _string_broadcast
+    behavior["__broadcast__", "bytestring"] = _string_broadcast
+    behavior["__broadcast__", "string"] = _string_broadcast
 
     behavior["__numba_typer__", "bytestring"] = _string_numba_typer
     behavior["__numba_lower__", "bytestring"] = _string_numba_lower
