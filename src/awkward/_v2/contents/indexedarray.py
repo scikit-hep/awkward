@@ -716,7 +716,7 @@ class IndexedArray(Content):
                     length.data,
                 )
             )
-        #FIXME test_0404
+        # FIXME test_0404
         out = ak._v2.index.Index64.zeros(1 + length[0], self._nplike)
         out[1:] = next[0 : length[0]]
         return next[0 : length[0]]
