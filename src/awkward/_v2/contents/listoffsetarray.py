@@ -1435,7 +1435,9 @@ class ListOffsetArray(Content):
         mask,
         keepdims,
     ):
-        if self._offsets.nplike.known_data and self._offsets[0] != 0:
+        if self._offsets.dtype != np.dtype(np.int64) or (
+            self._offsets.nplike.known_data and self._offsets[0] != 0
+        ):
             next = self.toListOffsetArray64(True)
             return next._reduce_next(
                 reducer,
