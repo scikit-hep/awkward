@@ -207,7 +207,7 @@ def _load(
     max_gap,
     max_block,
     footer_sample_size,
-    conservative_optiontype,
+    generate_bitmasks,
     subform,
     highlevel,
     behavior,
@@ -250,7 +250,7 @@ def _read_parquet_file(
     max_gap,
     max_block,
     metadata,
-    conservative_optiontype,
+    generate_bitmasks,
 ):
     import fsspec.parquet
     import pyarrow.parquet as pyarrow_parquet
@@ -274,7 +274,7 @@ def _read_parquet_file(
 
     return ak._v2._connect.pyarrow.handle_arrow(
         arrow_table,
-        conservative_optiontype=conservative_optiontype,
+        generate_bitmasks=generate_bitmasks,
         pass_empty_field=True,
     )
 
