@@ -26,18 +26,18 @@ class UnknownType(Type):
         self._parameters = parameters
         self._typestr = typestr
 
-    def __str__(self):
+    def _str(self, indent, compact):
         if self._typestr is not None:
-            out = self._typestr
+            out = [self._typestr]
 
         else:
             params = self._str_parameters()
             if params is None:
-                out = "unknown"
+                out = ["unknown"]
             else:
-                out = "unknown[" + params + "]"
+                out = ["unknown[", params, "]"]
 
-        return self._str_categorical_begin() + out + self._str_categorical_end()
+        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
         args = self._repr_args()
