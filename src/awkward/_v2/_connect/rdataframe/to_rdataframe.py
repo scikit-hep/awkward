@@ -134,20 +134,15 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
             done = compiler(
                 f"""
 namespace awkward {{
+    auto erase_array_view_{generated_type}_{key} = []({type(rdf_array_view_entries[key]).__cpp_name__} *entry) {{ cout << "Adoid deleter of " << entry << endl; }};
+    // std::unique_ptr<{type(rdf_array_view_entries[key]).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
 
     class AwkwardArrayColumnReader_{generated_type}_{key} : public ROOT::Detail::RDF::RColumnReaderBase {{
     public:
-        AwkwardArrayColumnReader_{generated_type}_{key}(
-            {type(rdf_array_view_entries[key]).__cpp_name__} view,
-            const std::string entry_name,
-            const std::string entry_type,
-            ssize_t entry_length,
-            ssize_t* entry_ptrs) :
-            name(entry_name),
-            type(entry_type),
-            length(entry_length),
-            ptrs(entry_ptrs),
-            view_(view) {{
+        AwkwardArrayColumnReader_{generated_type}_{key}(ssize_t length, ssize_t* ptrs)
+            : length_(length),
+              ptrs_(ptrs),
+              view_(get_entry_{generated_type}_{key}(length, ptrs, 0)) {{
             cout << "CONSTRUCTED AwkwardArrayColumnReader_{generated_type}_{key} of a {type(rdf_array_view_entries[key]).__cpp_name__} at " << &view_ << endl;
             //auto obj = {rdf_entry_func[key]}(length, ptrs, 0);
             //cout << ROOT::Internal::RDF::TypeID2TypeName(typeid(obj)) << " at " << &obj << endl;
@@ -156,38 +151,31 @@ namespace awkward {{
             cout << "DESTRUCTED AwkwardArrayColumnReader_{generated_type}_{key} of a {type(rdf_array_view_entries[key]).__cpp_name__} at " << &view_ << endl;
         }}
 
-        void *get_entry_impl(Long64_t entry) {{
-            return GetImpl(entry);
-        }}
-
-        const std::string name;
-        const std::string type;
-        ssize_t length;
-        ssize_t* ptrs;
-
     private:
-        void *GetImpl(Long64_t entry) {{
-            view_ = {rdf_entry_func[key]}(length, ptrs, entry);
-            return reinterpret_cast<void *>(&view_); // FIXME: return view_[entry];
+        void* GetImpl(Long64_t entry) {{
+            view_ = get_entry_{generated_type}_{key}(length_, ptrs_, entry);
+            return reinterpret_cast<void*>(&view_);
         }}
 
         {type(rdf_array_view_entries[key]).__cpp_name__} view_;
+        ssize_t length_;
+        ssize_t* ptrs_;
     }};
 }}
     """.strip()
             )
             assert done is True
 
-            rdf_column_readers[key] = getattr(
-                ROOT, f"awkward::AwkwardArrayColumnReader_{generated_type}_{key}"
-            )(
-                rdf_array_view_entries[key],
-                f"awkward:{key}",
-                type(rdf_array_view_entries[key]).__cpp_name__,
-                len(rdf_layouts[key]),
-                rdf_lookups[key].arrayptrs,
-            )
-            print("Reader", type(rdf_column_readers[key]).__cpp_name__)  # noqa: T001
+            # rdf_column_readers[key] = getattr(
+            #     ROOT, f"awkward::AwkwardArrayColumnReader_{generated_type}"
+            # )(
+            #     rdf_array_view_entries[key],
+            #     f"awkward:{key}",
+            #     type(rdf_array_view_entries[key]).__cpp_name__,
+            #     len(rdf_layouts[key]),
+            #     rdf_lookups[key].arrayptrs,
+            # )
+            # print("Reader", type(rdf_column_readers[key]).__cpp_name__)  # noqa: T001
 
         # rdf_array_wrappers[key] = ROOT.awkward.ArrayWrapper(
         #     f"awkward:{key}",
@@ -202,10 +190,10 @@ namespace awkward {{
         #
         # rdf_columns[rdf_array_wrappers[key].name] = rdf_array_wrappers[key]
         # rdf_list_of_columns.append(rdf_array_wrappers[key])
-        rdf_list_of_column_readers.append(rdf_column_readers[key])
+        # rdf_list_of_column_readers.append(rdf_column_readers[key])
 
     if not hasattr(ROOT, "AwkwardArrayDataSource"):
-        cpp_code = f"""
+        cpp_code_begin = f"""
 // {key}
 template <typename ...ColumnTypes>
 class AwkwardArrayDataSource final : public ROOT::RDF::RDataSource {{
@@ -221,7 +209,7 @@ private:
     const std::vector<std::pair<std::string, std::string>> fColEntryTypes;
 
     std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
-    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges;
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull, 1ull}} }};
     std::vector<std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>> fColumnReaders;
     const std::map<std::string, ROOT::Detail::RDF::RColumnReaderBase*> fColumnReadersMap;
     const PointerHolderPtrs_t fPointerHoldersModels;
@@ -348,7 +336,39 @@ public:
         cout << endl
             << "#2.2. GetColumnReaders " << endl;
         const auto index = std::distance(fColNames.begin(), std::find(fColNames.begin(), fColNames.end(), name));
-        return std::move(fColumnReaders[index]);
+
+        """
+
+        cpp_code_readers = f"""
+        // Instantiate an array reader for selected column based on {key}:
+        switch (index) {{
+        """
+        indx = 0
+        for key in columns:
+            cpp_code_readers = (
+                cpp_code_readers
+                + f"""
+            case {indx}:
+                return std::unique_ptr<awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}>(new awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}(fColDataPointers[index].first,
+                fColDataPointers[index].second));
+            break;
+            """
+            )
+            indx = indx + 1
+
+        cpp_code_readers = (
+            cpp_code_readers
+            + f"""
+        // If the {key} reader is not defined:
+        default:
+            std::string err = "The specified column name, \"" + name + "\" does not have a reader defined.";
+            throw std::runtime_error(err);
+        }}
+        """
+        )
+
+        cpp_code_end = f"""
+        // Done generating code for a specific {key} in Python. Proceed with C++:
    }}
 
     void Initialise() {{
@@ -359,7 +379,7 @@ public:
         cout << "nEntriesInRange " << nEntriesInRange << endl;
         auto reminder = 1U == fNSlots ? 0 : nEntries % fNSlots;
         cout << "reminder " << reminder << endl;
-        fEntryRanges.resize(fNSlots);
+        //fEntryRanges.resize(fNSlots);
         cout << "fEntryRanges size " << fEntryRanges.size() << endl;
         // FIXME: define some ranges here!
     }}
@@ -399,7 +419,9 @@ ROOT::RDataFrame* MakeAwkwardArrayDS(ColumnTypes&... wrappers) {{
     std::cout << "======= Make AwkwardArray Data Source!" << endl;
     return new ROOT::RDataFrame(std::make_unique<AwkwardArrayDataSource<ColumnTypes...>>(std::move(wrappers)...));
 }}
-"""
+        """
+
+        cpp_code = cpp_code_begin + cpp_code_readers + cpp_code_end
         done = compiler(cpp_code)
         assert done is True
 

@@ -145,6 +145,7 @@ ROOT::RDataFrame* MakeATestDS() {{
         result_ptrs.GetValue()
 
 
+@pytest.mark.skip(reason="No reason")
 def test_one_array():
 
     array = ak._v2.Array(
@@ -230,22 +231,16 @@ private:
     ssize_t column_length;
     ssize_t* column_ptrs;
     {type(array_view_entry).__cpp_name__} fColumn;
-    void* fColumnPtr;
 
     const std::vector<std::string> fColNames;
     const std::vector<std::string> fColTypeNames;
     const std::map<std::string, std::string> fColTypesMap;
-
-    const PointerHolderPtrs_t fPointerHoldersModels;
-    std::vector<PointerHolderPtrs_t> fPointerHolders;
-
-    std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
-    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull,1ull}} }};
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull, 1ull}} }};
 
     /// type-erased vector of pointers to pointers to column values - one per slot
     Record_t
     GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
-        cout << "#2. GetColumnReadersImpl for " << colName;
+        cout << "#2. GetColumnReadersImpl for " << colName << endl;
         return {{}};
     }}
 
@@ -266,40 +261,20 @@ public:
             fColNames({{name}}),
             fColTypeNames({{column_type}}),
             fColTypesMap( {{ {{ name, column_type }} }})
-    {{
-        cout << endl << "An AwkwardArrayDataSource_{generated_type} with column names " << endl;
-        for (auto n : fColNames) {{
-            cout << n << ", ";
-        }}
-        cout << endl << " and types " << endl;
-        for (auto t : fColTypeNames) {{
-            cout << t << ", ";
-        }}
-
-        for (int64_t i = 0; i < column_length; i++) {{
-            auto obj = get_entry_{generated_type}(column_length, column_ptrs, i);
-            cout << obj[0] << "(" << &obj << ") == " << fColumn[i] << ", ";
-            fColumnPtr = reinterpret_cast<void*>(&obj);
-            std::unique_ptr<{type(array_view_entry).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
-            cout << obj_ptr << endl;
-        }}
-        cout << "is constructed." << endl;
-    }}
+    {{ }}
 
     ~AwkwardArrayDataSource_{generated_type}() {{
     }}
 
     void SetNSlots(unsigned int nSlots) {{
-        cout << "#1. SetNSlots " << nSlots << " (" << fColumnPtr << ")" << endl;
+        cout << "#1. SetNSlots " << nSlots << endl;
         fNSlots = nSlots;
         return;
     }}
 
     std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
     GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & tid) {{
-        cout << endl << "#2.2. GetColumnReaders " << endl;
-        cout << "GetColumnReaders..." << endl;
-
+        cout << "#2.2. GetColumnReaders " << endl;
         return std::unique_ptr<AwkwardArrayColumnReader_{generated_type}>(new AwkwardArrayColumnReader_{generated_type}(column_length, column_ptrs));
     }}
 
@@ -337,7 +312,6 @@ public:
 }};
 
 ROOT::RDataFrame* MakeAwkwardArrayTestDS(std::string name, std::string column_type, ssize_t length, ssize_t* ptrs) {{
-    cout << endl << "======= Make AwkwardArray Data Source of {generated_type}!" << endl;
     return new ROOT::RDataFrame(std::make_unique<AwkwardArrayDataSource_{generated_type}>(name, column_type, length, ptrs));
 }}
 """
@@ -347,17 +321,19 @@ ROOT::RDataFrame* MakeAwkwardArrayTestDS(std::string name, std::string column_ty
     data_frame = ROOT.MakeAwkwardArrayTestDS(
         "x", type(array_view_entry).__cpp_name__, len(layout), lookup.arrayptrs
     )
-    done = compiler(
-        """
+
+    if not hasattr(ROOT, "MyFunctor_1"):
+        done = compiler(
+            """
         template<typename T>
         struct MyFunctor_1 {
             void operator()(const T& a) {
-            for (int64_t i = 0; i < a.size(); i++)
+            for (int64_t i = 0; i <= a.size(); i++) // FIXME: ?
                 cout << a[i] << ", " << endl;
             }
         };
         """
-    )
+        )
     assert done is True
     print("GetColumnType")
     column_type = data_frame.GetColumnType("x")
@@ -365,21 +341,6 @@ ROOT::RDataFrame* MakeAwkwardArrayTestDS(std::string name, std::string column_ty
     f = ROOT.MyFunctor_1[column_type]()
 
     data_frame.Foreach(f, ["x"])
-
-    # print("GetColumnType")
-    # column_type = data_frame.GetColumnType("x")
-    # print("column_type", column_type)
-    # print("Take")
-    # result_ptrs = data_frame.Take[column_type]("x")
-    # result_ready = result_ptrs.IsReady()
-    # print("result is ready?", result_ready)
-    #
-    # #ptr = result_ptrs.Get()
-    # #print(">>>pointer", ptr)
-    # print("result_ptrs", result_ptrs)
-    # print("GetValue")
-    # cpp_reference = result_ptrs.GetValue()
-    # print("   check type", type(cpp_reference))
 
 
 def test_two_arrays():
@@ -398,21 +359,11 @@ def test_two_arrays():
     data_frame = ak._v2.operations.convert.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}
     )
-    print("GetColumnType")
+
     column_type = data_frame.GetColumnType("awkward:x")
-    print("column_type", column_type)
-    print("Take")
     result_ptrs = data_frame.Take[column_type]("awkward:x")
     result_ready = result_ptrs.IsReady()
     print("result is ready?", result_ready)
-
-    if result_ready:
-        ptr = result_ptrs.Get()
-        print(">>>pointer", ptr)
-        print("result_ptrs", result_ptrs)
-        print("GetValue")
-        cpp_reference = result_ptrs.GetValue()
-        print(cpp_reference)
 
     done = compiler(
         """
@@ -425,10 +376,9 @@ def test_two_arrays():
         """
     )
     assert done is True
-    print("column_type", column_type)
-    # f = ROOT.MyFunctor[column_type]()
 
-    # rdf.Foreach(f, ["awkward:x"])
+    f = ROOT.MyFunctor[column_type]()
+    data_frame.Foreach(f, ["awkward:x"])
 
 
 # def test_one_array():
