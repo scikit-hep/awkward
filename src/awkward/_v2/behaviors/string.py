@@ -151,9 +151,7 @@ def _string_broadcast(layout, offsets):
     if ak._v2._util.win or ak._v2._util.bits32:
         counts = counts.astype(np.int32)
     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
-    return ak._v2.contents.IndexedArray64(
-        ak._v2.index.Index64(parents), layout
-    ).project()
+    return ak._v2.contents.IndexedArray(ak._v2.index.Index64(parents), layout).project()
 
 
 def _string_numba_typer(viewtype):
