@@ -130,9 +130,6 @@ namespace awkward {
       : start_(start), stop_(stop), which_(which), ptrs_(ptrs) {
     }
 
-    ~ArrayView() {
-    }
-
     size_t size() const noexcept {
       return stop_ - start_;
     }
@@ -598,9 +595,6 @@ namespace awkward {{
       : ArrayView(start, stop, which, ptrs) {{
     }}
 
-    ~{self.class_type(key[1:])}() {{
-    }}
-
     typedef {self.value_type(key[1:])} value_type;
 
     {self._generate_common(key)}
@@ -682,9 +676,6 @@ namespace awkward {{
       : ArrayView(start, stop, which, ptrs) {{
     }}
 
-    ~{self.class_type(key[1:])}() {{
-    }}
-
     typedef std::string value_type;
 
     {self._generate_common(key)}
@@ -710,9 +701,6 @@ namespace awkward {{
       : ArrayView(start, stop, which, ptrs) {{
     }}
 
-    ~{self.class_type(key[1:])}() {{
-    }}
-
     typedef {value_type} value_type;
 
     {self._generate_common(key)}
@@ -734,9 +722,6 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{
-    }}
-
-    ~{self.class_type(key[1:])}() {{
     }}
 
     typedef {self.value_type(key[1:])} value_type;
@@ -835,9 +820,6 @@ namespace awkward {{
       : ArrayView(start, stop, which, ptrs) {{
     }}
 
-    ~{self.class_type(key[1:])}() {{
-    }}
-
     typedef std::string value_type;
 
     {self._generate_common(key)}
@@ -863,9 +845,6 @@ namespace awkward {{
       : ArrayView(start, stop, which, ptrs) {{
     }}
 
-    ~{self.class_type(key[1:])}() {{
-    }}
-
     typedef {value_type} value_type;
 
     {self._generate_common(key)}
@@ -887,9 +866,6 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{
-    }}
-
-    ~{self.class_type(key[1:])}() {{
     }}
 
     typedef {self.value_type(key[1:])} value_type;
