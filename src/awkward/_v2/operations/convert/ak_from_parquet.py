@@ -1,24 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-import functools
 
 import awkward as ak
 
 
-def error_wrap(impl_name=None):
-    def _(impl):
-        impln = impl_name or f"{str(impl.__module__)}.{impl.__name__}"
-
-        @functools.wraps(impl)
-        def fn(*args, **kwargs):
-            with ak._v2._util.OperationErrorContext(impln, kwargs):
-                return impl(*args, **kwargs)
-
-        return fn
-
-    return _
-
-
-@error_wrap(impl_name="ak._v2.from_parquet")
 def from_parquet(
     path,
     columns=None,
@@ -61,31 +45,46 @@ def from_parquet(
 
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
-    import awkward._v2._connect.pyarrow  # noqa: F401
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_parquet",
+        dict(
+            path=path,
+            columns=columns,
+            row_groups=row_groups,
+            storage_options=storage_options,
+            max_gap=max_gap,
+            max_block=max_block,
+            footer_sample_size=footer_sample_size,
+            conservative_optiontype=conservative_optiontype,
+            highlevel=highlevel,
+            behavior=behavior,
+        ),
+    ):
+        import awkward._v2._connect.pyarrow  # noqa: F401
 
-    parquet_columns, subform, actual_paths, fs, subrg, meta = _metadata(
-        path,
-        storage_options,
-        row_groups,
-        columns,
-        max_gap,
-        max_block,
-        footer_sample_size,
-    )
-    return _load(
-        actual_paths,
-        parquet_columns,
-        subrg,
-        max_gap,
-        max_block,
-        footer_sample_size,
-        conservative_optiontype,
-        subform,
-        highlevel,
-        behavior,
-        fs,
-        meta,
-    )
+        parquet_columns, subform, actual_paths, fs, subrg, meta = _metadata(
+            path,
+            storage_options,
+            row_groups,
+            columns,
+            max_gap,
+            max_block,
+            footer_sample_size,
+        )
+        return _load(
+            actual_paths,
+            parquet_columns,
+            subrg,
+            max_gap,
+            max_block,
+            footer_sample_size,
+            conservative_optiontype,
+            subform,
+            highlevel,
+            behavior,
+            fs,
+            meta,
+        )
 
 
 def _metadata(
@@ -215,7 +214,7 @@ def _load(
     arrays = []
     for i, p in enumerate(actual_paths):
         arrays.append(
-            read_parquet_file(
+            _read_parquet_file(
                 p,
                 fs=fs,
                 parquet_columns=parquet_columns,
@@ -239,7 +238,7 @@ def _load(
         )
 
 
-def read_parquet_file(
+def _read_parquet_file(
     path,
     fs,
     parquet_columns,
