@@ -19,34 +19,32 @@ class ByteBehavior(Array):
     def __str__(self):
         return str(self.__bytes__())
 
+    def __repr__(self):
+        return repr(self.__bytes__())
 
-#     def __repr__(self):
-#         return repr(self.__bytes__())
+    def __iter__(self):
+        yield from self.__bytes__()
 
-#     def __iter__(self):
-#         for x in self.__bytes__():
-#             yield x
+    def __eq__(self, other):
+        if isinstance(other, (bytes, ByteBehavior)):
+            return bytes(self) == bytes(other)
+        else:
+            return False
 
-#     def __eq__(self, other):
-#         if isinstance(other, (bytes, ByteBehavior)):
-#             return bytes(self) == bytes(other)
-#         else:
-#             return False
+    def __ne__(self, other):
+        return not self.__eq__(self, other)
 
-#     def __ne__(self, other):
-#         return not self.__eq__(self, other)
+    def __add__(self, other):
+        if isinstance(other, (bytes, ByteBehavior)):
+            return bytes(self) + bytes(other)
+        else:
+            raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
 
-#     def __add__(self, other):
-#         if isinstance(other, (bytes, ByteBehavior)):
-#             return bytes(self) + bytes(other)
-#         else:
-#             raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
-
-#     def __radd__(self, other):
-#         if isinstance(other, (bytes, ByteBehavior)):
-#             return bytes(other) + bytes(self)
-#         else:
-#             raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
+    def __radd__(self, other):
+        if isinstance(other, (bytes, ByteBehavior)):
+            return bytes(other) + bytes(self)
+        else:
+            raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
 
 
 class CharBehavior(Array):
@@ -62,42 +60,40 @@ class CharBehavior(Array):
     def __str__(self):
         return self.__bytes__().decode("utf-8", "surrogateescape")
 
+    def __repr__(self):
+        return repr(self.__bytes__().decode("utf-8", "surrogateescape"))
 
-#     def __repr__(self):
-#         return repr(self.__bytes__().decode("utf-8", "surrogateescape"))
+    def __iter__(self):
+        yield from self.__str__()
 
-#     def __iter__(self):
-#         for x in self.__str__():
-#             yield x
+    def __eq__(self, other):
+        if isinstance(other, (str, CharBehavior)):
+            return str(self) == str(other)
+        else:
+            return False
 
-#     def __eq__(self, other):
-#         if isinstance(other, (str, CharBehavior)):
-#             return str(self) == str(other)
-#         else:
-#             return False
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
-#     def __ne__(self, other):
-#         return not self.__eq__(other)
+    def __add__(self, other):
+        if isinstance(other, (str, CharBehavior)):
+            return str(self) + str(other)
+        else:
+            raise ak._v2._util.error(TypeError("can only concatenate str to str"))
 
-#     def __add__(self, other):
-#         if isinstance(other, (str, CharBehavior)):
-#             return str(self) + str(other)
-#         else:
-#             raise ak._v2._util.error(TypeError("can only concatenate str to str"))
-
-#     def __radd__(self, other):
-#         if isinstance(other, (str, CharBehavior)):
-#             return str(other) + str(self)
-#         else:
-#             raise ak._v2._util.error(TypeError("can only concatenate str to str"))
+    def __radd__(self, other):
+        if isinstance(other, (str, CharBehavior)):
+            return str(other) + str(self)
+        else:
+            raise ak._v2._util.error(TypeError("can only concatenate str to str"))
 
 
-# class ByteStringBehavior(ak._v2.highlevel.Array):
-#     __name__ = "Array"
+class ByteStringBehavior(Array):
+    __name__ = "Array"
 
-#     def __iter__(self):
-#         for x in super(ByteStringBehavior, self).__iter__():
-#             yield x.__bytes__()
+    def __iter__(self):
+        for x in super().__iter__():
+            yield x.__bytes__()
 
 
 class StringBehavior(Array):
@@ -239,15 +235,15 @@ def _string_numba_lower(
 
 
 def register(behavior):
-    # behavior["byte"] = ByteBehavior
-    # behavior["__typestr__", "byte"] = "byte"
-    # behavior["char"] = CharBehavior
-    # behavior["__typestr__", "char"] = "char"
+    behavior["byte"] = ByteBehavior
+    behavior["__typestr__", "byte"] = "byte"
+    behavior["char"] = CharBehavior
+    behavior["__typestr__", "char"] = "char"
 
-    # behavior["bytestring"] = ByteStringBehavior
-    # behavior["__typestr__", "bytestring"] = "bytes"
-    # behavior["string"] = StringBehavior
-    # behavior["__typestr__", "string"] = "string"
+    behavior["bytestring"] = ByteStringBehavior
+    behavior["__typestr__", "bytestring"] = "bytes"
+    behavior["string"] = StringBehavior
+    behavior["__typestr__", "string"] = "string"
 
     behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
     behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
