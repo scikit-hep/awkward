@@ -879,24 +879,6 @@ def to_awkwardarrow_type(storage_type, use_extensionarray, mask, node):
         return storage_type
 
 
-def not_null(awkwardarrow_type, akarray):
-    if awkwardarrow_type is None:
-        # option-type but not-containing-any-nulls could accidentally be stripped
-        return isinstance(akarray, ak._v2.contents.UnmaskedArray)
-    else:
-        # always gets option-typeness right
-        return awkwardarrow_type.mask_type in (None, "IndexedArray")
-
-
-def form_not_null(awkwardarrow_type, akform):
-    if awkwardarrow_type is None:
-        # option-type but not-containing-any-nulls could accidentally be stripped
-        return isinstance(akform, ak._v2.forms.UnmaskedForm)
-    else:
-        # always gets option-typeness right
-        return awkwardarrow_type.mask_type in (None, "IndexedArray")
-
-
 def remove_optiontype(akarray):
     assert type(akarray).is_OptionType
     if isinstance(akarray, ak._v2.contents.IndexedOptionArray):
@@ -930,11 +912,7 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
             obj, awkwardarrow_type, storage_type, buffers, conservative_optiontype
         )
         assert len(buffers) == 0
-
-        if not_null(awkwardarrow_type, out):
-            return remove_optiontype(out)
-        else:
-            return out
+        return out
 
     elif isinstance(obj, pyarrow.lib.ChunkedArray):
         layouts = [
@@ -955,14 +933,10 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
         child_array = []
         for i in range(obj.num_columns):
             layout = handle_arrow(obj.column(i), conservative_optiontype)
-
-            if (
-                obj.schema.field(i).nullable
-                and not layout.is_OptionType
-                and not layout.is_UnionType
-            ):
-                layout = ak._v2.contents.UnmaskedArray(layout)
-            child_array.append(layout)
+            if not obj.schema.field(i).nullable:
+                child_array.append(remove_optiontype(layout))
+            else:
+                child_array.append(layout)
 
         if pass_empty_field and list(obj.schema.names) == [""]:
             return child_array[0]
@@ -1047,11 +1021,11 @@ def handle_arrow(obj, conservative_optiontype=False, pass_empty_field=False):
 
 def form_handle_arrow(schema, pass_empty_field=False):
     forms = []
-    for arrowtype in schema.types:
+    for i, arrowtype in enumerate(schema.types):
         awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(arrowtype)
         akform = form_popbuffers(awkwardarrow_type, storage_type)
 
-        if form_not_null(awkwardarrow_type, akform):
+        if not schema.field(i).nullable:
             forms.append(form_remove_optiontype(akform))
         else:
             forms.append(akform)

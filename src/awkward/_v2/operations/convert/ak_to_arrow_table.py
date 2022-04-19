@@ -124,7 +124,7 @@ def _impl(
             )
             pafields.append(
                 pyarrow.field(name, paarrays[-1].type).with_nullable(
-                    layout.is_OptionType
+                    layout[name].is_OptionType
                 )
             )
         parameters = []

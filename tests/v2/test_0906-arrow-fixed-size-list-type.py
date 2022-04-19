@@ -26,7 +26,7 @@ def test():
         ],
         type=struct,
     )
-    as_awkward = awkward._v2._connect.pyarrow.handle_arrow(array)
+    as_awkward = awkward._v2.from_arrow(array, highlevel=False)
 
     assert to_list(as_awkward) == [
         {"x": [1.1, 2.1], "y": [3.1, 4.1]},

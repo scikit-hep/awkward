@@ -46,7 +46,23 @@ def from_arrow(array, conservative_optiontype=False, highlevel=True, behavior=No
 def _impl(array, conservative_optiontype, highlevel, behavior):
     import awkward._v2._connect.pyarrow
 
+    pyarrow = awkward._v2._connect.pyarrow.pyarrow
+
     out = awkward._v2._connect.pyarrow.handle_arrow(
         array, conservative_optiontype=conservative_optiontype, pass_empty_field=True
     )
+
+    if isinstance(array, (pyarrow.lib.Array, pyarrow.lib.ChunkedArray)):
+        (
+            awkwardarrow_type,
+            storage_type,
+        ) = awkward._v2._connect.pyarrow.to_awkwardarrow_storage_types(array.type)
+
+        if awkwardarrow_type is None:
+            if isinstance(out, ak._v2.contents.UnmaskedArray):
+                out = awkward._v2._connect.pyarrow.remove_optiontype(out)
+        else:
+            if awkwardarrow_type.mask_type in (None, "IndexedArray"):
+                out = awkward._v2._connect.pyarrow.remove_optiontype(out)
+
     return ak._v2._util.wrap(out, behavior, highlevel)
