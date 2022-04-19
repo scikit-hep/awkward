@@ -145,7 +145,6 @@ ROOT::RDataFrame* MakeATestDS() {{
         result_ptrs.GetValue()
 
 
-@pytest.mark.skip(reason="No reason")
 def test_one_array():
 
     array = ak._v2.Array(
@@ -160,7 +159,7 @@ def test_one_array():
     lookup = ak._v2._lookup.Lookup(layout)
 
     generator.generate(compiler)
-    print(lookup.arrayptrs, "DONE!")
+    print(lookup.arrayptrs.data, "DONE!")
 
 
 def test_simple_test():
