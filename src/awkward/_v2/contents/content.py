@@ -1123,10 +1123,13 @@ class Content:
             ):
                 content = self.content
             else:
-                return 'at {} ("{}"): __array__ = "string" only allowed for IndexedArray and IndexedOptionArray'.format(
+                return 'at {} ("{}"): __array__ = "categorical" only allowed for IndexedArray and IndexedOptionArray'.format(
                     path, type(self)
                 )
-            return NotImplementedError("TODO: Implement is_unique")
+            if not self.content.is_unique():
+                return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
+                    path, type(self)
+                )
 
         return ""
 

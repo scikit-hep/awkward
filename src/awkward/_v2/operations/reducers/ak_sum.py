@@ -10,7 +10,6 @@ def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        array: Data to sum over.
         axis (None or int): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
@@ -179,6 +178,8 @@ def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     The third list is reduced to `0` if `mask_identity=False` because `0` is
     the identity of addition, but it is reduced to None if
     `mask_identity=True`.
+
+    See also #ak.nansum.
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.sum",
@@ -190,6 +191,53 @@ def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
             flatten_records=flatten_records,
         ),
     ):
+        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+
+
+# @ak._v2._connect.numpy.implements("nansum")
+def nansum(
+    array, axis=None, keepdims=False, mask_identity=False, flatten_records=False
+):
+    """
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        axis (None or int): If None, combine all values from the array into
+            a single scalar result; if an int, group by that axis: `0` is the
+            outermost, `1` is the first level of nested lists, etc., and
+            negative `axis` counts from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
+        keepdims (bool): If False, this reducer decreases the number of
+            dimensions by 1; if True, the reduced values are wrapped in a new
+            length-1 dimension so that the result of this operation may be
+            broadcasted with the original array.
+        mask_identity (bool): If True, reducing over empty lists results in
+            None (an option type); otherwise, reducing over empty lists
+            results in the operation's identity.
+        flatten_records (bool): If True, axis=None combines fields from different
+            records; otherwise, records raise an error.
+
+    Like #ak.sum, but treating NaN ("not a number") values as missing.
+
+    Equivalent to
+
+        ak.sum(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.sum.
+    """
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.nansum",
+        dict(
+            array=array,
+            axis=axis,
+            keepdims=keepdims,
+            mask_identity=mask_identity,
+            flatten_records=flatten_records,
+        ),
+    ):
+        array = ak._v2.operations.structure.ak_nan_to_none._impl(array, False, None)
+
         return _impl(array, axis, keepdims, mask_identity, flatten_records)
 
 

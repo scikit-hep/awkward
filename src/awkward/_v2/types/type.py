@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import json
+import sys
 
 import awkward as ak
 
@@ -21,6 +22,12 @@ class Type:
     @property
     def typestr(self):
         return self._typestr
+
+    def __str__(self):
+        return "".join(self._str("", True))
+
+    def show(self, stream=sys.stdout):
+        stream.write("".join(self._str("", False) + ["\n"]))
 
     _str_parameters_exclude = ("__categorical__",)
 

@@ -52,20 +52,39 @@ class UnionType(Type):
     def contents(self):
         return self._contents
 
-    def __str__(self):
+    def _str(self, indent, compact):
         if self._typestr is not None:
-            out = self._typestr
+            out = [self._typestr]
 
         else:
-            children = [str(x) for x in self._contents]
+            if compact:
+                pre, post = "", ""
+            else:
+                pre, post = "\n" + indent + "    ", "\n" + indent
+
+            children = []
+            for i, x in enumerate(self._contents):
+                if i + 1 < len(self._contents):
+                    if compact:
+                        y = x._str(indent, compact) + [", "]
+                    else:
+                        y = x._str(indent + "    ", compact) + [",\n", indent, "    "]
+                else:
+                    if compact:
+                        y = x._str(indent, compact)
+                    else:
+                        y = x._str(indent + "    ", compact)
+                children.append(y)
+
+            flat_children = [y for x in children for y in x]
             params = self._str_parameters()
 
             if params is None:
-                out = "union[{}]".format(", ".join(children))
+                out = ["union[", pre] + flat_children + [post, "]"]
             else:
-                out = "union[{}, {}]".format(", ".join(children), params)
+                out = ["union[", pre] + flat_children + [", ", post, params, "]"]
 
-        return self._str_categorical_begin() + out + self._str_categorical_end()
+        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._contents)] + self._repr_args()
