@@ -121,8 +121,7 @@ def test_two_columns_as_vecs():
     data_frame.Foreach(f_y, ["awkward:y"])
 
 
-@pytest.mark.skip(reason="FIXME: this test fails when flatlist_as_rvec=True")
-def test_array_as_rvec():
+def test_array_as_vec():
 
     array = ak._v2.Array(
         [
@@ -131,9 +130,28 @@ def test_array_as_rvec():
             [{"x": 3, "y": [3.0, 0.3, 3.3]}],
         ]
     )
-    layout = array.layout
-    generator = ak._v2._connect.cling.togenerator(layout.form)
-    lookup = ak._v2._lookup.Lookup(layout)
+    data_frame = ak._v2.operations.convert.to_rdataframe(
+        {"array": array}, flatlist_as_rvec=False
+    )
 
-    generator.generate(compiler, flatlist_as_rvec=True)
-    print(lookup.arrayptrs.data, "DONE!")
+    done = compiler(
+        """
+        template <typename Array>
+        struct MyFunctor_1 {
+            void operator()(const Array& a) {
+                for (int64_t i = 0; i < a.size(); i++) {
+                    cout << a[i].x() << ", ";
+                    auto y = a[i].y();
+                    for (int64_t j = 0; j < y.size(); j++) {
+                        cout << y[j] << ", ";
+                    }
+                }
+            }
+        };
+        """
+    )
+    assert done is True
+
+    f = ROOT.MyFunctor_1[data_frame.GetColumnType("awkward:array")]()
+
+    data_frame.Foreach(f, ["awkward:array"])

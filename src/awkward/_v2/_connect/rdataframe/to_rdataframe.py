@@ -281,7 +281,7 @@ public:
 }};
 
 template <typename ...ColumnTypes>
-ROOT::RDataFrame* MakeAwkwardArrayDS(ColumnTypes&... wrappers) {{
+ROOT::RDataFrame* MakeAwkwardArrayDS_{rdf_array_data_source_class_name}(ColumnTypes&... wrappers) {{
     return new ROOT::RDataFrame(std::make_unique<{rdf_array_data_source_class_name}<ColumnTypes...>>(std::move(wrappers)...));
 }}
         """
@@ -290,6 +290,8 @@ ROOT::RDataFrame* MakeAwkwardArrayDS(ColumnTypes&... wrappers) {{
         done = compiler(cpp_code)
         assert done is True
 
-    rdf = ROOT.MakeAwkwardArrayDS(*rdf_list_of_wrappers)
+    rdf = getattr(ROOT, f"MakeAwkwardArrayDS_{rdf_array_data_source_class_name}")(
+        *rdf_list_of_wrappers
+    )
 
     return (rdf,)
