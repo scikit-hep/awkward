@@ -11,6 +11,10 @@ compiler = ROOT.gInterpreter.Declare
 
 
 def to_rdataframe(columns, flatlist_as_rvec):
+    if not columns:
+        ak._v2._util.error(
+            ValueError("dict of columns must have at least one ak.Array")
+        )
 
     if not hasattr(ROOT, "awkward::ArrayWrapper"):
         done = compiler(
@@ -129,7 +133,6 @@ private:
     std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
     std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ }};
 
-    // type-erased vector of pointers to pointers to column values - one per slot
     Record_t
     GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
         return {{ }};
