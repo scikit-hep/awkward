@@ -33,7 +33,7 @@ def test_two_arrays():
     done = compiler(
         """
         template <typename Array>
-        struct MyFunctor {
+        struct MyFunctorX {
             void operator()(const Array& a) {
                 cout << "#6. Call user function: " << a << endl;
             }
@@ -42,8 +42,29 @@ def test_two_arrays():
     )
     assert done is True
 
-    f = ROOT.MyFunctor[data_frame.GetColumnType("awkward:x")]()
-    data_frame.Foreach(f, ["awkward:x"])
+    done = compiler(
+        """
+        template <typename Array>
+        struct MyFunctorY {
+            void operator()(const Array& a) {
+                cout << "#6. Call user function: " << a.size() << endl;
+                for (int64_t i = 0; i < a.size(); i++) {
+                    for (int64_t j = 0; j < a[i].size(); j++) {
+                        cout << a[i][j] << ", ";
+                    }
+                    cout << endl;
+                }
+            }
+        };
+        """
+    )
+    assert done is True
+
+    f_x = ROOT.MyFunctorX[data_frame.GetColumnType("awkward:x")]()
+    f_y = ROOT.MyFunctorY[data_frame.GetColumnType("awkward:y")]()
+
+    data_frame.Foreach(f_x, ["awkward:x"])
+    data_frame.Foreach(f_y, ["awkward:y"])
 
 
 @pytest.mark.skip(reason="FIXME: the test fails when flatlist_as_rvec=True")

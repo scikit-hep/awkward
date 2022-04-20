@@ -32,7 +32,7 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
             name(name),
             type(type),
             length(length),
-            ptrs(ptrs) {}
+            ptrs(ptrs) { }
 
             const std::string_view name;
             const std::string_view type;
@@ -63,10 +63,10 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
             rdf_array_data_source_class_name + f"""_{generated_type}_as_{key}"""
         )
 
-        if not hasattr(ROOT, f"get_entry_{generated_type}_{key}"):
+        if not hasattr(ROOT, f"get_entry_{generated_type}_{key}_{flatlist_as_rvec}"):
             done = compiler(
                 f"""
-            auto get_entry_{generated_type}_{key}(ssize_t length, ssize_t* ptrs, int64_t i) {{
+            auto get_entry_{generated_type}_{key}_{flatlist_as_rvec}(ssize_t length, ssize_t* ptrs, int64_t i) {{
                 return {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
             }}
             """.strip()
@@ -74,7 +74,7 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
             assert done is True
 
             rdf_array_view_entries[key] = getattr(
-                ROOT, f"get_entry_{generated_type}_{key}"
+                ROOT, f"get_entry_{generated_type}_{key}_{flatlist_as_rvec}"
             )(len(layout), lookup.arrayptrs, 0)
 
         array_wrapper = ROOT.awkward.ArrayWrapper(
@@ -85,25 +85,26 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
         )
 
         if not hasattr(
-            ROOT, f"awkward::AwkwardArrayColumnReader_{generated_type}_{key}"
+            ROOT,
+            f"awkward::AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec}",
         ):
             done = compiler(
                 f"""
 namespace awkward {{
-    auto erase_array_view_{generated_type}_{key} = []({type(rdf_array_view_entries[key]).__cpp_name__} *entry) {{ cout << "Adoid deleter of " << entry << endl; }};
+    auto erase_array_view_{generated_type}_{key}_{flatlist_as_rvec} = []({type(rdf_array_view_entries[key]).__cpp_name__} *entry) {{ cout << "Adoid deleter of " << entry << endl; }};
     // FIXME: need a deleter?
     // std::unique_ptr<{type(rdf_array_view_entries[key]).__cpp_name__}, decltype(erase_array_view_{generated_type})> obj_ptr(&obj, erase_array_view_{generated_type});
 
-    class AwkwardArrayColumnReader_{generated_type}_{key} : public ROOT::Detail::RDF::RColumnReaderBase {{
+    class AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec} : public ROOT::Detail::RDF::RColumnReaderBase {{
     public:
-        AwkwardArrayColumnReader_{generated_type}_{key}(ssize_t length, ssize_t* ptrs)
+        AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec}(ssize_t length, ssize_t* ptrs)
             : length_(length),
               ptrs_(ptrs),
-              view_(get_entry_{generated_type}_{key}(length, ptrs, 0)) {{
-            cout << "CONSTRUCTED AwkwardArrayColumnReader_{generated_type}_{key} of a {type(rdf_array_view_entries[key]).__cpp_name__} at " << &view_ << endl;
+              view_(get_entry_{generated_type}_{key}_{flatlist_as_rvec}(length, ptrs, 0)) {{
+            cout << "CONSTRUCTED AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec} of a {type(rdf_array_view_entries[key]).__cpp_name__} at " << &view_ << endl;
         }}
-        ~AwkwardArrayColumnReader_{generated_type}_{key}() {{
-            cout << "DESTRUCTED AwkwardArrayColumnReader_{generated_type}_{key} of a {type(rdf_array_view_entries[key]).__cpp_name__} at " << &view_ << endl;
+        ~AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec}() {{
+            cout << "DESTRUCTED AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec} of a {type(rdf_array_view_entries[key]).__cpp_name__} at " << &view_ << endl;
         }}
 
         ssize_t length_;
@@ -111,7 +112,7 @@ namespace awkward {{
 
     private:
         void* GetImpl(Long64_t entry) {{
-            view_ = get_entry_{generated_type}_{key}(length_, ptrs_, entry);
+            view_ = get_entry_{generated_type}_{key}_{flatlist_as_rvec}(length_, ptrs_, entry);
             return reinterpret_cast<void*>(&view_);
         }}
 
@@ -135,9 +136,7 @@ private:
     const std::vector<std::string> fColTypeNames;
     const std::map<std::string, std::string> fColTypesMap;
     std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
-
-    // FIXME: define entry ranges for each column???
-    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull, 1ull}} }};
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ }};
 
     // type-erased vector of pointers to pointers to column values - one per slot
     Record_t
@@ -268,8 +267,8 @@ public:
             case {indx}:
                 cout << "index is " << {indx} << " and "
                 << fColDataPointers[{indx}].first << " length of data at " << fColDataPointers[{indx}].second << endl;
-                return std::unique_ptr<awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}>(
-                    new awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}(
+                return std::unique_ptr<awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}_{flatlist_as_rvec}>(
+                    new awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}_{flatlist_as_rvec}(
                         fColDataPointers[{indx}].first,
                         fColDataPointers[{indx}].second
                     )
@@ -301,8 +300,10 @@ public:
         cout << "nEntriesInRange " << nEntriesInRange << endl;
         auto reminder = 1U == fNSlots ? 0 : nEntries % fNSlots;
         cout << "reminder " << reminder << endl;
+        fEntryRanges.resize(1);
+        fEntryRanges[0].first = 0ull;
+        fEntryRanges[0].second = fColDataPointers[0].first; // FIXME: the range is defined by the first column?
         cout << "fEntryRanges size " << fEntryRanges.size() << endl;
-        // FIXME: define some ranges here!
     }}
 
     const std::vector<std::string> &GetColumnNames() const {{
