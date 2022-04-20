@@ -144,10 +144,10 @@ def categories(array, highlevel=True):
 
     output = [None]
 
-    def getfunction(layout):
+    def action(layout, **kwargs):
         if layout.parameter("__array__") == "categorical":
             output[0] = layout.content
-            return lambda: layout
+            return layout
 
         else:
             return None
@@ -155,7 +155,7 @@ def categories(array, highlevel=True):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
-    ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
+    layout.recursively_apply(action)
 
     if output[0] is None:
         return None
@@ -275,7 +275,7 @@ def to_categorical(array, highlevel=True):
                 index = ak._v2.index.Index64(mapping[original_index])
 
             elif layout.is_OptionType:
-                mask = ak.nplike.numpy.asarray(layout.bytemask())
+                mask = ak.nplike.numpy.asarray(layout.mask_as_bool(valid_when=False))
                 mapping[mask.view(np.bool_)] = -1
                 index = ak._v2.index.Index64(mapping)
 
@@ -317,12 +317,12 @@ def from_categorical(array, highlevel=True):
     #ak.from_categorical.
     """
 
-    def getfunction(layout):
+    def action(layout, **kwargs):
         if layout.parameter("__array__") == "categorical":
             out = ak._v2.operations.structure.with_parameter(
                 layout, "__array__", None, highlevel=False
             )
-            return lambda: out
+            return out
 
         else:
             return None
@@ -330,7 +330,7 @@ def from_categorical(array, highlevel=True):
     layout = ak._v2.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
-    out = ak._v2._util.recursively_apply(layout, getfunction, pass_depth=False)
+    out = layout.recursively_apply(action)
     if highlevel:
         return ak._v2._util.wrap(out, ak._v2._util.behavior_of(array))
     else:
