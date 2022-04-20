@@ -44,25 +44,18 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
         )
         assert done is True
 
-    # FIXME: check the need for all these dictionaries
-    rdf_layouts = {}
-    rdf_generators = {}
     rdf_generated_types = {}
-    rdf_lookups = {}
     rdf_list_of_wrappers = []
-    rdf_array_wrappers = {}
     rdf_array_view_entries = {}
-    rdf_entry_func = {}
-    rdf_column_readers = {}
     rdf_array_data_source_class_name = "AwkwardArrayDataSource_of"
 
     for key in columns:
-        rdf_layouts[key] = columns[key].layout
-        rdf_generators[key] = ak._v2._connect.cling.togenerator(rdf_layouts[key].form)
-        rdf_lookups[key] = ak._v2._lookup.Lookup(rdf_layouts[key])
+        layout = columns[key].layout
+        generator = ak._v2._connect.cling.togenerator(layout.form)
+        lookup = ak._v2._lookup.Lookup(layout)
 
-        rdf_generators[key].generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
-        generated_type = rdf_generators[key].entry_type()
+        generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
+        generated_type = generator.entry_type()
         rdf_generated_types[key] = generated_type
 
         # Generate a unique class name
@@ -74,22 +67,21 @@ def to_rdataframe(columns, flatlist_as_rvec=True):
             done = compiler(
                 f"""
             auto get_entry_{generated_type}_{key}(ssize_t length, ssize_t* ptrs, int64_t i) {{
-                return {rdf_generators[key].entry(flatlist_as_rvec=flatlist_as_rvec)};
+                return {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
             }}
             """.strip()
             )
             assert done is True
-            rdf_entry_func[key] = f"get_entry_{generated_type}_{key}"
 
-            rdf_array_view_entries[key] = getattr(ROOT, rdf_entry_func[key])(
-                len(rdf_layouts[key]), rdf_lookups[key].arrayptrs, 0
-            )
+            rdf_array_view_entries[key] = getattr(
+                ROOT, f"get_entry_{generated_type}_{key}"
+            )(len(layout), lookup.arrayptrs, 0)
 
-        rdf_array_wrappers[key] = ROOT.awkward.ArrayWrapper(
+        array_wrapper = ROOT.awkward.ArrayWrapper(
             f"awkward:{key}",
             type(rdf_array_view_entries[key]).__cpp_name__,
-            len(rdf_layouts[key]),
-            rdf_lookups[key].arrayptrs,
+            len(layout),
+            lookup.arrayptrs,
         )
 
         if not hasattr(
@@ -130,7 +122,7 @@ namespace awkward {{
             )
             assert done is True
 
-        rdf_list_of_wrappers.append(rdf_array_wrappers[key])
+        rdf_list_of_wrappers.append(array_wrapper)
 
     if not hasattr(ROOT, rdf_array_data_source_class_name):
         cpp_code_begin = f"""
@@ -145,7 +137,7 @@ private:
     std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
 
     // FIXME: define entry ranges for each column???
-    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull, 3ull}} }};
+    std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ {{0ull, 1ull}} }};
 
     // type-erased vector of pointers to pointers to column values - one per slot
     Record_t
@@ -354,9 +346,4 @@ ROOT::RDataFrame* MakeAwkwardArrayDS(ColumnTypes&... wrappers) {{
 
     rdf = ROOT.MakeAwkwardArrayDS(*rdf_list_of_wrappers)
 
-    return (
-        rdf,
-        rdf_column_readers,
-        rdf_lookups,
-        rdf_generators,
-    )
+    return (rdf,)
