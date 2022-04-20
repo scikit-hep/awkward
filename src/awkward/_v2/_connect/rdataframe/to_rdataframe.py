@@ -10,7 +10,7 @@ import ROOT
 compiler = ROOT.gInterpreter.Declare
 
 
-def to_rdataframe(columns, flatlist_as_rvec=True):
+def to_rdataframe(columns, flatlist_as_rvec):
 
     if not hasattr(ROOT, "awkward::ArrayWrapper"):
         done = compiler(
@@ -294,4 +294,4 @@ ROOT::RDataFrame* MakeAwkwardArrayDS_{rdf_array_data_source_class_name}(ColumnTy
         *rdf_list_of_wrappers
     )
 
-    return (rdf,)
+    return rdf

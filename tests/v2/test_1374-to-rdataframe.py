@@ -27,7 +27,7 @@ def test_two_columns_as_rvecs():
 
     # An 'awkward' namespace will be added to the column name
     data_frame = ak._v2.operations.convert.to_rdataframe(
-        {"x": ak_array_1, "y": ak_array_2}
+        {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=True
     )
 
     done = compiler(
@@ -81,7 +81,7 @@ def test_two_columns_as_vecs():
 
     # An 'awkward' namespace will be added to the column name
     data_frame = ak._v2.operations.convert.to_rdataframe(
-        {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=False
+        {"x": ak_array_1, "y": ak_array_2}
     )
 
     done = compiler(
@@ -121,7 +121,7 @@ def test_two_columns_as_vecs():
     data_frame.Foreach(f_y, ["awkward:y"])
 
 
-def test_array_as_vec():
+def test_array():
 
     array = ak._v2.Array(
         [
@@ -130,9 +130,7 @@ def test_array_as_vec():
             [{"x": 3, "y": [3.0, 0.3, 3.3]}],
         ]
     )
-    data_frame = ak._v2.operations.convert.to_rdataframe(
-        {"array": array}, flatlist_as_rvec=False
-    )
+    data_frame = ak._v2.operations.convert.to_rdataframe({"array": array})
 
     done = compiler(
         """

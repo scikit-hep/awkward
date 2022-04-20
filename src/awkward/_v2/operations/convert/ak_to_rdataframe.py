@@ -3,7 +3,7 @@
 import awkward as ak
 
 
-def to_rdataframe(arrays, flatlist_as_rvec=True):
+def to_rdataframe(arrays, flatlist_as_rvec=False):
     """
     Args:
         arrays (dict): a dictionary of Array-like data (anything #ak.to_layout recognizes).
@@ -36,6 +36,6 @@ def _impl(
     rdf = ak._v2._connect.rdataframe.to_rdataframe.to_rdataframe(
         arrays,
         flatlist_as_rvec=flatlist_as_rvec,
-    )[0]
+    )
 
     return rdf
