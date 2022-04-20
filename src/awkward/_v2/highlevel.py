@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import io
 import sys
 import re
 import keyword
@@ -976,7 +977,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __setitem__(self, where, what):
         """
         Args:
-            where (str): Field name to add to records in the array.
+            where (str or tuple of str): Field name to add to records in the array.
             what (#ak.Array): Array to add as the new field.
 
         Unlike #__getitem__, which allows a wide variety of slice types,
@@ -1042,6 +1043,25 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._layout = ak._v2.operations.structure.with_field(
                 self._layout, what, where, highlevel=False
             )
+            self._numbaview = None
+
+    def __delitem__(self, where):
+        """
+        Args:
+            where (str): Field name to add to records in the array.
+
+        Removes a field from records in the array.
+        """
+        with ak._v2._util.OperationErrorContext(
+            "ak._v2.Array.__delitem__",
+            dict(self=self, field_name=where),
+        ):
+            names = ak._v2.operations.describe.fields(self._layout)
+            if where not in names:
+                raise ak._v2._util.error(
+                    TypeError(f"array fields do not contain {where!r}")
+                )
+            self._layout = self._layout[[x for x in names if x != where]]
             self._numbaview = None
 
     def __getattr__(self, where):
@@ -1171,7 +1191,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         valuestr = awkward._v2._prettyprint.valuestr(self, limit_rows, limit_cols)
         if type:
-            out = "type: " + str(self.type) + "\n" + valuestr
+            tmp = io.StringIO()
+            self.type.show(stream=tmp)
+            out = "type: " + tmp.getvalue() + valuestr
         else:
             out = valuestr
 
@@ -1664,7 +1686,7 @@ class Record(NDArrayOperatorsMixin):
     def __setitem__(self, where, what):
         """
         Args:
-            where (str): Field name to add data to the record.
+            where (str or tuple of str): Field name to add data to the record.
             what: Data to add as the new field.
 
         For example:
@@ -1697,6 +1719,25 @@ class Record(NDArrayOperatorsMixin):
             self._layout = ak._v2.operations.structure.with_field(
                 self._layout, what, where, highlevel=False
             )
+            self._numbaview = None
+
+    def __delitem__(self, where):
+        """
+        Args:
+            where (str): Field name to add to records in the array.
+
+        Removes a field from records in the array.
+        """
+        with ak._v2._util.OperationErrorContext(
+            "ak._v2.Record.__delitem__",
+            dict(self=self, field_name=where),
+        ):
+            names = ak._v2.operations.describe.fields(self._layout)
+            if where not in names:
+                raise ak._v2._util.error(
+                    TypeError(f"array fields do not contain {where!r}")
+                )
+            self._layout = self._layout[[x for x in names if x != where]]
             self._numbaview = None
 
     def __getattr__(self, where):
@@ -1818,7 +1859,9 @@ class Record(NDArrayOperatorsMixin):
 
         valuestr = awkward._v2._prettyprint.valuestr(self, limit_rows, limit_cols)
         if type:
-            out = "type: " + str(self.type) + "\n" + valuestr
+            tmp = io.StringIO()
+            self.type.show(stream=tmp)
+            out = "type: " + tmp.getvalue() + valuestr
         else:
             out = valuestr
 
