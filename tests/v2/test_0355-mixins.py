@@ -62,8 +62,14 @@ def test_make_mixins():
         ],
         with_name="Point",
     )
-    wone = ak._v2.Array(ak._v2.operations.structure.with_field(one, abs(one), "weight"), with_name="WeightedPoint")
-    wtwo = ak._v2.Array(ak._v2.operations.structure.with_field(two, abs(two), "weight"), with_name="WeightedPoint")
+    wone = ak._v2.Array(
+        ak._v2.operations.structure.with_field(one, abs(one), "weight"),
+        with_name="WeightedPoint",
+    )
+    wtwo = ak._v2.Array(
+        ak._v2.operations.structure.with_field(two, abs(two), "weight"),
+        with_name="WeightedPoint",
+    )
 
     assert to_list(one + wone) == [
         [{"x": 2, "y": 2.2}, {"x": 4, "y": 4.4}, {"x": 6, "y": 6.6}],

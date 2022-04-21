@@ -19,7 +19,9 @@ def test():
     x = np.random.randint(0, 64, 128)
     y = np.random.randint(0, 64, 128)
 
-    point_1030 = ak._v2.operations.structure.zip({"x": x, "y": y}, behavior=behavior, with_name="1030_point")
+    point_1030 = ak._v2.operations.structure.zip(
+        {"x": x, "y": y}, behavior=behavior, with_name="1030_point"
+    )
     assert isinstance(point_1030.mag2, ak._v2.Array)
 
     point = ak._v2.operations.structure.zip(
