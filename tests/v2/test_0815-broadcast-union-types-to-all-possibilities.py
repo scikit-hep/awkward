@@ -36,6 +36,7 @@ def test():
         with_name="Point",
     )
     b, c = make("Point2"), make("Point")
+
     assert (a + b).tolist() == [
         [{"x": 2, "y": 2}, {"x": 3, "y": 3}],
         [{"x": 4, "y": 4}],
@@ -55,4 +56,5 @@ def test():
     ]
 
     e = ak._v2.operations.structure.concatenate([b[b.x < 0], c[c.x < 0]], axis=1)
+
     assert (a + e).tolist() == [[], []]

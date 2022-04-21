@@ -241,7 +241,7 @@ class UnionArray(Content):
             self._tags,
             self._index,
             [x._getitem_fields(where, only_fields) for x in self._contents],
-            self._fields_identifer(where),
+            self._fields_identifier(where),
             None,
             self._nplike,
         )
