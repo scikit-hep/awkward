@@ -513,8 +513,6 @@ def custom_ufunc(ufunc, layout, behavior):
     custom = layout.parameter("__array__")
     if not isstr(custom):
         custom = layout.parameter("__record__")
-    if not isstr(custom):
-        custom = layout.purelist_parameter("__record__")
     if isstr(custom):
         for key, fcn in behavior.items():
             if (
