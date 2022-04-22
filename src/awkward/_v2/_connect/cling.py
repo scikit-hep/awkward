@@ -592,6 +592,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -672,6 +673,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef std::string value_type;
 
@@ -696,6 +698,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {value_type} value_type;
 
@@ -718,6 +721,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -813,6 +817,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef std::string value_type;
 
@@ -837,6 +842,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {value_type} value_type;
 
@@ -859,6 +865,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -937,6 +944,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -1012,6 +1020,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -1087,6 +1096,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -1165,6 +1175,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -1234,6 +1245,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -1317,6 +1329,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t at, ssize_t which, ssize_t* ptrs)
       : RecordView(at, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : RecordView(0, 0, 0) {{ }}
 
     const std::string parameter(const std::string& parameter) const noexcept {{
       {"" if len(params) == 0 else "".join(x for x in params)}return "null";
@@ -1393,6 +1406,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
@@ -1480,6 +1494,7 @@ namespace awkward {{
   public:
     {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
+    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {self.value_type(key[1:])} value_type;
 
