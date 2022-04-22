@@ -342,3 +342,8 @@ class Form:
 
         output = []
         return self._select_columns(0, specifier, matches, output)
+
+    def column_types(self, specifier, expand_braces=True):
+        return self.select_columns(
+            specifier, expand_braces=expand_braces
+        )._column_types()
