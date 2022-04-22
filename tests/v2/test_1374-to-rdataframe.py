@@ -349,8 +349,8 @@ def test_jims_example1():
     array = ak._v2.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}])
     rdf = ak._v2.to_rdataframe({"some_array": array})
     list(rdf.GetColumnNames())
-    rdf.Define("y", "some_array.x()")
-    rdf.Display().Print()
+    rdf_y = rdf.Define("y", "some_array.x()")
+    rdf_y.Display().Print()
 
 
 def test_jims_example2():
