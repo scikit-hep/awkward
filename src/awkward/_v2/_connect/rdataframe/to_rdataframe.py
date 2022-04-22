@@ -16,6 +16,8 @@ def to_rdataframe(columns, flatlist_as_rvec):
             ValueError("dict of columns must have at least one ak.Array")
         )
 
+    # FIXME: check if the arrays are the same length
+
     if not hasattr(ROOT, "awkward::ArrayWrapper"):
         done = compiler(
             """
@@ -50,6 +52,7 @@ def to_rdataframe(columns, flatlist_as_rvec):
     rdf_list_of_wrappers = []
     rdf_generated_types = {}
     rdf_array_view_entries = {}
+    rdf_entry_types = {}
 
     rdf_array_data_source_class_name = "AwkwardArrayDataSource_of"
 
@@ -59,7 +62,7 @@ def to_rdataframe(columns, flatlist_as_rvec):
         lookup = ak._v2._lookup.Lookup(layout)
 
         generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
-        generated_type = generator.entry_type()
+        generated_type = generator.entry_type(flatlist_as_rvec=flatlist_as_rvec)
         rdf_generated_types[key] = generated_type
 
         # Generate a unique class name
@@ -81,9 +84,16 @@ def to_rdataframe(columns, flatlist_as_rvec):
                 ROOT, f"get_entry_{generated_type}_{key}_{flatlist_as_rvec}"
             )(len(layout), lookup.arrayptrs, 0)
 
+            # FIXME: replace with etry_type
+            rdf_entry_types[key] = (
+                type(rdf_array_view_entries[key]).__name__
+                if isinstance(generator, ak._v2._connect.cling.NumpyArrayGenerator)
+                else type(rdf_array_view_entries[key]).__cpp_name__
+            )
+
         array_wrapper = ROOT.awkward.ArrayWrapper(
-            f"awkward:{key}",
-            type(rdf_array_view_entries[key]).__cpp_name__,
+            f"{key}",
+            f"{rdf_entry_types[key]}",
             len(layout),
             lookup.arrayptrs,
         )
@@ -111,7 +121,7 @@ namespace awkward {{
             return reinterpret_cast<void*>(&view_);
         }}
 
-        {type(rdf_array_view_entries[key]).__cpp_name__} view_;
+        {rdf_entry_types[key]} view_;
     }};
 }}
     """.strip()
@@ -154,7 +164,7 @@ public:
             cpp_code_column_names = (
                 cpp_code_column_names
                 + f"""
-            "awkward:{key}"
+            "{key}"
             """.strip()
             )
             k = k + 1
@@ -170,7 +180,7 @@ public:
             cpp_code_wrappers_type = (
                 cpp_code_wrappers_type
                 + f"""
-            "{type(rdf_array_view_entries[key]).__cpp_name__}"
+            "{rdf_entry_types[key]}"
             """.strip()
             )
             k = k + 1
@@ -185,7 +195,7 @@ public:
             cpp_code_column_types_map = (
                 cpp_code_column_types_map
                 + f"""
-            {{ "awkward:{key}", "{type(rdf_array_view_entries[key]).__cpp_name__}" }}
+            {{ "{key}", "{rdf_entry_types[key]}" }}
             """.strip()
             )
             k = k + 1
