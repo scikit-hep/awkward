@@ -54,6 +54,7 @@ def to_rdataframe(columns, flatlist_as_rvec):
     rdf_array_view_entries = {}
     rdf_entry_types = {}
 
+    # FIXME: hash((("one", generator1), ("two", generator2)))
     rdf_array_data_source_class_name = "AwkwardArrayDataSource_of"
 
     for key in columns:
