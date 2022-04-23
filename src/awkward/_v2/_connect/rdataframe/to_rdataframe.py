@@ -16,149 +16,113 @@ def to_rdataframe(columns, flatlist_as_rvec):
             ValueError("dict of columns must have at least one ak.Array")
         )
 
-    # FIXME: check if the arrays are the same length
+    length = len(next(iter(columns.values())))
+    for key in columns:
+        if len(columns[key]) != length:
+            ak._v2._util.error(ValueError("all arrays must be equal length"))
 
-    if not hasattr(ROOT, "awkward::ArrayWrapper"):
-        done = compiler(
-            """
-    namespace awkward {
-        struct ArrayWrapper {
-            ArrayWrapper() = delete;
-            ArrayWrapper(const ArrayWrapper& wrapper) = delete;
-            ArrayWrapper& operator=(ArrayWrapper const& wrapper) = delete;
-
-            // An array wrapper is short-lived.
-            // It gets destructed after AwkwardArrayDataSource::SetNSlots are done.
-            ArrayWrapper(
-                const std::string_view name,
-                const std::string_view type,
-                ssize_t length,
-                ssize_t* ptrs) :
-            name(name),
-            type(type),
-            length(length),
-            ptrs(ptrs) { }
-
-            const std::string_view name;
-            const std::string_view type;
-            const ssize_t length;
-            ssize_t* ptrs;
-        };
-    }
-        """
-        )
-        assert done is True
-
-    rdf_list_of_wrappers = []
+    rdf_list_of_ptrs = []
     rdf_generated_types = {}
-    rdf_array_view_entries = {}
+    rdf_generators = {}
     rdf_entry_types = {}
-
-    # FIXME: hash((("one", generator1), ("two", generator2)))
-    rdf_array_data_source_class_name = "AwkwardArrayDataSource_of"
+    rdf_dataset_types = {}
+    rdf_lookups = {}
 
     for key in columns:
         layout = columns[key].layout
-        generator = ak._v2._connect.cling.togenerator(layout.form)
-        lookup = ak._v2._lookup.Lookup(layout)
+        rdf_generators[key] = ak._v2._connect.cling.togenerator(layout.form)
+        rdf_lookups[key] = ak._v2._lookup.Lookup(layout)
+        rdf_generators[key].generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
-        generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
-        generated_type = generator.entry_type(flatlist_as_rvec=flatlist_as_rvec)
+        rdf_dataset_types[key] = rdf_generators[key].class_type((flatlist_as_rvec,))
+        generated_type = rdf_generators[key].entry_type(
+            flatlist_as_rvec=flatlist_as_rvec
+        )
         rdf_generated_types[key] = generated_type
 
-        # Generate a unique class name
-        rdf_array_data_source_class_name = (
-            rdf_array_data_source_class_name + f"""_{generated_type}_as_{key}"""
+        rdf_entry_types[key] = (
+            rdf_generators[key].entry_type(flatlist_as_rvec=flatlist_as_rvec)
+            if isinstance(
+                rdf_generators[key], ak._v2._connect.cling.NumpyArrayGenerator
+            )
+            else f"awkward::{rdf_generators[key].entry_type(flatlist_as_rvec=flatlist_as_rvec)}"
         )
 
-        if not hasattr(ROOT, f"get_entry_{generated_type}_{key}_{flatlist_as_rvec}"):
-            done = compiler(
-                f"""
-            auto get_entry_{generated_type}_{key}_{flatlist_as_rvec}(ssize_t length, ssize_t* ptrs, int64_t i) {{
-                return {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
-            }}
-            """.strip()
-            )
-            assert done is True
+        rdf_list_of_ptrs.append(rdf_lookups[key].arrayptrs.ctypes.data)
 
-            rdf_array_view_entries[key] = getattr(
-                ROOT, f"get_entry_{generated_type}_{key}_{flatlist_as_rvec}"
-            )(len(layout), lookup.arrayptrs, 0)
-
-            # FIXME: replace with etry_type
-            rdf_entry_types[key] = (
-                type(rdf_array_view_entries[key]).__name__
-                if isinstance(generator, ak._v2._connect.cling.NumpyArrayGenerator)
-                else type(rdf_array_view_entries[key]).__cpp_name__
-            )
-
-        array_wrapper = ROOT.awkward.ArrayWrapper(
-            f"{key}",
-            f"{rdf_entry_types[key]}",
-            len(layout),
-            lookup.arrayptrs,
-        )
-
-        if not hasattr(
-            ROOT,
-            f"awkward::AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec}",
-        ):
-            done = compiler(
-                f"""
-namespace awkward {{
-    class AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec} : public ROOT::Detail::RDF::RColumnReaderBase {{
-    public:
-        AwkwardArrayColumnReader_{generated_type}_{key}_{flatlist_as_rvec}(ssize_t length, ssize_t* ptrs)
-            : length(length),
-              ptrs(ptrs),
-              view_(get_entry_{generated_type}_{key}_{flatlist_as_rvec}(length, ptrs, 0)) {{ }}
-
-        ssize_t length;
-        ssize_t* ptrs;
-
-    private:
-        void* GetImpl(Long64_t entry) {{
-            view_ = get_entry_{generated_type}_{key}_{flatlist_as_rvec}(length, ptrs, entry);
-            return reinterpret_cast<void*>(&view_);
-        }}
-
-        {rdf_entry_types[key]} view_;
-    }};
-}}
-    """.strip()
-            )
-            assert done is True
-
-        rdf_list_of_wrappers.append(array_wrapper)
+    hashed = hash(zip(rdf_generators.keys(), rdf_generators.values()))
+    rdf_array_data_source_class_name = f"AwkwardArrayDataSource_{hashed}"
 
     if not hasattr(ROOT, rdf_array_data_source_class_name):
         cpp_code_begin = f"""
-template <typename ...ColumnTypes>
 class {rdf_array_data_source_class_name} final : public ROOT::RDF::RDataSource {{
 private:
+    ULong64_t fSize = 0ULL;
+    std::vector<ULong64_t> fPtrs;
     unsigned int fNSlots{{0U}};
 
     const std::vector<std::string> fColNames;
     const std::vector<std::string> fColTypeNames;
     const std::map<std::string, std::string> fColTypesMap;
-    std::vector<std::pair<ssize_t, ssize_t*>> fColDataPointers;
     std::vector<std::pair<ULong64_t, ULong64_t>> fEntryRanges{{ }};
+    """
+
+        cpp_code_vectors = """
+
+    """
+        for key in rdf_entry_types:
+            cpp_code_vectors = (
+                cpp_code_vectors
+                + f"""
+    ULong64_t fPtrs_{key} = 0;
+    std::vector<{rdf_entry_types[key]}>  slots_{key};
+    std::vector<{rdf_entry_types[key]}*> addrs_{key};
+    """
+            )
+
+        cpp_code_begin = (
+            cpp_code_begin
+            + cpp_code_vectors
+            + """
 
     Record_t
-    GetColumnReadersImpl(std::string_view colName, const std::type_info &id) {{
-        return {{ }};
-    }}
+    GetColumnReadersImpl(std::string_view name, const std::type_info &id) {
+        Record_t reader;
+    """
+        )
 
-    size_t GetEntriesNumber() {{
-        return fColNames.size();
+        cpp_code_define_readers = """
+
+    """
+
+        for key in columns:
+            cpp_code_define_readers = (
+                cpp_code_define_readers
+                + f"""
+    if (name == "{key}") {{
+       for (auto i : ROOT::TSeqU(fNSlots)) {{
+          addrs_{key}[i] = &slots_{key}[i];
+          reader.emplace_back((void *)(&addrs_{key}[i]));
+       }}
+    }}
+    """
+            )
+
+        cpp_code_begin = (
+            cpp_code_begin
+            + cpp_code_define_readers
+            + f"""
+
+        return reader;
     }}
 
 public:
-    {rdf_array_data_source_class_name}(ColumnTypes&&... wrappers)
-        :
+    {rdf_array_data_source_class_name}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list)
+        : fSize(size),
+          fPtrs({{ptrs_list}}),
         """
+        )
 
-        # wrappers.name...
         cpp_code_column_names = """fColNames({""".strip()
         k = 0
         for key in columns:
@@ -174,7 +138,6 @@ public:
 
         cpp_code_column_names = cpp_code_column_names + "}),"
 
-        # wrappers.type...
         cpp_code_wrappers_type = """fColTypeNames({""".strip()
         k = 0
         for key in columns:
@@ -189,7 +152,6 @@ public:
                 cpp_code_wrappers_type = cpp_code_wrappers_type + ", "
         cpp_code_wrappers_type = cpp_code_wrappers_type + "}),"
 
-        # column type map
         cpp_code_column_types_map = """fColTypesMap({""".strip()
         k = 0
         for key in columns:
@@ -203,109 +165,132 @@ public:
             if k < len(columns):
                 cpp_code_column_types_map = cpp_code_column_types_map + ", "
 
-        cpp_code_column_types_map = cpp_code_column_types_map + "}),"
-
-        # data pointers
-        cpp_code_data_pointers = (
-            """fColDataPointers({{wrappers.length, wrappers.ptrs}...})"""
-        )
+        cpp_code_column_types_map = cpp_code_column_types_map + "})"
 
         cpp_code_begin = (
             cpp_code_begin
             + cpp_code_column_names
             + cpp_code_wrappers_type
             + cpp_code_column_types_map
-            + cpp_code_data_pointers
             + """
-    { }
+    {
+    """
+        )
+
+        cpp_code_init_vectors = """
+
+    """
+        k = 0
+        for key in columns:
+            cpp_code_init_vectors = (
+                cpp_code_init_vectors
+                + f"""
+    fPtrs_{key} = fPtrs[{k}];
+    """
+            )
+            k = k + 1
+
+        cpp_code_begin = (
+            cpp_code_begin
+            + cpp_code_init_vectors
+            + """
+    }
 
     void SetNSlots(unsigned int nSlots) {
         fNSlots = nSlots; // FIXME: always 1 slot for now
-    }
-
-    std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
-    GetColumnReaders(unsigned int slot, std::string_view name, const std::type_info & /*tid*/) {
-        const auto index = std::distance(fColNames.begin(), std::find(fColNames.begin(), fColNames.end(), name));
-        """
+    """
         )
 
-        cpp_code_readers = """
-        switch (index) {
-        """
-        indx = 0
+        cpp_code_resize_vectors = """
+
+    """
         for key in columns:
-            cpp_code_readers = (
-                cpp_code_readers
+            cpp_code_resize_vectors = (
+                cpp_code_resize_vectors
                 + f"""
-            case {indx}:
-                return std::unique_ptr<awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}_{flatlist_as_rvec}>(
-                    new awkward::AwkwardArrayColumnReader_{rdf_generated_types[key]}_{key}_{flatlist_as_rvec}(
-                        fColDataPointers[{indx}].first,
-                        fColDataPointers[{indx}].second
-                    )
-                );
-            """
+        slots_{key}.resize(fNSlots);
+        addrs_{key}.resize(fNSlots);
+    """
             )
-            indx = indx + 1
 
-        cpp_code_readers = (
-            cpp_code_readers
+        cpp_code_begin = (
+            cpp_code_begin
+            + cpp_code_resize_vectors
             + """
-        default:
-            std::string err = "The specified column name, \"" + name + "\" does not have a reader defined.";
-            throw std::runtime_error(err);
-        }
-        """
-        ).strip()
+    }
 
-        cpp_code_end = f"""
-   }}
+    void Initialise() {
+        // initialize fEntryRanges
+        const auto chunkSize = fSize / fNSlots;
+        auto start = 0UL;
+        auto end = 0UL;
+        for (auto i : ROOT::TSeqUL(fNSlots)) {
+            start = end;
+            end += chunkSize;
+            fEntryRanges.emplace_back(start, end);
+            (void)i;
+         }
+         // TODO: redistribute reminder to all slots
+         fEntryRanges.back().second += fSize % fNSlots;
+    }
 
-    void Initialise() {{
-        fEntryRanges.resize(1);
-        fEntryRanges[0].first = 0ull;
-        fEntryRanges[0].second = fColDataPointers[0].first; // FIXME: the range is defined by the first column?
-    }}
-
-    const std::vector<std::string> &GetColumnNames() const {{
+    const std::vector<std::string> &GetColumnNames() const {
         return fColNames;
-    }}
+    }
 
     bool
-    HasColumn(std::string_view colName) const {{
+    HasColumn(std::string_view colName) const {
         const auto key = std::string(colName);
         const auto endIt = fColTypesMap.end();
         return endIt != fColTypesMap.find(key);
-    }}
+    }
 
     std::string
-    GetTypeName(std::string_view colName) const {{
+    GetTypeName(std::string_view colName) const {
         const auto key = std::string(colName);
         return fColTypesMap.at(key);
-    }}
+    }
 
-    std::vector<std::pair<ULong64_t, ULong64_t>> GetEntryRanges() {{
+    std::vector<std::pair<ULong64_t, ULong64_t>> GetEntryRanges() {
         auto entryRanges(std::move(fEntryRanges)); // empty fEntryRanges
         return entryRanges;
-    }}
+    }
 
-    bool SetEntry(unsigned int slot, ULong64_t entry) {{
+    bool SetEntry(unsigned int slot, ULong64_t entry) {
+
+    """
+        )
+        cpp_code_entries = """
+
+    """
+        for key in rdf_entry_types:
+            cpp_code_entries = (
+                cpp_code_entries
+                + f"""
+        slots_{key}[slot] = awkward::{rdf_dataset_types[key]}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}))[entry];
+    """
+            )
+
+        cpp_code_end = (
+            cpp_code_entries
+            + f"""
         return true;
     }}
 }};
 
-template <typename ...ColumnTypes>
-ROOT::RDataFrame* MakeAwkwardArrayDS_{rdf_array_data_source_class_name}(ColumnTypes&... wrappers) {{
-    return new ROOT::RDataFrame(std::make_unique<{rdf_array_data_source_class_name}<ColumnTypes...>>(std::move(wrappers)...));
+ROOT::RDataFrame* MakeAwkwardArrayDS_{rdf_array_data_source_class_name}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
+    return new ROOT::RDataFrame(std::make_unique<{rdf_array_data_source_class_name}>(size, ptrs_list));
 }}
         """
+        )
 
-        cpp_code = cpp_code_begin + cpp_code_readers + cpp_code_end
+        cpp_code = cpp_code_begin + cpp_code_end
         done = compiler(cpp_code)
         assert done is True
 
     rdf = getattr(ROOT, f"MakeAwkwardArrayDS_{rdf_array_data_source_class_name}")(
-        *rdf_list_of_wrappers
+        length,
+        (rdf_list_of_ptrs),
     )
 
-    return rdf
+    return (rdf, rdf_lookups, rdf_generators)

@@ -16,6 +16,8 @@ numpy = ak.nplike.Numpy.instance()
 cache = {}
 
 
+# FIXME: flatlist_as_rvec as parameter
+# cache in one place
 def generate_headers(compiler, use_cached=True):
     key = "headers"
     if use_cached:
