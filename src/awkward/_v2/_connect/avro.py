@@ -23,6 +23,7 @@ class read_avro_py:
             f'data = np.memmap("{self.file_name}", np.uint8)\npos=0\n',
             """def decode_varint(pos, data):\n\tshift = 0\n\tresult = 0\n\twhile True:\n\t\ti = data[pos]\n\t\tpos += 1\n\t\tresult |= (i & 0x7f) << shift\n\t\tshift += 7\n\t\tif not (i & 0x80):\n\t\t\tbreak\n\treturn pos, result\ndef decode_zigzag(n):\n\treturn (n >> 1) ^ (-(n & 1))\n\n""",
             f"field = {str(self.field)}\n\n",
+            "idoparcounter = 0\n",
             f"for i in range({len(self.field)}):\n",
             "    fields = data[field[i][0]:field[i][1]]\n",
             f"    for i in range({sum(self.blocks)}):",
@@ -161,7 +162,7 @@ class read_avro_py:
             # \ncon['node{count+1}-data'].extend([114])"
             code = f"con['node{count}-offsets'].append(np.uint8(0+con['node{count}-offsets'][-1]))"
             return code
-        if dtype["type"]["type"] == "enum":
+        if dtype["type"] == "enum":
             return f"con['node{count}-index'].append(0)"
 
     def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
@@ -367,6 +368,7 @@ class read_avro_py:
 
         elif isinstance(file["type"], list):
             # print(file["name"])
+            type_idx = 0
             temp = count
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
@@ -375,46 +377,111 @@ class read_avro_py:
             _exec_code.append("\n" + "    " * ind + 'print("index :",idxx)')
             out = len(file["type"])
             if out == 2:
-                if "null" in file["type"]:
+                for elem in file["type"]:
+                    if isinstance(elem, dict) and elem["type"] == "record":
+                        flag = 1
+                    else:
+                        flag = 0
+                if "null" in file["type"] and flag == 0:
+
                     aform.append(
                         '{"class": "ByteMaskedArray","mask": "i8","content":\n'
                     )
                     var1 = f" 'node{count}-mask'"
                     dec.append(var1)
                     dec.append(": [],")
-            temp = count
-            idxx = file["type"].index("null")
-            for i in range(out):
-                if file["type"][i] == "null":
-                    _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
-                    _exec_code.append(
-                        "\n"
-                        + "    " * (ind + 1)
-                        + f"con['node{temp}-mask'].append(np.int8(False))"
+                    type_idx = 0
+                if "null" in file["type"] and flag == 1:
+                    aform.append(
+                        '{"class": "IndexedOptionArray64","index": "i64","content":\n'
                     )
-                    print({"type": file["type"][1 - idxx]})
-                    _exec_code.append(
-                        "\n"
-                        + "    " * (ind + 1)
+                    var1 = f" 'node{count}-index'"
+                    dec.append(var1)
+                    dec.append(": [],")
+                    type_idx = 1
+            if type_idx == 0:
+                temp = count
+                idxx = file["type"].index("null")
+                for i in range(out):
+                    if file["type"][i] == "null":
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append(
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"con['node{temp}-mask'].append(np.int8(False))"
+                        )
+                        print({"type": file["type"][1 - idxx]})
+                        if isinstance(file["type"][1 - idxx], dict):
+                            _exec_code.append(
+                                "\n"
+                                + "    " * (ind + 1)
+                                # change dum_dat function to return full string
+                                + self.dum_dat(file["type"][1 - idxx], temp + 1)
+                            )
+                        else:
+                            _exec_code.append(
+                                "\n"
+                                + "    " * (ind + 1)
+                                # change dum_dat function to return full string
+                                + self.dum_dat(
+                                    {"type": file["type"][1 - idxx]}, temp + 1
+                                )
+                            )
+                    else:
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append(
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"con['node{count}-mask'].append(np.int8(-1))"
+                        )
+
+                        aform, _exec_code, count, dec = self.rec_exp_json_code(
+                            {"type": file["type"][i]},
+                            _exec_code,
+                            ind + 1,
+                            aform,
+                            count + 1,
+                            dec,
+                        )
+                aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
+            if type_idx == 1:
+                temp = count
+                idxx = file["type"].index("null")
+                for i in range(out):
+                    if file["type"][i] == "null":
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append(
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"con['node{temp}-index'].append(np.int8(-1))"
+                        )
+
+                        print({"type": file["type"][1 - idxx]})
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
                         # change dum_dat function to return full string
-                        + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
-                    )
-                else:
-                    _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
-                    _exec_code.append(
-                        "\n"
-                        + "    " * (ind + 1)
-                        + f"con['node{count}-mask'].append(np.int8(True))"
-                    )
-                    aform, _exec_code, count, dec = self.rec_exp_json_code(
-                        {"type": file["type"][i]},
-                        _exec_code,
-                        ind + 1,
-                        aform,
-                        count + 1,
-                        dec,
-                    )
-            aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                        #    + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
+                        # )
+                    else:
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append(
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"con['node{count}-index'].append(idoparcounter)"
+                        )
+                        _exec_code.append(
+                            "\n" + "    " * (ind + 1) + "idoparcounter += 1"
+                        )
+                        aform, _exec_code, count, dec = self.rec_exp_json_code(
+                            {"type": file["type"][i]},
+                            _exec_code,
+                            ind + 1,
+                            aform,
+                            count + 1,
+                            dec,
+                        )
+                aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
             return aform, _exec_code, count, dec
 
         elif isinstance(file["type"], dict):
@@ -501,7 +568,7 @@ class read_avro_py:
                 "\n" + "    " * (ind + 1) + "pos, inn = decode_varint(pos,fields)"
             )
             _exec_code.append("\n" + "    " * (ind + 1) + "nbytes = decode_zigzag(inn)")
-            _exec_code.append("\n" + "    " * ind + "for i in range(out):")
+            _exec_code.append("\n" + "    " * ind + "for j in range(out):")
             aform, _exec_code, count, dec = self.rec_exp_json_code(
                 {"type": file["items"]}, _exec_code, ind + 1, aform, count + 1, dec
             )
