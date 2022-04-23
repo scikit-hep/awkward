@@ -70,7 +70,7 @@ private:
         cpp_code_vectors = """
 
     """
-        for key in rdf_entry_types:
+        for key in columns:
             cpp_code_vectors = (
                 cpp_code_vectors
                 + f"""
