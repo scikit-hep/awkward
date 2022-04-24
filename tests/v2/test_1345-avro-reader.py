@@ -271,7 +271,12 @@ def test_Unions_record_null():
 
 def test_Unions_null_X_Y():
     data = ["TWO", 5684, "ONE", None, 3154, "FOUR", 69645, "THREE"]  # int_string_null
-    raise NotImplementedError
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/int_string_null_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data
+    )
     # assert (
     #    ak.from_avro_file(
     #        file_name="tests/samples/int_string_null_test_data.avro", reader_lang="py"

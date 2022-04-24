@@ -42,7 +42,7 @@ class read_avro_py:
         if show_code:
             print("".join(self.head + self.body))  # noqa
         exec("".join(self.head + self.body), globals(), loc)
-        print("".join(self.form)[:-2])
+        # print("".join(self.form)[:-2])
         temp_json = "".join(self.form)[:-2]
         if temp_json[-1] != "}":
             if temp_json[-1] != '"':
@@ -370,38 +370,65 @@ class read_avro_py:
             # print(file["name"])
             type_idx = 0
             temp = count
+            null_present = False
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
             _exec_code.append("\n" + "    " * ind + "idxx = abs(decode_zigzag(inn))")
             _exec_code.append("\n" + "    " * ind + 'print("index :",idxx)')
             out = len(file["type"])
-            if out == 2:
-                for elem in file["type"]:
-                    if isinstance(elem, dict) and elem["type"] == "record":
-                        flag = 1
-                    else:
-                        flag = 0
-                if "null" in file["type"] and flag == 0:
+            for elem in file["type"]:
+                if isinstance(elem, dict) and elem["type"] == "record":
+                    flag = 1
+                else:
+                    flag = 0
+            if "null" in file["type"] and flag == 0 and out == 2:
 
-                    aform.append(
-                        '{"class": "ByteMaskedArray","mask": "i8","content":\n'
-                    )
-                    var1 = f" 'node{count}-mask'"
-                    dec.append(var1)
-                    dec.append(": [],")
-                    type_idx = 0
-                if "null" in file["type"] and flag == 1:
-                    aform.append(
-                        '{"class": "IndexedOptionArray64","index": "i64","content":\n'
-                    )
-                    var1 = f" 'node{count}-index'"
-                    dec.append(var1)
-                    dec.append(": [],")
-                    type_idx = 1
+                aform.append('{"class": "ByteMaskedArray","mask": "i8","content":\n')
+                var1 = f" 'node{count}-mask'"
+                dec.append(var1)
+                dec.append(": [],")
+                type_idx = 0
+            elif "null" in file["type"] and flag == 1:
+                aform.append(
+                    '{"class": "IndexedOptionArray64","index": "i64","content":\n'
+                )
+                var1 = f" 'node{count}-index'"
+                dec.append(var1)
+                dec.append(": [],")
+                type_idx = 1
+            else:
+                aform.append(
+                    '{"class": "UnionArray8_64","tags": "i8","index": "i64","contents":\n'
+                )
+                var1 = f" 'node{count}-tags'"
+                dec.append(var1)
+                dec.append(": [],")
+                var1 = f" 'node{count}-index'"
+                dec.append(var1)
+                dec.append(": [],")
+                for elem in file["type"]:
+                    if elem == "null":
+                        aform.append(
+                            '{"class": "ByteMaskedArray","mask": "i8","content":\n'
+                        )
+                        var1 = f" 'node{count+1}-mask'"
+                        dec.append(var1)
+                        dec.append(": [],")
+                        null_present = True
+                type_idx = 2
+
             if type_idx == 0:
                 temp = count
+                dum_idx = 0
                 idxx = file["type"].index("null")
+                if out == 2:
+                    dum_idx = 1 - idxx
+                elif out > 2:
+                    if idxx == 0:
+                        dum_idx = 1
+                    else:
+                        dum_idx = idxx - 1
                 for i in range(out):
                     if file["type"][i] == "null":
                         _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
@@ -410,13 +437,13 @@ class read_avro_py:
                             + "    " * (ind + 1)
                             + f"con['node{temp}-mask'].append(np.int8(False))"
                         )
-                        print({"type": file["type"][1 - idxx]})
-                        if isinstance(file["type"][1 - idxx], dict):
+                        print({"type": file["type"][dum_idx]})
+                        if isinstance(file["type"][dum_idx], dict):
                             _exec_code.append(
                                 "\n"
                                 + "    " * (ind + 1)
                                 # change dum_dat function to return full string
-                                + self.dum_dat(file["type"][1 - idxx], temp + 1)
+                                + self.dum_dat(file["type"][dum_idx], temp + 1)
                             )
                         else:
                             _exec_code.append(
@@ -424,7 +451,7 @@ class read_avro_py:
                                 + "    " * (ind + 1)
                                 # change dum_dat function to return full string
                                 + self.dum_dat(
-                                    {"type": file["type"][1 - idxx]}, temp + 1
+                                    {"type": file["type"][dum_idx]}, temp + 1
                                 )
                             )
                     else:
@@ -447,6 +474,14 @@ class read_avro_py:
             if type_idx == 1:
                 temp = count
                 idxx = file["type"].index("null")
+                if out == 2:
+                    dum_idx = 1 - idxx
+                elif out > 2:
+                    if idxx == 0:
+                        dum_idx = 1
+                    else:
+                        dum_idx = idxx - 1
+                idxx = file["type"].index("null")
                 for i in range(out):
                     if file["type"][i] == "null":
                         _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
@@ -456,7 +491,7 @@ class read_avro_py:
                             + f"con['node{temp}-index'].append(np.int8(-1))"
                         )
 
-                        print({"type": file["type"][1 - idxx]})
+                        print({"type": file["type"][dum_idx]})
                         # _exec_code.append(
                         #    "\n"
                         #    + "    " * (ind + 1)
@@ -481,6 +516,28 @@ class read_avro_py:
                             count + 1,
                             dec,
                         )
+                aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
+            if type_idx == 2:
+                temp = count
+                if null_present:
+                    idxx = file["type"].index("null")
+                # idxx = file["type"].index("null")
+                for i in range(out):
+                    _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
+                    _exec_code.append(
+                        "\n"
+                        + "    " * (ind + 1)
+                        + f"con['node{temp}-tags'].append({i})"
+                    )
+                    _exec_code.append("\n" + "    " * (ind + 1) + "idoparcounter += 1")
+                    aform, _exec_code, count, dec = self.rec_exp_json_code(
+                        {"type": file["type"][i]},
+                        _exec_code,
+                        ind + 1,
+                        aform,
+                        count + 1,
+                        dec,
+                    )
                 aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
             return aform, _exec_code, count, dec
 
