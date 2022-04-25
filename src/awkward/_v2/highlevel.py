@@ -1151,9 +1151,18 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         if self._layout.nplike.known_shape and self._layout.nplike.known_data:
             typestr = repr(str(self.type))[1:-1]
-            strwidth = max(
-                0, min(limit_cols // 2, limit_cols - len(pytype) - len(" type='...'") - 3)
-            )
+            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+                strwidth = limit_cols - (
+                    len(typestr) + len(pytype) + len(" type=''") + 3
+                )
+            else:
+                strwidth = max(
+                    0,
+                    min(
+                        limit_cols // 2,
+                        limit_cols - len(pytype) - len(" type='...'") - 3,
+                    ),
+                )
             valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, strwidth)
 
         else:
@@ -1815,9 +1824,18 @@ class Record(NDArrayOperatorsMixin):
             and self._layout.array.nplike.known_data
         ):
             typestr = repr(str(self.type))[1:-1]
-            strwidth = max(
-                0, min(limit_cols // 2, limit_cols - len(pytype) - len(" type='...'") - 3)
-            )
+            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+                strwidth = limit_cols - (
+                    len(typestr) + len(pytype) + len(" type=''") + 3
+                )
+            else:
+                strwidth = max(
+                    0,
+                    min(
+                        limit_cols // 2,
+                        limit_cols - len(pytype) - len(" type='...'") - 3,
+                    ),
+                )
             valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, strwidth)
 
         else:
