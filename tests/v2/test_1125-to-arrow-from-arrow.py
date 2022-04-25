@@ -239,21 +239,7 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
-
-    # https://issues.apache.org/jira/browse/ARROW-14522
-    if extensionarray:
-        paarray = akarray.to_arrow(extensionarray=extensionarray, emptyarray_to="f8")
-        akarray2 = ak._v2.from_arrow(paarray, highlevel=False)
-        assert to_list(akarray2) == to_list(akarray)
-
-        filename = os.path.join(tmp_path, "whatever.parquet")
-        pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
-        table = pyarrow_parquet.read_table(filename)
-        akarray4 = ak._v2.from_arrow(table[0].chunks[0], highlevel=False)
-        assert to_list(akarray4) == to_list(akarray)
-
-    else:
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])
