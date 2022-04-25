@@ -25,7 +25,7 @@ def through_arrow(
         bytestring_to32=bytestring_to32,
         categorical_as_dictionary=categorical_as_dictionary,
     )
-    array_form = ak._v2.from_arrow(arrow_table, generate_bitmasks=True).layout.form
+    array_form = ak._v2.from_arrow(arrow_table).layout.form
     return arrow_table.schema, array_form
 
 
@@ -51,9 +51,7 @@ def through_parquet(
         filename,
     )
     parquet_file = pyarrow_parquet.ParquetFile(filename)
-    array_form = ak._v2.from_arrow(
-        parquet_file.read_row_groups([0]), generate_bitmasks=True
-    ).layout.form
+    array_form = ak._v2.from_arrow(parquet_file.read_row_groups([0])).layout.form
     return parquet_file.schema_arrow, array_form
 
 

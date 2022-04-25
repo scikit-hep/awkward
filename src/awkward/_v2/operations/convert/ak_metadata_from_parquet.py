@@ -16,18 +16,20 @@ ParquetMetadata = collections.namedtuple(
 def metadata_from_parquet(
     path,
     storage_options=None,
-    max_gap=64_000,
-    max_block=256_000_000,
-    footer_sample_size=1_000_000,
 ):
     """
+    This function differs from ak.from_parquet._metadata as follows:
+
+      * this function will always use a _metadata file, if present
+      * if there is no _metadata, the schema comes from _common_metadata or the first
+        data file
+      * the total number of rows is always known  # TODO: is this true?
+
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
-            May contain glob patterns.
-        storage_options: Passed to `fsspec.parquet.open_parquet_file`.
-        max_gap (int): Passed to `fsspec.parquet.open_parquet_file`.
-        max_block (int): Passed to `fsspec.parquet.open_parquet_file`.
-        footer_sample_size (int): Passed to `fsspec.parquet.open_parquet_file`.
+            May contain glob patterns. A list of paths is also allowed, but they
+            must be data files, not directories.
+        storage_options: Passed to `fsspec`.
 
     Returns a named tuple containing
 
@@ -47,26 +49,17 @@ def metadata_from_parquet(
         dict(
             path=path,
             storage_options=storage_options,
-            max_gap=max_gap,
-            max_block=max_block,
-            footer_sample_size=footer_sample_size,
         ),
     ):
         return _impl(
             path,
             storage_options,
-            max_gap,
-            max_block,
-            footer_sample_size,
         )
 
 
 def _impl(
     path,
     storage_options,
-    max_gap,
-    max_block,
-    footer_sample_size,
 ):
     import awkward._v2._connect.pyarrow  # noqa: F401
 
@@ -87,15 +80,8 @@ def _impl(
         path, fs, paths
     )
 
-    with fsspec.parquet.open_parquet_file(
+    with fs.open(
         path_for_metadata,
-        fs=fs,
-        engine="pyarrow",
-        row_groups=[],
-        storage_options=storage_options,
-        max_gap=max_gap,
-        max_block=max_block,
-        footer_sample_size=footer_sample_size,
     ) as file_for_metadata:
         parquetfile_for_metadata = pyarrow_parquet.ParquetFile(file_for_metadata)
 

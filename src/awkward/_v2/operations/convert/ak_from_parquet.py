@@ -70,9 +70,6 @@ def from_parquet(
             storage_options,
             row_groups,
             columns,
-            max_gap,
-            max_block,
-            footer_sample_size,
         )
         return _load(
             actual_paths,
@@ -90,9 +87,17 @@ def from_parquet(
         )
 
 
-def _metadata(
-    path, storage_options, row_groups, columns, max_gap, max_block, footer_sample_size
-):
+def _metadata(path, storage_options, row_groups, columns, ignore_metadata=False):
+    # Test cases
+    #  - list of data files, scanned
+    #  - list of data files, not scanned
+    #  - list of directories -> exception
+    #  - directory with _metadata, used
+    #  - directory with _metadata, not used, files scanned
+    #  - directory with _metadata, not used, files not scanned
+    #  - directory without _metadata but with _common_metadata
+    #  - directory with only data files, scanned
+    #  - directory with only data files, not scanned
     import pyarrow.parquet as pyarrow_parquet
     import fsspec.parquet
 
@@ -111,15 +116,8 @@ def _metadata(
     subform = None
     subrg = [None] * len(all_paths)
     actual_paths = all_paths
-    with fsspec.parquet.open_parquet_file(
+    with fs.open(
         path_for_metadata,
-        fs=fs,
-        engine="pyarrow",
-        row_groups=[],
-        storage_options=storage_options,
-        max_gap=max_gap,
-        max_block=max_block,
-        footer_sample_size=footer_sample_size,
     ) as file_for_metadata:
         parquetfile_for_metadata = pyarrow_parquet.ParquetFile(file_for_metadata)
 
@@ -157,9 +155,7 @@ def _metadata(
                         raise ak._v2._util.error(
                             LookupError(
                                 f"""path from metadata is {unsplit_path!r} but more
-                                than one path matches:
-
-    {eoln.join(all_paths)}"""
+                                than one path matches:\n\n{eoln.join(all_paths)}"""
                             )
                         )
 
@@ -174,9 +170,7 @@ def _metadata(
                         raise ak._v2._util.error(
                             LookupError(
                                 f"""path {'/'.join(split_path)!r} from metadata not found
-                                in path matches:
-
-    {eoln.join(all_paths)}"""
+                                in path matches:\n\n{eoln.join(all_paths)}"""
                             )
                         )
 
@@ -272,6 +266,7 @@ def _read_parquet_file(
         else:
             arrow_table = parquetfile.read_row_groups(row_groups, parquet_columns)
 
+    # TODO: apply metadata on convert
     return ak._v2._connect.pyarrow.handle_arrow(
         arrow_table,
         generate_bitmasks=generate_bitmasks,
@@ -288,17 +283,17 @@ def _all_and_metadata_paths(path, fs, paths):
     all_paths = []
     for x in paths:
         if fs.isfile(x):
-            is_meta = x.split("/")[-1] == "_metadata"
-            is_comm = x.split("/")[-1] == "_common_metadata"
+            is_meta = x.rsplit("/", 1)[-1] == "_metadata"
+            is_comm = x.rsplit("/", 1)[-1] == "_common_metadata"
             all_paths.append((x, is_meta, is_comm))
         elif fs.isdir(x):
-            for prefix, _, files in fs.walk(x):
-                for f in files:
-                    is_meta = f == "_metadata"
-                    is_comm = f == "_common_metadata"
-                    if f.endswith((".parq", ".parquet")) or is_meta or is_comm:
-                        if fs.isfile("/".join((prefix, f))):
-                            all_paths.append(("/".join((prefix, f)), is_meta, is_comm))
+            for fdata in fs.find(x):
+                f = fdata["name"]
+                is_meta = f == "_metadata"
+                is_comm = f == "_common_metadata"
+                if f.endswith((".parq", ".parquet")) or is_meta or is_comm:
+                    if fdata["type"] == "file":
+                        all_paths.append(f, is_meta, is_comm)
 
     path_for_metadata = [x for x, is_meta, is_comm in all_paths if is_meta]
     if len(path_for_metadata) != 0:
