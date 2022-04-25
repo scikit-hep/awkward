@@ -45,7 +45,7 @@ def to_parquet(
 
     row_group = 0
     array = next(iterator)
-    layout = ak._v2.operations.convert.ak_to_layout(
+    layout = ak._v2.operations.convert.ak_to_layout.to_layout(
         array, allow_record=False, allow_other=False
     )
     table = ak._v2.operations.convert.ak_to_arrow_table._impl(
@@ -106,7 +106,7 @@ def to_parquet(
                     array = next(iterator)
                 except StopIteration:
                     break
-                layout = ak._v2.operations.convert.ak_to_layout(
+                layout = ak._v2.operations.convert.ak_to_layout.to_layout(
                     array, allow_record=False, allow_other=False
                 )
                 table = ak._v2.operations.convert.ak_to_arrow_table._impl(
