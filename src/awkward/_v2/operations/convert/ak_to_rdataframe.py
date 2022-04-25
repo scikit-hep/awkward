@@ -34,9 +34,7 @@ def _impl(
     # FIXME: check if there are any arrays or the arrays lengths are equal
     import awkward._v2._connect.rdataframe.to_rdataframe  # noqa: F401
 
-    rdf = ak._v2._connect.rdataframe.to_rdataframe.to_rdataframe(
+    return ak._v2._connect.rdataframe.to_rdataframe.to_rdataframe(
         arrays,
         flatlist_as_rvec=flatlist_as_rvec,
     )
-
-    return rdf[0]

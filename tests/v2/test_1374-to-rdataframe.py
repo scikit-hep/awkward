@@ -244,8 +244,8 @@ def test_two_columns_as_rvecs():
     data_frame.Foreach(f_x, ["x"])
     data_frame.Foreach(f_y, ["y"])
 
-    h = data_frame.Histo1D("x")
-    h.Draw()
+    # h = data_frame.Histo1D("x")
+    # h.Draw()
 
 
 def test_two_columns_as_vecs():
@@ -315,9 +315,17 @@ def test_jims_example2():
 
 
 def test_empty_array():
-    array = ak._v2.Array([[], [], []])
+    array = ak._v2.Array([])
     rdf = ak._v2.to_rdataframe({"empty_array": array})
     print(rdf.GetColumnNames())
     print(rdf.GetColumnType("empty_array"))
-    # rdf.Define("y", "empty_array")
+    rdf.Display().Print()
+
+
+def test_empty_list_array():
+    array = ak._v2.Array([[], [], []])
+    rdf = ak._v2.to_rdataframe({"empty_list_array": array})
+    print(rdf.GetColumnNames())
+    print(rdf.GetColumnType("empty_list_array"))
+    # FIXME: this fails
     # rdf.Display().Print()
