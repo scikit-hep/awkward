@@ -182,7 +182,7 @@ def to_parquet(
             **parquet_extra_options,
         ) as writer:
             while True:
-                writer.write_table(table)  # , row_group_size=row_group_size)
+                writer.write_table(table, row_group_size=row_group_size)
                 if hook_after_write is not None:
                     hook_after_write(
                         row_group=row_group,
