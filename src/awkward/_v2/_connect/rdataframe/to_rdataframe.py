@@ -33,11 +33,11 @@ def to_rdataframe(columns, flatlist_as_rvec):
         rdf_generators[key].generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
         entry_types[key] = (
-            rdf_generators[key].entry_type(flatlist_as_rvec=flatlist_as_rvec)
+            rdf_generators[key].entry_type()
             if isinstance(
                 rdf_generators[key], ak._v2._connect.cling.NumpyArrayGenerator
             )
-            else f"awkward::{rdf_generators[key].entry_type(flatlist_as_rvec=flatlist_as_rvec)}"
+            else f"awkward::{rdf_generators[key].entry_type()}"
         )
 
         data_ptrs_list.append(rdf_lookups[key].arrayptrs.ctypes.data)
@@ -259,7 +259,7 @@ public:
             cpp_code_entries = (
                 cpp_code_entries
                 + f"""
-        slots_{key}[slot] = awkward::{rdf_generators[key].class_type((flatlist_as_rvec,))}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}))[entry];
+        slots_{key}[slot] = awkward::{rdf_generators[key].class_type()}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}))[entry];
     """
             )
 

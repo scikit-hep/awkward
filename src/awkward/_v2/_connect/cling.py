@@ -16,8 +16,7 @@ numpy = ak.nplike.Numpy.instance()
 cache = {}
 
 
-# FIXME: flatlist_as_rvec as parameter
-# cache in one place
+# FIXME: cache in one place
 def generate_headers(compiler, use_cached=True):
     key = "headers"
     if use_cached:
@@ -488,47 +487,45 @@ class Generator:
       {"" if len(params) == 0 else "".join(x for x in params)}return "null";
     }}
 
-    bool operator==({self.class_type(key[1:])} other) const noexcept {{
+    bool operator==({self.class_type()} other) const noexcept {{
       return start_ == other.start_  &&
              stop_ == other.stop_  &&
              which_ == other.which_  &&
              ptrs_ == other.ptrs_;
     }}
 
-    bool operator!=({self.class_type(key[1:])} other) const noexcept {{
+    bool operator!=({self.class_type()} other) const noexcept {{
       return start_ != other.start_  ||
              stop_ != other.stop_  ||
              which_ != other.which_  ||
              ptrs_ != other.ptrs_;
     }}
 
-    Iterator<{self.class_type(key[1:])}, value_type> begin() const noexcept {{
-      return Iterator<{self.class_type(key[1:])}, value_type>(start_, stop_, which_, ptrs_);
+    Iterator<{self.class_type()}, value_type> begin() const noexcept {{
+      return Iterator<{self.class_type()}, value_type>(start_, stop_, which_, ptrs_);
     }}
 
-    Iterator<{self.class_type(key[1:])}, value_type> end() const noexcept {{
-      return Iterator<{self.class_type(key[1:])}, value_type>(stop_, stop_, which_, ptrs_);
+    Iterator<{self.class_type()}, value_type> end() const noexcept {{
+      return Iterator<{self.class_type()}, value_type>(stop_, stop_, which_, ptrs_);
     }}
 
-    RIterator<{self.class_type(key[1:])}, value_type> rbegin() const noexcept {{
-      return RIterator<{self.class_type(key[1:])}, value_type>(stop_ - 1, stop_, which_, ptrs_);
+    RIterator<{self.class_type()}, value_type> rbegin() const noexcept {{
+      return RIterator<{self.class_type()}, value_type>(stop_ - 1, stop_, which_, ptrs_);
     }}
 
-    RIterator<{self.class_type(key[1:])}, value_type> rend() const noexcept {{
-      return RIterator<{self.class_type(key[1:])}, value_type>(start_ - 1, stop_, which_, ptrs_);
+    RIterator<{self.class_type()}, value_type> rend() const noexcept {{
+      return RIterator<{self.class_type()}, value_type>(start_ - 1, stop_, which_, ptrs_);
     }}
         """.strip()
 
-    def dataset(self, length="length", ptrs="ptrs", flatlist_as_rvec=False):
-        key = (self, flatlist_as_rvec)
-        return f"awkward::{self.class_type(key[1:])}(0, {length}, 0, reinterpret_cast<ssize_t*>({ptrs}))"
+    def dataset(self, length="length", ptrs="ptrs"):
+        return f"awkward::{self.class_type()}(0, {length}, 0, reinterpret_cast<ssize_t*>({ptrs}))"
 
-    def entry_type(self, flatlist_as_rvec=False):
-        key = (self, flatlist_as_rvec)
-        return self.value_type(key[1:])
+    def entry_type(self):
+        return self.value_type()
 
-    def entry(self, length="length", ptrs="ptrs", entry="i", flatlist_as_rvec=False):
-        return f"{self.dataset(length=length, ptrs=ptrs, flatlist_as_rvec=flatlist_as_rvec)}[{entry}]"
+    def entry(self, length="length", ptrs="ptrs", entry="i"):
+        return f"{self.dataset(length=length, ptrs=ptrs)}[{entry}]"
 
 
 class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
@@ -538,10 +535,11 @@ class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
             form.primitive, cls.form_from_identifier(form), form.parameters
         )
 
-    def __init__(self, primitive, identifier, parameters):
+    def __init__(self, primitive, identifier, parameters, flatlist_as_rvec=False):
         self.primitive = primitive
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -561,10 +559,18 @@ class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
-        return f"NumpyArray_{self.primitive}_{self.class_type_suffix((self,) + key)}"
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
 
-    def value_type(self, key):
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
+        return f"NumpyArray_{self.primitive}_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+
+    def value_type(self):
         return {
             "bool": "bool",
             "int8": "int8_t",
@@ -584,24 +590,25 @@ class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
         }[self.primitive]
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
-      return reinterpret_cast<{self.value_type(key[1:])}*>(ptrs_[which_ + {self.ARRAY}])[start_ + at];
+      return reinterpret_cast<{self.value_type()}*>(ptrs_[which_ + {self.ARRAY}])[start_ + at];
     }}
   }};
 }}
@@ -620,11 +627,12 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
             form.parameters,
         )
 
-    def __init__(self, content, size, identifier, parameters):
+    def __init__(self, content, size, identifier, parameters, flatlist_as_rvec=False):
         self.content = content
         self.size = size
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -647,6 +655,14 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
         )
 
     @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
+
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    @property
     def is_string(self):
         return isinstance(self.parameters, dict) and self.parameters.get(
             "__array__"
@@ -655,27 +671,30 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
     def is_flatlist(self):
         return isinstance(self.content, NumpyArrayGenerator)
 
-    def class_type(self, key):
-        return f"RegularArray_{self.class_type_suffix((self,) + key)}"
+    def class_type(self):
+        return (
+            f"RegularArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        )
 
-    def value_type(self, key):
-        return self.content.class_type(key)
+    def value_type(self):
+        return self.content.class_type()
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
-        if not self.is_string and not (flatlist_as_rvec and self.is_flatlist):
-            self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        if not self.is_string and not (self.flatlist_as_rvec and self.is_flatlist):
+            self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             if self.is_string:
                 out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef std::string value_type;
 
@@ -691,16 +710,16 @@ namespace awkward {{
   }};
 }}
 """.strip()
-            elif flatlist_as_rvec and self.is_flatlist:
-                nested_type = self.content.value_type(key[1:])
+            elif self.flatlist_as_rvec and self.is_flatlist:
+                nested_type = self.content.value_type()
                 value_type = f"ROOT::RVec<{nested_type}>"
                 out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {value_type} value_type;
 
@@ -719,13 +738,13 @@ namespace awkward {{
             else:
                 out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
@@ -756,7 +775,9 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
             form.parameters,
         )
 
-    def __init__(self, index_type, content, identifier, parameters):
+    def __init__(
+        self, index_type, content, identifier, parameters, flatlist_as_rvec=False
+    ):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "u32":
@@ -768,6 +789,7 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -790,6 +812,14 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         )
 
     @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
+
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    @property
     def is_string(self):
         return isinstance(self.parameters, dict) and self.parameters.get(
             "__array__"
@@ -799,27 +829,28 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
     def is_flatlist(self):
         return isinstance(self.content, NumpyArrayGenerator)
 
-    def class_type(self, key):
-        return f"ListArray_{self.class_type_suffix((self,) + key)}"
+    def class_type(self):
+        return f"ListArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
 
-    def value_type(self, key):
-        return self.content.class_type(key)
+    def value_type(self):
+        return self.content.class_type()
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
-        if not self.is_string and not (flatlist_as_rvec and self.is_flatlist):
-            self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        if not self.is_string and not (self.flatlist_as_rvec and self.is_flatlist):
+            self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             if self.is_string:
                 out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef std::string value_type;
 
@@ -835,16 +866,16 @@ namespace awkward {{
   }};
 }}
 """.strip()
-            elif flatlist_as_rvec and self.is_flatlist:
-                nested_type = self.content.value_type(key[1:])
+            elif self.flatlist_as_rvec and self.is_flatlist:
+                nested_type = self.content.value_type()
                 value_type = f"ROOT::RVec<{nested_type}>"
                 out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
     typedef {value_type} value_type;
 
@@ -863,13 +894,13 @@ namespace awkward {{
             else:
                 out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
@@ -895,7 +926,9 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
             form.parameters,
         )
 
-    def __init__(self, index_type, content, identifier, parameters):
+    def __init__(
+        self, index_type, content, identifier, parameters, flatlist_as_rvec=False
+    ):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "u32":
@@ -907,6 +940,7 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -928,33 +962,44 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
-        return f"IndexedArray_{self.class_type_suffix((self,) + key)}"
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
 
-    def value_type(self, key):
-        return self.content.value_type(key)
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
+        return (
+            f"IndexedArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        )
+
+    def value_type(self):
+        return self.content.value_type()
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
-      return {self.content.class_type(key[1:])}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0];
+      return {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0];
     }}
   }};
 }}
@@ -973,7 +1018,9 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
             form.parameters,
         )
 
-    def __init__(self, index_type, content, identifier, parameters):
+    def __init__(
+        self, index_type, content, identifier, parameters, flatlist_as_rvec=False
+    ):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "i64":
@@ -983,6 +1030,7 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1004,34 +1052,43 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
-        return f"IndexedOptionArray_{self.class_type_suffix((self,) + key)}"
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
 
-    def value_type(self, key):
-        return f"std::optional<{self.content.value_type(key)}>"
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
+        return f"IndexedOptionArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+
+    def value_type(self):
+        return f"std::optional<{self.content.value_type()}>"
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
       if (index >= 0) {{
-        return value_type{{ {self.content.class_type(key[1:])}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0] }};
+        return value_type{{ {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_)[0] }};
       }}
       else {{
         return std::nullopt;
@@ -1054,11 +1111,14 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
             form.parameters,
         )
 
-    def __init__(self, content, valid_when, identifier, parameters):
+    def __init__(
+        self, content, valid_when, identifier, parameters, flatlist_as_rvec=False
+    ):
         self.content = content
         self.valid_when = valid_when
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1080,34 +1140,43 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
-        return f"ByteMaskedArray_{self.class_type_suffix((self,) + key)}"
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
 
-    def value_type(self, key):
-        return f"std::optional<{self.content.value_type(key)}>"
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
+        return f"ByteMaskedArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+
+    def value_type(self):
+        return f"std::optional<{self.content.value_type()}>"
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
       int8_t mask = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.MASK}])[start_ + at];
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type(key[1:])}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
+        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -1131,12 +1200,21 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
             form.parameters,
         )
 
-    def __init__(self, content, valid_when, lsb_order, identifier, parameters):
+    def __init__(
+        self,
+        content,
+        valid_when,
+        lsb_order,
+        identifier,
+        parameters,
+        flatlist_as_rvec=False,
+    ):
         self.content = content
         self.valid_when = valid_when
         self.lsb_order = lsb_order
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1159,27 +1237,36 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
-        return f"BitMaskedArray_{self.class_type_suffix((self,) + key)}"
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
 
-    def value_type(self, key):
-        return f"std::optional<{self.content.value_type(key)}>"
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
+        return f"BitMaskedArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+
+    def value_type(self):
+        return f"std::optional<{self.content.value_type()}>"
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
@@ -1191,7 +1278,7 @@ namespace awkward {{
       uint8_t mask = {"(byte >> shift) & 1" if self.lsb_order else "(byte << shift) & 128"};
 
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type(key[1:])}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
+        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -1211,10 +1298,11 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
             togenerator(form.content), cls.form_from_identifier(form), form.parameters
         )
 
-    def __init__(self, content, identifier, parameters):
+    def __init__(self, content, identifier, parameters, flatlist_as_rvec=False):
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1229,32 +1317,41 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
-        return f"UnmaskedArray_{self.class_type_suffix((self,) + key)}"
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
 
-    def value_type(self, key):
-        return f"std::optional<{self.content.value_type(key)}>"
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
+        return f"UnmaskedArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+
+    def value_type(self):
+        return f"std::optional<{self.content.value_type()}>"
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, flatlist_as_rvec)
+        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
-      return value_type{{ {self.content.class_type(key[1:])}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
+      return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_)[at] }};
     }}
   }};
 }}
@@ -1264,10 +1361,11 @@ namespace awkward {{
 
 
 class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
-    def __init__(self, contents, fields, parameters):
+    def __init__(self, contents, fields, parameters, flatlist_as_rvec=False):
         self.contents = tuple(contents)
         self.fields = None if fields is None else tuple(fields)
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1287,7 +1385,15 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
+
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
         if (
             isinstance(self.parameters, dict)
             and self.parameters.get("__record__") is not None
@@ -1295,14 +1401,15 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
             insert = "_" + self.parameters["__record__"]
         else:
             insert = ""
-        return f"Record{insert}_{self.class_type_suffix((self,) + key)}"
+        return f"Record{insert}_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_RecordView(compiler, use_cached=use_cached)
         for content in self.contents:
-            content.generate(compiler, use_cached, flatlist_as_rvec)
+            content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             params = [
                 f"if (parameter == {json.dumps(name)}) return {json.dumps(json.dumps(value))};\n      "
@@ -1318,8 +1425,8 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
                 if re.match("^[A-Za-z_][A-Za-z_0-9]*$", fieldname) is not None:
                     getfields.append(
                         f"""
-    {content.value_type(key[1:])} {fieldname}() const noexcept {{
-      return {content.class_type(key[1:])}(at_, at_ + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_)[0];
+    {content.value_type()} {fieldname}() const noexcept {{
+      return {content.class_type()}(at_, at_ + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_)[0];
     }}
 """.strip()
                     )
@@ -1327,11 +1434,11 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
             eoln = "\n    "
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public RecordView {{
+  class {self.class_type()}: public RecordView {{
   public:
-    {self.class_type(key[1:])}(ssize_t at, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t at, ssize_t which, ssize_t* ptrs)
       : RecordView(at, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : RecordView(0, 0, 0) {{ }}
+    {self.class_type()}() : RecordView(0, 0, 0) {{ }}
 
     const std::string parameter(const std::string& parameter) const noexcept {{
       {"" if len(params) == 0 else "".join(x for x in params)}return "null";
@@ -1355,11 +1462,14 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
             form.parameters,
         )
 
-    def __init__(self, contents, fields, identifier, parameters):
+    def __init__(
+        self, contents, fields, identifier, parameters, flatlist_as_rvec=False
+    ):
         self.contents = tuple(contents)
         self.fields = None if fields is None else tuple(fields)
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
         self.record = RecordGenerator(contents, fields, parameters)
 
@@ -1383,7 +1493,15 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
+
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
         if (
             isinstance(self.parameters, dict)
             and self.parameters.get("__record__") is not None
@@ -1391,26 +1509,27 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
             insert = "_" + self.parameters["__record__"]
         else:
             insert = ""
-        return f"RecordArray{insert}_{self.class_type_suffix((self,) + key)}"
+        return f"RecordArray{insert}_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
 
-    def value_type(self, key):
-        return self.record.class_type(key)
+    def value_type(self):
+        return self.record.class_type()
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.record.generate(compiler, use_cached, flatlist_as_rvec)
+        self.record.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
@@ -1434,7 +1553,9 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
             form.parameters,
         )
 
-    def __init__(self, index_type, contents, identifier, parameters):
+    def __init__(
+        self, index_type, contents, identifier, parameters, flatlist_as_rvec=False
+    ):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "u32":
@@ -1446,6 +1567,7 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         self.contents = tuple(contents)
         self.identifier = identifier
         self.parameters = parameters
+        self.flatlist_as_rvec = flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1467,38 +1589,49 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
             and self.parameters == other.parameters
         )
 
-    def class_type(self, key):
-        return f"UnionArray_{self.class_type_suffix((self,) + key)}"
+    @property
+    def flatlist_as_rvec(self):
+        return self._flatlist_as_rvec
 
-    def value_type(self, key):
-        return f"std::variant<{','.join(x.value_type(key) for x in self.contents)}>"
+    @flatlist_as_rvec.setter
+    def flatlist_as_rvec(self, value):
+        self._flatlist_as_rvec = value
+
+    def class_type(self):
+        return (
+            f"UnionArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        )
+
+    def value_type(self):
+        return f"std::variant<{','.join(x.value_type() for x in self.contents)}>"
 
     def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
+        self.flatlist_as_rvec = flatlist_as_rvec
         generate_ArrayView(compiler, use_cached=use_cached)
         for content in self.contents:
-            content.generate(compiler, use_cached, flatlist_as_rvec)
+            content.generate(compiler, use_cached, self.flatlist_as_rvec)
 
-        key = (self, flatlist_as_rvec)
+        key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             cases = []
             for i, content in enumerate(self.contents):
                 cases.append(
                     f"""
         case {i}:
-          return value_type{{ {content.class_type(key[1:])}(index, index + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_)[0] }};
+          return value_type{{ {content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_)[0] }};
 """.strip()
                 )
 
             eoln = "\n        "
             out = f"""
 namespace awkward {{
-  class {self.class_type(key[1:])}: public ArrayView {{
+  class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type(key[1:])}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
       : ArrayView(start, stop, which, ptrs) {{ }}
-    {self.class_type(key[1:])}() : ArrayView(0, 0, 0, 0) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0) {{ }}
 
-    typedef {self.value_type(key[1:])} value_type;
+    typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
@@ -1508,7 +1641,7 @@ namespace awkward {{
       switch (tag) {{
         {eoln.join(cases)}
         default:
-          return value_type{{ {self.contents[0].class_type(key[1:])}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_)[0] }};
+          return value_type{{ {self.contents[0].class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_)[0] }};
       }}
     }}
   }};

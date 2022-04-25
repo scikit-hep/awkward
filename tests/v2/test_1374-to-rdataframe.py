@@ -29,11 +29,11 @@ def test_wonky():
     lookup2 = ak._v2._lookup.Lookup(example2.layout)
     generator2.generate(ROOT.gInterpreter.Declare, flatlist_as_rvec=True)
 
-    dataset_type_one = generator1.class_type((True,))
-    entry_type_one = generator1.entry_type(flatlist_as_rvec=True)
+    dataset_type_one = generator1.class_type()
+    entry_type_one = generator1.entry_type()
     print("entry_type_one", entry_type_one)
-    dataset_type_two = generator2.class_type((True,))
-    entry_type_two = generator2.entry_type(flatlist_as_rvec=True)
+    dataset_type_two = generator2.class_type()
+    entry_type_two = generator2.entry_type()
     print("entry_type_two", entry_type_two)
 
     assert len(example1) == len(example2)
