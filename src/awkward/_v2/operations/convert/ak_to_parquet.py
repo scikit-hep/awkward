@@ -19,8 +19,6 @@ def to_parquet(
     count_nulls=True,
     compression="zstd",
     compression_level=None,
-    compression_categorical=True,
-    compression_floating=True,
     row_group_size=64 * 1024 * 1024,
     data_page_size=None,
     parquet_flavor=None,
@@ -122,29 +120,29 @@ def to_parquet(
             replacement.update({x: value for x in parquet_columns(specifier)})
         compression_level = replacement
 
-    if compression_categorical is True:
-        compression_categorical = parquet_columns(None, only="string")
-    elif compression_categorical is False or compression_categorical is None:
-        compression_categorical = False
-    elif isinstance(compression_categorical, Mapping):
-        replacement = {}
-        for specifier, value in compression_categorical.items():
-            replacement.update(
-                {x: value for x in parquet_columns(specifier, only="string")}
-            )
-        compression_categorical = [x for x, value in replacement.items() if value]
+    # if compression_categorical is True:
+    #     compression_categorical = parquet_columns(None, only="string")
+    # elif compression_categorical is False or compression_categorical is None:
+    #     compression_categorical = False
+    # elif isinstance(compression_categorical, Mapping):
+    #     replacement = {}
+    #     for specifier, value in compression_categorical.items():
+    #         replacement.update(
+    #             {x: value for x in parquet_columns(specifier, only="string")}
+    #         )
+    #     compression_categorical = [x for x, value in replacement.items() if value]
 
-    if compression_floating is True:
-        compression_floating = parquet_columns(None, only="floating")
-    elif compression_floating is False or compression_floating is None:
-        compression_floating = False
-    elif isinstance(compression_floating, Mapping):
-        replacement = {}
-        for specifier, value in compression_floating.items():
-            replacement.update(
-                {x: value for x in parquet_columns(specifier, only="floating")}
-            )
-        compression_floating = [x for x, value in replacement.items() if value]
+    # if compression_floating is True:
+    #     compression_floating = parquet_columns(None, only="floating")
+    # elif compression_floating is False or compression_floating is None:
+    #     compression_floating = False
+    # elif isinstance(compression_floating, Mapping):
+    #     replacement = {}
+    #     for specifier, value in compression_floating.items():
+    #         replacement.update(
+    #             {x: value for x in parquet_columns(specifier, only="floating")}
+    #         )
+    #     compression_floating = [x for x, value in replacement.items() if value]
 
     if parquet_metadata_statistics is True:
         parquet_metadata_statistics = True
@@ -171,12 +169,12 @@ def to_parquet(
             filesystem=file.fs,
             flavor=parquet_flavor,
             version=parquet_version,
-            use_dictionary=compression_categorical,
+            # use_dictionary=compression_categorical,
             compression=compression,
             write_statistics=parquet_metadata_statistics,
             use_deprecated_int96_timestamps=parquet_old_int96_timestamps,
             compression_level=compression_level,
-            use_byte_stream_split=compression_floating,
+            # use_byte_stream_split=compression_floating,
             data_page_version=parquet_page_version,
             use_compliant_nested_type=parquet_compliant_nested,
             data_page_size=data_page_size,
