@@ -31,10 +31,8 @@ def test_wonky():
 
     dataset_type_one = generator1.class_type()
     entry_type_one = generator1.entry_type()
-    print("entry_type_one", entry_type_one)
     dataset_type_two = generator2.class_type()
     entry_type_two = generator2.entry_type()
-    print("entry_type_two", entry_type_two)
 
     assert len(example1) == len(example2)
 
@@ -319,6 +317,7 @@ def test_jims_example2():
 def test_empty_array():
     array = ak._v2.Array([[], [], []])
     rdf = ak._v2.to_rdataframe({"empty_array": array})
-    list(rdf.GetColumnNames())
+    print(rdf.GetColumnNames())
+    print(rdf.GetColumnType("empty_array"))
     # rdf.Define("y", "empty_array")
     # rdf.Display().Print()
