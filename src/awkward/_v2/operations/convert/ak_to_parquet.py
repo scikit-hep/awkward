@@ -27,7 +27,7 @@ def to_parquet(
     parquet_metadata_statistics=True,
     parquet_coerce_timestamps=None,
     parquet_old_int96_timestamps=None,
-    parquet_compliant_nested=True,
+    parquet_compliant_nested=False,
     parquet_extra_options=None,
     hook_after_write=None,
 ):

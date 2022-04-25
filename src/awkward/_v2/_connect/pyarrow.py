@@ -27,10 +27,10 @@ or
 
 else:
     if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
-        "6.0.0"
+        "7.0.0"
     ):
         pyarrow = None
-        error_message = "pyarrow 6.0.0 or later required for {0}"
+        error_message = "pyarrow 7.0.0 or later required for {0}"
 
 
 def import_pyarrow(name):
@@ -904,6 +904,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         buffers = obj.buffers()
 
         awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(obj.type)
+
         out = popbuffers(
             obj, awkwardarrow_type, storage_type, buffers, generate_bitmasks
         )
