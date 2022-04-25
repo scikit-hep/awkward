@@ -21,11 +21,9 @@ def to_rdataframe(columns, flatlist_as_rvec):
         if len(columns[key]) != length:
             ak._v2._util.error(ValueError("all arrays must be equal length"))
 
-    rdf_list_of_ptrs = []
-    rdf_generated_types = {}
+    data_ptrs_list = []
     rdf_generators = {}
-    rdf_entry_types = {}
-    rdf_dataset_types = {}
+    entry_types = {}
     rdf_lookups = {}
 
     for key in columns:
@@ -34,13 +32,7 @@ def to_rdataframe(columns, flatlist_as_rvec):
         rdf_lookups[key] = ak._v2._lookup.Lookup(layout)
         rdf_generators[key].generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
 
-        rdf_dataset_types[key] = rdf_generators[key].class_type((flatlist_as_rvec,))
-        generated_type = rdf_generators[key].entry_type(
-            flatlist_as_rvec=flatlist_as_rvec
-        )
-        rdf_generated_types[key] = generated_type
-
-        rdf_entry_types[key] = (
+        entry_types[key] = (
             rdf_generators[key].entry_type(flatlist_as_rvec=flatlist_as_rvec)
             if isinstance(
                 rdf_generators[key], ak._v2._connect.cling.NumpyArrayGenerator
@@ -48,14 +40,14 @@ def to_rdataframe(columns, flatlist_as_rvec):
             else f"awkward::{rdf_generators[key].entry_type(flatlist_as_rvec=flatlist_as_rvec)}"
         )
 
-        rdf_list_of_ptrs.append(rdf_lookups[key].arrayptrs.ctypes.data)
+        data_ptrs_list.append(rdf_lookups[key].arrayptrs.ctypes.data)
 
     hashed = hash(zip(rdf_generators.keys(), rdf_generators.values()))
-    rdf_array_data_source_class_name = f"AwkwardArrayDataSource_{hashed}"
+    array_data_source_class_name = f"AwkwardArrayDataSource_{hashed}"
 
-    if not hasattr(ROOT, rdf_array_data_source_class_name):
+    if not hasattr(ROOT, array_data_source_class_name):
         cpp_code_begin = f"""
-class {rdf_array_data_source_class_name} final : public ROOT::RDF::RDataSource {{
+class {array_data_source_class_name} final : public ROOT::RDF::RDataSource {{
 private:
     ULong64_t fSize = 0ULL;
     std::vector<ULong64_t> fPtrs;
@@ -75,8 +67,8 @@ private:
                 cpp_code_vectors
                 + f"""
     ULong64_t fPtrs_{key} = 0;
-    std::vector<{rdf_entry_types[key]}>  slots_{key};
-    std::vector<{rdf_entry_types[key]}*> addrs_{key};
+    std::vector<{entry_types[key]}>  slots_{key};
+    std::vector<{entry_types[key]}*> addrs_{key};
     """
             )
 
@@ -117,7 +109,7 @@ private:
     }}
 
 public:
-    {rdf_array_data_source_class_name}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list)
+    {array_data_source_class_name}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list)
         : fSize(size),
           fPtrs({{ptrs_list}}),
         """
@@ -144,7 +136,7 @@ public:
             cpp_code_wrappers_type = (
                 cpp_code_wrappers_type
                 + f"""
-            "{rdf_entry_types[key]}"
+            "{entry_types[key]}"
             """.strip()
             )
             k = k + 1
@@ -158,7 +150,7 @@ public:
             cpp_code_column_types_map = (
                 cpp_code_column_types_map
                 + f"""
-            {{ "{key}", "{rdf_entry_types[key]}" }}
+            {{ "{key}", "{entry_types[key]}" }}
             """.strip()
             )
             k = k + 1
@@ -263,11 +255,11 @@ public:
         cpp_code_entries = """
 
     """
-        for key in rdf_entry_types:
+        for key in columns:
             cpp_code_entries = (
                 cpp_code_entries
                 + f"""
-        slots_{key}[slot] = awkward::{rdf_dataset_types[key]}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}))[entry];
+        slots_{key}[slot] = awkward::{rdf_generators[key].class_type((flatlist_as_rvec,))}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}))[entry];
     """
             )
 
@@ -278,8 +270,8 @@ public:
     }}
 }};
 
-ROOT::RDataFrame* MakeAwkwardArrayDS_{rdf_array_data_source_class_name}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
-    return new ROOT::RDataFrame(std::make_unique<{rdf_array_data_source_class_name}>(size, ptrs_list));
+ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source_class_name}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
+    return new ROOT::RDataFrame(std::make_unique<{array_data_source_class_name}>(size, ptrs_list));
 }}
         """
         )
@@ -288,9 +280,9 @@ ROOT::RDataFrame* MakeAwkwardArrayDS_{rdf_array_data_source_class_name}(ULong64_
         done = compiler(cpp_code)
         assert done is True
 
-    rdf = getattr(ROOT, f"MakeAwkwardArrayDS_{rdf_array_data_source_class_name}")(
+    rdf = getattr(ROOT, f"MakeAwkwardArrayDS_{array_data_source_class_name}")(
         length,
-        (rdf_list_of_ptrs),
+        (data_ptrs_list),
     )
 
     return (rdf, rdf_lookups, rdf_generators)

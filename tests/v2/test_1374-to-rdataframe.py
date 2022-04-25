@@ -202,23 +202,11 @@ ROOT::RDF::RInterface<ROOT::RDF::RDFDetail::RLoopManager, RWonkyDS> MakeWonkyDat
 
 
 def test_two_columns_as_rvecs():
-
-    array = ak._v2.Array(
-        [
-            [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
-            [],
-            [{"x": 3, "y": [3.0, 0.3, 3.3]}],
-        ]
-    )
-    ak_array_1 = array["x"]
-    ak_array_2 = array["y"]
-
     ak_array_1 = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
     ak_array_2 = ak._v2.Array(
         [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
     )
 
-    # An 'awkward' namespace will be added to the column name
     data_frame = ak._v2.operations.convert.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=True
     )
@@ -227,7 +215,7 @@ def test_two_columns_as_rvecs():
     done = compiler(
         """
         template<typename T>
-        struct MyFunctorX {
+        struct MyFunctorX_RVec {
             void operator()(T const& x) {
                 cout << "user function for X: " << x << endl;
             }
@@ -238,11 +226,11 @@ def test_two_columns_as_rvecs():
 
     done = compiler(
         """
-        template<class T>
-        struct MyFunctorY {
+        template<typename T>
+        struct MyFunctorY_RVec {
             void operator()(T const& y) {
                 cout << "user function for Y: ";
-                cout << y[0] << endl;
+                cout << y.x() << endl;
             }
         };
         """
@@ -252,8 +240,8 @@ def test_two_columns_as_rvecs():
     print(data_frame.GetColumnType("x"))
     print(data_frame.GetColumnType("y"))
 
-    f_x = ROOT.MyFunctorX[data_frame.GetColumnType("x")]()
-    f_y = ROOT.MyFunctorY[data_frame.GetColumnType("y")]()
+    f_x = ROOT.MyFunctorX_RVec[data_frame.GetColumnType("x")]()
+    f_y = ROOT.MyFunctorY_RVec[data_frame.GetColumnType("y")]()
 
     data_frame.Foreach(f_x, ["x"])
     data_frame.Foreach(f_y, ["y"])
@@ -262,80 +250,50 @@ def test_two_columns_as_rvecs():
     h.Draw()
 
 
-# def test_two_columns_as_vecs():
-#
-#     array = ak._v2.Array(
-#         [
-#             [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
-#             [],
-#             [{"x": 3, "y": [3.0, 0.3, 3.3]}],
-#         ]
-#     )
-#     ak_array_1 = array["x"]
-#     ak_array_2 = array["y"]
-#
-#     # An 'awkward' namespace will be added to the column name
-#     data_frame = ak._v2.operations.convert.to_rdataframe(
-#         {"x": ak_array_1, "y": ak_array_2}
-#     )
-#     data_frame.Display().Print()
-#
-#     # done = compiler(
-#     #     """
-#     #     struct MyFunctorX_1 {
-#     #         void operator()(const double a) {
-#     #             cout << "user function for X: " << a << endl;
-#     #         }
-#     #     };
-#     #     """
-#     # )
-#     # assert done is True
-#     #
-#     # done = compiler(
-#     #     """
-#     #     struct MyFunctorY_1 {
-#     #         void operator()(const double a) {
-#     #             cout << "user function for Y: ";
-#     #             cout << a << endl;
-#     #         }
-#     #     };
-#     #     """
-#     # )
-#     # assert done is True
-#     #
-#     # f_x = ROOT.MyFunctorX_1[data_frame.GetColumnType("x")]()
-#     # f_y = ROOT.MyFunctorY_1[data_frame.GetColumnType("y")]()
-#     #
-#     # data_frame.Foreach(f_x, ["x"])
-#     # data_frame.Foreach(f_y, ["y"])
-
-
-def test_array():
-
-    array = ak._v2.Array(
-        [
-            [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
-            [],
-            [{"x": 3, "y": [3.0, 0.3, 3.3]}],
-        ]
+def test_two_columns_as_vecs():
+    ak_array_1 = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    ak_array_2 = ak._v2.Array(
+        [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
     )
-    data_frame = ak._v2.operations.convert.to_rdataframe({"array": array})
+
+    data_frame = ak._v2.operations.convert.to_rdataframe(
+        {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=False
+    )
+    data_frame.Display().Print()
 
     done = compiler(
         """
         template<typename T>
-        struct MyFunctor_1 {
-            void operator()(const T& a) {
-                cout << a << endl;
+        struct MyFunctorX_Vec {
+            void operator()(T const& x) {
+                cout << "user function for X: " << x << endl;
             }
         };
         """
     )
     assert done is True
 
-    f = ROOT.MyFunctor_1[data_frame.GetColumnType("array")]()
+    done = compiler(
+        """
+        template<typename T>
+        struct MyFunctorY_Vec {
+            void operator()(T const& y) {
+                cout << "user function for Y: ";
+                cout << y.x() << endl;
+            }
+        };
+        """
+    )
+    assert done is True
 
-    data_frame.Foreach(f, ["array"])
+    print(data_frame.GetColumnType("x"))
+    print(data_frame.GetColumnType("y"))
+
+    f_x = ROOT.MyFunctorX_Vec[data_frame.GetColumnType("x")]()
+    f_y = ROOT.MyFunctorY_Vec[data_frame.GetColumnType("y")]()
+
+    data_frame.Foreach(f_x, ["x"])
+    data_frame.Foreach(f_y, ["y"])
 
 
 def test_jims_example1():
