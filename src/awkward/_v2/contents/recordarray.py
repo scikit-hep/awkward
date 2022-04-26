@@ -1012,14 +1012,6 @@ class RecordArray(Content):
         if out is not None:
             return out
 
-        cls = ak._v2._util.recordclass(self, behavior)
-        if cls is not ak._v2.highlevel.Record:
-            length = self._length
-            out = [None] * length
-            for i in range(length):
-                out[i] = cls(self[i])
-            return out
-
         if self.is_tuple:
             contents = [x._to_list(behavior) for x in self._contents]
             length = self._length

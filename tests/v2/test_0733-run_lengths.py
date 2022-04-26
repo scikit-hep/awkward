@@ -64,9 +64,6 @@ def test_groupby():
 
 
 def test_onstrings1():
-    data = ak.Array(["one", "one", "one", "two", "two", "three", "two", "two"])
-    assert ak.run_lengths(data).tolist() == [3, 2, 1, 2]
-
     data = ak._v2.Array(["one", "one", "one", "two", "two", "three", "two", "two"])
     assert ak._v2.operations.structure.run_lengths(data).tolist() == [3, 2, 1, 2]
 

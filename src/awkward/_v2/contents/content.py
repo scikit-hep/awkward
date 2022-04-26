@@ -577,7 +577,12 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
+        elif isinstance(where, Iterable) and len(where) == 0:
+            return self._carry(
+                ak._v2.index.Index64.empty(0, self._nplike), allow_lazy=True
+            )
+
+        elif isinstance(where, Iterable) and all(ak._v2._util.isstr(x) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):
