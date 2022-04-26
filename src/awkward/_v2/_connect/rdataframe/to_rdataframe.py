@@ -8,9 +8,6 @@ import awkward._v2._connect.cling  # noqa: E402
 import ROOT
 
 compiler = ROOT.gInterpreter.Declare
-# def compiler(source_code):
-#     print(source_code)
-#     return ROOT.gInterpreter.Declare(source_code)
 
 
 def to_rdataframe(layouts, length, flatlist_as_rvec):
@@ -140,6 +137,8 @@ class DataSourceGenerator:
 
         if not hasattr(ROOT, array_data_source):
             cpp_code = f"""
+namespace awkward {{
+
     class {array_data_source} final
       : public ROOT::RDF::RDataSource {{
     private:
@@ -229,12 +228,14 @@ class DataSourceGenerator:
     ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
         return new ROOT::RDataFrame(std::make_unique<{array_data_source}>(size, ptrs_list));
     }}
+
+}}
             """
 
             done = compiler(cpp_code)
             assert done is True
 
-        rdf = getattr(ROOT, f"MakeAwkwardArrayDS_{array_data_source}")(
+        rdf = getattr(ROOT.awkward, f"MakeAwkwardArrayDS_{array_data_source}")(
             self.length,
             (self.data_ptrs_list),
         )
