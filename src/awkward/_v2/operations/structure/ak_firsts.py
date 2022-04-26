@@ -49,13 +49,14 @@ def _impl(array, axis, highlevel, behavior):
             out = layout[0]
     else:
         if posaxis < 0:
-            raise ak._v2._util.error(NotImplementedError(
-                "ak.firsts with ambiguous negative axis"
-
-            ))
+            raise ak._v2._util.error(
+                NotImplementedError("ak.firsts with ambiguous negative axis")
+            )
         toslice = (slice(None, None, None),) * posaxis + (0,)
-        out = ak._v2.operations.structure.mask(layout, ak._v2.operations.structure.num(layout, axis=posaxis) > 0, highlevel=False)[
-            toslice
-        ]
+        out = ak._v2.operations.structure.mask(
+            layout,
+            ak._v2.operations.structure.num(layout, axis=posaxis) > 0,
+            highlevel=False,
+        )[toslice]
 
     return ak._v2._util.wrap(out, behavior, highlevel)
