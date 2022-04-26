@@ -89,9 +89,9 @@ def test_nonflat_slice():
     )
 
 
-@pytest.mark.skip(
-    reason="Should be working now that we have toListOffsetArray64, but isn't."
-)
+# @pytest.mark.skip(
+#     reason="Should be working now that we have toListOffsetArray64, but isn't."
+# )
 def test_nonflat_slice_2():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
     content = ak._v2.contents.NumpyArray(array.reshape(-1))
