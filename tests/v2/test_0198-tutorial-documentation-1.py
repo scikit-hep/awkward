@@ -21,10 +21,14 @@ def test_singletons():
     ]
 
     assert to_list(
-        ak._v2.operations.structure.singletons(ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]))
+        ak._v2.operations.structure.singletons(
+            ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+        )
     ) == [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
     assert to_list(
-        ak._v2.operations.structure.singletons(ak._v2.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]]))
+        ak._v2.operations.structure.singletons(
+            ak._v2.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
+        )
     ) == [[[1.1], [2.2], []], [[3.3], []], [[]], [[4.4], [5.5]]]
     assert to_list(
         ak._v2.operations.structure.singletons(
@@ -33,13 +37,14 @@ def test_singletons():
     ) == [[[[1.1], [2.2], []]], [[[3.3], []]], [[[]]], [[[4.4], [5.5]]]]
 
 
-@pytest.mark.skip(
-    reason="Enable when ak.firsts is merged"
-)
+@pytest.mark.skip(reason="Enable when ak.firsts is merged")
 def test_firsts():
     assert to_list(
         ak._v2.operations.structure.firsts(
-            ak._v2.operations.structure.singletons(ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])), axis=1
+            ak._v2.operations.structure.singletons(
+                ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+            ),
+            axis=1,
         )
     ) == [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
     assert to_list(
@@ -53,7 +58,9 @@ def test_firsts():
     assert to_list(
         ak._v2.operations.structure.firsts(
             ak._v2.operations.structure.singletons(
-                ak._v2.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
+                ak._v2.Array(
+                    [[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]
+                )
             ),
             axis=3,
         )
@@ -69,12 +76,20 @@ def test_allow_missing():
 
 def test_flatten0():
     array = ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-    assert to_list(ak._v2.operations.structure.flatten(array, axis=0)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert to_list(ak._v2.operations.structure.flatten(array, axis=0)) == [
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+    ]
 
     content0 = ak._v2.operations.convert.from_iter(
         [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5], highlevel=False
     )
-    content1 = ak._v2.operations.convert.from_iter(["one", None, "two", None, "three"], highlevel=False)
+    content1 = ak._v2.operations.convert.from_iter(
+        ["one", None, "two", None, "three"], highlevel=False
+    )
     array = ak._v2.Array(
         ak._v2.contents.UnionArray(
             ak._v2.index.Index8(

@@ -10,19 +10,38 @@ def test():
     assert ak._v2.operations.structure.singletons(ak_array).tolist() == [[1], [2], [3]]
 
 
-#FIXME: action to be taken on deciding between [None] [] ; see Issue #983
+# FIXME: action to be taken on deciding between [None] [] ; see Issue #983
 def test2():
     a = ak._v2.Array([[3, 1, 2], [4, 5], []])
-    assert ak._v2.operations.reducers.argmin(a, axis=1, keepdims=True).tolist() == [[1], [0], [None]] 
-    assert ak._v2.operations.structure.singletons(ak._v2.operations.reducers.argmin(a, axis=1)).tolist() == [[1], [0], []] 
+    assert ak._v2.operations.reducers.argmin(a, axis=1, keepdims=True).tolist() == [
+        [1],
+        [0],
+        [None],
+    ]
+    assert ak._v2.operations.structure.singletons(
+        ak._v2.operations.reducers.argmin(a, axis=1)
+    ).tolist() == [[1], [0], []]
 
-    assert a[ak._v2.operations.reducers.argmin(a, axis=1, keepdims=True)].tolist() == [[1], [4], [None]] 
-    assert a[ak._v2.operations.structure.singletons(ak._v2.operations.reducers.argmin(a, axis=1))].tolist() == [[1], [4], []]
+    assert a[ak._v2.operations.reducers.argmin(a, axis=1, keepdims=True)].tolist() == [
+        [1],
+        [4],
+        [None],
+    ]
+    assert a[
+        ak._v2.operations.structure.singletons(
+            ak._v2.operations.reducers.argmin(a, axis=1)
+        )
+    ].tolist() == [[1], [4], []]
 
 
 def test_numpyarray():
     a = ak._v2.contents.NumpyArray(np.arange(12).reshape(4, 3))
-    assert ak._v2.operations.structure.singletons(a).tolist() == [[[0], [1], [2]], [[3], [4], [5]], [[6], [7], [8]], [[9], [10], [11]]]
+    assert ak._v2.operations.structure.singletons(a).tolist() == [
+        [[0], [1], [2]],
+        [[3], [4], [5]],
+        [[6], [7], [8]],
+        [[9], [10], [11]],
+    ]
 
 
 def test_empyarray():
