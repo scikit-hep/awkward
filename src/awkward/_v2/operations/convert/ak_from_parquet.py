@@ -125,6 +125,13 @@ def _metadata(
 
         if columns is not None:
             list_indicator = "list.item"
+            for column_metadata in file_for_metadata.schema:
+                if (
+                    column_metadata.max_repetition_level > 0
+                    and ".list.element." in column_metadata.path
+                ):
+                    list_indicator = "list.element"
+                    break
 
             form = ak._v2._connect.pyarrow.form_handle_arrow(
                 parquetfile_for_metadata.schema_arrow, pass_empty_field=True
@@ -272,10 +279,11 @@ def _read_parquet_file(
         else:
             arrow_table = parquetfile.read_row_groups(row_groups, parquet_columns)
 
-    return ak._v2._connect.pyarrow.handle_arrow(
+    return ak._v2.operations.convert.ak_from_arrow._impl(
         arrow_table,
-        generate_bitmasks=generate_bitmasks,
-        pass_empty_field=True,
+        generate_bitmasks,
+        False,
+        None,
     )
 
 
