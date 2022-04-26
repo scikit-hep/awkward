@@ -8,6 +8,9 @@ import awkward._v2._connect.cling  # noqa: E402
 import ROOT
 
 compiler = ROOT.gInterpreter.Declare
+# def compiler(source_code):
+#     print(source_code)
+#     return ROOT.gInterpreter.Declare(source_code)
 
 
 def to_rdataframe(columns, flatlist_as_rvec):
@@ -56,15 +59,19 @@ class DataSourceGenerator:
                 layout.form, flatlist_as_rvec=self.flatlist_as_rvec
             )
             self.lookups[key] = ak._v2._lookup.Lookup(layout)
-            self.generators[key].generate(compiler)
+            generator = self.generators[key]
+            generator.generate(compiler)
 
-            entry_type = (
-                self.generators[key].entry_type()
-                if isinstance(
-                    self.generators[key], ak._v2._connect.cling.NumpyArrayGenerator
-                )
-                else f"awkward::{self.generators[key].entry_type()}"
-            )
+            entry_type = generator.entry_type()
+            if isinstance(generator, ak._v2._connect.cling.NumpyArrayGenerator):
+                pass
+            elif isinstance(generator, ak._v2._connect.cling.ListArrayGenerator) and (
+                generator.is_string
+                or (generator.flatlist_as_rvec and generator.is_flatlist)
+            ):
+                pass
+            else:
+                entry_type = "awkward::" + entry_type
 
             self.data_ptrs_list.append(self.lookups[key].arrayptrs.ctypes.data)
 

@@ -808,7 +808,13 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         return f"ListArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return self.content.class_type()
+        if self.is_string:
+            return "std::string"
+        elif self.flatlist_as_rvec and self.is_flatlist:
+            nested_type = self.content.value_type()
+            return f"ROOT::RVec<{nested_type}>"
+        else:
+            return self.content.class_type()
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)

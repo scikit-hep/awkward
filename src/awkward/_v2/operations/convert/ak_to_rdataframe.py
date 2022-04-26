@@ -3,7 +3,7 @@
 import awkward as ak
 
 
-def to_rdataframe(arrays, flatlist_as_rvec=False):
+def to_rdataframe(arrays, flatlist_as_rvec=True):
     """
     Args:
         arrays (dict): a dictionary of Array-like data (anything #ak.to_layout recognizes).
