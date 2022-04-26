@@ -13,19 +13,9 @@ compiler = ROOT.gInterpreter.Declare
 #     return ROOT.gInterpreter.Declare(source_code)
 
 
-def to_rdataframe(columns, flatlist_as_rvec):
-    if not columns:
-        ak._v2._util.error(
-            ValueError("dict of columns must have at least one ak.Array")
-        )
-
-    length = len(next(iter(columns.values())))
-    for key in columns:
-        if len(columns[key]) != length:
-            ak._v2._util.error(ValueError("all arrays must be equal length"))
-
+def to_rdataframe(layouts, length, flatlist_as_rvec):
     return DataSourceGenerator(length, flatlist_as_rvec=flatlist_as_rvec).data_frame(
-        columns
+        layouts
     )
 
 
@@ -41,7 +31,7 @@ class DataSourceGenerator:
         key = hash(zip(self.generators.keys(), self.generators.values()))
         return f"AwkwardArrayDataSource_{key}"
 
-    def data_frame(self, columns):
+    def data_frame(self, layouts):
         cpp_code_declare_slots = ""
         cpp_code_define_readers = ""
         cpp_code_column_names = ""
@@ -53,8 +43,8 @@ class DataSourceGenerator:
 
         k = 0
 
-        for key in columns:
-            layout = columns[key].layout
+        for key in layouts:
+            layout = layouts[key]
             self.generators[key] = ak._v2._connect.cling.togenerator(
                 layout.form, flatlist_as_rvec=self.flatlist_as_rvec
             )
@@ -141,7 +131,7 @@ class DataSourceGenerator:
             )
 
             k = k + 1
-            if k < len(columns):
+            if k < len(layouts):
                 cpp_code_column_names = cpp_code_column_names + ", "
                 cpp_code_column_type_names = cpp_code_column_type_names + ", "
                 cpp_code_column_types_map = cpp_code_column_types_map + ", "
