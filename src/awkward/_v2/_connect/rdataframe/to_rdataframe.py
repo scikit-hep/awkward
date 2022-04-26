@@ -52,11 +52,11 @@ class DataSourceGenerator:
 
         for key in columns:
             layout = columns[key].layout
-            self.generators[key] = ak._v2._connect.cling.togenerator(layout.form)
-            self.lookups[key] = ak._v2._lookup.Lookup(layout)
-            self.generators[key].generate(
-                compiler, flatlist_as_rvec=self.flatlist_as_rvec
+            self.generators[key] = ak._v2._connect.cling.togenerator(
+                layout.form, flatlist_as_rvec=self.flatlist_as_rvec
             )
+            self.lookups[key] = ak._v2._lookup.Lookup(layout)
+            self.generators[key].generate(compiler)
 
             entry_type = (
                 self.generators[key].entry_type()

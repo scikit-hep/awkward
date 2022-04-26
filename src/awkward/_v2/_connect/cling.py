@@ -5,7 +5,6 @@ import ctypes
 import struct
 import json
 import re
-import threading
 
 import awkward as ak
 
@@ -417,42 +416,42 @@ namespace awkward {{
     return out
 
 
-def togenerator(form):
+def togenerator(form, flatlist_as_rvec):
     if isinstance(form, ak._v2.forms.EmptyForm):
-        return togenerator(form.toNumpyForm(np.dtype(np.float64)))
+        return togenerator(form.toNumpyForm(np.dtype(np.float64)), flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.NumpyForm):
         if len(form.inner_shape) == 0:
-            return NumpyArrayGenerator.from_form(form)
+            return NumpyArrayGenerator.from_form(form, flatlist_as_rvec)
         else:
-            return togenerator(form.toRegularForm())
+            return togenerator(form.toRegularForm(), flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.RegularForm):
-        return RegularArrayGenerator.from_form(form)
+        return RegularArrayGenerator.from_form(form, flatlist_as_rvec)
 
     elif isinstance(form, (ak._v2.forms.ListForm, ak._v2.forms.ListOffsetForm)):
-        return ListArrayGenerator.from_form(form)
+        return ListArrayGenerator.from_form(form, flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.IndexedForm):
-        return IndexedArrayGenerator.from_form(form)
+        return IndexedArrayGenerator.from_form(form, flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.IndexedOptionForm):
-        return IndexedOptionArrayGenerator.from_form(form)
+        return IndexedOptionArrayGenerator.from_form(form, flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.ByteMaskedForm):
-        return ByteMaskedArrayGenerator.from_form(form)
+        return ByteMaskedArrayGenerator.from_form(form, flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.BitMaskedForm):
-        return BitMaskedArrayGenerator.from_form(form)
+        return BitMaskedArrayGenerator.from_form(form, flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.UnmaskedForm):
-        return UnmaskedArrayGenerator.from_form(form)
+        return UnmaskedArrayGenerator.from_form(form, flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.RecordForm):
-        return RecordArrayGenerator.from_form(form)
+        return RecordArrayGenerator.from_form(form, flatlist_as_rvec)
 
     elif isinstance(form, ak._v2.forms.UnionForm):
-        return UnionArrayGenerator.from_form(form)
+        return UnionArrayGenerator.from_form(form, flatlist_as_rvec)
 
     else:
         raise ak._v2._util.error(AssertionError(f"unrecognized Form: {type(form)}"))
@@ -529,12 +528,15 @@ class Generator:
 
 class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return NumpyArrayGenerator(
-            form.primitive, cls.form_from_identifier(form), form.parameters
+            form.primitive,
+            cls.form_from_identifier(form),
+            form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(self, primitive, identifier, parameters, flatlist_as_rvec=False):
+    def __init__(self, primitive, identifier, parameters, flatlist_as_rvec):
         self.primitive = primitive
         self.identifier = identifier
         self.parameters = parameters
@@ -558,16 +560,8 @@ class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
-        return f"NumpyArray_{self.primitive}_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        return f"NumpyArray_{self.primitive}_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return {
@@ -588,8 +582,7 @@ class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
             "timedelta64": "std::duration",
         }[self.primitive]
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
 
         key = (self, self.flatlist_as_rvec)
@@ -618,20 +611,22 @@ namespace awkward {{
 
 class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return RegularArrayGenerator(
-            togenerator(form.content),
+            togenerator(form.content, flatlist_as_rvec),
             form.size,
             cls.form_from_identifier(form),
             form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(self, content, size, identifier, parameters, flatlist_as_rvec=False):
+    def __init__(self, content, size, identifier, parameters, flatlist_as_rvec):
         self.content = content
         self.size = size
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -654,14 +649,6 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
         )
 
     @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
-    @property
     def is_string(self):
         return isinstance(self.parameters, dict) and self.parameters.get(
             "__array__"
@@ -671,18 +658,15 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
         return isinstance(self.content, NumpyArrayGenerator)
 
     def class_type(self):
-        return (
-            f"RegularArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
-        )
+        return f"RegularArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return self.content.class_type()
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
         if not self.is_string and not (self.flatlist_as_rvec and self.is_flatlist):
-            self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
+            self.content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -761,7 +745,7 @@ namespace awkward {{
 
 class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         if isinstance(form, ak._v2.forms.ListForm):
             index_string = form.starts
         else:
@@ -769,14 +753,13 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
 
         return ListArrayGenerator(
             index_string,
-            togenerator(form.content),
+            togenerator(form.content, flatlist_as_rvec),
             cls.form_from_identifier(form),
             form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(
-        self, index_type, content, identifier, parameters, flatlist_as_rvec=False
-    ):
+    def __init__(self, index_type, content, identifier, parameters, flatlist_as_rvec):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "u32":
@@ -789,6 +772,7 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -811,14 +795,6 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         )
 
     @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
-    @property
     def is_string(self):
         return isinstance(self.parameters, dict) and self.parameters.get(
             "__array__"
@@ -829,16 +805,15 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         return isinstance(self.content, NumpyArrayGenerator)
 
     def class_type(self):
-        return f"ListArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        return f"ListArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return self.content.class_type()
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
         if not self.is_string and not (self.flatlist_as_rvec and self.is_flatlist):
-            self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
+            self.content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -917,17 +892,16 @@ namespace awkward {{
 
 class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return IndexedArrayGenerator(
             form.index,
-            togenerator(form.content),
+            togenerator(form.content, flatlist_as_rvec),
             cls.form_from_identifier(form),
             form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(
-        self, index_type, content, identifier, parameters, flatlist_as_rvec=False
-    ):
+    def __init__(self, index_type, content, identifier, parameters, flatlist_as_rvec):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "u32":
@@ -940,6 +914,7 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -961,26 +936,15 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
-        return (
-            f"IndexedArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
-        )
+        return f"IndexedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return self.content.value_type()
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
+        self.content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1009,17 +973,16 @@ namespace awkward {{
 
 class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return IndexedOptionArrayGenerator(
             form.index,
-            togenerator(form.content),
+            togenerator(form.content, flatlist_as_rvec),
             cls.form_from_identifier(form),
             form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(
-        self, index_type, content, identifier, parameters, flatlist_as_rvec=False
-    ):
+    def __init__(self, index_type, content, identifier, parameters, flatlist_as_rvec):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "i64":
@@ -1030,6 +993,7 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1051,24 +1015,15 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
-        return f"IndexedOptionArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        return f"IndexedOptionArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return f"std::optional<{self.content.value_type()}>"
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
+        self.content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1102,22 +1057,22 @@ namespace awkward {{
 
 class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return ByteMaskedArrayGenerator(
-            togenerator(form.content),
+            togenerator(form.content, flatlist_as_rvec),
             form.valid_when,
             cls.form_from_identifier(form),
             form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(
-        self, content, valid_when, identifier, parameters, flatlist_as_rvec=False
-    ):
+    def __init__(self, content, valid_when, identifier, parameters, flatlist_as_rvec):
         self.content = content
         self.valid_when = valid_when
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1139,24 +1094,17 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
-        return f"ByteMaskedArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        return (
+            f"ByteMaskedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
+        )
 
     def value_type(self):
         return f"std::optional<{self.content.value_type()}>"
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
+        self.content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1190,13 +1138,14 @@ namespace awkward {{
 
 class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return BitMaskedArrayGenerator(
-            togenerator(form.content),
+            togenerator(form.content, flatlist_as_rvec),
             form.valid_when,
             form.lsb_order,
             cls.form_from_identifier(form),
             form.parameters,
+            flatlist_as_rvec,
         )
 
     def __init__(
@@ -1206,7 +1155,7 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
         lsb_order,
         identifier,
         parameters,
-        flatlist_as_rvec=False,
+        flatlist_as_rvec,
     ):
         self.content = content
         self.valid_when = valid_when
@@ -1214,6 +1163,7 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1236,24 +1186,15 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
-        return f"BitMaskedArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        return f"BitMaskedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return f"std::optional<{self.content.value_type()}>"
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
+        self.content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1292,16 +1233,20 @@ namespace awkward {{
 
 class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return UnmaskedArrayGenerator(
-            togenerator(form.content), cls.form_from_identifier(form), form.parameters
+            togenerator(form.content, flatlist_as_rvec),
+            cls.form_from_identifier(form),
+            form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(self, content, identifier, parameters, flatlist_as_rvec=False):
+    def __init__(self, content, identifier, parameters, flatlist_as_rvec):
         self.content = content
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1316,24 +1261,15 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
-        return f"UnmaskedArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        return f"UnmaskedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return f"std::optional<{self.content.value_type()}>"
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached, self.flatlist_as_rvec)
+        self.content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1360,11 +1296,13 @@ namespace awkward {{
 
 
 class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
-    def __init__(self, contents, fields, parameters, flatlist_as_rvec=False):
+    def __init__(self, contents, fields, parameters, flatlist_as_rvec):
         self.contents = tuple(contents)
         self.fields = None if fields is None else tuple(fields)
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        for content in self.contents:
+            assert self.flatlist_as_rvec == content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1384,14 +1322,6 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
         if (
             isinstance(self.parameters, dict)
@@ -1400,13 +1330,12 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
             insert = "_" + self.parameters["__record__"]
         else:
             insert = ""
-        return f"Record{insert}_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        return f"Record{insert}_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_RecordView(compiler, use_cached=use_cached)
         for content in self.contents:
-            content.generate(compiler, use_cached, self.flatlist_as_rvec)
+            content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1453,24 +1382,25 @@ namespace awkward {{
 
 class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return RecordArrayGenerator(
-            [togenerator(x) for x in form.contents],
+            [togenerator(x, flatlist_as_rvec) for x in form.contents],
             None if form.is_tuple else form.fields,
             cls.form_from_identifier(form),
             form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(
-        self, contents, fields, identifier, parameters, flatlist_as_rvec=False
-    ):
+    def __init__(self, contents, fields, identifier, parameters, flatlist_as_rvec):
         self.contents = tuple(contents)
         self.fields = None if fields is None else tuple(fields)
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        for content in self.contents:
+            assert self.flatlist_as_rvec == content.flatlist_as_rvec
 
-        self.record = RecordGenerator(contents, fields, parameters)
+        self.record = RecordGenerator(contents, fields, parameters, flatlist_as_rvec)
 
     def __hash__(self):
         return hash(
@@ -1492,14 +1422,6 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
         if (
             isinstance(self.parameters, dict)
@@ -1508,15 +1430,14 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
             insert = "_" + self.parameters["__record__"]
         else:
             insert = ""
-        return f"RecordArray{insert}_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
+        return f"RecordArray{insert}_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return self.record.class_type()
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.record.generate(compiler, use_cached, self.flatlist_as_rvec)
+        self.record.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1544,17 +1465,16 @@ namespace awkward {{
 
 class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
     @classmethod
-    def from_form(cls, form):
+    def from_form(cls, form, flatlist_as_rvec):
         return UnionArrayGenerator(
             form.index,
-            [togenerator(x) for x in form.contents],
+            [togenerator(x, flatlist_as_rvec) for x in form.contents],
             cls.form_from_identifier(form),
             form.parameters,
+            flatlist_as_rvec,
         )
 
-    def __init__(
-        self, index_type, contents, identifier, parameters, flatlist_as_rvec=False
-    ):
+    def __init__(self, index_type, contents, identifier, parameters, flatlist_as_rvec):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "u32":
@@ -1567,6 +1487,8 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
+        for content in self.contents:
+            assert self.flatlist_as_rvec == content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
@@ -1588,27 +1510,16 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
             and self.parameters == other.parameters
         )
 
-    @property
-    def flatlist_as_rvec(self):
-        return self._flatlist_as_rvec
-
-    @flatlist_as_rvec.setter
-    def flatlist_as_rvec(self, value):
-        self._flatlist_as_rvec = value
-
     def class_type(self):
-        return (
-            f"UnionArray_{self.class_type_suffix((self,) + (self.flatlist_as_rvec,))}"
-        )
+        return f"UnionArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         return f"std::variant<{','.join(x.value_type() for x in self.contents)}>"
 
-    def generate(self, compiler, use_cached=True, flatlist_as_rvec=False):
-        self.flatlist_as_rvec = flatlist_as_rvec
+    def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
         for content in self.contents:
-            content.generate(compiler, use_cached, self.flatlist_as_rvec)
+            content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1648,200 +1559,3 @@ namespace awkward {{
 """.strip()
             cache[key] = out
             compiler(out)
-
-
-class CppStatements:
-    dtype_to_cpp = {
-        np.dtype(np.int8): "char",
-        np.dtype(np.int16): "int16_t",
-        np.dtype(np.int32): "int32_t",
-        np.dtype(np.int64): "int64_t",
-        np.dtype(np.uint8): "unsigned char",
-        np.dtype(np.uint16): "uint16_t",
-        np.dtype(np.uint32): "uint32_t",
-        np.dtype(np.uint64): "uint64_t",
-        np.dtype(np.float32): "float",
-        np.dtype(np.float64): "double",
-    }
-
-    def __init__(self, cppcode, **kwargs):
-        compiler = RawCppCompiler.instance()
-
-        self._cppcode = cppcode
-        self._funcname = f"awkward_function_{compiler.next_number()}"
-        self._funcargs = []
-        self._assignments = []
-        self._order = []
-        self._argname_to_index = {}
-        self._forms = []
-        self._generators = []
-        for argname, argval in kwargs.items():
-            self._order.append(argname)
-            if isinstance(argval, (ak._v2.Array, ak._v2.forms.Form)):
-                if isinstance(argval, ak._v2.Array):
-                    form = argval.layout.form
-                else:
-                    form = argval
-                number = compiler.next_number()
-                length = f"awkward_argument_{number}_length"
-                ptrs = f"awkward_argument_{number}_ptrs"
-                self._funcargs.append(f"ssize_t {length}, ssize_t {ptrs}")
-                generator = togenerator(form)
-                generator.generate(compiler.declare)
-                self._assignments.append(
-                    f"auto {argname} = {generator.dataset(length, ptrs)};"
-                )
-                self._argname_to_index[argname] = len(self._forms)
-                self._forms.append(form)
-                self._generators.append(generator)
-
-            elif isinstance(argval, ak._v2.ArrayBuilder):
-                generate_ArrayBuilder(compiler.declare)
-                number = compiler.next_number()
-                ptr = f"awkward_argument_{number}_ptr"
-                self._funcargs.append(f"ssize_t {ptr}")
-                self._assignments.append(
-                    f"auto {argname} = awkward::ArrayBuilder(reinterpret_cast<void*>({ptr}));"
-                )
-                self._argname_to_index[argname] = "ArrayBuilder"
-
-            elif isinstance(argval, (numpy.ndarray, np.dtype)):
-                if isinstance(argval, numpy.ndarray):
-                    dtype = argval.dtype
-                else:
-                    dtype = argval
-                if dtype not in self.dtype_to_cpp:
-                    raise ak._v2._util.error(
-                        TypeError(f"arrays of {dtype} not allowed")
-                    )
-
-                number = compiler.next_number()
-                ptr = f"awkward_argument_{number}_ptr"
-                self._funcargs.append(f"ssize_t {ptr}")
-                self._assignments.append(
-                    f"auto {argname} = reinterpret_cast<{self.dtype_to_cpp[dtype]}*>({ptr});"
-                )
-                self._argname_to_index[argname] = len(self._forms)
-                self._forms.append(dtype)
-
-            else:
-                raise ak._v2._util.error(
-                    TypeError(f"can't compile objects of type {type(argval)}")
-                )
-
-        eoln = "\n"
-        compiler.declare(
-            f"""
-ssize_t {self._funcname}({", ".join(self._funcargs)}) {{
-{eoln.join(self._assignments)}
-{self._cppcode}
-
-return 0;
-}}
-"""
-        )
-
-    def __call__(self, **kwargs):
-        compiler = RawCppCompiler.instance()
-
-        if set(kwargs) != set(self._order):
-            raise ak._v2._util.error(
-                TypeError(
-                    f"expected arguments [{', '.join(self._order)}], not [{', '.join(kwargs)}]"
-                )
-            )
-
-        # must be kept in scope while the C++ runs
-        lookups = []
-
-        arguments = []
-        for argname in self._order:
-            argval = kwargs[argname]
-            if isinstance(argval, ak._v2.Array):
-                index = self._argname_to_index[argname]
-
-                if argval.layout.form != self._forms[index]:
-                    raise ak._v2._util.error(
-                        TypeError(
-                            f"argument {argname} has a different Form (concrete type) from the one used in the declaration"
-                        )
-                    )
-
-                lookup = ak._v2._lookup.Lookup(argval.layout)
-                lookups.append(lookup)
-                arguments.append(len(argval.layout))
-                arguments.append(lookup.arrayptrs.ctypes.data)
-
-            elif isinstance(argval, ak._v2.ArrayBuilder):
-                index = self._argname_to_index[argname]
-
-                if index != "ArrayBuilder":
-                    raise ak._v2._util.error(
-                        TypeError(
-                            f"argument {argname} is an ArrayBuilder but was not declared as such"
-                        )
-                    )
-
-                arguments.append(argval._layout._ptr)
-
-            elif isinstance(argval, numpy.ndarray):
-                index = self._argname_to_index[argname]
-
-                if argval.dtype != self._forms[index]:
-                    raise ak._v2._util.error(
-                        TypeError(
-                            f"argument {argname} has a different dtype from the one used in the declaration"
-                        )
-                    )
-
-                arguments.append(argval.ctypes.data)
-
-            else:
-                raise ak._v2._util.error(
-                    TypeError(
-                        f"argument {argname} does not match the type used in the declaration"
-                    )
-                )
-
-        # call it (no return value)
-        compiler.call(self._funcname, *arguments)
-
-
-class RawCppCompiler(ak.nplike.Singleton):
-    # only called once; this is a Singleton
-    def __init__(self):
-        self._lock = threading.Lock()
-        self._number = 0
-
-        self._libAArrayclangInterpreter = ctypes.CDLL("../libAArrayclangInterpreter.so")
-
-        self._Clang_LookupName = self._libAArrayclangInterpreter.Clang_LookupName
-        self._Clang_LookupName.argtypes = [ctypes.c_char_p]
-        self._Clang_LookupName.restype = ctypes.c_size_t
-
-        self._Clang_GetFunctionAddress = (
-            self._libAArrayclangInterpreter.Clang_GetFunctionAddress
-        )
-        self._Clang_GetFunctionAddress.argtypes = [ctypes.c_size_t]
-        self._Clang_GetFunctionAddress.restype = ctypes.c_void_p
-
-        self._Clang_Parse = self._libAArrayclangInterpreter.Clang_Parse
-        self._Clang_Parse.argtypes = [ctypes.c_char_p]
-        self._Clang_Parse.restype = ctypes.c_size_t
-
-    def next_number(self):
-        with self._lock:
-            out = self._number
-            self._number += 1
-        return out
-
-    def declare(self, cppcode):
-        if self._Clang_Parse(cppcode.encode("ascii")) != 0:
-            raise ak._v2._util.error(SyntaxError("invalid C++ code"))
-
-    def call(self, name, *args):
-        fn_handle = self._Clang_LookupName(name.encode("ascii"))
-        fn_proto = ctypes.CFUNCTYPE(*([ctypes.c_ssize_t] * (1 + len(args))))
-
-        fn_pointer = fn_proto(self._Clang_GetFunctionAddress(fn_handle))
-        return fn_pointer(*args)
