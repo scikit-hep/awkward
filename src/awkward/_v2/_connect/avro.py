@@ -23,7 +23,6 @@ class read_avro_py:
             f'data = np.memmap("{self.file_name}", np.uint8)\npos=0\n',
             """def decode_varint(pos, data):\n\tshift = 0\n\tresult = 0\n\twhile True:\n\t\ti = data[pos]\n\t\tpos += 1\n\t\tresult |= (i & 0x7f) << shift\n\t\tshift += 7\n\t\tif not (i & 0x80):\n\t\t\tbreak\n\treturn pos, result\ndef decode_zigzag(n):\n\treturn (n >> 1) ^ (-(n & 1))\n\n""",
             f"field = {str(self.field)}\n\n",
-            "idoparcounter = 0\n",
             f"for i in range({len(self.field)}):\n",
             "    fields = data[field[i][0]:field[i][1]]\n",
             f"    for i in range({sum(self.blocks)}):",
@@ -398,24 +397,27 @@ class read_avro_py:
                 dec.append(": [],")
                 type_idx = 1
             else:
-                aform.append(
-                    '{"class": "UnionArray8_64","tags": "i8","index": "i64","contents":\n'
-                )
-                var1 = f" 'node{count}-tags'"
-                dec.append(var1)
-                dec.append(": [],")
-                var1 = f" 'node{count}-index'"
-                dec.append(var1)
-                dec.append(": [],")
                 for elem in file["type"]:
                     if elem == "null":
                         aform.append(
                             '{"class": "ByteMaskedArray","mask": "i8","content":\n'
                         )
-                        var1 = f" 'node{count+1}-mask'"
+                        var1 = f" 'node{count}-mask'"
+                        mask_idx = count
                         dec.append(var1)
                         dec.append(": [],")
+                        count = count + 1
                         null_present = True
+                aform.append(
+                    '{"class": "UnionArray8_64","tags": "i8","index": "i64","contents": [\n'
+                )
+                var1 = f" 'node{count}-tags'"
+                union_idx = count
+                dec.append(var1)
+                dec.append(": [],")
+                var1 = f" 'node{count}-index'"
+                dec.append(var1)
+                dec.append(": [],")
                 type_idx = 2
 
             if type_idx == 0:
@@ -459,7 +461,7 @@ class read_avro_py:
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
-                            + f"con['node{count}-mask'].append(np.int8(-1))"
+                            + f"con['node{count}-mask'].append(np.int8(True))"
                         )
 
                         aform, _exec_code, count, dec = self.rec_exp_json_code(
@@ -480,7 +482,7 @@ class read_avro_py:
                     if idxx == 0:
                         dum_idx = 1
                     else:
-                        dum_idx = idxx - 1
+                        dum_idx = 0
                 idxx = file["type"].index("null")
                 for i in range(out):
                     if file["type"][i] == "null":
@@ -500,13 +502,14 @@ class read_avro_py:
                         # )
                     else:
                         _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.insert(3, f"countvar{count}{i} = 0\n")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
-                            + f"con['node{count}-index'].append(idoparcounter)"
+                            + f"con['node{count}-index'].append(countvar{count}{i})"
                         )
                         _exec_code.append(
-                            "\n" + "    " * (ind + 1) + "idoparcounter += 1"
+                            "\n" + "    " * (ind + 1) + f"countvar{count}{i} += 1"
                         )
                         aform, _exec_code, count, dec = self.rec_exp_json_code(
                             {"type": file["type"][i]},
@@ -518,27 +521,88 @@ class read_avro_py:
                         )
                 aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
             if type_idx == 2:
-                temp = count
                 if null_present:
                     idxx = file["type"].index("null")
+                if out == 2:
+                    dum_idx = 1 - idxx
+                elif out > 2:
+                    if idxx == 0:
+                        dum_idx = 1
+                    else:
+                        dum_idx = idxx - 1
+                temp = count
                 # idxx = file["type"].index("null")
                 for i in range(out):
-                    _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
-                    _exec_code.append(
-                        "\n"
-                        + "    " * (ind + 1)
-                        + f"con['node{temp}-tags'].append({i})"
-                    )
-                    _exec_code.append("\n" + "    " * (ind + 1) + "idoparcounter += 1")
-                    aform, _exec_code, count, dec = self.rec_exp_json_code(
-                        {"type": file["type"][i]},
-                        _exec_code,
-                        ind + 1,
-                        aform,
-                        count + 1,
-                        dec,
-                    )
-                aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                    if file["type"][i] == "null":
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append(
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"con['node{mask_idx}-mask'].append(np.int8(False))"
+                        )
+                        _exec_code.append(
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"con['node{union_idx}-tags'].append(0)"
+                        )
+                        _exec_code.append(
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"con['node{union_idx}-index'].append(0)"
+                        )
+                        print({"type": file["type"][dum_idx]})
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        # change dum_dat function to return full string
+                        #    + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
+                        # )
+                    else:
+                        if null_present:
+                            _exec_code.append(
+                                "\n" + "    " * (ind) + f"if idxx == {i}:"
+                            )
+                            _exec_code.append(
+                                "\n"
+                                + "    " * (ind + 1)
+                                + f"con['node{mask_idx}-mask'].append(np.int8(True))"
+                            )
+                            _exec_code.append(
+                                "\n"
+                                + "    " * (ind + 1)
+                                + f"con['node{union_idx}-tags'].append(idxx)"
+                            )
+                        else:
+                            _exec_code.append(
+                                "\n" + "    " * (ind) + f"if idxx == {i}:"
+                            )
+                            _exec_code.append(
+                                "\n"
+                                + "    " * (ind + 1)
+                                + f"con['node{union_idx}-tags'].append(idxx)"
+                            )
+                        _exec_code.insert(3, f"countvar{count}{i} = 0\n")
+                        _exec_code.append(
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"con['node{union_idx}-index'].append(countvar{count}{i})"
+                        )
+                        _exec_code.append(
+                            "\n" + "    " * (ind + 1) + f"countvar{count}{i} += 1"
+                        )
+                        aform, _exec_code, count, dec = self.rec_exp_json_code(
+                            {"type": file["type"][i]},
+                            _exec_code,
+                            ind + 1,
+                            aform,
+                            count + 1,
+                            dec,
+                        )
+                if aform[-1][-2] == ",":
+                    aform[-1] = aform[-1][0:-2]
+                aform.append(f'], "form_key": "node{union_idx}"}},')
+                if null_present:
+                    aform.append(f'"valid_when": true,"form_key": "node{mask_idx}"}}\n')
             return aform, _exec_code, count, dec
 
         elif isinstance(file["type"], dict):
