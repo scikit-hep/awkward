@@ -543,7 +543,7 @@ class read_avro_py:
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
-                            + f"con['node{union_idx}-tags'].append(0)"
+                            + f"con['node{union_idx}-tags'].append(np.int8(0))"
                         )
                         _exec_code.append(
                             "\n"
@@ -570,7 +570,7 @@ class read_avro_py:
                             _exec_code.append(
                                 "\n"
                                 + "    " * (ind + 1)
-                                + f"con['node{union_idx}-tags'].append(idxx)"
+                                + f"con['node{union_idx}-tags'].append(np.int8(idxx))"
                             )
                         else:
                             _exec_code.append(
@@ -579,7 +579,7 @@ class read_avro_py:
                             _exec_code.append(
                                 "\n"
                                 + "    " * (ind + 1)
-                                + f"con['node{union_idx}-tags'].append(idxx)"
+                                + f"con['node{union_idx}-tags'].append(np.int8(idxx))"
                             )
                         _exec_code.insert(3, f"countvar{count}{i} = 0\n")
                         _exec_code.append(
