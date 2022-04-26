@@ -25,9 +25,11 @@ def to_parquet(
     parquet_version="1.0",
     parquet_page_version="1.0",
     parquet_metadata_statistics=True,
+    parquet_dictionary_encoding=False,
+    parquet_byte_stream_split=False,
     parquet_coerce_timestamps=None,
     parquet_old_int96_timestamps=None,
-    parquet_compliant_nested=False,
+    parquet_compliant_nested=False,  # https://issues.apache.org/jira/browse/ARROW-16348
     parquet_extra_options=None,
     hook_after_write=None,
 ):
@@ -120,30 +122,6 @@ def to_parquet(
             replacement.update({x: value for x in parquet_columns(specifier)})
         compression_level = replacement
 
-    # if compression_categorical is True:
-    #     compression_categorical = parquet_columns(None, only="string")
-    # elif compression_categorical is False or compression_categorical is None:
-    #     compression_categorical = False
-    # elif isinstance(compression_categorical, Mapping):
-    #     replacement = {}
-    #     for specifier, value in compression_categorical.items():
-    #         replacement.update(
-    #             {x: value for x in parquet_columns(specifier, only="string")}
-    #         )
-    #     compression_categorical = [x for x, value in replacement.items() if value]
-
-    # if compression_floating is True:
-    #     compression_floating = parquet_columns(None, only="floating")
-    # elif compression_floating is False or compression_floating is None:
-    #     compression_floating = False
-    # elif isinstance(compression_floating, Mapping):
-    #     replacement = {}
-    #     for specifier, value in compression_floating.items():
-    #         replacement.update(
-    #             {x: value for x in parquet_columns(specifier, only="floating")}
-    #         )
-    #     compression_floating = [x for x, value in replacement.items() if value]
-
     if parquet_metadata_statistics is True:
         parquet_metadata_statistics = True
     elif parquet_metadata_statistics is False or parquet_metadata_statistics is None:
@@ -159,6 +137,30 @@ def to_parquet(
             replacement.extend([x for x in parquet_columns(specifier)])
         parquet_metadata_statistics = replacement
 
+    if parquet_dictionary_encoding is True:
+        parquet_dictionary_encoding = parquet_columns(None, only="string")
+    elif parquet_dictionary_encoding is False or parquet_dictionary_encoding is None:
+        parquet_dictionary_encoding = False
+    elif isinstance(parquet_dictionary_encoding, Mapping):
+        replacement = {}
+        for specifier, value in parquet_dictionary_encoding.items():
+            replacement.update(
+                {x: value for x in parquet_columns(specifier, only="string")}
+            )
+        parquet_dictionary_encoding = [x for x, value in replacement.items() if value]
+
+    if parquet_byte_stream_split is True:
+        parquet_byte_stream_split = parquet_columns(None, only="floating")
+    elif parquet_byte_stream_split is False or parquet_byte_stream_split is None:
+        parquet_byte_stream_split = False
+    elif isinstance(parquet_byte_stream_split, Mapping):
+        replacement = {}
+        for specifier, value in parquet_byte_stream_split.items():
+            replacement.update(
+                {x: value for x in parquet_columns(specifier, only="floating")}
+            )
+        parquet_byte_stream_split = [x for x, value in replacement.items() if value]
+
     if parquet_extra_options is None:
         parquet_extra_options = {}
 
@@ -169,12 +171,12 @@ def to_parquet(
             filesystem=file.fs,
             flavor=parquet_flavor,
             version=parquet_version,
-            # use_dictionary=compression_categorical,
+            use_dictionary=parquet_dictionary_encoding,
             compression=compression,
             write_statistics=parquet_metadata_statistics,
             use_deprecated_int96_timestamps=parquet_old_int96_timestamps,
             compression_level=compression_level,
-            # use_byte_stream_split=compression_floating,
+            use_byte_stream_split=parquet_byte_stream_split,
             data_page_version=parquet_page_version,
             use_compliant_nested_type=parquet_compliant_nested,
             data_page_size=data_page_size,
