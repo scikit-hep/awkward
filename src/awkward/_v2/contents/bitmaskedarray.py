@@ -634,7 +634,9 @@ class BitMaskedArray(Content):
             return out
 
         mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)[: self._length]
-        out = self._content._getitem_range(slice(0, self._length))._to_list(behavior, json_conversions)
+        out = self._content._getitem_range(slice(0, self._length))._to_list(
+            behavior, json_conversions
+        )
 
         for i, isvalid in enumerate(mask):
             if not isvalid:

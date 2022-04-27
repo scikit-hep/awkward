@@ -1390,7 +1390,9 @@ class Content:
                 if complex_real_string is not None:
                     Real = numbers.Real
                     Complex = numbers.Complex
-                    if any(not isinstance(x, Real) and isinstance(x, Complex) for x in out):
+                    if any(
+                        not isinstance(x, Real) and isinstance(x, Complex) for x in out
+                    ):
                         outimag = [None] * len(out)
                         for i, x in enumerate(out):
                             if isinstance(x, Complex):

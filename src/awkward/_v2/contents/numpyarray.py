@@ -1297,7 +1297,9 @@ class NumpyArray(Content):
 
     def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "byte":
-            convert_bytes = None if json_conversions is None else json_conversions["convert_bytes"]
+            convert_bytes = (
+                None if json_conversions is None else json_conversions["convert_bytes"]
+            )
             if convert_bytes is None:
                 return ak._v2._util.tobytes(self._data)
             else:
@@ -1318,8 +1320,12 @@ class NumpyArray(Content):
                     if issubclass(self.dtype.type, np.complexfloating):
                         return ak._v2.contents.RecordArray(
                             [
-                                ak._v2.contents.NumpyArray(self._data.real, nplike=self._nplike),
-                                ak._v2.contents.NumpyArray(self._data.imag, nplike=self._nplike),
+                                ak._v2.contents.NumpyArray(
+                                    self._data.real, nplike=self._nplike
+                                ),
+                                ak._v2.contents.NumpyArray(
+                                    self._data.imag, nplike=self._nplike
+                                ),
                             ],
                             [complex_real_string, complex_imag_string],
                             self.length,
