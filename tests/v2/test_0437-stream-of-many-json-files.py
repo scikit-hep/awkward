@@ -132,7 +132,7 @@ def test_two_arrays():
     array = ak._v2.operations.convert.from_json(str)
     assert array.tolist() == ["one", "two"]
 
-    array = ak._v2.operations.io.from_json_file(
+    array = ak._v2.operations.convert.from_json_file(
         os.path.join(path, "samples/test-two-arrays.json")
     )
     assert array.tolist() == [
@@ -286,7 +286,7 @@ def test_array_tojson():
 
 def test_fromfile():
     # read multiple json fragments from a json file
-    array = ak._v2.operations.io.from_json_file(
+    array = ak._v2.operations.convert.from_json_file(
         os.path.join(path, "samples/test-record-array.json")
     )
     assert array.tolist() == [
@@ -300,7 +300,7 @@ def test_fromfile():
 
     # read json file containing 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with floats
-    array = ak._v2.operations.io.from_json_file(
+    array = ak._v2.operations.convert.from_json_file(
         os.path.join(path, "samples/test.json"),
         infinity_string="inf",
         minus_infinity_string="-inf",
@@ -363,7 +363,9 @@ def test_fromfile():
     ]
 
     # read json file containing 'nan' and 'inf' user-defined strings
-    array = ak._v2.operations.io.from_json_file(os.path.join(path, "samples/test.json"))
+    array = ak._v2.operations.convert.from_json_file(
+        os.path.join(path, "samples/test.json")
+    )
 
     assert array.tolist() == [
         1.1,
@@ -423,7 +425,7 @@ def test_fromfile():
 
     # read json file containing 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with a predefined 'None' string
-    array = ak._v2.operations.io.from_json_file(
+    array = ak._v2.operations.convert.from_json_file(
         os.path.join(path, "samples/test.json"),
         infinity_string="inf",
         minus_infinity_string="-inf",
@@ -499,7 +501,7 @@ def test_fromfile():
     # read json file containing multiple definitions of 'nan' and 'inf'
     # user-defined strings
     # replace can only work for one string definition
-    array = ak._v2.operations.io.from_json_file(
+    array = ak._v2.operations.convert.from_json_file(
         os.path.join(path, "samples/test-nan-inf.json"),
         infinity_string="Infinity",
         nan_string="None at all",

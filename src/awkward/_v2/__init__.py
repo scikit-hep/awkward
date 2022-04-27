@@ -31,7 +31,6 @@ import awkward._v2.behaviors.mixins  # noqa: F401
 import awkward._v2.behaviors.string  # noqa: F401
 
 # operations
-from awkward._v2.operations.io import *  # noqa: F401, F403
 from awkward._v2.operations.convert import *  # noqa: F401, F403
 from awkward._v2.operations.describe import *  # noqa: F401, F403
 from awkward._v2.operations.structure import *  # noqa: F401, F403
