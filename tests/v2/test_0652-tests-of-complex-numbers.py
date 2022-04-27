@@ -112,7 +112,7 @@ def test_to_json():
         ak._v2.operations.convert.to_json(
             ak._v2.operations.convert.from_iter([1 + 1j, 2 + 2j, 3 + 3j])
         )
-    assert "type complex is not JSON serializable" in str(err)
+    assert "not JSON serializable" in str(err)
 
     expectation = [{"r": 1.0, "i": 1.0}, {"r": 2.0, "i": 2.0}, {"r": 3.0, "i": 3.0}]
     assert expectation == json.loads(
