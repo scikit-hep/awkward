@@ -30,3 +30,6 @@ from awkward._v2.operations.convert.ak_metadata_from_parquet import (  # noqa: F
 from awkward._v2.operations.convert.ak_to_buffers import to_buffers  # noqa: F401
 from awkward._v2.operations.convert.ak_from_buffers import from_buffers  # noqa: F401
 from awkward._v2.operations.convert.ak_to_pandas import to_pandas  # noqa: F401
+from awkward._v2.operations.convert.ak_to_rdataframe import (  # noqa: F401
+    to_rdataframe,
+)
