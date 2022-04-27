@@ -151,9 +151,9 @@ def test_complex_with_nan_and_inf():
 
 
 def test_tofile(tmp_path):
-    ak._v2.operations.convert.to_json_file(
+    ak._v2.operations.convert.to_json(
         ak._v2.operations.convert.from_json("[[1.1,2.2,3],[],[4,5.5]]"),
-        os.path.join(str(tmp_path), "tmp1.json"),
+        file=os.path.join(str(tmp_path), "tmp1.json"),
     )
 
     with open(os.path.join(str(tmp_path), "tmp1.json")) as f:
@@ -258,8 +258,8 @@ def test_numpy():
         )
     )
     assert (
-        ak._v2.operations.convert.to_json(b3)
-        == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,Infinity],[40.4,50.5,60.6]]]"
+        ak._v2.operations.convert.to_json(b3, infinity_string="Infinity")
+        == '[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,"Infinity"],[40.4,50.5,60.6]]]'
     )
     b4 = ak._v2.contents.NumpyArray(
         np.array(
@@ -270,8 +270,8 @@ def test_numpy():
         )
     )
     assert (
-        ak._v2.operations.convert.to_json(b4)
-        == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,-Infinity],[40.4,50.5,60.6]]]"
+        ak._v2.operations.convert.to_json(b4, minus_infinity_string="-Infinity")
+        == '[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,"-Infinity"],[40.4,50.5,60.6]]]'
     )
     c = ak._v2.contents.NumpyArray(
         np.array([[True, False, True], [False, False, True]])
