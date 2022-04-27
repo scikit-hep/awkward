@@ -16,7 +16,7 @@ def to_json_file(
     infinity_string=None,
     minus_infinity_string=None,
     complex_record_fields=None,
-    buffersize=65536,
+    convert_bytes=None,
 ):
     """
     Args:
@@ -36,8 +36,9 @@ def to_json_file(
             number.
         complex_record_fields (None or (str, str)): If not None, defines a pair of
             field names to interpret records as complex numbers.
-        buffersize (int): Size (in bytes) of the buffer used by the JSON
-            parser.
+        convert_bytes (None or function): If not None, this function is applied to
+            all Python 3 bytes objects to produce something JSON serializable,
+            such as a string using UTF-8 or Base-64 encoding, lists of integers, etc.
 
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a JSON file.
@@ -56,7 +57,7 @@ def to_json_file(
        * #ak.types.RecordArray with field names: converted into JSON objects.
        * #ak.types.UnionArray: JSON data are naturally heterogeneous.
 
-    See also #ak.from_json and #ak.Array.tojson.
+    See also #ak.from_json.
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.to_json_file",
@@ -69,7 +70,7 @@ def to_json_file(
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
             complex_record_fields=complex_record_fields,
-            buffersize=buffersize,
+            convert_bytes=convert_bytes,
         ),
     ):
         return _impl(
@@ -81,7 +82,7 @@ def to_json_file(
             infinity_string,
             minus_infinity_string,
             complex_record_fields,
-            buffersize,
+            convert_bytes,
         )
 
 
@@ -94,7 +95,7 @@ def _impl(
     infinity_string,
     minus_infinity_string,
     complex_record_fields,
-    buffersize,
+    convert_bytes,
 ):
     if array is None or isinstance(array, (bool, str, bytes, Number)):
         return json.dump(array)
@@ -134,26 +135,16 @@ def _impl(
     else:
         raise ak._v2._util.error(TypeError(f"unrecognized array type: {repr(array)}"))
 
-    if complex_record_fields is None:
-        complex_real_string = None
-        complex_imag_string = None
-    elif (
-        isinstance(complex_record_fields, tuple)
-        and len(complex_record_fields) == 2
-        and isinstance(complex_record_fields[0], str)
-        and isinstance(complex_record_fields[1], str)
-    ):
-        complex_real_string, complex_imag_string = complex_record_fields
-
-    with open(destination, "w", encoding="utf-8") as f:
-        for chunk in json.dumps(
-            out.tojson(
-                nan_string,
-                infinity_string,
-                minus_infinity_string,
-                complex_real_string,
-                complex_imag_string,
-            ),
-            separators=(",", ":"),
-        ):
-            f.write(chunk)
+    with open(destination, "w", encoding="utf-8") as file:
+        jsondata = out.to_json(
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+            complex_record_fields=complex_record_fields,
+            convert_bytes=convert_bytes,
+            behavior=ak._v2._util.behavior_of(array),
+        )
+        try:
+            json.dump(jsondata, file, separators=(",", ":"))
+        except Exception as err:
+            raise ak._v2._util.error(err)

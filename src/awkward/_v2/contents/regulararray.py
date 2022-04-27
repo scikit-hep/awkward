@@ -1214,21 +1214,30 @@ class RegularArray(Content):
 
     def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "bytestring":
+            convert_bytes = None if json_conversions is None else json_conversions["convert_bytes"]
             content = ak._v2._util.tobytes(self._content.data)
             length, size = self._length, self._size
             out = [None] * length
-            for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size]
+            if convert_bytes is None:
+                for i in range(length):
+                    out[i] = content[(i) * size : (i + 1) * size]
+            else:
+                for i in range(length):
+                    out[i] = convert_bytes(content[(i) * size : (i + 1) * size])
             return out
 
         elif self.parameter("__array__") == "string":
-            content = ak._v2._util.tobytes(self._content.data)
+            data = self._content.data
+            if hasattr(data, "tobytes"):
+                def tostring(x):
+                    return x.tobytes().decode(errors="surrogateescape")
+            else:
+                def tostring(x):
+                    return x.tostring().decode(errors="surrogateescape")
             length, size = self._length, self._size
             out = [None] * length
             for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size].decode(
-                    errors="surrogateescape"
-                )
+                out[i] = tostring(data[(i) * size : (i + 1) * size])
             return out
 
         else:

@@ -1012,7 +1012,7 @@ class RecordArray(Content):
         if out is not None:
             return out
 
-        if self.is_tuple:
+        if self.is_tuple and json_conversions is None:
             contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             length = self._length
             out = [None] * length
@@ -1022,6 +1022,8 @@ class RecordArray(Content):
 
         else:
             fields = self._fields
+            if fields is None:
+                fields = [str(i) for i in range(len(self._contents))]
             contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             length = self._length
             out = [None] * length

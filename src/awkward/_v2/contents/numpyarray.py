@@ -1297,7 +1297,11 @@ class NumpyArray(Content):
 
     def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "byte":
-            return ak._v2._util.tobytes(self._data)
+            convert_bytes = None if json_conversions is None else json_conversions["convert_bytes"]
+            if convert_bytes is None:
+                return ak._v2._util.tobytes(self._data)
+            else:
+                return convert_bytes(ak._v2._util.tobytes(self._data))
 
         elif self.parameter("__array__") == "char":
             return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")

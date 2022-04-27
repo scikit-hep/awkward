@@ -85,7 +85,7 @@ def test_bytearray():
     array = ak._v2.contents.NumpyArray(
         np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
     )
-    assert ak._v2.operations.convert.to_json(array) == '"hellothere"'
+    assert ak._v2.operations.convert.to_json(array, convert_bytes=bytes.decode) == '"hellothere"'
 
 
 def test_complex():

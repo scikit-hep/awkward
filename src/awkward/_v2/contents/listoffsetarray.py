@@ -2083,19 +2083,28 @@ class ListOffsetArray(Content):
         nextcontent = self._content._getitem_range(slice(mini, maxi))
 
         if self.parameter("__array__") == "bytestring":
+            convert_bytes = None if json_conversions is None else json_conversions["convert_bytes"]
             content = ak._v2._util.tobytes(nextcontent.data)
             out = [None] * starts.length
-            for i in range(starts.length):
-                out[i] = content[starts_data[i] : stops_data[i]]
+            if convert_bytes is None:
+                for i in range(starts.length):
+                    out[i] = content[starts_data[i] : stops_data[i]]
+            else:
+                for i in range(starts.length):
+                    out[i] = convert_bytes(content[starts_data[i] : stops_data[i]])
             return out
 
         elif self.parameter("__array__") == "string":
-            content = ak._v2._util.tobytes(nextcontent.data)
+            data = nextcontent.data
+            if hasattr(data, "tobytes"):
+                def tostring(x):
+                    return x.tobytes().decode(errors="surrogateescape")
+            else:
+                def tostring(x):
+                    return x.tostring().decode(errors="surrogateescape")
             out = [None] * starts.length
             for i in range(starts.length):
-                out[i] = content[starts_data[i] : stops_data[i]].decode(
-                    errors="surrogateescape"
-                )
+                out[i] = tostring(data[starts_data[i] : stops_data[i]])
             return out
 
         else:
