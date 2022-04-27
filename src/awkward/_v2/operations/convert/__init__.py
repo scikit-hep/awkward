@@ -36,3 +36,6 @@ from awkward._v2.operations.convert.ak_to_pandas import to_pandas  # noqa: F401
 from awkward._v2.operations.convert.ak_to_rdataframe import (  # noqa: F401
     to_rdataframe,
 )
+from awkward._v2.operations.convert.ak_from_rdataframe import (  # noqa: F401
+    from_rdataframe,
+)
