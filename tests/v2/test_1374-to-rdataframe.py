@@ -200,8 +200,8 @@ ROOT::RDF::RInterface<ROOT::RDF::RDFDetail::RLoopManager, RWonkyDS> MakeWonkyDat
     data_frame = ROOT.awkward.MakeWonkyDataFrame(
         len(example1), lookup1.arrayptrs.ctypes.data, lookup2.arrayptrs.ctypes.data
     )
-    assert data_frame.GetColumnType("x") == "double"
-    assert data_frame.GetColumnType("y").startswith("awkward::Record_")
+    assert data_frame.GetColumnType("one") == "double"
+    assert data_frame.GetColumnType("two").startswith("awkward::Record_")
 
     data_frame.Display().Print()
 
@@ -225,7 +225,7 @@ def test_two_columns_as_rvecs():
         template<typename T>
         struct MyFunctorX_RVec {
             void operator()(T const& x) {
-                assert(x == x_val[i_x++]);
+                R__ASSERT(x == x_val[i_x++]);
             }
         };
         """
@@ -235,12 +235,12 @@ def test_two_columns_as_rvecs():
     done = compiler(
         """
         int i_y = 0;
-        double y_val[5] = {10.1, 20.2, 30.3, 40.4, 50.5};
+        double y_val[5] = {1.1, 2.2, 3.3, 4.4, 5.5};
 
         template<typename T>
         struct MyFunctorY_RVec {
             void operator()(T const& y) {
-                assert(y.x() == y_val[i_y++]);
+                R__ASSERT(y.x() == y_val[i_y++]);
             }
         };
         """
@@ -262,17 +262,25 @@ def test_list_array():
 
     data_frame = ak._v2.operations.convert.to_rdataframe({"x": ak_array})
 
-    assert data_frame.GetColumnType("x") == "ROOT::RVec<ROOT::RVec<double>>"
+    assert data_frame.GetColumnType("x") == "ROOT::RVec<double>"
 
     done = compiler(
         """
-        int i_xrv = 0;
-        ROOT::RVec<ROOT::RVec<double>> xrv_val = {{1.1}, {2.2, 3.3, 4.4}, {5.5, 6.6}};
+        int64_t row = 0;
+
+        ROOT::RVec<ROOT::RVec<double>> row_vals =
+        {{ 1.1},
+         { 2.2, 3.3, 4.4 },
+         { 5.5, 6.6 }
+        };
 
         template<typename T>
         struct MyFunctor_RVec {
             void operator()(T const& x) {
-                assert(x == xrv_val[i_xv++]);
+                for( int64_t j = 0; j < x.size(); j++ ) {
+                    R__ASSERT(x[j] == row_vals[row][j]);
+                }
+                row++;
             }
         };
         """
@@ -302,7 +310,7 @@ def test_two_columns_as_vecs():
         template<typename T>
         struct MyFunctorX_Vec {
             void operator()(T const& x) {
-                assert(x == xv_val[i_xv++]);
+                R__ASSERT(x == xv_val[i_xv++]);
             }
         };
         """
@@ -312,12 +320,12 @@ def test_two_columns_as_vecs():
     done = compiler(
         """
         int i_yv = 0;
-        double yv_val[5] = {10.1, 20.2, 30.3, 40.4, 50.5};
+        double yv_val[5] = {1.1, 2.2, 3.3, 4.4, 5.5};
 
         template<typename T>
         struct MyFunctorY_Vec {
             void operator()(T const& y) {
-                assert(y.x() == yv_val[i_yv++]);
+                R__ASSERT(y.x() == yv_val[i_yv++]);
             }
         };
         """
@@ -371,34 +379,85 @@ def test_jims_example1():
     rdf = ak._v2.to_rdataframe({"some_array": array})
     list(rdf.GetColumnNames())
     rdf_y = rdf.Define("y", "some_array.x()")
+
+    # rdf_y.Foreach((assert (y == some_array.x())), ["y", "some_array"])
     rdf_y.Display().Print()
 
 
 def test_jims_example2():
     example1 = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
     example2 = ak._v2.Array(
-        [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
+        [
+            {"x": [1.1, 1.2, 1.3]},
+            {"x": [2.2, 2.21]},
+            {"x": [3.3]},
+            {"x": [4.4, 4.41, 4.42, 4.44]},
+            {"x": [5.5]},
+        ]
     )
 
     data_frame = ak._v2.operations.convert.to_rdataframe(
         {"one": example1, "two": example2}
     )
 
-    assert data_frame.GetColumnType("x") == "double"
-    assert data_frame.GetColumnType("y").startswith("awkward::Record_")
+    assert data_frame.GetColumnType("one") == "double"
+    assert data_frame.GetColumnType("two").startswith("awkward::Record_")
 
-    data_frame.Display().Print()
+    done = compiler(
+        """
+        int i_one = 0;
+        double one_val[5] = {1.1, 2.2, 3.3, 4.4, 5.5};
+
+        template<typename T>
+        struct check_one {
+            void operator()(T const& one) {
+                R__ASSERT(one == one_val[i_one++]);
+            }
+        };
+        """
+    )
+    assert done is True
+
+    done = compiler(
+        """
+        int i_two = 0;
+        ROOT::RVec<ROOT::RVec<double>> two_val =
+            {{ 1.1, 1.2, 1.3 },
+             { 2.2, 2.21 },
+             { 3.3 },
+             { 4.4, 4.41, 4.42, 4.44 },
+             { 5.5 }
+            };
+
+        template<typename T>
+        struct check_two {
+            void operator()(T const& two) {
+                for( int64_t j = 0; j < two.x().size(); j++ ) {
+                    R__ASSERT(two.x()[j] == two_val[i_two][j]);
+                }
+                i_two++;
+            }
+        };
+        """
+    )
+    assert done is True
+
+    f_one = ROOT.check_one[data_frame.GetColumnType("one")]()
+    f_two = ROOT.check_two[data_frame.GetColumnType("two")]()
+
+    data_frame.Foreach(f_one, ["one"])
+    data_frame.Foreach(f_two, ["two"])
 
 
 def test_empty_array():
     array = ak._v2.Array([])
     rdf = ak._v2.to_rdataframe({"empty_array": array})
     assert rdf.GetColumnType("empty_array") == "double"
-    rdf.Display().Print()
+    assert rdf.Count().GetValue() == 0
 
 
 def test_empty_list_array():
     array = ak._v2.Array([[], [], []])
     rdf = ak._v2.to_rdataframe({"empty_list_array": array})
     assert rdf.GetColumnType("empty_list_array") == "ROOT::RVec<double>"
-    rdf.Display().Print()
+    assert rdf.Count().GetValue() == 3
