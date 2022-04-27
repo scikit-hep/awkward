@@ -51,7 +51,8 @@ def to_json(
             infinity values will be replaced with this string instead of a JSON
             number.
         complex_record_fields (None or (str, str)): If not None, defines a pair of
-            field names to interpret records as complex numbers.
+            field names to interpret records as complex numbers, such as
+            `("real", "imag")`.
         convert_bytes (None or function): If not None, this function is applied to
             all Python 3 bytes objects to produce something JSON serializable,
             such as a string using UTF-8 or Base64 encoding, lists of integers, etc.
@@ -235,23 +236,25 @@ def _impl(
                             sort_keys=False,
                         )
                     )
-                return line_delimited.join(out)
+                    out.append(line_delimited)
+                return "".join(out)
 
             else:
                 with opener() as file:
-                    json.dump(
-                        datum,
-                        file,
-                        skipkeys=True,
-                        ensure_ascii=True,
-                        check_circular=False,
-                        allow_nan=False,
-                        indent=None,
-                        separators=separators,
-                        default=convert_other,
-                        sort_keys=False,
-                    )
-                    file.write(line_delimited)
+                    for datum in jsondata:
+                        json.dump(
+                            datum,
+                            file,
+                            skipkeys=True,
+                            ensure_ascii=True,
+                            check_circular=False,
+                            allow_nan=False,
+                            indent=None,
+                            separators=separators,
+                            default=convert_other,
+                            sort_keys=False,
+                        )
+                        file.write(line_delimited)
 
         else:
             if isinstance(array, (ak._v2.highlevel.Record, ak._v2.record.Record)):
