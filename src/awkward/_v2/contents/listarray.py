@@ -1439,20 +1439,3 @@ class ListArray(Content):
             parameters=self._parameters,
             nplike=nplike,
         )
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        return ListOffsetArray._to_json(
-            self,
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
-        )

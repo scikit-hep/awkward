@@ -2130,44 +2130,6 @@ class ListOffsetArray(Content):
             nplike=nplike,
         )
 
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        if (
-            self.parameter("__array__") == "bytestring"
-            or self.parameter("__array__") == "string"
-        ):
-            content = ak._v2._util.tobytes(self._content.data)
-            starts, stops = self.starts, self.stops
-            out = [None] * starts.length
-            for i in range(starts.length):
-                out[i] = content[starts[i] : stops[i]].decode(errors="surrogateescape")
-            return out
-
-        else:
-            out = self._to_json_custom()
-            if out is not None:
-                return out
-
-            content = self._content._to_json(
-                nan_string,
-                infinity_string,
-                minus_infinity_string,
-                complex_real_string,
-                complex_imag_string,
-            )
-            starts, stops = self.starts, self.stops
-            out = [None] * starts.length
-
-            for i in range(starts.length):
-                out[i] = content[starts[i] : stops[i]]
-            return out
-
     def _awkward_strings_to_nonfinite(self, nonfinit_dict):
         if self.parameter("__array__") == "string":
             strings = self.to_list()

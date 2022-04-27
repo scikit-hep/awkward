@@ -339,13 +339,3 @@ class EmptyArray(Content):
 
     def _to_nplike(self, nplike):
         return EmptyArray(self._identifier, self._parameters, nplike=nplike)
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        return []

@@ -1662,29 +1662,3 @@ class IndexedOptionArray(Content):
         return IndexedOptionArray(
             index, content, self.identifier, self.parameters, nplike=nplike
         )
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        out = self._to_json_custom()
-        if out is not None:
-            return out
-
-        index = self._index.raw(numpy)
-        content = self._content._to_json(
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
-        )
-        out = [None] * len(index)
-        for i, ind in enumerate(index):
-            if ind >= 0:
-                out[i] = content[ind]
-        return out
