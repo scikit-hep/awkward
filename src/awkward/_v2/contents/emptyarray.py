@@ -334,7 +334,7 @@ class EmptyArray(Content):
     def packed(self):
         return self
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         return []
 
     def _to_nplike(self, nplike):

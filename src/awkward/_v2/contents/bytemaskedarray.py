@@ -1009,13 +1009,13 @@ class ByteMaskedArray(Content):
                 self._nplike,
             )
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)
-        out = self._content._getitem_range(slice(0, len(mask)))._to_list(behavior)
+        out = self._content._getitem_range(slice(0, len(mask)))._to_list(behavior, json_conversions)
 
         for i, isvalid in enumerate(mask):
             if not isvalid:
@@ -1044,7 +1044,7 @@ class ByteMaskedArray(Content):
         complex_real_string,
         complex_imag_string,
     ):
-        out = self._to_list_custom(behavior)
+        out = self._to_list_custom(behavior, None)
         if out is not None:
             return out
 

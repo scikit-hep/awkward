@@ -1424,8 +1424,8 @@ class ListArray(Content):
     def packed(self):
         return self.toListOffsetArray64(True).packed()
 
-    def _to_list(self, behavior):
-        return ListOffsetArray._to_list(self, behavior)
+    def _to_list(self, behavior, json_conversions):
+        return ListOffsetArray._to_list(self, behavior, json_conversions)
 
     def _to_nplike(self, nplike):
         starts = self._starts._to_nplike(nplike)

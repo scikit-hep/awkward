@@ -543,12 +543,12 @@ class UnmaskedArray(Content):
             self._content.packed(), self._identifier, self._parameters, self._nplike
         )
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
-        return self._content._to_list(behavior)
+        return self._content._to_list(behavior, json_conversions)
 
     def _to_nplike(self, nplike):
         content = self._content._to_nplike(nplike)

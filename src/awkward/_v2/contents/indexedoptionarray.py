@@ -1637,8 +1637,8 @@ class IndexedOptionArray(Content):
                 self._nplike,
             )
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
@@ -1648,7 +1648,7 @@ class IndexedOptionArray(Content):
         nextcontent = self._content._carry(
             ak._v2.index.Index(index[not_missing]), False
         )
-        out = nextcontent._to_list(behavior)
+        out = nextcontent._to_list(behavior, json_conversions)
 
         for i, isvalid in enumerate(not_missing):
             if not isvalid:

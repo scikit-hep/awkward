@@ -1007,13 +1007,13 @@ class RecordArray(Content):
             self._nplike,
         )
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         if self.is_tuple:
-            contents = [x._to_list(behavior) for x in self._contents]
+            contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             length = self._length
             out = [None] * length
             for i in range(length):
@@ -1022,7 +1022,7 @@ class RecordArray(Content):
 
         else:
             fields = self._fields
-            contents = [x._to_list(behavior) for x in self._contents]
+            contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             length = self._length
             out = [None] * length
             for i in range(length):

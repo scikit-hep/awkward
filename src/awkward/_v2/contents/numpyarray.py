@@ -1295,7 +1295,7 @@ class NumpyArray(Content):
     def packed(self):
         return self.contiguous().toRegularArray()
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "byte":
             return ak._v2._util.tobytes(self._data)
 
@@ -1303,11 +1303,45 @@ class NumpyArray(Content):
             return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")
 
         else:
-            out = self._to_list_custom(behavior)
+            out = self._to_list_custom(behavior, json_conversions)
             if out is not None:
                 return out
 
-            return self._data.tolist()
+            if json_conversions is not None:
+                complex_real_string = json_conversions["complex_real_string"]
+                complex_imag_string = json_conversions["complex_imag_string"]
+                if complex_real_string is not None:
+                    if issubclass(self.dtype.type, np.complexfloating):
+                        return ak._v2.contents.RecordArray(
+                            [
+                                ak._v2.contents.NumpyArray(self._data.real, nplike=self._nplike),
+                                ak._v2.contents.NumpyArray(self._data.imag, nplike=self._nplike),
+                            ],
+                            [complex_real_string, complex_imag_string],
+                            self.length,
+                            parameters=self._parameters,
+                            nplike=self._nplike,
+                        )._to_list(behavior, json_conversions)
+
+            out = self._data.tolist()
+
+            if json_conversions is not None:
+                nan_string = json_conversions["nan_string"]
+                if nan_string is not None:
+                    for i in self._nplike.nonzero(self._nplike.isnan(self._data))[0]:
+                        out[i] = nan_string
+
+                infinity_string = json_conversions["infinity_string"]
+                if infinity_string is not None:
+                    for i in self._nplike.nonzero(self._data == np.inf)[0]:
+                        out[i] = infinity_string
+
+                minus_infinity_string = json_conversions["minus_infinity_string"]
+                if minus_infinity_string is not None:
+                    for i in self._nplike.nonzero(self._data == -np.inf)[0]:
+                        out[i] = minus_infinity_string
+
+            return out
 
     def _to_nplike(self, nplike):
         return NumpyArray(

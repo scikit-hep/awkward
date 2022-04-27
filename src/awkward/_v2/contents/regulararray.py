@@ -1212,7 +1212,7 @@ class RegularArray(Content):
             self._nplike,
         )
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "bytestring":
             content = ak._v2._util.tobytes(self._content.data)
             length, size = self._length, self._size
@@ -1232,11 +1232,11 @@ class RegularArray(Content):
             return out
 
         else:
-            out = self._to_list_custom(behavior)
+            out = self._to_list_custom(behavior, json_conversions)
             if out is not None:
                 return out
 
-            content = self._content._to_list(behavior)
+            content = self._content._to_list(behavior, json_conversions)
             length, size = self._length, self._size
             out = [None] * length
             for i in range(length):
