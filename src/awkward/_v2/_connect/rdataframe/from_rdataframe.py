@@ -35,8 +35,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
         # check if it's an integral or a floating point type
         if cppyy.gbl._is_arithmetic[cpp_reference.value_type]():
-            # FIXME: use form?
-            # form = ak._v2.forms.numpyform.NumpyForm(primitive_form_type(cpp_reference.value_type))
+
             array = numpy.asarray(cpp_reference)
 
             # FIXME: copy data?
@@ -46,6 +45,8 @@ def from_rdataframe(data_frame, column, column_as_record=True):
                 else ak._v2.highlevel.Array(array)
             )
         else:
+            # check if it is iterable
+            # print(cpp_reference.value_type)
             raise ak._v2._util.error(NotImplementedError)
 
     else:
