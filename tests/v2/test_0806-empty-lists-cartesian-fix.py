@@ -19,7 +19,6 @@ def test_empty_arrays_cartesian():
     to_list(ak._v2.operations.structure.concatenate([one, two], axis=0))
 
 
-@pytest.mark.skip(reason="ak._v2.operations.structure.firsts to be implemented")
 def test_cartesian():
     muon = ak._v2.Array([[{"pt": 1.0}], []], with_name="muon")
     electron = ak._v2.Array([[], [{"pt": 1.0}]], with_name="electron")
@@ -42,6 +41,7 @@ def test_cartesian():
     result = ak._v2.operations.structure.cartesian(
         [candidate, ak._v2.Array([[1, 2, 3], []])], axis=1
     )
+
     assert to_list(result) == [None, None]
 
     one, two = ak._v2.operations.structure.broadcast_arrays(

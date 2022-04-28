@@ -120,7 +120,6 @@ def test_cartesian():
         ak._v2.operations.structure.cartesian([one, two], axis=-5)
 
 
-@pytest.mark.skip(reason="ak._v2.operations.structure.firsts to be implemented")
 def test_firsts():
     array = ak._v2.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]]])
 

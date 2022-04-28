@@ -27,10 +27,10 @@ or
 
 else:
     if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
-        "6.0.0"
+        "7.0.0"
     ):
         pyarrow = None
-        error_message = "pyarrow 6.0.0 or later required for {0}"
+        error_message = "pyarrow 7.0.0 or later required for {0}"
 
 
 def import_pyarrow(name):
@@ -904,6 +904,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         buffers = obj.buffers()
 
         awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(obj.type)
+
         out = popbuffers(
             obj, awkwardarrow_type, storage_type, buffers, generate_bitmasks
         )
@@ -919,60 +920,94 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
             return ak._v2.operations.structure.concatenate(layouts, highlevel=False)
 
     elif isinstance(obj, pyarrow.lib.RecordBatch):
-        child_array = []
-        for i in range(obj.num_columns):
-            layout = handle_arrow(obj.column(i), generate_bitmasks)
-            if not obj.schema.field(i).nullable:
-                child_array.append(remove_optiontype(layout))
-            else:
-                child_array.append(layout)
-
         if pass_empty_field and list(obj.schema.names) == [""]:
-            return child_array[0]
+            layout = handle_arrow(obj.column(0), generate_bitmasks)
+            if not obj.schema.field(0).nullable:
+                return remove_optiontype(layout)
+            else:
+                return layout
         else:
-            return ak._v2.contents.RecordArray(
-                child_array, obj.schema.names, length=len(obj)
+            record_is_optiontype = False
+            optiontype_fields = []
+            optiontype_parameters = None
+            recordtype_parameters = None
+            if (
+                obj.schema.metadata is not None
+                and b"ak:parameters" in obj.schema.metadata
+            ):
+                for x in json.loads(obj.schema.metadata[b"ak:parameters"]):
+                    (key,) = x.keys()
+                    (value,) = x.values()
+                    if key == "optiontype_fields":
+                        optiontype_fields = value
+                    elif key in (
+                        "UnmaskedArray",
+                        "BitMaskedArray",
+                        "ByteMaskedArray",
+                        "IndexedOptionArray",
+                    ):
+                        record_is_optiontype = True
+                        optiontype_parameters = value
+                    elif key == "RecordArray":
+                        recordtype_parameters = value
+
+            record_mask = None
+            contents = []
+            for i in range(obj.num_columns):
+                field = obj.schema.field(i)
+                layout = handle_arrow(obj.column(i), generate_bitmasks)
+                if record_is_optiontype:
+                    if record_mask is None:
+                        record_mask = layout.mask_as_bool(valid_when=False)
+                    else:
+                        record_mask &= layout.mask_as_bool(valid_when=False)
+                if (
+                    record_is_optiontype and field.name not in optiontype_fields
+                ) or not field.nullable:
+                    contents.append(remove_optiontype(layout))
+                else:
+                    contents.append(layout)
+
+            out = ak._v2.contents.RecordArray(
+                contents,
+                obj.schema.names,
+                length=len(obj),
+                parameters=recordtype_parameters,
             )
+
+            if record_is_optiontype and record_mask is None and generate_bitmasks:
+                record_mask = numpy.zeros(len(out), dtype=np.bool_)
+
+            if record_is_optiontype and record_mask is None:
+                return ak._v2.contents.UnmaskedArray(
+                    out, parameters=optiontype_parameters
+                )
+
+            elif record_is_optiontype:
+                return ak._v2.contents.ByteMaskedArray(
+                    ak._v2.index.Index8(record_mask),
+                    out,
+                    valid_when=False,
+                    parameters=optiontype_parameters,
+                )
+
+            else:
+                return out
 
     elif isinstance(obj, pyarrow.lib.Table):
         batches = obj.combine_chunks().to_batches()
         if len(batches) == 0:
-            # zero-length array with the right type
+            # FIXME: create a zero-length array with the right type
             raise ak._v2._util.error(NotImplementedError)
         elif len(batches) == 1:
-            out = handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
+            return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:
             arrays = [
                 handle_arrow(batch, generate_bitmasks, pass_empty_field)
                 for batch in batches
                 if len(batch) > 0
             ]
-            out = ak._v2.operations.structure.concatenate(arrays, highlevel=False)
-
-        if obj.schema.metadata is not None and b"ak:parameters" in obj.schema.metadata:
-            optiontype, recordtype = None, None
-            if out.is_OptionType:
-                optiontype = out
-            if out.is_RecordType:
-                recordtype = out
-            elif out.content.is_RecordType:
-                recordtype = out.content
-
-            parameters = json.loads(obj.schema.metadata[b"ak:parameters"])
-            for x in parameters:
-                (key,) = x.keys()
-                (value,) = x.values()
-                if optiontype is not None and key in (
-                    "UnmaskedArray",
-                    "BitMaskedArray",
-                    "ByteMaskedArray",
-                    "IndexedOptionArray",
-                ):
-                    optiontype._parameters = value
-                elif recordtype is not None and key == "RecordArray":
-                    recordtype._parameters = value
-
-        return out
+            return ak._v2.operations.structure.concatenate(arrays, highlevel=False)
 
     elif (
         isinstance(obj, Iterable)
@@ -999,43 +1034,57 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
 
 
 def form_handle_arrow(schema, pass_empty_field=False):
-    forms = []
-    for i, arrowtype in enumerate(schema.types):
-        awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(arrowtype)
-        akform = form_popbuffers(awkwardarrow_type, storage_type)
-
-        if not schema.field(i).nullable:
-            forms.append(form_remove_optiontype(akform))
-        else:
-            forms.append(akform)
-
     if pass_empty_field and list(schema.names) == [""]:
-        assert len(forms) == 1
-        out = forms[0]
+        awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(schema.types[0])
+        akform = form_popbuffers(awkwardarrow_type, storage_type)
+        if not schema.field(0).nullable:
+            return form_remove_optiontype(akform)
+        else:
+            return akform
+
     else:
-        out = ak._v2.forms.RecordForm(forms, list(schema.names))
+        record_is_optiontype = False
+        optiontype_fields = []
+        optiontype_parameters = None
+        recordtype_parameters = None
+        if schema.metadata is not None and b"ak:parameters" in schema.metadata:
+            for x in json.loads(schema.metadata[b"ak:parameters"]):
+                (key,) = x.keys()
+                (value,) = x.values()
+                if key == "optiontype_fields":
+                    optiontype_fields = value
+                elif key in (
+                    "UnmaskedArray",
+                    "BitMaskedArray",
+                    "ByteMaskedArray",
+                    "IndexedOptionArray",
+                ):
+                    record_is_optiontype = True
+                    optiontype_parameters = value
+                elif key == "RecordArray":
+                    recordtype_parameters = value
 
-    if schema.metadata is not None and b"ak:parameters" in schema.metadata:
-        optiontype, recordtype = None, None
-        if out.is_OptionType:
-            optiontype = out
-        if out.is_RecordType:
-            recordtype = out
-        elif out.content.is_RecordType:
-            recordtype = out.content
+        forms = []
+        for i, arrowtype in enumerate(schema.types):
+            field = schema.field(i)
+            awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(arrowtype)
+            akform = form_popbuffers(awkwardarrow_type, storage_type)
 
-        parameters = json.loads(schema.metadata[b"ak:parameters"])
-        for x in parameters:
-            (key,) = x.keys()
-            (value,) = x.values()
-            if optiontype is not None and key in (
-                "UnmaskedArray",
-                "BitMaskedArray",
-                "ByteMaskedArray",
-                "IndexedOptionArray",
-            ):
-                optiontype._parameters = value
-            elif recordtype is not None and key == "RecordArray":
-                recordtype._parameters = value
+            if (
+                record_is_optiontype and field.name not in optiontype_fields
+            ) or not field.nullable:
+                forms.append(form_remove_optiontype(akform))
+            else:
+                forms.append(akform)
 
-    return out
+        out = ak._v2.forms.RecordForm(
+            forms, list(schema.names), parameters=recordtype_parameters
+        )
+
+        if record_is_optiontype:
+            return ak._v2.forms.ByteMaskedForm(
+                "i8", out, valid_when=False, parameters=optiontype_parameters
+            )
+
+        else:
+            return out
