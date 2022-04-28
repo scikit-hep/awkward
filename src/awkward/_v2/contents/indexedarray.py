@@ -716,9 +716,7 @@ class IndexedArray(Content):
                     length.data,
                 )
             )
-        # FIXME test_0404
-        out = ak._v2.index.Index64.zeros(1 + length[0], self._nplike)
-        out[1:] = next[0 : length[0]]
+
         return next[0 : length[0]]
 
     def numbers_to_type(self, name):
@@ -735,6 +733,9 @@ class IndexedArray(Content):
             return True
 
         nextindex = self._unique_index(self._index)
+
+        if len(nextindex) != len(self._index):
+            return False
 
         next = self._content._carry(nextindex, False)
         return next._is_unique(negaxis, starts, parents, outlength)
