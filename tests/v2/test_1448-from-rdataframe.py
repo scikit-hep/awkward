@@ -12,26 +12,28 @@ compiler = ROOT.gInterpreter.Declare
 
 def test_data_frame():
     data_frame = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
+    data_frame_xy = data_frame.Define("y", "x*2")
 
-    done = compiler(
-        """
-        template<typename T>
-        struct test_data_frame_MyFunctorX {
-            void operator()(T const& x) {
-                cout << "user function for X: " << x << endl;
-            }
-        };
-        """
+    ak_array_x = ak._v2.from_rdataframe(
+        data_frame_xy, column="x", column_as_record=False
     )
-    assert done is True
+    assert ak_array_x.layout.form == ak._v2.forms.NumpyForm("float64")
 
-    print(data_frame.GetColumnType("x"))
-
-    f_x = ROOT.test_data_frame_MyFunctorX[data_frame.GetColumnType("x")]()
-    data_frame.Foreach(f_x, ["x"])
-    data_frame_y = data_frame.Define("y", "x*2")
-
-    ak_array_y = ak._v2.from_rdataframe(
-        data_frame_y, column="x", column_as_record=False
+    ak_record_array_x = ak._v2.from_rdataframe(
+        data_frame_xy, column="x", column_as_record=True
     )
-    assert ak_array_y.layout.form == ak._v2.forms.NumpyForm("float64")
+    assert ak_record_array_x.layout.form == ak._v2.forms.RecordForm(
+        [ak._v2.forms.NumpyForm("float64")], "x"
+    )
+
+    ak_record_array_y = ak._v2.from_rdataframe(
+        data_frame_xy, column="y", column_as_record=True
+    )
+    ak_array = ak._v2.zip([ak_record_array_x, ak_record_array_y])
+    assert ak_array.layout.form == ak._v2.forms.RecordForm(
+        contents=[
+            ak._v2.forms.RecordForm([ak._v2.forms.NumpyForm("float64")], "x"),
+            ak._v2.forms.RecordForm([ak._v2.forms.NumpyForm("float64")], "y"),
+        ],
+        fields=None,
+    )
