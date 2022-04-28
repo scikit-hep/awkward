@@ -469,7 +469,6 @@ def test_fromarrow_UnionArray():
     )
 
 
-@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.concatenate")
 def test_chunkedarray():
     a = pyarrow.chunked_array(
         [
@@ -707,7 +706,6 @@ def test_arrow_null_nested_array_null():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.concatenate")
 def test_arrow_chunked_array():
     a = pyarrow.chunked_array(
         [
@@ -770,7 +768,6 @@ def test_arrow_null_struct_null():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.concatenate")
 def test_arrow_chunked_struct():
     t = pyarrow.struct({"x": pyarrow.int64(), "y": pyarrow.float64()})
     a = pyarrow.chunked_array(
@@ -953,7 +950,6 @@ def test_arrow_binary_null():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.concatenate")
 def test_arrow_chunked_strings():
     a = pyarrow.chunked_array(
         [

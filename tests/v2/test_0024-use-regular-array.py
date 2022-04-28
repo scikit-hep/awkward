@@ -89,9 +89,6 @@ def test_nonflat_slice():
     )
 
 
-# @pytest.mark.skip(
-#     reason="Should be working now that we have toListOffsetArray64, but isn't."
-# )
 def test_nonflat_slice_2():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
     content = ak._v2.contents.NumpyArray(array.reshape(-1))
@@ -102,7 +99,9 @@ def test_nonflat_slice_2():
     )
 
     two = listoffsetarray[
-        [[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]
+        np.asarray([[1, 0], [1, 1], [1, 0]]),
+        np.asarray([[2, 0], [1, 1], [2, 0]]),
+        np.asarray([[2, 4], [2, 4], [0, 1]]),
     ]
     assert to_list(two) == [[27, 4], [22, 24], [25, 1]]
 
