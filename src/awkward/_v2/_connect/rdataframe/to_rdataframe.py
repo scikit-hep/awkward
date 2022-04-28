@@ -6,8 +6,15 @@ import awkward._v2._lookup  # noqa: E402
 import awkward._v2._connect.cling  # noqa: E402
 
 import ROOT
+import threading
 
 compiler = ROOT.gInterpreter.Declare
+compiler_lock = threading.Lock()
+
+
+def compile(source_code):
+    with compiler_lock:
+        return compiler(source_code)
 
 
 def to_rdataframe(layouts, length, flatlist_as_rvec):
@@ -232,7 +239,7 @@ namespace awkward {{
 }}
             """
 
-            done = compiler(cpp_code)
+            done = compile(cpp_code)
             assert done is True
 
         rdf = getattr(ROOT.awkward, f"MakeAwkwardArrayDS_{array_data_source}")(
