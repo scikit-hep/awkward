@@ -240,11 +240,11 @@ def _impl(
                 return "".join(out)
 
             else:
-                with opener() as file:
+                with opener() as openfile:
                     for datum in jsondata:
                         json.dump(
                             datum,
-                            file,
+                            openfile,
                             skipkeys=True,
                             ensure_ascii=True,
                             check_circular=False,
@@ -273,10 +273,10 @@ def _impl(
                     sort_keys=False,
                 )
             else:
-                with opener() as file:
+                with opener() as openfile:
                     return json.dump(
                         jsondata,
-                        file,
+                        openfile,
                         skipkeys=True,
                         ensure_ascii=True,
                         check_circular=False,
