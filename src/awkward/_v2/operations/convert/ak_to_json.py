@@ -254,7 +254,7 @@ def _impl(
                             default=convert_other,
                             sort_keys=False,
                         )
-                        file.write(line_delimited)
+                        openfile.write(line_delimited)
 
         else:
             if isinstance(array, (ak._v2.highlevel.Record, ak._v2.record.Record)):
