@@ -15,10 +15,47 @@ numpy = ak.nplike.Numpy.instance()
 cppyy.cppdef(
     """
 #include <type_traits>
+#include <iterator>
+
+namespace is_iterable_impl
+{
+    using std::begin;
+    using std::end;
+
+    template<class T>
+    using check_specs = std::void_t<
+        std::enable_if_t<std::is_same_v<
+            decltype(begin(std::declval<T&>())), // has begin()
+            decltype(end(std::declval<T&>()))    // has end()
+        >>,                                      // ... begin() and end() are the same type ...
+        decltype(*begin(std::declval<T&>()))     // ... which can be dereferenced
+    >;
+
+    template<class T, class = void>
+    struct is_iterable
+    : std::false_type
+    {};
+
+    template<class T>
+    struct is_iterable<T, check_specs<T>>
+    : std::true_type
+    {};
+}
+
+template<class T>
+using is_iterable = is_iterable_impl::is_iterable<T>;
+
+template<class T>
+constexpr bool is_iterable_v = is_iterable<T>::value;
 
 template<typename T>
 bool _is_arithmetic() {
     return std::is_arithmetic<T>::value;
+};
+
+template<typename T>
+bool _is_iterable() {
+    return is_iterable<T>::value;
 };
 """
 )
@@ -46,7 +83,10 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             )
         else:
             # check if it is iterable
-            # print(cpp_reference.value_type)
+            if cppyy.gbl._is_iterable[cpp_reference.value_type]():
+                # print("Iterable!", cpp_reference.value_type)
+                pass
+
             raise ak._v2._util.error(NotImplementedError)
 
     else:
