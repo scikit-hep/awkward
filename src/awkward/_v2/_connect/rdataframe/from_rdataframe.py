@@ -6,38 +6,45 @@ import awkward._v2._lookup  # noqa: E402
 import awkward._v2._connect.cling  # noqa: E402
 
 import ROOT
+import cppyy
 
 compiler = ROOT.gInterpreter.Declare
 
+numpy = ak.nplike.Numpy.instance()
 
-def from_rdataframe(data_frame, columns=None, exclude=None, columns_as_records=True):
-    def type_of_nested_data(column_type):
-        t1 = column_type.rfind("<")
-        t2 = column_type.find(">")
-        return column_type if t1 == -1 and t2 == -1 else column_type[t1 + 1 : t2]
 
-    # Find all column names in the dataframe
-    if not columns:
-        columns = [str(x) for x in data_frame.GetColumnNames()]
+def from_rdataframe(data_frame, column, column_as_record=True):
+    # def primitive_form_type(key):
+    #     return {
+    #         "bool": "bool",
+    #         "float": "float32",
+    #         "double": "float64",
+    #     }[key]
 
-    # Exclude the specified columns
-    if exclude is None:
-        exclude = []
-    columns = [x for x in columns if x not in exclude]
+    # FIXME: if columns_as_records:
+    column_type = data_frame.GetColumnType(column)
 
-    if columns_as_records:
-        column_type = {}
-        type = {}
-        result_ptrs = {}
-        for col in columns:
-            column_type[col] = data_frame.GetColumnType(col)
-            type[col] = type_of_nested_data(column_type[col])
-            result_ptrs[col] = data_frame.Take[column_type[col]](col)
+    if "<" in column_type or ">" in column_type:
+        raise ak._v2._util.error(NotImplementedError)
 
-        # separate it from the above for performance reasons: `GetValue()` triggers
-        # an RDF event loop.
-        cpp_reference = {}
-        for col in columns:
-            cpp_reference[col] = result_ptrs[col].GetValue()
+    # is it primitive type?
+    # print("primitive?", column_type, primitive_form_type(column_type))
 
-    return ak._v2.Array([])
+    result_ptrs = data_frame.Take[column_type](column)
+
+    # separate it from the above for performance reasons: `GetValue()` triggers
+    # an RDF event loop.
+    cpp_reference = result_ptrs.GetValue()
+
+    # check that its an std::vector
+    if cppyy.typeid(cppyy.gbl.std.vector[column_type]()) == cppyy.typeid(cpp_reference):
+
+        # FIXME: use form?
+        # form = ak._v2.forms.numpyform.NumpyForm(primitive_form_type(cpp_reference.value_type))
+        array = numpy.asarray(cpp_reference)
+
+        # FIXME: copy data?
+        return ak._v2.highlevel.Array(array)
+
+    else:
+        raise ak._v2._util.error(NotImplementedError)
