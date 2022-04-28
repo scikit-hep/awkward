@@ -110,6 +110,7 @@ def _impl(
     parameters = None
     paarrays, pafields = [], []
     if check[-1].is_RecordType and not check[-1].is_tuple:
+        optiontype_fields = []
         for name in check[-1].fields:
             paarrays.append(
                 layout[name].to_arrow(
@@ -127,7 +128,10 @@ def _impl(
                     layout[name].is_OptionType
                 )
             )
-        parameters = []
+            if check[-1].contents[check[-1].field_to_index(name)].is_OptionType:
+                optiontype_fields.append(name)
+
+        parameters = [{"optiontype_fields": optiontype_fields}]
         for x in check:
             parameters.append(
                 {ak._v2._util.direct_Content_subclass(x).__name__: x._parameters}

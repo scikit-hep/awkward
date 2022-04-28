@@ -39,7 +39,7 @@ def test_highlevel():
     )
     assert (
         repr(c)
-        == "<Array [{one: 3.14, ...}, ...] type='2 * {one: float64, two: var * float64}'>"
+        == "<Array [{one: 3.14, two: [...]}, {...}] type='2 * {one: float64, two: var *...'>"
     )
     assert str(c) == "[{one: 3.14, two: [1.1, 2.2]}, {one: 99.9, two: [-3.14]}]"
 

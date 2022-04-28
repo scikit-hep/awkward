@@ -182,3 +182,6 @@ class IndexedForm(Form):
             self._parameters,
             self._form_key,
         )
+
+    def _column_types(self):
+        return self._content._column_types()

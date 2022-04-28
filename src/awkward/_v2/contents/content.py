@@ -1131,7 +1131,7 @@ class Content:
                 return 'at {} ("{}"): __array__ = "categorical" only allowed for IndexedArray and IndexedOptionArray'.format(
                     path, type(self)
                 )
-            if not self.content.is_unique():
+            if not content.is_unique():
                 return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
                     path, type(self)
                 )

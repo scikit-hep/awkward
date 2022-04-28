@@ -290,13 +290,11 @@ def test_indexedoptionarray_emptyarray(tmp_path, through, extensionarray):
         parameters={"which": "outer"},
     )
 
-    # https://issues.apache.org/jira/browse/ARROW-14522
-    if through is through_arrow or not extensionarray:
-        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
-            schema_arrow, pass_empty_field=True
-        )
-        assert predicted_form == array_form
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])
