@@ -31,7 +31,7 @@ def test_data_frame():
     data_frame.Foreach(f_x, ["x"])
     data_frame_y = data_frame.Define("y", "x*2")
 
-    ak_array = ak._v2.from_rdataframe(
-        data_frame_y, columns=["x"], exclude=["y"], columns_as_records=False
+    ak_array_y = ak._v2.from_rdataframe(
+        data_frame_y, column="x", column_as_record=False
     )
-    print(ak_array)
+    assert ak_array_y.layout.form == ak._v2.forms.NumpyForm("float64")
