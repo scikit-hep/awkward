@@ -258,5 +258,4 @@ namespace awkward {{
             (self.data_ptrs_list),
         )
 
-        rdf.lookups = self.lookups
         return rdf
