@@ -2026,7 +2026,9 @@ def to_arrow(
     """
     pyarrow = _import_pyarrow("ak.to_arrow")
 
-    layout = to_layout(array, allow_record=False, allow_other=False)
+    layout = to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.layout.Record):
+        layout = layout.array[layout.at : layout.at + 1]
 
     def recurse(layout, mask, is_option):
         if isinstance(layout, ak.layout.NumpyArray):
@@ -2553,7 +2555,9 @@ def to_arrow_table(
     """
     pyarrow = _import_pyarrow("ak.to_arrow_table")
 
-    layout = to_layout(array, allow_record=False, allow_other=False)
+    layout = to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.layout.Record):
+        layout = layout.array[layout.at : layout.at + 1]
 
     if explode_records or isinstance(
         ak.operations.describe.type(layout), ak.types.RecordType
@@ -3053,7 +3057,10 @@ def to_parquet(
                 pa_arrays, schema=pyarrow.schema(pa_fields)
             )
 
-    layout = to_layout(array, allow_record=False, allow_other=False)
+    layout = to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.layout.Record):
+        layout = layout.array[layout.at : layout.at + 1]
+
     iterator = batch_iterator(layout)
     first = next(iterator)
 
