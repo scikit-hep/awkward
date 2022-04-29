@@ -838,4 +838,136 @@ namespace awkward {
                     minus_infinity_string);
     return do_parse(handler, reader, stream);
   }
+
+  class FileLikeObjectStream {
+  public:
+    typedef char Ch;
+
+    FileLikeObjectStream(FileLikeObject* source, int64_t buffersize)
+      : source_(source)
+      , buffersize_(buffersize)
+      , bufferlast_(0)
+      , current_(0)
+      , readcount_(0)
+      , count_(0)
+      , eof_(false) {
+      buffer_ = new char[buffersize];
+      read();
+    }
+
+    ~FileLikeObjectStream() {
+      delete [] buffer_;
+    }
+
+    Ch Peek() const {
+      return *current_;
+     }
+    Ch Take() {
+      Ch c = *current_;
+      read();
+      return c;
+    }
+    size_t Tell() const {
+      return count_ + static_cast<size_t>(current_ - buffer_);
+    }
+
+    // not implemented
+    void Put(Ch) { assert(false); }
+    void Flush() { assert(false); }
+    Ch* PutBegin() { assert(false); return 0; }
+    size_t PutEnd(Ch*) { assert(false); return 0; }
+
+  private:
+    void read() {
+      if (current_ < bufferlast_) {
+        ++current_;
+      }
+      else if (!eof_) {
+        count_ += readcount_;
+        readcount_ = source_->read(buffersize_, buffer_);
+        bufferlast_ = buffer_ + readcount_ - 1;
+        current_ = buffer_;
+
+        if (readcount_ < buffersize_) {
+          buffer_[readcount_] = '\0';
+          ++bufferlast_;
+          eof_ = true;
+        }
+      }
+    }
+
+    FileLikeObject* source_;
+    int64_t buffersize_;
+    Ch* buffer_;
+    Ch* bufferlast_;
+    Ch* current_;
+    int64_t readcount_;
+    int64_t count_;
+    bool eof_;
+  };
+
+  int64_t
+  FromJsonObject(FileLikeObject* source,
+                 ArrayBuilder& builder,
+                 int64_t buffersize,
+                 bool read_one,
+                 const char* nan_string,
+                 const char* infinity_string,
+                 const char* minus_infinity_string) {
+
+    rj::Reader reader;
+    FileLikeObjectStream stream(source, buffersize);
+    Handler handler(builder,
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string);
+
+    if (read_one) {
+      bool fully_parsed = reader.Parse(stream, handler);
+      if (!fully_parsed) {
+        throw std::invalid_argument(
+          std::string("JSON syntax error at char ")
+          + std::to_string(stream.Tell()) + std::string(": \'")
+          + stream.Peek() + std::string("\'")
+          + FILENAME(__LINE__));
+      }
+      return 1;
+    }
+
+    else {
+      int64_t number = 0;
+      while (stream.Peek() != 0) {
+        handler.reset_moved();
+        bool fully_parsed = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
+        if (handler.moved()) {
+          if (!fully_parsed) {
+            if (stream.Peek() == 0) {
+              throw std::invalid_argument(
+                  std::string("incomplete JSON object at the end of the stream")
+                  + FILENAME(__LINE__));
+            }
+            else {
+              throw std::invalid_argument(
+                std::string("JSON syntax error at char ")
+                + std::to_string(stream.Tell()) + std::string(": \'")
+                + stream.Peek() + std::string("\'")
+                + FILENAME(__LINE__));
+            }
+          }
+          else {
+            number++;
+          }
+        }
+        else if (stream.Peek() != 0) {
+          throw std::invalid_argument(
+            std::string("JSON syntax error at char ")
+            + std::to_string(stream.Tell()) + std::string(": \'")
+            + stream.Peek() + std::string("\'")
+            + FILENAME(__LINE__));
+        }
+      }
+      return number;
+    }
+
+  }
 }
