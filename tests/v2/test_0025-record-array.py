@@ -264,7 +264,6 @@ def test_type():
     )
 
 
-# @pytest.mark.skip(reason="FIXME: recordtype requires field argument")
 def test_recordtype():
     content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
     content2 = ak._v2.contents.NumpyArray(
