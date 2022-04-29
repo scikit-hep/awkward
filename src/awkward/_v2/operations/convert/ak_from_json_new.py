@@ -142,7 +142,7 @@ def _get_reader(source):
     elif isinstance(source, pathlib.Path):
         parsed_url = urlparse(str(source))
         if parsed_url.scheme == "" or parsed_url.netloc == "":
-            return lambda: open(source, "rb")
+            return lambda: open(source, "rb")  # pylint: disable=R1732
         else:
             import fsspec
 
