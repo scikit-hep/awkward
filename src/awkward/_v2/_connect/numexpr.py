@@ -1,161 +1,165 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# Ideally, you want to collaborate with NumExpr to get this without a nested module.
-# Barring that, though, just reimplement in v2.
+# v2: replace with src/awkward/_v2/_connect/numexpr.py
 
-# from __future__ import absolute_import
+import warnings
+import sys
 
-# import warnings
-# import sys
-# import types
+import awkward as ak
 
-# import awkward as ak
-
-# checked_version = False
+checked_version = False
 
 
-# def import_numexpr():
-#     global checked_version
-#     try:
-#         import numexpr
-#     except ImportError:
-#         raise ImportError(
-#             """install the 'numexpr' package with:
+def import_numexpr():
+    global checked_version
+    try:
+        import numexpr
+    except ModuleNotFoundError:
+        raise ak._v2._util.error(
+            ModuleNotFoundError(
+                """install the 'numexpr' package with:
 
-#     pip install numexpr --upgrade
+    pip install numexpr --upgrade
 
-# or
+or
 
-#     conda install numexpr"""
-#         )
-#     else:
-#         if not checked_version and ak._v2._util.parse_version(
-#             numexpr.__version__
-#         ) < ak._v2._util.parse_version("2.7.1"):
-#             warnings.warn(
-#                 "Awkward Array is only known to work with numexpr 2.7.1 or later"
-#                 "(you have version {0})".format(numexpr.__version__),
-#                 RuntimeWarning,
-#             )
-#         checked_version = True
-#         return numexpr
-
-
-# def getArguments(names, local_dict=None, global_dict=None):
-#     call_frame = sys._getframe(2)
-
-#     clear_local_dict = False
-#     if local_dict is None:
-#         local_dict = call_frame.f_locals
-#         clear_local_dict = True
-#     try:
-#         frame_globals = call_frame.f_globals
-#         if global_dict is None:
-#             global_dict = frame_globals
-
-#         clear_local_dict = clear_local_dict and frame_globals is not local_dict
-
-#         arguments = []
-#         for name in names:
-#             try:
-#                 a = local_dict[name]
-#             except KeyError:
-#                 a = global_dict[name]
-#             arguments.append(a)  # <--- different from NumExpr
-#     finally:
-#         if clear_local_dict:
-#             local_dict.clear()
-
-#     return arguments
+    conda install numexpr"""
+            )
+        ) from None
+    else:
+        if not checked_version and ak._v2._util.parse_version(
+            numexpr.__version__
+        ) < ak._v2._util.parse_version("2.7.1"):
+            warnings.warn(
+                "Awkward Array is only known to work with numexpr 2.7.1 or later"
+                "(you have version {})".format(numexpr.__version__),
+                RuntimeWarning,
+            )
+        checked_version = True
+        return numexpr
 
 
-# def evaluate(
-#     expression, local_dict=None, global_dict=None, order="K", casting="safe", **kwargs
-# ):
-#     numexpr = import_numexpr()
+def getArguments(names, local_dict=None, global_dict=None):
+    call_frame = sys._getframe(2)
 
-#     context = numexpr.necompiler.getContext(kwargs, frame_depth=1)
-#     expr_key = (expression, tuple(sorted(context.items())))
-#     if expr_key not in numexpr.necompiler._names_cache:
-#         numexpr.necompiler._names_cache[expr_key] = numexpr.necompiler.getExprNames(
-#             expression, context
-#         )
-#     names, ex_uses_vml = numexpr.necompiler._names_cache[expr_key]
-#     arguments = getArguments(names, local_dict, global_dict)
+    clear_local_dict = False
+    if local_dict is None:
+        local_dict = call_frame.f_locals
+        clear_local_dict = True
+    try:
+        frame_globals = call_frame.f_globals
+        if global_dict is None:
+            global_dict = frame_globals
 
-#     arrays = [
-#         ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
-#         for x in arguments
-#     ]
+        clear_local_dict = clear_local_dict and frame_globals is not local_dict
 
-#     def getfunction(inputs):
-#         if all(
-#             isinstance(x, ak._v2.contents.NumpyArray) or not isinstance(x, ak._v2.contents.Content)
-#             for x in inputs
-#         ):
-#             return lambda: (
-#                 ak._v2.contents.NumpyArray(
-#                     numexpr.evaluate(
-#                         expression,
-#                         dict(zip(names, inputs)),
-#                         {},
-#                         order=order,
-#                         casting=casting,
-#                         **kwargs
-#                     )
-#                 ),
-#             )
-#         else:
-#             return None
+        arguments = []
+        for name in names:
+            try:
+                a = local_dict[name]
+            except KeyError:
+                a = global_dict[name]
+            arguments.append(a)  # <--- different from NumExpr
+    finally:
+        if clear_local_dict:
+            local_dict.clear()
 
-#     behavior = ak._v2._util.behaviorof(*arrays)
-#     out = ak._v2._util.broadcast_and_apply(
-#         arrays, getfunction, behavior, allow_records=False, pass_depth=False
-#     )
-#     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._v2._util.wrap(out[0], behavior)
+    return arguments
 
 
-# evaluate.evaluate = evaluate
+def evaluate(
+    expression, local_dict=None, global_dict=None, order="K", casting="safe", **kwargs
+):
+    numexpr = import_numexpr()
+
+    context = numexpr.necompiler.getContext(kwargs, frame_depth=1)
+    expr_key = (expression, tuple(sorted(context.items())))
+    if expr_key not in numexpr.necompiler._names_cache:
+        numexpr.necompiler._names_cache[expr_key] = numexpr.necompiler.getExprNames(
+            expression, context
+        )
+    names, ex_uses_vml = numexpr.necompiler._names_cache[expr_key]
+    arguments = getArguments(names, local_dict, global_dict)
+
+    arrays = [
+        ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        for x in arguments
+    ]
+
+    def action(inputs, **ignore):
+        if all(
+            isinstance(x, ak._v2.contents.NumpyArray)
+            or not isinstance(x, ak._v2.contents.Content)
+            for x in inputs
+        ):
+            return (
+                ak._v2.contents.NumpyArray(
+                    numexpr.evaluate(
+                        expression,
+                        dict(zip(names, inputs)),
+                        {},
+                        order=order,
+                        casting=casting,
+                        **kwargs
+                    )
+                ),
+            )
+        else:
+            return None
+
+    behavior = ak._v2._util.behavior_of(*arrays)
+    out = ak._v2._broadcasting.broadcast_and_apply(
+        arrays, action, behavior, allow_records=False
+    )
+    assert isinstance(out, tuple) and len(out) == 1
+    return ak._v2._util.wrap(out[0], behavior)
 
 
-# def re_evaluate(local_dict=None):
-#     numexpr = import_numexpr()
-
-#     try:
-#         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
-#     except KeyError:
-#         raise RuntimeError(
-#             "not a previous evaluate() execution found"
-#
-#         )
-#     names = numexpr.necompiler._numexpr_last["argnames"]
-#     arguments = getArguments(names, local_dict)
-
-#     arrays = [
-#         ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
-#         for x in arguments
-#     ]
-
-#     def getfunction(inputs):
-#         if all(
-#             isinstance(x, ak._v2.contents.NumpyArray) or not isinstance(x, ak._v2.contents.Content)
-#             for x in inputs
-#         ):
-#             return lambda: (
-#                 ak._v2.contents.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
-#             )
-#         else:
-#             return None
-
-#     behavior = ak._v2._util.behaviorof(*arrays)
-#     out = ak._v2._util.broadcast_and_apply(
-#         arrays, getfunction, behavior, allow_records=False, pass_depth=False
-#     )
-#     assert isinstance(out, tuple) and len(out) == 1
-#     return ak._v2._util.wrap(out[0], behavior)
+evaluate.evaluate = evaluate
 
 
-# ak.numexpr = types.ModuleType("numexpr")
-# ak.numexpr.evaluate = evaluate
-# ak.numexpr.re_evaluate = re_evaluate
+def re_evaluate(local_dict=None):
+    numexpr = import_numexpr()
+
+    try:
+        compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
+    except KeyError:
+        raise ak._v2._util.error(
+            RuntimeError(
+                "not a previous evaluate() execution found"
+                + ak._v2._util.exception_suffix(__file__)
+            )
+        )
+    names = numexpr.necompiler._numexpr_last["argnames"]
+    arguments = getArguments(names, local_dict)
+
+    arrays = [
+        ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        for x in arguments
+    ]
+
+    def action(inputs, **ignore):
+        if all(
+            isinstance(x, ak._v2.contents.NumpyArray)
+            or not isinstance(x, ak._v2.contents.Content)
+            for x in inputs
+        ):
+            return (
+                ak._v2.contents.NumpyArray(
+                    numexpr.re_evaluate(dict(zip(names, inputs)))
+                ),
+            )
+        else:
+            return None
+
+    behavior = ak._v2._util.behavior_of(*arrays)
+    out = ak._v2._broadcasting.broadcast_and_apply(
+        arrays, action, behavior, allow_records=False
+    )
+    assert isinstance(out, tuple) and len(out) == 1
+    return ak._v2._util.wrap(out[0], behavior)
+
+
+# ak._v2._connect.numexpr = types.ModuleType("numexpr")
+# ak._v2._connect.numexpr.evaluate = evaluate
+# ak._v2._connect.numexpr.re_evaluate = re_evaluate

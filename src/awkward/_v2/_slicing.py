@@ -274,10 +274,7 @@ def prepare_tuple_nested(item):
         )
 
     elif isinstance(item, ak._v2.contents.UnionArray):
-        # needs simplify_uniontype
-        raise ak._v2._util.error(
-            NotImplementedError("FIXME: need to implement UnionArray as a slice")
-        )
+        return prepare_tuple_nested(item.simplify_uniontype())
 
     else:
         raise ak._v2._util.error(

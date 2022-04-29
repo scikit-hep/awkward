@@ -1656,7 +1656,7 @@ def test_UnionArray_RecordArray_NumpyArray():
     assert a["nest"][-3] == 3.3
     assert a["nest"][-2] == 3.0
     assert a["nest"][-1] == 5.5
-    assert isinstance(a["nest"][3:], ak._v2.contents.unionarray.UnionArray)
+    assert isinstance(a["nest"][3:], ak._v2.contents.NumpyArray)
     assert a.typetracer["nest"][3:].form == a["nest"][3:].form
     assert len(a["nest"][3:]) == 4
     assert len(a["nest"][-4:]) == 4

@@ -37,7 +37,6 @@ def test_singletons():
     ) == [[[[1.1], [2.2], []]], [[[3.3], []]], [[[]]], [[[4.4], [5.5]]]]
 
 
-@pytest.mark.skip(reason="Enable when ak.firsts is merged")
 def test_firsts():
     assert to_list(
         ak._v2.operations.structure.firsts(

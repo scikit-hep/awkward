@@ -380,7 +380,7 @@ def test_to_categorical_masked_again():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.describe.type issues")
+@pytest.mark.skip(reason="Missing check for overridden __repr__")
 def test_typestr():
     assert (
         str(

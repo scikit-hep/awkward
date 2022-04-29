@@ -139,7 +139,6 @@ def test_behavior_forwarding_convert():
     )
 
 
-@pytest.mark.skip(reason="FIXME: v2 highlevel implemented yet")
-def test_behaviour_notimplemented():
+def test_behaviour_singletons_firsts():
     assert ak._v2.operations.structure.firsts([one, two], behavior={})[0].behavior == {}
     assert ak._v2.operations.structure.singletons(one, behavior={})[0].behavior == {}
