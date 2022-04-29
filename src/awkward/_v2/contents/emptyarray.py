@@ -274,7 +274,11 @@ class EmptyArray(Content):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
                 ak._v2._connect.pyarrow.to_awkwardarrow_type(
-                    pyarrow.null(), options["extensionarray"], mask_node, self
+                    pyarrow.null(),
+                    options["extensionarray"],
+                    options["record_is_scalar"],
+                    mask_node,
+                    self,
                 ),
                 length,
                 [

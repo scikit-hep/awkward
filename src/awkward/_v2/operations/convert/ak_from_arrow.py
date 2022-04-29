@@ -65,4 +65,7 @@ def _impl(array, generate_bitmasks, highlevel, behavior):
             if awkwardarrow_type.mask_type in (None, "IndexedArray"):
                 out = awkward._v2._connect.pyarrow.remove_optiontype(out)
 
+            if awkwardarrow_type.record_is_scalar:
+                out = out._getitem_at(0)
+
     return ak._v2._util.wrap(out, behavior, highlevel)

@@ -40,7 +40,9 @@ def to_parquet(
     )
     fsspec = awkward._v2._connect.pyarrow.import_fsspec("ak.to_parquet")
 
-    if isinstance(data, Iterable) and not isinstance(data, Sized):
+    if isinstance(data, (ak._v2.highlevel.Record, ak._v2.record.Record)):
+        iterator = iter([data])
+    elif isinstance(data, Iterable) and not isinstance(data, Sized):
         iterator = iter(data)
     elif isinstance(data, Iterable):
         iterator = iter([data])
@@ -54,7 +56,7 @@ def to_parquet(
     row_group = 0
     array = next(iterator)
     layout = ak._v2.operations.convert.ak_to_layout.to_layout(
-        array, allow_record=False, allow_other=False
+        array, allow_record=True, allow_other=False
     )
     table = ak._v2.operations.convert.ak_to_arrow_table._impl(
         layout,
@@ -77,7 +79,10 @@ def to_parquet(
     else:
         column_prefix = ()
 
-    form = layout.form
+    if isinstance(layout, ak._v2.record.Record):
+        form = layout.array.form
+    else:
+        form = layout.form
 
     def parquet_columns(specifier, only=None):
         if specifier is None:
@@ -200,7 +205,7 @@ def to_parquet(
                 except StopIteration:
                     break
                 layout = ak._v2.operations.convert.ak_to_layout.to_layout(
-                    array, allow_record=False, allow_other=False
+                    array, allow_record=True, allow_other=False
                 )
                 table = ak._v2.operations.convert.ak_to_arrow_table._impl(
                     layout,

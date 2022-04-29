@@ -1233,7 +1233,11 @@ class NumpyArray(Content):
 
         return pyarrow.Array.from_buffers(
             ak._v2._connect.pyarrow.to_awkwardarrow_type(
-                storage_type, options["extensionarray"], mask_node, self
+                storage_type,
+                options["extensionarray"],
+                options["record_is_scalar"],
+                mask_node,
+                self,
             ),
             length,
             [

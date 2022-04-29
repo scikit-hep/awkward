@@ -100,8 +100,13 @@ def _impl(
     from awkward._v2._connect.pyarrow import pyarrow
 
     layout = ak._v2.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False
+        array, allow_record=True, allow_other=False
     )
+    if isinstance(layout, ak._v2.record.Record):
+        layout = layout.array[layout.at : layout.at + 1]
+        record_is_scalar = True
+    else:
+        record_is_scalar = False
 
     check = [layout]
     while check[-1].is_OptionType or check[-1].is_IndexedType:
@@ -121,6 +126,7 @@ def _impl(
                     categorical_as_dictionary=categorical_as_dictionary,
                     extensionarray=extensionarray,
                     count_nulls=count_nulls,
+                    record_is_scalar=record_is_scalar,
                 )
             )
             pafields.append(
@@ -131,7 +137,10 @@ def _impl(
             if check[-1].contents[check[-1].field_to_index(name)].is_OptionType:
                 optiontype_fields.append(name)
 
-        parameters = [{"optiontype_fields": optiontype_fields}]
+        parameters = [
+            {"optiontype_fields": optiontype_fields},
+            {"record_is_scalar": record_is_scalar},
+        ]
         for x in check:
             parameters.append(
                 {ak._v2._util.direct_Content_subclass(x).__name__: x._parameters}
@@ -147,6 +156,7 @@ def _impl(
                 categorical_as_dictionary=categorical_as_dictionary,
                 extensionarray=extensionarray,
                 count_nulls=count_nulls,
+                record_is_scalar=record_is_scalar,
             )
         )
         pafields.append(

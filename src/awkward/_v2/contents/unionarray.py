@@ -1260,7 +1260,11 @@ class UnionArray(Content):
 
         return pyarrow.Array.from_buffers(
             ak._v2._connect.pyarrow.to_awkwardarrow_type(
-                types, options["extensionarray"], None, self
+                types,
+                options["extensionarray"],
+                options["record_is_scalar"],
+                None,
+                self,
             ),
             nptags.shape[0],
             [

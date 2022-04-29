@@ -242,6 +242,8 @@ def _load(
         return ak._v2.operations.convert.ak_from_buffers._impl(
             subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
         )
+    elif len(arrays) == 1 and isinstance(arrays[0], ak._v2.record.Record):
+        return ak._v2._util.wrap(arrays[0], behavior, highlevel)
     else:
         return ak._v2.operations.structure.ak_concatenate._impl(
             arrays, 0, True, True, highlevel, behavior
