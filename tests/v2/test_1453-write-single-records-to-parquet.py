@@ -18,5 +18,9 @@ def test(tmp_path):
 
     assert ak._v2.from_arrow(ak._v2.to_arrow(original)).tolist() == original.tolist()
 
+    assert (
+        ak._v2.from_arrow(ak._v2.to_arrow_table(original)).tolist() == original.tolist()
+    )
+
     ak._v2.to_parquet(original, filename)
     assert ak._v2.from_parquet(filename).tolist() == original.tolist()
