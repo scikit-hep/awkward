@@ -8,18 +8,18 @@ import awkward._v2._connect.cling  # noqa: E402
 import ROOT
 import threading
 
-compiler = ROOT.gInterpreter.Declare
+
+def compile(source_code):
+    with compiler_lock:
+        return ROOT.gInterpreter.Declare(source_code)
+
+
 compiler_lock = threading.Lock()
-compiler(
+compile(
     """
 #include <Python.h>
 """
 )
-
-
-def compile(source_code):
-    with compiler_lock:
-        return compiler(source_code)
 
 
 def to_rdataframe(layouts, length, flatlist_as_rvec):
@@ -59,7 +59,7 @@ class DataSourceGenerator:
             )
             self.lookups[key] = ak._v2._lookup.Lookup(layout)
             generator = self.generators[key]
-            generator.generate(compiler)
+            generator.generate(ROOT.gInterpreter.Declare)
 
             entry_type = generator.entry_type()
             if isinstance(generator, ak._v2._connect.cling.NumpyArrayGenerator):
