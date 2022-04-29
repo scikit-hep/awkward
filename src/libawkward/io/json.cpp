@@ -927,8 +927,7 @@ namespace awkward {
       if (!fully_parsed) {
         throw std::invalid_argument(
           std::string("JSON syntax error at char ")
-          + std::to_string(stream.Tell()) + std::string(": \'")
-          + stream.Peek() + std::string("\'")
+          + std::to_string(stream.Tell())
           + FILENAME(__LINE__));
       }
       return 1;
@@ -949,8 +948,7 @@ namespace awkward {
             else {
               throw std::invalid_argument(
                 std::string("JSON syntax error at char ")
-                + std::to_string(stream.Tell()) + std::string(": \'")
-                + stream.Peek() + std::string("\'")
+                + std::to_string(stream.Tell())
                 + FILENAME(__LINE__));
             }
           }
@@ -961,8 +959,7 @@ namespace awkward {
         else if (stream.Peek() != 0) {
           throw std::invalid_argument(
             std::string("JSON syntax error at char ")
-            + std::to_string(stream.Tell()) + std::string(": \'")
-            + stream.Peek() + std::string("\'")
+            + std::to_string(stream.Tell())
             + FILENAME(__LINE__));
         }
       }

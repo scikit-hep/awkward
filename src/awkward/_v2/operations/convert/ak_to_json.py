@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import json
+import pathlib
 from urllib.parse import urlparse
 from numbers import Number
 
@@ -25,10 +26,10 @@ def to_json(
     """
     Args:
         array: Data to convert to JSON.
-        file (None, str, or file-like object): If None, this function returns a
-            JSON-encoded string. Otherwise, this function has no return value.
-            If a string, this function opens a file with that name, writes JSON
-            data, and closes the file. If that string has a URI protocol (like
+        file (None, str/pathlib.Path, or file-like object): If None, this function returns
+            JSON-encoded bytes. Otherwise, this function has no return value.
+            If a string/pathlib.Path, this function opens a file with that name, writes JSON
+            data, and closes the file. If that path has a URI protocol (like
             "https://" or "s3://"), this function attempts to open the file with
             the fsspec library. If a file-like object with a `write` method,
             this function writes to the object, but does not close it.
@@ -61,7 +62,8 @@ def to_json(
             but are not JSON serializable.
 
     Converts `array` (many types supported, including all Awkward Arrays and
-    Records) into a JSON string.
+    Records) into JSON text. Returns bytes (encoded JSON) if `file` is None;
+    otherwise, this function returns nothing and writes to a file.
 
     This function converts the array into Python objects with #ak.to_list, performs
     some conversions to make the data JSON serializable (`nan_string`, `infinity_string`,
@@ -200,7 +202,7 @@ def _impl(
     )
 
     if file is not None:
-        if ak._v2._util.isstr(file):
+        if ak._v2._util.isstr(file) or isinstance(file, pathlib.Path):
             parsed_url = urlparse(file)
             if parsed_url.scheme == "" or parsed_url.netloc == "":
 
@@ -211,7 +213,7 @@ def _impl(
                 import fsspec
 
                 def opener():
-                    return fsspec.open(file, "w", encoding="utf8")
+                    return fsspec.open(file, "w", encoding="utf8").open()
 
         else:
 
