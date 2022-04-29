@@ -97,8 +97,13 @@ def _impl(
     count_nulls,
 ):
     layout = ak._v2.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False
+        array, allow_record=True, allow_other=False
     )
+    if isinstance(layout, ak._v2.record.Record):
+        layout = layout.array[layout.at : layout.at + 1]
+        record_is_scalar = True
+    else:
+        record_is_scalar = False
 
     return layout.to_arrow(
         list_to32=list_to32,
@@ -108,4 +113,5 @@ def _impl(
         categorical_as_dictionary=categorical_as_dictionary,
         extensionarray=extensionarray,
         count_nulls=count_nulls,
+        record_is_scalar=record_is_scalar,
     )

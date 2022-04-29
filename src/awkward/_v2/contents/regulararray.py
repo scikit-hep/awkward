@@ -1102,6 +1102,7 @@ class RegularArray(Content):
                 ak._v2._connect.pyarrow.to_awkwardarrow_type(
                     pyarrow.binary(self._size),
                     options["extensionarray"],
+                    options["record_is_scalar"],
                     mask_node,
                     self,
                 ),
@@ -1125,6 +1126,7 @@ class RegularArray(Content):
                 ak._v2._connect.pyarrow.to_awkwardarrow_type(
                     pyarrow.list_(content_type, self._size),
                     options["extensionarray"],
+                    options["record_is_scalar"],
                     mask_node,
                     self,
                 ),

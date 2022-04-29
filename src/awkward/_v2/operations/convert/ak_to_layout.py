@@ -51,7 +51,7 @@ def _impl(array, allow_record, allow_other, numpytype):
     elif isinstance(array, ak._v2.record.Record):
         if not allow_record:
             raise ak._v2._util.error(
-                TypeError("ak._v2.Record objects are not allowed here")
+                TypeError("ak._v2.Record objects are not allowed in this function")
             )
         else:
             return array
@@ -59,8 +59,13 @@ def _impl(array, allow_record, allow_other, numpytype):
     elif isinstance(array, ak._v2.highlevel.Array):
         return array.layout
 
-    elif allow_record and isinstance(array, ak._v2.highlevel.Record):
-        return array.layout
+    elif isinstance(array, ak._v2.highlevel.Record):
+        if not allow_record:
+            raise ak._v2._util.error(
+                TypeError("ak._v2.Record objects are not allowed in this function")
+            )
+        else:
+            return array.layout
 
     # elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
     #     return array.snapshot().layout

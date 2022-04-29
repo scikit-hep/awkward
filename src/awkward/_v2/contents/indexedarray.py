@@ -1142,7 +1142,11 @@ class IndexedArray(Content):
             if options["extensionarray"]:
                 return ak._v2._connect.pyarrow.AwkwardArrowArray.from_storage(
                     ak._v2._connect.pyarrow.to_awkwardarrow_type(
-                        out.type, options["extensionarray"], mask_node, self
+                        out.type,
+                        options["extensionarray"],
+                        options["record_is_scalar"],
+                        mask_node,
+                        self,
                     ),
                     out,
                 )

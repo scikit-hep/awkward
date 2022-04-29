@@ -93,12 +93,14 @@ if pyarrow is not None:
             mask_parameters,
             node_parameters,
             record_is_tuple,
+            record_is_scalar,
         ):
             self._mask_type = mask_type
             self._node_type = node_type
             self._mask_parameters = mask_parameters
             self._node_parameters = node_parameters
             self._record_is_tuple = record_is_tuple
+            self._record_is_scalar = record_is_scalar
             super().__init__(storage_type, "awkward")
 
         def __str__(self):
@@ -127,6 +129,10 @@ if pyarrow is not None:
         def record_is_tuple(self):
             return self._record_is_tuple
 
+        @property
+        def record_is_scalar(self):
+            return self._record_is_scalar
+
         def __arrow_ext_class__(self):
             return AwkwardArrowArray
 
@@ -138,6 +144,7 @@ if pyarrow is not None:
                     "mask_parameters": self._mask_parameters,
                     "node_parameters": self._node_parameters,
                     "record_is_tuple": self._record_is_tuple,
+                    "record_is_scalar": self._record_is_scalar,
                 }
             ).encode(errors="surrogatescape")
 
@@ -151,6 +158,7 @@ if pyarrow is not None:
                 metadata["mask_parameters"],
                 metadata["node_parameters"],
                 metadata["record_is_tuple"],
+                metadata["record_is_scalar"],
             )
 
         @property
@@ -162,7 +170,7 @@ if pyarrow is not None:
             return self.storage_type.num_fields
 
     pyarrow.register_extension_type(
-        AwkwardArrowType(pyarrow.null(), None, None, None, None, None)
+        AwkwardArrowType(pyarrow.null(), None, None, None, None, None, None)
     )
 
     # order is important; _string_like[:2] vs _string_like[::2]
@@ -861,7 +869,9 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         )
 
 
-def to_awkwardarrow_type(storage_type, use_extensionarray, mask, node):
+def to_awkwardarrow_type(
+    storage_type, use_extensionarray, record_is_scalar, mask, node
+):
     if use_extensionarray:
         return AwkwardArrowType(
             storage_type,
@@ -870,6 +880,7 @@ def to_awkwardarrow_type(storage_type, use_extensionarray, mask, node):
             None if mask is None else mask.parameters,
             None if node is None else node.parameters,
             node.is_tuple if isinstance(node, ak._v2.contents.RecordArray) else None,
+            record_is_scalar,
         )
     else:
         return storage_type
@@ -929,6 +940,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         else:
             record_is_optiontype = False
             optiontype_fields = []
+            record_is_scalar = False
             optiontype_parameters = None
             recordtype_parameters = None
             if (
@@ -940,6 +952,8 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                     (value,) = x.values()
                     if key == "optiontype_fields":
                         optiontype_fields = value
+                    elif key == "record_is_scalar":
+                        record_is_scalar = value
                     elif key in (
                         "UnmaskedArray",
                         "BitMaskedArray",
@@ -974,6 +988,9 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 length=len(obj),
                 parameters=recordtype_parameters,
             )
+
+            if record_is_scalar:
+                return out._getitem_at(0)
 
             if record_is_optiontype and record_mask is None and generate_bitmasks:
                 record_mask = numpy.zeros(len(out), dtype=np.bool_)

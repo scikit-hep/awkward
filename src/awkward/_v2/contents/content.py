@@ -1271,6 +1271,7 @@ class Content:
         categorical_as_dictionary=False,
         extensionarray=True,
         count_nulls=True,
+        record_is_scalar=False,
     ):
         import awkward._v2._connect.pyarrow
 
@@ -1288,6 +1289,7 @@ class Content:
                 "categorical_as_dictionary": categorical_as_dictionary,
                 "extensionarray": extensionarray,
                 "count_nulls": count_nulls,
+                "record_is_scalar": record_is_scalar,
             },
         )
 
