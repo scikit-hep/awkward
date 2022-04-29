@@ -264,7 +264,6 @@ def test_type():
     )
 
 
-@pytest.mark.skip(reason="FIXME: recordtype requires field argument")
 def test_recordtype():
     content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
     content2 = ak._v2.contents.NumpyArray(
@@ -279,28 +278,36 @@ def test_recordtype():
         (
             ak._v2.types.NumpyType("int64"),
             ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
-        )
+        ),
+        None,
     )
     assert str(
         ak._v2.types.RecordType(
-            {
-                "one": ak._v2.types.NumpyType("int32"),
-                "two": ak._v2.types.NumpyType("float64"),
-            }
+            (
+                ak._v2.types.NumpyType("int32"),
+                ak._v2.types.NumpyType("float64"),
+            ),
+            ["one", "two"],
         )
-    ) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
+    ) in ("{one: int32, two: float64}", "{two: float64, one: int32}")
+
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray], ["one", "two"]
+    )
 
     assert ak._v2.operations.describe.type(recordarray) == ak._v2.types.RecordType(
-        {
-            "one": ak._v2.types.NumpyType("int64"),
-            "two": ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
-        }
+        (
+            ak._v2.types.NumpyType("int64"),
+            ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
+        ),
+        ["one", "two"],
     )
     assert ak._v2.operations.describe.type(recordarray[2]) == ak._v2.types.RecordType(
-        {
-            "one": ak._v2.types.NumpyType("int64"),
-            "two": ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
-        }
+        (
+            ak._v2.types.NumpyType("int64"),
+            ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
+        ),
+        ["one", "two"],
     )
 
 

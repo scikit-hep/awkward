@@ -234,7 +234,7 @@ class UnionArray(Content):
             self._field_identifier(where),
             None,
             self._nplike,
-        )
+        ).simplify_uniontype()
 
     def _getitem_fields(self, where, only_fields=()):
         return UnionArray(
@@ -244,7 +244,7 @@ class UnionArray(Content):
             self._fields_identifier(where),
             None,
             self._nplike,
-        )
+        ).simplify_uniontype()
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)

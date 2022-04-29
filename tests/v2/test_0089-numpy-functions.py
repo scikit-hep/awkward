@@ -300,7 +300,6 @@ def test_numpy_array():
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
 
-@pytest.mark.skip(reason="np.array_equal AssertionError: assert False")
 def test_numpy_array_FIXME():
     assert np.array_equal(
         np.asarray(
@@ -356,9 +355,6 @@ def test_where():
     )
 
 
-@pytest.mark.skip(
-    reason=" TypeError: no numpy.equal overloads for custom types: string, string"
-)
 def test_string_equal():
     one = ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)
     two = ak._v2.highlevel.Array(["ONE", "two", "four"], check_valid=True)

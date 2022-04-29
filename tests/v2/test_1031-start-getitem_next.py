@@ -5592,7 +5592,7 @@ def test_UnionArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             3:,
         ],
-        ak._v2.contents.unionarray.UnionArray,
+        ak._v2.contents.NumpyArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231

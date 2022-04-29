@@ -112,7 +112,10 @@ def _impl(array):
     elif isinstance(array, ak.layout.ArrayBuilder):
         return NotImplementedError
 
-    elif isinstance(array, (ak._v2.contents.Content, ak._v2.record.Record)):
+    elif isinstance(array, ak._v2.record.Record):
+        return array.array.form.type
+
+    elif isinstance(array, ak._v2.contents.Content):
         return array.form.type
 
     elif isinstance(

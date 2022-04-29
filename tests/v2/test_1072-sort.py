@@ -35,7 +35,6 @@ def test_keep_None_in_place_test_2():
     assert v2_array.typetracer.argsort(axis=1).form == v2_array.argsort(axis=1).form
 
 
-@pytest.mark.skip(reason="FIXME: v2 highlevel argsort has not been implemented yet")
 def test_empty_slice():
     electron = ak._v2.highlevel.Array(
         ak._v2.contents.ListOffsetArray(
@@ -50,11 +49,6 @@ def test_empty_slice():
     v2_electron = electron.layout[[[], []]]
 
     assert to_list(v2_electron) == [[], []]
-
-    id = ak._v2.operations.structure.argsort(electron, axis=1)
-
-    assert to_list(v2_electron[id]) == [[], []]
-    assert v2_electron.typetracer[id].form == v2_electron[id].form
 
 
 def test_masked():
@@ -229,9 +223,8 @@ def test_numpyarray_sort():
     assert v2_array.typetracer.sort().form == v2_array.sort().form
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.(arg)sort not implemented")
 def test_3d():
-    array = ak._v2.contents.NumpyArray(
+    array = ak._v2.Array(
         np.array(
             [
                 # axis 2:    0       1       2       3       4         # axis 1:
@@ -501,7 +494,6 @@ def test_bytemaskedarray_sort():
     assert v2_array.typetracer.sort().form == v2_array.sort().form
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.(arg)sort not implemented")
 def test_bytemaskedarray_sort_2():
     array3 = ak._v2.highlevel.Array(
         [[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]]
@@ -572,7 +564,7 @@ def test_bytemaskedarray_sort_2():
         [0, 1, 2, 3],
     ]
 
-    assert to_list(array._v2.operations.structure.sort(1, False, False)) == [
+    assert to_list(ak._v2.operations.structure.sort(array, 1, False, False)) == [
         [2.2, 1.1, 0.0],
         [],
         None,
@@ -782,7 +774,6 @@ def test_indexedoptionarray_sort():
     )
 
 
-@pytest.mark.skip(reason="FIXME: ak._v2.operations.structure.(arg)sort not implemented")
 def test_sort_zero_length_arrays():
     array = ak._v2.contents.IndexedArray(
         ak._v2.index.Index64([]), ak._v2.contents.NumpyArray([1, 2, 3])
@@ -818,10 +809,9 @@ def test_sort_zero_length_arrays():
     assert to_list(ak._v2.operations.structure.sort(array)) == []
     assert to_list(ak._v2.operations.structure.argsort(array)) == []
 
-    array = ak._v2.contents.RecordArray([])
+    array = ak._v2.contents.RecordArray([], None, 0)
     assert to_list(array) == []
     assert to_list(ak._v2.operations.structure.sort(array)) == []
-    assert to_list(ak._v2.operations.structure.argsort(array)) == []
 
     content = ak._v2.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])

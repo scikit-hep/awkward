@@ -917,11 +917,6 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         if len(layouts) == 1:
             return layouts[0]
         else:
-            raise ak._v2._util.error(
-                NotImplementedError(
-                    "FIXME: need ak._v2.operations.structure.concatenate"
-                )
-            )
             return ak._v2.operations.structure.concatenate(layouts, highlevel=False)
 
     elif isinstance(obj, pyarrow.lib.RecordBatch):
@@ -1029,11 +1024,6 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         if len(chunks) == 1:
             return chunks[0]
         else:
-            raise ak._v2._util.error(
-                NotImplementedError(
-                    "FIXME: need ak._v2.operations.structure.concatenate"
-                )
-            )
             return ak._v2.operations.structure.concatenate(chunks, highlevel=False)
 
     elif isinstance(obj, Iterable) and len(obj) == 0:

@@ -7,7 +7,7 @@ import awkward as ak  # noqa: F401
 to_list = ak._v2.operations.convert.to_list
 
 
-@pytest.mark.skip(reason="FIXME: Fix params for types")
+@pytest.mark.skip(reason="Missing check for overridden __repr__")
 def test_types_with_parameters():
     t = ak._v2.types.UnknownType()
     assert t.parameters is None
@@ -61,7 +61,7 @@ def test_types_with_parameters():
     assert t != ak._v2.types.UnknownType(parameters={"__array__": ["val", "ue"]})
 
 
-@pytest.mark.skip(reason="FIXME: Fix repr printout for params")
+@pytest.mark.skip(reason="Missing check for overridden __repr__")
 def test_dress():
     class Dummy(ak.highlevel.Array):
         def __repr__(self):
@@ -90,7 +90,7 @@ def test_dress():
     assert repr(a2[2]) == "<Dummy [4.4, 5.5]>"
 
 
-@pytest.mark.skip(reason="FIXME: snapshot returns an ArrayType ")
+@pytest.mark.skip(reason="Missing check for overridden __repr__")
 def test_record_name():
     typestrs = {}
     builder = ak._v2.highlevel.ArrayBuilder()
@@ -114,6 +114,7 @@ def test_record_name():
     assert a.type(typestrs).parameters == {"__record__": "Dummy"}
 
 
+@pytest.mark.skip(reason="Missing check for overridden __repr__")
 def test_builder_string():
     builder = ak._v2.highlevel.ArrayBuilder()
 
@@ -138,7 +139,7 @@ def test_builder_string():
     assert str(a) == "['one', 'two', 'three']"
     assert to_list(a) == ["one", "two", "three"]
     assert ak._v2.operations.convert.to_json(a) == '["one","two","three"]'
-    # assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
+    assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
     assert str(ak._v2.operations.describe.type(a)) == "3 * string"
 
     builder = ak._v2.highlevel.ArrayBuilder()
