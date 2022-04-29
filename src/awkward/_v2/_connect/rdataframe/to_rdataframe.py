@@ -10,6 +10,11 @@ import threading
 
 compiler = ROOT.gInterpreter.Declare
 compiler_lock = threading.Lock()
+compiler(
+    """
+#include <Python.h>
+"""
+)
 
 
 def compile(source_code):
@@ -144,8 +149,6 @@ class DataSourceGenerator:
 
         if not hasattr(ROOT, array_data_source):
             cpp_code = f"""
-#include <Python.h>
-
 namespace awkward {{
 
     class {array_data_source} final
@@ -258,5 +261,4 @@ namespace awkward {{
             (self.data_ptrs_list),
         )
 
-        rdf.lookups = self.lookups
         return rdf
