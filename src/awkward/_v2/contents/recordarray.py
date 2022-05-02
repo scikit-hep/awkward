@@ -949,6 +949,11 @@ class RecordArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
+        if self._nplike.known_shape:
+            contents = [x[: self._length] for x in self._contents]
+        else:
+            contents = self._contents
+
         if options["return_array"]:
 
             def continuation():
@@ -961,7 +966,7 @@ class RecordArray(Content):
                             lateral_context,
                             options,
                         )
-                        for content in self._contents
+                        for content in contents
                     ],
                     self._fields,
                     self._length,
@@ -973,7 +978,7 @@ class RecordArray(Content):
         else:
 
             def continuation():
-                for content in self._contents:
+                for content in contents:
                     content._recursively_apply(
                         action,
                         depth,
