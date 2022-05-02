@@ -1153,11 +1153,16 @@ class RegularArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
+        if self._nplike.known_shape:
+            content = self._content[: self._length * self._size]
+        else:
+            content = self._content
+
         if options["return_array"]:
 
             def continuation():
                 return RegularArray(
-                    self._content._recursively_apply(
+                    content._recursively_apply(
                         action,
                         depth + 1,
                         copy.copy(depth_context),
@@ -1174,7 +1179,7 @@ class RegularArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply(
+                content._recursively_apply(
                     action,
                     depth + 1,
                     copy.copy(depth_context),

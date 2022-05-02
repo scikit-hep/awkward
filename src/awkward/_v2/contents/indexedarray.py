@@ -1175,12 +1175,24 @@ class IndexedArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
+        if (
+            self._nplike.known_shape
+            and self._nplike.known_data
+            and self._index.length != 0
+        ):
+            npindex = self._index.data
+            indexmin = npindex.min()
+            index = ak._v2.index.Index(npindex - indexmin, nplike=self._nplike)
+            content = self._content[indexmin : npindex.max() + 1]
+        else:
+            index, content = self._index, self._content
+
         if options["return_array"]:
 
             def continuation():
                 return IndexedArray(
-                    self._index,
-                    self._content._recursively_apply(
+                    index,
+                    content._recursively_apply(
                         action,
                         depth,
                         copy.copy(depth_context),
@@ -1195,7 +1207,7 @@ class IndexedArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply(
+                content._recursively_apply(
                     action,
                     depth,
                     copy.copy(depth_context),

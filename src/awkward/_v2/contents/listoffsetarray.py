@@ -2020,12 +2020,21 @@ class ListOffsetArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
+        if self._nplike.known_shape and self._nplike.known_data:
+            offsetsmin = self._offsets.data[0]
+            offsets = ak._v2.index.Index(
+                self._offsets.data - offsetsmin, nplike=self._nplike
+            )
+            content = self._content[offsetsmin : self._offsets.data[-1]]
+        else:
+            offsets, content = self._offsets, self._content
+
         if options["return_array"]:
 
             def continuation():
                 return ListOffsetArray(
-                    self._offsets,
-                    self._content._recursively_apply(
+                    offsets,
+                    content._recursively_apply(
                         action,
                         depth + 1,
                         copy.copy(depth_context),
@@ -2040,7 +2049,7 @@ class ListOffsetArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply(
+                content._recursively_apply(
                     action,
                     depth + 1,
                     copy.copy(depth_context),

@@ -1376,13 +1376,29 @@ class ListArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
+        if (
+            self._nplike.known_shape
+            and self._nplike.known_data
+            and self._starts.length != 0
+        ):
+            startsmin = self._starts.data.min()
+            starts = ak._v2.index.Index(
+                self._starts.data - startsmin, nplike=self._nplike
+            )
+            stops = ak._v2.index.Index(
+                self._stops.data - startsmin, nplike=self._nplike
+            )
+            content = self._content[startsmin : self._stops.data.max()]
+        else:
+            starts, stops, content = self._starts, self._stops, self._content
+
         if options["return_array"]:
 
             def continuation():
                 return ListArray(
-                    self._starts,
-                    self._stops,
-                    self._content._recursively_apply(
+                    starts,
+                    stops,
+                    content._recursively_apply(
                         action,
                         depth + 1,
                         copy.copy(depth_context),
@@ -1397,7 +1413,7 @@ class ListArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply(
+                content._recursively_apply(
                     action,
                     depth + 1,
                     copy.copy(depth_context),

@@ -935,12 +935,17 @@ class ByteMaskedArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
+        if self._nplike.known_shape:
+            content = self._content[0 : self._mask.length]
+        else:
+            content = self._content
+
         if options["return_array"]:
 
             def continuation():
                 return ByteMaskedArray(
                     self._mask,
-                    self._content._recursively_apply(
+                    content._recursively_apply(
                         action,
                         depth,
                         copy.copy(depth_context),
@@ -956,7 +961,7 @@ class ByteMaskedArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply(
+                content._recursively_apply(
                     action,
                     depth,
                     copy.copy(depth_context),
