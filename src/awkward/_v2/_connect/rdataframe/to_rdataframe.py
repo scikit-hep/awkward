@@ -6,8 +6,20 @@ import awkward._v2._lookup  # noqa: E402
 import awkward._v2._connect.cling  # noqa: E402
 
 import ROOT
+import threading
 
-compiler = ROOT.gInterpreter.Declare
+
+def compile(source_code):
+    with compiler_lock:
+        return ROOT.gInterpreter.Declare(source_code)
+
+
+compiler_lock = threading.Lock()
+compile(
+    """
+#include <Python.h>
+"""
+)
 
 
 def to_rdataframe(layouts, length, flatlist_as_rvec):
@@ -47,7 +59,7 @@ class DataSourceGenerator:
             )
             self.lookups[key] = ak._v2._lookup.Lookup(layout)
             generator = self.generators[key]
-            generator.generate(compiler)
+            generator.generate(ROOT.gInterpreter.Declare)
 
             entry_type = generator.entry_type()
             if isinstance(generator, ak._v2._connect.cling.NumpyArrayGenerator):
@@ -152,6 +164,8 @@ namespace awkward {{
 
         {cpp_code_declare_slots}
 
+        PyObject* fPyLookup;
+
         Record_t
         GetColumnReadersImpl(std::string_view name, const std::type_info &id) {{
             Record_t reader;
@@ -166,14 +180,20 @@ namespace awkward {{
         }}
 
     public:
-        {array_data_source}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list)
+        {array_data_source}(PyObject* lookup, ULong64_t size, std::initializer_list<ULong64_t> ptrs_list)
           : fSize(size),
             fPtrs({{ptrs_list}}),
             fColNames({{{cpp_code_column_names}}}),
             fColTypeNames({{{cpp_code_column_type_names}}}),
-            fColTypesMap({{{cpp_code_column_types_map}}})
+            fColTypesMap({{{cpp_code_column_types_map}}}),
+            fPyLookup(lookup)
             {{
+                Py_INCREF(fPyLookup);
                 {cpp_code_init_slots}
+            }}
+
+            ~{array_data_source}() {{
+                Py_DECREF(fPyLookup);
             }}
 
             void SetNSlots(unsigned int nSlots) {{
@@ -225,17 +245,18 @@ namespace awkward {{
         }}
     }};
 
-    ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source}(ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
-        return new ROOT::RDataFrame(std::make_unique<{array_data_source}>(size, ptrs_list));
+    ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source}(PyObject* lookup, ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
+        return new ROOT::RDataFrame(std::make_unique<{array_data_source}>(std::forward<PyObject*>(lookup), size, ptrs_list));
     }}
 
 }}
             """
 
-            done = compiler(cpp_code)
+            done = compile(cpp_code)
             assert done is True
 
         rdf = getattr(ROOT.awkward, f"MakeAwkwardArrayDS_{array_data_source}")(
+            self.lookups,
             self.length,
             (self.data_ptrs_list),
         )
