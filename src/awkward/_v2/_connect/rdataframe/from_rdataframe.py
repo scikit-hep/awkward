@@ -84,8 +84,15 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         else:
             # check if it is iterable
             if cppyy.gbl._is_iterable[cpp_reference.value_type]():
-                # print("Iterable!", cpp_reference.value_type)
-                pass
+                # size = [cpp_reference[i].size() for i in range(cpp_reference.size())]
+                array = [
+                    numpy.asarray(cpp_reference[i]) for i in range(cpp_reference.size())
+                ]
+                return (
+                    ak._v2.highlevel.Array({column: array})
+                    if column_as_record
+                    else ak._v2.highlevel.Array(array)
+                )
 
             raise ak._v2._util.error(NotImplementedError)
 
