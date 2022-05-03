@@ -63,12 +63,17 @@ bool _is_iterable() {
 
 def from_rdataframe(data_frame, column, column_as_record=True):
 
-    column_type = data_frame.GetColumnType(column)
-    result_ptrs = data_frame.Take[column_type](column)
+    # Cast input node to base RNode type
+    data_frame_rnode = cppyy.gbl.ROOT.RDF.AsRNode(data_frame)
+
+    column_type = data_frame_rnode.GetColumnType(column)
+    result_ptrs = data_frame_rnode.Take[column_type](column)
     cpp_reference = result_ptrs.GetValue()
 
     # check that its an std::vector
-    if cppyy.typeid(cppyy.gbl.std.vector[column_type]()) == cppyy.typeid(cpp_reference):
+    if hasattr(cpp_reference, "__array_interface__") or cppyy.typeid(
+        cppyy.gbl.std.vector[column_type]()
+    ) == cppyy.typeid(cpp_reference):
 
         # check if it's an integral or a floating point type
         if cppyy.gbl._is_arithmetic[cpp_reference.value_type]():
@@ -84,7 +89,6 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         else:
             # check if it is iterable
             if cppyy.gbl._is_iterable[cpp_reference.value_type]():
-                # size = [cpp_reference[i].size() for i in range(cpp_reference.size())]
                 array = [
                     numpy.asarray(cpp_reference[i]) for i in range(cpp_reference.size())
                 ]
