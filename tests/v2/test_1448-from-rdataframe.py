@@ -65,6 +65,7 @@ def test_data_frame_rvecs():
 
 def test_to_from_data_frame():
     ak_array_in = ak._v2.Array([[1.1], [2.2, 3.3, 4.4], [5.5, 6.6]])
+    assert ak_array_in.layout.content.is_contiguous == True
 
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
 
@@ -73,6 +74,8 @@ def test_to_from_data_frame():
     ak_array_out = ak._v2.from_rdataframe(
         data_frame, column="x", column_as_record=False
     )
+    assert ak_array_out.layout.content.is_contiguous == True
+
     assert ak_array_in.to_list() == ak_array_out.to_list()
 
 
