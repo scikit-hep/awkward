@@ -69,7 +69,6 @@ struct is_specialization<Ref<Args...>, Ref>: std::true_type {};
 
 
 def from_rdataframe(data_frame, column, column_as_record=True):
-
     def _wrap_as_array(column, array, column_as_record):
         return (
             ak._v2.highlevel.Array({column: array})
@@ -81,11 +80,8 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     data_frame_rnode = cppyy.gbl.ROOT.RDF.AsRNode(data_frame)
 
     column_type = data_frame_rnode.GetColumnType(column)
-    print("Column type:", column_type)
     result_ptrs = data_frame_rnode.Take[column_type](column)
-    print(result_ptrs)
     cpp_reference = result_ptrs.GetValue()
-    print("cppyy typeid:", cppyy.typeid(cpp_reference))
 
     # check that its an std::vector - only if its type is not supported
     #
@@ -102,9 +98,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
         return _wrap_as_array(column, array, column_as_record)
 
-    if cppyy.typeid(
-        cppyy.gbl.std.vector[column_type]()
-    ) == cppyy.typeid(cpp_reference):
+    if cppyy.typeid(cppyy.gbl.std.vector[column_type]()) == cppyy.typeid(cpp_reference):
 
         # check if it's an integral or a floating point type
         if cppyy.gbl._is_arithmetic[cpp_reference.value_type]():
