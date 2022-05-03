@@ -57,21 +57,52 @@ template<typename T>
 bool _is_iterable() {
     return is_iterable<T>::value;
 };
+
+template<typename T, template<typename...> class Ref>
+struct is_specialization : std::false_type {};
+
+template<template<typename...> class Ref, typename... Args>
+struct is_specialization<Ref<Args...>, Ref>: std::true_type {};
+
 """
 )
 
 
 def from_rdataframe(data_frame, column, column_as_record=True):
 
+    def _wrap_as_array(column, array, column_as_record):
+        return (
+            ak._v2.highlevel.Array({column: array})
+            if column_as_record
+            else ak._v2.highlevel.Array(array)
+        )
+
     # Cast input node to base RNode type
     data_frame_rnode = cppyy.gbl.ROOT.RDF.AsRNode(data_frame)
 
     column_type = data_frame_rnode.GetColumnType(column)
+    print("Column type:", column_type)
     result_ptrs = data_frame_rnode.Take[column_type](column)
+    print(result_ptrs)
     cpp_reference = result_ptrs.GetValue()
+    print("cppyy typeid:", cppyy.typeid(cpp_reference))
 
-    # check that its an std::vector
-    if hasattr(cpp_reference, "__array_interface__") or cppyy.typeid(
+    # check that its an std::vector - only if its type is not supported
+    #
+    # The conversion of STL vectors and TVec to numpy arrays happens
+    # without copying the data.
+    # The memory-adoption is achieved by the dictionary __array_interface__, which
+    # is added dynamically to the Python objects by PyROOT.
+
+    # array interface is added for STL vectors and RVecs of the following types:
+    # float, double, int, unsigned int, long, unsigned long
+
+    if hasattr(cpp_reference, "__array_interface__"):
+        array = numpy.asarray(cpp_reference)
+
+        return _wrap_as_array(column, array, column_as_record)
+
+    if cppyy.typeid(
         cppyy.gbl.std.vector[column_type]()
     ) == cppyy.typeid(cpp_reference):
 
@@ -80,23 +111,15 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
             array = numpy.asarray(cpp_reference)
 
-            # FIXME: copy data?
-            return (
-                ak._v2.highlevel.Array({column: array})
-                if column_as_record
-                else ak._v2.highlevel.Array(array)
-            )
+            return _wrap_as_array(column, array, column_as_record)
         else:
-            # check if it is iterable
+            # check if it is an iterable
             if cppyy.gbl._is_iterable[cpp_reference.value_type]():
+                # FIXME:
                 array = [
                     numpy.asarray(cpp_reference[i]) for i in range(cpp_reference.size())
                 ]
-                return (
-                    ak._v2.highlevel.Array({column: array})
-                    if column_as_record
-                    else ak._v2.highlevel.Array(array)
-                )
+                return _wrap_as_array(column, array, column_as_record)
 
             raise ak._v2._util.error(NotImplementedError)
 
