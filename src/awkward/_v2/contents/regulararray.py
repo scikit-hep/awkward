@@ -1219,31 +1219,46 @@ class RegularArray(Content):
             self._nplike,
         )
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "bytestring":
+            convert_bytes = (
+                None if json_conversions is None else json_conversions["convert_bytes"]
+            )
             content = ak._v2._util.tobytes(self._content.data)
             length, size = self._length, self._size
             out = [None] * length
-            for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size]
+            if convert_bytes is None:
+                for i in range(length):
+                    out[i] = content[(i) * size : (i + 1) * size]
+            else:
+                for i in range(length):
+                    out[i] = convert_bytes(content[(i) * size : (i + 1) * size])
             return out
 
         elif self.parameter("__array__") == "string":
-            content = ak._v2._util.tobytes(self._content.data)
+            data = self._content.data
+            if hasattr(data, "tobytes"):
+
+                def tostring(x):
+                    return x.tobytes().decode(errors="surrogateescape")
+
+            else:
+
+                def tostring(x):
+                    return x.tostring().decode(errors="surrogateescape")
+
             length, size = self._length, self._size
             out = [None] * length
             for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size].decode(
-                    errors="surrogateescape"
-                )
+                out[i] = tostring(data[(i) * size : (i + 1) * size])
             return out
 
         else:
-            out = self._to_list_custom(behavior)
+            out = self._to_list_custom(behavior, json_conversions)
             if out is not None:
                 return out
 
-            content = self._content._to_list(behavior)
+            content = self._content._to_list(behavior, json_conversions)
             length, size = self._length, self._size
             out = [None] * length
             for i in range(length):
@@ -1260,42 +1275,3 @@ class RegularArray(Content):
             parameters=self.parameters,
             nplike=nplike,
         )
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        if (
-            self.parameter("__array__") == "bytestring"
-            or self.parameter("__array__") == "string"
-        ):
-            content = ak._v2._util.tobytes(self._content.data)
-            length, size = self._length, self._size
-            out = [None] * length
-            for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size].decode(
-                    errors="surrogateescape"
-                )
-            return out
-
-        else:
-            out = self._to_json_custom()
-            if out is not None:
-                return out
-
-            content = self._content._to_json(
-                nan_string,
-                infinity_string,
-                minus_infinity_string,
-                complex_real_string,
-                complex_imag_string,
-            )
-            length, size = self._length, self._size
-            out = [None] * length
-            for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size]
-            return out

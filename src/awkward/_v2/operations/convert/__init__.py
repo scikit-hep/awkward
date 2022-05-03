@@ -9,6 +9,9 @@ from awkward._v2.operations.convert.ak_to_jax import to_jax  # noqa: F401
 from awkward._v2.operations.convert.ak_from_iter import from_iter  # noqa: F401
 from awkward._v2.operations.convert.ak_to_list import to_list  # noqa: F401
 from awkward._v2.operations.convert.ak_from_json import from_json  # noqa: F401
+from awkward._v2.operations.convert.ak_from_json_file import (  # noqa: F401
+    from_json_file,
+)
 from awkward._v2.operations.convert.ak_from_json_schema import (  # noqa: F401
     from_json_schema,
 )

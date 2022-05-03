@@ -633,13 +633,15 @@ class BitMaskedArray(Content):
                 self._nplike,
             )
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)[: self._length]
-        out = self._content._getitem_range(slice(0, self._length))._to_list(behavior)
+        out = self._content._getitem_range(slice(0, self._length))._to_list(
+            behavior, json_conversions
+        )
 
         for i, isvalid in enumerate(mask):
             if not isvalid:
@@ -660,29 +662,3 @@ class BitMaskedArray(Content):
             parameters=self._parameters,
             nplike=nplike,
         )
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        out = self._to_json_custom()
-        if out is not None:
-            return out
-
-        mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)[: self._length]
-        content = self._content._to_json(
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
-        )
-        out = [None] * self._length
-        for i, isvalid in enumerate(mask):
-            if isvalid:
-                out[i] = content[i]
-        return out

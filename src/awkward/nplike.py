@@ -77,6 +77,7 @@ class NumpyMetadata(Singleton):
     signedinteger = numpy.signedinteger
     unsignedinteger = numpy.unsignedinteger
     floating = numpy.floating
+    complexfloating = numpy.complexfloating
     number = numpy.number
     object_ = numpy.object_
     generic = numpy.generic
@@ -113,10 +114,6 @@ if hasattr(numpy, "datetime64"):
 
 if hasattr(numpy, "timedelta64"):
     NumpyMetadata.timedelta64 = numpy.timedelta64
-
-NumpyMetadata.all_complex = tuple(
-    getattr(numpy, x) for x in dir(NumpyMetadata) if x.startswith("complex")
-)
 
 
 class NumpyLike(Singleton):

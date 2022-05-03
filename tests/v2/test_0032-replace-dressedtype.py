@@ -125,7 +125,10 @@ def test_builder_string():
     a = builder.snapshot()
     assert str(a) == "[b'one', b'two', b'three']"
     assert to_list(a) == [b"one", b"two", b"three"]
-    assert ak._v2.operations.convert.to_json(a) == '["one","two","three"]'
+    assert (
+        ak._v2.operations.convert.to_json(a, convert_bytes=bytes.decode)
+        == '["one","two","three"]'
+    )
     # assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
     assert str(ak._v2.operations.describe.type(a)) == "3 * bytes"
 

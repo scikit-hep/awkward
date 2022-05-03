@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import numbers
+import math
 import copy
 from collections.abc import Iterable
 
@@ -1331,19 +1333,123 @@ class Content:
             },
         )
 
+    def to_json(
+        self,
+        nan_string=None,
+        infinity_string=None,
+        minus_infinity_string=None,
+        complex_record_fields=None,
+        convert_bytes=None,
+        behavior=None,
+    ):
+        if complex_record_fields is None:
+            complex_real_string = None
+            complex_imag_string = None
+        elif (
+            isinstance(complex_record_fields, tuple)
+            and len(complex_record_fields) == 2
+            and isinstance(complex_record_fields[0], str)
+            and isinstance(complex_record_fields[1], str)
+        ):
+            complex_real_string, complex_imag_string = complex_record_fields
+
+        return self.packed()._to_list(
+            behavior,
+            {
+                "nan_string": nan_string,
+                "infinity_string": infinity_string,
+                "minus_infinity_string": minus_infinity_string,
+                "complex_real_string": complex_real_string,
+                "complex_imag_string": complex_imag_string,
+                "convert_bytes": convert_bytes,
+            },
+        )
+
     def tolist(self, behavior=None):
         return self.to_list(behavior)
 
     def to_list(self, behavior=None):
-        return self.packed()._to_list(behavior)
+        return self.packed()._to_list(behavior, None)
 
-    def _to_list_custom(self, behavior):
+    def _to_list_custom(self, behavior, json_conversions):
         cls = ak._v2._util.arrayclass(self, behavior)
         if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
             array = cls(self)
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]
+
+            if json_conversions is not None:
+                convert_bytes = json_conversions["convert_bytes"]
+                if convert_bytes is not None:
+                    for i, x in enumerate(out):
+                        if isinstance(x, bytes):
+                            out[i] = convert_bytes(x)
+
+                outimag = None
+                complex_real_string = json_conversions["complex_real_string"]
+                complex_imag_string = json_conversions["complex_imag_string"]
+                if complex_real_string is not None:
+                    Real = numbers.Real
+                    Complex = numbers.Complex
+                    if any(
+                        not isinstance(x, Real) and isinstance(x, Complex) for x in out
+                    ):
+                        outimag = [None] * len(out)
+                        for i, x in enumerate(out):
+                            if isinstance(x, Complex):
+                                out[i] = x.real
+                                outimag[i] = x.imag
+                            else:
+                                out[i] = x
+                                outimag[i] = None
+
+                filters = []
+
+                nan_string = json_conversions["nan_string"]
+                if nan_string is not None:
+                    isnan = math.isnan
+                    filters.append(lambda x: nan_string if isnan(x) else x)
+
+                infinity_string = json_conversions["infinity_string"]
+                if infinity_string is not None:
+                    inf = float("inf")
+                    filters.append(lambda x: infinity_string if x == inf else x)
+
+                minus_infinity_string = json_conversions["minus_infinity_string"]
+                if minus_infinity_string is not None:
+                    minf = float("-inf")
+                    filters.append(lambda x: minus_infinity_string if x == minf else x)
+
+                if len(filters) == 1:
+                    f0 = filters[0]
+                    for i, x in enumerate(out):
+                        out[i] = f0(x)
+                    if outimag is not None:
+                        for i, x in enumerate(outimag):
+                            outimag[i] = f0(x)
+                elif len(filters) == 2:
+                    f0 = filters[0]
+                    f1 = filters[1]
+                    for i, x in enumerate(out):
+                        out[i] = f1(f0(x))
+                    if outimag is not None:
+                        for i, x in enumerate(outimag):
+                            outimag[i] = f1(f0(x))
+                elif len(filters) == 3:
+                    f0 = filters[0]
+                    f1 = filters[1]
+                    f2 = filters[2]
+                    for i, x in enumerate(out):
+                        out[i] = f2(f1(f0(x)))
+                    if outimag is not None:
+                        for i, x in enumerate(outimag):
+                            outimag[i] = f2(f1(f0(x)))
+
+                if outimag is not None:
+                    for i, (real, imag) in enumerate(zip(out, outimag)):
+                        out[i] = {complex_real_string: real, complex_imag_string: imag}
+
             return out
 
     def flatten(self, axis=1, depth=0):
@@ -1355,47 +1461,6 @@ class Content:
             return self
         else:
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
-
-    def _to_json_custom(self):
-        cls = ak._v2._util.arrayclass(self, None)
-        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
-            array = cls(self)
-            out = [None] * self.length
-            for i in range(self.length):
-                out[i] = array[i]
-            return out
-
-    def tojson(
-        self,
-        nan_string=None,
-        infinity_string=None,
-        minus_infinity_string=None,
-        complex_real_string=None,
-        complex_imag_string=None,
-    ):
-        return self.to_json(
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
-        )
-
-    def to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        return self.packed()._to_json(
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
-        )
 
     def withparameter(self, key, value):
         out = copy.copy(self)

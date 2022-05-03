@@ -1234,14 +1234,14 @@ class IndexedArray(Content):
     def packed(self):
         return self.project().packed()
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         index = self._index.raw(numpy)
         nextcontent = self._content._carry(ak._v2.index.Index(index), False)
-        return nextcontent._to_list(behavior)
+        return nextcontent._to_list(behavior, json_conversions)
 
     def _to_nplike(self, nplike):
         index = self._index._to_nplike(nplike)
@@ -1253,28 +1253,3 @@ class IndexedArray(Content):
             parameters=self.parameters,
             nplike=nplike,
         )
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        out = self._to_json_custom()
-        if out is not None:
-            return out
-
-        index = self._index.raw(numpy)
-        content = self._content._to_json(
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
-        )
-        out = [None] * index.length
-        for i, ind in enumerate(index):
-            out[i] = content[ind]
-        return out

@@ -32,19 +32,21 @@ def test_fromfile(tmp_path):
     with open(os.path.join(str(tmp_path), "tmp1.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], [], [4, 5.5]]")
 
-    array = ak._v2.operations.io.from_json_file(
+    array = ak._v2.operations.convert.from_json_file(
         os.path.join(str(tmp_path), "tmp1.json")
     )
     assert array.tolist() == [[1.1, 2.2, 3.0], [], [4.0, 5.5]]
 
     with pytest.raises(IOError):
-        ak._v2.operations.io.from_json_file("nonexistent.json")
+        ak._v2.operations.convert.from_json_file("nonexistent.json")
 
     with open(os.path.join(str(tmp_path), "tmp2.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], []], [4, 5.5]]")
 
     with pytest.raises(ValueError):
-        ak._v2.operations.io.from_json_file(os.path.join(str(tmp_path), "tmp2.json"))
+        ak._v2.operations.convert.from_json_file(
+            os.path.join(str(tmp_path), "tmp2.json")
+        )
 
 
 def test_tostring():
@@ -83,7 +85,10 @@ def test_bytearray():
     array = ak._v2.contents.NumpyArray(
         np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "byte"}
     )
-    assert ak._v2.operations.convert.to_json(array) == '"hellothere"'
+    assert (
+        ak._v2.operations.convert.to_json(array, convert_bytes=bytes.decode)
+        == '"hellothere"'
+    )
 
 
 def test_complex():
@@ -146,9 +151,9 @@ def test_complex_with_nan_and_inf():
 
 
 def test_tofile(tmp_path):
-    ak._v2.operations.io.to_json_file(
+    ak._v2.operations.convert.to_json(
         ak._v2.operations.convert.from_json("[[1.1,2.2,3],[],[4,5.5]]"),
-        os.path.join(str(tmp_path), "tmp1.json"),
+        file=os.path.join(str(tmp_path), "tmp1.json"),
     )
 
     with open(os.path.join(str(tmp_path), "tmp1.json")) as f:
@@ -253,8 +258,8 @@ def test_numpy():
         )
     )
     assert (
-        ak._v2.operations.convert.to_json(b3)
-        == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,Infinity],[40.4,50.5,60.6]]]"
+        ak._v2.operations.convert.to_json(b3, infinity_string="Infinity")
+        == '[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,"Infinity"],[40.4,50.5,60.6]]]'
     )
     b4 = ak._v2.contents.NumpyArray(
         np.array(
@@ -265,8 +270,8 @@ def test_numpy():
         )
     )
     assert (
-        ak._v2.operations.convert.to_json(b4)
-        == "[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,-Infinity],[40.4,50.5,60.6]]]"
+        ak._v2.operations.convert.to_json(b4, minus_infinity_string="-Infinity")
+        == '[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,"-Infinity"],[40.4,50.5,60.6]]]'
     )
     c = ak._v2.contents.NumpyArray(
         np.array([[True, False, True], [False, False, True]])

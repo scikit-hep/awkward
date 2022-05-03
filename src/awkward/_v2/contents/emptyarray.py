@@ -338,18 +338,8 @@ class EmptyArray(Content):
     def packed(self):
         return self
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         return []
 
     def _to_nplike(self, nplike):
         return EmptyArray(self._identifier, self._parameters, nplike=nplike)
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        return []

@@ -189,7 +189,7 @@ class Record:
         if cls is not ak._v2.highlevel.Record:
             return cls(self)
 
-        return self._array[self._at : self._at + 1].to_list(behavior)[0]
+        return self._array[self._at : self._at + 1]._to_list(behavior, None)[0]
 
     def deep_copy(self):
         return Record(self._array.deep_copy(), copy.deepcopy(self._at))

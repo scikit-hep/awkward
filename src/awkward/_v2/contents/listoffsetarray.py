@@ -2082,7 +2082,7 @@ class ListOffsetArray(Content):
             next._offsets, content, next._identifier, next._parameters, self._nplike
         )
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         starts, stops = self.starts, self.stops
         starts_data = starts.raw(numpy)
         stops_data = stops.raw(numpy)[: len(starts_data)]
@@ -2100,27 +2100,42 @@ class ListOffsetArray(Content):
         nextcontent = self._content._getitem_range(slice(mini, maxi))
 
         if self.parameter("__array__") == "bytestring":
+            convert_bytes = (
+                None if json_conversions is None else json_conversions["convert_bytes"]
+            )
             content = ak._v2._util.tobytes(nextcontent.data)
             out = [None] * starts.length
-            for i in range(starts.length):
-                out[i] = content[starts_data[i] : stops_data[i]]
+            if convert_bytes is None:
+                for i in range(starts.length):
+                    out[i] = content[starts_data[i] : stops_data[i]]
+            else:
+                for i in range(starts.length):
+                    out[i] = convert_bytes(content[starts_data[i] : stops_data[i]])
             return out
 
         elif self.parameter("__array__") == "string":
-            content = ak._v2._util.tobytes(nextcontent.data)
+            data = nextcontent.data
+            if hasattr(data, "tobytes"):
+
+                def tostring(x):
+                    return x.tobytes().decode(errors="surrogateescape")
+
+            else:
+
+                def tostring(x):
+                    return x.tostring().decode(errors="surrogateescape")
+
             out = [None] * starts.length
             for i in range(starts.length):
-                out[i] = content[starts_data[i] : stops_data[i]].decode(
-                    errors="surrogateescape"
-                )
+                out[i] = tostring(data[starts_data[i] : stops_data[i]])
             return out
 
         else:
-            out = self._to_list_custom(behavior)
+            out = self._to_list_custom(behavior, json_conversions)
             if out is not None:
                 return out
 
-            content = nextcontent._to_list(behavior)
+            content = nextcontent._to_list(behavior, json_conversions)
             out = [None] * starts.length
 
             for i in range(starts.length):
@@ -2137,44 +2152,6 @@ class ListOffsetArray(Content):
             parameters=self._parameters,
             nplike=nplike,
         )
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        if (
-            self.parameter("__array__") == "bytestring"
-            or self.parameter("__array__") == "string"
-        ):
-            content = ak._v2._util.tobytes(self._content.data)
-            starts, stops = self.starts, self.stops
-            out = [None] * starts.length
-            for i in range(starts.length):
-                out[i] = content[starts[i] : stops[i]].decode(errors="surrogateescape")
-            return out
-
-        else:
-            out = self._to_json_custom()
-            if out is not None:
-                return out
-
-            content = self._content._to_json(
-                nan_string,
-                infinity_string,
-                minus_infinity_string,
-                complex_real_string,
-                complex_imag_string,
-            )
-            starts, stops = self.starts, self.stops
-            out = [None] * starts.length
-
-            for i in range(starts.length):
-                out[i] = content[starts[i] : stops[i]]
-            return out
 
     def _awkward_strings_to_nonfinite(self, nonfinit_dict):
         if self.parameter("__array__") == "string":

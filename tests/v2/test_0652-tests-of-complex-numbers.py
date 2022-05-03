@@ -108,11 +108,11 @@ def test_to_json():
     # Complex numbers can't be converted to JSON without setting 'complex_record_fields',
     # but the error messages should refer to that name now. (I changed the name at
     # high-level, but not in the error messages emitted by C++ code.)
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(TypeError) as err:
         ak._v2.operations.convert.to_json(
             ak._v2.operations.convert.from_iter([1 + 1j, 2 + 2j, 3 + 3j])
         )
-    assert "needs both" not in str(err)
+    assert "not JSON serializable" in str(err)
 
     expectation = [{"r": 1.0, "i": 1.0}, {"r": 2.0, "i": 2.0}, {"r": 3.0, "i": 3.0}]
     assert expectation == json.loads(

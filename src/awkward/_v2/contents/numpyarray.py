@@ -1299,19 +1299,63 @@ class NumpyArray(Content):
     def packed(self):
         return self.contiguous().toRegularArray()
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "byte":
-            return ak._v2._util.tobytes(self._data)
+            convert_bytes = (
+                None if json_conversions is None else json_conversions["convert_bytes"]
+            )
+            if convert_bytes is None:
+                return ak._v2._util.tobytes(self._data)
+            else:
+                return convert_bytes(ak._v2._util.tobytes(self._data))
 
         elif self.parameter("__array__") == "char":
             return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")
 
         else:
-            out = self._to_list_custom(behavior)
+            out = self._to_list_custom(behavior, json_conversions)
             if out is not None:
                 return out
 
-            return self._data.tolist()
+            if json_conversions is not None:
+                complex_real_string = json_conversions["complex_real_string"]
+                complex_imag_string = json_conversions["complex_imag_string"]
+                if complex_real_string is not None:
+                    if issubclass(self.dtype.type, np.complexfloating):
+                        return ak._v2.contents.RecordArray(
+                            [
+                                ak._v2.contents.NumpyArray(
+                                    self._data.real, nplike=self._nplike
+                                ),
+                                ak._v2.contents.NumpyArray(
+                                    self._data.imag, nplike=self._nplike
+                                ),
+                            ],
+                            [complex_real_string, complex_imag_string],
+                            self.length,
+                            parameters=self._parameters,
+                            nplike=self._nplike,
+                        )._to_list(behavior, json_conversions)
+
+            out = self._data.tolist()
+
+            if json_conversions is not None:
+                nan_string = json_conversions["nan_string"]
+                if nan_string is not None:
+                    for i in self._nplike.nonzero(self._nplike.isnan(self._data))[0]:
+                        out[i] = nan_string
+
+                infinity_string = json_conversions["infinity_string"]
+                if infinity_string is not None:
+                    for i in self._nplike.nonzero(self._data == np.inf)[0]:
+                        out[i] = infinity_string
+
+                minus_infinity_string = json_conversions["minus_infinity_string"]
+                if minus_infinity_string is not None:
+                    for i in self._nplike.nonzero(self._data == -np.inf)[0]:
+                        out[i] = minus_infinity_string
+
+            return out
 
     def _to_nplike(self, nplike):
         return NumpyArray(
@@ -1320,85 +1364,6 @@ class NumpyArray(Content):
             parameters=self.parameters,
             nplike=nplike,
         )
-
-    def _to_json_custom(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        cls = ak._v2._util.arrayclass(self, None)
-        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
-            array = cls(self)
-            out = [None] * self.length
-            for i in range(self.length):
-                out[i] = array[i]
-            return out
-
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        if (
-            self.parameter("__array__") == "byte"
-            or self.parameter("__array__") == "char"
-        ):
-            return ak._v2._util.tobytes(self._data).decode(errors="surrogateescape")
-
-        else:
-            if self.dtype == np.complex128:
-                if complex_real_string is None or complex_imag_string is None:
-                    raise ak._v2._util.error(
-                        ValueError(
-                            "Complex numbers can't be converted to JSON without"
-                            " setting 'complex_record_fields' "
-                        )
-                    )
-
-                return ak._v2.operations.structure.zip(
-                    {
-                        complex_real_string: ak._v2.contents.NumpyArray(
-                            self._data.real
-                        ),
-                        complex_imag_string: ak._v2.contents.NumpyArray(
-                            self._data.imag
-                        ),
-                    }
-                ).layout._to_json(
-                    nan_string,
-                    infinity_string,
-                    minus_infinity_string,
-                    complex_real_string,
-                    complex_imag_string,
-                )
-
-            if (
-                nan_string is not None
-                or infinity_string is not None
-                or minus_infinity_string is not None
-            ):
-                out = self._nonfinite_to_union(
-                    nan_string, infinity_string, minus_infinity_string
-                )
-                return out.tolist()
-
-            out = self._to_json_custom(
-                nan_string,
-                infinity_string,
-                minus_infinity_string,
-                complex_real_string,
-                complex_imag_string,
-            )
-            if out is not None:
-                return out
-
-            return self._data.tolist()
 
     def __deepcopy__(self, memo=None):
         return ak._v2.contents.NumpyArray(
