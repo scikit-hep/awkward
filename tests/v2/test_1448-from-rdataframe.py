@@ -39,7 +39,6 @@ def test_data_frame_vecs():
     )
 
 
-@pytest.mark.skip(reason="FIXME: nested types have not been implemented yet")
 def test_data_frame_rvecs():
     data_frame = ROOT.RDataFrame(1024)
     coordDefineCode = """ROOT::VecOps::RVec<double> {0}(len);
@@ -59,4 +58,6 @@ def test_data_frame_rvecs():
     d1 = d.Define("r", "sqrt(x*x + y*y)")
 
     array = ak._v2.from_rdataframe(d1, column="r", column_as_record=True)
-    print(array)
+    assert array.layout.form == ak._v2.forms.RecordForm(
+        [ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64"))], ["r"]
+    )
