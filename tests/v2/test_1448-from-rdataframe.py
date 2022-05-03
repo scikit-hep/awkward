@@ -61,3 +61,28 @@ def test_data_frame_rvecs():
     assert array.layout.form == ak._v2.forms.RecordForm(
         [ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64"))], ["r"]
     )
+
+
+def test_to_from_data_frame():
+    ak_array_in = ak._v2.Array([[1.1], [2.2, 3.3, 4.4], [5.5, 6.6]])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "ROOT::RVec<double>"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+@pytest.mark.skip(reason="FIXME: Error pythonizing class std::vector<_Complex double>")
+def test_data_frame_complex_vecs():
+    data_frame = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
+    data_frame_xy = data_frame.Define("y", "x*2 +1j")
+    data_frame_xy.Display().Print()
+
+    ak_array_y = ak._v2.from_rdataframe(
+        data_frame_xy, column="y", column_as_record=False
+    )
+    assert ak_array_y.layout.form == ak._v2.forms.NumpyForm("float64")
