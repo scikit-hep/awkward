@@ -79,7 +79,9 @@ def test_to_from_data_frame():
     assert ak_array_in.to_list() == ak_array_out.to_list()
 
 
-@pytest.mark.skip(reason="FIXME: support boolean? error: assigning to 'std::__1::__vector_base<bool *, std::__1::allocator<bool *> >::value_type' (aka 'bool *') from incompatible type '__bit_iterator<std::__1::vector<bool, std::__1::allocator<bool> >, false>'")
+@pytest.mark.skip(
+    reason="FIXME: support boolean? error: assigning to 'std::__1::__vector_base<bool *, std::__1::allocator<bool *> >::value_type' (aka 'bool *') from incompatible type '__bit_iterator<std::__1::vector<bool, std::__1::allocator<bool> >, false>'"
+)
 def test_boolean_data_frame():
     ak_array_in = ak._v2.Array([True, True, False, True, False, False])
 
