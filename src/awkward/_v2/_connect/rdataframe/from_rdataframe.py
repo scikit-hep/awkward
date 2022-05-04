@@ -75,17 +75,21 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             else ak._v2.highlevel.Array(array)
         )
 
+    # FIXME: not used, but would be needed if we want to copy the data
+    # to a contiguous content
     def _offsets(vec_of_vecs):
         offsets = [0]
-        offsets = offsets + [
-            vec_of_vecs[i].size() for i in range(vec_of_vecs.size())
-        ]
+        offsets = offsets + [vec_of_vecs[i].size() for i in range(vec_of_vecs.size())]
         return offsets
 
     def _recurse(cpp_ref):
         if hasattr(cpp_ref, "__array_interface__"):
             return numpy.asarray(cpp_ref)
-        elif hasattr(cpp_ref, "begin") and hasattr(cpp_ref, "end") and hasattr(cpp_ref, "size"):
+        elif (
+            hasattr(cpp_ref, "begin")
+            and hasattr(cpp_ref, "end")
+            and hasattr(cpp_ref, "size")
+        ):
             return [_recurse(cpp_ref[i]) for i in range(cpp_ref.size())]
         else:
             raise ak._v2._util.error(NotImplementedError)
@@ -97,8 +101,6 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     result_ptrs = data_frame_rnode.Take[column_type](column)
     cpp_reference = result_ptrs.GetValue()
 
-    # check that its an std::vector - only if its type is not supported
-    #
     # Note, the conversion of STL vectors and TVec to numpy arrays in ROOT
     # happens without copying the data.
     # The memory-adoption is achieved by the dictionary '__array_interface__',
@@ -113,11 +115,14 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
         return _wrap_as_array(column, array, column_as_record)
 
+    # Do we need to check that its an std::vector? This is done if the vector type
+    # is not supported by PyROOT as an '__array_interface__'
+    # FIXME: test it on 'boolean' and 'strings'.
     if cppyy.typeid(cppyy.gbl.std.vector[column_type]()) == cppyy.typeid(cpp_reference):
 
         # check if it's an integral or a floating point type
         # that is not included in the '__array_interface__'
-        # list of types (see above)
+        # list of supported types (see above)
         if cppyy.gbl._is_arithmetic[cpp_reference.value_type]():
 
             array = numpy.asarray(cpp_reference)
@@ -125,6 +130,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             return _wrap_as_array(column, array, column_as_record)
         else:
             array = _recurse(cpp_reference)
+
             # check if it is an iterable
             # if cppyy.gbl._is_iterable[cpp_reference.value_type]():
             #
