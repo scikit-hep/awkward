@@ -96,4 +96,4 @@ if __name__ == "__main__":
         if arg == "--libdir":
             output.append(libdir)
 
-    print(" ".join(output))  # noqa: T001
+    print(" ".join(output))  # noqa: T001, T201
