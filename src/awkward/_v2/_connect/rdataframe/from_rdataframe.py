@@ -13,7 +13,6 @@ compiler = ROOT.gInterpreter.Declare
 numpy = ak.nplike.Numpy.instance()
 
 
-
 def from_rdataframe(data_frame, column, column_as_record=True):
     def _wrap_as_array(column, array, column_as_record):
         return (
