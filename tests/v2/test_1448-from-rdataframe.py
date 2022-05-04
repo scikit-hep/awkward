@@ -40,7 +40,7 @@ def test_data_frame_vecs():
 
 
 def test_data_frame_rvecs():
-    data_frame = ROOT.RDataFrame(1024)
+    data_frame = ROOT.RDataFrame(10)
     coordDefineCode = """ROOT::VecOps::RVec<double> {0}(len);
                      std::transform({0}.begin(), {0}.end(), {0}.begin(), [](double){{return gRandom->Uniform(-1.0, 1.0);}});
                      return {0};"""
@@ -56,7 +56,6 @@ def test_data_frame_rvecs():
     # Let's now define radii out of x and y. We'll do it treating the collections
     # stored in the columns without looping on the individual elements.
     d1 = d.Define("r", "sqrt(x*x + y*y)")
-    print("Counted:", d1.Count().GetValue())
 
     array = ak._v2.from_rdataframe(d1, column="r", column_as_record=True)
     assert array.layout.form == ak._v2.forms.RecordForm(
@@ -76,6 +75,21 @@ def test_to_from_data_frame():
         data_frame, column="x", column_as_record=False
     )
     assert ak_array_out.layout.content.is_contiguous is True
+
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+@pytest.mark.skip(reason="FIXME: support boolean? error: assigning to 'std::__1::__vector_base<bool *, std::__1::allocator<bool *> >::value_type' (aka 'bool *') from incompatible type '__bit_iterator<std::__1::vector<bool, std::__1::allocator<bool> >, false>'")
+def test_boolean_data_frame():
+    ak_array_in = ak._v2.Array([True, True, False, True, False, False])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "ROOT::RVec<bool>"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
 
     assert ak_array_in.to_list() == ak_array_out.to_list()
 
