@@ -40,7 +40,7 @@ def test_data_frame_vecs():
 
 
 def test_data_frame_rvecs():
-    data_frame = ROOT.RDataFrame(10) #FIXME 24)
+    data_frame = ROOT.RDataFrame(1024)
     coordDefineCode = """ROOT::VecOps::RVec<double> {0}(len);
                      std::transform({0}.begin(), {0}.end(), {0}.begin(), [](double){{return gRandom->Uniform(-1.0, 1.0);}});
                      return {0};"""
