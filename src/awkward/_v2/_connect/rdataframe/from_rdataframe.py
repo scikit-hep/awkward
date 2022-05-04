@@ -21,6 +21,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             else ak._v2.highlevel.Array(array)
         )
 
+        # FIXME: cpp_ref    = <cppyy.gbl.variant<ROOT::VecOps::RVec<double>,double>
     def _recurse(cpp_ref):
         # Note, the conversion of STL vectors and TVec to numpy arrays in ROOT
         # happens without copying the data.
