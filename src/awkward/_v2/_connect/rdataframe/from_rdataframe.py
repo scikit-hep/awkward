@@ -83,6 +83,14 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         return offsets
 
     def _recurse(cpp_ref):
+        # Note, the conversion of STL vectors and TVec to numpy arrays in ROOT
+        # happens without copying the data.
+        # The memory-adoption is achieved by the dictionary '__array_interface__',
+        # which is added dynamically to the Python objects by PyROOT.
+
+        # '__array_interface__' attribute is added for STL vectors and RVecs of
+        # the following types:
+        #   float, double, int, unsigned int, long, unsigned long
         if hasattr(cpp_ref, "__array_interface__"):
             return numpy.asarray(cpp_ref)
         elif (
@@ -101,49 +109,5 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     result_ptrs = data_frame_rnode.Take[column_type](column)
     cpp_reference = result_ptrs.GetValue()
 
-    # Note, the conversion of STL vectors and TVec to numpy arrays in ROOT
-    # happens without copying the data.
-    # The memory-adoption is achieved by the dictionary '__array_interface__',
-    # which is added dynamically to the Python objects by PyROOT.
-    #
-    # '__array_interface__' attribute is added for STL vectors and RVecs of
-    # the following types:
-    #   float, double, int, unsigned int, long, unsigned long
-
-    if hasattr(cpp_reference, "__array_interface__"):
-        array = numpy.asarray(cpp_reference)
-
-        return _wrap_as_array(column, array, column_as_record)
-
-    # Do we need to check that its an std::vector? This is done if the vector type
-    # is not supported by PyROOT as an '__array_interface__'
-    # FIXME: test it on 'boolean' and 'strings'.
-    if cppyy.typeid(cppyy.gbl.std.vector[column_type]()) == cppyy.typeid(cpp_reference):
-
-        # check if it's an integral or a floating point type
-        # that is not included in the '__array_interface__'
-        # list of supported types (see above)
-        if cppyy.gbl._is_arithmetic[cpp_reference.value_type]():
-
-            array = numpy.asarray(cpp_reference)
-
-            return _wrap_as_array(column, array, column_as_record)
-        else:
-            array = _recurse(cpp_reference)
-
-            # check if it is an iterable
-            # if cppyy.gbl._is_iterable[cpp_reference.value_type]():
-            #
-            #     # FIXME: if we want to copy the data, we can create a contiguous
-            #     # memory of the following offsets sum size:
-            #     #
-            #     # offsets = _offsets(cpp_reference)
-            #     # print("offsets:", offsets, "total size:", sum(offsets))
-            #
-            #     array = [
-            #         numpy.asarray(cpp_reference[i]) for i in range(cpp_reference.size())
-            #     ]
-            return _wrap_as_array(column, array, column_as_record)
-
-    else:
-        raise ak._v2._util.error(NotImplementedError)
+    array = _recurse(cpp_reference)
+    return _wrap_as_array(column, array, column_as_record)
