@@ -14,7 +14,7 @@ np = ak.nplike.NumpyMetadata.instance()
 def code_to_function(code, function_name, externals=None, debug=False):
     if debug:
         print("################### " + function_name)  # noqa: T001, T201
-        print(code)  # noqa: T001
+        print(code)  # noqa: T001, T201
     namespace = {} if externals is None else dict(externals)
     exec(code, namespace)
     return namespace[function_name]
