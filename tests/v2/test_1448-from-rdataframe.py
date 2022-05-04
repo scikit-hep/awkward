@@ -40,7 +40,7 @@ def test_data_frame_vecs():
 
 
 def test_data_frame_rvecs():
-    data_frame = ROOT.RDataFrame(1024)
+    data_frame = ROOT.RDataFrame(10) #FIXME 24)
     coordDefineCode = """ROOT::VecOps::RVec<double> {0}(len);
                      std::transform({0}.begin(), {0}.end(), {0}.begin(), [](double){{return gRandom->Uniform(-1.0, 1.0);}});
                      return {0};"""
@@ -56,6 +56,7 @@ def test_data_frame_rvecs():
     # Let's now define radii out of x and y. We'll do it treating the collections
     # stored in the columns without looping on the individual elements.
     d1 = d.Define("r", "sqrt(x*x + y*y)")
+    print("Counted:", d1.Count().GetValue())
 
     array = ak._v2.from_rdataframe(d1, column="r", column_as_record=True)
     assert array.layout.form == ak._v2.forms.RecordForm(
