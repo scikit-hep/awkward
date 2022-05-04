@@ -45,7 +45,7 @@ def test_data_frame_rvecs():
                      std::transform({0}.begin(), {0}.end(), {0}.begin(), [](double){{return gRandom->Uniform(-1.0, 1.0);}});
                      return {0};"""
 
-    d = (
+    data_frame_x_y = (
         data_frame.Define("len", "gRandom->Uniform(0, 16)")
         .Define("x", coordDefineCode.format("x"))
         .Define("y", coordDefineCode.format("y"))
@@ -55,9 +55,9 @@ def test_data_frame_rvecs():
     # hold collections of coordinates. The size of these collections vary.
     # Let's now define radii out of x and y. We'll do it treating the collections
     # stored in the columns without looping on the individual elements.
-    d1 = d.Define("r", "sqrt(x*x + y*y)")
+    data_frame_x_y_r = data_frame_x_y.Define("r", "sqrt(x*x + y*y)")
 
-    array = ak._v2.from_rdataframe(d1, column="r", column_as_record=True)
+    array = ak._v2.from_rdataframe(data_frame_x_y_r, column="r", column_as_record=True)
     assert array.layout.form == ak._v2.forms.RecordForm(
         [ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64"))], ["r"]
     )
@@ -79,9 +79,19 @@ def test_to_from_data_frame():
     assert ak_array_in.to_list() == ak_array_out.to_list()
 
 
-@pytest.mark.skip(
-    reason="FIXME: support boolean? error: assigning to 'std::__1::__vector_base<bool *, std::__1::allocator<bool *> >::value_type' (aka 'bool *') from incompatible type '__bit_iterator<std::__1::vector<bool, std::__1::allocator<bool> >, false>'"
-)
+def test_to_from_data_frame_rvec_of_rvec():
+    ak_array_in = ak._v2.Array([[[1.1]], [[2.2, 3.3], [4.4]], [[5.5, 6.6], []]])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+@pytest.mark.skip(reason="FIXME: support boolean?")
 def test_boolean_data_frame():
     ak_array_in = ak._v2.Array([True, True, False, True, False, False])
 
