@@ -9,7 +9,6 @@ import ROOT
 import cppyy
 
 compiler = ROOT.gInterpreter.Declare
-
 numpy = ak.nplike.Numpy.instance()
 
 compiler(
