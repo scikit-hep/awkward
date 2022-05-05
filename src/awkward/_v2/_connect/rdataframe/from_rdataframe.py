@@ -40,6 +40,9 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             and hasattr(cpp_ref, "size")
         ):
             return [_recurse(cpp_ref[i]) for i in range(cpp_ref.size())]
+        # elif isinstance(cpp_ref, cppyy.gbl.variant):
+        elif isinstance(cpp_ref, complex):
+            return numpy.asarray(cpp_ref)
         else:
             raise ak._v2._util.error(NotImplementedError)
 

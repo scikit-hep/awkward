@@ -40,7 +40,7 @@ def test_data_frame_vecs():
 
 
 def test_data_frame_rvecs():
-    data_frame = ROOT.RDataFrame(10)
+    data_frame = ROOT.RDataFrame(1024)
     coordDefineCode = """ROOT::VecOps::RVec<double> {0}(len);
                      std::transform({0}.begin(), {0}.end(), {0}.begin(), [](double){{return gRandom->Uniform(-1.0, 1.0);}});
                      return {0};"""
@@ -83,6 +83,7 @@ def test_to_from_data_frame_rvec_of_rvec():
     ak_array_in = ak._v2.Array([[[1.1]], [[2.2, 3.3], [4.4]], [[5.5, 6.6], []]])
 
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+    # assert data_frame.GetColumnType("x") == "ROOT::RVec<double>"
 
     ak_array_out = ak._v2.from_rdataframe(
         data_frame, column="x", column_as_record=False
@@ -121,13 +122,12 @@ def test_boolean_data_frame():
     assert ak_array_in.to_list() == ak_array_out.to_list()
 
 
-@pytest.mark.skip(reason="FIXME: Error pythonizing class std::vector<_Complex double>")
 def test_data_frame_complex_vecs():
     data_frame = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
-    data_frame_xy = data_frame.Define("y", "x*2 +1j")
+    data_frame_xy = data_frame.Define("y", "x*2 +1i")
     data_frame_xy.Display().Print()
 
     ak_array_y = ak._v2.from_rdataframe(
         data_frame_xy, column="y", column_as_record=False
     )
-    assert ak_array_y.layout.form == ak._v2.forms.NumpyForm("float64")
+    assert ak_array_y.layout.form == ak._v2.forms.NumpyForm("complex128")
