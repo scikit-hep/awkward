@@ -73,6 +73,7 @@ filterwarnings = [
   "error",
   "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning",  # move to importlib to fix (setuptools issue)
   "ignore:The NumPy module was reloaded:UserWarning",
+  "ignore:.*np\\.MachAr.*:DeprecationWarning",  # until https://github.com/numba/numba/issues/7758 is fixed
 ]
 log_cli_level = "info"
 
