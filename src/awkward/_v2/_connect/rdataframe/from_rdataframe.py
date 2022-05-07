@@ -20,30 +20,29 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             else ak._v2.highlevel.Array(array)
         )
 
-        # FIXME: cpp_ref    = <cppyy.gbl.variant<ROOT::VecOps::RVec<double>,double>
-
-    def _recurse(cpp_ref):
-        # Note, the conversion of STL vectors and TVec to numpy arrays in ROOT
-        # happens without copying the data.
-        # The memory-adoption is achieved by the dictionary '__array_interface__',
-        # which is added dynamically to the Python objects by PyROOT.
-
-        # '__array_interface__' attribute is added for STL vectors and RVecs of
-        # the following types:
-        #   float, double, int, unsigned int, long, unsigned long
-        if hasattr(cpp_ref, "__array_interface__"):
-            return numpy.asarray(cpp_ref)
-        elif (
-            hasattr(cpp_ref, "begin")
-            and hasattr(cpp_ref, "end")
-            and hasattr(cpp_ref, "size")
-        ):
-            return [_recurse(cpp_ref[i]) for i in range(cpp_ref.size())]
-        # elif isinstance(cpp_ref, cppyy.gbl.variant):
-        elif isinstance(cpp_ref, complex):
-            return numpy.asarray(cpp_ref)
-        else:
-            raise ak._v2._util.error(NotImplementedError)
+    #
+    # def _recurse(cpp_ref):
+    #     # Note, the conversion of STL vectors and TVec to numpy arrays in ROOT
+    #     # happens without copying the data.
+    #     # The memory-adoption is achieved by the dictionary '__array_interface__',
+    #     # which is added dynamically to the Python objects by PyROOT.
+    #
+    #     # '__array_interface__' attribute is added for STL vectors and RVecs of
+    #     # the following types:
+    #     #   float, double, int, unsigned int, long, unsigned long
+    #     if hasattr(cpp_ref, "__array_interface__"):
+    #         return cpp_ref
+    #     elif (
+    #         hasattr(cpp_ref, "begin")
+    #         and hasattr(cpp_ref, "end")
+    #         and hasattr(cpp_ref, "size")
+    #     ):
+    #         return cpp_ref #[_recurse(cpp_ref[i]) for i in range(cpp_ref.size())]
+    #     # elif isinstance(cpp_ref, cppyy.gbl.variant):
+    #     elif isinstance(cpp_ref, complex):
+    #         return numpy.asarray(cpp_ref)
+    #     else:
+    #         raise ak._v2._util.error(NotImplementedError)
 
     # Cast input node to base RNode type
     data_frame_rnode = cppyy.gbl.ROOT.RDF.AsRNode(data_frame)
@@ -52,5 +51,5 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     result_ptrs = data_frame_rnode.Take[column_type](column)
     cpp_reference = result_ptrs.GetValue()
 
-    array = _recurse(cpp_reference)
-    return _wrap_as_array(column, array, column_as_record)
+    # array = _recurse(cpp_reference)
+    return _wrap_as_array(column, cpp_reference, column_as_record)
