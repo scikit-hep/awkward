@@ -17,13 +17,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 def code_to_function(code, function_name, externals=None, debug=False):
     if debug:
-<<<<<<< HEAD
         print("################### " + function_name)  # noqa: T201
         print(code)  # noqa: T201
-=======
-        print("################### " + function_name)  # noqa: T001, T201
-        print(code)  # noqa: T001, T201
->>>>>>> e717936226ee8373deb4790921735a012714d58a
     namespace = {} if externals is None else dict(externals)
     exec(code, namespace)
     return namespace[function_name]
