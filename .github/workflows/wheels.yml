@@ -84,7 +84,7 @@ jobs:
       with:
         submodules: true
 
-    - uses: docker/setup-qemu-action@v1.2.0
+    - uses: docker/setup-qemu-action@v2.0.0
 
     - uses: pypa/cibuildwheel@2.5.0
       env:
