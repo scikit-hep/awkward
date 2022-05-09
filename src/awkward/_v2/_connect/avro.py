@@ -2,6 +2,8 @@ import numpy as np
 import awkward as ak
 import json
 
+from awkward.operations.describe import parameters
+
 
 class read_avro_py:
     def __init__(self, file_name, show_code=False):
@@ -117,10 +119,7 @@ class read_avro_py:
 
     def check_valid(self):
         init = self.ret_str(0, 4)
-        if init == "Obj\x01":
-            return True
-        else:
-            return False
+        return bool(init == "Obj\x01")
 
     def ret_str(self, start, stop):
         return self._data[start:stop].tobytes().decode(errors="surrogateescape")
@@ -164,7 +163,7 @@ class read_avro_py:
             return f"con['node{count}-index'].append(0)"
 
     def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
-        if isinstance(file, str) or isinstance(file, list):
+        if isinstance(file, (list, str)):
             file = {"type": file}
         if (
             file["type"] == "null"
