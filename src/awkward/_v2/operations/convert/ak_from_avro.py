@@ -17,9 +17,9 @@ def from_avro_file(
         return temp_class.outarr  # wrap the layout here using from_buffers.impl
     elif reader_lang == "ft":
         pass
-        # temp_class = awkward._v2._connect.avro.read_avro_ft(
-        #    file_name, show_code)
-        # return temp_class.outarr  # wrap the layout here using from_buffers.impl
+        temp_class = awkward._v2._connect.avro.read_avro_ft(
+            file_name, show_code)
+        return temp_class.outarr  # wrap the layout here using from_buffers.impl
 
 
 def metadata_from_avro_file(file_name, show_code=False, reader_lang="ft"):
