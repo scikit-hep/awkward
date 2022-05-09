@@ -181,8 +181,7 @@ class read_avro_py:
                 "\n" + "    " * ind + f"con['node{count}-index'].append(-1)"
             )
             _exec_code.append(
-                "\n" + "    " * ind +
-                f"con['node{count+1}-data'].append(np.uint8(0))"
+                "\n" + "    " * ind + f"con['node{count+1}-data'].append(np.uint8(0))"
             )
             return aform, _exec_code, count, dec
 
@@ -249,8 +248,7 @@ class read_avro_py:
             )
             _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append(
-                "\n" + "    " * ind +
-                f"con['node{count}-data'].append(np.int32(out))"
+                "\n" + "    " * ind + f"con['node{count}-data'].append(np.int32(out))"
             )
             _exec_code.append("\n" + "    " * ind + "print(out)")
             return aform, _exec_code, count, dec
@@ -270,8 +268,7 @@ class read_avro_py:
             _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append("\n" + "    " * ind + "print(out)")
             _exec_code.append(
-                "\n" + "    " * ind +
-                f"con['node{count}-data'].append(np.int64(out))"
+                "\n" + "    " * ind + f"con['node{count}-data'].append(np.int64(out))"
             )
             return aform, _exec_code, count, dec
 
@@ -330,8 +327,7 @@ class read_avro_py:
             dec.append(": [],")
             _exec_code.append("\n" + "    " * ind + "print(fields[pos])")
             _exec_code.append(
-                "\n" + "    " * ind +
-                f"con['node{count}-data'].append(fields[pos])"
+                "\n" + "    " * ind + f"con['node{count}-data'].append(fields[pos])"
             )
             _exec_code.append("\n" + "    " * ind + "pos = pos+1")
             return aform, _exec_code, count, dec
@@ -375,8 +371,7 @@ class read_avro_py:
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
-            _exec_code.append("\n" + "    " * ind +
-                              "idxx = abs(decode_zigzag(inn))")
+            _exec_code.append("\n" + "    " * ind + "idxx = abs(decode_zigzag(inn))")
             _exec_code.append("\n" + "    " * ind + 'print("index :",idxx)')
             out = len(file["type"])
             for elem in file["type"]:
@@ -386,8 +381,7 @@ class read_avro_py:
                     flag = 0
             if "null" in file["type"] and flag == 0 and out == 2:
 
-                aform.append(
-                    '{"class": "ByteMaskedArray","mask": "i8","content":\n')
+                aform.append('{"class": "ByteMaskedArray","mask": "i8","content":\n')
                 var1 = f" 'node{count}-mask'"
                 dec.append(var1)
                 dec.append(": [],")
@@ -437,8 +431,7 @@ class read_avro_py:
                         dum_idx = idxx - 1
                 for i in range(out):
                     if file["type"][i] == "null":
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
@@ -462,8 +455,7 @@ class read_avro_py:
                                 )
                             )
                     else:
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
@@ -478,8 +470,7 @@ class read_avro_py:
                             count + 1,
                             dec,
                         )
-                aform.append(
-                    f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
             if type_idx == 1:
                 temp = count
                 idxx = file["type"].index("null")
@@ -493,8 +484,7 @@ class read_avro_py:
                 idxx = file["type"].index("null")
                 for i in range(out):
                     if file["type"][i] == "null":
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
@@ -509,8 +499,7 @@ class read_avro_py:
                         #    + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
                         # )
                     else:
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.insert(3, f"countvar{count}{i} = 0\n")
                         _exec_code.append(
                             "\n"
@@ -518,8 +507,7 @@ class read_avro_py:
                             + f"con['node{count}-index'].append(countvar{count}{i})"
                         )
                         _exec_code.append(
-                            "\n" + "    " * (ind + 1) +
-                            f"countvar{count}{i} += 1"
+                            "\n" + "    " * (ind + 1) + f"countvar{count}{i} += 1"
                         )
                         aform, _exec_code, count, dec = self.rec_exp_json_code(
                             {"type": file["type"][i]},
@@ -529,8 +517,7 @@ class read_avro_py:
                             count + 1,
                             dec,
                         )
-                aform.append(
-                    f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
             if type_idx == 2:
                 if null_present:
                     idxx = file["type"].index("null")
@@ -545,8 +532,7 @@ class read_avro_py:
                 # idxx = file["type"].index("null")
                 for i in range(out):
                     if file["type"][i] == "null":
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
@@ -600,8 +586,7 @@ class read_avro_py:
                             + f"con['node{union_idx}-index'].append(countvar{count}{i})"
                         )
                         _exec_code.append(
-                            "\n" + "    " * (ind + 1) +
-                            f"countvar{count}{i} += 1"
+                            "\n" + "    " * (ind + 1) + f"countvar{count}{i} += 1"
                         )
                         aform, _exec_code, count, dec = self.rec_exp_json_code(
                             {"type": file["type"][i]},
@@ -615,8 +600,7 @@ class read_avro_py:
                     aform[-1] = aform[-1][0:-2]
                 aform.append(f'], "form_key": "node{union_idx}"}},')
                 if null_present:
-                    aform.append(
-                        f'"valid_when": true,"form_key": "node{mask_idx}"}}\n')
+                    aform.append(f'"valid_when": true,"form_key": "node{mask_idx}"}}\n')
             return aform, _exec_code, count, dec
 
         elif isinstance(file["type"], dict):
@@ -687,8 +671,7 @@ class read_avro_py:
             var1 = f" 'node{count}-offsets'"
             dec.append(var1)
             dec.append(": [0],")
-            aform.append(
-                '{"class": "ListOffsetArray64","offsets": "i64","content": ')
+            aform.append('{"class": "ListOffsetArray64","offsets": "i64","content": ')
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
@@ -701,15 +684,12 @@ class read_avro_py:
             )
             _exec_code.append("\n" + "    " * ind + "if out < 0:")
             _exec_code.append(
-                "\n" + "    " * (ind + 1) +
-                "pos, inn = decode_varint(pos,fields)"
+                "\n" + "    " * (ind + 1) + "pos, inn = decode_varint(pos,fields)"
             )
-            _exec_code.append("\n" + "    " * (ind + 1) +
-                              "nbytes = decode_zigzag(inn)")
+            _exec_code.append("\n" + "    " * (ind + 1) + "nbytes = decode_zigzag(inn)")
             _exec_code.append("\n" + "    " * ind + "for j in range(out):")
             aform, _exec_code, count, dec = self.rec_exp_json_code(
-                {"type": file["items"]}, _exec_code, ind +
-                1, aform, count + 1, dec
+                {"type": file["items"]}, _exec_code, ind + 1, aform, count + 1, dec
             )
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
