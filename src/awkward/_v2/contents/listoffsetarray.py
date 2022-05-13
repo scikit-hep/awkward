@@ -360,7 +360,8 @@ class ListOffsetArray(Content):
                     stops.data,
                     lenstarts,
                     head,
-                )
+                ),
+                slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
@@ -394,7 +395,8 @@ class ListOffsetArray(Content):
                     start,
                     stop,
                     step,
-                )
+                ),
+                slicer=head,
             )
 
             if self._starts.dtype == "int64":
@@ -427,7 +429,8 @@ class ListOffsetArray(Content):
                     start,
                     stop,
                     step,
-                )
+                ),
+                slicer=head,
             )
 
             nextcontent = self._content._carry(nextcarry, True)
@@ -455,7 +458,8 @@ class ListOffsetArray(Content):
                         total.data,
                         nextoffsets.data,
                         lenstarts,
-                    )
+                    ),
+                    slicer=head,
                 )
 
                 nextadvanced = ak._v2.index.Index64.empty(total[0], self._nplike)
@@ -475,7 +479,8 @@ class ListOffsetArray(Content):
                         advanced.data,
                         nextoffsets.data,
                         lenstarts,
-                    )
+                    ),
+                    slicer=head,
                 )
 
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
@@ -531,7 +536,7 @@ class ListOffsetArray(Content):
                         regular_flathead.length,
                         self._content.length,
                     ),
-                    head,
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
@@ -574,7 +579,7 @@ class ListOffsetArray(Content):
                         regular_flathead.length,
                         self._content.length,
                     ),
-                    head,
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)

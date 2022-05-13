@@ -251,7 +251,7 @@ class RegularArray(Content):
                 where.shape[0],
                 self._size,
             ),
-            carry,
+            slicer=carry,
         )
 
         return RegularArray(
@@ -362,7 +362,7 @@ class RegularArray(Content):
                     self._length,
                     self._size,
                 ),
-                head,
+                slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
@@ -399,7 +399,7 @@ class RegularArray(Content):
                     self._size,
                     nextsize,
                 ),
-                head,
+                slicer=head,
             )
 
             nextcontent = self._content._carry(nextcarry, True)
@@ -433,7 +433,7 @@ class RegularArray(Content):
                         self._length,
                         nextsize,
                     ),
-                    head,
+                    slicer=head,
                 )
                 return RegularArray(
                     nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
@@ -476,7 +476,7 @@ class RegularArray(Content):
                     flathead.shape[0],
                     self._size,
                 ),
-                head,
+                slicer=head,
             )
 
             if advanced is None or advanced.length == 0:
@@ -505,7 +505,7 @@ class RegularArray(Content):
                         regular_flathead.length,
                         self._size,
                     ),
-                    head,
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
@@ -549,7 +549,7 @@ class RegularArray(Content):
                         regular_flathead.length,
                         self._size,
                     ),
-                    head,
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
@@ -597,6 +597,7 @@ class RegularArray(Content):
                     head.length,
                     regularlength,
                 ),
+                slicer=head,
             )
             down = self._content._getitem_next_jagged(
                 multistarts, multistops, head._content, tail

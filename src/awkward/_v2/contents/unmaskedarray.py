@@ -170,7 +170,9 @@ class UnmaskedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+        elif isinstance(
+            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+        ):
             return UnmaskedArray(
                 self._content._getitem_next(head, tail, advanced),
                 self._identifier,
@@ -190,11 +192,8 @@ class UnmaskedArray(Content):
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
 
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise ak._v2._util.error(NotImplementedError)
-
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            raise ak._v2._util.error(NotImplementedError)
+            return self._getitem_next_missing(head, tail, advanced)
 
         else:
             raise ak._v2._util.error(AssertionError(repr(head)))

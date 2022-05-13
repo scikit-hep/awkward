@@ -85,7 +85,7 @@ def test_getitem():
         a.typetracer[2, 1, np.array([], dtype=int)].form
         == a[2, 1, np.array([], dtype=int)].form
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         a[2, 1, np.array([0], dtype=int)]
     with pytest.raises(IndexError):
         a[2, 1][100:200, 0]
@@ -161,7 +161,7 @@ def test_from_json_getitem():
     assert a[2, 1, 100:200].tolist() == []
     assert a[2, 1][np.array([], dtype=int)].tolist() == []
     assert a[2, 1, np.array([], dtype=int)].tolist() == []
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(IndexError) as excinfo:
         a[2, 1, np.array([0], dtype=int)]
     assert "index out of range while attempting to get index 0" in str(excinfo.value)
     with pytest.raises(IndexError) as excinfo:
@@ -178,7 +178,7 @@ def test_from_json_getitem():
     )
 
     # FIXME: Failed: DID NOT RAISE <class 'IndexError'>
-    # with pytest.raises(ValueError) as excinfo:
+    # with pytest.raises(IndexError) as excinfo:
     #     a[2, 1][100:200, np.array([], dtype=int)]
     # assert ", too many dimensions in slice" in str(excinfo.value)
 

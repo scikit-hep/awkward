@@ -313,6 +313,7 @@ class ListArray(Content):
                     self._starts.data,
                     self._stops.data,
                 ),
+                slicer=ListArray(slicestarts, slicestops, slicecontent),
             )
 
             asListOffsetArray64 = self.toListOffsetArray64(True)
@@ -346,7 +347,8 @@ class ListArray(Content):
                     slicestarts.data,
                     slicestops.data,
                     slicestarts.length,
-                )
+                ),
+                slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
             sliceindex = ak._v2.index.Index64(slicecontent._data)
             outoffsets = ak._v2.index.Index64.empty(
@@ -384,7 +386,8 @@ class ListArray(Content):
                     self._starts.data,
                     self._stops.data,
                     self._content.length,
-                )
+                ),
+                slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
 
             nextcontent = self._content._carry(nextcarry, True)
@@ -429,7 +432,8 @@ class ListArray(Content):
                     slicestarts.length,
                     missing.data,
                     missing.length,
-                )
+                ),
+                slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
 
             nextcarry = ak._v2.index.Index64.empty(numvalid[0], self._nplike)
@@ -466,7 +470,8 @@ class ListArray(Content):
                     slicestops.data,
                     slicestarts.length,
                     missing.data,
-                )
+                ),
+                slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
 
             if isinstance(
@@ -554,7 +559,7 @@ class ListArray(Content):
                     lenstarts,
                     head,
                 ),
-                head,
+                slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
@@ -591,7 +596,8 @@ class ListArray(Content):
                         start,
                         stop,
                         step,
-                    )
+                    ),
+                    slicer=head,
                 )
                 nextcarry = ak._v2.index.Index64.empty(carrylength[0], self._nplike)
             else:
@@ -628,7 +634,8 @@ class ListArray(Content):
                     start,
                     stop,
                     step,
-                )
+                ),
+                slicer=head,
             )
 
             nextcontent = self._content._carry(nextcarry, True)
@@ -657,7 +664,8 @@ class ListArray(Content):
                             total.data,
                             nextoffsets.data,
                             lenstarts,
-                        )
+                        ),
+                        slicer=head,
                     )
                     nextadvanced = ak._v2.index.Index64.empty(total[0], self._nplike)
                 else:
@@ -681,7 +689,8 @@ class ListArray(Content):
                         advanced.data,
                         nextoffsets.data,
                         lenstarts,
-                    )
+                    ),
+                    slicer=head,
                 )
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
                     nextoffsets,
@@ -741,7 +750,7 @@ class ListArray(Content):
                         regular_flathead.length,
                         self._content.length,
                     ),
-                    head,
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
@@ -784,7 +793,8 @@ class ListArray(Content):
                         lenstarts,
                         regular_flathead.length,
                         self._content.length,
-                    )
+                    ),
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
@@ -832,6 +842,7 @@ class ListArray(Content):
                     head.length,
                     length,
                 ),
+                slicer=head,
             )
             carried = self._content._carry(nextcarry, True)
             down = carried._getitem_next_jagged(
