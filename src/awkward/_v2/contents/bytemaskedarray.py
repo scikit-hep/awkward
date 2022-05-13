@@ -590,16 +590,16 @@ class ByteMaskedArray(Content):
     def fillna(self, value):
         return self.toIndexedOptionArray64().fillna(value)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, False)
-            out = next._localindex(posaxis, depth)
+            out = next._local_index(posaxis, depth)
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,

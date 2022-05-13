@@ -753,10 +753,10 @@ class ListOffsetArray(Content):
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         elif posaxis == depth + 1:
             offsets = self._compact_offsets64(True)
             if self._nplike.known_data:
@@ -786,7 +786,7 @@ class ListOffsetArray(Content):
         else:
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 self._offsets,
-                self._content._localindex(posaxis, depth + 1),
+                self._content._local_index(posaxis, depth + 1),
                 self._identifier,
                 self._parameters,
                 self._nplike,

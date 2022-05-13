@@ -690,14 +690,14 @@ class RecordArray(Content):
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._localindex(posaxis, depth))
+                contents.append(content._local_index(posaxis, depth))
             return RecordArray(
                 contents,
                 self._fields,

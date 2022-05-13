@@ -691,7 +691,7 @@ class Content:
 
         return axis
 
-    def _localindex_axis0(self):
+    def _local_index_axis0(self):
         localindex = ak._v2.index.Index64.empty(self.length, self._nplike)
         self._handle_error(
             self._nplike["awkward_localindex", np.int64](
@@ -790,8 +790,8 @@ class Content:
 
         return (head, tail)
 
-    def localindex(self, axis):
-        return self._localindex(axis, 0)
+    def local_index(self, axis):
+        return self._local_index(axis, 0)
 
     def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
         if axis is None:

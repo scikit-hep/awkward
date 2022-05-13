@@ -693,10 +693,10 @@ class RegularArray(Content):
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         elif posaxis == depth + 1:
             localindex = ak._v2.index.Index64.empty(
                 self._length * self._size, self._nplike
@@ -718,7 +718,7 @@ class RegularArray(Content):
             )
         else:
             return ak._v2.contents.RegularArray(
-                self._content._localindex(posaxis, depth + 1),
+                self._content._local_index(posaxis, depth + 1),
                 self._size,
                 self._length,
                 self._identifier,

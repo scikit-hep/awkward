@@ -294,13 +294,13 @@ class UnmaskedArray(Content):
     def fillna(self, value):
         return self._content.fillna(value)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             return UnmaskedArray(
-                self._content._localindex(posaxis, depth),
+                self._content._local_index(posaxis, depth),
                 self._identifier,
                 self._parameters,
                 self._nplike,

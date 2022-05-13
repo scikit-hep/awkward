@@ -764,15 +764,15 @@ class IndexedOptionArray(Content):
         )
         return out.simplify_uniontype(True, True)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
 
             next = self._content._carry(nextcarry, False)
-            out = next._localindex(posaxis, depth)
+            out = next._local_index(posaxis, depth)
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,

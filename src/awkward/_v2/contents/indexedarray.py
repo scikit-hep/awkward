@@ -653,12 +653,12 @@ class IndexedArray(Content):
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
-            return self.project()._localindex(posaxis, depth)
+            return self.project()._local_index(posaxis, depth)
 
     def _unique_index(self, index, sorted=True):
         next = ak._v2.index.Index64.zeros(self.length, self._nplike)

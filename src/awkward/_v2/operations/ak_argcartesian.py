@@ -91,7 +91,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         layouts = {
             n: ak._v2.operations.to_layout(
                 x, allow_record=False, allow_other=False
-            ).localindex(axis)
+            ).local_index(axis)
             for n, x in arrays.items()
         }
     else:
@@ -100,7 +100,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         layouts = [
             ak._v2.operations.to_layout(
                 x, allow_record=False, allow_other=False
-            ).localindex(axis)
+            ).local_index(axis)
             for x in arrays
         ]
 

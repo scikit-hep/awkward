@@ -414,8 +414,8 @@ class BitMaskedArray(Content):
     def fillna(self, value):
         return self.toIndexedOptionArray64().fillna(value)
 
-    def _localindex(self, axis, depth):
-        return self.toByteMaskedArray()._localindex(axis, depth)
+    def _local_index(self, axis, depth):
+        return self.toByteMaskedArray()._local_index(axis, depth)
 
     def numbers_to_type(self, name):
         return self.toByteMaskedArray().numbers_to_type(name)

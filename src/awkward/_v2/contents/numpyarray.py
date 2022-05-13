@@ -501,14 +501,16 @@ class NumpyArray(Content):
     def fillna(self, value):
         return self
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         elif len(self.shape) <= 1:
-            raise ak._v2._util.error(np.AxisError("'axis' out of range for localindex"))
+            raise ak._v2._util.error(
+                np.AxisError("'axis' out of range for local_index")
+            )
         else:
-            return self.toRegularArray()._localindex(posaxis, depth)
+            return self.toRegularArray()._local_index(posaxis, depth)
 
     def contiguous(self):
         if self.is_contiguous:

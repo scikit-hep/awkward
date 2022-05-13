@@ -179,7 +179,7 @@ class EmptyArray(Content):
     def fillna(self, value):
         return EmptyArray(None, self._parameters, self._nplike)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(
             self._nplike.empty(0, np.int64), None, None, self._nplike
         )
