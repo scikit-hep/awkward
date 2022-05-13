@@ -1462,7 +1462,7 @@ class Content:
         else:
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
 
-    def withparameter(self, key, value):
+    def with_parameter(self, key, value):
         out = copy.copy(self)
 
         if self._parameters is None:

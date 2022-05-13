@@ -42,7 +42,7 @@ def _impl(array, parameter, value, highlevel, behavior):
     behavior = ak._v2._util.behavior_of(array, behavior=behavior)
     layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
 
-    out = layout.withparameter(parameter, value)
+    out = layout.with_parameter(parameter, value)
 
     return ak._v2._util.wrap(
         out, ak._v2._util.behavior_of(array, behavior=behavior), highlevel
