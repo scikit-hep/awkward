@@ -109,8 +109,8 @@ def _string_equal(one, two):
     behavior = ak._v2._util.behavior_of(one, two)
 
     one, two = (
-        ak._v2.operations.structure.without_parameters(one).layout,
-        ak._v2.operations.structure.without_parameters(two).layout,
+        ak._v2.operations.without_parameters(one).layout,
+        ak._v2.operations.without_parameters(two).layout,
     )
 
     # first condition: string lengths must be the same
@@ -127,7 +127,7 @@ def _string_equal(one, two):
         onepossible = one[possible]
         twopossible = two[possible]
 
-        reduced = ak._v2.operations.reducers.all(
+        reduced = ak._v2.operations.all(
             ak._v2.Array(onepossible) == ak._v2.Array(twopossible), axis=-1
         ).layout
         # update same-length strings with a verdict about their characters

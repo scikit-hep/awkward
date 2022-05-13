@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_make_mixins():
@@ -23,7 +23,7 @@ def test_make_mixins():
 
         @ak._v2.behaviors.mixins.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
-            return ak._v2.operations.structure.zip(
+            return ak._v2.operations.zip(
                 {"x": self.x + other.x, "y": self.y + other.y},
                 with_name="Point",
             )
@@ -37,7 +37,7 @@ def test_make_mixins():
         @ak._v2.behaviors.mixins.mixin_class_method(np.add, {"WeightedPoint"})
         def weighted_add(self, other):
             sumw = self.weight + other.weight
-            return ak._v2.operations.structure.zip(
+            return ak._v2.operations.zip(
                 {
                     "x": (self.x * self.weight + other.x * other.weight) / sumw,
                     "y": (self.y * self.weight + other.y * other.weight) / sumw,
@@ -63,11 +63,11 @@ def test_make_mixins():
         with_name="Point",
     )
     wone = ak._v2.Array(
-        ak._v2.operations.structure.with_field(one, abs(one), "weight"),
+        ak._v2.operations.with_field(one, abs(one), "weight"),
         with_name="WeightedPoint",
     )
     wtwo = ak._v2.Array(
-        ak._v2.operations.structure.with_field(two, abs(two), "weight"),
+        ak._v2.operations.with_field(two, abs(two), "weight"),
         with_name="WeightedPoint",
     )
 

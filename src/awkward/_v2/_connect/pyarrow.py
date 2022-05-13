@@ -928,7 +928,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         if len(layouts) == 1:
             return layouts[0]
         else:
-            return ak._v2.operations.structure.concatenate(layouts, highlevel=False)
+            return ak._v2.operations.concatenate(layouts, highlevel=False)
 
     elif isinstance(obj, pyarrow.lib.RecordBatch):
         if pass_empty_field and list(obj.schema.names) == [""]:
@@ -1024,7 +1024,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 for batch in batches
                 if len(batch) > 0
             ]
-            return ak._v2.operations.structure.concatenate(arrays, highlevel=False)
+            return ak._v2.operations.concatenate(arrays, highlevel=False)
 
     elif (
         isinstance(obj, Iterable)
@@ -1041,7 +1041,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         if len(chunks) == 1:
             return chunks[0]
         else:
-            return ak._v2.operations.structure.concatenate(chunks, highlevel=False)
+            return ak._v2.operations.concatenate(chunks, highlevel=False)
 
     elif isinstance(obj, Iterable) and len(obj) == 0:
         return ak._v2.contents.RecordArray([], [], length=0)

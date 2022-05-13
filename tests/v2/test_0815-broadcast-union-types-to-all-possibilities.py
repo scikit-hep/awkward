@@ -10,7 +10,7 @@ def test():
     class Point:
         @ak._v2.behaviors.mixins.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
-            return ak._v2.operations.structure.zip(
+            return ak._v2.operations.zip(
                 {"x": self.x + other.x, "y": self.y + other.y},
                 with_name="Point",
             )
@@ -20,7 +20,7 @@ def test():
         pass
 
     def make(name):
-        return ak._v2.operations.structure.zip(
+        return ak._v2.operations.zip(
             {
                 "x": ak.Array([[1, 2], [3]]),
                 "y": ak.Array([[1, 2], [3]]),
@@ -28,7 +28,7 @@ def test():
             with_name=name,
         )
 
-    a = ak._v2.operations.structure.zip(
+    a = ak._v2.operations.zip(
         {
             "x": ak.Array([1, 1]),
             "y": ak.Array([1, 1]),
@@ -49,12 +49,12 @@ def test():
         [{"x": 2, "y": 2}, {"x": 3, "y": 3}],
         [{"x": 4, "y": 4}],
     ]
-    d = ak._v2.operations.structure.concatenate([b, c], axis=1)
+    d = ak._v2.operations.concatenate([b, c], axis=1)
     assert (a + d).tolist() == [
         [{"x": 2, "y": 2}, {"x": 3, "y": 3}, {"x": 2, "y": 2}, {"x": 3, "y": 3}],
         [{"x": 4, "y": 4}, {"x": 4, "y": 4}],
     ]
 
-    e = ak._v2.operations.structure.concatenate([b[b.x < 0], c[c.x < 0]], axis=1)
+    e = ak._v2.operations.concatenate([b[b.x < 0], c[c.x < 0]], axis=1)
 
     assert (a + e).tolist() == [[], []]

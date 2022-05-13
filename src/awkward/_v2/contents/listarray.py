@@ -1360,14 +1360,14 @@ class ListArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        return ak._v2.operations.convert.to_numpy(self.toRegularArray(), allow_missing)
+        return ak._v2.operations.to_numpy(self.toRegularArray(), allow_missing)
 
     def _completely_flatten(self, nplike, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
         ):
-            return [ak._v2.operations.convert.to_numpy(self)]
+            return [ak._v2.operations.to_numpy(self)]
         else:
             next = self.toListOffsetArray64(False)
             flat = next.content[next.offsets[0] : next.offsets[-1]]

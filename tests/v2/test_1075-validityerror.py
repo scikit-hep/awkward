@@ -59,7 +59,7 @@ def test_IndexedArray():
 
 
 def test_ByteMaskedArray():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
     )
@@ -71,7 +71,7 @@ def test_ByteMaskedArray():
 
 
 def test_IndexedOptionArray():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
     )

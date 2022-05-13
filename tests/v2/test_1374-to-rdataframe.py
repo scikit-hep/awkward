@@ -19,7 +19,7 @@ def test_two_columns_as_rvecs():
         [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
     )
 
-    data_frame = ak._v2.operations.convert.to_rdataframe(
+    data_frame = ak._v2.operations.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=True
     )
     assert set(data_frame.GetColumnNames()) == {"x", "y"}
@@ -64,7 +64,7 @@ def test_two_columns_as_rvecs():
 def test_list_array():
     ak_array = ak._v2.Array([[1.1], [2.2, 3.3, 4.4], [5.5, 6.6]])
 
-    data_frame = ak._v2.operations.convert.to_rdataframe({"x": ak_array})
+    data_frame = ak._v2.operations.to_rdataframe({"x": ak_array})
 
     assert data_frame.GetColumnType("x") == "ROOT::RVec<double>"
 
@@ -101,7 +101,7 @@ def test_two_columns_as_vecs():
         [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
     )
 
-    data_frame = ak._v2.operations.convert.to_rdataframe(
+    data_frame = ak._v2.operations.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=False
     )
     assert set(data_frame.GetColumnNames()) == {"x", "y"}
@@ -149,9 +149,7 @@ def test_two_columns_transform_filter():
         [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
     )
 
-    data_frame = ak._v2.operations.convert.to_rdataframe(
-        {"one": example1, "two": example2}
-    )
+    data_frame = ak._v2.operations.to_rdataframe({"one": example1, "two": example2})
     assert set(data_frame.GetColumnNames()) == {"one", "two"}
 
     compiler(
@@ -218,9 +216,7 @@ def test_jims_example2():
         ]
     )
 
-    data_frame = ak._v2.operations.convert.to_rdataframe(
-        {"one": example1, "two": example2}
-    )
+    data_frame = ak._v2.operations.to_rdataframe({"one": example1, "two": example2})
 
     assert data_frame.GetColumnType("one") == "double"
     assert data_frame.GetColumnType("two").startswith("awkward::Record_")

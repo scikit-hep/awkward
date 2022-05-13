@@ -37,9 +37,7 @@ def test_EmptyArray():
 
 
 def test_NumpyArray_toRegularArray():
-    a = ak._v2.operations.convert.from_numpy(
-        np.arange(2 * 3 * 5).reshape(2, 3, 5)
-    ).layout
+    a = ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(2, 3, 5)).layout
     b = a.toRegularArray()
     assert isinstance(b, ak._v2.contents.RegularArray)
     assert len(b) == len(a) == 2
@@ -51,9 +49,7 @@ def test_NumpyArray_toRegularArray():
     assert len(b.content.content) == 30
     assert a.typetracer.toRegularArray().form == b.form
 
-    a = ak._v2.operations.convert.from_numpy(
-        np.arange(2 * 0 * 5).reshape(2, 0, 5)
-    ).layout
+    a = ak._v2.operations.from_numpy(np.arange(2 * 0 * 5).reshape(2, 0, 5)).layout
     b = a.toRegularArray()
     assert isinstance(b, ak._v2.contents.RegularArray)
     assert len(b) == len(a) == 2

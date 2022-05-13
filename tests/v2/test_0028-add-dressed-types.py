@@ -4,12 +4,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_fromnumpy():
     a = np.arange(2 * 3 * 5).reshape((2, 3, 5))
-    b = ak._v2.operations.convert.from_numpy(a)
+    b = ak._v2.operations.from_numpy(a)
     assert to_list(a) == to_list(b)
 
 
@@ -70,10 +70,10 @@ def test_string2():
     assert not isinstance(a, ak._v2.behaviors.string.StringBehavior)
     assert to_list(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
-    assert str(ak._v2.operations.describe.type(a)) == "3 * var * uint8"
-    assert str(ak._v2.operations.describe.type(a[0])) == "3 * uint8"
-    assert str(ak._v2.operations.describe.type(a[1])) == "0 * uint8"
-    assert str(ak._v2.operations.describe.type(a[2])) == "5 * uint8"
+    assert str(ak._v2.operations.type(a)) == "3 * var * uint8"
+    assert str(ak._v2.operations.type(a[0])) == "3 * uint8"
+    assert str(ak._v2.operations.type(a[1])) == "0 * uint8"
+    assert str(ak._v2.operations.type(a[2])) == "5 * uint8"
     assert (
         repr(a)
         == "<Array [[104, 101, 121], ..., [116, 104, ..., 114, 101]] type='3 * var * uint8'>"

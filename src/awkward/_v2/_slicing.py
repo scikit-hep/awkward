@@ -118,7 +118,7 @@ def prepare_tuple_item(item):
         return list(item)
 
     elif isinstance(item, Iterable):
-        layout = ak._v2.operations.convert.to_layout(item)
+        layout = ak._v2.operations.to_layout(item)
         as_array = layout.maybe_to_array(layout.nplike)
         if as_array is None:
             return prepare_tuple_item(layout)

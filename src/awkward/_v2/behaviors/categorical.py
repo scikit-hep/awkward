@@ -66,14 +66,14 @@ def _categorical_equal(one, two):
     one_content = ak._v2._util.wrap(one.content, behavior)
     two_content = ak._v2._util.wrap(two.content, behavior)
 
-    if len(one_content) == len(two_content) and ak._v2.operations.reducers.all(
+    if len(one_content) == len(two_content) and ak._v2.operations.all(
         one_content == two_content, axis=None
     ):
         one_mapped = one_index
 
     else:
-        one_list = ak._v2.operations.convert.to_list(one_content)
-        two_list = ak._v2.operations.convert.to_list(two_content)
+        one_list = ak._v2.operations.to_list(one_content)
+        two_list = ak._v2.operations.to_list(two_content)
         one_hashable = [_hashable(x) for x in one_list]
         two_hashable = [_hashable(x) for x in two_list]
         two_lookup = {x: i for i, x in enumerate(two_hashable)}
@@ -122,9 +122,7 @@ def is_categorical(array):
     See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
     """
 
-    layout = ak._v2.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False
-    )
+    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
     return layout.purelist_parameter("__array__") == "categorical"
 
 
@@ -152,9 +150,7 @@ def categories(array, highlevel=True):
         else:
             return None
 
-    layout = ak._v2.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False
-    )
+    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
     layout.recursively_apply(action)
 
     if output[0] is None:
@@ -249,7 +245,7 @@ def to_categorical(array, highlevel=True):
                 content = layout
                 cls = ak._v2.contents.IndexedArray
 
-            content_list = ak._v2.operations.convert.to_list(content)
+            content_list = ak._v2.operations.to_list(content)
             hashable = [_hashable(x) for x in content_list]
 
             lookup = {}
@@ -288,9 +284,7 @@ def to_categorical(array, highlevel=True):
         else:
             return None
 
-    layout = ak._v2.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False
-    )
+    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.recursively_apply(action)
     if highlevel:
         out = ak._v2._util.wrap(out, ak._v2._util.behavior_of(array))
@@ -319,7 +313,7 @@ def from_categorical(array, highlevel=True):
 
     def action(layout, **kwargs):
         if layout.parameter("__array__") == "categorical":
-            out = ak._v2.operations.structure.with_parameter(
+            out = ak._v2.operations.with_parameter(
                 layout, "__array__", None, highlevel=False
             )
             return out
@@ -327,9 +321,7 @@ def from_categorical(array, highlevel=True):
         else:
             return None
 
-    layout = ak._v2.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False
-    )
+    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.recursively_apply(action)
     if highlevel:
         return ak._v2._util.wrap(out, ak._v2._util.behavior_of(array))

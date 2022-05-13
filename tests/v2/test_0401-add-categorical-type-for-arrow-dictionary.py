@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_same_categories():
@@ -384,7 +384,7 @@ def test_to_categorical_masked_again():
 def test_typestr():
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.behaviors.categorical.to_categorical(
                     ak._v2.Array([1.1, 2.2, 2.2, 3.3])
                 )
@@ -394,7 +394,7 @@ def test_typestr():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.behaviors.categorical.to_categorical(
                     ak._v2.Array([1.1, 2.2, None, 2.2, 3.3])
                 )
@@ -404,7 +404,7 @@ def test_typestr():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.behaviors.categorical.to_categorical(
                     ak._v2.Array(["one", "two", "two", "three"])
                 )
@@ -414,7 +414,7 @@ def test_typestr():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.behaviors.categorical.to_categorical(
                     ak._v2.Array(["one", "two", None, "two", "three"])
                 )
@@ -447,20 +447,16 @@ def test_arrow_nomask():
     array = ak._v2.Array([1.1, 2.2, 3.3, 4.4, None])
     assert (
         str(
-            ak._v2.operations.describe.type(
-                ak._v2.operations.convert.from_arrow(
-                    ak._v2.operations.convert.to_arrow(array)
-                )
+            ak._v2.operations.type(
+                ak._v2.operations.from_arrow(ak._v2.operations.to_arrow(array))
             )
         )
         == "5 * ?float64"
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
-                ak._v2.operations.convert.from_arrow(
-                    ak._v2.operations.convert.to_arrow(array[:-1])
-                )
+            ak._v2.operations.type(
+                ak._v2.operations.from_arrow(ak._v2.operations.to_arrow(array[:-1]))
             )
         )
         == "4 * ?float64"

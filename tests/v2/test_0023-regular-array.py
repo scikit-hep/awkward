@@ -6,7 +6,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 content = ak._v2.contents.NumpyArray(
     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
@@ -20,11 +20,11 @@ listarray = ak._v2.contents.ListArray(starts, stops, regulararray)
 
 
 def test_simple_type():
-    assert str(ak._v2.operations.describe.type(content)) == "float64"
+    assert str(ak._v2.operations.type(content)) == "float64"
 
 
 def test_type():
-    assert str(ak._v2.operations.describe.type(regulararray)) == "2 * var * float64"
+    assert str(ak._v2.operations.type(regulararray)) == "2 * var * float64"
 
 
 def test_iteration():

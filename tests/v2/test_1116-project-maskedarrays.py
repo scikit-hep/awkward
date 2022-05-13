@@ -4,11 +4,11 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_bytemaskedarray():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask2 = ak._v2.index.Index8(np.array([0, 1, 0, 0], dtype=np.int8))
@@ -28,7 +28,7 @@ def test_bytemaskedarray():
 
 
 def test_bitmaskedarray():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask = ak._v2.index.IndexU8(np.array([0, 1, 0, 0], dtype=np.uint8))
@@ -45,7 +45,7 @@ def test_bitmaskedarray():
 
 
 def test_unmasked():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     unmaskedarray2 = ak._v2.contents.UnmaskedArray(array)

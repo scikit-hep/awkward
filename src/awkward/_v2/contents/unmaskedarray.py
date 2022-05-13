@@ -481,9 +481,7 @@ class UnmaskedArray(Content):
         return self._content._to_arrow(pyarrow, self, None, length, options)
 
     def _to_numpy(self, allow_missing):
-        content = ak._v2.operations.convert.to_numpy(
-            self.content, allow_missing=allow_missing
-        )
+        content = ak._v2.operations.to_numpy(self.content, allow_missing=allow_missing)
         if allow_missing:
             return self._nplike.ma.MaskedArray(content)
         else:

@@ -17,9 +17,7 @@ def test():
         )
     )
 
-    assert ak._v2.operations.structure.where(
-        condition == 2, array, 2 * array
-    ).tolist() == [
+    assert ak._v2.operations.where(condition == 2, array, 2 * array).tolist() == [
         [2, 4, 6],
         [8, 10, 12],
         [14, 16, 18],
