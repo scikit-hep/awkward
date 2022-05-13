@@ -1061,7 +1061,7 @@ class IndexedArray(Content):
                     )
                 )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         error = self._nplike["awkward_IndexedArray_validity", self.index.dtype.type](
             self.index.data, self.index.length, self._content.length, False
         )
@@ -1089,7 +1089,7 @@ class IndexedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.index._nbytes_part() + self.content._nbytes_part()

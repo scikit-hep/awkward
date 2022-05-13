@@ -253,7 +253,7 @@ class EmptyArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         return ""
 
     def _nbytes_part(self):

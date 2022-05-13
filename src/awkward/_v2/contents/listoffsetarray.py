@@ -1725,7 +1725,7 @@ class ListOffsetArray(Content):
             nextstarts,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self.offsets.length < 1:
             return f'at {path} ("{type(self)}"): len(offsets) < 1'
         assert self.starts.nplike is self._nplike and self.stops.nplike is self._nplike
@@ -1755,7 +1755,7 @@ class ListOffsetArray(Content):
             ):
                 return ""
             else:
-                return self._content.validityerror(path + ".content")
+                return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.offsets._nbytes_part() + self.content._nbytes_part()

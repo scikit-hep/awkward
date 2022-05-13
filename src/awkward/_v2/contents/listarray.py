@@ -1201,7 +1201,7 @@ class ListArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self._nplike.known_shape and self.stops.length < self.starts.length:
             return f'at {path} ("{type(self)}"): len(stops) < len(starts)'
         assert self.starts.nplike is self._nplike and self.stops.nplike is self._nplike
@@ -1231,7 +1231,7 @@ class ListArray(Content):
             ):
                 return ""
             else:
-                return self._content.validityerror(path + ".content")
+                return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = (

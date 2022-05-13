@@ -1186,7 +1186,7 @@ class NumpyArray(Content):
 
         return out
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if len(self.shape) == 0:
             return f'at {path} ("{type(self)}"): shape is zero-dimensional'
         for i, dim in enumerate(self.shape):

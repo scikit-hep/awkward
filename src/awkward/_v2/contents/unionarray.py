@@ -1129,7 +1129,7 @@ class UnionArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         for i in range(len(self.contents)):
             if isinstance(self.contents[i], ak._v2.contents.unionarray.UnionArray):
                 return "{} contains {}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
@@ -1169,7 +1169,7 @@ class UnionArray(Content):
                 )
 
             for i in range(len(self.contents)):
-                sub = self.contents[i].validityerror(path + f".content({i})")
+                sub = self.contents[i].validity_error(path + f".content({i})")
                 if sub != "":
                     return sub
 

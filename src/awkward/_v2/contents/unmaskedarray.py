@@ -442,7 +442,7 @@ class UnmaskedArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if isinstance(
             self._content,
             (
@@ -455,7 +455,7 @@ class UnmaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.content._nbytes_part()

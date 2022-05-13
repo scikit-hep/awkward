@@ -1040,7 +1040,7 @@ class Content:
                 )
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
-    def validityerror_parameters(self, path):
+    def validity_error_parameters(self, path):
         if self.parameter("__array__") == "string":
             content = None
             if isinstance(
@@ -1140,11 +1140,11 @@ class Content:
 
         return ""
 
-    def validityerror(self, path="layout"):
-        paramcheck = self.validityerror_parameters(path)
+    def validity_error(self, path="layout"):
+        paramcheck = self.validity_error_parameters(path)
         if paramcheck != "":
             return paramcheck
-        return self._validityerror(path)
+        return self._validity_error(path)
 
     @property
     def nbytes(self):

@@ -1007,7 +1007,7 @@ class RegularArray(Content):
 
         return out
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self.size < 0:
             return f'at {path} ("{type(self)}"): size < 0'
         if (
@@ -1016,7 +1016,7 @@ class RegularArray(Content):
         ):
             return ""
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.content._nbytes_part()

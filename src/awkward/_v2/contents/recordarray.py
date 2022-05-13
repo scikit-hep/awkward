@@ -825,12 +825,12 @@ class RecordArray(Content):
             self._nplike,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
             if cont.length < self.length:
                 return f'at {path} ("{type(self)}"): len(field({i})) < len(recordarray)'
         for i, cont in enumerate(self.contents):
-            sub = cont.validityerror(f"{path}.field({i})")
+            sub = cont.validity_error(f"{path}.field({i})")
             if sub != "":
                 return sub
         return ""

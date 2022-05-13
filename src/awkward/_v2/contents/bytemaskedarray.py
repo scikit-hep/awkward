@@ -855,7 +855,7 @@ class ByteMaskedArray(Content):
                     )
                 )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self._nplike.known_shape and self._content.length < self.mask.length:
             return f'at {path} ("{type(self)}"): len(content) < len(mask)'
         elif isinstance(
@@ -870,7 +870,7 @@ class ByteMaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.mask._nbytes_part() + self.content._nbytes_part()

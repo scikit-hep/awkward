@@ -501,7 +501,7 @@ class BitMaskedArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self.mask.length * 8 < self.length:
             return f'at {path} ("{type(self)}"): len(mask) * 8 < length'
         elif self._content.length < self.length:
@@ -518,7 +518,7 @@ class BitMaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.mask._nbytes_part() + self.content._nbytes_part()

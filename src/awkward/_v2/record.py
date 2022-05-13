@@ -72,8 +72,8 @@ class Record:
         out.append(post)
         return "".join(out)
 
-    def validityerror(self, path="layout.array"):
-        return self._array.validityerror(path)
+    def validity_error(self, path="layout.array"):
+        return self._array.validity_error(path)
 
     @property
     def parameters(self):
