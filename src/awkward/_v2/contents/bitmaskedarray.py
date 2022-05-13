@@ -410,8 +410,8 @@ class BitMaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
-    def fillna(self, value):
-        return self.toIndexedOptionArray64().fillna(value)
+    def fill_none(self, value):
+        return self.toIndexedOptionArray64().fill_none(value)
 
     def _local_index(self, axis, depth):
         return self.toByteMaskedArray()._local_index(axis, depth)

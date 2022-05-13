@@ -970,10 +970,10 @@ class UnionArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-    def fillna(self, value):
+    def fill_none(self, value):
         contents = []
         for content in self._contents:
-            contents.append(content.fillna(value))
+            contents.append(content.fill_none(value))
         out = UnionArray(
             self._tags,
             self._index,

@@ -290,8 +290,8 @@ class UnmaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
-    def fillna(self, value):
-        return self._content.fillna(value)
+    def fill_none(self, value):
+        return self._content.fill_none(value)
 
     def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)

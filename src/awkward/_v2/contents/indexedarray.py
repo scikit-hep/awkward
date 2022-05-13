@@ -641,14 +641,14 @@ class IndexedArray(Content):
             )
         )
 
-    def fillna(self, value):
+    def fill_none(self, value):
         if value.nplike.known_shape and value.length != 1:
             raise ak._v2._util.error(
-                ValueError(f"fillna value length ({value.length}) is not equal to 1")
+                ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
         return IndexedArray(
             self._index,
-            self._content.fillna(value),
+            self._content.fill_none(value),
             None,
             self._parameters,
             self._nplike,
