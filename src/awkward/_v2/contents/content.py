@@ -340,7 +340,8 @@ class Content:
                 index.length,
                 length,
                 raw._size,
-            )
+            ),
+            slicer=head,
         )
 
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
@@ -397,7 +398,8 @@ class Content:
                 starts.data,
                 stops.data,
                 index.length,
-            )
+            ),
+            slicer=head,
         )
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
@@ -622,7 +624,8 @@ class Content:
                 result,
                 carry.data,
                 carry.length,
-            )
+            ),
+            slicer=carry.data,
         )
         if result[0]:
             if carry.length == self.length:

@@ -833,7 +833,7 @@ def test_emptyarray():
     assert to_list(listoffsetarray[array4]) == [[], [None], None, []]
     assert listoffsetarray.typetracer[array4].form == listoffsetarray[array4].form
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         listoffsetarray[array5]
 
 

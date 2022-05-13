@@ -333,7 +333,8 @@ class ByteMaskedArray(Content):
                 reducedstarts.data,
                 reducedstops.data,
                 self.length,
-            )
+            ),
+            slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
         )
 
         next = self._content._carry(nextcarry, True)
@@ -353,7 +354,9 @@ class ByteMaskedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+        elif isinstance(
+            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+        ):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
@@ -380,9 +383,6 @@ class ByteMaskedArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            return self._getitem_next_jagged_generic(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)

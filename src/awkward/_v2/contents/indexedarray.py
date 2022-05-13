@@ -218,7 +218,8 @@ class IndexedArray(Content):
                 self._index.data,
                 self._index.length,
                 self._content.length,
-            )
+            ),
+            slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
         )
         # an eager carry (allow_lazy = false) to avoid infinite loop (unproven)
         next = self._content._carry(nextcarry, False)
@@ -233,7 +234,9 @@ class IndexedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+        elif isinstance(
+            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+        ):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
             nextcarry = ak._v2.index.Index64.empty(self._index.length, self._nplike)
@@ -250,7 +253,8 @@ class IndexedArray(Content):
                     self._index.data,
                     self._index.length,
                     self._content.length,
-                )
+                ),
+                slicer=head,
             )
 
             next = self._content._carry(nextcarry, False)
@@ -267,9 +271,6 @@ class IndexedArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise ak._v2._util.error(NotImplementedError)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)

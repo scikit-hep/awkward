@@ -290,7 +290,8 @@ class IndexedOptionArray(Content):
                 reducedstarts.data,
                 reducedstops.data,
                 self.length,
-            )
+            ),
+            slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
         )
         next = self._content._carry(nextcarry, True)
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
@@ -309,7 +310,9 @@ class IndexedOptionArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+        elif isinstance(
+            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+        ):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
 
             numnull, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
@@ -332,9 +335,6 @@ class IndexedOptionArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            raise ak._v2._util.error(NotImplementedError)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)

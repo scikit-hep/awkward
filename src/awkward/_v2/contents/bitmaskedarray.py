@@ -327,7 +327,9 @@ class BitMaskedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+        elif isinstance(
+            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+        ):
             return self.toByteMaskedArray()._getitem_next(head, tail, advanced)
 
         elif ak._util.isstr(head):
@@ -341,9 +343,6 @@ class BitMaskedArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            return self.toByteMaskedArray()._getitem_next(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)
