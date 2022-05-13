@@ -105,7 +105,7 @@ class ArrayView:
     @classmethod
     def fromarray(cls, array):
         behavior = ak._v2._util.behavior_of(array)
-        layout = ak._v2.operations.convert.to_layout(
+        layout = ak._v2.operations.to_layout(
             array,
             allow_record=False,
             allow_other=False,
@@ -496,7 +496,7 @@ class RecordView:
     @classmethod
     def fromrecord(cls, record):
         behavior = ak._v2._util.behavior_of(record)
-        layout = ak._v2.operations.convert.to_layout(
+        layout = ak._v2.operations.to_layout(
             record,
             allow_record=True,
             allow_other=False,

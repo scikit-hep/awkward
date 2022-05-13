@@ -539,7 +539,7 @@ class Content:
             and where._parameters is not None
             and (where._parameters.get("__array__") in ("string", "bytestring"))
         ):
-            return self._getitem_fields(ak._v2.operations.convert.to_list(where))
+            return self._getitem_fields(ak._v2.operations.to_list(where))
 
         elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
             return where.toNumpyArray(np.int64)
@@ -588,7 +588,7 @@ class Content:
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):
-            layout = ak._v2.operations.convert.to_layout(where)
+            layout = ak._v2.operations.to_layout(where)
             as_array = layout.maybe_to_array(layout.nplike)
             if as_array is None:
                 return self._getitem(layout)

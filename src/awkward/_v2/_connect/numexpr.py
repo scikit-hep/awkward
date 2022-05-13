@@ -82,7 +82,7 @@ def evaluate(
     arguments = getArguments(names, local_dict, global_dict)
 
     arrays = [
-        ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        ak._v2.operations.to_layout(x, allow_record=True, allow_other=True)
         for x in arguments
     ]
 
@@ -134,7 +134,7 @@ def re_evaluate(local_dict=None):
     arguments = getArguments(names, local_dict)
 
     arrays = [
-        ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        ak._v2.operations.to_layout(x, allow_record=True, allow_other=True)
         for x in arguments
     ]
 

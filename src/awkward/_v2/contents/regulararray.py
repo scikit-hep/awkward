@@ -1075,9 +1075,7 @@ class RegularArray(Content):
         if array_param in {"bytestring", "string"}:
             return self._nplike.array(self.to_list())
 
-        out = ak._v2.operations.convert.to_numpy(
-            self.content, allow_missing=allow_missing
-        )
+        out = ak._v2.operations.to_numpy(self.content, allow_missing=allow_missing)
         head, tail = out.shape[0], out.shape[1:]
         if self.size == 0:
             shape = (0, 0) + tail
@@ -1145,7 +1143,7 @@ class RegularArray(Content):
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
         ):
-            return [ak._v2.operations.convert.to_numpy(self)]
+            return [ak._v2.operations.to_numpy(self)]
         else:
             flat = self._content[: self._length * self._size]
             return flat._completely_flatten(nplike, options)

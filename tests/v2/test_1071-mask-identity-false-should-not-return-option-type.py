@@ -18,6 +18,6 @@ def test():
     array = ak._v2.highlevel.Array(layout)
 
     assert (
-        str(ak._v2.operations.reducers.min(array, axis=-1, mask_identity=False).type)
+        str(ak._v2.operations.min(array, axis=-1, mask_identity=False).type)
         == "1 * var * float64"
     )

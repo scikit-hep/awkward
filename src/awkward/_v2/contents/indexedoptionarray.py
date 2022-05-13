@@ -1523,7 +1523,7 @@ class IndexedOptionArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        content = ak._v2.operations.convert.to_numpy(
+        content = ak._v2.operations.to_numpy(
             self.project(), allow_missing=allow_missing
         )
 

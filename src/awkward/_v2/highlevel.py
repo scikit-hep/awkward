@@ -199,13 +199,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = data._layout
 
         elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
-            layout = ak._v2.operations.convert.from_numpy(data, highlevel=False)
+            layout = ak._v2.operations.from_numpy(data, highlevel=False)
 
         elif ak._v2._util.in_module(data, "cupy"):
-            layout = ak._v2.operations.convert.from_cupy(data, highlevel=False)
+            layout = ak._v2.operations.from_cupy(data, highlevel=False)
 
         elif ak._v2._util.in_module(data, "pyarrow"):
-            layout = ak._v2.operations.convert.from_arrow(data, highlevel=False)
+            layout = ak._v2.operations.from_arrow(data, highlevel=False)
 
         elif isinstance(data, dict):
             fields = []
@@ -228,10 +228,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = ak._v2.contents.RecordArray(contents, fields)
 
         elif isinstance(data, str):
-            layout = ak._v2.operations.convert.from_json(data, highlevel=False)
+            layout = ak._v2.operations.from_json(data, highlevel=False)
 
         else:
-            layout = ak._v2.operations.convert.from_iter(
+            layout = ak._v2.operations.from_iter(
                 data, highlevel=False, allow_record=False
             )
 
@@ -241,16 +241,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
 
         if with_name is not None:
-            layout = ak._v2.operations.structure.with_name(
-                layout, with_name, highlevel=False
-            )
+            layout = ak._v2.operations.with_name(layout, with_name, highlevel=False)
 
-        if backend is not None and backend != ak._v2.operations.describe.backend(
-            layout
-        ):
-            layout = ak._v2.operations.describe.to_backend(
-                layout, backend, highlevel=False
-            )
+        if backend is not None and backend != ak._v2.operations.backend(layout):
+            layout = ak._v2.operations.to_backend(layout, backend, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -260,7 +254,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self.__doc__ = docstr
 
         if check_valid:
-            ak._v2.operations.describe.validity_error(self, exception=True)
+            ak._v2.operations.validity_error(self, exception=True)
 
     @property
     def layout(self):
@@ -351,7 +345,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             with ak._v2._util.OperationErrorContext(
                 "ak._v2.Array.mask", {0: self._array, 1: where}
             ):
-                return ak._v2.operations.structure.mask(self._array, where, True)
+                return ak._v2.operations.mask(self._array, where, True)
 
     @property
     def mask(self):
@@ -391,7 +385,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         Converts this Array into a NumPy array, if possible; same as #ak.to_numpy.
         """
-        return ak._v2.operations.convert.to_numpy(self, allow_missing=allow_missing)
+        return ak._v2.operations.to_numpy(self, allow_missing=allow_missing)
 
     @property
     def nbytes(self):
@@ -1040,7 +1034,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
-            self._layout = ak._v2.operations.structure.with_field(
+            self._layout = ak._v2.operations.with_field(
                 self._layout, what, where, highlevel=False
             )
             self._numbaview = None
@@ -1056,7 +1050,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             "ak._v2.Array.__delitem__",
             dict(self=self, field_name=where),
         ):
-            names = ak._v2.operations.describe.fields(self._layout)
+            names = ak._v2.operations.fields(self._layout)
             if where not in names:
                 raise ak._v2._util.error(
                     TypeError(f"array fields do not contain {where!r}")
@@ -1342,8 +1336,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
-        form, length, container = ak._v2.operations.convert.to_buffers(
+        packed = ak._v2.operations.packed(self._layout, highlevel=False)
+        form, length, container = ak._v2.operations.to_buffers(
             packed, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
         )
         if self._behavior is ak._v2.behavior:
@@ -1362,7 +1356,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             form, length, container, behavior = state
             if ak._v2._util.isint(length):
-                layout = ak._v2.operations.convert.from_buffers(
+                layout = ak._v2.operations.from_buffers(
                     form,
                     length,
                     container,
@@ -1371,7 +1365,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 )
             else:
                 layouts = [
-                    ak._v2.operations.convert.from_buffers(
+                    ak._v2.operations.from_buffers(
                         form,
                         length,
                         container,
@@ -1380,9 +1374,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     )
                     for i in length
                 ]
-                layout = ak._v2.operations.structure.concatenate(
-                    layouts, highlevel=False
-                )
+                layout = ak._v2.operations.concatenate(layouts, highlevel=False)
         self.layout = layout
         self.behavior = behavior
 
@@ -1459,10 +1451,10 @@ class Record(NDArrayOperatorsMixin):
             layout = data._layout
 
         elif isinstance(data, str):
-            layout = ak._v2.operations.convert.from_json(data, highlevel=False)
+            layout = ak._v2.operations.from_json(data, highlevel=False)
 
         elif isinstance(data, dict):
-            layout = ak._v2.operations.convert.from_iter([data], highlevel=False)[0]
+            layout = ak._v2.operations.from_iter([data], highlevel=False)[0]
 
         elif isinstance(data, Iterable):
             raise ak._v2._util.error(
@@ -1478,14 +1470,10 @@ class Record(NDArrayOperatorsMixin):
             )
 
         if with_name is not None:
-            layout = ak._v2.operations.structure.with_name(
-                layout, with_name, highlevel=False
-            )
+            layout = ak._v2.operations.with_name(layout, with_name, highlevel=False)
 
-        if library is not None and library != ak._v2.operations.convert.library(layout):
-            layout = ak._v2.operations.convert.to_library(
-                layout, library, highlevel=False
-            )
+        if library is not None and library != ak._v2.operations.library(layout):
+            layout = ak._v2.operations.to_library(layout, library, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -1495,7 +1483,7 @@ class Record(NDArrayOperatorsMixin):
             self.__doc__ = docstr
 
         if check_valid:
-            ak._v2.operations.describe.validity_error(self, exception=True)
+            ak._v2.operations.validity_error(self, exception=True)
 
     @property
     def layout(self):
@@ -1721,7 +1709,7 @@ class Record(NDArrayOperatorsMixin):
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
-            self._layout = ak._v2.operations.structure.with_field(
+            self._layout = ak._v2.operations.with_field(
                 self._layout, what, where, highlevel=False
             )
             self._numbaview = None
@@ -1737,7 +1725,7 @@ class Record(NDArrayOperatorsMixin):
             "ak._v2.Record.__delitem__",
             dict(self=self, field_name=where),
         ):
-            names = ak._v2.operations.describe.fields(self._layout)
+            names = ak._v2.operations.fields(self._layout)
             if where not in names:
                 raise ak._v2._util.error(
                     TypeError(f"array fields do not contain {where!r}")
@@ -1923,8 +1911,8 @@ class Record(NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
-        form, length, container = ak._v2.operations.convert.to_buffers(
+        packed = ak._v2.operations.packed(self._layout, highlevel=False)
+        form, length, container = ak._v2.operations.to_buffers(
             packed.array, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
         )
         if self._behavior is ak._v2.behavior:
@@ -1943,7 +1931,7 @@ class Record(NDArrayOperatorsMixin):
         else:
             form, length, container, behavior, at = state
             if ak._v2._util.isint(length):
-                layout = ak._v2.operations.convert.from_buffers(
+                layout = ak._v2.operations.from_buffers(
                     form,
                     length,
                     container,
@@ -1952,7 +1940,7 @@ class Record(NDArrayOperatorsMixin):
                 )
             else:
                 layouts = [
-                    ak._v2.operations.convert.from_buffers(
+                    ak._v2.operations.from_buffers(
                         form,
                         length,
                         container,
@@ -1961,9 +1949,7 @@ class Record(NDArrayOperatorsMixin):
                     )
                     for i in length
                 ]
-                layout = ak._v2.operations.structure.concatenate(
-                    layouts, highlevel=False
-                )
+                layout = ak._v2.operations.concatenate(layouts, highlevel=False)
         layout = ak._v2.record.Record(layout, at)
         self.layout = layout
         self.behavior = behavior
@@ -2300,7 +2286,7 @@ class ArrayBuilder(Sized):
         """
         formstr, length, container = self._layout.to_buffers()
         form = ak._v2.forms.from_json(formstr)
-        return ak._v2.operations.convert.from_buffers(form, length, container)
+        return ak._v2.operations.from_buffers(form, length, container)
 
     def null(self):
         """

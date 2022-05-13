@@ -1277,9 +1277,7 @@ class UnionArray(Content):
 
     def _to_numpy(self, allow_missing):
         contents = [
-            ak._v2.operations.convert.to_numpy(
-                self.project(i), allow_missing=allow_missing
-            )
+            ak._v2.operations.to_numpy(self.project(i), allow_missing=allow_missing)
             for i in range(len(self.contents))
         ]
 

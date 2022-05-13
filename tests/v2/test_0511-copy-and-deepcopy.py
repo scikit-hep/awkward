@@ -6,7 +6,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test():
@@ -22,22 +22,22 @@ def test():
 
     three = copy.deepcopy(two)
     four = np.copy(two)
-    five = ak._v2.operations.structure.copy(two)
+    five = ak._v2.operations.copy(two)
     np_array[5] = 321
     assert to_list(three) == [0.0, 999, 2.2, 123, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert to_list(four) == [0.0, 999, 2.2, 123, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert to_list(five) == [0.0, 999, 2.2, 123, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
     assert to_list(copy.deepcopy(ak._v2.Array([[1, 2, 3], [], [4, 5]]))) == to_list(
-        ak._v2.operations.structure.copy(ak._v2.Array([[1, 2, 3], [], [4, 5]]))
+        ak._v2.operations.copy(ak._v2.Array([[1, 2, 3], [], [4, 5]]))
     )
     assert to_list(copy.deepcopy(ak._v2.Record({"one": 1, "two": 2.2}))) == to_list(
-        ak._v2.operations.structure.copy(ak._v2.Record({"one": 1, "two": 2.2}))
+        ak._v2.operations.copy(ak._v2.Record({"one": 1, "two": 2.2}))
     )
 
     underlying_array = np.array([1.1, 2.2, 3.3, 4.4, 5.5])
     wrapper = ak._v2.Array(underlying_array)
-    duplicate = ak._v2.operations.structure.copy(wrapper)
+    duplicate = ak._v2.operations.copy(wrapper)
     underlying_array[2] = 123
 
     assert to_list(underlying_array) == [1.1, 2.2, 123.0, 4.4, 5.5]

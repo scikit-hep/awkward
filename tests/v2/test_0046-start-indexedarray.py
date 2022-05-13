@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_basic():
@@ -51,9 +51,9 @@ def test_type():
     content = ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
     index = ak._v2.index.Index32(np.array([2, 2, 0, 3, 4], dtype=np.int32))
     array = ak._v2.contents.IndexedArray(index, content)
-    assert ak._v2.operations.describe.type(array) == ak._v2.types.NumpyType("float64")
+    assert ak._v2.operations.type(array) == ak._v2.types.NumpyType("float64")
     array = ak._v2.contents.IndexedOptionArray(index, content)
-    assert ak._v2.operations.describe.type(array) == ak._v2.types.OptionType(
+    assert ak._v2.operations.type(array) == ak._v2.types.OptionType(
         ak._v2.types.NumpyType("float64")
     )
 

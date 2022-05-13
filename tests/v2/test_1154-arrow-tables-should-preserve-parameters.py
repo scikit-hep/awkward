@@ -18,6 +18,6 @@ def test():
             parameters={"__record__": "Hello"},
         )
     )
-    assert ak._v2.operations.convert.from_arrow(
-        ak._v2.operations.convert.to_arrow_table(a)
+    assert ak._v2.operations.from_arrow(
+        ak._v2.operations.to_arrow_table(a)
     ).type.content.parameters == {"__record__": "Hello"}

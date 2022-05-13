@@ -4,12 +4,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_singletons():
     array = ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-    assert to_list(ak._v2.operations.structure.singletons(array)) == [
+    assert to_list(ak._v2.operations.singletons(array)) == [
         [1.1],
         [2.2],
         [],
@@ -21,17 +21,17 @@ def test_singletons():
     ]
 
     assert to_list(
-        ak._v2.operations.structure.singletons(
+        ak._v2.operations.singletons(
             ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
         )
     ) == [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
     assert to_list(
-        ak._v2.operations.structure.singletons(
+        ak._v2.operations.singletons(
             ak._v2.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
         )
     ) == [[[1.1], [2.2], []], [[3.3], []], [[]], [[4.4], [5.5]]]
     assert to_list(
-        ak._v2.operations.structure.singletons(
+        ak._v2.operations.singletons(
             ak._v2.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
         )
     ) == [[[[1.1], [2.2], []]], [[[3.3], []]], [[[]]], [[[4.4], [5.5]]]]
@@ -39,24 +39,24 @@ def test_singletons():
 
 def test_firsts():
     assert to_list(
-        ak._v2.operations.structure.firsts(
-            ak._v2.operations.structure.singletons(
+        ak._v2.operations.firsts(
+            ak._v2.operations.singletons(
                 ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
             ),
             axis=1,
         )
     ) == [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
     assert to_list(
-        ak._v2.operations.structure.firsts(
-            ak._v2.operations.structure.singletons(
+        ak._v2.operations.firsts(
+            ak._v2.operations.singletons(
                 ak._v2.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
             ),
             axis=2,
         )
     ) == [[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]]
     assert to_list(
-        ak._v2.operations.structure.firsts(
-            ak._v2.operations.structure.singletons(
+        ak._v2.operations.firsts(
+            ak._v2.operations.singletons(
                 ak._v2.Array(
                     [[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]
                 )
@@ -68,14 +68,14 @@ def test_firsts():
 
 def test_allow_missing():
     array = ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-    ak._v2.operations.convert.to_numpy(array)
+    ak._v2.operations.to_numpy(array)
     with pytest.raises(ValueError):
-        ak._v2.operations.convert.to_numpy(array, allow_missing=False)
+        ak._v2.operations.to_numpy(array, allow_missing=False)
 
 
 def test_flatten0():
     array = ak._v2.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
-    assert to_list(ak._v2.operations.structure.flatten(array, axis=0)) == [
+    assert to_list(ak._v2.operations.flatten(array, axis=0)) == [
         1.1,
         2.2,
         3.3,
@@ -83,10 +83,10 @@ def test_flatten0():
         5.5,
     ]
 
-    content0 = ak._v2.operations.convert.from_iter(
+    content0 = ak._v2.operations.from_iter(
         [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5], highlevel=False
     )
-    content1 = ak._v2.operations.convert.from_iter(
+    content1 = ak._v2.operations.from_iter(
         ["one", None, "two", None, "three"], highlevel=False
     )
     array = ak._v2.Array(
@@ -115,7 +115,7 @@ def test_flatten0():
         "three",
         5.5,
     ]
-    assert to_list(ak._v2.operations.structure.flatten(array, axis=0)) == [
+    assert to_list(ak._v2.operations.flatten(array, axis=0)) == [
         1.1,
         "one",
         2.2,

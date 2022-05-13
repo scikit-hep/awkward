@@ -8,9 +8,9 @@ import awkward as ak  # noqa: F401
 def test_toRegularArray():
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 3, 5, 7, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -20,9 +20,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 3, 5, 7, 11, 0), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -32,9 +32,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 3, 5, 7, 0, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -44,9 +44,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 3, 5, 0, 7, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -56,9 +56,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 3, 0, 5, 7, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -68,9 +68,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 0, 3, 5, 7, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -80,9 +80,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((0, 2, 3, 5, 7, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -93,9 +93,9 @@ def test_toRegularArray():
 
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 3, 5, 7, 0, 11, 0), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -105,9 +105,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 3, 5, 0, 7, 11, 0), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -117,9 +117,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 3, 0, 5, 7, 0, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -129,9 +129,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((2, 0, 3, 5, 7, 0, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -141,9 +141,9 @@ def test_toRegularArray():
     )
     assert (
         str(
-            ak._v2.operations.describe.type(
+            ak._v2.operations.type(
                 ak._v2.highlevel.Array(
-                    ak._v2.operations.convert.from_numpy(
+                    ak._v2.operations.from_numpy(
                         np.empty((0, 2, 3, 5, 7, 0, 11), np.float64)
                     ).layout.toRegularArray()
                 )
@@ -154,12 +154,9 @@ def test_toRegularArray():
 
 
 def test_actual():
-    x = ak._v2.operations.convert.from_numpy(
+    x = ak._v2.operations.from_numpy(
         np.arange(2 * 3 * 4, dtype=np.int64).reshape(2, 3, 4)
     )
     s = x[..., :0]
-    result = ak._v2.operations.structure.zip({"q": s, "t": s})
-    assert (
-        str(ak._v2.operations.describe.type(result))
-        == "2 * 3 * 0 * {q: int64, t: int64}"
-    )
+    result = ak._v2.operations.zip({"q": s, "t": s})
+    assert str(ak._v2.operations.type(result)) == "2 * 3 * 0 * {q: int64, t: int64}"

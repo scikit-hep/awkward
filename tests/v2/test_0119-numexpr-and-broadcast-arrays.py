@@ -4,14 +4,14 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_broadcast_arrays():
     a = ak._v2.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
     b = ak._v2.Array([100, 200, 300], check_valid=True)
 
-    out = ak._v2.operations.structure.broadcast_arrays(a, b)
+    out = ak._v2.operations.broadcast_arrays(a, b)
     assert to_list(out[0]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert to_list(out[1]) == [[100, 100, 100], [], [300, 300]]
 

@@ -830,9 +830,7 @@ def union_to_record(unionarray, anonymous):
             contents.append(union_to_record(layout, anonymous))
         elif layout.is_OptionType:
             contents.append(
-                ak._v2.operations.structure.fill_none(
-                    layout, np.nan, axis=0, highlevel=False
-                )
+                ak._v2.operations.fill_none(layout, np.nan, axis=0, highlevel=False)
             )
         else:
             contents.append(layout)
@@ -1087,10 +1085,9 @@ def to_arraylib(module, array, allow_missing):
         elif isinstance(array, ak.layout.ArrayBuilder):
             return _impl(array.snapshot())
 
-        elif (
-            ak._v2.operations.describe.parameters(array).get("__array__")
-            == "bytestring"
-            or ak._v2.operations.describe.parameters(array).get("__array__") == "string"
+        elif ak._v2.operations.parameters(array).get("__array__") in (
+            "bytestring",
+            "string",
         ):
             raise ak._v2._util.error(
                 ValueError(f"{module.__name__} does not support arrays of strings")
@@ -1164,9 +1161,7 @@ def to_arraylib(module, array, allow_missing):
     if module.__name__ in ("jax.numpy", "cupy"):
         return _impl(array)
     elif module.__name__ == "numpy":
-        layout = ak._v2.operations.convert.to_layout(
-            array, allow_record=True, allow_other=True
-        )
+        layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=True)
 
         if isinstance(layout, (ak._v2.contents.Content, ak._v2.record.Record)):
             return layout.to_numpy(allow_missing=allow_missing)

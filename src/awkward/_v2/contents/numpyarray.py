@@ -182,7 +182,7 @@ class NumpyArray(Content):
             index=ak._v2.index.Index64(index),
             contents=[
                 out,
-                ak._v2.operations.convert.from_iter(
+                ak._v2.operations.from_iter(
                     [
                         infinity_string if infinity_string is not None else "Infinity",
                         minus_infinity_string

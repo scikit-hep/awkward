@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_unknown():
@@ -12,11 +12,11 @@ def test_unknown():
     e = ak._v2.contents.EmptyArray()
     a = ak._v2.contents.ListOffsetArray(i, e)
     assert to_list(a) == [[], [], []]
-    assert str(ak._v2.operations.describe.type(a)) == "var * unknown"
-    assert ak._v2.operations.describe.type(a) == ak._v2.types.ListType(
+    assert str(ak._v2.operations.type(a)) == "var * unknown"
+    assert ak._v2.operations.type(a) == ak._v2.types.ListType(
         ak._v2.types.UnknownType()
     )
-    assert not ak._v2.operations.describe.type(a) == ak._v2.types.NumpyType("float64")
+    assert not ak._v2.operations.type(a) == ak._v2.types.NumpyType("float64")
 
     i = ak._v2.index.Index64(np.array([0, 0, 0, 0, 0, 0], dtype=np.int64))
     ii = ak._v2.index.Index64(np.array([0, 0, 2, 5], dtype=np.int64))
@@ -24,8 +24,8 @@ def test_unknown():
     a = ak._v2.contents.ListOffsetArray(ii, a)
 
     assert to_list(a) == [[], [[], []], [[], [], []]]
-    assert str(ak._v2.operations.describe.type(a)) == "var * var * unknown"
-    assert ak._v2.operations.describe.type(a) == ak._v2.types.ListType(
+    assert str(ak._v2.operations.type(a)) == "var * var * unknown"
+    assert ak._v2.operations.type(a) == ak._v2.types.ListType(
         ak._v2.types.ListType(ak._v2.types.UnknownType())
     )
 
@@ -42,25 +42,23 @@ def test_unknown_arraybuilder():
     a.begin_list()
     a.end_list()
     assert to_list(a) == [[], [], []]
-    assert str(ak._v2.operations.describe.type(a)) == "3 * var * unknown"
-    assert ak._v2.operations.describe.type(a) == ak._v2.types.ListType(
+    assert str(ak._v2.operations.type(a)) == "3 * var * unknown"
+    assert ak._v2.operations.type(a) == ak._v2.types.ListType(
         ak._v2.types.UnknownType()
     )
-    assert not ak._v2.operations.describe.type(a) == ak._v2.types.NumpyType("float64")
+    assert not ak._v2.operations.type(a) == ak._v2.types.NumpyType("float64")
 
     a = a.snapshot()
     assert to_list(a) == [[], [], []]
-    assert str(ak._v2.operations.describe.type(a)) == "var * unknown"
-    assert ak._v2.operations.describe.type(a) == ak._v2.types.ListType(
+    assert str(ak._v2.operations.type(a)) == "var * unknown"
+    assert ak._v2.operations.type(a) == ak._v2.types.ListType(
         ak._v2.types.UnknownType()
     )
-    assert not ak._v2.operations.describe.type(a) == ak._v2.types.NumpyType("float64")
+    assert not ak._v2.operations.type(a) == ak._v2.types.NumpyType("float64")
 
 
 def test_getitem():
-    a = ak._v2.operations.convert.from_iter(
-        [[], [[], []], [[], [], []]], highlevel=False
-    )
+    a = ak._v2.operations.from_iter([[], [[], []], [[], [], []]], highlevel=False)
 
     assert to_list(a[2]) == [[], [], []]
     assert a.typetracer[2].form == a[2].form
@@ -107,15 +105,13 @@ def test_getitem():
 
 
 def test_unknown2():
-    a = ak._v2.operations.convert.from_json("[[], [], []]", highlevel=False)
+    a = ak._v2.operations.from_json("[[], [], []]", highlevel=False)
     assert a.tolist() == [[], [], []]
     assert str(a.form.type) == "var * unknown"
     assert a.form.type == ak._v2.types.ListType(ak._v2.types.UnknownType())
     assert not a.form.type == ak._v2.types.NumpyType("float64")
 
-    a = ak._v2.operations.convert.from_json(
-        "[[], [[], []], [[], [], []]]", highlevel=False
-    )
+    a = ak._v2.operations.from_json("[[], [[], []], [[], [], []]]", highlevel=False)
     assert a.tolist() == [[], [[], []], [[], [], []]]
     assert str(a.form.type) == "var * var * unknown"
     assert a.form.type == ak._v2.types.ListType(
@@ -146,8 +142,8 @@ def test_unknown2():
 
 
 def test_from_json_getitem():
-    a = ak._v2.operations.convert.from_json("[]")
-    a = ak._v2.operations.convert.from_json("[[], [[], []], [[], [], []]]")
+    a = ak._v2.operations.from_json("[]")
+    a = ak._v2.operations.from_json("[[], [[], []], [[], [], []]]")
     assert a[2].tolist() == [[], [], []]
 
     assert a[2, 1].tolist() == []

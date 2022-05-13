@@ -14,7 +14,7 @@ if not numpy_at_least("1.13.1"):
 
 
 def convert_to_array(layout, args, kwargs):
-    out = ak._v2.operations.convert.to_numpy(layout, allow_missing=False)
+    out = ak._v2.operations.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
         return out
     else:
@@ -74,7 +74,7 @@ def _array_ufunc_custom_cast(inputs, behavior):
         if cast_fcn is not None:
             x = cast_fcn(x)
         nextinputs.append(
-            ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+            ak._v2.operations.to_layout(x, allow_record=True, allow_other=True)
         )
     return nextinputs
 

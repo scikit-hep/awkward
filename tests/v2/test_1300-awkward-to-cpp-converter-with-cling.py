@@ -1833,7 +1833,7 @@ void roottest_nested_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssiz
 
 
 def test_ListArray_strings():
-    layout = ak._v2.operations.convert.from_iter(
+    layout = ak._v2.operations.from_iter(
         ["one", "two", "three", "four", "five"], highlevel=False
     )
 
@@ -1860,10 +1860,8 @@ void roottest_ListArray_strings(double* out, ssize_t length, ssize_t* ptrs) {{
 
 
 def test_RegularArray_strings():
-    layout = ak._v2.operations.structure.to_regular(
-        ak._v2.operations.convert.from_iter(
-            ["onexx", "twoxx", "three", "fourx", "fivex"]
-        ),
+    layout = ak._v2.operations.to_regular(
+        ak._v2.operations.from_iter(["onexx", "twoxx", "three", "fourx", "fivex"]),
         axis=1,
         highlevel=False,
     )

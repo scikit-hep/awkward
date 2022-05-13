@@ -12,15 +12,13 @@ def test():
         def blah(self):
             return self["x"]
 
-    a = ak._v2.operations.structure.zip({"x": [[1, 2], [3]], "y": [[4, 5], [6]]})
-    b = ak._v2.operations.structure.zip(
-        {"x": [[-1, -2, -3], [-4]], "z": [[-4, -5, -6], [-7]]}
-    )
+    a = ak._v2.operations.zip({"x": [[1, 2], [3]], "y": [[4, 5], [6]]})
+    b = ak._v2.operations.zip({"x": [[-1, -2, -3], [-4]], "z": [[-4, -5, -6], [-7]]})
 
     a2 = a[a.x % 2 == 0]
     b2 = b[b.x % 2 == 0]
-    c2 = ak._v2.operations.structure.with_name(
-        ak._v2.operations.structure.concatenate([a2, b2], axis=1), "Blah"
+    c2 = ak._v2.operations.with_name(
+        ak._v2.operations.concatenate([a2, b2], axis=1), "Blah"
     )
 
     assert c2.blah.tolist() == [[2, -2], [-4]]
