@@ -12,7 +12,7 @@ def test_fillna_empty_array():
     value = ak._v2.contents.NumpyArray(np.array([10]))
 
     assert to_list(empty) == []
-    array = empty.rpad(5, 0)
+    array = empty.pad_none(5, 0)
     assert to_list(array) == [None, None, None, None, None]
     assert to_list(array.fillna(value)) == [10, 10, 10, 10, 10]
 
@@ -21,11 +21,11 @@ def test_fillna_numpy_array():
     content = ak._v2.contents.NumpyArray(np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
     value = ak._v2.contents.NumpyArray(np.array([0]))
 
-    array = content.rpad(3, 0)
+    array = content.pad_none(3, 0)
     assert to_list(array) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], None]
     assert to_list(array.fillna(value)) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 0]
 
-    array = content.rpad(5, 1)
+    array = content.pad_none(5, 1)
     assert to_list(array) == [
         [1.1, 2.2, 3.3, None, None],
         [4.4, 5.5, 6.6, None, None],
@@ -115,7 +115,7 @@ def test_fillna_unionarray():
 
     assert to_list(array) == [[], [2, 2], [1.1], [1], [2.2, 2.2], []]
 
-    padded_array = array.rpad(2, 1)
+    padded_array = array.pad_none(2, 1)
     assert to_list(padded_array) == [
         [None, None],
         [2, 2],

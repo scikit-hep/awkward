@@ -137,6 +137,6 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
 
 def _impl(array, target, axis, clip, highlevel, behavior):
     layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.rpad(target, axis, clip=clip)
+    out = layout.pad_none(target, axis, clip=clip)
 
     return ak._v2._util.wrap(out, behavior, highlevel)

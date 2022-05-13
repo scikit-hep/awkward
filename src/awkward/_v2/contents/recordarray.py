@@ -843,14 +843,14 @@ class RecordArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._rpad(target, posaxis, depth, clip))
+                contents.append(content._pad_none(target, posaxis, depth, clip))
             if len(contents) == 0:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,

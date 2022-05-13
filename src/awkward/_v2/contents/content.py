@@ -1235,7 +1235,7 @@ class Content:
     def dimension_optiontype(self):
         return self.Form.dimension_optiontype.__get__(self)
 
-    def rpad_axis0(self, target, clip):
+    def pad_none_axis0(self, target, clip):
         if not clip and target < self.length:
             index = ak._v2.index.Index64(
                 self._nplike.arange(self.length, dtype=np.int64)
@@ -1261,8 +1261,8 @@ class Content:
         )
         return next.simplify_optiontype()
 
-    def rpad(self, length, axis, clip=False):
-        return self._rpad(length, axis, 0, clip)
+    def pad_none(self, length, axis, clip=False):
+        return self._pad_none(length, axis, 0, clip)
 
     def to_arrow(
         self,

@@ -526,8 +526,8 @@ class BitMaskedArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
-        return self.toByteMaskedArray()._rpad(target, axis, depth, clip)
+    def _pad_none(self, target, axis, depth, clip):
+        return self.toByteMaskedArray()._pad_none(target, axis, depth, clip)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toByteMaskedArray()._to_arrow(

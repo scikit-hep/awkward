@@ -1197,11 +1197,11 @@ class NumpyArray(Content):
                 return f'at {path} ("{type(self)}"): shape[{i}] % itemsize != 0'
         return ""
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         if len(self.shape) == 0:
-            raise ak._v2._util.error(ValueError("cannot rpad a scalar"))
+            raise ak._v2._util.error(ValueError("cannot apply ak.pad_none to a scalar"))
         elif len(self.shape) > 1 or not self.is_contiguous:
-            return self.toRegularArray()._rpad(target, axis, depth, clip)
+            return self.toRegularArray()._pad_none(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ak._v2._util.error(
@@ -1211,9 +1211,9 @@ class NumpyArray(Content):
             if target < self.length:
                 return self
             else:
-                return self._rpad(target, posaxis, depth, clip=True)
+                return self._pad_none(target, posaxis, depth, clip=True)
         else:
-            return self.rpad_axis0(target, clip=True)
+            return self.pad_none_axis0(target, clip=True)
 
     def _nbytes_part(self):
         result = self.data.nbytes

@@ -1243,11 +1243,11 @@ class ListArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         if not clip:
             posaxis = self.axis_wrap_if_negative(axis)
             if posaxis == depth:
-                return self.rpad_axis0(target, clip)
+                return self.pad_none_axis0(target, clip)
             elif posaxis == depth + 1:
                 min_ = ak._v2.index.Index64.empty(1, self._nplike)
                 assert (
@@ -1346,13 +1346,15 @@ class ListArray(Content):
                 return ak._v2.contents.listarray.ListArray(
                     self._starts,
                     self._stops,
-                    self._content._rpad(target, posaxis, depth + 1, clip),
+                    self._content._pad_none(target, posaxis, depth + 1, clip),
                     None,
                     self._parameters,
                     self._nplike,
                 )
         else:
-            return self.toListOffsetArray64(True)._rpad(target, axis, depth, clip=True)
+            return self.toListOffsetArray64(True)._pad_none(
+                target, axis, depth, clip=True
+            )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toListOffsetArray64(False)._to_arrow(

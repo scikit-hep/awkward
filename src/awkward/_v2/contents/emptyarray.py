@@ -261,14 +261,14 @@ class EmptyArray(Content):
             return self.identifier._nbytes_part()
         return 0
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ak._v2._util.error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
             )
         else:
-            return self.rpad_axis0(target, True)
+            return self.pad_none_axis0(target, True)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if options["emptyarray_to"] is None:
