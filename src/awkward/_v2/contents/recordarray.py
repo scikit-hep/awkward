@@ -677,10 +677,10 @@ class RecordArray(Content):
             )
         )
 
-    def fillna(self, value):
+    def fill_none(self, value):
         contents = []
         for content in self._contents:
-            contents.append(content.fillna(value))
+            contents.append(content.fill_none(value))
         return RecordArray(
             contents,
             self._fields,

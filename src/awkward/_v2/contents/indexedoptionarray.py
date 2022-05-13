@@ -743,10 +743,10 @@ class IndexedOptionArray(Content):
             )
         )
 
-    def fillna(self, value):
+    def fill_none(self, value):
         if value.nplike.known_shape and value.length != 1:
             raise ak._v2._util.error(
-                ValueError(f"fillna value length ({value.length}) is not equal to 1")
+                ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
 
         contents = [self._content, value]

@@ -749,10 +749,10 @@ class ListOffsetArray(Content):
         )
         return listarray.mergemany(others)
 
-    def fillna(self, value):
+    def fill_none(self, value):
         return ListOffsetArray(
             self._offsets,
-            self._content.fillna(value),
+            self._content.fill_none(value),
             self._identifier,
             self._parameters,
             self._nplike,

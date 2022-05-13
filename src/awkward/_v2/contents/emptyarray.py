@@ -176,7 +176,7 @@ class EmptyArray(Content):
             tail_others = others[1:]
             return others[0].mergemany(tail_others)
 
-    def fillna(self, value):
+    def fill_none(self, value):
         return EmptyArray(None, self._parameters, self._nplike)
 
     def _local_index(self, axis, depth):
