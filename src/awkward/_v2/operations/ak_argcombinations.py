@@ -92,7 +92,7 @@ def _impl(
     else:
         layout = ak._v2.operations.to_layout(
             array, allow_record=False, allow_other=False
-        ).localindex(axis)
+        ).local_index(axis)
         out = layout.combinations(
             n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
         )

@@ -414,8 +414,8 @@ class BitMaskedArray(Content):
     def fillna(self, value):
         return self.toIndexedOptionArray64().fillna(value)
 
-    def _localindex(self, axis, depth):
-        return self.toByteMaskedArray()._localindex(axis, depth)
+    def _local_index(self, axis, depth):
+        return self.toByteMaskedArray()._local_index(axis, depth)
 
     def numbers_to_type(self, name):
         return self.toByteMaskedArray().numbers_to_type(name)
@@ -501,7 +501,7 @@ class BitMaskedArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self.mask.length * 8 < self.length:
             return f'at {path} ("{type(self)}"): len(mask) * 8 < length'
         elif self._content.length < self.length:
@@ -518,7 +518,7 @@ class BitMaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.mask._nbytes_part() + self.content._nbytes_part()
@@ -526,8 +526,8 @@ class BitMaskedArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
-        return self.toByteMaskedArray()._rpad(target, axis, depth, clip)
+    def _pad_none(self, target, axis, depth, clip):
+        return self.toByteMaskedArray()._pad_none(target, axis, depth, clip)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toByteMaskedArray()._to_arrow(

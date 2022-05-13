@@ -693,10 +693,10 @@ class RegularArray(Content):
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         elif posaxis == depth + 1:
             localindex = ak._v2.index.Index64.empty(
                 self._length * self._size, self._nplike
@@ -718,7 +718,7 @@ class RegularArray(Content):
             )
         else:
             return ak._v2.contents.RegularArray(
-                self._content._localindex(posaxis, depth + 1),
+                self._content._local_index(posaxis, depth + 1),
                 self._size,
                 self._length,
                 self._identifier,
@@ -1007,7 +1007,7 @@ class RegularArray(Content):
 
         return out
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self.size < 0:
             return f'at {path} ("{type(self)}"): size < 0'
         if (
@@ -1016,7 +1016,7 @@ class RegularArray(Content):
         ):
             return ""
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.content._nbytes_part()
@@ -1024,17 +1024,17 @@ class RegularArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
 
         elif posaxis == depth + 1:
             if not clip:
                 if target < self._size:
                     return self
                 else:
-                    return self._rpad(target, posaxis, depth, True)
+                    return self._pad_none(target, posaxis, depth, True)
 
             else:
                 index = ak._v2.index.Index64.empty(self.length * target, self._nplike)
@@ -1062,7 +1062,7 @@ class RegularArray(Content):
 
         else:
             return ak._v2.contents.regulararray.RegularArray(
-                self._content._rpad(target, posaxis, depth + 1, clip),
+                self._content._pad_none(target, posaxis, depth + 1, clip),
                 self._size,
                 self.length,
                 None,

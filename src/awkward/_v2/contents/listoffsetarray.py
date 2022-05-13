@@ -753,10 +753,10 @@ class ListOffsetArray(Content):
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         elif posaxis == depth + 1:
             offsets = self._compact_offsets64(True)
             if self._nplike.known_data:
@@ -786,7 +786,7 @@ class ListOffsetArray(Content):
         else:
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 self._offsets,
-                self._content._localindex(posaxis, depth + 1),
+                self._content._local_index(posaxis, depth + 1),
                 self._identifier,
                 self._parameters,
                 self._nplike,
@@ -1725,7 +1725,7 @@ class ListOffsetArray(Content):
             nextstarts,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self.offsets.length < 1:
             return f'at {path} ("{type(self)}"): len(offsets) < 1'
         assert self.starts.nplike is self._nplike and self.stops.nplike is self._nplike
@@ -1755,7 +1755,7 @@ class ListOffsetArray(Content):
             ):
                 return ""
             else:
-                return self._content.validityerror(path + ".content")
+                return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.offsets._nbytes_part() + self.content._nbytes_part()
@@ -1763,10 +1763,10 @@ class ListOffsetArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
         if posaxis == depth + 1:
             if not clip:
                 tolength = ak._v2.index.Index64.empty(1, self._nplike)
@@ -1882,7 +1882,7 @@ class ListOffsetArray(Content):
         else:
             return ak._v2.contents.listoffsetarray.ListOffsetArray(
                 self._offsets,
-                self._content._rpad(target, posaxis, depth + 1, clip),
+                self._content._pad_none(target, posaxis, depth + 1, clip),
                 None,
                 self._parameters,
                 self._nplike,

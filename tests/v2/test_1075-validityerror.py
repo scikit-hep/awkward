@@ -10,8 +10,8 @@ def test_ListOffsetArray():
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
     ).layout
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
     v2_array = ak._v2.highlevel.Array(
         [
@@ -21,8 +21,8 @@ def test_ListOffsetArray():
         ]
     ).layout
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_RegularArray():
@@ -30,15 +30,15 @@ def test_RegularArray():
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]])
     ).layout
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_NumpyArray():
     v2_array = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3]).layout
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_IndexedArray():
@@ -54,8 +54,8 @@ def test_IndexedArray():
         ]
     ).layout
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_ByteMaskedArray():
@@ -66,8 +66,8 @@ def test_ByteMaskedArray():
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
     v2_array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_IndexedOptionArray():
@@ -78,8 +78,8 @@ def test_IndexedOptionArray():
     index = ak._v2.index.Index64(np.array([0, 1, -1, -1, 4], dtype=np.int64))
     v2_array = ak._v2.contents.IndexedOptionArray(index, content)
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_BitMaskedArray():
@@ -116,15 +116,15 @@ def test_BitMaskedArray():
         lsb_order=False,
     )
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_EmptyArray():
     v2_array = ak._v2.contents.emptyarray.EmptyArray()
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_RecordArray():
@@ -141,8 +141,8 @@ def test_RecordArray():
         ),
     )
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_UnionArray():
@@ -164,8 +164,8 @@ def test_UnionArray():
         ],
     )
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""
 
 
 def test_UnmaskedArray():
@@ -175,5 +175,5 @@ def test_UnmaskedArray():
         )
     )
 
-    assert v2_array.validityerror() == ""
-    assert v2_array.typetracer.validityerror() == ""
+    assert v2_array.validity_error() == ""
+    assert v2_array.typetracer.validity_error() == ""

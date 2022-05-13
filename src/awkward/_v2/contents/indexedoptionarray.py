@@ -764,15 +764,15 @@ class IndexedOptionArray(Content):
         )
         return out.simplify_uniontype(True, True)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
 
             next = self._content._carry(nextcarry, False)
-            out = next._localindex(posaxis, depth)
+            out = next._local_index(posaxis, depth)
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,
@@ -1426,7 +1426,7 @@ class IndexedOptionArray(Content):
             )
             return out2.simplify_optiontype()
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         assert self.index.nplike is self._nplike
         error = self._nplike["awkward_IndexedArray_validity", self.index.dtype.type](
             self.index.data, self.index.length, self._content.length, True
@@ -1455,7 +1455,7 @@ class IndexedOptionArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.index._nbytes_part() + self.content._nbytes_part()
@@ -1463,10 +1463,10 @@ class IndexedOptionArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
             mask = ak._v2.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak._v2.index.Index64.empty(mask.length, self._nplike)
@@ -1478,7 +1478,7 @@ class IndexedOptionArray(Content):
                     mask.dtype.type,
                 ](index.data, mask.data, mask.length)
             )
-            next = self.project()._rpad(target, posaxis, depth, clip)
+            next = self.project()._pad_none(target, posaxis, depth, clip)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
                 next,
@@ -1489,7 +1489,7 @@ class IndexedOptionArray(Content):
         else:
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 self._index,
-                self._content._rpad(target, posaxis, depth, clip),
+                self._content._pad_none(target, posaxis, depth, clip),
                 None,
                 self._parameters,
                 self._nplike,

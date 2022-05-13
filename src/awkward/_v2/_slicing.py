@@ -295,7 +295,7 @@ def prepare_tuple_bool_to_int(item):
         and issubclass(item.content.dtype.type, (bool, np.bool_))
     ):
         if item.nplike.known_data or item.nplike.known_shape:
-            localindex = item.localindex(axis=1)
+            localindex = item.local_index(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
             cumsum = item.nplike.empty(item.content.data.shape[0] + 1, np.int64)
@@ -337,7 +337,7 @@ def prepare_tuple_bool_to_int(item):
                     safeindex.shape[0], np.bool_
                 )
 
-            localindex = item.localindex(axis=1)
+            localindex = item.local_index(axis=1)
 
             # nextcontent does not include missing values
             expanded[isnegative] = False

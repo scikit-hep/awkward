@@ -294,13 +294,13 @@ class UnmaskedArray(Content):
     def fillna(self, value):
         return self._content.fillna(value)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             return UnmaskedArray(
-                self._content._localindex(posaxis, depth),
+                self._content._local_index(posaxis, depth),
                 self._identifier,
                 self._parameters,
                 self._nplike,
@@ -442,7 +442,7 @@ class UnmaskedArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if isinstance(
             self._content,
             (
@@ -455,7 +455,7 @@ class UnmaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.content._nbytes_part()
@@ -463,15 +463,15 @@ class UnmaskedArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
-            return self._content._rpad(target, posaxis, depth, clip)
+            return self._content._pad_none(target, posaxis, depth, clip)
         else:
             return ak._v2.contents.unmaskedarray.UnmaskedArray(
-                self._content._rpad(target, posaxis, depth, clip),
+                self._content._pad_none(target, posaxis, depth, clip),
                 None,
                 self._parameters,
                 self._nplike,

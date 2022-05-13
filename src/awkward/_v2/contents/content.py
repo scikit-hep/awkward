@@ -691,7 +691,7 @@ class Content:
 
         return axis
 
-    def _localindex_axis0(self):
+    def _local_index_axis0(self):
         localindex = ak._v2.index.Index64.empty(self.length, self._nplike)
         self._handle_error(
             self._nplike["awkward_localindex", np.int64](
@@ -790,8 +790,8 @@ class Content:
 
         return (head, tail)
 
-    def localindex(self, axis):
-        return self._localindex(axis, 0)
+    def local_index(self, axis):
+        return self._local_index(axis, 0)
 
     def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
         if axis is None:
@@ -1040,7 +1040,7 @@ class Content:
                 )
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
-    def validityerror_parameters(self, path):
+    def validity_error_parameters(self, path):
         if self.parameter("__array__") == "string":
             content = None
             if isinstance(
@@ -1140,11 +1140,11 @@ class Content:
 
         return ""
 
-    def validityerror(self, path="layout"):
-        paramcheck = self.validityerror_parameters(path)
+    def validity_error(self, path="layout"):
+        paramcheck = self.validity_error_parameters(path)
         if paramcheck != "":
             return paramcheck
-        return self._validityerror(path)
+        return self._validity_error(path)
 
     @property
     def nbytes(self):
@@ -1235,7 +1235,7 @@ class Content:
     def dimension_optiontype(self):
         return self.Form.dimension_optiontype.__get__(self)
 
-    def rpad_axis0(self, target, clip):
+    def pad_none_axis0(self, target, clip):
         if not clip and target < self.length:
             index = ak._v2.index.Index64(
                 self._nplike.arange(self.length, dtype=np.int64)
@@ -1261,8 +1261,8 @@ class Content:
         )
         return next.simplify_optiontype()
 
-    def rpad(self, length, axis, clip=False):
-        return self._rpad(length, axis, 0, clip)
+    def pad_none(self, length, axis, clip=False):
+        return self._pad_none(length, axis, 0, clip)
 
     def to_arrow(
         self,
@@ -1462,7 +1462,7 @@ class Content:
         else:
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
 
-    def withparameter(self, key, value):
+    def with_parameter(self, key, value):
         out = copy.copy(self)
 
         if self._parameters is None:
