@@ -11,6 +11,94 @@ import cppyy
 compiler = ROOT.gInterpreter.Declare
 numpy = ak.nplike.Numpy.instance()
 
+compiler(
+    """
+#include <iterator>
+#include <stdlib.h>
+
+template<typename T>
+T* copy_ptr(const T* from_ptr, int64_t size)
+{
+    T* array = malloc(sizeof(T)*size);
+    for (int64_t i = 0; i < size; i++) {
+        array[i] = from_ptr[i];
+    }
+    return array;
+}
+
+template <typename T>
+std::pair<std::vector<int64_t>, T>
+offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& res_vec) {
+    auto const& vals = res_vec.GetPtr();
+    typedef typename T::value_type value_type;
+
+    std::vector<int64_t> offsets;
+    offsets.reserve(vals.size() + 1);
+    offsets.emplace_back(0);
+    int64_t length = 0;
+    std::for_each(vals.begin(), vals.end(), [&] (auto const& n) {
+        length += n.size();
+        offsets.emplace_back(length);
+    });
+
+    std::vector<value_type> data;
+    data.reserve(length);
+    std::for_each(vals.begin(), vals.end(), [&] (auto const& n) {
+        data.insert(data.end(), n.begin(), n.end());
+    });
+    return {offsets, data};
+}
+
+template <typename, typename = void>
+constexpr bool is_iterable{};
+
+template <typename T>
+constexpr bool is_iterable<
+    T,
+    std::void_t< decltype(std::declval<T>().begin()),
+                 decltype(std::declval<T>().end())
+    >
+> = true;
+
+template <typename Test, template <typename...> class Ref>
+struct is_specialization : std::false_type {
+};
+
+template <template <typename...> class Ref, typename... Args>
+struct is_specialization<Ref<Args...>, Ref> : std::true_type {
+};
+
+template <typename T, typename std::enable_if<is_specialization<T, std::complex>::value, T>::type * = nullptr>
+std::pair<std::string, std::pair<std::vector<int64_t>, T>> check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& res_vec) {
+    return {std::string("complex"), {{}, {}}};
+}
+
+template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type * = nullptr>
+std::pair<std::string, std::pair<std::vector<int64_t>, T>> check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& res_vec) {
+    return {std::string("primitive"), {{}, {}}};
+}
+
+template <typename T, typename std::enable_if<is_iterable<T>, T>::type * = nullptr>
+std::pair<std::string, std::pair<std::vector<int64_t>, T>> check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& res_vec) {
+    auto str = std::string(typeid(T).name());
+    if (str.find("awkward") != string::npos) {
+        return {std::string("awkward"), {{}, {}}};
+    }
+    else {
+        typedef typename T::value_type value_type;
+        if (is_iterable<value_type>) {
+            cout << "FIXME: Fast copy is not implemented yet." << endl;
+        } else if (std::is_arithmetic<value_type>::value) {
+            return {std::string("iterable"), offsets_and_flatten(res_vec)};
+        }
+        return {std::string("iterable"), {{}, {}}};
+    }
+    return {"undefined", {{}, {}}};
+}
+
+"""
+)
+
 
 def from_rdataframe(data_frame, column, column_as_record=True):
     def _wrap_as_array(column, array, column_as_record):
@@ -20,36 +108,63 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             else ak._v2.highlevel.Array(array)
         )
 
-    #
-    # def _recurse(cpp_ref):
-    #     # Note, the conversion of STL vectors and TVec to numpy arrays in ROOT
-    #     # happens without copying the data.
-    #     # The memory-adoption is achieved by the dictionary '__array_interface__',
-    #     # which is added dynamically to the Python objects by PyROOT.
-    #
-    #     # '__array_interface__' attribute is added for STL vectors and RVecs of
-    #     # the following types:
-    #     #   float, double, int, unsigned int, long, unsigned long
-    #     if hasattr(cpp_ref, "__array_interface__"):
-    #         return cpp_ref
-    #     elif (
-    #         hasattr(cpp_ref, "begin")
-    #         and hasattr(cpp_ref, "end")
-    #         and hasattr(cpp_ref, "size")
-    #     ):
-    #         return cpp_ref #[_recurse(cpp_ref[i]) for i in range(cpp_ref.size())]
-    #     # elif isinstance(cpp_ref, cppyy.gbl.variant):
-    #     elif isinstance(cpp_ref, complex):
-    #         return numpy.asarray(cpp_ref)
-    #     else:
-    #         raise ak._v2._util.error(NotImplementedError)
-
     # Cast input node to base RNode type
     data_frame_rnode = cppyy.gbl.ROOT.RDF.AsRNode(data_frame)
 
     column_type = data_frame_rnode.GetColumnType(column)
-    result_ptrs = data_frame_rnode.Take[column_type](column)
-    cpp_reference = result_ptrs.GetValue()
 
-    # array = _recurse(cpp_reference)
-    return _wrap_as_array(column, cpp_reference, column_as_record)
+    # 'Take' is a lazy action:
+    result_ptrs = data_frame_rnode.Take[column_type](column)
+    ptrs_type, data_pair = ROOT.check_type_of[column_type](result_ptrs)
+
+    if ptrs_type == "primitive" or ptrs_type == "complex":
+
+        # Triggers event loop and execution of all actions booked in the associated RLoopManager.
+        cpp_reference = result_ptrs.GetValue()
+
+        return (
+            ak._v2._util.wrap(
+                ak._v2.contents.RecordArray(
+                    fields=[column],
+                    contents=[ak._v2.contents.NumpyArray(numpy.asarray(cpp_reference))],
+                ),
+                highlevel=True,
+            )
+            if column_as_record
+            else ak._v2._util.wrap(
+                ak._v2.contents.NumpyArray(numpy.asarray(cpp_reference)), highlevel=True
+            )
+        )
+
+    elif ptrs_type == "iterable":
+        return (
+            ak._v2._util.wrap(
+                ak._v2.contents.RecordArray(
+                    fields=[column],
+                    contents=[
+                        ak._v2.contents.ListOffsetArray(
+                            ak._v2.index.Index64(data_pair.first),
+                            ak._v2.contents.NumpyArray(numpy.asarray(data_pair.second)),
+                        )
+                    ],
+                ),
+                highlevel=True,
+            )
+            if column_as_record
+            else ak._v2._util.wrap(
+                ak._v2.contents.ListOffsetArray(
+                    ak._v2.index.Index64(data_pair.first),
+                    ak._v2.contents.NumpyArray(numpy.asarray(data_pair.second)),
+                ),
+                highlevel=True,
+            )
+        )
+
+    elif ptrs_type == "awkward":
+
+        # Triggers event loop and execution of all actions booked in the associated RLoopManager.
+        cpp_reference = result_ptrs.GetValue()
+
+        return _wrap_as_array(column, cpp_reference, column_as_record)
+    else:
+        raise ak._v2._util.error(NotImplementedError)
