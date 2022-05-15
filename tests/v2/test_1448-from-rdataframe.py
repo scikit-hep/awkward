@@ -86,7 +86,7 @@ def test_to_from_data_frame_rvec_of_rvec():
     ak_array_in = ak._v2.Array([[[1.1]], [[2.2, 3.3], [4.4]], [[5.5, 6.6], []]])
 
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
-    # assert data_frame.GetColumnType("x") == "ROOT::RVec<double>"
+    assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
 
     ak_array_out = ak._v2.from_rdataframe(
         data_frame, column="x", column_as_record=False
@@ -95,7 +95,6 @@ def test_to_from_data_frame_rvec_of_rvec():
     assert ak_array_in.to_list() == ak_array_out.to_list()
 
 
-# @pytest.mark.skip(reason="FIXME: support variant")
 def test_to_from_data_frame_rvec_of_rvec_of_rvec():
     ak_array_in = ak._v2.Array(
         [[[[1.1]]], [[[2.2], [3.3], [], [4.4]]], [[[], [5.5, 6.6], []]]]
