@@ -122,40 +122,38 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         # Triggers event loop and execution of all actions booked in the associated RLoopManager.
         cpp_reference = result_ptrs.GetValue()
 
+        content = ak._v2.contents.NumpyArray(numpy.asarray(cpp_reference))
+
         return (
             ak._v2._util.wrap(
                 ak._v2.contents.RecordArray(
                     fields=[column],
-                    contents=[ak._v2.contents.NumpyArray(numpy.asarray(cpp_reference))],
+                    contents=[content],
                 ),
                 highlevel=True,
             )
             if column_as_record
-            else ak._v2._util.wrap(
-                ak._v2.contents.NumpyArray(numpy.asarray(cpp_reference)), highlevel=True
-            )
+            else ak._v2._util.wrap(content, highlevel=True)
         )
 
     elif ptrs_type == "iterable":
+
+        content = ak._v2.contents.ListOffsetArray(
+            ak._v2.index.Index64(data_pair.first),
+            ak._v2.contents.NumpyArray(numpy.asarray(data_pair.second)),
+        )
+
         return (
             ak._v2._util.wrap(
                 ak._v2.contents.RecordArray(
                     fields=[column],
-                    contents=[
-                        ak._v2.contents.ListOffsetArray(
-                            ak._v2.index.Index64(data_pair.first),
-                            ak._v2.contents.NumpyArray(numpy.asarray(data_pair.second)),
-                        )
-                    ],
+                    contents=[content],
                 ),
                 highlevel=True,
             )
             if column_as_record
             else ak._v2._util.wrap(
-                ak._v2.contents.ListOffsetArray(
-                    ak._v2.index.Index64(data_pair.first),
-                    ak._v2.contents.NumpyArray(numpy.asarray(data_pair.second)),
-                ),
+                content,
                 highlevel=True,
             )
         )
