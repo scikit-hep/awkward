@@ -65,14 +65,11 @@ def from_parquet(
     ):
         import awkward._v2._connect.pyarrow  # noqa: F401
 
-        parquet_columns, subform, actual_paths, fs, subrg, meta = _metadata(
+        parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = _metadata(
             path,
             storage_options,
             row_groups,
             columns,
-            max_gap,
-            max_block,
-            footer_sample_size,
         )
         return _load(
             actual_paths,
@@ -86,14 +83,24 @@ def from_parquet(
             highlevel,
             behavior,
             fs,
-            meta,
         )
 
 
-def _metadata(
-    path, storage_options, row_groups, columns, max_gap, max_block, footer_sample_size
-):
-    import pyarrow.parquet as pyarrow_parquet
+def _metadata(path, storage_options, row_groups, columns, ignore_metadata=False,
+              scan_files=True):
+    # Test cases
+    #  - list of data files, scanned
+    #  - list of data files, not scanned
+    #  - list of directories -> exception
+    #  - directory with _metadata, used
+    #  - directory with _metadata, not used, files scanned
+    #  - directory with _metadata, not used, files not scanned
+    #  - directory without _metadata but with _common_metadata
+    #  - directory with only data files, scanned
+    #  - directory with only data files, not scanned
+    import awkward._v2._connect.pyarrow
+    # early exit if missing deps
+    pyarrow_parquet = awkward._v2._connect.pyarrow.import_pyarrow_parquet("ak._v2.from_parquet")
     import fsspec.parquet
 
     if row_groups is not None:
@@ -101,25 +108,22 @@ def _metadata(
             raise ak._v2._util.error(
                 TypeError("row_groups must be a set of non-negative integers")
             )
+        if len(set(row_groups)) < len(row_groups):
+            raise ak._v2._util.error(
+                ValueError("row group indices must not repeat")
+            )
 
     fs, _, paths = fsspec.get_fs_token_paths(
         path, mode="rb", storage_options=storage_options
     )
-    all_paths, path_for_metadata = _all_and_metadata_paths(path, fs, paths)
+    all_paths, path_for_schema, can_sub = _all_and_metadata_paths(path, fs, paths, ignore_metadata, scan_files)
 
     parquet_columns = None
     subform = None
     subrg = [None] * len(all_paths)
     actual_paths = all_paths
-    with fsspec.parquet.open_parquet_file(
-        path_for_metadata,
-        fs=fs,
-        engine="pyarrow",
-        row_groups=[],
-        storage_options=storage_options,
-        max_gap=max_gap,
-        max_block=max_block,
-        footer_sample_size=footer_sample_size,
+    with fs.open(
+        path_for_schema,
     ) as file_for_metadata:
         parquetfile_for_metadata = pyarrow_parquet.ParquetFile(file_for_metadata)
 
@@ -164,9 +168,7 @@ def _metadata(
                         raise ak._v2._util.error(
                             LookupError(
                                 f"""path from metadata is {unsplit_path!r} but more
-                                than one path matches:
-
-    {eoln.join(all_paths)}"""
+                                than one path matches:\n\n{eoln.join(all_paths)}"""
                             )
                         )
 
@@ -181,9 +183,7 @@ def _metadata(
                         raise ak._v2._util.error(
                             LookupError(
                                 f"""path {'/'.join(split_path)!r} from metadata not found
-                                in path matches:
-
-    {eoln.join(all_paths)}"""
+                                in path matches:\n\n{eoln.join(all_paths)}"""
                             )
                         )
 
@@ -200,11 +200,14 @@ def _metadata(
                 if len(subrg[k]) == 0:
                     del actual_paths[k]
                     del subrg[k]
+        else:
+            col_counts = [metadata.row_group(i).num_rows for i in range(metadata.num_row_groups)]
         if subform is None:
             subform = ak._v2._connect.pyarrow.form_handle_arrow(
                 parquetfile_for_metadata.schema_arrow, pass_empty_field=True
             )
-    return parquet_columns, subform, actual_paths, fs, subrg, metadata
+
+    return parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata
 
 
 def _load(
@@ -219,7 +222,7 @@ def _load(
     highlevel,
     behavior,
     fs,
-    meta,
+    metadata=None
 ):
     arrays = []
     for i, p in enumerate(actual_paths):
@@ -233,7 +236,7 @@ def _load(
                 max_block=max_block,
                 footer_sample_size=footer_sample_size,
                 generate_bitmasks=generate_bitmasks,
-                metadata=meta,
+                metadata=metadata
             )
         )
 
@@ -242,12 +245,30 @@ def _load(
         return ak._v2.operations.ak_from_buffers._impl(
             subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
         )
-    elif len(arrays) == 1 and isinstance(arrays[0], ak._v2.record.Record):
-        return ak._v2._util.wrap(arrays[0], behavior, highlevel)
     else:
         return ak._v2.operations.ak_concatenate._impl(
             arrays, 0, True, True, highlevel, behavior
         )
+
+
+def _open_file(path, fs, columns, row_groups, max_gap, max_block, footer_sample_size, metadata):
+    """Picks between fsspec.parquet and normal fs.open"""
+    import fsspec.parquet
+    # condition should be if columns and ow_groups are not all the possible ones
+    if (columns or row_groups) and getattr(fs, "async_impl", False):
+        return fsspec.parquet.open_parquet_file(
+            path,
+            fs=fs,
+            engine="pyarrow",
+            columns=columns,
+            row_groups=row_groups,
+            max_gap=max_gap,
+            metadata=metadata,
+            max_block=max_block,
+            footer_sample_size=footer_sample_size,
+        )
+    else:
+        return fs.open(path, "rb")
 
 
 def _read_parquet_file(
@@ -258,22 +279,12 @@ def _read_parquet_file(
     footer_sample_size,
     max_gap,
     max_block,
-    metadata,
     generate_bitmasks,
+    metadata=None
 ):
-    import fsspec.parquet
     import pyarrow.parquet as pyarrow_parquet
 
-    with fsspec.parquet.open_parquet_file(
-        path,
-        fs=fs,
-        engine="pyarrow",
-        columns=parquet_columns,
-        row_groups=row_groups,
-        max_gap=max_gap,
-        max_block=max_block,
-        footer_sample_size=footer_sample_size,
-    ) as file:
+    with _open_file(path, fs, parquet_columns, row_groups, max_gap, max_block, footer_sample_size, metadata) as file:
         parquetfile = pyarrow_parquet.ParquetFile(file)
 
         if row_groups is None:
@@ -294,25 +305,33 @@ class _DictOfEmptyBuffers:
         return b"\x00\x00\x00\x00\x00\x00\x00\x00"
 
 
-def _all_and_metadata_paths(path, fs, paths):
+def _all_and_metadata_paths(path, fs, paths, ignore_metadata=False, scan_files=True):
     all_paths = []
     for x in paths:
         if fs.isfile(x):
-            is_meta = x.split("/")[-1] == "_metadata"
-            is_comm = x.split("/")[-1] == "_common_metadata"
+            is_meta = x.rsplit("/", 1)[-1] == "_metadata"
+            if is_meta and ignore_metadata:
+                continue
+            is_comm = x.rsplit("/", 1)[-1] == "_common_metadata"
+            if is_comm and scan_files:
+                continue
             all_paths.append((x, is_meta, is_comm))
         elif fs.isdir(x):
-            for prefix, _, files in fs.walk(x):
-                for f in files:
-                    is_meta = f == "_metadata"
-                    is_comm = f == "_common_metadata"
-                    if f.endswith((".parq", ".parquet")) or is_meta or is_comm:
-                        if fs.isfile("/".join((prefix, f))):
-                            all_paths.append(("/".join((prefix, f)), is_meta, is_comm))
+            for f, fdata in fs.find(x, detail=True).items():
+                is_meta = f.endswith("_metadata")
+                if is_meta and ignore_metadata:
+                    continue
+                is_comm = f.endswith("_common_metadata")
+                if is_comm and scan_files:
+                    continue
+                if f.endswith((".parq", ".parquet")) or is_meta or is_comm:
+                    if fdata["type"] == "file":
+                        all_paths.append((f, is_meta, is_comm))
 
     path_for_metadata = [x for x, is_meta, is_comm in all_paths if is_meta]
     if len(path_for_metadata) != 0:
-        path_for_metadata = path_for_metadata[0]
+        path_for_metadata, is_meta, is_comm = path_for_metadata[0]
+        can_sub = True
     else:
         path_for_metadata = [x for x, is_meta, is_comm in all_paths if is_comm]
         if len(path_for_metadata) != 0:
@@ -328,4 +347,4 @@ def _all_and_metadata_paths(path, fs, paths):
             ValueError(f"no *.parquet or *.parq matches for path {path!r}")
         )
 
-    return all_paths, path_for_metadata
+    return all_paths, path_for_metadata, can_sub

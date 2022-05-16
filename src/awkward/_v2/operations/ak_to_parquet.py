@@ -40,9 +40,7 @@ def to_parquet(
     )
     fsspec = awkward._v2._connect.pyarrow.import_fsspec("ak.to_parquet")
 
-    if isinstance(data, (ak._v2.highlevel.Record, ak._v2.record.Record)):
-        iterator = iter([data])
-    elif isinstance(data, Iterable) and not isinstance(data, Sized):
+    if isinstance(data, Iterable) and not isinstance(data, Sized):
         iterator = iter(data)
     elif isinstance(data, Iterable):
         iterator = iter([data])
@@ -79,10 +77,7 @@ def to_parquet(
     else:
         column_prefix = ()
 
-    if isinstance(layout, ak._v2.record.Record):
-        form = layout.array.form
-    else:
-        form = layout.form
+    form = layout.form
 
     def parquet_columns(specifier, only=None):
         if specifier is None:
