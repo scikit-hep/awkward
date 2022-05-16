@@ -15,7 +15,7 @@ class Record:
             raise ak._v2._util.error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )
-        if not ak._util.isint(at):
+        if not ak._v2._util.isint(at):
             raise ak._v2._util.error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )

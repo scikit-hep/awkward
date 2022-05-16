@@ -151,8 +151,6 @@ class Index:
         out = self._data[where]
         if hasattr(out, "shape") and len(out.shape) != 0:
             return type(self)(out)
-        elif type(out).__module__.startswith("cupy.") and len(out.shape) == 0:
-            return out.item()
         else:
             return out
 
