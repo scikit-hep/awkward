@@ -66,13 +66,13 @@ def test_list_array():
 
     data_frame = ak._v2.operations.to_rdataframe({"x": ak_array})
 
-    assert data_frame.GetColumnType("x") == "ROOT::RVec<double>"
+    assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<double>"
 
     done = compiler(
         """
         int64_t row = 0;
 
-        ROOT::RVec<ROOT::RVec<double>> row_vals =
+        ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> row_vals =
         {{ 1.1},
          { 2.2, 3.3, 4.4 },
          { 5.5, 6.6 }
@@ -234,7 +234,7 @@ def test_jims_example2():
         };
 
         int i_two = 0;
-        ROOT::RVec<ROOT::RVec<double>> two_val =
+        ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> two_val =
             {{ 1.1, 1.2, 1.3 },
              { 2.2, 2.21 },
              { 3.3 },
@@ -272,5 +272,5 @@ def test_empty_array():
 def test_empty_list_array():
     array = ak._v2.Array([[], [], []])
     data_frame = ak._v2.to_rdataframe({"empty_list_array": array})
-    assert data_frame.GetColumnType("empty_list_array") == "ROOT::RVec<double>"
+    assert data_frame.GetColumnType("empty_list_array") == "ROOT::VecOps::RVec<double>"
     assert data_frame.Count().GetValue() == 3

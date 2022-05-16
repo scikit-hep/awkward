@@ -4,9 +4,6 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-import awkward._v2._lookup  # noqa: E402
-import awkward._v2._connect.cling  # noqa: E402
-
 ROOT = pytest.importorskip("ROOT")
 
 
@@ -59,8 +56,10 @@ def test_data_frame_rvecs():
     # Let's now define radii out of x and y. We'll do it treating the collections
     # stored in the columns without looping on the individual elements.
     data_frame_x_y_r = data_frame_x_y.Define("r", "sqrt(x*x + y*y)")
+    assert data_frame_x_y_r.GetColumnType("r") == "ROOT::VecOps::RVec<double>"
 
     array = ak._v2.from_rdataframe(data_frame_x_y_r, column="r", column_as_record=True)
+
     assert array.layout.form == ak._v2.forms.RecordForm(
         [ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64"))], ["r"]
     )
@@ -72,7 +71,7 @@ def test_to_from_data_frame():
 
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
 
-    assert data_frame.GetColumnType("x") == "ROOT::RVec<double>"
+    assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<double>"
 
     ak_array_out = ak._v2.from_rdataframe(
         data_frame, column="x", column_as_record=False
@@ -115,7 +114,7 @@ def test_boolean_data_frame():
 
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
 
-    assert data_frame.GetColumnType("x") == "ROOT::RVec<bool>"
+    assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<bool>"
 
     ak_array_out = ak._v2.from_rdataframe(
         data_frame, column="x", column_as_record=False
@@ -127,7 +126,6 @@ def test_boolean_data_frame():
 def test_data_frame_complex_vecs():
     data_frame = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
     data_frame_xy = data_frame.Define("y", "x*2 +1i")
-    data_frame_xy.Display().Print()
 
     ak_array_y = ak._v2.from_rdataframe(
         data_frame_xy, column="y", column_as_record=False
