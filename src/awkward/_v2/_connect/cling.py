@@ -695,7 +695,7 @@ namespace awkward {{
 """.strip()
             elif self.flatlist_as_rvec and self.is_flatlist:
                 nested_type = self.content.value_type()
-                value_type = f"ROOT::RVec<{nested_type}>"
+                value_type = f"ROOT::VecOps::RVec<{nested_type}>"
                 out = f"""
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
@@ -812,7 +812,7 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
             return "std::string"
         elif self.flatlist_as_rvec and self.is_flatlist:
             nested_type = self.content.value_type()
-            return f"ROOT::RVec<{nested_type}>"
+            return f"ROOT::VecOps::RVec<{nested_type}>"
         else:
             return self.content.class_type()
 
@@ -848,7 +848,7 @@ namespace awkward {{
 """.strip()
             elif self.flatlist_as_rvec and self.is_flatlist:
                 nested_type = self.content.value_type()
-                value_type = f"ROOT::RVec<{nested_type}>"
+                value_type = f"ROOT::VecOps::RVec<{nested_type}>"
                 out = f"""
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{

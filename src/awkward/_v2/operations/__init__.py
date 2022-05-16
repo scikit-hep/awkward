@@ -32,6 +32,7 @@ from awkward._v2.operations.ak_from_json import from_json
 from awkward._v2.operations.ak_from_json_schema import from_json_schema
 from awkward._v2.operations.ak_from_numpy import from_numpy
 from awkward._v2.operations.ak_from_parquet import from_parquet
+from awkward._v2.operations.ak_from_rdataframe import from_rdataframe
 from awkward._v2.operations.ak_from_regular import from_regular
 from awkward._v2.operations.ak_full_like import full_like
 from awkward._v2.operations.ak_isclose import isclose
