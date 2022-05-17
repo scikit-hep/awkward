@@ -1404,8 +1404,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def _jax_flatten(self):
         from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData
 
-        numpyarray_nodes = _find_numpyarray_nodes(self.layout)
-        return (numpyarray_nodes, AuxData(self.layout))
+        layout = ak._v2.operations.to_layout(self, allow_record=True, allow_other=False)
+
+        numpyarray_nodes = _find_numpyarray_nodes(layout)
+        return (numpyarray_nodes, AuxData(layout))
 
     @classmethod
     def jax_flatten(cls, array):
@@ -1416,8 +1418,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def jax_unflatten(cls, aux_data, children):
         from awkward._v2._connect.jax import _replace_numpyarray_nodes
 
-        newlayout = aux_data.layout.deep_copy()
-        return ak._v2.Array(_replace_numpyarray_nodes(newlayout, list(children)))
+        return ak._v2._util.wrap(
+            _replace_numpyarray_nodes(aux_data.layout, list(children))
+        )
 
 
 class Record(NDArrayOperatorsMixin):

@@ -206,8 +206,8 @@ class NumpyArray(Content):
     def maybe_to_array(self, nplike):
         return nplike.asarray(self._data)
 
-    def __array__(self, **kwargs):
-        return numpy.asarray(self._data, **kwargs)
+    def __array__(self, *args, **kwargs):
+        return numpy.asarray(self._data, *args, **kwargs)
 
     def __iter__(self):
         return iter(self._data)

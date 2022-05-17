@@ -117,8 +117,14 @@ def _find_numpyarray_nodes(layout):
 def _replace_numpyarray_nodes(layout, buffers):
     def replace_numpyarray_nodes(node, **kwargs):
         if isinstance(node, ak._v2.contents.numpyarray.NumpyArray):
-            node._data = buffers[0]
-            buffers.pop()
+            buffer = buffers[0]
+            buffers.pop(0)
+            return ak._v2.contents.NumpyArray(
+                buffer,
+                layout.identifier,
+                layout.parameters,
+                nplike=ak.nplike.Jax.instance(),
+            )
 
     return layout.recursively_apply(action=replace_numpyarray_nodes)
 

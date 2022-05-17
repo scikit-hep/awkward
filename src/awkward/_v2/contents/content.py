@@ -1493,8 +1493,10 @@ class Content:
     def _jax_flatten(self):
         from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData
 
-        numpyarray_nodes = _find_numpyarray_nodes(self)
-        return (numpyarray_nodes, AuxData(self))
+        layout = ak._v2.operations.to_layout(self, allow_record=True, allow_other=False)
+
+        numpyarray_nodes = _find_numpyarray_nodes(layout)
+        return (numpyarray_nodes, AuxData(layout))
 
     @classmethod
     def jax_flatten(cls, array):
@@ -1505,5 +1507,4 @@ class Content:
     def jax_unflatten(cls, aux_data, children):
         from awkward._v2._connect.jax import _replace_numpyarray_nodes
 
-        newlayout = aux_data.layout.deep_copy()
-        return _replace_numpyarray_nodes(newlayout, list(children))
+        return _replace_numpyarray_nodes(aux_data.layout, list(children))
