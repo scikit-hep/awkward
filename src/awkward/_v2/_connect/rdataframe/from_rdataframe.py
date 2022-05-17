@@ -117,11 +117,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     result_ptrs = data_frame_rnode.Take[column_type](column)
     ptrs_type, data_pair = ROOT.check_type_of[column_type](result_ptrs)
 
-<<<<<<< HEAD
-    if ptrs_type == "primitive" or ptrs_type == "complex":
-=======
     if ptrs_type in ("primitive", "complex"):
->>>>>>> 66f2a1ffd3c57125d9b68f3f024b078546be3883
 
         # Triggers event loop and execution of all actions booked in the associated RLoopManager.
         cpp_reference = result_ptrs.GetValue()
