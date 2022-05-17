@@ -23,7 +23,7 @@ def test_two_columns():
     )
     ak_array_1 = array["x"]
     ak_array_2 = array["y"]
-    data_frame = ak._v2.operations.convert.to_rdataframe(
+    data_frame = ak._v2.operations.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=True
     )
     assert set(data_frame.GetColumnNames()) == {"x", "y"}
