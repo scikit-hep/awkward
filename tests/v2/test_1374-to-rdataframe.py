@@ -13,15 +13,31 @@ ROOT = pytest.importorskip("ROOT")
 compiler = ROOT.gInterpreter.Declare
 
 
+def test_two_columns():
+    array = ak._v2.Array(
+        [
+            [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.2, 0.2]}],
+            [],
+            [{"x": 3, "y": [3.0, 0.3, 3.3]}],
+        ]
+    )
+    ak_array_1 = array["x"]
+    ak_array_2 = array["y"]
+    data_frame = ak._v2.operations.to_rdataframe(
+        {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=True
+    )
+    assert set(data_frame.GetColumnNames()) == {"x", "y"}
+    assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<int64_t>"
+    assert data_frame.GetColumnType("y").startswith("awkward::ListArray_")
+
+
 def test_two_columns_as_rvecs():
     ak_array_1 = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
     ak_array_2 = ak._v2.Array(
         [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
     )
 
-    data_frame = ak._v2.operations.to_rdataframe(
-        {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=True
-    )
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_1, "y": ak_array_2})
     assert set(data_frame.GetColumnNames()) == {"x", "y"}
     assert data_frame.GetColumnType("x") == "double"
     assert data_frame.GetColumnType("y").startswith("awkward::Record_")
@@ -149,7 +165,7 @@ def test_two_columns_transform_filter():
         [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
     )
 
-    data_frame = ak._v2.operations.to_rdataframe({"one": example1, "two": example2})
+    data_frame = ak._v2.to_rdataframe({"one": example1, "two": example2})
     assert set(data_frame.GetColumnNames()) == {"one", "two"}
 
     compiler(
