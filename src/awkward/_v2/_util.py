@@ -1188,10 +1188,4 @@ def is_jax_buffer(array):
 
 
 def is_jax_tracer(tracer):
-    from awkward._v2._connect.jax import import_jax
-
-    jax = import_jax()
-
-    if jax is not None:
-        return isinstance(tracer, jax.core.Tracer)
     return type(tracer).__module__.startswith("jax.")
