@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cmath>
+
 namespace test {
  
 struct GrowableBuffer {
@@ -6,36 +8,85 @@ struct GrowableBuffer {
     ///
     /// @param initial The initial number of reserved entries for a GrowableBuffer.
     static GrowableBuffer
-      empty(const int initial) {  /* not implemented yet */  }
- 
+      empty(const int initial) {
+        return empty(initial, 0);
+    }
+
+    /// @brief Creates an empty GrowableBuffer with a minimum reservation.
+    ///
+    /// @param initial The initial number of reserved entries for a GrowableBuffer.
+    /// @param minreserve The initial reservation will be the maximum
+    /// of `minreserve` and initial.
+    static GrowableBuffer
+      empty(const int initial, int minreserve) {
+        int actual = (int) initial;
+        if (actual < (int)minreserve) {
+          actual = (int)minreserve;
+        }
+        return GrowableBuffer(initial,
+          new double[actual], 
+          0, actual); 
+    }
+
+    /// @brief Creates a GrowableBuffer from a full set of parameters.
+    ///
+    /// @param initial The initial number of reserved entries for a GrowableBuffer.
+    /// @param ptr Reference-counted pointer to the array buffer.
+    /// @param length Currently used number of elements.
+    /// @param reserved Currently allocated number of elements.
+    ///
+    /// Although the #length increments every time #append is called,
+    /// it is always less than or equal to #reserved because of reallocations.
+    GrowableBuffer(const int initial,
+                   double* ptr,
+                   int length,
+                   int reserved)
+      : initial_(initial)
+      , ptr_(std::move(ptr))
+      , length_(length)
+      , reserved_(reserved) { }
+
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
     /// initial #reserved from initial
-
-    GrowableBuffer(const int initial): length_(0) {  }
+    GrowableBuffer(const int initial)
+      : ptr_(new double[initial_])
+      , length_(0)
+      , reserved_(initial) { }
  
     /// @brief Reference to a pointer to the array buffer.
-    const double*&
-      ptr() const {  /* not implemented yet */  }
- 
+    const double*
+      ptr() const { 
+        return ptr_;
+    }
+
     /// @brief Currently used number of elements.
     ///
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of reallocations.
-    size_t
-      length() const {  return length_; }
+    int
+      length() const {
+        return length_; 
+    }
  
     /// @brief Changes the #length in-place and possibly reallocate.
     ///
     /// If the `newlength` is larger than #reserved, #ptr is reallocated.
     void
-      set_length(int newlength) {  /* not implemented yet */  }
+      set_length(int newlength) { 
+        if (newlength > reserved_) {
+          set_reserved(newlength);
+        }
+        length_ = newlength;
+    }
  
     /// @brief Currently allocated number of elements.
     ///
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of reallocations.
-    size_t
-      reserved() const {  /* not implemented yet */  }
+    int
+      reserved() const {
+        return reserved_;
+    }
  
     /// @brief Possibly changes the #reserved and reallocate.
     ///
@@ -44,13 +95,24 @@ struct GrowableBuffer {
     ///
     /// If #reserved actually changes, #ptr is reallocated.
     void
-      set_reserved(int minreserved) {  /* not implemented yet */  }
+      set_reserved(int minreserved) { 
+        if (minreserved > reserved_) {
+          double* ptr(new double[minreserved]);
+          memcpy(ptr, ptr_, length_* sizeof(double));
+          ptr_ = std::move(ptr);
+          reserved_ = minreserved;
+        }
+   }
  
     /// @brief Discards accumulated data, the #reserved returns to
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial},
     /// and a new #ptr is allocated.
     void
-      clear() {  /* not implemented yet */  }
+      clear() { 
+        length_ = 0;
+        reserved_ = (int)initial_;
+        ptr_ = new double[initial_];
+    }
  
     /// @brief Inserts one `datum` into the array, possibly triggering a
     /// reallocation.
@@ -58,12 +120,20 @@ struct GrowableBuffer {
     /// This increases the #length by 1; if the new #length is larger than
     /// #reserved, a new #ptr will be allocated.
     void
-      append(double datum) {  /* not implemented yet */  }
+      append(double datum) {
+        if (length_ == reserved_) {
+          set_reserved((int)ceil(reserved_ * 1.5));
+        }
+        ptr_[length_] = datum;
+        length_++;
+    }
  
     /// @brief Returns the element at a given position in the array, without
     /// handling negative indexing or bounds-checking.
     double
-      getitem_at_nowrap(int at) const {  /* not implemented yet */  }
+      getitem_at_nowrap(int at) const {
+        return ptr_[at];
+    }
     
     /// @brief Compacts all accumulated data from multiple panels to one 
     /// contiguously allocated memory panel 
@@ -91,8 +161,8 @@ int main(int argc, const char * argv[]) {
         buffer.append(data[i]);
     }
     buffer.snapshot();
-    for (int at = 0; at < buffer.le        std::coungth(); at++) {
-t << buffer.getitem_at_nowrap(at) << ", ";
+    for (int at = 0; at < buffer.length(); at++) {
+        std::cout << buffer.getitem_at_nowrap(at) << ", ";
     }
     
     return 0;
