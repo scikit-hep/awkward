@@ -48,6 +48,7 @@ def metadata_from_parquet(
     See also #ak.from_parquet, #ak.to_parquet.
     """
     import awkward._v2._connect.pyarrow  # noqa: F401
+
     with ak._v2._util.OperationErrorContext(
         "ak._v2.metadata_from_parquet",
         dict(
@@ -60,7 +61,7 @@ def metadata_from_parquet(
             storage_options,
             row_groups=row_groups,
             ignore_metadata=ignore_metadata,
-            scan_files=scan_files
+            scan_files=scan_files,
         )
 
 
@@ -75,8 +76,12 @@ def _impl(
         path, storage_options, row_groups, None, ignore_metadata, scan_files)
     parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata = results
 
-    out = {"form": subform, "paths": actual_paths, "col_counts": col_counts,
-           "columns": parquet_columns}
+    out = {
+        "form": subform,
+        "paths": actual_paths,
+        "col_counts": col_counts,
+        "columns": parquet_columns,
+    }
     if col_counts:
         out["num_row_groups"] = len(col_counts)
         out["col_counts"] = col_counts

@@ -86,11 +86,20 @@ def from_parquet(
         )
 
 
-def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_metadata=False,
-             scan_files=True):
+def metadata(
+    path,
+    storage_options=None,
+    row_groups=None,
+    columns=None,
+    ignore_metadata=False,
+    scan_files=True,
+):
     import awkward._v2._connect.pyarrow
+
     # early exit if missing deps
-    pyarrow_parquet = awkward._v2._connect.pyarrow.import_pyarrow_parquet("ak._v2.from_parquet")
+    pyarrow_parquet = awkward._v2._connect.pyarrow.import_pyarrow_parquet(
+        "ak._v2.from_parquet"
+    )
     import fsspec.parquet
 
     if row_groups is not None:
@@ -99,14 +108,14 @@ def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_m
                 ValueError("row_groups must be a set of non-negative integers")
             )
         if len(set(row_groups)) < len(row_groups):
-            raise ak._v2._util.error(
-                ValueError("row group indices must not repeat")
-            )
+            raise ak._v2._util.error(ValueError("row group indices must not repeat"))
 
     fs, _, paths = fsspec.get_fs_token_paths(
         path, mode="rb", storage_options=storage_options
     )
-    all_paths, path_for_schema, can_sub = _all_and_metadata_paths(path, fs, paths, ignore_metadata, scan_files)
+    all_paths, path_for_schema, can_sub = _all_and_metadata_paths(
+        path, fs, paths, ignore_metadata, scan_files
+    )
 
     subrg = [None] * len(all_paths)
     actual_paths = all_paths
@@ -118,8 +127,8 @@ def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_m
     list_indicator = "list.item"
     for column_metadata in parquetfile_for_metadata.schema:
         if (
-                column_metadata.max_repetition_level > 0
-                and ".list.element." in column_metadata.path
+            column_metadata.max_repetition_level > 0
+            and ".list.element." in column_metadata.path
         ):
             list_indicator = "list.element"
             break
@@ -149,6 +158,10 @@ def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_m
     if row_groups is not None:
         if any(_ >= metadata.num_row_groups for _ in row_groups):
             raise ValueError(f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}")
+        if not can_sub:
+            raise TypeError(
+                "Requested selection of row-groups, but not scanning metadata"
+            )
 
         path_rgs = {}
         rgs_path = {}
@@ -171,7 +184,9 @@ def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_m
             col_counts.append(metadata.row_group(select).num_rows)
     else:
         if can_sub:
-            col_counts = [metadata.row_group(i).num_rows for i in range(metadata.num_row_groups)]
+            col_counts = [
+                metadata.row_group(i).num_rows for i in range(metadata.num_row_groups)
+            ]
         else:
             col_counts = None
 
@@ -192,7 +207,7 @@ def _load(
     highlevel,
     behavior,
     fs,
-    metadata=None
+    metadata=None,
 ):
     arrays = []
     for i, p in enumerate(actual_paths):
@@ -206,7 +221,7 @@ def _load(
                 max_block=max_block,
                 footer_sample_size=footer_sample_size,
                 generate_bitmasks=generate_bitmasks,
-                metadata=metadata
+                metadata=metadata,
             )
         )
 
@@ -221,9 +236,12 @@ def _load(
         )
 
 
-def _open_file(path, fs, columns, row_groups, max_gap, max_block, footer_sample_size, metadata):
+def _open_file(
+    path, fs, columns, row_groups, max_gap, max_block, footer_sample_size, metadata
+):
     """Picks between fsspec.parquet and normal fs.open"""
     import fsspec.parquet
+
     # condition should be if columns and ow_groups are not all the possible ones
     if (columns or row_groups) and getattr(fs, "async_impl", False):
         return fsspec.parquet.open_parquet_file(
@@ -250,11 +268,20 @@ def _read_parquet_file(
     max_gap,
     max_block,
     generate_bitmasks,
-    metadata=None
+    metadata=None,
 ):
     import pyarrow.parquet as pyarrow_parquet
 
-    with _open_file(path, fs, parquet_columns, row_groups, max_gap, max_block, footer_sample_size, metadata) as file:
+    with _open_file(
+        path,
+        fs,
+        parquet_columns,
+        row_groups,
+        max_gap,
+        max_block,
+        footer_sample_size,
+        metadata,
+    ) as file:
         parquetfile = pyarrow_parquet.ParquetFile(file)
 
         if row_groups is None:

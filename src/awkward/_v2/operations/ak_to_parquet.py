@@ -32,7 +32,7 @@ def to_parquet(
     parquet_compliant_nested=False,  # https://issues.apache.org/jira/browse/ARROW-16348
     parquet_extra_options=None,
     hook_after_write=None,
-    storage_options=None
+    storage_options=None,
 ):
     """
 

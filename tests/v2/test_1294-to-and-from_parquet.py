@@ -840,9 +840,11 @@ def test_unionarray(tmp_path, through, extensionarray):
 #  - directory with only data files, scanned
 #  - directory with only data files, not scanned
 
+
 @pytest.fixture()
 def generate_datafiles(tmp_path):
     import fsspec
+
     fs = fsspec.filesystem("file")
     data1 = ak.from_iter([[1, 2, 3], [4, 5]])
     data2 = data1 + 1
@@ -854,14 +856,18 @@ def generate_datafiles(tmp_path):
 @pytest.fixture()
 def with_common_metadata(generate_datafiles):
     path, mdlist, fs = generate_datafiles
-    ak._v2.operations.ak_to_parquet.write_metadata(path, fs, *mdlist, global_metadata=False)
+    ak._v2.operations.ak_to_parquet.write_metadata(
+        path, fs, *mdlist, global_metadata=False
+    )
     return path
 
 
 @pytest.fixture()
 def with_global_metadata(generate_datafiles):
     path, mdlist, fs = generate_datafiles
-    ak._v2.operations.ak_to_parquet.write_metadata(path, fs, *mdlist, global_metadata=True)
+    ak._v2.operations.ak_to_parquet.write_metadata(
+        path, fs, *mdlist, global_metadata=True
+    )
     return path
 
 
@@ -876,25 +882,27 @@ def with_corrupted_global_metadata(generate_datafiles):
 
 def test_defaults_global(with_global_metadata):
     arr = ak._v2.metadata_from_parquet(with_global_metadata)
-    assert arr['num_rows'] == 4
+    assert arr["num_rows"] == 4
     assert arr["col_counts"] == [2, 2]
 
 
 def test_defaults_common(with_common_metadata):
     arr = ak._v2.metadata_from_parquet(with_common_metadata)
-    assert arr['num_rows'] == 4
+    assert arr["num_rows"] == 4
     assert arr["col_counts"] == [2, 2]
 
 
 def test_dont_scan(with_global_metadata):
-    arr = ak._v2.metadata_from_parquet(with_global_metadata, ignore_metadata=True, scan_files=False)
+    arr = ak._v2.metadata_from_parquet(
+        with_global_metadata, ignore_metadata=True, scan_files=False
+    )
     assert arr["col_counts"] is None
 
 
 def test_cant_select(with_common_metadata):
     # strictly, tow_groups=[0] could be allowed, since that file is first and may be scanned
     # anyway
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         ak._v2.metadata_from_parquet(with_common_metadata, scan_files=False, row_groups=[1])
 
 
