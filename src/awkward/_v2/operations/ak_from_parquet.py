@@ -157,7 +157,9 @@ def metadata(
                 metadata.append_row_groups(md)
     if row_groups is not None:
         if any(_ >= metadata.num_row_groups for _ in row_groups):
-            raise ValueError(f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}")
+            raise ValueError(
+                f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}"
+            )
         if not can_sub:
             raise TypeError(
                 "Requested selection of row-groups, but not scanning metadata"

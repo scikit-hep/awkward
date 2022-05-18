@@ -14,11 +14,7 @@ ParquetMetadata = collections.namedtuple(
 
 
 def metadata_from_parquet(
-    path,
-    storage_options=None,
-    row_groups=None,
-    ignore_metadata=False,
-    scan_files=True
+    path, storage_options=None, row_groups=None, ignore_metadata=False, scan_files=True
 ):
     """
     This function differs from ak.from_parquet._metadata as follows:
@@ -66,14 +62,11 @@ def metadata_from_parquet(
 
 
 def _impl(
-    path,
-    storage_options,
-    row_groups=None,
-    ignore_metadata=False,
-    scan_files=True
+    path, storage_options, row_groups=None, ignore_metadata=False, scan_files=True
 ):
     results = ak._v2.operations.ak_from_parquet.metadata(
-        path, storage_options, row_groups, None, ignore_metadata, scan_files)
+        path, storage_options, row_groups, None, ignore_metadata, scan_files
+    )
     parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata = results
 
     out = {

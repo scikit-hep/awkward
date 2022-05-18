@@ -903,7 +903,9 @@ def test_cant_select(with_common_metadata):
     # strictly, tow_groups=[0] could be allowed, since that file is first and may be scanned
     # anyway
     with pytest.raises(ValueError):
-        ak._v2.metadata_from_parquet(with_common_metadata, scan_files=False, row_groups=[1])
+        ak._v2.metadata_from_parquet(
+            with_common_metadata, scan_files=False, row_groups=[1]
+        )
 
 
 def test_select(with_global_metadata):
