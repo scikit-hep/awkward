@@ -243,12 +243,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if with_name is not None:
             layout = ak._v2.operations.with_name(layout, with_name, highlevel=False)
 
-        if (
-            backend is not None
-            and ak._v2._util.regularize_backend(backend) is ak.nplike.Jax.instance()
-        ):
-            layout = ak._v2.packed(layout, highlevel=False)
-
         if backend is not None and backend != ak._v2.operations.backend(layout):
             layout = ak._v2.operations.to_backend(layout, backend, highlevel=False)
 
@@ -1407,16 +1401,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 return True
         return False
 
-    def _jax_flatten(self):
+    def _jax_flatten_layout(self):
         return self._layout._jax_flatten()
 
     @classmethod
-    def jax_flatten(cls, array):
+    def _jax_flatten(cls, array):
         assert type(array) is cls
-        return array._jax_flatten()
+        return array._jax_flatten_layout()
 
     @classmethod
-    def jax_unflatten(cls, aux_data, children):
+    def _jax_unflatten(cls, aux_data, children):
         layout_cls = aux_data.layout.__class__
         return ak._v2._util.wrap(layout_cls.jax_unflatten(aux_data, children))
 
@@ -1993,16 +1987,16 @@ class Record(NDArrayOperatorsMixin):
                 return True
         return False
 
-    def _jax_flatten(self):
+    def _jax_flatten_layout(self):
         return self._layout._jax_flatten()
 
     @classmethod
-    def jax_flatten(cls, array):
+    def _jax_flatten(cls, array):
         assert type(array) is cls
-        return array._jax_flatten()
+        return array._jax_flatten_layout()
 
     @classmethod
-    def jax_unflatten(cls, aux_data, children):
+    def _jax_unflatten(cls, aux_data, children):
         layout_cls = aux_data.layout.__class__
         return ak._v2._util.wrap(layout_cls.jax_unflatten(aux_data, children))
 

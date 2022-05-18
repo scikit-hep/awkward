@@ -5,6 +5,15 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
+def _identifiers_equal(one, two):
+    if one is None and two is None:
+        return True
+    elif isinstance(one, Identifier) and isinstance(two, Identifier):
+        return one.layout_equal(two, index_dtype=True)
+    else:
+        return False
+
+
 class Identifier:
     _numrefs = 0
 

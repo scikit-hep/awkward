@@ -2187,3 +2187,8 @@ class ListOffsetArray(Content):
                     )
 
                 return content
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return self.offsets.layout_equal(
+            other.offsets, index_dtype, numpyarray
+        ) and self.content.layout_equal(other.content, index_dtype, numpyarray)

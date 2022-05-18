@@ -185,6 +185,15 @@ class Index:
     def _to_nplike(self, nplike):
         return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
+    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+        if index_dtype:
+            return (
+                self.nplike.array_equal(self.data, other.data)
+                and self._data.dtype == other.data.dtype
+            )
+        else:
+            return self.nplike.array_equal(self.data, other.data)
+
 
 class Index8(Index):
     _expected_dtype = np.dtype(np.int8)

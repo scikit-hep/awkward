@@ -1041,3 +1041,10 @@ class ByteMaskedArray(Content):
             parameters=self._parameters,
             nplike=nplike,
         )
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.valid_when == other.valid_when
+            and self.mask.layout_equal(other.mask, index_dtype, numpyarray)
+            and self.content.layout_equal(other.content, index_dtype, numpyarray)
+        )

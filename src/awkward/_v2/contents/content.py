@@ -1508,3 +1508,14 @@ class Content:
         from awkward._v2._connect.jax import _replace_numpyarray_nodes
 
         return _replace_numpyarray_nodes(aux_data.layout, list(children))
+
+    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.__class__ is other.__class__
+            and len(self) == len(other)
+            and ak._v2.identifier._identifiers_equal(self.identifier, other.identifier)
+            and ak._v2.forms.form._parameters_equal(
+                self.parameters, other.parameters, only_array_record=False
+            )
+            and self._layout_equal(other, index_dtype, numpyarray)
+        )

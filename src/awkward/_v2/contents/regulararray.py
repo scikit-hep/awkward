@@ -1274,3 +1274,8 @@ class RegularArray(Content):
             parameters=self.parameters,
             nplike=nplike,
         )
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return self.size == other.size and self.content.layout_equal(
+            self.content, index_dtype, numpyarray
+        )

@@ -343,3 +343,6 @@ class EmptyArray(Content):
 
     def _to_nplike(self, nplike):
         return EmptyArray(self._identifier, self._parameters, nplike=nplike)
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return True

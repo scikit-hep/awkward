@@ -55,7 +55,12 @@ class NumpyArray(Content):
 
     @property
     def ptr(self):
-        return self._data.ctypes.data
+        if self.nplike is ak.nplike.Numpy:
+            return self._data.ctypes.data
+        elif self.nplike is ak.nplike.Cupy:
+            return self._data.data.ptr
+        elif self.nplike is ak.nplike.Jax:
+            return self._data.device_buffer.unsafe_buffer_pointer()
 
     def raw(self, nplike):
         return self.nplike.raw(self.data, nplike)
@@ -1374,3 +1379,14 @@ class NumpyArray(Content):
             copy.deepcopy(self._parameters),
             self._nplike,
         )
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        if numpyarray:
+            return (
+                self.nplike.array_equal(self.data, other.data)
+                and self.dtype == other.dtype
+                and self.is_contiguous == other.is_contiguous
+                and self.shape == other.shape
+            )
+        else:
+            return True
