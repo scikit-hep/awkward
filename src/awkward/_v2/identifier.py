@@ -127,3 +127,10 @@ class Identifier:
 
     def _nbytes_part(self):
         return self.data.nbytes
+
+    def layout_equal(self, other, index_dtype=True):
+        if self._ref != other._ref or self._fieldloc != other._fieldloc:
+            return False
+        if index_dtype and self._data.dtype != other._data.dtype:
+            return False
+        return self._nplike.array_equal(self._data, other._data)
