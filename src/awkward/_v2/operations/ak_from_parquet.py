@@ -65,7 +65,7 @@ def from_parquet(
     ):
         import awkward._v2._connect.pyarrow  # noqa: F401
 
-        parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = _metadata(
+        parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = metadata(
             path,
             storage_options,
             row_groups,
@@ -86,18 +86,8 @@ def from_parquet(
         )
 
 
-def _metadata(path, storage_options, row_groups, columns, ignore_metadata=False,
-              scan_files=True):
-    # Test cases
-    #  - list of data files, scanned
-    #  - list of data files, not scanned
-    #  - list of directories -> exception
-    #  - directory with _metadata, used
-    #  - directory with _metadata, not used, files scanned
-    #  - directory with _metadata, not used, files not scanned
-    #  - directory without _metadata but with _common_metadata
-    #  - directory with only data files, scanned
-    #  - directory with only data files, not scanned
+def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_metadata=False,
+             scan_files=True):
     import awkward._v2._connect.pyarrow
     # early exit if missing deps
     pyarrow_parquet = awkward._v2._connect.pyarrow.import_pyarrow_parquet("ak._v2.from_parquet")
@@ -118,7 +108,6 @@ def _metadata(path, storage_options, row_groups, columns, ignore_metadata=False,
     )
     all_paths, path_for_schema, can_sub = _all_and_metadata_paths(path, fs, paths, ignore_metadata, scan_files)
 
-    parquet_columns = None
     subform = None
     subrg = [None] * len(all_paths)
     actual_paths = all_paths
@@ -127,85 +116,71 @@ def _metadata(path, storage_options, row_groups, columns, ignore_metadata=False,
     ) as file_for_metadata:
         parquetfile_for_metadata = pyarrow_parquet.ParquetFile(file_for_metadata)
 
-        if columns is not None:
-            list_indicator = "list.item"
-            for column_metadata in file_for_metadata.schema:
-                if (
-                    column_metadata.max_repetition_level > 0
-                    and ".list.element." in column_metadata.path
-                ):
-                    list_indicator = "list.element"
-                    break
+    list_indicator = "list.item"
+    for column_metadata in parquetfile_for_metadata.schema:
+        if (
+                column_metadata.max_repetition_level > 0
+                and ".list.element." in column_metadata.path
+        ):
+            list_indicator = "list.element"
+            break
+    if columns is not None:
 
-            form = ak._v2._connect.pyarrow.form_handle_arrow(
-                parquetfile_for_metadata.schema_arrow, pass_empty_field=True
-            )
-            subform = form.select_columns(columns)
-            parquet_columns = subform.columns(list_indicator=list_indicator)
+        form = ak._v2._connect.pyarrow.form_handle_arrow(
+            parquetfile_for_metadata.schema_arrow, pass_empty_field=True
+        )
+        subform = form.select_columns(columns)
 
-        metadata = parquetfile_for_metadata.metadata
-        if row_groups is not None:
-            eoln = "\n    "
-            if any(not 0 <= rg < metadata.num_row_groups for rg in row_groups):
-                raise ak._v2._util.error(
-                    ValueError(
-                        f"one of the requested row_groups is out of range "
-                        f"(must be less than {metadata.num_row_groups})"
-                    )
-                )
-
-            split_paths = [p.split("/") for p in all_paths]
-            prev_index = None
-            prev_i = 0
-            actual_paths = []
-            subrg = []
-            for i in range(metadata.num_row_groups):
-                unsplit_path = metadata.row_group(i).column(0).file_path
-                if unsplit_path == "":
-                    if len(all_paths) == 1:
-                        index = 0
-                    else:
-                        raise ak._v2._util.error(
-                            LookupError(
-                                f"""path from metadata is {unsplit_path!r} but more
-                                than one path matches:\n\n{eoln.join(all_paths)}"""
-                            )
-                        )
-
-                else:
-                    split_path = unsplit_path.split("/")
-                    index = None
-                    for j, compare in enumerate(split_paths):
-                        if split_path == compare[-len(split_path) :]:
-                            index = j
-                            break
-                    if index is None:
-                        raise ak._v2._util.error(
-                            LookupError(
-                                f"""path {'/'.join(split_path)!r} from metadata not found
-                                in path matches:\n\n{eoln.join(all_paths)}"""
-                            )
-                        )
-
-                if prev_index != index:
-                    prev_index = index
-                    prev_i = i
-                    actual_paths.append(all_paths[index])
-                    subrg.append([])
-
-                if i in row_groups:
-                    subrg[-1].append(i - prev_i)
-
-            for k in range(len(subrg) - 1, -1, -1):
-                if len(subrg[k]) == 0:
-                    del actual_paths[k]
-                    del subrg[k]
+    metadata = parquetfile_for_metadata.metadata
+    if scan_files and not path_for_schema.endswith("/_metadata"):
+        if path_for_schema in all_paths:
+            scan_paths = all_paths[1:]
         else:
+            scan_paths = all_paths
+        for apath in scan_paths:
+            with fs.open(apath, "rb") as f:
+                md = pyarrow_parquet.ParquetFile(f).metadata
+                # TODO: not nested directory structure yet
+                md.set_file_path(apath.rsplit("/", 1)[-1])
+                metadata.append_row_groups(md)
+    if row_groups is not None:
+        if not can_sub:
+            raise TypeError("Requested selection of row-groups, but not scanning metadata")
+
+        path_rgs = {}
+        for i in range(metadata.num_row_groups):
+            path_rgs.setdefault(metadata.row_group(i).column(0).file_path, []).append(i)
+        split_paths = [p.split("/") for p in all_paths]
+        prev_index = None
+        prev_i = 0
+        actual_paths = []
+        subrg = []
+        for i in range(metadata.num_row_groups):
+
+            if prev_index != index:
+                prev_index = index
+                prev_i = i
+                actual_paths.append(all_paths[index])
+                subrg.append([])
+
+            if i in row_groups:
+                subrg[-1].append(i - prev_i)
+
+        for k in range(len(subrg) - 1, -1, -1):
+            if len(subrg[k]) == 0:
+                del actual_paths[k]
+                del subrg[k]
+    else:
+        if can_sub:
             col_counts = [metadata.row_group(i).num_rows for i in range(metadata.num_row_groups)]
-        if subform is None:
-            subform = ak._v2._connect.pyarrow.form_handle_arrow(
-                parquetfile_for_metadata.schema_arrow, pass_empty_field=True
-            )
+        else:
+            col_counts = None
+
+    if subform is None:
+        subform = ak._v2._connect.pyarrow.form_handle_arrow(
+            parquetfile_for_metadata.schema_arrow, pass_empty_field=True
+        )
+    parquet_columns = subform.columns(list_indicator=list_indicator)
 
     return parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata
 
@@ -330,7 +305,7 @@ def _all_and_metadata_paths(path, fs, paths, ignore_metadata=False, scan_files=T
 
     path_for_metadata = [x for x, is_meta, is_comm in all_paths if is_meta]
     if len(path_for_metadata) != 0:
-        path_for_metadata, is_meta, is_comm = path_for_metadata[0]
+        path_for_metadata = path_for_metadata[0]
         can_sub = True
     else:
         path_for_metadata = [x for x, is_meta, is_comm in all_paths if is_comm]
@@ -339,6 +314,8 @@ def _all_and_metadata_paths(path, fs, paths, ignore_metadata=False, scan_files=T
         else:
             if len(all_paths) != 0:
                 path_for_metadata = all_paths[0][0]
+        # we will still know rew-groups and counts if we scan, so can sub-select
+        can_sub = scan_files or len(all_paths) == 1
 
     all_paths = [x for x, is_meta, is_comm in all_paths if not is_meta and not is_comm]
 

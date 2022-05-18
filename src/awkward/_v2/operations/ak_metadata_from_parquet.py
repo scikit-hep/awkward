@@ -16,6 +16,8 @@ ParquetMetadata = collections.namedtuple(
 def metadata_from_parquet(
     path,
     storage_options=None,
+    ignore_metadata=False,
+    scan_files=True
 ):
     """
     This function differs from ak.from_parquet._metadata as follows:
@@ -31,7 +33,7 @@ def metadata_from_parquet(
             must be data files, not directories.
         storage_options: Passed to `fsspec`.
 
-    Returns a named tuple containing
+    Returns dict containing
 
       * `form`: an Awkward Form representing the low-level type of the data
          (use `.type` to get a high-level type),
@@ -44,6 +46,7 @@ def metadata_from_parquet(
 
     See also #ak.from_parquet, #ak.to_parquet.
     """
+    import awkward._v2._connect.pyarrow  # noqa: F401
     with ak._v2._util.OperationErrorContext(
         "ak._v2.metadata_from_parquet",
         dict(
@@ -54,37 +57,28 @@ def metadata_from_parquet(
         return _impl(
             path,
             storage_options,
+            ignore_metadata=ignore_metadata,
+            scan_files=scan_files
         )
 
 
 def _impl(
     path,
     storage_options,
+    ignore_metadata=False,
+    scan_files=True
 ):
-    import awkward._v2._connect.pyarrow  # noqa: F401
+    results = ak._v2.operations.ak_from_parquet.metadata(
+        path, storage_options, None, None, ignore_metadata, scan_files)
+    parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata = results
 
-    name = "ak._v2.from_parquet"
-    pyarrow_parquet = ak._v2._connect.pyarrow.import_pyarrow_parquet(name)
-    ak._v2._connect.pyarrow.import_fsspec(name)
-
-    import fsspec.parquet
-
-    fs, _, paths = fsspec.get_fs_token_paths(
-        path, mode="rb", storage_options=storage_options
-    )
-
-    (
-        all_paths,
-        path_for_metadata,
-    ) = ak._v2.operations.ak_from_parquet._all_and_metadata_paths(path, fs, paths)
-
-    with fs.open(
-        path_for_metadata,
-    ) as file_for_metadata:
-        parquetfile_for_metadata = pyarrow_parquet.ParquetFile(file_for_metadata)
-
-        form = ak._v2._connect.pyarrow.form_handle_arrow(
-            parquetfile_for_metadata.schema_arrow, pass_empty_field=True
-        )
-
-        return ParquetMetadata(form, fs, all_paths, parquetfile_for_metadata.metadata)
+    out = {"form": subform, "paths": actual_paths, "col_counts": col_counts,
+           "columns": parquet_columns}
+    if col_counts:
+        out["num_row_groups"] = len(col_counts)
+        out["col_counts"] = col_counts
+        out["num_rows"] = sum(col_counts)
+    else:
+        out["num_rows"] = None
+        out["num_row_groups"] = None
+    return out
