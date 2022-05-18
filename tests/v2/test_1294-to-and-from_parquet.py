@@ -897,3 +897,16 @@ def test_cant_select(with_common_metadata):
     with pytest.raises(TypeError):
         ak._v2.metadata_from_parquet(with_common_metadata, scan_files=False, row_groups=[1])
 
+
+def test_select(with_global_metadata):
+    arr = ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[1])
+    assert arr["col_counts"] == [2]
+
+    with pytest.raises(ValueError):
+        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[1, 1])
+
+    with pytest.raises(ValueError):
+        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[-1])
+
+    with pytest.raises(ValueError):
+        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[4])

@@ -96,7 +96,7 @@ def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_m
     if row_groups is not None:
         if not all(ak._v2._util.isint(x) and x >= 0 for x in row_groups):
             raise ak._v2._util.error(
-                TypeError("row_groups must be a set of non-negative integers")
+                ValueError("row_groups must be a set of non-negative integers")
             )
         if len(set(row_groups)) < len(row_groups):
             raise ak._v2._util.error(
@@ -108,7 +108,6 @@ def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_m
     )
     all_paths, path_for_schema, can_sub = _all_and_metadata_paths(path, fs, paths, ignore_metadata, scan_files)
 
-    subform = None
     subrg = [None] * len(all_paths)
     actual_paths = all_paths
     with fs.open(
@@ -130,6 +129,10 @@ def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_m
             parquetfile_for_metadata.schema_arrow, pass_empty_field=True
         )
         subform = form.select_columns(columns)
+    else:
+        subform = ak._v2._connect.pyarrow.form_handle_arrow(
+            parquetfile_for_metadata.schema_arrow, pass_empty_field=True
+        )
 
     metadata = parquetfile_for_metadata.metadata
     if scan_files and not path_for_schema.endswith("/_metadata"):
@@ -144,42 +147,34 @@ def metadata(path, storage_options=None, row_groups=None, columns=None, ignore_m
                 md.set_file_path(apath.rsplit("/", 1)[-1])
                 metadata.append_row_groups(md)
     if row_groups is not None:
-        if not can_sub:
-            raise TypeError("Requested selection of row-groups, but not scanning metadata")
+        if any(_ >= metadata.num_row_groups for _ in row_groups):
+            raise ValueError(f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}")
 
         path_rgs = {}
-        for i in range(metadata.num_row_groups):
-            path_rgs.setdefault(metadata.row_group(i).column(0).file_path, []).append(i)
-        split_paths = [p.split("/") for p in all_paths]
-        prev_index = None
-        prev_i = 0
-        actual_paths = []
+        rgs_path = {}
         subrg = []
+        col_counts = []
         for i in range(metadata.num_row_groups):
+            fp = metadata.row_group(i).column(0).file_path
+            path_rgs.setdefault(fp, []).append(i)
+            rgs_path[i] = fp
 
-            if prev_index != index:
-                prev_index = index
-                prev_i = i
-                actual_paths.append(all_paths[index])
-                subrg.append([])
-
-            if i in row_groups:
-                subrg[-1].append(i - prev_i)
-
-        for k in range(len(subrg) - 1, -1, -1):
-            if len(subrg[k]) == 0:
-                del actual_paths[k]
-                del subrg[k]
+        actual_paths = []
+        for select in row_groups:
+            path = rgs_path[select]
+            path2 = [_ for _ in all_paths if _.endswith(path)][0]
+            if path2 not in actual_paths:
+                actual_paths.append(path2)
+                subrg.append([path_rgs[path].index(select)])
+            else:
+                subrg[-1].append(path_rgs[path].index(select))
+            col_counts.append(metadata.row_group(select).num_rows)
     else:
         if can_sub:
             col_counts = [metadata.row_group(i).num_rows for i in range(metadata.num_row_groups)]
         else:
             col_counts = None
 
-    if subform is None:
-        subform = ak._v2._connect.pyarrow.form_handle_arrow(
-            parquetfile_for_metadata.schema_arrow, pass_empty_field=True
-        )
     parquet_columns = subform.columns(list_indicator=list_indicator)
 
     return parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata
