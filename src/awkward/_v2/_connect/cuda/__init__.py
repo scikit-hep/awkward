@@ -141,7 +141,7 @@ class Invocation:
 
 def import_cupy(name="Awkward Arrays with CUDA"):
     if cupy is None:
-        raise ModuleNotFoundError(error_message.format(name))  # noqa: AK101
+        raise awkward._v2._util.error(ModuleNotFoundError(error_message.format(name)))
     return cupy
 
 
@@ -187,8 +187,8 @@ def initialize_cuda_kernels(cupy):
 
         return kernel
     else:
-        raise ModuleNotFoundError(  # noqa: AK101
-            error_message.format("Awkward Arrays with CUDA")
+        raise awkward._v2._util.error(
+            ModuleNotFoundError(error_message.format("Awkward Arrays with CUDA"))
         )
 
 
