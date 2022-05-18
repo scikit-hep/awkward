@@ -33,7 +33,7 @@ class RegularArray(Content):
                 )
             )
         if not isinstance(size, ak._v2._typetracer.UnknownLengthType):
-            if not (ak._util.isint(size) and size >= 0):
+            if not (ak._v2._util.isint(size) and size >= 0):
                 raise ak._v2._util.error(
                     TypeError(
                         "{} 'size' must be a non-negative integer, not {}".format(
@@ -44,7 +44,7 @@ class RegularArray(Content):
             else:
                 size = int(size)
         if not isinstance(zeros_length, ak._v2._typetracer.UnknownLengthType):
-            if not (ak._util.isint(zeros_length) and zeros_length >= 0):
+            if not (ak._v2._util.isint(zeros_length) and zeros_length >= 0):
                 raise ak._v2._util.error(
                     TypeError(
                         "{} 'zeros_length' must be a non-negative integer, not {}".format(
@@ -1273,4 +1273,9 @@ class RegularArray(Content):
             identifier=self.identifier,
             parameters=self.parameters,
             nplike=nplike,
+        )
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return self.size == other.size and self.content.layout_equal(
+            self.content, index_dtype, numpyarray
         )

@@ -1489,3 +1489,33 @@ class Content:
             else:
                 setattr(new_instance, k, copy.deepcopy(v, memo))
         return new_instance
+
+    def _jax_flatten(self):
+        from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData
+
+        layout = ak._v2.operations.to_layout(self, allow_record=True, allow_other=False)
+
+        numpyarray_nodes = _find_numpyarray_nodes(layout)
+        return (numpyarray_nodes, AuxData(layout))
+
+    @classmethod
+    def jax_flatten(cls, array):
+        assert type(array) is cls
+        return array._jax_flatten()
+
+    @classmethod
+    def jax_unflatten(cls, aux_data, children):
+        from awkward._v2._connect.jax import _replace_numpyarray_nodes
+
+        return _replace_numpyarray_nodes(aux_data.layout, list(children))
+
+    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.__class__ is other.__class__
+            and len(self) == len(other)
+            and ak._v2.identifier._identifiers_equal(self.identifier, other.identifier)
+            and ak._v2.forms.form._parameters_equal(
+                self.parameters, other.parameters, only_array_record=False
+            )
+            and self._layout_equal(other, index_dtype, numpyarray)
+        )

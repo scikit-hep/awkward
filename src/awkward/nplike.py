@@ -18,11 +18,13 @@ def of(*arrays):
         if nplike is not None:
             nplikes.add(nplike)
         else:
-            if isinstance(array, ak.nplike.numpy.ndarray):
+            from awkward._v2._util import is_numpy_buffer, is_cupy_buffer, is_jax_buffer
+
+            if is_numpy_buffer(array):
                 nplikes.add(ak.nplike.Numpy.instance())
-            elif type(array).__module__.startswith("cupy."):
+            elif is_cupy_buffer(array):
                 nplikes.add(ak.nplike.Cupy.instance())
-            elif type(array).__module__.startswith("jaxlib."):
+            elif is_jax_buffer(array):
                 nplikes.add(ak.nplike.Jax.instance())
 
     if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in nplikes):
@@ -403,10 +405,16 @@ class NumpyKernel:
     @staticmethod
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
-            if isinstance(x, numpy.ndarray):
+            from awkward._v2._util import is_numpy_buffer, is_cupy_buffer, is_jax_buffer
+
+            if is_numpy_buffer(x):
                 return ctypes.cast(x.ctypes.data, t)
-            elif type(x).__module__.startswith("cupy."):
-                return ctypes.cast(x.data.ptr, t)
+            elif is_cupy_buffer(x):
+                raise ak._v2._util.error(
+                    AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
+                )
+            elif is_jax_buffer(x):
+                return ctypes.cast(x.device_buffer.unsafe_buffer_pointer(), t)
             else:
                 return ctypes.cast(x, t)
         else:
@@ -414,9 +422,13 @@ class NumpyKernel:
 
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
-        return self._kernel(
-            *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
-        )
+
+        from awkward._v2._util import is_jax_tracer
+
+        if not any(is_jax_tracer(arg) for arg in args):
+            return self._kernel(
+                *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
+            )
 
 
 class CupyKernel(NumpyKernel):
@@ -756,12 +768,12 @@ class Jax(NumpyLike):
             return [self.to_rectilinear(x, *args, **kwargs) for x in array]
 
         else:
-            ak._v2._util.error(ValueError("to_rectilinear argument must be iterable"))
+            raise ak._v2._util.error(
+                ValueError("to_rectilinear argument must be iterable")
+            )
 
     def __getitem__(self, name_and_types):
-        ak._v2._util.error(
-            ValueError("__getitem__ for JAX Kernels is not implemented yet")
-        )
+        return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
         from awkward._v2._connect.jax import import_jax  # noqa: F401

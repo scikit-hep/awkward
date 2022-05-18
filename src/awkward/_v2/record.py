@@ -15,7 +15,7 @@ class Record:
             raise ak._v2._util.error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )
-        if not ak._util.isint(at):
+        if not ak._v2._util.isint(at):
             raise ak._v2._util.error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
@@ -219,3 +219,22 @@ class Record:
             return Record(out, self._at)
         else:
             return None
+
+    def _jax_flatten(self):
+        from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData
+
+        numpyarray_nodes = _find_numpyarray_nodes(self)
+        return (numpyarray_nodes, AuxData(self))
+
+    @classmethod
+    def jax_flatten(cls, array):
+        assert type(array) is cls
+        return array._jax_flatten()
+
+    @classmethod
+    def jax_unflatten(cls, aux_data, children):
+        from awkward._v2._connect.jax import _replace_numpyarray_nodes
+
+        return ak._v2._util.wrap(
+            _replace_numpyarray_nodes(aux_data.layout, list(children))
+        )

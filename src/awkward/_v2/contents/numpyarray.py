@@ -55,7 +55,18 @@ class NumpyArray(Content):
 
     @property
     def ptr(self):
-        return self._data.ctypes.data
+        if isinstance(self.nplike, ak.nplike.Numpy):
+            return self._data.ctypes.data
+        elif isinstance(self.nplike, ak.nplike.Cupy):
+            return self._data.data.ptr
+        elif isinstance(self.nplike, ak.nplike.Jax):
+            return self._data.device_buffer.unsafe_buffer_pointer()
+        else:
+            raise ak._v2._util.error(
+                AssertionError(
+                    "Unrecognized nplike encountered while fetching ptr to raw data"
+                )
+            )
 
     def raw(self, nplike):
         return self.nplike.raw(self.data, nplike)
@@ -206,8 +217,8 @@ class NumpyArray(Content):
     def maybe_to_array(self, nplike):
         return nplike.asarray(self._data)
 
-    def __array__(self, **kwargs):
-        return numpy.asarray(self._data, **kwargs)
+    def __array__(self, *args, **kwargs):
+        return numpy.asarray(self._data, *args, **kwargs)
 
     def __iter__(self):
         return iter(self._data)
@@ -1374,3 +1385,14 @@ class NumpyArray(Content):
             copy.deepcopy(self._parameters),
             self._nplike,
         )
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        if numpyarray:
+            return (
+                self.nplike.array_equal(self.data, other.data)
+                and self.dtype == other.dtype
+                and self.is_contiguous == other.is_contiguous
+                and self.shape == other.shape
+            )
+        else:
+            return True
