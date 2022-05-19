@@ -73,7 +73,7 @@ def from_parquet(
         )
         return _load(
             actual_paths,
-            parquet_columns,
+            parquet_columns if columns is not None else None,
             subrg,
             max_gap,
             max_block,
