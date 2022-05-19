@@ -97,7 +97,10 @@ def to_parquet(
     else:
         column_prefix = ()
 
-    form = layout.form
+    if isinstance(data, ak._v2.Record):
+        form = layout.array.form
+    else:
+        form = layout.form
 
     def parquet_columns(specifier, only=None):
         if specifier is None:

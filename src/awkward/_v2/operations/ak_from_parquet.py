@@ -232,7 +232,13 @@ def _load(
         return ak._v2.operations.ak_from_buffers._impl(
             subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
         )
+    elif len(arrays) == 1:
+        # make high-level
+        if isinstance(arrays[0], ak._v2.record.Record):
+            return ak._v2.Record(arrays[0])
+        return ak._v2.Array(arrays[0])
     else:
+        # TODO: if each array is a record
         return ak._v2.operations.ak_concatenate._impl(
             arrays, 0, True, True, highlevel, behavior
         )
@@ -294,6 +300,7 @@ def _read_parquet_file(
     return ak._v2.operations.ak_from_arrow._impl(
         arrow_table,
         generate_bitmasks,
+        # why is high-level False here?
         False,
         None,
     )
