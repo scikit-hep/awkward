@@ -217,23 +217,55 @@ extern "C" {
 
 namespace awkward {
 
-template<typename T>
-T* copy_ptr(const T* from_ptr, int64_t size)
-{
-    T* array = malloc(sizeof(T)*size);
-    for (int64_t i = 0; i < size; i++) {
-        array[i] = from_ptr[i];
-    }
-    return array;
-}
+template <typename T>
+struct fill_array_impl {
+    static void fill_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
+        cout << "FIXME: processing of a " << typeid(T).name()
+            << " type is not implemented yet." << endl;
+    };
+};
+
+template <>
+struct fill_array_impl<bool> {
+    static void fill_array(ROOT::RDF::RResultPtr<std::vector<bool>>& result, void* ptr) {
+        for (auto const& it : result) {
+            awkward_ArrayBuilder_boolean(ptr, it);
+        }
+    };
+};
+
+template <>
+struct fill_array_impl<int64_t> {
+    static void fill_array(ROOT::RDF::RResultPtr<std::vector<int64_t>>& result, void* ptr) {
+        for (auto const& it : result) {
+            awkward_ArrayBuilder_integer(ptr, it);
+        }
+    };
+};
+
+template <>
+struct fill_array_impl<double> {
+    static void fill_array(ROOT::RDF::RResultPtr<std::vector<double>>& result, void* ptr) {
+        for (auto const& it : result) {
+            awkward_ArrayBuilder_real(ptr, it);
+        }
+    };
+};
+
+template <>
+struct fill_array_impl<std::complex<double>> {
+    static void fill_array(ROOT::RDF::RResultPtr<std::vector<std::complex<double>>>& result, void* ptr) {
+        for (auto const& it : result) {
+            awkward_ArrayBuilder_complex(ptr, it.real(), it.imag());
+        }
+    };
+};
 
 template <typename T>
 void
-fill_real(void* ptr, const T& data) {
-    typedef typename T::value_type value_type;
-    for (auto const& it: data) {
-        awkward_ArrayBuilder_real(ptr, it);
-    }
+fill_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+    auto ptr = reinterpret_cast<void *>(builder_ptr);
+    fill_array_impl<T>::fill_array(result, ptr);
 }
 
 template <typename T, typename V>
@@ -249,9 +281,9 @@ struct build_array_impl {
 template <typename T>
 struct build_array_impl<T, double> {
     static void build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-        for (auto const& data: result) {
+        for (auto const& data : result) {
             awkward_ArrayBuilder_beginlist(ptr);
-            for (auto const& it: data) {
+            for (auto const& it : data) {
                 awkward_ArrayBuilder_real(ptr, it);
             }
             awkward_ArrayBuilder_endlist(ptr);
@@ -262,9 +294,9 @@ struct build_array_impl<T, double> {
 template <typename T>
 struct build_array_impl<T, int64_t> {
     static void build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-    for (auto const& data: result) {
+    for (auto const& data : result) {
         awkward_ArrayBuilder_beginlist(ptr);
-        for (auto const& it: data) {
+        for (auto const& it : data) {
             awkward_ArrayBuilder_integer(ptr, it);
         }
         awkward_ArrayBuilder_endlist(ptr);
@@ -275,9 +307,9 @@ struct build_array_impl<T, int64_t> {
 template <typename T>
 struct build_array_impl<T, bool> {
     static void build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-        for (auto const& data: result) {
+        for (auto const& data : result) {
             awkward_ArrayBuilder_beginlist(ptr);
-            for (auto const& it: data) {
+            for (auto const& it : data) {
                 awkward_ArrayBuilder_boolean(ptr, it);
             }
             awkward_ArrayBuilder_endlist(ptr);
@@ -386,7 +418,22 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     ptrs_type = ROOT.awkward.check_type_of[column_type](result_ptrs)
 
     if ptrs_type in ("primitive", "complex"):
-        print("primitive", "complex")
+
+        builder = ak._v2.highlevel.ArrayBuilder()
+        ROOT.awkward.fill_array[column_type](result_ptrs, builder._layout._ptr)
+        array = builder.snapshot()
+
+        return (
+            ak._v2._util.wrap(
+                ak._v2.contents.RecordArray(
+                    fields=[column],
+                    contents=[array.layout],
+                ),
+                highlevel=True,
+            )
+            if column_as_record
+            else array
+        )
 
         # Triggers event loop and execution of all actions booked in the associated RLoopManager.
         cpp_reference = result_ptrs.GetValue()

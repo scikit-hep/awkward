@@ -4,71 +4,40 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+import awkward._v2._lookup  # noqa: E402
+import awkward._v2._connect.cling  # noqa: E402
+
 ROOT = pytest.importorskip("ROOT")
 
 
 compiler = ROOT.gInterpreter.Declare
 
+@pytest.mark.skip(reason="FIXME: error: no member named 'NumpyArray_int64_JfKqPprbmZ0' in namespace 'awkward'")
+def test_to_from_data_frame_large():
+    n = 30
+    assert 2 * (n // 2) == n
+    rows = 3**(n//2)
+    cols = n
 
-def test_array_builder():
-    import ctypes
+    arr = np.zeros((rows, cols), dtype=int)
+    shape = (rows,)
 
-    builder = ak.ArrayBuilder()
+    source = np.array([-1, 0, 1], dtype=np.int64)[:, None]
 
-    ROOT.gInterpreter.Declare(
-        f"""
-    #include <functional>
+    for col in range(n//2):
+        shape = (-1, 3, shape[-1]//3,)
+        col_view = arr[:, col]
+        col_view.shape = shape
+        col_view[:] = source
 
-    typedef uint8_t (*FuncPtr)(void*);
-    typedef uint8_t (*FuncIntPtr)(void*, int64_t);
+    ak_array_in = ak._v2.from_numpy(arr, regulararray=True)
+    print(ak_array_in)
 
-    uint8_t
-    test_beginlist() {{
-        return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_beginlist, ctypes.c_voidp).value})), reinterpret_cast<void *>({builder._layout._ptr}));
-    }}
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
 
-    uint8_t
-    test_endlist() {{
-        return std::invoke(reinterpret_cast<FuncPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_endlist, ctypes.c_void_p).value})), reinterpret_cast<void *>({builder._layout._ptr}));
-    }}
-
-    uint8_t
-    test_integer(int64_t x) {{
-        return std::invoke(reinterpret_cast<FuncIntPtr>(reinterpret_cast<long>({ctypes.cast(ak._libawkward.ArrayBuilder_integer, ctypes.c_void_p).value})), reinterpret_cast<void *>({builder._layout._ptr}), x);
-    }}
-    """
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
     )
-    ROOT.test_beginlist()
-    ROOT.test_integer(1)
-    ROOT.test_integer(2)
-    ROOT.test_integer(3)
-    ROOT.test_endlist()
-
-    assert ak.to_list(builder.snapshot()) == [[1, 2, 3]]
-
-    ROOT.test_beginlist()
-    ROOT.test_integer(1)
-    ROOT.test_integer(2)
-    ROOT.test_integer(3)
-    ROOT.test_endlist()
-
-    assert ak.to_list(builder.snapshot()) == [[1, 2, 3], [1, 2, 3]]
-
-
-def test_array_builder_root():
-    from awkward._v2._connect.rdataframe.from_rdataframe import connect_ArrayBuilder
-
-    builder = ak.ArrayBuilder()
-    func = connect_ArrayBuilder(compiler, builder)
-
-    getattr(ROOT, func["beginlist"])()
-    getattr(ROOT, func["integer"])(1)
-    getattr(ROOT, func["integer"])(2)
-    getattr(ROOT, func["integer"])(3)
-    getattr(ROOT, func["endlist"])()
-    getattr(ROOT, func["real"])(3.3)
-
-    assert ak.to_list(builder.snapshot()) == [[1, 2, 3], 3.3]
 
 
 def test_data_frame_vecs():
