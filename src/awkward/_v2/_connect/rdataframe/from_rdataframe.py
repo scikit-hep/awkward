@@ -143,14 +143,6 @@ compiler(
 #include <stdlib.h>
 
 extern "C" {
-  /// @brief C interface to {@link awkward::ArrayBuilder#length ArrayBuilder::length}.
-   uint8_t
-    awkward_ArrayBuilder_length(void* arraybuilder,
-                                int64_t* result);
-  /// @brief C interface to {@link awkward::ArrayBuilder#clear ArrayBuilder::clear}.
-   uint8_t
-    awkward_ArrayBuilder_clear(void* arraybuilder);
-
   /// @brief C interface to {@link awkward::ArrayBuilder#null ArrayBuilder::null}.
    uint8_t
     awkward_ArrayBuilder_null(void* arraybuilder);
@@ -221,55 +213,6 @@ extern "C" {
    uint8_t
     awkward_ArrayBuilder_endlist(void* arraybuilder);
 
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#begintuple ArrayBuilder::begintuple}.
-   uint8_t
-    awkward_ArrayBuilder_begintuple(void* arraybuilder,
-                                    int64_t numfields);
-
-  /// @brief C interface to {@link awkward::ArrayBuilder#index ArrayBuilder::index}.
-   uint8_t
-    awkward_ArrayBuilder_index(void* arraybuilder,
-                               int64_t index);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#endtuple ArrayBuilder::endtuple}.
-   uint8_t
-    awkward_ArrayBuilder_endtuple(void* arraybuilder);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#beginrecord ArrayBuilder::beginrecord}.
-   uint8_t
-    awkward_ArrayBuilder_beginrecord(void* arraybuilder);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#beginrecord_fast ArrayBuilder::beginrecord_fast}.
-   uint8_t
-    awkward_ArrayBuilder_beginrecord_fast(void* arraybuilder,
-                                          const char* name);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#beginrecord_check ArrayBuilder::beginrecord_check}.
-   uint8_t
-    awkward_ArrayBuilder_beginrecord_check(void* arraybuilder,
-                                           const char* name);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#field_fast ArrayBuilder::field_fast}.
-   uint8_t
-    awkward_ArrayBuilder_field_fast(void* arraybuilder,
-                                    const char* key);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#field_check ArrayBuilder::field_check}.
-   uint8_t
-    awkward_ArrayBuilder_field_check(void* arraybuilder,
-                                     const char* key);
-
-  /// @brief C interface to
-  /// {@link awkward::ArrayBuilder#endrecord ArrayBuilder::endrecord}.
-   uint8_t
-    awkward_ArrayBuilder_endrecord(void* arraybuilder);
 }
 
 namespace awkward {
@@ -293,14 +236,19 @@ fill_real(void* ptr, const T& data) {
     }
 }
 
+template <typename T, typename V>
+struct build_array_impl {
+    static void build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+        typedef typename T::value_type value_type;
+
+        cout << "FIXME: processing an iterable of a " << typeid(value_type).name()
+            << " type is not implemented yet." << endl;
+    };
+};
+
 template <typename T>
-void
-build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    auto ptr = reinterpret_cast<void *>(builder_ptr);
-
-    typedef typename T::value_type value_type;
-
-    if (std::is_floating_point<value_type>::value) {
+struct build_array_impl<T, double> {
+    static void build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
         for (auto const& data: result) {
             awkward_ArrayBuilder_beginlist(ptr);
             for (auto const& it: data) {
@@ -308,15 +256,40 @@ build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
             }
             awkward_ArrayBuilder_endlist(ptr);
         }
-    } else if (std::numeric_limits<value_type>::is_integer) {
+    };
+};
+
+template <typename T>
+struct build_array_impl<T, int64_t> {
+    static void build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
+    for (auto const& data: result) {
+        awkward_ArrayBuilder_beginlist(ptr);
+        for (auto const& it: data) {
+            awkward_ArrayBuilder_integer(ptr, it);
+        }
+        awkward_ArrayBuilder_endlist(ptr);
+    }
+    };
+};
+
+template <typename T>
+struct build_array_impl<T, bool> {
+    static void build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
         for (auto const& data: result) {
             awkward_ArrayBuilder_beginlist(ptr);
             for (auto const& it: data) {
-                awkward_ArrayBuilder_integer(ptr, it);
+                awkward_ArrayBuilder_boolean(ptr, it);
             }
             awkward_ArrayBuilder_endlist(ptr);
         }
-    }
+    };
+};
+
+template <typename T>
+void
+build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+    auto ptr = reinterpret_cast<void *>(builder_ptr);
+    build_array_impl<T, typename T::value_type>::build_array(result, ptr);
 }
 
 template <typename T>
@@ -410,16 +383,10 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     # 'Take' is a lazy action:
     result_ptrs = data_frame_rnode.Take[column_type](column)
 
-    # builder = ak._v2.highlevel.ArrayBuilder()
-    # func = connect_ArrayBuilder(
-    #     compiler, builder
-    # )
-
     ptrs_type = ROOT.awkward.check_type_of[column_type](result_ptrs)
-    # ptrs_type, data_pair = ROOT.check_type_of[column_type](result_ptrs)
-    # ptrs_type = ROOT.check_type_of[column_type](result_ptrs, builder._layout._ptr)
 
     if ptrs_type in ("primitive", "complex"):
+        print("primitive", "complex")
 
         # Triggers event loop and execution of all actions booked in the associated RLoopManager.
         cpp_reference = result_ptrs.GetValue()
@@ -469,7 +436,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         )
 
     elif ptrs_type == "awkward":
-
+        print("awkward")
         # Triggers event loop and execution of all actions booked in the associated RLoopManager.
         cpp_reference = result_ptrs.GetValue()
 
