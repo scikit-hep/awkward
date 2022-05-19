@@ -12,11 +12,14 @@ ROOT = pytest.importorskip("ROOT")
 
 compiler = ROOT.gInterpreter.Declare
 
-@pytest.mark.skip(reason="FIXME: error: no member named 'NumpyArray_int64_JfKqPprbmZ0' in namespace 'awkward'")
+
+@pytest.mark.skip(
+    reason="FIXME: error: no member named 'NumpyArray_int64_JfKqPprbmZ0' in namespace 'awkward'"
+)
 def test_to_from_data_frame_large():
     n = 30
     assert 2 * (n // 2) == n
-    rows = 3**(n//2)
+    rows = 3 ** (n // 2)
     cols = n
 
     arr = np.zeros((rows, cols), dtype=int)
@@ -24,8 +27,12 @@ def test_to_from_data_frame_large():
 
     source = np.array([-1, 0, 1], dtype=np.int64)[:, None]
 
-    for col in range(n//2):
-        shape = (-1, 3, shape[-1]//3,)
+    for col in range(n // 2):
+        shape = (
+            -1,
+            3,
+            shape[-1] // 3,
+        )
         col_view = arr[:, col]
         col_view.shape = shape
         col_view[:] = source
@@ -38,6 +45,7 @@ def test_to_from_data_frame_large():
     ak_array_out = ak._v2.from_rdataframe(
         data_frame, column="x", column_as_record=False
     )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
 
 
 def test_data_frame_vecs():
