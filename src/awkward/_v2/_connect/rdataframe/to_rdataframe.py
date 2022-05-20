@@ -82,6 +82,26 @@ class DataSourceGenerator:
                 and self.generators[key].is_flatlist
             ):
                 pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.IndexedOptionArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.IndexedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.ByteMaskedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.BitMaskedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.UnmaskedArrayGenerator
+            ):
+                pass
             else:
                 self.entry_types[key] = "awkward::" + self.entry_types[key]
 
@@ -252,7 +272,6 @@ namespace awkward {{
         }}
 
         bool SetEntry(unsigned int slot, ULong64_t entry) {{
-            cout << "SetEntry " << entry << endl;
             {cpp_code_entries}
             return true;
         }}
