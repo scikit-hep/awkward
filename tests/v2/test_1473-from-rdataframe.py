@@ -13,11 +13,13 @@ ROOT = pytest.importorskip("ROOT")
 compiler = ROOT.gInterpreter.Declare
 
 
-@pytest.mark.skip(
-    reason="FIXME: error: no member named 'NumpyArray_int64_JfKqPprbmZ0' in namespace 'awkward'"
-)
+def debug_compiler(code):
+    print(code)
+    ROOT.gInterpreter.Declare(code)
+
+
 def test_to_from_data_frame_large():
-    n = 30
+    n = 6  # 30
     assert 2 * (n // 2) == n
     rows = 3 ** (n // 2)
     cols = n
@@ -38,7 +40,6 @@ def test_to_from_data_frame_large():
         col_view[:] = source
 
     ak_array_in = ak._v2.from_numpy(arr, regulararray=True)
-    print(ak_array_in)
 
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
 
