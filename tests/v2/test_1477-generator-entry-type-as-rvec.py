@@ -70,6 +70,8 @@ def test_RecordArray_NumpyArray():
         "awkward::Record_Something_"
     )
 
+
+def test_RecordArray_NumpyArray_two():
     ak_array_two = ak._v2.contents.recordarray.RecordArray(
         [
             ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
@@ -82,10 +84,14 @@ def test_RecordArray_NumpyArray():
     data_frame_two = ak._v2.to_rdataframe({"two": ak_array_two})
     assert str(data_frame_two.GetColumnType("two")).startswith("awkward::Record_")
 
+
+def test_RecordArray_NumpyArray_three():
     ak_array_three = ak._v2.contents.recordarray.RecordArray([], [], 10)
     data_frame_three = ak._v2.to_rdataframe({"three": ak_array_three})
     assert str(data_frame_three.GetColumnType("three")).startswith("awkward::Record_")
 
+
+def test_RecordArray_NumpyArray_four():
     ak_array_four = ak._v2.contents.recordarray.RecordArray([], None, 10)
     data_frame_four = ak._v2.to_rdataframe({"four": ak_array_four})
     assert str(data_frame_four.GetColumnType("four")).startswith("awkward::Record_")
@@ -118,6 +124,8 @@ def test_ByteMaskedArray_NumpyArray():
     data_frame_one = ak._v2.to_rdataframe({"one": ak_array_one})
     assert data_frame_one.GetColumnType("one") == "std::optional<double>"
 
+
+def test_ByteMaskedArray_NumpyArray_two():
     ak_array_two = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
         ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
@@ -163,6 +171,8 @@ def test_BitMaskedArray_NumpyArray():
     data_frame_one = ak._v2.to_rdataframe({"one": ak_array_one})
     assert data_frame_one.GetColumnType("one") == "std::optional<double>"
 
+
+def test_BitMaskedArray_NumpyArray_two():
     ak_array_two = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
             np.packbits(
@@ -198,6 +208,8 @@ def test_BitMaskedArray_NumpyArray():
     data_frame_two = ak._v2.to_rdataframe({"two": ak_array_two})
     assert data_frame_two.GetColumnType("two") == "std::optional<double>"
 
+
+def test_BitMaskedArray_NumpyArray_three():
     ak_array_three = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
             np.packbits(
@@ -236,6 +248,8 @@ def test_BitMaskedArray_NumpyArray():
     data_frame_three = ak._v2.to_rdataframe({"three": ak_array_three})
     assert data_frame_three.GetColumnType("three") == "std::optional<double>"
 
+
+def test_BitMaskedArray_NumpyArray_four():
     ak_array_four = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
             np.packbits(
@@ -320,6 +334,8 @@ def test_nested_RegularArray_NumpyArray():
     data_frame_one = ak._v2.to_rdataframe({"one": ak_array_one})
     assert str(data_frame_one.GetColumnType("one")).startswith("awkward::RegularArray_")
 
+
+def test_nested_RegularArray_NumpyArray_two():
     ak_array_two = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 11], dtype=np.int64)),
         ak._v2.contents.regulararray.RegularArray(
@@ -380,6 +396,8 @@ def test_nested_RecordArray_NumpyArray():
         "awkward::RecordArray_Something_"
     )
 
+
+def test_nested_RecordArray_NumpyArray_two():
     ak_array_two = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 6], dtype=np.int64)),
         ak._v2.contents.recordarray.RecordArray(
@@ -397,6 +415,8 @@ def test_nested_RecordArray_NumpyArray():
     data_frame_two = ak._v2.to_rdataframe({"two": ak_array_two})
     assert str(data_frame_two.GetColumnType("two")).startswith("awkward::RecordArray_")
 
+
+def test_nested_RecordArray_NumpyArray_three():
     ak_array_three = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 11], dtype=np.int64)),
         ak._v2.contents.recordarray.RecordArray([], [], 11),
@@ -406,6 +426,8 @@ def test_nested_RecordArray_NumpyArray():
         "awkward::RecordArray_"
     )
 
+
+def test_nested_RecordArray_NumpyArray_four():
     ak_array_four = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 11], dtype=np.int64)),
         ak._v2.contents.recordarray.RecordArray([], None, 11),
@@ -458,6 +480,8 @@ def test_nested_ByteMaskedArray_NumpyArray():
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
     assert str(data_frame.GetColumnType("x")).startswith("awkward::ByteMaskedArray_")
 
+
+def test_nested_ByteMaskedArray_NumpyArray_two():
     ak_array_two = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 6], dtype=np.int64)),
         ak._v2.contents.bytemaskedarray.ByteMaskedArray(
@@ -530,6 +554,8 @@ def test_nested_BitMaskedArray_NumpyArray():
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
     assert str(data_frame.GetColumnType("x")).startswith("awkward::BitMaskedArray_")
 
+
+def test_nested_BitMaskedArray_NumpyArray_two():
     ak_array_two = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 14], dtype=np.int64)),
         ak._v2.contents.bitmaskedarray.BitMaskedArray(
@@ -587,6 +613,8 @@ def test_nested_BitMaskedArray_NumpyArray():
         "awkward::BitMaskedArray_"
     )
 
+
+def test_nested_BitMaskedArray_NumpyArray_three():
     ak_array_three = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 14], dtype=np.int64)),
         ak._v2.contents.bitmaskedarray.BitMaskedArray(
@@ -647,6 +675,8 @@ def test_nested_BitMaskedArray_NumpyArray():
         "awkward::BitMaskedArray_"
     )
 
+
+def test_nested_BitMaskedArray_NumpyArray_four():
     ak_array_four = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 14], dtype=np.int64)),
         ak._v2.contents.bitmaskedarray.BitMaskedArray(
