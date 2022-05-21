@@ -49,7 +49,7 @@ struct GrowableBuffer {
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
     /// initial #reserved from initial
     GrowableBuffer(const int initial)
-      : ptr_(new double[initial_])
+      : ptr_(new double[initial])
       , length_(0)
       , reserved_(initial) { }
  

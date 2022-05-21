@@ -1,7 +1,6 @@
 #include <iostream>
 
 struct Panel {
-
     Panel()
     : head_(NULL),
     tail_(NULL) { }
