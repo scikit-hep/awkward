@@ -1,5 +1,4 @@
 #include<iostream>
-using namespace std;
 
 struct Panel_Node {
   Panel_Node(int initial)
@@ -49,14 +48,14 @@ struct Panel {
         total_length++;
       }
       temp = temp->next_;
+    }
+    ptr_ = std::move(ptr); 
   }
-       ptr_ = std::move(ptr); 
-    }
     
-    double
-      getitem_at_nowrap(int at) const {
-        return ptr_[at];
-    }
+  double
+    getitem_at_nowrap(int at) const {
+      return ptr_[at];
+  }
 
 
   void fill_panel(double datum, int reserved) {
@@ -79,8 +78,7 @@ struct Panel {
     new_Panel->num_elements = 0;
     tail_->next_ = new_Panel;
     tail_ = new_Panel;
-  }
-   
+  } 
 
   int length()  
   {  
@@ -118,8 +116,8 @@ int main() {
     for (int at = 0; at < p.length(); at++) {
         std::cout << p.getitem_at_nowrap(at) << ", ";
     }
-    std::cout << endl << "Length = " << p.length();
-    std::cout << endl << "Panels = " << p.panels();
+    std::cout << "\nLength = " << p.length();
+    std::cout << "\nPanels = " << p.panels();
     
     return 0;
 };
