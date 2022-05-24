@@ -17,6 +17,7 @@ compiler(
     """
 #include <iterator>
 #include <stdlib.h>
+#include <string>
 
 extern "C" {
     uint8_t
@@ -35,20 +36,6 @@ extern "C" {
     awkward_ArrayBuilder_complex(void* arraybuilder,
                                  double real,
                                  double imag);
-
-    uint8_t
-    awkward_ArrayBuilder_datetime(void* arraybuilder,
-                                  int64_t x,
-                                  const char* unit);
-
-    uint8_t
-    awkward_ArrayBuilder_timedelta(void* arraybuilder,
-                                   int64_t x,
-                                   const char* unit);
-
-    uint8_t
-    awkward_ArrayBuilder_bytestring(void* arraybuilder,
-                                    const char* x);
 
     uint8_t
     awkward_ArrayBuilder_string(void* arraybuilder,
@@ -107,6 +94,15 @@ struct build_array_impl<std::complex<double>> {
     };
 };
 
+template <>
+struct build_array_impl<std::string> {
+    static void build_array(ROOT::RDF::RResultPtr<std::vector<std::string>>& result, void* ptr) {
+        for (auto const& it : result) {
+            awkward_ArrayBuilder_string(ptr, it.c_str());
+        }
+    };
+};
+
 template <typename T>
 void
 build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
@@ -137,6 +133,17 @@ struct build_list_array_impl<T, double> {
     };
 };
 
+
+template <typename T>
+struct build_list_array_impl<T, ROOT::VecOps::RVec<ROOT::VecOps::RVec<double> > > {
+    static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
+        typedef typename T::value_type value_type;
+
+        cout << "FIXME: processing an iterable of a " << typeid(value_type).name()
+            << " type is not implemented yet." << endl;
+    };
+};
+
 template <typename T>
 struct build_list_array_impl<T, int64_t> {
     static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
@@ -164,30 +171,32 @@ struct build_list_array_impl<T, bool> {
 };
 
 template <typename T>
+struct build_list_array_impl<T, std::complex<double>> {
+    static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
+        for (auto const& data : result) {
+            awkward_ArrayBuilder_beginlist(ptr);
+            for (auto const& it : data) {
+                awkward_ArrayBuilder_complex(ptr, it.real(), it.imag());
+            }
+            awkward_ArrayBuilder_endlist(ptr);
+        }
+    };
+};
+
+template <typename T>
 void
 build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
     auto ptr = reinterpret_cast<void *>(builder_ptr);
     build_list_array_impl<T, typename T::value_type>::build_list_array(result, ptr);
 }
 
-template <typename T>
-std::pair<std::vector<int64_t>, T>
-offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
-
-    typedef typename T::value_type value_type;
-    std::vector<value_type> data;
-
-    std::vector<int64_t> offsets;
-    offsets.reserve(result->size() + 1);
-    offsets.emplace_back(0);
-    int64_t length = 0;
-    std::for_each(result->begin(), result->end(), [&] (auto const& n) {
-        length += n.size();
-        offsets.emplace_back(length);
-        data.insert(data.end(), n.begin(), n.end());
-    });
-
-    return {offsets, data};
+template <>
+void
+build_list_array<std::string>(ROOT::RDF::RResultPtr<std::vector<std::string>>& result, long builder_ptr) {
+    auto ptr = reinterpret_cast<void *>(builder_ptr);
+    for (auto const& it : result) {
+        awkward_ArrayBuilder_string(ptr, it.c_str());
+    }
 }
 
 template <typename, typename = void>
@@ -201,6 +210,49 @@ constexpr bool is_iterable<
     >
 > = true;
 
+template <typename T>
+void
+offsets_and_flatten_impl(
+    T& result,
+    void* ptr)
+{
+    typedef typename T::value_type value_type;
+
+    cout << "FIXME: processing an iterable of a " << typeid(value_type).name()
+        << " type is not implemented yet." << endl;
+}
+
+template<>
+void
+offsets_and_flatten_impl<ROOT::VecOps::RVec<ROOT::VecOps::RVec<double> > const> (
+    const ROOT::VecOps::RVec<ROOT::VecOps::RVec<double> >& result,
+    void* ptr)
+{
+    std::for_each(result.begin(), result.end(), [&] (auto const& n) {
+        awkward_ArrayBuilder_beginlist(ptr);
+        for (auto const& it : n) {
+            awkward_ArrayBuilder_real(ptr, it);
+        }
+        awkward_ArrayBuilder_endlist(ptr);
+    });
+}
+
+template <typename T>
+void
+offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+    auto ptr = reinterpret_cast<void *>(builder_ptr);
+
+    typedef typename T::value_type value_type;
+
+    if (is_iterable<value_type>) {
+        std::for_each(result->begin(), result->end(), [&] (auto const& n) {
+            awkward_ArrayBuilder_beginlist(ptr);
+            offsets_and_flatten_impl(n, ptr);
+            awkward_ArrayBuilder_endlist(ptr);
+        });
+    }
+}
+
 template <typename Test, template <typename...> class Ref>
 struct is_specialization : std::false_type {
 };
@@ -211,32 +263,41 @@ struct is_specialization<Ref<Args...>, Ref> : std::true_type {
 
 template <typename T, typename std::enable_if<is_specialization<T, std::complex>::value, T>::type * = nullptr>
 std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+    build_array(result, builder_ptr);
     return std::string("complex");
 }
 
 template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type * = nullptr>
 std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+    build_array(result, builder_ptr);
     return std::string("primitive");
 }
 
 template <typename T, typename std::enable_if<is_iterable<T>, T>::type * = nullptr>
 std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+
     auto str = std::string(typeid(T).name());
+
     if (str.find("awkward") != string::npos) {
-        return std::string("awkward");
+        return std::string("awkward type");
     }
     else {
+
         typedef typename T::value_type value_type;
+
         if (is_iterable<value_type>) {
-            cout << "FIXME: Fast copy is not implemented yet." << endl;
+            return std::string("nested iterable");
         } else if (std::is_arithmetic<value_type>::value) {
-            // build_list_array(result, builder_ptr);
-            return std::string("iterable"); //, offsets_and_flatten(result)};
+            build_list_array(result, builder_ptr);
+            return std::string("iterable");
+        } else if (is_specialization<value_type, std::complex>::value) {
+            build_list_array(result, builder_ptr);
+            return "iterable of complex";
         }
-        return std::string("iterable");
+        return "something_else";
     }
     return "undefined";
 }
@@ -273,26 +334,23 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
     # 'Take' is a lazy action:
     result_ptrs = data_frame_rnode.Take[column_type](column)
+    builder = ak._v2.highlevel.ArrayBuilder()
 
-    ptrs_type = ROOT.awkward.check_type_of[column_type](result_ptrs)
+    ptrs_type = ROOT.awkward.check_type_of[column_type](
+        result_ptrs, builder._layout._ptr
+    )
 
-    if ptrs_type in ("primitive", "complex"):
+    if ptrs_type in ("primitive", "complex", "iterable", "iterable of complex"):
 
-        builder = ak._v2.highlevel.ArrayBuilder()
-        ROOT.awkward.build_array[column_type](result_ptrs, builder._layout._ptr)
-        array = builder.snapshot()
+        return _maybe_wrap(builder.snapshot(), column_as_record)
 
-        return _maybe_wrap(array, column_as_record)
+    elif ptrs_type == "nested iterable":
 
-    elif ptrs_type == "iterable":
+        ROOT.awkward.offsets_and_flatten[column_type](result_ptrs, builder._layout._ptr)
+        
+        return _maybe_wrap(builder.snapshot(), column_as_record)
 
-        builder = ak._v2.highlevel.ArrayBuilder()
-        ROOT.awkward.build_list_array[column_type](result_ptrs, builder._layout._ptr)
-        array = builder.snapshot()
-
-        return _maybe_wrap(array, column_as_record)
-
-    elif ptrs_type == "awkward":
+    elif ptrs_type == "awkward type":
 
         # Triggers event loop and execution of all actions booked in the associated RLoopManager.
         cpp_reference = result_ptrs.GetValue()

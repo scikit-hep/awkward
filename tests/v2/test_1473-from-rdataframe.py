@@ -13,11 +13,6 @@ ROOT = pytest.importorskip("ROOT")
 compiler = ROOT.gInterpreter.Declare
 
 
-def debug_compiler(code):
-    print(code)
-    ROOT.gInterpreter.Declare(code)
-
-
 def test_to_from_data_frame_large():
     n = 6  # 30
     assert 2 * (n // 2) == n
@@ -41,12 +36,37 @@ def test_to_from_data_frame_large():
 
     ak_array_in = ak._v2.from_numpy(arr, regulararray=True)
 
-    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+    array = ak._v2.Array([ak_array_in])
+
+    data_frame = ak._v2.to_rdataframe({"x": array})
+    done = compiler(
+        """
+    template<typename T>
+    struct MyFunctor_x {
+        ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> operator()(T x) {
+            ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> result;
+            for (int64_t i = 0; i < x.size(); i++) {
+                ROOT::VecOps::RVec<double> nested_result;
+                for(int64_t j = 0; j < x[i].size(); j++) {
+                    nested_result.emplace_back((double)x[i][j]);
+                }
+                result.emplace_back(nested_result);
+            }
+            return result;
+        }
+    };
+    """
+    )
+    assert done is True
+
+    f_x = ROOT.MyFunctor_x[data_frame.GetColumnType("x")]()
+
+    data_frame_y = data_frame.Define("y", f_x, ["x"])
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame_y, column="y", column_as_record=False
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert array.to_list() == ak_array_out.to_list()
 
 
 def test_data_frame_vecs():
@@ -76,6 +96,169 @@ def test_data_frame_vecs():
         ],
         fields=None,
     )
+
+
+@pytest.mark.skip(reason="FIXME: arrays of boolean are not supported yet")
+def test_data_frame_boolean():
+    ak_array_in = ak._v2.Array([True, False, True, True, True])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "bool"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_integers():
+    ak_array_in = ak._v2.Array([1, 2, 3, 4, 5])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "int64_t"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_real():
+    ak_array_in = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "double"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_complex():
+    ak_array_in = ak._v2.Array(
+        [1.0 + 0.1j, 2.0 + 0.2j, 3.0 + 0.3j, 4.0 + 0.4j, 5.0 + 0.5j]
+    )
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "std::complex<double>"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_strings():
+    ak_array_in = ak._v2.Array(["one", "two", "three"])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "std::string"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_vec_of_integers():
+    ak_array_in = ak._v2.Array([[1, 2], [3], [4, 5]])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<int64_t>"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_vec_of_real():
+    ak_array_in = ak._v2.Array([[1.1, 2.2], [3.3], [4.4, 5.5]])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<double>"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_vec_of_complex():
+    ak_array_in = ak._v2.Array(
+        [[1.0 + 0.1j, 2.0 + 0.2j], [3.0 + 0.3j], [4.0 + 0.4j, 5.0 + 0.5j]]
+    )
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<std::complex<double>>"
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_vec_of_strings():
+    ak_array_in = ak._v2.Array([["one"], ["two", "three"]])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_vec_of_vec_of_integers():
+    ak_array_in = ak._v2.Array([[[1], [2]], [[3], [4, 5]]])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_vec_of_vec_of_real():
+    ak_array_in = ak._v2.Array([[[1.1], [2.2]], [[3.3], [4.4, 5.5]]])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
+
+
+def test_data_frame_vec_of_vec_of_complex():
+    ak_array_in = ak._v2.Array(
+        [[[1.0 + 0.1j], [2.0 + 0.2j]], [[3.0 + 0.3j], [4.0 + 0.4j, 5.0 + 0.5j]]]
+    )
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame, column="x", column_as_record=False
+    )
+    assert ak_array_in.to_list() == ak_array_out.to_list()
 
 
 def test_data_frame_rvecs():
@@ -139,21 +322,6 @@ def test_to_from_data_frame_rvec_of_rvec_of_rvec():
     )
 
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
-
-    ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
-    )
-
-    assert ak_array_in.to_list() == ak_array_out.to_list()
-
-
-@pytest.mark.skip(reason="FIXME: support boolean")
-def test_boolean_data_frame():
-    ak_array_in = ak._v2.Array([True, True, False, True, False, False])
-
-    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
-
-    assert data_frame.GetColumnType("x") == "ROOT::RVec<bool>"
 
     ak_array_out = ak._v2.from_rdataframe(
         data_frame, column="x", column_as_record=False

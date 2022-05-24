@@ -61,6 +61,9 @@ class DataSourceGenerator:
             self.generators[key].generate(ROOT.gInterpreter.Declare)
 
             self.entry_types[key] = self.generators[key].entry_type()
+            if self.entry_types[key] == "bool":
+                raise ak._v2._util.error(NotImplementedError)
+
             if isinstance(
                 self.generators[key], ak._v2._connect.cling.NumpyArrayGenerator
             ):
