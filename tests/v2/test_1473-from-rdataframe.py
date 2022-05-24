@@ -272,9 +272,9 @@ def test_data_frame_vec_of_vec_of_complex():
     assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame_y, column="y", column_as_record=False
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert array.to_list() == ak_array_out.to_list()
 
 
 def test_rdata_frame_vecs_as_records():
