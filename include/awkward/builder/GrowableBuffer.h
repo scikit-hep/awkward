@@ -52,19 +52,19 @@ namespace awkward {
       /// @brief Currently used number of panels.
       size_t
         panels() const;
-            
+
       /// @brief Creates a panel if no panel exists already and
       ///inserts one `datum` into the array in panel.
-      void 
+      void
         fill_panel(T datum, size_t reserved);
-        
+
       /// @brief Allocates a new panel with slots equal to #reserved
-      void 
+      void
         add_panel(size_t reserved);
-    
-      Panel_Node *head_; 
-      Panel_Node *tail_; 
-      size_t panels_; 
+
+      Panel_Node *head_;
+      Panel_Node *tail_;
+      size_t panels_;
     };
 
     /// @brief Creates an empty GrowableBuffer.
@@ -184,9 +184,9 @@ namespace awkward {
     T
       getitem_at_nowrap(int64_t at) const;
 
-    /// @brief Compacts all accumulated data from multiple panels to one 
-    /// contiguously allocated memory panel 
-    void 
+    /// @brief Compacts all accumulated data from multiple panels to one
+    /// contiguously allocated memory panel
+    void
       snapshot();
 
   private:

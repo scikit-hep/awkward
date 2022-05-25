@@ -11,17 +11,17 @@
 
 namespace awkward {
   template <typename T>
-  GrowableBuffer<T>::Panel_Node::Panel_Node(size_t reserved) 
+  GrowableBuffer<T>::Panel_Node::Panel_Node(size_t reserved)
       : panel_length_(0)
       , next_(nullptr)
       , ptr_(reinterpret_cast<T*>(awkward_malloc(reserved*sizeof(T)))) { }
-  
+
   template <typename T>
-  GrowableBuffer<T>::Panel::Panel(size_t reserved) 
+  GrowableBuffer<T>::Panel::Panel(size_t reserved)
       : head_(nullptr)
       , tail_(nullptr)
       , panels_(1) { }
-  
+
   template <typename T>
   GrowableBuffer<T>::Panel::~Panel() {
     Panel_Node *current = head_;
@@ -30,7 +30,7 @@ namespace awkward {
       current = current->next_;
       awkward_free(temp);
     }
-  } 
+  }
 
   template <typename T>
   size_t
@@ -39,27 +39,27 @@ namespace awkward {
   }
 
   template <typename T>
-  void 
+  void
   GrowableBuffer<T>::Panel::fill_panel(T datum, size_t reserved) {
-    if (head_ == nullptr) { 
-      head_ = reinterpret_cast<Panel_Node*>(awkward_malloc(reserved*(int64_t)sizeof(Panel_Node)));  
+    if (head_ == nullptr) {
+      head_ = reinterpret_cast<Panel_Node*>(awkward_malloc(reserved*(int64_t)sizeof(Panel_Node)));
       new (head_) Panel_Node(reserved);
-      head_->ptr_[0] = datum; 
+      head_->ptr_[0] = datum;
       head_->panel_length_++;
       tail_ = head_;
       return;
     }
     if (tail_->panel_length_ < reserved) {
       tail_->ptr_[tail_->panel_length_] = datum;
-      tail_->panel_length_++;  
+      tail_->panel_length_++;
     }
   }
 
   template <typename T>
-  void 
+  void
   GrowableBuffer<T>::Panel::add_panel(size_t reserved) {
-    panels_++; 
-    Panel_Node *new_Panel =  reinterpret_cast<Panel_Node*>(awkward_malloc(reserved*(int64_t)sizeof(Panel_Node)));  
+    panels_++;
+    Panel_Node *new_Panel =  reinterpret_cast<Panel_Node*>(awkward_malloc(reserved*(int64_t)sizeof(Panel_Node)));
     new (head_) Panel_Node(reserved);
     tail_->next_ = new_Panel;
     tail_ = new_Panel;
@@ -207,7 +207,7 @@ namespace awkward {
   template <typename T>
   void
   GrowableBuffer<T>:: snapshot() {
-    UniquePtr ptr(reinterpret_cast<T*>(awkward_malloc((int64_t)(length_*sizeof(T))))); 
+    UniquePtr ptr(reinterpret_cast<T*>(awkward_malloc((int64_t)(length_*sizeof(T)))));
     Panel_Node *temp = panel_.head_;
     int64_t total_length = 0;
     while (temp != nullptr) {
@@ -217,7 +217,7 @@ namespace awkward {
       }
       temp = temp->next_;
     }
-    ptr_ = std::move(ptr); 
+    ptr_ = std::move(ptr);
   }
 
   template class EXPORT_TEMPLATE_INST GrowableBuffer<bool>;
