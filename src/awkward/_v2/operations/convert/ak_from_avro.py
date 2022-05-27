@@ -27,8 +27,8 @@ def metadata_from_avro_file(file_name, show_code=False, reader_lang="ft"):
     if reader_lang == "py":
         temp_class = awkward._v2._connect.avro.read_avro_py(
             file_name, show_code)
-        if show_code:
-            print("".join(temp_class.head + temp_class.body))  # noqa
         return temp_class.form
     elif reader_lang == "ft":
-        pass
+        temp_class = awkward._v2._connect.avro.read_avro_ft(
+            file_name, show_code)
+        return temp_class.form

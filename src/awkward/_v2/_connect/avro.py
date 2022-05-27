@@ -1,5 +1,5 @@
 import numpy as np
-import awkward as ak
+import awkward._v2 as ak
 import json
 
 from awkward.operations.describe import parameters
@@ -10,10 +10,11 @@ class read_avro_py:
         self.file_name = file_name
         self._data = np.memmap(file_name, np.uint8)
         self.field = []
-        try:
-            assert self.check_valid is True
-        except Exception as error:
-            raise TypeError("Not a valid avro." + repr(error))
+        # try:
+        #    if self.check_valid != True:
+        #        raise
+        # except Exception as error:
+        #    raise TypeError("Not a valid avro." + repr(error))
         pos, self.pairs = self.decode_varint(4, self._data)
         self.pairs = self.decode_zigzag(self.pairs)
         print(self.pairs)
@@ -54,7 +55,7 @@ class read_avro_py:
         for key in con.keys():
             con[key] = np.array(con[key])
         print(con)
-        self.outarr = ak._v2.from_buffers(
+        self.outarr = ak.from_buffers(
             self.form, sum(self.blocks), con
         )  # put in ._v2 later
         print(self.outarr.layout)
@@ -757,10 +758,10 @@ class read_avro_ft:
         self.file_name = file_name
         self._data = np.memmap(file_name, np.uint8)
         self.field = []
-        try:
-            assert self.check_valid is True
-        except Exception as error:
-            raise TypeError("Not a valid avro." + repr(error))
+        # try:
+        #    assert self.check_valid is True
+        # except Exception as error:
+        #    raise TypeError("Not a valid avro." + repr(error))
         pos, self.pairs = self.decode_varint(4, self._data)
         self.pairs = self.decode_zigzag(self.pairs)
         print(self.pairs)
@@ -775,10 +776,10 @@ class read_avro_ft:
             "    fields = data[field[i][0]:field[i][1]]\n",
             f"    for i in range({sum(self.blocks)}):",
         ]
-        aform = []
+        #aform = []
         dec = ["import struct\nimport numpy \n", "con = {"]
         self.form, self._exec_code, self.count, dec = self.rec_exp_json_code(
-            self.schema, _exec_code, ind, aform, 0, dec
+            self.schema, _exec_code, ind, 0, dec
         )
         dec.append("}")
         dec.append("\n")
@@ -790,18 +791,18 @@ class read_avro_ft:
             print("".join(self.head + self.body))  # noqa
         exec("".join(self.head + self.body), globals(), loc)
         # print("".join(self.form)[:-2])
-        temp_json = "".join(self.form)[:-2]
-        if temp_json[-1] != "}":
-            if temp_json[-1] != '"':
-                temp_json += '"'
-            temp_json += "}"
-        print(temp_json)
-        self.form = json.loads(temp_json)
+        #temp_json = "".join(self.form)[:-2]
+        # if temp_json[-1] != "}":
+        #    if temp_json[-1] != '"':
+        #        temp_json += '"'
+        #    temp_json += "}"
+        # print(temp_json)
+        #self.form = json.loads(temp_json)
         con = loc["con"]
         for key in con.keys():
             con[key] = np.array(con[key])
         print(con)
-        self.outarr = ak._v2.from_buffers(
+        self.outarr = ak.from_buffers(
             self.form, sum(self.blocks), con
         )  # put in ._v2 later
         print(self.outarr.layout)
@@ -912,15 +913,17 @@ class read_avro_ft:
         if dtype["type"] == "enum":
             return f"con['node{count}-index'].append(0)"
 
-    def rec_exp_json_code(self, file, _exec_code, ind, aform, count, dec):
+    def rec_exp_json_code(self, file, _exec_code, ind, count, dec):
         if isinstance(file, str) or isinstance(file, list):
             file = {"type": file}
         if (
             file["type"] == "null"
         ):  # problem is that a null array does not have any length
-            aform.append(
-                f'{{"class": "IndexedOptionArray64","index": "i64","content": {{"class": "EmptyArray","form_key": "node{count+1}"}},"form_key": "node{count}"}}'
-            )
+            # aform.append(
+            #    f'{{"class": "IndexedOptionArray64","index": "i64","content": {{"class": "EmptyArray","form_key": "node{count+1}"}},"form_key": "node{count}"}}'
+            # )
+            aform = ak.forms.IndexedOptionForm("i64", ak.forms.EmptyForm(
+                form_key=f"node{count+1}"), form_key=f"node{count}")
             var1 = f" 'node{count}-index'"
             var2 = f" 'node{count+1}-data'"
             dec.append(var1)
@@ -939,23 +942,31 @@ class read_avro_ft:
         elif file["type"] == "record":
             # print(file["type"],count)
             temp = count
-            aform.append('{"class" : "RecordArray",')
-            aform.append('"contents": {\n')
+            #aform.append('{"class" : "RecordArray",')
+            #aform.append('"contents": {\n')
+            aformcont = []
+            aformfields = []
             for elem in file["fields"]:
-                aform.append('"' + elem["name"] + '"' + ": ")
+                #aform.append('"' + elem["name"] + '"' + ": ")
+                aformfields.append(elem["name"])
                 aform, _exec_code, count, dec = self.rec_exp_json_code(
-                    elem, _exec_code, ind, aform, count + 1, dec
+                    elem, _exec_code, ind, count + 1, dec
                 )
-            aform[-1] = aform[-1][:-2]
-            aform.append(f'}},"form_key": "node{temp}"}},\n')
+                aformcont.append(aform)
+            #aform[-1] = aform[-1][:-2]
+            #aform.append(f'}},"form_key": "node{temp}"}},\n')
+            aform = ak.forms.RecordForm(
+                aformcont, aformfields, form_key=f"node{temp}")
             return aform, _exec_code, count, dec
 
         elif file["type"] == "string":
             # print(file["name"])
             # print(file["type"],count)
-            aform.append(
-                f'{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray","primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{count+1}"}},"parameters": {{"__array__": "string"}},"form_key": "node{count}"}},\n'
-            )
+            # aform.append(
+            #    f'{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray","primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{count+1}"}},"parameters": {{"__array__": "string"}},"form_key": "node{count}"}},\n'
+            # )
+            aform = ak.forms.ListOffsetForm(
+                "i64", ak.forms.NumpyForm("uint8", parameters={"__array__": "char"}, form_key=f"node{count+1}"), form_key=f"node{count}")
             var1 = f" 'node{count}-offsets'"
             var2 = f" 'node{count+1}-data'"
             dec.append(var1)
@@ -991,7 +1002,8 @@ class read_avro_ft:
             # aform.append(
             #    f'{{"class" : "NumpyArray", "primitive": "int32", "form_key": "node{count}"}},\n'
             # )
-            aform = ak.forms.NumpyForm("int32", form_key=f"node{count}")
+            aform = ak.forms.NumpyForm(
+                primitive="int32", form_key=f"node{count}")
             var1 = f" 'node{count}-data'"
             dec.append(var1)
             dec.append(": [],")
@@ -1094,16 +1106,16 @@ class read_avro_ft:
         elif file["type"] == "bytes":
             # print(file["name"])
             # print(file["type"],count)
-            astring = f'{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray", "primitive": "uint8","parameters": {{"__array__": "byte"}}, "form_key": "node{count+1}"}},"parameters": {{"__array__": "byte"}},"form_key": "node{count}"}},\n'
+            #astring = f'{{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray", "primitive": "uint8","parameters": {{"__array__": "byte"}}, "form_key": "node{count+1}"}},"parameters": {{"__array__": "byte"}},"form_key": "node{count}"}},\n'
             var1 = f" 'node{count+1}-data'"
             var2 = f" 'node{count}-offsets'"
             dec.append(var2)
             dec.append(": [0],")
             dec.append(var1)
             dec.append(": [],")
-            aform.append(astring)
+            # aform.append(astring)
             aform = ak.forms.ListOffsetForm(
-                "i64", ak.forms.NumpyForm("uint8", form_key=f"node{count+1}"), parameters={"__array__": "byte"}, form_key=f"node{count+1}")
+                "i64", ak.forms.NumpyForm("uint8", form_key=f"node{count+1}"), parameters={"__array__": "byte"}, form_key=f"node{count}")
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
@@ -1231,7 +1243,6 @@ class read_avro_ft:
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
-                            aform,
                             count + 1,
                             dec,
                         )
@@ -1282,7 +1293,6 @@ class read_avro_ft:
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
-                            aform,
                             count + 1,
                             dec,
                         )
@@ -1364,7 +1374,6 @@ class read_avro_ft:
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
-                            aform,
                             count + 1,
                             dec,
                         )
@@ -1380,7 +1389,7 @@ class read_avro_ft:
             # print(file["name"])
             # print(file["type"],count)
             aform, _exec_code, count, dec = self.rec_exp_json_code(
-                file["type"], _exec_code, ind, aform, count, dec
+                file["type"], _exec_code, ind, count, dec
             )
             return aform, _exec_code, count, dec
 
@@ -1389,9 +1398,11 @@ class read_avro_ft:
             var1 = f" 'node{count+1}-data'"
             dec.append(var1)
             dec.append(": [],")
-            aform.append(
-                f'{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{count+1}", "parameters": {{"__array__": "byte"}}}},"size": {file["size"]},"form_key": "node{count}"}},\n'
-            )
+            # aform.append(
+            #    f'{{"class": "RegularArray","content": {{"class": "NumpyArray","primitive": "uint8","form_key": "node{count+1}", "parameters": {{"__array__": "byte"}}}},"size": {file["size"]},"form_key": "node{count}"}},\n'
+            # )
+            aform = ak.forms.RegularForm(ak.forms.NumpyForm("uint8", form_key=f"node{count+1}"), parameters={
+                "__array__": "byte"}, size=file["size"], form_key=f"node{count}")
             temp = file["size"]
             _exec_code.append("\n" + "    " * ind + f"lenn = {temp}")
             _exec_code.append(
@@ -1409,9 +1420,11 @@ class read_avro_ft:
         elif file["type"] == "enum":
             # print(file["name"])
             # print(file["type"],count)
-            aform.append(
-                f'{{"class": "IndexedArray64","index": "i64","content": {{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray","primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{count+2}"}},"parameters": {{"__array__": "string"}},"form_key": "node{count+1}"}}, "parameters": {{"__array__": "categorical"}}, "form_key": "node{count}"}},\n'
-            )
+            # aform.append(
+            #    f'{{"class": "IndexedArray64","index": "i64","content": {{"class": "ListOffsetArray64","offsets": "i64","content": {{"class": "NumpyArray","primitive": "uint8","parameters": {{"__array__": "char"}},"form_key": "node{count+2}"}},"parameters": {{"__array__": "string"}},"form_key": "node{count+1}"}}, "parameters": {{"__array__": "categorical"}}, "form_key": "node{count}"}},\n'
+            # )
+            aform = ak.forms.IndexedForm("i64", ak.forms.ListOffsetForm(
+                "i64", ak.forms.NumpyForm("uint8", parameters={"__array__": "char"}, form_key=f"node{count+2}"), form_key=f"node{count+1}"), parameters={"__array__": "categorical"}, form_key=f"node{count}")
             var1 = f" 'node{count}-index'"
             dec.append(var1)
             dec.append(": [],")
@@ -1444,8 +1457,8 @@ class read_avro_ft:
             var1 = f" 'node{count}-offsets'"
             dec.append(var1)
             dec.append(": [0],")
-            aform.append(
-                '{"class": "ListOffsetArray64","offsets": "i64","content": ')
+            # aform.append(
+            #    '{"class": "ListOffsetArray64","offsets": "i64","content": ')
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
@@ -1464,9 +1477,9 @@ class read_avro_ft:
             _exec_code.append("\n" + "    " * (ind + 1) +
                               "nbytes = decode_zigzag(inn)")
             _exec_code.append("\n" + "    " * ind + "for j in range(out):")
-            aform, _exec_code, count, dec = self.rec_exp_json_code(
+            aformtemp, _exec_code, count, dec = self.rec_exp_json_code(
                 {"type": file["items"]}, _exec_code, ind +
-                1, aform, count + 1, dec
+                1, count + 1, dec
             )
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
@@ -1474,7 +1487,9 @@ class read_avro_ft:
             _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append("\n" + "    " * ind + """if out != 0:""")
             _exec_code.append("\n" + "    " * (ind + 1) + "raise")
-            aform.append(f'"form_key": "node{temp}"}},\n')
+            #aform.append(f'"form_key": "node{temp}"}},\n')
+            aform = ak.forms.ListOffsetForm(
+                "i64", aformtemp, form_key=f"node{temp}")
             return aform, _exec_code, count, dec
 
         elif file["type"] == "map":

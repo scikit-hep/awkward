@@ -2,7 +2,7 @@
 
 from awkward._v2.operations.convert.ak_from_numpy import from_numpy  # noqa: F401
 from awkward._v2.operations.convert.ak_from_avro import from_avro_file  # noqa: F401
-
+from awkward._v2.operations.convert.ak_from_avro import metadata_from_avro_file  # noqa: F401
 # from awkward._v2.operations.convert.ak_from_avro import (
 #    form_from_avro_file,
 # )  # noqa: F401
