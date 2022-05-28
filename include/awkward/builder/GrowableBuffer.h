@@ -148,13 +148,13 @@ namespace awkward {
     /// @brief Currently used number of panels.
     size_t
       panels() const;
-           
+
     /// @brief Inserts one `datum` into the array in panel.
-    void 
+    void
       fill_panel(T datum, size_t reserved);
-        
+
     /// @brief Creates a new panel with slots equal to #reserved
-    void 
+    void
       add_panel(size_t reserved);
 
     /// @brief Discards accumulated data, the #reserved returns to
@@ -176,9 +176,9 @@ namespace awkward {
     T
       getitem_at_nowrap(int64_t at) const;
 
-    /// @brief Compacts all accumulated data from multiple panels to one 
-    /// contiguously allocated memory panel 
-    void 
+    /// @brief Compacts all accumulated data from multiple panels to one
+    /// contiguously allocated memory panel
+    void
       snapshot();
 
   private:
@@ -189,9 +189,9 @@ namespace awkward {
     size_t length_;
     // @brief See #reserved.
     size_t reserved_;
-    GrowableBufferPanel *head_; 
-    GrowableBufferPanel *tail_; 
-    size_t panels_; 
+    GrowableBufferPanel *head_;
+    GrowableBufferPanel *tail_;
+    size_t panels_;
   };
 }
 
