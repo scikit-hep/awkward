@@ -27,44 +27,18 @@ namespace awkward {
     using UniquePtrDeleter = decltype(kernel::array_deleter<T>());
     using UniquePtr = std::unique_ptr<T, UniquePtrDeleter>;
   public:
-    class Panel_Node {
-    public:
-      /// @brief Creates a Panel_Node by allocating a new node, taking an
-      /// initial #reserved from
+    struct GrowableBufferPanel {
+      /// @brief Creates a GrowableBufferPanel by allocating a new Panel,
+      /// taking an initial #reserved from
       /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial}.
-      Panel_Node(size_t reserved);
-
-      size_t panel_length_;
-      Panel_Node* next_;
-      T* ptr_;
-    };
-
-    class Panel {
-    public:
-      /// @brief Creates a Panel by allocating a new panel, taking an
-      /// initial #reserved from
-      /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial}.
-      Panel(size_t reserved);
+      GrowableBufferPanel(size_t reserved);
 
       /// @brief Deletes a Panel.
-      ~Panel();
+      ~GrowableBufferPanel();
 
-      /// @brief Currently used number of panels.
-      size_t
-        panels() const;
-
-      /// @brief Creates a panel if no panel exists already and
-      ///inserts one `datum` into the array in panel.
-      void
-        fill_panel(T datum, size_t reserved);
-
-      /// @brief Allocates a new panel with slots equal to #reserved
-      void
-        add_panel(size_t reserved);
-
-      Panel_Node *head_;
-      Panel_Node *tail_;
-      size_t panels_;
+      size_t length;
+      std::unique_ptr<GrowableBufferPanel> next;
+      UniquePtr ptr;
     };
 
     /// @brief Creates an empty GrowableBuffer.
@@ -113,14 +87,20 @@ namespace awkward {
     /// @param ptr Reference-counted pointer to the array buffer.
     /// @param length Currently used number of elements.
     /// @param reserved Currently allocated number of elements.
-    /// @param panel Object of Panel class
+    /// @param head Pointer to the first panel.
+    /// @param tail Pointer to the last panel.
+    /// @param panels Currently used number of panels.
     ///
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of reallocations.
     GrowableBuffer(const ArrayBuilderOptions& options,
-                   GrowableBuffer::UniquePtr ptr,
+                   UniquePtr ptr,
                    size_t length,
-                   size_t reserved);
+                   size_t reserved,
+                   GrowableBufferPanel *head,
+                   GrowableBufferPanel *tail,
+                   size_t panels
+                   );
 
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
     /// initial #reserved from
@@ -165,6 +145,18 @@ namespace awkward {
     void
       set_reserved(size_t minreserved);
 
+    /// @brief Currently used number of panels.
+    size_t
+      panels() const;
+           
+    /// @brief Inserts one `datum` into the array in panel.
+    void 
+      fill_panel(T datum, size_t reserved);
+        
+    /// @brief Creates a new panel with slots equal to #reserved
+    void 
+      add_panel(size_t reserved);
+
     /// @brief Discards accumulated data, the #reserved returns to
     /// {@link ArrayBuilderOptions#initial ArrayBuilderOptions::initial},
     /// and a new #ptr is allocated.
@@ -184,9 +176,9 @@ namespace awkward {
     T
       getitem_at_nowrap(int64_t at) const;
 
-    /// @brief Compacts all accumulated data from multiple panels to one
-    /// contiguously allocated memory panel
-    void
+    /// @brief Compacts all accumulated data from multiple panels to one 
+    /// contiguously allocated memory panel 
+    void 
       snapshot();
 
   private:
@@ -197,7 +189,9 @@ namespace awkward {
     size_t length_;
     // @brief See #reserved.
     size_t reserved_;
-    Panel panel_;
+    GrowableBufferPanel *head_; 
+    GrowableBufferPanel *tail_; 
+    size_t panels_; 
   };
 }
 
