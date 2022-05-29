@@ -1138,6 +1138,7 @@ class read_avro_ft:
 
         elif isinstance(file["type"], list):
             # print(file["name"])
+            flag = 0
             type_idx = 0
             temp = count
             null_present = False
@@ -1155,16 +1156,20 @@ class read_avro_ft:
                     flag = 0
             if "null" in file["type"] and flag == 0 and out == 2:
 
-                aform.append(
-                    '{"class": "ByteMaskedArray","mask": "i8","content":\n')
+                # aform.append(
+                #    '{"class": "ByteMaskedArray","mask": "i8","content":\n')
+                # aform = ak.forms.ByteMaskedForm(
+                #    "i8", ak.forms.EmptyForm(), True)
                 var1 = f" 'node{count}-mask'"
                 dec.append(var1)
                 dec.append(": [],")
                 type_idx = 0
             elif "null" in file["type"] and flag == 1:
-                aform.append(
-                    '{"class": "IndexedOptionArray64","index": "i64","content":\n'
-                )
+                # aform.append(
+                #    '{"class": "IndexedOptionArray64","index": "i64","content":\n'
+                # )
+                # aform = ak.forms.IndexedOptionForm(
+                #    "i64", ak.forms.EmptyForm(), form_key=f"node{count}")
                 var1 = f" 'node{count}-index'"
                 dec.append(var1)
                 dec.append(": [],")
@@ -1172,18 +1177,28 @@ class read_avro_ft:
             else:
                 for elem in file["type"]:
                     if elem == "null":
-                        aform.append(
-                            '{"class": "ByteMaskedArray","mask": "i8","content":\n'
-                        )
+                        # form.append(
+                        #    '{"class": "ByteMaskedArray","mask": "i8","content":\n'
+                        # )
+                        # aform = ak.forms.ByteMaskedForm(
+                        #    "i8", ak.forms.EmptyForm(), True)
+                        flag = 1
                         var1 = f" 'node{count}-mask'"
                         mask_idx = count
                         dec.append(var1)
                         dec.append(": [],")
                         count = count + 1
                         null_present = True
-                aform.append(
-                    '{"class": "UnionArray8_64","tags": "i8","index": "i64","contents": [\n'
-                )
+                # if null_present:
+                #    aform1 = ak.forms.UnionForm(
+                #        "i8", "i64", ak.forms.EmptyForm())
+                #    aform.content = aform1
+                # else:
+                #    aform = ak.forms.UnionForm(
+                #        "i8", "i64", ak.forms.EmptyForm())
+                # aform.append(
+                #    '{"class": "UnionArray8_64","tags": "i8","index": "i64","contents": [\n'
+                # )
                 var1 = f" 'node{count}-tags'"
                 union_idx = count
                 dec.append(var1)
@@ -1239,15 +1254,17 @@ class read_avro_ft:
                             + f"con['node{count}-mask'].append(np.int8(True))"
                         )
 
-                        aform, _exec_code, count, dec = self.rec_exp_json_code(
+                        aform1, _exec_code, count, dec = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
                             dec,
                         )
-                aform.append(
-                    f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                # aform.append(
+                 #   f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                aform = ak.forms.ByteMaskedForm(
+                    "i8", aform1, True, form_key=f"node{temp}")
             if type_idx == 1:
                 temp = count
                 idxx = file["type"].index("null")
@@ -1289,15 +1306,17 @@ class read_avro_ft:
                             "\n" + "    " * (ind + 1) +
                             f"countvar{count}{i} += 1"
                         )
-                        aform, _exec_code, count, dec = self.rec_exp_json_code(
+                        aform1, _exec_code, count, dec = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
                             dec,
                         )
-                aform.append(
-                    f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                # aform.append(
+                 #   f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                aform = ak.forms.IndexedOptionForm(
+                    "i64", aform1, form_key=f"node{temp}")
             if type_idx == 2:
                 if null_present:
                     idxx = file["type"].index("null")
@@ -1310,6 +1329,7 @@ class read_avro_ft:
                         dum_idx = idxx - 1
                 temp = count
                 # idxx = file["type"].index("null")
+                temp_forms = []
                 for i in range(out):
                     if file["type"][i] == "null":
                         _exec_code.append(
@@ -1370,19 +1390,26 @@ class read_avro_ft:
                             "\n" + "    " * (ind + 1) +
                             f"countvar{count}{i} += 1"
                         )
-                        aform, _exec_code, count, dec = self.rec_exp_json_code(
+                        aform1, _exec_code, count, dec = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
                             dec,
                         )
-                if aform[-1][-2] == ",":
-                    aform[-1] = aform[-1][0:-2]
-                aform.append(f'], "form_key": "node{union_idx}"}},')
+                        temp_forms.append(aform1)
+                # if aform[-1][-2] == ",":
+                #    aform[-1] = aform[-1][0:-2]
+                #aform.append(f'], "form_key": "node{union_idx}"}},')
                 if null_present:
-                    aform.append(
-                        f'"valid_when": true,"form_key": "node{mask_idx}"}}\n')
+                    # aform.append(
+                    #   f'"valid_when": true,"form_key": "node{mask_idx}"}}\n')
+                    aform = ak.forms.ByteMaskedForm(
+                        "i8", ak.forms.UnionForm(
+                            "i8", "i64", temp_forms, form_key=f"node{union_idx}"), True, form_key=f"node{mask_idx}")
+                else:
+                    aform = ak.forms.UnionForm(
+                        "i8", "i64", aform1, form_key=f"node{mask_idx}")
             return aform, _exec_code, count, dec
 
         elif isinstance(file["type"], dict):

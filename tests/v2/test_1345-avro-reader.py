@@ -313,6 +313,12 @@ def test_Unions_int_null():
         ).to_list()
         == data
     )
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/int_null_test_data.avro", reader_lang="ft"
+        ).to_list()
+        == data
+    )
 
 
 def test_Unions_string_null():
@@ -324,6 +330,12 @@ def test_Unions_string_null():
         ).to_list()
         == data
     )
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/string_null_test_data.avro", reader_lang="ft"
+        ).to_list()
+        == data
+    )
 
 
 def test_Unions_enum_null():
@@ -331,6 +343,12 @@ def test_Unions_enum_null():
     assert (
         ak.from_avro_file(
             file_name="tests/samples/enum_null_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data
+    )
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/enum_null_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -352,6 +370,12 @@ def test_Unions_record_null():
         ).to_list()[0]["name"]
         == data[0]["name"]
     )
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/record_null_test_data.avro", reader_lang="ft"
+        ).to_list()[0]["name"]
+        == data[0]["name"]
+    )
 
 
 def test_Unions_null_X_Y():
@@ -360,6 +384,12 @@ def test_Unions_null_X_Y():
     assert (
         ak.from_avro_file(
             file_name="tests/samples/int_string_null_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data
+    )
+    assert (
+        ak.from_avro_file(
+            file_name="tests/samples/int_string_null_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
