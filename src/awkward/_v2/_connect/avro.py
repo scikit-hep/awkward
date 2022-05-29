@@ -1292,7 +1292,7 @@ class read_avro_ft:
                         #    + "    " * (ind + 1)
                         # change dum_dat function to return full string
                         #    + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
-                        # )
+                        # ))
                     else:
                         _exec_code.append(
                             "\n" + "    " * (ind) + f"if idxx == {i}:")
