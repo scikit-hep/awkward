@@ -225,6 +225,36 @@ offsets_and_flatten_impl<ROOT::VecOps::RVec<ROOT::VecOps::RVec<double> > const> 
     });
 }
 
+template<>
+void
+offsets_and_flatten_impl<ROOT::VecOps::RVec<ROOT::VecOps::RVec<int64_t> > const> (
+    const ROOT::VecOps::RVec<ROOT::VecOps::RVec<int64_t> >& result,
+    void* ptr)
+{
+    std::for_each(result.begin(), result.end(), [&] (auto const& n) {
+        awkward_ArrayBuilder_beginlist(ptr);
+        for (auto const& it : n) {
+            awkward_ArrayBuilder_integer(ptr, it);
+        }
+        awkward_ArrayBuilder_endlist(ptr);
+    });
+}
+
+template<>
+void
+offsets_and_flatten_impl<ROOT::VecOps::RVec<ROOT::VecOps::RVec<std::complex<double>> > const> (
+    const ROOT::VecOps::RVec<ROOT::VecOps::RVec<std::complex<double>> >& result,
+    void* ptr)
+{
+    std::for_each(result.begin(), result.end(), [&] (auto const& n) {
+        awkward_ArrayBuilder_beginlist(ptr);
+        for (auto const& it : n) {
+            awkward_ArrayBuilder_complex(ptr, it.real(), it.imag());
+        }
+        awkward_ArrayBuilder_endlist(ptr);
+    });
+}
+
 template <typename T>
 void
 offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {

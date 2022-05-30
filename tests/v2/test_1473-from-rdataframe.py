@@ -42,7 +42,7 @@ def test_to_from_data_frame_large():
     done = compiler(
         """
     template<typename T>
-    struct MyFunctor_x {
+    struct MyFunctor_double {
         ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> operator()(T x) {
             ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> result;
             for (int64_t i = 0; i < x.size(); i++) {
@@ -55,47 +55,63 @@ def test_to_from_data_frame_large():
             return result;
         }
     };
+
+    template<typename T>
+    struct MyFunctor_integer {
+        ROOT::VecOps::RVec<ROOT::VecOps::RVec<int64_t>> operator()(T x) {
+            ROOT::VecOps::RVec<ROOT::VecOps::RVec<int64_t>> result;
+            for (int64_t i = 0; i < x.size(); i++) {
+                ROOT::VecOps::RVec<int64_t> nested_result;
+                for(int64_t j = 0; j < x[i].size(); j++) {
+                    nested_result.emplace_back((int64_t)x[i][j]);
+                }
+                result.emplace_back(nested_result);
+            }
+            return result;
+        }
+    };
+
+    template<typename T>
+    struct MyFunctor_complex {
+        ROOT::VecOps::RVec<ROOT::VecOps::RVec<std::complex<double>>> operator()(T x) {
+            ROOT::VecOps::RVec<ROOT::VecOps::RVec<std::complex<double>>> result;
+            for (int64_t i = 0; i < x.size(); i++) {
+                ROOT::VecOps::RVec<std::complex<double>> nested_result;
+                for(int64_t j = 0; j < x[i].size(); j++) {
+                    nested_result.emplace_back(std::complex<double>(x[i][j],0));
+                }
+                result.emplace_back(nested_result);
+            }
+            return result;
+        }
+    };
+
     """
     )
     assert done is True
 
-    f_x = ROOT.MyFunctor_x[data_frame.GetColumnType("x")]()
+    to_double = ROOT.MyFunctor_double[data_frame.GetColumnType("x")]()
+    to_integer = ROOT.MyFunctor_integer[data_frame.GetColumnType("x")]()
+    to_complex = ROOT.MyFunctor_complex[data_frame.GetColumnType("x")]()
 
-    data_frame_y = data_frame.Define("y", f_x, ["x"])
+    data_frame_y = data_frame.Define("y", to_double, ["x"])
+    data_frame_k = data_frame.Define("k", to_integer, ["x"])
+    data_frame_z = data_frame.Define("z", to_complex, ["x"])
 
     ak_array_out = ak._v2.from_rdataframe(
         data_frame_y, column="y", column_as_record=False
     )
     assert array.to_list() == ak_array_out.to_list()
 
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame_k, column="k", column_as_record=False
+    )
+    assert array.to_list() == ak_array_out.to_list()
 
-def test_data_frame_vecs():
-    data_frame = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
-    data_frame_xy = data_frame.Define("y", "x*2")
-
-    ak_array_x = ak._v2.from_rdataframe(
-        data_frame_xy, column="x", column_as_record=False
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame_z, column="z", column_as_record=False
     )
-    assert ak_array_x.layout.form == ak._v2.forms.NumpyForm("float64")
-
-    ak_record_array_x = ak._v2.from_rdataframe(
-        data_frame_xy, column="x", column_as_record=True
-    )
-    assert ak_record_array_x.layout.form == ak._v2.forms.RecordForm(
-        [ak._v2.forms.NumpyForm("float64")], "x"
-    )
-
-    ak_record_array_y = ak._v2.from_rdataframe(
-        data_frame_xy, column="y", column_as_record=True
-    )
-    ak_array = ak._v2.zip([ak_record_array_x, ak_record_array_y])
-    assert ak_array.layout.form == ak._v2.forms.RecordForm(
-        contents=[
-            ak._v2.forms.RecordForm([ak._v2.forms.NumpyForm("float64")], "x"),
-            ak._v2.forms.RecordForm([ak._v2.forms.NumpyForm("float64")], "y"),
-        ],
-        fields=None,
-    )
+    assert array.to_list() == ak_array_out.to_list()
 
 
 @pytest.mark.skip(reason="FIXME: arrays of boolean are not supported yet")
@@ -261,7 +277,46 @@ def test_data_frame_vec_of_vec_of_complex():
     assert ak_array_in.to_list() == ak_array_out.to_list()
 
 
-def test_data_frame_rvecs():
+def test_rdata_frame_vecs_as_records():
+    data_frame = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
+    data_frame_xy = data_frame.Define("y", "x*2")
+
+    ak_array_x = ak._v2.from_rdataframe(
+        data_frame_xy, column="x", column_as_record=False
+    )
+    assert ak_array_x.layout.form == ak._v2.forms.NumpyForm("float64")
+
+    ak_record_array_x = ak._v2.from_rdataframe(
+        data_frame_xy, column="x", column_as_record=True
+    )
+    assert ak_record_array_x.layout.form == ak._v2.forms.RecordForm(
+        [ak._v2.forms.NumpyForm("float64")], "x"
+    )
+
+    ak_record_array_y = ak._v2.from_rdataframe(
+        data_frame_xy, column="y", column_as_record=True
+    )
+    ak_array = ak._v2.zip([ak_record_array_x, ak_record_array_y])
+    assert ak_array.layout.form == ak._v2.forms.RecordForm(
+        contents=[
+            ak._v2.forms.RecordForm([ak._v2.forms.NumpyForm("float64")], "x"),
+            ak._v2.forms.RecordForm([ak._v2.forms.NumpyForm("float64")], "y"),
+        ],
+        fields=None,
+    )
+
+
+def test_rdata_frame_vecs_of_complex():
+    data_frame = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
+    data_frame_xy = data_frame.Define("y", "x*2 +1i")
+
+    ak_array_y = ak._v2.from_rdataframe(
+        data_frame_xy, column="y", column_as_record=False
+    )
+    assert ak_array_y.layout.form == ak._v2.forms.NumpyForm("complex128")
+
+
+def test_rdata_frame_rvecs_as_records():
     data_frame = ROOT.RDataFrame(1024)
     coordDefineCode = """ROOT::VecOps::RVec<double> {0}(len);
                      std::transform({0}.begin(), {0}.end(), {0}.begin(), [](double){{return gRandom->Uniform(-1.0, 1.0);}});
@@ -328,13 +383,3 @@ def test_to_from_data_frame_rvec_of_rvec_of_rvec():
     )
 
     assert ak_array_in.to_list() == ak_array_out.to_list()
-
-
-def test_data_frame_complex_vecs():
-    data_frame = ROOT.RDataFrame(10).Define("x", "gRandom->Rndm()")
-    data_frame_xy = data_frame.Define("y", "x*2 +1i")
-
-    ak_array_y = ak._v2.from_rdataframe(
-        data_frame_xy, column="y", column_as_record=False
-    )
-    assert ak_array_y.layout.form == ak._v2.forms.NumpyForm("complex128")
