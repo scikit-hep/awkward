@@ -3,6 +3,8 @@
 #ifndef AWKWARD_ARRAY_BUILDERS_H_
 #define AWKWARD_ARRAY_BUILDERS_H_
 
+#include "awkward/layoutbuilder/LayoutBuilder.h"
+
 #include <iterator>
 #include <stdlib.h>
 #include <string>
