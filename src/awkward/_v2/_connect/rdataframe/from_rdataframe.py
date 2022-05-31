@@ -21,6 +21,21 @@ done = compiler(
 )
 assert done is True
 
+primitive_types = (
+    "int8",
+    "int16",
+    "int32",
+    "int64",
+    "uint8",
+    "uint16",
+    "uint32",
+    "uint64",
+    "float32",
+    "float64",
+    "complex128",
+    "complex256",
+)
+
 
 def from_rdataframe(data_frame, column, column_as_record=True):
     def _wrap_as_array(column, array, column_as_record):
@@ -55,10 +70,54 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     ptrs_type = ROOT.awkward.check_type_of[column_type](
         result_ptrs, builder._layout._ptr
     )
+    # print(ptrs_type)
 
-    if ptrs_type in ("primitive", "complex", "iterable", "iterable of complex"):
+    if ptrs_type in primitive_types:
+        form = ak._v2.forms.NumpyForm(ptrs_type)
 
-        return _maybe_wrap(builder.snapshot(), column_as_record)
+        builder = ak.layout.LayoutBuilder64(str(form))
+        ROOT.awkward.build_layout[column_type](result_ptrs, builder._ptr)
+
+        return _wrap_as_array(column, builder.snapshot(), column_as_record)
+
+    elif ptrs_type.startswith("iterable"):
+
+        strings_form = """
+{
+    "class": "ListOffsetArray",
+    "offsets": "i64",
+    "content": {
+        "class": "NumpyArray",
+        "primitive": "uint8",
+        "parameters": {
+            "__array__": "char"
+        }
+    },
+    "parameters": {
+        "__array__": "string"
+    }
+}"""
+        builder_form = (
+            strings_form
+            if ptrs_type[ptrs_type.index(" ") + 1 :] == "chars"
+            else str(
+                ak._v2.forms.ListOffsetForm(
+                    "i64", ak._v2.forms.NumpyForm(ptrs_type[ptrs_type.index(" ") + 1 :])
+                )
+            )
+        )
+
+        # print(builder_form)
+
+        builder = ak.layout.LayoutBuilder64(builder_form)
+        ROOT.awkward.build_list_offset_layout[column_type](result_ptrs, builder._ptr)
+        # layout = builder.snapshot()
+
+        # print(layout)
+
+        return _wrap_as_array(column, builder.snapshot(), column_as_record)
+
+        # return _maybe_wrap(builder.snapshot(), column_as_record)
 
     elif ptrs_type == "nested iterable":
 

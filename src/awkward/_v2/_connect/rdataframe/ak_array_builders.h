@@ -3,6 +3,8 @@
 #ifndef AWKWARD_ARRAY_BUILDERS_H_
 #define AWKWARD_ARRAY_BUILDERS_H_
 
+#include "awkward/layoutbuilder/LayoutBuilder.h"
+
 #include <iterator>
 #include <stdlib.h>
 #include <string>
@@ -37,6 +39,193 @@ extern "C" {
 }
 
 namespace awkward {
+
+template <typename T>
+const std::string
+type_to_name() {
+    return typeid(T).name();
+}
+
+template <>
+const std::string
+type_to_name<bool>() {
+    return "bool";
+}
+
+template <>
+const std::string
+type_to_name<int8_t>() {
+    return "int8";
+}
+
+template <>
+const std::string
+type_to_name<int16_t>() {
+    return "int16";
+}
+
+template <>
+const std::string
+type_to_name<int32_t>() {
+    return "int32";
+}
+
+template <>
+const std::string
+type_to_name<int64_t>() {
+    return "int64";
+}
+
+template <>
+const std::string
+type_to_name<uint8_t>() {
+    return "uint8";
+}
+
+template <>
+const std::string
+type_to_name<uint16_t>() {
+    return "uint16";
+}
+
+template <>
+const std::string
+type_to_name<uint32_t>() {
+    return "uint32";
+}
+
+template <>
+const std::string
+type_to_name<uint64_t>() {
+    return "uint64";
+}
+
+template <>
+const std::string
+type_to_name<float>() {
+    return "float32";
+}
+
+template <>
+const std::string
+type_to_name<double>() {
+    return "float64";
+}
+
+template <>
+const std::string
+type_to_name<char>() {
+    return "chars";
+}
+
+template <typename T>
+struct build_layout_impl {
+    static void build_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, awkward::LayoutBuilder64* builder) {
+        cout << "FIXME: processing of a " << typeid(T).name()
+            << " type is not implemented yet." << endl;
+    };
+};
+
+template <>
+struct build_layout_impl<int64_t> {
+    static void build_layout(ROOT::RDF::RResultPtr<std::vector<int64_t>>& result, awkward::LayoutBuilder64* builder) {
+        for (auto const& it : result) {
+            builder->int64(it);
+        }
+    };
+};
+
+template <>
+struct build_layout_impl<double> {
+    static void build_layout(ROOT::RDF::RResultPtr<std::vector<double>>& result, awkward::LayoutBuilder64* builder) {
+        for (auto const& it : result) {
+            builder->float64(it);
+        }
+    };
+};
+
+template <>
+struct build_layout_impl<std::complex<double>> {
+    static void build_layout(ROOT::RDF::RResultPtr<std::vector<std::complex<double>>>& result, awkward::LayoutBuilder64* builder) {
+        for (auto const& it : result) {
+            builder->complex(it);
+        }
+    };
+};
+
+template <typename T>
+void
+build_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+    auto ptr = reinterpret_cast<awkward::LayoutBuilder64 *>(builder_ptr);
+    build_layout_impl<T>::build_layout(result, ptr);
+}
+
+template <typename T, typename V>
+struct build_list_offset_layout_impl {
+    static void build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+        typedef typename T::value_type value_type;
+
+        cout << "FIXME: processing an iterable of a " << typeid(value_type).name()
+            << " type is not implemented yet." << endl;
+    };
+};
+
+template <typename T>
+struct build_list_offset_layout_impl<T, int64_t> {
+    static void build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, awkward::LayoutBuilder64* builder) {
+        for (auto const& data : result) {
+            builder->begin_list();
+            for (auto const& x : data) {
+                builder->int64(x);
+            }
+            builder->end_list();
+        }
+    };
+};
+
+template <typename T>
+struct build_list_offset_layout_impl<T, double> {
+    static void build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, awkward::LayoutBuilder64* builder) {
+        for (auto const& data : result) {
+            builder->begin_list();
+            for (auto const& x : data) {
+                builder->float64(x);
+            }
+            builder->end_list();
+        }
+    };
+};
+
+template <typename T>
+struct build_list_offset_layout_impl<T, std::complex<double>> {
+    static void build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, awkward::LayoutBuilder64* builder) {
+        for (auto const& data : result) {
+            builder->begin_list();
+            for (auto const& x : data) {
+                builder->complex(x);
+            }
+            builder->end_list();
+        }
+    };
+};
+
+template <typename T>
+void
+build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+    auto ptr = reinterpret_cast<awkward::LayoutBuilder64 *>(builder_ptr);
+    build_list_offset_layout_impl<T, typename T::value_type>::build_list_offset_layout(result, ptr);
+}
+
+template <>
+void
+build_list_offset_layout<std::string>(ROOT::RDF::RResultPtr<std::vector<std::string>>& result, long builder_ptr) {
+    auto builder = reinterpret_cast<awkward::LayoutBuilder64 *>(builder_ptr);
+    for (auto const& it : result) {
+        builder->begin_list();
+        builder->string(it.c_str(), it.length());
+        builder->end_list();
+    }
+}
 
 template <typename T>
 struct build_array_impl {
@@ -284,15 +473,15 @@ struct is_specialization<Ref<Args...>, Ref> : std::true_type {
 template <typename T, typename std::enable_if<is_specialization<T, std::complex>::value, T>::type * = nullptr>
 std::string
 check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    build_array(result, builder_ptr);
-    return std::string("complex");
+    // build_array(result, builder_ptr);
+    return std::string("complex128");
 }
 
 template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type * = nullptr>
 std::string
 check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    build_array(result, builder_ptr);
-    return std::string("primitive");
+    // build_array(result, builder_ptr);
+    return type_to_name<T>(); //std::string("primitive");
 }
 
 template <typename T, typename std::enable_if<is_iterable<T>, T>::type * = nullptr>
@@ -311,11 +500,11 @@ check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
         if (is_iterable<value_type>) {
             return std::string("nested iterable");
         } else if (std::is_arithmetic<value_type>::value) {
-            build_list_array(result, builder_ptr);
-            return std::string("iterable");
+            // build_list_array(result, builder_ptr);
+            return std::string("iterable " + type_to_name<value_type>());
         } else if (is_specialization<value_type, std::complex>::value) {
-            build_list_array(result, builder_ptr);
-            return "iterable of complex";
+            // build_list_array(result, builder_ptr);
+            return std::string("iterable ") + std::string("complex128");
         }
         return "something_else";
     }
