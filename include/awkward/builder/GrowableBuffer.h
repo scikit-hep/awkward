@@ -26,7 +26,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL GrowableBuffer {
     using UniquePtrDeleter = decltype(kernel::array_deleter<T>());
     using UniquePtr = std::unique_ptr<T, UniquePtrDeleter>;
-  public:
+
     struct GrowableBufferPanel {
       /// @brief Creates a GrowableBufferPanel by allocating a new Panel,
       /// taking an initial #reserved from
@@ -41,6 +41,7 @@ namespace awkward {
       UniquePtr ptr;
     };
 
+  public:
     /// @brief Creates an empty GrowableBuffer.
     ///
     /// @param options Configuration options for building an array.
@@ -109,7 +110,7 @@ namespace awkward {
 
     /// @brief Reference to a unique pointer to the array buffer.
     const GrowableBuffer::UniquePtr&
-      ptr() const;
+      ptr();
 
     /// @brief FIXME: needed for uproot.cpp - remove when it's gone.
     /// Note, it transfers ownership of the array buffer.
@@ -148,13 +149,13 @@ namespace awkward {
     /// @brief Currently used number of panels.
     size_t
       panels() const;
-
+           
     /// @brief Inserts one `datum` into the array in panel.
-    void
+    void 
       fill_panel(T datum, size_t reserved);
-
+        
     /// @brief Creates a new panel with slots equal to #reserved
-    void
+    void 
       add_panel(size_t reserved);
 
     /// @brief Discards accumulated data, the #reserved returns to
@@ -176,10 +177,10 @@ namespace awkward {
     T
       getitem_at_nowrap(int64_t at) const;
 
-    /// @brief Compacts all accumulated data from multiple panels to one
-    /// contiguously allocated memory panel
+    /// @brief Compacts all accumulated data from multiple panels to one 
+    /// contiguously allocated memory panel 
     void
-      snapshot();
+      concatenate() ;
 
   private:
     const ArrayBuilderOptions options_;
@@ -189,9 +190,9 @@ namespace awkward {
     size_t length_;
     // @brief See #reserved.
     size_t reserved_;
-    GrowableBufferPanel *head_;
-    GrowableBufferPanel *tail_;
-    size_t panels_;
+    GrowableBufferPanel *head_; 
+    GrowableBufferPanel *tail_; 
+    size_t panels_; 
   };
 }
 
