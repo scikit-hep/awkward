@@ -1241,6 +1241,43 @@ namespace awkward {
 
   template <typename T, typename I>
   util::ForthError
+  ForthMachineOf<T, I>::begin_again(
+      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs, bool reset_instruction) {
+
+    if (!is_ready()) {
+      current_error_ = util::ForthError::not_ready;
+      return current_error_;
+    }
+    if (current_error_ != util::ForthError::none) {
+      return current_error_;
+    }
+
+    current_inputs_ = std::vector<std::shared_ptr<ForthInputBuffer>>();
+    for (auto name : input_names_) {
+      bool found = false;
+      for (auto pair : inputs) {
+        if (pair.first == name) {
+          current_inputs_.push_back(pair.second);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        throw std::invalid_argument(
+          std::string("AwkwardForth source code defines an input that was not provided: ")
+          + name + FILENAME(__LINE__)
+        );
+      }
+    }
+  if (reset_instruction){
+    recursion_target_depth_.push(0);
+    bytecodes_pointer_push(0);
+  }
+  return current_error_;
+  }
+
+  template <typename T, typename I>
+  util::ForthError
   ForthMachineOf<T, I>::run(
       const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
     begin(inputs);
