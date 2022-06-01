@@ -193,7 +193,8 @@ namespace awkward {
   LayoutBuilder<T, I>::LayoutBuilder(const std::string& json_form,
                                      const ArrayBuilderOptions& options,
                                      bool vm_init)
-    : initial_(options.initial()),
+    : json_form_(json_form),
+      initial_(options.initial()),
       length_(8),
       builder_(nullptr),
       vm_(nullptr),
@@ -218,6 +219,13 @@ namespace awkward {
     if (vm_init) {
       initialise();
     }
+  }
+
+  template <typename T, typename I>
+  const std::string
+  LayoutBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+    //self.vm().get()->outputs();
+    return builder_.get()->to_buffers(container, form_key_id, vm().get()->outputs());
   }
 
   template <typename T, typename I>

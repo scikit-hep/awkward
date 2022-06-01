@@ -17,6 +17,7 @@ namespace awkward {
                                              const std::string attribute,
                                              const std::string partition)
     : parameters_(parameters),
+      form_key_(form_key),
       form_primitive_(form_primitive) {
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
       .append(form_primitive).append("\" ");
@@ -50,6 +51,19 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder<T, I>::classname() const {
     return "NumpyArrayBuilder";
+  }
+
+  template <typename T, typename I>
+  const std::string
+  NumpyArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+    auto search = outputs.find(vm_output_data());
+
+    container.copy_buffer(form_key() + "-data",
+                          search->second.get()->ptr().get(),
+                          (int64_t)((ssize_t)search->second.get()->len() * itemsize()));
+
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"" + form_primitive() + "\", \"form_key\": \""
+           + form_key() + "\"}";
   }
 
   template <typename T, typename I>

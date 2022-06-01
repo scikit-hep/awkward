@@ -26,6 +26,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
+    const std::string
+      to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const override;
+
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
       vm_output() const override;
@@ -93,11 +96,42 @@ namespace awkward {
       form_parameters() const { return parameters_; }
 
     const std::string&
+      form_key() const {return form_key_; }
+
+    const std::string&
       form_primitive() const {return form_primitive_; }
 
+    ssize_t
+      itemsize() const {
+        return primitive_to_itemsize_.at(form_primitive());
+      }
+
   private:
+
+    std::map<std::string, ssize_t> primitive_to_itemsize_ {
+      {"bool", 1},
+      {"int8", 1},
+      {"int16", 2},
+      {"int32", 4},
+      {"int64", 8},
+      {"uint8", 1},
+      {"uint16", 2},
+      {"uint32", 4},
+      {"uint64", 8},
+      {"float16", 2},
+      {"float32", 4},
+      {"float64", 8},
+      {"float128", 16},
+      {"complex64", 8},
+      {"complex128", 16},
+      {"complex256", 32},
+      {"datetime64", 8},
+      {"timedelta64", 8},
+    };
+
     /// @brief This Form parameters
     const util::Parameters parameters_;
+    const std::string form_key_;
     const std::string form_primitive_;
 
     /// @brief AwkwardForth virtual machine instructions

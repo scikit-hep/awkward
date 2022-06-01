@@ -43,6 +43,14 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
+  RegularArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+    throw std::runtime_error(
+      std::string("'RegularArrayBuilder<T, I>::to_buffers' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const std::string
   RegularArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }

@@ -2969,9 +2969,8 @@ class LayoutBuilder(Sized):
         Sets the pointer to a given tag `tag`; the next
         command will fill that slot.
         """
-        self._layout.field(key)
+        self._layout.tag(tag)
         return self
-
 
     class _Nested:
         def __init__(self, LayoutBuilder):
