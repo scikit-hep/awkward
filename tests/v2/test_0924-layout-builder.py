@@ -161,26 +161,26 @@ def test_bit_masked_form():
     assert ak._v2.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
 
-# def test_byte_masked_form():
-#     form = """
-# {
-#     "class": "ByteMaskedArray",
-#     "mask": "i8",
-#     "content": "float64",
-#     "valid_when": true,
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.float64(1.1)
-#     builder.float64(2.2)
-#     builder.float64(3.3)
-#
-#     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
-#
-#
+def test_byte_masked_form():
+    form = """
+{
+    "class": "ByteMaskedArray",
+    "mask": "i8",
+    "content": "float64",
+    "valid_when": true,
+    "form_key": "node0"
+}
+    """
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.float64(1.1)
+    builder.float64(2.2)
+    builder.float64(3.3)
+
+    assert ak._v2.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
+
 # def test_unmasked_form():
 #     form = """
 # {
