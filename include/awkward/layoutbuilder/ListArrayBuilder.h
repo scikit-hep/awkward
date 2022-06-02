@@ -104,6 +104,9 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    const std::string&
+      form_key() const {return form_key_; }
+
     ssize_t
       len() const override {
         return length_;
@@ -122,7 +125,8 @@ namespace awkward {
     bool begun_;
 
     const std::string form_starts_;
-    ssize_t length_;
+    const std::string form_key_;
+    mutable ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

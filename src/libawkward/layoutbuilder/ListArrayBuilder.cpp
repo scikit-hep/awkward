@@ -18,7 +18,8 @@ namespace awkward {
     : content_(content),
       parameters_(parameters),
       begun_(false),
-      form_starts_(form_starts) {
+      form_starts_(form_starts),
+      form_key_(form_key) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")
@@ -61,9 +62,26 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   ListArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
-    throw std::runtime_error(
-      std::string("'ListArrayBuilder<T, I>::to_buffers' is not implemented yet")
-      + FILENAME(__LINE__));
+    auto search = outputs.find(vm_output_data());
+    length_ = (ssize_t)search->second.get()->len() - 1;
+
+    auto offsets = search->second.get()->toIndex64();
+
+    // FIXME: deal with complex numbers in the builder itself
+    if (content().get()->is_complex()) {
+      for (int64_t i = 0; i < offsets.length(); i++) {
+        offsets.ptr().get()[i] = offsets.ptr().get()[i] >> 1;
+      }
+    }
+
+    container.copy_buffer(form_key() + "-offsets",
+                          offsets.ptr().get(),
+                          (int64_t)(offsets.length() * (int64_t)sizeof(int64_t)));
+
+    return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
+      + content()->to_buffers(container, form_key_id, outputs) + ", "
+      + this->parameters_as_string(parameters_) + " \"form_key\": \""
+      + form_key() + "\"}";
   }
 
   template <typename T, typename I>
