@@ -39,9 +39,10 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   UnmaskedArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
-    throw std::runtime_error(
-      std::string("'UnmaskedArrayBuilder<T, I>::to_buffers' is not implemented yet")
-      + FILENAME(__LINE__));
+    auto search = outputs.find(content().get()->vm_output_data());
+    length_ = (ssize_t)search->second.get()->len();
+
+    return content().get()->to_buffers(container, form_key_id, outputs);
   }
 
   template <typename T, typename I>
