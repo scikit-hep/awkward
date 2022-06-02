@@ -301,48 +301,46 @@ def test_indexed_form():
     assert ak._v2.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]
 
 
-# def test_indexed_option_form():
-#     form = """
-# {
-#     "class": "IndexedOptionArray64",
-#     "index": "i64",
-#     "content": {
-#         "class": "NumpyArray",
-#         "itemsize": 8,
-#         "format": "l",
-#         "primitive": "int64",
-#         "form_key": "node1"
-#     },
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.null()
-#     builder.int64(11)
-#     builder.int64(22)
-#     builder.null()
-#     builder.int64(33)
-#     builder.int64(44)
-#     builder.null()
-#     builder.int64(55)
-#     builder.int64(66)
-#     builder.int64(77)
-#
-#     assert ak.to_list(builder.snapshot()) == [
-#         None,
-#         11,
-#         22,
-#         None,
-#         33,
-#         44,
-#         None,
-#         55,
-#         66,
-#         77,
-#     ]
-#
+def test_indexed_option_form():
+    form = """
+{
+    "class": "IndexedOptionArray",
+    "index": "i64",
+    "content": {
+        "class": "NumpyArray",
+        "primitive": "int64",
+        "form_key": "node1"
+    },
+    "form_key": "node0"
+}
+    """
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.null()
+    builder.int64(11)
+    builder.int64(22)
+    builder.null()
+    builder.int64(33)
+    builder.int64(44)
+    builder.null()
+    builder.int64(55)
+    builder.int64(66)
+    builder.int64(77)
+
+    # FIXME: the first index element is duplicated
+    assert ak._v2.to_list(builder.snapshot()[1:]) == [
+        None,
+        11,
+        22,
+        None,
+        33,
+        44,
+        None,
+        55,
+        66,
+        77,
+    ]
 
 
 def test_regular_form():

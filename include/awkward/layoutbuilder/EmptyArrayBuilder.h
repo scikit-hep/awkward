@@ -102,8 +102,8 @@ namespace awkward {
 
     ssize_t
       len() const override {
-      return 0;
-    }
+        return 0;
+      }
 
   private:
     /// @brief This Form parameters
