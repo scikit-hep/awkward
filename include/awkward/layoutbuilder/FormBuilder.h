@@ -157,6 +157,20 @@ namespace awkward {
         return false;
       }
 
+    /// @brief FIXME: find if it's already implemented in utils
+    virtual std::string
+    parameters_as_string(const util::Parameters& parameters) const {
+      std::stringstream p;
+      if (!parameters.empty()) {
+        p << "\"parameters\": {";
+        for (auto const &pair: parameters) {
+          p << "\"" << pair.first << "\": " << pair.second << " ";
+        }
+        p << "}, ";
+      }
+      return p.str();
+    }
+
   };
 
   template <typename T, typename I>

@@ -4,6 +4,7 @@
 
 #include "awkward/layoutbuilder/RegularArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
+#include "awkward/layoutbuilder/NumpyArrayBuilder.h"
 
 namespace awkward {
 
@@ -17,7 +18,9 @@ namespace awkward {
                                                  const std::string partition)
     : content_(content),
       parameters_(parameters),
-      form_size_(size) {
+      form_key_(form_key),
+      form_size_(size),
+      length_(size) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")
@@ -44,9 +47,15 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   RegularArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
-    throw std::runtime_error(
-      std::string("'RegularArrayBuilder<T, I>::to_buffers' is not implemented yet")
-      + FILENAME(__LINE__));
+    auto search = outputs.find(content().get()->vm_output_data());
+    length_ = content().get()->is_complex() ? (ssize_t)search->second.get()->len() >> 1 : (ssize_t)search->second.get()->len();
+    length_ = length_ / form_size_;
+
+    return "{\"class\": \"RegularArray\", \"size\": " + std::to_string(form_size())
+      + ", \"content\": "
+      + content()->to_buffers(container, form_key_id, outputs) + ", "
+      + this->parameters_as_string(parameters_) + " \"form_key\": \""
+      + form_key() + "\"}";
   }
 
   template <typename T, typename I>

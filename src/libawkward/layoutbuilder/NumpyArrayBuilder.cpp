@@ -19,7 +19,7 @@ namespace awkward {
     : parameters_(parameters),
       form_key_(form_key),
       form_primitive_(form_primitive),
-      length_(-1),
+      length_(0),
       is_complex_(form_primitive.rfind("complex", 0) == 0) {
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
       .append(form_primitive).append("\" ");
@@ -65,16 +65,8 @@ namespace awkward {
                           search->second.get()->ptr().get(),
                           (int64_t)((ssize_t)search->second.get()->len() * itemsize()));
 
-    std::stringstream parameters;
-    if (!parameters_.empty()) {
-      parameters << " \"parameters\": {";
-      for (auto const &pair: parameters_) {
-        parameters << "\"" << pair.first << "\": " << pair.second << " ";
-      }
-      parameters << "}, ";
-    }
-    return "{\"class\": \"NumpyArray\", \"primitive\": \"" + form_primitive() + "\","
-      + parameters.str() + " \"form_key\": \""
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"" + form_primitive() + "\", "
+      + this->parameters_as_string(parameters_) + " \"form_key\": \""
       + form_key() + "\"}";
   }
 

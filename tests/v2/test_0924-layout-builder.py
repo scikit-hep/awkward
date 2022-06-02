@@ -341,41 +341,39 @@ def test_unsupported_form():
 #         77,
 #     ]
 #
-#
-# def test_regular_form():
-#     form = """
-# {
-#     "class": "RegularArray",
-#     "content": {
-#         "class": "NumpyArray",
-#         "itemsize": 8,
-#         "format": "l",
-#         "primitive": "int64",
-#         "form_key": "node1"
-#     },
-#     "size": 3,
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.int64(11)
-#     builder.int64(22)
-#     builder.int64(33)
-#     builder.int64(44)
-#     builder.int64(55)
-#     builder.int64(66)
-#     builder.int64(77)
-#
-#     assert ak.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66]]
-#
-#     builder.int64(88)
-#     builder.int64(99)
-#
-#     assert ak.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66], [77, 88, 99]]
-#
-#
+
+
+def test_regular_form():
+    form = """
+{
+    "class": "RegularArray",
+    "content": "int64",
+    "size": 3
+}
+    """
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.int64(11)
+    builder.int64(22)
+    builder.int64(33)
+    builder.int64(44)
+    builder.int64(55)
+    builder.int64(66)
+    builder.int64(77)
+
+    assert ak._v2.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66]]
+
+    builder.int64(88)
+    builder.int64(99)
+
+    assert ak._v2.to_list(builder.snapshot()) == [
+        [11, 22, 33],
+        [44, 55, 66],
+        [77, 88, 99],
+    ]
+
+
 # def test_union_form():
 #     form = """
 # {
@@ -646,7 +644,7 @@ def test_char_form():
 def test_string_form():
     form = """
 {
-    "class": "ListOffsetArray64",
+    "class": "ListOffsetArray",
     "offsets": "i64",
     "content": {
         "class": "NumpyArray",

@@ -83,8 +83,9 @@ namespace awkward {
                           (int64_t)(offsets.length() * (int64_t)sizeof(int64_t)));
 
     return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-           + content()->to_buffers(container, form_key_id, outputs) + ", \"form_key\": \""
-           + form_key() + "\"}";
+      + content()->to_buffers(container, form_key_id, outputs) + ", "
+      + this->parameters_as_string(parameters_) + " \"form_key\": \""
+      + form_key() + "\"}";
   }
 
   template <typename T, typename I>
