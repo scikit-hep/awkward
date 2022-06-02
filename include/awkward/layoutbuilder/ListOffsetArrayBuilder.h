@@ -104,6 +104,11 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    ssize_t
+      len() const override {
+      return length_;
+    }
+
   private:
     /// @brief This Form content builder
     FormBuilderPtr<T, I> content_;
@@ -127,6 +132,7 @@ namespace awkward {
     const std::string form_key_;
     const std::string attribute_;
     const std::string partition_;
+    ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

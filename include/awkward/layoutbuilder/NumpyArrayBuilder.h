@@ -106,6 +106,11 @@ namespace awkward {
         return primitive_to_itemsize_.at(form_primitive());
       }
 
+    ssize_t
+      len() const override {
+      return length_;
+    }
+
   private:
 
     std::map<std::string, ssize_t> primitive_to_itemsize_ {
@@ -133,6 +138,7 @@ namespace awkward {
     const util::Parameters parameters_;
     const std::string form_key_;
     const std::string form_primitive_;
+    mutable ssize_t length_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Form

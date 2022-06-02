@@ -101,12 +101,18 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    ssize_t
+      len() const override {
+      return length_;
+    }
+
   private:
     /// @brief This Json Form content builder
     const FormBuilderPtr<T, I> content_;
 
     /// @brief This Form parameters
     const util::Parameters parameters_;
+    ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Json Form

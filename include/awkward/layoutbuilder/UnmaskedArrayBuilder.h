@@ -103,9 +103,15 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    ssize_t
+      len() const override {
+      return length_;
+    }
+
   private:
     /// @brief This Form content builder
     FormBuilderPtr<T, I> content_;
+    ssize_t length_;
 
     /// @brief This Form parameters
     const util::Parameters& parameters_;

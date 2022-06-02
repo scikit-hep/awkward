@@ -670,7 +670,7 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   LayoutBuilder<T, I>::length() const {
-    return length_;
+    return builder_->len();
   }
 
   template <typename T, typename I>
@@ -767,7 +767,10 @@ namespace awkward {
   template<typename T, typename I>
   void
   LayoutBuilder<T, I>::add_complex(std::complex<double> x) {
-    set_data<std::complex<double>>(x);
+    set_data<std::complex<double>>(x.real());
+    vm_.get()->stack_push(static_cast<utype>(state::complex128));
+    resume();
+    set_data<std::complex<double>>(x.imag());
     vm_.get()->stack_push(static_cast<utype>(state::complex128));
     resume();
   }

@@ -43,6 +43,10 @@ namespace awkward {
     virtual const std::string
       to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const = 0;
 
+    /// @brief The builder's output buffer length.
+    virtual ssize_t
+      len() const = 0;
+
     // /// @brief The Form describing the array.
     // virtual const FormPtr
     //   form() const = 0;

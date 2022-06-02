@@ -100,6 +100,11 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    ssize_t
+      len() const override {
+      return 0;
+    }
+
   private:
     /// @brief This Form parameters
     const util::Parameters parameters_;

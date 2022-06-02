@@ -18,7 +18,8 @@ namespace awkward {
                                              const std::string partition)
     : parameters_(parameters),
       form_key_(form_key),
-      form_primitive_(form_primitive) {
+      form_primitive_(form_primitive),
+      length_(-1) {
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
       .append(form_primitive).append("\" ");
 
@@ -57,6 +58,7 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data());
+    length_ = (form_primitive().rfind("complex", 0) == 0) ? (ssize_t)search->second.get()->len() >> 1 : (ssize_t)search->second.get()->len();
 
     container.copy_buffer(form_key() + "-data",
                           search->second.get()->ptr().get(),

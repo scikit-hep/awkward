@@ -103,6 +103,11 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    ssize_t
+      len() const override {
+      return length_;
+    }
+
   private:
     /// @brief Keeps track of a field index.
     int64_t field_index();
@@ -119,6 +124,7 @@ namespace awkward {
     int64_t field_index_;
     int64_t contents_size_;
     std::vector<int64_t> list_field_index_;
+    ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

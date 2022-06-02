@@ -7,7 +7,28 @@ import awkward as ak  # noqa: F401
 import awkward.forth
 
 
-def test_numpy_form():
+def test_numpy_bool_form():
+    form = """
+{
+    "class": "NumpyArray",
+    "primitive": "bool"
+}    """
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.boolean(True)
+    builder.boolean(True)
+    builder.boolean(False)
+    builder.boolean(True)
+
+    array = builder.snapshot()
+    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
+        ak._v2.types.NumpyType("bool"), 4
+    )  # FIXME: ak._v2.types.NumpyType("bool")
+
+    assert ak._v2.to_list(array) == [True, True, False, True]
+
+
+def test_numpy_int_form():
     form = """
 {
     "class": "NumpyArray",
@@ -21,9 +42,53 @@ def test_numpy_form():
     builder.int64(4)
 
     array = builder.snapshot()
-    assert ak._v2.operations.type(array) == ak._v2.types.NumpyType("int64")
+    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
+        ak._v2.types.NumpyType("int64"), 4
+    )  # FIXME: ak._v2.types.NumpyType("int64")
 
-    assert ak.to_list(array) == [1, 2, 3, 4]
+    assert ak._v2.to_list(array) == [1, 2, 3, 4]
+
+
+def test_numpy_float_form():
+    form = """
+{
+    "class": "NumpyArray",
+    "primitive": "float64"
+}    """
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.float64(1.1)
+    builder.float64(2.2)
+    builder.float64(3.3)
+    builder.float64(4.4)
+
+    array = builder.snapshot()
+    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
+        ak._v2.types.NumpyType("float64"), 4
+    )  # FIXME: ak._v2.types.NumpyType("float64")
+
+    assert ak._v2.to_list(array) == [1.1, 2.2, 3.3, 4.4]
+
+
+def test_numpy_complex_form():
+    form = """
+{
+    "class": "NumpyArray",
+    "primitive": "complex128"
+}    """
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.complex(1.0 + 0.1j)
+    builder.complex(2.0 + 0.2j)
+    builder.complex(3.0 + 0.3j)
+    builder.complex(4.0 + 0.4j)
+
+    array = builder.snapshot()
+    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
+        ak._v2.types.NumpyType("complex128"), 4
+    )  # FIXME: ak._v2.types.NumpyType("complex128")
+
+    assert ak._v2.to_list(array) == [1.0 + 0.1j, 2.0 + 0.2j, 3.0 + 0.3j, 4.0 + 0.4j]
 
 
 #

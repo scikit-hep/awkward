@@ -101,6 +101,11 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    ssize_t
+      len() const override {
+      return length_;
+    }
+
   private:
     /// @brief This Form layout builder
     const FormBuilderPtr<T, I> content_;
@@ -112,6 +117,7 @@ namespace awkward {
     bool is_categorical_;
 
     const std::string form_index_;
+    ssize_t length_;
 
     void validate() const;
 

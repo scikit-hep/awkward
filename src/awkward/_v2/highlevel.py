@@ -269,7 +269,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
            * node types, such as #ak.layout.ListArray64 and
              #ak.layout.ListOffsetArray64,
            * integer type specialization, such as #ak.layout.ListArray64
-             and #ak.layout.ListArray32,
+             and #ak.layout.ListArray64,
            * or specific values, such as gaps in a #ak.layout.ListArray64.
 
         The #ak.layout.Content elements are fully composable, whereas an
@@ -2694,18 +2694,18 @@ class LayoutBuilder(Sized):
     """
 
     def __init__(self, form, behavior=None):
-        self._layout = ak.layout.LayoutBuilder32(form=form)
+        self._layout = ak.layout.LayoutBuilder64(form=form)
         self.behavior = behavior
 
     @classmethod
     def _wrap(cls, layout, behavior=None):
         """
         Args:
-            layout (#ak.layout.LayoutBuilder32): Low-level builder to wrap.
+            layout (#ak.layout.LayoutBuilder64): Low-level builder to wrap.
             behavior (None or dict): Custom #ak.behavior for arrays built by
                 this LayoutBuilder.
 
-        Wraps a low-level #ak.layout.LayoutBuilder32 as a high-level
+        Wraps a low-level #ak.layout.LayoutBuilder64 as a high-level
         #ak.LayoutBuilder.
 
         The #ak.LayoutBuilder constructor creates a new #ak.layout.LayoutBuilder

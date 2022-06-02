@@ -103,6 +103,11 @@ namespace awkward {
     const int64_t
       form_size() const { return form_size_; }
 
+    ssize_t
+      len() const override {
+      return length_;
+    }
+
   private:
     /// @brief This Form content builder
     const FormBuilderPtr<T, I> content_;
@@ -110,6 +115,7 @@ namespace awkward {
     /// @brief This Form parameters
     const util::Parameters parameters_;
     const int64_t form_size_;
+    ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form
