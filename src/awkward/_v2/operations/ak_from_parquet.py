@@ -125,7 +125,7 @@ def _metadata(
 
         if columns is not None:
             list_indicator = "list.item"
-            for column_metadata in file_for_metadata.schema:
+            for column_metadata in parquetfile_for_metadata.schema:
                 if (
                     column_metadata.max_repetition_level > 0
                     and ".list.element." in column_metadata.path
@@ -138,6 +138,8 @@ def _metadata(
             )
             subform = form.select_columns(columns)
             parquet_columns = subform.columns(list_indicator=list_indicator)
+            if parquetfile_for_metadata.schema_arrow.names == [""]:
+                parquet_columns = ["." + x for x in parquet_columns]
 
         metadata = parquetfile_for_metadata.metadata
         if row_groups is not None:
