@@ -19,7 +19,9 @@ namespace awkward {
     : content_(content),
       parameters_(parameters),
       is_categorical_(is_categorical),
-      form_index_(form_index) {
+      form_index_(form_index),
+      form_key_(form_key),
+      length_(0) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")
@@ -60,9 +62,20 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   IndexedArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
-    throw std::runtime_error(
-      std::string("'IndexedArrayBuilder<T, I>::to_buffers' is not implemented yet")
-      + FILENAME(__LINE__));
+    auto search = outputs.find(vm_output_data());
+    length_ = (ssize_t)search->second.get()->len();
+
+    auto index = search->second.get()->toIndex64();
+
+    container.copy_buffer(form_key() + "-index",
+                          index.ptr().get(),
+                          (int64_t)(index.length() * (int64_t)sizeof(int64_t)));
+
+    return "{\"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
+      + content().get()->to_buffers(container, form_key_id, outputs) + ", "
+      + this->parameters_as_string(parameters_) + " \"form_key\": \""
+      + form_key() + "\"}";
+
   }
 
   template <typename T, typename I>

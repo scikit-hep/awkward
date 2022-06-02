@@ -274,35 +274,33 @@ def test_list_offset_form():
     ]
 
 
-# def test_indexed_form():
-#     form = """
-# {
-#     "class": "IndexedArray64",
-#     "index": "i64",
-#     "content": {
-#         "class": "NumpyArray",
-#         "itemsize": 8,
-#         "format": "l",
-#         "primitive": "int64",
-#         "form_key": "node1"
-#     },
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.int64(11)
-#     builder.int64(22)
-#     builder.int64(33)
-#     builder.int64(44)
-#     builder.int64(55)
-#     builder.int64(66)
-#     builder.int64(77)
-#
-#     assert ak.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]
-#
-#
+def test_indexed_form():
+    form = """
+{
+    "class": "IndexedArray",
+    "index": "i64",
+    "content": {
+        "class": "NumpyArray",
+        "primitive": "int64",
+        "form_key": "node1"
+    },
+    "form_key": "node0"
+}
+    """
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.int64(11)
+    builder.int64(22)
+    builder.int64(33)
+    builder.int64(44)
+    builder.int64(55)
+    builder.int64(66)
+    builder.int64(77)
+
+    assert ak._v2.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]
+
+
 # def test_indexed_option_form():
 #     form = """
 # {
@@ -583,45 +581,45 @@ def test_error_in_numpy_form():
     assert str(err.value) == "NumpyForm builder accepts only float64"
 
 
-# def test_categorical_form():
-#     form = """
-# {
-#     "class": "IndexedArray64",
-#     "index": "i64",
-#     "content": "int64",
-#     "parameters": {
-#         "__array__": "categorical"
-#     }
-# }
-# """
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.int64(2019)
-#     builder.int64(2020)
-#     builder.int64(2021)
-#     builder.int64(2020)
-#     builder.int64(2019)
-#     builder.int64(2020)
-#     builder.int64(2020)
-#     builder.int64(2020)
-#     builder.int64(2020)
-#     builder.int64(2020)
-#
-#     assert ak.to_list(builder.snapshot()) == [
-#         2019,
-#         2020,
-#         2021,
-#         2020,
-#         2019,
-#         2020,
-#         2020,
-#         2020,
-#         2020,
-#         2020,
-#     ]
-#     assert str(ak.type(ak.Array(builder.snapshot()))) == "10 * categorical[type=int64]"
-#
+@pytest.mark.skip(reason="FIXME: check categorical type")
+def test_categorical_form():
+    form = """
+{
+    "class": "IndexedArray",
+    "index": "i64",
+    "content": "int64",
+    "parameters": {
+        "__array__": "categorical"
+    }
+}
+"""
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.int64(2019)
+    builder.int64(2020)
+    builder.int64(2021)
+    builder.int64(2020)
+    builder.int64(2019)
+    builder.int64(2020)
+    builder.int64(2020)
+    builder.int64(2020)
+    builder.int64(2020)
+    builder.int64(2020)
+
+    assert ak._v2.to_list(builder.snapshot()) == [
+        2019,
+        2020,
+        2021,
+        2020,
+        2019,
+        2020,
+        2020,
+        2020,
+        2020,
+        2020,
+    ]
+    assert str(ak.type(ak.Array(builder.snapshot()))) == "10 * categorical[type=int64]"
 
 
 def test_char_form():
