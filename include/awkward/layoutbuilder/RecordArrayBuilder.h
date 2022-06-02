@@ -103,6 +103,9 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    const std::string&
+      form_key() const {return form_key_; }
+
     ssize_t
       len() const override {
       return length_;
@@ -121,6 +124,7 @@ namespace awkward {
 
     /// @brief This builder Form
     const std::string form_;
+    const std::string form_key_;
     int64_t field_index_;
     int64_t contents_size_;
     std::vector<int64_t> list_field_index_;

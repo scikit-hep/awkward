@@ -17,8 +17,10 @@ namespace awkward {
                                                const std::string partition)
     : form_recordlookup_(recordlookup),
       parameters_(parameters),
+      form_key_(form_key),
       field_index_(0),
-      contents_size_((int64_t) contents.size()) {
+      contents_size_((int64_t) contents.size()),
+      length_((int64_t) contents.size()) {
     for (auto const& content : contents) {
       contents_.push_back(content);
       vm_output_.append(contents_.back().get()->vm_output());
@@ -50,9 +52,21 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   RecordArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
-    throw std::runtime_error(
-      std::string("'RecordArrayBuilder<T, I>::to_buffers' is not implemented yet")
-      + FILENAME(__LINE__));
+
+    std::stringstream out;
+    out << "{\"class\": \"RecordArray\", \"contents\": {";
+    for (size_t i = 0;  i < contents().size();  i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      out << "" + util::quote((*form_recordlookup())[i]) + ": ";
+      out << contents()[i].get()->to_buffers(container, form_key_id, outputs);
+    }
+    out << "}, ";
+    out << this->parameters_as_string(parameters_);
+    out << "\"form_key\": \"" + form_key() + "\"}";
+
+    return out.str();
   }
 
   template <typename T, typename I>

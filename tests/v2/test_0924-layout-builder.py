@@ -507,57 +507,57 @@ def test_regular_form():
 #         -2.2,
 #     ]
 #
-#
-# def test_record_form():
-#     form = """
-# {
-#     "class": "RecordArray",
-#     "contents": {
-#         "one": "float64",
-#         "two": "float64"
-#     },
-#     "form_key": "node0"
-# }
-#     """
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     # if record contents have the same type,
-#     # the fields alternate
-#     builder.float64(1.1)  # "one"
-#     builder.float64(2.2)  # "two"
-#     builder.float64(3.3)  # "one"
-#     builder.float64(4.4)  # "two"
-#
-#     # etc.
-#
-#     assert ak.to_list(builder.snapshot()) == [
-#         {"one": 1.1, "two": 2.2},
-#         {"one": 3.3, "two": 4.4},
-#     ]
-#
-#
-# def test_error_in_record_form():
-#     form = """
-# {
-#     "class": "RecordArray",
-#     "contents": {
-#         "one": "float64",
-#         "two": "float64"
-#     },
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     # if record contents have the same type,
-#     # the fields alternate
-#     builder.float64(1.1)  # "one"
-#     builder.float64(2.2)  # "two"
-#     with pytest.raises(ValueError) as err:
-#         builder.int64(11)
-#     assert str(err.value) == "NumpyForm builder accepts only float64"
-#
+
+
+def test_record_form():
+    form = """
+{
+    "class": "RecordArray",
+    "contents": {
+        "one": "float64",
+        "two": "float64"
+    },
+    "form_key": "node0"
+}
+    """
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    # if record contents have the same type,
+    # the fields alternate
+    builder.float64(1.1)  # "one"
+    builder.float64(2.2)  # "two"
+    builder.float64(3.3)  # "one"
+    builder.float64(4.4)  # "two"
+
+    # etc.
+
+    assert ak._v2.to_list(builder.snapshot()) == [
+        {"one": 1.1, "two": 2.2},
+        {"one": 3.3, "two": 4.4},
+    ]
+
+
+def test_error_in_record_form():
+    form = """
+{
+    "class": "RecordArray",
+    "contents": {
+        "one": "float64",
+        "two": "float64"
+    },
+    "form_key": "node0"
+}
+    """
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    # if record contents have the same type,
+    # the fields alternate
+    builder.float64(1.1)  # "one"
+    builder.float64(2.2)  # "two"
+    with pytest.raises(ValueError) as err:
+        builder.int64(11)
+    assert str(err.value) == "NumpyForm builder accepts only float64"
 
 
 def test_error_in_numpy_form():
