@@ -106,36 +106,41 @@ def test_numpy_complex_form():
     assert ak._v2.to_list(array) == [1.0 + 0.1j, 2.0 + 0.2j, 3.0 + 0.3j, 4.0 + 0.4j]
 
 
-#
-# def test_record_form2():
-#     form = """
-# {
-#     "class": "RecordArray",
-#     "contents": {
-#         "one": "float64",
-#         "two": "int64"
-#     },
-#     "form_key": "node0"
-# }
-#     """
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     # the fields alternate
-#     builder.float64(1.1)  # "one"
-#     builder.int64(2)  # "two"
-#     builder.float64(3.3)  # "one"
-#     builder.int64(4)  # "two"
-#
-#     # etc.
-#     array = builder.snapshot()
-#     assert ak._v2.operations.type(array) == ak._v2.types.NumpyType("float64")
-#
-#     assert ak.to_list(array) == [
-#         {"one": 1.1, "two": 2},
-#         {"one": 3.3, "two": 4},
-#     ]
-#
-#
+def test_record_form2():
+    form = """
+{
+    "class": "RecordArray",
+    "contents": {
+        "one": "float64",
+        "two": "int64"
+    },
+    "form_key": "node0"
+}
+    """
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    # the fields alternate
+    builder.float64(1.1)  # "one"
+    builder.int64(2)  # "two"
+    builder.float64(3.3)  # "one"
+    builder.int64(4)  # "two"
+
+    # etc.
+    array = builder.snapshot()
+    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
+        ak._v2.types.RecordType(
+            [ak._v2.types.NumpyType("float64"), ak._v2.types.NumpyType("int64")],
+            ["one", "two"],
+        ),
+        2,
+    )
+
+    assert ak._v2.to_list(array) == [
+        {"one": 1.1, "two": 2},
+        {"one": 3.3, "two": 4},
+    ]
+
+
 # def test_bit_masked_form():
 #     form = """
 # {
@@ -207,69 +212,69 @@ def test_unsupported_form():
         ak._v2.highlevel.LayoutBuilder(form)
 
 
-# def test_list_offset_form():
-#     form = """
-# {
-#     "class": "ListOffsetArray64",
-#     "offsets": "i64",
-#     "content": {
-#         "class": "RecordArray",
-#         "contents": {
-#             "x": {
-#                 "class": "NumpyArray",
-#                 "primitive": "float64",
-#                 "form_key": "node2"
-#             },
-#             "y": {
-#                 "class": "ListOffsetArray64",
-#                 "offsets": "i64",
-#                 "content": {
-#                     "class": "NumpyArray",
-#                     "primitive": "int64",
-#                     "form_key": "node4"
-#                 },
-#                 "form_key": "node3"
-#             }
-#         },
-#         "form_key": "node1"
-#     },
-#     "form_key": "node0"
-# }
-#     """
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.begin_list()
-#     builder.float64(1.1)
-#     builder.begin_list()
-#     builder.int64(1)
-#     builder.end_list()
-#     builder.float64(2.2)
-#     builder.begin_list()
-#     builder.int64(1)
-#     builder.int64(2)
-#     builder.end_list()
-#     builder.end_list()
-#
-#     builder.begin_list()
-#     builder.end_list()
-#
-#     builder.begin_list()
-#     builder.float64(3.3)
-#     builder.begin_list()
-#     builder.int64(1)
-#     builder.int64(2)
-#     builder.int64(3)
-#     builder.end_list()
-#     builder.end_list()
-#
-#     assert ak.to_list(builder.snapshot()) == [
-#         [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
-#         [],
-#         [{"x": 3.3, "y": [1, 2, 3]}],
-#     ]
-#
-#
+def test_list_offset_form():
+    form = """
+{
+    "class": "ListOffsetArray64",
+    "offsets": "i64",
+    "content": {
+        "class": "RecordArray",
+        "contents": {
+            "x": {
+                "class": "NumpyArray",
+                "primitive": "float64",
+                "form_key": "node2"
+            },
+            "y": {
+                "class": "ListOffsetArray64",
+                "offsets": "i64",
+                "content": {
+                    "class": "NumpyArray",
+                    "primitive": "int64",
+                    "form_key": "node4"
+                },
+                "form_key": "node3"
+            }
+        },
+        "form_key": "node1"
+    },
+    "form_key": "node0"
+}
+    """
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.begin_list()
+    builder.float64(1.1)
+    builder.begin_list()
+    builder.int64(1)
+    builder.end_list()
+    builder.float64(2.2)
+    builder.begin_list()
+    builder.int64(1)
+    builder.int64(2)
+    builder.end_list()
+    builder.end_list()
+
+    builder.begin_list()
+    builder.end_list()
+
+    builder.begin_list()
+    builder.float64(3.3)
+    builder.begin_list()
+    builder.int64(1)
+    builder.int64(2)
+    builder.int64(3)
+    builder.end_list()
+    builder.end_list()
+
+    assert ak._v2.to_list(builder.snapshot()) == [
+        [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
+        [],
+        [{"x": 3.3, "y": [1, 2, 3]}],
+    ]
+
+
 # def test_indexed_form():
 #     form = """
 # {
