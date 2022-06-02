@@ -108,10 +108,13 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    const std::string&
+      form_key() const {return form_key_; }
+
     ssize_t
       len() const override {
-      return length_;
-    }
+        return length_;
+      }
 
   private:
     /// @brief This Form content builders
@@ -119,12 +122,13 @@ namespace awkward {
 
     /// @brief This Form parameters
     const util::Parameters parameters_;
+    const std::string form_key_;
 
     /// @brief UnionArray tag
     int8_t tag_;
 
     const std::string form_index_;
-    ssize_t length_;
+    mutable ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

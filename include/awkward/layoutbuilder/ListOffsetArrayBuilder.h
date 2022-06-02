@@ -109,8 +109,8 @@ namespace awkward {
 
     ssize_t
       len() const override {
-      return length_;
-    }
+        return length_;
+      }
 
   private:
     /// @brief This Form content builder
