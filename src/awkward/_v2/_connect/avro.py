@@ -796,6 +796,7 @@ class read_avro_ft:
         # print(forth_code)
         # print(self.field)
         # print(pos)
+        print(self.form)
         first_iter = 1
         _init_code.append(";\n")
 
@@ -806,9 +807,11 @@ class read_avro_ft:
             _exec_code.insert(0, f"{num_items} 0 do \n")
             _exec_code = "".join(_exec_code)
             forth_code = header_code+_exec_code+"\nloop"
+            print(forth_code)
             machine = awkward.forth.ForthMachine64(forth_code)
             if first_iter:
                 machine.begin({"stream": self._data[pos: pos+len_block]})
+                print(ak.Array(machine.bytecodes).to_list())
                 machine.call("init-out")
                 machine.resume()
                 first_iter = 1
@@ -834,6 +837,7 @@ class read_avro_ft:
                 con[elem] = machine.output_Index64(elem)
             else:
                 con[elem] = machine.output_NumpyArray(elem)
+        print(con)
         self.outarr = ak.from_buffers(
             self.form, sum(self.blocks), con
         )  # put in ._v2 later
@@ -921,26 +925,29 @@ class read_avro_ft:
 
     def dum_dat(self, dtype, count):
         if dtype["type"] == "int":
-            return f"con['node{count}-data'].append(np.int32(0))"
+            return f"0 node{count}-data <- stack "
         if dtype["type"] == "long":
-            return f"con['node{count}-data'].append(np.int64(0))"
+            return f"0 node{count}-data <- stack "
         if dtype["type"] == "float":
-            return f"con['node{count}-data'].append(np.float32(0))"
+            return f"0 node{count}-data <- stack "
         if dtype["type"] == "double":
-            return f"con['node{count}-data'].append(np.float64(0))"
+            return f"0 node{count}-data <- stack "
         if dtype["type"] == "boolean":
-            return f"con['node{count}-data'].append(0)"
+            return f"0 node{count}-data <- stack "
         if dtype["type"] == "bytes":
-            return (
-                f"con['node{count}-offsets'].append(1+con['node{count}-offsets'][-1])"
-                + f"con['node{count+1}-data'].extend([b'a']])"
-            )
+            return f"1 node{count}-offsets +<- stack 97 node{count+1}-data <- stack "
+            # return (
+            #    f"con['node{count}-offsets'].append(1+con['node{count}-offsets'][-1])"
+            #    + f"con['node{count+1}-data'].extend([b'a']])"
+            # )
         if dtype["type"] == "string":
             # \ncon['node{count+1}-data'].extend([114])"
-            code = f"con['node{count}-offsets'].append(np.uint8(0+con['node{count}-offsets'][-1]))"
-            return code
+            return f"0 node{count}-offsets +<- stack "
+            # code = f"con['node{count}-offsets'].append(np.uint8(0+con['node{count}-offsets'][-1]))"
+            # return code
         if dtype["type"] == "enum":
-            return f"con['node{count}-index'].append(0)"
+            return f"0 node{count}-index <- stack "
+            # return f"con['node{count}-index'].append(0)"
 
     def rec_exp_json_code(self, file, _exec_code, ind, count, dec, keys, _init_code, con):
         if isinstance(file, str) or isinstance(file, list):
@@ -1127,12 +1134,16 @@ class read_avro_ft:
             type_idx = 0
             temp = count
             null_present = False
-            _exec_code.append(
-                "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
-            )
-            _exec_code.append("\n" + "    " * ind +
-                              "idxx = abs(decode_zigzag(inn))")
-            _exec_code.append("\n" + "    " * ind + 'print("index :",idxx)')
+            # _exec_code.append("\n" + "    " * ind +
+            #                  'stream zigzag-> stack\n')
+            # _exec_code.append("\n" + "    " * ind +
+            #                  f'dup node{count}-offsets +<- stack\n')
+            # _exec_code.append(
+            #    "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
+            # )
+            # _exec_code.append("\n" + "    " * ind +
+            #                  "idxx = abs(decode_zigzag(inn))")
+            #_exec_code.append("\n" + "    " * ind + 'print("index :",idxx)')
             out = len(file["type"])
             for elem in file["type"]:
                 if isinstance(elem, dict) and elem["type"] == "record":
@@ -1145,9 +1156,11 @@ class read_avro_ft:
                 #    '{"class": "ByteMaskedArray","mask": "i8","content":\n')
                 # aform = ak.forms.ByteMaskedForm(
                 #    "i8", ak.forms.EmptyForm(), True)
-                var1 = f" 'node{count}-mask'"
-                dec.append(var1)
-                dec.append(": [],")
+                dec.append(f"output node{count}-mask int8\n")
+                keys.append(f"node{count}-mask")
+                #var1 = f" 'node{count}-mask'"
+                # dec.append(var1)
+                #dec.append(": [],")
                 type_idx = 0
             elif "null" in file["type"] and flag == 1:
                 # aform.append(
@@ -1155,10 +1168,12 @@ class read_avro_ft:
                 # )
                 # aform = ak.forms.IndexedOptionForm(
                 #    "i64", ak.forms.EmptyForm(), form_key=f"node{count}")
-                var1 = f" 'node{count}-index'"
-                dec.append(var1)
-                dec.append(": [],")
-                type_idx = 1
+                dec.append(f"output node{count}-index int64\n")
+                keys.append(f"node{count}-index")
+                #var1 = f" 'node{count}-index'"
+                # dec.append(var1)
+                #dec.append(": [],")
+                #type_idx = 1
             else:
                 for elem in file["type"]:
                     if elem == "null":
@@ -1167,11 +1182,13 @@ class read_avro_ft:
                         # )
                         # aform = ak.forms.ByteMaskedForm(
                         #    "i8", ak.forms.EmptyForm(), True)
+                        dec.append(f"output node{count}-mask int8\n")
+                        keys.append(f"node{count}-mask")
                         flag = 1
-                        var1 = f" 'node{count}-mask'"
+                        #var1 = f" 'node{count}-mask'"
                         mask_idx = count
-                        dec.append(var1)
-                        dec.append(": [],")
+                        # dec.append(var1)
+                        #dec.append(": [],")
                         count = count + 1
                         null_present = True
                 # if null_present:
@@ -1184,14 +1201,23 @@ class read_avro_ft:
                 # aform.append(
                 #    '{"class": "UnionArray8_64","tags": "i8","index": "i64","contents": [\n'
                 # )
-                var1 = f" 'node{count}-tags'"
+                dec.append(f"output node{count}-tags int8\n")
+                keys.append(f"node{count}-tags")
+                dec.append(f"output node{count}-index int64\n")
+                keys.append(f"node{count}-index")
+                #var1 = f" 'node{count}-tags'"
                 union_idx = count
-                dec.append(var1)
-                dec.append(": [],")
-                var1 = f" 'node{count}-index'"
-                dec.append(var1)
-                dec.append(": [],")
+                # dec.append(var1)
+                #dec.append(": [],")
+                #var1 = f" 'node{count}-index'"
+                # dec.append(var1)
+                #dec.append(": [],")
                 type_idx = 2
+            _exec_code.append(
+                "\n"
+                + "    " * (ind)
+                + f"stream zigzag-> stack case"
+            )
 
             if type_idx == 0:
                 temp = count
@@ -1206,46 +1232,41 @@ class read_avro_ft:
                         dum_idx = idxx - 1
                 for i in range(out):
                     if file["type"][i] == "null":
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
-                        _exec_code.append(
-                            "\n"
-                            + "    " * (ind + 1)
-                            + f"con['node{temp}-mask'].append(np.int8(False))"
-                        )
-                        print({"type": file["type"][dum_idx]})
+
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        #    + f"con['node{temp}-mask'].append(np.int8(False))"
+                        # )
+                        #print({"type": file["type"][dum_idx]})
                         if isinstance(file["type"][dum_idx], dict):
-                            _exec_code.append(
-                                "\n"
-                                + "    " * (ind + 1)
-                                # change dum_dat function to return full string
-                                + self.dum_dat(file["type"][dum_idx], temp + 1)
-                            )
+                            aa = "\n" + "    " * \
+                                (ind + 1) + \
+                                self.dum_dat(file["type"][dum_idx], temp + 1)
                         else:
-                            _exec_code.append(
-                                "\n"
-                                + "    " * (ind + 1)
-                                # change dum_dat function to return full string
-                                + self.dum_dat(
-                                    {"type": file["type"][dum_idx]}, temp + 1
-                                )
-                            )
+                            aa = "\n" + "    " * \
+                                (ind + 1) + \
+                                self.dum_dat(
+                                    {"type": file["type"][dum_idx]}, temp + 1)
+                        _exec_code.append(
+                            "\n" + "    " * (ind) + f"{i} of 0 node{temp}-mask <- stack {aa} endof")
                     else:
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
-                        _exec_code.append(
-                            "\n"
-                            + "    " * (ind + 1)
-                            + f"con['node{count}-mask'].append(np.int8(True))"
-                        )
+                            "\n" + "    " * (ind) + f"{i} dup drop of 1 node{temp}-mask <- stack")
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        #    + f"con['node{count}-mask'].append(np.int8(True))"
+                        # )
 
-                        aform1, _exec_code, count, dec = self.rec_exp_json_code(
+                        aform1, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
-                            dec,
+                            dec, keys, _init_code, con
                         )
+                        _exec_code.append(" endof")
                 # aform.append(
                  #   f'"valid_when": true,"form_key": "node{temp}"}}\n')
                 aform = ak.forms.ByteMaskedForm(
@@ -1264,12 +1285,12 @@ class read_avro_ft:
                 for i in range(out):
                     if file["type"][i] == "null":
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
-                        _exec_code.append(
-                            "\n"
-                            + "    " * (ind + 1)
-                            + f"con['node{temp}-index'].append(np.int8(-1))"
-                        )
+                            "\n" + "    " * (ind) + f"{i} of -1 node{temp}-index <- stack endof")
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        #    + f"con['node{temp}-index'].append(np.int8(-1))"
+                        # )
 
                         print({"type": file["type"][dum_idx]})
                         # _exec_code.append(
@@ -1280,23 +1301,28 @@ class read_avro_ft:
                         # ))
                     else:
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
-                        _exec_code.insert(3, f"countvar{count}{i} = 0\n")
-                        _exec_code.append(
-                            "\n"
-                            + "    " * (ind + 1)
-                            + f"con['node{count}-index'].append(countvar{count}{i})"
-                        )
+                            "\n" + "    " * (ind) + f"{i} of countvar{count}{i} i-> node{count}-index endof")
+                        ##################
+                        ##################
+                        #####################
+                        ##################
+                        _init_code.append(f"variable countvar{count}{i}\n")
+                        #_exec_code.insert(3, f"countvar{count}{i} = 0\n")
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        #    + f"con['node{count}-index'].append(countvar{count}{i})"
+                        # )
                         _exec_code.append(
                             "\n" + "    " * (ind + 1) +
-                            f"countvar{count}{i} += 1"
+                            f"1 countvar{count}{i} +!"
                         )
-                        aform1, _exec_code, count, dec, con = self.rec_exp_json_code(
+                        aform1, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
-                            dec, con
+                            dec, keys, _init_code, con
                         )
                 # aform.append(
                  #   f'"valid_when": true,"form_key": "node{temp}"}}\n')
@@ -1318,23 +1344,23 @@ class read_avro_ft:
                 for i in range(out):
                     if file["type"][i] == "null":
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
-                        _exec_code.append(
-                            "\n"
-                            + "    " * (ind + 1)
-                            + f"con['node{mask_idx}-mask'].append(np.int8(False))"
-                        )
-                        _exec_code.append(
-                            "\n"
-                            + "    " * (ind + 1)
-                            + f"con['node{union_idx}-tags'].append(np.int8(0))"
-                        )
-                        _exec_code.append(
-                            "\n"
-                            + "    " * (ind + 1)
-                            + f"con['node{union_idx}-index'].append(0)"
-                        )
-                        print({"type": file["type"][dum_idx]})
+                            "\n" + "    " * (ind) + f"{i} of 0 node{mask_idx}-mask <- stack 0 node{union_idx}-tags <- stack 0 node{union_idx}-index <- stack endof")
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        #    + f"con['node{mask_idx}-mask'].append(np.int8(False))"
+                        # )
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        #    + f"con['node{union_idx}-tags'].append(np.int8(0))"
+                        # )
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        #    + f"con['node{union_idx}-index'].append(0)"
+                        # )
+                        #print({"type": file["type"][dum_idx]})
                         # _exec_code.append(
                         #    "\n"
                         #    + "    " * (ind + 1)
@@ -1344,43 +1370,57 @@ class read_avro_ft:
                     else:
                         if null_present:
                             _exec_code.append(
-                                "\n" + "    " * (ind) + f"if idxx == {i}:"
+                                "\n" + "    " *
+                                (ind) +
+                                f"{i} of 1 node{mask_idx}-mask <- stack {idxx} node{union_idx}-tags <- stack endof"
                             )
-                            _exec_code.append(
-                                "\n"
-                                + "    " * (ind + 1)
-                                + f"con['node{mask_idx}-mask'].append(np.int8(True))"
-                            )
-                            _exec_code.append(
-                                "\n"
-                                + "    " * (ind + 1)
-                                + f"con['node{union_idx}-tags'].append(np.int8(idxx))"
-                            )
+                            # _exec_code.append(
+                            #    "\n"
+                            #    + "    " * (ind + 1)
+                            #    + f"con['node{mask_idx}-mask'].append(np.int8(True))"
+                            # )
+                            # _exec_code.append(
+                            #    "\n"
+                            #    + "    " * (ind + 1)
+                            #    + f"con['node{union_idx}-tags'].append(np.int8(idxx))"
+                            # )
                         else:
                             _exec_code.append(
-                                "\n" + "    " * (ind) + f"if idxx == {i}:"
+                                "\n" + "    " *
+                                (ind) +
+                                f"{i} of {idxx} node{union_idx}-tags <- stack 1 countvar{count}{i} +! endof"
                             )
-                            _exec_code.append(
-                                "\n"
-                                + "    " * (ind + 1)
-                                + f"con['node{union_idx}-tags'].append(np.int8(idxx))"
-                            )
-                        _exec_code.insert(3, f"countvar{count}{i} = 0\n")
+                            # _exec_code.append(
+                            #    "\n"
+                            #    + "    " * (ind + 1)
+                            #    + f"con['node{union_idx}-tags'].append(np.int8(idxx))"
+                            # )
+                        _init_code.append(f"variable countvar{count}{i} \n")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
-                            + f"con['node{union_idx}-index'].append(countvar{count}{i})"
+                            + f"countvar{count}{i} -> node{union_idx}-index"
                         )
                         _exec_code.append(
                             "\n" + "    " * (ind + 1) +
-                            f"countvar{count}{i} += 1"
+                            f"1 countvar{count}{i} +!"
                         )
-                        aform1, _exec_code, count, dec, con = self.rec_exp_json_code(
+                        #_exec_code.insert(3, f"countvar{count}{i} = 0\n")
+                        # _exec_code.append(
+                        #    "\n"
+                        #    + "    " * (ind + 1)
+                        #    + f"con['node{union_idx}-index'].append(countvar{count}{i})"
+                        # )
+                        # _exec_code.append(
+                        #    "\n" + "    " * (ind + 1) +
+                        #    f"countvar{count}{i} += 1"
+                        # )
+                        aform1, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
-                            dec, con
+                            dec, keys, _init_code, con
                         )
                         temp_forms.append(aform1)
                 # if aform[-1][-2] == ",":
@@ -1395,6 +1435,10 @@ class read_avro_ft:
                 else:
                     aform = ak.forms.UnionForm(
                         "i8", "i64", aform1, form_key=f"node{mask_idx}")
+            _exec_code.append(
+                "\n" + "    " * (ind + 1) +
+                "endcase"
+            )
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif isinstance(file["type"], dict):
