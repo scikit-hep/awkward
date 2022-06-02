@@ -7,6 +7,21 @@ import awkward as ak  # noqa: F401
 import awkward.forth
 
 
+def test_empty_form():
+    form = """
+{
+    "class": "EmptyArray"
+}
+    """
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+    array = builder.snapshot()
+    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
+        ak._v2.types.UnknownType(), 0
+    )
+
+    assert ak._v2.to_list(array) == []
+
+
 def test_numpy_bool_form():
     form = """
 {
@@ -177,20 +192,21 @@ def test_numpy_complex_form():
 #
 #     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 #
-#
-# def test_unsupported_form():
-#     form = """
-# {
-#     "class": "VirtualArray",
-#     "form": "float64",
-#     "has_length": true
-# }
-#            """
-#
-#     with pytest.raises(ValueError):
-#         ak._v2.highlevel.LayoutBuilder(form)
-#
-#
+
+
+def test_unsupported_form():
+    form = """
+{
+    "class": "VirtualArray",
+    "form": "float64",
+    "has_length": true
+}
+           """
+
+    with pytest.raises(ValueError):
+        ak._v2.highlevel.LayoutBuilder(form)
+
+
 # def test_list_offset_form():
 #     form = """
 # {
@@ -544,26 +560,27 @@ def test_numpy_complex_form():
 #         builder.int64(11)
 #     assert str(err.value) == "NumpyForm builder accepts only float64"
 #
-#
-# def test_error_in_numpy_form():
-#     form = """
-# {
-#     "class": "NumpyArray",
-#     "itemsize": 8,
-#     "format": "d",
-#     "primitive": "float64"
-# }
-#     """
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.float64(1.1)
-#     builder.float64(2.2)
-#     with pytest.raises(ValueError) as err:
-#         builder.int64(11)
-#     assert str(err.value) == "NumpyForm builder accepts only float64"
-#
-#
+
+
+def test_error_in_numpy_form():
+    form = """
+{
+    "class": "NumpyArray",
+    "itemsize": 8,
+    "format": "d",
+    "primitive": "float64"
+}
+    """
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.float64(1.1)
+    builder.float64(2.2)
+    with pytest.raises(ValueError) as err:
+        builder.int64(11)
+    assert str(err.value) == "NumpyForm builder accepts only float64"
+
+
 # def test_categorical_form():
 #     form = """
 # {
@@ -603,96 +620,120 @@ def test_numpy_complex_form():
 #     ]
 #     assert str(ak.type(ak.Array(builder.snapshot()))) == "10 * categorical[type=int64]"
 #
-#
-# def test_char_form():
-#     form = """
-# {
-#     "class": "NumpyArray",
-#     "itemsize": 1,
-#     "format": "B",
-#     "primitive": "uint8",
-#     "parameters": {
-#         "__array__": "char"
-#     }
-# }"""
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.string("one")
-#     builder.string("two")
-#     builder.string("three")
-#
-#     assert ak.to_list(builder.snapshot()) == "onetwothree"
-#
-#
-# def test_string_form():
-#     form = """
-# {
-#     "class": "ListOffsetArray64",
-#     "offsets": "i64",
-#     "content": {
-#         "class": "NumpyArray",
-#         "itemsize": 1,
-#         "format": "B",
-#         "primitive": "uint8",
-#         "parameters": {
-#             "__array__": "char"
-#         }
-#     },
-#     "parameters": {
-#         "__array__": "string"
-#     }
-# }"""
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.string("one")
-#     builder.string("two")
-#     builder.string("three")
-#
-#     assert ak.to_list(builder.snapshot()) == ["one", "two", "three"]
-#
-#
-# def test_empty_form():
-#     form = """{
-#            "class": "ListOffsetArray64",
-#            "offsets": "i64",
-#            "content": {
-#                "class": "ListOffsetArray64",
-#                "offsets": "i64",
-#                "content": {
-#                    "class": "EmptyArray"
-#                },
-#                "form_key": "node1"
-#            },
-#            "form_key": "node0"
-#        }"""
-#
-#     builder = ak._v2.highlevel.LayoutBuilder(form)
-#
-#     builder.begin_list()
-#     builder.end_list()
-#     builder.begin_list()
-#     builder.begin_list()
-#     builder.end_list()
-#     builder.begin_list()
-#     builder.end_list()
-#     builder.begin_list()
-#     builder.end_list()
-#     builder.end_list()
-#     builder.begin_list()
-#     builder.begin_list()
-#     builder.end_list()
-#     builder.begin_list()
-#     builder.end_list()
-#     builder.end_list()
-#     builder.begin_list()
-#     builder.end_list()
-#     builder.begin_list()
-#     builder.begin_list()
-#     # builder.int64(1)
-#     # will fail with ValueError: EmptyArrayBuilder does not accept 'int64'
-#     builder.end_list()
-#     builder.end_list()
-#
-#     assert ak.to_list(builder.snapshot()) == [[], [[], [], []], [[], []], [], [[]]]
+
+
+def test_char_form():
+    form = """
+{
+    "class": "NumpyArray",
+    "itemsize": 1,
+    "format": "B",
+    "primitive": "uint8",
+    "parameters": {
+        "__array__": "char"
+    }
+}"""
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.string("one")
+    builder.string("two")
+    builder.string("three")
+
+    assert ak._v2.to_list(builder.snapshot()) == "onetwothree"
+
+
+def test_string_form():
+    form = """
+{
+    "class": "ListOffsetArray64",
+    "offsets": "i64",
+    "content": {
+        "class": "NumpyArray",
+        "itemsize": 1,
+        "format": "B",
+        "primitive": "uint8",
+        "parameters": {
+            "__array__": "char"
+        }
+    },
+    "parameters": {
+        "__array__": "string"
+    }
+}"""
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.string("one")
+    builder.string("two")
+    builder.string("three")
+
+    assert ak._v2.to_list(builder.snapshot()) == ["one", "two", "three"]
+
+
+def test_list_offset_empty_form():
+    form = """
+{
+    "class": "ListOffsetArray",
+    "offsets": "i64",
+    "content": {
+        "class": "EmptyArray"
+    }
+}
+"""
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+
+    assert ak._v2.to_list(builder.snapshot()) == [[], [], []]
+
+
+def test_list_offset_list_offset_empty_form():
+    form = """
+{
+    "class": "ListOffsetArray",
+    "offsets": "i64",
+    "content": {
+        "class": "ListOffsetArray",
+        "offsets": "i64",
+        "content": {
+            "class": "EmptyArray"
+        }
+    }
+}
+"""
+
+    builder = ak._v2.highlevel.LayoutBuilder(form)
+
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.begin_list()
+    # builder.int64(1)
+    # will fail with ValueError: EmptyArrayBuilder does not accept 'int64'
+    builder.end_list()
+    builder.end_list()
+
+    assert ak._v2.to_list(builder.snapshot()) == [[], [[], [], []], [[], []], [], [[]]]

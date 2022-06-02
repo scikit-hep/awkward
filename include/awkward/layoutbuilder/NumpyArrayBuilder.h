@@ -111,6 +111,11 @@ namespace awkward {
       return length_;
     }
 
+    bool
+      is_complex() const override {
+        return is_complex_;
+    }
+
   private:
 
     std::map<std::string, ssize_t> primitive_to_itemsize_ {
@@ -139,6 +144,7 @@ namespace awkward {
     const std::string form_key_;
     const std::string form_primitive_;
     mutable ssize_t length_;
+    bool is_complex_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Form

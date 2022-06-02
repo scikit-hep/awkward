@@ -47,6 +47,11 @@ namespace awkward {
     virtual ssize_t
       len() const = 0;
 
+    virtual bool
+      is_complex() const {
+        return false;
+      }
+
     // /// @brief The Form describing the array.
     // virtual const FormPtr
     //   form() const = 0;

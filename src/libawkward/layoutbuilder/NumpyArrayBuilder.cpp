@@ -19,7 +19,8 @@ namespace awkward {
     : parameters_(parameters),
       form_key_(form_key),
       form_primitive_(form_primitive),
-      length_(-1) {
+      length_(-1),
+      is_complex_(form_primitive.rfind("complex", 0) == 0) {
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
       .append(form_primitive).append("\" ");
 
@@ -58,14 +59,23 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data());
-    length_ = (form_primitive().rfind("complex", 0) == 0) ? (ssize_t)search->second.get()->len() >> 1 : (ssize_t)search->second.get()->len();
+    length_ = is_complex() ? (ssize_t)search->second.get()->len() >> 1 : (ssize_t)search->second.get()->len();
 
     container.copy_buffer(form_key() + "-data",
                           search->second.get()->ptr().get(),
                           (int64_t)((ssize_t)search->second.get()->len() * itemsize()));
 
-    return "{\"class\": \"NumpyArray\", \"primitive\": \"" + form_primitive() + "\", \"form_key\": \""
-           + form_key() + "\"}";
+    std::stringstream parameters;
+    if (!parameters_.empty()) {
+      parameters << " \"parameters\": {";
+      for (auto const &pair: parameters_) {
+        parameters << "\"" << pair.first << "\": " << pair.second << " ";
+      }
+      parameters << "}, ";
+    }
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"" + form_primitive() + "\","
+      + parameters.str() + " \"form_key\": \""
+      + form_key() + "\"}";
   }
 
   template <typename T, typename I>
