@@ -24,7 +24,8 @@ def test_textint():
            x skipws 2 x #textint-> y"""
     )
     vm.run(
-        {"x": np.array([ord(x) for x in "     12345 -123      3210  -42 0"], np.uint8)}
+        {"x": np.array([ord(x)
+                       for x in "     12345 -123      3210  -42 0"], np.uint8)}
     )
     assert vm.stack == [12345, -123, 3210]
     assert np.asarray(vm["y"]).tolist() == [-42.0, 0.0]
@@ -39,7 +40,8 @@ def test_textfloat():
     vm.run(
         {
             "x": np.array(
-                [ord(x) for x in "     42 -42 42.123 -42.123e1 42.123e+2 -42.123e-2"],
+                [ord(x)
+                 for x in "     42 -42 42.123 -42.123e1 42.123e+2 -42.123e-2"],
                 np.uint8,
             )
         }
@@ -66,7 +68,8 @@ def test_quotedstr():
         }
     )
     assert (
-        ak._v2._util.tobytes(np.asarray(vm["y"])) == b'one   twothree   fo\\u"rf\nivE'
+        ak._v2._util.tobytes(np.asarray(
+            vm["y"])) == b'one   twothree   fo\\u"rf\nivE'
     )
     assert vm.stack == [3, 6, 8, 6, 5]
 
@@ -92,7 +95,8 @@ def test_peek():
            5 0 do x skipws 0 x peek 1 x peek x textint-> y loop"""
     )
     vm.run(
-        {"x": np.array([ord(x) for x in "     12345 -123      3210  -42 98"], np.uint8)}
+        {"x": np.array([ord(x)
+                       for x in "     12345 -123      3210  -42 98"], np.uint8)}
     )
     assert vm.stack == [
         ord("1"),
@@ -243,3 +247,63 @@ def test_specialized_case():
     vm.stack_push(2)
     vm.resume()
     assert vm.stack == [10, 20, 30]
+
+
+def test_case_corner_case():
+    vm = ForthMachine32(
+        r"case 0 of 1000 dup 0 do 1000 drop loop endof 1 of 1001 endof 2 of 1002 endof 9999 swap endcase 10 20 30")
+
+    vm.begin()
+    vm.stack_push(0)
+    vm.resume()
+    assert vm.stack == [1000, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(1)
+    vm.resume()
+    assert vm.stack == [1001, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(2)
+    vm.resume()
+    assert vm.stack == [1002, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(3)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(-1)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+
+def test_case_corner_case_2():
+    vm = ForthMachine32(
+        r"case 0 of 1000 dup 0 do 1000 drop loop endof 1 of 1001 endof 1 1 + of 1002 endof 9999 swap endcase 10 20 30")
+
+    vm.begin()
+    vm.stack_push(0)
+    vm.resume()
+    assert vm.stack == [1000, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(1)
+    vm.resume()
+    assert vm.stack == [1001, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(2)
+    vm.resume()
+    assert vm.stack == [1002, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(3)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(-1)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]

@@ -535,7 +535,7 @@ namespace awkward {
           out << "case ( regular )\n";
           for (int64_t i = 0;  i < num_cases;  i++) {
             out << indent << "  " << i << " of";
-            I consequent = start + (i << 1) + 1;
+            I consequent = start + i;
             if (segment_nonempty(consequent)) {
               out << "\n" << indent << "    ";
               out << decompiled_segment(consequent, indent + "    ");
@@ -2253,6 +2253,9 @@ namespace awkward {
         I alternate;
 
         I first_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
+        for(I i = 0; i<ofs.size(); i++){
+          dictionary.push_back({});
+        }
         bool can_specialize = true;
         int64_t substart = pos + 1;
         for (int64_t i = 0;  i < ofs.size();  i++) {
@@ -2274,9 +2277,9 @@ namespace awkward {
           dictionary[(IndexTypeOf<int64_t>)pred_bytecode - BOUND_DICTIONARY] = pred;
           predicates.push_back(pred_bytecode);
 
-          I cons_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
+          I cons_bytecode = first_bytecode + i; //(I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> cons;
-          dictionary.push_back(cons);
+          //dictionary.push_back(cons);
           parse(defn,
                 tokenized,
                 linecol,
@@ -3575,7 +3578,7 @@ namespace awkward {
               }
               else {
                 stack_depth_--;
-                which = start + (*value << 1) + 1;
+                which = start + *value;
               }
 
               if (recursion_current_depth_ == recursion_max_depth_) {

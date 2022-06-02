@@ -1243,6 +1243,7 @@ class read_avro_ft:
                             aa = "\n" + "    " * \
                                 (ind + 1) + \
                                 self.dum_dat(file["type"][dum_idx], temp + 1)
+                            # print(file["type"][dum_idx])
                         else:
                             aa = "\n" + "    " * \
                                 (ind + 1) + \
@@ -1252,7 +1253,7 @@ class read_avro_ft:
                             "\n" + "    " * (ind) + f"{i} of 0 node{temp}-mask <- stack {aa} endof")
                     else:
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"{i} dup drop of 1 node{temp}-mask <- stack")
+                            "\n" + "    " * (ind) + f"{i} of 1 node{temp}-mask <- stack")
                         # _exec_code.append(
                         #    "\n"
                         #    + "    " * (ind + 1)
