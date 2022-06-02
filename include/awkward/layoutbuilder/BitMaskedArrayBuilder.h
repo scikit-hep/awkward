@@ -105,8 +105,8 @@ namespace awkward {
 
     ssize_t
       len() const override {
-      return length_;
-    }
+        return length_;
+      }
 
   private:
     /// @brief This Form content builder
@@ -114,7 +114,7 @@ namespace awkward {
 
     /// @brief This Form parameters
     const util::Parameters parameters_;
-    ssize_t length_;
+    mutable ssize_t length_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Form.
