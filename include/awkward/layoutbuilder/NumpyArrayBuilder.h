@@ -103,6 +103,11 @@ namespace awkward {
 
     ssize_t
       itemsize() const {
+        if (form_primitive() == "float64") {
+          return sizeof(double);
+        } else if (form_primitive() == "complex128") {
+          return sizeof(double) << 1;
+        }
         return util::dtype_to_itemsize(util::name_to_dtype(form_primitive()));
       }
 

@@ -2693,8 +2693,9 @@ class LayoutBuilder(Sized):
     Note that it is a specialized procedurer: the type is known in advance.
     """
 
-    def __init__(self, form, behavior=None):
+    def __init__(self, form=None, behavior=None):
         self._layout = ak.layout.LayoutBuilder64(form=form)
+        self.form = form
         self.behavior = behavior
 
     @classmethod
