@@ -222,8 +222,8 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  LayoutBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
-    return builder_.get()->to_buffers(container, form_key_id, vm().get()->outputs());
+  LayoutBuilder<T, I>::to_buffers(BuffersContainer& container) const {
+    return builder_.get()->to_buffers(container, vm().get()->outputs());
   }
 
   template <typename T, typename I>

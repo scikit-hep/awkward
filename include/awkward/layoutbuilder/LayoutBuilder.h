@@ -81,7 +81,7 @@ namespace awkward {
     /// @brief Copy the current snapshot into the BuffersContainer and
     /// return a Form as a std::string (JSON).
     const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id) const;
+      to_buffers(BuffersContainer& container) const;
 
     /// @brief Connects a Virtual Machine if it was not initialized before.
     void

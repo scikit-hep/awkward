@@ -38,8 +38,10 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  UnmaskedArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
-    return content().get()->to_buffers(container, form_key_id, outputs);
+  UnmaskedArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
+    return content().get()->to_buffers(container, outputs);
   }
 
   template <typename T, typename I>

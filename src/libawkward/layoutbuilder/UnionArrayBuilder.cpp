@@ -90,7 +90,9 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  UnionArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+  UnionArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_tags());
     if (search != outputs.end()) {
       auto length = (ssize_t)search->second.get()->len();
@@ -122,7 +124,7 @@ namespace awkward {
         if (i != 0) {
           out << ", ";
         }
-        out << contents_[i].get()->to_buffers(container, form_key_id, outputs);
+        out << contents_[i].get()->to_buffers(container, outputs);
       }
       out << "], \"form_key\": \"" << form_key() + "\"}";
       return out.str();

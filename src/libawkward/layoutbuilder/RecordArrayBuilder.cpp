@@ -53,7 +53,9 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  RecordArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+  RecordArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
     std::stringstream out;
     out << "{\"class\": \"RecordArray\", \"contents\": {";
     for (size_t i = 0;  i < contents().size();  i++) {
@@ -61,7 +63,7 @@ namespace awkward {
         out << ", ";
       }
       out << "" + util::quote(fields_[i]) + ": ";
-      out << contents()[i].get()->to_buffers(container, form_key_id, outputs);
+      out << contents()[i].get()->to_buffers(container, outputs);
     }
     out << "}, ";
     out << this->parameters_as_string(parameters_);

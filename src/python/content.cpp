@@ -1546,8 +1546,7 @@ make_LayoutBuilder(const py::handle& m, const std::string& name) {
       })
       .def("to_buffers", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
         ::NumpyBuffersContainer container;
-        int64_t form_key_id = 0;
-        std::string form = self.to_buffers(container, form_key_id);
+        std::string form = self.to_buffers(container);
         py::tuple out(3);
         out[0] = py::str(form);
         out[1] = py::int_(self.length());

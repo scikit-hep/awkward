@@ -62,7 +62,6 @@ namespace awkward {
   const std::string
   IndexedArrayBuilder<T, I>::to_buffers(
     BuffersContainer& container,
-    int64_t& form_key_id,
     const ForthOutputBufferMap& outputs) const {
 
     auto search = outputs.find(vm_output_data());
@@ -73,7 +72,7 @@ namespace awkward {
           (int32_t)((ssize_t)search->second.get()->len() * (ssize_t)sizeof(int32_t)));
 
         return "{\"class\": \"IndexedArray\", \"index\": \"i32\", \"content\": "
-          + content().get()->to_buffers(container, form_key_id, outputs) + ", "
+          + content().get()->to_buffers(container, outputs) + ", "
           + this->parameters_as_string(parameters_) + " \"form_key\": \""
           + form_key() + "\"}";
 
@@ -83,7 +82,7 @@ namespace awkward {
           (int64_t)((ssize_t)search->second.get()->len() * (ssize_t)sizeof(int64_t)));
 
         return "{\"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
-          + content().get()->to_buffers(container, form_key_id, outputs) + ", "
+          + content().get()->to_buffers(container, outputs) + ", "
           + this->parameters_as_string(parameters_) + " \"form_key\": \""
           + form_key() + "\"}";
 

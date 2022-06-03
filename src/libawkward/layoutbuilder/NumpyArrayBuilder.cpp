@@ -56,7 +56,9 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  NumpyArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+  NumpyArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data());
     if (search != outputs.end()) {
       container.copy_buffer(form_key() + "-data",

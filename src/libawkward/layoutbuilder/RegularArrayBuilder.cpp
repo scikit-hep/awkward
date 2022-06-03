@@ -45,10 +45,12 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  RegularArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+  RegularArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
     return "{\"class\": \"RegularArray\", \"size\": " + std::to_string(form_size())
       + ", \"content\": "
-      + content()->to_buffers(container, form_key_id, outputs) + ", "
+      + content()->to_buffers(container, outputs) + ", "
       + this->parameters_as_string(parameters_) + " \"form_key\": \""
       + form_key() + "\"}";
   }

@@ -80,7 +80,9 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  IndexedOptionArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+  IndexedOptionArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data());
     if (search != outputs.end()) {
       if (form_index() == "int32") {
@@ -89,7 +91,7 @@ namespace awkward {
           (int32_t)((ssize_t)search->second.get()->len() * (ssize_t)sizeof(int32_t)));
 
         return "{\"class\": \"IndexedOptionArray\", \"index\": \"i32\", \"content\": "
-          + content().get()->to_buffers(container, form_key_id, outputs) + ", "
+          + content().get()->to_buffers(container, outputs) + ", "
           + this->parameters_as_string(parameters_) + " \"form_key\": \""
           + form_key() + "\"}";
 
@@ -99,7 +101,7 @@ namespace awkward {
           (int64_t)((ssize_t)search->second.get()->len() * (ssize_t)sizeof(int64_t)));
 
         return "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
-          + content().get()->to_buffers(container, form_key_id, outputs) + ", "
+          + content().get()->to_buffers(container, outputs) + ", "
           + this->parameters_as_string(parameters_) + " \"form_key\": \""
           + form_key() + "\"}";
 

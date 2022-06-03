@@ -65,7 +65,9 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  ListOffsetArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+  ListOffsetArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data());
     auto offsets = search->second.get()->toIndex64();
 
@@ -81,7 +83,7 @@ namespace awkward {
                           (int64_t)(offsets.length() * (int64_t)sizeof(int64_t)));
 
     return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-      + content()->to_buffers(container, form_key_id, outputs) + ", "
+      + content()->to_buffers(container, outputs) + ", "
       + this->parameters_as_string(parameters_) + " \"form_key\": \""
       + form_key() + "\"}";
   }

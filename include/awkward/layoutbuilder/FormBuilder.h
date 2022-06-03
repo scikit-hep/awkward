@@ -41,7 +41,7 @@ namespace awkward {
     /// @brief Copy the current snapshot into the BuffersContainer and
     /// return a Form as a std::string (JSON).
     virtual const std::string
-      to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const = 0;
+      to_buffers(BuffersContainer& container, const ForthOutputBufferMap& outputs) const = 0;
 
     /// @brief The builder's output buffer length.
     virtual ssize_t
