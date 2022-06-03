@@ -1417,3 +1417,18 @@ class UnionArray(Content):
             parameters=self.parameters,
             nplike=nplike,
         )
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.tags == other.tags
+            and self.index.layout_equal(other.index, index_dtype, numpyarray)
+            and len(self.contents) == len(other.contents)
+            and all(
+                [
+                    self.contents[i].layout_equal(
+                        other.contents[i], index_dtype, numpyarray
+                    )
+                    for i in range(len(self.contents))
+                ]
+            )
+        )

@@ -190,7 +190,14 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         args.append(x.raw(nplike))
                     else:
                         args.append(x)
-                result = getattr(ufunc, method)(*args, **kwargs)
+
+                if isinstance(nplike, ak.nplike.Jax):
+                    from awkward._v2._connect.jax import import_jax
+
+                    jax = import_jax()
+                    result = getattr(jax.numpy, ufunc.__name__)(*args, **kwargs)
+                else:
+                    result = getattr(ufunc, method)(*args, **kwargs)
 
             else:
                 shape = None

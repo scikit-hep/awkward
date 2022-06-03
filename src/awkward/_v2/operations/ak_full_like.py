@@ -151,7 +151,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
 
         elif isinstance(layout, ak._v2.contents.NumpyArray):
             nplike = ak.nplike.of(layout)
-            original = nplike.asarray(layout)
+            original = nplike.asarray(layout.data)
 
             if fill_value == 0 or fill_value is _ZEROS:
                 return ak._v2.contents.NumpyArray(

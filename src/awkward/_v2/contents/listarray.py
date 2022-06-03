@@ -1468,3 +1468,10 @@ class ListArray(Content):
             parameters=self._parameters,
             nplike=nplike,
         )
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.starts.layout_equal(other.starts, index_dtype, numpyarray)
+            and self.stops.layout_equal(other.stops, index_dtype, numpyarray)
+            and self.content.layout_equal(other.content, index_dtype, numpyarray)
+        )

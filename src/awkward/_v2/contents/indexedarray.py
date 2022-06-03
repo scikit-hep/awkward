@@ -1254,3 +1254,8 @@ class IndexedArray(Content):
             parameters=self.parameters,
             nplike=nplike,
         )
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return self.index.layout_equal(
+            other.index, index_dtype, numpyarray
+        ) and self.content.layout_equal(other.content, index_dtype, numpyarray)

@@ -29,9 +29,10 @@ def to_rdataframe(layouts, length, flatlist_as_rvec):
 
 
 class DataSourceGenerator:
-    def __init__(self, length, flatlist_as_rvec=False):
+    def __init__(self, length, flatlist_as_rvec=True):
         self.length = length
         self.flatlist_as_rvec = flatlist_as_rvec
+        self.entry_types = {}
         self.data_ptrs_list = []
         self.generators = {}
         self.lookups = {}
@@ -53,24 +54,56 @@ class DataSourceGenerator:
         k = 0
 
         for key in layouts:
-            layout = layouts[key]
             self.generators[key] = ak._v2._connect.cling.togenerator(
-                layout.form, flatlist_as_rvec=self.flatlist_as_rvec
+                layouts[key].form, flatlist_as_rvec=self.flatlist_as_rvec
             )
-            self.lookups[key] = ak._v2._lookup.Lookup(layout)
-            generator = self.generators[key]
-            generator.generate(ROOT.gInterpreter.Declare)
+            self.lookups[key] = ak._v2._lookup.Lookup(layouts[key])
+            self.generators[key].generate(ROOT.gInterpreter.Declare)
 
-            entry_type = generator.entry_type()
-            if isinstance(generator, ak._v2._connect.cling.NumpyArrayGenerator):
+            self.entry_types[key] = self.generators[key].entry_type()
+            if isinstance(
+                self.generators[key], ak._v2._connect.cling.NumpyArrayGenerator
+            ):
                 pass
-            elif isinstance(generator, ak._v2._connect.cling.ListArrayGenerator) and (
-                generator.is_string
-                or (generator.flatlist_as_rvec and generator.is_flatlist)
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.ListArrayGenerator
+            ) and (
+                self.generators[key].is_string
+                or (
+                    self.generators[key].flatlist_as_rvec
+                    and self.generators[key].is_flatlist
+                )
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.RegularArrayGenerator
+            ) and (
+                self.generators[key].flatlist_as_rvec
+                and self.generators[key].is_flatlist
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.IndexedOptionArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.IndexedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.ByteMaskedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.BitMaskedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._v2._connect.cling.UnmaskedArrayGenerator
             ):
                 pass
             else:
-                entry_type = "awkward::" + entry_type
+                self.entry_types[key] = "awkward::" + self.entry_types[key]
 
             self.data_ptrs_list.append(self.lookups[key].arrayptrs.ctypes.data)
 
@@ -78,8 +111,8 @@ class DataSourceGenerator:
                 cpp_code_declare_slots
                 + f"""
         ULong64_t fPtrs_{key} = 0;
-        std::vector<{entry_type}>  slots_{key};
-        std::vector<{entry_type}*> addrs_{key};
+        std::vector<{self.entry_types[key]}>  slots_{key};
+        std::vector<{self.entry_types[key]}*> addrs_{key};
     """
             )
 
@@ -106,14 +139,14 @@ class DataSourceGenerator:
             cpp_code_column_type_names = (
                 cpp_code_column_type_names
                 + f"""
-        "{entry_type}"
+        "{self.entry_types[key]}"
     """.strip()
             )
 
             cpp_code_column_types_map = (
                 cpp_code_column_types_map
                 + f"""
-        {{ "{key}", "{entry_type}" }}
+        {{ "{key}", "{self.entry_types[key]}" }}
     """.strip()
             )
 
@@ -213,7 +246,6 @@ namespace awkward {{
                 fEntryRanges.emplace_back(start, end);
                 (void)i;
              }}
-             // TODO: redistribute reminder to all slots
              fEntryRanges.back().second += fSize % fNSlots;
         }}
 

@@ -149,9 +149,11 @@ class Index:
 
     def __getitem__(self, where):
         out = self._data[where]
+        from awkward._v2._util import is_cupy_buffer, is_jax_buffer
+
         if hasattr(out, "shape") and len(out.shape) != 0:
             return type(self)(out)
-        elif type(out).__module__.startswith("cupy.") and len(out.shape) == 0:
+        elif (is_jax_buffer(out) or is_cupy_buffer(out)) and len(out.shape) == 0:
             return out.item()
         else:
             return out
@@ -182,6 +184,15 @@ class Index:
 
     def _to_nplike(self, nplike):
         return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
+
+    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+        if index_dtype:
+            return (
+                self.nplike.array_equal(self.data, other.data)
+                and self._data.dtype == other.data.dtype
+            )
+        else:
+            return self.nplike.array_equal(self.data, other.data)
 
 
 class Index8(Index):

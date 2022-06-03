@@ -2026,11 +2026,11 @@ class ListOffsetArray(Content):
         self, action, depth, depth_context, lateral_context, options
     ):
         if self._nplike.known_shape and self._nplike.known_data:
-            offsetsmin = self._offsets.data[0]
+            offsetsmin = self._offsets[0]
             offsets = ak._v2.index.Index(
                 self._offsets.data - offsetsmin, nplike=self._nplike
             )
-            content = self._content[offsetsmin : self._offsets.data[-1]]
+            content = self._content[offsetsmin : self._offsets[-1]]
         else:
             offsets, content = self._offsets, self._content
 
@@ -2187,3 +2187,8 @@ class ListOffsetArray(Content):
                     )
 
                 return content
+
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return self.offsets.layout_equal(
+            other.offsets, index_dtype, numpyarray
+        ) and self.content.layout_equal(other.content, index_dtype, numpyarray)
