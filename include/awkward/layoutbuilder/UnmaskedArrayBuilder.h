@@ -104,7 +104,11 @@ namespace awkward {
       form_parameters() const { return parameters_; }
 
     ssize_t
-      len() const override {
+      len(const ForthOutputBufferMap& outputs) const override {
+        auto search = outputs.find(content().get()->vm_output_data());
+        if (search != outputs.end()) {
+          length_ = (ssize_t)search->second.get()->len();
+        }
         return length_;
       }
 

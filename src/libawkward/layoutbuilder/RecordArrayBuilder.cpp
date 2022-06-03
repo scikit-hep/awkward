@@ -20,7 +20,7 @@ namespace awkward {
       form_key_(form_key),
       field_index_(0),
       contents_size_((int64_t) contents.size()),
-      length_((int64_t) contents.size()) {
+      length_(0) {
     for (auto const& content : contents) {
       contents_.push_back(content);
       vm_output_.append(contents_.back().get()->vm_output());
@@ -52,7 +52,9 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   RecordArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
-    length_ = contents().size();
+    std::cout << vm_func_name() << std::endl;
+    for(size_t i = 0;  i < contents().size();  i++)
+      std::cout << "" + util::quote((*form_recordlookup())[i]) + ": ";
 
     std::stringstream out;
     out << "{\"class\": \"RecordArray\", \"contents\": {";

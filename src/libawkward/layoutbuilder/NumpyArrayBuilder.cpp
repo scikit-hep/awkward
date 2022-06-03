@@ -59,7 +59,6 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data());
-    length_ = is_complex() ? (ssize_t)search->second.get()->len() >> 1 : (ssize_t)search->second.get()->len();
 
     container.copy_buffer(form_key() + "-data",
                           search->second.get()->ptr().get(),

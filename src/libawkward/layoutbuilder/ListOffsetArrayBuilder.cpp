@@ -67,8 +67,6 @@ namespace awkward {
   const std::string
   ListOffsetArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data());
-    length_ = (ssize_t)search->second.get()->len() - 1;
-
     auto offsets = search->second.get()->toIndex64();
 
     // FIXME: deal with complex numbers in the builder itself

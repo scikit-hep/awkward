@@ -110,11 +110,11 @@ namespace awkward {
 
     container.copy_buffer(form_key() + "-tags",
                           tags.ptr().get(),
-                          (int64_t)(length_ * sizeof(int8_t)));
+                          (int64_t)(length_ * (ssize_t)sizeof(int8_t)));
 
     container.copy_buffer(form_key() + "-index",
                           index.ptr().get(),
-                          (int64_t)(index.length() * sizeof(int64_t)));
+                          (int64_t)(index.length() * (ssize_t)sizeof(int64_t)));
 
     std::stringstream out;
     out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";

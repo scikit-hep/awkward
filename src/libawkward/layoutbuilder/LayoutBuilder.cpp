@@ -224,7 +224,6 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   LayoutBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
-    //self.vm().get()->outputs();
     return builder_.get()->to_buffers(container, form_key_id, vm().get()->outputs());
   }
 
@@ -670,7 +669,7 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   LayoutBuilder<T, I>::length() const {
-    return builder_->len();
+    return builder_->len(vm().get()->outputs());
   }
 
   template <typename T, typename I>

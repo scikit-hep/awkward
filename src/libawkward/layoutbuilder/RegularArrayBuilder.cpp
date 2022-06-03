@@ -47,10 +47,6 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   RegularArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
-    auto search = outputs.find(content().get()->vm_output_data());
-    length_ = content().get()->is_complex() ? (ssize_t)search->second.get()->len() >> 1 : (ssize_t)search->second.get()->len();
-    length_ = length_ / form_size_;
-
     return "{\"class\": \"RegularArray\", \"size\": " + std::to_string(form_size())
       + ", \"content\": "
       + content()->to_buffers(container, form_key_id, outputs) + ", "

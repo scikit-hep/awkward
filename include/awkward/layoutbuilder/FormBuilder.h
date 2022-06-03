@@ -45,7 +45,7 @@ namespace awkward {
 
     /// @brief The builder's output buffer length.
     virtual ssize_t
-      len() const = 0;
+      len(const ForthOutputBufferMap& outputs) const = 0;
 
     virtual bool
       is_complex() const {

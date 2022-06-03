@@ -108,7 +108,7 @@ namespace awkward {
       form_key() const {return form_key_; }
 
     ssize_t
-      len() const override {
+      len(const ForthOutputBufferMap& outputs) const override {
         return length_;
       }
 
