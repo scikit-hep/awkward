@@ -428,7 +428,8 @@ class read_avro_py:
                 dec.append(var1)
                 dec.append(": [],")
                 type_idx = 2
-
+            print(type_idx)
+            print("GSEGSEGEGEG")
             if type_idx == 0:
                 temp = count
                 dum_idx = 0
@@ -441,6 +442,7 @@ class read_avro_py:
                     else:
                         dum_idx = idxx - 1
                 for i in range(out):
+                    print(file["type"][i])
                     if file["type"][i] == "null":
                         _exec_code.append(
                             "\n" + "    " * (ind) + f"if idxx == {i}:")
@@ -449,8 +451,8 @@ class read_avro_py:
                             + "    " * (ind + 1)
                             + f"con['node{temp}-mask'].append(np.int8(False))"
                         )
-                        print({"type": file["type"][dum_idx]})
                         if isinstance(file["type"][dum_idx], dict):
+
                             _exec_code.append(
                                 "\n"
                                 + "    " * (ind + 1)
@@ -1173,7 +1175,7 @@ class read_avro_ft:
                 #var1 = f" 'node{count}-index'"
                 # dec.append(var1)
                 #dec.append(": [],")
-                #type_idx = 1
+                type_idx = 1
             else:
                 for elem in file["type"]:
                     if elem == "null":
@@ -1191,9 +1193,9 @@ class read_avro_ft:
                         #dec.append(": [],")
                         count = count + 1
                         null_present = True
-                # if null_present:
-                #    aform1 = ak.forms.UnionForm(
-                #        "i8", "i64", ak.forms.EmptyForm())
+                #  if null_present:
+                #   aform1 = ak.forms.UnionForm(
+                #       "i8", "i64", ak.forms.EmptyForm())
                 #    aform.content = aform1
                 # else:
                 #    aform = ak.forms.UnionForm(
@@ -1218,7 +1220,6 @@ class read_avro_ft:
                 + "    " * (ind)
                 + f"stream zigzag-> stack case"
             )
-
             if type_idx == 0:
                 temp = count
                 dum_idx = 0
@@ -1231,6 +1232,7 @@ class read_avro_ft:
                     else:
                         dum_idx = idxx - 1
                 for i in range(out):
+
                     if file["type"][i] == "null":
 
                         # _exec_code.append(
@@ -1238,8 +1240,9 @@ class read_avro_ft:
                         #    + "    " * (ind + 1)
                         #    + f"con['node{temp}-mask'].append(np.int8(False))"
                         # )
-                        #print({"type": file["type"][dum_idx]})
+
                         if isinstance(file["type"][dum_idx], dict):
+
                             aa = "\n" + "    " * \
                                 (ind + 1) + \
                                 self.dum_dat(file["type"][dum_idx], temp + 1)
@@ -1302,7 +1305,7 @@ class read_avro_ft:
                         # ))
                     else:
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"{i} of countvar{count}{i} i-> node{count}-index endof")
+                            "\n" + "    " * (ind) + f"{i} of countvar{count}{i} @ node{count}-index <- stack 1 countvar{count}{i} +! ")
                         ##################
                         ##################
                         #####################
@@ -1313,11 +1316,6 @@ class read_avro_ft:
                         #    "\n"
                         #    + "    " * (ind + 1)
                         #    + f"con['node{count}-index'].append(countvar{count}{i})"
-                        # )
-                        _exec_code.append(
-                            "\n" + "    " * (ind + 1) +
-                            f"1 countvar{count}{i} +!"
-                        )
                         aform1, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
@@ -1325,6 +1323,7 @@ class read_avro_ft:
                             count + 1,
                             dec, keys, _init_code, con
                         )
+                        _exec_code.append("\nendof")
                 # aform.append(
                  #   f'"valid_when": true,"form_key": "node{temp}"}}\n')
                 aform = ak.forms.IndexedOptionForm(
@@ -1373,7 +1372,7 @@ class read_avro_ft:
                             _exec_code.append(
                                 "\n" + "    " *
                                 (ind) +
-                                f"{i} of 1 node{mask_idx}-mask <- stack {idxx} node{union_idx}-tags <- stack endof"
+                                f"{i} of 1 node{mask_idx}-mask <- stack {i} node{union_idx}-tags <- stack"
                             )
                             # _exec_code.append(
                             #    "\n"
@@ -1389,7 +1388,7 @@ class read_avro_ft:
                             _exec_code.append(
                                 "\n" + "    " *
                                 (ind) +
-                                f"{i} of {idxx} node{union_idx}-tags <- stack 1 countvar{count}{i} +! endof"
+                                f"{i} of {i} node{union_idx}-tags <- stack 1 countvar{count}{i} +!"
                             )
                             # _exec_code.append(
                             #    "\n"
@@ -1400,7 +1399,7 @@ class read_avro_ft:
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
-                            + f"countvar{count}{i} -> node{union_idx}-index"
+                            + f"countvar{count}{i} @ node{union_idx}-index <- stack"
                         )
                         _exec_code.append(
                             "\n" + "    " * (ind + 1) +
@@ -1424,6 +1423,7 @@ class read_avro_ft:
                             dec, keys, _init_code, con
                         )
                         temp_forms.append(aform1)
+                        _exec_code.append("\n endof")
                 # if aform[-1][-2] == ",":
                 #    aform[-1] = aform[-1][0:-2]
                 # aform.append(f'], "form_key": "node{union_idx}"}},')
