@@ -128,7 +128,7 @@ namespace awkward {
     int64_t field_index_;
     int64_t contents_size_;
     std::vector<int64_t> list_field_index_;
-    ssize_t length_;
+    mutable ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

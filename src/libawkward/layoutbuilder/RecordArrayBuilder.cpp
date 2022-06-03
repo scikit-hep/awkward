@@ -52,6 +52,7 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   RecordArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
+    length_ = contents().size();
 
     std::stringstream out;
     out << "{\"class\": \"RecordArray\", \"contents\": {";

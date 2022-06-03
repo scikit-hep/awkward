@@ -103,7 +103,7 @@ namespace awkward {
 
     ssize_t
       itemsize() const {
-        return primitive_to_itemsize_.at(form_primitive());
+        return util::dtype_to_itemsize(util::name_to_dtype(form_primitive()));
       }
 
     ssize_t
@@ -117,27 +117,6 @@ namespace awkward {
     }
 
   private:
-
-    std::map<std::string, ssize_t> primitive_to_itemsize_ {
-      {"bool", 1},
-      {"int8", 1},
-      {"int16", 2},
-      {"int32", 4},
-      {"int64", 8},
-      {"uint8", 1},
-      {"uint16", 2},
-      {"uint32", 4},
-      {"uint64", 8},
-      {"float16", 2},
-      {"float32", 4},
-      {"float64", 8},
-      {"float128", 16},
-      {"complex64", 8},
-      {"complex128", 16},
-      {"complex256", 32},
-      {"datetime64", 8},
-      {"timedelta64", 8},
-    };
 
     /// @brief This Form parameters
     const util::Parameters parameters_;
