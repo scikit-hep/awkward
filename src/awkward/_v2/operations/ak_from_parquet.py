@@ -238,7 +238,7 @@ def _load(
             return ak._v2.Record(arrays[0])
         return ak._v2.Array(arrays[0])
     else:
-        # TODO: if each array is a record
+        # TODO: if each array is a record?
         return ak._v2.operations.ak_concatenate._impl(
             arrays, 0, True, True, highlevel, behavior
         )

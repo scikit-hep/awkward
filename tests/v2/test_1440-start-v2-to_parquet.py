@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import io
 import os
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -17,11 +18,12 @@ def parquet_round_trip(akarray, extensionarray, tmp_path):
     akarray2 = ak._v2.from_parquet(filename)
 
     assert to_list(akarray2) == to_list(akarray)
+    str_type2 = io.StringIO()
+    str_type = io.StringIO()
     if extensionarray:
-        print("read back")
-        akarray2.type.show()
-        print("original")
-        akarray.type.show()
+        akarray2.type.show(stream=str_type2)
+        akarray.type.show(stream=str_type)
+        assert str_type.getvalue() == str_type2.getvalue()
 
         assert akarray2.type == akarray.type
 
