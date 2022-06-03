@@ -111,9 +111,9 @@ namespace awkward {
       len(const ForthOutputBufferMap& outputs) const override {
         auto search = outputs.find(vm_output_data());
         if (search != outputs.end()) {
-          length_ = (ssize_t)search->second.get()->len() - 1;
+          return (ssize_t)search->second.get()->len() - 1;
         }
-        return length_;
+        return 0;
       }
 
   private:
@@ -139,7 +139,6 @@ namespace awkward {
     const std::string form_key_;
     const std::string attribute_;
     const std::string partition_;
-    mutable ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

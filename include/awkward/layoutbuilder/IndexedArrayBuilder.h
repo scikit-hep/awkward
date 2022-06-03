@@ -109,8 +109,10 @@ namespace awkward {
     ssize_t
       len(const ForthOutputBufferMap& outputs) const override {
         auto search = outputs.find(vm_output_data());
-        length_ = (ssize_t)search->second.get()->len();
-        return length_;
+        if (search != outputs.end()) {
+          return (ssize_t)search->second.get()->len();
+        }
+        return 0;
       }
 
   private:
@@ -125,7 +127,6 @@ namespace awkward {
 
     const std::string form_index_;
     const std::string form_key_;
-    mutable ssize_t length_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Json Form.

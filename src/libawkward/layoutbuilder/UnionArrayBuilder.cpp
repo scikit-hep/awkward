@@ -19,8 +19,7 @@ namespace awkward {
     : parameters_(parameters),
       form_key_(form_key),
       tag_(0),
-      form_index_(index_form_to_name(form_index)),
-      length_(0) {
+      form_index_(index_form_to_name(form_index)) {
     vm_func_type_ = std::to_string(static_cast<utype>(state::tag));
 
     for (auto const& content : contents) {
@@ -93,40 +92,45 @@ namespace awkward {
   const std::string
   UnionArrayBuilder<T, I>::to_buffers(BuffersContainer& container, int64_t& form_key_id, const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_tags());
-    length_ = (ssize_t)search->second.get()->len();
+    if (search != outputs.end()) {
+      auto length = (ssize_t)search->second.get()->len();
 
-    auto tags = search->second.get()->toIndex8();
+      auto tags = search->second.get()->toIndex8();
 
-    Index64 current(length_);
-    Index64 index(length_);
-    struct Error err = kernel::UnionArray_regular_index<int8_t, int64_t>(
-      kernel::lib::cpu,   // DERIVE
-      index.data(),
-      current.data(),
-      length_,
-      tags.data(),
-      length_);
-    util::handle_error(err, "UnionArray", nullptr);
+      Index64 current(length);
+      Index64 index(length);
+      struct Error err = kernel::UnionArray_regular_index<int8_t, int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
+        current.data(),
+        length,
+        tags.data(),
+        length);
+      util::handle_error(err, "UnionArray", nullptr);
 
-    container.copy_buffer(form_key() + "-tags",
-                          tags.ptr().get(),
-                          (int64_t)(length_ * (ssize_t)sizeof(int8_t)));
+      container.copy_buffer(form_key() + "-tags",
+                            tags.ptr().get(),
+                            (int64_t)(length * (ssize_t)sizeof(int8_t)));
 
-    container.copy_buffer(form_key() + "-index",
-                          index.ptr().get(),
-                          (int64_t)(index.length() * (ssize_t)sizeof(int64_t)));
+      container.copy_buffer(form_key() + "-index",
+                            index.ptr().get(),
+                            (int64_t)(index.length() * (ssize_t)sizeof(int64_t)));
 
-    std::stringstream out;
-    out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
-    for (size_t i = 0;  i < contents().size();  i++) {
-      if (i != 0) {
-        out << ", ";
+      std::stringstream out;
+      out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
+      for (size_t i = 0;  i < contents().size();  i++) {
+        if (i != 0) {
+          out << ", ";
+        }
+        out << contents_[i].get()->to_buffers(container, form_key_id, outputs);
       }
-      out << contents_[i].get()->to_buffers(container, form_key_id, outputs);
+      out << "], \"form_key\": \"" << form_key() + "\"}";
+      return out.str();
     }
-    out << "], \"form_key\": \"" << form_key() + "\"}";
-    return out.str();
-
+    throw std::invalid_argument(
+      std::string("Snapshot of a ") + classname()
+      + std::string(" needs tags ")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>

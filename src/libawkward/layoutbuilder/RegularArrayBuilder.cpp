@@ -19,8 +19,7 @@ namespace awkward {
     : content_(content),
       parameters_(parameters),
       form_key_(form_key),
-      form_size_(size),
-      length_(size) {
+      form_size_(size) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

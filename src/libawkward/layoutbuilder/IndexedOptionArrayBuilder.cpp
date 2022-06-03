@@ -20,8 +20,7 @@ namespace awkward {
       parameters_(parameters),
       is_categorical_(is_categorical),
       form_index_(form_index),
-      form_key_(form_key),
-      length_(0) {
+      form_key_(form_key) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")

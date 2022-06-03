@@ -290,9 +290,6 @@ namespace awkward {
     /// See #initial.
     int64_t initial_;
 
-    /// @brief length of an input buffer
-    int64_t length_;
-
     /// @brief Root node of the FormBuilder tree.
     FormBuilderPtr<T, I> builder_;
 

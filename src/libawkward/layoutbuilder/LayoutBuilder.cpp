@@ -195,7 +195,6 @@ namespace awkward {
                                      bool vm_init)
     : json_form_(json_form),
       initial_(options.initial()),
-      length_(8),
       builder_(nullptr),
       vm_(nullptr),
       vm_input_data_("data"),

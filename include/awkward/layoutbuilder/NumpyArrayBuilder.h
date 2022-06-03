@@ -105,8 +105,12 @@ namespace awkward {
       itemsize() const {
         if (form_primitive() == "float64") {
           return sizeof(double);
+        } else if (form_primitive() == "int64") {
+          return sizeof(int64_t);
         } else if (form_primitive() == "complex128") {
-          return sizeof(double) << 1;
+          return sizeof(double) + sizeof(double);
+        } else if (form_primitive() == "bool") {
+          return sizeof(bool);
         }
         return util::dtype_to_itemsize(util::name_to_dtype(form_primitive()));
       }
@@ -115,11 +119,11 @@ namespace awkward {
       len(const ForthOutputBufferMap& outputs) const override {
         auto search = outputs.find(vm_output_data());
         if (search != outputs.end()) {
-          length_ = is_complex() ?
+          return (is_complex() ?
             (ssize_t)search->second.get()->len() >> 1 :
-            (ssize_t)search->second.get()->len();
+            (ssize_t)search->second.get()->len());
         }
-        return length_;
+        return 0;
       }
 
     bool

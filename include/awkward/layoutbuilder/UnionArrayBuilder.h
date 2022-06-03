@@ -113,11 +113,11 @@ namespace awkward {
 
     ssize_t
       len(const ForthOutputBufferMap& outputs) const override {
-        auto search = outputs.find(vm_output_data());
+        auto search = outputs.find(vm_output_tags());
         if (search != outputs.end()) {
-          length_ = (ssize_t)search->second.get()->len();
+          return (ssize_t)search->second.get()->len();
         }
-        return length_;
+        return 0;
       }
 
   private:
@@ -132,7 +132,6 @@ namespace awkward {
     int8_t tag_;
 
     const std::string form_index_;
-    mutable ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

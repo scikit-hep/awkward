@@ -108,8 +108,7 @@ namespace awkward {
 
     ssize_t
       len(const ForthOutputBufferMap& outputs) const override {
-        length_ = (ssize_t)contents().size();
-        return length_;
+        return (ssize_t)contents_size_;
       }
 
   private:
@@ -118,6 +117,7 @@ namespace awkward {
 
     /// @brief This Form content builders
     std::vector<FormBuilderPtr<T, I>> contents_;
+    std::vector<std::string> fields_;
     const util::RecordLookupPtr form_recordlookup_;
 
     /// @brief This Form parameters
@@ -129,7 +129,6 @@ namespace awkward {
     int64_t field_index_;
     int64_t contents_size_;
     std::vector<int64_t> list_field_index_;
-    mutable ssize_t length_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

@@ -107,15 +107,14 @@ namespace awkward {
       len(const ForthOutputBufferMap& outputs) const override {
         auto search = outputs.find(content().get()->vm_output_data());
         if (search != outputs.end()) {
-          length_ = (ssize_t)search->second.get()->len();
+          return (ssize_t)search->second.get()->len();
         }
-        return length_;
+        return 0;
       }
 
   private:
     /// @brief This Form content builder
     FormBuilderPtr<T, I> content_;
-    mutable ssize_t length_;
 
     /// @brief This Form parameters
     const util::Parameters& parameters_;
