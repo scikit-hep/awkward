@@ -530,7 +530,7 @@ namespace awkward {
         case CODE_CASE_REGULAR: {
           int64_t start = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1] - BOUND_DICTIONARY;
           int64_t stop = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2] - BOUND_DICTIONARY;
-          int64_t num_cases = (stop - start) >> 1;  // divide by 2
+          int64_t num_cases = stop - start;
           std::stringstream out;
           out << "case ( regular )\n";
           for (int64_t i = 0;  i < num_cases;  i++) {
@@ -1116,9 +1116,7 @@ namespace awkward {
   void
   ForthMachineOf<T, I>::begin(
       const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
-
     reset();
-
     current_inputs_ = std::vector<std::shared_ptr<ForthInputBuffer>>();
     for (auto name : input_names_) {
       bool found = false;
@@ -1243,10 +1241,11 @@ namespace awkward {
   util::ForthError
   ForthMachineOf<T, I>::begin_again(
       const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs, bool reset_instruction) {
-
     if (!is_ready()) {
-      current_error_ = util::ForthError::not_ready;
-      return current_error_;
+      throw std::invalid_argument(
+          std::string("'begin' not called on the AwkwardForth machine, 'begin_again' invalid")
+          + FILENAME(__LINE__)
+        );
     }
     if (current_error_ != util::ForthError::none) {
       return current_error_;
@@ -1943,13 +1942,13 @@ namespace awkward {
             );
         }
         std::string name = tokenized[(IndexTypeOf<std::string>)pos + 1];
-
         int64_t num;
+
         if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
             is_defined(name)  ||  is_reserved(name)  ||  is_integer(name, num)) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2,
-                        "input names, output names, variable names, and user-defined"
+                        "input names, output names, variable names, and user-defined "
                         "words must all be unique and not reserved words or integers")
             + FILENAME(__LINE__)
           );
@@ -2026,11 +2025,13 @@ namespace awkward {
         std::string name = tokenized[(IndexTypeOf<std::string>)pos + 1];
 
         int64_t num;
+
+
         if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
             is_defined(name)  ||  is_reserved(name)  ||  is_integer(name, num)) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2,
-                        "input names, output names, variable names, and user-defined"
+                        "input names, output names, variable names, and user-defined "
                         "words must all be unique and not reserved words or integers")
             + FILENAME(__LINE__)
           );
@@ -2056,7 +2057,7 @@ namespace awkward {
             is_defined(name)  ||  is_reserved(name)  ||  is_integer(name, num)) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2,
-                        "input names, output names, variable names, and user-defined"
+                        "input names, output names, variable names, and user-defined "
                         "words must all be unique and not reserved words or integers")
             + FILENAME(__LINE__)
           );
@@ -2084,7 +2085,7 @@ namespace awkward {
             is_defined(name)  ||  is_reserved(name)  ||  is_integer(name, num)) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2,
-                        "input names, output names, variable names, and user-defined"
+                        "input names, output names, variable names, and user-defined "
                         "words must all be unique and not reserved words or integers")
             + FILENAME(__LINE__)
           );
@@ -2253,7 +2254,7 @@ namespace awkward {
         I alternate;
 
         I first_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
-        for(I i = 0; i<ofs.size(); i++){
+        for(I i = 0; i < ofs.size() + 1; i++){
           dictionary.push_back({});
         }
         bool can_specialize = true;
@@ -2277,9 +2278,8 @@ namespace awkward {
           dictionary[(IndexTypeOf<int64_t>)pred_bytecode - BOUND_DICTIONARY] = pred;
           predicates.push_back(pred_bytecode);
 
-          I cons_bytecode = first_bytecode + i; //(I)dictionary.size() + BOUND_DICTIONARY;
+          I cons_bytecode = first_bytecode + i;
           std::vector<I> cons;
-          //dictionary.push_back(cons);
           parse(defn,
                 tokenized,
                 linecol,
@@ -2296,9 +2296,8 @@ namespace awkward {
         }
 
         {
-          I alt_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
+          I alt_bytecode = first_bytecode + ofs.size();
           std::vector<I> alt;
-          dictionary.push_back(alt);
           parse(defn,
                 tokenized,
                 linecol,
@@ -3573,7 +3572,7 @@ namespace awkward {
               bytecodes_pointer_where()++;
 
               I which;
-              if (*value < 0  ||  *value >= ((stop - start) >> 1)) {
+              if (*value < 0  ||  *value >= (stop - start)) {
                 which = stop;
               }
               else {

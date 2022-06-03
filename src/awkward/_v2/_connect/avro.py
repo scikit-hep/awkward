@@ -775,25 +775,28 @@ class read_avro_ft:
             self.schema, _exec_code, ind, 0, dec, keys, _init_code, con
         )
         print(self.form)
-        first_iter = 1
+        first_iter = True
         _init_code.append(";\n")
-
+        pos, num_items, len_block = self.decode_block(pos)
+        header_code = header_code + "".join(dec)
+        header_code = header_code+"".join(_init_code)
+        _exec_code.insert(0, "0 do \n")
+        _exec_code1 = "".join(_exec_code)
+        forth_code = header_code+_exec_code1+"\nloop"
+        print(forth_code)
+        print("ASDFNOEJGOGEON")
+        machine = awkward.forth.ForthMachine64(forth_code)
+        machine.stack_push(num_items)
         while pos+16 < len(self._data):
-            pos, num_items, len_block = self.decode_block(pos)
-            header_code = header_code + "".join(dec)
-            header_code = header_code+"".join(_init_code)
-            _exec_code.insert(0, f"{num_items} 0 do \n")
-            _exec_code = "".join(_exec_code)
-            forth_code = header_code+_exec_code+"\nloop"
-            print(forth_code)
-            machine = awkward.forth.ForthMachine64(forth_code)
             if first_iter:
                 machine.begin({"stream": self._data[pos: pos+len_block]})
                 print(ak.Array(machine.bytecodes).to_list())
                 machine.call("init-out")
                 machine.resume()
-                first_iter = 1
+                first_iter = False
             else:
+                pos, num_items, len_block = self.decode_block(pos)
+                machine.stack_push(num_items)
                 machine.begin_again(
                     {"stream": self._data[pos: pos+len_block]}, True)
                 machine.resume()
