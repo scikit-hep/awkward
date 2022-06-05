@@ -439,6 +439,10 @@ class TypeTracer(ak.nplike.NumpyLike):
     known_data = False
     known_shape = False
 
+    @property
+    def index_nplike(self):
+        return self
+
     def to_rectilinear(self, array, *args, **kwargs):
         raise ak._v2._util.error(NotImplementedError)
 

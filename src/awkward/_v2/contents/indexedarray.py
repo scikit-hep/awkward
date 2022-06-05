@@ -44,8 +44,8 @@ class IndexedArray(Content):
         if nplike is None:
             nplike = index.nplike
 
-        self._index = index
-        self._content = content
+        self._index = index._to_nplike(nplike)
+        self._content = content._to_nplike(nplike)
         self._init(identifier, parameters, nplike)
 
     @property

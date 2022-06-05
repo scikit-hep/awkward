@@ -414,7 +414,11 @@ class NumpyKernel:
                     AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
                 )
             elif is_jax_buffer(x):
-                return ctypes.cast(x.device_buffer.unsafe_buffer_pointer(), t)
+                raise ak._v2._util.error(
+                    ValueError(
+                        "JAX Buffers can't be passed as function args for the C Kernels"
+                    )
+                )
             else:
                 return ctypes.cast(x, t)
         else:
@@ -485,6 +489,10 @@ class CupyKernel(NumpyKernel):
 
 
 class Numpy(NumpyLike):
+    @property
+    def index_nplike(self):
+        return self
+
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, numpy.ndarray):
             return array
@@ -548,6 +556,10 @@ class Numpy(NumpyLike):
 
 
 class Cupy(NumpyLike):
+    @property
+    def index_nplike(self):
+        return self
+
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
@@ -745,6 +757,10 @@ class Cupy(NumpyLike):
 
 
 class Jax(NumpyLike):
+    @property
+    def index_nplike(self):
+        return ak.nplike.Numpy.instance()
+
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, self._module.DeviceArray):
             return array

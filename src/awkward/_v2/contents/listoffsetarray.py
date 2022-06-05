@@ -48,17 +48,19 @@ class ListOffsetArray(Content):
         if nplike is None:
             nplike = offsets.nplike
 
-        self._offsets = offsets
-        self._content = content
+        self._offsets = offsets._to_nplike(nplike)
+        self._content = content._to_nplike(nplike)
         self._init(identifier, parameters, nplike)
 
     @property
     def starts(self):
-        return self._offsets[:-1]
+        # print(self.offsets.nplike, self.offsets[:-1].nplike)
+        # print(type(self._offsets[:-1]))
+        return self._offsets[:-1]._to_nplike(self.nplike)
 
     @property
     def stops(self):
-        return self._offsets[1:]
+        return self._offsets[1:]._to_nplike(self.nplike)
 
     @property
     def offsets(self):
@@ -1348,6 +1350,7 @@ class ListOffsetArray(Content):
             offsets = ak._v2.index.Index64.empty(
                 self.length + 1, self._nplike, dtype=np.int64
             )
+            # print(offsets.nplike, starts.nplike, stops.nplike, self._nplike)
             assert (
                 offsets.nplike is self._nplike
                 and starts.nplike is self._nplike
@@ -1371,7 +1374,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            tocarryraw = self._nplike.empty(n, dtype=np.intp)
+            tocarryraw = ak._v2.index.Index.empty(n, dtype=np.intp, nplike=self.nplike)
             tocarry = []
 
             for i in range(n):
@@ -1399,7 +1402,7 @@ class ListOffsetArray(Content):
                     starts.data.dtype.type,
                     stops.data.dtype.type,
                 ](
-                    tocarryraw,
+                    tocarryraw.data,
                     toindex.data,
                     fromindex.data,
                     n,

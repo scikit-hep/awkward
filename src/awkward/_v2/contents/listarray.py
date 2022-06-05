@@ -63,9 +63,9 @@ class ListArray(Content):
         if nplike is None:
             nplike = starts.nplike
 
-        self._starts = starts
-        self._stops = stops
-        self._content = content
+        self._starts = starts._to_nplike(nplike)
+        self._stops = stops._to_nplike(nplike)
+        self._content = content._to_nplike(nplike)
         self._init(identifier, parameters, nplike)
 
     @property
