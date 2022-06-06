@@ -95,9 +95,7 @@ def _categorical_equal(one, two):
 def _apply_ufunc(ufunc, method, inputs, kwargs):
     nextinputs = []
     for x in inputs:
-        if isinstance(x, ak._v2.highlevel.Array) and isinstance(
-            x.layout, ak._v2._util.indexedtypes
-        ):
+        if isinstance(x, ak._v2.highlevel.Array) and x.layout.is_IndexedType:
             nextinputs.append(
                 ak._v2.highlevel.Array(
                     x.layout.project(), behavior=ak._v2._util.behavior_of(x)
