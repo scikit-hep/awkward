@@ -7,13 +7,13 @@ def test_int():
     data = [34, 45, 67, 78, 23, 89, 6, 33, 96, 73]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/int_test_data.avro", reader_lang="py"
+            file="tests/samples/int_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/int_test_data.avro", reader_lang="ft"
+            file="tests/samples/int_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -23,13 +23,13 @@ def test_boolean():
     data = [True, False, False, True, True, True, False, False, False, False]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/bool_test_data.avro", reader_lang="py"
+            file="tests/samples/bool_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/bool_test_data.avro", reader_lang="ft"
+            file="tests/samples/bool_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -39,13 +39,13 @@ def test_long():
     data = [12, 435, 56, 12, 67, 34, 89, 2345, 536, 8769]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/long_test_data.avro", reader_lang="py"
+            file="tests/samples/long_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/long_test_data.avro", reader_lang="ft"
+            file="tests/samples/long_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -67,7 +67,7 @@ def test_float():
     assert (
         pytest.approx(
             ak.from_avro_file(
-                file_name="tests/samples/float_test_data.avro", reader_lang="py"
+                file="tests/samples/float_test_data.avro", reader_lang="py"
             ).to_list()
         )
         == data
@@ -75,7 +75,7 @@ def test_float():
     assert (
         pytest.approx(
             ak.from_avro_file(
-                file_name="tests/samples/float_test_data.avro", reader_lang="ft"
+                file="tests/samples/float_test_data.avro", reader_lang="ft"
             ).to_list()
         )
         == data
@@ -98,7 +98,7 @@ def test_double():
     assert (
         pytest.approx(
             ak.from_avro_file(
-                file_name="tests/samples/double_test_data.avro", reader_lang="py"
+                file="tests/samples/double_test_data.avro", reader_lang="py"
             ).to_list()
         )
         == data
@@ -106,7 +106,7 @@ def test_double():
     assert (
         pytest.approx(
             ak.from_avro_file(
-                file_name="tests/samples/double_test_data.avro", reader_lang="ft"
+                file="tests/samples/double_test_data.avro", reader_lang="ft"
             ).to_list()
         )
         == data
@@ -129,7 +129,7 @@ def test_bytes():
     assert (
         pytest.approx(
             ak.from_avro_file(
-                file_name="tests/samples/bytes_test_data.avro", reader_lang="py"
+                file="tests/samples/bytes_test_data.avro", reader_lang="py"
             ).to_list()
         )
         == data
@@ -137,7 +137,7 @@ def test_bytes():
     assert (
         pytest.approx(
             ak.from_avro_file(
-                file_name="tests/samples/bytes_test_data.avro", reader_lang="ft"
+                file="tests/samples/bytes_test_data.avro", reader_lang="ft"
             ).to_list()[0]
         )
         == data[0]
@@ -159,14 +159,14 @@ def test_string():
     ]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/string_test_data.avro",
+            file="tests/samples/string_test_data.avro",
             reader_lang="py",
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/string_test_data.avro",
+            file="tests/samples/string_test_data.avro",
             reader_lang="ft",
         ).to_list()
         == data
@@ -186,13 +186,13 @@ def test_fixed():
     ]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/fixed_test_data.avro", reader_lang="py"
+            file="tests/samples/fixed_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/fixed_test_data.avro", reader_lang="ft"
+            file="tests/samples/fixed_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -212,13 +212,13 @@ def test_null():  # change the while loop to for loop to fix this
     ]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/null_test_data.avro", reader_lang="py"
+            file="tests/samples/null_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/null_test_data.avro", reader_lang="ft"
+            file="tests/samples/null_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -229,13 +229,13 @@ def test_enum():
             "ONE", "FOUR", "THREE", "TWO", "ONE"]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/enum_test_data.avro", reader_lang="py"
+            file="tests/samples/enum_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/enum_test_data.avro", reader_lang="ft"
+            file="tests/samples/enum_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -254,13 +254,13 @@ def test_arrays_int():
     ]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/array_test_data.avro", reader_lang="py"
+            file="tests/samples/array_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/array_test_data.avro", reader_lang="ft"
+            file="tests/samples/array_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -275,11 +275,11 @@ def test_array_string():
         ["afsdfd", "sgrh"],
     ]
     assert(ak.from_avro_file(
-        file_name="tests/samples/array_string_test_data.avro", reader_lang="py"
+        file="tests/samples/array_string_test_data.avro", reader_lang="py"
     ).to_list() == data)
 
     assert(ak.from_avro_file(
-        file_name="tests/samples/array_string_test_data.avro", reader_lang="ft"
+        file="tests/samples/array_string_test_data.avro", reader_lang="ft"
     ).to_list() == data)
 
 
@@ -293,13 +293,13 @@ def test_array_enum():
     ]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/array_enum_test_data.avro", reader_lang="py"
+            file="tests/samples/array_enum_test_data.avro", reader_lang="py"
         )[0][0]
         == data[0][0]
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/array_enum_test_data.avro", reader_lang="ft"
+            file="tests/samples/array_enum_test_data.avro", reader_lang="ft"
         )[0][0]
         == data[0][0]
     )
@@ -309,13 +309,13 @@ def test_Unions_int_null():
     data = [2345, 65475, None, 676457, 343, 7908, None, 5768]  # int_null_test
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/int_null_test_data.avro", reader_lang="py"
+            file="tests/samples/int_null_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/int_null_test_data.avro", reader_lang="ft"
+            file="tests/samples/int_null_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -326,13 +326,13 @@ def test_Unions_string_null():
             "Green", None, "Red"]  # string_null_test
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/string_null_test_data.avro", reader_lang="py"
+            file="tests/samples/string_null_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/string_null_test_data.avro", reader_lang="ft"
+            file="tests/samples/string_null_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -342,13 +342,13 @@ def test_Unions_enum_null():
     data = ["TWO", None, "ONE", None, "FOUR", None, "THREE"]  # enum_null_test
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/enum_null_test_data.avro", reader_lang="py"
+            file="tests/samples/enum_null_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/enum_null_test_data.avro", reader_lang="ft"
+            file="tests/samples/enum_null_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
@@ -366,13 +366,13 @@ def test_Unions_record_null():
 
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/record_null_test_data.avro", reader_lang="py"
+            file="tests/samples/record_null_test_data.avro", reader_lang="py"
         ).to_list()[0]["name"]
         == data[0]["name"]
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/record_null_test_data.avro", reader_lang="ft"
+            file="tests/samples/record_null_test_data.avro", reader_lang="ft"
         ).to_list()[0]["name"]
         == data[0]["name"]
     )
@@ -383,19 +383,19 @@ def test_Unions_null_X_Y():
             "FOUR", 69645, "THREE"]  # int_string_null
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/int_string_null_test_data.avro", reader_lang="py"
+            file="tests/samples/int_string_null_test_data.avro", reader_lang="py"
         ).to_list()
         == data
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/int_string_null_test_data.avro", reader_lang="ft"
+            file="tests/samples/int_string_null_test_data.avro", reader_lang="ft"
         ).to_list()
         == data
     )
     # assert (
     #    ak.from_avro_file(
-    #        file_name="tests/samples/int_string_null_test_data.avro", reader_lang="py"
+    #        file="tests/samples/int_string_null_test_data.avro", reader_lang="py"
     #    ).to_list()
     #    == data
     # )
@@ -405,7 +405,7 @@ def test_Unions_null_X_Y():
 #    data = []
 #    assert (
 #        ak.from_avro_file(
-#            file_name="tests/samples/record_0_test_data.avro", reader_lang="py"
+#            file="tests/samples/record_0_test_data.avro", reader_lang="py"
 #        ).to_list()
 #        == data
 #    )
@@ -417,13 +417,13 @@ def test_record_1():
     ]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/record_1_test_data.avro", reader_lang="py"
+            file="tests/samples/record_1_test_data.avro", reader_lang="py"
         ).to_list()[0]
         == data[0]
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/record_1_test_data.avro", reader_lang="ft"
+            file="tests/samples/record_1_test_data.avro", reader_lang="ft"
         ).to_list()[0]
         == data[0]
     )
@@ -441,13 +441,13 @@ def test_records():
     ]
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/record_test_data.avro", reader_lang="py"
+            file="tests/samples/record_test_data.avro", reader_lang="py"
         ).to_list()[0]
         == data[0]
     )
     assert (
         ak.from_avro_file(
-            file_name="tests/samples/record_test_data.avro", reader_lang="ft"
+            file="tests/samples/record_test_data.avro", reader_lang="ft"
         ).to_list()[0]
         == data[0]
     )

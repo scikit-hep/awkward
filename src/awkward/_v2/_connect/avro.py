@@ -11,15 +11,12 @@ class read_avro_py:
         self.file_name = file_name
         self._data = np.memmap(file_name, np.uint8)
         self.field = []
-        # try:
-        #    if self.check_valid != True:
-        #        raise
-        # except Exception as error:
-        #    raise TypeError("Not a valid avro." + repr(error))
         pos, self.pairs = self.decode_varint(4, self._data)
         self.pairs = self.decode_zigzag(self.pairs)
         print(self.pairs)
         pos = self.cont_spec(pos)
+        print(self.codec)
+        print(self.schema)
         pos = self.decode_block(pos)
         ind = 2
         _exec_code = [
@@ -756,15 +753,42 @@ class read_avro_py:
             raise NotImplementedError
 
 
+class LengthError(Exception):
+    pass
+
+
 class read_avro_ft:
-    def __init__(self, file_name, show_code=False):
-        self.file_name = file_name
-        self._data = np.memmap(file_name, np.uint8)
+    def __init__(self, file, show_code=False):
+        # self.file_name = file_name
+        # self._data = np.memmap(file_name, np.uint8)
+        self._data = file
         self.field = []
-        pos, self.pairs = self.decode_varint(4, self._data)
-        self.pairs = self.decode_zigzag(self.pairs)
-        pos = self.cont_spec(pos)
+        self.blocks = []
+        self._marker = 0
+        # print(type(file.read(4)))
+        numbytes = 1024
+        self.temp_header = bytearray()
+        self.metadata = {}
+        while True:
+            try:
+                self.temp_header += self._data.read(numbytes)
+                if not self.check_valid():
+                    raise TypeError("File is not a valid avro.")
+                pos = 4
+                pos, self.pairs = self.decode_varint(4, self.temp_header)
+                self.pairs = self.decode_zigzag(self.pairs)
+                if self.pairs < 0:
+                    pos, self.header_size = self.decode_varint(
+                        pos, self.temp_header)
+                    self.header_size = self.decode_zigzag(self.pairs)
+                    self.pairs = abs(self.pairs)
+                pos = self.cont_spec(pos)
+                break
+
+            except LengthError:
+                numbytes *= 2
         ind = 2
+        self.update_pos(pos)
         _exec_code = []
         _init_code = [": init-out\n"]
         header_code = "input stream \n"
@@ -772,102 +796,107 @@ class read_avro_ft:
         dec = []
         con = {}
         self.form, self._exec_code, self.count, dec, keys, _init_code, con = self.rec_exp_json_code(
-            self.schema, _exec_code, ind, 0, dec, keys, _init_code, con
+            self.metadata["avro.schema"], _exec_code, ind, 0, dec, keys, _init_code, con
         )
-        print(self.form)
         first_iter = True
         _init_code.append(";\n")
-        pos, num_items, len_block = self.decode_block(pos)
+        self.update_pos(17)
         header_code = header_code + "".join(dec)
         header_code = header_code+"".join(_init_code)
         _exec_code.insert(0, "0 do \n")
         _exec_code1 = "".join(_exec_code)
         forth_code = header_code+_exec_code1+"\nloop"
-        print(forth_code)
-        print("ASDFNOEJGOGEON")
+        # print(forth_code)
+        # print("ASDFNOEJGOGEON")
         machine = awkward.forth.ForthMachine64(forth_code)
-        machine.stack_push(num_items)
-        while pos+16 < len(self._data):
+        while True:
+            try:
+                pos, num_items, len_block = self.decode_block()
+                temp_data = self._data.read(len_block)
+                self.update_pos(len_block)
+            except LengthError:
+                break
             if first_iter:
-                machine.begin({"stream": self._data[pos: pos+len_block]})
-                print(ak.Array(machine.bytecodes).to_list())
+                machine.begin(
+                    {"stream": np.frombuffer(temp_data, dtype=np.uint8)})
+                machine.stack_push(num_items)
+                # print(ak.Array(machine.bytecodes).to_list())
                 machine.call("init-out")
                 machine.resume()
                 first_iter = False
             else:
-                pos, num_items, len_block = self.decode_block(pos)
-                machine.stack_push(num_items)
+                pos, num_items, len_block = self.decode_block()
                 machine.begin_again(
-                    {"stream": self._data[pos: pos+len_block]}, True)
+                    {"stream": np.frombuffer(temp_data, dtype=np.uint8)}, True)
+                machine.stack_push(num_items)
                 machine.resume()
-            pos += len_block
+            self.update_pos(len_block)
+            self.update_pos(16)
 
         for elem in keys:
             if "offsets" in elem:
                 con[elem] = machine.output_Index64(elem)
             else:
                 con[elem] = machine.output_NumpyArray(elem)
-        print(con)
         self.outarr = ak.from_buffers(
             self.form, sum(self.blocks), con
         )
 
-    def decode_block(self, pos):
-        self.blocks = []
-        pos, info = self.decode_varint(pos + 17, self._data)
+    def update_pos(self, pos):
+        self._marker += pos
+        self._data.seek(self._marker)
+
+    def decode_block(self):
+        temp_data = self._data.read(10)
+        pos, info = self.decode_varint(0, temp_data)
         info1 = self.decode_zigzag(info)
+        self.update_pos(pos)
         self.blocks.append(int(info1))
-        pos, info = self.decode_varint(pos, self._data)
+        temp_data = self._data.read(10)
+        pos, info = self.decode_varint(0, temp_data)
         info2 = self.decode_zigzag(info)
+        self.update_pos(pos)
         self.field.append([pos, pos + int(info2)])
         return pos, info1, info2
 
     def cont_spec(self, pos):
-        aa = -1
-        while aa != 2:
-            pos, dat = self.decode_varint(pos, self._data)
+        aa = 0
+        while aa < self.pairs:
+            pos, dat = self.decode_varint(pos, self.temp_header)
             dat = self.decode_zigzag(dat)
-            val = self.ret_str(pos, pos + int(dat))
-            pos = pos + int(dat)
-            aa = self.check_special(val)
-            if aa == 0:
-                pos, dat = self.decode_varint(pos, self._data)
-                dat = self.decode_zigzag(dat)
-                val = self.ret_str(pos, pos + int(dat))
-                self.codec = val
-                pos = pos + int(dat)
-            elif aa == 1:
-
-                pos, dat = self.decode_varint(pos, self._data)
-                dat = self.decode_zigzag(dat)
-                val = self.ret_str(pos, pos + int(dat))
-                self.schema = json.loads(val)
-                pos = pos + int(dat)
-                return pos
-
-    def check_special(self, val):
-        if val == "avro.codec":
-            return 0
-        elif val == "avro.schema":
-            return 1
-        else:
-            return 2
+            key = self.temp_header[pos:pos+int(dat)]
+            pos = pos+int(dat)
+            if len(key) < int(dat):
+                raise LengthError
+            pos, dat = self.decode_varint(pos, self.temp_header)
+            dat = self.decode_zigzag(dat)
+            val = self.temp_header[pos:pos+int(dat)]
+            pos = pos+int(dat)
+            if len(val) < int(dat):
+                raise LengthError
+            if key == b'avro.schema':
+                self.metadata[key.decode()] = json.loads(val.decode())
+            else:
+                self.metadata[key.decode()] = val
+            aa += 1
+        return pos
 
     def check_valid(self):
-        init = self.ret_str(0, 4)
-        if init == "Obj\x01":
+        init = self.temp_header[0:4]
+        if len(init) < 4:
+            raise LengthError
+        if init == b"Obj\x01":
             return True
         else:
             return False
-
-    def ret_str(self, start, stop):
-        return self._data[start:stop].tobytes().decode(errors="surrogateescape")
 
     def decode_varint(self, pos, _data):
         shift = 0
         result = 0
         while True:
-            i = self._data[pos]
+            if pos >= len(_data):
+                raise LengthError
+            i = _data[pos]
             pos += 1
             result |= (i & 0x7F) << shift
             shift += 7
