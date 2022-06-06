@@ -621,6 +621,7 @@ class NumpyArray(Content):
         return True if is_equal[0] == 1 else False
 
     def _as_unique_strings(self, offsets):
+        offsets = ak._v2.index.Index64(offsets.data, nplike=offsets.nplike)
         outoffsets = ak._v2.index.Index64.empty(offsets.length, self._nplike)
         out = self._nplike.empty(self.shape[0], self.dtype)
 
