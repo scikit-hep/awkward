@@ -613,7 +613,7 @@ class Content:
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak._v2.index.Index)
 
-        result = self._nplike.empty(1, dtype=np.bool_)
+        result = self._nplike.index_nplike.empty(1, dtype=np.bool_)
         assert carry.nplike is self._nplike
         self._handle_error(
             self._nplike[
@@ -986,7 +986,7 @@ class Content:
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        tocarryraw = self._nplike.empty(n, dtype=np.intp)
+        tocarryraw = self._nplike.index_nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
             ptr = ak._v2.index.Index64.empty(

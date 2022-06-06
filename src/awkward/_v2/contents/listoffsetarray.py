@@ -1669,8 +1669,8 @@ class ListOffsetArray(Content):
             )
         )
 
-        np_nextcarry = self._nplike.empty(nextlen, dtype=np.int64)
-        np_nextparents = self._nplike.empty(nextlen, dtype=np.int64)
+        np_nextcarry = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
+        np_nextparents = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
         maxnextparents = ak._v2.index.Index64.empty(1, self._nplike)
         distincts = ak._v2.index.Index64.empty(outlength * maxcount[0], self._nplike)
         assert (
@@ -2162,7 +2162,7 @@ class ListOffsetArray(Content):
         if self.parameter("__array__") == "string":
             strings = self.to_list()
             if any(item in nonfinit_dict for item in strings):
-                numbers = self.nplike.empty(self.starts.length, np.float64)
+                numbers = self.nplike.index_nplike.empty(self.starts.length, np.float64)
                 has_another_string = False
                 for i, val in enumerate(strings):
                     if val in nonfinit_dict:

@@ -1629,7 +1629,7 @@ class IndexedOptionArray(Content):
         is_none = original_index < 0
         num_none = self._nplike.count_nonzero(is_none)
         if self._content.length > len(original_index) - num_none:
-            new_index = self._nplike.empty(
+            new_index = self._nplike.index_nplike.empty(
                 len(original_index), dtype=original_index.dtype
             )
             new_index[is_none] = -1

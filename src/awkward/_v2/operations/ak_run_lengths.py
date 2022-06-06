@@ -99,7 +99,7 @@ def _impl(array, highlevel, behavior):
 
     def lengths_of(data, offsets):
         if len(data) == 0:
-            return nplike.empty(0, np.int64), offsets
+            return nplike.index_nplike.empty(0, np.int64), offsets
         else:
             diffs = data[1:] != data[:-1]
 
@@ -108,7 +108,7 @@ def _impl(array, highlevel, behavior):
             if offsets is not None:
                 diffs[offsets[1:-1] - 1] = True
             positions = nplike.nonzero(diffs)[0]
-            full_positions = nplike.empty(len(positions) + 2, np.int64)
+            full_positions = nplike.index_nplike.empty(len(positions) + 2, np.int64)
             full_positions[0] = 0
             full_positions[-1] = len(data)
             full_positions[1:-1] = positions + 1
@@ -117,7 +117,9 @@ def _impl(array, highlevel, behavior):
             if offsets is None:
                 nextoffsets = None
             else:
-                nextoffsets = nplike.searchsorted(full_positions, offsets, side="left")
+                nextoffsets = nplike.index_nplike.searchsorted(
+                    full_positions, offsets, side="left"
+                )
             return nextcontent, nextoffsets
 
     def action(layout, **kwargs):

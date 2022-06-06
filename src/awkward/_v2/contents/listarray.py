@@ -157,7 +157,9 @@ class ListArray(Content):
         starts = self._starts.data
         stops = self._stops.data
         if self._nplike.array_equal(starts[1:], stops[:-1]):
-            offsets = self._nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
+            offsets = self._nplike.index_nplike.empty(
+                starts.shape[0] + 1, dtype=starts.dtype
+            )
             if offsets.shape[0] == 1:
                 offsets[0] = 0
             else:

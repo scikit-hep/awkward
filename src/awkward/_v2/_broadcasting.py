@@ -116,7 +116,9 @@ def all_same_offsets(nplike, inputs):
                 return False
 
             elif offsets is None:
-                offsets = nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
+                offsets = nplike.index_nplike.empty(
+                    starts.shape[0] + 1, dtype=starts.dtype
+                )
                 if offsets.shape[0] == 1:
                     offsets[0] = 0
                 else:
@@ -130,13 +132,15 @@ def all_same_offsets(nplike, inputs):
 
         elif isinstance(x, RegularArray):
             if x.size == 0:
-                my_offsets = nplike.empty(0, dtype=np.int64)
+                my_offsets = nplike.index_nplike.empty(0, dtype=np.int64)
             else:
-                my_offsets = nplike.arange(0, x.content.length, x.size, dtype=np.int64)
+                my_offsets = nplike.index_nplike.arange(
+                    0, x.content.length, x.size, dtype=np.int64
+                )
 
             if offsets is None:
                 offsets = my_offsets
-            elif not nplike.array_equal(offsets, my_offsets):
+            elif not nplike.index_nplike.array_equal(offsets, my_offsets):
                 return False
 
         elif isinstance(x, Content):
@@ -258,8 +262,8 @@ def apply_step(
 
                 all_combos = list(itertools.product(*[range(x) for x in numtags]))
 
-                tags = nplike.empty(length, dtype=np.int8)
-                index = nplike.empty(length, dtype=np.int64)
+                tags = nplike.index_nplike.empty(length, dtype=np.int8)
+                index = nplike.index_nplike.empty(length, dtype=np.int64)
                 numoutputs, outcontents = None, []
                 for combo in all_combos:
                     nextinputs = []
@@ -323,8 +327,8 @@ def apply_step(
                     [(str(i), combos.dtype) for i in range(len(tagslist))]
                 ).reshape(length)
 
-                tags = nplike.empty(length, dtype=np.int8)
-                index = nplike.empty(length, dtype=np.int64)
+                tags = nplike.index_nplike.empty(length, dtype=np.int8)
+                index = nplike.index_nplike.empty(length, dtype=np.int64)
                 numoutputs, outcontents = None, []
                 for tag, combo in enumerate(all_combos):
                     mask = combos == combo

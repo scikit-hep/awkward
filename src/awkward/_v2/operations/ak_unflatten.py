@@ -98,9 +98,9 @@ def _impl(array, counts, axis, highlevel, behavior):
         if not issubclass(counts.dtype.type, np.integer):
             raise ak._v2._util.error(ValueError("counts must be integers"))
 
-        current_offsets = [nplike.empty(len(counts) + 1, np.int64)]
+        current_offsets = [nplike.index_nplike.empty(len(counts) + 1, np.int64)]
         current_offsets[0][0] = 0
-        nplike.cumsum(counts, out=current_offsets[0][1:])
+        nplike.index_nplike.cumsum(counts, out=current_offsets[0][1:])
 
     def doit(layout):
         if isinstance(counts, (numbers.Integral, np.integer)):

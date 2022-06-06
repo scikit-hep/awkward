@@ -869,7 +869,7 @@ class RegularArray(Content):
                     combinationslen = combinationslen // j
 
             totallen = combinationslen * self.length
-            tocarryraw = self._nplike.empty(n, dtype=np.intp)
+            tocarryraw = self._nplike.index_nplike.empty(n, dtype=np.intp)
             tocarry = []
             for i in range(n):
                 ptr = ak._v2.index.Index64.empty(totallen, self._nplike, dtype=np.int64)

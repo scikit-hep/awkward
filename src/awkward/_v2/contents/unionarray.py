@@ -665,7 +665,9 @@ class UnionArray(Content):
 
         else:
             has_offsets = False
-            offsetsraws = self._nplike.empty(len(self._contents), dtype=np.intp)
+            offsetsraws = self._nplike.index_nplike.empty(
+                len(self._contents), dtype=np.intp
+            )
             contents = []
 
             for i in range(len(self._contents)):
@@ -1138,7 +1140,9 @@ class UnionArray(Content):
             if self._nplike.known_shape and self.index.length < self.tags.length:
                 return f'at {path} ("{type(self)}"): len(index) < len(tags)'
 
-            lencontents = self._nplike.empty(len(self.contents), dtype=np.int64)
+            lencontents = self._nplike.index_nplike.empty(
+                len(self.contents), dtype=np.int64
+            )
             if self._nplike.known_shape:
                 for i in range(len(self.contents)):
                     lencontents[i] = self.contents[i].length

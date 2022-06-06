@@ -165,9 +165,11 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                     all_counts.append(c)
                     all_flatten.append(f)
 
-                offsets = nplike.empty(len(nextinputs[0]) + 1, dtype=np.int64)
+                offsets = nplike.index_nplike.empty(
+                    len(nextinputs[0]) + 1, dtype=np.int64
+                )
                 offsets[0] = 0
-                nplike.cumsum(counts, out=offsets[1:])
+                nplike.index_nplike.cumsum(counts, out=offsets[1:])
 
                 offsets = ak._v2.index.Index64(offsets)
 
