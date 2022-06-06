@@ -785,8 +785,11 @@ class read_avro_ft:
         machine = awkward.forth.ForthMachine64(forth_code)
         while True:
             try:
+
                 pos, num_items, len_block = self.decode_block()
                 temp_data = self._data.read(len_block)
+                if len(temp_data) < len_block:
+                    raise LengthError
                 self.update_pos(len_block)
             except LengthError:
                 break
@@ -798,13 +801,11 @@ class read_avro_ft:
                 machine.resume()
                 first_iter = False
             else:
-                pos, num_items, len_block = self.decode_block()
                 machine.begin_again(
                     {"stream": np.frombuffer(temp_data, dtype=np.uint8)}, True
                 )
                 machine.stack_push(num_items)
                 machine.resume()
-            self.update_pos(len_block)
             self.update_pos(16)
 
         for elem in keys:
