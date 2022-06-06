@@ -91,8 +91,8 @@ class BitMaskedArray(Content):
         if nplike is None:
             nplike = mask.nplike
 
-        self._mask = mask._to_nplike(nplike)
-        self._content = content._to_nplike(nplike)
+        self._mask = mask
+        self._content = content
         self._valid_when = valid_when
         self._length = length
         self._lsb_order = lsb_order

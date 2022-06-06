@@ -1371,14 +1371,6 @@ class NumpyArray(Content):
             return out
 
     def _to_nplike(self, nplike):
-        if isinstance(nplike, ak.nplike.Jax):
-            from awkward._v2._connect.jax.jaxnumpyarray import JaxNumpyArray
-
-            return JaxNumpyArray(
-                self.raw(ak.nplike.Jax.instance()),
-                identifier=self.identifier,
-                parameters=self.parameters,
-            )
         return NumpyArray(
             self.raw(nplike),
             identifier=self.identifier,

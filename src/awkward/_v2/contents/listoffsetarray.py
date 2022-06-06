@@ -48,19 +48,17 @@ class ListOffsetArray(Content):
         if nplike is None:
             nplike = offsets.nplike
 
-        self._offsets = offsets._to_nplike(nplike)
-        self._content = content._to_nplike(nplike)
+        self._offsets = offsets
+        self._content = content
         self._init(identifier, parameters, nplike)
 
     @property
     def starts(self):
-        # print(self.offsets.nplike, self.offsets[:-1].nplike)
-        # print(type(self._offsets[:-1]))
-        return self._offsets[:-1]._to_nplike(self.nplike)
+        return self._offsets[:-1]
 
     @property
     def stops(self):
-        return self._offsets[1:]._to_nplike(self.nplike)
+        return self._offsets[1:]
 
     @property
     def offsets(self):
@@ -1350,7 +1348,6 @@ class ListOffsetArray(Content):
             offsets = ak._v2.index.Index64.empty(
                 self.length + 1, self._nplike, dtype=np.int64
             )
-            # print(offsets.nplike, starts.nplike, stops.nplike, self._nplike)
             assert (
                 offsets.nplike is self._nplike
                 and starts.nplike is self._nplike
