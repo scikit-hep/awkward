@@ -225,8 +225,7 @@ def test_null():  # change the while loop to for loop to fix this
 
 
 def test_enum():
-    data = ["TWO", "ONE", "FOUR", "THREE", "TWO",
-            "ONE", "FOUR", "THREE", "TWO", "ONE"]
+    data = ["TWO", "ONE", "FOUR", "THREE", "TWO", "ONE", "FOUR", "THREE", "TWO", "ONE"]
     assert (
         ak.from_avro_file(
             file="tests/samples/enum_test_data.avro", reader_lang="py"
@@ -274,13 +273,19 @@ def test_array_string():
         ["afsdfd", "sgrh"],
         ["afsdfd", "sgrh"],
     ]
-    assert(ak.from_avro_file(
-        file="tests/samples/array_string_test_data.avro", reader_lang="py"
-    ).to_list() == data)
+    assert (
+        ak.from_avro_file(
+            file="tests/samples/array_string_test_data.avro", reader_lang="py"
+        ).to_list()
+        == data
+    )
 
-    assert(ak.from_avro_file(
-        file="tests/samples/array_string_test_data.avro", reader_lang="ft"
-    ).to_list() == data)
+    assert (
+        ak.from_avro_file(
+            file="tests/samples/array_string_test_data.avro", reader_lang="ft"
+        ).to_list()
+        == data
+    )
 
 
 def test_array_enum():
@@ -322,8 +327,7 @@ def test_Unions_int_null():
 
 
 def test_Unions_string_null():
-    data = ["blue", None, "yellow", None,
-            "Green", None, "Red"]  # string_null_test
+    data = ["blue", None, "yellow", None, "Green", None, "Red"]  # string_null_test
     assert (
         ak.from_avro_file(
             file="tests/samples/string_null_test_data.avro", reader_lang="py"
@@ -379,8 +383,7 @@ def test_Unions_record_null():
 
 
 def test_Unions_null_X_Y():
-    data = ["TWO", 5684, "ONE", None, 3154,
-            "FOUR", 69645, "THREE"]  # int_string_null
+    data = ["TWO", 5684, "ONE", None, 3154, "FOUR", 69645, "THREE"]  # int_string_null
     assert (
         ak.from_avro_file(
             file="tests/samples/int_string_null_test_data.avro", reader_lang="py"

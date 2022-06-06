@@ -3,7 +3,7 @@ import awkward._v2 as ak
 import awkward.forth
 import json
 
-from awkward.operations.describe import parameters
+# from awkward.operations.describe import parameters
 
 
 class read_avro_py:
@@ -13,10 +13,7 @@ class read_avro_py:
         self.field = []
         pos, self.pairs = self.decode_varint(4, self._data)
         self.pairs = self.decode_zigzag(self.pairs)
-        print(self.pairs)
         pos = self.cont_spec(pos)
-        print(self.codec)
-        print(self.schema)
         pos = self.decode_block(pos)
         ind = 2
         _exec_code = [
@@ -47,16 +44,13 @@ class read_avro_py:
             if temp_json[-1] != '"':
                 temp_json += '"'
             temp_json += "}"
-        print(temp_json)
         self.form = json.loads(temp_json)
         con = loc["con"]
         for key in con.keys():
             con[key] = np.array(con[key])
-        print(con)
         self.outarr = ak.from_buffers(
             self.form, sum(self.blocks), con
         )  # put in ._v2 later
-        print(self.outarr.layout)
 
     def decode_block(self, pos):
         self.blocks = []
@@ -64,7 +58,6 @@ class read_avro_py:
             # The byte is random at this position
             # print(self._data.tobytes(), "srgrg")
             # print(pos)
-            temp = pos
             # print(self._data[temp:].tobytes(), "srgr")
             # while temp < len(self._data)-temp:
             #    print("segeg")
@@ -183,8 +176,7 @@ class read_avro_py:
                 "\n" + "    " * ind + f"con['node{count}-index'].append(-1)"
             )
             _exec_code.append(
-                "\n" + "    " * ind +
-                f"con['node{count+1}-data'].append(np.uint8(0))"
+                "\n" + "    " * ind + f"con['node{count+1}-data'].append(np.uint8(0))"
             )
             return aform, _exec_code, count, dec
 
@@ -251,8 +243,7 @@ class read_avro_py:
             )
             _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append(
-                "\n" + "    " * ind +
-                f"con['node{count}-data'].append(np.int32(out))"
+                "\n" + "    " * ind + f"con['node{count}-data'].append(np.int32(out))"
             )
             _exec_code.append("\n" + "    " * ind + "print(out)")
             return aform, _exec_code, count, dec
@@ -272,8 +263,7 @@ class read_avro_py:
             _exec_code.append("\n" + "    " * ind + "out = decode_zigzag(inn)")
             _exec_code.append("\n" + "    " * ind + "print(out)")
             _exec_code.append(
-                "\n" + "    " * ind +
-                f"con['node{count}-data'].append(np.int64(out))"
+                "\n" + "    " * ind + f"con['node{count}-data'].append(np.int64(out))"
             )
             return aform, _exec_code, count, dec
 
@@ -332,8 +322,7 @@ class read_avro_py:
             dec.append(": [],")
             _exec_code.append("\n" + "    " * ind + "print(fields[pos])")
             _exec_code.append(
-                "\n" + "    " * ind +
-                f"con['node{count}-data'].append(fields[pos])"
+                "\n" + "    " * ind + f"con['node{count}-data'].append(fields[pos])"
             )
             _exec_code.append("\n" + "    " * ind + "pos = pos+1")
             return aform, _exec_code, count, dec
@@ -377,8 +366,7 @@ class read_avro_py:
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
-            _exec_code.append("\n" + "    " * ind +
-                              "idxx = abs(decode_zigzag(inn))")
+            _exec_code.append("\n" + "    " * ind + "idxx = abs(decode_zigzag(inn))")
             _exec_code.append("\n" + "    " * ind + 'print("index :",idxx)')
             out = len(file["type"])
             for elem in file["type"]:
@@ -388,8 +376,7 @@ class read_avro_py:
                     flag = 0
             if "null" in file["type"] and flag == 0 and out == 2:
 
-                aform.append(
-                    '{"class": "ByteMaskedArray","mask": "i8","content":\n')
+                aform.append('{"class": "ByteMaskedArray","mask": "i8","content":\n')
                 var1 = f" 'node{count}-mask'"
                 dec.append(var1)
                 dec.append(": [],")
@@ -425,8 +412,6 @@ class read_avro_py:
                 dec.append(var1)
                 dec.append(": [],")
                 type_idx = 2
-            print(type_idx)
-            print("GSEGSEGEGEG")
             if type_idx == 0:
                 temp = count
                 dum_idx = 0
@@ -439,10 +424,8 @@ class read_avro_py:
                     else:
                         dum_idx = idxx - 1
                 for i in range(out):
-                    print(file["type"][i])
                     if file["type"][i] == "null":
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
@@ -466,8 +449,7 @@ class read_avro_py:
                                 )
                             )
                     else:
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
@@ -482,8 +464,7 @@ class read_avro_py:
                             count + 1,
                             dec,
                         )
-                aform.append(
-                    f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
             if type_idx == 1:
                 temp = count
                 idxx = file["type"].index("null")
@@ -497,15 +478,12 @@ class read_avro_py:
                 idxx = file["type"].index("null")
                 for i in range(out):
                     if file["type"][i] == "null":
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
                             + f"con['node{temp}-index'].append(np.int8(-1))"
                         )
-
-                        print({"type": file["type"][dum_idx]})
                         # _exec_code.append(
                         #    "\n"
                         #    + "    " * (ind + 1)
@@ -513,8 +491,7 @@ class read_avro_py:
                         #    + self.dum_dat({"type": file["type"][1 - idxx]}, temp + 1)
                         # )
                     else:
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.insert(3, f"countvar{count}{i} = 0\n")
                         _exec_code.append(
                             "\n"
@@ -522,8 +499,7 @@ class read_avro_py:
                             + f"con['node{count}-index'].append(countvar{count}{i})"
                         )
                         _exec_code.append(
-                            "\n" + "    " * (ind + 1) +
-                            f"countvar{count}{i} += 1"
+                            "\n" + "    " * (ind + 1) + f"countvar{count}{i} += 1"
                         )
                         aform, _exec_code, count, dec = self.rec_exp_json_code(
                             {"type": file["type"][i]},
@@ -533,8 +509,7 @@ class read_avro_py:
                             count + 1,
                             dec,
                         )
-                aform.append(
-                    f'"valid_when": true,"form_key": "node{temp}"}}\n')
+                aform.append(f'"valid_when": true,"form_key": "node{temp}"}}\n')
             if type_idx == 2:
                 if null_present:
                     idxx = file["type"].index("null")
@@ -549,8 +524,7 @@ class read_avro_py:
                 # idxx = file["type"].index("null")
                 for i in range(out):
                     if file["type"][i] == "null":
-                        _exec_code.append(
-                            "\n" + "    " * (ind) + f"if idxx == {i}:")
+                        _exec_code.append("\n" + "    " * (ind) + f"if idxx == {i}:")
                         _exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
@@ -566,7 +540,6 @@ class read_avro_py:
                             + "    " * (ind + 1)
                             + f"con['node{union_idx}-index'].append(0)"
                         )
-                        print({"type": file["type"][dum_idx]})
                         # _exec_code.append(
                         #    "\n"
                         #    + "    " * (ind + 1)
@@ -604,8 +577,7 @@ class read_avro_py:
                             + f"con['node{union_idx}-index'].append(countvar{count}{i})"
                         )
                         _exec_code.append(
-                            "\n" + "    " * (ind + 1) +
-                            f"countvar{count}{i} += 1"
+                            "\n" + "    " * (ind + 1) + f"countvar{count}{i} += 1"
                         )
                         aform, _exec_code, count, dec = self.rec_exp_json_code(
                             {"type": file["type"][i]},
@@ -619,8 +591,7 @@ class read_avro_py:
                     aform[-1] = aform[-1][0:-2]
                 aform.append(f'], "form_key": "node{union_idx}"}},')
                 if null_present:
-                    aform.append(
-                        f'"valid_when": true,"form_key": "node{mask_idx}"}}\n')
+                    aform.append(f'"valid_when": true,"form_key": "node{mask_idx}"}}\n')
             return aform, _exec_code, count, dec
 
         elif isinstance(file["type"], dict):
@@ -691,8 +662,7 @@ class read_avro_py:
             var1 = f" 'node{count}-offsets'"
             dec.append(var1)
             dec.append(": [0],")
-            aform.append(
-                '{"class": "ListOffsetArray64","offsets": "i64","content": ')
+            aform.append('{"class": "ListOffsetArray64","offsets": "i64","content": ')
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
             )
@@ -705,15 +675,12 @@ class read_avro_py:
             )
             _exec_code.append("\n" + "    " * ind + "if out < 0:")
             _exec_code.append(
-                "\n" + "    " * (ind + 1) +
-                "pos, inn = decode_varint(pos,fields)"
+                "\n" + "    " * (ind + 1) + "pos, inn = decode_varint(pos,fields)"
             )
-            _exec_code.append("\n" + "    " * (ind + 1) +
-                              "nbytes = decode_zigzag(inn)")
+            _exec_code.append("\n" + "    " * (ind + 1) + "nbytes = decode_zigzag(inn)")
             _exec_code.append("\n" + "    " * ind + "for j in range(out):")
             aform, _exec_code, count, dec = self.rec_exp_json_code(
-                {"type": file["items"]}, _exec_code, ind +
-                1, aform, count + 1, dec
+                {"type": file["items"]}, _exec_code, ind + 1, aform, count + 1, dec
             )
             _exec_code.append(
                 "\n" + "    " * ind + "pos, inn = decode_varint(pos,fields)"
@@ -778,8 +745,7 @@ class read_avro_ft:
                 pos, self.pairs = self.decode_varint(4, self.temp_header)
                 self.pairs = self.decode_zigzag(self.pairs)
                 if self.pairs < 0:
-                    pos, self.header_size = self.decode_varint(
-                        pos, self.temp_header)
+                    pos, self.header_size = self.decode_varint(pos, self.temp_header)
                     self.header_size = self.decode_zigzag(self.pairs)
                     self.pairs = abs(self.pairs)
                 pos = self.cont_spec(pos)
@@ -795,17 +761,25 @@ class read_avro_ft:
         keys = []
         dec = []
         con = {}
-        self.form, self._exec_code, self.count, dec, keys, _init_code, con = self.rec_exp_json_code(
+        (
+            self.form,
+            self._exec_code,
+            self.count,
+            dec,
+            keys,
+            _init_code,
+            con,
+        ) = self.rec_exp_json_code(
             self.metadata["avro.schema"], _exec_code, ind, 0, dec, keys, _init_code, con
         )
         first_iter = True
         _init_code.append(";\n")
         self.update_pos(17)
         header_code = header_code + "".join(dec)
-        header_code = header_code+"".join(_init_code)
+        header_code = header_code + "".join(_init_code)
         _exec_code.insert(0, "0 do \n")
         _exec_code1 = "".join(_exec_code)
-        forth_code = header_code+_exec_code1+"\nloop"
+        forth_code = header_code + _exec_code1 + "\nloop"
         # print(forth_code)
         # print("ASDFNOEJGOGEON")
         machine = awkward.forth.ForthMachine64(forth_code)
@@ -817,8 +791,7 @@ class read_avro_ft:
             except LengthError:
                 break
             if first_iter:
-                machine.begin(
-                    {"stream": np.frombuffer(temp_data, dtype=np.uint8)})
+                machine.begin({"stream": np.frombuffer(temp_data, dtype=np.uint8)})
                 machine.stack_push(num_items)
                 # print(ak.Array(machine.bytecodes).to_list())
                 machine.call("init-out")
@@ -827,7 +800,8 @@ class read_avro_ft:
             else:
                 pos, num_items, len_block = self.decode_block()
                 machine.begin_again(
-                    {"stream": np.frombuffer(temp_data, dtype=np.uint8)}, True)
+                    {"stream": np.frombuffer(temp_data, dtype=np.uint8)}, True
+                )
                 machine.stack_push(num_items)
                 machine.resume()
             self.update_pos(len_block)
@@ -838,9 +812,7 @@ class read_avro_ft:
                 con[elem] = machine.output_Index64(elem)
             else:
                 con[elem] = machine.output_NumpyArray(elem)
-        self.outarr = ak.from_buffers(
-            self.form, sum(self.blocks), con
-        )
+        self.outarr = ak.from_buffers(self.form, sum(self.blocks), con)
 
     def update_pos(self, pos):
         self._marker += pos
@@ -864,17 +836,17 @@ class read_avro_ft:
         while aa < self.pairs:
             pos, dat = self.decode_varint(pos, self.temp_header)
             dat = self.decode_zigzag(dat)
-            key = self.temp_header[pos:pos+int(dat)]
-            pos = pos+int(dat)
+            key = self.temp_header[pos : pos + int(dat)]
+            pos = pos + int(dat)
             if len(key) < int(dat):
                 raise LengthError
             pos, dat = self.decode_varint(pos, self.temp_header)
             dat = self.decode_zigzag(dat)
-            val = self.temp_header[pos:pos+int(dat)]
-            pos = pos+int(dat)
+            val = self.temp_header[pos : pos + int(dat)]
+            pos = pos + int(dat)
             if len(val) < int(dat):
                 raise LengthError
-            if key == b'avro.schema':
+            if key == b"avro.schema":
                 self.metadata[key.decode()] = json.loads(val.decode())
             else:
                 self.metadata[key.decode()] = val
@@ -925,22 +897,23 @@ class read_avro_ft:
         if dtype["type"] == "enum":
             return f"0 node{count}-index <- stack "
 
-    def rec_exp_json_code(self, file, _exec_code, ind, count, dec, keys, _init_code, con):
+    def rec_exp_json_code(
+        self, file, _exec_code, ind, count, dec, keys, _init_code, con
+    ):
         if isinstance(file, str) or isinstance(file, list):
             file = {"type": file}
-        if (
-            file["type"] == "null"
-        ):
-            aform = ak.forms.IndexedOptionForm("i64", ak.forms.EmptyForm(
-                form_key=f"node{count+1}"), form_key=f"node{count}")
+        if file["type"] == "null":
+            aform = ak.forms.IndexedOptionForm(
+                "i64",
+                ak.forms.EmptyForm(form_key=f"node{count+1}"),
+                form_key=f"node{count}",
+            )
             dec.append(f"output node{count+1}-data uint8 \n")
             dec.append(f"output node{count}-index int64 \n")
             keys.append(f"node{count+1}-data")
             keys.append(f"node{count}-index")
-            _exec_code.append("\n" + "    " * ind +
-                              f'-1 node{count}-index <- stack')
-            _exec_code.append("\n" + "    " * ind +
-                              f'0 node{count+1}-data <- stack')
+            _exec_code.append("\n" + "    " * ind + f"-1 node{count}-index <- stack")
+            _exec_code.append("\n" + "    " * ind + f"0 node{count+1}-data <- stack")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "record":
@@ -949,82 +922,78 @@ class read_avro_ft:
             aformfields = []
             for elem in file["fields"]:
                 aformfields.append(elem["name"])
-                aform, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
+                (
+                    aform,
+                    _exec_code,
+                    count,
+                    dec,
+                    keys,
+                    _init_code,
+                    con,
+                ) = self.rec_exp_json_code(
                     elem, _exec_code, ind, count + 1, dec, keys, _init_code, con
                 )
                 aformcont.append(aform)
-            aform = ak.forms.RecordForm(
-                aformcont, aformfields, form_key=f"node{temp}")
+            aform = ak.forms.RecordForm(aformcont, aformfields, form_key=f"node{temp}")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "string":
             aform = ak.forms.ListOffsetForm(
-                "i64", ak.forms.NumpyForm("uint8", parameters={"__array__": "char"}, form_key=f"node{count+1}"), form_key=f"node{count}")
+                "i64",
+                ak.forms.NumpyForm(
+                    "uint8", parameters={"__array__": "char"}, form_key=f"node{count+1}"
+                ),
+                form_key=f"node{count}",
+            )
             dec.append(f"output node{count+1}-data uint8 \n")
             dec.append(f"output node{count}-offsets int64 \n")
             keys.append(f"node{count+1}-data")
             keys.append(f"node{count}-offsets")
             _init_code.append(f"0 node{count}-offsets <- stack\n")
-            _exec_code.append("\n" + "    " * ind +
-                              'stream zigzag-> stack\n')
-            _exec_code.append("\n" + "    " * ind +
-                              f'dup node{count}-offsets +<- stack\n')
-            _exec_code.append("\n" + "    " * ind +
-                              '0 do')
-            _exec_code.append("\n" + "    " * (ind+1) +
-                              f'stream B-> node{count+1}-data')
-            _exec_code.append("\n" + "    " * ind +
-                              'loop')
+            _exec_code.append("\n" + "    " * ind + "stream zigzag-> stack\n")
+            _exec_code.append(
+                "\n" + "    " * ind + f"dup node{count}-offsets +<- stack\n"
+            )
+            _exec_code.append("\n" + "    " * ind + "0 do")
+            _exec_code.append(
+                "\n" + "    " * (ind + 1) + f"stream B-> node{count+1}-data"
+            )
+            _exec_code.append("\n" + "    " * ind + "loop")
             return aform, _exec_code, count + 1, dec, keys, _init_code, con
 
         elif file["type"] == "int":
-            aform = ak.forms.NumpyForm(
-                primitive="int32", form_key=f"node{count}")
+            aform = ak.forms.NumpyForm(primitive="int32", form_key=f"node{count}")
             dec.append(f"output node{count}-data int32 \n")
             keys.append(f"node{count}-data")
-            _exec_code.append("\n" + "    " * ind +
-                              f'stream zigzag-> node{count}-data')
+            _exec_code.append("\n" + "    " * ind + f"stream zigzag-> node{count}-data")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "long":
             aform = ak.forms.NumpyForm("int64", form_key=f"node{count}")
             keys.append(f"node{count}-data")
             dec.append(f"output node{count}-data int64 \n")
-            _exec_code.append("\n" + "    " * ind +
-                              f'stream zigzag-> node{count}-data')
+            _exec_code.append("\n" + "    " * ind + f"stream zigzag-> node{count}-data")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "float":
             aform = ak.forms.NumpyForm("float32", form_key=f"node{count}")
             dec.append(f"output node{count}-data float32 \n")
             keys.append(f"node{count}-data")
-            _exec_code.append(
-                "\n"
-                + "    " * ind
-                + f'stream f-> node{count}-data'
-            )
+            _exec_code.append("\n" + "    " * ind + f"stream f-> node{count}-data")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "double":
             aform = ak.forms.NumpyForm("float64", form_key=f"node{count}")
             dec.append(f"output node{count}-data float64 \n")
             keys.append(f"node{count}-data")
-            _exec_code.append(
-                "\n"
-                + "    " * ind
-                + f'stream d-> node{count}-data'
-            )
+            _exec_code.append("\n" + "    " * ind + f"stream d-> node{count}-data")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "boolean":
             aform = ak.forms.NumpyForm("bool", form_key=f"node{count}")
             dec.append(f"output node{count}-data bool\n")
             keys.append(f"node{count}-data")
-            _exec_code.append(
-                "\n"
-                + "    " * ind
-                + f'stream ?-> node{count}-data'
-            )
+            _exec_code.append("\n" + "    " * ind + f"stream ?-> node{count}-data")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "bytes":
@@ -1033,19 +1002,24 @@ class read_avro_ft:
             keys.append(f"node{count+1}-data")
             keys.append(f"node{count}-offsets")
             aform = ak.forms.ListOffsetForm(
-                "i64", ak.forms.NumpyForm("uint8", form_key=f"node{count+1}", parameters={"__array__": "byte"}), parameters={"__array__": "bytestring"}, form_key=f"node{count}")
+                "i64",
+                ak.forms.NumpyForm(
+                    "uint8", form_key=f"node{count+1}", parameters={"__array__": "byte"}
+                ),
+                parameters={"__array__": "bytestring"},
+                form_key=f"node{count}",
+            )
 
             _init_code.append(f"0 node{count}-offsets <- stack\n")
-            _exec_code.append("\n" + "    " * ind +
-                              'stream zigzag-> stack\n')
-            _exec_code.append("\n" + "    " * ind +
-                              f'dup node{count}-offsets +<- stack\n')
-            _exec_code.append("\n" + "    " * ind +
-                              '0 do')
-            _exec_code.append("\n" + "    " * (ind+1) +
-                              f'stream B-> node{count+1}-data')
-            _exec_code.append("\n" + "    " * ind +
-                              'loop')
+            _exec_code.append("\n" + "    " * ind + "stream zigzag-> stack\n")
+            _exec_code.append(
+                "\n" + "    " * ind + f"dup node{count}-offsets +<- stack\n"
+            )
+            _exec_code.append("\n" + "    " * ind + "0 do")
+            _exec_code.append(
+                "\n" + "    " * (ind + 1) + f"stream B-> node{count+1}-data"
+            )
+            _exec_code.append("\n" + "    " * ind + "loop")
             return aform, _exec_code, count + 1, dec, keys, _init_code, con
 
         elif isinstance(file["type"], list):
@@ -1082,11 +1056,7 @@ class read_avro_ft:
                 keys.append(f"node{count}-index")
                 union_idx = count
                 type_idx = 2
-            _exec_code.append(
-                "\n"
-                + "    " * (ind)
-                + "stream zigzag-> stack case"
-            )
+            _exec_code.append("\n" + "    " * (ind) + "stream zigzag-> stack case")
             if type_idx == 0:
                 temp = count
                 dum_idx = 0
@@ -1104,30 +1074,51 @@ class read_avro_ft:
 
                         if isinstance(file["type"][dum_idx], dict):
 
-                            aa = "\n" + "    " * \
-                                (ind + 1) + \
-                                self.dum_dat(file["type"][dum_idx], temp + 1)
+                            aa = (
+                                "\n"
+                                + "    " * (ind + 1)
+                                + self.dum_dat(file["type"][dum_idx], temp + 1)
+                            )
                         else:
-                            aa = "\n" + "    " * \
-                                (ind + 1) + \
-                                self.dum_dat(
-                                    {"type": file["type"][dum_idx]}, temp + 1)
+                            aa = (
+                                "\n"
+                                + "    " * (ind + 1)
+                                + self.dum_dat(
+                                    {"type": file["type"][dum_idx]}, temp + 1
+                                )
+                            )
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"{i} of 0 node{temp}-mask <- stack {aa} endof")
+                            "\n"
+                            + "    " * (ind)
+                            + f"{i} of 0 node{temp}-mask <- stack {aa} endof"
+                        )
                     else:
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"{i} of 1 node{temp}-mask <- stack")
+                            "\n" + "    " * (ind) + f"{i} of 1 node{temp}-mask <- stack"
+                        )
 
-                        aform1, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
+                        (
+                            aform1,
+                            _exec_code,
+                            count,
+                            dec,
+                            keys,
+                            _init_code,
+                            con,
+                        ) = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
-                            dec, keys, _init_code, con
+                            dec,
+                            keys,
+                            _init_code,
+                            con,
                         )
                         _exec_code.append(" endof")
                 aform = ak.forms.ByteMaskedForm(
-                    "i8", aform1, True, form_key=f"node{temp}")
+                    "i8", aform1, True, form_key=f"node{temp}"
+                )
             if type_idx == 1:
                 temp = count
                 idxx = file["type"].index("null")
@@ -1142,23 +1133,39 @@ class read_avro_ft:
                 for i in range(out):
                     if file["type"][i] == "null":
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"{i} of -1 node{temp}-index <- stack endof")
-
-                        print({"type": file["type"][dum_idx]})
+                            "\n"
+                            + "    " * (ind)
+                            + f"{i} of -1 node{temp}-index <- stack endof"
+                        )
                     else:
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"{i} of countvar{count}{i} @ node{count}-index <- stack 1 countvar{count}{i} +! ")
+                            "\n"
+                            + "    " * (ind)
+                            + f"{i} of countvar{count}{i} @ node{count}-index <- stack 1 countvar{count}{i} +! "
+                        )
                         _init_code.append(f"variable countvar{count}{i}\n")
-                        aform1, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
+                        (
+                            aform1,
+                            _exec_code,
+                            count,
+                            dec,
+                            keys,
+                            _init_code,
+                            con,
+                        ) = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
-                            dec, keys, _init_code, con
+                            dec,
+                            keys,
+                            _init_code,
+                            con,
                         )
                         _exec_code.append("\nendof")
                 aform = ak.forms.IndexedOptionForm(
-                    "i64", aform1, form_key=f"node{temp}")
+                    "i64", aform1, form_key=f"node{temp}"
+                )
             if type_idx == 2:
                 if null_present:
                     idxx = file["type"].index("null")
@@ -1174,19 +1181,22 @@ class read_avro_ft:
                 for i in range(out):
                     if file["type"][i] == "null":
                         _exec_code.append(
-                            "\n" + "    " * (ind) + f"{i} of 0 node{mask_idx}-mask <- stack 0 node{union_idx}-tags <- stack 0 node{union_idx}-index <- stack endof")
+                            "\n"
+                            + "    " * (ind)
+                            + f"{i} of 0 node{mask_idx}-mask <- stack 0 node{union_idx}-tags <- stack 0 node{union_idx}-index <- stack endof"
+                        )
                     else:
                         if null_present:
                             _exec_code.append(
-                                "\n" + "    " *
-                                (ind) +
-                                f"{i} of 1 node{mask_idx}-mask <- stack {i} node{union_idx}-tags <- stack"
+                                "\n"
+                                + "    " * (ind)
+                                + f"{i} of 1 node{mask_idx}-mask <- stack {i} node{union_idx}-tags <- stack"
                             )
                         else:
                             _exec_code.append(
-                                "\n" + "    " *
-                                (ind) +
-                                f"{i} of {i} node{union_idx}-tags <- stack 1 countvar{count}{i} +!"
+                                "\n"
+                                + "    " * (ind)
+                                + f"{i} of {i} node{union_idx}-tags <- stack 1 countvar{count}{i} +!"
                             )
                         _init_code.append(f"variable countvar{count}{i} \n")
                         _exec_code.append(
@@ -1195,34 +1205,55 @@ class read_avro_ft:
                             + f"countvar{count}{i} @ node{union_idx}-index <- stack"
                         )
                         _exec_code.append(
-                            "\n" + "    " * (ind + 1) +
-                            f"1 countvar{count}{i} +!"
+                            "\n" + "    " * (ind + 1) + f"1 countvar{count}{i} +!"
                         )
-                        aform1, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
+                        (
+                            aform1,
+                            _exec_code,
+                            count,
+                            dec,
+                            keys,
+                            _init_code,
+                            con,
+                        ) = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             _exec_code,
                             ind + 1,
                             count + 1,
-                            dec, keys, _init_code, con
+                            dec,
+                            keys,
+                            _init_code,
+                            con,
                         )
                         temp_forms.append(aform1)
                         _exec_code.append("\n endof")
 
                 if null_present:
                     aform = ak.forms.ByteMaskedForm(
-                        "i8", ak.forms.UnionForm(
-                            "i8", "i64", temp_forms, form_key=f"node{union_idx}"), True, form_key=f"node{mask_idx}")
+                        "i8",
+                        ak.forms.UnionForm(
+                            "i8", "i64", temp_forms, form_key=f"node{union_idx}"
+                        ),
+                        True,
+                        form_key=f"node{mask_idx}",
+                    )
                 else:
                     aform = ak.forms.UnionForm(
-                        "i8", "i64", aform1, form_key=f"node{mask_idx}")
-            _exec_code.append(
-                "\n" + "    " * (ind + 1) +
-                "endcase"
-            )
+                        "i8", "i64", aform1, form_key=f"node{mask_idx}"
+                    )
+            _exec_code.append("\n" + "    " * (ind + 1) + "endcase")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif isinstance(file["type"], dict):
-            aform, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
+            (
+                aform,
+                _exec_code,
+                count,
+                dec,
+                keys,
+                _init_code,
+                con,
+            ) = self.rec_exp_json_code(
                 file["type"], _exec_code, ind, count, dec, keys, _init_code, con
             )
             return aform, _exec_code, count, dec, keys, _init_code, con
@@ -1230,9 +1261,14 @@ class read_avro_ft:
         elif file["type"] == "fixed":
             keys.append(f"node{count+1}-data")
             dec.append(f"output node{count+1}-data uint8 \n")
-            aform = ak.forms.RegularForm(ak.forms.NumpyForm("uint8", form_key=f"node{count+1}", parameters={
-                "__array__": "byte"}), parameters={
-                "__array__": "bytestring"}, size=file["size"], form_key=f"node{count}")
+            aform = ak.forms.RegularForm(
+                ak.forms.NumpyForm(
+                    "uint8", form_key=f"node{count+1}", parameters={"__array__": "byte"}
+                ),
+                parameters={"__array__": "bytestring"},
+                size=file["size"],
+                form_key=f"node{count}",
+            )
             temp = file["size"]
             _exec_code.append(
                 "\n" + "    " * ind + f"{temp} stream #B-> node{count+1}-data"
@@ -1240,8 +1276,20 @@ class read_avro_ft:
             return aform, _exec_code, count + 1, dec, keys, _init_code, con
 
         elif file["type"] == "enum":
-            aform = ak.forms.IndexedForm("i64", ak.forms.ListOffsetForm(
-                "i64", ak.forms.NumpyForm("uint8", parameters={"__array__": "char"}, form_key=f"node{count+2}"), form_key=f"node{count+1}"), parameters={"__array__": "categorical"}, form_key=f"node{count}")
+            aform = ak.forms.IndexedForm(
+                "i64",
+                ak.forms.ListOffsetForm(
+                    "i64",
+                    ak.forms.NumpyForm(
+                        "uint8",
+                        parameters={"__array__": "char"},
+                        form_key=f"node{count+2}",
+                    ),
+                    form_key=f"node{count+1}",
+                ),
+                parameters={"__array__": "categorical"},
+                form_key=f"node{count}",
+            )
             keys.append(f"node{count}-index")
             dec.append(f"output node{count}-index int64 \n")
             tempar = file["symbols"]
@@ -1252,41 +1300,46 @@ class read_avro_ft:
                 prev = offset[-1]
                 for elem in tempar[i]:
                     dat.append(np.uint8(ord(elem)))
-            con[f'node{count+1}-offsets'] = np.array(offset, dtype=np.int64)
-            con[f'node{count+2}-data'] = np.array(dat, dtype=np.uint8)
+            con[f"node{count+1}-offsets"] = np.array(offset, dtype=np.int64)
+            con[f"node{count+2}-data"] = np.array(dat, dtype=np.uint8)
             _exec_code.append(
                 "\n" + "    " * ind + f"stream zigzag-> node{count}-index"
             )
             return aform, _exec_code, count + 2, dec, keys, _init_code, con
         elif file["type"] == "array":
             temp = count
-            dec.append(
-                f"output node{count}-offsets int64\n")
+            dec.append(f"output node{count}-offsets int64\n")
             _init_code.append(f"0 node{count}-offsets <- stack\n")
-            _exec_code.append(
-                "\n" + "    " * ind + "stream zigzag-> stack"
-            )
+            _exec_code.append("\n" + "    " * ind + "stream zigzag-> stack")
             _exec_code.append(
                 "\n" + "    " * ind + f"dup node{count}-offsets +<- stack"
             )
             keys.append(f"node{count}-offsets")
             _exec_code.append("\n" + "    " * ind + "0 do")
-            aformtemp, _exec_code, count, dec, keys, _init_code, con = self.rec_exp_json_code(
-                {"type": file["items"]}, _exec_code, ind +
-                1, count + 1, dec, keys, _init_code, con
+            (
+                aformtemp,
+                _exec_code,
+                count,
+                dec,
+                keys,
+                _init_code,
+                con,
+            ) = self.rec_exp_json_code(
+                {"type": file["items"]},
+                _exec_code,
+                ind + 1,
+                count + 1,
+                dec,
+                keys,
+                _init_code,
+                con,
             )
-            _exec_code.append(
-                "\n" + "    " * ind + "loop"
-            )
-            _exec_code.append(
-                "\n" + "    " * ind + "stream zigzag-> stack"
-            )
+            _exec_code.append("\n" + "    " * ind + "loop")
+            _exec_code.append("\n" + "    " * ind + "stream zigzag-> stack")
             _exec_code.append("\n" + "    " * ind + "if")
-            _exec_code.append("\n" + "    " * (ind+1) +
-                              "")  # raise an error
+            _exec_code.append("\n" + "    " * (ind + 1) + "")  # raise an error
             _exec_code.append("\n" + "    " * ind + "then")
-            aform = ak.forms.ListOffsetForm(
-                "i64", aformtemp, form_key=f"node{temp}")
+            aform = ak.forms.ListOffsetForm("i64", aformtemp, form_key=f"node{temp}")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "map":
