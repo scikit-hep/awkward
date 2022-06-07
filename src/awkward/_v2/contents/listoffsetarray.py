@@ -2177,7 +2177,8 @@ class ListOffsetArray(Content):
                     union_tags = ak._v2.index.Index8.zeros(content.length, self._nplike)
                     content._nplike.isnan(content._data, union_tags._data)
                     union_index = ak._v2.index.Index64(
-                        self._nplike.arange(content.length, dtype=np.int64)
+                        self._nplike.arange(content.length, dtype=np.int64),
+                        nplike=self.nplike,
                     )
 
                     return ak._v2.contents.unionarray.UnionArray(

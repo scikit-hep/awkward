@@ -145,7 +145,8 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         nextinputs.append(
                             ak._v2.contents.ListOffsetArray(
                                 ak._v2.index.Index64(
-                                    nplike.arange(length + 1, dtype=np.int64)
+                                    nplike.arange(length + 1, dtype=np.int64),
+                                    nplike=nplike,
                                 ),
                                 ak._v2.contents.NumpyArray(
                                     nplike.broadcast_to(nplike.array([x]), (length,))

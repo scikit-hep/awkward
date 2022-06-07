@@ -1241,7 +1241,7 @@ class Content:
     def pad_none_axis0(self, target, clip):
         if not clip and target < self.length:
             index = ak._v2.index.Index64(
-                self._nplike.arange(self.length, dtype=np.int64)
+                self._nplike.arange(self.length, dtype=np.int64), nplike=self.nplike
             )
 
         else:

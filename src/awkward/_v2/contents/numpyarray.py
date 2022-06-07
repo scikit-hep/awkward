@@ -181,9 +181,9 @@ class NumpyArray(Content):
         is_posinf = is_nonfinite & (self._data > 0)  # true for inf only
         is_neginf = is_nonfinite & (self._data < 0)  # true for -inf only
         is_nan = self._nplike.isnan(self._data)  # true for nan only
-        tags = self._nplike.zeros(out.length, np.int8)
+        tags = self._nplike.index_nplike.zeros(out.length, np.int8)
         tags[is_nonfinite] = 1
-        index = self._nplike.arange(out.length, dtype=np.int64)
+        index = self._nplike.index_nplike.arange(out.length, dtype=np.int64)
         index[is_posinf] = 0
         index[is_neginf] = 1
         index[is_nan] = 2

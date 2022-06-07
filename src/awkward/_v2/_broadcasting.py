@@ -333,7 +333,7 @@ def apply_step(
                 for tag, combo in enumerate(all_combos):
                     mask = combos == combo
                     tags[mask] = tag
-                    index[mask] = nplike.arange(
+                    index[mask] = nplike.index_nplike.arange(
                         nplike.count_nonzero(mask), dtype=np.int64
                     )
                     nextinputs = []
@@ -449,7 +449,8 @@ def apply_step(
                                 tmpindex = Index64(
                                     nplike.repeat(
                                         nplike.arange(x.length, dtype=np.int64), maxsize
-                                    )
+                                    ),
+                                    nplike=nplike,
                                 )
 
                     nextinputs = []

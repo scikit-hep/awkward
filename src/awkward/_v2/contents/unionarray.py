@@ -1382,14 +1382,16 @@ class UnionArray(Content):
             if len(contents[tag]) > num_tag:
                 if original_index is index:
                     index = index.copy()
-                index[is_tag] = self._nplike.arange(num_tag, dtype=index.dtype)
+                index[is_tag] = self._nplike.index_nplike.arange(
+                    num_tag, dtype=index.dtype
+                )
                 contents[tag] = self.project(tag)
 
             contents[tag] = contents[tag].packed()
 
         return UnionArray(
-            ak._v2.index.Index8(tags),
-            ak._v2.index.Index(index),
+            ak._v2.index.Index8(tags, nplike=self.nplike),
+            ak._v2.index.Index(index, nplike=self.nplike),
             contents,
             self._identifier,
             self._parameters,

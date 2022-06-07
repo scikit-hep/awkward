@@ -103,8 +103,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             nplike = ak.nplike.of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak._v2.contents.ListArray(
-                ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-                ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+                ak._v2.index.Index64(
+                    nplike.zeros(len(layout), dtype=np.int64), nplike=nplike
+                ),
+                ak._v2.index.Index64(
+                    nplike.zeros(len(layout), dtype=np.int64), nplike=nplike
+                ),
                 ak._v2.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
             )
@@ -118,7 +122,9 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
 
             return ak._v2.contents.ListArray(
-                ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+                ak._v2.index.Index64(
+                    nplike.zeros(len(layout), dtype=np.int64), nplike=nplike
+                ),
                 ak._v2.index.Index64(
                     nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
@@ -130,8 +136,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             nplike = ak.nplike.of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak._v2.contents.ListArray(
-                ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-                ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+                ak._v2.index.Index64(
+                    nplike.zeros(len(layout), dtype=np.int64), nplike=nplike
+                ),
+                ak._v2.index.Index64(
+                    nplike.zeros(len(layout), dtype=np.int64), nplike=nplike
+                ),
                 ak._v2.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
             )
@@ -141,7 +151,9 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             asstr = str(fill_value).encode("utf-8", "surrogateescape")
             asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
             return ak._v2.contents.ListArray(
-                ak._v2.index.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+                ak._v2.index.Index64(
+                    nplike.zeros(len(layout), dtype=np.int64), nplike=nplike
+                ),
                 ak._v2.index.Index64(
                     nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),

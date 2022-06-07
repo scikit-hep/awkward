@@ -240,7 +240,7 @@ def prepare_tuple_nested(item):
         nextindex[nonnull] = item.nplike.arange(projected.length, dtype=np.int64)
 
         return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index64(nextindex),
+            ak._v2.index.Index64(nextindex, nplike=item.nplike),
             prepare_tuple_nested(projected),
             identifier=item.identifier,
             parameters=item.parameters,
@@ -267,7 +267,7 @@ def prepare_tuple_nested(item):
         )
 
         return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index64(nextindex),
+            ak._v2.index.Index64(nextindex, nplike=item.nplike),
             nextcontent,
             identifier=item.identifier,
             parameters=item.parameters,
@@ -364,9 +364,9 @@ def prepare_tuple_bool_to_int(item):
             )
 
         return ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index64(nextoffsets),
+            ak._v2.index.Index64(nextoffsets, nplike=item.nplike),
             ak._v2.contents.IndexedOptionArray(
-                ak._v2.index.Index(outindex),
+                ak._v2.index.Index(outindex, nplike=item.nplike),
                 ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
             ),
         )
@@ -423,7 +423,7 @@ def prepare_tuple_bool_to_int(item):
                 )
 
             return ak._v2.contents.IndexedOptionArray(
-                ak._v2.index.Index(outindex),
+                ak._v2.index.Index(outindex, item.nplike),
                 ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
             )
 

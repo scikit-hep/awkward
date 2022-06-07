@@ -1634,10 +1634,11 @@ class IndexedOptionArray(Content):
             )
             new_index[is_none] = -1
             new_index[~is_none] = self._nplike.arange(
-                len(original_index) - num_none, dtype=original_index.dtype
+                len(original_index) - num_none,
+                dtype=original_index.dtype,
             )
             return ak._v2.contents.IndexedOptionArray(
-                ak._v2.index.Index(new_index),
+                ak._v2.index.Index(new_index, nplike=self.nplike),
                 self.project().packed(),
                 self._identifier,
                 self._parameters,

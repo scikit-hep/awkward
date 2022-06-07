@@ -317,7 +317,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         layouts = [x for x in layouts]
 
         indexes = [
-            ak._v2.index.Index64(x.reshape(-1))
+            ak._v2.index.Index64(x.reshape(-1), nplike=nplike)
             for x in nplike.meshgrid(
                 *[nplike.arange(len(x), dtype=np.int64) for x in layouts], indexing="ij"
             )
