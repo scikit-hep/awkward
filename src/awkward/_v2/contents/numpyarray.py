@@ -542,7 +542,7 @@ class NumpyArray(Content):
         # Alternatively, self._data.flags["C_CONTIGUOUS"], but the following assumes
         # less of the nplike.
 
-        if type(self._data).__module__.startswith("jaxlib."):
+        if isinstance(self.nplike, ak.nplike.Jax):
             return True
 
         x = self._data.dtype.itemsize
@@ -1115,6 +1115,10 @@ class NumpyArray(Content):
                 keepdims,
             )
 
+        if isinstance(self.nplike, ak.nplike.Jax):
+            import awkward._v2._connect.jax._reducers  # noqa: F401
+
+            reducer = getattr(ak._v2._connect.jax._reducers, reducer.__name__)
         out = reducer.apply(self, parents, outlength)
 
         if reducer.needs_position:
