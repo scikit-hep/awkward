@@ -1004,15 +1004,11 @@ class read_avro_ft:
             dec.append(f"output node{count}-data int32 \n")
             keys.append(f"node{count}-data")
             if self.is_prim:
-                _exec_code.append(
-                    "\n" + "    " * ind + "0 do"
-                )
-            _exec_code.append("\n" + "    " * ind +
-                              f"stream zigzag-> node{count}-data")
-            if self.is_prim:
-                _exec_code.append(
-                    "\n" + "    " * ind + "loop"
-                )
+                _exec_code.append("\n" + "    " * ind +
+                                  f"stream #zigzag-> node{count}-data")
+            else:
+                _exec_code.append("\n" + "    " * ind +
+                                  f"stream zigzag-> node{count}-data")
             return aform, _exec_code, count, dec, keys, _init_code, con
 
         elif file["type"] == "long":
