@@ -98,6 +98,11 @@ option(PYBUILD "Build Python modules")
 cmake_dependent_option(AWKWARD_EXTERNAL_PYBIND11 "Build against an external pybind11" OFF
                        "PYBUILD" OFF)
 
+addtest(test001 studies/growable_buffer/growable_buffer.cpp)
+addtest(test002 studies/growable_buffer/growable_buffer_panels.cpp)
+addtest(test003 studies/growable_buffer/linked_list_implementation.cpp)
+addtest(test004 studies/growable_buffer/linked_list_with_arrays.cpp)
+
 # Third tier: Python modules.
 if(PYBUILD)
   if(AWKWARD_EXTERNAL_PYBIND11)
