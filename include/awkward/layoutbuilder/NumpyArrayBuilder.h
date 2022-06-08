@@ -108,7 +108,7 @@ namespace awkward {
         } else if (form_primitive() == "int64") {
           return sizeof(int64_t);
         } else if (form_primitive() == "complex128") {
-          return sizeof(double) + sizeof(double);
+          return sizeof(std::complex<double>);
         } else if (form_primitive() == "bool") {
           return sizeof(bool);
         }
@@ -137,7 +137,6 @@ namespace awkward {
     const util::Parameters parameters_;
     const std::string form_key_;
     const std::string form_primitive_;
-    mutable ssize_t length_;
     bool is_complex_;
 
     /// @brief AwkwardForth virtual machine instructions
