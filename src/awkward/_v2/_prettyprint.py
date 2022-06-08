@@ -84,11 +84,19 @@ def valuestr_horiz(data, limit_cols):
             limit_cols -= 5  # anticipate the ", ..."
             which = 0
             for forward, index in alternate(len(data)):
+                current = get_at(data, index)
                 if forward:
                     for_comma = 0 if which == 0 else 2
-                    cols_taken, strs = valuestr_horiz(
-                        get_at(data, index), limit_cols - for_comma
-                    )
+                    cols_taken, strs = valuestr_horiz(current, limit_cols - for_comma)
+
+                    if (
+                        ak._v2.highlevel.Record in current.__class__.__bases__
+                        or ak._v2.highlevel.Array in current.__class__.__bases__
+                        and not type(current).__repr__
+                        is ak._v2.highlevel.Array.__repr__
+                    ):
+                        strs = type(current).__repr__(current)
+
                     if limit_cols - (for_comma + cols_taken) >= 0:
                         if which != 0:
                             front.append(", ")
@@ -98,9 +106,16 @@ def valuestr_horiz(data, limit_cols):
                     else:
                         break
                 else:
-                    cols_taken, strs = valuestr_horiz(
-                        get_at(data, index), limit_cols - 2
-                    )
+                    cols_taken, strs = valuestr_horiz(current, limit_cols - 2)
+
+                    if (
+                        ak._v2.highlevel.Record in current.__class__.__bases__
+                        or ak._v2.highlevel.Array in current.__class__.__bases__
+                        and not type(current).__repr__
+                        is ak._v2.highlevel.Array.__repr__
+                    ):
+                        strs = type(current).__repr__(current)
+
                     if limit_cols - (2 + cols_taken) >= 0:
                         back[:0] = strs
                         back.insert(0, ", ")
@@ -243,7 +258,6 @@ def valuestr(data, limit_rows, limit_cols):
                         key_str = key_str[1:]
                 else:
                     key_str = key + ": "
-
             _, strs = valuestr_horiz(
                 get_field(data, key), limit_cols - 2 - len(key_str)
             )

@@ -72,14 +72,6 @@ def test_dress():
     a = ak._v2.highlevel.Array(x, behavior=ns, check_valid=True)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
-    x2 = ak.layout.ListOffsetArray64(
-        ak.layout.Index64(np.array([0, 3, 3, 5], dtype=np.int64)),
-        ak.layout.NumpyArray(
-            np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__array__": "Dummy"}
-        ),
-    )
-    a2 = ak.Array(x2, behavior=ns, check_valid=True)
-
     x2 = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64)),
         ak._v2.contents.NumpyArray(
@@ -87,9 +79,10 @@ def test_dress():
         ),
     )
     a2 = ak._v2.highlevel.Array(x2, behavior=ns, check_valid=True)
+    # columns limit changed from 40 to 80 in v2
     assert (
         repr(a2)
-        == "<Array [<Dummy [[1.1, 2.2, 3.3], [], [4.4, 5.5]]>] type='3 * var * float64[parameters...'>"
+        == "<Array [<Dummy [1.1, 2.2, 3.3]>, <Dummy []>, <Dummy [4.4, 5.5]>] type='3 * ...'>"
     )
     assert repr(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
     assert repr(a2[1]) == "<Dummy []>"

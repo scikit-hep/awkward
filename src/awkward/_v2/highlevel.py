@@ -1174,30 +1174,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             typestr = "'" + typestr + "'"
 
-        if self._behavior is not None:
-            # string = ""
-            for i in range(len(self._layout)):
-                current_layout = self._layout[i]
-
-                if current_layout is awkward._v2.contents.Content:
-                    cls = ak._v2._util.arrayclass(current_layout, self._behavior)
-                    if (
-                        cls is not awkward._v2.highlevel.Array
-                        and cls is not awkward._v2.behaviors.string.StringBehavior
-                    ):
-                        y = cls(self, behavior=self._behavior)
-                        if "__repr__" in type(y).__dict__:
-                            return f"<{pytype} [{cls.__repr__(y)}] type={typestr}>"
-
-            #     elif isinstance(current_layout, awkward._v2.record.Record):
-            #         cls = ak._v2._util.recordclass(current_layout, self._behavior)
-            #         if cls is not awkward._v2.highlevel.Array and cls is not awkward._v2.behaviors.string.StringBehavior:
-            #             y = cls(self.layout[i], behavior=self._behavior)
-            #             if "__repr__" in type(y).__dict__:
-            #                 string +=  cls.__repr__(y) + ", "
-            # if string != '':
-            #     return f"<{pytype} [{string[:-2]}] type={typestr}>"
-
         return f"<{pytype}{valuestr} type={typestr}>"
 
     def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
@@ -1877,12 +1853,6 @@ class Record(NDArrayOperatorsMixin):
             typestr = "'" + typestr[: length - 3] + "...'"
         else:
             typestr = "'" + typestr + "'"
-
-        if self._behavior is not None:
-            list_of_values = str(list(self.layout.to_list().values()))[1:-1].replace(
-                ",", ""
-            )
-            return f"<{list_of_values}>"
 
         return f"<{pytype}{valuestr} type={typestr}>"
 
