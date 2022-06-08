@@ -23,7 +23,7 @@ def from_avro_file(file, show_code=False, reader_lang="ft"):  # behavior and hig
                     )  # wrap the layout here using from_buffers.impl
                 elif reader_lang == "ft":
                     pass
-                    temp_class = awkward._v2._connect.avro.read_avro_ft(file, show_code)
+                    temp_class = awkward._v2._connect.avro.ReadAvroFT(file, show_code)
                     return temp_class.outarr
         except ImportError:
             raise ImportError("Incorrect filename")
@@ -35,7 +35,7 @@ def from_avro_file(file, show_code=False, reader_lang="ft"):  # behavior and hig
                 raise TypeError  # wrap the layout here using from_buffers.impl
             elif reader_lang == "ft":
                 pass
-                temp_class = awkward._v2._connect.avro.read_avro_ft(file, show_code)
+                temp_class = awkward._v2._connect.avro.ReadAvroFT(file, show_code)
                 return temp_class.outarr
 
 
@@ -49,5 +49,5 @@ def metadata_from_avro_file(file, show_code=False, reader_lang="ft"):
         temp_class = awkward._v2._connect.avro.read_avro_py(file, show_code)
         return temp_class.form
     elif reader_lang == "ft":
-        temp_class = awkward._v2._connect.avro.read_avro_ft(file, show_code)
+        temp_class = awkward._v2._connect.avro.ReadAvroFT(file, show_code)
         return temp_class.form
