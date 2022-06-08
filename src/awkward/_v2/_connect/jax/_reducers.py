@@ -142,8 +142,8 @@ class Any(Reducer):
     @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
-
         result = cls.jax.ops.segment_max(array.data, parents.data)
+        result = cls.jax.numpy.asarray(result, dtype=bool)
 
         return ak._v2.contents.NumpyArray(result, nplike=array.nplike)
 
@@ -160,6 +160,7 @@ class All(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         result = cls.jax.ops.segment_min(array.data, parents.data)
+        result = cls.jax.numpy.asarray(result, dtype=bool)
 
         return ak._v2.contents.NumpyArray(result, nplike=array.nplike)
 
@@ -199,6 +200,9 @@ class Min(Reducer):
         assert isinstance(array, ak._v2.contents.NumpyArray)
 
         result = cls.jax.ops.segment_min(array.data, parents.data)
+        result = cls.jax.numpy.minimum(
+            result, cls._min_initial(cls.initial, array.dtype)
+        )
 
         if array.dtype.type in (np.complex128, np.complex64):
             return ak._v2.contents.NumpyArray(
@@ -206,9 +210,7 @@ class Min(Reducer):
                 nplike=array.nplike,
             )
         else:
-            return ak._v2.contents.NumpyArray(
-                array.nplike.array(result, array.dtype), nplike=array.nplike
-            )
+            return ak._v2.contents.NumpyArray(result, nplike=array.nplike)
 
 
 class Max(Reducer):
@@ -247,12 +249,13 @@ class Max(Reducer):
 
         result = cls.jax.ops.segment_max(array.data, parents.data)
 
+        result = cls.jax.numpy.maximum(
+            result, cls._max_initial(cls.initial, array.dtype)
+        )
         if array.dtype.type in (np.complex128, np.complex64):
             return ak._v2.contents.NumpyArray(
                 array.nplike.array(result.view(array.dtype), array.dtype),
                 nplike=array.nplike,
             )
         else:
-            return ak._v2.contents.NumpyArray(
-                array.nplike.array(result, array.dtype), nplike=array.nplike
-            )
+            return ak._v2.contents.NumpyArray(result, nplike=array.nplike)

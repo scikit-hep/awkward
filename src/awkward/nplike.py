@@ -863,54 +863,36 @@ class Jax(NumpyLike):
 
     def all(self, *args, **kwargs):
         out = self._module.all(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out
 
     def any(self, *args, **kwargs):
         out = self._module.any(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out
 
     def count_nonzero(self, *args, **kwargs):
         out = self._module.count_nonzero(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out
 
     def sum(self, *args, **kwargs):
         out = self._module.sum(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out
 
     def prod(self, *args, **kwargs):
         out = self._module.prod(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out
 
     def min(self, *args, **kwargs):
         out = self._module.min(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out
 
     def max(self, *args, **kwargs):
         out = self._module.max(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out
 
     def argmin(self, *args, **kwargs):
         out = self._module.argmin(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out
 
     def argmax(self, *args, **kwargs):
         out = self._module.argmax(*args, **kwargs)
-        if out.shape == ():
-            return out.item()
         return out

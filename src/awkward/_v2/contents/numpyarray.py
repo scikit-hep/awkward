@@ -21,7 +21,8 @@ class NumpyArray(Content):
             data = data.data
         self._data = nplike.asarray(data)
 
-        ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
+        if not isinstance(nplike, ak.nplike.Jax):
+            ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
             raise ak._v2._util.error(
                 TypeError(
@@ -1118,7 +1119,10 @@ class NumpyArray(Content):
         if isinstance(self.nplike, ak.nplike.Jax):
             import awkward._v2._connect.jax._reducers  # noqa: F401
 
-            reducer = getattr(ak._v2._connect.jax._reducers, reducer.__name__)
+            if isinstance(reducer, type):
+                reducer = getattr(ak._v2._connect.jax._reducers, reducer.__name__)
+            else:
+                reducer = getattr(ak._v2._connect.jax._reducers, type(reducer).__name__)
         out = reducer.apply(self, parents, outlength)
 
         if reducer.needs_position:
