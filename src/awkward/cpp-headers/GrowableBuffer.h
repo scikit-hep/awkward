@@ -101,5 +101,5 @@ private:
   std::vector<size_t> length_;
   std::vector<size_t> reserved_;
 };
-  
+
 #endif // GROWABLEBUFFER_H_
