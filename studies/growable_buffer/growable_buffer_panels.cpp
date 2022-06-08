@@ -16,7 +16,7 @@ public:
     reserved_.push_back(initial);
     }
 
-  const std::unique_ptr<PRIMITIVE>
+  const std::unique_ptr<PRIMITIVE>&
   ptr() const {
     return ptr_[0];
   }
@@ -64,34 +64,26 @@ public:
     fill_panel(datum);
   }
 
-  // when length of each panel is different
-  /*PRIMITIVE
-  getitem_at_nowrap(int64_t at, int64_t index) const {
-    if (at<length_[index])
-      return ptr_[index].get()[at%length_[index]];
-    return getitem_at_nowrap(at - length_[index], index+1);
-  }*/
-
   PRIMITIVE
   getitem_at_nowrap(int64_t at) const {
     return ptr_[0].get()[at];
-    return ptr_[floor(at/initial_)].get()[at%initial_];
   }
 
   void
   concatenate() {
-    auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[length()]);
-    size_t new_length = length();
-    int64_t next_panel = 0;
-    for (int64_t i = 0;  i < ptr_.size();  i++) {
-      std::cout << ptr_[i].get()[0] << ", " << length_[i] << std::endl;
-      memcpy(ptr.get() + next_panel, reinterpret_cast<void*>(ptr_[i].get()), length_[i]*sizeof(PRIMITIVE));
-      next_panel += length_[i];
+    if (!is_contiguous()) {
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[length()]);
+      size_t new_length = length();
+      int64_t next_panel = 0;
+      for (int64_t i = 0;  i < ptr_.size();  i++) {
+        memcpy(ptr.get() + next_panel, reinterpret_cast<void*>(ptr_[i].get()), length_[i]*sizeof(PRIMITIVE));
+        next_panel += length_[i];
+      }
+      clear();
+      ptr_[0] = std::move(ptr);
+      length_[0] = new_length;
     }
-    clear();
-    ptr_[0] = std::move(ptr);
-    length_[0] = new_length;
-  }
+   }
 
   int64_t is_contiguous() {
     return (ptr_.size() == 1);
