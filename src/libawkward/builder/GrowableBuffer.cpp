@@ -25,7 +25,7 @@ namespace awkward {
       actual = (size_t)minreserve;
     }
     return GrowableBuffer(options,
-      UniquePtr(reinterpret_cast<T*>(awkward_malloc((int64_t)(actual*sizeof(T))))),
+      UniquePtr(new T[actual*sizeof(T)]),
       0, actual);
   }
 
@@ -38,7 +38,7 @@ namespace awkward {
     if (actual < length) {
       actual = length;
     }
-    UniquePtr ptr(reinterpret_cast<T*>(awkward_malloc((int64_t)(actual*sizeof(T)))));
+    UniquePtr ptr(new T[actual*sizeof(T)]);
     T* rawptr = ptr.get();
     for (size_t i = 0;  i < length;  i++) {
       rawptr[i] = value;
@@ -54,7 +54,7 @@ namespace awkward {
     if (actual < length) {
       actual = length;
     }
-    UniquePtr ptr(reinterpret_cast<T*>(awkward_malloc((int64_t)(actual*sizeof(T)))));
+    UniquePtr ptr(new T[actual*sizeof(T)]);
     T* rawptr = ptr.get();
     for (size_t i = 0;  i < length;  i++) {
       rawptr[i] = (T)i;
@@ -75,7 +75,7 @@ namespace awkward {
   template <typename T>
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options)
       : GrowableBuffer(options,
-                       UniquePtr(reinterpret_cast<T*>(awkward_malloc(options.initial()*(int64_t)sizeof(T)))),
+                       UniquePtr(new T[options.initial()*(int64_t)sizeof(T)]),
                        0,
                        (size_t) options.initial()) { }
 
@@ -116,7 +116,7 @@ namespace awkward {
   void
   GrowableBuffer<T>::set_reserved(size_t minreserved) {
     if (minreserved > reserved_) {
-      UniquePtr ptr(reinterpret_cast<T*>(awkward_malloc((int64_t)(minreserved*sizeof(T)))));
+      UniquePtr ptr(new T[minreserved*sizeof(T)]);
       memcpy(ptr.get(), ptr_.get(), length_ * sizeof(T));
       ptr_ = std::move(ptr);
       reserved_ = minreserved;
@@ -128,7 +128,7 @@ namespace awkward {
   GrowableBuffer<T>::clear() {
     length_ = 0;
     reserved_ = (size_t) options_.initial();
-    ptr_ = UniquePtr(reinterpret_cast<T*>(awkward_malloc(options_.initial()*(int64_t)sizeof(T))));
+    ptr_ = UniquePtr(new T[options_.initial()*(int64_t)sizeof(T)]);
   }
 
   template <typename T>

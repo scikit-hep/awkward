@@ -3,9 +3,7 @@
 #ifndef AWKWARD_GROWABLEBUFFER_H_
 #define AWKWARD_GROWABLEBUFFER_H_
 
-#include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/kernel-dispatch.h"
 
 #include <memory>
 
@@ -30,8 +28,7 @@ namespace awkward {
   /// copies the buffer it owns.
   template <typename T>
   class LIBAWKWARD_EXPORT_SYMBOL GrowableBuffer {
-    using UniquePtrDeleter = decltype(kernel::array_deleter<T>());
-    using UniquePtr = std::unique_ptr<T, UniquePtrDeleter>;
+    using UniquePtr = std::unique_ptr<T[]>;
   public:
     /// @brief Creates an empty GrowableBuffer.
     ///
