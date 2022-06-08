@@ -52,6 +52,15 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  ssize_t
+  RecordArrayBuilder<T, I>::len(const ForthOutputBufferMap& outputs) const {
+    if (!contents_.empty()) {
+      return contents_.front().get()->len(outputs);
+    }
+    return 0;
+  }
+
+  template <typename T, typename I>
   const std::string
   RecordArrayBuilder<T, I>::to_buffers(
     BuffersContainer& container,

@@ -1544,6 +1544,10 @@ make_LayoutBuilder(const py::handle& m, const std::string& name) {
       .def("json_form", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
         return py::str(self.json_form());
       })
+      .def("form", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
+        ::EmptyBuffersContainer container;
+        return py::str(self.to_buffers(container));
+      })
       .def("to_buffers", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
         ::NumpyBuffersContainer container;
         std::string form = self.to_buffers(container);

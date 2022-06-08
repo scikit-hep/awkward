@@ -247,7 +247,7 @@ namespace awkward {
 
     if (json_doc.IsString()) {
       std::string primitive = json_doc.GetString();
-      std::string json_form_key = std::string("node-id")
+      std::string json_form_key = std::string("node")
         + std::to_string(LayoutBuilder<T, I>::next_id());
 
       return std::make_shared<NumpyArrayBuilder<T, I>>(util::Parameters(),
@@ -263,7 +263,7 @@ namespace awkward {
 
     if (json_doc.HasMember("form_key")) {
       if (json_doc["form_key"].IsNull()) {
-        json_form_key = std::string("node-id")
+        json_form_key = std::string("node")
           + std::to_string(LayoutBuilder<T, I>::next_id());
       }
       else if (json_doc["form_key"].IsString()) {
@@ -275,7 +275,7 @@ namespace awkward {
       }
     }
     else {
-      json_form_key = std::string("node-id")
+      json_form_key = std::string("node")
         + std::to_string(LayoutBuilder<T, I>::next_id());
     }
 
@@ -631,7 +631,6 @@ namespace awkward {
       std::cout << i.second.get()->toNumpyArray().get()->tostring();
       std::cout << "\n";
     }
-    // FIXME refactoring std::cout << "array:\n" << snapshot().get()->tostring() << "\n";
   }
 
   template <typename T, typename I>

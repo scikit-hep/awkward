@@ -107,9 +107,7 @@ namespace awkward {
       form_key() const {return form_key_; }
 
     ssize_t
-      len(const ForthOutputBufferMap& outputs) const override {
-        return (ssize_t)contents_size_;
-      }
+      len(const ForthOutputBufferMap& outputs) const override;
 
   private:
     /// @brief Keeps track of a field index.
