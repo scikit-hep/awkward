@@ -23,7 +23,7 @@ from awkward._v2.operations.ak_firsts import firsts
 from awkward._v2.operations.ak_flatten import flatten
 from awkward._v2.operations.ak_from_arrow import from_arrow
 from awkward._v2.operations.ak_from_arrow_schema import from_arrow_schema
-from awkward._v2.operations.ak_from_avro_file import from_avro
+from awkward._v2.operations.ak_from_avro_file import from_avro_file
 from awkward._v2.operations.ak_from_buffers import from_buffers
 from awkward._v2.operations.ak_from_cupy import from_cupy
 from awkward._v2.operations.ak_from_iter import from_iter
