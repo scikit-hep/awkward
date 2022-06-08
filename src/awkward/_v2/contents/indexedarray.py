@@ -871,7 +871,8 @@ class IndexedArray(Content):
 
             elif isinstance(unique, ak._v2.contents.NumpyArray):
                 nextoutindex = ak._v2.index.Index64(
-                    self._nplike.arange(unique.length, dtype=np.int64)
+                    self._nplike.index_nplike.arange(unique.length, dtype=np.int64),
+                    nplike=self.nplike,
                 )
                 out = ak._v2.contents.IndexedOptionArray(
                     nextoutindex,

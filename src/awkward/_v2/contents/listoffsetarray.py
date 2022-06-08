@@ -145,7 +145,8 @@ class ListOffsetArray(Content):
 
             if start_at_zero:
                 offsets = ak._v2.index.Index64(
-                    self._offsets.raw(self._nplike) - self._offsets[0]
+                    self._offsets.raw(self._nplike) - self._offsets[0],
+                    nplike=self.nplike,
                 )
                 content = self._content[self._offsets[0] :]
             else:
@@ -206,7 +207,10 @@ class ListOffsetArray(Content):
         start, stop, step = where.indices(self.length)
         offsets = self._offsets[start : stop + 1]
         if offsets.length == 0:
-            offsets = Index(self._nplike.array([0], dtype=self._offsets.dtype))
+            offsets = Index(
+                self._nplike.index_nplike.array([0], dtype=self._offsets.dtype),
+                nplike=self.nplike,
+            )
         return ListOffsetArray(
             offsets,
             self._content,
@@ -505,7 +509,7 @@ class ListOffsetArray(Content):
 
         elif isinstance(head, ak._v2.index.Index64):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            flathead = self._nplike.asarray(head.data.reshape(-1))
+            flathead = self._nplike.index_nplike.asarray(head.data.reshape(-1))
             lenstarts = self.starts.length
             regular_flathead = ak._v2.index.Index64(flathead)
             if advanced is None or advanced.length == 0:
@@ -1371,7 +1375,7 @@ class ListOffsetArray(Content):
                 )
             )
 
-            tocarryraw = self._nplike.empty(n, dtype=np.intp)
+            tocarryraw = ak._v2.index.Index.empty(n, dtype=np.intp, nplike=self.nplike)
             tocarry = []
 
             for i in range(n):
@@ -1399,7 +1403,7 @@ class ListOffsetArray(Content):
                     starts.data.dtype.type,
                     stops.data.dtype.type,
                 ](
-                    tocarryraw,
+                    tocarryraw.data,
                     toindex.data,
                     fromindex.data,
                     n,
@@ -1669,8 +1673,8 @@ class ListOffsetArray(Content):
             )
         )
 
-        np_nextcarry = self._nplike.empty(nextlen, dtype=np.int64)
-        np_nextparents = self._nplike.empty(nextlen, dtype=np.int64)
+        np_nextcarry = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
+        np_nextparents = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
         maxnextparents = ak._v2.index.Index64.empty(1, self._nplike)
         distincts = ak._v2.index.Index64.empty(outlength * maxcount[0], self._nplike)
         assert (
@@ -1705,9 +1709,9 @@ class ListOffsetArray(Content):
             )
         )
         # A "stable" sort is essential for the subsequent steps.
-        reorder = self._nplike.argsort(np_nextparents, kind="stable")
-        nextcarry = ak._v2.index.Index64(np_nextcarry[reorder])
-        nextparents = ak._v2.index.Index64(np_nextparents[reorder])
+        reorder = self._nplike.index_nplike.argsort(np_nextparents, kind="stable")
+        nextcarry = ak._v2.index.Index64(np_nextcarry[reorder], nplike=self.nplike)
+        nextparents = ak._v2.index.Index64(np_nextparents[reorder], nplike=self.nplike)
         nextstarts = ak._v2.index.Index64.empty(maxnextparents[0] + 1, self._nplike)
         assert nextstarts.nplike is self._nplike and nextparents.nplike is self._nplike
         self._handle_error(
@@ -2162,7 +2166,7 @@ class ListOffsetArray(Content):
         if self.parameter("__array__") == "string":
             strings = self.to_list()
             if any(item in nonfinit_dict for item in strings):
-                numbers = self.nplike.empty(self.starts.length, np.float64)
+                numbers = self.nplike.index_nplike.empty(self.starts.length, np.float64)
                 has_another_string = False
                 for i, val in enumerate(strings):
                     if val in nonfinit_dict:
@@ -2177,7 +2181,10 @@ class ListOffsetArray(Content):
                     union_tags = ak._v2.index.Index8.zeros(content.length, self._nplike)
                     content._nplike.isnan(content._data, union_tags._data)
                     union_index = ak._v2.index.Index64(
-                        self._nplike.arange(content.length, dtype=np.int64)
+                        self._nplike.index_nplike.arange(
+                            content.length, dtype=np.int64
+                        ),
+                        nplike=self.nplike,
                     )
 
                     return ak._v2.contents.unionarray.UnionArray(

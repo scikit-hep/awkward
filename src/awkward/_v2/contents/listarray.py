@@ -156,15 +156,17 @@ class ListArray(Content):
     def toListOffsetArray64(self, start_at_zero=False):
         starts = self._starts.data
         stops = self._stops.data
-        if self._nplike.array_equal(starts[1:], stops[:-1]):
-            offsets = self._nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
+        if self._nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
+            offsets = self._nplike.index_nplike.empty(
+                starts.shape[0] + 1, dtype=starts.dtype
+            )
             if offsets.shape[0] == 1:
                 offsets[0] = 0
             else:
                 offsets[:-1] = starts
                 offsets[-1] = stops[-1]
             return ListOffsetArray(
-                ak._v2.index.Index(offsets),
+                ak._v2.index.Index(offsets, nplike=self.nplike),
                 self._content,
                 self._identifier,
                 self._parameters,
@@ -716,8 +718,8 @@ class ListArray(Content):
             lenstarts = self._starts.length
 
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            flathead = self._nplike.asarray(head.data.reshape(-1))
-            regular_flathead = ak._v2.index.Index64(flathead)
+            flathead = self._nplike.index_nplike.asarray(head.data.reshape(-1))
+            regular_flathead = ak._v2.index.Index64(flathead, nplike=self.nplike)
             if advanced is None or advanced.length == 0:
                 nextcarry = ak._v2.index.Index64.empty(
                     lenstarts * flathead.shape[0], self._nplike

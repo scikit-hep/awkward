@@ -98,9 +98,9 @@ def _impl(array, counts, axis, highlevel, behavior):
         if not issubclass(counts.dtype.type, np.integer):
             raise ak._v2._util.error(ValueError("counts must be integers"))
 
-        current_offsets = [nplike.empty(len(counts) + 1, np.int64)]
+        current_offsets = [nplike.index_nplike.empty(len(counts) + 1, np.int64)]
         current_offsets[0][0] = 0
-        nplike.cumsum(counts, out=current_offsets[0][1:])
+        nplike.index_nplike.cumsum(counts, out=current_offsets[0][1:])
 
     def doit(layout):
         if isinstance(counts, (numbers.Integral, np.integer)):
@@ -112,8 +112,10 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         else:
             position = (
-                nplike.searchsorted(
-                    current_offsets[0], nplike.array([len(layout)]), side="right"
+                nplike.index_nplike.searchsorted(
+                    current_offsets[0],
+                    nplike.index_nplike.array([len(layout)]),
+                    side="right",
                 )[0]
                 - 1
             )
@@ -132,7 +134,9 @@ def _impl(array, counts, axis, highlevel, behavior):
 
             out = ak._v2.contents.ListOffsetArray(ak._v2.index.Index64(offsets), layout)
             if not isinstance(mask, (bool, np.bool_)):
-                index = ak._v2.index.Index8(nplike.asarray(mask).astype(np.int8))
+                index = ak._v2.index.Index8(
+                    nplike.asarray(mask).astype(np.int8), nplike=nplike
+                )
                 out = ak._v2.contents.ByteMaskedArray(index, out, valid_when=False)
 
         return out
@@ -152,22 +156,27 @@ def _impl(array, counts, axis, highlevel, behavior):
             if posaxis == depth and layout.is_ListType:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.toListOffsetArray64(True)
-                outeroffsets = nplike.asarray(listoffsetarray.offsets)
+                outeroffsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
 
                 content = doit(listoffsetarray.content[: outeroffsets[-1]])
                 if isinstance(content, ak._v2.contents.ByteMaskedArray):
-                    inneroffsets = nplike.asarray(content.content.offsets)
+                    inneroffsets = nplike.index_nplike.asarray(content.content.offsets)
                 elif isinstance(content, ak._v2.contents.RegularArray):
-                    inneroffsets = nplike.asarray(
+                    inneroffsets = nplike.index_nplike.asarray(
                         content.toListOffsetArray64(True).offsets
                     )
                 else:
-                    inneroffsets = nplike.asarray(content.offsets)
+                    inneroffsets = nplike.index_nplike.asarray(content.offsets)
 
                 positions = (
-                    nplike.searchsorted(inneroffsets, outeroffsets, side="right") - 1
+                    nplike.index_nplike.searchsorted(
+                        inneroffsets, outeroffsets, side="right"
+                    )
+                    - 1
                 )
-                if not nplike.array_equal(inneroffsets[positions], outeroffsets):
+                if not nplike.index_nplike.array_equal(
+                    inneroffsets[positions], outeroffsets
+                ):
                     raise ak._v2._util.error(
                         ValueError(
                             "structure imposed by 'counts' does not fit in the array or partition "

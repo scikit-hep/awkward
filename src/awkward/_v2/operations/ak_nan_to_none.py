@@ -36,7 +36,9 @@ def _impl(array, highlevel, behavior):
             layout.dtype.type, np.floating
         ):
             return ak._v2.contents.ByteMaskedArray(
-                ak._v2.index.Index8(layout.nplike.isnan(layout.data)),
+                ak._v2.index.Index8(
+                    layout.nplike.isnan(layout.data), nplike=layout.nplike
+                ),
                 layout,
                 valid_when=False,
             )

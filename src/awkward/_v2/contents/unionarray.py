@@ -665,7 +665,9 @@ class UnionArray(Content):
 
         else:
             has_offsets = False
-            offsetsraws = self._nplike.empty(len(self._contents), dtype=np.intp)
+            offsetsraws = self._nplike.index_nplike.empty(
+                len(self._contents), dtype=np.intp
+            )
             contents = []
 
             for i in range(len(self._contents)):
@@ -1138,7 +1140,9 @@ class UnionArray(Content):
             if self._nplike.known_shape and self.index.length < self.tags.length:
                 return f'at {path} ("{type(self)}"): len(index) < len(tags)'
 
-            lencontents = self._nplike.empty(len(self.contents), dtype=np.int64)
+            lencontents = self._nplike.index_nplike.empty(
+                len(self.contents), dtype=np.int64
+            )
             if self._nplike.known_shape:
                 for i in range(len(self.contents)):
                     lencontents[i] = self.contents[i].length
@@ -1373,19 +1377,21 @@ class UnionArray(Content):
 
         for tag in range(len(self._contents)):
             is_tag = tags == tag
-            num_tag = self._nplike.count_nonzero(is_tag)
+            num_tag = self._nplike.index_nplike.count_nonzero(is_tag)
 
             if len(contents[tag]) > num_tag:
                 if original_index is index:
                     index = index.copy()
-                index[is_tag] = self._nplike.arange(num_tag, dtype=index.dtype)
+                index[is_tag] = self._nplike.index_nplike.arange(
+                    num_tag, dtype=index.dtype
+                )
                 contents[tag] = self.project(tag)
 
             contents[tag] = contents[tag].packed()
 
         return UnionArray(
-            ak._v2.index.Index8(tags),
-            ak._v2.index.Index(index),
+            ak._v2.index.Index8(tags, nplike=self.nplike),
+            ak._v2.index.Index(index, nplike=self.nplike),
             contents,
             self._identifier,
             self._parameters,

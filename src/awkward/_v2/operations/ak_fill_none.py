@@ -92,7 +92,9 @@ def _impl(array, value, axis, highlevel, behavior):
         if isinstance(valuelayout, ak._v2.record.Record):
             valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
         elif len(valuelayout) == 0:
-            offsets = ak._v2.index.Index64(nplike.array([0, 0], dtype=np.int64))
+            offsets = ak._v2.index.Index64(
+                nplike.array([0, 0], dtype=np.int64), nplike=nplike
+            )
             valuelayout = ak._v2.contents.ListOffsetArray(offsets, valuelayout)
         else:
             valuelayout = ak._v2.contents.RegularArray(valuelayout, len(valuelayout), 1)

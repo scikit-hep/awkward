@@ -38,11 +38,13 @@ def _impl(array, highlevel, behavior):
         nplike = ak.nplike.of(layout)
 
         if layout.is_OptionType:
-            nulls = nplike.asarray(layout.mask_as_bool(valid_when=False)).view(np.bool_)
-            offsets = nplike.ones(len(layout) + 1, dtype=np.int64)
+            nulls = nplike.index_nplike.asarray(
+                layout.mask_as_bool(valid_when=False)
+            ).view(np.bool_)
+            offsets = nplike.index_nplike.ones(len(layout) + 1, dtype=np.int64)
             offsets[0] = 0
             offsets[1:][nulls] = 0
-            nplike.cumsum(offsets, out=offsets)
+            nplike.index_nplike.cumsum(offsets, out=offsets)
             return ak._v2.contents.ListOffsetArray(
                 ak._v2.index.Index64(offsets), layout.project()
             )
