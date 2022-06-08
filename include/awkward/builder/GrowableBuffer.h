@@ -3,6 +3,7 @@
 #ifndef AWKWARD_GROWABLEBUFFER_H_
 #define AWKWARD_GROWABLEBUFFER_H_
 
+#include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 #include <memory>

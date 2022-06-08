@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/util.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
