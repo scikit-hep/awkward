@@ -24,7 +24,7 @@ namespace awkward {
       actual = (size_t)minreserve;
     }
     return GrowableBuffer(options,
-      UniquePtr(new T[actual*sizeof(T)]),
+      std::unique_ptr<T[]>(new T[actual]()),
       0, actual);
   }
 
@@ -37,7 +37,7 @@ namespace awkward {
     if (actual < length) {
       actual = length;
     }
-    UniquePtr ptr(new T[actual*sizeof(T)]);
+    std::unique_ptr<T[]> ptr(new T[actual]());
     T* rawptr = ptr.get();
     for (size_t i = 0;  i < length;  i++) {
       rawptr[i] = value;
@@ -53,7 +53,7 @@ namespace awkward {
     if (actual < length) {
       actual = length;
     }
-    UniquePtr ptr(new T[actual*sizeof(T)]);
+    std::unique_ptr<T[]> ptr(new T[actual]());
     T* rawptr = ptr.get();
     for (size_t i = 0;  i < length;  i++) {
       rawptr[i] = (T)i;
@@ -63,7 +63,7 @@ namespace awkward {
 
   template <typename T>
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options,
-                                    UniquePtr ptr,
+                                    std::unique_ptr<T[]> ptr,
                                     size_t length,
                                     size_t reserved)
       : options_(options)
@@ -74,18 +74,18 @@ namespace awkward {
   template <typename T>
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options)
       : GrowableBuffer(options,
-                       UniquePtr(new T[options.initial()*(int64_t)sizeof(T)]),
+                       std::unique_ptr<T[]>(new T[options.initial()]()),
                        0,
                        (size_t) options.initial()) { }
 
   template <typename T>
-  const typename GrowableBuffer<T>::UniquePtr&
+  const std::unique_ptr<T[]>&
   GrowableBuffer<T>::ptr() const {
     return ptr_;
   }
 
   template <typename T>
-  typename GrowableBuffer<T>::UniquePtr
+  std::unique_ptr<T[]>
   GrowableBuffer<T>::get_ptr() {
     return std::move(ptr_);
   }
@@ -115,7 +115,7 @@ namespace awkward {
   void
   GrowableBuffer<T>::set_reserved(size_t minreserved) {
     if (minreserved > reserved_) {
-      UniquePtr ptr(new T[minreserved*sizeof(T)]);
+      std::unique_ptr<T[]> ptr(new T[minreserved]());
       memcpy(ptr.get(), ptr_.get(), length_ * sizeof(T));
       ptr_ = std::move(ptr);
       reserved_ = minreserved;
@@ -127,7 +127,7 @@ namespace awkward {
   GrowableBuffer<T>::clear() {
     length_ = 0;
     reserved_ = (size_t) options_.initial();
-    ptr_ = UniquePtr(new T[options_.initial()*(int64_t)sizeof(T)]);
+    ptr_ = std::unique_ptr<T[]>(new T[options_.initial()]());
   }
 
   template <typename T>
