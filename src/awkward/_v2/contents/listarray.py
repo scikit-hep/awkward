@@ -166,7 +166,7 @@ class ListArray(Content):
                 offsets[:-1] = starts
                 offsets[-1] = stops[-1]
             return ListOffsetArray(
-                ak._v2.index.Index(offsets),
+                ak._v2.index.Index(offsets, nplike=self.nplike),
                 self._content,
                 self._identifier,
                 self._parameters,

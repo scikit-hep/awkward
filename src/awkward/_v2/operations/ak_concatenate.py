@@ -145,7 +145,9 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         nextinputs.append(
                             ak._v2.contents.ListOffsetArray(
                                 ak._v2.index.Index64(
-                                    nplike.arange(length + 1, dtype=np.int64),
+                                    nplike.index_nplike.arange(
+                                        length + 1, dtype=np.int64
+                                    ),
                                     nplike=nplike,
                                 ),
                                 ak._v2.contents.NumpyArray(
@@ -160,7 +162,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
                 for x in nextinputs:
                     o, f = x._offsets_and_flattened(1, 0)
-                    o = nplike.asarray(o)
+                    o = nplike.index_nplike.asarray(o)
                     c = o[1:] - o[:-1]
                     nplike.add(counts, c, out=counts)
                     all_counts.append(c)
@@ -172,7 +174,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 offsets[0] = 0
                 nplike.index_nplike.cumsum(counts, out=offsets[1:])
 
-                offsets = ak._v2.index.Index64(offsets)
+                offsets = ak._v2.index.Index64(offsets, nplike=nplike)
 
                 inner = ak._v2.contents.UnionArray(
                     ak._v2.index.Index8.empty(len(offsets) - 1, nplike),

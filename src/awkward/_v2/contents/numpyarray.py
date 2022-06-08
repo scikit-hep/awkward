@@ -190,8 +190,8 @@ class NumpyArray(Content):
         index[is_nan] = 2
 
         out = ak._v2.contents.unionarray.UnionArray(
-            tags=ak._v2.index.Index8(tags),
-            index=ak._v2.index.Index64(index),
+            tags=ak._v2.index.Index8(tags, nplike=self.nplike),
+            index=ak._v2.index.Index64(index, nplike=self.nplike),
             contents=[
                 out,
                 ak._v2.operations.from_iter(
@@ -338,7 +338,10 @@ class NumpyArray(Content):
             if advanced is None:
                 where = (slice(None), head.data) + tail
             else:
-                where = (self._nplike.asarray(advanced.data), head.data) + tail
+                where = (
+                    self._nplike.index_nplike.asarray(advanced.data),
+                    head.data,
+                ) + tail
 
             try:
                 out = self._data[where]
@@ -559,7 +562,7 @@ class NumpyArray(Content):
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak._v2.index.Index64.zeros(1, self._nplike)
 
-        tmp = self._nplike.empty(length, self.dtype)
+        tmp = self._nplike.index_nplike.empty(length, self.dtype)
         self._handle_error(
             self._nplike[  # noqa: E231
                 "awkward_NumpyArray_fill",

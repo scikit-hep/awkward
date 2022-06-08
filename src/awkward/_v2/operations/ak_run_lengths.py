@@ -107,7 +107,7 @@ def _impl(array, highlevel, behavior):
                 diffs = nplike.asarray(diffs)
             if offsets is not None:
                 diffs[offsets[1:-1] - 1] = True
-            positions = nplike.nonzero(diffs)[0]
+            positions = nplike.index_nplike.nonzero(diffs)[0]
             full_positions = nplike.index_nplike.empty(len(positions) + 2, np.int64)
             full_positions[0] = 0
             full_positions[-1] = len(data)
@@ -158,7 +158,7 @@ def _impl(array, highlevel, behavior):
                 or layout.content.parameter("__array__") == "bytestring"
             ):
                 listoffsetarray = layout.toListOffsetArray64(False)
-                offsets = nplike.asarray(listoffsetarray.offsets)
+                offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
                 content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
                 if content.is_IndexedType:
@@ -173,7 +173,7 @@ def _impl(array, highlevel, behavior):
                 )
 
             listoffsetarray = layout.toListOffsetArray64(False)
-            offsets = nplike.asarray(listoffsetarray.offsets)
+            offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
             content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
             if content.is_IndexedType:

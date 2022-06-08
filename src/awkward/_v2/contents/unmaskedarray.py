@@ -93,7 +93,9 @@ class UnmaskedArray(Content):
 
     def toByteMaskedArray(self):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-            ak._v2.index.Index8(self.mask_as_bool(valid_when=True).view(np.int8)),
+            ak._v2.index.Index8(
+                self.mask_as_bool(valid_when=True).view(np.int8), nplike=self.nplike
+            ),
             self._content,
             True,
             self._identifier,

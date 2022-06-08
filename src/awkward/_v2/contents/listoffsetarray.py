@@ -145,7 +145,8 @@ class ListOffsetArray(Content):
 
             if start_at_zero:
                 offsets = ak._v2.index.Index64(
-                    self._offsets.raw(self._nplike) - self._offsets[0]
+                    self._offsets.raw(self._nplike) - self._offsets[0],
+                    nplike=self.nplike,
                 )
                 content = self._content[self._offsets[0] :]
             else:
@@ -508,7 +509,7 @@ class ListOffsetArray(Content):
 
         elif isinstance(head, ak._v2.index.Index64):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            flathead = self._nplike.asarray(head.data.reshape(-1))
+            flathead = self._nplike.index_nplike.asarray(head.data.reshape(-1))
             lenstarts = self.starts.length
             regular_flathead = ak._v2.index.Index64(flathead)
             if advanced is None or advanced.length == 0:
@@ -2180,7 +2181,9 @@ class ListOffsetArray(Content):
                     union_tags = ak._v2.index.Index8.zeros(content.length, self._nplike)
                     content._nplike.isnan(content._data, union_tags._data)
                     union_index = ak._v2.index.Index64(
-                        self._nplike.arange(content.length, dtype=np.int64),
+                        self._nplike.index_nplike.arange(
+                            content.length, dtype=np.int64
+                        ),
                         nplike=self.nplike,
                     )
 

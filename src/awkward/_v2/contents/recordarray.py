@@ -359,7 +359,7 @@ class RecordArray(Content):
             if self._nplike.index_nplike.any(where >= self._length, prefer=False):
                 raise ak._v2._util.indexerror(self, where)
 
-            nextindex = ak._v2.index.Index64(where)
+            nextindex = ak._v2.index.Index64(where, nplike=self.nplike)
             return ak._v2.contents.indexedarray.IndexedArray(
                 nextindex,
                 self,

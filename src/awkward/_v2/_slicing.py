@@ -255,14 +255,14 @@ def prepare_tuple_nested(item):
         ),
     ):
         is_valid = item.mask_as_bool(valid_when=True)
-        positions_where_valid = item.nplike.nonzero(is_valid)[0]
+        positions_where_valid = item.nplike.index_nplike.nonzero(is_valid)[0]
 
         nextcontent = prepare_tuple_nested(item.content)._carry(
             ak._v2.index.Index64(positions_where_valid), False
         )
 
-        nextindex = item.nplike.full(is_valid.shape[0], -1, np.int64)
-        nextindex[positions_where_valid] = item.nplike.arange(
+        nextindex = item.nplike.index_nplike.full(is_valid.shape[0], -1, np.int64)
+        nextindex[positions_where_valid] = item.nplike.index_nplike.arange(
             positions_where_valid.shape[0], dtype=np.int64
         )
 
@@ -298,9 +298,13 @@ def prepare_tuple_bool_to_int(item):
             localindex = item.local_index(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
-            cumsum = item.nplike.empty(item.content.data.shape[0] + 1, np.int64)
+            cumsum = item.nplike.index_nplike.empty(
+                item.content.data.shape[0] + 1, np.int64
+            )
             cumsum[0] = 0
-            cumsum[1:] = item.nplike.cumsum(item.content.data)
+            cumsum[1:] = item.nplike.index_nplike.asarray(
+                item.nplike.cumsum(item.content.data)
+            )
             nextoffsets = cumsum[item.offsets]
 
         else:
@@ -321,9 +325,13 @@ def prepare_tuple_bool_to_int(item):
         and issubclass(item.content.content.dtype.type, (bool, np.bool_))
     ):
         if item.nplike.known_data or item.nplike.known_shape:
+            if isinstance(item.nplike, ak.nplike.Jax):
+                raise ak._v2._util.error(
+                    "This slice is not supported for JAX differentiation."
+                )
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
-            if item.nplike.any(item.content.index.data < -1):
+            if item.nplike.index_nplike.any(item.content.index.data < -1):
                 safeindex = item.content.index.data.copy()
                 safeindex[isnegative] = -1
             else:
@@ -351,8 +359,8 @@ def prepare_tuple_bool_to_int(item):
             nextoffsets = cumsum[item.offsets]
 
             # outindex fits into the lists; non-missing are sequential
-            outindex = item.nplike.full(nextoffsets[-1], -1, np.int64)
-            outindex[~isnegative[expanded]] = item.nplike.arange(
+            outindex = item.nplike.index_nplike.full(nextoffsets[-1], -1, np.int64)
+            outindex[~isnegative[expanded]] = item.nplike.index_nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
             )
 
@@ -386,9 +394,13 @@ def prepare_tuple_bool_to_int(item):
             item.content.dtype.type, (bool, np.bool_)
         ):
             if item.nplike.known_data or item.nplike.known_shape:
+                if isinstance(item.nplike, ak.nplike.Jax):
+                    raise ak._v2._util.error(
+                        "This slice is not supported for JAX differentiation."
+                    )
                 # missing values as any integer other than -1 are extremely rare
                 isnegative = item.index.data < 0
-                if item.nplike.any(item.index.data < -1):
+                if item.nplike.index_nplike.any(item.index.data < -1):
                     safeindex = item.index.data.copy()
                     safeindex[isnegative] = -1
                 else:

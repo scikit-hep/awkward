@@ -226,13 +226,13 @@ class RegularArray(Content):
             copied = True
 
         negative = where < 0
-        if self._nplike.any(negative, prefer=False):
+        if self._nplike.index_nplike.any(negative, prefer=False):
             if not copied:
                 where = where.copy()
                 copied = True
             where[negative] += self._length
 
-        if self._nplike.any(where >= self._length, prefer=False):
+        if self._nplike.index_nplike.any(where >= self._length, prefer=False):
             raise ak._v2._util.indexerror(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(
@@ -459,7 +459,7 @@ class RegularArray(Content):
         elif isinstance(head, ak._v2.index.Index64):
             head = head._to_nplike(self.nplike)
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            flathead = self._nplike.asarray(head.data.reshape(-1))
+            flathead = self._nplike.index_nplike.asarray(head.data.reshape(-1))
 
             regular_flathead = ak._v2.index.Index64.empty(
                 flathead.shape[0], self._nplike

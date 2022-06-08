@@ -325,7 +325,7 @@ class Content:
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        index = ak._v2.index.Index64(head.index)
+        index = ak._v2.index.Index64(head.index, nplike=self.nplike)
         indexlength = index.length
         index = index._to_nplike(self.nplike)
         outindex = ak._v2.index.Index64.empty(index.length * length, self._nplike)
@@ -361,7 +361,7 @@ class Content:
         head = head._to_nplike(self._nplike)
         jagged = head.content.toListOffsetArray64()
 
-        index = ak._v2.index.Index64(head._index)
+        index = ak._v2.index.Index64(head._index, nplike=self.nplike)
         content = that._getitem_at(0)
         if self._nplike.known_shape and content.length < index.length:
             raise ak._v2._util.indexerror(
@@ -1243,7 +1243,8 @@ class Content:
     def pad_none_axis0(self, target, clip):
         if not clip and target < self.length:
             index = ak._v2.index.Index64(
-                self._nplike.arange(self.length, dtype=np.int64), nplike=self.nplike
+                self._nplike.index_nplike.arange(self.length, dtype=np.int64),
+                nplike=self.nplike,
             )
 
         else:

@@ -1377,7 +1377,7 @@ class UnionArray(Content):
 
         for tag in range(len(self._contents)):
             is_tag = tags == tag
-            num_tag = self._nplike.count_nonzero(is_tag)
+            num_tag = self._nplike.index_nplike.count_nonzero(is_tag)
 
             if len(contents[tag]) > num_tag:
                 if original_index is index:
