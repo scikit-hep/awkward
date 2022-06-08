@@ -206,7 +206,10 @@ class ListOffsetArray(Content):
         start, stop, step = where.indices(self.length)
         offsets = self._offsets[start : stop + 1]
         if offsets.length == 0:
-            offsets = Index(self._nplike.array([0], dtype=self._offsets.dtype))
+            offsets = Index(
+                self._nplike.index_nplike.array([0], dtype=self._offsets.dtype),
+                nplike=self.nplike,
+            )
         return ListOffsetArray(
             offsets,
             self._content,

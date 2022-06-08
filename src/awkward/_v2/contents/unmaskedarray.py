@@ -102,7 +102,7 @@ class UnmaskedArray(Content):
         )
 
     def toIndexedOptionArray64(self):
-        arange = self._nplike.arange(self._content.length, dtype=np.int64)
+        arange = self._nplike.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             ak._v2.index.Index64(arange, nplike=self.nplike),
             self._content,

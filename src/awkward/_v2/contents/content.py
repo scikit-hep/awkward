@@ -551,12 +551,14 @@ class Content:
                 carry = ak._v2.index.Index64(where.data.reshape(-1))
                 allow_lazy = True
             elif issubclass(where.dtype.type, np.integer):
-                carry = ak._v2.index.Index64(where.data.astype(np.int64).reshape(-1))
+                carry = ak._v2.index.Index64(
+                    where.data.astype(np.int64).reshape(-1), nplike=self.nplike
+                )
                 allow_lazy = "copied"  # True, but also can be modified in-place
             elif issubclass(where.dtype.type, (np.bool_, bool)):
                 if len(where.data.shape) == 1:
                     where = self._nplike.nonzero(where.data)[0]
-                    carry = ak._v2.index.Index64(where)
+                    carry = ak._v2.index.Index64(where, nplike=self.nplike)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     wheres = self._nplike.nonzero(where.data)

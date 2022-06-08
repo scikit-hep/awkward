@@ -353,10 +353,10 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._nplike.any(negative, prefer=False):
+            if self._nplike.index_nplike.any(negative, prefer=False):
                 where[negative] += self._length
 
-            if self._nplike.any(where >= self._length, prefer=False):
+            if self._nplike.index_nplike.any(where >= self._length, prefer=False):
                 raise ak._v2._util.indexerror(self, where)
 
             nextindex = ak._v2.index.Index64(where)
@@ -444,7 +444,7 @@ class RecordArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            npsingle = self._nplike.full((1,), self.length, np.int64)
+            npsingle = self._nplike.index_nplike.full((1,), self.length, np.int64)
             single = ak._v2.index.Index64(npsingle, nplike=self._nplike)
             singleton = ak._v2.contents.numpyarray.NumpyArray(
                 single, None, None, self._nplike
@@ -916,7 +916,7 @@ class RecordArray(Content):
         for n, x in zip(self.fields, contents):
             if isinstance(x, self._nplike.ma.MaskedArray):
                 if mask is None:
-                    mask = self._nplike.ma.zeros(
+                    mask = self._nplike.index_nplike.ma.zeros(
                         self.length, [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
