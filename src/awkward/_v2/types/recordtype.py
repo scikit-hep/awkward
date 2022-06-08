@@ -148,7 +148,6 @@ class RecordType(Type):
         return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
-
         if (
             self._typestr != "override"
             and self._parameters is not None

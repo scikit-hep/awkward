@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal, _parameters_update
+from awkward._v2.forms.form import Form, _parameters_equal
 
 
 class IndexedForm(Form):
@@ -60,20 +60,11 @@ class IndexedForm(Form):
 
     def _type(self, typestrs):
         out = self._content._type(typestrs)
-
-        if self._parameters is not None:
-            if out._parameters is None:
-                out._parameters = self._parameters
-            else:
-                out._parameters = dict(out._parameters)
-                _parameters_update(out._parameters, self._parameters)
-
-            if self._parameters.get("__array__") == "categorical":
-                if out._parameters is self._parameters:
-                    out._parameters = dict(out._parameters)
-                del out._parameters["__array__"]
-                out._parameters["__categorical__"] = True
-
+        if (
+            self._parameters is not None
+            and self._parameters.get("__array__") == "categorical"
+        ):
+            out._parameters["__categorical__"] = True
         return out
 
     def __eq__(self, other):
