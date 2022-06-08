@@ -105,14 +105,14 @@ def all_same_offsets(nplike, inputs):
         if isinstance(x, ListOffsetArray):
             if offsets is None:
                 offsets = x.offsets.raw(nplike)
-            elif not nplike.array_equal(offsets, x.offsets.raw(nplike)):
+            elif not nplike.index_nplike.array_equal(offsets, x.offsets.raw(nplike)):
                 return False
 
         elif isinstance(x, ListArray):
             starts = x.starts.raw(nplike)
             stops = x.stops.raw(nplike)
 
-            if not nplike.array_equal(starts[1:], stops[:-1]):
+            if not nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
                 return False
 
             elif offsets is None:
@@ -125,7 +125,7 @@ def all_same_offsets(nplike, inputs):
                     offsets[:-1] = starts
                     offsets[-1] = stops[-1]
 
-            elif not nplike.array_equal(offsets[:-1], starts) or (
+            elif not nplike.index_nplike.array_equal(offsets[:-1], starts) or (
                 stops.shape[0] != 0 and offsets[-1] != stops[-1]
             ):
                 return False
@@ -316,7 +316,7 @@ def apply_step(
                             )
                 assert length is not None
 
-                combos = nplike.stack(tagslist, axis=-1)
+                combos = nplike.index_nplike.stack(tagslist, axis=-1)
 
                 all_combos = nplike.array(
                     list(itertools.product(*[range(x) for x in numtags])),
@@ -383,16 +383,19 @@ def apply_step(
                         if mask is None:
                             mask = m
                         else:
-                            mask = nplike.bitwise_or(mask, m, out=mask)
+                            mask = nplike.index_nplike.bitwise_or(mask, m, out=mask)
 
                 nextmask = Index8(mask.view(np.int8))
-                index = nplike.full(mask.shape[0], -1, dtype=np.int64)
-                index[~mask] = nplike.arange(
-                    mask.shape[0] - nplike.count_nonzero(mask), dtype=np.int64
+                index = nplike.index_nplike.full(mask.shape[0], -1, dtype=np.int64)
+                index[~mask] = nplike.index_nplike.arange(
+                    mask.shape[0] - nplike.index_nplike.count_nonzero(mask),
+                    dtype=np.int64,
                 )
                 index = Index64(index)
                 if any(not isinstance(x, optiontypes) for x in inputs):
-                    nextindex = nplike.arange(mask.shape[0], dtype=np.int64)
+                    nextindex = nplike.index_nplike.arange(
+                        mask.shape[0], dtype=np.int64
+                    )
                     nextindex[mask] = -1
                     nextindex = Index64(nextindex)
 
@@ -412,7 +415,9 @@ def apply_step(
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, optiontypes):
-                        index = Index64(nplike.empty((x.length,), np.int64))
+                        index = Index64(
+                            nplike.index_nplike.empty((x.length,), np.int64)
+                        )
                         nextinputs.append(x.content)
                     else:
                         nextinputs.append(x)
@@ -447,8 +452,11 @@ def apply_step(
                         if isinstance(x, RegularArray):
                             if maxsize > 1 and x.size == 1:
                                 tmpindex = Index64(
-                                    nplike.repeat(
-                                        nplike.arange(x.length, dtype=np.int64), maxsize
+                                    nplike.index_nplike.repeat(
+                                        nplike.index_nplike.arange(
+                                            x.length, dtype=np.int64
+                                        ),
+                                        maxsize,
                                     ),
                                     nplike=nplike,
                                 )
@@ -512,12 +520,18 @@ def apply_step(
                 for x in inputs:
                     if isinstance(x, ListOffsetArray):
                         offsets = Index64(
-                            nplike.empty((x.offsets.data.shape[0],), np.int64)
+                            nplike.index_nplike.empty(
+                                (x.offsets.data.shape[0],), np.int64
+                            ),
+                            nplike=nplike,
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, ListArray):
                         offsets = Index64(
-                            nplike.empty((x.starts.data.shape[0] + 1,), np.int64)
+                            nplike.index_nplike.empty(
+                                (x.starts.data.shape[0] + 1,), np.int64
+                            ),
+                            nplike=nplike,
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, RegularArray):
@@ -557,7 +571,7 @@ def apply_step(
                         if starts.length == 0 or stops.length == 0:
                             nextinputs.append(x.content[:0])
                         else:
-                            lencontent = nplike.max(stops)
+                            lencontent = nplike.index_nplike.max(stops)
                             nextinputs.append(x.content[:lencontent])
 
                     else:
