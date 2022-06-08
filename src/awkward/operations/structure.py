@@ -611,6 +611,7 @@ def zip(
             layouts.append(layout)
 
     else:
+        arrays = list(arrays)
         behavior = ak._util.behaviorof(*arrays, behavior=behavior)
         recordlookup = None
         layouts = []
@@ -908,6 +909,8 @@ def with_name(array, name, highlevel=True, behavior=None):
     def getfunction2(layout):
         if isinstance(layout, ak._util.uniontypes):
             return lambda: layout.simplify(merge=True, mergebool=False)
+        elif isinstance(layout, ak.layout.RecordArray):
+            return lambda: layout
         else:
             return None
 
@@ -953,6 +956,10 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
             "or as a new integer slot by passing None for 'where'"
             + ak._util.exception_suffix(__file__)
         )
+
+    if not isinstance(where, str) and isinstance(where, Iterable):
+        where = list(where)
+
     if (
         not isinstance(where, str)
         and isinstance(where, Iterable)
@@ -1321,6 +1328,10 @@ def broadcast_arrays(*arrays, **kwargs):
             right-broadcasting, as described below.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
+        depth_limit (None or int, default is None): If None, attempt to fully
+            broadcast the `arrays` to all levels. If an int, limit the number
+            of dimensions that get broadcasted. The minimum value is `1`,
+            for no broadcasting.
 
     Like NumPy's
     [broadcast_arrays](https://docs.scipy.org/doc/numpy/reference/generated/numpy.broadcast_arrays.html)
@@ -1413,12 +1424,40 @@ def broadcast_arrays(*arrays, **kwargs):
     for all elements). This distinction is can be accessed through the
     #ak.Array.type, but it is lost when converting an array into JSON or
     Python objects.
+
+    If arrays have the same depth but different lengths of nested
+    lists, attempting to broadcast them together is a broadcasting error.
+
+        >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
+        >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
+        >>> ak.broadcast_arrays(one, two)
+        ValueError: in ListArray64, cannot broadcast nested list
+
+    For this, one can set the `depth_limit` to prevent the operation from
+    attempting to broadcast what can't be broadcasted.
+
+        >>> this, that = ak.broadcast_arrays(one, two, depth_limit=1)
+        >>> ak.to_list(this)
+        [[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]]
+        >>> ak.to_list(that)
+        [[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]]
     """
-    (highlevel, left_broadcast, right_broadcast) = ak._util.extra(
+    (highlevel, depth_limit, left_broadcast, right_broadcast) = ak._util.extra(
         (),
         kwargs,
-        [("highlevel", True), ("left_broadcast", True), ("right_broadcast", True)],
+        [
+            ("highlevel", True),
+            ("depth_limit", None),
+            ("left_broadcast", True),
+            ("right_broadcast", True),
+        ],
     )
+
+    if depth_limit is not None and depth_limit <= 0:
+        raise ValueError(
+            "depth_limit must be None or at least 1"
+            + ak._util.exception_suffix(__file__)
+        )
 
     inputs = []
     for x in arrays:
@@ -1429,8 +1468,11 @@ def broadcast_arrays(*arrays, **kwargs):
             y = ak.layout.NumpyArray(ak.nplike.of(*arrays).array([y]))
         inputs.append(y)
 
-    def getfunction(inputs):
-        if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
+    def getfunction(inputs, depth):
+        if depth == depth_limit or (
+            depth_limit is None
+            and all(isinstance(x, ak.layout.NumpyArray) for x in inputs)
+        ):
             return lambda: tuple(inputs)
         else:
             return None
@@ -1442,7 +1484,6 @@ def broadcast_arrays(*arrays, **kwargs):
         behavior,
         left_broadcast=left_broadcast,
         right_broadcast=right_broadcast,
-        pass_depth=False,
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
@@ -3289,6 +3330,7 @@ def cartesian(
             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
                 is_partitioned = True
     else:
+        arrays = list(arrays)
         behavior = ak._util.behaviorof(*arrays, behavior=behavior)
         nplike = ak.nplike.of(*arrays)
         new_arrays = []
@@ -3611,6 +3653,7 @@ def argcartesian(
                 for n, x in arrays.items()
             }
         else:
+            arrays = list(arrays)
             behavior = ak._util.behaviorof(*arrays, behavior=behavior)
             layouts = [
                 ak.operations.convert.to_layout(

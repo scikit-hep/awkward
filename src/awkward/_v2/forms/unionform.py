@@ -19,28 +19,36 @@ class UnionForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(tags):
-            raise TypeError(
-                "{} 'tags' must be of type str, not {}".format(
-                    type(self).__name__, repr(tags)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'tags' must be of type str, not {}".format(
+                        type(self).__name__, repr(tags)
+                    )
                 )
             )
         if not ak._util.isstr(index):
-            raise TypeError(
-                "{} 'index' must be of type str, not {}".format(
-                    type(self).__name__, repr(index)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'index' must be of type str, not {}".format(
+                        type(self).__name__, repr(index)
+                    )
                 )
             )
         if not isinstance(contents, Iterable):
-            raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'contents' must be iterable, not {}".format(
+                        type(self).__name__, repr(contents)
+                    )
                 )
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} all 'contents' must be Form subclasses, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
                     )
                 )
 
@@ -164,7 +172,7 @@ class UnionForm(Form):
         )
 
     def simplify_uniontype(self, merge=True, mergebool=False):
-        raise NotImplementedError
+        raise ak._v2._util.error(NotImplementedError)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:
@@ -227,8 +235,43 @@ class UnionForm(Form):
         return list(set.intersection(*[set(x) for x in fieldslists]))
 
     @property
+    def is_tuple(self):
+        return all(x.is_tuple for x in self._contents) and (len(self._contents) > 0)
+
+    @property
     def dimension_optiontype(self):
         for content in self._contents:
             if content.dimension_optiontype:
                 return True
         return False
+
+    def _columns(self, path, output, list_indicator):
+        for content, field in zip(self._contents, self.fields):
+            content._columns(path + (field,), output, list_indicator)
+
+    def _select_columns(self, index, specifier, matches, output):
+        contents = []
+        for content in self._contents:
+            len_output = len(output)
+            next_content = content._select_columns(index, specifier, matches, output)
+            if len_output != len(output):
+                contents.append(next_content)
+
+        if len(contents) == 0:
+            return ak._v2.forms.EmptyForm(
+                self._has_identifier, self._parameters, self._form_key
+            )
+        elif len(contents) == 1:
+            return contents[0]
+        else:
+            return UnionForm(
+                self._tags,
+                self._index,
+                contents,
+                self._has_identifier,
+                self._parameters,
+                self._form_key,
+            )
+
+    def _column_types(self):
+        return sum((x._column_types() for x in self._contents), ())

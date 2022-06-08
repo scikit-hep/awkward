@@ -11,6 +11,7 @@ import awkward._v2._connect.cling  # noqa: E402
 
 
 compiler = ROOT.gInterpreter.Declare
+cpp17 = hasattr(ROOT.std, "optional")
 
 
 def debug_compiler(code):
@@ -25,17 +26,17 @@ def test_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[1];
-  out[2] = obj.at(3);
+  out[2] = obj[3];
 }}
 """
     )
@@ -48,14 +49,14 @@ def test_EmptyArray():
     v2a = ak._v2.contents.emptyarray.EmptyArray()
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 size_t roottest_EmptyArray_v2a(ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   return obj.size();
 }}
 """
@@ -69,14 +70,14 @@ def test_NumpyArray_shape():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_NumpyArray_shape_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0].size();
@@ -102,14 +103,16 @@ def test_RegularArray_NumpyArray(flatlist_as_rvec):
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(debug_compiler, flatlist_as_rvec=flatlist_as_rvec)
+    generator.generate(debug_compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0][0];
   out[2] = obj[0][1];
@@ -134,14 +137,14 @@ def test_RegularArray_NumpyArray_v2b():
     )
 
     layout = v2b
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[1].size();
@@ -164,14 +167,16 @@ def test_ListArray_NumpyArray(flatlist_as_rvec):
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -199,14 +204,16 @@ def test_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ListOffsetArray_NumpyArray_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -241,14 +248,14 @@ def test_RecordArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   auto rec1 = obj[1];
   auto rec4 = obj[4];
@@ -274,14 +281,14 @@ void roottest_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* p
     )
 
     layout = v2b
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   auto rec1 = obj[1];
   auto rec4 = obj[4];
@@ -299,14 +306,14 @@ void roottest_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* p
     v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
 
     layout = v2c
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   obj[5];
 }}
@@ -319,14 +326,14 @@ void roottest_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* p
     v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
 
     layout = v2d
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RecordArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   obj[5];
 }}
@@ -337,6 +344,7 @@ void roottest_RecordArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* p
     assert out.tolist() == [10.0]
 
 
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_IndexedArray_NumpyArray():
     v2a = ak._v2.contents.indexedarray.IndexedArray(
         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
@@ -344,14 +352,14 @@ def test_IndexedArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_IndexedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0];
   out[2] = obj[1];
@@ -375,14 +383,14 @@ def test_IndexedOptionArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_IndexedOptionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -399,6 +407,7 @@ void roottest_IndexedOptionArray_NumpyArray_v2a(double* out, ssize_t length, ssi
     assert out.tolist() == [7.0, 2.2, 2.2, 999.0, 1.1, 999.0, 5.5, 4.4]
 
 
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_ByteMaskedArray_NumpyArray():
     v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
@@ -407,14 +416,14 @@ def test_ByteMaskedArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -435,14 +444,14 @@ void roottest_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_
     )
 
     layout = v2b
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ByteMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -457,6 +466,7 @@ void roottest_ByteMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_
     assert out.tolist() == [5.0, 1.1, 999.0, 3.3, 999.0, 5.5]
 
 
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_BitMaskedArray_NumpyArray():
     v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
         ak._v2.index.Index(
@@ -492,14 +502,14 @@ def test_BitMaskedArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -570,14 +580,14 @@ void roottest_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t
     )
 
     layout = v2b
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -651,14 +661,14 @@ void roottest_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t
     )
 
     layout = v2c
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -732,14 +742,14 @@ void roottest_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t
     )
 
     layout = v2d
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -777,20 +787,21 @@ void roottest_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t
     ]
 
 
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_UnmaskedArray_NumpyArray():
     v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_UnmaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[1].has_value() ? obj[1].value() : 999.0;
   out[2] = obj[3].has_value() ? obj[3].value() : 999.0;
@@ -813,14 +824,14 @@ def test_UnionArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = obj[0].index();
   out[2] = obj[1].index();
@@ -855,17 +866,19 @@ def test_nested_NumpyArray(flatlist_as_rvec):
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[1];
-  out[2] = obj.at(3);
+  out[2] = obj[3];
 }}
 """
     )
@@ -886,14 +899,14 @@ def test_nested_NumpyArray_shape():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_NumpyArray_shape_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0].size();
@@ -924,14 +937,16 @@ def test_nested_RegularArray_NumpyArray(flatlist_as_rvec):
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0][0];
   out[2] = obj[0][1];
@@ -957,14 +972,14 @@ void roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out,
     )
 
     layout = v2b
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RegularArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[1].size();
@@ -990,14 +1005,16 @@ def test_nested_ListArray_NumpyArray(flatlist_as_rvec):
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(compiler, flatlist_as_rvec=flatlist_as_rvec)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ListArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -1028,14 +1045,16 @@ def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout)
-    generator.generate(debug_compiler, flatlist_as_rvec=flatlist_as_rvec)
+    generator.generate(debug_compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ListOffsetArray_NumpyArray_{flatlist_as_rvec}(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry(flatlist_as_rvec=flatlist_as_rvec)}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].size();
   out[2] = obj[0][0];
@@ -1075,14 +1094,14 @@ def test_nested_RecordArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   auto rec1 = obj[1];
   auto rec4 = obj[4];
@@ -1113,14 +1132,14 @@ void roottest_nested_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssi
     )
 
     layout = v2b
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   auto rec1 = obj[1];
   auto rec4 = obj[4];
@@ -1141,14 +1160,14 @@ void roottest_nested_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssi
     )
 
     layout = v2c
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   obj[5];
 }}
@@ -1164,14 +1183,14 @@ void roottest_nested_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssi
     )
 
     layout = v2d
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_RecordArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   obj[5];
 }}
@@ -1194,14 +1213,14 @@ def test_nested_IndexedArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_IndexedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0];
   out[2] = obj[1];
@@ -1230,14 +1249,14 @@ def test_nested_IndexedOptionArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_IndexedOptionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1269,14 +1288,14 @@ def test_nested_ByteMaskedArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1304,14 +1323,14 @@ void roottest_nested_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length,
     )
 
     layout = v2b
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_ByteMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1383,14 +1402,14 @@ def test_nested_BitMaskedArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1483,14 +1502,14 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, 
     )
 
     layout = v2b
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1586,14 +1605,14 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, 
     )
 
     layout = v2c
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1689,14 +1708,14 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, 
     )
 
     layout = v2d
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_BitMaskedArray_NumpyArray_v2d(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].has_value() ? obj[0].value() : 999.0;
   out[2] = obj[1].has_value() ? obj[1].value() : 999.0;
@@ -1745,14 +1764,14 @@ def test_nested_UnmaskedArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_UnmaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[1].has_value() ? obj[1].value() : 999.0;
   out[2] = obj[3].has_value() ? obj[3].value() : 999.0;
@@ -1782,14 +1801,14 @@ def test_nested_UnionArray_NumpyArray():
     )
 
     layout = v2a
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_nested_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()}[1];
+  auto obj = {generator.dataset()}[1];
   out[0] = obj.size();
   out[1] = obj[0].index();
   out[2] = obj[1].index();
@@ -1814,18 +1833,18 @@ void roottest_nested_UnionArray_NumpyArray_v2a(double* out, ssize_t length, ssiz
 
 
 def test_ListArray_strings():
-    layout = ak._v2.operations.convert.from_iter(
+    layout = ak._v2.operations.from_iter(
         ["one", "two", "three", "four", "five"], highlevel=False
     )
 
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_ListArray_strings(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = (obj[0] == "one");
   out[2] = (obj[1] == "two");
@@ -1841,22 +1860,20 @@ void roottest_ListArray_strings(double* out, ssize_t length, ssize_t* ptrs) {{
 
 
 def test_RegularArray_strings():
-    layout = ak._v2.operations.structure.to_regular(
-        ak._v2.operations.convert.from_iter(
-            ["onexx", "twoxx", "three", "fourx", "fivex"]
-        ),
+    layout = ak._v2.operations.to_regular(
+        ak._v2.operations.from_iter(["onexx", "twoxx", "three", "fourx", "fivex"]),
         axis=1,
         highlevel=False,
     )
 
-    generator = ak._v2._connect.cling.togenerator(layout.form)
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
 void roottest_RegularArray_strings(double* out, ssize_t length, ssize_t* ptrs) {{
-  auto obj = {generator.entry()};
+  auto obj = {generator.dataset()};
   out[0] = obj.size();
   out[1] = (obj[0] == "onexx");
   out[2] = (obj[1] == "twoxx");
@@ -1869,3 +1886,90 @@ void roottest_RegularArray_strings(double* out, ssize_t length, ssize_t* ptrs) {
     out = np.zeros(6, dtype=np.float64)
     ROOT.roottest_RegularArray_strings(out, len(layout), lookup.arrayptrs)
     assert out.tolist() == [5.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+
+def test_NumpyArray_iterator():
+    v2a = ak._v2.contents.numpyarray.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3]),
+        parameters={"some": "stuff", "other": [1, 2, "three"]},
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_NumpyArray_iterator_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.dataset()};
+
+  size_t i = 0;
+  for (auto it = obj.begin();  it != obj.end();  ++it) {{
+    out[i] = *it;
+    i++;
+  }}
+}}
+"""
+    )
+    out = np.zeros(4, dtype=np.float64)
+    ROOT.roottest_NumpyArray_iterator_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [0.0, 1.1, 2.2, 3.3]
+
+
+def test_NumpyArray_iterator2():
+    v2a = ak._v2.contents.numpyarray.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3]),
+        parameters={"some": "stuff", "other": [1, 2, "three"]},
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_NumpyArray_iterator2_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.dataset()};
+
+  size_t i = 0;
+  for (auto x : obj) {{
+    out[i] = x;
+    i++;
+  }}
+}}
+"""
+    )
+    out = np.zeros(4, dtype=np.float64)
+    ROOT.roottest_NumpyArray_iterator2_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [0.0, 1.1, 2.2, 3.3]
+
+
+def test_NumpyArray_riterator():
+    v2a = ak._v2.contents.numpyarray.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3]),
+        parameters={"some": "stuff", "other": [1, 2, "three"]},
+    )
+
+    layout = v2a
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    ROOT.gInterpreter.Declare(
+        f"""
+void roottest_NumpyArray_riterator_v2a(double* out, ssize_t length, ssize_t* ptrs) {{
+  auto obj = {generator.dataset()};
+
+  size_t i = 0;
+  for (auto it = obj.rbegin();  it != obj.rend();  ++it) {{
+    out[i] = *it;
+    i++;
+  }}
+}}
+"""
+    )
+    out = np.zeros(4, dtype=np.float64)
+    ROOT.roottest_NumpyArray_riterator_v2a(out, len(layout), lookup.arrayptrs)
+    assert out.tolist() == [3.3, 2.2, 1.1, 0.0]

@@ -1,13 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 pyarrow = pytest.importorskip("pyarrow")
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test():
@@ -27,7 +26,7 @@ def test():
         ],
         type=struct,
     )
-    as_awkward = awkward._v2._connect.pyarrow.handle_arrow(array)
+    as_awkward = awkward._v2.from_arrow(array, highlevel=False)
 
     assert to_list(as_awkward) == [
         {"x": [1.1, 2.1], "y": [3.1, 4.1]},

@@ -1,15 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-ak_to_buffers = ak._v2.operations.convert.to_buffers
-ak_from_buffers = ak._v2.operations.convert.from_buffers
-ak_from_iter = ak._v2.operations.convert.from_iter
+ak_to_buffers = ak._v2.operations.to_buffers
+ak_from_buffers = ak._v2.operations.from_buffers
+ak_from_iter = ak._v2.operations.from_iter
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_EmptyArray():

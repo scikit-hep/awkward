@@ -1,15 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_1d():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [3.3, 2.2, 5.5, 1.1, 4.4],
         highlevel=False,
     )
@@ -26,7 +25,7 @@ def test_1d():
 
 
 def test_2d():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [
             [3.3, 2.2, 5.5, 1.1, 4.4],
             [4.4, 2.2, 1.1, 3.3, 5.5],
@@ -41,7 +40,7 @@ def test_2d():
 
 
 def test_3d():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [
             [
                 [3.3, 2.2, 5.5, 1.1, 4.4],
@@ -79,7 +78,7 @@ def test_3d():
 
 
 def test_jagged():
-    v2_array = ak._v2.operations.convert.from_iter(
+    v2_array = ak._v2.operations.from_iter(
         [[2.2, 1.1, 3.3], [], [4.4, 5.5], [5.5], [-4.4, -5.5, -6.6]], highlevel=False
     )
     assert to_list(v2_array.argmin(axis=1)) == [1, None, 0, 0, 2]
@@ -99,7 +98,7 @@ def test_jagged():
 
 
 def test_missing():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[[2.2, 1.1, 3.3]], [[]], [None, None, None], [[-4.4, -5.5, -6.6]]],
         highlevel=False,
     )

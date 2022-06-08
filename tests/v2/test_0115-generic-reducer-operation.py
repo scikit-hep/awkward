@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 primes = [x for x in range(2, 1000) if all(x % n != 0 for n in range(2, x))]
 
@@ -1052,11 +1051,11 @@ def test_IndexedOptionArray():
 
 
 def test_UnionArray():
-    content1 = ak._v2.operations.convert.from_iter(
+    content1 = ak._v2.operations.from_iter(
         [[[2, 3, 5, 7, 11], [13, 17, 19, 23, 29], [31, 37, 41, 43, 47]]],
         highlevel=False,
     )
-    content2 = ak._v2.operations.convert.from_iter(
+    content2 = ak._v2.operations.from_iter(
         [[[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]]],
         highlevel=False,
     )
@@ -1527,7 +1526,7 @@ def test_mask():
 
 
 def test_ByteMaskedArray():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
             [],
@@ -1623,97 +1622,93 @@ def test_highlevel():
         [[[2, 3, 5], [], [7, 11], [13]], [], [[17, 19], [23]]], check_valid=True
     )
 
-    assert ak._v2.operations.reducers.count(array) == 9
-    assert to_list(ak._v2.operations.reducers.count(array, axis=-1)) == [
+    assert ak._v2.operations.count(array) == 9
+    assert to_list(ak._v2.operations.count(array, axis=-1)) == [
         [3, 0, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.reducers.count(array, axis=2)) == [
+    assert to_list(ak._v2.operations.count(array, axis=2)) == [
         [3, 0, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.reducers.count(array, axis=-1, keepdims=True)) == [
+    assert to_list(ak._v2.operations.count(array, axis=-1, keepdims=True)) == [
         [[3], [0], [2], [1]],
         [],
         [[2], [1]],
     ]
-    assert to_list(ak._v2.operations.reducers.count(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.count(array, axis=-2)) == [
         [3, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.reducers.count(array, axis=1)) == [
+    assert to_list(ak._v2.operations.count(array, axis=1)) == [
         [3, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.reducers.count(array, axis=-2, keepdims=True)) == [
+    assert to_list(ak._v2.operations.count(array, axis=-2, keepdims=True)) == [
         [[3, 2, 1]],
         [[]],
         [[2, 1]],
     ]
 
-    assert ak._v2.operations.reducers.count_nonzero(array) == 9
-    assert to_list(ak._v2.operations.reducers.count_nonzero(array, axis=-1)) == [
+    assert ak._v2.operations.count_nonzero(array) == 9
+    assert to_list(ak._v2.operations.count_nonzero(array, axis=-1)) == [
         [3, 0, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.reducers.count_nonzero(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.count_nonzero(array, axis=-2)) == [
         [3, 2, 1],
         [],
         [2, 1],
     ]
 
-    assert (
-        ak._v2.operations.reducers.sum(array) == 2 + 3 + 5 + 7 + 11 + 13 + 17 + 19 + 23
-    )
-    assert to_list(ak._v2.operations.reducers.sum(array, axis=-1)) == [
+    assert ak._v2.operations.sum(array) == 2 + 3 + 5 + 7 + 11 + 13 + 17 + 19 + 23
+    assert to_list(ak._v2.operations.sum(array, axis=-1)) == [
         [2 + 3 + 5, 0, 7 + 11, 13],
         [],
         [17 + 19, 23],
     ]
-    assert to_list(ak._v2.operations.reducers.sum(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.sum(array, axis=-2)) == [
         [2 + 7 + 13, 3 + 11, 5],
         [],
         [17 + 23, 19],
     ]
 
-    assert (
-        ak._v2.operations.reducers.prod(array) == 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23
-    )
-    assert to_list(ak._v2.operations.reducers.prod(array, axis=-1)) == [
+    assert ak._v2.operations.prod(array) == 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23
+    assert to_list(ak._v2.operations.prod(array, axis=-1)) == [
         [2 * 3 * 5, 1, 7 * 11, 13],
         [],
         [17 * 19, 23],
     ]
-    assert to_list(ak._v2.operations.reducers.prod(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.prod(array, axis=-2)) == [
         [2 * 7 * 13, 3 * 11, 5],
         [],
         [17 * 23, 19],
     ]
 
-    assert ak._v2.operations.reducers.min(array) == 2
-    assert to_list(ak._v2.operations.reducers.min(array, axis=-1)) == [
+    assert ak._v2.operations.min(array) == 2
+    assert to_list(ak._v2.operations.min(array, axis=-1)) == [
         [2, None, 7, 13],
         [],
         [17, 23],
     ]
-    assert to_list(ak._v2.operations.reducers.min(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.min(array, axis=-2)) == [
         [2, 3, 5],
         [],
         [17, 19],
     ]
 
-    assert ak._v2.operations.reducers.max(array) == 23
-    assert to_list(ak._v2.operations.reducers.max(array, axis=-1)) == [
+    assert ak._v2.operations.max(array) == 23
+    assert to_list(ak._v2.operations.max(array, axis=-1)) == [
         [5, None, 11, 13],
         [],
         [19, 23],
     ]
-    assert to_list(ak._v2.operations.reducers.max(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.max(array, axis=-2)) == [
         [13, 11, 5],
         [],
         [23, 19],
@@ -1728,25 +1723,25 @@ def test_highlevel():
         check_valid=True,
     )
 
-    assert ak._v2.operations.reducers.any(array) is np.bool_(True)
-    assert to_list(ak._v2.operations.reducers.any(array, axis=-1)) == [
+    assert ak._v2.operations.any(array) is np.bool_(True)
+    assert to_list(ak._v2.operations.any(array, axis=-1)) == [
         [True, False, False, True],
         [],
         [True, True],
     ]
-    assert to_list(ak._v2.operations.reducers.any(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.any(array, axis=-2)) == [
         [True, False, True],
         [],
         [True, True],
     ]
 
-    assert ak._v2.operations.reducers.all(array) is np.bool_(False)
-    assert to_list(ak._v2.operations.reducers.all(array, axis=-1)) == [
+    assert ak._v2.operations.all(array) is np.bool_(False)
+    assert to_list(ak._v2.operations.all(array, axis=-1)) == [
         [False, True, False, True],
         [],
         [False, True],
     ]
-    assert to_list(ak._v2.operations.reducers.all(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.all(array, axis=-2)) == [
         [False, False, True],
         [],
         [False, True],
@@ -1759,35 +1754,25 @@ def test_nonreducers():
         [[1.1, 2.2, 2.9, 4.0, 5.1], [0.9, 2.1, 3.2, 4.1, 4.9]], check_valid=True
     )
 
-    assert ak._v2.operations.reducers.mean(y) == np.mean(
-        ak._v2.operations.convert.to_numpy(y)
+    assert ak._v2.operations.mean(y) == np.mean(ak._v2.operations.to_numpy(y))
+    assert ak._v2.operations.var(y) == np.var(ak._v2.operations.to_numpy(y))
+    assert ak._v2.operations.var(y, ddof=1) == np.var(
+        ak._v2.operations.to_numpy(y), ddof=1
     )
-    assert ak._v2.operations.reducers.var(y) == np.var(
-        ak._v2.operations.convert.to_numpy(y)
-    )
-    assert ak._v2.operations.reducers.var(y, ddof=1) == np.var(
-        ak._v2.operations.convert.to_numpy(y), ddof=1
-    )
-    assert ak._v2.operations.reducers.std(y) == np.std(
-        ak._v2.operations.convert.to_numpy(y)
-    )
-    assert ak._v2.operations.reducers.std(y, ddof=1) == np.std(
-        ak._v2.operations.convert.to_numpy(y), ddof=1
+    assert ak._v2.operations.std(y) == np.std(ak._v2.operations.to_numpy(y))
+    assert ak._v2.operations.std(y, ddof=1) == np.std(
+        ak._v2.operations.to_numpy(y), ddof=1
     )
 
-    assert ak._v2.operations.reducers.moment(y, 1) == np.mean(
-        ak._v2.operations.convert.to_numpy(y)
+    assert ak._v2.operations.moment(y, 1) == np.mean(ak._v2.operations.to_numpy(y))
+    assert ak._v2.operations.moment(y - ak._v2.operations.mean(y), 2) == np.var(
+        ak._v2.operations.to_numpy(y)
     )
-    assert ak._v2.operations.reducers.moment(
-        y - ak._v2.operations.reducers.mean(y), 2
-    ) == np.var(ak._v2.operations.convert.to_numpy(y))
-    assert ak._v2.operations.reducers.covar(y, y) == np.var(
-        ak._v2.operations.convert.to_numpy(y)
-    )
-    assert ak._v2.operations.reducers.corr(y, y) == 1.0
+    assert ak._v2.operations.covar(y, y) == np.var(ak._v2.operations.to_numpy(y))
+    assert ak._v2.operations.corr(y, y) == 1.0
 
-    assert ak._v2.operations.reducers.corr(x, y) == pytest.approx(0.9968772535047296)
-    fit = ak._v2.operations.reducers.linear_fit(x, y)
+    assert ak._v2.operations.corr(x, y) == pytest.approx(0.9968772535047296)
+    fit = ak._v2.operations.linear_fit(x, y)
     assert to_list(fit) == pytest.approx(
         {
             "intercept": 0.07999999999999773,
@@ -1797,41 +1782,37 @@ def test_nonreducers():
         }
     )
 
-    assert to_list(ak._v2.operations.reducers.mean(y, axis=-1)) == pytest.approx(
-        to_list(np.mean(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    assert to_list(ak._v2.operations.mean(y, axis=-1)) == pytest.approx(
+        to_list(np.mean(ak._v2.operations.to_numpy(y), axis=-1))
     )
-    assert to_list(ak._v2.operations.reducers.var(y, axis=-1)) == pytest.approx(
-        to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    assert to_list(ak._v2.operations.var(y, axis=-1)) == pytest.approx(
+        to_list(np.var(ak._v2.operations.to_numpy(y), axis=-1))
     )
-    assert to_list(ak._v2.operations.reducers.var(y, axis=-1, ddof=1)) == pytest.approx(
-        to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1, ddof=1))
+    assert to_list(ak._v2.operations.var(y, axis=-1, ddof=1)) == pytest.approx(
+        to_list(np.var(ak._v2.operations.to_numpy(y), axis=-1, ddof=1))
     )
-    assert to_list(ak._v2.operations.reducers.std(y, axis=-1)) == pytest.approx(
-        to_list(np.std(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    assert to_list(ak._v2.operations.std(y, axis=-1)) == pytest.approx(
+        to_list(np.std(ak._v2.operations.to_numpy(y), axis=-1))
     )
-    assert to_list(ak._v2.operations.reducers.std(y, axis=-1, ddof=1)) == pytest.approx(
-        to_list(np.std(ak._v2.operations.convert.to_numpy(y), axis=-1, ddof=1))
+    assert to_list(ak._v2.operations.std(y, axis=-1, ddof=1)) == pytest.approx(
+        to_list(np.std(ak._v2.operations.to_numpy(y), axis=-1, ddof=1))
     )
 
-    assert to_list(ak._v2.operations.reducers.moment(y, 1, axis=-1)) == pytest.approx(
-        to_list(np.mean(ak._v2.operations.convert.to_numpy(y), axis=-1))
+    assert to_list(ak._v2.operations.moment(y, 1, axis=-1)) == pytest.approx(
+        to_list(np.mean(ak._v2.operations.to_numpy(y), axis=-1))
     )
     assert to_list(
-        ak._v2.operations.reducers.moment(
-            y - ak._v2.operations.reducers.mean(y, axis=-1), 2, axis=-1
-        )
-    ) == pytest.approx(to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1)))
-    assert to_list(ak._v2.operations.reducers.covar(y, y, axis=-1)) == pytest.approx(
-        to_list(np.var(ak._v2.operations.convert.to_numpy(y), axis=-1))
+        ak._v2.operations.moment(y - ak._v2.operations.mean(y, axis=-1), 2, axis=-1)
+    ) == pytest.approx(to_list(np.var(ak._v2.operations.to_numpy(y), axis=-1)))
+    assert to_list(ak._v2.operations.covar(y, y, axis=-1)) == pytest.approx(
+        to_list(np.var(ak._v2.operations.to_numpy(y), axis=-1))
     )
-    assert to_list(ak._v2.operations.reducers.corr(y, y, axis=-1)) == pytest.approx(
-        [1.0, 1.0]
-    )
+    assert to_list(ak._v2.operations.corr(y, y, axis=-1)) == pytest.approx([1.0, 1.0])
 
-    assert to_list(ak._v2.operations.reducers.corr(x, y, axis=-1)) == pytest.approx(
+    assert to_list(ak._v2.operations.corr(x, y, axis=-1)) == pytest.approx(
         [0.9975103695813371, 0.9964193240901015]
     )
-    fit = ak._v2.operations.reducers.linear_fit(x, y, axis=-1)
+    fit = ak._v2.operations.linear_fit(x, y, axis=-1)
     assert to_list(fit[0]) == pytest.approx(
         {
             "intercept": 0.11999999999999772,
@@ -1855,7 +1836,7 @@ def test_softmax():
         [[np.log(2), np.log(2), np.log(4)], [], [np.log(5), np.log(5)]],
         check_valid=True,
     )
-    assert to_list(ak._v2.operations.reducers.softmax(array, axis=-1)) == [
+    assert to_list(ak._v2.operations.softmax(array, axis=-1)) == [
         pytest.approx([0.25, 0.25, 0.5]),
         [],
         pytest.approx([0.5, 0.5]),

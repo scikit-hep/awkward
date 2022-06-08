@@ -1,15 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_bytemaskedarray_num():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
             [],
@@ -212,7 +211,7 @@ def test_indexedoptionarray():
 
 
 def test_recordarray():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [
             {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
@@ -224,7 +223,7 @@ def test_recordarray():
 
     assert to_list(array.num(0)) == {"x": 4, "y": 4}
 
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [
             {"x": [3.3, 3.3, 3.3], "y": []},
             {"x": [2.2, 2.2], "y": [1]},
@@ -243,7 +242,7 @@ def test_recordarray():
     ]
     assert to_list(array.num(1)[2]) == {"x": 1, "y": 2}
 
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [
             {"x": [[3.3, 3.3, 3.3]], "y": []},
             {"x": [[2.2, 2.2]], "y": [1]},
@@ -264,10 +263,10 @@ def test_recordarray():
 
 
 def test_unionarray():
-    content1 = ak._v2.operations.convert.from_iter(
+    content1 = ak._v2.operations.from_iter(
         [[], [1], [2, 2], [3, 3, 3]], highlevel=False
     )
-    content2 = ak._v2.operations.convert.from_iter(
+    content2 = ak._v2.operations.from_iter(
         [[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []], highlevel=False
     )
     tags = ak._v2.index.Index8(np.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=np.int8))
@@ -291,7 +290,7 @@ def test_unionarray():
 
 def test_highlevel():
     array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    assert to_list(ak._v2.operations.structure.num(array)) == [3, 0, 2]
+    assert to_list(ak._v2.operations.num(array)) == [3, 0, 2]
 
 
 def test_array_3d():

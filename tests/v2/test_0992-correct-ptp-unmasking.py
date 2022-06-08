@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -17,7 +16,7 @@ def test():
         ]
     )
 
-    assert ak._v2.operations.reducers.sum(array, axis=-1).tolist() == [
+    assert ak._v2.operations.sum(array, axis=-1).tolist() == [
         1,  # 0 + 1
         3,  # 3
         0,  # list is empty
@@ -25,7 +24,7 @@ def test():
         15,  # 4 + 5 + 6
     ]
 
-    assert ak._v2.operations.reducers.sum(array, axis=-2).tolist() == [
+    assert ak._v2.operations.sum(array, axis=-2).tolist() == [
         4,
         9,
         0,
@@ -36,7 +35,7 @@ def test():
         #                     6
     ]
 
-    assert ak._v2.operations.reducers.min(array, axis=-1).tolist() == [
+    assert ak._v2.operations.min(array, axis=-1).tolist() == [
         0,  # min([0, 1])
         3,  # min([3])
         None,  # list is empty
@@ -44,7 +43,7 @@ def test():
         4,  # min([4, 5, 6])
     ]
 
-    assert ak._v2.operations.reducers.min(array, axis=-2).tolist() == [
+    assert ak._v2.operations.min(array, axis=-2).tolist() == [
         0,
         1,
         None,
@@ -56,21 +55,28 @@ def test():
     ]
 
     # first bug-fix: single '?'
-    assert str(ak._v2.operations.reducers.min(array, axis=-1).type) == "5 * ?int64"
+    assert str(ak._v2.operations.min(array, axis=-1).type) == "5 * ?int64"
 
     # second bug-fix: correct mask_identity=False behavior
-    assert ak._v2.operations.reducers.ptp(array, axis=-1).tolist() == [
+    assert ak._v2.operations.ptp(array, axis=-1).tolist() == [
         1,
         0,
         None,
         None,
         2,
     ]
-    assert ak._v2.operations.reducers.ptp(
-        array, axis=-1, mask_identity=False
-    ).tolist() == [1, 0, 0, None, 2]
+    assert ak._v2.operations.ptp(array, axis=-1, mask_identity=False).tolist() == [
+        1,
+        0,
+        0,
+        None,
+        2,
+    ]
 
-    assert ak._v2.operations.reducers.ptp(array, axis=-2).tolist() == [4, 4, None, 0]
-    assert ak._v2.operations.reducers.ptp(
-        array, axis=-2, mask_identity=False
-    ).tolist() == [4, 4, 0, 0]
+    assert ak._v2.operations.ptp(array, axis=-2).tolist() == [4, 4, None, 0]
+    assert ak._v2.operations.ptp(array, axis=-2, mask_identity=False).tolist() == [
+        4,
+        4,
+        0,
+        0,
+    ]

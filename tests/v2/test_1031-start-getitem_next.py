@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -38,9 +37,7 @@ def test_EmptyArray():
 
 
 def test_NumpyArray_toRegularArray():
-    a = ak._v2.operations.convert.from_numpy(
-        np.arange(2 * 3 * 5).reshape(2, 3, 5)
-    ).layout
+    a = ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(2, 3, 5)).layout
     b = a.toRegularArray()
     assert isinstance(b, ak._v2.contents.RegularArray)
     assert len(b) == len(a) == 2
@@ -52,9 +49,7 @@ def test_NumpyArray_toRegularArray():
     assert len(b.content.content) == 30
     assert a.typetracer.toRegularArray().form == b.form
 
-    a = ak._v2.operations.convert.from_numpy(
-        np.arange(2 * 0 * 5).reshape(2, 0, 5)
-    ).layout
+    a = ak._v2.operations.from_numpy(np.arange(2 * 0 * 5).reshape(2, 0, 5)).layout
     b = a.toRegularArray()
     assert isinstance(b, ak._v2.contents.RegularArray)
     assert len(b) == len(a) == 2
@@ -5593,7 +5588,7 @@ def test_UnionArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             3:,
         ],
-        ak._v2.contents.unionarray.UnionArray,
+        ak._v2.contents.NumpyArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231

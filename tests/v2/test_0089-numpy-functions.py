@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_mixing_lists_and_none():
@@ -141,13 +140,13 @@ def test_implicit_broadcasting():
 
 def test_tonumpy():
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
+        ak._v2.operations.to_numpy(
             ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)
         ),
         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
     )
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
+        ak._v2.operations.to_numpy(
             ak._v2.highlevel.Array(
                 np.array([1.1, 2.2, 3.3, 4.4, 5.5]), check_valid=True
             )
@@ -155,7 +154,7 @@ def test_tonumpy():
         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
     )
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
+        ak._v2.operations.to_numpy(
             ak._v2.highlevel.Array(
                 [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]], check_valid=True
             )
@@ -163,7 +162,7 @@ def test_tonumpy():
         np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]),
     )
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
+        ak._v2.operations.to_numpy(
             ak._v2.highlevel.Array(
                 np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]), check_valid=True
             )
@@ -171,21 +170,19 @@ def test_tonumpy():
         np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]),
     )
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
+        ak._v2.operations.to_numpy(
             ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)
         ),
         np.array(["one", "two", "three"]),
     )
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
+        ak._v2.operations.to_numpy(
             ak._v2.highlevel.Array([b"one", b"two", b"three"], check_valid=True)
         ),
         np.array([b"one", b"two", b"three"]),
     )
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
-            ak._v2.highlevel.Array([], check_valid=True)
-        ),
+        ak._v2.operations.to_numpy(ak._v2.highlevel.Array([], check_valid=True)),
         np.array([]),
     )
 
@@ -199,22 +196,22 @@ def test_tonumpy():
         ak._v2.contents.UnionArray(tags, index, [content0, content1]), check_valid=True
     )
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(array),
+        ak._v2.operations.to_numpy(array),
         np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]),
     )
 
-    assert ak._v2.operations.convert.to_numpy(
+    assert ak._v2.operations.to_numpy(
         ak._v2.highlevel.Array([1.1, 2.2, None, None, 3.3], check_valid=True)
     ).tolist() == [1.1, 2.2, None, None, 3.3]
-    assert ak._v2.operations.convert.to_numpy(
+    assert ak._v2.operations.to_numpy(
         ak._v2.highlevel.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
-    assert ak._v2.operations.convert.to_numpy(
+    assert ak._v2.operations.to_numpy(
         ak._v2.highlevel.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
+        ak._v2.operations.to_numpy(
             ak._v2.highlevel.Array(
                 [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
                 check_valid=True,
@@ -225,7 +222,7 @@ def test_tonumpy():
         ),
     )
     assert np.array_equal(
-        ak._v2.operations.convert.to_numpy(
+        ak._v2.operations.to_numpy(
             ak._v2.highlevel.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)
         ),
         np.array(
@@ -290,18 +287,17 @@ def test_numpy_array():
         np.asarray(array), np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5])
     )
 
-    assert ak._v2.operations.convert.to_numpy(
+    assert ak._v2.operations.to_numpy(
         ak._v2.highlevel.Array([1.1, 2.2, None, None, 3.3], check_valid=True)
     ).tolist() == [1.1, 2.2, None, None, 3.3]
-    assert ak._v2.operations.convert.to_numpy(
+    assert ak._v2.operations.to_numpy(
         ak._v2.highlevel.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
-    assert ak._v2.operations.convert.to_numpy(
+    assert ak._v2.operations.to_numpy(
         ak._v2.highlevel.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)
     ).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
 
-@pytest.mark.skip(reason="np.array_equal AssertionError: assert False")
 def test_numpy_array_FIXME():
     assert np.array_equal(
         np.asarray(
@@ -330,9 +326,7 @@ def test_where_FIXME():
         check_valid=True,
     )
 
-    assert isinstance(
-        ak._v2.operations.structure.where(condition)[0], ak._v2.highlevel.Array
-    )
+    assert isinstance(ak._v2.operations.where(condition)[0], ak._v2.highlevel.Array)
 
 
 def test_where():
@@ -347,19 +341,14 @@ def test_where():
         check_valid=True,
     )
 
-    assert isinstance(
-        ak._v2.operations.structure.where(condition)[0], ak._v2.highlevel.Array
-    )
+    assert isinstance(ak._v2.operations.where(condition)[0], ak._v2.highlevel.Array)
 
-    assert to_list(ak._v2.operations.structure.where(condition)[0]) == [5, 7, 9]
-    assert to_list(ak._v2.operations.structure.where(condition, one, two)) == to_list(
+    assert to_list(ak._v2.operations.where(condition)[0]) == [5, 7, 9]
+    assert to_list(ak._v2.operations.where(condition, one, two)) == to_list(
         np.where(np.asarray(condition), np.asarray(one), np.asarray(two))
     )
 
 
-@pytest.mark.skip(
-    reason=" TypeError: no numpy.equal overloads for custom types: string, string"
-)
 def test_string_equal():
     one = ak._v2.highlevel.Array(["one", "two", "three"], check_valid=True)
     two = ak._v2.highlevel.Array(["ONE", "two", "four"], check_valid=True)

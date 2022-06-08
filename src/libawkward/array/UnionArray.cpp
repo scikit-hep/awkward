@@ -271,6 +271,15 @@ namespace awkward {
   }
 
   bool
+  UnionForm::istuple() const {
+    bool all_contents_are_tuple = true;
+    for (auto content : contents_) {
+        all_contents_are_tuple = all_contents_are_tuple && content.get()->istuple();
+    }
+    return all_contents_are_tuple && (!contents_.empty());
+  }
+
+  bool
   UnionForm::equal(const FormPtr& other,
                    bool check_identities,
                    bool check_parameters,
@@ -1445,6 +1454,16 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::istuple() const {
+    bool all_contents_are_tuple = true;
+    for (auto content : contents_) {
+        all_contents_are_tuple = all_contents_are_tuple && content.get()->istuple();
+    }
+    return all_contents_are_tuple && (!contents_.empty());
+  }
+
+  template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::validityerror(const std::string& path) const {
     const std::string paramcheck = validityerror_parameters(path);
@@ -2122,9 +2141,6 @@ namespace awkward {
                                    int64_t outlength,
                                    bool ascending,
                                    bool stable) const {
-    if (length() == 0) {
-      return std::make_shared<NumpyArray>(Index64(0));
-    }
     ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||

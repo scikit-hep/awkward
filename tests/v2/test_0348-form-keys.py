@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pickle
 
 import pytest  # noqa: F401
@@ -10,8 +9,8 @@ import awkward as ak  # noqa: F401
 
 ak_Array = ak._v2.highlevel.Array
 ak_Record = ak._v2.highlevel.Record
-ak_to_buffers = ak._v2.operations.convert.to_buffers
-ak_from_buffers = ak._v2.operations.convert.from_buffers
+ak_to_buffers = ak._v2.operations.to_buffers
+ak_from_buffers = ak._v2.operations.from_buffers
 
 
 def test_numpyarray():

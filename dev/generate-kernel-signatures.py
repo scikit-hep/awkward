@@ -12,9 +12,12 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 cuda_kernels_impl = [
     "awkward_ListArray_num",
+    "awkward_RegularArray_num",
+    "awkward_ListArray_validity",
+    "awkward_BitMaskedArray_to_ByteMaskedArray",
+    "awkward_ListArray_compact_offsets",
     "awkward_new_Identities",
     "awkward_Identities32_to_Identities64",
-    "awkward_RegularArray_num",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
     "awkward_IndexedArray_mask",
@@ -37,7 +40,6 @@ cuda_kernels_impl = [
     "awkward_ByteMaskedArray_toIndexedOptionArray",
     "awkward_combinations",  # ?
     "awkward_IndexedArray_simplify",
-    "awkward_ListArray_validity",
     "awkward_UnionArray_validity",
     "awkward_index_carry",
     "awkward_ByteMaskedArray_getitem_carry",
@@ -64,9 +66,39 @@ cuda_kernels_impl = [
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
-    # "awkward_ListOffsetArray_compact_offsets", Need to tune tests
-    "awkward_BitMaskedArray_to_ByteMaskedArray",
+    "awkward_ListOffsetArray_compact_offsets",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
+    "awkward_ByteMaskedArray_getitem_nextcarry",
+    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+    "awkward_ByteMaskedArray_reduce_next_64",
+    "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_index_rpad_and_clip_axis1",
+    "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
+    "awkward_IndexedArray_reduce_next_64",
+    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+    "awkward_ListOffsetArray_rpad_and_clip_axis1",
+    # "awkward_ListOffsetArray_rpad_axis1",
+    "awkward_MaskedArray_getitem_next_jagged_project",
+    "awkward_NumpyArray_getitem_boolean_nonzero",
+    "awkward_UnionArray_project",
+    "awkward_reduce_argmax",
+    "awkward_reduce_argmax_bool_64",
+    "awkward_reduce_argmin",
+    "awkward_reduce_argmin_bool_64",
+    "awkward_reduce_count_64",
+    "awkward_reduce_max",
+    "awkward_reduce_min",
+    "awkward_reduce_sum",
+    "awkward_reduce_sum_int32_bool_64" "awkward_reduce_sum_int64_bool_64",
+    "awkward_reduce_sum_bool",
+    "awkward_reduce_prod_bool",
+    "awkward_reduce_countnonzero",
 ]
 
 
@@ -256,7 +288,7 @@ def by_signature(lib):
     f.dir = [{}]
     out[{}] = f
 """.format(
-                        childfunc["name"],
+                        str(childfunc["name"]),
                         ", ".join(arglist),
                         ", ".join(dirlist),
                         ", ".join(special),
@@ -273,14 +305,22 @@ def by_signature(lib):
 
 
 def kernel_signatures_cuda_py(specification):
-    print("Generating src/awkward/_kernel_signatures_cuda.py...")
+    print("Generating src/awkward/_connect/cuda/_kernel_signatures.py...")
 
     with open(
-        os.path.join(CURRENT_DIR, "..", "src", "awkward", "_kernel_signatures_cuda.py"),
+        os.path.join(
+            os.path.dirname(CURRENT_DIR),
+            "src",
+            "awkward",
+            "_v2",
+            "_connect",
+            "cuda",
+            "_kernel_signatures.py",
+        ),
         "w",
     ) as file:
         file.write(
-            """# AUTO GENERATED ON {0}
+            f"""# AUTO GENERATED ON {reproducible_datetime()}
 # DO NOT EDIT BY HAND!
 #
 # To regenerate file, run
@@ -291,24 +331,7 @@ def kernel_signatures_cuda_py(specification):
 
 # fmt: off
 
-from ctypes import (
-    POINTER,
-    Structure,
-    c_bool,
-    c_int8,
-    c_uint8,
-    c_int16,
-    c_uint16,
-    c_int32,
-    c_uint32,
-    c_int64,
-    c_uint64,
-    c_float,
-    c_double,
-    c_char_p,
-)
-
-import numpy as np
+# pylint: skip-file
 
 from numpy import (
     bool_,
@@ -324,45 +347,95 @@ from numpy import (
     float64,
 )
 
-class ERROR(Structure):
-    _fields_ = [
-        ("str", c_char_p),
-        ("filename", c_char_p),
-        ("id", c_int64),
-        ("attempt", c_int64),
-        ("pass_through", c_bool),
-    ]
+from awkward._v2._connect.cuda import fetch_specialization
+from awkward._v2._connect.cuda import import_cupy
 
-
-def by_signature(lib):
-    out = {{}}
-""".format(
-                reproducible_datetime()
-            )
+cupy = import_cupy("Awkward Arrays with CUDA")
+"""
         )
+
+        file.write(
+            """
+def by_signature(cuda_kernel_templates):
+    out = {}
+"""
+        )
+        with open(
+            os.path.join(
+                os.path.dirname(CURRENT_DIR),
+                "src",
+                "awkward",
+                "_v2",
+                "_connect",
+                "cuda",
+                "cuda_kernels",
+                "cuda_common.cu",
+            ),
+        ) as cu_file:
+            code = cu_file.read()
+            python_code = code[
+                code.find("// BEGIN PYTHON") : code.find("// END PYTHON")
+            ]
+            python_code = python_code.replace("// BEGIN PYTHON", "")
+            python_code = python_code.replace("// ", "    ")
+            file.write(python_code)
 
         for spec in specification["kernels"]:
             for childfunc in spec["specializations"]:
                 special = [repr(spec["name"])]
-                arglist = [
-                    type_to_pytype(x["type"], special) for x in childfunc["args"]
-                ]
+                [type_to_pytype(x["type"], special) for x in childfunc["args"]]
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]
                 if spec["name"] in cuda_kernels_impl:
-                    file.write(
-                        """
-    f = lib.{}
-    f.argtypes = [{}]
-    f.restype = ERROR
+                    with open(
+                        os.path.join(
+                            os.path.dirname(CURRENT_DIR),
+                            "src",
+                            "awkward",
+                            "_v2",
+                            "_connect",
+                            "cuda",
+                            "cuda_kernels",
+                            spec["name"] + ".cu",
+                        ),
+                    ) as cu_file:
+                        code = cu_file.read()
+
+                        if "// BEGIN PYTHON" not in code:
+                            file.write(
+                                """
+    def f(grid, block, args):
+        cuda_kernel_templates.get_function(fetch_specialization([{}]))(grid, block, args)
     f.dir = [{}]
     out[{}] = f
 """.format(
-                            childfunc["name"],
-                            ", ".join(arglist),
-                            ", ".join(dirlist),
-                            ", ".join(special),
-                        )
-                    )
+                                    ", ".join(special),
+                                    ", ".join(dirlist),
+                                    ", ".join(special),
+                                )
+                            )
+                        else:
+
+                            python_code = code[
+                                code.find("// BEGIN PYTHON") : code.find(
+                                    "// END PYTHON"
+                                )
+                            ]
+                            python_code = python_code.replace("// BEGIN PYTHON", "")
+                            python_code = python_code.replace("// ", "    ")
+
+                            if "{dtype_specializations}" in python_code:
+                                python_code = python_code.replace(
+                                    "{dtype_specializations}", ", ".join(special[1:])
+                                )
+
+                            file.write(python_code)
+                            file.write(
+                                """    f.dir = [{}]
+    out[{}] = f
+""".format(
+                                    ", ".join(dirlist), ", ".join(special)
+                                )
+                            )
                 else:
                     file.write(
                         """

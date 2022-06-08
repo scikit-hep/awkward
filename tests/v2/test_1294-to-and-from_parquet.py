@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import os.path
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -26,9 +25,7 @@ def through_arrow(
         bytestring_to32=bytestring_to32,
         categorical_as_dictionary=categorical_as_dictionary,
     )
-    array_form = ak._v2.from_arrow(
-        arrow_table, conservative_optiontype=True
-    ).layout.form
+    array_form = ak._v2.from_arrow(arrow_table, generate_bitmasks=True).layout.form
     return arrow_table.schema, array_form
 
 
@@ -55,7 +52,7 @@ def through_parquet(
     )
     parquet_file = pyarrow_parquet.ParquetFile(filename)
     array_form = ak._v2.from_arrow(
-        parquet_file.read_row_groups([0]), conservative_optiontype=True
+        parquet_file.read_row_groups([0]), generate_bitmasks=True
     ).layout.form
     return parquet_file.schema_arrow, array_form
 
@@ -295,13 +292,11 @@ def test_indexedoptionarray_emptyarray(tmp_path, through, extensionarray):
         parameters={"which": "outer"},
     )
 
-    # https://issues.apache.org/jira/browse/ARROW-14522
-    if through is through_arrow or not extensionarray:
-        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
-            schema_arrow, pass_empty_field=True
-        )
-        assert predicted_form == array_form
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])

@@ -6,6 +6,8 @@ import numbers
 
 import awkward as ak
 
+numpy = ak.nplike.Numpy.instance()
+
 
 def half(integer):
     return int(math.ceil(integer / 2))
@@ -32,6 +34,38 @@ def alternate(length):
 is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 
 
+# avoid recursion in which ak._v2.Array.__getitem__ calls prettyprint
+# to form an error string: private reimplementation of ak._v2.Array.__getitem__
+
+
+def get_at(data, index):
+    out = data._layout._getitem_at(index)
+    if isinstance(out, ak._v2.contents.NumpyArray):
+        array_param = out.parameter("__array__")
+        if array_param == "byte":
+            return ak._v2._util.tobytes(out.raw(numpy))
+        elif array_param == "char":
+            return ak._v2._util.tobytes(out.raw(numpy)).decode(errors="surrogateescape")
+    if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+        return ak._v2._util.wrap(out, data._behavior)
+    else:
+        return out
+
+
+def get_field(data, field):
+    out = data._layout._getitem_field(field)
+    if isinstance(out, ak._v2.contents.NumpyArray):
+        array_param = out.parameter("__array__")
+        if array_param == "byte":
+            return ak._v2._util.tobytes(out.raw(numpy))
+        elif array_param == "char":
+            return ak._v2._util.tobytes(out.raw(numpy)).decode(errors="surrogateescape")
+    if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
+        return ak._v2._util.wrap(out, data._behavior)
+    else:
+        return out
+
+
 def valuestr_horiz(data, limit_cols):
     original_limit_cols = limit_cols
 
@@ -43,7 +77,7 @@ def valuestr_horiz(data, limit_cols):
             return 2, front + back
 
         elif len(data) == 1:
-            cols_taken, strs = valuestr_horiz(data[0], limit_cols)
+            cols_taken, strs = valuestr_horiz(get_at(data, 0), limit_cols)
             return 2 + cols_taken, front + strs + back
 
         else:
@@ -53,7 +87,7 @@ def valuestr_horiz(data, limit_cols):
                 if forward:
                     for_comma = 0 if which == 0 else 2
                     cols_taken, strs = valuestr_horiz(
-                        data[index], limit_cols - for_comma
+                        get_at(data, index), limit_cols - for_comma
                     )
                     if limit_cols - (for_comma + cols_taken) >= 0:
                         if which != 0:
@@ -64,7 +98,9 @@ def valuestr_horiz(data, limit_cols):
                     else:
                         break
                 else:
-                    cols_taken, strs = valuestr_horiz(data[index], limit_cols - 2)
+                    cols_taken, strs = valuestr_horiz(
+                        get_at(data, index), limit_cols - 2
+                    )
                     if limit_cols - (2 + cols_taken) >= 0:
                         back[:0] = strs
                         back.insert(0, ", ")
@@ -114,7 +150,7 @@ def valuestr_horiz(data, limit_cols):
                 which += 1
 
                 target = limit_cols if len(fields) == 1 else half(limit_cols)
-                cols_taken, strs = valuestr_horiz(data[key], target)
+                cols_taken, strs = valuestr_horiz(get_field(data, key), target)
                 if limit_cols - cols_taken >= 0:
                     front.extend(strs)
                     limit_cols -= cols_taken
@@ -164,7 +200,7 @@ def valuestr(data, limit_rows, limit_cols):
         front, back = [], []
         which = 0
         for forward, index in alternate(len(data)):
-            _, strs = valuestr_horiz(data[index], limit_cols - 2)
+            _, strs = valuestr_horiz(get_at(data, index), limit_cols - 2)
             if forward:
                 front.append("".join(strs))
             else:
@@ -180,13 +216,14 @@ def valuestr(data, limit_rows, limit_cols):
         out = front + back
         for i, val in enumerate(out):
             if i > 0:
-                out[i] = " " + val
+                val = out[i] = " " + val
             else:
-                out[i] = "[" + val
+                val = out[i] = "[" + val
             if i < len(out) - 1:
                 out[i] = val + ","
             else:
                 out[i] = val + "]"
+
         return "\n".join(out)
 
     elif isinstance(data, ak._v2.highlevel.Record):
@@ -207,7 +244,9 @@ def valuestr(data, limit_rows, limit_cols):
                 else:
                     key_str = key + ": "
 
-            _, strs = valuestr_horiz(data[key], limit_cols - 2 - len(key_str))
+            _, strs = valuestr_horiz(
+                get_field(data, key), limit_cols - 2 - len(key_str)
+            )
             front.append(key_str + "".join(strs))
 
             which += 1
@@ -220,11 +259,11 @@ def valuestr(data, limit_rows, limit_cols):
         out = front
         for i, val in enumerate(out):
             if i > 0:
-                out[i] = " " + val
+                val = out[i] = " " + val
             elif data.is_tuple:
-                out[i] = "(" + val
+                val = out[i] = "(" + val
             else:
-                out[i] = "{" + val
+                val = out[i] = "{" + val
             if i < len(out) - 1:
                 out[i] = val + ","
             elif data.is_tuple:
@@ -234,4 +273,4 @@ def valuestr(data, limit_rows, limit_cols):
         return "\n".join(out)
 
     else:
-        raise AssertionError(type(data))
+        raise ak._v2._util.error(AssertionError(type(data)))

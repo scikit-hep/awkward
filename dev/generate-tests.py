@@ -25,7 +25,8 @@ class Argument:
 
 
 class Specification:
-    def __init__(self, spec, testdata, blacklisted):
+    def __init__(self, templatized_kernel_name, spec, testdata, blacklisted):
+        self.templatized_kernel_name = templatized_kernel_name
         self.name = spec["name"]
         self.args = []
         for arg in spec["args"]:
@@ -188,6 +189,7 @@ def readspec():
             if "def " in spec["definition"]:
                 for childfunc in spec["specializations"]:
                     specdict[childfunc["name"]] = Specification(
+                        spec["name"],
                         childfunc,
                         data,
                         not spec["automatic-tests"],
@@ -290,7 +292,17 @@ def gettypeval(typename):
 
 def getcudakernelslist():
     cudakernels = []
-    for f in os.listdir(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels")):
+    for f in os.listdir(
+        os.path.join(
+            os.path.dirname(CURRENT_DIR),
+            "src",
+            "awkward",
+            "_v2",
+            "_connect",
+            "cuda",
+            "cuda_kernels",
+        )
+    ):
         if os.path.isfile(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels", f)):
             if f.startswith("awkward_") and f.endswith(".cu"):
                 cudakernels.append(f[:-3])
@@ -524,6 +536,99 @@ def gencpukerneltests(specdict):
                 f.write("\n")
 
 
+cuda_kernels_tests = [
+    "awkward_ListArray_num",
+    "awkward_RegularArray_num",
+    "awkward_ListArray_validity",
+    "awkward_BitMaskedArray_to_ByteMaskedArray",
+    "awkward_ListArray_compact_offsets",
+    "awkward_new_Identities",
+    "awkward_Identities32_to_Identities64",
+    "awkward_ListOffsetArray_flatten_offsets",
+    "awkward_IndexedArray_overlay_mask",
+    "awkward_IndexedArray_mask",
+    "awkward_ByteMaskedArray_mask",
+    "awkward_zero_mask",
+    "awkward_RegularArray_compact_offsets",
+    "awkward_IndexedArray_fill_count",
+    "awkward_UnionArray_fillna",
+    "awkward_localindex",
+    "awkward_content_reduce_zeroparents_64",
+    "awkward_ListOffsetArray_reduce_global_startstop_64",
+    "awkward_IndexedArray_reduce_next_fix_offsets_64",
+    "awkward_Index_to_Index64",
+    "awkward_carry_arange",
+    "awkward_index_carry_nocheck",
+    "awkward_NumpyArray_contiguous_init",
+    "awkward_NumpyArray_getitem_next_array_advanced",
+    "awkward_NumpyArray_getitem_next_at",
+    "awkward_RegularArray_getitem_next_array_advanced",
+    "awkward_ByteMaskedArray_toIndexedOptionArray",
+    "awkward_combinations",  # ?
+    "awkward_IndexedArray_simplify",
+    "awkward_UnionArray_validity",
+    "awkward_index_carry",
+    "awkward_ByteMaskedArray_getitem_carry",
+    "awkward_IndexedArray_validity",
+    "awkward_ByteMaskedArray_overlay_mask",
+    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+    "awkward_RegularArray_getitem_carry",
+    "awkward_NumpyArray_getitem_next_array",
+    "awkward_RegularArray_localindex",
+    "awkward_NumpyArray_contiguous_next",
+    "awkward_NumpyArray_getitem_next_range",
+    "awkward_NumpyArray_getitem_next_range_advanced",
+    "awkward_RegularArray_getitem_next_range",
+    "awkward_RegularArray_getitem_next_range_spreadadvanced",
+    "awkward_RegularArray_getitem_next_array",
+    "awkward_missing_repeat",
+    "awkward_Identities_getitem_carry",
+    "awkward_RegularArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_next_array",
+    "awkward_RegularArray_broadcast_tooffsets",
+    "awkward_NumpyArray_fill_tobool",
+    "awkward_NumpyArray_reduce_adjust_starts_64",
+    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+    "awkward_regularize_arrayslice",
+    "awkward_RegularArray_getitem_next_at",
+    "awkward_ListOffsetArray_compact_offsets",
+    "awkward_BitMaskedArray_to_IndexedOptionArray",
+    "awkward_ByteMaskedArray_getitem_nextcarry",
+    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
+    "awkward_ByteMaskedArray_reduce_next_64",
+    "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_index_rpad_and_clip_axis1",
+    "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry",
+    "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_getitem_nextcarry_outindex_mask",
+    "awkward_IndexedArray_reduce_next_64",
+    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
+    "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
+    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+    "awkward_ListOffsetArray_rpad_and_clip_axis1",
+    # "awkward_ListOffsetArray_rpad_axis1",
+    "awkward_MaskedArray_getitem_next_jagged_project",
+    "awkward_NumpyArray_getitem_boolean_nonzero",
+    "awkward_UnionArray_project",
+    "awkward_reduce_argmax",
+    "awkward_reduce_argmax_bool_64",
+    "awkward_reduce_argmin",
+    "awkward_reduce_argmin_bool_64",
+    "awkward_reduce_count_64",
+    "awkward_reduce_max",
+    "awkward_reduce_min",
+    "awkward_reduce_sum",
+    "awkward_reduce_sum_int32_bool_64",
+    "awkward_reduce_sum_int64_bool_64",
+    "awkward_reduce_sum_bool",
+    "awkward_reduce_prod_bool",
+    "awkward_reduce_countnonzero",
+]
+
+
 def gencudakerneltests(specdict):
     print("Generating files for testing CUDA kernels")
 
@@ -543,49 +648,13 @@ def gencudakerneltests(specdict):
 
 # fmt: off
 
-from __future__ import absolute_import
-
-import ctypes
-import platform
-
-import pkg_resources
-
-# awkward-cuda-kernels is only supported on Linux, but let's leave the placeholder.
-if platform.system() == "Windows":
-    shared_library_name = "awkward-cuda-kernels.dll"
-elif platform.system() == "Darwin":
-    shared_library_name = "libawkward-cuda-kernels.dylib"
-else:
-    shared_library_name = "libawkward-cuda-kernels.so"
-
-CUDA_KERNEL_SO = pkg_resources.resource_filename(
-    "awkward_cuda_kernels", shared_library_name
-)
-
-lib = ctypes.CDLL(CUDA_KERNEL_SO)
-
-
-class Error(ctypes.Structure):
-    _fields_ = [
-        ("str", ctypes.POINTER(ctypes.c_char)),
-        ("filename", ctypes.POINTER(ctypes.c_char)),
-        ("identity", ctypes.c_int64),
-        ("attempt", ctypes.c_int64),
-        ("pass_through", ctypes.c_bool),
-    ]
 """.format(
                 datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
             )
         )
 
-    cudakernels = getcudakernelslist()
-    funcnames = getfuncnames()
-    cudafuncnames = {funcname: funcnames[funcname] for funcname in cudakernels}
-
     for spec in specdict.values():
-        if (spec.name in cudakernels) or any(
-            spec.name in x for x in cudafuncnames.values()
-        ):
+        if spec.templatized_kernel_name in cuda_kernels_tests:
             with open(
                 os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
             ) as f:
@@ -604,22 +673,24 @@ class Error(ctypes.Structure):
                         datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
                     )
                 )
+
                 f.write(
-                    "import ctypes\nimport cupy\nimport pytest\nfrom __init__ import lib, Error\n\n"
+                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._v2._connect.cuda as ak_cu\n\ncupy_nplike = ak.nplike.Cupy.instance()\n\n"
                 )
                 num = 1
                 if spec.tests == []:
                     f.write(
                         "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
                     )
-                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
+                    f.write("def test_cpu" + spec.name + "_" + str(num) + "():\n")
                     f.write(
                         " " * 4
                         + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
                     )
                 for test in spec.tests:
-                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
+                    f.write("def test_cuda_" + spec.name + "_" + str(num) + "():\n")
                     num += 1
+                    dtypes = []
                     for arg, val in test["inargs"].items():
                         typename = remove_const(
                             next(
@@ -628,70 +699,68 @@ class Error(ctypes.Structure):
                                 if argument.name == arg
                             ).typename
                         )
+                        if "List" not in typename:
+                            f.write(" " * 4 + arg + " = " + str(val) + "\n")
                         if "List" in typename:
-                            count = typename.count(
-                                "List"
-                            )  # Might need later for ndim array
+
+                            count = typename.count("List")
                             typename = gettypename(typename)
-                            f.write(
-                                " " * 4
-                                + "{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                    arg,
-                                    str(val),
-                                    "float32" if typename == "float" else typename,
+                            if typename == "bool" or typename == "float":
+                                typename = typename + "_"
+                            if count == 1:
+                                f.write(
+                                    " " * 4
+                                    + "{} = cupy.array({}, dtype=cupy.{})\n".format(
+                                        arg, val, typename
+                                    )
                                 )
-                            )
-                            f.write(
-                                " " * 4
-                                + "d_{0} = ctypes.cast({0}.data.ptr, ctypes.POINTER(ctypes.c_{1}))\n".format(
-                                    arg, typename
-                                )
-                            )
-                        else:
-                            f.write(" " * 4 + "d_" + arg + " = " + str(val) + "\n")
-                    f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
-                    f.write(" " * 4 + "funcC.restype = Error\n")
-                    f.write(" " * 4 + f"funcC.argtypes = {getctypelist(spec.args)}\n")
+                                dtypes.append("cupy." + typename)
+                            elif count == 2:
+                                raise NotImplementedError
+                                # f.write(
+                                #     " " * 4
+                                #     + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
+                                #         arg, typename
+                                #     )
+                                # )
+                    cuda_string = (
+                        "funcC = cupy_nplike['"
+                        + spec.templatized_kernel_name
+                        + "', {}]\n".format(", ".join(dtypes))
+                    )
+                    f.write(" " * 4 + cuda_string)
                     args = ""
                     count = 0
                     for arg in spec.args:
                         if count == 0:
-                            args += "d_" + arg.name
+                            args += arg.name
                             count += 1
                         else:
-                            args += ", d_" + arg.name
+                            args += ", " + arg.name
                     if test["success"]:
-                        f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
+                        f.write(" " * 4 + "funcC(" + args + ")\n")
+                        f.write(
+                            """
+    try:
+        ak_cu.synchronize_cuda()
+    except:
+        pytest.fail("This test case shouldn't have raised an error")
+"""
+                        )
+
                         for arg, val in test["outargs"].items():
-                            f.write(
-                                " " * 4
-                                + "pytest_{} = cupy.array({}, dtype=cupy.{})\n".format(
-                                    arg,
-                                    str(val),
-                                    gettypename(
-                                        next(
-                                            argument.typename
-                                            for argument in spec.args
-                                            if argument.name == arg
-                                        )
-                                    ),
-                                )
-                            )
+                            f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
                             if isinstance(val, list):
                                 f.write(
-                                    " " * 4 + f"for x in range(len(pytest_{arg})):\n"
-                                )
-                                f.write(
-                                    " " * 8
-                                    + "assert {0}[x] == pytest_{0}[x]\n".format(arg)
+                                    " " * 4
+                                    + "assert cupy.array_equal({0}[:len(pytest_{0})], cupy.array(pytest_{0}))\n".format(
+                                        arg
+                                    )
                                 )
                             else:
                                 f.write(
                                     " " * 4 + "assert {0} == pytest_{0}\n".format(arg)
                                 )
-                        f.write(" " * 4 + "assert not ret_pass.str\n")
-                    else:
-                        f.write(" " * 4 + f"assert funcC({args}).str\n")
                     f.write("\n")
 
 
@@ -738,5 +807,5 @@ if __name__ == "__main__":
     specdict = readspec()
     genspectests(specdict)
     gencpukerneltests(specdict)
-    gencudakerneltests(specdict)
     genunittests()
+    gencudakerneltests(specdict)

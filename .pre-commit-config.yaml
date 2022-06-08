@@ -1,7 +1,7 @@
 exclude: ^(docs|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.1.0
+  rev: v4.2.0
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -16,18 +16,18 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/asottile/setup-cfg-fmt
-  rev: v1.20.0
+  rev: v1.20.1
   hooks:
   - id: setup-cfg-fmt
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: "v2.31.0"
+  rev: "v2.32.1"
   hooks:
   - id: pyupgrade
     args: ["--py36-plus"]
 
 - repo: https://github.com/psf/black
-  rev: 22.1.0
+  rev: 22.3.0
   hooks:
   - id: black
 
@@ -41,10 +41,10 @@ repos:
   rev: 4.0.1
   hooks:
   - id: flake8
-    additional_dependencies: [flake8-bugbear, flake8-print]
+    additional_dependencies: [flake8-bugbear, flake8-print>=5]
 
 - repo: https://github.com/mgedmin/check-manifest
-  rev: "0.47"
+  rev: "0.48"
   hooks:
   - id: check-manifest
     stages: [manual]

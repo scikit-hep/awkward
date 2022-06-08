@@ -1,18 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_getitem():
-    content0 = ak._v2.operations.convert.from_iter(
+    content0 = ak._v2.operations.from_iter(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
     )
-    content1 = ak._v2.operations.convert.from_iter(
+    content1 = ak._v2.operations.from_iter(
         ["one", "two", "three", "four", "five"], highlevel=False
     )
     tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
@@ -124,11 +123,11 @@ def test_getitem():
     ]
     assert array.typetracer[:, :-1].form == array[:, :-1].form
 
-    content2 = ak._v2.operations.convert.from_iter(
+    content2 = ak._v2.operations.from_iter(
         [{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}],
         highlevel=False,
     )
-    content3 = ak._v2.operations.convert.from_iter(
+    content3 = ak._v2.operations.from_iter(
         [
             {"x": 0.0, "y": "zero", "z": False},
             {"x": 1.1, "y": "one", "z": True},
@@ -187,10 +186,10 @@ def test_getitem():
     assert array2.typetracer["y", :, 1:].form == array2["y", :, 1:].form
     with pytest.raises(IndexError) as err:
         array2[:, 1:, "y"]
-    assert str(err.value).startswith("cannot slice")
+    assert "cannot slice" in str(err.value)
     with pytest.raises(IndexError) as err:
         array2["z"]
-    assert str(err.value).startswith("no field 'z'")
+    assert "no field 'z'" in str(err.value)
 
     array3 = ak._v2.contents.UnionArray(tags, index, [content3, content2])
     array4 = ak._v2.contents.UnionArray(

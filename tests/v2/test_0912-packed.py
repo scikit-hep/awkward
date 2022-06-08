@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_numpy_array():
@@ -13,14 +12,14 @@ def test_numpy_array():
     layout = ak._v2.contents.NumpyArray(matrix[:, 0])
     assert not layout.is_contiguous
 
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
     assert packed.is_contiguous
 
 
 def test_empty_array():
     layout = ak._v2.contents.EmptyArray()
-    assert ak._v2.operations.structure.packed(layout, highlevel=False) is layout
+    assert ak._v2.operations.packed(layout, highlevel=False) is layout
 
 
 def test_indexed_option_array():
@@ -28,7 +27,7 @@ def test_indexed_option_array():
     content = ak._v2.contents.NumpyArray(np.arange(8))
     layout = ak._v2.contents.IndexedOptionArray(index, content)
 
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(layout) == to_list(packed)
     assert isinstance(packed, ak._v2.contents.IndexedOptionArray)
     assert np.asarray(packed.index).tolist() == [0, -1, 1, -1, 2]
@@ -40,7 +39,7 @@ def test_indexed_array():
     content = ak._v2.contents.NumpyArray(np.arange(10))
     layout = ak._v2.contents.IndexedArray(index, content)
 
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
 
     assert isinstance(packed, ak._v2.contents.NumpyArray)
@@ -55,7 +54,7 @@ def test_list_array():
     stops = ak._v2.index.Index64(np.array([3, 3, 5, 6, 9]))
     layout = ak._v2.contents.ListArray(starts, stops, content)
 
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
     assert isinstance(packed, ak._v2.contents.ListOffsetArray)
     assert packed.offsets[0] == 0
@@ -68,7 +67,7 @@ def test_list_offset_array():
     offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6]))
     layout = ak._v2.contents.ListOffsetArray(offsets, content)
 
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
     assert isinstance(packed, ak._v2.contents.ListOffsetArray)
     assert packed.offsets[0] == 0
@@ -80,7 +79,7 @@ def test_unmasked_array():
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
     layout = ak._v2.contents.UnmaskedArray(content)
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
 
 
@@ -93,9 +92,7 @@ def test_union_array():
         ak._v2.index.Index64([0, 1, 0, 1, 0, 1]),
         [a, b, c],
     )
-    packed = ak._v2.operations.structure.packed(
-        layout.simplify_uniontype(), highlevel=False
-    )
+    packed = ak._v2.operations.packed(layout.simplify_uniontype(), highlevel=False)
     assert to_list(packed) == to_list(layout)
     # Check that it merges like contents
     assert len(packed.contents) == 2
@@ -107,7 +104,7 @@ def test_record_array():
     a = ak._v2.contents.NumpyArray(np.arange(10))
     b = ak._v2.contents.NumpyArray(np.arange(10) * 2 + 4)
     layout = ak._v2.contents.RecordArray([a, b], None, 5)
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
     assert len(packed.contents[0]) == 5
     assert len(packed.contents[1]) == 5
@@ -116,7 +113,7 @@ def test_record_array():
 def test_regular_array():
     content = ak._v2.contents.NumpyArray(np.arange(10))
     layout = ak._v2.contents.RegularArray(content, 3)
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
     assert len(packed.content) == 9
     assert packed.size == layout.size
@@ -126,7 +123,7 @@ def test_bit_masked_aray():
     mask = ak._v2.index.IndexU8(np.array([0b10101010]))
     content = ak._v2.contents.NumpyArray(np.arange(16))
     layout = ak._v2.contents.BitMaskedArray(mask, content, False, 8, False)
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
     assert len(packed.content) == 8
 
@@ -139,7 +136,7 @@ def test_byte_masked_array():
         content,
         False,
     )
-    packed = ak._v2.operations.structure.packed(layout, highlevel=False)
+    packed = ak._v2.operations.packed(layout, highlevel=False)
     assert to_list(packed) == to_list(layout)
     assert len(packed.content) == 8
 
@@ -149,7 +146,7 @@ def test_record():
     b = ak._v2.contents.NumpyArray(np.arange(10) * 2 + 4)
     layout = ak._v2.contents.RecordArray([a, b], None, 5)
     record = layout[4]
-    packed = ak._v2.operations.structure.packed(record, highlevel=False)
+    packed = ak._v2.operations.packed(record, highlevel=False)
     assert to_list(packed) == to_list(record)
     assert len(packed.array) == 1
     assert to_list(packed.array) == [(4, 12)]

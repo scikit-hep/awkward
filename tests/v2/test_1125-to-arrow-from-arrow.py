@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import os
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -9,17 +8,17 @@ import awkward as ak  # noqa: F401
 pyarrow = pytest.importorskip("pyarrow")
 pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def arrow_round_trip(akarray, paarray, extensionarray):
     assert to_list(akarray) == paarray.to_pylist()
-    akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
+    akarray2 = ak._v2.from_arrow(paarray, highlevel=False)
     assert to_list(akarray2) == to_list(akarray)
     if extensionarray:
         assert akarray2.form.type == akarray.form.type
-    akarray3 = ak._v2._connect.pyarrow.handle_arrow(
-        akarray2.to_arrow(extensionarray=extensionarray)
+    akarray3 = ak._v2.from_arrow(
+        akarray2.to_arrow(extensionarray=extensionarray), highlevel=False
     )
     if extensionarray:
         assert akarray3.form.type == akarray.form.type
@@ -29,7 +28,7 @@ def parquet_round_trip(akarray, paarray, extensionarray, tmp_path):
     filename = os.path.join(tmp_path, "whatever.parquet")
     pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
     table = pyarrow_parquet.read_table(filename)
-    akarray4 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
+    akarray4 = ak._v2.from_arrow(table[0].chunks[0], highlevel=False)
     assert to_list(akarray4) == to_list(akarray)
     if extensionarray:
         assert akarray4.form.type == akarray.form.type
@@ -240,21 +239,7 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
     )
     paarray = akarray.to_arrow(extensionarray=extensionarray)
     arrow_round_trip(akarray, paarray, extensionarray)
-
-    # https://issues.apache.org/jira/browse/ARROW-14522
-    if extensionarray:
-        paarray = akarray.to_arrow(extensionarray=extensionarray, emptyarray_to="f8")
-        akarray2 = ak._v2._connect.pyarrow.handle_arrow(paarray)
-        assert to_list(akarray2) == to_list(akarray)
-
-        filename = os.path.join(tmp_path, "whatever.parquet")
-        pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
-        table = pyarrow_parquet.read_table(filename)
-        akarray4 = ak._v2._connect.pyarrow.handle_arrow(table[0].chunks[0])
-        assert to_list(akarray4) == to_list(akarray)
-
-    else:
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+    parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])

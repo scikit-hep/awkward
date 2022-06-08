@@ -1,12 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import numbers  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 primes = [x for x in range(2, 1000) if all(x % n != 0 for n in range(2, x))]
 
@@ -205,14 +204,14 @@ def test_astype_complex():
 
     array_float64 = ak._v2.contents.UnmaskedArray(content_float64)
     assert to_list(array_float64) == [0.25, 0.5, 3.5, 4.5, 5.5]
-    assert str(ak._v2.operations.describe.type(content_float64)) == "float64"
+    assert str(ak._v2.operations.type(content_float64)) == "float64"
     assert (
-        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_float64)))
+        str(ak._v2.operations.type(ak._v2.highlevel.Array(content_float64)))
         == "5 * float64"
     )
-    assert str(ak._v2.operations.describe.type(array_float64)) == "?float64"
+    assert str(ak._v2.operations.type(array_float64)) == "?float64"
     assert (
-        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_float64)))
+        str(ak._v2.operations.type(ak._v2.highlevel.Array(array_float64)))
         == "5 * ?float64"
     )
 
@@ -224,7 +223,7 @@ def test_astype_complex():
     assert np.can_cast(np.complex64, np.float64, "unsafe") is True
     assert np.can_cast(np.complex128, np.float64, "unsafe") is True
 
-    content_complex64 = ak._v2.operations.structure.values_astype(
+    content_complex64 = ak._v2.operations.values_astype(
         content_float64, "complex64", highlevel=False
     )
     array_complex64 = ak._v2.contents.UnmaskedArray(content_complex64)
@@ -244,14 +243,14 @@ def test_astype_complex():
         (4.5 + 0.0j),
         (5.5 + 0.0j),
     ]
-    assert str(ak._v2.operations.describe.type(content_complex64)) == "complex64"
+    assert str(ak._v2.operations.type(content_complex64)) == "complex64"
     assert (
-        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content_complex64)))
+        str(ak._v2.operations.type(ak._v2.highlevel.Array(content_complex64)))
         == "5 * complex64"
     )
-    assert str(ak._v2.operations.describe.type(array_complex64)) == "?complex64"
+    assert str(ak._v2.operations.type(array_complex64)) == "?complex64"
     assert (
-        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array_complex64)))
+        str(ak._v2.operations.type(ak._v2.highlevel.Array(array_complex64)))
         == "5 * ?complex64"
     )
     content = ak._v2.contents.NumpyArray(
@@ -269,6 +268,7 @@ def test_astype_complex():
         (9.9 + 0j),
     ]
 
+    assert content_complex64.sum() == (14.25 + 0j)
     assert content_complex64.prod() == (10.828125 + 0j)
     assert content_complex64.min() == (0.25 + 0j)
     assert content_complex64.max() == (5.5 + 0j)

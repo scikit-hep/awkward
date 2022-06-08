@@ -1,23 +1,20 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_empty_array_slice():
     # inspired by PR021::test_getitem
-    a = ak._v2.operations.convert.from_json("[[], [[], []], [[], [], []]]")
+    a = ak._v2.operations.from_json("[[], [[], []], [[], [], []]]")
     assert to_list(a[2, 1, np.array([], dtype=int)]) == []
     # FIXME: assert [[]] == []
     # assert to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == []
 
-    a = ak._v2.operations.convert.from_iter(
-        [[], [[], []], [[], [], []]], highlevel=False
-    )
+    a = ak._v2.operations.from_iter([[], [[], []], [[], [], []]], highlevel=False)
     assert to_list(a[2, 1, np.array([], dtype=int)]) == []
     assert (
         a.typetracer[2, 1, np.array([], dtype=int)].form
@@ -90,9 +87,6 @@ def test_nonflat_slice():
     )
 
 
-@pytest.mark.skip(
-    reason="Should be working now that we have toListOffsetArray64, but isn't."
-)
 def test_nonflat_slice_2():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
     content = ak._v2.contents.NumpyArray(array.reshape(-1))
@@ -103,7 +97,9 @@ def test_nonflat_slice_2():
     )
 
     two = listoffsetarray[
-        [[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]
+        np.asarray([[1, 0], [1, 1], [1, 0]]),
+        np.asarray([[2, 0], [1, 1], [2, 0]]),
+        np.asarray([[2, 4], [2, 4], [0, 1]]),
     ]
     assert to_list(two) == [[27, 4], [22, 24], [25, 1]]
 

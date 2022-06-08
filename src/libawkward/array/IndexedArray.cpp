@@ -180,6 +180,11 @@ namespace awkward {
   }
 
   bool
+  IndexedForm::istuple() const {
+    return content_.get()->istuple();
+  }
+
+  bool
   IndexedForm::equal(const FormPtr& other,
                      bool check_identities,
                      bool check_parameters,
@@ -423,6 +428,11 @@ namespace awkward {
   const std::vector<std::string>
   IndexedOptionForm::keys() const {
     return content_.get()->keys();
+  }
+
+  bool
+  IndexedOptionForm::istuple() const {
+    return content_.get()->istuple();
   }
 
   bool
@@ -1517,6 +1527,12 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::istuple() const {
+    return content_.get()->istuple();
+  }
+
+  template <typename T, bool ISOPTION>
   const std::string
   IndexedArrayOf<T, ISOPTION>::validityerror(const std::string& path) const {
     const std::string paramcheck = validityerror_parameters(path);
@@ -2506,10 +2522,6 @@ namespace awkward {
                                             int64_t outlength,
                                             bool ascending,
                                             bool stable) const {
-    if (length() == 0 ) {
-      return std::make_shared<NumpyArray>(Index64(0));
-    }
-
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
 

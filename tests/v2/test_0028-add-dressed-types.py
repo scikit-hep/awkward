@@ -1,37 +1,36 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_fromnumpy():
     a = np.arange(2 * 3 * 5).reshape((2, 3, 5))
-    b = ak._v2.operations.convert.from_numpy(a)
+    b = ak._v2.operations.from_numpy(a)
     assert to_list(a) == to_list(b)
 
 
-@pytest.mark.skip(reason="FIXME: ak.type issues repr printout")
 def test_highlevel():
     a = ak._v2.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True
     )
     assert (
         repr(a)
-        == "<Array [[1.1, 2.2, 3.3], ... [7.7, 8.8, 9.9]] type='5 * var * float64'>"
+        == "<Array [[1.1, 2.2, 3.3], [], ..., [7.7, 8.8, 9.9]] type='5 * var * float64'>"
     )
     assert str(a) == "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]"
 
     b = ak._v2.highlevel.Array(np.arange(100, dtype=np.int32), check_valid=True)
     assert (
-        repr(b) == "<Array [0, 1, 2, 3, 4, ... 95, 96, 97, 98, 99] type='100 * int32'>"
+        repr(b)
+        == "<Array [0, 1, 2, 3, 4, 5, 6, ..., 94, 95, 96, 97, 98, 99] type='100 * int32'>"
     )
     assert (
         str(b)
-        == "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ... 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]"
+        == "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ..., 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]"
     )
 
     c = ak._v2.highlevel.Array(
@@ -40,7 +39,7 @@ def test_highlevel():
     )
     assert (
         repr(c)
-        == '<Array [{one: 3.14, two: [1.1, ... -3.14]}] type=\'2 * {"one": float64, "two": va...\'>'
+        == "<Array [{one: 3.14, two: [...]}, {...}] type='2 * {one: float64, two: var *...'>"
     )
     assert str(c) == "[{one: 3.14, two: [1.1, 2.2]}, {one: 99.9, two: [-3.14]}]"
 
@@ -58,13 +57,12 @@ def test_string1():
     assert str(a) == str(b"hey there")
 
 
-@pytest.mark.skip(reason="FIXME: StringBehavior not implemented")
 def test_string2():
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array([ord(x) for x in "heythere"], dtype=np.uint8)
     )
-    listoffsetarray = ak.layout.ListOffsetArray64(
-        ak.layout.Index64(np.array([0, 3, 3, 8])), content
+    listoffsetarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 3, 3, 8])), content
     )
     a = ak._v2.highlevel.Array(listoffsetarray, check_valid=True)
 
@@ -72,26 +70,25 @@ def test_string2():
     assert not isinstance(a, ak._v2.behaviors.string.StringBehavior)
     assert to_list(a) == [[104, 101, 121], [], [116, 104, 101, 114, 101]]
 
-    assert str(ak._v2.operations.describe.type(a)) == "3 * var * uint8"
-    assert str(ak._v2.operations.describe.type(a[0])) == "3 * uint8"
-    assert str(ak._v2.operations.describe.type(a[1])) == "0 * uint8"
-    assert str(ak._v2.operations.describe.type(a[2])) == "5 * uint8"
-
+    assert str(ak._v2.operations.type(a)) == "3 * var * uint8"
+    assert str(ak._v2.operations.type(a[0])) == "3 * uint8"
+    assert str(ak._v2.operations.type(a[1])) == "0 * uint8"
+    assert str(ak._v2.operations.type(a[2])) == "5 * uint8"
     assert (
         repr(a)
-        == "<Array [[104, 101, 121], ... 101, 114, 101]] type='3 * var * uint8'>"
+        == "<Array [[104, 101, 121], ..., [116, 104, ..., 114, 101]] type='3 * var * uint8'>"
     )
     assert str(a) == "[[104, 101, 121], [], [116, 104, 101, 114, 101]]"
     assert repr(a[0]) == "<Array [104, 101, 121] type='3 * uint8'>"
     assert repr(a[1]) == "<Array [] type='0 * uint8'>"
     assert repr(a[2]) == "<Array [116, 104, 101, 114, 101] type='5 * uint8'>"
 
-    content = ak.layout.NumpyArray(
+    content = ak._v2.contents.NumpyArray(
         np.array([ord(x) for x in "heythere"], dtype=np.uint8),
         parameters={"__array__": "char", "encoding": "utf-8"},
     )
-    listoffsetarray = ak.layout.ListOffsetArray64(
-        ak.layout.Index64(np.array([0, 3, 3, 8])),
+    listoffsetarray = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 3, 3, 8])),
         content,
         parameters={"__array__": "string"},
     )

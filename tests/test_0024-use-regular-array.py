@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -65,7 +64,9 @@ def test_nonflat_slice():
     ]
 
     two = listoffsetarray[
-        [[1, 0], [1, 1], [1, 0]], [[2, 0], [1, 1], [2, 0]], [[2, 4], [2, 4], [0, 1]]
+        np.asarray([[1, 0], [1, 1], [1, 0]]),
+        np.asarray([[2, 0], [1, 1], [2, 0]]),
+        np.asarray([[2, 4], [2, 4], [0, 1]]),
     ]
     assert ak.to_list(two) == [[27, 4], [22, 24], [25, 1]]
     assert np.asarray(two.content.identities).tolist() == [

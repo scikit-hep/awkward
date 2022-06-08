@@ -169,6 +169,11 @@ namespace awkward {
   }
 
   bool
+  RegularForm::istuple() const {
+    return content_.get()->istuple();
+  }
+
+  bool
   RegularForm::equal(const FormPtr& other,
                      bool check_identities,
                      bool check_parameters,
@@ -783,6 +788,11 @@ namespace awkward {
     return content_.get()->keys();
   }
 
+  bool
+  RegularArray::istuple() const {
+    return content_.get()->istuple();
+  }
+
   const std::string
   RegularArray::validityerror(const std::string& path) const {
     const std::string paramcheck = validityerror_parameters(path);
@@ -1309,9 +1319,6 @@ namespace awkward {
                              int64_t outlength,
                              bool ascending,
                              bool stable) const {
-    if (length() == 0) {
-      return std::make_shared<NumpyArray>(Index64(0));
-    }
     std::shared_ptr<Content> out = toListOffsetArray64(true).get()->argsort_next(
                                        negaxis,
                                        starts,

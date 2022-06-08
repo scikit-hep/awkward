@@ -17,15 +17,19 @@ class IndexedOptionForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(index):
-            raise TypeError(
-                "{} 'index' must be of type str, not {}".format(
-                    type(self).__name__, repr(index)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'index' must be of type str, not {}".format(
+                        type(self).__name__, repr(index)
+                    )
                 )
             )
         if not isinstance(content, Form):
-            raise TypeError(
-                "{} all 'contents' must be Form subclasses, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} all 'contents' must be Form subclasses, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
 
@@ -177,5 +181,24 @@ class IndexedOptionForm(Form):
         return self._content.fields
 
     @property
+    def is_tuple(self):
+        return self._content.is_tuple
+
+    @property
     def dimension_optiontype(self):
         return True
+
+    def _columns(self, path, output, list_indicator):
+        self._content._columns(path, output, list_indicator)
+
+    def _select_columns(self, index, specifier, matches, output):
+        return IndexedOptionForm(
+            self._index,
+            self._content._select_columns(index, specifier, matches, output),
+            self._has_identifier,
+            self._parameters,
+            self._form_key,
+        )
+
+    def _column_types(self):
+        return self._content._column_types()

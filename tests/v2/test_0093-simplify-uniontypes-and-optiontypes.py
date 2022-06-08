@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_numpyarray_merge():
@@ -76,8 +75,8 @@ def test_regulararray_merge():
 
     np1 = np.arange(2 * 7 * 5).reshape(2, 7, 5)
     np2 = np.arange(3 * 7 * 5).reshape(3, 7, 5)
-    ak1 = ak._v2.operations.convert.from_iter(np1, highlevel=False)
-    ak2 = ak._v2.operations.convert.from_iter(np2, highlevel=False)
+    ak1 = ak._v2.operations.from_iter(np1, highlevel=False)
+    ak2 = ak._v2.operations.from_iter(np2, highlevel=False)
 
     assert to_list(ak1.merge(ak2)) == to_list(np.concatenate([np1, np2]))
     assert to_list(ak1.merge(emptyarray)) == to_list(ak1)
@@ -316,11 +315,11 @@ def test_listoffsetarray_merge():
 def test_recordarray_merge():
     emptyarray = ak._v2.contents.EmptyArray()
 
-    arrayr1 = ak._v2.operations.convert.from_iter(
+    arrayr1 = ak._v2.operations.from_iter(
         [{"x": 0, "y": []}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}],
         highlevel=False,
     )
-    arrayr2 = ak._v2.operations.convert.from_iter(
+    arrayr2 = ak._v2.operations.from_iter(
         [
             {"x": 2.2, "y": [2.2, 2.2]},
             {"x": 1.1, "y": [1.1, 1.1]},
@@ -328,15 +327,15 @@ def test_recordarray_merge():
         ],
         highlevel=False,
     )
-    arrayr3 = ak._v2.operations.convert.from_iter(
+    arrayr3 = ak._v2.operations.from_iter(
         [{"x": 0, "y": 0.0}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}],
         highlevel=False,
     )
-    arrayr4 = ak._v2.operations.convert.from_iter(
+    arrayr4 = ak._v2.operations.from_iter(
         [{"y": [], "x": 0}, {"y": [1, 1], "x": 1}, {"y": [2, 2], "x": 2}],
         highlevel=False,
     )
-    arrayr5 = ak._v2.operations.convert.from_iter(
+    arrayr5 = ak._v2.operations.from_iter(
         [
             {"x": 0, "y": [], "z": 0},
             {"x": 1, "y": [1, 1], "z": 1},
@@ -344,7 +343,7 @@ def test_recordarray_merge():
         ],
         highlevel=False,
     )
-    arrayr6 = ak._v2.operations.convert.from_iter(
+    arrayr6 = ak._v2.operations.from_iter(
         [
             {"z": 0, "x": 0, "y": []},
             {"z": 1, "x": 1, "y": [1, 1]},
@@ -352,29 +351,29 @@ def test_recordarray_merge():
         ],
         highlevel=False,
     )
-    arrayr7 = ak._v2.operations.convert.from_iter(
+    arrayr7 = ak._v2.operations.from_iter(
         [{"x": 0}, {"x": 1}, {"x": 2}], highlevel=False
     )
 
-    arrayt1 = ak._v2.operations.convert.from_iter(
+    arrayt1 = ak._v2.operations.from_iter(
         [(0, []), (1, [1.1]), (2, [2, 2])], highlevel=False
     )
-    arrayt2 = ak._v2.operations.convert.from_iter(
+    arrayt2 = ak._v2.operations.from_iter(
         [(2.2, [2.2, 2.2]), (1.1, [1.1, 1.1]), (0.0, [0.0, 0.0])], highlevel=False
     )
-    arrayt3 = ak._v2.operations.convert.from_iter(
+    arrayt3 = ak._v2.operations.from_iter(
         [(0, 0.0), (1, 1.1), (2, 2.2)], highlevel=False
     )
-    arrayt4 = ak._v2.operations.convert.from_iter(
+    arrayt4 = ak._v2.operations.from_iter(
         [([], 0), ([1.1], 1), ([2.2, 2.2], 2)], highlevel=False
     )
-    arrayt5 = ak._v2.operations.convert.from_iter(
+    arrayt5 = ak._v2.operations.from_iter(
         [(0, [], 0), (1, [1], 1), (2, [2, 2], 2)], highlevel=False
     )
-    arrayt6 = ak._v2.operations.convert.from_iter(
+    arrayt6 = ak._v2.operations.from_iter(
         [(0, 0, []), (1, 1, [1]), (2, 2, [2, 2])], highlevel=False
     )
-    arrayt7 = ak._v2.operations.convert.from_iter([(0,), (1,), (2,)], highlevel=False)
+    arrayt7 = ak._v2.operations.from_iter([(0,), (1,), (2,)], highlevel=False)
 
     assert arrayr1.mergeable(arrayr2)
     assert arrayr2.mergeable(arrayr1)
@@ -539,12 +538,10 @@ def test_recordarray_merge():
 
 
 def test_indexedarray_merge():
-    content1 = ak._v2.operations.convert.from_iter(
+    content1 = ak._v2.operations.from_iter(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
     )
-    content2 = ak._v2.operations.convert.from_iter(
-        [[1, 2], [], [3, 4]], highlevel=False
-    )
+    content2 = ak._v2.operations.from_iter([[1, 2], [], [3, 4]], highlevel=False)
     index1 = ak._v2.index.Index64(np.array([2, 0, -1, 0, 1, 2], dtype=np.int64))
     indexedarray1 = ak._v2.contents.IndexedOptionArray(index1, content1)
 
@@ -611,15 +608,11 @@ def test_indexedarray_merge():
 def test_unionarray_merge():
     emptyarray = ak._v2.contents.EmptyArray()
 
-    one = ak._v2.operations.convert.from_iter(
-        [0.0, 1.1, 2.2, [], [1], [2, 2]], highlevel=False
-    )
-    two = ak._v2.operations.convert.from_iter(
+    one = ak._v2.operations.from_iter([0.0, 1.1, 2.2, [], [1], [2, 2]], highlevel=False)
+    two = ak._v2.operations.from_iter(
         [{"x": 1, "y": 1.1}, 999, 123, {"x": 2, "y": 2.2}], highlevel=False
     )
-    three = ak._v2.operations.convert.from_iter(
-        ["one", "two", "three"], highlevel=False
-    )
+    three = ak._v2.operations.from_iter(["one", "two", "three"], highlevel=False)
 
     assert to_list(one.merge(two)) == [
         0.0,
@@ -701,18 +694,18 @@ def test_unionarray_merge():
 
 
 def test_merge_parameters():
-    one = ak._v2.operations.convert.from_iter(
+    one = ak._v2.operations.from_iter(
         [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], highlevel=False
     )
-    two = ak._v2.operations.convert.from_iter(["good", "stuff"], highlevel=False)
+    two = ak._v2.operations.from_iter(["good", "stuff"], highlevel=False)
 
-    assert to_list(ak._v2.operations.structure.concatenate([one, two])) == [
+    assert to_list(ak._v2.operations.concatenate([one, two])) == [
         [121, 117, 99, 107, 121],
         [115, 116, 117, 102, 102],
         "good",
         "stuff",
     ]
-    assert to_list(ak._v2.operations.structure.concatenate([two, one])) == [
+    assert to_list(ak._v2.operations.concatenate([two, one])) == [
         "good",
         "stuff",
         [121, 117, 99, 107, 121],
@@ -720,21 +713,17 @@ def test_merge_parameters():
     ]
 
     assert (
-        ak._v2.operations.structure.concatenate(
-            [one, two], highlevel=False
-        ).typetracer.form
-        == ak._v2.operations.structure.concatenate([one, two], highlevel=False).form
+        ak._v2.operations.concatenate([one, two], highlevel=False).typetracer.form
+        == ak._v2.operations.concatenate([one, two], highlevel=False).form
     )
     assert (
-        ak._v2.operations.structure.concatenate(
-            [two, one], highlevel=False
-        ).typetracer.form
-        == ak._v2.operations.structure.concatenate([two, one], highlevel=False).form
+        ak._v2.operations.concatenate([two, one], highlevel=False).typetracer.form
+        == ak._v2.operations.concatenate([two, one], highlevel=False).form
     )
 
 
 def test_mask_as_bool():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         ["one", "two", None, "three", None, None, "four"], highlevel=False
     )
     index2 = ak._v2.index.Index64(np.array([2, 2, 1, 5, 0], dtype=np.int64))
@@ -758,7 +747,7 @@ def test_mask_as_bool():
 
 
 def test_indexedarray_simplify():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         ["one", "two", None, "three", None, None, "four", "five"], highlevel=False
     )
     index2 = ak._v2.index.Index64(np.array([2, 2, 1, 6, 5], dtype=np.int64))
@@ -1199,11 +1188,9 @@ def test_indexedarray_simplify_more():
 
 
 def test_unionarray_simplify_one():
-    one = ak._v2.operations.convert.from_iter([5, 4, 3, 2, 1], highlevel=False)
-    two = ak._v2.operations.convert.from_iter(
-        [[], [1], [2, 2], [3, 3, 3]], highlevel=False
-    )
-    three = ak._v2.operations.convert.from_iter([1.1, 2.2, 3.3], highlevel=False)
+    one = ak._v2.operations.from_iter([5, 4, 3, 2, 1], highlevel=False)
+    two = ak._v2.operations.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
+    three = ak._v2.operations.from_iter([1.1, 2.2, 3.3], highlevel=False)
     tags = ak._v2.index.Index8(
         np.array([0, 0, 1, 2, 1, 0, 2, 1, 1, 0, 2, 0], dtype=np.int8)
     )
@@ -1250,11 +1237,9 @@ def test_unionarray_simplify_one():
 
 
 def test_unionarray_simplify():
-    one = ak._v2.operations.convert.from_iter([5, 4, 3, 2, 1], highlevel=False)
-    two = ak._v2.operations.convert.from_iter(
-        [[], [1], [2, 2], [3, 3, 3]], highlevel=False
-    )
-    three = ak._v2.operations.convert.from_iter([1.1, 2.2, 3.3], highlevel=False)
+    one = ak._v2.operations.from_iter([5, 4, 3, 2, 1], highlevel=False)
+    two = ak._v2.operations.from_iter([[], [1], [2, 2], [3, 3, 3]], highlevel=False)
+    three = ak._v2.operations.from_iter([1.1, 2.2, 3.3], highlevel=False)
 
     tags2 = ak._v2.index.Index8(np.array([0, 1, 0, 1, 0, 0, 1], dtype=np.int8))
     index2 = ak._v2.index.Index32(np.array([0, 0, 1, 1, 2, 3, 2], dtype=np.int32))
@@ -1343,7 +1328,7 @@ def test_concatenate():
         [True, False, False, True, True], check_valid=True
     ).layout
 
-    assert to_list(ak._v2.operations.structure.concatenate([one, two, three])) == [
+    assert to_list(ak._v2.operations.concatenate([one, two, three])) == [
         1.1,
         2.2,
         3.3,
@@ -1360,15 +1345,11 @@ def test_concatenate():
         1.0,
     ]
     assert isinstance(
-        ak._v2.operations.structure.concatenate([one, two, three], highlevel=False),
+        ak._v2.operations.concatenate([one, two, three], highlevel=False),
         ak._v2.contents.unionarray.UnionArray,
     )
     assert (
-        len(
-            ak._v2.operations.structure.concatenate(
-                [one, two, three], highlevel=False
-            ).contents
-        )
+        len(ak._v2.operations.concatenate([one, two, three], highlevel=False).contents)
         == 2
     )
 
@@ -1384,14 +1365,14 @@ def test_where():
         [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], check_valid=True
     )
 
-    assert to_list(ak._v2.operations.structure.where(condition, one, two)) == [
+    assert to_list(ak._v2.operations.where(condition, one, two)) == [
         1.1,
         0.0,
         3.3,
         1.0,
         5.5,
     ]
-    assert to_list(ak._v2.operations.structure.where(condition, one, three)) == [
+    assert to_list(ak._v2.operations.where(condition, one, three)) == [
         1.1,
         [1],
         3.3,

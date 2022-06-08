@@ -22,6 +22,7 @@ import awkward._connect._numpy
 import awkward._connect._numba
 import awkward._connect._numexpr
 import awkward._connect._autograd
+import awkward.numba
 
 # high-level interface
 behavior = {}

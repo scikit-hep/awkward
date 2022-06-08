@@ -266,6 +266,21 @@ def fields(array):
     return layout.keys()
 
 
+def is_tuple(array):
+    """
+    Args:
+        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record, #ak.ArrayBuilder, #ak.layout.ArrayBuilder):
+            Array or record to check.
+
+    If `array` is a record, this returns True if the record is a tuple.
+    If `array` is an array, this returns True if the outermost record is a tuple.
+    """
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=True, allow_other=False
+    )
+    return layout.istuple
+
+
 __all__ = [
     x
     for x in list(globals())

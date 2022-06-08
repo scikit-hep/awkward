@@ -225,6 +225,17 @@ namespace awkward {
     }
   }
 
+  bool VirtualForm::istuple() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
+    }
+    else {
+      return form_.get()->istuple();
+    }
+  }
+
   bool
   VirtualForm::equal(const FormPtr& other,
                      bool check_identities,
@@ -782,6 +793,11 @@ namespace awkward {
   const std::vector<std::string>
   VirtualArray::keys() const {
     return form(true).get()->keys();
+  }
+
+  bool
+  VirtualArray::istuple() const {
+    return form(true).get()->istuple();
   }
 
   const std::string

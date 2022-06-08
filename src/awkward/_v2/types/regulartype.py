@@ -8,27 +8,35 @@ from awkward._v2.forms.form import _parameters_equal
 class RegularType(Type):
     def __init__(self, content, size, parameters=None, typestr=None):
         if not isinstance(content, Type):
-            raise TypeError(
-                "{} 'content' must be a Type subtype, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'content' must be a Type subtype, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if not ak._util.isint(size) or size < 0:
-            raise ValueError(
-                "{} 'size' must be of a positive integer, not {}".format(
-                    type(self).__name__, repr(size)
+            raise ak._v2._util.error(
+                ValueError(
+                    "{} 'size' must be of a positive integer, not {}".format(
+                        type(self).__name__, repr(size)
+                    )
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'parameters' must be of type dict or None, not {}".format(
+                        type(self).__name__, repr(parameters)
+                    )
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'typestr' must be of type string or None, not {}".format(
+                        type(self).__name__, repr(typestr)
+                    )
                 )
             )
         self._content = content
@@ -44,24 +52,28 @@ class RegularType(Type):
     def size(self):
         return self._size
 
-    def __str__(self):
+    def _str(self, indent, compact):
         if self._typestr is not None:
-            out = self._typestr
+            out = [self._typestr]
 
         elif self.parameter("__array__") == "string":
-            return f"string[{self._size}]"
+            return [f"string[{self._size}]"]
 
         elif self.parameter("__array__") == "bytestring":
-            return f"bytes[{self._size}]"
+            return [f"bytes[{self._size}]"]
 
         else:
             params = self._str_parameters()
             if params is None:
-                out = f"{self._size} * {str(self._content)}"
+                out = [str(self._size), " * "] + self._content._str(indent, compact)
             else:
-                out = f"[{self._size} * {str(self._content)}, {params}]"
+                out = (
+                    ["[", str(self._size), " * "]
+                    + self._content._str(indent, compact)
+                    + [", ", params, "]"]
+                )
 
-        return self._str_categorical_begin() + out + self._str_categorical_end()
+        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._content), repr(self._size)] + self._repr_args()

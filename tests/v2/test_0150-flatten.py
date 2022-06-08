@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 """includes test_0117, test_0110, test_0042, test_0127,
  test_0198, test_0446, test_0585, test_0590, test_0612,
@@ -16,26 +15,20 @@ to_list = ak._v2.operations.convert.to_list
 def test_flatten_ListOffsetArray():
     array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
 
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array)) == [
         1.1,
         2.2,
         3.3,
         4.4,
         5.5,
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:])
-    ) == [4.4, 5.5]
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:])) == [4.4, 5.5]
 
     array = ak._v2.highlevel.Array(
         [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]]
     ).layout
 
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
@@ -43,37 +36,29 @@ def test_flatten_ListOffsetArray():
         [],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:])
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:])) == [
         [5.5],
         [],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[:, 1:])
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[:, 1:])) == [
         [],
         [3.3, 4.4],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2)) == [
         [0.0, 1.1, 2.2, 3.3, 4.4],
         [],
         [5.5],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:], axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:], axis=2)) == [
         [],
         [5.5],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[:, 1:], axis=2)
+    assert ak._v2.operations.to_list(
+        ak._v2.operations.flatten(array[:, 1:], axis=2)
     ) == [
         [3.3, 4.4],
         [],
@@ -86,67 +71,49 @@ def test_flatten_ListOffsetArray():
     ).layout
 
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=1)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=1))
         == np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7).tolist()
     )
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=2)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2))
         == np.arange(2 * 3 * 5 * 7).reshape(2, 3 * 5, 7).tolist()
     )
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=3)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=3))
         == np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5 * 7).tolist()
     )
 
     array = ak._v2.highlevel.Array(
-        ak._v2.operations.convert.from_iter(
+        ak._v2.operations.from_iter(
             np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist(), highlevel=False
         )
     ).layout
 
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=1)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=1))
         == np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7).tolist()
     )
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=2)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2))
         == np.arange(2 * 3 * 5 * 7).reshape(2, 3 * 5, 7).tolist()
     )
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=3)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=3))
         == np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5 * 7).tolist()
     )
 
     array = ak._v2.highlevel.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)).layout
 
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=1)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=1))
         == np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7).tolist()
     )
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=2)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2))
         == np.arange(2 * 3 * 5 * 7).reshape(2, 3 * 5, 7).tolist()
     )
     assert (
-        ak._v2.operations.convert.to_list(
-            ak._v2.operations.structure.flatten(array, axis=3)
-        )
+        ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=3))
         == np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5 * 7).tolist()
     )
 
@@ -156,9 +123,7 @@ def test_flatten_IndexedArray():
         [[1.1, 2.2, None, 3.3], None, [], None, [4.4, 5.5], None]
     ).layout
 
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array)) == [
         1.1,
         2.2,
         None,
@@ -166,9 +131,7 @@ def test_flatten_IndexedArray():
         4.4,
         5.5,
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:])
-    ) == [4.4, 5.5]
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:])) == [4.4, 5.5]
 
     array = ak._v2.highlevel.Array(
         [
@@ -179,23 +142,19 @@ def test_flatten_IndexedArray():
         ]
     ).layout
 
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2)) == [
         [0.0, 1.1, 2.2, 3.3, 4.4],
         [],
         [5.5],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:], axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:], axis=2)) == [
         [],
         [5.5],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[:, 1:], axis=2)
+    assert ak._v2.operations.to_list(
+        ak._v2.operations.flatten(array[:, 1:], axis=2)
     ) == [
         [3.3, 4.4],
         [],
@@ -214,9 +173,7 @@ def test_flatten_IndexedArray():
         ]
     ).layout
 
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2)) == [
         [0.0, 1.1, 2.2, 3.3, 4.4],
         [],
         [5.5],
@@ -224,17 +181,15 @@ def test_flatten_IndexedArray():
         None,
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:], axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:], axis=2)) == [
         [],
         [5.5],
         None,
         None,
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[:, 1:], axis=2)
+    assert ak._v2.operations.to_list(
+        ak._v2.operations.flatten(array[:, 1:], axis=2)
     ) == [
         [3.3, 4.4],
         [],
@@ -255,9 +210,7 @@ def test_flatten_IndexedArray():
         ]
     ).layout
 
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array)) == [
         [0.0, 1.1, None, 2.2],
         None,
         [],
@@ -268,9 +221,7 @@ def test_flatten_IndexedArray():
         [6.6, None, 7.7, 8.8, 9.9],
         None,
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2)) == [
         [0.0, 1.1, None, 2.2, 3.3, 4.4],
         None,
         [],
@@ -278,17 +229,15 @@ def test_flatten_IndexedArray():
         None,
         [6.6, None, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:], axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:], axis=2)) == [
         None,
         [],
         [5.5],
         None,
         [6.6, None, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[:, 1:], axis=2)
+    assert ak._v2.operations.to_list(
+        ak._v2.operations.flatten(array[:, 1:], axis=2)
     ) == [
         [3.3, 4.4],
         None,
@@ -298,7 +247,7 @@ def test_flatten_IndexedArray():
         [6.6, None, 7.7, 8.8, 9.9],
     ]
 
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     index = ak._v2.index.Index64(np.array([2, 1, 0, 3, 3, 4], dtype=np.int64))
@@ -312,9 +261,7 @@ def test_flatten_IndexedArray():
         [5.5],
         [6.6, 7.7, 8.8, 9.9],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array)) == [
         3.3,
         4.4,
         0.0,
@@ -328,7 +275,7 @@ def test_flatten_IndexedArray():
         9.9,
     ]
 
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]], [[], [6.6, 7.7, 8.8, 9.9]]],
         highlevel=False,
     )
@@ -342,9 +289,7 @@ def test_flatten_IndexedArray():
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [[], [6.6, 7.7, 8.8, 9.9]],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2)) == [
         [5.5],
         [5.5],
         [],
@@ -363,23 +308,19 @@ def test_flatten_RecordArray():
         ]
     ).layout
 
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2)) == [
         {"x": [], "y": [3, 3, 3]},
         {"x": [1], "y": [2, 2]},
         {"x": [2, 2], "y": [1]},
         {"x": [3, 3, 3], "y": []},
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:], axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:], axis=2)) == [
         {"x": [1], "y": [2, 2]},
         {"x": [2, 2], "y": [1]},
         {"x": [3, 3, 3], "y": []},
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[:, 1:], axis=2)
+    assert ak._v2.operations.to_list(
+        ak._v2.operations.flatten(array[:, 1:], axis=2)
     ) == [
         {"x": [], "y": []},
         {"x": [], "y": []},
@@ -389,10 +330,10 @@ def test_flatten_RecordArray():
 
 
 def test_flatten_UnionArray():
-    content1 = ak._v2.operations.convert.from_iter(
+    content1 = ak._v2.operations.from_iter(
         [[1.1], [2.2, 2.2], [3.3, 3.3, 3.3]], highlevel=False
     )
-    content2 = ak._v2.operations.convert.from_iter(
+    content2 = ak._v2.operations.from_iter(
         [[[3, 3, 3], [3, 3, 3], [3, 3, 3]], [[2, 2], [2, 2]], [[1]]], highlevel=False
     )
     tags = ak._v2.index.Index8(np.array([0, 1, 0, 1, 0, 1], dtype=np.int8))
@@ -414,9 +355,7 @@ def test_flatten_UnionArray():
         [3.3, 3.3, 3.3],
         [[1]],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array)) == [
         1.1,
         [3, 3, 3],
         [3, 3, 3],
@@ -430,9 +369,7 @@ def test_flatten_UnionArray():
         3.3,
         [1],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:])
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:])) == [
         [3, 3, 3],
         [3, 3, 3],
         [3, 3, 3],
@@ -456,9 +393,7 @@ def test_flatten_UnionArray():
         [[1]],
         [[1]],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2)) == [
         [3, 3, 3, 3, 3, 3, 3, 3, 3],
         [3, 3, 3, 3, 3, 3, 3, 3, 3],
         [2, 2, 2, 2],
@@ -466,17 +401,15 @@ def test_flatten_UnionArray():
         [1],
         [1],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[1:], axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array[1:], axis=2)) == [
         [3, 3, 3, 3, 3, 3, 3, 3, 3],
         [2, 2, 2, 2],
         [2, 2, 2, 2],
         [1],
         [1],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array[:, 1:], axis=2)
+    assert ak._v2.operations.to_list(
+        ak._v2.operations.flatten(array[:, 1:], axis=2)
     ) == [
         [3, 3, 3, 3, 3, 3],
         [3, 3, 3, 3, 3, 3],
@@ -491,9 +424,7 @@ def test_flatten_0042():
     array = ak._v2.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True
     ).layout
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=1)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=1)) == [
         1.1,
         2.2,
         3.3,
@@ -550,7 +481,7 @@ def test_flatten2():
 
 
 def test_ByteMaskedArray_flatten():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
             [],
@@ -570,36 +501,28 @@ def test_ByteMaskedArray_flatten():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=1)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=1)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
         [],
         [10.0, 11.1, 12.2],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=-2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=-2)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
         [],
         [10.0, 11.1, 12.2],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=2)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=2)) == [
         [0.0, 1.1, 2.2, 3.3, 4.4],
         [],
         None,
         None,
         [10.0, 11.1, 12.2],
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=-1)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=-1)) == [
         [0.0, 1.1, 2.2, 3.3, 4.4],
         [],
         None,
@@ -611,9 +534,7 @@ def test_ByteMaskedArray_flatten():
 def test_flatten_0198():
     array = ak._v2.highlevel.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]).layout
 
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=0)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=0)) == [
         1.1,
         2.2,
         3.3,
@@ -621,10 +542,10 @@ def test_flatten_0198():
         5.5,
     ]
 
-    content0 = ak._v2.operations.convert.from_iter(
+    content0 = ak._v2.operations.from_iter(
         [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5], highlevel=False
     )
-    content1 = ak._v2.operations.convert.from_iter(
+    content1 = ak._v2.operations.from_iter(
         ["one", None, "two", None, "three"], highlevel=False
     )
     array = ak._v2.contents.UnionArray(
@@ -652,9 +573,7 @@ def test_flatten_0198():
         "three",
         5.5,
     ]
-    assert ak._v2.operations.convert.to_list(
-        ak._v2.operations.structure.flatten(array, axis=0)
-    ) == [
+    assert ak._v2.operations.to_list(ak._v2.operations.flatten(array, axis=0)) == [
         1.1,
         "one",
         2.2,
@@ -669,22 +588,22 @@ def test_flatten_0198():
 def test_fix_flatten_of_sliced_array_0446():
     array = ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5], [6, 7, 8, 9]]).layout
 
-    assert ak._v2.operations.structure.flatten(array[:-1], axis=1).tolist() == [
+    assert ak._v2.operations.flatten(array[:-1], axis=1).tolist() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak._v2.operations.structure.flatten(array[:-2], axis=1).tolist() == [1, 2, 3]
-    assert ak._v2.operations.structure.flatten(array[:-1], axis=None).tolist() == [
+    assert ak._v2.operations.flatten(array[:-2], axis=1).tolist() == [1, 2, 3]
+    assert ak._v2.operations.flatten(array[:-1], axis=None).tolist() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak._v2.operations.structure.flatten(array[:-2], axis=None).tolist() == [
+    assert ak._v2.operations.flatten(array[:-2], axis=None).tolist() == [
         1,
         2,
         3,
@@ -694,7 +613,7 @@ def test_fix_flatten_of_sliced_array_0446():
 def test_flatten_None_axis():
     array2 = ak._v2.highlevel.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7))
 
-    assert to_list(ak._v2.operations.structure.flatten(array2, axis=None)) == to_list(
+    assert to_list(ak._v2.operations.flatten(array2, axis=None)) == to_list(
         np.arange(2 * 3 * 5 * 7)
     )
 
@@ -702,12 +621,12 @@ def test_flatten_None_axis():
 def test_fix_corner_case_0585():
     array = ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
 
-    assert ak._v2.operations.structure.flatten(array, axis=0).tolist() == [
+    assert ak._v2.operations.flatten(array, axis=0).tolist() == [
         [1, 2, 3],
         [],
         [4, 5],
     ]
-    assert ak._v2.operations.structure.flatten(array, axis=-2).tolist() == [
+    assert ak._v2.operations.flatten(array, axis=-2).tolist() == [
         [1, 2, 3],
         [],
         [4, 5],
@@ -715,14 +634,14 @@ def test_fix_corner_case_0585():
 
     array = ak._v2.highlevel.Array([1, 2, 3, 4, 5]).layout
 
-    assert ak._v2.operations.structure.flatten(array, axis=0).tolist() == [
+    assert ak._v2.operations.flatten(array, axis=0).tolist() == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert ak._v2.operations.structure.flatten(array, axis=-1).tolist() == [
+    assert ak._v2.operations.flatten(array, axis=-1).tolist() == [
         1,
         2,
         3,
@@ -737,9 +656,9 @@ def test_flatten_allow_regulararray_size_zero_0590():
         ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
     )
 
-    assert ak._v2.operations.structure.flatten(empty, axis=0).tolist() == []
-    assert ak._v2.operations.structure.flatten(empty, axis=1).tolist() == []
-    assert ak._v2.operations.structure.flatten(empty, axis=2).tolist() == []
+    assert ak._v2.operations.flatten(empty, axis=0).tolist() == []
+    assert ak._v2.operations.flatten(empty, axis=1).tolist() == []
+    assert ak._v2.operations.flatten(empty, axis=2).tolist() == []
 
 
 def test_0724():
@@ -751,21 +670,19 @@ def test_0724():
     idx = ak._v2.index.Index64([175990832])
     a = ak._v2.contents.ListOffsetArray(idx, a)
 
-    assert ak._v2.operations.structure.flatten(a, axis=2).tolist() == []
-    assert (
-        str(ak._v2.operations.structure.flatten(a, axis=2).type) == "0 * var * ?float64"
-    )
+    assert ak._v2.operations.flatten(a, axis=2).tolist() == []
+    assert str(ak._v2.operations.flatten(a, axis=2).type) == "0 * var * ?float64"
 
 
 def test_flatten_axis_none_0866():
-    a1 = ak._v2.operations.structure.zip(
+    a1 = ak._v2.operations.zip(
         {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
     )
-    a2 = ak._v2.operations.structure.zip(
+    a2 = ak._v2.operations.zip(
         {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
     )
-    union = ak._v2.operations.structure.where([True, False, True], a1, a2)
-    assert set(ak._v2.operations.structure.flatten(union, axis=None)) == {
+    union = ak._v2.operations.where([True, False, True], a1, a2)
+    assert set(ak._v2.operations.flatten(union, axis=None)) == {
         1,
         2,
         3,
@@ -778,6 +695,6 @@ def test_flatten_axis_none_0866():
 
 
 def test_0973():
-    array = ak._v2.operations.convert.from_numpy(np.zeros((3, 3, 5)))
-    flattened = ak._v2.operations.structure.flatten(array, axis=None)
+    array = ak._v2.operations.from_numpy(np.zeros((3, 3, 5)))
+    flattened = ak._v2.operations.flatten(array, axis=None)
     assert flattened.ndim == 1

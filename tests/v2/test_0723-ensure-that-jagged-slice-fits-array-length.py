@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -34,10 +33,10 @@ def test_second_issue():
     idx = ak._v2.index.Index64([0, -1, 1, 2, -1, 3, 4, 5])
     a = ak._v2.contents.IndexedOptionArray(idx, a)
     a = ak._v2.Array(a)
-    assert ak._v2.operations.describe.is_valid(a)
+    assert ak._v2.operations.is_valid(a)
 
-    assert ak._v2.operations.describe.is_valid(ak._v2.operations.structure.argsort(a))
-    assert a[ak._v2.operations.structure.argsort(a)].tolist() == [
+    assert ak._v2.operations.is_valid(ak._v2.operations.argsort(a))
+    assert a[ak._v2.operations.argsort(a)].tolist() == [
         [0, 1],
         None,
         [2, 3],

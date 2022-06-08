@@ -66,7 +66,9 @@ def tolookup(layout, positions):
         return UnionLookup.tolookup(layout, positions)
 
     else:
-        raise AssertionError(f"unrecognized Content: {type(layout)}")
+        raise ak._v2._util.error(
+            AssertionError(f"unrecognized Content: {type(layout)}")
+        )
 
 
 class ContentLookup:
@@ -89,7 +91,9 @@ class ContentLookup:
         elif arraytype.dtype.bitwidth == 64:
             return ak._v2.index.Index64
         else:
-            raise AssertionError(f"no Index* type for array: {arraytype}")
+            raise ak._v2._util.error(
+                AssertionError(f"no Index* type for array: {arraytype}")
+            )
 
 
 class NumpyLookup(ContentLookup):

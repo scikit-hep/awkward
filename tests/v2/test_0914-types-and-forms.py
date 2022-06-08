@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -661,7 +660,7 @@ def test_RecordType():
                 {"x": 123},
             )
         )
-        == 'struct[["x", "y"], [unknown, bool], parameters={"x": 123}]'
+        == 'struct[{x: unknown, y: bool}, parameters={"x": 123}]'
     )
     assert (
         str(
@@ -877,7 +876,7 @@ def test_RecordType():
                 {"x": 123, "__categorical__": True},
             )
         )
-        == 'categorical[type=struct[["x", "y"], [unknown, bool], parameters={"x": 123}]]'
+        == 'categorical[type=struct[{x: unknown, y: bool}, parameters={"x": 123}]]'
     )
     assert (
         str(

@@ -28,10 +28,12 @@ def primitive_to_dtype(primitive):
     else:
         out = _primitive_to_dtype_dict.get(primitive)
         if out is None:
-            raise TypeError(
-                "unrecognized primitive: {}. Must be one of\n\n    {}\n\nor a "
-                "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
-                    repr(primitive), ", ".join(_primitive_to_dtype_dict)
+            raise ak._v2._util.error(
+                TypeError(
+                    "unrecognized primitive: {}. Must be one of\n\n    {}\n\nor a "
+                    "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
+                        repr(primitive), ", ".join(_primitive_to_dtype_dict)
+                    )
                 )
             )
         return out
@@ -43,10 +45,12 @@ def dtype_to_primitive(dtype):
     else:
         out = _dtype_to_primitive_dict.get(dtype)
         if out is None:
-            raise TypeError(
-                "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
-                "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
-                    repr(dtype), ", ".join(_primitive_to_dtype_dict)
+            raise ak._v2._util.error(
+                TypeError(
+                    "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
+                    "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
+                        repr(dtype), ", ".join(_primitive_to_dtype_dict)
+                    )
                 )
             )
         return out
@@ -93,15 +97,19 @@ class NumpyType(Type):
     def __init__(self, primitive, parameters=None, typestr=None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
-            raise TypeError(
-                "{} 'parameters' must be of type dict or None, not {}".format(
-                    type(self).__name__, repr(parameters)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'parameters' must be of type dict or None, not {}".format(
+                        type(self).__name__, repr(parameters)
+                    )
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise TypeError(
-                "{} 'typestr' must be of type string or None, not {}".format(
-                    type(self).__name__, repr(typestr)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'typestr' must be of type string or None, not {}".format(
+                        type(self).__name__, repr(typestr)
+                    )
                 )
             )
         self._primitive = primitive
@@ -114,15 +122,15 @@ class NumpyType(Type):
 
     _str_parameters_exclude = ("__categorical__", "__unit__")
 
-    def __str__(self):
+    def _str(self, indent, compact):
         if self._typestr is not None:
-            out = self._typestr
+            out = [self._typestr]
 
         elif self.parameter("__array__") == "char":
-            out = "char"
+            out = ["char"]
 
         elif self.parameter("__array__") == "byte":
-            out = "byte"
+            out = ["byte"]
 
         else:
             if self.parameter("__unit__") is not None:
@@ -135,7 +143,7 @@ class NumpyType(Type):
             params = self._str_parameters()
 
             if units is None and params is None:
-                out = self._primitive
+                out = [self._primitive]
             else:
                 if units is not None and params is not None:
                     units = units + ", "
@@ -143,9 +151,9 @@ class NumpyType(Type):
                     units = ""
                 elif params is None:
                     params = ""
-                out = self._primitive + "[" + units + params + "]"
+                out = [self._primitive, "[", units, params, "]"]
 
-        return self._str_categorical_begin() + out + self._str_categorical_end()
+        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._primitive)] + self._repr_args()

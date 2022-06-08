@@ -13,12 +13,12 @@ if not numpy_at_least("1.13.1"):
     raise ImportError("NumPy 1.13.1 or later required")
 
 
-# def convert_to_array(layout, args, kwargs):
-#     out = ak._v2.operations.convert.to_numpy(layout, allow_missing=False)
-#     if args == () and kwargs == {}:
-#         return out
-#     else:
-#         return numpy.array(out, *args, **kwargs)
+def convert_to_array(layout, args, kwargs):
+    out = ak._v2.operations.to_numpy(layout, allow_missing=False)
+    if args == () and kwargs == {}:
+        return out
+    else:
+        return numpy.array(out, *args, **kwargs)
 
 
 # implemented = {}
@@ -74,7 +74,7 @@ def _array_ufunc_custom_cast(inputs, behavior):
         if cast_fcn is not None:
             x = cast_fcn(x)
         nextinputs.append(
-            ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+            ak._v2.operations.to_layout(x, allow_record=True, allow_other=True)
         )
     return nextinputs
 
@@ -190,7 +190,14 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         args.append(x.raw(nplike))
                     else:
                         args.append(x)
-                result = getattr(ufunc, method)(*args, **kwargs)
+
+                if isinstance(nplike, ak.nplike.Jax):
+                    from awkward._v2._connect.jax import import_jax
+
+                    jax = import_jax()
+                    result = getattr(jax.numpy, ufunc.__name__)(*args, **kwargs)
+                else:
+                    result = getattr(ufunc, method)(*args, **kwargs)
 
             else:
                 shape = None
@@ -234,9 +241,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         error_message.append(type(x).__name__)
                 else:
                     error_message.append(type(x).__name__)
-            raise TypeError(
-                "no {}.{} overloads for custom types: {}".format(
-                    type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
+            raise ak._v2._util.error(
+                TypeError(
+                    "no {}.{} overloads for custom types: {}".format(
+                        type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
+                    )
                 )
             )
 
@@ -286,9 +295,9 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 #             if first == -1:
 #                 first = len(Ai)
 #             elif first != len(Ai):
-#                 raise ValueError(
+#                 raise ak._v2._util.error(ValueError(
 #                     "one of the left matrices in np.matmul is not rectangular"
-#                 )
+#                 ))
 #         if first == -1:
 #             first = 0
 #         rowsA = len(A)
@@ -299,19 +308,19 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 #             if first == -1:
 #                 first = len(Bi)
 #             elif first != len(Bi):
-#                 raise ValueError(
+#                 raise ak._v2._util.error(ValueError(
 #                     "one of the right matrices in np.matmul is not rectangular"
-#                 )
+#                 ))
 #         if first == -1:
 #             first = 0
 #         rowsB = len(B)
 #         colsB = first
 
 #         if colsA != rowsB:
-#             raise ValueError(
+#             raise ak._v2._util.error(ValueError(
 #                 u"one of the pairs of matrices in np.matmul do not match shape: "
 #                 u"(n \u00d7 k) @ (k \u00d7 m)"
-#             )
+#             ))
 
 #         total_outer += 1
 #         total_inner += rowsA
@@ -355,7 +364,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
 
 def action_for_matmul(inputs):
-    raise NotImplementedError
+    raise ak._v2._util.error(NotImplementedError)
 
 
 # def action_for_matmul(inputs):

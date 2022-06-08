@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -19,6 +18,6 @@ def test():
     array = ak._v2.highlevel.Array(layout)
 
     assert (
-        str(ak._v2.operations.reducers.min(array, axis=-1, mask_identity=False).type)
+        str(ak._v2.operations.min(array, axis=-1, mask_identity=False).type)
         == "1 * var * float64"
     )

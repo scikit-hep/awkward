@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import glob
 from collections.abc import Iterable
 
 import awkward as ak
@@ -19,22 +20,28 @@ class RecordForm(Form):
         form_key=None,
     ):
         if not isinstance(contents, Iterable):
-            raise TypeError(
-                "{} 'contents' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'contents' must be iterable, not {}".format(
+                        type(self).__name__, repr(contents)
+                    )
                 )
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise TypeError(
-                    "{} all 'contents' must be Form subclasses, not {}".format(
-                        type(self).__name__, repr(content)
+                raise ak._v2._util.error(
+                    TypeError(
+                        "{} all 'contents' must be Form subclasses, not {}".format(
+                            type(self).__name__, repr(content)
+                        )
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
-            raise TypeError(
-                "{} 'fields' must be iterable, not {}".format(
-                    type(self).__name__, repr(contents)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'fields' must be iterable, not {}".format(
+                        type(self).__name__, repr(contents)
+                    )
                 )
             )
 
@@ -68,9 +75,11 @@ class RecordForm(Form):
             else:
                 return self._fields[index]
         else:
-            raise IndexError(
-                "no index {} in record with {} fields".format(
-                    index, len(self._contents)
+            raise ak._v2._util.error(
+                IndexError(
+                    "no index {} in record with {} fields".format(
+                        index, len(self._contents)
+                    )
                 )
             )
 
@@ -90,9 +99,11 @@ class RecordForm(Form):
                 pass
             else:
                 return i
-        raise IndexError(
-            "no field {} in record with {} fields".format(
-                repr(field), len(self._contents)
+        raise ak._v2._util.error(
+            IndexError(
+                "no field {} in record with {} fields".format(
+                    repr(field), len(self._contents)
+                )
             )
         )
 
@@ -113,9 +124,11 @@ class RecordForm(Form):
         elif ak._util.isstr(index_or_field):
             index = self.field_to_index(index_or_field)
         else:
-            raise TypeError(
-                "index_or_field must be an integer (index) or string (field), not {}".format(
-                    repr(index_or_field)
+            raise ak._v2._util.error(
+                TypeError(
+                    "index_or_field must be an integer (index) or string (field), not {}".format(
+                        repr(index_or_field)
+                    )
                 )
             )
         return self._contents[index]
@@ -291,3 +304,36 @@ class RecordForm(Form):
     @property
     def dimension_optiontype(self):
         return False
+
+    def _columns(self, path, output, list_indicator):
+        for content, field in zip(self._contents, self.fields):
+            content._columns(path + (field,), output, list_indicator)
+
+    def _select_columns(self, index, specifier, matches, output):
+        contents = []
+        fields = []
+        for content, field in zip(self._contents, self.fields):
+            next_matches = [
+                matches[i]
+                and (index >= len(item) or glob.fnmatch.fnmatchcase(field, item[index]))
+                for i, item in enumerate(specifier)
+            ]
+            if any(next_matches):
+                len_output = len(output)
+                next_content = content._select_columns(
+                    index + 1, specifier, next_matches, output
+                )
+                if len_output != len(output):
+                    contents.append(next_content)
+                    fields.append(field)
+
+        return RecordForm(
+            contents,
+            fields,
+            self._has_identifier,
+            self._parameters,
+            self._form_key,
+        )
+
+    def _column_types(self):
+        return sum((x._column_types() for x in self._contents), ())

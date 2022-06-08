@@ -2,7 +2,6 @@
 
 from collections.abc import Iterable
 
-from awkward._v2.contents.content import NestedIndexError
 from awkward._v2.forms.form import Form, _parameters_equal
 
 import awkward as ak
@@ -50,9 +49,11 @@ class NumpyForm(Form):
             ak._v2.types.numpytype.primitive_to_dtype(primitive)
         )
         if not isinstance(inner_shape, Iterable):
-            raise TypeError(
-                "{} 'inner_shape' must be iterable, not {}".format(
-                    type(self).__name__, repr(inner_shape)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'inner_shape' must be iterable, not {}".format(
+                        type(self).__name__, repr(inner_shape)
+                    )
                 )
             )
 
@@ -157,10 +158,10 @@ class NumpyForm(Form):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        raise NestedIndexError(self, where, "not an array of records")
+        raise ak._v2._util.indexerror(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
-        raise NestedIndexError(self, where, "not an array of records")
+        raise ak._v2._util.indexerror(self, where, "not an array of records")
 
     def _carry(self, allow_lazy):
         return NumpyForm(
@@ -199,5 +200,20 @@ class NumpyForm(Form):
         return []
 
     @property
+    def is_tuple(self):
+        return False
+
+    @property
     def dimension_optiontype(self):
         return False
+
+    def _columns(self, path, output, list_indicator):
+        output.append(".".join(path))
+
+    def _select_columns(self, index, specifier, matches, output):
+        if any(match and index >= len(item) for item, match in zip(specifier, matches)):
+            output.append(None)
+        return self
+
+    def _column_types(self):
+        return (ak._v2.types.numpytype.primitive_to_dtype(self._primitive),)

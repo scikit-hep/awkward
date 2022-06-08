@@ -16,11 +16,6 @@ class Reducer:
         if given_dtype in (np.uint8, np.uint16, np.uint32):
             return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
 
-        if given_dtype == np.complex128:
-            return np.float64
-        if given_dtype == np.complex64:
-            return np.float32
-
         return given_dtype
 
     @classmethod
@@ -41,6 +36,10 @@ class ArgMin(Reducer):
     name = "argmin"
     needs_position = True
     preferred_dtype = np.int64
+
+    @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.int64
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -88,6 +87,10 @@ class ArgMax(Reducer):
     preferred_dtype = np.int64
 
     @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.int64
+
+    @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         dtype = cls.maybe_other_type(array.dtype)
@@ -132,6 +135,10 @@ class Count(Reducer):
     preferred_dtype = np.float64
 
     @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.int64
+
+    @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         result = array.nplike.empty(outlength, dtype=np.int64)
@@ -154,6 +161,10 @@ class CountNonzero(Reducer):
     preferred_dtype = np.float64
 
     @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.int64
+
+    @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         dtype = np.dtype(np.int64) if array.dtype.kind.upper() == "M" else array.dtype
@@ -164,7 +175,7 @@ class CountNonzero(Reducer):
                 array.nplike[
                     "awkward_reduce_countnonzero_complex",
                     result.dtype.type,
-                    cls.return_dtype(array.dtype),
+                    np.float64 if array.dtype.type == np.complex128 else np.float32,
                     parents.dtype.type,
                 ](
                     result,
@@ -201,7 +212,9 @@ class Sum(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         if array.dtype.kind == "M":
-            raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+            raise ak._v2._util.error(
+                ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+            )
         else:
             dtype = cls.maybe_other_type(array.dtype)
         result = array.nplike.empty(
@@ -244,13 +257,13 @@ class Sum(Reducer):
                     )
                 )
             else:
-                raise NotImplementedError
+                raise ak._v2._util.error(NotImplementedError)
         elif array.dtype.type in (np.complex128, np.complex64):
             assert parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_sum_complex",
-                    result.dtype.type,
+                    np.float64 if array.dtype.type == np.complex128 else np.float32,
                     np.float64 if array.dtype.type == np.complex128 else np.float32,
                     parents.dtype.type,
                 ](
@@ -294,7 +307,9 @@ class Prod(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak._v2.contents.NumpyArray)
         if array.dtype.kind.upper() == "M":
-            raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
+            raise ak._v2._util.error(
+                ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
+            )
         result = array.nplike.empty(
             cls.maybe_double_length(array.dtype.type, outlength),
             dtype=cls.return_dtype(array.dtype),
@@ -320,7 +335,7 @@ class Prod(Reducer):
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod_complex",
-                    result.dtype.type,
+                    np.float64 if array.dtype.type == np.complex128 else np.float32,
                     np.float64 if array.dtype.type == np.complex128 else np.float32,
                     parents.dtype.type,
                 ](
@@ -356,6 +371,10 @@ class Prod(Reducer):
 class Any(Reducer):
     name = "any"
     preferred_dtype = np.bool_
+
+    @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.bool_
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -400,6 +419,10 @@ class Any(Reducer):
 class All(Reducer):
     name = "all"
     preferred_dtype = np.bool_
+
+    @classmethod
+    def return_dtype(cls, given_dtype):
+        return np.bool_
 
     @classmethod
     def apply(cls, array, parents, outlength):
@@ -594,7 +617,7 @@ class Max(Reducer):
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_max_complex",
-                    dtype,
+                    result.dtype.type,
                     dtype,
                     parents.dtype.type,
                 ](

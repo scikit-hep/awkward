@@ -65,9 +65,11 @@ def getitem_broadcast(items):
                         for w in nplike.nonzero(x):
                             out.append(ak._v2.index.Index64(w))
                 else:
-                    raise TypeError(
-                        "array slice must be an array of integers or booleans, not\n\n    {}".format(
-                            repr(x).replace("\n", "\n    ")
+                    raise ak._v2._util.error(
+                        TypeError(
+                            "array slice must be an array of integers or booleans, not\n\n    {}".format(
+                                repr(x).replace("\n", "\n    ")
+                            )
                         )
                     )
 
@@ -116,7 +118,7 @@ def prepare_tuple_item(item):
         return list(item)
 
     elif isinstance(item, Iterable):
-        layout = ak._v2.operations.convert.to_layout(item)
+        layout = ak._v2.operations.to_layout(item)
         as_array = layout.maybe_to_array(layout.nplike)
         if as_array is None:
             return prepare_tuple_item(layout)
@@ -124,12 +126,14 @@ def prepare_tuple_item(item):
             return as_array
 
     else:
-        raise TypeError(
-            "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-            "integer/boolean arrays (possibly with variable-length nested "
-            "lists or missing values), field name (str) or names (non-tuple "
-            "iterable of str) are valid indices for slicing, not\n\n    "
-            + repr(item).replace("\n", "\n    ")
+        raise ak._v2._util.error(
+            TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(item).replace("\n", "\n    ")
+            )
         )
 
 
@@ -148,7 +152,7 @@ def prepare_tuple_RegularArray_toListOffsetArray64(item):
         return item
 
     else:
-        raise AssertionError(type(item))
+        raise ak._v2._util.error(AssertionError(type(item)))
 
 
 def prepare_tuple_nested(item):
@@ -230,15 +234,13 @@ def prepare_tuple_nested(item):
         nextindex = item.index.data.astype(np.int64)  # this ALWAYS copies
         nonnull = nextindex >= 0
 
-        projected = item.content._carry(
-            ak._v2.index.Index64(nextindex[nonnull]), False, NestedIndexError
-        )
+        projected = item.content._carry(ak._v2.index.Index64(nextindex[nonnull]), False)
 
         # content has been projected; index must agree
         nextindex[nonnull] = item.nplike.arange(projected.length, dtype=np.int64)
 
         return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index64(nextindex),
+            ak._v2.index.Index64(nextindex, nplike=item.nplike),
             prepare_tuple_nested(projected),
             identifier=item.identifier,
             parameters=item.parameters,
@@ -253,35 +255,36 @@ def prepare_tuple_nested(item):
         ),
     ):
         is_valid = item.mask_as_bool(valid_when=True)
-        positions_where_valid = item.nplike.nonzero(is_valid)[0]
+        positions_where_valid = item.nplike.index_nplike.nonzero(is_valid)[0]
 
         nextcontent = prepare_tuple_nested(item.content)._carry(
-            ak._v2.index.Index64(positions_where_valid), False, NestedIndexError
+            ak._v2.index.Index64(positions_where_valid), False
         )
 
-        nextindex = item.nplike.full(is_valid.shape[0], -1, np.int64)
-        nextindex[positions_where_valid] = item.nplike.arange(
+        nextindex = item.nplike.index_nplike.full(is_valid.shape[0], -1, np.int64)
+        nextindex[positions_where_valid] = item.nplike.index_nplike.arange(
             positions_where_valid.shape[0], dtype=np.int64
         )
 
         return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index64(nextindex),
+            ak._v2.index.Index64(nextindex, nplike=item.nplike),
             nextcontent,
             identifier=item.identifier,
             parameters=item.parameters,
         )
 
     elif isinstance(item, ak._v2.contents.UnionArray):
-        # needs simplify_uniontype
-        raise NotImplementedError("FIXME: need to implement UnionArray as a slice")
+        return prepare_tuple_nested(item.simplify_uniontype())
 
     else:
-        raise TypeError(
-            "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
-            "integer/boolean arrays (possibly with variable-length nested "
-            "lists or missing values), field name (str) or names (non-tuple "
-            "iterable of str) are valid indices for slicing, not\n\n    "
-            + repr(item).replace("\n", "\n    ")
+        raise ak._v2._util.error(
+            TypeError(
+                "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
+                "integer/boolean arrays (possibly with variable-length nested "
+                "lists or missing values), field name (str) or names (non-tuple "
+                "iterable of str) are valid indices for slicing, not\n\n    "
+                + repr(item).replace("\n", "\n    ")
+            )
         )
 
 
@@ -292,12 +295,16 @@ def prepare_tuple_bool_to_int(item):
         and issubclass(item.content.dtype.type, (bool, np.bool_))
     ):
         if item.nplike.known_data or item.nplike.known_shape:
-            localindex = item.localindex(axis=1)
+            localindex = item.local_index(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
-            cumsum = item.nplike.empty(item.content.data.shape[0] + 1, np.int64)
+            cumsum = item.nplike.index_nplike.empty(
+                item.content.data.shape[0] + 1, np.int64
+            )
             cumsum[0] = 0
-            cumsum[1:] = item.nplike.cumsum(item.content.data)
+            cumsum[1:] = item.nplike.index_nplike.asarray(
+                item.nplike.cumsum(item.content.data)
+            )
             nextoffsets = cumsum[item.offsets]
 
         else:
@@ -318,9 +325,13 @@ def prepare_tuple_bool_to_int(item):
         and issubclass(item.content.content.dtype.type, (bool, np.bool_))
     ):
         if item.nplike.known_data or item.nplike.known_shape:
+            if isinstance(item.nplike, ak.nplike.Jax):
+                raise ak._v2._util.error(
+                    "This slice is not supported for JAX differentiation."
+                )
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
-            if item.nplike.any(item.content.index.data < -1):
+            if item.nplike.index_nplike.any(item.content.index.data < -1):
                 safeindex = item.content.index.data.copy()
                 safeindex[isnegative] = -1
             else:
@@ -334,7 +345,7 @@ def prepare_tuple_bool_to_int(item):
                     safeindex.shape[0], np.bool_
                 )
 
-            localindex = item.localindex(axis=1)
+            localindex = item.local_index(axis=1)
 
             # nextcontent does not include missing values
             expanded[isnegative] = False
@@ -348,8 +359,8 @@ def prepare_tuple_bool_to_int(item):
             nextoffsets = cumsum[item.offsets]
 
             # outindex fits into the lists; non-missing are sequential
-            outindex = item.nplike.full(nextoffsets[-1], -1, np.int64)
-            outindex[~isnegative[expanded]] = item.nplike.arange(
+            outindex = item.nplike.index_nplike.full(nextoffsets[-1], -1, np.int64)
+            outindex[~isnegative[expanded]] = item.nplike.index_nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
             )
 
@@ -361,9 +372,9 @@ def prepare_tuple_bool_to_int(item):
             )
 
         return ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index64(nextoffsets),
+            ak._v2.index.Index64(nextoffsets, nplike=item.nplike),
             ak._v2.contents.IndexedOptionArray(
-                ak._v2.index.Index(outindex),
+                ak._v2.index.Index(outindex, nplike=item.nplike),
                 ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
             ),
         )
@@ -383,9 +394,13 @@ def prepare_tuple_bool_to_int(item):
             item.content.dtype.type, (bool, np.bool_)
         ):
             if item.nplike.known_data or item.nplike.known_shape:
+                if isinstance(item.nplike, ak.nplike.Jax):
+                    raise ak._v2._util.error(
+                        "This slice is not supported for JAX differentiation."
+                    )
                 # missing values as any integer other than -1 are extremely rare
                 isnegative = item.index.data < 0
-                if item.nplike.any(item.index.data < -1):
+                if item.nplike.index_nplike.any(item.index.data < -1):
                     safeindex = item.index.data.copy()
                     safeindex[isnegative] = -1
                 else:
@@ -420,7 +435,7 @@ def prepare_tuple_bool_to_int(item):
                 )
 
             return ak._v2.contents.IndexedOptionArray(
-                ak._v2.index.Index(outindex),
+                ak._v2.index.Index(outindex, item.nplike),
                 ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
             )
 
@@ -434,7 +449,7 @@ def prepare_tuple_bool_to_int(item):
         return item
 
     else:
-        raise AssertionError(type(item))
+        raise ak._v2._util.error(AssertionError(type(item)))
 
 
 def getitem_next_array_wrap(outcontent, shape):
@@ -451,29 +466,3 @@ def getitem_next_array_wrap(outcontent, shape):
             size = 1
         out = ak._v2.contents.RegularArray(out, size, length, None, None)
     return out
-
-
-class NestedIndexError(IndexError):
-    def __init__(self, array, slicer, details=None):
-        self._array = array
-        self._slicer = slicer
-        self._details = details
-
-    @property
-    def array(self):
-        return self._array
-
-    @property
-    def slicer(self):
-        return self._slicer
-
-    @property
-    def details(self):
-        return self._details
-
-    def __str__(self):
-        return "cannot slice {} with {}{}".format(
-            type(self._array).__name__,
-            repr(self._slicer),
-            "" if self._details is None else ": " + self._details,
-        )

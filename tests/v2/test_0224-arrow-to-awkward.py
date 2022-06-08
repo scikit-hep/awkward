@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -8,7 +7,7 @@ import awkward as ak  # noqa: F401
 pyarrow = pytest.importorskip("pyarrow")
 pytest.importorskip("awkward._v2._connect.pyarrow")
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_toarrow_BitMaskedArray():
@@ -61,6 +60,17 @@ def test_toarrow_ListOffsetArray64():
         [6.6],
         [7.7, 8.8, 9.9],
     ]
+    assert array[1:].to_arrow().to_pylist() == [
+        [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+    assert array[2:].to_arrow().to_pylist() == [
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
 
 
 def test_toarrow_ListOffsetArrayU32():
@@ -73,6 +83,17 @@ def test_toarrow_ListOffsetArrayU32():
     assert array.to_arrow().to_pylist() == [
         [1.1, 2.2, 3.3],
         [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+    assert array[1:].to_arrow().to_pylist() == [
+        [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+    assert array[2:].to_arrow().to_pylist() == [
         [4.4, 5.5],
         [6.6],
         [7.7, 8.8, 9.9],
@@ -108,10 +129,17 @@ def test_toarrow_ListArray_RegularArray():
         [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]],
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
     ]
+    assert listarray[1:].to_arrow().to_pylist() == [
+        [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
+    ]
 
     assert isinstance(regulararray.to_arrow().storage, pyarrow.FixedSizeListArray)
     assert regulararray.to_arrow().to_pylist() == [
         [[0.0, 1.1, 2.2], []],
+        [[3.3, 4.4], [5.5]],
+        [[6.6, 7.7, 8.8, 9.9], []],
+    ]
+    assert regulararray[1:].to_arrow().to_pylist() == [
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]
@@ -441,7 +469,6 @@ def test_fromarrow_UnionArray():
     )
 
 
-@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.concatenate")
 def test_chunkedarray():
     a = pyarrow.chunked_array(
         [
@@ -570,20 +597,20 @@ def test_recordbatch():
 
 
 def test_arrow_toarrow_string():
-    a = ak._v2.operations.convert.from_iter(["one", "two", "three"]).layout
+    a = ak._v2.operations.from_iter(["one", "two", "three"]).layout
     assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == to_list(a)
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [["one", "two", "three"], [], ["four", "five"]]
     ).layout
     assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == to_list(a)
     if hasattr(pyarrow.BinaryArray, "from_buffers"):
-        a = ak._v2.operations.convert.from_iter([b"one", b"two", b"three"]).layout
+        a = ak._v2.operations.from_iter([b"one", b"two", b"three"]).layout
         assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
             b"one",
             b"two",
             b"three",
         ]
-        a = ak._v2.operations.convert.from_iter(
+        a = ak._v2.operations.from_iter(
             [[b"one", b"two", b"three"], [], [b"four", b"five"]]
         ).layout
         assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
@@ -592,13 +619,13 @@ def test_arrow_toarrow_string():
             [b"four", b"five"],
         ]
     else:
-        a = ak._v2.operations.convert.from_iter([b"one", b"two", b"three"]).layout
+        a = ak._v2.operations.from_iter([b"one", b"two", b"three"]).layout
         assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
             "one",
             "two",
             "three",
         ]
-        a = ak._v2.operations.convert.from_iter(
+        a = ak._v2.operations.from_iter(
             [[b"one", b"two", b"three"], [], [b"four", b"five"]]
         ).layout
         assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
@@ -679,7 +706,6 @@ def test_arrow_null_nested_array_null():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.concatenate")
 def test_arrow_chunked_array():
     a = pyarrow.chunked_array(
         [
@@ -742,7 +768,6 @@ def test_arrow_null_struct_null():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.concatenate")
 def test_arrow_chunked_struct():
     t = pyarrow.struct({"x": pyarrow.int64(), "y": pyarrow.float64()})
     a = pyarrow.chunked_array(
@@ -925,7 +950,6 @@ def test_arrow_binary_null():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: needs ak._v2.operations.structure.concatenate")
 def test_arrow_chunked_strings():
     a = pyarrow.chunked_array(
         [
@@ -1362,7 +1386,7 @@ def test_arrow_nonnullable_table():
 
 
 def test_arrow_coverage100():
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [True, True, False, False, True, False, True, False]
     ).layout
     assert a.to_arrow().to_pylist() == to_list(a)
@@ -1701,7 +1725,7 @@ def test_arrow_coverage100():
 
     a = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([False, False, False, True, True, False, False])),
-        ak._v2.operations.convert.from_iter(
+        ak._v2.operations.from_iter(
             [b"hello", b"", b"there", b"yuk", b"", b"o", b"hellothere"]
         ).layout,
         valid_when=False,
@@ -1718,9 +1742,7 @@ def test_arrow_coverage100():
 
     a = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8([True, True, False, True]),
-        ak._v2.operations.convert.from_iter(
-            [[1.1, 2.2, 3.3], [], [999], [4.4, 5.5]]
-        ).layout,
+        ak._v2.operations.from_iter([[1.1, 2.2, 3.3], [], [999], [4.4, 5.5]]).layout,
         valid_when=True,
     )
     assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
@@ -1730,7 +1752,7 @@ def test_arrow_coverage100():
         [4.4, 5.5],
     ]
 
-    a = ak._v2.operations.convert.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
+    a = ak._v2.operations.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
     assert a.to_arrow().to_pylist() == [[1, 2, 3], [], [4, 5], 999, 123]
     assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
         [1, 2, 3],
@@ -1742,7 +1764,7 @@ def test_arrow_coverage100():
 
 
 def test_arrow_coverage100_broken_unions():
-    a = ak._v2.operations.convert.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
+    a = ak._v2.operations.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
     b = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index8(np.array([True, True, False, False, True])),
         a,
@@ -1757,7 +1779,7 @@ def test_arrow_coverage100_broken_unions():
         123,
     ]
 
-    content1 = ak._v2.operations.convert.from_iter([1.1, 2.2, 3.3, 4.4, 5.5]).layout
+    content1 = ak._v2.operations.from_iter([1.1, 2.2, 3.3, 4.4, 5.5]).layout
     content2 = ak._v2.contents.NumpyArray(np.array([], dtype=np.int32))
     a = ak._v2.contents.UnionArray(
         ak._v2.index.Index8(np.array([0, 0, 0, 0, 0], "i1")),

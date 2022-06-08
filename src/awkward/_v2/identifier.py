@@ -5,6 +5,15 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
+def _identifiers_equal(one, two):
+    if one is None and two is None:
+        return True
+    elif isinstance(one, Identifier) and isinstance(two, Identifier):
+        return one.layout_equal(two, index_dtype=True)
+    else:
+        return False
+
+
 class Identifier:
     _numrefs = 0
 
@@ -20,14 +29,16 @@ class Identifier:
         if not isinstance(fieldloc, dict) or not all(
             ak._util.isint(k) and ak._util.isstr(v) for k, v in fieldloc.items()
         ):
-            raise TypeError("Identifier fieldloc must be a dict of int -> str")
+            raise ak._v2._util.error(
+                TypeError("Identifier fieldloc must be a dict of int -> str")
+            )
         self._nplike = ak.nplike.of(data)
 
         self._data = self._nplike.asarray(data, order="C")
         if len(self._data.shape) != 2:
-            raise TypeError("Identifier data must be 2-dimensional")
+            raise ak._v2._util.error(TypeError("Identifier data must be 2-dimensional"))
         if self._data.dtype not in (np.dtype(np.int32), np.dtype(np.int64)):
-            raise TypeError("Identifier data must be int32, int64")
+            raise ak._v2._util.error(TypeError("Identifier data must be int32, int64"))
 
     @classmethod
     def zeros(cls, ref, fieldloc, length, width, nplike, dtype):
@@ -116,3 +127,10 @@ class Identifier:
 
     def _nbytes_part(self):
         return self.data.nbytes
+
+    def layout_equal(self, other, index_dtype=True):
+        if self._ref != other._ref or self._fieldloc != other._fieldloc:
+            return False
+        if index_dtype and self._data.dtype != other._data.dtype:
+            return False
+        return self._nplike.array_equal(self._data, other._data)

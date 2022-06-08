@@ -182,6 +182,11 @@ namespace awkward {
   }
 
   bool
+  ListOffsetForm::istuple() const {
+    return content_.get()->istuple();
+  }
+
+  bool
   ListOffsetForm::equal(const FormPtr& other,
                         bool check_identities,
                         bool check_parameters,
@@ -909,6 +914,12 @@ namespace awkward {
   const std::vector<std::string>
   ListOffsetArrayOf<T>::keys() const {
     return content_.get()->keys();
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::istuple() const {
+    return content_.get()->istuple();
   }
 
   template <typename T>
@@ -1916,10 +1927,6 @@ namespace awkward {
                                            int64_t outlength,
                                            bool ascending,
                                            bool stable) const {
-    if (length() == 0 ) {
-     return shallow_copy();
-    }
-
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (parameter_equals("__array__", "\"string\"")  ||

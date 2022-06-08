@@ -1,13 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import json
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_basic():
@@ -193,7 +192,7 @@ def test_basic_tofrom_json():
         [content1, listoffsetarray, content2, content1],
         fields=["one", "two", "2", "wonky"],
     )
-    assert json.loads(ak._v2.operations.convert.to_json(recordarray.as_tuple)) == [
+    assert json.loads(ak._v2.operations.to_json(recordarray.as_tuple)) == [
         {"0": 1, "1": [1.1, 2.2, 3.3], "2": 1.1, "3": 1},
         {"0": 2, "1": [], "2": 2.2, "3": 2},
         {"0": 3, "1": [4.4, 5.5], "2": 3.3, "3": 3},
@@ -236,9 +235,9 @@ def test_type():
     fields = None
     listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content2)
     recordarray = ak._v2.contents.RecordArray([content1, listoffsetarray], fields)
-    assert str(ak._v2.operations.describe.type(recordarray)) == "(int64, var * float64)"
+    assert str(ak._v2.operations.type(recordarray)) == "(int64, var * float64)"
 
-    assert ak._v2.operations.describe.type(recordarray) == ak._v2.types.RecordType(
+    assert ak._v2.operations.type(recordarray) == ak._v2.types.RecordType(
         (
             ak._v2.types.NumpyType("int64"),
             ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
@@ -249,7 +248,7 @@ def test_type():
     recordarray = ak._v2.contents.RecordArray(
         [content1, listoffsetarray], fields=["one", "two"]
     )
-    assert str(ak._v2.operations.describe.type(recordarray)) in (
+    assert str(ak._v2.operations.type(recordarray)) in (
         "{one: int64, two: var * float64}",
         "{two: var * float64, one: int64}",
     )
@@ -265,7 +264,6 @@ def test_type():
     )
 
 
-@pytest.mark.skip(reason="FIXME: recordtype requires field argument")
 def test_recordtype():
     content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
     content2 = ak._v2.contents.NumpyArray(
@@ -276,32 +274,40 @@ def test_recordtype():
     listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content2)
     recordarray = ak._v2.contents.RecordArray([content1, listoffsetarray], fields)
 
-    assert ak._v2.operations.describe.type(recordarray[2]) == ak._v2.types.RecordType(
+    assert ak._v2.operations.type(recordarray[2]) == ak._v2.types.RecordType(
         (
             ak._v2.types.NumpyType("int64"),
             ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
-        )
+        ),
+        None,
     )
     assert str(
         ak._v2.types.RecordType(
-            {
-                "one": ak._v2.types.NumpyType("int32"),
-                "two": ak._v2.types.NumpyType("float64"),
-            }
+            (
+                ak._v2.types.NumpyType("int32"),
+                ak._v2.types.NumpyType("float64"),
+            ),
+            ["one", "two"],
         )
-    ) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
+    ) in ("{one: int32, two: float64}", "{two: float64, one: int32}")
 
-    assert ak._v2.operations.describe.type(recordarray) == ak._v2.types.RecordType(
-        {
-            "one": ak._v2.types.NumpyType("int64"),
-            "two": ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
-        }
+    recordarray = ak._v2.contents.RecordArray(
+        [content1, listoffsetarray], ["one", "two"]
     )
-    assert ak._v2.operations.describe.type(recordarray[2]) == ak._v2.types.RecordType(
-        {
-            "one": ak._v2.types.NumpyType("int64"),
-            "two": ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
-        }
+
+    assert ak._v2.operations.type(recordarray) == ak._v2.types.RecordType(
+        (
+            ak._v2.types.NumpyType("int64"),
+            ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
+        ),
+        ["one", "two"],
+    )
+    assert ak._v2.operations.type(recordarray[2]) == ak._v2.types.RecordType(
+        (
+            ak._v2.types.NumpyType("int64"),
+            ak._v2.types.ListType(ak._v2.types.NumpyType("float64")),
+        ),
+        ["one", "two"],
     )
 
 

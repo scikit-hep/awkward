@@ -16,5 +16,5 @@ def test():
         )
     )
 
-    mask = ak._v2.operations.structure.is_none(index_of_index)
+    mask = ak._v2.operations.is_none(index_of_index)
     assert mask.tolist() == [False, True, False, True]

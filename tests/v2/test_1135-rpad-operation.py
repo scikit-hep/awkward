@@ -1,21 +1,21 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_rpad_and_clip_empty_array():
     empty = ak._v2.contents.emptyarray.EmptyArray()
     assert to_list(empty) == []
-    assert to_list(empty.rpad(5, 0)) == [None, None, None, None, None]
-    assert empty.typetracer.rpad(5, 0).form == empty.rpad(5, 0).form
-    assert to_list(empty.rpad(5, 0, clip=True)) == [None, None, None, None, None]
+    assert to_list(empty.pad_none(5, 0)) == [None, None, None, None, None]
+    assert empty.typetracer.pad_none(5, 0).form == empty.pad_none(5, 0).form
+    assert to_list(empty.pad_none(5, 0, clip=True)) == [None, None, None, None, None]
     assert (
-        empty.typetracer.rpad(5, 0, clip=True).form == empty.rpad(5, 0, clip=True).form
+        empty.typetracer.pad_none(5, 0, clip=True).form
+        == empty.pad_none(5, 0, clip=True).form
     )
 
 
@@ -28,7 +28,7 @@ def test_rpad_and_clip_numpy_array():
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
 
-    assert to_list(array.rpad(5, 0, clip=True)) == [
+    assert to_list(array.pad_none(5, 0, clip=True)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
         None,
@@ -36,18 +36,20 @@ def test_rpad_and_clip_numpy_array():
         None,
     ]
     assert (
-        array.typetracer.rpad(5, 0, clip=True).form == array.rpad(5, 0, clip=True).form
+        array.typetracer.pad_none(5, 0, clip=True).form
+        == array.pad_none(5, 0, clip=True).form
     )
 
-    assert to_list(array.rpad(5, 1, clip=True)) == [
+    assert to_list(array.pad_none(5, 1, clip=True)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], None, None],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29], None, None],
     ]
     assert (
-        array.typetracer.rpad(5, 1, clip=True).form == array.rpad(5, 1, clip=True).form
+        array.typetracer.pad_none(5, 1, clip=True).form
+        == array.pad_none(5, 1, clip=True).form
     )
 
-    assert to_list(array.rpad(7, 2, clip=True)) == [
+    assert to_list(array.pad_none(7, 2, clip=True)) == [
         [
             [0, 1, 2, 3, 4, None, None],
             [5, 6, 7, 8, 9, None, None],
@@ -60,21 +62,23 @@ def test_rpad_and_clip_numpy_array():
         ],
     ]
     assert (
-        array.typetracer.rpad(7, 2, clip=True).form == array.rpad(7, 2, clip=True).form
+        array.typetracer.pad_none(7, 2, clip=True).form
+        == array.pad_none(7, 2, clip=True).form
     )
 
-    assert to_list(array.rpad(2, 2, clip=True)) == [
+    assert to_list(array.pad_none(2, 2, clip=True)) == [
         [[0, 1], [5, 6], [10, 11]],
         [[15, 16], [20, 21], [25, 26]],
     ]
     assert (
-        array.typetracer.rpad(2, 2, clip=True).form == array.rpad(2, 2, clip=True).form
+        array.typetracer.pad_none(2, 2, clip=True).form
+        == array.pad_none(2, 2, clip=True).form
     )
 
 
 def test_rpad_numpy_array():
     array = ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    assert to_list(array.rpad(10, 0)) == [
+    assert to_list(array.pad_none(10, 0)) == [
         1.1,
         2.2,
         3.3,
@@ -86,24 +90,24 @@ def test_rpad_numpy_array():
         None,
         None,
     ]
-    assert array.typetracer.rpad(10, 0).form == array.rpad(10, 0).form
+    assert array.typetracer.pad_none(10, 0).form == array.pad_none(10, 0).form
 
     array = ak._v2.contents.numpyarray.NumpyArray(
         np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]])
     )
-    assert to_list(array.rpad(5, 0)) == [
+    assert to_list(array.pad_none(5, 0)) == [
         [1.1, 2.2, 3.3],
         [4.4, 5.5, 6.6],
         None,
         None,
         None,
     ]
-    assert array.typetracer.rpad(5, 0).form == array.rpad(5, 0).form
-    assert to_list(array.rpad(5, 1)) == [
+    assert array.typetracer.pad_none(5, 0).form == array.pad_none(5, 0).form
+    assert to_list(array.pad_none(5, 1)) == [
         [1.1, 2.2, 3.3, None, None],
         [4.4, 5.5, 6.6, None, None],
     ]
-    assert array.typetracer.rpad(5, 1).form == array.rpad(5, 1).form
+    assert array.typetracer.pad_none(5, 1).form == array.pad_none(5, 1).form
 
     array = ak._v2.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
@@ -113,66 +117,66 @@ def test_rpad_numpy_array():
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
 
-    assert to_list(array.rpad(1, 0)) == [
+    assert to_list(array.pad_none(1, 0)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
 
-    assert array.typetracer.rpad(1, 0).form == array.rpad(1, 0).form
-    assert to_list(array.rpad(2, 0)) == [
+    assert array.typetracer.pad_none(1, 0).form == array.pad_none(1, 0).form
+    assert to_list(array.pad_none(2, 0)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
-    assert array.typetracer.rpad(2, 0).form == array.rpad(2, 0).form
-    assert to_list(array.rpad(3, 0)) == [
+    assert array.typetracer.pad_none(2, 0).form == array.pad_none(2, 0).form
+    assert to_list(array.pad_none(3, 0)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
         None,
     ]
-    assert array.typetracer.rpad(3, 0).form == array.rpad(3, 0).form
-    assert to_list(array.rpad(4, 0)) == [
-        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
-        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
-        None,
-        None,
-    ]
-    assert array.typetracer.rpad(4, 0).form == array.rpad(4, 0).form
-    assert to_list(array.rpad(5, 0)) == [
+    assert array.typetracer.pad_none(3, 0).form == array.pad_none(3, 0).form
+    assert to_list(array.pad_none(4, 0)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
         None,
         None,
+    ]
+    assert array.typetracer.pad_none(4, 0).form == array.pad_none(4, 0).form
+    assert to_list(array.pad_none(5, 0)) == [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+        None,
+        None,
         None,
     ]
-    assert array.typetracer.rpad(5, 0).form == array.rpad(5, 0).form
+    assert array.typetracer.pad_none(5, 0).form == array.pad_none(5, 0).form
 
-    assert to_list(array.rpad(2, 1)) == [
+    assert to_list(array.pad_none(2, 1)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
-    assert to_list(array.rpad(3, 1)) == [
+    assert to_list(array.pad_none(3, 1)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
-    assert array.typetracer.rpad(3, 1).form == array.rpad(3, 1).form
-    assert to_list(array.rpad(4, 1)) == [
+    assert array.typetracer.pad_none(3, 1).form == array.pad_none(3, 1).form
+    assert to_list(array.pad_none(4, 1)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], None],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29], None],
     ]
-    assert array.typetracer.rpad(4, 1).form == array.rpad(4, 1).form
-    assert to_list(array.rpad(5, 1)) == [
+    assert array.typetracer.pad_none(4, 1).form == array.pad_none(4, 1).form
+    assert to_list(array.pad_none(5, 1)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], None, None],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29], None, None],
     ]
-    assert array.typetracer.rpad(5, 1).form == array.rpad(5, 1).form
+    assert array.typetracer.pad_none(5, 1).form == array.pad_none(5, 1).form
 
-    assert to_list(array.rpad(3, 2)) == [
+    assert to_list(array.pad_none(3, 2)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
-    assert array.typetracer.rpad(3, 2).form == array.rpad(3, 2).form
+    assert array.typetracer.pad_none(3, 2).form == array.pad_none(3, 2).form
 
-    assert to_list(array.rpad(7, 2)) == [
+    assert to_list(array.pad_none(7, 2)) == [
         [
             [0, 1, 2, 3, 4, None, None],
             [5, 6, 7, 8, 9, None, None],
@@ -184,13 +188,13 @@ def test_rpad_numpy_array():
             [25, 26, 27, 28, 29, None, None],
         ],
     ]
-    assert array.typetracer.rpad(7, 2).form == array.rpad(7, 2).form
+    assert array.typetracer.pad_none(7, 2).form == array.pad_none(7, 2).form
 
-    assert to_list(array.rpad(2, 2)) == [
+    assert to_list(array.pad_none(2, 2)) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
-    assert array.typetracer.rpad(2, 2).form == array.rpad(2, 2).form
+    assert array.typetracer.pad_none(2, 2).form == array.pad_none(2, 2).form
 
 
 def test_rpad_and_clip_regular_array():
@@ -225,7 +229,7 @@ def test_rpad_and_clip_regular_array():
     indexedarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(index, content)
     array = ak._v2.contents.regulararray.RegularArray(indexedarray, 3, zeros_length=0)
 
-    assert to_list(array.rpad(5, 0, clip=True)) == [
+    assert to_list(array.pad_none(5, 0, clip=True)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
@@ -233,68 +237,81 @@ def test_rpad_and_clip_regular_array():
         None,
     ]
     assert (
-        array.typetracer.rpad(5, 0, clip=True).form == array.rpad(5, 0, clip=True).form
+        array.typetracer.pad_none(5, 0, clip=True).form
+        == array.pad_none(5, 0, clip=True).form
     )
-    assert to_list(array.rpad(4, 0, clip=True)) == [
+    assert to_list(array.pad_none(4, 0, clip=True)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
         None,
     ]
     assert (
-        array.typetracer.rpad(4, 0, clip=True).form == array.rpad(4, 0, clip=True).form
+        array.typetracer.pad_none(4, 0, clip=True).form
+        == array.pad_none(4, 0, clip=True).form
     )
-    assert to_list(array.rpad(3, 0, clip=True)) == [
+    assert to_list(array.pad_none(3, 0, clip=True)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
     assert (
-        array.typetracer.rpad(3, 0, clip=True).form == array.rpad(3, 0, clip=True).form
+        array.typetracer.pad_none(3, 0, clip=True).form
+        == array.pad_none(3, 0, clip=True).form
     )
-    assert to_list(array.rpad(2, 0, clip=True)) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6]]
+    assert to_list(array.pad_none(2, 0, clip=True)) == [
+        [6.9, 3.9, 6.9],
+        [2.2, 1.5, 1.6],
+    ]
     assert (
-        array.typetracer.rpad(2, 0, clip=True).form == array.rpad(2, 0, clip=True).form
+        array.typetracer.pad_none(2, 0, clip=True).form
+        == array.pad_none(2, 0, clip=True).form
     )
-    assert to_list(array.rpad(1, 0, clip=True)) == [[6.9, 3.9, 6.9]]
+    assert to_list(array.pad_none(1, 0, clip=True)) == [[6.9, 3.9, 6.9]]
     assert (
-        array.typetracer.rpad(1, 0, clip=True).form == array.rpad(1, 0, clip=True).form
+        array.typetracer.pad_none(1, 0, clip=True).form
+        == array.pad_none(1, 0, clip=True).form
     )
-    assert to_list(array.rpad(5, 1, clip=True)) == [
+    assert to_list(array.pad_none(5, 1, clip=True)) == [
         [6.9, 3.9, 6.9, None, None],
         [2.2, 1.5, 1.6, None, None],
         [3.6, None, 6.7, None, None],
     ]
     assert (
-        array.typetracer.rpad(5, 1, clip=True).form == array.rpad(5, 1, clip=True).form
+        array.typetracer.pad_none(5, 1, clip=True).form
+        == array.pad_none(5, 1, clip=True).form
     )
-    assert to_list(array.rpad(4, 1, clip=True)) == [
+    assert to_list(array.pad_none(4, 1, clip=True)) == [
         [6.9, 3.9, 6.9, None],
         [2.2, 1.5, 1.6, None],
         [3.6, None, 6.7, None],
     ]
     assert (
-        array.typetracer.rpad(4, 1, clip=True).form == array.rpad(4, 1, clip=True).form
+        array.typetracer.pad_none(4, 1, clip=True).form
+        == array.pad_none(4, 1, clip=True).form
     )
-    assert to_list(array.rpad(3, 1, clip=True)) == [
+    assert to_list(array.pad_none(3, 1, clip=True)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
     assert (
-        array.typetracer.rpad(3, 1, clip=True).form == array.rpad(3, 1, clip=True).form
+        array.typetracer.pad_none(3, 1, clip=True).form
+        == array.pad_none(3, 1, clip=True).form
     )
-    assert to_list(array.rpad(2, 1, clip=True)) == [
+    assert to_list(array.pad_none(2, 1, clip=True)) == [
         [6.9, 3.9],
         [2.2, 1.5],
         [3.6, None],
     ]
     assert (
-        array.typetracer.rpad(2, 1, clip=True).form == array.rpad(2, 1, clip=True).form
+        array.typetracer.pad_none(2, 1, clip=True).form
+        == array.pad_none(2, 1, clip=True).form
     )
-    assert to_list(array.rpad(1, 1, clip=True)) == [[6.9], [2.2], [3.6]]
+    assert to_list(array.pad_none(1, 1, clip=True)) == [[6.9], [2.2], [3.6]]
     assert (
-        array.typetracer.rpad(1, 1, clip=True).form == array.rpad(1, 1, clip=True).form
+        array.typetracer.pad_none(1, 1, clip=True).form
+        == array.pad_none(1, 1, clip=True).form
     )
 
     array = ak._v2.contents.numpyarray.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5))
@@ -303,7 +320,7 @@ def test_rpad_and_clip_regular_array():
         [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
     ]
 
-    assert to_list(array.rpad(7, 2, clip=True)) == [
+    assert to_list(array.pad_none(7, 2, clip=True)) == [
         [
             [0, 1, 2, 3, 4, None, None],
             [5, 6, 7, 8, 9, None, None],
@@ -316,7 +333,8 @@ def test_rpad_and_clip_regular_array():
         ],
     ]
     assert (
-        array.typetracer.rpad(7, 2, clip=True).form == array.rpad(7, 2, clip=True).form
+        array.typetracer.pad_none(7, 2, clip=True).form
+        == array.pad_none(7, 2, clip=True).form
     )
 
     content = ak._v2.contents.numpyarray.NumpyArray(
@@ -328,131 +346,131 @@ def test_rpad_and_clip_regular_array():
         listoffsetarray, 2, zeros_length=0
     )
 
-    assert to_list(regulararray.rpad(1, 0, clip=True)) == [[[0.0, 1.1, 2.2], []]]
+    assert to_list(regulararray.pad_none(1, 0, clip=True)) == [[[0.0, 1.1, 2.2], []]]
     assert (
-        regulararray.typetracer.rpad(1, 0, clip=True).form
-        == regulararray.rpad(1, 0, clip=True).form
+        regulararray.typetracer.pad_none(1, 0, clip=True).form
+        == regulararray.pad_none(1, 0, clip=True).form
     )
-    assert to_list(regulararray.rpad(2, 0, clip=True)) == [
+    assert to_list(regulararray.pad_none(2, 0, clip=True)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
     ]
     assert (
-        regulararray.typetracer.rpad(2, 0, clip=True).form
-        == regulararray.rpad(2, 0, clip=True).form
+        regulararray.typetracer.pad_none(2, 0, clip=True).form
+        == regulararray.pad_none(2, 0, clip=True).form
     )
-    assert to_list(regulararray.rpad(3, 0, clip=True)) == [
-        [[0.0, 1.1, 2.2], []],
-        [[3.3, 4.4], [5.5]],
-        [[6.6, 7.7, 8.8, 9.9], []],
-    ]
-    assert (
-        regulararray.typetracer.rpad(3, 0, clip=True).form
-        == regulararray.rpad(3, 0, clip=True).form
-    )
-    assert to_list(regulararray.rpad(4, 0, clip=True)) == [
+    assert to_list(regulararray.pad_none(3, 0, clip=True)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
-        None,
     ]
     assert (
-        regulararray.typetracer.rpad(4, 0, clip=True).form
-        == regulararray.rpad(4, 0, clip=True).form
+        regulararray.typetracer.pad_none(3, 0, clip=True).form
+        == regulararray.pad_none(3, 0, clip=True).form
     )
-    assert to_list(regulararray.rpad(5, 0, clip=True)) == [
+    assert to_list(regulararray.pad_none(4, 0, clip=True)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
         None,
+    ]
+    assert (
+        regulararray.typetracer.pad_none(4, 0, clip=True).form
+        == regulararray.pad_none(4, 0, clip=True).form
+    )
+    assert to_list(regulararray.pad_none(5, 0, clip=True)) == [
+        [[0.0, 1.1, 2.2], []],
+        [[3.3, 4.4], [5.5]],
+        [[6.6, 7.7, 8.8, 9.9], []],
+        None,
         None,
     ]
     assert (
-        regulararray.typetracer.rpad(5, 0, clip=True).form
-        == regulararray.rpad(5, 0, clip=True).form
+        regulararray.typetracer.pad_none(5, 0, clip=True).form
+        == regulararray.pad_none(5, 0, clip=True).form
     )
 
-    assert to_list(regulararray.rpad(1, 1, clip=True)) == [
+    assert to_list(regulararray.pad_none(1, 1, clip=True)) == [
         [[0.0, 1.1, 2.2]],
         [[3.3, 4.4]],
         [[6.6, 7.7, 8.8, 9.9]],
     ]
     assert (
-        regulararray.typetracer.rpad(1, 1, clip=True).form
-        == regulararray.rpad(1, 1, clip=True).form
+        regulararray.typetracer.pad_none(1, 1, clip=True).form
+        == regulararray.pad_none(1, 1, clip=True).form
     )
-    assert to_list(regulararray.rpad(2, 1, clip=True)) == [
+    assert to_list(regulararray.pad_none(2, 1, clip=True)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]
     assert (
-        regulararray.typetracer.rpad(2, 1, clip=True).form
-        == regulararray.rpad(2, 1, clip=True).form
+        regulararray.typetracer.pad_none(2, 1, clip=True).form
+        == regulararray.pad_none(2, 1, clip=True).form
     )
-    assert to_list(regulararray.rpad(3, 1, clip=True)) == [
+    assert to_list(regulararray.pad_none(3, 1, clip=True)) == [
         [[0.0, 1.1, 2.2], [], None],
         [[3.3, 4.4], [5.5], None],
         [[6.6, 7.7, 8.8, 9.9], [], None],
     ]
     assert (
-        regulararray.typetracer.rpad(3, 1, clip=True).form
-        == regulararray.rpad(3, 1, clip=True).form
+        regulararray.typetracer.pad_none(3, 1, clip=True).form
+        == regulararray.pad_none(3, 1, clip=True).form
     )
-    assert to_list(regulararray.rpad(7, 1, clip=True)) == [
+    assert to_list(regulararray.pad_none(7, 1, clip=True)) == [
         [[0.0, 1.1, 2.2], [], None, None, None, None, None],
         [[3.3, 4.4], [5.5], None, None, None, None, None],
         [[6.6, 7.7, 8.8, 9.9], [], None, None, None, None, None],
     ]
     assert (
-        regulararray.typetracer.rpad(7, 1, clip=True).form
-        == regulararray.rpad(7, 1, clip=True).form
+        regulararray.typetracer.pad_none(7, 1, clip=True).form
+        == regulararray.pad_none(7, 1, clip=True).form
     )
 
-    assert to_list(regulararray.rpad(1, 2, clip=True)) == [
+    assert to_list(regulararray.pad_none(1, 2, clip=True)) == [
         [[0.0], [None]],
         [[3.3], [5.5]],
         [[6.6], [None]],
     ]
     assert (
-        regulararray.typetracer.rpad(1, 2, clip=True).form
-        == regulararray.rpad(1, 2, clip=True).form
+        regulararray.typetracer.pad_none(1, 2, clip=True).form
+        == regulararray.pad_none(1, 2, clip=True).form
     )
-    assert to_list(regulararray.rpad(2, 2, clip=True)) == [
+    assert to_list(regulararray.pad_none(2, 2, clip=True)) == [
         [[0.0, 1.1], [None, None]],
         [[3.3, 4.4], [5.5, None]],
         [[6.6, 7.7], [None, None]],
     ]
     assert (
-        regulararray.typetracer.rpad(2, 2, clip=True).form
-        == regulararray.rpad(2, 2, clip=True).form
+        regulararray.typetracer.pad_none(2, 2, clip=True).form
+        == regulararray.pad_none(2, 2, clip=True).form
     )
-    assert to_list(regulararray.rpad(3, 2, clip=True)) == [
+    assert to_list(regulararray.pad_none(3, 2, clip=True)) == [
         [[0.0, 1.1, 2.2], [None, None, None]],
         [[3.3, 4.4, None], [5.5, None, None]],
         [[6.6, 7.7, 8.8], [None, None, None]],
     ]
     assert (
-        regulararray.typetracer.rpad(3, 2, clip=True).form
-        == regulararray.rpad(3, 2, clip=True).form
+        regulararray.typetracer.pad_none(3, 2, clip=True).form
+        == regulararray.pad_none(3, 2, clip=True).form
     )
-    assert to_list(regulararray.rpad(4, 2, clip=True)) == [
+    assert to_list(regulararray.pad_none(4, 2, clip=True)) == [
         [[0.0, 1.1, 2.2, None], [None, None, None, None]],
         [[3.3, 4.4, None, None], [5.5, None, None, None]],
         [[6.6, 7.7, 8.8, 9.9], [None, None, None, None]],
     ]
     assert (
-        regulararray.typetracer.rpad(4, 2, clip=True).form
-        == regulararray.rpad(4, 2, clip=True).form
+        regulararray.typetracer.pad_none(4, 2, clip=True).form
+        == regulararray.pad_none(4, 2, clip=True).form
     )
-    assert to_list(regulararray.rpad(5, 2, clip=True)) == [
+    assert to_list(regulararray.pad_none(5, 2, clip=True)) == [
         [[0.0, 1.1, 2.2, None, None], [None, None, None, None, None]],
         [[3.3, 4.4, None, None, None], [5.5, None, None, None, None]],
         [[6.6, 7.7, 8.8, 9.9, None], [None, None, None, None, None]],
     ]
     assert (
-        regulararray.typetracer.rpad(5, 2, clip=True).form
-        == regulararray.rpad(5, 2, clip=True).form
+        regulararray.typetracer.pad_none(5, 2, clip=True).form
+        == regulararray.pad_none(5, 2, clip=True).form
     )
 
 
@@ -488,57 +506,57 @@ def test_rpad_regular_array():
     indexedarray = ak._v2.contents.indexedoptionarray.IndexedOptionArray(index, content)
     array = ak._v2.contents.regulararray.RegularArray(indexedarray, 3, zeros_length=0)
 
-    assert to_list(array.rpad(5, 0)) == [
+    assert to_list(array.pad_none(5, 0)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
         None,
         None,
     ]
-    assert array.typetracer.rpad(5, 0).form == array.rpad(5, 0).form
-    assert to_list(array.rpad(4, 0)) == [
+    assert array.typetracer.pad_none(5, 0).form == array.pad_none(5, 0).form
+    assert to_list(array.pad_none(4, 0)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
         None,
     ]
-    assert array.typetracer.rpad(4, 0).form == array.rpad(4, 0).form
-    assert to_list(array.rpad(3, 0)) == [
+    assert array.typetracer.pad_none(4, 0).form == array.pad_none(4, 0).form
+    assert to_list(array.pad_none(3, 0)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
-    assert array.typetracer.rpad(3, 0).form == array.rpad(3, 0).form
-    assert to_list(array.rpad(1, 0)) == [
+    assert array.typetracer.pad_none(3, 0).form == array.pad_none(3, 0).form
+    assert to_list(array.pad_none(1, 0)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
-    assert array.typetracer.rpad(1, 0).form == array.rpad(1, 0).form
-    assert to_list(array.rpad(5, 1)) == [
+    assert array.typetracer.pad_none(1, 0).form == array.pad_none(1, 0).form
+    assert to_list(array.pad_none(5, 1)) == [
         [6.9, 3.9, 6.9, None, None],
         [2.2, 1.5, 1.6, None, None],
         [3.6, None, 6.7, None, None],
     ]
-    assert array.typetracer.rpad(5, 1).form == array.rpad(5, 1).form
-    assert to_list(array.rpad(4, 1)) == [
+    assert array.typetracer.pad_none(5, 1).form == array.pad_none(5, 1).form
+    assert to_list(array.pad_none(4, 1)) == [
         [6.9, 3.9, 6.9, None],
         [2.2, 1.5, 1.6, None],
         [3.6, None, 6.7, None],
     ]
-    assert array.typetracer.rpad(4, 1).form == array.rpad(4, 1).form
-    assert to_list(array.rpad(3, 1)) == [
+    assert array.typetracer.pad_none(4, 1).form == array.pad_none(4, 1).form
+    assert to_list(array.pad_none(3, 1)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
-    assert array.typetracer.rpad(3, 1).form == array.rpad(3, 1).form
-    assert to_list(array.rpad(1, 1)) == [
+    assert array.typetracer.pad_none(3, 1).form == array.pad_none(3, 1).form
+    assert to_list(array.pad_none(1, 1)) == [
         [6.9, 3.9, 6.9],
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
-    assert array.typetracer.rpad(1, 1).form == array.rpad(1, 1).form
+    assert array.typetracer.pad_none(1, 1).form == array.pad_none(1, 1).form
 
     content = ak._v2.contents.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
@@ -549,26 +567,32 @@ def test_rpad_regular_array():
         listoffsetarray, 2, zeros_length=0
     )
 
-    assert to_list(regulararray.rpad(1, 0)) == [
+    assert to_list(regulararray.pad_none(1, 0)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]
-    assert regulararray.typetracer.rpad(1, 0).form == regulararray.rpad(1, 0).form
-    assert to_list(regulararray.rpad(3, 0)) == [
+    assert (
+        regulararray.typetracer.pad_none(1, 0).form == regulararray.pad_none(1, 0).form
+    )
+    assert to_list(regulararray.pad_none(3, 0)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]
-    assert regulararray.typetracer.rpad(3, 0).form == regulararray.rpad(3, 0).form
-    assert to_list(regulararray.rpad(4, 0)) == [
+    assert (
+        regulararray.typetracer.pad_none(3, 0).form == regulararray.pad_none(3, 0).form
+    )
+    assert to_list(regulararray.pad_none(4, 0)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
         None,
     ]
-    assert regulararray.typetracer.rpad(4, 0).form == regulararray.rpad(4, 0).form
-    assert to_list(regulararray.rpad(7, 0)) == [
+    assert (
+        regulararray.typetracer.pad_none(4, 0).form == regulararray.pad_none(4, 0).form
+    )
+    assert to_list(regulararray.pad_none(7, 0)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
@@ -577,63 +601,83 @@ def test_rpad_regular_array():
         None,
         None,
     ]
-    assert regulararray.typetracer.rpad(7, 0).form == regulararray.rpad(7, 0).form
+    assert (
+        regulararray.typetracer.pad_none(7, 0).form == regulararray.pad_none(7, 0).form
+    )
 
-    assert to_list(regulararray.rpad(1, 1)) == [
+    assert to_list(regulararray.pad_none(1, 1)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]
-    assert regulararray.typetracer.rpad(1, 1).form == regulararray.rpad(1, 1).form
-    assert to_list(regulararray.rpad(2, 1)) == [
+    assert (
+        regulararray.typetracer.pad_none(1, 1).form == regulararray.pad_none(1, 1).form
+    )
+    assert to_list(regulararray.pad_none(2, 1)) == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], []],
     ]
-    assert regulararray.typetracer.rpad(2, 1).form == regulararray.rpad(2, 1).form
-    assert to_list(regulararray.rpad(3, 1)) == [
+    assert (
+        regulararray.typetracer.pad_none(2, 1).form == regulararray.pad_none(2, 1).form
+    )
+    assert to_list(regulararray.pad_none(3, 1)) == [
         [[0.0, 1.1, 2.2], [], None],
         [[3.3, 4.4], [5.5], None],
         [[6.6, 7.7, 8.8, 9.9], [], None],
     ]
-    assert regulararray.typetracer.rpad(3, 1).form == regulararray.rpad(3, 1).form
-    assert to_list(regulararray.rpad(5, 1)) == [
+    assert (
+        regulararray.typetracer.pad_none(3, 1).form == regulararray.pad_none(3, 1).form
+    )
+    assert to_list(regulararray.pad_none(5, 1)) == [
         [[0.0, 1.1, 2.2], [], None, None, None],
         [[3.3, 4.4], [5.5], None, None, None],
         [[6.6, 7.7, 8.8, 9.9], [], None, None, None],
     ]
-    assert regulararray.typetracer.rpad(5, 1).form == regulararray.rpad(5, 1).form
-    assert to_list(regulararray.rpad(7, 1)) == [
+    assert (
+        regulararray.typetracer.pad_none(5, 1).form == regulararray.pad_none(5, 1).form
+    )
+    assert to_list(regulararray.pad_none(7, 1)) == [
         [[0.0, 1.1, 2.2], [], None, None, None, None, None],
         [[3.3, 4.4], [5.5], None, None, None, None, None],
         [[6.6, 7.7, 8.8, 9.9], [], None, None, None, None, None],
     ]
-    assert regulararray.typetracer.rpad(7, 1).form == regulararray.rpad(7, 1).form
+    assert (
+        regulararray.typetracer.pad_none(7, 1).form == regulararray.pad_none(7, 1).form
+    )
 
-    assert to_list(regulararray.rpad(1, 2)) == [
+    assert to_list(regulararray.pad_none(1, 2)) == [
         [[0.0, 1.1, 2.2], [None]],
         [[3.3, 4.4], [5.5]],
         [[6.6, 7.7, 8.8, 9.9], [None]],
     ]
-    assert regulararray.typetracer.rpad(1, 2).form == regulararray.rpad(1, 2).form
-    assert to_list(regulararray.rpad(2, 2)) == [
+    assert (
+        regulararray.typetracer.pad_none(1, 2).form == regulararray.pad_none(1, 2).form
+    )
+    assert to_list(regulararray.pad_none(2, 2)) == [
         [[0.0, 1.1, 2.2], [None, None]],
         [[3.3, 4.4], [5.5, None]],
         [[6.6, 7.7, 8.8, 9.9], [None, None]],
     ]
-    assert regulararray.typetracer.rpad(2, 2).form == regulararray.rpad(2, 2).form
-    assert to_list(regulararray.rpad(3, 2)) == [
+    assert (
+        regulararray.typetracer.pad_none(2, 2).form == regulararray.pad_none(2, 2).form
+    )
+    assert to_list(regulararray.pad_none(3, 2)) == [
         [[0.0, 1.1, 2.2], [None, None, None]],
         [[3.3, 4.4, None], [5.5, None, None]],
         [[6.6, 7.7, 8.8, 9.9], [None, None, None]],
     ]
-    assert regulararray.typetracer.rpad(3, 2).form == regulararray.rpad(3, 2).form
-    assert to_list(regulararray.rpad(4, 2)) == [
+    assert (
+        regulararray.typetracer.pad_none(3, 2).form == regulararray.pad_none(3, 2).form
+    )
+    assert to_list(regulararray.pad_none(4, 2)) == [
         [[0.0, 1.1, 2.2, None], [None, None, None, None]],
         [[3.3, 4.4, None, None], [5.5, None, None, None]],
         [[6.6, 7.7, 8.8, 9.9], [None, None, None, None]],
     ]
-    assert regulararray.typetracer.rpad(4, 2).form == regulararray.rpad(4, 2).form
+    assert (
+        regulararray.typetracer.pad_none(4, 2).form == regulararray.pad_none(4, 2).form
+    )
 
 
 def test_rpad_and_clip_listoffset_array():
@@ -651,20 +695,20 @@ def test_rpad_and_clip_listoffset_array():
         [],
     ]
 
-    assert to_list(listoffsetarray.rpad(3, 0, clip=True)) == [
+    assert to_list(listoffsetarray.pad_none(3, 0, clip=True)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
     ]
     assert (
-        listoffsetarray.typetracer.rpad(3, 0, clip=True).form
-        == listoffsetarray.rpad(3, 0, clip=True).form
+        listoffsetarray.typetracer.pad_none(3, 0, clip=True).form
+        == listoffsetarray.pad_none(3, 0, clip=True).form
     )
     assert "option[" + str(listoffsetarray.form.type) + "]" == str(
-        listoffsetarray.rpad(3, 0, clip=True).form.type
+        listoffsetarray.pad_none(3, 0, clip=True).form.type
     )
 
-    assert to_list(listoffsetarray.rpad(7, 0, clip=True)) == [
+    assert to_list(listoffsetarray.pad_none(7, 0, clip=True)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
@@ -674,14 +718,14 @@ def test_rpad_and_clip_listoffset_array():
         None,
     ]
     assert (
-        listoffsetarray.typetracer.rpad(7, 0, clip=True).form
-        == listoffsetarray.rpad(7, 0, clip=True).form
+        listoffsetarray.typetracer.pad_none(7, 0, clip=True).form
+        == listoffsetarray.pad_none(7, 0, clip=True).form
     )
     assert "option[" + str(listoffsetarray.form.type) + "]" == str(
-        listoffsetarray.rpad(7, 0, clip=True).form.type
+        listoffsetarray.pad_none(7, 0, clip=True).form.type
     )
 
-    assert to_list(listoffsetarray.rpad(5, 1, clip=True)) == [
+    assert to_list(listoffsetarray.pad_none(5, 1, clip=True)) == [
         [0.0, 1.1, 2.2, None, None],
         [None, None, None, None, None],
         [3.3, 4.4, None, None, None],
@@ -690,14 +734,14 @@ def test_rpad_and_clip_listoffset_array():
         [None, None, None, None, None],
     ]
     assert (
-        listoffsetarray.typetracer.rpad(5, 1, clip=True).form
-        == listoffsetarray.rpad(5, 1, clip=True).form
+        listoffsetarray.typetracer.pad_none(5, 1, clip=True).form
+        == listoffsetarray.pad_none(5, 1, clip=True).form
     )
 
-    assert str(listoffsetarray.rpad(5, 1).form.type) == "var * ?float64"
-    assert str(listoffsetarray.rpad(5, 1, clip=True).form.type) == "5 * ?float64"
+    assert str(listoffsetarray.pad_none(5, 1).form.type) == "var * ?float64"
+    assert str(listoffsetarray.pad_none(5, 1, clip=True).form.type) == "5 * ?float64"
 
-    assert to_list(listoffsetarray.rpad(1, 1, clip=True)) == [
+    assert to_list(listoffsetarray.pad_none(1, 1, clip=True)) == [
         [0.0],
         [None],
         [3.3],
@@ -706,8 +750,8 @@ def test_rpad_and_clip_listoffset_array():
         [None],
     ]
     assert (
-        listoffsetarray.typetracer.rpad(1, 1, clip=True).form
-        == listoffsetarray.rpad(1, 1, clip=True).form
+        listoffsetarray.typetracer.pad_none(1, 1, clip=True).form
+        == listoffsetarray.pad_none(1, 1, clip=True).form
     )
 
     content = ak._v2.contents.numpyarray.NumpyArray(np.array([1.5, 3.3]))
@@ -758,12 +802,12 @@ def test_rpad_and_clip_listoffset_array():
         [],
         [],
     ]
-    assert to_list(listoffsetarray.rpad(1, 0, clip=True)) == [[3.3]]
+    assert to_list(listoffsetarray.pad_none(1, 0, clip=True)) == [[3.3]]
     assert (
-        listoffsetarray.typetracer.rpad(1, 0, clip=True).form
-        == listoffsetarray.rpad(1, 0, clip=True).form
+        listoffsetarray.typetracer.pad_none(1, 0, clip=True).form
+        == listoffsetarray.pad_none(1, 0, clip=True).form
     )
-    assert to_list(listoffsetarray.rpad(1, 1, clip=True)) == [
+    assert to_list(listoffsetarray.pad_none(1, 1, clip=True)) == [
         [3.3],
         [None],
         [None],
@@ -772,8 +816,8 @@ def test_rpad_and_clip_listoffset_array():
         [None],
     ]
     assert (
-        listoffsetarray.typetracer.rpad(1, 1, clip=True).form
-        == listoffsetarray.rpad(1, 1, clip=True).form
+        listoffsetarray.typetracer.pad_none(1, 1, clip=True).form
+        == listoffsetarray.pad_none(1, 1, clip=True).form
     )
 
 
@@ -793,7 +837,7 @@ def test_rpad_listoffset_array():
         [],
     ]
 
-    assert to_list(listoffsetarray.rpad(3, 0)) == [
+    assert to_list(listoffsetarray.pad_none(3, 0)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
@@ -801,13 +845,16 @@ def test_rpad_listoffset_array():
         [6.6, 7.7, 8.8, 9.9],
         [],
     ]
-    assert listoffsetarray.typetracer.rpad(3, 0).form == listoffsetarray.rpad(3, 0).form
+    assert (
+        listoffsetarray.typetracer.pad_none(3, 0).form
+        == listoffsetarray.pad_none(3, 0).form
+    )
 
-    assert "option[" + str(ak._v2.operations.describe.type(listoffsetarray)) + str(
-        "]"
-    ) == str(ak._v2.operations.describe.type(listoffsetarray.rpad(3, 0)))
+    assert "option[" + str(ak._v2.operations.type(listoffsetarray)) + "]" == str(
+        ak._v2.operations.type(listoffsetarray.pad_none(3, 0))
+    )
 
-    assert to_list(listoffsetarray.rpad(7, 0)) == [
+    assert to_list(listoffsetarray.pad_none(7, 0)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
@@ -816,13 +863,16 @@ def test_rpad_listoffset_array():
         [],
         None,
     ]
-    assert listoffsetarray.typetracer.rpad(7, 0).form == listoffsetarray.rpad(7, 0).form
+    assert (
+        listoffsetarray.typetracer.pad_none(7, 0).form
+        == listoffsetarray.pad_none(7, 0).form
+    )
 
-    assert "option[" + str(ak._v2.operations.describe.type(listoffsetarray)) + str(
-        "]"
-    ) == str(ak._v2.operations.describe.type(listoffsetarray.rpad(7, 0)))
+    assert "option[" + str(ak._v2.operations.type(listoffsetarray)) + "]" == str(
+        ak._v2.operations.type(listoffsetarray.pad_none(7, 0))
+    )
 
-    assert to_list(listoffsetarray.rpad(5, 1)) == [
+    assert to_list(listoffsetarray.pad_none(5, 1)) == [
         [0.0, 1.1, 2.2, None, None],
         [None, None, None, None, None],
         [3.3, 4.4, None, None, None],
@@ -830,13 +880,15 @@ def test_rpad_listoffset_array():
         [6.6, 7.7, 8.8, 9.9, None],
         [None, None, None, None, None],
     ]
-    assert listoffsetarray.typetracer.rpad(5, 1).form == listoffsetarray.rpad(5, 1).form
     assert (
-        str(ak._v2.operations.describe.type(listoffsetarray.rpad(5, 1)))
-        == "var * ?float64"
+        listoffsetarray.typetracer.pad_none(5, 1).form
+        == listoffsetarray.pad_none(5, 1).form
+    )
+    assert (
+        str(ak._v2.operations.type(listoffsetarray.pad_none(5, 1))) == "var * ?float64"
     )
 
-    assert to_list(listoffsetarray.rpad(1, 1)) == [
+    assert to_list(listoffsetarray.pad_none(1, 1)) == [
         [0.0, 1.1, 2.2],
         [None],
         [3.3, 4.4],
@@ -844,7 +896,10 @@ def test_rpad_listoffset_array():
         [6.6, 7.7, 8.8, 9.9],
         [None],
     ]
-    assert listoffsetarray.typetracer.rpad(1, 1).form == listoffsetarray.rpad(1, 1).form
+    assert (
+        listoffsetarray.typetracer.pad_none(1, 1).form
+        == listoffsetarray.pad_none(1, 1).form
+    )
 
     content = ak._v2.contents.numpyarray.NumpyArray(np.array([1.5, 3.3]))
     index = ak._v2.index.Index64(
@@ -895,7 +950,7 @@ def test_rpad_listoffset_array():
         [],
     ]
 
-    assert to_list(listoffsetarray.rpad(1, 0)) == [
+    assert to_list(listoffsetarray.pad_none(1, 0)) == [
         [3.3],
         [],
         [],
@@ -903,68 +958,83 @@ def test_rpad_listoffset_array():
         [],
         [],
     ]
-    assert listoffsetarray.typetracer.rpad(1, 0).form == listoffsetarray.rpad(1, 0).form
-    assert "option[{}]".format(
-        str(ak._v2.operations.describe.type(listoffsetarray))
-    ) == str(ak._v2.operations.describe.type(listoffsetarray.rpad(1, 0)))
-
-    assert to_list(listoffsetarray.rpad(6, 0)) == [
-        [3.3],
-        [],
-        [],
-        [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3],
-        [],
-        [],
-    ]
-    assert listoffsetarray.typetracer.rpad(6, 0).form == listoffsetarray.rpad(6, 0).form
-    assert "option[" + str(ak._v2.operations.describe.type(listoffsetarray)) + str(
-        "]"
-    ) == str(ak._v2.operations.describe.type(listoffsetarray.rpad(6, 0)))
-
-    assert to_list(listoffsetarray.rpad(7, 0)) == [
-        [3.3],
-        [],
-        [],
-        [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3],
-        [],
-        [],
-        None,
-    ]
-    assert listoffsetarray.typetracer.rpad(7, 0).form == listoffsetarray.rpad(7, 0).form
-    assert "option[" + str(ak._v2.operations.describe.type(listoffsetarray)) + str(
-        "]"
-    ) == str(ak._v2.operations.describe.type(listoffsetarray.rpad(7, 0)))
-
-    assert to_list(listoffsetarray.rpad(9, 0)) == [
-        [3.3],
-        [],
-        [],
-        [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3],
-        [],
-        [],
-        None,
-        None,
-        None,
-    ]
-    assert listoffsetarray.typetracer.rpad(9, 0).form == listoffsetarray.rpad(9, 0).form
-    assert "option[" + str(ak._v2.operations.describe.type(listoffsetarray)) + str(
-        "]"
-    ) == str(ak._v2.operations.describe.type(listoffsetarray.rpad(9, 0)))
-
-    assert to_list(listoffsetarray.rpad(1, 1)) == [
-        [3.3],
-        [None],
-        [None],
-        [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3],
-        [None],
-        [None],
-    ]
-    assert listoffsetarray.typetracer.rpad(1, 1).form == listoffsetarray.rpad(1, 1).form
-    assert str(ak._v2.operations.describe.type(listoffsetarray)) == str(
-        ak._v2.operations.describe.type(listoffsetarray.rpad(1, 1))
+    assert (
+        listoffsetarray.typetracer.pad_none(1, 0).form
+        == listoffsetarray.pad_none(1, 0).form
+    )
+    assert f"option[{str(ak._v2.operations.type(listoffsetarray))}]" == str(
+        ak._v2.operations.type(listoffsetarray.pad_none(1, 0))
     )
 
-    assert to_list(listoffsetarray.rpad(4, 1)) == [
+    assert to_list(listoffsetarray.pad_none(6, 0)) == [
+        [3.3],
+        [],
+        [],
+        [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3],
+        [],
+        [],
+    ]
+    assert (
+        listoffsetarray.typetracer.pad_none(6, 0).form
+        == listoffsetarray.pad_none(6, 0).form
+    )
+    assert "option[" + str(ak._v2.operations.type(listoffsetarray)) + "]" == str(
+        ak._v2.operations.type(listoffsetarray.pad_none(6, 0))
+    )
+
+    assert to_list(listoffsetarray.pad_none(7, 0)) == [
+        [3.3],
+        [],
+        [],
+        [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3],
+        [],
+        [],
+        None,
+    ]
+    assert (
+        listoffsetarray.typetracer.pad_none(7, 0).form
+        == listoffsetarray.pad_none(7, 0).form
+    )
+    assert "option[" + str(ak._v2.operations.type(listoffsetarray)) + "]" == str(
+        ak._v2.operations.type(listoffsetarray.pad_none(7, 0))
+    )
+
+    assert to_list(listoffsetarray.pad_none(9, 0)) == [
+        [3.3],
+        [],
+        [],
+        [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3],
+        [],
+        [],
+        None,
+        None,
+        None,
+    ]
+    assert (
+        listoffsetarray.typetracer.pad_none(9, 0).form
+        == listoffsetarray.pad_none(9, 0).form
+    )
+    assert "option[" + str(ak._v2.operations.type(listoffsetarray)) + "]" == str(
+        ak._v2.operations.type(listoffsetarray.pad_none(9, 0))
+    )
+
+    assert to_list(listoffsetarray.pad_none(1, 1)) == [
+        [3.3],
+        [None],
+        [None],
+        [3.3, 3.3, None, 1.5, None, 1.5, 1.5, 1.5, 3.3, None, 3.3],
+        [None],
+        [None],
+    ]
+    assert (
+        listoffsetarray.typetracer.pad_none(1, 1).form
+        == listoffsetarray.pad_none(1, 1).form
+    )
+    assert str(ak._v2.operations.type(listoffsetarray)) == str(
+        ak._v2.operations.type(listoffsetarray.pad_none(1, 1))
+    )
+
+    assert to_list(listoffsetarray.pad_none(4, 1)) == [
         [3.3, None, None, None],
         [None, None, None, None],
         [None, None, None, None],
@@ -972,8 +1042,8 @@ def test_rpad_listoffset_array():
         [None, None, None, None],
         [None, None, None, None],
     ]
-    assert str(ak._v2.operations.describe.type(listoffsetarray)) == str(
-        ak._v2.operations.describe.type(listoffsetarray.rpad(4, 1))
+    assert str(ak._v2.operations.type(listoffsetarray)) == str(
+        ak._v2.operations.type(listoffsetarray.pad_none(4, 1))
     )
 
 
@@ -992,29 +1062,29 @@ def test_rpad_list_array():
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert to_list(array.rpad(1, 0)) == [
+    assert to_list(array.pad_none(1, 0)) == [
         [0.0, 1.1, 2.2],
         [],
         [4.4, 5.5],
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert f"option[{str(ak._v2.operations.describe.type(array))}]" == str(
-        ak._v2.operations.describe.type(array.rpad(1, 0))
+    assert f"option[{str(ak._v2.operations.type(array))}]" == str(
+        ak._v2.operations.type(array.pad_none(1, 0))
     )
 
-    assert to_list(array.rpad(2, 0)) == [
+    assert to_list(array.pad_none(2, 0)) == [
         [0.0, 1.1, 2.2],
         [],
         [4.4, 5.5],
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert f"option[{str(ak._v2.operations.describe.type(array))}]" == str(
-        ak._v2.operations.describe.type(array.rpad(2, 0))
+    assert f"option[{str(ak._v2.operations.type(array))}]" == str(
+        ak._v2.operations.type(array.pad_none(2, 0))
     )
 
-    assert to_list(array.rpad(7, 0)) == [
+    assert to_list(array.pad_none(7, 0)) == [
         [0.0, 1.1, 2.2],
         [],
         [4.4, 5.5],
@@ -1023,11 +1093,11 @@ def test_rpad_list_array():
         None,
         None,
     ]
-    assert "option[" + str(ak._v2.operations.describe.type(array)) + "]" == str(
-        ak._v2.operations.describe.type(array.rpad(7, 0))
+    assert "option[" + str(ak._v2.operations.type(array)) + "]" == str(
+        ak._v2.operations.type(array.pad_none(7, 0))
     )
 
-    assert to_list(array.rpad(1, 1)) == [
+    assert to_list(array.pad_none(1, 1)) == [
         [0.0, 1.1, 2.2],
         [None],
         [4.4, 5.5],
@@ -1035,7 +1105,7 @@ def test_rpad_list_array():
         [8.8],
     ]
 
-    assert to_list(array.rpad(2, 1)) == [
+    assert to_list(array.pad_none(2, 1)) == [
         [0.0, 1.1, 2.2],
         [None, None],
         [4.4, 5.5],
@@ -1043,7 +1113,7 @@ def test_rpad_list_array():
         [8.8, None],
     ]
 
-    assert to_list(array.rpad(3, 1)) == [
+    assert to_list(array.pad_none(3, 1)) == [
         [0.0, 1.1, 2.2],
         [None, None, None],
         [4.4, 5.5, None],
@@ -1051,7 +1121,7 @@ def test_rpad_list_array():
         [8.8, None, None],
     ]
 
-    assert to_list(array.rpad(4, 1)) == [
+    assert to_list(array.pad_none(4, 1)) == [
         [0.0, 1.1, 2.2, None],
         [None, None, None, None],
         [4.4, 5.5, None, None],
@@ -1075,23 +1145,25 @@ def test_rpad_and_clip_list_array():
         [5.5, 6.6, 7.7],
         [8.8],
     ]
-    assert to_list(array.rpad(1, 0, clip=True)) == [[0.0, 1.1, 2.2]]
+    assert to_list(array.pad_none(1, 0, clip=True)) == [[0.0, 1.1, 2.2]]
     assert (
-        array.typetracer.rpad(1, 0, clip=True).form == array.rpad(1, 0, clip=True).form
+        array.typetracer.pad_none(1, 0, clip=True).form
+        == array.pad_none(1, 0, clip=True).form
     )
     assert "option[" + str(array.form.type) + "]" == str(
-        array.rpad(1, 0, clip=True).form.type
+        array.pad_none(1, 0, clip=True).form.type
     )
 
-    assert to_list(array.rpad(2, 0, clip=True)) == [[0.0, 1.1, 2.2], []]
+    assert to_list(array.pad_none(2, 0, clip=True)) == [[0.0, 1.1, 2.2], []]
     assert (
-        array.typetracer.rpad(2, 0, clip=True).form == array.rpad(2, 0, clip=True).form
+        array.typetracer.pad_none(2, 0, clip=True).form
+        == array.pad_none(2, 0, clip=True).form
     )
     assert "option[" + str(array.form.type) + "]" == str(
-        array.rpad(2, 0, clip=True).form.type
+        array.pad_none(2, 0, clip=True).form.type
     )
 
-    assert to_list(array.rpad(7, 0, clip=True)) == [
+    assert to_list(array.pad_none(7, 0, clip=True)) == [
         [0.0, 1.1, 2.2],
         [],
         [4.4, 5.5],
@@ -1101,13 +1173,14 @@ def test_rpad_and_clip_list_array():
         None,
     ]
     assert (
-        array.typetracer.rpad(7, 0, clip=True).form == array.rpad(7, 0, clip=True).form
+        array.typetracer.pad_none(7, 0, clip=True).form
+        == array.pad_none(7, 0, clip=True).form
     )
     assert "option[" + str(array.form.type) + "]" == str(
-        array.rpad(7, 0, clip=True).form.type
+        array.pad_none(7, 0, clip=True).form.type
     )
 
-    assert to_list(array.rpad(1, 1, clip=True)) == [
+    assert to_list(array.pad_none(1, 1, clip=True)) == [
         [0.0],
         [None],
         [4.4],
@@ -1115,10 +1188,11 @@ def test_rpad_and_clip_list_array():
         [8.8],
     ]
     assert (
-        array.typetracer.rpad(1, 1, clip=True).form == array.rpad(1, 1, clip=True).form
+        array.typetracer.pad_none(1, 1, clip=True).form
+        == array.pad_none(1, 1, clip=True).form
     )
 
-    assert to_list(array.rpad(2, 1, clip=True)) == [
+    assert to_list(array.pad_none(2, 1, clip=True)) == [
         [0.0, 1.1],
         [None, None],
         [4.4, 5.5],
@@ -1126,7 +1200,8 @@ def test_rpad_and_clip_list_array():
         [8.8, None],
     ]
     assert (
-        array.typetracer.rpad(2, 1, clip=True).form == array.rpad(2, 1, clip=True).form
+        array.typetracer.pad_none(2, 1, clip=True).form
+        == array.pad_none(2, 1, clip=True).form
     )
 
 
@@ -1153,47 +1228,55 @@ def test_rpad_indexed_array():
         [0.0, 1.1, 2.2],
     ]
 
-    assert to_list(backward.rpad(4, 1)) == to_list(indexedarray.rpad(4, 1))
-    assert to_list(indexedarray.rpad(1, 0)) == [
+    assert to_list(backward.pad_none(4, 1)) == to_list(indexedarray.pad_none(4, 1))
+    assert to_list(indexedarray.pad_none(1, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
         [],
         [0.0, 1.1, 2.2],
     ]
-    assert to_list(indexedarray.rpad(2, 1)) == [
+    assert to_list(indexedarray.pad_none(2, 1)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5, None],
         [3.3, 4.4],
         [None, None],
         [0.0, 1.1, 2.2],
     ]
-    assert indexedarray.typetracer.rpad(2, 1).form == indexedarray.rpad(2, 1).form
-    assert to_list(indexedarray.rpad(3, 1)) == [
+    assert (
+        indexedarray.typetracer.pad_none(2, 1).form == indexedarray.pad_none(2, 1).form
+    )
+    assert to_list(indexedarray.pad_none(3, 1)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5, None, None],
         [3.3, 4.4, None],
         [None, None, None],
         [0.0, 1.1, 2.2],
     ]
-    assert indexedarray.typetracer.rpad(3, 1).form == indexedarray.rpad(3, 1).form
-    assert to_list(indexedarray.rpad(4, 0)) == [
+    assert (
+        indexedarray.typetracer.pad_none(3, 1).form == indexedarray.pad_none(3, 1).form
+    )
+    assert to_list(indexedarray.pad_none(4, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
         [],
         [0.0, 1.1, 2.2],
     ]
-    assert indexedarray.typetracer.rpad(4, 0).form == indexedarray.rpad(4, 0).form
-    assert to_list(indexedarray.rpad(5, 0)) == [
+    assert (
+        indexedarray.typetracer.pad_none(4, 0).form == indexedarray.pad_none(4, 0).form
+    )
+    assert to_list(indexedarray.pad_none(5, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
         [],
         [0.0, 1.1, 2.2],
     ]
-    assert indexedarray.typetracer.rpad(5, 0).form == indexedarray.rpad(5, 0).form
-    assert to_list(indexedarray.rpad(6, 0)) == [
+    assert (
+        indexedarray.typetracer.pad_none(5, 0).form == indexedarray.pad_none(5, 0).form
+    )
+    assert to_list(indexedarray.pad_none(6, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
@@ -1201,8 +1284,10 @@ def test_rpad_indexed_array():
         [0.0, 1.1, 2.2],
         None,
     ]
-    assert indexedarray.typetracer.rpad(6, 0).form == indexedarray.rpad(6, 0).form
-    assert to_list(indexedarray.rpad(7, 0)) == [
+    assert (
+        indexedarray.typetracer.pad_none(6, 0).form == indexedarray.pad_none(6, 0).form
+    )
+    assert to_list(indexedarray.pad_none(7, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
@@ -1211,7 +1296,9 @@ def test_rpad_indexed_array():
         None,
         None,
     ]
-    assert indexedarray.typetracer.rpad(7, 0).form == indexedarray.rpad(7, 0).form
+    assert (
+        indexedarray.typetracer.pad_none(7, 0).form == indexedarray.pad_none(7, 0).form
+    )
 
 
 def test_rpad_and_clip_indexed_array():
@@ -1236,78 +1323,65 @@ def test_rpad_and_clip_indexed_array():
         [0.0, 1.1, 2.2],
     ]
 
-    assert to_list(backward.rpad(4, 1, clip=True)) == to_list(
-        indexedarray.rpad(4, 1, clip=True)
+    assert to_list(backward.pad_none(4, 1, clip=True)) == to_list(
+        indexedarray.pad_none(4, 1, clip=True)
     )
-    assert to_list(indexedarray.rpad(1, 0, clip=True)) == [[6.6, 7.7, 8.8, 9.9]]
+    assert to_list(indexedarray.pad_none(1, 0, clip=True)) == [[6.6, 7.7, 8.8, 9.9]]
     assert (
-        indexedarray.typetracer.rpad(1, 0, clip=True).form
-        == indexedarray.rpad(1, 0, clip=True).form
+        indexedarray.typetracer.pad_none(1, 0, clip=True).form
+        == indexedarray.pad_none(1, 0, clip=True).form
     )
-    assert to_list(indexedarray.rpad(2, 0, clip=True)) == [
+    assert to_list(indexedarray.pad_none(2, 0, clip=True)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
     ]
     assert (
-        indexedarray.typetracer.rpad(2, 0, clip=True).form
-        == indexedarray.rpad(2, 0, clip=True).form
+        indexedarray.typetracer.pad_none(2, 0, clip=True).form
+        == indexedarray.pad_none(2, 0, clip=True).form
     )
-    assert to_list(indexedarray.rpad(3, 0, clip=True)) == [
-        [6.6, 7.7, 8.8, 9.9],
-        [5.5],
-        [3.3, 4.4],
-    ]
-    assert (
-        indexedarray.typetracer.rpad(3, 0, clip=True).form
-        == indexedarray.rpad(3, 0, clip=True).form
-    )
-    assert to_list(indexedarray.rpad(4, 0, clip=True)) == [
+    assert to_list(indexedarray.pad_none(3, 0, clip=True)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
-        [],
     ]
     assert (
-        indexedarray.typetracer.rpad(4, 0, clip=True).form
-        == indexedarray.rpad(4, 0, clip=True).form
+        indexedarray.typetracer.pad_none(3, 0, clip=True).form
+        == indexedarray.pad_none(3, 0, clip=True).form
     )
-    assert to_list(indexedarray.rpad(5, 0, clip=True)) == [
+    assert to_list(indexedarray.pad_none(4, 0, clip=True)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
         [],
-        [0.0, 1.1, 2.2],
     ]
     assert (
-        indexedarray.typetracer.rpad(5, 0, clip=True).form
-        == indexedarray.rpad(5, 0, clip=True).form
+        indexedarray.typetracer.pad_none(4, 0, clip=True).form
+        == indexedarray.pad_none(4, 0, clip=True).form
     )
-    assert to_list(indexedarray.rpad(6, 0, clip=True)) == [
+    assert to_list(indexedarray.pad_none(5, 0, clip=True)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
         [],
         [0.0, 1.1, 2.2],
-        None,
     ]
     assert (
-        indexedarray.typetracer.rpad(6, 0, clip=True).form
-        == indexedarray.rpad(6, 0, clip=True).form
+        indexedarray.typetracer.pad_none(5, 0, clip=True).form
+        == indexedarray.pad_none(5, 0, clip=True).form
     )
-    assert to_list(indexedarray.rpad(7, 0, clip=True)) == [
+    assert to_list(indexedarray.pad_none(6, 0, clip=True)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
         [],
         [0.0, 1.1, 2.2],
         None,
-        None,
     ]
     assert (
-        indexedarray.typetracer.rpad(7, 0, clip=True).form
-        == indexedarray.rpad(7, 0, clip=True).form
+        indexedarray.typetracer.pad_none(6, 0, clip=True).form
+        == indexedarray.pad_none(6, 0, clip=True).form
     )
-    assert to_list(indexedarray.rpad(8, 0, clip=True)) == [
+    assert to_list(indexedarray.pad_none(7, 0, clip=True)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
@@ -1315,14 +1389,27 @@ def test_rpad_and_clip_indexed_array():
         [0.0, 1.1, 2.2],
         None,
         None,
+    ]
+    assert (
+        indexedarray.typetracer.pad_none(7, 0, clip=True).form
+        == indexedarray.pad_none(7, 0, clip=True).form
+    )
+    assert to_list(indexedarray.pad_none(8, 0, clip=True)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        [],
+        [0.0, 1.1, 2.2],
+        None,
+        None,
         None,
     ]
     assert (
-        indexedarray.typetracer.rpad(8, 0, clip=True).form
-        == indexedarray.rpad(8, 0, clip=True).form
+        indexedarray.typetracer.pad_none(8, 0, clip=True).form
+        == indexedarray.pad_none(8, 0, clip=True).form
     )
 
-    assert to_list(indexedarray.rpad(1, 1, clip=True)) == [
+    assert to_list(indexedarray.pad_none(1, 1, clip=True)) == [
         [6.6],
         [5.5],
         [3.3],
@@ -1330,10 +1417,10 @@ def test_rpad_and_clip_indexed_array():
         [0.0],
     ]
     assert (
-        indexedarray.typetracer.rpad(1, 1, clip=True).form
-        == indexedarray.rpad(1, 1, clip=True).form
+        indexedarray.typetracer.pad_none(1, 1, clip=True).form
+        == indexedarray.pad_none(1, 1, clip=True).form
     )
-    assert to_list(indexedarray.rpad(2, 1, clip=True)) == [
+    assert to_list(indexedarray.pad_none(2, 1, clip=True)) == [
         [6.6, 7.7],
         [5.5, None],
         [3.3, 4.4],
@@ -1341,10 +1428,10 @@ def test_rpad_and_clip_indexed_array():
         [0.0, 1.1],
     ]
     assert (
-        indexedarray.typetracer.rpad(2, 1, clip=True).form
-        == indexedarray.rpad(2, 1, clip=True).form
+        indexedarray.typetracer.pad_none(2, 1, clip=True).form
+        == indexedarray.pad_none(2, 1, clip=True).form
     )
-    assert to_list(indexedarray.rpad(3, 1, clip=True)) == [
+    assert to_list(indexedarray.pad_none(3, 1, clip=True)) == [
         [6.6, 7.7, 8.8],
         [5.5, None, None],
         [3.3, 4.4, None],
@@ -1352,10 +1439,10 @@ def test_rpad_and_clip_indexed_array():
         [0.0, 1.1, 2.2],
     ]
     assert (
-        indexedarray.typetracer.rpad(3, 1, clip=True).form
-        == indexedarray.rpad(3, 1, clip=True).form
+        indexedarray.typetracer.pad_none(3, 1, clip=True).form
+        == indexedarray.pad_none(3, 1, clip=True).form
     )
-    assert to_list(indexedarray.rpad(4, 1, clip=True)) == [
+    assert to_list(indexedarray.pad_none(4, 1, clip=True)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5, None, None, None],
         [3.3, 4.4, None, None],
@@ -1363,10 +1450,10 @@ def test_rpad_and_clip_indexed_array():
         [0.0, 1.1, 2.2, None],
     ]
     assert (
-        indexedarray.typetracer.rpad(4, 1, clip=True).form
-        == indexedarray.rpad(4, 1, clip=True).form
+        indexedarray.typetracer.pad_none(4, 1, clip=True).form
+        == indexedarray.pad_none(4, 1, clip=True).form
     )
-    assert to_list(indexedarray.rpad(5, 1, clip=True)) == [
+    assert to_list(indexedarray.pad_none(5, 1, clip=True)) == [
         [6.6, 7.7, 8.8, 9.9, None],
         [5.5, None, None, None, None],
         [3.3, 4.4, None, None, None],
@@ -1374,8 +1461,8 @@ def test_rpad_and_clip_indexed_array():
         [0.0, 1.1, 2.2, None, None],
     ]
     assert (
-        indexedarray.typetracer.rpad(5, 1, clip=True).form
-        == indexedarray.rpad(5, 1, clip=True).form
+        indexedarray.typetracer.pad_none(5, 1, clip=True).form
+        == indexedarray.pad_none(5, 1, clip=True).form
     )
 
 
@@ -1439,84 +1526,100 @@ def test_rpad_indexed_option_array():
         [0.0, None, None],
     ]
 
-    assert to_list(backward.rpad(4, 1)) == to_list(indexedarray.rpad(4, 1))
-    assert to_list(indexedarray.rpad(1, 0)) == [
+    assert to_list(backward.pad_none(4, 1)) == to_list(indexedarray.pad_none(4, 1))
+    assert to_list(indexedarray.pad_none(1, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
         None,
         [0.0, None, None],
     ]
-    assert indexedarray.typetracer.rpad(1, 0).form == indexedarray.rpad(1, 0).form
-    assert to_list(indexedarray.rpad(1, 1)) == [
+    assert (
+        indexedarray.typetracer.pad_none(1, 0).form == indexedarray.pad_none(1, 0).form
+    )
+    assert to_list(indexedarray.pad_none(1, 1)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5],
         [3.3, 4.4],
         None,
         [0.0, None, None],
     ]
-    assert indexedarray.typetracer.rpad(1, 1).form == indexedarray.rpad(1, 1).form
-    assert to_list(indexedarray.rpad(3, 1)) == [
+    assert (
+        indexedarray.typetracer.pad_none(1, 1).form == indexedarray.pad_none(1, 1).form
+    )
+    assert to_list(indexedarray.pad_none(3, 1)) == [
         [6.6, 7.7, 8.8, 9.9],
         [5.5, None, None],
         [3.3, 4.4, None],
         None,
         [0.0, None, None],
     ]
-    assert indexedarray.typetracer.rpad(3, 1).form == indexedarray.rpad(3, 1).form
-    assert to_list(indexedarray.rpad(4, 0)) == [
-        [6.6, 7.7, 8.8, 9.9],
-        [5.5],
-        [3.3, 4.4],
-        None,
-        [0.0, None, None],
-    ]
-    assert indexedarray.typetracer.rpad(4, 0).form == indexedarray.rpad(4, 0).form
-    assert to_list(indexedarray.rpad(5, 0)) == [
-        [6.6, 7.7, 8.8, 9.9],
-        [5.5],
-        [3.3, 4.4],
-        None,
-        [0.0, None, None],
-    ]
-    assert indexedarray.typetracer.rpad(5, 0).form == indexedarray.rpad(5, 0).form
-    assert to_list(indexedarray.rpad(6, 0)) == [
-        [6.6, 7.7, 8.8, 9.9],
-        [5.5],
-        [3.3, 4.4],
-        None,
-        [0.0, None, None],
-        None,
-    ]
-    assert indexedarray.typetracer.rpad(6, 0).form == indexedarray.rpad(6, 0).form
-    assert to_list(indexedarray.rpad(7, 0)) == [
-        [6.6, 7.7, 8.8, 9.9],
-        [5.5],
-        [3.3, 4.4],
-        None,
-        [0.0, None, None],
-        None,
-        None,
-    ]
-    assert indexedarray.typetracer.rpad(7, 0).form == indexedarray.rpad(7, 0).form
-    assert to_list(indexedarray.rpad(8, 0)) == [
-        [6.6, 7.7, 8.8, 9.9],
-        [5.5],
-        [3.3, 4.4],
-        None,
-        [0.0, None, None],
-        None,
-        None,
-        None,
-    ]
-    assert indexedarray.typetracer.rpad(8, 0).form == indexedarray.rpad(8, 0).form
-
-    assert to_list(indexedarray.rpad(1, 0, clip=True)) == [[6.6, 7.7, 8.8, 9.9]]
     assert (
-        indexedarray.typetracer.rpad(1, 0, clip=True).form
-        == indexedarray.rpad(1, 0, clip=True).form
+        indexedarray.typetracer.pad_none(3, 1).form == indexedarray.pad_none(3, 1).form
     )
-    assert to_list(indexedarray.rpad(1, 1, clip=True)) == [
+    assert to_list(indexedarray.pad_none(4, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+    ]
+    assert (
+        indexedarray.typetracer.pad_none(4, 0).form == indexedarray.pad_none(4, 0).form
+    )
+    assert to_list(indexedarray.pad_none(5, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+    ]
+    assert (
+        indexedarray.typetracer.pad_none(5, 0).form == indexedarray.pad_none(5, 0).form
+    )
+    assert to_list(indexedarray.pad_none(6, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+        None,
+    ]
+    assert (
+        indexedarray.typetracer.pad_none(6, 0).form == indexedarray.pad_none(6, 0).form
+    )
+    assert to_list(indexedarray.pad_none(7, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+        None,
+        None,
+    ]
+    assert (
+        indexedarray.typetracer.pad_none(7, 0).form == indexedarray.pad_none(7, 0).form
+    )
+    assert to_list(indexedarray.pad_none(8, 0)) == [
+        [6.6, 7.7, 8.8, 9.9],
+        [5.5],
+        [3.3, 4.4],
+        None,
+        [0.0, None, None],
+        None,
+        None,
+        None,
+    ]
+    assert (
+        indexedarray.typetracer.pad_none(8, 0).form == indexedarray.pad_none(8, 0).form
+    )
+
+    assert to_list(indexedarray.pad_none(1, 0, clip=True)) == [[6.6, 7.7, 8.8, 9.9]]
+    assert (
+        indexedarray.typetracer.pad_none(1, 0, clip=True).form
+        == indexedarray.pad_none(1, 0, clip=True).form
+    )
+    assert to_list(indexedarray.pad_none(1, 1, clip=True)) == [
         [6.6],
         [5.5],
         [3.3],
@@ -1524,8 +1627,8 @@ def test_rpad_indexed_option_array():
         [0.0],
     ]
     assert (
-        indexedarray.typetracer.rpad(1, 1, clip=True).form
-        == indexedarray.rpad(1, 1, clip=True).form
+        indexedarray.typetracer.pad_none(1, 1, clip=True).form
+        == indexedarray.pad_none(1, 1, clip=True).form
     )
 
 
@@ -1540,21 +1643,21 @@ def test_rpad_recordarray():
     contents = [content1, content2]
     array = ak._v2.contents.recordarray.RecordArray(contents, keys)
 
-    assert to_list(array.rpad(5, 0)) == [
+    assert to_list(array.pad_none(5, 0)) == [
         {"x": [], "y": [2, 2]},
         {"x": [1.1], "y": [1]},
         {"x": [2.2, 2.2], "y": []},
         None,
         None,
     ]
-    assert array.typetracer.rpad(5, 0).form == array.rpad(5, 0).form
+    assert array.typetracer.pad_none(5, 0).form == array.pad_none(5, 0).form
 
-    assert to_list(array.rpad(2, 1)) == [
+    assert to_list(array.pad_none(2, 1)) == [
         {"x": [None, None], "y": [2, 2]},
         {"x": [1.1, None], "y": [1, None]},
         {"x": [2.2, 2.2], "y": [None, None]},
     ]
-    assert array.typetracer.rpad(2, 1).form == array.rpad(2, 1).form
+    assert array.typetracer.pad_none(2, 1).form == array.pad_none(2, 1).form
 
 
 def test_rpad_unionarray():
@@ -1569,7 +1672,7 @@ def test_rpad_unionarray():
     array = ak._v2.contents.unionarray.UnionArray(tags, index, [content1, content2])
     assert to_list(array) == [[], [2, 2], [1.1], [1], [2.2, 2.2], []]
 
-    assert to_list(array.rpad(7, 0)) == [
+    assert to_list(array.pad_none(7, 0)) == [
         [],
         [2, 2],
         [1.1],
@@ -1578,9 +1681,9 @@ def test_rpad_unionarray():
         [],
         None,
     ]
-    assert array.typetracer.rpad(7, 0).form == array.rpad(7, 0).form
+    assert array.typetracer.pad_none(7, 0).form == array.pad_none(7, 0).form
 
-    assert to_list(array.rpad(2, 1)) == [
+    assert to_list(array.pad_none(2, 1)) == [
         [None, None],
         [2, 2],
         [1.1, None],
@@ -1588,4 +1691,4 @@ def test_rpad_unionarray():
         [2.2, 2.2],
         [None, None],
     ]
-    assert array.typetracer.rpad(2, 1).form == array.rpad(2, 1).form
+    assert array.typetracer.pad_none(2, 1).form == array.pad_none(2, 1).form

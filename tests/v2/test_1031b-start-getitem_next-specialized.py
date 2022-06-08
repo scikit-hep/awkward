@@ -1,18 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_NumpyArray():
     a = ak._v2.contents.RegularArray(
-        ak._v2.operations.convert.from_numpy(
-            np.arange(2 * 3 * 5).reshape(-1, 5)
-        ).layout,
+        ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
         3,
     )
     assert to_list(a[1]) == [
@@ -50,9 +47,7 @@ def test_NumpyArray():
 
 def test_RegularArray():
     new = ak._v2.contents.RegularArray(
-        ak._v2.operations.convert.from_numpy(
-            np.arange(2 * 3 * 5).reshape(-1, 5)
-        ).layout,
+        ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
         3,
     )
 
@@ -213,13 +208,13 @@ def test_UnionArray():
         ak._v2.index.Index64(np.array([1, 0], np.int64)),
         [
             ak._v2.contents.RegularArray(
-                ak._v2.operations.convert.from_numpy(
+                ak._v2.operations.from_numpy(
                     np.arange(2 * 3 * 5).reshape(-1, 5)
                 ).layout,
                 3,
             ),
             ak._v2.contents.RegularArray(
-                ak._v2.operations.convert.from_numpy(
+                ak._v2.operations.from_numpy(
                     np.arange(2 * 3 * 5).reshape(-1, 5)
                 ).layout,
                 3,
@@ -280,9 +275,7 @@ def test_IndexedArray():
     new = ak._v2.contents.IndexedArray(
         ak._v2.index.Index64(np.array([1, 0], np.int64)),
         ak._v2.contents.RegularArray(
-            ak._v2.operations.convert.from_numpy(
-                np.arange(2 * 3 * 5).reshape(-1, 5)
-            ).layout,
+            ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
             3,
         ),
     )

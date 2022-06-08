@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_mine():
@@ -18,8 +17,8 @@ def test_mine():
         )
     )
     assert (
-        ak._v2.operations.reducers.argmax(array, axis=-1).tolist()
-        == ak._v2.operations.reducers.argmax(
+        ak._v2.operations.argmax(array, axis=-1).tolist()
+        == ak._v2.operations.argmax(
             ak._v2.highlevel.Array([[1.1], [2.2, 3.3], [4.4, 5.5, 6.6]]), axis=-1
         ).tolist()
     )
@@ -43,7 +42,7 @@ def test_998():
         )
     )
 
-    assert to_list(ak._v2.operations.reducers.argmax(array, axis=-1)) == [0, 1, 2]
+    assert to_list(ak._v2.operations.argmax(array, axis=-1)) == [0, 1, 2]
 
 
 def test_1000():
@@ -72,7 +71,7 @@ def test_1000():
         )
     )
 
-    assert to_list(ak._v2.operations.reducers.argmax(array, axis=1)) == [
+    assert to_list(ak._v2.operations.argmax(array, axis=1)) == [
         [0, 1, 1],
         [1, 1],
     ]

@@ -2,8 +2,6 @@
 
 # v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
 
-import sys
-
 import ctypes
 
 from collections.abc import Iterable
@@ -20,10 +18,14 @@ def of(*arrays):
         if nplike is not None:
             nplikes.add(nplike)
         else:
-            if isinstance(array, ak.nplike.numpy.ndarray):
+            from awkward._v2._util import is_numpy_buffer, is_cupy_buffer, is_jax_buffer
+
+            if is_numpy_buffer(array):
                 nplikes.add(ak.nplike.Numpy.instance())
-            elif type(array).__module__.startswith("cupy."):
+            elif is_cupy_buffer(array):
                 nplikes.add(ak.nplike.Cupy.instance())
+            elif is_jax_buffer(array):
+                nplikes.add(ak.nplike.Jax.instance())
 
     if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in nplikes):
         return ak._v2._typetracer.TypeTracer.instance()
@@ -77,6 +79,7 @@ class NumpyMetadata(Singleton):
     signedinteger = numpy.signedinteger
     unsignedinteger = numpy.unsignedinteger
     floating = numpy.floating
+    complexfloating = numpy.complexfloating
     number = numpy.number
     object_ = numpy.object_
     generic = numpy.generic
@@ -113,10 +116,6 @@ if hasattr(numpy, "datetime64"):
 
 if hasattr(numpy, "timedelta64"):
     NumpyMetadata.timedelta64 = numpy.timedelta64
-
-NumpyMetadata.all_complex = tuple(
-    getattr(numpy, x) for x in dir(NumpyMetadata) if x.startswith("complex")
-)
 
 
 class NumpyLike(Singleton):
@@ -406,10 +405,20 @@ class NumpyKernel:
     @staticmethod
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
-            if isinstance(x, numpy.ndarray):
+            from awkward._v2._util import is_numpy_buffer, is_cupy_buffer, is_jax_buffer
+
+            if is_numpy_buffer(x):
                 return ctypes.cast(x.ctypes.data, t)
-            elif type(x).__module__.startswith("cupy."):
-                return ctypes.cast(x.data.ptr, t)
+            elif is_cupy_buffer(x):
+                raise ak._v2._util.error(
+                    AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
+                )
+            elif is_jax_buffer(x):
+                raise ak._v2._util.error(
+                    ValueError(
+                        "JAX Buffers can't be passed as function args for the C Kernels"
+                    )
+                )
             else:
                 return ctypes.cast(x, t)
         else:
@@ -417,12 +426,73 @@ class NumpyKernel:
 
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
-        return self._kernel(
-            *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
+
+        from awkward._v2._util import is_jax_tracer
+
+        if not any(is_jax_tracer(arg) for arg in args):
+            return self._kernel(
+                *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
+            )
+
+
+class CupyKernel(NumpyKernel):
+    def max_length(self, args):
+        cupy = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
+        max_length = numpy.iinfo(numpy.int64).min
+        for array in args:
+            if isinstance(array, cupy.ndarray):
+                max_length = max(max_length, len(array))
+        return max_length
+
+    def calc_grid(self, length):
+        if length > 1024:
+            return -(length // -1024), 1, 1
+        return 1, 1, 1
+
+    def calc_blocks(self, length):
+        if length > 1024:
+            return 1024, 1, 1
+        return length, 1, 1
+
+    def __call__(self, *args):
+        cupy = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
+        maxlength = self.max_length(args)
+        grid, blocks = self.calc_grid(maxlength), self.calc_blocks(maxlength)
+        cupy_stream_ptr = cupy.cuda.get_current_stream().ptr
+
+        if cupy_stream_ptr not in ak._v2._connect.cuda.cuda_streamptr_to_contexts:
+            ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr] = (
+                cupy.array(ak._v2._connect.cuda.NO_ERROR),
+                [],
+            )
+
+        assert len(args) == len(self._kernel.dir)
+        # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
+        # The second arg is the error_code.
+        args = list(args)
+        args.extend(
+            [
+                len(
+                    ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1]
+                ),
+                ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][0],
+            ]
         )
+        ak._v2._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
+            ak._v2._connect.cuda.Invocation(
+                name=self._name_and_types[0],
+                error_context=ak._v2._util.ErrorContext.primary(),
+            )
+        )
+
+        self._kernel(grid, blocks, tuple(args))
 
 
 class Numpy(NumpyLike):
+    @property
+    def index_nplike(self):
+        return self
+
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, numpy.ndarray):
             return array
@@ -476,23 +546,30 @@ class Numpy(NumpyLike):
             return ak._v2._typetracer.TypeTracerArray(
                 dtype=array.dtype, shape=array.shape
             )
+        elif isinstance(nplike, Jax):
+            jax = Jax.instance()
+            return jax.asarray(array, dtype=array.dtype)
         else:
             raise TypeError(
-                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
             )
 
 
 class Cupy(NumpyLike):
+    @property
+    def index_nplike(self):
+        return self
+
     def to_rectilinear(self, array, *args, **kwargs):
         return ak.operations.convert.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
-        if "awkward._cuda_kernels" not in sys.modules:
-            import awkward._cuda_kernels  # noqa: F401
+        cupy = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
+        _cuda_kernels = ak._v2._connect.cuda.initialize_cuda_kernels(cupy)  # noqa: F401
 
-        func = ak._cuda_kernels.kernel[name_and_types]
+        func = _cuda_kernels[name_and_types]
         if func is not None:
-            return NumpyKernel(func, name_and_types)
+            return CupyKernel(func, name_and_types)
         else:
             raise NotImplementedError(
                 f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
@@ -500,19 +577,9 @@ class Cupy(NumpyLike):
             )
 
     def __init__(self):
-        try:
-            import cupy
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                """to use CUDA arrays in Python, install the 'cupy' package with:
+        import awkward._v2._connect.cuda  # noqa: F401
 
-    pip install cupy --upgrade
-
-or
-
-    conda install cupy"""
-            ) from None
-        self._module = cupy
+        self._module = ak._v2._connect.cuda.import_cupy("Awkward Arrays with CUDA")
 
     @property
     def ma(self):
@@ -560,9 +627,12 @@ or
             return ak._v2._typetracer.TypeTracerArray(
                 dtype=array.dtype, shape=array.shape
             )
+        elif isinstance(nplike, Jax):
+            jax = Jax.instance()
+            return jax.asarray(array.get(), dtype=array.dtype)
         else:
             raise TypeError(
-                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
+                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
             )
 
     def ascontiguousarray(self, array, dtype=None):
@@ -609,25 +679,8 @@ or
         else:
             return self._module.repeat(array, repeats)
 
-    def nan_to_num(self, array, copy=True, nan=0.0, posinf=None, neginf=None):
-        # https://github.com/cupy/cupy/issues/4867
-        if copy:
-            array = self._module.copy(array)
-        if posinf is None:
-            if array.dtype.kind == "f":
-                posinf = numpy.finfo(array.dtype.type).max
-            else:
-                posinf = numpy.iinfo(array.dtype.type).max
-        if neginf is None:
-            if array.dtype.kind == "f":
-                neginf = numpy.finfo(array.dtype.type).min
-            else:
-                neginf = numpy.iinfo(array.dtype.type).min
-
-        array[self._module.isnan(array)] = nan
-        array[self._module.isinf(array) & (array > 0)] = posinf
-        array[self._module.isinf(array) & (array < 0)] = neginf
-        return array
+    def nan_to_num(self, *args, **kwargs):
+        self._module.nan_to_num(*args, **kwargs)
 
     # For all reducers: https://github.com/cupy/cupy/issues/3819
 
@@ -701,3 +754,145 @@ or
     ):
         # array, max_line_width, precision=None, suppress_small=None
         return self._module.array_str(array, max_line_width, precision, suppress_small)
+
+
+class Jax(NumpyLike):
+    @property
+    def index_nplike(self):
+        return ak.nplike.Numpy.instance()
+
+    def to_rectilinear(self, array, *args, **kwargs):
+        if isinstance(array, self._module.DeviceArray):
+            return array
+
+        elif isinstance(
+            array,
+            (
+                ak.Array,
+                ak.Record,
+                ak.ArrayBuilder,
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.layout.ArrayBuilder,
+                ak.layout.LayoutBuilder32,
+                ak.layout.LayoutBuilder64,
+            ),
+        ):
+            return ak.operations.convert.to_jax(array, *args, **kwargs)
+
+        elif isinstance(array, Iterable):
+            return [self.to_rectilinear(x, *args, **kwargs) for x in array]
+
+        else:
+            raise ak._v2._util.error(
+                ValueError("to_rectilinear argument must be iterable")
+            )
+
+    def __getitem__(self, name_and_types):
+        return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
+
+    def __init__(self):
+        from awkward._v2._connect.jax import import_jax  # noqa: F401
+
+        self._module = import_jax().numpy
+
+    @property
+    def ma(self):
+        ak._v2._util.error(
+            ValueError(
+                "JAX arrays cannot have missing values until JAX implements "
+                "numpy.ma.MaskedArray" + ak._util.exception_suffix(__file__)
+            )
+        )
+
+    @property
+    def char(self):
+        ak._v2._util.error(
+            ValueError(
+                "JAX arrays cannot do string manipulations until JAX implements "
+                "numpy.char"
+            )
+        )
+
+    @property
+    def ndarray(self):
+        return self._module.ndarray
+
+    def asarray(self, array, dtype=None, order=None):
+        return self._module.asarray(array, dtype=dtype, order="K")
+
+    def ascontiguousarray(self, array, dtype=None):
+        if isinstance(
+            array,
+            (
+                ak.highlevel.Array,
+                ak.highlevel.Record,
+                ak.layout.Content,
+                ak.layout.Record,
+            ),
+        ):
+            out = ak.operations.convert.to_jax(array)
+            if dtype is not None and out.dtype != dtype:
+                return self._module.ascontiguousarray(out, dtype=dtype)
+            else:
+                return out
+        else:
+            return self._module.ascontiguousarray(array, dtype=dtype)
+
+    def raw(self, array, nplike):
+        if isinstance(nplike, Jax):
+            return array
+        elif isinstance(nplike, ak.nplike.Cupy):
+            cupy = ak.nplike.Cupy.instance()
+            return cupy.asarray(array)
+        elif isinstance(nplike, ak.nplike.Numpy):
+            numpy = ak.nplike.Numpy.instance()
+            return numpy.asarray(array)
+        elif isinstance(nplike, ak._v2._typetracer.TypeTracer):
+            return ak._v2._typetracer.TypeTracerArray(
+                dtype=array.dtype, shape=array.shape
+            )
+        else:
+            ak._v2._util.error(
+                TypeError(
+                    "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax",
+                )
+            )
+
+    # For all reducers: JAX returns zero-dimensional arrays like CuPy
+
+    def all(self, *args, **kwargs):
+        out = self._module.all(*args, **kwargs)
+        return out
+
+    def any(self, *args, **kwargs):
+        out = self._module.any(*args, **kwargs)
+        return out
+
+    def count_nonzero(self, *args, **kwargs):
+        out = self._module.count_nonzero(*args, **kwargs)
+        return out
+
+    def sum(self, *args, **kwargs):
+        out = self._module.sum(*args, **kwargs)
+        return out
+
+    def prod(self, *args, **kwargs):
+        out = self._module.prod(*args, **kwargs)
+        return out
+
+    def min(self, *args, **kwargs):
+        out = self._module.min(*args, **kwargs)
+        return out
+
+    def max(self, *args, **kwargs):
+        out = self._module.max(*args, **kwargs)
+        return out
+
+    def argmin(self, *args, **kwargs):
+        out = self._module.argmin(*args, **kwargs)
+        return out
+
+    def argmax(self, *args, **kwargs):
+        out = self._module.argmax(*args, **kwargs)
+        return out

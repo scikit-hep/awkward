@@ -2,8 +2,6 @@
 
 # v2: replace with src/awkward/_v2/_connect/numba/__init__.py.
 
-import types
-
 import awkward as ak
 
 checked_version = False
@@ -108,7 +106,3 @@ def castint(context, builder, fromtype, totype, val):
         return builder.trunc(val, context.get_value_type(totype))
     else:
         return val
-
-
-ak.numba = types.ModuleType("numba")
-ak.numba.register = register

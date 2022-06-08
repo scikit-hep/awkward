@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -19,6 +18,6 @@ def test():
             parameters={"__record__": "Hello"},
         )
     )
-    assert ak._v2.operations.convert.from_arrow(
-        ak._v2.operations.convert.to_arrow_table(a)
+    assert ak._v2.operations.from_arrow(
+        ak._v2.operations.to_arrow_table(a)
     ).type.content.parameters == {"__record__": "Hello"}

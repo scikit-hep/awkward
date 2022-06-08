@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test():
@@ -14,5 +13,5 @@ def test():
         size=0,
         zeros_length=1,
     )
-    packed = ak._v2.operations.structure.packed(array)
+    packed = ak._v2.operations.packed(array)
     assert to_list(packed) == [[]]

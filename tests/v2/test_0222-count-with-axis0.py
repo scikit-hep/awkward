@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -592,6 +591,4 @@ def test():
         for inner in outer:
             sample[-1].append([0] * inner)
 
-    assert ak._v2.operations.describe.is_valid(
-        ak._v2.operations.reducers.count(sample, axis=0)
-    )
+    assert ak._v2.operations.is_valid(ak._v2.operations.count(sample, axis=0))

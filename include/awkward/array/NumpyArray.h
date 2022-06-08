@@ -96,6 +96,9 @@ namespace awkward {
       keys() const override;
 
     bool
+      istuple() const override;
+
+    bool
       equal(const FormPtr& other,
             bool check_identities,
             bool check_parameters,
@@ -415,6 +418,9 @@ namespace awkward {
 
     const std::vector<std::string>
       keys() const override;
+
+    bool
+      istuple() const override;
 
     // operations
     const std::string

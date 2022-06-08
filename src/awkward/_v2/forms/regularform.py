@@ -12,15 +12,19 @@ class RegularForm(Form):
         self, content, size, has_identifier=False, parameters=None, form_key=None
     ):
         if not isinstance(content, Form):
-            raise TypeError(
-                "{} all 'contents' must be Form subclasses, not {}".format(
-                    type(self).__name__, repr(content)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} all 'contents' must be Form subclasses, not {}".format(
+                        type(self).__name__, repr(content)
+                    )
                 )
             )
         if not ak._util.isint(size):
-            raise TypeError(
-                "{} 'size' must be of type int, not {}".format(
-                    type(self).__name__, repr(size)
+            raise ak._v2._util.error(
+                TypeError(
+                    "{} 'size' must be of type int, not {}".format(
+                        type(self).__name__, repr(size)
+                    )
                 )
             )
 
@@ -158,5 +162,32 @@ class RegularForm(Form):
         return self._content.fields
 
     @property
+    def is_tuple(self):
+        return self._content.is_tuple
+
+    @property
     def dimension_optiontype(self):
         return False
+
+    def _columns(self, path, output, list_indicator):
+        if (
+            self.parameter("__array__") not in ("string", "bytestring")
+            and list_indicator is not None
+        ):
+            path = path + (list_indicator,)
+        self._content._columns(path, output, list_indicator)
+
+    def _select_columns(self, index, specifier, matches, output):
+        return RegularForm(
+            self._content._select_columns(index, specifier, matches, output),
+            self._size,
+            self._has_identifier,
+            self._parameters,
+            self._form_key,
+        )
+
+    def _column_types(self):
+        if self.parameter("__array__") in ("string", "bytestring"):
+            return ("string",)
+        else:
+            return self._content._column_types()
