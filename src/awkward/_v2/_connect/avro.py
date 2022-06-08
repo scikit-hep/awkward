@@ -752,6 +752,7 @@ class ReadAvroFT:
         numbytes = 1024
         self.temp_header = bytearray()
         self.metadata = {}
+
         while True:
             try:
                 self.temp_header += self.data.read(numbytes)
@@ -770,6 +771,7 @@ class ReadAvroFT:
 
             except _ReachedEndofArrayError:
                 numbytes *= 2
+
         ind = 2
         self.update_pos(pos)
         exec_code = []
@@ -778,6 +780,7 @@ class ReadAvroFT:
         keys = []
         dec = []
         con = {}
+
         (
             self.form,
             self.exec_code,
@@ -789,6 +792,7 @@ class ReadAvroFT:
         ) = self.rec_exp_json_code(
             self.metadata["avro.schema"], exec_code, ind, 0, dec, keys, init_code, con
         )
+
         first_iter = True
         init_code.append(";\n")
         self.update_pos(17)
@@ -797,12 +801,14 @@ class ReadAvroFT:
         exec_code.insert(0, "0 do \n")
         exec_code.append("\nloop")
         exec_code = "".join(exec_code)
+
         forth_code = f"""
                 {header_code}
                 {init_code}
                 {exec_code}"""
         if show_code:
             print(forth_code)  # noqa
+
         machine = awkward.forth.ForthMachine64(forth_code)
         while True:
             try:
@@ -865,6 +871,7 @@ class ReadAvroFT:
             pos = pos + int(dat)
             if len(key) < int(dat):
                 raise _ReachedEndofArrayError
+
             pos, dat = self.decode_varint(pos, self.temp_header)
             dat = self.decode_zigzag(dat)
             val = self.temp_header[pos: pos + int(dat)]
@@ -1095,7 +1102,7 @@ class ReadAvroFT:
 
         elif isinstance(file["type"], list):
             flag = 0
-            type_idx = 0
+            type_idx = ""
             temp = count
             null_present = False
             out = len(file["type"])
@@ -1108,12 +1115,12 @@ class ReadAvroFT:
             if "null" in file["type"] and flag == 0 and out == 2:
                 dec.append(f"output node{count}-mask int8\n")
                 keys.append(f"node{count}-mask")
-                type_idx = 0
+                type_idx = "null_non_record"
 
             elif "null" in file["type"] and flag == 1:
                 dec.append(f"output node{count}-index int64\n")
                 keys.append(f"node{count}-index")
-                type_idx = 1
+                type_idx = "null_record"
 
             else:
                 for elem in file["type"]:
@@ -1129,11 +1136,11 @@ class ReadAvroFT:
                 dec.append(f"output node{count}-index int64\n")
                 keys.append(f"node{count}-index")
                 union_idx = count
-                type_idx = 2
+                type_idx = "no_null"
             exec_code.append("\n" + "    " * (ind) +
                              "stream zigzag-> stack case")
 
-            if type_idx == 0:
+            if type_idx == "null_non_record":
                 temp = count
                 dum_idx = 0
                 idxx = file["type"].index("null")
@@ -1197,7 +1204,7 @@ class ReadAvroFT:
                     "i8", aform1, True, form_key=f"node{temp}"
                 )
 
-            if type_idx == 1:
+            if type_idx == "null_record":
                 temp = count
                 idxx = file["type"].index("null")
                 if out == 2:
@@ -1245,7 +1252,7 @@ class ReadAvroFT:
                     "i64", aform1, form_key=f"node{temp}"
                 )
 
-            if type_idx == 2:
+            if type_idx == "no_null":
                 if null_present:
                     idxx = file["type"].index("null")
                 if out == 2:
