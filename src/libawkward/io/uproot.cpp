@@ -11,6 +11,7 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
+#include "awkward/util.h"
 
 #include "awkward/io/uproot.h"
 
