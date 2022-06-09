@@ -33,7 +33,7 @@ class ReadAvroFT:
                 self.temp_header += self.data.read(numbytes)
                 if not self.check_valid():
                     raise ak._v2._util.error(
-                        TypeError("invalid Avro file: first 4 bytes are not 'Obj1'")
+                        TypeError("invalid Avro file: first 4 bytes are not b'Obj\x01'")
                     )
                 pos = 4
                 pos, self.pairs = self.decode_varint(4, self.temp_header)
