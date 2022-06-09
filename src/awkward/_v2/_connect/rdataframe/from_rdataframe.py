@@ -21,21 +21,6 @@ done = compiler(
 )
 assert done is True
 
-primitive_types = (
-    "int8",
-    "int16",
-    "int32",
-    "int64",
-    "uint8",
-    "uint16",
-    "uint32",
-    "uint64",
-    "float32",
-    "float64",
-    "complex128",
-    "complex256",
-)
-
 
 def from_rdataframe(data_frame, column, column_as_record=True):
     def _wrap_as_array(column, array, column_as_record):
@@ -67,47 +52,26 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     result_ptrs = data_frame_rnode.Take[column_type](column)
 
     ptrs_type = ROOT.awkward.check_type_of[column_type](result_ptrs)
+    if ptrs_type.startswith("{"):
+        form = ak._v2.forms.from_json(ptrs_type)
 
-    if ptrs_type in primitive_types:
-        form = ak._v2.forms.NumpyForm(ptrs_type)
-        ptr, length = ROOT.awkward.copy_buffer[column_type](result_ptrs)
-        array = ak._v2.from_buffers(form, length, {"data": ptr}, "data")
-        return _maybe_wrap(array, column_as_record)
+        if isinstance(form, ak._v2.forms.NumpyForm):
+            ptr, length = ROOT.awkward.copy_buffer[column_type](result_ptrs)
+            array = ak._v2.from_buffers(form, length, {"node0-data": ptr})
 
-    elif ptrs_type.startswith("iterable"):
+            return _maybe_wrap(array, column_as_record)
 
-        strings_form = """
-{
-    "class": "ListOffsetArray",
-    "offsets": "i64",
-    "content": {
-        "class": "NumpyArray",
-        "primitive": "uint8",
-        "parameters": {
-            "__array__": "char"
-        }
-    },
-    "parameters": {
-        "__array__": "string"
-    }
-}"""
-        buffer_form = (
-            strings_form
-            if ptrs_type[ptrs_type.index(" ") + 1 :] == "chars"
-            else str(
-                ak._v2.forms.ListOffsetForm(
-                    "i64", ak._v2.forms.NumpyForm(ptrs_type[ptrs_type.index(" ") + 1 :])
-                )
+        elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
+            form.content, ak._v2.forms.NumpyForm
+        ):
+            ptrs = ROOT.awkward.copy_offsets_and_flatten[column_type](result_ptrs)
+            array = ak._v2.from_buffers(
+                form,
+                ptrs[0][1],
+                {"node0-offsets": ptrs[0][0], "node1-data": ptrs[1][0]},
             )
-        )
-        result = ROOT.awkward.copy_offsets_and_flatten[column_type](result_ptrs)
-        array = ak._v2.from_buffers(
-            buffer_form,
-            result[0][1],
-            {"None-offsets": result[0][0], "None-data": result[1][0]},
-        )
 
-        return _maybe_wrap(array, column_as_record)
+            return _maybe_wrap(array, column_as_record)
 
     elif ptrs_type == "nested iterable":
         # print(ptrs_type)

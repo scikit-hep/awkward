@@ -260,16 +260,49 @@ template <template <typename...> class Ref, typename... Args>
 struct is_specialization<Ref<Args...>, Ref> : std::true_type {
 };
 
+template <typename T>
+std::string
+type_to_form(int64_t form_key_id) {
+  std::stringstream form_key;
+  form_key << "node" << (form_key_id++);
+
+  if (std::is_arithmetic<T>::value) {
+    std::string parameters(type_to_name<T>() + "\",");
+    if (std::is_same<T, char>::value) {
+      parameters = std::string("uint8\", \"parameters\": { \"__array__\": \"char\" }, ");
+    }
+    return "{\"class\": \"NumpyArray\", \"primitive\": \""
+      + parameters + "\"form_key\": \"" + form_key.str() + "\"}";
+  } else if (is_specialization<T, std::complex>::value) {
+    return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
+      + form_key.str() + "\"}";
+  }
+
+  typedef typename T::value_type value_type;
+
+  if (is_iterable<T>) {
+    std::string parameters("");
+    if (std::is_same<value_type, char>::value) {
+      parameters = std::string(" \"parameters\": { \"__array__\": \"string\" }, ");
+    }
+    return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\":"
+      + type_to_form<value_type>(form_key_id)
+      + ", " + parameters + "\"form_key\": \"" + form_key.str() + "\"}";
+  }
+  return "something_else";
+}
+
 template <typename T, typename std::enable_if<is_specialization<T, std::complex>::value, T>::type * = nullptr>
 std::string
 check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
-    return std::string("complex128");
+  return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \"node0\"}";
 }
 
 template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type * = nullptr>
 std::string
 check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
-    return type_to_name<T>();
+    return "{\"class\": \"NumpyArray\", \"primitive\": \""
+      + type_to_name<T>() + "\", \"form_key\": \"node0\"}";
 }
 
 template <typename T, typename std::enable_if<is_iterable<T>, T>::type * = nullptr>
@@ -282,17 +315,7 @@ check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
         return std::string("awkward type");
     }
     else {
-
-        typedef typename T::value_type value_type;
-
-        if (is_iterable<value_type>) {
-            return std::string("nested iterable");
-        } else if (std::is_arithmetic<value_type>::value) {
-            return std::string("iterable " + type_to_name<value_type>());
-        } else if (is_specialization<value_type, std::complex>::value) {
-            return std::string("iterable ") + std::string("complex128");
-        }
-        return "something_else";
+      return type_to_form<T>(0);
     }
     return "undefined";
 }
