@@ -7,6 +7,7 @@ import awkward._v2._connect.cling  # noqa: E402
 
 import ROOT
 import cppyy
+import numpy as np  # noqa: F401
 
 cppyy.add_include_path("include")
 cppyy.add_include_path("src/awkward/_v2/_connect")
@@ -65,20 +66,13 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
     # 'Take' is a lazy action:
     result_ptrs = data_frame_rnode.Take[column_type](column)
-    builder = ak._v2.highlevel.ArrayBuilder()
 
-    ptrs_type = ROOT.awkward.check_type_of[column_type](
-        result_ptrs, builder._layout._ptr
-    )
-    # print(ptrs_type)
+    ptrs_type = ROOT.awkward.check_type_of[column_type](result_ptrs)
 
     if ptrs_type in primitive_types:
         form = ak._v2.forms.NumpyForm(ptrs_type)
-
-        builder = ak.layout.LayoutBuilder64(str(form))
-        ROOT.awkward.build_layout[column_type](result_ptrs, builder._ptr)
-
-        return _wrap_as_array(column, builder.snapshot(), column_as_record)
+        ptr, length = ROOT.awkward.copy_array[column_type](result_ptrs)
+        return ak._v2.from_buffers(form, length, {"data": ptr}, "data")
 
     elif ptrs_type.startswith("iterable"):
 
@@ -107,8 +101,6 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             )
         )
 
-        # print(builder_form)
-
         builder = ak.layout.LayoutBuilder64(builder_form)
         ROOT.awkward.build_list_offset_layout[column_type](result_ptrs, builder._ptr)
         # layout = builder.snapshot()
@@ -120,6 +112,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         # return _maybe_wrap(builder.snapshot(), column_as_record)
 
     elif ptrs_type == "nested iterable":
+        builder = ak._v2.highlevel.ArrayBuilder()
 
         ROOT.awkward.offsets_and_flatten[column_type](result_ptrs, builder._layout._ptr)
 

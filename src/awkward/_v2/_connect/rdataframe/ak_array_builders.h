@@ -40,6 +40,17 @@ extern "C" {
 
 namespace awkward {
 
+template<typename T>
+void*
+create_array(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+  T* ptr = (T*)malloc(sizeof(T)*result->size());
+  int64_t i = 0;
+  for (auto const& it : result) {
+    ptr[i++] = it;
+  }
+  return ptr;
+}
+
 template <typename T>
 const std::string
 type_to_name() {
@@ -287,6 +298,68 @@ build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
     build_array_impl<T>::build_array(result, ptr);
 }
 
+// template <typename T>
+// struct copy_array_impl {
+//     static void* copy_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
+//         cout << "FIXME: processing of a " << typeid(T).name()
+//             << " type is not implemented yet." << endl;
+//     };
+// };
+//
+// template <>
+// struct copy_array_impl<bool> {
+//     static void* copy_array(ROOT::RDF::RResultPtr<std::vector<bool>>& result, void* ptr) {
+//
+//         for (auto const& it : result) {
+//             awkward_ArrayBuilder_boolean(ptr, it);
+//         }
+//     };
+// };
+//
+// template <>
+// struct copy_array_impl<int64_t> {
+//     static void copy_array(ROOT::RDF::RResultPtr<std::vector<int64_t>>& result, void* ptr) {
+//         for (auto const& it : result) {
+//             awkward_ArrayBuilder_integer(ptr, it);
+//         }
+//     };
+// };
+//
+// template <>
+// struct copy_array_impl<double> {
+//     static void copy_array(ROOT::RDF::RResultPtr<std::vector<double>>& result, void* ptr) {
+//         for (auto const& it : result) {
+//             awkward_ArrayBuilder_real(ptr, it);
+//         }
+//     };
+// };
+//
+// template <>
+// struct copy_array_impl<std::complex<double>> {
+//     static void copy_array(ROOT::RDF::RResultPtr<std::vector<std::complex<double>>>& result, void* ptr) {
+//         for (auto const& it : result) {
+//             awkward_ArrayBuilder_complex(ptr, it.real(), it.imag());
+//         }
+//     };
+// };
+//
+// template <>
+// struct copy_array_impl<std::string> {
+//     static void* copy_array(ROOT::RDF::RResultPtr<std::vector<std::string>>& result) {
+//       return create_array(result, result.size());
+//         // for (auto const& it : result) {
+//         //     awkward_ArrayBuilder_string(ptr, it.c_str());
+//         // }
+//     };
+// };
+
+template <typename T>
+std::pair<void*, size_t>
+copy_array(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+  return {create_array<T>(result), result->size()};
+  //  copy_array_impl<T>::copy_array(result);
+}
+
 template <typename T, typename V>
 struct build_list_array_impl {
     static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
@@ -472,21 +545,19 @@ struct is_specialization<Ref<Args...>, Ref> : std::true_type {
 
 template <typename T, typename std::enable_if<is_specialization<T, std::complex>::value, T>::type * = nullptr>
 std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    // build_array(result, builder_ptr);
+check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
     return std::string("complex128");
 }
 
 template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type * = nullptr>
 std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    // build_array(result, builder_ptr);
-    return type_to_name<T>(); //std::string("primitive");
+check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+    return type_to_name<T>();
 }
 
 template <typename T, typename std::enable_if<is_iterable<T>, T>::type * = nullptr>
 std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
+check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
 
     auto str = std::string(typeid(T).name());
 
@@ -500,10 +571,8 @@ check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
         if (is_iterable<value_type>) {
             return std::string("nested iterable");
         } else if (std::is_arithmetic<value_type>::value) {
-            // build_list_array(result, builder_ptr);
             return std::string("iterable " + type_to_name<value_type>());
         } else if (is_specialization<value_type, std::complex>::value) {
-            // build_list_array(result, builder_ptr);
             return std::string("iterable ") + std::string("complex128");
         }
         return "something_else";
