@@ -32,21 +32,6 @@ done = compiler(
 )
 assert done is True
 
-primitive_types = (
-    "int8",
-    "int16",
-    "int32",
-    "int64",
-    "uint8",
-    "uint16",
-    "uint32",
-    "uint64",
-    "float32",
-    "float64",
-    "complex128",
-    "complex256",
-)
-
 
 def from_rdataframe(data_frame, column, column_as_record=True):
     def _wrap_as_array(column, array, column_as_record):
