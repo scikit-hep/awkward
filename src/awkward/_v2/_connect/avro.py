@@ -27,13 +27,15 @@ class ReadAvroFT:
                 self.temp_header += self.data.read(numbytes)
                 if not self.check_valid():
                     raise ak._v2._util.error(
-                        TypeError("invalid Avro file: first 4 bytes are not b'Obj\x01'")
+                        TypeError(
+                            "invalid Avro file: first 4 bytes are not b'Obj\x01'")
                     )
                 pos = 4
                 pos, self.pairs = self.decode_varint(4, self.temp_header)
                 self.pairs = self.decode_zigzag(self.pairs)
                 if self.pairs < 0:
-                    pos, self.header_size = self.decode_varint(pos, self.temp_header)
+                    pos, self.header_size = self.decode_varint(
+                        pos, self.temp_header)
                     self.header_size = self.decode_zigzag(self.pairs)
                     self.pairs = abs(self.pairs)
                 pos = self.cont_spec(pos)
@@ -57,7 +59,8 @@ class ReadAvroFT:
             init_code,
             container,
         ) = self.rec_exp_json_code(
-            self.metadata["avro.schema"], exec_code, ind, 0, [], [], init_code, {}
+            self.metadata["avro.schema"], exec_code, ind, 0, [
+            ], [], init_code, {}
         )
 
         first_iter = True
@@ -88,14 +91,18 @@ class ReadAvroFT:
             except _ReachedEndofArrayError:  # noqa: AK101
                 break
 
-            if self.blocks > limit_entries:
-                temp_diff = self.blocks - limit_entries
+            if limit_entries is not None and self.blocks > limit_entries:
+                temp_diff = int(self.blocks - limit_entries)
                 self.blocks -= temp_diff
                 num_items -= temp_diff
                 break_flag = True
 
+            else:
+                pass
+
             if first_iter:
-                machine.begin({"stream": np.frombuffer(temp_data, dtype=np.uint8)})
+                machine.begin(
+                    {"stream": np.frombuffer(temp_data, dtype=np.uint8)})
                 machine.stack_push(num_items)
                 machine.call("init-out")
                 machine.resume()
@@ -141,14 +148,14 @@ class ReadAvroFT:
         while temp_count < self.pairs:
             pos, dat = self.decode_varint(pos, self.temp_header)
             dat = self.decode_zigzag(dat)
-            key = self.temp_header[pos : pos + int(dat)]
+            key = self.temp_header[pos: pos + int(dat)]
             pos = pos + int(dat)
             if len(key) < int(dat):
                 raise _ReachedEndofArrayError  # noqa: AK101
 
             pos, dat = self.decode_varint(pos, self.temp_header)
             dat = self.decode_zigzag(dat)
-            val = self.temp_header[pos : pos + int(dat)]
+            val = self.temp_header[pos: pos + int(dat)]
             pos = pos + int(dat)
             if len(val) < int(dat):
                 raise _ReachedEndofArrayError  # noqa: AK101
@@ -306,10 +313,12 @@ class ReadAvroFT:
                 exec_code.append("\n" + "    " * ind + "0 do")
             exec_code.append("\n" + "    " * ind + "stream zigzag-> stack\n")
             exec_code.append(
-                "\n" + "    " * ind + f"dup node{form_next_id}-offsets +<- stack\n"
+                "\n" + "    " * ind +
+                f"dup node{form_next_id}-offsets +<- stack\n"
             )
             exec_code.append(
-                "\n" + "    " * (ind + 1) + f"stream #B-> node{form_next_id+1}-data"
+                "\n" + "    " * (ind + 1) +
+                f"stream #B-> node{form_next_id+1}-data"
             )
 
             if self.is_primitive:
@@ -334,11 +343,13 @@ class ReadAvroFT:
 
             if self.is_primitive:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream #zigzag-> node{form_next_id}-data"
+                    "\n" + "    " * ind +
+                    f"stream #zigzag-> node{form_next_id}-data"
                 )
             else:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream zigzag-> node{form_next_id}-data"
+                    "\n" + "    " * ind +
+                    f"stream zigzag-> node{form_next_id}-data"
                 )
 
             return (
@@ -352,17 +363,20 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "long":
-            aform = ak._v2.forms.NumpyForm("int64", form_key=f"node{form_next_id}")
+            aform = ak._v2.forms.NumpyForm(
+                "int64", form_key=f"node{form_next_id}")
             form_keys.append(f"node{form_next_id}-data")
             declarations.append(f"output node{form_next_id}-data int64 \n")
 
             if self.is_primitive:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream #zigzag-> node{form_next_id}-data"
+                    "\n" + "    " * ind +
+                    f"stream #zigzag-> node{form_next_id}-data"
                 )
             else:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream zigzag-> node{form_next_id}-data"
+                    "\n" + "    " * ind +
+                    f"stream zigzag-> node{form_next_id}-data"
                 )
 
             return (
@@ -376,13 +390,15 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "float":
-            aform = ak._v2.forms.NumpyForm("float32", form_key=f"node{form_next_id}")
+            aform = ak._v2.forms.NumpyForm(
+                "float32", form_key=f"node{form_next_id}")
             declarations.append(f"output node{form_next_id}-data float32 \n")
             form_keys.append(f"node{form_next_id}-data")
 
             if self.is_primitive:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream #f-> node{form_next_id}-data"
+                    "\n" + "    " * ind +
+                    f"stream #f-> node{form_next_id}-data"
                 )
             else:
                 exec_code.append(
@@ -400,13 +416,15 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "double":
-            aform = ak._v2.forms.NumpyForm("float64", form_key=f"node{form_next_id}")
+            aform = ak._v2.forms.NumpyForm(
+                "float64", form_key=f"node{form_next_id}")
             declarations.append(f"output node{form_next_id}-data float64 \n")
             form_keys.append(f"node{form_next_id}-data")
 
             if self.is_primitive:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream #d-> node{form_next_id}-data"
+                    "\n" + "    " * ind +
+                    f"stream #d-> node{form_next_id}-data"
                 )
             else:
                 exec_code.append(
@@ -424,13 +442,15 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "boolean":
-            aform = ak._v2.forms.NumpyForm("bool", form_key=f"node{form_next_id}")
+            aform = ak._v2.forms.NumpyForm(
+                "bool", form_key=f"node{form_next_id}")
             declarations.append(f"output node{form_next_id}-data bool\n")
             form_keys.append(f"node{form_next_id}-data")
 
             if self.is_primitive:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream #?-> node{form_next_id}-data"
+                    "\n" + "    " * ind +
+                    f"stream #?-> node{form_next_id}-data"
                 )
             else:
                 exec_code.append(
@@ -466,10 +486,12 @@ class ReadAvroFT:
             init_code.append(f"0 node{form_next_id}-offsets <- stack\n")
             exec_code.append("\n" + "    " * ind + "stream zigzag-> stack\n")
             exec_code.append(
-                "\n" + "    " * ind + f"dup node{form_next_id}-offsets +<- stack\n"
+                "\n" + "    " * ind +
+                f"dup node{form_next_id}-offsets +<- stack\n"
             )
             exec_code.append(
-                "\n" + "    " * (ind + 1) + f"stream #B-> node{form_next_id+1}-data"
+                "\n" + "    " * (ind + 1) +
+                f"stream #B-> node{form_next_id+1}-data"
             )
 
             return (
@@ -507,7 +529,8 @@ class ReadAvroFT:
             else:
                 for elem in file["type"]:
                     if elem == "null":
-                        declarations.append(f"output node{form_next_id}-mask int8\n")
+                        declarations.append(
+                            f"output node{form_next_id}-mask int8\n")
                         form_keys.append(f"node{form_next_id}-mask")
                         flag = 1
                         mask_idx = form_next_id
@@ -520,7 +543,8 @@ class ReadAvroFT:
                 union_idx = form_next_id
                 type_idx = "no_null"
 
-            exec_code.append("\n" + "    " * (ind) + "stream zigzag-> stack case")
+            exec_code.append("\n" + "    " * (ind) +
+                             "stream zigzag-> stack case")
 
             if type_idx == "null_non_record":
                 temp = form_next_id
@@ -558,7 +582,8 @@ class ReadAvroFT:
 
                     else:
                         exec_code.append(
-                            "\n" + "    " * (ind) + f"{i} of 1 node{temp}-mask <- stack"
+                            "\n" + "    " *
+                            (ind) + f"{i} of 1 node{temp}-mask <- stack"
                         )
 
                         (
@@ -610,7 +635,8 @@ class ReadAvroFT:
                             + "    " * (ind)
                             + f"{i} of countvar{form_next_id}{i} @ node{form_next_id}-index <- stack 1 countvar{form_next_id}{i} +! "
                         )
-                        init_code.append(f"variable countvar{form_next_id}{i}\n")
+                        init_code.append(
+                            f"variable countvar{form_next_id}{i}\n")
                         (
                             aform1,
                             exec_code,
@@ -668,7 +694,8 @@ class ReadAvroFT:
                                 + "    " * (ind)
                                 + f"{i} of {i} node{union_idx}-tags <- stack 1 countvar{form_next_id}{i} +!"
                             )
-                        init_code.append(f"variable countvar{form_next_id}{i} \n")
+                        init_code.append(
+                            f"variable countvar{form_next_id}{i} \n")
                         exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
@@ -772,7 +799,8 @@ class ReadAvroFT:
 
             temp = file["size"]
             exec_code.append(
-                "\n" + "    " * ind + f"{temp} stream #B-> node{form_next_id+1}-data"
+                "\n" + "    " * ind +
+                f"{temp} stream #B-> node{form_next_id+1}-data"
             )
 
             return (
@@ -816,9 +844,11 @@ class ReadAvroFT:
             container[f"node{form_next_id+1}-offsets"] = np.array(
                 offset, dtype=np.int64
             )
-            container[f"node{form_next_id+2}-data"] = np.array(dat, dtype=np.uint8)
+            container[f"node{form_next_id+2}-data"] = np.array(
+                dat, dtype=np.uint8)
             exec_code.append(
-                "\n" + "    " * ind + f"stream zigzag-> node{form_next_id}-index"
+                "\n" + "    " * ind +
+                f"stream zigzag-> node{form_next_id}-index"
             )
 
             return (
@@ -841,7 +871,8 @@ class ReadAvroFT:
                 "\n" + "    " * ind + "if stream zigzag-> stack drop negate then"
             )
             exec_code.append(
-                "\n" + "    " * ind + f"dup node{form_next_id}-offsets +<- stack"
+                "\n" + "    " * ind +
+                f"dup node{form_next_id}-offsets +<- stack"
             )
 
             if isinstance(file["items"], str):

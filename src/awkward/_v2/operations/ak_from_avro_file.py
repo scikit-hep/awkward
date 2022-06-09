@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 def from_avro_file(
-    file, debug_forth=False, limit_entries=float("inf"), highlevel=True, behavior=None
+    file, debug_forth=False, limit_entries=None, highlevel=True, behavior=None
 ):
     """
     Args:
@@ -48,11 +48,13 @@ def from_avro_file(
                     ).outcontents
                     return _impl(form, length, container, highlevel, behavior)
             except ImportError:
-                raise ImportError("Incorrect filename")
+                raise ak._v2._util.error(
+                    "the filename is incorrect or the file does not exist")
 
         else:
             if not hasattr(file, "read"):
-                raise ak._v2._util.error(TypeError("The filetype is not correct"))
+                raise ak._v2._util.error(
+                    TypeError("the fileobject provided is not of the correct type."))
             else:
                 form, length, container = awkward._v2._connect.avro.ReadAvroFT(
                     file, limit_entries, debug_forth
