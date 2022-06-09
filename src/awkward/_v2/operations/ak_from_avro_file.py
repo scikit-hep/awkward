@@ -2,33 +2,70 @@
 
 # from typing import Type
 import awkward as ak
+import pathlib
 
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# TODO: add OperationErrorContext; see ak_from_iter
-# TODO: pathlib.Path is as good as str (ak._v2._util.regularize_path)
-# TODO: limit_entries as a parameter would make metadata_from_avro_file unnecessary
-# TODO: show_code => debug_forth
-
-
-def from_avro_file(file, show_code=False):  # TODO: behavior and highlevel
+def from_avro_file(
+    file, debug_forth=False, limit_entries=float("inf"), highlevel=True, behavior=None
+):
     """
-    TODO: doc string
+    Args:
+        file (string or fileobject): Avro file to be read as Awkward Array.
+        debug_forth (bool): If True, prints the generated Forth code for debugging.
+        limit_entries (int): The number of rows of the Avro file to be read into the Awkward Array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+    Reads Avro files as Awkward Arrays.
+
+    Internally this function uses AwkwardForth DSL. The function recursively parses the Avro schema, generates
+    Awkward form and Forth code for that specific Avro file and then reads it.
     """
     import awkward._v2._connect.avro
 
-    if isinstance(file, str):
-        try:
-            with open(file, "rb") as opened_file:
-                return awkward._v2._connect.avro.ReadAvroFT(
-                    opened_file, show_code
-                ).outarr
-        except ImportError:
-            raise ImportError("Incorrect filename")
+    with ak._v2._util.OperationErrorContext(
+        "ak._v2.from_avro_file",
+        dict(
+            file=file,
+            highlevel=highlevel,
+            behavior=behavior,
+            debug_forth=debug_forth,
+            limit_entries=limit_entries,
+        ),
+    ):
 
-    else:
-        if not hasattr(file, "read"):
-            raise ak._v2._util.error(TypeError("The filetype is not correct"))
+        if isinstance(file, pathlib.Path):
+            file = str(file)
+
+        if isinstance(file, str):
+            try:
+                with open(file, "rb") as opened_file:
+                    form, length, container = awkward._v2._connect.avro.ReadAvroFT(
+                        opened_file, limit_entries, debug_forth
+                    ).outcontents
+                    return _impl(form, length, container, highlevel, behavior)
+            except ImportError:
+                raise ImportError("Incorrect filename")
+
         else:
-            return awkward._v2._connect.avro.ReadAvroFT(file, show_code).outarr
+            if not hasattr(file, "read"):
+                raise ak._v2._util.error(TypeError("The filetype is not correct"))
+            else:
+                form, length, container = awkward._v2._connect.avro.ReadAvroFT(
+                    file, limit_entries, debug_forth
+                ).outarr
+                return _impl(form, length, container, highlevel, behavior)
+
+
+def _impl(form, length, container, highlevel, behavior):
+
+    return ak._v2.from_buffers(
+        form=form,
+        length=length,
+        container=container,
+        highlevel=highlevel,
+        behavior=behavior,
+    )

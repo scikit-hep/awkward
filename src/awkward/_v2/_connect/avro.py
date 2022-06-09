@@ -1,16 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# TODO: count => form_next_id or form_last_id
-# TODO: dec => declarations
-# TODO: keys => form_keys
-# TODO: con => container
-# TODO: more informative error messages
-
 import json
 
 import numpy as np
 
-import awkward._v2 as ak
+import awkward as ak
 import awkward.forth
 
 
@@ -19,7 +13,7 @@ class _ReachedEndofArrayError(Exception):
 
 
 class ReadAvroFT:
-    def __init__(self, file, show_code=False):
+    def __init__(self, file, limit_entries, debug_forth=False):
         self.data = file
         self.blocks = 0
         self.marker = 0
@@ -57,11 +51,11 @@ class ReadAvroFT:
         (
             self.form,
             self.exec_code,
-            self.count,
-            dec,
-            keys,
+            self.form_next_id,
+            declarations,
+            form_keys,
             init_code,
-            con,
+            container,
         ) = self.rec_exp_json_code(
             self.metadata["avro.schema"], exec_code, ind, 0, [], [], init_code, {}
         )
@@ -69,7 +63,7 @@ class ReadAvroFT:
         first_iter = True
         init_code.append(";\n")
         self.update_pos(17)
-        header_code = header_code + "".join(dec)
+        header_code = header_code + "".join(declarations)
         init_code = "".join(init_code)
         exec_code.insert(0, "0 do \n")
         exec_code.append("\nloop")
@@ -77,12 +71,13 @@ class ReadAvroFT:
 
         forth_code = f"""
                 {header_code}
-                {init_code}
+                    {init_code}
                 {exec_code}"""
-        if show_code:
+        if debug_forth:
             print(forth_code)  # noqa: T201
 
         machine = awkward.forth.ForthMachine64(forth_code)
+        break_flag = False
         while True:
             try:
                 pos, num_items, len_block = self.decode_block()
@@ -92,6 +87,12 @@ class ReadAvroFT:
                 self.update_pos(len_block)
             except _ReachedEndofArrayError:  # noqa: AK101
                 break
+
+            if self.blocks > limit_entries:
+                temp_diff = self.blocks - limit_entries
+                self.blocks -= temp_diff
+                num_items -= temp_diff
+                break_flag = True
 
             if first_iter:
                 machine.begin({"stream": np.frombuffer(temp_data, dtype=np.uint8)})
@@ -107,14 +108,16 @@ class ReadAvroFT:
                 machine.resume()
 
             self.update_pos(16)
+            if break_flag:
+                break
 
-        for elem in keys:
+        for elem in form_keys:
             if "offsets" in elem:
-                con[elem] = machine.output_Index64(elem)
+                container[elem] = machine.output_Index64(elem)
             else:
-                con[elem] = machine.output_NumpyArray(elem)
+                container[elem] = machine.output_NumpyArray(elem)
 
-        self.outarr = ak.from_buffers(self.form, self.blocks, con)
+        self.outcontents = (self.form, self.blocks, container)
 
     def update_pos(self, pos):
         self.marker += pos
@@ -202,27 +205,49 @@ class ReadAvroFT:
         else:
             raise AssertionError  # noqa: AK101
 
-    def rec_exp_json_code(self, file, exec_code, ind, count, dec, keys, init_code, con):
+    def rec_exp_json_code(
+        self,
+        file,
+        exec_code,
+        ind,
+        form_next_id,
+        declarations,
+        form_keys,
+        init_code,
+        container,
+    ):
         if isinstance(file, (str, list)):
             file = {"type": file}
 
         if file["type"] == "null":
-            aform = ak.forms.IndexedOptionForm(
+            aform = ak._v2.forms.IndexedOptionForm(
                 "i64",
-                ak.forms.EmptyForm(form_key=f"node{count+1}"),
-                form_key=f"node{count}",
+                ak._v2.forms.EmptyForm(form_key=f"node{form_next_id+1}"),
+                form_key=f"node{form_next_id}",
             )
-            dec.append(f"output node{count+1}-data uint8 \n")
-            dec.append(f"output node{count}-index int64 \n")
-            keys.append(f"node{count+1}-data")
-            keys.append(f"node{count}-index")
-            exec_code.append("\n" + "    " * ind + f"-1 node{count}-index <- stack")
-            exec_code.append("\n" + "    " * ind + f"0 node{count+1}-data <- stack")
+            declarations.append(f"output node{form_next_id+1}-data uint8 \n")
+            declarations.append(f"output node{form_next_id}-index int64 \n")
+            form_keys.append(f"node{form_next_id+1}-data")
+            form_keys.append(f"node{form_next_id}-index")
+            exec_code.append(
+                "\n" + "    " * ind + f"-1 node{form_next_id}-index <- stack"
+            )
+            exec_code.append(
+                "\n" + "    " * ind + f"0 node{form_next_id+1}-data <- stack"
+            )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "record":
-            temp = count
+            temp = form_next_id
             aformcont = []
             aformfields = []
             for elem in file["fields"]:
@@ -230,146 +255,237 @@ class ReadAvroFT:
                 (
                     aform,
                     exec_code,
-                    count,
-                    dec,
-                    keys,
+                    form_next_id,
+                    declarations,
+                    form_keys,
                     init_code,
-                    con,
+                    container,
                 ) = self.rec_exp_json_code(
-                    elem, exec_code, ind, count + 1, dec, keys, init_code, con
+                    elem,
+                    exec_code,
+                    ind,
+                    form_next_id + 1,
+                    declarations,
+                    form_keys,
+                    init_code,
+                    container,
                 )
                 aformcont.append(aform)
 
-            aform = ak.forms.RecordForm(aformcont, aformfields, form_key=f"node{temp}")
+            aform = ak._v2.forms.RecordForm(
+                aformcont, aformfields, form_key=f"node{temp}"
+            )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "string":
-            aform = ak.forms.ListOffsetForm(
+            aform = ak._v2.forms.ListOffsetForm(
                 "i64",
-                ak.forms.NumpyForm(
-                    "uint8", parameters={"__array__": "char"}, form_key=f"node{count+1}"
+                ak._v2.forms.NumpyForm(
+                    "uint8",
+                    parameters={"__array__": "char"},
+                    form_key=f"node{form_next_id+1}",
                 ),
-                form_key=f"node{count}",
+                form_key=f"node{form_next_id}",
             )
-            dec.append(f"output node{count+1}-data uint8 \n")
-            dec.append(f"output node{count}-offsets int64 \n")
-            keys.append(f"node{count+1}-data")
-            keys.append(f"node{count}-offsets")
-            init_code.append(f"0 node{count}-offsets <- stack\n")
+            declarations.append(f"output node{form_next_id+1}-data uint8 \n")
+            declarations.append(f"output node{form_next_id}-offsets int64 \n")
+            form_keys.append(f"node{form_next_id+1}-data")
+            form_keys.append(f"node{form_next_id}-offsets")
+            init_code.append(f"0 node{form_next_id}-offsets <- stack\n")
 
             if self.is_primitive:
                 exec_code.append("\n" + "    " * ind + "0 do")
             exec_code.append("\n" + "    " * ind + "stream zigzag-> stack\n")
             exec_code.append(
-                "\n" + "    " * ind + f"dup node{count}-offsets +<- stack\n"
+                "\n" + "    " * ind + f"dup node{form_next_id}-offsets +<- stack\n"
             )
             exec_code.append(
-                "\n" + "    " * (ind + 1) + f"stream #B-> node{count+1}-data"
+                "\n" + "    " * (ind + 1) + f"stream #B-> node{form_next_id+1}-data"
             )
 
             if self.is_primitive:
                 exec_code.append("\n" + "    " * ind + "loop")
 
-            return aform, exec_code, count + 1, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id + 1,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "int":
-            aform = ak.forms.NumpyForm(primitive="int32", form_key=f"node{count}")
-            dec.append(f"output node{count}-data int32 \n")
-            keys.append(f"node{count}-data")
+            aform = ak._v2.forms.NumpyForm(
+                primitive="int32", form_key=f"node{form_next_id}"
+            )
+            declarations.append(f"output node{form_next_id}-data int32 \n")
+            form_keys.append(f"node{form_next_id}-data")
 
             if self.is_primitive:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream #zigzag-> node{count}-data"
+                    "\n" + "    " * ind + f"stream #zigzag-> node{form_next_id}-data"
                 )
             else:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream zigzag-> node{count}-data"
+                    "\n" + "    " * ind + f"stream zigzag-> node{form_next_id}-data"
                 )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "long":
-            aform = ak.forms.NumpyForm("int64", form_key=f"node{count}")
-            keys.append(f"node{count}-data")
-            dec.append(f"output node{count}-data int64 \n")
+            aform = ak._v2.forms.NumpyForm("int64", form_key=f"node{form_next_id}")
+            form_keys.append(f"node{form_next_id}-data")
+            declarations.append(f"output node{form_next_id}-data int64 \n")
 
             if self.is_primitive:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream #zigzag-> node{count}-data"
+                    "\n" + "    " * ind + f"stream #zigzag-> node{form_next_id}-data"
                 )
             else:
                 exec_code.append(
-                    "\n" + "    " * ind + f"stream zigzag-> node{count}-data"
+                    "\n" + "    " * ind + f"stream zigzag-> node{form_next_id}-data"
                 )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "float":
-            aform = ak.forms.NumpyForm("float32", form_key=f"node{count}")
-            dec.append(f"output node{count}-data float32 \n")
-            keys.append(f"node{count}-data")
+            aform = ak._v2.forms.NumpyForm("float32", form_key=f"node{form_next_id}")
+            declarations.append(f"output node{form_next_id}-data float32 \n")
+            form_keys.append(f"node{form_next_id}-data")
 
             if self.is_primitive:
-                exec_code.append("\n" + "    " * ind + f"stream #f-> node{count}-data")
+                exec_code.append(
+                    "\n" + "    " * ind + f"stream #f-> node{form_next_id}-data"
+                )
             else:
-                exec_code.append("\n" + "    " * ind + f"stream f-> node{count}-data")
+                exec_code.append(
+                    "\n" + "    " * ind + f"stream f-> node{form_next_id}-data"
+                )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "double":
-            aform = ak.forms.NumpyForm("float64", form_key=f"node{count}")
-            dec.append(f"output node{count}-data float64 \n")
-            keys.append(f"node{count}-data")
+            aform = ak._v2.forms.NumpyForm("float64", form_key=f"node{form_next_id}")
+            declarations.append(f"output node{form_next_id}-data float64 \n")
+            form_keys.append(f"node{form_next_id}-data")
 
             if self.is_primitive:
-                exec_code.append("\n" + "    " * ind + f"stream #d-> node{count}-data")
+                exec_code.append(
+                    "\n" + "    " * ind + f"stream #d-> node{form_next_id}-data"
+                )
             else:
-                exec_code.append("\n" + "    " * ind + f"stream d-> node{count}-data")
+                exec_code.append(
+                    "\n" + "    " * ind + f"stream d-> node{form_next_id}-data"
+                )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "boolean":
-            aform = ak.forms.NumpyForm("bool", form_key=f"node{count}")
-            dec.append(f"output node{count}-data bool\n")
-            keys.append(f"node{count}-data")
+            aform = ak._v2.forms.NumpyForm("bool", form_key=f"node{form_next_id}")
+            declarations.append(f"output node{form_next_id}-data bool\n")
+            form_keys.append(f"node{form_next_id}-data")
 
             if self.is_primitive:
-                exec_code.append("\n" + "    " * ind + f"stream #?-> node{count}-data")
+                exec_code.append(
+                    "\n" + "    " * ind + f"stream #?-> node{form_next_id}-data"
+                )
             else:
-                exec_code.append("\n" + "    " * ind + f"stream ?-> node{count}-data")
+                exec_code.append(
+                    "\n" + "    " * ind + f"stream ?-> node{form_next_id}-data"
+                )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "bytes":
-            dec.append(f"output node{count+1}-data uint8\n")
-            dec.append(f"output node{count}-offsets int64\n")
-            keys.append(f"node{count+1}-data")
-            keys.append(f"node{count}-offsets")
-            aform = ak.forms.ListOffsetForm(
+            declarations.append(f"output node{form_next_id+1}-data uint8\n")
+            declarations.append(f"output node{form_next_id}-offsets int64\n")
+            form_keys.append(f"node{form_next_id+1}-data")
+            form_keys.append(f"node{form_next_id}-offsets")
+            aform = ak._v2.forms.ListOffsetForm(
                 "i64",
-                ak.forms.NumpyForm(
-                    "uint8", form_key=f"node{count+1}", parameters={"__array__": "byte"}
+                ak._v2.forms.NumpyForm(
+                    "uint8",
+                    form_key=f"node{form_next_id+1}",
+                    parameters={"__array__": "byte"},
                 ),
                 parameters={"__array__": "bytestring"},
-                form_key=f"node{count}",
+                form_key=f"node{form_next_id}",
             )
 
-            init_code.append(f"0 node{count}-offsets <- stack\n")
+            init_code.append(f"0 node{form_next_id}-offsets <- stack\n")
             exec_code.append("\n" + "    " * ind + "stream zigzag-> stack\n")
             exec_code.append(
-                "\n" + "    " * ind + f"dup node{count}-offsets +<- stack\n"
+                "\n" + "    " * ind + f"dup node{form_next_id}-offsets +<- stack\n"
             )
             exec_code.append(
-                "\n" + "    " * (ind + 1) + f"stream #B-> node{count+1}-data"
+                "\n" + "    " * (ind + 1) + f"stream #B-> node{form_next_id+1}-data"
             )
 
-            return aform, exec_code, count + 1, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id + 1,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif isinstance(file["type"], list):
             flag = 0
             type_idx = ""
-            temp = count
+            temp = form_next_id
             null_present = False
             out = len(file["type"])
             for elem in file["type"]:
@@ -379,35 +495,35 @@ class ReadAvroFT:
                     flag = 0
 
             if "null" in file["type"] and flag == 0 and out == 2:
-                dec.append(f"output node{count}-mask int8\n")
-                keys.append(f"node{count}-mask")
+                declarations.append(f"output node{form_next_id}-mask int8\n")
+                form_keys.append(f"node{form_next_id}-mask")
                 type_idx = "null_non_record"
 
             elif "null" in file["type"] and flag == 1:
-                dec.append(f"output node{count}-index int64\n")
-                keys.append(f"node{count}-index")
+                declarations.append(f"output node{form_next_id}-index int64\n")
+                form_keys.append(f"node{form_next_id}-index")
                 type_idx = "null_record"
 
             else:
                 for elem in file["type"]:
                     if elem == "null":
-                        dec.append(f"output node{count}-mask int8\n")
-                        keys.append(f"node{count}-mask")
+                        declarations.append(f"output node{form_next_id}-mask int8\n")
+                        form_keys.append(f"node{form_next_id}-mask")
                         flag = 1
-                        mask_idx = count
-                        count = count + 1
+                        mask_idx = form_next_id
+                        form_next_id = form_next_id + 1
                         null_present = True
-                dec.append(f"output node{count}-tags int8\n")
-                keys.append(f"node{count}-tags")
-                dec.append(f"output node{count}-index int64\n")
-                keys.append(f"node{count}-index")
-                union_idx = count
+                declarations.append(f"output node{form_next_id}-tags int8\n")
+                form_keys.append(f"node{form_next_id}-tags")
+                declarations.append(f"output node{form_next_id}-index int64\n")
+                form_keys.append(f"node{form_next_id}-index")
+                union_idx = form_next_id
                 type_idx = "no_null"
 
             exec_code.append("\n" + "    " * (ind) + "stream zigzag-> stack case")
 
             if type_idx == "null_non_record":
-                temp = count
+                temp = form_next_id
                 dum_idx = 0
                 idxx = file["type"].index("null")
                 if out == 2:
@@ -448,29 +564,29 @@ class ReadAvroFT:
                         (
                             aform1,
                             exec_code,
-                            count,
-                            dec,
-                            keys,
+                            form_next_id,
+                            declarations,
+                            form_keys,
                             init_code,
-                            con,
+                            container,
                         ) = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             exec_code,
                             ind + 1,
-                            count + 1,
-                            dec,
-                            keys,
+                            form_next_id + 1,
+                            declarations,
+                            form_keys,
                             init_code,
-                            con,
+                            container,
                         )
                         exec_code.append(" endof")
 
-                aform = ak.forms.ByteMaskedForm(
+                aform = ak._v2.forms.ByteMaskedForm(
                     "i8", aform1, True, form_key=f"node{temp}"
                 )
 
             if type_idx == "null_record":
-                temp = count
+                temp = form_next_id
                 idxx = file["type"].index("null")
                 if out == 2:
                     dum_idx = 1 - idxx
@@ -492,30 +608,30 @@ class ReadAvroFT:
                         exec_code.append(
                             "\n"
                             + "    " * (ind)
-                            + f"{i} of countvar{count}{i} @ node{count}-index <- stack 1 countvar{count}{i} +! "
+                            + f"{i} of countvar{form_next_id}{i} @ node{form_next_id}-index <- stack 1 countvar{form_next_id}{i} +! "
                         )
-                        init_code.append(f"variable countvar{count}{i}\n")
+                        init_code.append(f"variable countvar{form_next_id}{i}\n")
                         (
                             aform1,
                             exec_code,
-                            count,
-                            dec,
-                            keys,
+                            form_next_id,
+                            declarations,
+                            form_keys,
                             init_code,
-                            con,
+                            container,
                         ) = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             exec_code,
                             ind + 1,
-                            count + 1,
-                            dec,
-                            keys,
+                            form_next_id + 1,
+                            declarations,
+                            form_keys,
                             init_code,
-                            con,
+                            container,
                         )
                         exec_code.append("\nendof")
 
-                aform = ak.forms.IndexedOptionForm(
+                aform = ak._v2.forms.IndexedOptionForm(
                     "i64", aform1, form_key=f"node{temp}"
                 )
 
@@ -530,7 +646,7 @@ class ReadAvroFT:
                     else:
                         dum_idx = idxx - 1
 
-                temp = count
+                temp = form_next_id
                 temp_forms = []
                 for i in range(out):
                     if file["type"][i] == "null":
@@ -550,108 +666,143 @@ class ReadAvroFT:
                             exec_code.append(
                                 "\n"
                                 + "    " * (ind)
-                                + f"{i} of {i} node{union_idx}-tags <- stack 1 countvar{count}{i} +!"
+                                + f"{i} of {i} node{union_idx}-tags <- stack 1 countvar{form_next_id}{i} +!"
                             )
-                        init_code.append(f"variable countvar{count}{i} \n")
+                        init_code.append(f"variable countvar{form_next_id}{i} \n")
                         exec_code.append(
                             "\n"
                             + "    " * (ind + 1)
-                            + f"countvar{count}{i} @ node{union_idx}-index <- stack"
+                            + f"countvar{form_next_id}{i} @ node{union_idx}-index <- stack"
                         )
                         exec_code.append(
-                            "\n" + "    " * (ind + 1) + f"1 countvar{count}{i} +!"
+                            "\n"
+                            + "    " * (ind + 1)
+                            + f"1 countvar{form_next_id}{i} +!"
                         )
                         (
                             aform1,
                             exec_code,
-                            count,
-                            dec,
-                            keys,
+                            form_next_id,
+                            declarations,
+                            form_keys,
                             init_code,
-                            con,
+                            container,
                         ) = self.rec_exp_json_code(
                             {"type": file["type"][i]},
                             exec_code,
                             ind + 1,
-                            count + 1,
-                            dec,
-                            keys,
+                            form_next_id + 1,
+                            declarations,
+                            form_keys,
                             init_code,
-                            con,
+                            container,
                         )
                         temp_forms.append(aform1)
                         exec_code.append("\n endof")
 
                 if null_present:
-                    aform = ak.forms.ByteMaskedForm(
+                    aform = ak._v2.forms.ByteMaskedForm(
                         "i8",
-                        ak.forms.UnionForm(
+                        ak._v2.forms.UnionForm(
                             "i8", "i64", temp_forms, form_key=f"node{union_idx}"
                         ),
                         True,
                         form_key=f"node{mask_idx}",
                     )
                 else:
-                    aform = ak.forms.UnionForm(
+                    aform = ak._v2.forms.UnionForm(
                         "i8", "i64", aform1, form_key=f"node{mask_idx}"
                     )
 
             exec_code.append("\n" + "    " * (ind + 1) + "endcase")
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif isinstance(file["type"], dict):
             (
                 aform,
                 exec_code,
-                count,
-                dec,
-                keys,
+                form_next_id,
+                declarations,
+                form_keys,
                 init_code,
-                con,
+                container,
             ) = self.rec_exp_json_code(
-                file["type"], exec_code, ind, count, dec, keys, init_code, con
+                file["type"],
+                exec_code,
+                ind,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
             )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "fixed":
-            keys.append(f"node{count+1}-data")
-            dec.append(f"output node{count+1}-data uint8 \n")
-            aform = ak.forms.RegularForm(
-                ak.forms.NumpyForm(
-                    "uint8", form_key=f"node{count+1}", parameters={"__array__": "byte"}
+            form_keys.append(f"node{form_next_id+1}-data")
+            declarations.append(f"output node{form_next_id+1}-data uint8 \n")
+            aform = ak._v2.forms.RegularForm(
+                ak._v2.forms.NumpyForm(
+                    "uint8",
+                    form_key=f"node{form_next_id+1}",
+                    parameters={"__array__": "byte"},
                 ),
                 parameters={"__array__": "bytestring"},
                 size=file["size"],
-                form_key=f"node{count}",
+                form_key=f"node{form_next_id}",
             )
 
             temp = file["size"]
             exec_code.append(
-                "\n" + "    " * ind + f"{temp} stream #B-> node{count+1}-data"
+                "\n" + "    " * ind + f"{temp} stream #B-> node{form_next_id+1}-data"
             )
 
-            return aform, exec_code, count + 1, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id + 1,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "enum":
-            aform = ak.forms.IndexedForm(
+            aform = ak._v2.forms.IndexedForm(
                 "i64",
-                ak.forms.ListOffsetForm(
+                ak._v2.forms.ListOffsetForm(
                     "i64",
-                    ak.forms.NumpyForm(
+                    ak._v2.forms.NumpyForm(
                         "uint8",
                         parameters={"__array__": "char"},
-                        form_key=f"node{count+2}",
+                        form_key=f"node{form_next_id+2}",
                     ),
-                    form_key=f"node{count+1}",
+                    form_key=f"node{form_next_id+1}",
                 ),
                 parameters={"__array__": "categorical"},
-                form_key=f"node{count}",
+                form_key=f"node{form_next_id}",
             )
 
-            keys.append(f"node{count}-index")
-            dec.append(f"output node{count}-index int64 \n")
+            form_keys.append(f"node{form_next_id}-index")
+            declarations.append(f"output node{form_next_id}-index int64 \n")
 
             tempar = file["symbols"]
             offset, dat = [0], []
@@ -662,46 +813,60 @@ class ReadAvroFT:
                 for elem in x:
                     dat.append(np.uint8(ord(elem)))
 
-            con[f"node{count+1}-offsets"] = np.array(offset, dtype=np.int64)
-            con[f"node{count+2}-data"] = np.array(dat, dtype=np.uint8)
-            exec_code.append("\n" + "    " * ind + f"stream zigzag-> node{count}-index")
+            container[f"node{form_next_id+1}-offsets"] = np.array(
+                offset, dtype=np.int64
+            )
+            container[f"node{form_next_id+2}-data"] = np.array(dat, dtype=np.uint8)
+            exec_code.append(
+                "\n" + "    " * ind + f"stream zigzag-> node{form_next_id}-index"
+            )
 
-            return aform, exec_code, count + 2, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id + 2,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "array":
-            temp = count
-            dec.append(f"output node{count}-offsets int64\n")
-            init_code.append(f"0 node{count}-offsets <- stack\n")
+            temp = form_next_id
+            declarations.append(f"output node{form_next_id}-offsets int64\n")
+            init_code.append(f"0 node{form_next_id}-offsets <- stack\n")
             exec_code.append("\n" + "    " * ind + "stream zigzag-> stack")
             exec_code.append("\n" + "    " * ind + "dup 0 <")
             exec_code.append(
                 "\n" + "    " * ind + "if stream zigzag-> stack drop negate then"
             )
-            exec_code.append("\n" + "    " * ind + f"dup node{count}-offsets +<- stack")
+            exec_code.append(
+                "\n" + "    " * ind + f"dup node{form_next_id}-offsets +<- stack"
+            )
 
             if isinstance(file["items"], str):
                 self.is_primitive = True
             else:
                 exec_code.append("\n" + "    " * ind + "0 do")
 
-            keys.append(f"node{count}-offsets")
+            form_keys.append(f"node{form_next_id}-offsets")
             (
                 aformtemp,
                 exec_code,
-                count,
-                dec,
-                keys,
+                form_next_id,
+                declarations,
+                form_keys,
                 init_code,
-                con,
+                container,
             ) = self.rec_exp_json_code(
                 {"type": file["items"]},
                 exec_code,
                 ind + 1,
-                count + 1,
-                dec,
-                keys,
+                form_next_id + 1,
+                declarations,
+                form_keys,
                 init_code,
-                con,
+                container,
             )
 
             if self.is_primitive:
@@ -710,9 +875,19 @@ class ReadAvroFT:
                 exec_code.append("\n" + "    " * ind + "loop")
 
             exec_code.append("\n" + "    " * ind + "1 stream skip")
-            aform = ak.forms.ListOffsetForm("i64", aformtemp, form_key=f"node{temp}")
+            aform = ak._v2.forms.ListOffsetForm(
+                "i64", aformtemp, form_key=f"node{temp}"
+            )
 
-            return aform, exec_code, count, dec, keys, init_code, con
+            return (
+                aform,
+                exec_code,
+                form_next_id,
+                declarations,
+                form_keys,
+                init_code,
+                container,
+            )
 
         elif file["type"] == "map":
             # print(file["name"])
