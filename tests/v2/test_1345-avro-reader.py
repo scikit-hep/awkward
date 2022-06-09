@@ -8,14 +8,16 @@ import awkward as ak  # noqa: F401
 def test_int():
     data = [34, 45, 67, 78, 23, 89, 6, 33, 96, 73]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/int_test_data.avro").to_list() == data
+        ak._v2.from_avro_file(
+            file="tests/samples/int_test_data.avro").to_list() == data
     )
 
 
 def test_boolean():
     data = [True, False, False, True, True, True, False, False, False, False]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/bool_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/bool_test_data.avro").to_list()
         == data
     )
 
@@ -23,7 +25,8 @@ def test_boolean():
 def test_long():
     data = [12, 435, 56, 12, 67, 34, 89, 2345, 536, 8769]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/long_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/long_test_data.avro").to_list()
         == data
     )
 
@@ -43,7 +46,8 @@ def test_float():
     ]
     assert (
         pytest.approx(
-            ak._v2.from_avro_file(file="tests/samples/float_test_data.avro").to_list()
+            ak._v2.from_avro_file(
+                file="tests/samples/float_test_data.avro").to_list()
         )
         == data
     )
@@ -64,7 +68,8 @@ def test_double():
     ]
     assert (
         pytest.approx(
-            ak._v2.from_avro_file(file="tests/samples/double_test_data.avro").to_list()
+            ak._v2.from_avro_file(
+                file="tests/samples/double_test_data.avro").to_list()
         )
         == data
     )
@@ -85,7 +90,8 @@ def test_bytes():
     ]
     assert (
         pytest.approx(
-            ak._v2.from_avro_file(file="tests/samples/bytes_test_data.avro").to_list()
+            ak._v2.from_avro_file(
+                file="tests/samples/bytes_test_data.avro").to_list()
         )
         == data
     )
@@ -124,7 +130,8 @@ def test_fixed():
         b"like this one",
     ]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/fixed_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/fixed_test_data.avro").to_list()
         == data
     )
 
@@ -142,15 +149,18 @@ def test_null():  # change the while loop to for loop to fix this
         None,
     ]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/null_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/null_test_data.avro").to_list()
         == data
     )
 
 
 def test_enum():
-    data = ["TWO", "ONE", "FOUR", "THREE", "TWO", "ONE", "FOUR", "THREE", "TWO", "ONE"]
+    data = ["TWO", "ONE", "FOUR", "THREE", "TWO",
+            "ONE", "FOUR", "THREE", "TWO", "ONE"]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/enum_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/enum_test_data.avro").to_list()
         == data
     )
 
@@ -167,7 +177,8 @@ def test_arrays_int():
         [34, 647, 12],
     ]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/array_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/array_test_data.avro").to_list()
         == data
     )
 
@@ -189,7 +200,7 @@ def test_array_string():
     )
 
 
-@pytest.mark.skip(reason="FIXME!")
+# @pytest.mark.skip(reason="FIXME!")
 def test_array_enum():
     data = [
         ["ONE", "FOUR"],
@@ -198,21 +209,25 @@ def test_array_enum():
         ["TWO", "ONE"],
         ["FOUR", "THREE"],
     ]
-    assert ak._v2.from_avro_file(file="tests/samples/array_enum_test_data.avro") == data
+    assert ak._v2.from_avro_file(
+        file="tests/samples/array_enum_test_data.avro").to_list() == data
 
 
 def test_Unions_int_null():
     data = [2345, 65475, None, 676457, 343, 7908, None, 5768]  # int_null_test
     assert (
-        ak._v2.from_avro_file(file="tests/samples/int_null_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/int_null_test_data.avro").to_list()
         == data
     )
 
 
 def test_Unions_string_null():
-    data = ["blue", None, "yellow", None, "Green", None, "Red"]  # string_null_test
+    data = ["blue", None, "yellow", None,
+            "Green", None, "Red"]  # string_null_test
     assert (
-        ak._v2.from_avro_file(file="tests/samples/string_null_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/string_null_test_data.avro").to_list()
         == data
     )
 
@@ -220,7 +235,8 @@ def test_Unions_string_null():
 def test_Unions_enum_null():
     data = ["TWO", None, "ONE", None, "FOUR", None, "THREE"]  # enum_null_test
     assert (
-        ak._v2.from_avro_file(file="tests/samples/enum_null_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/enum_null_test_data.avro").to_list()
         == data
     )
 
@@ -236,13 +252,15 @@ def test_Unions_record_null():
     ]
 
     assert (
-        ak._v2.from_avro_file(file="tests/samples/record_null_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/record_null_test_data.avro").to_list()
         == data
     )
 
 
 def test_Unions_null_X_Y():
-    data = ["TWO", 5684, "ONE", None, 3154, "FOUR", 69645, "THREE"]  # int_string_null
+    data = ["TWO", 5684, "ONE", None, 3154,
+            "FOUR", 69645, "THREE"]  # int_string_null
     assert (
         ak._v2.from_avro_file(
             file="tests/samples/int_string_null_test_data.avro"
@@ -256,7 +274,8 @@ def test_record_1():
         {"name": "Pierre-Simon Laplace", "age": 77, "Numbers": "TWO"},
     ]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/record_1_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/record_1_test_data.avro").to_list()
         == data
     )
 
@@ -272,6 +291,7 @@ def test_records():
         {"name": "Aryan", "age": 6478, "Numbers": "FOUR"},
     ]
     assert (
-        ak._v2.from_avro_file(file="tests/samples/record_test_data.avro").to_list()
+        ak._v2.from_avro_file(
+            file="tests/samples/record_test_data.avro").to_list()
         == data
     )
