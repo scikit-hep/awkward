@@ -3,8 +3,6 @@
 #ifndef AWKWARD_ARRAY_BUILDERS_H_
 #define AWKWARD_ARRAY_BUILDERS_H_
 
-#include "awkward/layoutbuilder/LayoutBuilder.h"
-
 #include <iterator>
 #include <stdlib.h>
 #include <string>
@@ -130,323 +128,42 @@ type_to_name<char>() {
 }
 
 template <typename T>
-struct build_layout_impl {
-    static void build_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, awkward::LayoutBuilder64* builder) {
-        cout << "FIXME: processing of a " << typeid(T).name()
-            << " type is not implemented yet." << endl;
-    };
-};
-
-template <>
-struct build_layout_impl<int64_t> {
-    static void build_layout(ROOT::RDF::RResultPtr<std::vector<int64_t>>& result, awkward::LayoutBuilder64* builder) {
-        for (auto const& it : result) {
-            builder->int64(it);
-        }
-    };
-};
-
-template <>
-struct build_layout_impl<double> {
-    static void build_layout(ROOT::RDF::RResultPtr<std::vector<double>>& result, awkward::LayoutBuilder64* builder) {
-        for (auto const& it : result) {
-            builder->float64(it);
-        }
-    };
-};
-
-template <>
-struct build_layout_impl<std::complex<double>> {
-    static void build_layout(ROOT::RDF::RResultPtr<std::vector<std::complex<double>>>& result, awkward::LayoutBuilder64* builder) {
-        for (auto const& it : result) {
-            builder->complex(it);
-        }
-    };
-};
-
-template <typename T>
-void
-build_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    auto ptr = reinterpret_cast<awkward::LayoutBuilder64 *>(builder_ptr);
-    build_layout_impl<T>::build_layout(result, ptr);
-}
-
-template <typename T, typename V>
-struct build_list_offset_layout_impl {
-    static void build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-        typedef typename T::value_type value_type;
-
-        cout << "FIXME: processing an iterable of a " << typeid(value_type).name()
-            << " type is not implemented yet." << endl;
-    };
-};
-
-template <typename T>
-struct build_list_offset_layout_impl<T, int64_t> {
-    static void build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, awkward::LayoutBuilder64* builder) {
-        for (auto const& data : result) {
-            builder->begin_list();
-            for (auto const& x : data) {
-                builder->int64(x);
-            }
-            builder->end_list();
-        }
-    };
-};
-
-template <typename T>
-struct build_list_offset_layout_impl<T, double> {
-    static void build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, awkward::LayoutBuilder64* builder) {
-        for (auto const& data : result) {
-            builder->begin_list();
-            for (auto const& x : data) {
-                builder->float64(x);
-            }
-            builder->end_list();
-        }
-    };
-};
-
-template <typename T>
-struct build_list_offset_layout_impl<T, std::complex<double>> {
-    static void build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, awkward::LayoutBuilder64* builder) {
-        for (auto const& data : result) {
-            builder->begin_list();
-            for (auto const& x : data) {
-                builder->complex(x);
-            }
-            builder->end_list();
-        }
-    };
-};
-
-template <typename T>
-void
-build_list_offset_layout(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    auto ptr = reinterpret_cast<awkward::LayoutBuilder64 *>(builder_ptr);
-    build_list_offset_layout_impl<T, typename T::value_type>::build_list_offset_layout(result, ptr);
-}
-
-template <>
-void
-build_list_offset_layout<std::string>(ROOT::RDF::RResultPtr<std::vector<std::string>>& result, long builder_ptr) {
-    auto builder = reinterpret_cast<awkward::LayoutBuilder64 *>(builder_ptr);
-    for (auto const& it : result) {
-        builder->begin_list();
-        builder->string(it.c_str(), it.length());
-        builder->end_list();
-    }
-}
-
-template <typename T>
-struct build_array_impl {
-    static void build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-        cout << "FIXME: processing of a " << typeid(T).name()
-            << " type is not implemented yet." << endl;
-    };
-};
-
-template <>
-struct build_array_impl<bool> {
-    static void build_array(ROOT::RDF::RResultPtr<std::vector<bool>>& result, void* ptr) {
-        for (auto const& it : result) {
-            awkward_ArrayBuilder_boolean(ptr, it);
-        }
-    };
-};
-
-template <>
-struct build_array_impl<int64_t> {
-    static void build_array(ROOT::RDF::RResultPtr<std::vector<int64_t>>& result, void* ptr) {
-        for (auto const& it : result) {
-            awkward_ArrayBuilder_integer(ptr, it);
-        }
-    };
-};
-
-template <>
-struct build_array_impl<double> {
-    static void build_array(ROOT::RDF::RResultPtr<std::vector<double>>& result, void* ptr) {
-        for (auto const& it : result) {
-            awkward_ArrayBuilder_real(ptr, it);
-        }
-    };
-};
-
-template <>
-struct build_array_impl<std::complex<double>> {
-    static void build_array(ROOT::RDF::RResultPtr<std::vector<std::complex<double>>>& result, void* ptr) {
-        for (auto const& it : result) {
-            awkward_ArrayBuilder_complex(ptr, it.real(), it.imag());
-        }
-    };
-};
-
-template <>
-struct build_array_impl<std::string> {
-    static void build_array(ROOT::RDF::RResultPtr<std::vector<std::string>>& result, void* ptr) {
-        for (auto const& it : result) {
-            awkward_ArrayBuilder_string(ptr, it.c_str());
-        }
-    };
-};
-
-template <typename T>
-void
-build_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    auto ptr = reinterpret_cast<void *>(builder_ptr);
-    build_array_impl<T>::build_array(result, ptr);
-}
-
-// template <typename T>
-// struct copy_array_impl {
-//     static void* copy_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-//         cout << "FIXME: processing of a " << typeid(T).name()
-//             << " type is not implemented yet." << endl;
-//     };
-// };
-//
-// template <>
-// struct copy_array_impl<bool> {
-//     static void* copy_array(ROOT::RDF::RResultPtr<std::vector<bool>>& result, void* ptr) {
-//
-//         for (auto const& it : result) {
-//             awkward_ArrayBuilder_boolean(ptr, it);
-//         }
-//     };
-// };
-//
-// template <>
-// struct copy_array_impl<int64_t> {
-//     static void copy_array(ROOT::RDF::RResultPtr<std::vector<int64_t>>& result, void* ptr) {
-//         for (auto const& it : result) {
-//             awkward_ArrayBuilder_integer(ptr, it);
-//         }
-//     };
-// };
-//
-// template <>
-// struct copy_array_impl<double> {
-//     static void copy_array(ROOT::RDF::RResultPtr<std::vector<double>>& result, void* ptr) {
-//         for (auto const& it : result) {
-//             awkward_ArrayBuilder_real(ptr, it);
-//         }
-//     };
-// };
-//
-// template <>
-// struct copy_array_impl<std::complex<double>> {
-//     static void copy_array(ROOT::RDF::RResultPtr<std::vector<std::complex<double>>>& result, void* ptr) {
-//         for (auto const& it : result) {
-//             awkward_ArrayBuilder_complex(ptr, it.real(), it.imag());
-//         }
-//     };
-// };
-//
-// template <>
-// struct copy_array_impl<std::string> {
-//     static void* copy_array(ROOT::RDF::RResultPtr<std::vector<std::string>>& result) {
-//       return create_array(result, result.size());
-//         // for (auto const& it : result) {
-//         //     awkward_ArrayBuilder_string(ptr, it.c_str());
-//         // }
-//     };
-// };
-
-template <typename T>
 std::pair<void*, size_t>
-copy_array(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+copy_buffer(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
   return {create_array<T>(result), result->size()};
-  //  copy_array_impl<T>::copy_array(result);
 }
 
 template <typename T, typename V>
-struct build_list_array_impl {
-    static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-        typedef typename T::value_type value_type;
+struct copy_offsets_and_flatten_impl {
+    static std::vector<std::pair<void*, size_t>>
+      copy_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+        //typedef typename T::value_type value_type;
 
-        cout << "FIXME: processing an iterable of a " << typeid(value_type).name()
-            << " type is not implemented yet." << endl;
-    };
-};
-
-template <typename T>
-struct build_list_array_impl<T, double> {
-    static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-        for (auto const& data : result) {
-            awkward_ArrayBuilder_beginlist(ptr);
-            for (auto const& it : data) {
-                awkward_ArrayBuilder_real(ptr, it);
-            }
-            awkward_ArrayBuilder_endlist(ptr);
+        size_t offsets_length = result->size() + 1;
+        int64_t* offsets = (int64_t*)malloc(sizeof(int64_t)*offsets_length);
+        int64_t i = 1;
+        offsets[0] = 0;
+        for (auto const& it : result) {
+          offsets[i] = offsets[i - 1] + it.size();
+          i++;
         }
-    };
-};
 
-
-template <typename T>
-struct build_list_array_impl<T, ROOT::VecOps::RVec<ROOT::VecOps::RVec<double> > > {
-    static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-        typedef typename T::value_type value_type;
-
-        cout << "FIXME: processing an iterable of a " << typeid(value_type).name()
-            << " type is not implemented yet." << endl;
-    };
-};
-
-template <typename T>
-struct build_list_array_impl<T, int64_t> {
-    static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-    for (auto const& data : result) {
-        awkward_ArrayBuilder_beginlist(ptr);
-        for (auto const& it : data) {
-            awkward_ArrayBuilder_integer(ptr, it);
+        size_t data_length = offsets[i - 1];
+        V* data = (V*)malloc(sizeof(V)*data_length);
+        int64_t j = 0;
+        for (auto const& vec : result) {
+          for (auto const& x : vec) {
+            data[j++] = x;
+          }
         }
-        awkward_ArrayBuilder_endlist(ptr);
-    }
+        return {{offsets, offsets_length - 1}, {data, data_length}};
     };
 };
 
 template <typename T>
-struct build_list_array_impl<T, bool> {
-    static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-        for (auto const& data : result) {
-            awkward_ArrayBuilder_beginlist(ptr);
-            for (auto const& it : data) {
-                awkward_ArrayBuilder_boolean(ptr, it);
-            }
-            awkward_ArrayBuilder_endlist(ptr);
-        }
-    };
-};
-
-template <typename T>
-struct build_list_array_impl<T, std::complex<double>> {
-    static void build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, void* ptr) {
-        for (auto const& data : result) {
-            awkward_ArrayBuilder_beginlist(ptr);
-            for (auto const& it : data) {
-                awkward_ArrayBuilder_complex(ptr, it.real(), it.imag());
-            }
-            awkward_ArrayBuilder_endlist(ptr);
-        }
-    };
-};
-
-template <typename T>
-void
-build_list_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, long builder_ptr) {
-    auto ptr = reinterpret_cast<void *>(builder_ptr);
-    build_list_array_impl<T, typename T::value_type>::build_list_array(result, ptr);
-}
-
-template <>
-void
-build_list_array<std::string>(ROOT::RDF::RResultPtr<std::vector<std::string>>& result, long builder_ptr) {
-    auto ptr = reinterpret_cast<void *>(builder_ptr);
-    for (auto const& it : result) {
-        awkward_ArrayBuilder_string(ptr, it.c_str());
-    }
+std::vector<std::pair<void*, size_t>>
+copy_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+  return copy_offsets_and_flatten_impl<T, typename T::value_type>::copy_offsets_and_flatten(result);
 }
 
 template <typename, typename = void>

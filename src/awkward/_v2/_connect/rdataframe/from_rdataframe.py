@@ -9,7 +9,6 @@ import ROOT
 import cppyy
 import numpy as np  # noqa: F401
 
-cppyy.add_include_path("include")
 cppyy.add_include_path("src/awkward/_v2/_connect")
 
 compiler = ROOT.gInterpreter.Declare
@@ -71,8 +70,9 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
     if ptrs_type in primitive_types:
         form = ak._v2.forms.NumpyForm(ptrs_type)
-        ptr, length = ROOT.awkward.copy_array[column_type](result_ptrs)
-        return ak._v2.from_buffers(form, length, {"data": ptr}, "data")
+        ptr, length = ROOT.awkward.copy_buffer[column_type](result_ptrs)
+        array = ak._v2.from_buffers(form, length, {"data": ptr}, "data")
+        return _maybe_wrap(array, column_as_record)
 
     elif ptrs_type.startswith("iterable"):
 
@@ -91,7 +91,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         "__array__": "string"
     }
 }"""
-        builder_form = (
+        buffer_form = (
             strings_form
             if ptrs_type[ptrs_type.index(" ") + 1 :] == "chars"
             else str(
@@ -100,29 +100,28 @@ def from_rdataframe(data_frame, column, column_as_record=True):
                 )
             )
         )
+        result = ROOT.awkward.copy_offsets_and_flatten[column_type](result_ptrs)
+        array = ak._v2.from_buffers(
+            buffer_form,
+            result[0][1],
+            {"None-offsets": result[0][0], "None-data": result[1][0]},
+        )
 
-        builder = ak.layout.LayoutBuilder64(builder_form)
-        ROOT.awkward.build_list_offset_layout[column_type](result_ptrs, builder._ptr)
-        # layout = builder.snapshot()
-
-        # print(layout)
-
-        return _wrap_as_array(column, builder.snapshot(), column_as_record)
-
-        # return _maybe_wrap(builder.snapshot(), column_as_record)
+        return _maybe_wrap(array, column_as_record)
 
     elif ptrs_type == "nested iterable":
-        builder = ak._v2.highlevel.ArrayBuilder()
-
-        ROOT.awkward.offsets_and_flatten[column_type](result_ptrs, builder._layout._ptr)
-
-        return _maybe_wrap(builder.snapshot(), column_as_record)
-
-    elif ptrs_type == "awkward type":
-
-        # Triggers event loop and execution of all actions booked in the associated RLoopManager.
-        cpp_reference = result_ptrs.GetValue()
-
-        return _wrap_as_array(column, cpp_reference, column_as_record)
-    else:
+        # print(ptrs_type)
+        #     builder = ak._v2.highlevel.ArrayBuilder()
+        #
+        #     ROOT.awkward.offsets_and_flatten[column_type](result_ptrs, builder._layout._ptr)
+        #
+        #     return _maybe_wrap(builder.snapshot(), column_as_record)
+        #
+        # elif ptrs_type == "awkward type":
+        #
+        #     # Triggers event loop and execution of all actions booked in the associated RLoopManager.
+        #     cpp_reference = result_ptrs.GetValue()
+        #
+        #     return _wrap_as_array(column, cpp_reference, column_as_record)
+        # else:
         raise ak._v2._util.error(NotImplementedError)
