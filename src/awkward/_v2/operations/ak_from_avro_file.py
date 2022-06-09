@@ -49,12 +49,14 @@ def from_avro_file(
                     return _impl(form, length, container, highlevel, behavior)
             except ImportError:
                 raise ak._v2._util.error(
-                    "the filename is incorrect or the file does not exist")
+                    "the filename is incorrect or the file does not exist"
+                )
 
         else:
             if not hasattr(file, "read"):
                 raise ak._v2._util.error(
-                    TypeError("the fileobject provided is not of the correct type."))
+                    TypeError("the fileobject provided is not of the correct type.")
+                )
             else:
                 form, length, container = awkward._v2._connect.avro.ReadAvroFT(
                     file, limit_entries, debug_forth
