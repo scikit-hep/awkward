@@ -20,6 +20,7 @@ namespace awkward {
       form_key_(form_key),
       form_primitive_(form_primitive),
       is_complex_(form_primitive.rfind("complex", 0) == 0) {
+    auto tmp_primitive = (is_complex_ ? "float64" : form_primitive);
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
       .append(form_primitive).append("\" ");
 
@@ -31,11 +32,11 @@ namespace awkward {
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(form_primitive).append(" ");
+      .append(tmp_primitive).append(" ");
 
     vm_func_name_ = std::string(form_key)
       .append("-")
-      .append(form_primitive);
+      .append(tmp_primitive);
 
     vm_func_type_ = form_primitive_to_state;
 

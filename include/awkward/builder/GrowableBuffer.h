@@ -5,6 +5,7 @@
 
 #include "awkward/common.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
+#include "awkward/kernel-dispatch.h"
 
 #include <memory>
 
@@ -29,6 +30,8 @@ namespace awkward {
   /// copies the buffer it owns.
   template <typename T>
   class LIBAWKWARD_EXPORT_SYMBOL GrowableBuffer {
+    using UniquePtrDeleter = decltype(kernel::array_deleter<T>());
+    using UniquePtr = std::unique_ptr<T, UniquePtrDeleter>;
   public:
     /// @brief Creates an empty GrowableBuffer.
     ///
@@ -80,7 +83,7 @@ namespace awkward {
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of reallocations.
     GrowableBuffer(const ArrayBuilderOptions& options,
-                   std::unique_ptr<T[]> ptr,
+                   GrowableBuffer::UniquePtr ptr,
                    size_t length,
                    size_t reserved);
 
@@ -90,12 +93,12 @@ namespace awkward {
     GrowableBuffer(const ArrayBuilderOptions& options);
 
     /// @brief Reference to a unique pointer to the array buffer.
-    const std::unique_ptr<T[]>&
+    const GrowableBuffer::UniquePtr&
       ptr() const;
 
     /// @brief FIXME: needed for uproot.cpp - remove when it's gone.
     /// Note, it transfers ownership of the array buffer.
-    std::unique_ptr<T[]>
+    GrowableBuffer::UniquePtr
       get_ptr();
 
     /// @brief Currently used number of elements.
@@ -149,7 +152,7 @@ namespace awkward {
   private:
     const ArrayBuilderOptions options_;
     // @brief See #ptr.
-    std::unique_ptr<T[]> ptr_;
+    UniquePtr ptr_;
     // @brief See #length.
     size_t length_;
     // @brief See #reserved.
