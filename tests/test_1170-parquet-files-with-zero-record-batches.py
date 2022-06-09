@@ -3,11 +3,19 @@
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
+import os  # noqa: F401
 
 pytest.importorskip("pyarrow.parquet")
 
 
 def test_parquet():
+
+    path = os.getcwd()
+
+    print(path)
+
+    arr = os. listdir('.')
+    print(arr)
     empty = ak.from_parquet("tests/samples/zero-record-batches.parquet")
     assert isinstance(empty, ak.Array)
     assert len(empty) == 0
