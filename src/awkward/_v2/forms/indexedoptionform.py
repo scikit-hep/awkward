@@ -61,10 +61,10 @@ class IndexedOptionForm(Form):
 
     def _type(self, typestrs):
         out = ak._v2.types.optiontype.OptionType(
-                self._content._type(typestrs),
-                self._parameters,
-                ak._v2._util.gettypestr(self._parameters, typestrs),
-            )
+            self._content._type(typestrs),
+            self._parameters,
+            ak._v2._util.gettypestr(self._parameters, typestrs),
+        )
 
         if out._parameters.get("__array__") == "categorical":
             del out._parameters["__array__"]
