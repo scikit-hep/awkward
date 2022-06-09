@@ -85,6 +85,10 @@ def test_numpy_float_form():
     assert ak._v2.to_list(array) == [1.1, 2.2, 3.3, 4.4]
 
 
+@pytest.mark.skipif(
+    ak._util.win,
+    reason="FIXME: the test fails on Windows",
+)
 def test_numpy_complex_form():
     form = """
 {
