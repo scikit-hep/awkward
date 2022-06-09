@@ -14,7 +14,7 @@ def test_parquet():
 
     print(path)
 
-    arr = os. listdir('.')
+    arr = os.listdir(".")
     print(arr)
     empty = ak.from_parquet("tests/samples/zero-record-batches.parquet")
     assert isinstance(empty, ak.Array)
