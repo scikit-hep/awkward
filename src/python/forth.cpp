@@ -261,6 +261,23 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               }
               self.begin(ins);
           }, py::arg("inputs") = py::dict())
+          .def("begin_again", [](ak::ForthMachineOf<T, I>& self,
+                           const py::dict& inputs, bool reset_instruction) -> void {
+              std::map<std::string, std::shared_ptr<ak::ForthInputBuffer>> ins;
+              for (auto pair : inputs) {
+                std::string name = pair.first.cast<std::string>();
+                py::buffer obj = pair.second.cast<py::buffer>();
+                py::buffer_info info = obj.request(self.input_must_be_writable(name));
+                int64_t length = info.itemsize;
+                for (auto x : info.shape) {
+                  length *= x;
+                }
+                std::shared_ptr<void> ptr = std::shared_ptr<uint8_t>(
+                    reinterpret_cast<uint8_t*>(info.ptr), pyobject_deleter<uint8_t>(obj.ptr()));
+                ins[name] = std::make_shared<ak::ForthInputBuffer>(ptr, 0, length);
+              }
+              self.begin_again(ins, reset_instruction);
+          }, py::arg("inputs"), py::arg("reset_instruction") = true)
           .def("step", [](ak::ForthMachineOf<T, I>& self,
                           bool raise_user_halt,
                           bool raise_recursion_depth_exceeded,
