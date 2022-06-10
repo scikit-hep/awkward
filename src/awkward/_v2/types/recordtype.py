@@ -156,8 +156,9 @@ class RecordType(Type):
         ):
             args = dict(zip(self._fields, [x.primitive for x in self._contents]))
             return "{}[{}]".format(self._parameters["__record__"], str(args)[1:-1])
-        args = [repr(self._contents), repr(self._fields)] + self._repr_args()
-        return "{}({})".format(type(self).__name__, ", ".join(args))
+        else:
+            args = [repr(self._contents), repr(self._fields)] + self._repr_args()
+            return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):
         if isinstance(other, RecordType):
