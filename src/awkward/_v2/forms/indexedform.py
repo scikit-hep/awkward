@@ -60,18 +60,18 @@ class IndexedForm(Form):
 
     def _type(self, typestrs):
         out = self._content._type(typestrs)
-        if out._parameters is None and self._parameters is not None:
-            out._parameters = dict(self._parameters)
-            if out._parameters.get("__array__") == "categorical":
+
+        if self._parameters is not None:
+            if out._parameters is None:
+                out._parameters = self._parameters
+            else:
+                out._parameters = dict(out._parameters)
+                _parameters_update(out._parameters, self._parameters)
+
+            if self._parameters.get("__array__") == "categorical":
+                if out._parameters is self._parameters:
+                    out._parameters = dict(out._parameters)
                 del out._parameters["__array__"]
-                out._parameters["__categorical__"] = True
-        elif out._parameters is not None and self._parameters is not None:
-            _parameters_update(out._parameters, self._parameters)
-            print("self paramters ", self._parameters)
-            print("out ", out._parameters)
-            if out._parameters.get("__array__") == "categorical":
-                del out._parameters["__array__"]
-                out._parameters["__categorical__"] = True
 
         return out
 

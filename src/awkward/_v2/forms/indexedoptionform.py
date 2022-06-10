@@ -60,17 +60,17 @@ class IndexedOptionForm(Form):
         )
 
     def _type(self, typestrs):
-        out = ak._v2.types.optiontype.OptionType(
-                self._content._type(typestrs),
-                self._parameters,
-                ak._v2._util.gettypestr(self._parameters, typestrs),
-            )
+        if self.parameter("__array__") == "categorical":
+            parameters = dict(self._parameters)
+            del parameters["__array__"]
+        else:
+            parameters = self._parameters
 
-        if out._parameters is not None and out._parameters.get("__array__") == "categorical":
-            del out._parameters["__array__"]
-            out._parameters["__categorical__"] = True
-
-        return out.simplify_option_union()
+        return ak._v2.types.optiontype.OptionType(
+            self._content._type(typestrs),
+            parameters,
+            ak._v2._util.gettypestr(self._parameters, typestrs),
+        ).simplify_option_union()
 
     def __eq__(self, other):
         if isinstance(other, IndexedOptionForm):

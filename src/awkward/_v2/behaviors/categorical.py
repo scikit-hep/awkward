@@ -235,7 +235,7 @@ def to_categorical(array, highlevel=True):
             if layout.is_IndexedType and layout.is_OptionType:
                 content = layout.content
                 cls = ak._v2.contents.IndexedOptionArray
-            elif layout.is_IndexedType and not layout.is_OptionType:
+            elif layout.is_IndexedType:
                 content = layout.content
                 cls = ak._v2.contents.IndexedArray
             elif layout.is_OptionType:
