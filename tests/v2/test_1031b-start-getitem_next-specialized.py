@@ -93,6 +93,15 @@ def test_RegularArray():
 
     assert to_list(new[1, [2, 0]]) == [[25, 26, 27, 28, 29], [15, 16, 17, 18, 19]]
 
+    array = ak._v2.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    assert (
+        repr(array[[True, False, True]])
+        == "<Array [[1.1, 2.2, 3.3], [4.4, 5.5]] type='2 * var * float64'>"
+    )
+    assert (
+        repr(array[[True, False, True], 1]) == "<Array [2.2, 5.5] type='2 * float64'>"
+    )
+
 
 def test_RecordArray():
     new = ak._v2.contents.RecordArray(
