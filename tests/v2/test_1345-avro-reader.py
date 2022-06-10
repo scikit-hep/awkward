@@ -7,7 +7,7 @@ import os  # noqa: F401
 
 
 DIR = os.path.dirname(__file__)
-if DIR.endswith("/v2") or DIR.endswith("\v2"):
+if DIR.endswith("/v2") or DIR.endswith("\\v2"):
     DIR = os.path.dirname(DIR)
 DIR = os.path.abspath(DIR)
 
