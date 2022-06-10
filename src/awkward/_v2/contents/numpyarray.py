@@ -219,7 +219,7 @@ class NumpyArray(Content):
         return nplike.asarray(self._data)
 
     def __array__(self, *args, **kwargs):
-        return numpy.asarray(self._data, *args, **kwargs)
+        return self.nplike.asarray(self._data, *args, **kwargs)
 
     def __iter__(self):
         return iter(self._data)
@@ -1275,7 +1275,7 @@ class NumpyArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        out = self._nplike.asarray(self)
+        out = numpy.asarray(self._data)
         if type(out).__module__.startswith("cupy."):
             return out.get()
         else:
