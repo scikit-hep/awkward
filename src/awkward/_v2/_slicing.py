@@ -59,8 +59,9 @@ def getitem_broadcast(items):
                     out[-1].metadata["shape"] = x.shape
                 elif issubclass(x.dtype.type, (np.bool_, bool)):
                     if len(x.shape) == 1:
-                        out.append(ak._v2.index.Index64(nplike.nonzero(x)[0]))
-                        out[-1].metadata["shape"] = x.shape
+                        current = ak._v2.index.Index64(nplike.nonzero(x)[0])
+                        out.append(current)
+                        out[-1].metadata["shape"] = current.data.shape
                     else:
                         for w in nplike.nonzero(x):
                             out.append(ak._v2.index.Index64(w))
