@@ -168,6 +168,16 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        return UnmaskedArray(
+            self._content._getitem_next_jagged(
+                slicestarts, slicestops, slicecontent, tail
+            ),
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
+
     def _getitem_next(self, head, tail, advanced):
         if head == ():
             return self

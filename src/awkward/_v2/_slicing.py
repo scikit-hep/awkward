@@ -158,6 +158,7 @@ def prepare_tuple_RegularArray_toListOffsetArray64(item):
 
 def prepare_tuple_nested(item):
     if isinstance(item, ak._v2.contents.EmptyArray):
+        # policy: unknown -> int
         return prepare_tuple_nested(item.toNumpyArray(np.int64))
 
     elif isinstance(item, ak._v2.contents.NumpyArray) and issubclass(
@@ -217,7 +218,6 @@ def prepare_tuple_nested(item):
             ak._v2.contents.UnmaskedArray,
         ),
     ):
-        # FIXME: might infinite-loop before simplify_optiontype is implemented
         next = item.simplify_optiontype()
         return prepare_tuple_nested(next)
 
@@ -258,8 +258,8 @@ def prepare_tuple_nested(item):
         is_valid = item.mask_as_bool(valid_when=True)
         positions_where_valid = item.nplike.index_nplike.nonzero(is_valid)[0]
 
-        nextcontent = prepare_tuple_nested(item.content)._carry(
-            ak._v2.index.Index64(positions_where_valid), False
+        nextcontent = prepare_tuple_nested(
+            item.content._carry(ak._v2.index.Index64(positions_where_valid), False)
         )
 
         nextindex = item.nplike.index_nplike.full(is_valid.shape[0], -1, np.int64)
@@ -275,7 +275,18 @@ def prepare_tuple_nested(item):
         )
 
     elif isinstance(item, ak._v2.contents.UnionArray):
-        return prepare_tuple_nested(item.simplify_uniontype())
+        attempt = item.simplify_uniontype()
+        if isinstance(attempt, ak._v2.contents.UnionArray):
+            raise ak._v2._util.error(
+                TypeError(
+                    "irreducible unions (different types at the same level in an array) can't be used as slices"
+                )
+            )
+
+        return prepare_tuple_nested(attempt)
+
+    elif isinstance(item, ak._v2.contents.RecordArray):
+        raise ak._v2._util.error(TypeError("record arrays can't be used as slices"))
 
     else:
         raise ak._v2._util.error(
@@ -290,6 +301,7 @@ def prepare_tuple_nested(item):
 
 
 def prepare_tuple_bool_to_int(item):
+    # actually convert leaf-node booleans to integers
     if (
         isinstance(item, ak._v2.contents.ListOffsetArray)
         and isinstance(item.content, ak._v2.contents.NumpyArray)
