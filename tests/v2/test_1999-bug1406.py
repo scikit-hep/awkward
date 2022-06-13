@@ -6,6 +6,7 @@ import numpy as np
 
 to_list = ak._v2.operations.to_list
 
+
 def test_1406issue():
     array = ak._v2.Array(
         ak._v2.contents.ListOffsetArray(
@@ -27,7 +28,7 @@ def test_1406issue():
                     ak._v2.index.Index64(np.array([0, 0, 1], dtype=np.int64)),
                     ak._v2.contents.NumpyArray(np.array([0], dtype=np.int64)),
                 ),
-            )
+            ),
         ),
         check_valid=True,
     )
@@ -44,8 +45,7 @@ def test_success_remove_option_type():
             ),
         ),
         check_valid=True,
-        )
-
+    )
 
     index = ak._v2.Array(
         ak._v2.contents.ListOffsetArray(
@@ -83,13 +83,13 @@ def test_success_start_offset0():
                     ak._v2.index.Index64(np.array([0, 0, 1], dtype=np.int64)),
                     ak._v2.contents.NumpyArray(np.array([0], dtype=np.int64)),
                 ),
-            )
+            ),
         ),
         check_valid=True,
     )
 
     assert to_list(array[index]) == [[[], [2]]]
-        
+
 
 def test_success_nonempty_list():
     array = ak._v2.Array(
@@ -112,10 +112,9 @@ def test_success_nonempty_list():
                     ak._v2.index.Index64(np.array([0, 1, 2], dtype=np.int64)),
                     ak._v2.contents.NumpyArray(np.array([0, 0], dtype=np.int64)),
                 ),
-            )
+            ),
         ),
         check_valid=True,
     )
 
     assert to_list(array[index]) == [[[0], [1]]]
-
