@@ -92,12 +92,49 @@ template <typename, typename = void>
 constexpr bool is_iterable{};
 
 template <typename T>
-constexpr bool is_iterable<
-    T,
-    std::void_t< decltype(std::declval<T>().begin()),
-                 decltype(std::declval<T>().end())
-    >
-> = true;
+class Buffers {
+public:
+  Buffers(ROOT::RDF::RResultPtr<std::vector<T>>& result)
+    : result_(result) {}
+
+  ~Buffers() {
+    std::cout << "Buffers destructed!\n" << std::endl;
+  }
+
+  std::vector<std::pair<int64_t, void*>>
+  offsets_and_flatten() {
+
+    int64_t i = 0;
+    int64_t j = 0;
+    for (auto const& vec_of_vecs : result_) {
+      offsets_.emplace_back(i);
+      i += vec_of_vecs.size();
+
+      for (auto const& vec : vec_of_vecs) {
+        inner_offsets_.emplace_back(j);
+        j += vec.size();
+
+        for (auto const& x : vec) {
+          data_.emplace_back(x);
+        }
+      }
+      inner_offsets_.emplace_back(j);
+    }
+    offsets_.emplace_back(i);
+
+    return {
+      {offsets_.size(), reinterpret_cast<void *>(&offsets_[0])},
+      {inner_offsets_.size(), reinterpret_cast<void *>(&inner_offsets_[0])},
+      {data_.size(), reinterpret_cast<void *>(&data_[0])}
+    };
+  }
+
+private:
+  ROOT::RDF::RResultPtr<std::vector<T>>& result_;
+  std::vector<int64_t> offsets_;
+  std::vector<int64_t> inner_offsets_;
+  std::vector<double> data_;
+};
 
 template <typename T, typename DATA>
 class CppBuffers {
