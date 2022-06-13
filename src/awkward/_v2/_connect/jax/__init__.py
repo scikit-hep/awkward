@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+import sys
 
 try:
     import jax
@@ -53,6 +54,13 @@ def register_pytrees():
 def import_jax(name="Awkward Arrays with JAX"):
     if jax is None:
         raise ak._v2._util.error(ModuleNotFoundError(error_message.format(name)))
+
+    if not (sys.version_info.major == 3 and sys.version_info.minor >= 7):
+        raise ak._v2._util.error(
+            AssertionError(
+                "Using Awkward Arrays with JAX requires Python version >= 3.7"
+            )
+        )
 
     global pytrees_registered
 

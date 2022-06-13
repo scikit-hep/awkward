@@ -103,6 +103,15 @@ class EmptyArray(Content):
         else:
             raise ak._v2._util.indexerror(self, carry.data, "array is empty")
 
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        raise ak._v2._util.indexerror(
+            self,
+            ak._v2.contents.ListArray(
+                slicestarts, slicestops, slicecontent, None, None, self._nplike
+            ),
+            "too many jagged slice dimensions for array",
+        )
+
     def _getitem_next(self, head, tail, advanced):
         if head == ():
             return self

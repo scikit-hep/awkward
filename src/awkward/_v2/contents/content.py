@@ -325,7 +325,7 @@ class Content:
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        index = ak._v2.index.Index64(head.index)
+        index = ak._v2.index.Index64(head.index, nplike=self.nplike)
         indexlength = index.length
         index = index._to_nplike(self.nplike)
         outindex = ak._v2.index.Index64.empty(index.length * length, self._nplike)
@@ -361,7 +361,7 @@ class Content:
         head = head._to_nplike(self._nplike)
         jagged = head.content.toListOffsetArray64()
 
-        index = ak._v2.index.Index64(head._index)
+        index = ak._v2.index.Index64(head._index, nplike=self.nplike)
         content = that._getitem_at(0)
         if self._nplike.known_shape and content.length < index.length:
             raise ak._v2._util.indexerror(
@@ -551,12 +551,14 @@ class Content:
                 carry = ak._v2.index.Index64(where.data.reshape(-1))
                 allow_lazy = True
             elif issubclass(where.dtype.type, np.integer):
-                carry = ak._v2.index.Index64(where.data.astype(np.int64).reshape(-1))
+                carry = ak._v2.index.Index64(
+                    where.data.astype(np.int64).reshape(-1), nplike=self.nplike
+                )
                 allow_lazy = "copied"  # True, but also can be modified in-place
             elif issubclass(where.dtype.type, (np.bool_, bool)):
                 if len(where.data.shape) == 1:
                     where = self._nplike.nonzero(where.data)[0]
-                    carry = ak._v2.index.Index64(where)
+                    carry = ak._v2.index.Index64(where, nplike=self.nplike)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     wheres = self._nplike.nonzero(where.data)
@@ -613,7 +615,7 @@ class Content:
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak._v2.index.Index)
 
-        result = self._nplike.empty(1, dtype=np.bool_)
+        result = self._nplike.index_nplike.empty(1, dtype=np.bool_)
         assert carry.nplike is self._nplike
         self._handle_error(
             self._nplike[
@@ -986,7 +988,7 @@ class Content:
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        tocarryraw = self._nplike.empty(n, dtype=np.intp)
+        tocarryraw = self._nplike.index_nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
             ptr = ak._v2.index.Index64.empty(
@@ -1241,7 +1243,8 @@ class Content:
     def pad_none_axis0(self, target, clip):
         if not clip and target < self.length:
             index = ak._v2.index.Index64(
-                self._nplike.arange(self.length, dtype=np.int64)
+                self._nplike.index_nplike.arange(self.length, dtype=np.int64),
+                nplike=self.nplike,
             )
 
         else:

@@ -21,7 +21,8 @@ class NumpyArray(Content):
             data = data.data
         self._data = nplike.asarray(data)
 
-        ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
+        if not isinstance(nplike, ak.nplike.Jax):
+            ak._v2.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
             raise ak._v2._util.error(
                 TypeError(
@@ -181,16 +182,16 @@ class NumpyArray(Content):
         is_posinf = is_nonfinite & (self._data > 0)  # true for inf only
         is_neginf = is_nonfinite & (self._data < 0)  # true for -inf only
         is_nan = self._nplike.isnan(self._data)  # true for nan only
-        tags = self._nplike.zeros(out.length, np.int8)
+        tags = self._nplike.index_nplike.zeros(out.length, np.int8)
         tags[is_nonfinite] = 1
-        index = self._nplike.arange(out.length, dtype=np.int64)
+        index = self._nplike.index_nplike.arange(out.length, dtype=np.int64)
         index[is_posinf] = 0
         index[is_neginf] = 1
         index[is_nan] = 2
 
         out = ak._v2.contents.unionarray.UnionArray(
-            tags=ak._v2.index.Index8(tags),
-            index=ak._v2.index.Index64(index),
+            tags=ak._v2.index.Index8(tags, nplike=self.nplike),
+            index=ak._v2.index.Index64(index, nplike=self.nplike),
             contents=[
                 out,
                 ak._v2.operations.from_iter(
@@ -218,7 +219,7 @@ class NumpyArray(Content):
         return nplike.asarray(self._data)
 
     def __array__(self, *args, **kwargs):
-        return numpy.asarray(self._data, *args, **kwargs)
+        return self.nplike.asarray(self._data, *args, **kwargs)
 
     def __iter__(self):
         return iter(self._data)
@@ -337,7 +338,10 @@ class NumpyArray(Content):
             if advanced is None:
                 where = (slice(None), head.data) + tail
             else:
-                where = (self._nplike.asarray(advanced.data), head.data) + tail
+                where = (
+                    self._nplike.index_nplike.asarray(advanced.data),
+                    head.data,
+                ) + tail
 
             try:
                 out = self._data[where]
@@ -542,7 +546,7 @@ class NumpyArray(Content):
         # Alternatively, self._data.flags["C_CONTIGUOUS"], but the following assumes
         # less of the nplike.
 
-        if type(self._data).__module__.startswith("jaxlib."):
+        if isinstance(self.nplike, ak.nplike.Jax):
             return True
 
         x = self._data.dtype.itemsize
@@ -558,7 +562,7 @@ class NumpyArray(Content):
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak._v2.index.Index64.zeros(1, self._nplike)
 
-        tmp = self._nplike.empty(length, self.dtype)
+        tmp = self._nplike.index_nplike.empty(length, self.dtype)
         self._handle_error(
             self._nplike[  # noqa: E231
                 "awkward_NumpyArray_fill",
@@ -621,6 +625,7 @@ class NumpyArray(Content):
         return True if is_equal[0] == 1 else False
 
     def _as_unique_strings(self, offsets):
+        offsets = ak._v2.index.Index64(offsets.data, nplike=offsets.nplike)
         outoffsets = ak._v2.index.Index64.empty(offsets.length, self._nplike)
         out = self._nplike.empty(self.shape[0], self.dtype)
 
@@ -1115,6 +1120,13 @@ class NumpyArray(Content):
                 keepdims,
             )
 
+        if isinstance(self.nplike, ak.nplike.Jax):
+            import awkward._v2._connect.jax._reducers  # noqa: F401
+
+            if isinstance(reducer, type):
+                reducer = getattr(ak._v2._connect.jax._reducers, reducer.__name__)
+            else:
+                reducer = getattr(ak._v2._connect.jax._reducers, type(reducer).__name__)
         out = reducer.apply(self, parents, outlength)
 
         if reducer.needs_position:
@@ -1263,7 +1275,7 @@ class NumpyArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        out = self._nplike.asarray(self)
+        out = numpy.asarray(self._data)
         if type(out).__module__.startswith("cupy."):
             return out.get()
         else:

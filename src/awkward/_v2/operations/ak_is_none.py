@@ -41,8 +41,8 @@ def _impl(array, axis, highlevel, behavior):
 
             # Convert the option type into a union, using the mask
             # as a tag.
-            tag = nplike.asarray(layout.mask_as_bool(valid_when=False))
-            index = nplike.where(tag, 0, nplike.asarray(layout.index))
+            tag = nplike.index_nplike.asarray(layout.mask_as_bool(valid_when=False))
+            index = nplike.index_nplike.where(tag, 0, nplike.asarray(layout.index))
 
             return ak._v2.contents.UnionArray(
                 ak._v2.index.Index8(tag),

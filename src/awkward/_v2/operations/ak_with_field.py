@@ -108,7 +108,10 @@ def _impl(base, what, where, highlevel, behavior):
                 if isinstance(base, ak._v2.contents.RecordArray):
                     if what is None:
                         what = ak._v2.contents.IndexedOptionArray(
-                            ak._v2.index.Index64(nplike.full(len(base), -1, np.int64)),
+                            ak._v2.index.Index64(
+                                nplike.index_nplike.full(len(base), -1, np.int64),
+                                nplike=nplike,
+                            ),
                             ak._v2.contents.EmptyArray(),
                         )
                     elif not isinstance(what, ak._v2.contents.Content):

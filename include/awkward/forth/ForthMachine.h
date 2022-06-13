@@ -232,6 +232,10 @@ namespace awkward {
     void
       begin();
 
+    ///@brief HERE
+    util::ForthError
+    begin_again(const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs, bool reset_instruction);
+
     /// @brief HERE
     util::ForthError
       step();

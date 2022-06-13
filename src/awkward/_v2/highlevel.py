@@ -1141,7 +1141,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def _repr(self, limit_cols):
         import awkward._v2._prettyprint
 
-        pytype = type(self).__name__
+        try:
+            pytype = super().__getattribute__("__name__")
+        except AttributeError:
+            pytype = type(self).__name__
 
         if self._layout.nplike.known_shape and self._layout.nplike.known_data:
             typestr = repr(str(self.type))[1:-1]
@@ -2312,7 +2315,7 @@ class ArrayBuilder(Sized):
         """
         formstr, length, container = self._layout.to_buffers()
         form = ak._v2.forms.from_json(formstr)
-        return ak._v2.operations.from_buffers(form, length, container)
+        return ak._v2.operations.from_buffers(form, length, container, highlevel=True)
 
     def null(self):
         """

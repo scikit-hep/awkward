@@ -625,7 +625,9 @@ class IndexedOptionArray(Content):
                 0,
             )
         )
-        reinterpreted_index = ak._v2.index.Index(self._nplike.asarray(self.index.data))
+        reinterpreted_index = ak._v2.index.Index(
+            self._nplike.index_nplike.asarray(self.index.data), nplike=self.nplike
+        )
 
         assert (
             index.nplike is self._nplike and reinterpreted_index.nplike is self._nplike
@@ -1570,7 +1572,7 @@ class IndexedOptionArray(Content):
         ):
             npindex = self._index.data
             npselect = npindex >= 0
-            if self._nplike.any(npselect):
+            if self._nplike.index_nplike.any(npselect):
                 indexmin = npindex[npselect].min()
                 index = ak._v2.index.Index(npindex - indexmin, nplike=self._nplike)
                 content = self._content[indexmin : npindex.max() + 1]
@@ -1627,17 +1629,18 @@ class IndexedOptionArray(Content):
         original_index = self._index.raw(self._nplike)
 
         is_none = original_index < 0
-        num_none = self._nplike.count_nonzero(is_none)
+        num_none = self._nplike.index_nplike.count_nonzero(is_none)
         if self._content.length > len(original_index) - num_none:
-            new_index = self._nplike.empty(
+            new_index = self._nplike.index_nplike.empty(
                 len(original_index), dtype=original_index.dtype
             )
             new_index[is_none] = -1
-            new_index[~is_none] = self._nplike.arange(
-                len(original_index) - num_none, dtype=original_index.dtype
+            new_index[~is_none] = self._nplike.index_nplike.arange(
+                len(original_index) - num_none,
+                dtype=original_index.dtype,
             )
             return ak._v2.contents.IndexedOptionArray(
-                ak._v2.index.Index(new_index),
+                ak._v2.index.Index(new_index, nplike=self.nplike),
                 self.project().packed(),
                 self._identifier,
                 self._parameters,

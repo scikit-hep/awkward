@@ -124,15 +124,17 @@ def _impl(array, axis, highlevel, behavior):
                 ):
                     return layout
 
-                tags = nplike.asarray(layout.tags)
-                index = nplike.array(nplike.asarray(layout.index), copy=True)
-                bigmask = nplike.empty(len(index), dtype=np.bool_)
+                tags = nplike.index_nplike.asarray(layout.tags)
+                index = nplike.index_nplike.array(
+                    nplike.asarray(layout.index), copy=True
+                )
+                bigmask = nplike.index_nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):
                     if content.is_OptionType and not isinstance(
                         content, ak._v2.contents.UnmaskedArray
                     ):
                         bigmask[:] = False
-                        bigmask[tags == tag] = nplike.asarray(
+                        bigmask[tags == tag] = nplike.index_nplike.asarray(
                             content.mask_as_bool(valid_when=False)
                         ).view(np.bool_)
                         index[bigmask] = -1

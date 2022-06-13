@@ -380,7 +380,7 @@ def test_to_categorical_masked_again():
     ]
 
 
-@pytest.mark.skip(reason="Missing check for overridden __repr__")
+@pytest.mark.skip(reason="Fix issues for categorical type")
 def test_typestr():
     assert (
         str(
@@ -420,7 +420,7 @@ def test_typestr():
                 )
             )
         )
-        == "5 * categorical[type=option[string]]"
+        == "5 * categorical[type=?string]"
     )
 
 
