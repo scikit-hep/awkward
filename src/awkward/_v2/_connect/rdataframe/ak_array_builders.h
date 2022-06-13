@@ -49,6 +49,24 @@ create_array(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
   return ptr;
 }
 
+template<typename T>
+std::vector<T>
+vect_array(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+  std::vector<T> vect;
+  vect.assign(result.begin(), result.end());
+  return vect;
+}
+
+template<typename T>
+void
+fill_array(ROOT::RDF::RResultPtr<std::vector<T>>& result, unsigned char* array) {
+  auto ptr = reinterpret_cast<T*>(array);
+  int64_t i = 0;
+  for (auto const& it : result) {
+    ptr[i++] = it;
+  }
+}
+
 template <typename T>
 const std::string
 type_to_name() {
@@ -133,39 +151,6 @@ copy_buffer(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
   return {create_array<T>(result), result->size()};
 }
 
-template <typename T, typename V>
-struct copy_offsets_and_flatten_impl {
-    static std::vector<std::pair<void*, size_t>>
-      copy_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
-        //typedef typename T::value_type value_type;
-
-        size_t offsets_length = result->size() + 1;
-        int64_t* offsets = (int64_t*)malloc(sizeof(int64_t)*offsets_length);
-        int64_t i = 1;
-        offsets[0] = 0;
-        for (auto const& it : result) {
-          offsets[i] = offsets[i - 1] + it.size();
-          i++;
-        }
-
-        size_t data_length = offsets[i - 1];
-        V* data = (V*)malloc(sizeof(V)*data_length);
-        int64_t j = 0;
-        for (auto const& vec : result) {
-          for (auto const& x : vec) {
-            data[j++] = x;
-          }
-        }
-        return {{offsets, offsets_length - 1}, {data, data_length}};
-    };
-};
-
-template <typename T>
-std::vector<std::pair<void*, size_t>>
-copy_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
-  return copy_offsets_and_flatten_impl<T, typename T::value_type>::copy_offsets_and_flatten(result);
-}
-
 template <typename, typename = void>
 constexpr bool is_iterable{};
 
@@ -176,6 +161,127 @@ constexpr bool is_iterable<
                  decltype(std::declval<T>().end())
     >
 > = true;
+
+
+template <typename T, typename V>
+struct copy_offsets_and_flatten_impl {
+    static void
+      copy_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result, std::vector <std::pair<void*, size_t>>& dict) {
+
+        typedef typename T::value_type value_type;
+
+        size_t offsets_length = result->size() + 1;
+        int64_t* offsets = (int64_t*)malloc(sizeof(int64_t)*offsets_length);
+        int64_t i = 1;
+        offsets[0] = 0;
+        for (auto const& it : result) {
+          offsets[i] = offsets[i - 1] + it.size();
+          i++;
+        }
+        dict.push_back({offsets, offsets_length - 1});
+
+        size_t data_length = offsets[i - 1];
+        V* data = (V*)malloc(sizeof(V)*data_length);
+        int64_t j = 0;
+        for (auto const& vec : result) {
+          for (auto const& x : vec) {
+            data[j++] = x;
+          }
+        }
+        dict.push_back({data, data_length});
+    };
+};
+
+template <typename T>
+std::vector<std::pair<void*, size_t>>
+copy_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+  std::vector <std::pair<void*, size_t>> dict;
+  copy_offsets_and_flatten_impl<T, typename T::value_type>::copy_offsets_and_flatten(result, dict);
+  return dict;
+}
+
+// template <typename T, typename V>
+// struct copy_nested_offsets_and_flatten_impl {
+//     static void
+//       copy_nested_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result, std::vector <std::vector<V>>& dict) {
+//
+//         std::vector<int64_t> offsets;
+//         std::vector<int64_t> inner_offsets;
+//         std::vector<V> data;
+//
+//         for (auto const& vec_of_vecs : result) {
+//           offsets.emplace_back(vec_of_vecs.size());
+//           for (auto const& vec : vec_of_vecs) {
+//             inner_offsets.emplace_back(vec.size());
+//             for (auto const& x : vec) {
+//               data.emplace_back(x);
+//             }
+//           }
+//         }
+//         dict.push_back(offsets);
+//         dict.push_back(inner_offsets);
+//         dict.push_back(data);
+//     };
+// };
+//
+// template <typename T, typename V>
+// std::vector<std::vector<V>>
+// copy_nested_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
+//   typedef typename T::value_type value_type;
+//   typedef typename value_type::value_type value_value_type;
+//   std::cout << typeid(T).name() << std::endl;
+//   std::cout << typeid(value_type).name() << std::endl;
+//   std::cout << typeid(value_value_type).name() << std::endl;
+//   std::vector<std::vector<V>> dict;
+//
+//   copy_nested_offsets_and_flatten_impl<T, value_value_type>::copy_nested_offsets_and_flatten(result, dict);
+//   return dict;
+// }
+
+template <typename T>
+class Buffers {
+public:
+  Buffers(ROOT::RDF::RResultPtr<std::vector<T>>& result)
+    : result_(result) {}
+
+  ~Buffers() {
+    std::cout << "Buffers destructed!\n" << std::endl;
+  }
+
+  std::vector<std::pair<int64_t, void*>>
+  offsets_and_flatten() {
+
+    int64_t i = 0;
+    int64_t j = 0;
+    for (auto const& vec_of_vecs : result_) {
+      offsets_.emplace_back(i);
+      i += vec_of_vecs.size();
+
+      for (auto const& vec : vec_of_vecs) {
+        inner_offsets_.emplace_back(j);
+        j += vec.size();
+
+        for (auto const& x : vec) {
+          data_.emplace_back(x);
+        }
+      }
+      inner_offsets_.emplace_back(j);
+    }
+    offsets_.emplace_back(i);
+
+    return {
+      {offsets_.size(), reinterpret_cast<void *>(&offsets_[0])},
+      {inner_offsets_.size(), reinterpret_cast<void *>(&inner_offsets_[0])},
+      {data_.size(), reinterpret_cast<void *>(&data_[0])}
+    };
+  }
+
+private:
+  ROOT::RDF::RResultPtr<std::vector<T>>& result_;
+  std::vector<int64_t> offsets_;
+  std::vector<int64_t> inner_offsets_;
+  std::vector<double> data_;
+};
 
 template <typename T>
 void
@@ -263,6 +369,10 @@ struct is_specialization<Ref<Args...>, Ref> : std::true_type {
 template <typename T>
 std::string
 type_to_form(int64_t form_key_id) {
+  if (std::string(typeid(T).name()).find("awkward") != string::npos) {
+    return std::string("awkward type");
+  }
+
   std::stringstream form_key;
   form_key << "node" << (form_key_id++);
 
@@ -289,36 +399,9 @@ type_to_form(int64_t form_key_id) {
       + type_to_form<value_type>(form_key_id)
       + ", " + parameters + "\"form_key\": \"" + form_key.str() + "\"}";
   }
-  return "something_else";
+  return "unsupported type";
 }
 
-template <typename T, typename std::enable_if<is_specialization<T, std::complex>::value, T>::type * = nullptr>
-std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
-  return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \"node0\"}";
-}
-
-template <typename T, typename std::enable_if<std::is_arithmetic<T>::value, T>::type * = nullptr>
-std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
-    return "{\"class\": \"NumpyArray\", \"primitive\": \""
-      + type_to_name<T>() + "\", \"form_key\": \"node0\"}";
-}
-
-template <typename T, typename std::enable_if<is_iterable<T>, T>::type * = nullptr>
-std::string
-check_type_of(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
-
-    auto str = std::string(typeid(T).name());
-
-    if (str.find("awkward") != string::npos) {
-        return std::string("awkward type");
-    }
-    else {
-      return type_to_form<T>(0);
-    }
-    return "undefined";
-}
 }
 
 #endif // AWKWARD_ARRAY_BUILDERS_H_
