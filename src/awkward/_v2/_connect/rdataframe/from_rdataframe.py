@@ -11,6 +11,11 @@ import ctypes
 from awkward._v2.types.numpytype import primitive_to_dtype
 import numpy
 
+cpp_type_of = {
+    "float64": "double",
+    "int64": "int64_t",
+    "complex128": "std::complex<double>",
+}
 
 
 class ndarray(numpy.ndarray):
@@ -21,6 +26,7 @@ class ndarray(numpy.ndarray):
     https://docs.scipy.org/doc/numpy/user/basics.subclassing.html for more
     information on subclassing numpy arrays.
     """
+
     def __new__(cls, numpy_array, result_ptr):
         """
         Dunder method invoked at the creation of an instance of this class. It
@@ -35,8 +41,10 @@ class ndarray(numpy.ndarray):
         """
         Dunder method that fills in the instance default `result_ptr` value.
         """
-        if obj is None: return
+        if obj is None:
+            return
         self.result_ptr = getattr(obj, "result_ptr", None)
+
 
 np = ak.nplike.NumpyMetadata.instance()
 # numpy = ak.nplike.Numpy.instance()
@@ -80,7 +88,6 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
     column_type = data_frame_rnode.GetColumnType(column)
     form_str = ROOT.awkward.type_to_form[column_type](0)
-    print(form_str)
 
     # 'Take' is a lazy action:
     result_ptrs = data_frame_rnode.Take[column_type](column)
@@ -90,9 +97,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
         if isinstance(form, ak._v2.forms.NumpyForm):
             dtype = primitive_to_dtype(form.primitive)
-            array = ak.nplike.numpy.empty(
-                data_frame.Count().GetValue(), form.primitive
-            )
+            array = ak.nplike.numpy.empty(data_frame.Count().GetValue(), form.primitive)
             ROOT.awkward.fill_array[column_type](
                 result_ptrs, array.ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte))
             )
@@ -111,7 +116,6 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
             name = f"node{len(ptrs) - 1}-data"
             buffers[name] = ptrs[len(ptrs) - 1][0]
-            print(buffers)
 
             array = ak._v2.from_buffers(
                 form,
@@ -124,36 +128,54 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
             form.content, ak._v2.forms.ListOffsetForm
         ):
-            # pull in the Buffers (after which we can import from it)
-            Buffers = cppyy.gbl.awkward.Buffers[column_type]
+            dtype = ak._v2.types.numpytype.primitive_to_dtype(
+                form.content.content.primitive
+            )
+            ### ctype = numpy.ctypeslib.as_ctypes_type(dtype)
+            data_type = cpp_type_of[dtype.name]
+            # pull in the CppBuffers (after which we can import from it)
+            CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type, data_type]
             #
-            # pythonize the Buffers offsets_and_flatten function to take ownership on return
-            Buffers.offsets_and_flatten.__creates__ = True
-            cpp_buffers = Buffers(result_ptrs)
-            
-            ptrs = Buffers.offsets_and_flatten(cpp_buffers)
-            print(ptrs)
-            print(form_str)
+            # pythonize the CppBuffers offsets_and_flatten function to take ownership on return
+            CppBuffers.offsets_and_flatten.__creates__ = True
+            cpp_buffers_self = CppBuffers(result_ptrs)
 
-            for i in range(len(ptrs) - 1):
-                v = ak.nplike.numpy.frombuffer(ptrs[i].second, dtype=np.int64, count=ptrs[i].first)
-                print(v)
+            CppBuffers.offsets_and_flatten(cpp_buffers_self)
+            offsets_length = CppBuffers.offsets_length(cpp_buffers_self, 0)
+            data_length = CppBuffers.data_length(cpp_buffers_self)
+
+            ptrs = []
+
+            offsets = ak.nplike.numpy.empty(offsets_length, np.int64)
+            CppBuffers.copy_offsets(
+                cpp_buffers_self, offsets.ctypes.data_as(ctypes.c_void_p), offsets_length, 0
+            )
+            ptrs.append(offsets)
+
+            inner_length = CppBuffers.offsets_length(cpp_buffers_self, 1)
+            inner_offsets = ak.nplike.numpy.empty(inner_length, np.int64)
+            CppBuffers.copy_offsets(
+                cpp_buffers_self,
+                inner_offsets.ctypes.data_as(ctypes.c_void_p),
+                inner_length,
+                1,
+            )
+            ptrs.append(inner_offsets)
+
+            data = ak.nplike.numpy.empty(data_length, dtype=dtype)
+            CppBuffers.copy_data(
+                cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p), data_length
+            )
 
             buffers = {}
-            for i in range(len(ptrs) - 1):
-                name = f"node{i}-offsets"
-                #buffers[name] =
-                arr = ak.nplike.numpy.frombuffer(ptrs[i].second, dtype=np.int64, count=ptrs[i].first)
-                buffers[name] = ndarray(numpy_array=arr, result_ptr=ptrs[i].second)
+            for i in range(len(ptrs)):
+                buffers[f"node{i}-offsets"] = ptrs[i]
 
-            name = f"node{len(ptrs) - 1}-data"
-            arr = ak.nplike.numpy.frombuffer(ptrs[len(ptrs) - 1].second, dtype = primitive_to_dtype(form.content.content.primitive), count=ptrs[len(ptrs) - 1].first)
-            buffers[name] = ndarray(numpy_array=arr, result_ptr=ptrs[len(ptrs) - 1].second)
-            print(buffers)
+            buffers[f"node{len(ptrs)}-data"] = data
 
             array = ak._v2.from_buffers(
                 form,
-                ptrs[0].first - 1,
+                offsets_length - 1,
                 buffers,
             )
 

@@ -238,49 +238,72 @@ copy_offsets_and_flatten(ROOT::RDF::RResultPtr<std::vector<T>>& result) {
 //   return dict;
 // }
 
-template <typename T>
-class Buffers {
+template <typename T, typename DATA>
+class CppBuffers {
 public:
-  Buffers(ROOT::RDF::RResultPtr<std::vector<T>>& result)
+  CppBuffers(ROOT::RDF::RResultPtr<std::vector<T>>& result)
     : result_(result) {}
 
-  ~Buffers() {
-    std::cout << "Buffers destructed!\n" << std::endl;
+  ~CppBuffers() {
+    std::cout << "CppBuffers destructed!\n" << std::endl;
   }
 
-  std::vector<std::pair<int64_t, void*>>
-  offsets_and_flatten() {
+  int64_t
+  offsets_length(int64_t level) {
+    return static_cast<int64_t>(offsets_[level].size());
+  }
 
+  int64_t
+  data_length() {
+    return data_.size();
+  }
+
+  void copy_offsets(void* to_buffer, int64_t length, int64_t level) {
+    auto ptr = reinterpret_cast<int64_t *>(to_buffer);
+    int64_t i = 0;
+    for (auto const& it : offsets_[level]) {
+      ptr[i++] = it;
+    }
+  }
+
+  void copy_data(void* to_buffer, int64_t length) {
+    auto ptr = reinterpret_cast<DATA*>(to_buffer);
+    int64_t i = 0;
+    for (auto const& it : data_) {
+      ptr[i++] = it;
+    }
+  }
+
+  void
+  offsets_and_flatten() {
     int64_t i = 0;
     int64_t j = 0;
+    std::vector<int64_t> offsets;
+    std::vector<int64_t> inner_offsets;
     for (auto const& vec_of_vecs : result_) {
-      offsets_.emplace_back(i);
+      offsets.emplace_back(i);
       i += vec_of_vecs.size();
 
       for (auto const& vec : vec_of_vecs) {
-        inner_offsets_.emplace_back(j);
+        inner_offsets.emplace_back(j);
         j += vec.size();
 
         for (auto const& x : vec) {
           data_.emplace_back(x);
         }
       }
-      inner_offsets_.emplace_back(j);
+      inner_offsets.emplace_back(j);
     }
-    offsets_.emplace_back(i);
+    offsets.emplace_back(i);
 
-    return {
-      {offsets_.size(), reinterpret_cast<void *>(&offsets_[0])},
-      {inner_offsets_.size(), reinterpret_cast<void *>(&inner_offsets_[0])},
-      {data_.size(), reinterpret_cast<void *>(&data_[0])}
-    };
+    offsets_.emplace_back(offsets);
+    offsets_.emplace_back(inner_offsets);
   }
 
 private:
   ROOT::RDF::RResultPtr<std::vector<T>>& result_;
-  std::vector<int64_t> offsets_;
-  std::vector<int64_t> inner_offsets_;
-  std::vector<double> data_;
+  std::vector<std::vector<int64_t>> offsets_;
+  std::vector<DATA> data_;
 };
 
 template <typename T>
