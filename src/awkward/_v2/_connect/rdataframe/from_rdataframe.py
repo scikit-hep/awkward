@@ -9,7 +9,6 @@ import ROOT
 import cppyy
 import ctypes
 from awkward._v2.types.numpytype import primitive_to_dtype
-import numpy
 
 cpp_type_of = {
     "float64": "double",
@@ -17,37 +16,7 @@ cpp_type_of = {
     "complex128": "std::complex<double>",
 }
 
-
-class ndarray(numpy.ndarray):
-    """
-    A wrapper class that inherits from numpy.ndarray and allows to attach the
-    result pointer of the `Take` action in an `RDataFrame` event loop to the
-    collection of values returned by that action. See
-    https://docs.scipy.org/doc/numpy/user/basics.subclassing.html for more
-    information on subclassing numpy arrays.
-    """
-
-    def __new__(cls, numpy_array, result_ptr):
-        """
-        Dunder method invoked at the creation of an instance of this class. It
-        creates a numpy array with an `RResultPtr` as an additional
-        attribute.
-        """
-        obj = numpy.asarray(numpy_array).view(cls)
-        obj.result_ptr = result_ptr
-        return obj
-
-    def __array_finalize__(self, obj):
-        """
-        Dunder method that fills in the instance default `result_ptr` value.
-        """
-        if obj is None:
-            return
-        self.result_ptr = getattr(obj, "result_ptr", None)
-
-
 np = ak.nplike.NumpyMetadata.instance()
-# numpy = ak.nplike.Numpy.instance()
 
 cppyy.add_include_path("src/awkward/_v2/_connect")
 
@@ -131,47 +100,35 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             dtype = ak._v2.types.numpytype.primitive_to_dtype(
                 form.content.content.primitive
             )
-            ### ctype = numpy.ctypeslib.as_ctypes_type(dtype)
             data_type = cpp_type_of[dtype.name]
+
             # pull in the CppBuffers (after which we can import from it)
             CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type, data_type]
-            #
-            # pythonize the CppBuffers offsets_and_flatten function to take ownership on return
-            CppBuffers.offsets_and_flatten.__creates__ = True
             cpp_buffers_self = CppBuffers(result_ptrs)
 
-            CppBuffers.offsets_and_flatten(cpp_buffers_self)
-            offsets_length = CppBuffers.offsets_length(cpp_buffers_self, 0)
+            # copy data from RDF and make nested offsets
+            num_levels, offsets_length = CppBuffers.offsets_and_flatten(
+                cpp_buffers_self
+            )
+
+            buffers = {}
+            for level in range(num_levels):
+                length = CppBuffers.offsets_length(cpp_buffers_self, level)
+                offsets = ak.nplike.numpy.empty(length, np.int64)
+                CppBuffers.copy_offsets(
+                    cpp_buffers_self,
+                    offsets.ctypes.data_as(ctypes.c_void_p),
+                    length,
+                    level,
+                )
+                buffers[f"node{level}-offsets"] = offsets
+
             data_length = CppBuffers.data_length(cpp_buffers_self)
-
-            ptrs = []
-
-            offsets = ak.nplike.numpy.empty(offsets_length, np.int64)
-            CppBuffers.copy_offsets(
-                cpp_buffers_self, offsets.ctypes.data_as(ctypes.c_void_p), offsets_length, 0
-            )
-            ptrs.append(offsets)
-
-            inner_length = CppBuffers.offsets_length(cpp_buffers_self, 1)
-            inner_offsets = ak.nplike.numpy.empty(inner_length, np.int64)
-            CppBuffers.copy_offsets(
-                cpp_buffers_self,
-                inner_offsets.ctypes.data_as(ctypes.c_void_p),
-                inner_length,
-                1,
-            )
-            ptrs.append(inner_offsets)
-
             data = ak.nplike.numpy.empty(data_length, dtype=dtype)
             CppBuffers.copy_data(
                 cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p), data_length
             )
-
-            buffers = {}
-            for i in range(len(ptrs)):
-                buffers[f"node{i}-offsets"] = ptrs[i]
-
-            buffers[f"node{len(ptrs)}-data"] = data
+            buffers[f"node{num_levels}-data"] = data
 
             array = ak._v2.from_buffers(
                 form,
@@ -181,11 +138,14 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
             return _maybe_wrap(array, column_as_record)
 
-        elif form_str == "awkward type":
-
-            # Triggers event loop and execution of all actions booked in the associated RLoopManager.
-            cpp_reference = result_ptrs.GetValue()
-
-            return _wrap_as_array(column, cpp_reference, column_as_record)
         else:
             raise ak._v2._util.error(NotImplementedError)
+
+    elif form_str == "awkward type":
+
+        # Triggers event loop and execution of all actions booked in the associated RLoopManager.
+        cpp_reference = result_ptrs.GetValue()
+
+        return _wrap_as_array(column, ak._v2.from_iter(cpp_reference), column_as_record)
+    else:
+        raise ak._v2._util.error(NotImplementedError)

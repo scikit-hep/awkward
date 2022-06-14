@@ -245,7 +245,6 @@ public:
     : result_(result) {}
 
   ~CppBuffers() {
-    std::cout << "CppBuffers destructed!\n" << std::endl;
   }
 
   int64_t
@@ -274,7 +273,7 @@ public:
     }
   }
 
-  void
+  std::pair<int64_t, int64_t>
   offsets_and_flatten() {
     int64_t i = 0;
     int64_t j = 0;
@@ -298,6 +297,8 @@ public:
 
     offsets_.emplace_back(offsets);
     offsets_.emplace_back(inner_offsets);
+
+    return {static_cast<int64_t>(offsets_.size()), static_cast<int64_t>(offsets_[0].size())};
   }
 
 private:
