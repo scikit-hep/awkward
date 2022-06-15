@@ -206,7 +206,15 @@ class TypeTracerArray:
 
         # not array-like
         if not hasattr(array, "shape"):
-            array = np.array(array)
+            sequence = list(array)
+            array = np.array(sequence)
+            if array.dtype is object:
+                raise ak._v2._util.error(
+                    ValueError(
+                        f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
+                        f"from a sequence of non-primitive types: {sequence}"
+                    )
+                )
 
         if dtype is None:
             dtype = array.dtype
