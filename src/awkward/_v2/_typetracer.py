@@ -432,9 +432,6 @@ class TypeTracerArray:
         return self
 
 
-unset = object()
-
-
 class TypeTracer(ak.nplike.NumpyLike):
     known_data = False
     known_shape = False
@@ -483,21 +480,21 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     ############################ array creation
 
-    def array(self, data, dtype=unset, **kwargs):
+    def array(self, data, dtype=None, **kwargs):
         # data[, dtype=[, copy=]]
-        if dtype is unset:
+        if dtype is None:
             dtype = data.dtype
         return TypeTracerArray.from_array(data, dtype=dtype)
 
-    def asarray(self, array, dtype=unset, **kwargs):
+    def asarray(self, array, dtype=None, **kwargs):
         # array[, dtype=][, order=]
-        if dtype is unset:
+        if dtype is None:
             dtype = array.dtype
         return TypeTracerArray.from_array(array, dtype=dtype)
 
-    def ascontiguousarray(self, array, dtype=unset, **kwargs):
+    def ascontiguousarray(self, array, dtype=None, **kwargs):
         # array[, dtype=]
-        if dtype is unset:
+        if dtype is None:
             dtype = array.dtype
         return TypeTracerArray.from_array(array, dtype=dtype)
 
@@ -520,9 +517,9 @@ class TypeTracer(ak.nplike.NumpyLike):
         # shape/len[, dtype=]
         return TypeTracerArray(dtype, shape)
 
-    def full(self, shape, value, dtype=unset, **kwargs):
+    def full(self, shape, value, dtype=None, **kwargs):
         # shape/len, value[, dtype=]
-        if dtype is unset:
+        if dtype is None:
             dtype = numpy.array(value).dtype
         return TypeTracerArray(dtype, shape)
 
@@ -854,7 +851,7 @@ class TypeTracer(ak.nplike.NumpyLike):
         raise ak._v2._util.error(NotImplementedError)
 
     def array_str(
-        self, array, max_line_width=unset, precision=unset, suppress_small=unset
+        self, array, max_line_width=None, precision=None, suppress_small=None
     ):
         # array, max_line_width, precision=None, suppress_small=None
         return "[?? ... ??]"
