@@ -168,9 +168,7 @@ namespace awkward {
     {"uint32", util::dtype::uint32},
     {"uint64", util::dtype::uint64},
     {"float32", util::dtype::float32},
-    {"float64", util::dtype::float64},
-    {"complex128", util::dtype::complex128},
-    {"complex256", util::dtype::complex256}
+    {"float64", util::dtype::float64}
   });
 
   const std::map<std::string, int64_t> generic_builtin_words_({
@@ -1184,10 +1182,6 @@ namespace awkward {
           break;
         }
         case util::dtype::float64: {
-          out = std::make_shared<ForthOutputBufferOf<double>>(init, resize);
-          break;
-        }
-        case util::dtype::complex128: {
           out = std::make_shared<ForthOutputBufferOf<double>>(init, resize);
           break;
         }
