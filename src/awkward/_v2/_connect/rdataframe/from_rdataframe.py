@@ -17,7 +17,6 @@ cpp_type_of = {
     "uint8": "uint8_t",
 }
 
-
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
@@ -63,7 +62,6 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
     # 'Take' is a lazy action:
     result_ptrs = data_frame_rnode.Take[column_type](column)
-    builder = ak._v2.highlevel.ArrayBuilder()
 
     if form_str.startswith("{"):
         form = ak._v2.forms.from_json(form_str)
