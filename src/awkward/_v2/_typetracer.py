@@ -214,7 +214,14 @@ class TypeTracerArray:
             sequence = list(array)
             if dtype is None:
                 dtype = np.array(sequence).dtype
-            return cls(dtype, shape=(len(sequence,)))
+            return cls(
+                dtype,
+                shape=(
+                    len(
+                        sequence,
+                    )
+                ),
+            )
 
     def __init__(self, dtype, shape=None):
         self._dtype = np.dtype(dtype)
