@@ -523,17 +523,20 @@ class TypeTracer(ak.nplike.NumpyLike):
             dtype = numpy.array(value).dtype
         return TypeTracerArray(dtype, shape)
 
-    def zeros_like(self, *args, **kwargs):
-        # array
-        raise ak._v2._util.error(NotImplementedError)
+    def zeros_like(self, a, dtype=None, **kwargs):
+        if dtype is None:
+            dtype = a.dtype
 
-    def ones_like(self, *args, **kwargs):
-        # array
-        raise ak._v2._util.error(NotImplementedError)
+        if isinstance(a, UnknownScalar):
+            return UnknownScalar(dtype)
 
-    def full_like(self, *args, **kwargs):
-        # array, fill_value
-        raise ak._v2._util.error(NotImplementedError)
+        return TypeTracerArray(dtype, a.shape)
+
+    def ones_like(self, a, dtype=None, **kwargs):
+        return self.zeros_like(a, dtype)
+
+    def full_like(self, a, fill_value, dtype=None, **kwargs):
+        return self.zeros_like(a, dtype)
 
     def arange(self, *args, **kwargs):
         # stop[, dtype=]
