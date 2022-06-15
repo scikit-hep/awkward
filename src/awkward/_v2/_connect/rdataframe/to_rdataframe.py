@@ -13,6 +13,8 @@ import threading
 
 computer_lock = threading.Lock()
 
+cache = {}
+
 
 def compile(source_code):
     with computer_lock:
@@ -33,9 +35,10 @@ def to_rdataframe(layouts, length, flatlist_as_rvec):
 
 
 class DataSourceGenerator:
-    def __init__(self, length, flatlist_as_rvec=True):
+    def __init__(self, length, flatlist_as_rvec=True, use_cached=True):
         self.length = length
         self.flatlist_as_rvec = flatlist_as_rvec
+        self.use_cached = use_cached
         self.entry_types = {}
         self.data_ptrs_list = []
         self.generators = {}
@@ -44,10 +47,8 @@ class DataSourceGenerator:
     def class_type(self):
 
         class_type_suffix = ""
-        for key in self.generators:
-            class_type_suffix = (
-                class_type_suffix + "_" + key + "_" + self.generators[key].class_type()
-            )
+        for key, value in self.generators.items():
+            class_type_suffix = class_type_suffix + "_" + key + "_" + value.class_type()
 
         key = (
             base64.encodebytes(struct.pack("q", hash(class_type_suffix)))
@@ -201,7 +202,12 @@ class DataSourceGenerator:
 
         array_data_source = self.class_type()
 
-        if not hasattr(ROOT, array_data_source):
+        if self.use_cached:
+            cpp_code = cache.get(array_data_source)
+        else:
+            cpp_code = None
+
+        if cpp_code is None:
             cpp_code = f"""
 namespace awkward {{
 
@@ -304,7 +310,7 @@ namespace awkward {{
 
 }}
             """
-
+            cache[array_data_source] = cpp_code
             done = compile(cpp_code)
             assert done is True
 
