@@ -14,7 +14,8 @@ compiler = ROOT.gInterpreter.Declare
 
 
 def test_to_from_data_frame_large():
-    n = 6  # 30
+    # Note, this test takes ~40 sec to run on my laptop
+    n = 30
     assert 2 * (n // 2) == n
     rows = 3 ** (n // 2)
     cols = n
@@ -36,82 +37,13 @@ def test_to_from_data_frame_large():
 
     ak_array_in = ak._v2.from_numpy(arr, regulararray=True)
 
-    array = ak._v2.Array([ak_array_in])
-
-    data_frame = ak._v2.to_rdataframe({"x": array})
-    done = compiler(
-        """
-    template<typename T>
-    struct MyFunctor_double {
-        ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> operator()(T x) {
-            ROOT::VecOps::RVec<ROOT::VecOps::RVec<double>> result;
-            for (int64_t i = 0; i < x.size(); i++) {
-                ROOT::VecOps::RVec<double> nested_result;
-                for(int64_t j = 0; j < x[i].size(); j++) {
-                    nested_result.emplace_back((double)x[i][j]);
-                }
-                result.emplace_back(nested_result);
-            }
-            return result;
-        }
-    };
-
-    template<typename T>
-    struct MyFunctor_integer {
-        ROOT::VecOps::RVec<ROOT::VecOps::RVec<int64_t>> operator()(T x) {
-            ROOT::VecOps::RVec<ROOT::VecOps::RVec<int64_t>> result;
-            for (int64_t i = 0; i < x.size(); i++) {
-                ROOT::VecOps::RVec<int64_t> nested_result;
-                for(int64_t j = 0; j < x[i].size(); j++) {
-                    nested_result.emplace_back((int64_t)x[i][j]);
-                }
-                result.emplace_back(nested_result);
-            }
-            return result;
-        }
-    };
-
-    template<typename T>
-    struct MyFunctor_complex {
-        ROOT::VecOps::RVec<ROOT::VecOps::RVec<std::complex<double>>> operator()(T x) {
-            ROOT::VecOps::RVec<ROOT::VecOps::RVec<std::complex<double>>> result;
-            for (int64_t i = 0; i < x.size(); i++) {
-                ROOT::VecOps::RVec<std::complex<double>> nested_result;
-                for(int64_t j = 0; j < x[i].size(); j++) {
-                    nested_result.emplace_back(std::complex<double>(x[i][j],0));
-                }
-                result.emplace_back(nested_result);
-            }
-            return result;
-        }
-    };
-
-    """
-    )
-    assert done is True
-
-    to_double = ROOT.MyFunctor_double[data_frame.GetColumnType("x")]()
-    to_integer = ROOT.MyFunctor_integer[data_frame.GetColumnType("x")]()
-    to_complex = ROOT.MyFunctor_complex[data_frame.GetColumnType("x")]()
-
-    data_frame_y = data_frame.Define("y", to_double, ["x"])
-    data_frame_k = data_frame.Define("k", to_integer, ["x"])
-    data_frame_z = data_frame.Define("z", to_complex, ["x"])
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame_y, column="y", column_as_record=False
+        data_frame, column="x", column_as_record=False
     )
-    assert array.to_list() == ak_array_out.to_list()
-
-    ak_array_out = ak._v2.from_rdataframe(
-        data_frame_k, column="k", column_as_record=False
-    )
-    assert array.to_list() == ak_array_out.to_list()
-
-    ak_array_out = ak._v2.from_rdataframe(
-        data_frame_z, column="z", column_as_record=False
-    )
-    assert array.to_list() == ak_array_out.to_list()
+    assert len(ak_array_in) == 14348907
+    assert len(ak_array_out) == 14348907
 
 
 @pytest.mark.skip(reason="FIXME: arrays of boolean are not supported yet")

@@ -169,7 +169,9 @@ public:
       for (auto const& vec : vec_of_vecs) {
         inner_offsets.emplace_back(j);
         j += vec.size();
-        data_.insert(data_.end(), vec.begin(), vec.end());
+        for (auto const&x : vec) {
+          data_.emplace_back(x);
+        }
       }
       inner_offsets.emplace_back(j);
     }
