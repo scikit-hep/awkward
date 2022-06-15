@@ -91,6 +91,14 @@ type_to_name<char>() {
 template <typename, typename = void>
 constexpr bool is_iterable{};
 
+template <typename T>
+constexpr bool is_iterable<
+    T,
+    std::void_t< decltype(std::declval<T>().begin()),
+                 decltype(std::declval<T>().end())
+    >
+> = true;
+
 template <typename T, typename DATA>
 class CppBuffers {
 public:
