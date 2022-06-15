@@ -99,28 +99,26 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             cpp_buffers_self = CppBuffers(result_ptrs)
 
             # copy data from RDF and make nested offsets
-            num_levels, offsets_length = CppBuffers.offsets_and_flatten_1(
-                cpp_buffers_self
-            )
+            depths, offsets_length = CppBuffers.offsets_and_flatten_1(cpp_buffers_self)
 
             buffers = {}
-            for level in range(num_levels):
-                length = CppBuffers.offsets_length(cpp_buffers_self, level)
+            for depth in range(depths):
+                length = CppBuffers.offsets_length(cpp_buffers_self, depth)
                 offsets = ak.nplike.numpy.empty(length, np.int64)
                 CppBuffers.copy_offsets(
                     cpp_buffers_self,
                     offsets.ctypes.data_as(ctypes.c_void_p),
                     length,
-                    level,
+                    depth,
                 )
-                buffers[f"node{level}-offsets"] = offsets
+                buffers[f"node{depth}-offsets"] = offsets
 
             data_length = CppBuffers.data_length(cpp_buffers_self)
             data = ak.nplike.numpy.empty(data_length, dtype=dtype)
             CppBuffers.copy_data(
                 cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p), data_length
             )
-            buffers[f"node{num_levels}-data"] = data
+            buffers[f"node{depths}-data"] = data
 
             layout = ak._v2.contents.ListOffsetArray(
                 ak._v2.index.Index(buffers["node0-offsets"], np.int64),
@@ -147,28 +145,26 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             cpp_buffers_self = CppBuffers(result_ptrs)
 
             # copy data from RDF and make nested offsets
-            num_levels, offsets_length = CppBuffers.offsets_and_flatten_2(
-                cpp_buffers_self
-            )
+            depths, offsets_length = CppBuffers.offsets_and_flatten_2(cpp_buffers_self)
 
             buffers = {}
-            for level in range(num_levels):
-                length = CppBuffers.offsets_length(cpp_buffers_self, level)
+            for depth in range(depths):
+                length = CppBuffers.offsets_length(cpp_buffers_self, depth)
                 offsets = ak.nplike.numpy.empty(length, np.int64)
                 CppBuffers.copy_offsets(
                     cpp_buffers_self,
                     offsets.ctypes.data_as(ctypes.c_void_p),
                     length,
-                    level,
+                    depth,
                 )
-                buffers[f"node{level}-offsets"] = offsets
+                buffers[f"node{depth}-offsets"] = offsets
 
             data_length = CppBuffers.data_length(cpp_buffers_self)
             data = ak.nplike.numpy.empty(data_length, dtype=dtype)
             CppBuffers.copy_data(
                 cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p), data_length
             )
-            buffers[f"node{num_levels}-data"] = data
+            buffers[f"node{depths}-data"] = data
 
             layout = ak._v2.contents.ListOffsetArray(
                 ak._v2.index.Index(buffers["node0-offsets"], np.int64),
@@ -186,7 +182,7 @@ def from_rdataframe(data_frame, column, column_as_record=True):
             return _maybe_wrap(ak._v2.Array(layout), column_as_record)
 
         else:
-            # FIXME: nested arrays more than 3 levels deep
+            # FIXME: nested arrays more than 3 depths deep
             raise ak._v2._util.error(NotImplementedError)
 
     elif form_str == "awkward type":

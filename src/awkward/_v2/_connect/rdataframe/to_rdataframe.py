@@ -1,5 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import base64
+import struct
+
 import awkward as ak
 
 import awkward._v2._lookup  # noqa: E402
@@ -10,11 +13,10 @@ import threading
 
 
 def compile(source_code):
-    with compiler_lock:
+    with threading.Lock():
         return ROOT.gInterpreter.Declare(source_code)
 
 
-compiler_lock = threading.Lock()
 compile(
     """
 #include <Python.h>
@@ -38,7 +40,21 @@ class DataSourceGenerator:
         self.lookups = {}
 
     def class_type(self):
-        key = hash(zip(self.generators.keys(), self.generators.values()))
+
+        class_type_suffix = ""
+        for key in self.generators:
+            class_type_suffix = (
+                class_type_suffix + "_" + key + "_" + self.generators[key].class_type()
+            )
+
+        key = (
+            base64.encodebytes(struct.pack("q", hash(class_type_suffix)))
+            .rstrip(b"=\n")
+            .replace(b"+", b"")
+            .replace(b"/", b"")
+            .decode("ascii")
+        )
+
         return f"AwkwardArrayDataSource_{key}"
 
     def data_frame(self, layouts):
