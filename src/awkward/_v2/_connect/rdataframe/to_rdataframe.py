@@ -11,13 +11,13 @@ import awkward._v2._connect.cling  # noqa: E402
 import ROOT
 import threading
 
-computer_lock = threading.Lock()
+compiler_lock = threading.Lock()
 
 cache = {}
 
 
 def compile(source_code):
-    with computer_lock:
+    with compiler_lock:
         return ROOT.gInterpreter.Declare(source_code)
 
 
