@@ -759,10 +759,7 @@ namespace awkward {
   template<typename T, typename I>
   void
   LayoutBuilder<T, I>::add_complex(std::complex<double> x) {
-    set_data<std::complex<double>>(x.real());
-    vm_.get()->stack_push(static_cast<utype>(state::complex128));
-    resume();
-    set_data<std::complex<double>>(x.imag());
+    set_data<std::complex<double>>(x);
     vm_.get()->stack_push(static_cast<utype>(state::complex128));
     resume();
   }
