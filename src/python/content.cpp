@@ -1255,12 +1255,6 @@ namespace {
     if (builder.get()->classname().rfind("ListOffsetArrayBuilder", 0) == 0) {
       const std::shared_ptr<const ak::ListOffsetArrayBuilder<T, I>> raw = std::dynamic_pointer_cast<const ak::ListOffsetArrayBuilder<T, I>>(builder);
       auto search = outputs.find(raw.get()->vm_output_data());
-      const std::shared_ptr<const ak::NumpyArrayBuilder<T, I>> raw_content = std::dynamic_pointer_cast<const ak::NumpyArrayBuilder<T, I>>(raw.get()->content());
-      // FIXME: deal with complex numbers in the builder itself
-      bool is_complex = false;
-      if (raw_content && raw_content.get()->form_primitive().rfind("complex", 0) == 0) {
-        is_complex = true;
-      }
       if (search != outputs.end()) {
         if (raw.get()->form_offsets() == "int32") {
           return box(std::make_shared<ak::ListOffsetArray32>(ak::Identities::none(),
@@ -1275,16 +1269,9 @@ namespace {
                                                               unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
         }
         else if (raw.get()->form_offsets() == "int64") {
-          // FIXME: deal with complex numbers in the builder itself
-          auto offsets = search->second.get()->toIndex64();
-          if (is_complex) {
-            for (int64_t i = 0; i < offsets.length(); i++) {
-              offsets.ptr().get()[i] = offsets.ptr().get()[i] >> 1;
-            }
-          }
           return box(std::make_shared<ak::ListOffsetArray64>(ak::Identities::none(),
                                                              raw.get()->form_parameters(),
-                                                             offsets,
+                                                             search->second.get()->toIndex64(),
                                                              unbox_content(layoutbuilder_snapshot(raw.get()->content(), outputs))));
         }
         else {
@@ -1306,7 +1293,7 @@ namespace {
       auto search = outputs.find(raw.get()->vm_output_data());
       if (search != outputs.end()) {
         auto dtype = awkward::util::name_to_dtype(raw.get()->form_primitive());
-        std::vector<ssize_t> shape = { (ssize_t)((raw.get()->form_primitive().rfind("complex", 0) == 0) ? (ssize_t)search->second.get()->len() * 0.5 : (ssize_t)search->second.get()->len()) };
+        std::vector<ssize_t> shape = { (ssize_t)search->second.get()->len() };
         std::vector<ssize_t> strides = { (ssize_t)awkward::util::dtype_to_itemsize(dtype) };
 
         return box(std::make_shared<ak::NumpyArray>(ak::Identities::none(),
