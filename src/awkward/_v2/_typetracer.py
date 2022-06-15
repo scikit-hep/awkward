@@ -203,9 +203,18 @@ class TypeTracerArray:
     def from_array(cls, array, dtype=None):
         if isinstance(array, ak._v2.index.Index):
             array = array.data
-        if dtype is None:
-            dtype = array.dtype
-        return cls(dtype, shape=array.shape)
+
+        # array-like
+        if hasattr(array, "shape"):
+            if dtype is None:
+                dtype = array.dtype
+            return cls(dtype, shape=array.shape)
+        # list of known scalar
+        else:
+            sequence = list(array)
+            if dtype is None:
+                dtype = np.array(sequence).dtype
+            return cls(dtype, shape=(len(sequence,)))
 
     def __init__(self, dtype, shape=None):
         self._dtype = np.dtype(dtype)
