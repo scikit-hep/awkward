@@ -464,7 +464,7 @@ class Generator:
             raise ak._v2._util.error(NotImplementedError("TODO: identifiers in C++"))
 
     def class_type_suffix(self, key):
-        return ak._v2._util.string_hash(key)
+        return ak._v2._util.identifier_hash(key)
 
     def _generate_common(self, key):
         params = [

@@ -47,7 +47,7 @@ class DataSourceGenerator:
         for key, value in self.generators.items():
             class_type_suffix = class_type_suffix + "_" + key + "_" + value.class_type()
 
-        key = ak._v2._util.string_hash(class_type_suffix)
+        key = ak._v2._util.identifier_hash(class_type_suffix)
 
         return f"AwkwardArrayDataSource_{key}"
 

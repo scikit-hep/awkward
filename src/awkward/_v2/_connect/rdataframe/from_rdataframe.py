@@ -8,6 +8,7 @@ import awkward._v2._connect.cling  # noqa: E402
 import ROOT
 import cppyy
 import ctypes
+import os
 from awkward._v2.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {
@@ -20,14 +21,15 @@ cpp_type_of = {
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
-cppyy.add_include_path("src/awkward/_v2/_connect")
+
+cppyy.add_include_path(os.path.dirname(os.path.abspath(__file__)))
 
 compiler = ROOT.gInterpreter.Declare
 
 
 done = compiler(
     """
-#include "rdataframe/ak_array_builders.h"
+#include "ak_array_builders.h"
 """
 )
 assert done is True

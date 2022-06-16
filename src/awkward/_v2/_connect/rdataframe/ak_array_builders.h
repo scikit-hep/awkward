@@ -85,7 +85,7 @@ type_to_name<double>() {
 template <>
 const std::string
 type_to_name<char>() {
-    return "chars";
+    return "char";
 }
 
 template <typename, typename = void>

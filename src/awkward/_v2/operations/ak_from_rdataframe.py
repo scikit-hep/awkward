@@ -17,7 +17,10 @@ def from_rdataframe(data_frame, column, column_as_record=True):
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.from_rdataframe",
-        dict(column=column),
+        dict(
+            data_frame=data_frame,
+            column=column,
+        ),
     ):
         return _impl(
             data_frame,
