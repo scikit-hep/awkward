@@ -8,13 +8,16 @@ import awkward._v2._connect.cling  # noqa: E402
 import ROOT
 import threading
 
+compiler_lock = threading.Lock()
+
+cache = {}
+
 
 def compile(source_code):
     with compiler_lock:
         return ROOT.gInterpreter.Declare(source_code)
 
 
-compiler_lock = threading.Lock()
 compile(
     """
 #include <Python.h>
@@ -29,16 +32,23 @@ def to_rdataframe(layouts, length, flatlist_as_rvec):
 
 
 class DataSourceGenerator:
-    def __init__(self, length, flatlist_as_rvec=True):
+    def __init__(self, length, flatlist_as_rvec=True, use_cached=True):
         self.length = length
         self.flatlist_as_rvec = flatlist_as_rvec
+        self.use_cached = use_cached
         self.entry_types = {}
         self.data_ptrs_list = []
         self.generators = {}
         self.lookups = {}
 
     def class_type(self):
-        key = hash(zip(self.generators.keys(), self.generators.values()))
+
+        class_type_suffix = ""
+        for key, value in self.generators.items():
+            class_type_suffix = class_type_suffix + "_" + key + "_" + value.class_type()
+
+        key = ak._v2._util.identifier_hash(class_type_suffix)
+
         return f"AwkwardArrayDataSource_{key}"
 
     def data_frame(self, layouts):
@@ -61,6 +71,9 @@ class DataSourceGenerator:
             self.generators[key].generate(ROOT.gInterpreter.Declare)
 
             self.entry_types[key] = self.generators[key].entry_type()
+            if self.entry_types[key] == "bool":
+                raise ak._v2._util.error(NotImplementedError)
+
             if isinstance(
                 self.generators[key], ak._v2._connect.cling.NumpyArrayGenerator
             ):
@@ -180,7 +193,12 @@ class DataSourceGenerator:
 
         array_data_source = self.class_type()
 
-        if not hasattr(ROOT, array_data_source):
+        if self.use_cached:
+            cpp_code = cache.get(array_data_source)
+        else:
+            cpp_code = None
+
+        if cpp_code is None:
             cpp_code = f"""
 namespace awkward {{
 
@@ -283,7 +301,7 @@ namespace awkward {{
 
 }}
             """
-
+            cache[array_data_source] = cpp_code
             done = compile(cpp_code)
             assert done is True
 
