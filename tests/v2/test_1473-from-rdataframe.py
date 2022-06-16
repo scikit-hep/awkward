@@ -14,8 +14,8 @@ compiler = ROOT.gInterpreter.Declare
 
 
 def test_to_from_data_frame_large():
-    # Note, this test takes ~40 sec to run on my laptop
-    n = 30
+    # Note, with n = 30 (14348907) this test takes ~40 sec to run on my laptop
+    n = 6
     assert 2 * (n // 2) == n
     rows = 3 ** (n // 2)
     cols = n
@@ -42,8 +42,7 @@ def test_to_from_data_frame_large():
     ak_array_out = ak._v2.from_rdataframe(
         data_frame, column="x", column_as_record=False
     )
-    assert len(ak_array_in) == 14348907
-    assert len(ak_array_out) == 14348907
+    assert len(ak_array_in) == len(ak_array_out)
 
 
 @pytest.mark.skip(reason="FIXME: arrays of boolean are not supported yet")

@@ -65,20 +65,47 @@ def from_rdataframe(data_frame, column, column_as_record=True):
 
     if form_str.startswith("{"):
         form = ak._v2.forms.from_json(form_str)
+        list_depth = form.purelist_depth
+        if list_depth > 3:
+            raise ak._v2._util.error(NotImplementedError)
+
+        def supported(form):
+            if form.purelist_depth == 1:
+                # special case for a list of strings form
+                return isinstance(form, ak._v2.forms.ListOffsetForm) or isinstance(
+                    form, ak._v2.forms.NumpyForm
+                )
+            else:
+                return isinstance(form, ak._v2.forms.ListOffsetForm) and supported(
+                    form.content
+                )
+
+        if not supported(form):
+            raise ak._v2._util.error(NotImplementedError)
+
+        def form_dtype(form):
+            if form.purelist_depth == 1:
+                # special case for a list of strings form
+                return (
+                    primitive_to_dtype(form.content.primitive)
+                    if isinstance(form, ak._v2.forms.ListOffsetForm)
+                    else primitive_to_dtype(form.primitive)
+                )
+            else:
+                return form_dtype(form.content)
+
+        dtype = form_dtype(form)
+        buffers = {}
+        depths = 0
+        offsets_length = 0
+
+        # pull in the CppBuffers (after which we can import from it)
+        CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type, cpp_type_of[dtype.name]]
+        # pythonize the CppBuffers create_array function to take ownership on return
+        CppBuffers.create_array.__creates__ = True
+        cpp_buffers_self = CppBuffers(result_ptrs)
 
         if isinstance(form, ak._v2.forms.NumpyForm):
-            dtype = primitive_to_dtype(form.primitive)
-
-            # pull in the CppBuffers (after which we can import from it)
-            CppBuffers = cppyy.gbl.awkward.CppBuffers[
-                column_type, cpp_type_of[dtype.name]
-            ]
-
-            # pythonize the CppBuffers create_array function to take ownership on return
-            CppBuffers.create_array.__creates__ = True
-
-            cpp_buffers_self = CppBuffers(result_ptrs)
-
             length, data = CppBuffers.create_array(cpp_buffers_self)
             layout = ak._v2.contents.numpyarray.NumpyArray(
                 numpy.frombuffer(data, dtype=dtype, count=length),
@@ -90,100 +117,39 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
             form.content, ak._v2.forms.NumpyForm
         ):
-            dtype = ak._v2.types.numpytype.primitive_to_dtype(form.content.primitive)
-
-            # pull in the CppBuffers (after which we can import from it)
-            CppBuffers = cppyy.gbl.awkward.CppBuffers[
-                column_type, cpp_type_of[dtype.name]
-            ]
-            cpp_buffers_self = CppBuffers(result_ptrs)
-
-            # copy data from RDF and make nested offsets
-            depths, offsets_length = CppBuffers.offsets_and_flatten_1(cpp_buffers_self)
-
-            buffers = {}
-            for depth in range(depths):
-                length = CppBuffers.offsets_length(cpp_buffers_self, depth)
-                offsets = ak.nplike.numpy.empty(length, np.int64)
-                CppBuffers.copy_offsets(
-                    cpp_buffers_self,
-                    offsets.ctypes.data_as(ctypes.c_void_p),
-                    length,
-                    depth,
-                )
-                buffers[f"node{depth}-offsets"] = offsets
-
-            data_length = CppBuffers.data_length(cpp_buffers_self)
-            data = ak.nplike.numpy.empty(data_length, dtype=dtype)
-            CppBuffers.copy_data(
-                cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p), data_length
-            )
-            buffers[f"node{depths}-data"] = data
-
-            layout = ak._v2.contents.ListOffsetArray(
-                ak._v2.index.Index(buffers["node0-offsets"], np.int64),
-                ak._v2.contents.numpyarray.NumpyArray(
-                    buffers["node1-data"], parameters=form.content.parameters
-                ),
-                parameters=form.parameters,
-            )
-
-            return _maybe_wrap(ak._v2.Array(layout), column_as_record)
-
-        elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
-            form.content, ak._v2.forms.ListOffsetForm
-        ):
-            # FIXME: this is pretty much the same code as above - merge it
-            dtype = ak._v2.types.numpytype.primitive_to_dtype(
-                form.content.content.primitive
-            )
-
-            # pull in the CppBuffers (after which we can import from it)
-            CppBuffers = cppyy.gbl.awkward.CppBuffers[
-                column_type, cpp_type_of[dtype.name]
-            ]
-            cpp_buffers_self = CppBuffers(result_ptrs)
-
+            # list_depth == 2 or 1 if its the list of strings
             # copy data from RDF and make nested offsets
             depths, offsets_length = CppBuffers.offsets_and_flatten_2(cpp_buffers_self)
 
-            buffers = {}
-            for depth in range(depths):
-                length = CppBuffers.offsets_length(cpp_buffers_self, depth)
-                offsets = ak.nplike.numpy.empty(length, np.int64)
-                CppBuffers.copy_offsets(
-                    cpp_buffers_self,
-                    offsets.ctypes.data_as(ctypes.c_void_p),
-                    length,
-                    depth,
-                )
-                buffers[f"node{depth}-offsets"] = offsets
-
-            data_length = CppBuffers.data_length(cpp_buffers_self)
-            data = ak.nplike.numpy.empty(data_length, dtype=dtype)
-            CppBuffers.copy_data(
-                cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p), data_length
-            )
-            buffers[f"node{depths}-data"] = data
-
-            layout = ak._v2.contents.ListOffsetArray(
-                ak._v2.index.Index(buffers["node0-offsets"], np.int64),
-                ak._v2.contents.listoffsetarray.ListOffsetArray(
-                    ak._v2.index.Index(buffers["node1-offsets"], np.int64),
-                    ak._v2.contents.numpyarray.NumpyArray(
-                        buffers["node2-data"],
-                        parameters=form.content.content.parameters,
-                    ),
-                    parameters=form.content.parameters,
-                ),
-                parameters=form.parameters,
-            )
-
-            return _maybe_wrap(ak._v2.Array(layout), column_as_record)
-
+        elif list_depth == 3:
+            depths, offsets_length = CppBuffers.offsets_and_flatten_3(cpp_buffers_self)
         else:
-            # FIXME: nested arrays more than 3 depths deep
-            raise ak._v2._util.error(NotImplementedError)
+            depths, offsets_length = CppBuffers.offsets_and_flatten_4(cpp_buffers_self)
+
+        for depth in range(depths):
+            length = CppBuffers.offsets_length(cpp_buffers_self, depth)
+            offsets = ak.nplike.numpy.empty(length, np.int64)
+            CppBuffers.copy_offsets(
+                cpp_buffers_self,
+                offsets.ctypes.data_as(ctypes.c_void_p),
+                length,
+                depth,
+            )
+            buffers[f"node{depth}-offsets"] = offsets
+
+        data_length = CppBuffers.data_length(cpp_buffers_self)
+        data = ak.nplike.numpy.empty(data_length, dtype=dtype)
+        CppBuffers.copy_data(
+            cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p), data_length
+        )
+        buffers[f"node{depths}-data"] = data
+
+        array = ak._v2.from_buffers(
+            form,
+            offsets_length - 1,
+            buffers,
+        )
+        return _maybe_wrap(array, column_as_record)
 
     elif form_str == "awkward type":
 

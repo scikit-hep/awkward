@@ -1,8 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import base64
 import ctypes
-import struct
 import json
 import re
 
@@ -466,13 +464,7 @@ class Generator:
             raise ak._v2._util.error(NotImplementedError("TODO: identifiers in C++"))
 
     def class_type_suffix(self, key):
-        return (
-            base64.encodebytes(struct.pack("q", hash(key)))
-            .rstrip(b"=\n")
-            .replace(b"+", b"")
-            .replace(b"/", b"")
-            .decode("ascii")
-        )
+        return ak._v2._util.string_hash(key)
 
     def _generate_common(self, key):
         params = [

@@ -1,8 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import base64
-import struct
-
 import awkward as ak
 
 import awkward._v2._lookup  # noqa: E402
@@ -50,13 +47,7 @@ class DataSourceGenerator:
         for key, value in self.generators.items():
             class_type_suffix = class_type_suffix + "_" + key + "_" + value.class_type()
 
-        key = (
-            base64.encodebytes(struct.pack("q", hash(class_type_suffix)))
-            .rstrip(b"=\n")
-            .replace(b"+", b"")
-            .replace(b"/", b"")
-            .decode("ascii")
-        )
+        key = ak._v2._util.string_hash(class_type_suffix)
 
         return f"AwkwardArrayDataSource_{key}"
 

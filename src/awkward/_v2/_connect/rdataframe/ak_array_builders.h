@@ -138,7 +138,7 @@ public:
   }
 
   std::pair<int64_t, int64_t>
-  offsets_and_flatten_1() {
+  offsets_and_flatten_2() {
     int64_t i = 0;
     std::vector<int64_t> offsets;
     offsets.reserve(1024);
@@ -155,7 +155,7 @@ public:
   }
 
   std::pair<int64_t, int64_t>
-  offsets_and_flatten_2() {
+  offsets_and_flatten_3() {
     int64_t i = 0;
     int64_t j = 0;
     std::vector<int64_t> offsets;
@@ -169,9 +169,7 @@ public:
       for (auto const& vec : vec_of_vecs) {
         inner_offsets.emplace_back(j);
         j += vec.size();
-        for (auto const&x : vec) {
-          data_.emplace_back(x);
-        }
+        data_.insert(data_.end(), vec.begin(), vec.end());
       }
       inner_offsets.emplace_back(j);
     }
@@ -184,7 +182,7 @@ public:
   }
 
   std::pair<int64_t, int64_t>
-  offsets_and_flatten_3() {
+  offsets_and_flatten_4() {
     int64_t i = 0;
     int64_t j = 0;
     int64_t k = 0;
