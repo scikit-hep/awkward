@@ -40,7 +40,8 @@ def test_to_from_data_frame_large():
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
     assert len(ak_array_in) == len(ak_array_out)
 
@@ -54,7 +55,8 @@ def test_data_frame_boolean():
     assert data_frame.GetColumnType("x") == "bool"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
     assert ak_array_in.to_list() == ak_array_out.to_list()
 
@@ -67,9 +69,10 @@ def test_data_frame_integers():
     assert data_frame.GetColumnType("x") == "int64_t"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_real():
@@ -80,9 +83,10 @@ def test_data_frame_real():
     assert data_frame.GetColumnType("x") == "double"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_complex():
@@ -95,9 +99,10 @@ def test_data_frame_complex():
     assert data_frame.GetColumnType("x") == "std::complex<double>"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_strings():
@@ -108,9 +113,10 @@ def test_data_frame_strings():
     assert data_frame.GetColumnType("x") == "std::string"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_vec_of_integers():
@@ -121,9 +127,10 @@ def test_data_frame_vec_of_integers():
     assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<int64_t>"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_vec_of_real():
@@ -134,9 +141,10 @@ def test_data_frame_vec_of_real():
     assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<double>"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_vec_of_complex():
@@ -149,9 +157,10 @@ def test_data_frame_vec_of_complex():
     assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<std::complex<double>>"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_vec_of_strings():
@@ -162,9 +171,10 @@ def test_data_frame_vec_of_strings():
     assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_vec_of_vec_of_integers():
@@ -175,9 +185,10 @@ def test_data_frame_vec_of_vec_of_integers():
     assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_vec_of_vec_of_real():
@@ -188,9 +199,10 @@ def test_data_frame_vec_of_vec_of_real():
     assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_data_frame_vec_of_vec_of_complex():
@@ -203,9 +215,10 @@ def test_data_frame_vec_of_vec_of_complex():
     assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_rdata_frame_vecs_as_records():
@@ -213,19 +226,22 @@ def test_rdata_frame_vecs_as_records():
     data_frame_xy = data_frame.Define("y", "x*2")
 
     ak_array_x = ak._v2.from_rdataframe(
-        data_frame_xy, column="x", column_as_record=False
+        data_frame_xy,
+        column="x",
     )
-    assert ak_array_x.layout.form == ak._v2.forms.NumpyForm("float64")
+    assert ak_array_x["x"].layout.form == ak._v2.forms.NumpyForm("float64")
 
     ak_record_array_x = ak._v2.from_rdataframe(
-        data_frame_xy, column="x", column_as_record=True
+        data_frame_xy,
+        column="x",
     )
     assert ak_record_array_x.layout.form == ak._v2.forms.RecordForm(
         [ak._v2.forms.NumpyForm("float64")], "x"
     )
 
     ak_record_array_y = ak._v2.from_rdataframe(
-        data_frame_xy, column="y", column_as_record=True
+        data_frame_xy,
+        column="y",
     )
     ak_array = ak._v2.zip([ak_record_array_x, ak_record_array_y])
     assert ak_array.layout.form == ak._v2.forms.RecordForm(
@@ -242,9 +258,10 @@ def test_rdata_frame_vecs_of_complex():
     data_frame_xy = data_frame.Define("y", "x*2 +1i")
 
     ak_array_y = ak._v2.from_rdataframe(
-        data_frame_xy, column="y", column_as_record=False
+        data_frame_xy,
+        column="y",
     )
-    assert ak_array_y.layout.form == ak._v2.forms.NumpyForm("complex128")
+    assert ak_array_y["y"].layout.form == ak._v2.forms.NumpyForm("complex128")
 
 
 def test_rdata_frame_rvecs_as_records():
@@ -266,7 +283,10 @@ def test_rdata_frame_rvecs_as_records():
     data_frame_x_y_r = data_frame_x_y.Define("r", "sqrt(x*x + y*y)")
     assert data_frame_x_y_r.GetColumnType("r") == "ROOT::VecOps::RVec<double>"
 
-    array = ak._v2.from_rdataframe(data_frame_x_y_r, column="r", column_as_record=True)
+    array = ak._v2.from_rdataframe(
+        data_frame_x_y_r,
+        column="r",
+    )
 
     assert array.layout.form == ak._v2.forms.RecordForm(
         [ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64"))], ["r"]
@@ -282,11 +302,12 @@ def test_to_from_data_frame():
     assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<double>"
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
-    assert ak_array_out.layout.content.is_contiguous is True
+    assert ak_array_out["x"].layout.content.is_contiguous is True
 
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_to_from_data_frame_rvec_of_rvec():
@@ -296,10 +317,11 @@ def test_to_from_data_frame_rvec_of_rvec():
     assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
 
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
 
 def test_to_from_data_frame_rvec_of_rvec_of_rvec():
@@ -310,7 +332,8 @@ def test_to_from_data_frame_rvec_of_rvec_of_rvec():
     data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
 
     ak_array_out = ak._v2.from_rdataframe(
-        data_frame, column="x", column_as_record=False
+        data_frame,
+        column="x",
     )
 
-    assert ak_array_in.to_list() == ak_array_out.to_list()
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
