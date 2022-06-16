@@ -765,6 +765,11 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         else:
             raise ak._v2._util.error(AssertionError(index_type))
         self.content = content
+
+        # FIXME: satisfy the ContentLookup super-class
+        self.contenttype = content
+        self.indextype = self.index_type
+
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
@@ -811,6 +816,17 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
             return f"ROOT::VecOps::RVec<{nested_type}>"
         else:
             return self.content.class_type()
+
+    # FIXME: override the IndexOf method in the ContentLookup super-class
+    def IndexOf(self, arraytype):
+        if self.index_type == "int32_t":
+            return ak._v2.index.Index32
+        elif self.index_type == "uint32_t":
+            return ak._v2.index.Index32
+        elif self.index_type == "int64_t":
+            return ak._v2.index.Index64
+        else:
+            raise ak._v2._util.error(AssertionError(self.index_type))
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
