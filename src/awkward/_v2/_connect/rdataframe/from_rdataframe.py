@@ -72,8 +72,8 @@ def from_rdataframe(data_frame, column, column_as_record=True):
         def supported(form):
             if form.purelist_depth == 1:
                 # special case for a list of strings form
-                return isinstance(form, ak._v2.forms.ListOffsetForm) or isinstance(
-                    form, ak._v2.forms.NumpyForm
+                return isinstance(
+                    form, (ak._v2.forms.ListOffsetForm, ak._v2.forms.NumpyForm)
                 )
             else:
                 return isinstance(form, ak._v2.forms.ListOffsetForm) and supported(
