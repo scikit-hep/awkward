@@ -22,14 +22,22 @@ np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
 
-cppyy.add_include_path(os.path.dirname(os.path.abspath(__file__)))
-
+cppyy.add_include_path(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            os.pardir,
+            os.pardir,
+            "cpp-headers",
+        )
+    )
+)
 compiler = ROOT.gInterpreter.Declare
 
 
 done = compiler(
     """
-#include "ak_array_builders.h"
+#include "rdataframe_jagged_builders.h"
 """
 )
 assert done is True

@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#ifndef AWKWARD_ARRAY_BUILDERS_H_
-#define AWKWARD_ARRAY_BUILDERS_H_
+#ifndef RDATAFRAME_JAGGED_BUILDERS_H_
+#define RDATAFRAME_JAGGED_BUILDERS_H_
 
 #include <iterator>
 #include <stdlib.h>
@@ -278,4 +278,4 @@ type_to_form(int64_t form_key_id) {
 
 }
 
-#endif // AWKWARD_ARRAY_BUILDERS_H_
+#endif // RDATAFRAME_JAGGED_BUILDERS_H_
