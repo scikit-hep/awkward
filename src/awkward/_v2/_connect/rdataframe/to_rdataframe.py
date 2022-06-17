@@ -12,8 +12,6 @@ compiler_lock = threading.Lock()
 
 cache = {}
 
-cache = {}
-
 
 def compile(source_code):
     with compiler_lock:
