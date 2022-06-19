@@ -1,4 +1,4 @@
-#include "../src/awkward/cpp-headers/GrowableBuffer.h"
+#include "../src/awkward/_v2/cpp-headers/GrowableBuffer.h"
 
 #include <complex>
 #include <cassert>
