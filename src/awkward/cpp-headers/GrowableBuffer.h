@@ -207,6 +207,15 @@ namespace awkward {
       fill_panel(datum);
     }
 
+    /// @brief Inserts an entire array into the panel(s), possibly triggering
+    /// allocation of a new panel.
+    void
+    append(PRIMITIVE* ptr, size_t size) {
+      for (int64_t i = 0; i < size; i++) {
+        append(ptr[i]);
+      }
+    }
+
     /// @brief Returns the element at a given position in the array, without
     /// handling negative indexing or bounds-checking.
     PRIMITIVE
