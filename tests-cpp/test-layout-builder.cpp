@@ -6,7 +6,7 @@
 void
 test_list_of_numpy() {
   size_t initial = 10;
-  awkward::ListOffsetLayoutBuilder<int64_t, awkward::NumpyLayoutBuilder<double>> builder(initial);
+  awkward::ListOffsetLayoutBuilder<awkward::NumpyLayoutBuilder<double>> builder(initial);
 
   awkward::NumpyLayoutBuilder<double>* builder2 = builder.begin_list();
   builder2->append(1.1);
@@ -53,9 +53,9 @@ test_record_of_numpy() {
 void
 test_record_of_lists()
 {
-  awkward::RecordLayoutBuilder<awkward::ListOffsetLayoutBuilder<int64_t, awkward::NumpyLayoutBuilder<double>>> builder;
+  awkward::RecordLayoutBuilder<awkward::ListOffsetLayoutBuilder<awkward::NumpyLayoutBuilder<double>>> builder;
   builder.begin_record();
-  awkward::ListOffsetLayoutBuilder<int64_t, awkward::NumpyLayoutBuilder<double>>* builder1 = builder.field(0);
+  awkward::ListOffsetLayoutBuilder<awkward::NumpyLayoutBuilder<double>>* builder1 = builder.field(0);
   awkward::NumpyLayoutBuilder<double>* builder2 = builder1->begin_list();
   builder2->append(1.1);
   builder2->append(1.2);
@@ -70,7 +70,7 @@ test_record_of_lists()
   builder.end_record();
 
   builder.begin_record();
-  awkward::ListOffsetLayoutBuilder<int64_t, awkward::NumpyLayoutBuilder<double>>* builder5 = builder.field(0);
+  awkward::ListOffsetLayoutBuilder<awkward::NumpyLayoutBuilder<double>>* builder5 = builder.field(0);
   awkward::NumpyLayoutBuilder<double>* builder6 = builder5->begin_list();
   builder6->append(3.1);
   builder6->append(3.2);

@@ -60,11 +60,11 @@ namespace awkward {
     awkward::GrowableBuffer<PRIMITIVE> data_;
   };
 
-  template <typename INDEX, typename BUILDER>
+  template <typename BUILDER>
   class ListOffsetLayoutBuilder {
   public:
     ListOffsetLayoutBuilder(size_t initial = 1024)
-        : offsets_(awkward::GrowableBuffer<INDEX>(initial))
+        : offsets_(awkward::GrowableBuffer<int64_t>(initial))
         , begun_(false) {
       offsets_.append(0);
     }
@@ -105,9 +105,9 @@ namespace awkward {
       begun_ = false;
     }
 
-    INDEX*
+    int64_t*
     to_buffers() const {
-      INDEX *ptr = new INDEX[offsets_.length()];
+      int64_t *ptr = new int64_t[offsets_.length()];
       offsets_.concatenate(ptr);
       return ptr;
     }
@@ -125,7 +125,7 @@ namespace awkward {
   private:
     size_t initial_;
     bool begun_;
-    GrowableBuffer<INDEX> offsets_;
+    GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
   };
 
@@ -219,7 +219,7 @@ namespace awkward {
       int64_t i = 0;
       for (auto x : contents_)
       {
-        std::cout << indent <<"  record "<< index_[i] << std::endl;
+        std::cout << indent <<"  field "<< index_[i] << std::endl;
         x->dump("  ");
         i++;
       }
