@@ -13,6 +13,20 @@ ROOT = pytest.importorskip("ROOT")
 compiler = ROOT.gInterpreter.Declare
 
 
+def test_data_frame_vec_of_vec_of_integers():
+    ak_array_in = ak._v2.Array([[[1], [2]], [[3], [4, 5]]])
+
+    data_frame = ak._v2.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
+
+    ak_array_out = ak._v2.from_rdataframe(
+        data_frame,
+        column="x",
+    )
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
+
+
 def test_data_frame_NumpyArray():
     array = ak._v2.contents.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3]),

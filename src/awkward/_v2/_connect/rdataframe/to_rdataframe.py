@@ -181,7 +181,7 @@ class DataSourceGenerator:
             cpp_code_entries = (
                 cpp_code_entries
                 + f"""
-        slots_{key}[slot] = awkward::{self.generators[key].class_type()}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}))[entry];
+        slots_{key}[slot] = awkward::{self.generators[key].class_type()}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}), &fPyLookup[slot], &fPyGenerator[slot])[entry];
     """
             )
 
@@ -216,6 +216,7 @@ namespace awkward {{
         {cpp_code_declare_slots}
 
         PyObject* fPyLookup;
+        PyObject* fPyGenerator;
 
         Record_t
         GetColumnReadersImpl(std::string_view name, const std::type_info &id) {{
@@ -231,27 +232,30 @@ namespace awkward {{
         }}
 
     public:
-        {array_data_source}(PyObject* lookup, ULong64_t size, std::initializer_list<ULong64_t> ptrs_list)
+        {array_data_source}(PyObject* lookup, PyObject* generator,ULong64_t size, std::initializer_list<ULong64_t> ptrs_list)
           : fSize(size),
             fPtrs({{ptrs_list}}),
             fColNames({{{cpp_code_column_names}}}),
             fColTypeNames({{{cpp_code_column_type_names}}}),
             fColTypesMap({{{cpp_code_column_types_map}}}),
-            fPyLookup(lookup)
+            fPyLookup(lookup),
+            fPyGenerator(generator)
             {{
                 Py_INCREF(fPyLookup);
+                Py_INCREF(fPyGenerator);
                 {cpp_code_init_slots}
             }}
 
-            ~{array_data_source}() {{
-                Py_DECREF(fPyLookup);
-            }}
+        ~{array_data_source}() {{
+            Py_DECREF(fPyLookup);
+            Py_DECREF(fPyGenerator);
+        }}
 
-            void SetNSlots(unsigned int nSlots) {{
-                fNSlots = nSlots; // FIXME: always 1 slot for now
+        void SetNSlots(unsigned int nSlots) {{
+            fNSlots = nSlots; // FIXME: always 1 slot for now
 
-                {cpp_code_resize_slots}
-            }}
+            {cpp_code_resize_slots}
+        }}
 
         void Initialise() {{
             // initialize fEntryRanges
@@ -293,10 +297,14 @@ namespace awkward {{
             {cpp_code_entries}
             return true;
         }}
+
+        PyObject* PyLookup() {{
+            return fPyLookup;
+        }}
     }};
 
-    ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source}(PyObject* lookup, ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
-        return new ROOT::RDataFrame(std::make_unique<{array_data_source}>(std::forward<PyObject*>(lookup), size, ptrs_list));
+    ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source}(PyObject* lookup, PyObject* generator, ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
+        return new ROOT::RDataFrame(std::make_unique<{array_data_source}>(std::forward<PyObject*>(lookup), std::forward<PyObject*>(generator),size, ptrs_list));
     }}
 
 }}
@@ -307,6 +315,7 @@ namespace awkward {{
 
         rdf = getattr(ROOT.awkward, f"MakeAwkwardArrayDS_{array_data_source}")(
             self.lookups,
+            self.generators,
             self.length,
             (self.data_ptrs_list),
         )

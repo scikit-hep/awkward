@@ -157,7 +157,16 @@ def from_rdataframe(data_frame, column):
 
         # Triggers event loop and execution of all actions booked in the associated RLoopManager.
         cpp_reference = result_ptrs.GetValue()
+        lookup = cpp_reference[0].lookup()
+        generator = cpp_reference[0].generator()
+        array_out = generator[column].tolayout(lookup[column], 0, ())
 
-        return _wrap_as_array(column, ak._v2.from_iter(cpp_reference))
+        return ak._v2._util.wrap(
+            ak._v2.contents.RecordArray(
+                fields=[column],
+                contents=[array_out],
+            ),
+            highlevel=True,
+        )
     else:
         raise ak._v2._util.error(NotImplementedError)
