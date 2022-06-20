@@ -134,10 +134,6 @@ namespace awkward {
       : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup), generator_(generator) {
       }
 
-    ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs)
-      : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(nullptr), generator_(nullptr) {
-      }
-
     size_t size() const noexcept {
       return stop_ - start_;
     }
@@ -186,11 +182,8 @@ def generate_RecordView(compiler, use_cached=True):
 namespace awkward {
   class RecordView {
   public:
-    RecordView(ssize_t at, ssize_t which, ssize_t* ptrs, PyObject* lookup, PyObject* generator)
+    RecordView(ssize_t at, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
       : at_(at), which_(which), ptrs_(ptrs), lookup_(lookup), generator_(generator) { }
-
-    RecordView(ssize_t at, ssize_t which, ssize_t* ptrs)
-      : at_(at), which_(which), ptrs_(ptrs), lookup_(nullptr), generator_(nullptr) { }
 
   protected:
     ssize_t at_;
