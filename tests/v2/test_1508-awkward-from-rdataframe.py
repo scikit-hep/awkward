@@ -40,13 +40,6 @@ def test_data_frame_NumpyArray():
 
     array_out = generator.tolayout(lookup, 0, ())
 
-    # data_frame = ak._v2.to_rdataframe({"x": array})
-    #
-    # assert data_frame.GetColumnType("x") == "double"
-    #
-    # ak_array_out = ak._v2.from_rdataframe(
-    #     data_frame, column="x", column_as_record=False
-    # )
     assert array.to_list() == array_out.to_list()
 
 
