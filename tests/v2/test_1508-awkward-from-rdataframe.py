@@ -25,11 +25,13 @@ def test_refcount():
 
     column_type = data_frame.GetColumnType("x")
     result_ptrs = data_frame.Take[column_type]("x")
+    view = result_ptrs.begin()
     lookup = result_ptrs.begin().lookup()
     generator = lookup["x"].generator
 
     column_type = data_frame.GetColumnType("x")
     result_ptrs = data_frame.Take[column_type]("x")
+    view = result_ptrs.begin()
     lookup = result_ptrs.begin().lookup()
     generator = lookup["x"].generator
 
@@ -46,6 +48,7 @@ def test_refcount():
             array_out,
             lookup,
             generator,
+            view,
         )
     ]
 
@@ -55,7 +58,7 @@ def test_refcount():
             return 3.14
 
         for _ in range(10):
-            f1(array_out)
+            f1(result_ptrs.begin().lookup())
             assert [
                 sys.getrefcount(x) == 2
                 for x in (
@@ -63,6 +66,7 @@ def test_refcount():
                     array_out,
                     lookup,
                     generator,
+                    view,
                 )
             ]
 
@@ -72,7 +76,7 @@ def test_refcount():
             return x
 
         for _ in range(10):
-            y = f2(array_out)
+            y = f2(result_ptrs.begin().lookup())
             assert [
                 sys.getrefcount(x) == 2
                 for x in (
@@ -80,6 +84,7 @@ def test_refcount():
                     array_out,
                     lookup,
                     generator,
+                    view,
                 )
             ]
 
@@ -89,7 +94,9 @@ def test_refcount():
             return x, x
 
         for _ in range(10):
-            y = f3(array_out)  # noqa: F841 (checking reference count)
+            y = f3(  # noqa: F841 (checking reference count)
+                result_ptrs.begin().lookup()
+            )
             assert [
                 sys.getrefcount(x) == 2
                 for x in (
@@ -97,6 +104,7 @@ def test_refcount():
                     array_out,
                     lookup,
                     generator,
+                    view,
                 )
             ]
 
