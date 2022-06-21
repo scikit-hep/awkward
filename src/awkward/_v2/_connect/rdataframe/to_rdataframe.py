@@ -67,7 +67,9 @@ class DataSourceGenerator:
             self.generators[key] = ak._v2._connect.cling.togenerator(
                 layouts[key].form, flatlist_as_rvec=self.flatlist_as_rvec
             )
-            self.lookups[key] = ak._v2._lookup.Lookup(layouts[key])
+            self.lookups[key] = ak._v2._lookup.Lookup(
+                layouts[key], self.generators[key]
+            )
             self.generators[key].generate(ROOT.gInterpreter.Declare)
 
             self.entry_types[key] = self.generators[key].entry_type()
@@ -252,7 +254,7 @@ namespace awkward {{
         }}
 
         void SetNSlots(unsigned int nSlots) {{
-            fNSlots = nSlots; // FIXME: always 1 slot for now
+            fNSlots = nSlots;
 
             {cpp_code_resize_slots}
         }}

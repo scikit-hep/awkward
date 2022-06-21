@@ -44,14 +44,12 @@ assert done is True
 
 
 def from_rdataframe(data_frame, column):
-    def _wrap_as_array(column, array):
-        return ak._v2.highlevel.Array({column: array})
-
-    def _maybe_wrap(array):
+    def _wrap_as_record_array(array):
+        layout = array.layout if isinstance(array, ak._v2.highlevel.Array) else array
         return ak._v2._util.wrap(
             ak._v2.contents.RecordArray(
                 fields=[column],
-                contents=[array.layout],
+                contents=[layout],
             ),
             highlevel=True,
         )
@@ -114,7 +112,7 @@ def from_rdataframe(data_frame, column):
                 parameters=form.parameters,
             )
 
-            return _maybe_wrap(ak._v2.Array(layout))
+            return _wrap_as_record_array(layout)
 
         elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
             form.content, ak._v2.forms.NumpyForm
@@ -151,22 +149,16 @@ def from_rdataframe(data_frame, column):
             offsets_length - 1,
             buffers,
         )
-        return _maybe_wrap(array)
+        return _wrap_as_record_array(array)
 
     elif form_str == "awkward type":
 
         # Triggers event loop and execution of all actions booked in the associated RLoopManager.
         cpp_reference = result_ptrs.GetValue()
         lookup = cpp_reference[0].lookup()
-        generator = cpp_reference[0].generator()
-        array_out = generator[column].tolayout(lookup[column], 0, ())
+        generator = lookup[column].generator
+        layout = generator.tolayout(lookup[column], 0, ())
 
-        return ak._v2._util.wrap(
-            ak._v2.contents.RecordArray(
-                fields=[column],
-                contents=[array_out],
-            ),
-            highlevel=True,
-        )
+        return _wrap_as_record_array(layout)
     else:
         raise ak._v2._util.error(NotImplementedError)
