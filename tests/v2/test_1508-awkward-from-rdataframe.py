@@ -49,6 +49,7 @@ def test_refcount():
             lookup,
             generator,
             view,
+            result_ptrs.begin().lookup(),
         )
     ]
 
@@ -67,6 +68,7 @@ def test_refcount():
                     lookup,
                     generator,
                     view,
+                    result_ptrs.begin().lookup(),
                 )
             ]
 
@@ -85,6 +87,7 @@ def test_refcount():
                     lookup,
                     generator,
                     view,
+                    result_ptrs.begin().lookup(),
                 )
             ]
 
@@ -105,6 +108,7 @@ def test_refcount():
                     lookup,
                     generator,
                     view,
+                    result_ptrs.begin().lookup(),
                 )
             ]
 
