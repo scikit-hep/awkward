@@ -27,7 +27,7 @@ def test_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -50,7 +50,7 @@ def test_EmptyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -71,7 +71,7 @@ def test_NumpyArray_shape():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -106,7 +106,7 @@ def test_RegularArray_NumpyArray(flatlist_as_rvec):
     generator = ak._v2._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(debug_compiler)
 
     ROOT.gInterpreter.Declare(
@@ -138,7 +138,7 @@ def test_RegularArray_NumpyArray_v2b():
 
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -170,7 +170,7 @@ def test_ListArray_NumpyArray(flatlist_as_rvec):
     generator = ak._v2._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -207,7 +207,7 @@ def test_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     generator = ak._v2._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -249,7 +249,7 @@ def test_RecordArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -282,7 +282,7 @@ void roottest_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t* p
 
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -307,7 +307,7 @@ void roottest_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t* p
 
     layout = v2c
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -327,7 +327,7 @@ void roottest_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t* p
 
     layout = v2d
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -353,7 +353,7 @@ def test_IndexedArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -384,7 +384,7 @@ def test_IndexedOptionArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -417,7 +417,7 @@ def test_ByteMaskedArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -445,7 +445,7 @@ void roottest_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_
 
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -503,7 +503,7 @@ def test_BitMaskedArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -581,7 +581,7 @@ void roottest_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, ssize_t
 
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -662,7 +662,7 @@ void roottest_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, ssize_t
 
     layout = v2c
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -743,7 +743,7 @@ void roottest_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, ssize_t
 
     layout = v2d
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -795,7 +795,7 @@ def test_UnmaskedArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -825,7 +825,7 @@ def test_UnionArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -869,7 +869,7 @@ def test_nested_NumpyArray(flatlist_as_rvec):
     generator = ak._v2._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -900,7 +900,7 @@ def test_nested_NumpyArray_shape():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -940,7 +940,7 @@ def test_nested_RegularArray_NumpyArray(flatlist_as_rvec):
     generator = ak._v2._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -973,7 +973,7 @@ void roottest_nested_RegularArray_NumpyArray_v2a_{flatlist_as_rvec}(double* out,
 
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1010,7 +1010,7 @@ def test_nested_ListArray_NumpyArray(flatlist_as_rvec):
     generator = ak._v2._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1050,7 +1050,7 @@ def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
     generator = ak._v2._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(debug_compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1097,7 +1097,7 @@ def test_nested_RecordArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1135,7 +1135,7 @@ void roottest_nested_RecordArray_NumpyArray_v2a(double* out, ssize_t length, ssi
 
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1163,7 +1163,7 @@ void roottest_nested_RecordArray_NumpyArray_v2b(double* out, ssize_t length, ssi
 
     layout = v2c
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1186,7 +1186,7 @@ void roottest_nested_RecordArray_NumpyArray_v2c(double* out, ssize_t length, ssi
 
     layout = v2d
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1216,7 +1216,7 @@ def test_nested_IndexedArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1252,7 +1252,7 @@ def test_nested_IndexedOptionArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1291,7 +1291,7 @@ def test_nested_ByteMaskedArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1326,7 +1326,7 @@ void roottest_nested_ByteMaskedArray_NumpyArray_v2a(double* out, ssize_t length,
 
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1405,7 +1405,7 @@ def test_nested_BitMaskedArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1505,7 +1505,7 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2a(double* out, ssize_t length, 
 
     layout = v2b
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1608,7 +1608,7 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2b(double* out, ssize_t length, 
 
     layout = v2c
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1711,7 +1711,7 @@ void roottest_nested_BitMaskedArray_NumpyArray_v2c(double* out, ssize_t length, 
 
     layout = v2d
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1767,7 +1767,7 @@ def test_nested_UnmaskedArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1804,7 +1804,7 @@ def test_nested_UnionArray_NumpyArray():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1840,7 +1840,7 @@ def test_ListArray_strings():
     )
 
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1869,7 +1869,7 @@ def test_RegularArray_strings():
     )
 
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1898,7 +1898,7 @@ def test_NumpyArray_iterator():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1927,7 +1927,7 @@ def test_NumpyArray_iterator2():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
@@ -1956,7 +1956,7 @@ def test_NumpyArray_riterator():
 
     layout = v2a
     generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
