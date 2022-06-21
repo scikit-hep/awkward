@@ -3,6 +3,7 @@
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
+import sys
 
 import awkward._v2._lookup  # noqa: E402
 import awkward._v2._connect.cling  # noqa: E402
@@ -11,6 +12,93 @@ ROOT = pytest.importorskip("ROOT")
 
 
 compiler = ROOT.gInterpreter.Declare
+
+
+def test_refcount():
+    array = ak._v2.Array([[[1], [2]], [[3], [4, 5]]])
+
+    assert [sys.getrefcount(x) == 2 for x in (array)]
+
+    data_frame = ak._v2.to_rdataframe({"x": array})
+
+    assert data_frame.GetColumnType("x").startswith("awkward::ListArray_")
+
+    column_type = data_frame.GetColumnType("x")
+    result_ptrs = data_frame.Take[column_type]("x")
+    lookup = result_ptrs.begin().lookup()
+    generator = lookup["x"].generator
+
+    column_type = data_frame.GetColumnType("x")
+    result_ptrs = data_frame.Take[column_type]("x")
+    lookup = result_ptrs.begin().lookup()
+    generator = lookup["x"].generator
+
+    array_out = ak._v2.from_rdataframe(
+        data_frame,
+        column="x",
+    )
+    assert array.to_list() == array_out["x"].to_list()
+
+    assert [
+        sys.getrefcount(x) == 2
+        for x in (
+            array,
+            array_out,
+            lookup,
+            generator,
+        )
+    ]
+
+    for _ in range(3):
+
+        def f1(x):
+            return 3.14
+
+        for _ in range(10):
+            f1(array_out)
+            assert [
+                sys.getrefcount(x) == 2
+                for x in (
+                    array,
+                    array_out,
+                    lookup,
+                    generator,
+                )
+            ]
+
+    for _ in range(3):
+
+        def f2(x):
+            return x
+
+        for _ in range(10):
+            y = f2(array_out)
+            assert [
+                sys.getrefcount(x) == 2
+                for x in (
+                    array,
+                    array_out,
+                    lookup,
+                    generator,
+                )
+            ]
+
+    for _ in range(3):
+
+        def f3(x):
+            return x, x
+
+        for _ in range(10):
+            y = f3(array_out)  # noqa: F841 (checking reference count)
+            assert [
+                sys.getrefcount(x) == 2
+                for x in (
+                    array,
+                    array_out,
+                    lookup,
+                    generator,
+                )
+            ]
 
 
 def test_data_frame_vec_of_vec_of_integers():

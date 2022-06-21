@@ -183,7 +183,7 @@ class DataSourceGenerator:
             cpp_code_entries = (
                 cpp_code_entries
                 + f"""
-        slots_{key}[slot] = awkward::{self.generators[key].class_type()}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}), &fPyLookup[slot])[entry];
+        slots_{key}[slot] = awkward::{self.generators[key].class_type()}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}), fPyLookup)[entry];
     """
             )
 
@@ -296,9 +296,6 @@ namespace awkward {{
             return true;
         }}
 
-        PyObject* PyLookup() {{
-            return fPyLookup;
-        }}
     }};
 
     ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source}(PyObject* lookup, ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{

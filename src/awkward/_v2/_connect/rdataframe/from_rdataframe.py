@@ -101,14 +101,16 @@ def from_rdataframe(data_frame, column):
 
         # pull in the CppBuffers (after which we can import from it)
         CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type, cpp_type_of[dtype.name]]
-        # pythonize the CppBuffers create_array function to take ownership on return
-        CppBuffers.create_array.__creates__ = True
         cpp_buffers_self = CppBuffers(result_ptrs)
 
         if isinstance(form, ak._v2.forms.NumpyForm):
-            length, data = CppBuffers.create_array(cpp_buffers_self)
+            distance = CppBuffers.result_distance(cpp_buffers_self)
+            data = ak.nplike.numpy.empty(distance, dtype)
+            CppBuffers.fill_data_array(
+                cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p)
+            )
             layout = ak._v2.contents.numpyarray.NumpyArray(
-                numpy.frombuffer(data, dtype=dtype, count=length),
+                data,
                 parameters=form.parameters,
             )
 
@@ -153,9 +155,12 @@ def from_rdataframe(data_frame, column):
 
     elif form_str == "awkward type":
 
-        # Triggers event loop and execution of all actions booked in the associated RLoopManager.
-        cpp_reference = result_ptrs.GetValue()
-        lookup = cpp_reference[0].lookup()
+        # ROOT::RDF::RResultPtr<T>::begin Returns an iterator to the beginning of
+        # the contained object if this makes sense, throw a compilation error otherwise.
+        #
+        # Does not trigger event loop and execution of all actions booked in
+        # the associated RLoopManager.
+        lookup = result_ptrs.begin().lookup()
         generator = lookup[column].generator
         layout = generator.tolayout(lookup[column], 0, ())
 

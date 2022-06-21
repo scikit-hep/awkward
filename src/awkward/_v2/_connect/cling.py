@@ -140,6 +140,7 @@ namespace awkward {
     }
 
     PyObject* lookup() {
+        Py_INCREF(lookup_);
         return lookup_;
     }
 
