@@ -6,7 +6,7 @@ np = ak.nplike.NumpyMetadata.instance()
 
 
 class Lookup:
-    def __init__(self, layout):
+    def __init__(self, layout, generator=None):
         positions = []
         tolookup(layout, positions)
 
@@ -17,6 +17,7 @@ class Lookup:
                 return x.ctypes.data
 
         self.nplike = layout.nplike
+        self.generator = generator
         self.positions = positions
         self.arrayptrs = self.nplike.array(
             [arrayptr(x) for x in positions], dtype=np.intp

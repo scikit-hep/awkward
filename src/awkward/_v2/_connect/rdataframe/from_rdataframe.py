@@ -44,14 +44,12 @@ assert done is True
 
 
 def from_rdataframe(data_frame, column):
-    def _wrap_as_array(column, array):
-        return ak._v2.highlevel.Array({column: array})
-
-    def _maybe_wrap(array):
+    def _wrap_as_record_array(array):
+        layout = array.layout if isinstance(array, ak._v2.highlevel.Array) else array
         return ak._v2._util.wrap(
             ak._v2.contents.RecordArray(
                 fields=[column],
-                contents=[array.layout],
+                contents=[layout],
             ),
             highlevel=True,
         )
@@ -103,18 +101,20 @@ def from_rdataframe(data_frame, column):
 
         # pull in the CppBuffers (after which we can import from it)
         CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type, cpp_type_of[dtype.name]]
-        # pythonize the CppBuffers create_array function to take ownership on return
-        CppBuffers.create_array.__creates__ = True
         cpp_buffers_self = CppBuffers(result_ptrs)
 
         if isinstance(form, ak._v2.forms.NumpyForm):
-            length, data = CppBuffers.create_array(cpp_buffers_self)
+            distance = CppBuffers.result_distance(cpp_buffers_self)
+            data = ak.nplike.numpy.empty(distance, dtype)
+            CppBuffers.fill_data_array(
+                cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p)
+            )
             layout = ak._v2.contents.numpyarray.NumpyArray(
-                numpy.frombuffer(data, dtype=dtype, count=length),
+                data,
                 parameters=form.parameters,
             )
 
-            return _maybe_wrap(ak._v2.Array(layout))
+            return _wrap_as_record_array(layout)
 
         elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
             form.content, ak._v2.forms.NumpyForm
@@ -151,13 +151,19 @@ def from_rdataframe(data_frame, column):
             offsets_length - 1,
             buffers,
         )
-        return _maybe_wrap(array)
+        return _wrap_as_record_array(array)
 
     elif form_str == "awkward type":
 
-        # Triggers event loop and execution of all actions booked in the associated RLoopManager.
-        cpp_reference = result_ptrs.GetValue()
+        # ROOT::RDF::RResultPtr<T>::begin Returns an iterator to the beginning of
+        # the contained object if this makes sense, throw a compilation error otherwise.
+        #
+        # Does not trigger event loop and execution of all actions booked in
+        # the associated RLoopManager.
+        lookup = result_ptrs.begin().lookup()
+        generator = lookup[column].generator
+        layout = generator.tolayout(lookup[column], 0, ())
 
-        return _wrap_as_array(column, ak._v2.from_iter(cpp_reference))
+        return _wrap_as_record_array(layout)
     else:
         raise ak._v2._util.error(NotImplementedError)

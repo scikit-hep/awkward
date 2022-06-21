@@ -215,15 +215,18 @@ public:
     return {static_cast<int64_t>(offsets_.size()), static_cast<int64_t>(offsets_[0].size())};
   }
 
-  std::pair<int64_t, void*>
-  create_array() {
-    int64_t size = result_->size();
-    DATA* ptr = new DATA[size];
+  int64_t
+  result_distance() {
+    return std::distance(result_.begin(), result_.end());
+  }
+
+  void
+  fill_data_array(void* to_buffer) {
     int64_t i = 0;
+    DATA* ptr = reinterpret_cast<DATA*>(to_buffer);
     for (auto const& it : result_) {
       ptr[i++] = it;
     }
-    return {size, ptr};
   }
 
 private:
