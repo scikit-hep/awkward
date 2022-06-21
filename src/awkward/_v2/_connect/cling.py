@@ -56,11 +56,11 @@ namespace awkward {
   template <typename ARRAY, typename VALUE>
   class Iterator {
   public:
-    Iterator(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup), generator_(generator) { }
+    Iterator(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup) { }
 
     VALUE operator*() const noexcept {
-      return ARRAY(start_, stop_, which_, ptrs_, lookup_, generator_)[0];
+      return ARRAY(start_, stop_, which_, ptrs_, lookup_)[0];
     }
 
     void operator++() noexcept {
@@ -87,17 +87,16 @@ namespace awkward {
     ssize_t which_;
     ssize_t* ptrs_;
     PyObject* lookup_;
-    PyObject* generator_;
   };
 
   template <typename ARRAY, typename VALUE>
   class RIterator {
   public:
-    RIterator(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup), generator_(generator) { }
+    RIterator(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup) { }
 
     VALUE operator*() const noexcept {
-      return ARRAY(start_, stop_, which_, ptrs_, lookup_, generator_)[0];
+      return ARRAY(start_, stop_, which_, ptrs_, lookup_)[0];
     }
 
     void operator++() noexcept {
@@ -124,14 +123,12 @@ namespace awkward {
     ssize_t which_;
     ssize_t* ptrs_;
     PyObject* lookup_;
-    PyObject* generator_;
-
   };
 
   class ArrayView {
   public:
-    ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup), generator_(generator) {
+    ArrayView(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : start_(start), stop_(stop), which_(which), ptrs_(ptrs), lookup_(lookup) {
       }
 
     size_t size() const noexcept {
@@ -146,18 +143,12 @@ namespace awkward {
         return lookup_;
     }
 
-    PyObject* generator() {
-        return generator_;
-    }
-
   protected:
     ssize_t start_;
     ssize_t stop_;
     ssize_t which_;
     ssize_t* ptrs_;
     PyObject* lookup_;
-    PyObject* generator_;
-
   };
 }
 """.strip()
@@ -182,15 +173,15 @@ def generate_RecordView(compiler, use_cached=True):
 namespace awkward {
   class RecordView {
   public:
-    RecordView(ssize_t at, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : at_(at), which_(which), ptrs_(ptrs), lookup_(lookup), generator_(generator) { }
+    RecordView(ssize_t at, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : at_(at), which_(which), ptrs_(ptrs), lookup_(lookup) { }
 
   protected:
     ssize_t at_;
     ssize_t which_;
     ssize_t* ptrs_;
     PyObject* lookup_;
-    PyObject* generator_;
+
   };
 }
 """.strip()
@@ -513,19 +504,19 @@ class Generator:
     }}
 
     Iterator<{self.class_type()}, value_type> begin() const noexcept {{
-      return Iterator<{self.class_type()}, value_type>(start_, stop_, which_, ptrs_, lookup_, generator_);
+      return Iterator<{self.class_type()}, value_type>(start_, stop_, which_, ptrs_, lookup_);
     }}
 
     Iterator<{self.class_type()}, value_type> end() const noexcept {{
-      return Iterator<{self.class_type()}, value_type>(stop_, stop_, which_, ptrs_, lookup_, generator_);
+      return Iterator<{self.class_type()}, value_type>(stop_, stop_, which_, ptrs_, lookup_);
     }}
 
     RIterator<{self.class_type()}, value_type> rbegin() const noexcept {{
-      return RIterator<{self.class_type()}, value_type>(stop_ - 1, stop_, which_, ptrs_, lookup_, generator_);
+      return RIterator<{self.class_type()}, value_type>(stop_ - 1, stop_, which_, ptrs_, lookup_);
     }}
 
     RIterator<{self.class_type()}, value_type> rend() const noexcept {{
-      return RIterator<{self.class_type()}, value_type>(start_ - 1, stop_, which_, ptrs_, lookup_, generator_);
+      return RIterator<{self.class_type()}, value_type>(start_ - 1, stop_, which_, ptrs_, lookup_);
     }}
         """.strip()
 
@@ -604,9 +595,9 @@ class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
@@ -692,9 +683,9 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef std::string value_type;
 
@@ -717,9 +708,9 @@ namespace awkward {{
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {value_type} value_type;
 
@@ -740,9 +731,9 @@ namespace awkward {{
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
@@ -751,7 +742,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = (start_ + at) * {self.size};
       ssize_t stop = start + {self.size};
-      return value_type(start, stop, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_, generator_);
+      return value_type(start, stop, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_);
     }}
   }};
 }}
@@ -861,9 +852,9 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef std::string value_type;
 
@@ -886,9 +877,9 @@ namespace awkward {{
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {value_type} value_type;
 
@@ -909,9 +900,9 @@ namespace awkward {{
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
@@ -920,7 +911,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       ssize_t start = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STARTS}])[start_ + at];
       ssize_t stop = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.STOPS}])[start_ + at];
-      return value_type(start, stop, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_, generator_);
+      return value_type(start, stop, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_);
     }}
   }};
 }}
@@ -991,9 +982,9 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
@@ -1001,7 +992,7 @@ namespace awkward {{
 
     value_type operator[](size_t at) const noexcept {{
       ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
-      return {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_, generator_)[0];
+      return {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0];
     }}
   }};
 }}
@@ -1070,9 +1061,9 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
@@ -1081,7 +1072,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
       if (index >= 0) {{
-        return value_type{{ {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_, generator_)[0] }};
+        return value_type{{ {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0] }};
       }}
       else {{
         return std::nullopt;
@@ -1151,9 +1142,9 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
@@ -1162,7 +1153,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       int8_t mask = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.MASK}])[start_ + at];
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_, generator_)[at] }};
+        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -1241,9 +1232,9 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
@@ -1257,7 +1248,7 @@ namespace awkward {{
       uint8_t mask = {"(byte >> shift) & 1" if self.lsb_order else "(byte << shift) & 128"};
 
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_, generator_)[at] }};
+        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -1316,16 +1307,16 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
-      return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_, generator_)[at] }};
+      return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
     }}
   }};
 }}
@@ -1393,7 +1384,7 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
                     getfields.append(
                         f"""
     {content.value_type()} {fieldname}() const noexcept {{
-      return {content.class_type()}(at_, at_ + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_, lookup_, generator_)[0];
+      return {content.class_type()}(at_, at_ + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_, lookup_)[0];
     }}
 """.strip()
                     )
@@ -1403,9 +1394,9 @@ class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
 namespace awkward {{
   class {self.class_type()}: public RecordView {{
   public:
-    {self.class_type()}(ssize_t at, ssize_t which, ssize_t* ptrs, PyObject* lookup, PyObject* generator)
-      : RecordView(at, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : RecordView(0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t at, ssize_t which, ssize_t* ptrs, PyObject* lookup)
+      : RecordView(at, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : RecordView(0, 0, 0, 0) {{ }}
 
     const std::string parameter(const std::string& parameter) const noexcept {{
       {"" if len(params) == 0 else "".join(x for x in params)}return "null";
@@ -1484,16 +1475,16 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
-      return value_type(start_ + at, which_, ptrs_, lookup_, generator_);
+      return value_type(start_ + at, which_, ptrs_, lookup_);
     }}
   }};
 }}
@@ -1567,7 +1558,7 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
                 cases.append(
                     f"""
         case {i}:
-          return value_type{{ {content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_, lookup_, generator_)[0] }};
+          return value_type{{ {content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + i}], ptrs_, lookup_)[0] }};
 """.strip()
                 )
 
@@ -1576,9 +1567,9 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
 namespace awkward {{
   class {self.class_type()}: public ArrayView {{
   public:
-    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr, PyObject* generator = nullptr)
-      : ArrayView(start, stop, which, ptrs, lookup, generator) {{ }}
-    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0, 0) {{ }}
+    {self.class_type()}(ssize_t start, ssize_t stop, ssize_t which, ssize_t* ptrs, PyObject* lookup = nullptr)
+      : ArrayView(start, stop, which, ptrs, lookup) {{ }}
+    {self.class_type()}() : ArrayView(0, 0, 0, 0, 0) {{ }}
 
     typedef {self.value_type()} value_type;
 
@@ -1590,7 +1581,7 @@ namespace awkward {{
       switch (tag) {{
         {eoln.join(cases)}
         default:
-          return value_type{{ {self.contents[0].class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_, lookup_, generator_)[0] }};
+          return value_type{{ {self.contents[0].class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_, lookup_)[0] }};
       }}
     }}
   }};
