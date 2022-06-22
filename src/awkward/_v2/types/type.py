@@ -11,6 +11,8 @@ np = ak.nplike.NumpyMetadata.instance()
 class Type:
     @property
     def parameters(self):
+        if self._parameters is None:
+            self._parameters = {}
         return self._parameters
 
     def parameter(self, key):
