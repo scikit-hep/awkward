@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import json
 from collections.abc import Iterable
 
 import awkward as ak
@@ -103,9 +104,7 @@ class RecordType(Type):
                 pairs = []
                 for k, v in zip(self._fields, children):
                     if ak._v2._prettyprint.is_identifier.match(k) is None:
-                        key_str = repr(k)
-                        if key_str.startswith("u"):
-                            key_str = key_str[1:]
+                        key_str = json.dumps(k)
                     else:
                         key_str = k
                     pairs.append([key_str, ": "] + v)
