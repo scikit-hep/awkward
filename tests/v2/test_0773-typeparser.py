@@ -71,7 +71,10 @@ def test_record_dict_3():
     text = '{"bla": int64[parameters={"wonky": ["bla", 1, 2]}], "foo": int64}'
     parsedtype = ak._v2.types.from_datashape(text)
     assert isinstance(parsedtype, ak._v2.types.RecordType)
-    assert str(parsedtype) == '{bla: int64[parameters={"wonky": ["bla", 1, 2]}], foo: int64}'
+    assert (
+        str(parsedtype)
+        == '{bla: int64[parameters={"wonky": ["bla", 1, 2]}], foo: int64}'
+    )
 
 
 def test_record_parmtuple_1():
@@ -92,14 +95,20 @@ def test_record_struct_1():
     text = 'struct[["1"], [int64[parameters={"xkcd": [11, 12, 13]}]], parameters={"wonky": ["bla", 1, 2]}]'
     parsedtype = ak._v2.types.from_datashape(text)
     assert isinstance(parsedtype, ak._v2.types.RecordType)
-    assert str(parsedtype) == 'struct[{"1": int64[parameters={"xkcd": [11, 12, 13]}]}, parameters={"wonky": ["bla", 1, 2]}]'
+    assert (
+        str(parsedtype)
+        == 'struct[{"1": int64[parameters={"xkcd": [11, 12, 13]}]}, parameters={"wonky": ["bla", 1, 2]}]'
+    )
 
 
 def test_record_struct_2():
     text = 'struct[["1", "2"], [int64[parameters={"xkcd": [11, 12, 13]}], int64], parameters={"wonky": ["bla", 1, 2]}]'
     parsedtype = ak._v2.types.from_datashape(text)
     assert isinstance(parsedtype, ak._v2.types.RecordType)
-    assert str(parsedtype) == "struct[{\"1\": int64[parameters={\"xkcd\": [11, 12, 13]}], \"2\": int64}, parameters={\"wonky\": [\"bla\", 1, 2]}]"
+    assert (
+        str(parsedtype)
+        == 'struct[{"1": int64[parameters={"xkcd": [11, 12, 13]}], "2": int64}, parameters={"wonky": ["bla", 1, 2]}]'
+    )
 
 
 def test_option_numpy_1():
@@ -230,7 +239,9 @@ def test_arraytype_bytestring():
 
 def test_arraytype_categorical_1():
     text = str(
-        ak._v2.behaviors.categorical.to_categorical(ak._v2.Array(["one", "one", "two", "three", "one", "three"])).type
+        ak._v2.behaviors.categorical.to_categorical(
+            ak._v2.Array(["one", "one", "two", "three", "one", "three"])
+        ).type
     )
     parsedtype = ak._v2.types.from_datashape(text, True)
     assert isinstance(parsedtype, ak._v2.types.ArrayType)
@@ -238,7 +249,11 @@ def test_arraytype_categorical_1():
 
 
 def test_arraytype_categorical_2():
-    text = str(ak._v2.behaviors.categorical.to_categorical(ak._v2.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])).type)
+    text = str(
+        ak._v2.behaviors.categorical.to_categorical(
+            ak._v2.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])
+        ).type
+    )
     parsedtype = ak._v2.types.from_datashape(text, True)
     assert isinstance(parsedtype, ak._v2.types.ArrayType)
     assert str(parsedtype) == text
@@ -248,14 +263,14 @@ def test_arraytype_record_1():
     text = '3 * Thingy["x": int64, "y": float64]'
     parsedtype = ak._v2.types.from_datashape(text, True)
     assert isinstance(parsedtype, ak._v2.types.ArrayType)
-    assert str(parsedtype) == '3 * Thingy[x: int64, y: float64]'
+    assert str(parsedtype) == "3 * Thingy[x: int64, y: float64]"
 
 
 def test_arraytype_record_2():
     text = '3 * var * Thingy["x": int64, "y": float64]'
     parsedtype = ak._v2.types.from_datashape(text, True)
     assert isinstance(parsedtype, ak._v2.types.ArrayType)
-    assert str(parsedtype) == '3 * var * Thingy[x: int64, y: float64]'
+    assert str(parsedtype) == "3 * var * Thingy[x: int64, y: float64]"
 
 
 def test_arraytype_1():
@@ -286,7 +301,9 @@ def test_arraytype_3():
 
 def test_arraytype_4():
     text = str(
-        ak.with_parameter(ak._v2.Array([[1, 2, 3], None, [4, 5]]), "wonky", "string").type
+        ak.with_parameter(
+            ak._v2.Array([[1, 2, 3], None, [4, 5]]), "wonky", "string"
+        ).type
     )
     parsedtype = ak._v2.types.from_datashape(text)
     assert str(parsedtype) == text
@@ -383,13 +400,13 @@ def test_arraytype_15():
 
 
 def test_arraytype_16():
-    text = '7 * ?union[int64, var * int64]'
+    text = "7 * ?union[int64, var * int64]"
     parsedtype = ak._v2.types.from_datashape(text)
     assert str(parsedtype) == text
 
 
 def test_arraytype_17():
-    text = '7 * ?union[int64, var * unknown]'
+    text = "7 * ?union[int64, var * unknown]"
     parsedtype = ak._v2.types.from_datashape(text)
     assert str(parsedtype) == text
 
@@ -412,4 +429,4 @@ def test_record_highlevel():
     text = 'Thingy["x": int64, "y": float64]'
     parsedtype = ak._v2.types.from_datashape(text, True)
     assert isinstance(parsedtype, ak._v2.types.RecordType)
-    assert str(parsedtype) == 'Thingy[x: int64, y: float64]'
+    assert str(parsedtype) == "Thingy[x: int64, y: float64]"
