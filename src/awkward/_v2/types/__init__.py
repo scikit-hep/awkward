@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from awkward._typeparser.parser import from_datashape  # noqa: F401
+
 from awkward._v2.types.type import Type  # noqa: F401
 from awkward._v2.types.unknowntype import UnknownType  # noqa: F401
 from awkward._v2.types.numpytype import NumpyType  # noqa: F401
