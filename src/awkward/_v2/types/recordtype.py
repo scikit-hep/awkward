@@ -101,20 +101,30 @@ class RecordType(Type):
             name = self.parameter("__record__")
 
             if name is not None:
-                if not ak._v2._prettyprint.is_identifier.match(name) or name in (
-                    "unknown",
-                    "string",
-                    "bytes",
-                    "option",
-                    "tuple",
-                    "struct",
-                    "union",
-                    "categorical",
-                ) or name in ak._v2.types.numpytype._primitive_to_dtype_dict:
+                if (
+                    not ak._v2._prettyprint.is_identifier.match(name)
+                    or name
+                    in (
+                        "unknown",
+                        "string",
+                        "bytes",
+                        "option",
+                        "tuple",
+                        "struct",
+                        "union",
+                        "categorical",
+                    )
+                    or name in ak._v2.types.numpytype._primitive_to_dtype_dict
+                ):
                     if params is None:
                         params = 'parameters={"__record__": ' + json.dumps(name) + "}"
                     else:
-                        params = 'parameters={"__record__": ' + json.dumps(name) + ", " + params[12:]
+                        params = (
+                            'parameters={"__record__": '
+                            + json.dumps(name)
+                            + ", "
+                            + params[12:]
+                        )
                     name = None
 
             if not self.is_tuple:
@@ -151,9 +161,7 @@ class RecordType(Type):
                         )
                     else:
                         c = "" if len(self._contents) == 0 else ", "
-                        out = (
-                            [name, "[", pre] + flat_children + [c, post, params, "]"]
-                        )
+                        out = [name, "[", pre] + flat_children + [c, post, params, "]"]
                 else:
                     if name is None:
                         out = (
