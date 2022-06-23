@@ -11,7 +11,7 @@ np = ak.nplike.NumpyMetadata.instance()
 class Type:
     @property
     def parameters(self):
-        if self._parameters is None:
+        if self._parameters is None:  # pylint: disable=E0203
             self._parameters = {}
         return self._parameters
 

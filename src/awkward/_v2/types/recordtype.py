@@ -133,8 +133,9 @@ class RecordType(Type):
                             + [post, "], ", params, "]"]
                         )
                     else:
+                        c = "" if len(self._contents) == 0 else ", "
                         out = (
-                            [name, "[", pre] + flat_children + [", ", post, params, "]"]
+                            [name, "[", pre] + flat_children + [c, post, params, "]"]
                         )
                 else:
                     if name is None:
@@ -142,7 +143,8 @@ class RecordType(Type):
                             ["struct[{", pre] + flat_pairs + [post, "}, ", params, "]"]
                         )
                     else:
-                        out = [name, "[", pre] + flat_pairs + [", ", post, params, "]"]
+                        c = "" if len(self._contents) == 0 else ", "
+                        out = [name, "[", pre] + flat_pairs + [c, post, params, "]"]
 
         return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
