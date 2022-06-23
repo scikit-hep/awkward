@@ -33,6 +33,7 @@ type: numpytype
     | record_parameters
     | named0
     | named
+    | union
     | list_parameters
     | categorical
 
@@ -99,6 +100,8 @@ named_pairs: named_pair ("," (named_pairs | "parameters" "=" json_object))?
 named_pair:  named_key ":" type
 named_key:   ESCAPED_STRING -> string
            | CNAME          -> identifier
+
+union: "union" "[" named_types? "]"
 
 list_parameters: "[" type "," "parameters" "=" json_object "]"
 
@@ -287,6 +290,19 @@ class Transformer:
 
     def identifier(self, args):
         return str(args[0])
+
+    def union(self, args):
+        if len(args) == 0:
+            arguments = []
+            parameters = None
+        elif isinstance(args[0][-1], dict):
+            arguments = args[0][:-1]
+            parameters = args[0][-1]
+        else:
+            arguments = args[0]
+            parameters = None
+
+        return ak._v2.types.UnionType(arguments, parameters)
 
     def list_parameters(self, args):
         # modify recently created type object
@@ -629,5 +645,35 @@ def test_named_record_fields_int32_float64_parameters():
         [NumpyType("int32"), NumpyType("float64")],
         ["one", "t w o"],
         {"__record__": "Name", "p": [123]},
+    )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_union_empty():
+    t = UnionType([])
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_union_float64():
+    t = UnionType([NumpyType("float64")])
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_union_float64_datetime64():
+    t = UnionType(
+        [NumpyType("float64"), NumpyType("datetime64")],
+    )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_union_float64_parameters():
+    t = UnionType([NumpyType("float64")], {"__array__": "Something"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_union_float64_datetime64_parameters():
+    t = UnionType(
+        [NumpyType("float64"), NumpyType("datetime64")],
+        {"__array__": "Something"},
     )
     assert str(parser.parse(str(t))) == str(t)
