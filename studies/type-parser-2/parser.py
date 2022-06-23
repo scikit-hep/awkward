@@ -27,6 +27,8 @@ type: numpytype
     | byte
     | option1
     | option2
+    | named0
+    | named
     | list_parameters
     | categorical
 
@@ -36,19 +38,19 @@ numpytype_name: DTYPE
               | DATETIME64
               | TIMEDELTA64
 
-DTYPE: "bool"
-     | "int8"
-     | "uint8"
-     | "int16"
-     | "uint16"
-     | "int32"
-     | "uint32"
-     | "int64"
-     | "uint64"
-     | "float32"
-     | "float64"
-     | "complex64"
-     | "complex128"
+DTYPE.2: "bool"
+       | "int8"
+       | "uint8"
+       | "int16"
+       | "uint16"
+       | "int32"
+       | "uint32"
+       | "int64"
+       | "uint64"
+       | "float32"
+       | "float64"
+       | "complex64"
+       | "complex128"
 
 DATETIME64:  /datetime64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?/
 TIMEDELTA64: /timedelta64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?/
@@ -73,7 +75,15 @@ option1: "?" type
 
 option2: "option" "[" type ("," "parameters" "=" json_object)? "]"
 
+named0:      CNAME "[" ("parameters" "=" json_object)? "]"
+named:       CNAME "[" (named_tuple | named_pairs) "]"
 
+named_tuple: type ("," (named_tuple | "parameters" "=" json_object))?
+named_pairs: named_pair ("," (named_pairs | "parameters" "=" json_object))?
+
+named_pair:  named_key ":" type
+named_key:   ESCAPED_STRING -> string
+           | CNAME          -> identifier
 
 list_parameters: "[" type "," "parameters" "=" json_object "]"
 
@@ -92,6 +102,7 @@ json_object: "{" [json_pair ("," json_pair)*] "}"
 json_pair:   ESCAPED_STRING ":" json
 
 %import common.INT
+%import common.CNAME
 %import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER
 %import common.WS
@@ -166,6 +177,48 @@ class Transformer:
 
     def option2(self, args):
         return ak._v2.types.OptionType(args[0], parameters=self._parameters(args, 1))
+
+    def named0(self, args):
+        parameters = {"__record__": str(args[0])}
+        if 1 < len(args):
+            parameters.update(args[1])
+        return ak._v2.types.RecordType([], None, parameters)
+
+    def named(self, args):
+        parameters = {"__record__": str(args[0])}
+
+        if isinstance(args[1][-1], dict):
+            arguments = args[1][:-1]
+            parameters.update(args[1][-1])
+        else:
+            arguments = args[1]
+
+        if any(isinstance(x, tuple) for x in arguments):
+            fields = [x[0] for x in arguments]
+            contents = [x[1] for x in arguments]
+        else:
+            fields = None
+            contents = arguments
+
+        return ak._v2.types.RecordType(contents, fields, parameters)
+
+    def named_tuple(self, args):
+        if len(args) == 2 and isinstance(args[1], list):
+            return args[:1] + args[1]
+        else:
+            return args
+
+    def named_pairs(self, args):
+        if len(args) == 2 and isinstance(args[1], list):
+            return args[:1] + args[1]
+        else:
+            return args
+
+    def named_pair(self, args):
+        return tuple(args)
+
+    def identifier(self, args):
+        return str(args[0])
 
     def list_parameters(self, args):
         # modify recently created type object
@@ -383,4 +436,94 @@ def test_option_varlen_string_parameters():
         ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "string"}),
         {"__array__": "Something"},
     )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+# >>> print(RecordType([], None))
+# ()
+# >>> print(RecordType([NumpyType("int32")], None))
+# (int32)
+# >>> print(RecordType([NumpyType("int32"), NumpyType("float64")], None))
+# (int32, float64)
+# >>> print(RecordType([], []))
+# {}
+# >>> print(RecordType([NumpyType("int32")], ["one"]))
+# {one: int32}
+# >>> print(RecordType([NumpyType("int32"), NumpyType("float64")], ["one", "t w o"]))
+# {one: int32, "t w o": float64}
+
+# >>> print(RecordType([], None, {"__record__": "Name"}))
+# Name[]
+# >>> print(RecordType([NumpyType("int32")], None, {"__record__": "Name"}))
+# Name[int32]
+# >>> print(RecordType([NumpyType("int32"), NumpyType("float64")], None, {"__record__": "Name"}))
+# Name[int32, float64]
+# >>> print(RecordType([], [], {"__record__": "Name"}))
+# Name[]
+# >>> print(RecordType([NumpyType("int32")], ["one"], {"__record__": "Name"}))
+# Name[one: int32]
+# >>> print(RecordType([NumpyType("int32"), NumpyType("float64")], ["one", "t w o"], {"__record__": "Name"}))
+# Name[one: int32, "t w o": float64]
+
+# >>> print(RecordType([], None, {"p": [123]}))
+# tuple[[], parameters={"p": [123]}]
+# >>> print(RecordType([NumpyType("int32")], None, {"p": [123]}))
+# tuple[[int32], parameters={"p": [123]}]
+# >>> print(RecordType([NumpyType("int32"), NumpyType("float64")], None, {"p": [123]}))
+# tuple[[int32, float64], parameters={"p": [123]}]
+# >>> print(RecordType([], [], {"p": [123]}))
+# struct[{}, parameters={"p": [123]}]
+# >>> print(RecordType([NumpyType("int32")], ["one"], {"p": [123]}))
+# struct[{one: int32}, parameters={"p": [123]}]
+# >>> print(RecordType([NumpyType("int32"), NumpyType("float64")], ["one", "t w o"], {"p": [123]}))
+# struct[{one: int32, "t w o": float64}, parameters={"p": [123]}]
+
+
+def test_named_record_empty():
+    t = RecordType([], None, {"__record__": "Name"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_int32():
+    t = RecordType([NumpyType("int32")], None, {"__record__": "Name"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_int32_float64():
+    t = RecordType([NumpyType("int32"), NumpyType("float64")], None, {"__record__": "Name"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_fields_int32():
+    t = RecordType([NumpyType("int32")], ["one"], {"__record__": "Name"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_fields_int32_float64():
+    t = RecordType([NumpyType("int32"), NumpyType("float64")], ["one", "t w o"], {"__record__": "Name"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_empty_parameters():
+    t = RecordType([], None, {"__record__": "Name", "p": [123]})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_int32_parameters():
+    t = RecordType([NumpyType("int32")], None, {"__record__": "Name", "p": [123]})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_int32_float64_parameters():
+    t = RecordType([NumpyType("int32"), NumpyType("float64")], None, {"__record__": "Name", "p": [123]})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_fields_int32_parameters():
+    t = RecordType([NumpyType("int32")], ["one"], {"__record__": "Name", "p": [123]})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_named_record_fields_int32_float64_parameters():
+    t = RecordType([NumpyType("int32"), NumpyType("float64")], ["one", "t w o"], {"__record__": "Name", "p": [123]})
     assert str(parser.parse(str(t))) == str(t)
