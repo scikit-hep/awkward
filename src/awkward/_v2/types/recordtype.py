@@ -100,6 +100,23 @@ class RecordType(Type):
             params = self._str_parameters()
             name = self.parameter("__record__")
 
+            if name is not None:
+                if not ak._v2._prettyprint.is_identifier.match(name) or name in (
+                    "unknown",
+                    "string",
+                    "bytes",
+                    "option",
+                    "tuple",
+                    "struct",
+                    "union",
+                    "categorical",
+                ) or name in ak._v2.types.numpytype._primitive_to_dtype_dict:
+                    if params is None:
+                        params = 'parameters={"__record__": ' + json.dumps(name) + "}"
+                    else:
+                        params = 'parameters={"__record__": ' + json.dumps(name) + ", " + params[12:]
+                    name = None
+
             if not self.is_tuple:
                 pairs = []
                 for k, v in zip(self._fields, children):
