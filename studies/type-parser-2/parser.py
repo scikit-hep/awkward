@@ -8,18 +8,25 @@ from awkward._v2.types.numpytype import NumpyType
 from awkward._v2.types.unknowntype import UnknownType
 from awkward._v2.types.regulartype import RegularType
 from awkward._v2.types.listtype import ListType
-from awkward._v2.types.recordtype import RecordType
 from awkward._v2.types.optiontype import OptionType
+from awkward._v2.types.recordtype import RecordType
 from awkward._v2.types.uniontype import UnionType
 from awkward._v2.types.arraytype import ArrayType
 
 
-grammar = r'''
+grammar = r"""
 start: type
 
 type: numpytype
     | unknowntype
     | regulartype
+    | listtype
+    | varlen_string
+    | fixedlen_string
+    | char
+    | byte
+    | option1
+    | option2
     | list_parameters
     | categorical
 
@@ -50,6 +57,21 @@ unknowntype: "unknown" ("[" "parameters" "=" json_object "]")?
 
 regulartype: INT "*" type
 
+listtype: "var" "*" type
+
+varlen_string: "string" -> varlen_string
+             | "bytes" -> varlen_bytestring
+
+fixedlen_string: ("string" "[" INT "]") -> fixedlen_string
+               | ("bytes" "[" INT "]") -> fixedlen_bytestring
+
+char: "char"
+
+byte: "byte"
+
+option1: "?" type
+
+option2: "option" "[" type ("," "parameters" "=" json_object)? "]"
 
 
 
@@ -75,7 +97,8 @@ json_pair:   ESCAPED_STRING ":" json
 %import common.WS
 
 %ignore WS
-'''
+"""
+
 
 class Transformer:
     @staticmethod
@@ -103,15 +126,55 @@ class Transformer:
     def regulartype(self, args):
         return ak._v2.types.RegularType(args[1], int(args[0]))
 
+    def listtype(self, args):
+        return ak._v2.types.ListType(args[0])
 
+    def varlen_string(self, args):
+        return ak._v2.types.ListType(
+            ak._v2.types.NumpyType("uint8", {"__array__": "char"}),
+            {"__array__": "string"},
+        )
 
+    def varlen_bytestring(self, args):
+        return ak._v2.types.ListType(
+            ak._v2.types.NumpyType("uint8", {"__array__": "byte"}),
+            {"__array__": "bytestring"},
+        )
+
+    def fixedlen_string(self, args):
+        return ak._v2.types.RegularType(
+            ak._v2.types.NumpyType("uint8", {"__array__": "char"}),
+            int(args[0]),
+            {"__array__": "string"},
+        )
+
+    def fixedlen_bytestring(self, args):
+        return ak._v2.types.RegularType(
+            ak._v2.types.NumpyType("uint8", {"__array__": "byte"}),
+            int(args[0]),
+            {"__array__": "bytestring"},
+        )
+
+    def char(self, args):
+        return ak._v2.types.NumpyType("uint8", {"__array__": "char"})
+
+    def byte(self, args):
+        return ak._v2.types.NumpyType("uint8", {"__array__": "byte"})
+
+    def option1(self, args):
+        return ak._v2.types.OptionType(args[0])
+
+    def option2(self, args):
+        return ak._v2.types.OptionType(args[0], parameters=self._parameters(args, 1))
 
     def list_parameters(self, args):
-        args[0].parameters.update(args[1])   # modify recently created type object
+        # modify recently created type object
+        args[0].parameters.update(args[1])
         return args[0]
 
     def categorical(self, args):
-        args[0].parameters["__categorical__"] = True   # modify recently created type object
+        # modify recently created type object
+        args[0].parameters["__categorical__"] = True
         return args[0]
 
     def json(self, args):
@@ -143,6 +206,7 @@ class Transformer:
 
     def null(self, args):
         return None
+
 
 parser = lark.Lark(grammar, parser="lalr", transformer=Transformer())
 
@@ -223,5 +287,100 @@ def test_regulartype_numpytype_categorical():
 
 
 def test_regulartype_numpytype_categorical_parameter():
-    t = RegularType(NumpyType("int32"), 5, {"__categorical__": True, "__array__": "Something"})
+    t = RegularType(
+        NumpyType("int32"), 5, {"__categorical__": True, "__array__": "Something"}
+    )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_listtype_numpytype():
+    t = ListType(NumpyType("int32"))
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_listtype_numpytype_parameter():
+    t = ListType(NumpyType("int32"), {"__array__": "Something"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_listtype_numpytype_categorical():
+    t = ListType(NumpyType("int32"), {"__categorical__": True})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_listtype_numpytype_categorical_parameter():
+    t = ListType(
+        NumpyType("int32"), {"__categorical__": True, "__array__": "Something"}
+    )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_varlen_string():
+    t = ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "string"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_varlen_bytestring():
+    t = ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "bytestring"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_fixedlen_string():
+    t = RegularType(
+        NumpyType("uint8", {"__array__": "char"}), 5, {"__array__": "string"}
+    )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_fixedlen_bytestring():
+    t = RegularType(
+        NumpyType("uint8", {"__array__": "byte"}), 5, {"__array__": "bytestring"}
+    )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_char():
+    t = NumpyType("uint8", {"__array__": "char"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_byte():
+    t = NumpyType("uint8", {"__array__": "byte"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_optiontype_numpytype_int32():
+    t = OptionType(NumpyType("int32"))
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_optiontype_numpytype_int32_parameters():
+    t = OptionType(NumpyType("int32"), {"__array__": "Something"})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_optiontype_numpytype_int32_categorical():
+    t = OptionType(NumpyType("int32"), {"__categorical__": True})
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_optiontype_numpytype_int32_categorical_parameters():
+    t = OptionType(
+        NumpyType("int32"), {"__array__": "Something", "__categorical__": True}
+    )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_option_varlen_string():
+    t = OptionType(
+        ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "string"})
+    )
+    assert str(parser.parse(str(t))) == str(t)
+
+
+def test_option_varlen_string_parameters():
+    t = OptionType(
+        ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "string"}),
+        {"__array__": "Something"},
+    )
     assert str(parser.parse(str(t))) == str(t)
