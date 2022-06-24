@@ -765,4 +765,689 @@ namespace awkward {
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<float>;
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<double>;
 
+  ////////// specialized
+
+  template <typename OUT>
+  ForthOutputBufferGrowable<OUT>::ForthOutputBufferGrowable(int64_t initial, double resize)
+    : ForthOutputBuffer(initial, resize)
+    , ptr_(new OUT[initial], kernel::array_deleter<OUT>()) { }
+
+  template <typename OUT>
+  const std::shared_ptr<void>
+  ForthOutputBufferGrowable<OUT>::ptr() const noexcept {
+    return ptr_;
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::dup(int64_t num_times, util::ForthError& err) noexcept {
+    if (length_ == 0) {
+      err = util::ForthError::rewind_beyond;
+    }
+    else if (num_times > 0) {
+      int64_t next = length_ + num_times;
+      maybe_resize(next);
+      OUT value = ptr_.get()[length_ - 1];
+      for (int64_t i = 0;  i < num_times;  i++) {
+        ptr_.get()[length_ + i] = value;
+      }
+      length_ = next;
+    }
+  }
+
+  template <typename OUT>
+  const ContentPtr
+  ForthOutputBufferGrowable<OUT>::toNumpyArray() const {
+    util::dtype dtype;
+    if (std::is_same<OUT, bool>::value) {
+      dtype = util::dtype::boolean;
+    }
+    else if (std::is_same<OUT, std::int8_t>::value) {
+      dtype = util::dtype::int8;
+    }
+    else if (std::is_same<OUT, std::int16_t>::value) {
+      dtype = util::dtype::int16;
+    }
+    else if (std::is_same<OUT, std::int32_t>::value) {
+      dtype = util::dtype::int32;
+    }
+    else if (std::is_same<OUT, std::int64_t>::value) {
+      dtype = util::dtype::int64;
+    }
+    else if (std::is_same<OUT, std::uint8_t>::value) {
+      dtype = util::dtype::uint8;
+    }
+    else if (std::is_same<OUT, std::uint16_t>::value) {
+      dtype = util::dtype::uint16;
+    }
+    else if (std::is_same<OUT, std::uint32_t>::value) {
+      dtype = util::dtype::uint32;
+    }
+    else if (std::is_same<OUT, std::uint64_t>::value) {
+      dtype = util::dtype::uint64;
+    }
+    else if (std::is_same<OUT, float>::value) {
+      dtype = util::dtype::float32;
+    }
+    else if (std::is_same<OUT, double>::value) {
+      dtype = util::dtype::float64;
+    }
+    else {
+      throw std::runtime_error(
+        std::string("unrecognized ForthOutputBuffer specialization: ")
+        + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+      );
+    }
+    return std::make_shared<NumpyArray>(Identities::none(),
+                                        util::Parameters(),
+                                        ptr_,
+                                        std::vector<ssize_t>({ (ssize_t)length_ }),
+                                        std::vector<ssize_t>({ (ssize_t)sizeof(OUT) }),
+                                        0,
+                                        (ssize_t)sizeof(OUT),
+                                        util::dtype_to_format(dtype),
+                                        dtype,
+                                        kernel::lib::cpu);
+  }
+
+  template <typename OUT>
+  const Index8
+  ForthOutputBufferGrowable<OUT>::toIndex8() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with Index8: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename OUT>
+  const IndexU8
+  ForthOutputBufferGrowable<OUT>::toIndexU8() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with IndexU8: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename OUT>
+  const Index32
+  ForthOutputBufferGrowable<OUT>::toIndex32() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with Index32: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename OUT>
+  const IndexU32
+  ForthOutputBufferGrowable<OUT>::toIndexU32() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with IndexU32: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename OUT>
+  const Index64
+  ForthOutputBufferGrowable<OUT>::toIndex64() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with Index64: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <>
+  const Index8
+  ForthOutputBufferGrowable<int8_t>::toIndex8() const {
+    return Index8(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <>
+  const IndexU8
+  ForthOutputBufferGrowable<uint8_t>::toIndexU8() const {
+    return IndexU8(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <>
+  const Index32
+  ForthOutputBufferGrowable<int32_t>::toIndex32() const {
+    return Index32(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <>
+  const IndexU32
+  ForthOutputBufferGrowable<uint32_t>::toIndexU32() const {
+    return IndexU32(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <>
+  const Index64
+  ForthOutputBufferGrowable<int64_t>::toIndex64() const {
+    return Index64(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_bool(bool value, bool byteswap) noexcept {
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_int8(int8_t value, bool byteswap) noexcept {
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_int16(int16_t value, bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap16(1, &value);
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_int32(int32_t value, bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap32(1, &value);
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_int64(int64_t value, bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap64(1, &value);
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_intp(ssize_t value, bool byteswap) noexcept {
+    if (byteswap) {
+      if (sizeof(ssize_t) == 4) {
+        byteswap32(1, &value);
+      }
+      else {
+        byteswap64(1, &value);
+      }
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_uint8(uint8_t value, bool byteswap) noexcept {
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_uint16(uint16_t value, bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap16(1, &value);
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_uint32(uint32_t value, bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap32(1, &value);
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_uint64(uint64_t value, bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap64(1, &value);
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_uintp(size_t value, bool byteswap) noexcept {
+    if (byteswap) {
+      if (sizeof(size_t) == 4) {
+        byteswap32(1, &value);
+      }
+      else {
+        byteswap64(1, &value);
+      }
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_float32(float value, bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap32(1, &value);
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_float64(double value, bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap64(1, &value);
+    }
+    write_one(value);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_one_string(char* string_buffer, int64_t length) noexcept {
+    int64_t next = length_ + length;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], string_buffer, length);
+    length_ = next;
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_bool(int64_t num_items,
+                                       bool* values,
+                                       bool byteswap) noexcept {
+    write_copy(num_items, values);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_int8(int64_t num_items,
+                                       int8_t* values,
+                                       bool byteswap) noexcept {
+    write_copy(num_items, values);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_int16(int64_t num_items,
+                                        int16_t* values,
+                                        bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap16(num_items, values);
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      byteswap16(num_items, values);
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_int32(int64_t num_items,
+                                        int32_t* values,
+                                        bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap32(num_items, values);
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      byteswap32(num_items, values);
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_int64(int64_t num_items,
+                                        int64_t* values,
+                                        bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap64(num_items, values);
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      byteswap64(num_items, values);
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_intp(int64_t num_items,
+                                       ssize_t* values,
+                                       bool byteswap) noexcept {
+    if (byteswap) {
+      if (sizeof(ssize_t) == 4) {
+        byteswap32(num_items, values);
+      }
+      else {
+        byteswap64(num_items, values);
+      }
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      if (sizeof(ssize_t) == 4) {
+        byteswap32(num_items, values);
+      }
+      else {
+        byteswap64(num_items, values);
+      }
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_const_uint8(int64_t num_items,
+                                              const uint8_t* values) noexcept {
+    write_copy(num_items, values);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_uint8(int64_t num_items,
+                                        uint8_t* values,
+                                        bool byteswap) noexcept {
+    write_copy(num_items, values);
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_uint16(int64_t num_items,
+                                         uint16_t* values,
+                                         bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap16(num_items, values);
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      byteswap16(num_items, values);
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_uint32(int64_t num_items,
+                                         uint32_t* values,
+                                         bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap32(num_items, values);
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      byteswap32(num_items, values);
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_uint64(int64_t num_items,
+                                         uint64_t* values,
+                                         bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap64(num_items, values);
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      byteswap64(num_items, values);
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_uintp(int64_t num_items,
+                                        size_t* values,
+                                        bool byteswap) noexcept {
+    if (byteswap) {
+      if (sizeof(size_t) == 4) {
+        byteswap32(num_items, values);
+      }
+      else {
+        byteswap64(num_items, values);
+      }
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      if (sizeof(size_t) == 4) {
+        byteswap32(num_items, values);
+      }
+      else {
+        byteswap64(num_items, values);
+      }
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_float32(int64_t num_items,
+                                          float* values,
+                                          bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap32(num_items, values);
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      byteswap32(num_items, values);
+    }
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_float64(int64_t num_items,
+                                          double* values,
+                                          bool byteswap) noexcept {
+    if (byteswap) {
+      byteswap64(num_items, values);
+    }
+    write_copy(num_items, values);
+    if (byteswap) {
+      byteswap64(num_items, values);
+    }
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<bool>::write_bool(int64_t num_items,
+                                        bool* values,
+                                        bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(bool) * (size_t)num_items);
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<int8_t>::write_int8(int64_t num_items,
+                                          int8_t* values,
+                                          bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(int8_t) * (size_t)num_items);
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<int16_t>::write_int16(int64_t num_items,
+                                            int16_t* values,
+                                            bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(int16_t) * (size_t)num_items);
+    if (byteswap) {
+      byteswap16(num_items, &ptr_.get()[length_]);
+    }
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<int32_t>::write_int32(int64_t num_items,
+                                            int32_t* values,
+                                            bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(int32_t) * (size_t)num_items);
+    if (byteswap) {
+      byteswap32(num_items, &ptr_.get()[length_]);
+    }
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<int64_t>::write_int64(int64_t num_items,
+                                            int64_t* values,
+                                            bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(int64_t) * (size_t)num_items);
+    if (byteswap) {
+      byteswap64(num_items, &ptr_.get()[length_]);
+    }
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<uint8_t>::write_const_uint8(int64_t num_items,
+                                                  const uint8_t* values) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<uint8_t>::write_uint8(int64_t num_items,
+                                            uint8_t* values,
+                                            bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<uint16_t>::write_uint16(int64_t num_items,
+                                              uint16_t* values,
+                                              bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint16_t) * (size_t)num_items);
+    if (byteswap) {
+      byteswap16(num_items, &ptr_.get()[length_]);
+    }
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<uint32_t>::write_uint32(int64_t num_items,
+                                              uint32_t* values,
+                                              bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint32_t) * (size_t)num_items);
+    if (byteswap) {
+      byteswap32(num_items, &ptr_.get()[length_]);
+    }
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<uint64_t>::write_uint64(int64_t num_items,
+                                              uint64_t* values,
+                                              bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint64_t) * (size_t)num_items);
+    if (byteswap) {
+      byteswap64(num_items, &ptr_.get()[length_]);
+    }
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<float>::write_float32(int64_t num_items,
+                                            float* values,
+                                            bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(float) * (size_t)num_items);
+    if (byteswap) {
+      byteswap32(num_items, &ptr_.get()[length_]);
+    }
+    length_ = next;
+  }
+
+  template <>
+  void
+  ForthOutputBufferGrowable<double>::write_float64(int64_t num_items,
+                                             double* values,
+                                             bool byteswap) noexcept {
+    int64_t next = length_ + num_items;
+    maybe_resize(next);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(double) * (size_t)num_items);
+    if (byteswap) {
+      byteswap64(num_items, &ptr_.get()[length_]);
+    }
+    length_ = next;
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_add_int32(int32_t value) noexcept {
+    OUT previous = 0;
+    if (length_ != 0) {
+      previous = ptr_.get()[length_ - 1];
+    }
+    length_++;
+    maybe_resize(length_);
+    ptr_.get()[length_ - 1] = previous + (OUT)value;
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::write_add_int64(int64_t value) noexcept {
+    OUT previous = 0;
+    if (length_ != 0) {
+      previous = ptr_.get()[length_ - 1];
+    }
+    length_++;
+    maybe_resize(length_);
+    ptr_.get()[length_ - 1] = previous + (OUT)value;
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferGrowable<OUT>::maybe_resize(int64_t next) {
+    if (next > reserved_) {
+      int64_t reservation = reserved_;
+      while (next > reservation) {
+        reservation = (int64_t)std::ceil(reservation * resize_);
+      }
+      std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
+                                                             kernel::array_deleter<OUT>());
+      std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * (size_t)reserved_);
+      ptr_ = new_buffer;
+      reserved_ = reservation;
+    }
+  }
+
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<bool>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<int8_t>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<int16_t>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<int32_t>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<int64_t>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<uint8_t>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<uint16_t>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<uint32_t>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<uint64_t>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<float>;
+  template class EXPORT_TEMPLATE_INST ForthOutputBufferGrowable<double>;
+
 }

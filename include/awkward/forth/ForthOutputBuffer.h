@@ -205,6 +205,8 @@ namespace awkward {
     double resize_;
   };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   template <typename OUT>
   class LIBAWKWARD_EXPORT_SYMBOL ForthOutputBufferOf : public ForthOutputBuffer {
   public:
@@ -352,6 +354,155 @@ namespace awkward {
     std::shared_ptr<OUT> ptr_;
   };
 
-}
 
+
+  template <typename OUT>
+  class LIBAWKWARD_EXPORT_SYMBOL ForthOutputBufferGrowable : public ForthOutputBuffer {
+  public:
+    ForthOutputBufferGrowable(int64_t initial, double resize);
+
+    void
+      dup(int64_t num_times, util::ForthError& err) noexcept override;
+
+    const std::shared_ptr<void>
+      ptr() const noexcept override;
+
+    const ContentPtr
+      toNumpyArray() const override;
+
+    const Index8
+      toIndex8() const override;
+
+    const IndexU8
+      toIndexU8() const override;
+
+    const Index32
+      toIndex32() const override;
+
+    const IndexU32
+      toIndexU32() const override;
+
+    const Index64
+      toIndex64() const override;
+
+    void
+      write_one_bool(bool value, bool byteswap) noexcept override;
+
+    void
+      write_one_int8(int8_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_int16(int16_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_int32(int32_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_int64(int64_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_intp(ssize_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_uint8(uint8_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_uint16(uint16_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_uint32(uint32_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_uint64(uint64_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_uintp(size_t value, bool byteswap) noexcept override;
+
+    void
+      write_one_float32(float value, bool byteswap) noexcept override;
+
+    void
+      write_one_float64(double value, bool byteswap) noexcept override;
+
+    void
+      write_one_string(char* string_buffer, int64_t length) noexcept override;
+
+    void
+      write_bool(int64_t num_items, bool* values, bool byteswap) noexcept override;
+
+    void
+      write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept override;
+
+    void
+      write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept override;
+
+    void
+      write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept override;
+
+    void
+      write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept override;
+
+    void
+      write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept override;
+
+    void
+      write_const_uint8(int64_t num_items, const uint8_t* values) noexcept override;
+
+    void
+      write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept override;
+
+    void
+      write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept override;
+
+    void
+      write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept override;
+
+    void
+      write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept override;
+
+    void
+      write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept override;
+
+    void
+      write_float32(int64_t num_items, float* values, bool byteswap) noexcept override;
+
+    void
+      write_float64(int64_t num_items, double* values, bool byteswap) noexcept override;
+
+    void
+      write_add_int32(int32_t value) noexcept override;
+
+    void
+      write_add_int64(int64_t value) noexcept override;
+
+  private:
+
+    /// @brief HERE
+    void
+      maybe_resize(int64_t next);
+
+    /// @brief HERE
+    template <typename IN>
+    inline void write_one(IN value) noexcept {
+      length_++;
+      maybe_resize(length_);
+      ptr_.get()[length_ - 1] = (OUT)value;
+    }
+
+    /// @brief HERE
+    template <typename IN>
+    inline void write_copy(int64_t num_items, const IN* values) noexcept {
+      int64_t next = length_ + num_items;
+      maybe_resize(next);
+      for (int64_t i = 0;  i < num_items;  i++) {
+        ptr_.get()[length_ + i] = (OUT)values[i];
+      }
+      length_ = next;
+    }
+
+    std::shared_ptr<OUT> ptr_;
+  };
+
+
+}
 #endif // AWKWARD_FORTHOUTPUTBUFFER_H_
