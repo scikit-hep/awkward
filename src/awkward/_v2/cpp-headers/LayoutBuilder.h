@@ -241,11 +241,12 @@ namespace awkward {
       content_.append(x);
     }
 
-    void
+    BUILDER*
     begin_list() {
       if (!begun_) {
         begun_ = true;
       }
+      return &content_;
     }
 
     void

@@ -44,6 +44,22 @@ test_record()
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node4\" }, \"form_key\": \"node3\" } }, "
                      "\"form_key\": \"node0\" }");
 
+  auto x_builder = std::get<0>(builder.contents)->builder_;
+  auto y_builder = std::get<1>(builder.contents)->builder_;
+  auto z_builder = std::get<2>(builder.contents)->builder_;
+
+  builder.begin_record();
+
+  x_builder.append(1.1);
+  y_builder.append(2);
+
+  awkward::NumpyLayoutBuilder<initial,double>* builderz = z_builder.begin_list();
+  builderz->append(1.1);
+  builderz->append(1.2);
+  builderz->append(1.3);
+  z_builder.end_list();
+
+  builder.end_record();
 }
 
 void
@@ -172,8 +188,8 @@ test_listoffset_of_listoffset() {
 
 int main(int argc, char **argv) {
   std::cout << "Test me!" << std::endl;
-  test_nested_record();
-  //test_record();
+  //test_nested_record();
+  test_record();
   //test_numpy();
   //test_listoffset_of_numpy();
   //test_listoffset_of_record();
