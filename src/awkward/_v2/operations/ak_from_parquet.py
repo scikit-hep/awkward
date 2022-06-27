@@ -159,13 +159,13 @@ def metadata(
         if any(_ >= metadata.num_row_groups for _ in row_groups):
             raise ak._v2._util.error(
                 ValueError(
-                f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}"
+                    f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}"
                 )
             )
         if not can_sub:
             raise ak._v2._util.error(
                 TypeError(
-                "Requested selection of row-groups, but not scanning metadata"
+                    "Requested selection of row-groups, but not scanning metadata"
                 )
             )
 
