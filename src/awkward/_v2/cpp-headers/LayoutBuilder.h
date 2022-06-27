@@ -7,16 +7,65 @@
 //#include "rdataframe_jagged_builders.h"
 
 #include <stdexcept>
+#include <cassert>
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <tuple>
 #include <complex>
 
 namespace awkward {
-  /* struct Record
-  {
+  extern int64_t form_key_id;
+  int64_t form_key_id = -1;
 
-  }; */
+  template<const char *str>
+  struct field_name {
+    const char* value = str;
+  };
+
+  template<class field_name, typename BUILDER>
+  struct Record {
+    const char* field() {
+        return field_.value;
+    }
+
+    BUILDER* builder() {
+        return builder_;
+    }
+
+    field_name field_;
+    BUILDER* builder_;
+  };
+
+  template <size_t INDEX>
+  struct visit_impl
+  {
+      template <typename RECORD, typename FUNCTION>
+      static void visit(RECORD& contents, size_t index, FUNCTION fun)
+      {
+          if (index == INDEX - 1) fun(std::get<INDEX - 1>(contents));
+          else visit_impl<INDEX - 1>::visit(contents, index, fun);
+      }
+  };
+
+  template <>
+  struct visit_impl<0>
+  {
+      template <typename RECORD, typename FUNCTION>
+      static void visit(RECORD& contents, size_t index, FUNCTION fun) { assert(false); }
+  };
+
+  template <typename FUNCTION, typename... RECORDs>
+  void visit_at(std::tuple<RECORDs...> const& contents, size_t index, FUNCTION fun)
+  {
+      visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
+  }
+
+  template <typename FUNCTION, typename... RECORDs>
+  void visit_at(std::tuple<RECORDs...>& contents, size_t index, FUNCTION fun)
+  {
+      visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
+  }
 
   template <typename T>
   const std::string
@@ -104,11 +153,11 @@ namespace awkward {
   struct is_specialization<Ref<Args...>, Ref> : std::true_type {
   };
 
-  template <typename PRIMITIVE>
+  template <unsigned INITIAL, typename PRIMITIVE>
   class NumpyLayoutBuilder {
   public:
-    NumpyLayoutBuilder(size_t initial = 1024)
-        : data_(awkward::GrowableBuffer<PRIMITIVE>(initial)) { }
+    NumpyLayoutBuilder()
+        : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) { }
 
     void
     append(PRIMITIVE x) {
@@ -132,11 +181,6 @@ namespace awkward {
       data_.clear();
     }
 
-    void
-    null() {
-      data_.append(-1);
-    }
-
     PRIMITIVE*
     to_buffers() const {
       PRIMITIVE* ptr = new PRIMITIVE[length()];
@@ -145,15 +189,15 @@ namespace awkward {
     }
 
     std::string
-    form(int64_t form_key_id = -1) {
+    form() {
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
       if (std::is_arithmetic<PRIMITIVE>::value) {
-        return "{\"class\": \"NumpyArray\", \"primitive\": \""
-          + type_to_name<PRIMITIVE>() + "\", " + "\"form_key\": \"" + form_key.str() + "\"}";
+        return "{ \"class\": \"NumpyArray\", \"primitive\": \""
+          + type_to_name<PRIMITIVE>() + "\", " + "\"form_key\": \"" + form_key.str() + "\" }";
       } else if (is_specialization<PRIMITIVE, std::complex>::value) {
-        return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
-          + form_key.str() + "\"}";
+        return "{ \"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
+          + form_key.str() + "\" }";
       }
       return "unsupported type";
     }
@@ -172,22 +216,22 @@ namespace awkward {
     awkward::GrowableBuffer<PRIMITIVE> data_;
   };
 
-  template <typename BUILDER>
+  template <unsigned INITIAL, typename BUILDER>
   class ListOffsetLayoutBuilder {
   public:
-    ListOffsetLayoutBuilder(size_t initial = 1024)
-        : offsets_(awkward::GrowableBuffer<int64_t>(initial))
+    ListOffsetLayoutBuilder()
+        : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL))
         , begun_(false) {
       offsets_.append(0);
     }
 
     // returns JSON string
     std::string
-    form(int64_t form_key_id = -1) {
+    form() {
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
-      return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-      + content_.form(form_key_id) + ", " + "\"form_key\": \"" + form_key.str() + "\"}";
+      return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     BUILDER*
@@ -204,7 +248,8 @@ namespace awkward {
         throw std::invalid_argument(
           std::string("called 'end_list' without 'begin_list' at the same level before it"
           "in ListOffsetLayoutBuilder"));
-      } else {
+      }
+      else {
         offsets_.append(content_.length());
         begun_ = false;
       }
@@ -223,11 +268,6 @@ namespace awkward {
       return content_.length();
     }
 
-    void
-    null() {
-      content_.append(-1);
-    }
-
     int64_t*
     to_buffers() const {
       int64_t* ptr = new int64_t[offsets_.length()];
@@ -242,27 +282,22 @@ namespace awkward {
       auto ptr = to_buffers();
       offsets_.dump(ptr);
       std::cout << std::endl;
-      content_.dump("    ");
+      content_.dump(indent + "    ");
     }
 
   private:
-    size_t initial_;
     bool begun_;
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
   };
 
-  template <typename BUILDER>
+  template <typename... RECORD>
   class RecordLayoutBuilder {
   public:
     RecordLayoutBuilder()
-        : contents_(std::vector<BUILDER*>()),
-          index_(std::vector<int64_t>()),
-          length_(-1),
-          begun_(false),
-          nextindex_(-1),
-          nexttotry_(-1),
-          index_size_(0) { }
+        : contents({new RECORD}...)
+        , length_(-1)
+        , begun_(false) { }
 
     int64_t
     length() const {
@@ -271,33 +306,29 @@ namespace awkward {
 
     void
     clear() {
-      for (auto contents : contents_) {
-        contents->clear();
-      }
-      index_.clear();
+      auto clear_contents = [](auto record) { record->builder()->clear(); };
+      for (size_t i = 0; i < 3; i++)
+        visit_at( contents, i, clear_contents);
       length_ = -1;
       begun_ = false;
-      nextindex_ = -1;
-      nexttotry_ = 0;
-      index_size_ = 0;
     }
 
     std::string
-    form(int64_t form_key_id = -1) {
-      std::stringstream form_key;
+    form() {
+            std::stringstream form_key;
       form_key << "node" << (++form_key_id);
       std::stringstream out;
-      out << "{\"class\": \"RecordArray\", \"contents\": {";
-      for (size_t i = 0;  i < contents_.size();  i++) {
+      out << "{ \"class\": \"RecordArray\", \"contents\": { ";
+      for (size_t i = 0;  i < std::tuple_size<decltype(contents)>::value;  i++) {
         if (i != 0) {
           out << ", ";
         }
-        field(0);
-        out << "\"" + std::to_string(index_[i]) + "\": ";
-        out << contents_[(size_t)i]->form(form_key_id);
+        auto contents_form = [&] (auto record) { out << "\"" << record->field() << + "\": ";
+                                                 out << record->builder()->form(); };
+        visit_at(contents, i, contents_form);
       }
-      out << "}, ";
-      out << "\"form_key\": \"" + form_key.str() + "\"}";
+      out << " }, ";
+      out << "\"form_key\": \"" + form_key.str() + "\" }";
       return out.str();
     }
 
@@ -308,35 +339,7 @@ namespace awkward {
       }
       if (!begun_) {
         begun_ = true;
-        nextindex_ = -1;
-        nexttotry_ = 0;
       }
-    }
-
-    BUILDER*
-    field(int64_t index) {
-      int64_t i = nexttotry_;
-      do {
-        if (i >= index_size_) {
-          i = 0;
-          if (i == nexttotry_) {
-            break;
-          }
-        }
-        if (index_[i] == index) {
-          nextindex_ = i;
-          nexttotry_ = i + 1;
-          return contents_[nextindex_];
-        }
-        i++;
-      } while (i != nexttotry_);
-
-      nextindex_ = index_size_;
-      nexttotry_ = 0;
-      contents_.push_back(new BUILDER);  //vector of unique_ptr of Record
-      index_.push_back(index);
-      index_size_ = (int64_t)index_.size();
-      return contents_[nextindex_];
     }
 
     void
@@ -345,17 +348,7 @@ namespace awkward {
         throw std::invalid_argument(
         std::string("called 'end_record' without 'begin_record' at the same level "
                     "before it"));
-      } else if (nextindex_ == -1) {
-        for (size_t i = 0; i < contents_.size(); i++) {
-          if (contents_[(size_t)i]->length() == length_) {
-            //maybeupdate((int64_t)i, contents_[(size_t)i]);
-          }
-          if (contents_[(size_t)i]->length() != length_ + 1) {
-            throw std::invalid_argument(
-                  std::string("record field '") + std::to_string(index_[i]) +
-                  std::string("' filled more than once in RecordLayoutBuilder"));
-          }
-        }
+      } else {
         length_++;
         begun_ = false;
       }
@@ -364,23 +357,20 @@ namespace awkward {
     void
     dump(std::string indent) const {
       std::cout << indent << "RecordLayoutBuilder" << std::endl;
-      int64_t i = 0;
-      for (auto contents : contents_) {
-        std::cout << indent << "  field " << index_[i] << std::endl;
-        contents->dump("  ");
-        i++;
+      auto print_contents = [&](auto record) { std::cout << indent << "  field " << record->field() << std::endl;
+                                               record->builder()->dump(indent + "    "); };
+      for (size_t i = 0; i < 3; i++) {
+        visit_at( contents, i, print_contents);
       }
     }
 
-  private:
-    std::vector<BUILDER*> contents_;
-    std::vector<int64_t> index_;
+    std::tuple<RECORD*...>  contents;
+
+    private:
     int64_t length_;
     bool begun_;
-    int64_t nextindex_;
-    int64_t nexttotry_;
-    int64_t index_size_;
   };
+
 }  // namespace awkward
 
 #endif  // AWKWARD_LAYOUTBUILDER_H_
