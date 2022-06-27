@@ -236,12 +236,16 @@ namespace awkward {
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
-    BUILDER*
+    template<typename PRIMITIVE>
+    void append(PRIMITIVE x) {
+      content_.append(x);
+    }
+
+    void
     begin_list() {
       if (!begun_) {
         begun_ = true;
       }
-      return &content_;
     }
 
     void
