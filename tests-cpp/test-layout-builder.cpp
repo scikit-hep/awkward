@@ -5,6 +5,23 @@
 #include <complex>
 
 void
+test_nested_record()
+{
+  static const char x_field[] = "x";
+  static const char y_field[] = "y";
+
+  static const unsigned initial = 10;
+
+  auto builder = awkward::RecordLayoutBuilder<
+  awkward::Record<awkward::field_name<x_field>, awkward::ListOffsetLayoutBuilder<initial, awkward::RecordLayoutBuilder<
+  awkward::Record<awkward::field_name<y_field>, awkward::NumpyLayoutBuilder<initial, double>>
+  >>>>();
+
+  auto form = builder.form();
+  std::cout << form << std::endl;
+}
+
+void
 test_record()
 {
   static const char x_field[] = "one";
@@ -154,10 +171,12 @@ test_listoffset_of_listoffset() {
 
 
 int main(int argc, char **argv) {
+  std::cout << "Test me!" << std::endl;
+  test_nested_record();
   //test_record();
   //test_numpy();
   //test_listoffset_of_numpy();
-  test_listoffset_of_record();
+  //test_listoffset_of_record();
   //test_listoffset_of_listoffset();
   return 0;
 }

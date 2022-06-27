@@ -29,12 +29,13 @@ namespace awkward {
         return field_.value;
     }
 
-    BUILDER* builder() {
-        return builder_;
+    std::string
+    form() {
+      return(builder_.form());
     }
 
     field_name field_;
-    BUILDER* builder_;
+    BUILDER builder_;
   };
 
   template <size_t INDEX>
@@ -228,6 +229,7 @@ namespace awkward {
     // returns JSON string
     std::string
     form() {
+      std::cout << "ListOffsetLayoutBuilder form " << std::endl;
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
@@ -315,16 +317,19 @@ namespace awkward {
 
     std::string
     form() {
-            std::stringstream form_key;
+      std::cout << "RecordLayoutBuilder form " << std::endl;
+
+      std::stringstream form_key;
       form_key << "node" << (++form_key_id);
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
       for (size_t i = 0;  i < std::tuple_size<decltype(contents)>::value;  i++) {
+        std::cout << "processing " << i << std::endl;
         if (i != 0) {
           out << ", ";
         }
-        auto contents_form = [&] (auto record) { out << "\"" << record->field() << + "\": ";
-                                                 out << record->builder()->form(); };
+        auto contents_form = [&out] (auto record) { out << "\"" << record->field() << + "\": ";
+                                                 out << record->form(); };
         visit_at(contents, i, contents_form);
       }
       out << " }, ";
