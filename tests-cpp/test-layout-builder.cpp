@@ -1,14 +1,57 @@
 #include "../src/awkward/_v2/cpp-headers/LayoutBuilder.h"
 
 #include <iostream>
-#include <string>
+#include <cassert>
+#include <complex>
 
 void
-test_list_of_numpy() {
-  size_t initial = 10;
-  awkward::ListOffsetLayoutBuilder<awkward::NumpyLayoutBuilder<double>> builder(initial);
+test_record()
+{
+  static const char x_field[] = "one";
+  static const char y_field[] = "two";
+  static const char z_field[] = "three";
 
-  awkward::NumpyLayoutBuilder<double>* builder2 = builder.begin_list();
+  static const unsigned initial = 10;
+
+  auto builder = awkward::RecordLayoutBuilder<
+        awkward::Record<awkward::field_name<x_field>, awkward::NumpyLayoutBuilder<initial, double>>,
+        awkward::Record<awkward::field_name<y_field>, awkward::NumpyLayoutBuilder<initial, int64_t>>,
+        awkward::Record<awkward::field_name<z_field>, awkward::ListOffsetLayoutBuilder<initial, awkward::NumpyLayoutBuilder<initial, double>>>
+        >();
+
+  auto form = builder.form();
+  assert (form == "{ \"class\": \"RecordArray\", \"contents\": { \"one\": "
+                  "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"two\": "
+                  "{ \"class\": \"NumpyArray\", \"primitive\": \"int64\", \"form_key\": \"node2\" }, \"three\": "
+                  "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
+                  "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node4\" }, \"form_key\": \"node3\" } }, "
+                     "\"form_key\": \"node0\" }");
+
+}
+
+void
+test_numpy() {
+  static const unsigned initial = 10;
+  auto builder = awkward::NumpyLayoutBuilder<initial, std::complex<double>>();
+
+  builder.append({1.1, 0.1});
+  builder.append({1.2, 0.2});
+  builder.append({1.3, 0.3});
+  builder.append({1.4, 0.4});
+  builder.append({1.5, 0.5});
+
+  auto form = builder.form();
+  assert (form == "{ \"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \"node0\" }");
+
+  //builder.dump(" ");
+}
+
+void
+test_listoffset_of_numpy() {
+  static const unsigned initial = 10;
+  auto builder = awkward::ListOffsetLayoutBuilder<initial, awkward::NumpyLayoutBuilder<initial, double>>();
+
+  awkward::NumpyLayoutBuilder<initial, double>* builder2 = builder.begin_list();
   builder2->append(1.1);
   builder2->append(2.2);
   builder2->append(3.3);
@@ -17,82 +60,104 @@ test_list_of_numpy() {
   builder.begin_list();
   builder.end_list();
 
-  auto builder3 = builder.begin_list();
-  builder3->append(4.4);
-  builder3->append(5.5);
+  builder.begin_list();
+  builder2->append(4.4);
+  builder2->append(5.5);
   builder.end_list();
 
-  builder.dump("");
+  builder.begin_list();
+  builder2->append(6.6);
+  builder.end_list();
+
+  builder.begin_list();
+  builder2->append(7.7);
+  builder2->append(8.8);
+  builder2->append(9.9);
+  builder.end_list();
+
+  auto form = builder.form();
+  assert (form == "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
+                  "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"form_key\": \"node0\" }");
+
+  //builder.dump("");
 }
 
 void
-test_record_of_numpy() {
-  awkward::RecordLayoutBuilder<awkward::NumpyLayoutBuilder<double>> builder;
-  builder.begin_record();
-  awkward::NumpyLayoutBuilder<double>* builder2 = builder.field(0);
-  builder2->append(1);
-  auto builder3 = builder.field(1);
-  builder3->append(2);
-  builder.end_record();
+test_listoffset_of_record() {
+  static const unsigned initial = 10;
+  static const char i_field[] = "i";
+  static const char j_field[] = "j";
 
-  builder.begin_record();
-  auto builder4 = builder.field(0);
-  builder4->append(1);
-  auto builder5 = builder.field(1);
-  builder5->append(2);
-  builder.end_record();
+  auto builder = awkward::ListOffsetLayoutBuilder<initial, awkward::RecordLayoutBuilder<
+                 awkward::Record<awkward::field_name<i_field>,awkward::NumpyLayoutBuilder<initial, int64_t>>,
+                 awkward::Record<awkward::field_name<j_field>, awkward::ListOffsetLayoutBuilder<initial, awkward::NumpyLayoutBuilder<initial, double>>>
+                 >>();
 
-  builder.begin_record();
-  auto builder6 = builder.field(0);
-  builder6->append(1);
-  auto builder7 = builder.field(1);
-  builder7->append(2);
-  builder.end_record();
+  auto form = builder.form();
+  assert (form == "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
+                  "{ \"class\": \"RecordArray\", \"contents\": { \"i\": "
+                  "{ \"class\": \"NumpyArray\", \"primitive\": \"int64\", \"form_key\": \"node2\" }, \"j\": "
+                  "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
+                  "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node4\" }, \"form_key\": \"node3\" } }, "
+                  "\"form_key\": \"node1\" }, \"form_key\": \"node0\" }");
+
+  //builder.dump("");
 }
 
 void
-test_record_of_lists()
-{
-  awkward::RecordLayoutBuilder<awkward::ListOffsetLayoutBuilder<awkward::NumpyLayoutBuilder<double>>> builder;
-  builder.begin_record();
-  awkward::ListOffsetLayoutBuilder<awkward::NumpyLayoutBuilder<double>>* builder1 = builder.field(0);
-  awkward::NumpyLayoutBuilder<double>* builder2 = builder1->begin_list();
-  builder2->append(1.1);
-  builder2->append(1.2);
-  builder2->append(1.3);
-  builder1->end_list();
+test_listoffset_of_listoffset() {
+  static const unsigned initial = 10;
+  auto builder = awkward::ListOffsetLayoutBuilder<initial, awkward::ListOffsetLayoutBuilder<initial, awkward::NumpyLayoutBuilder<initial, double>>>();
 
-  auto builder3 = builder.field(1);
-  auto builder4 = builder3->begin_list();
-  builder4->append(2.1);
-  builder4->append(2.2);
-  builder3->end_list();
-  builder.end_record();
+  awkward::ListOffsetLayoutBuilder<initial, awkward::NumpyLayoutBuilder<initial, double>>* builder2 = builder.begin_list();
 
-  builder.begin_record();
-  awkward::ListOffsetLayoutBuilder<awkward::NumpyLayoutBuilder<double>>* builder5 = builder.field(0);
-  awkward::NumpyLayoutBuilder<double>* builder6 = builder5->begin_list();
-  builder6->append(3.1);
-  builder6->append(3.2);
-  builder6->append(3.3);
-  builder5->end_list();
+  awkward::NumpyLayoutBuilder<initial, double>* builder3 = builder2->begin_list();
+  builder3->append(1.1);
+  builder3->append(2.2);
+  builder3->append(3.3);
+  builder2->end_list();
 
-  auto builder7 = builder.field(1);
-  auto builder8 = builder7->begin_list();
-  builder8->append(4.1);
-  builder8->append(4.2);
-  builder7->end_list();
-  builder.end_record();
+  builder2->begin_list();
+  builder2->end_list();
 
-  builder.dump("");
+  builder2->begin_list();
+  builder3->append(4.4);
+  builder3->append(5.5);
+  builder2->end_list();
+
+  builder.end_list();
+
+  builder.begin_list();
+  builder.end_list();
+
+  builder.begin_list();
+  builder2->begin_list();
+  builder3->append(6.6);
+  builder3->append(7.7);
+  builder2->end_list();
+
+  builder2->begin_list();
+  builder3->append(8.8);
+  builder3->append(9.9);
+  builder2->end_list();
+  builder.end_list();
+
+  auto form = builder.form();
+  assert (form == "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
+                  "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
+                  "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node2\" }, "
+                    "\"form_key\": \"node1\" }, \"form_key\": \"node0\" }");
+
+  //builder.dump("");
+
 }
+
 
 int main(int argc, char **argv) {
-  std::cout << "BEGIN" << std::endl;
-  size_t initial = 10;
-  //test_list_of_numpy();
-  //test_record_of_numpy();
-  test_record_of_lists();
-  std::cout << "END" << std::endl;
+  //test_record();
+  //test_numpy();
+  //test_listoffset_of_numpy();
+  test_listoffset_of_record();
+  //test_listoffset_of_listoffset();
   return 0;
 }
