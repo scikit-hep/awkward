@@ -226,8 +226,9 @@ def write_metadata(dir_path, fs, *metas, global_metadata=True):
     assert metas
     md = metas[0]
     with fs.open("/".join([dir_path, "_common_metadata"]), "wb") as fil:
-        md.write_metadata_file("/".join([dir_path, "_common_metadata"]))
+        md.write_metadata_file(fil)
     if global_metadata:
         for meta in metas[1:]:
             md.append_row_groups(meta)
-        md.write_metadata_file("/".join([dir_path, "_metadata"]))
+        with fs.open("/".join([dir_path, "_metadata"]), "wb") as fil:
+            md.write_metadata_file(fil)
