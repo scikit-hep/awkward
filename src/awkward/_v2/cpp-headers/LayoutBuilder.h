@@ -222,14 +222,14 @@ namespace awkward {
   public:
     ListOffsetLayoutBuilder()
         : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL))
-        , begun_(false) {
+        , begun_(false)
+        , length_(0) {
       offsets_.append(0);
     }
 
     // returns JSON string
     std::string
     form() {
-      std::cout << "ListOffsetLayoutBuilder form " << std::endl;
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
@@ -257,8 +257,9 @@ namespace awkward {
           "in ListOffsetLayoutBuilder"));
       }
       else {
-        offsets_.append(content_.length());
+        length_++;
         begun_ = false;
+        offsets_.append(content_.length());
       }
     }
 
@@ -268,11 +269,12 @@ namespace awkward {
       offsets_.append(0);
       content_.clear();
       begun_ = false;
+      length_ = 0;
     }
 
     int64_t
     length() const {
-      return content_.length();
+      return length_;
     }
 
     int64_t*
@@ -294,6 +296,7 @@ namespace awkward {
 
   private:
     bool begun_;
+    int64_t length_;
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
   };
@@ -322,14 +325,11 @@ namespace awkward {
 
     std::string
     form() {
-      std::cout << "RecordLayoutBuilder form " << std::endl;
-
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
       for (size_t i = 0;  i < std::tuple_size<decltype(contents)>::value;  i++) {
-        std::cout << "processing " << i << std::endl;
         if (i != 0) {
           out << ", ";
         }
