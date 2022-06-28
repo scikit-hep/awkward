@@ -461,6 +461,65 @@ template <unsigned INITIAL, typename BUILDER>
     BUILDER content_;
   };
 
+template <unsigned INITIAL, typename BUILDER>
+  class IndexLayoutBuilder {
+  public:
+    IndexLayoutBuilder()
+        : index_(awkward::GrowableBuffer<uint64_t>(INITIAL)) { }
+
+    // returns JSON string
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << (++form_key_id);
+      return "{ \"class\": \"IndexArray\", \"index\": \"uint64\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+    }
+
+    void
+    clear() {
+      index_.clear();
+      content_.clear();
+    }
+
+    int64_t
+    length() const {
+      return content_.length();
+    }
+
+    awkward::GrowableBuffer<uint64_t>
+    index() {
+      return index_;
+    }
+
+    template<typename PRIMITIVE>
+    void append(PRIMITIVE x) {
+      index_.append(content_.length());
+      content_.append(x);
+    }
+
+    uint64_t*
+    to_buffers() const {
+      uint64_t* ptr = new uint64_t[index_.length()];
+      index_.concatenate(ptr);
+      return ptr;
+    }
+
+    void
+    dump(std::string indent) const {
+      std::cout << indent << "IndexArrayLayoutBuilder" << std::endl;
+      std::cout << indent << "    index ";
+      auto ptr = to_buffers();
+      index_.dump(ptr);
+      std::cout << std::endl;
+      content_.dump(indent + "    ");
+    }
+
+  private:
+    GrowableBuffer<uint64_t> index_; //int64_t??
+    BUILDER content_;
+  };
+
 }  // namespace awkward
 
 #endif  // AWKWARD_LAYOUTBUILDER_H_
