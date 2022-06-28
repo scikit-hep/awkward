@@ -381,6 +381,86 @@ namespace awkward {
     bool begun_;
   };
 
+
+template <unsigned INITIAL, typename BUILDER>
+  class ListLayoutBuilder {
+  public:
+    ListLayoutBuilder()
+        : starts_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        , stops_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        , begun_(false)
+        , length_(0) { }
+
+    // returns JSON string
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << (++form_key_id);
+      return "{ \"class\": \"ListArray\", \"starts\": \"int64\", \"stops\": \"int64\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+    }
+
+    BUILDER*
+    begin_list() {
+      if (!begun_) {
+        begun_ = true;
+        starts_.append(content_.length());
+      }
+      return &content_;
+    }
+
+    void
+    end_list() {
+      if (!begun_) {
+        throw std::invalid_argument(
+          std::string("called 'end_list' without 'begin_list' at the same level before it"
+          "in ListLayoutBuilder"));
+      } else {
+        length_++;
+        begun_ = false;
+        stops_.append(content_.length());
+      }
+    }
+
+    void
+    clear() {
+      starts_.clear();
+      starts_.append(0);
+      stops_.clear();
+      content_.clear();
+      begun_ = false;
+      length_ = 0;
+    }
+
+    int64_t
+    length() const {
+      return length_;
+    }
+
+    void
+    dump(std::string indent) const {
+      std::cout << indent << "ListLayoutBuilder" << std::endl;
+      std::cout << indent << "    starts ";
+      int64_t* ptr1 = new int64_t[starts_.length()];
+      starts_.concatenate(ptr1);
+      starts_.dump(ptr1);
+      std::cout << std::endl;
+      std::cout << indent << "    stops ";
+      int64_t* ptr2 = new int64_t[stops_.length()];
+      stops_.concatenate(ptr2);
+      stops_.dump(ptr2);
+      std::cout << std::endl;
+      content_.dump(indent + "    ");
+    }
+
+  private:
+    bool begun_;
+    int64_t length_;
+    GrowableBuffer<int64_t> starts_;
+    GrowableBuffer<int64_t> stops_;
+    BUILDER content_;
+  };
+
 }  // namespace awkward
 
 #endif  // AWKWARD_LAYOUTBUILDER_H_
