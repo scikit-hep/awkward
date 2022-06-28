@@ -467,9 +467,9 @@ template <unsigned INITIAL, typename BUILDER>
   };
 
 template <unsigned INITIAL, typename BUILDER>
-  class IndexLayoutBuilder {
+  class IndexedLayoutBuilder {
   public:
-    IndexLayoutBuilder()
+    IndexedLayoutBuilder()
         : index_(awkward::GrowableBuffer<uint64_t>(INITIAL)) { }
 
     std::string
@@ -511,7 +511,7 @@ template <unsigned INITIAL, typename BUILDER>
 
     void
     dump(std::string indent) const {
-      std::cout << indent << "IndexArrayLayoutBuilder" << std::endl;
+      std::cout << indent << "IndexedLayoutBuilder" << std::endl;
       std::cout << indent << "    index ";
       auto ptr = to_buffers();
       index_.dump(ptr);
@@ -522,6 +522,77 @@ template <unsigned INITIAL, typename BUILDER>
   private:
     GrowableBuffer<uint64_t> index_;
     BUILDER content_;
+  };
+
+template <unsigned INITIAL, typename BUILDER>
+  class IndexedOptionLayoutBuilder {
+  public:
+    IndexedOptionLayoutBuilder()
+        : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        , index_length_(0) { }
+
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << (++form_key_id);
+      return "{ \"class\": \"IndexedOptionArray\", \"index\": \"int64\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+    }
+
+    void
+    clear() {
+      index_.clear();
+      content_.clear();
+    }
+
+    int64_t
+    length() const {
+      return content_.length();
+    }
+
+    awkward::GrowableBuffer<int64_t>
+    index() {
+      return index_;
+    }
+
+    void
+    null() {
+      index_.append(-1);
+    }
+
+    template<typename PRIMITIVE>
+    void append(PRIMITIVE x) {
+      if (x == NULL) {
+        null();
+      }
+      else {
+        index_.append(index_length_);
+        index_length_++;
+      }
+      content_.append(x);
+    }
+
+    int64_t*
+    to_buffers() const {
+      int64_t* ptr = new int64_t[index_.length()];
+      index_.concatenate(ptr);
+      return ptr;
+    }
+
+    void
+    dump(std::string indent) const {
+      std::cout << indent << "IndexedOptionLayoutBuilder" << std::endl;
+      std::cout << indent << "    index ";
+      auto ptr = to_buffers();
+      index_.dump(ptr);
+      std::cout << std::endl;
+      content_.dump(indent + "    ");
+    }
+
+  private:
+    GrowableBuffer<int64_t> index_;
+    BUILDER content_;
+    int64_t index_length_;
   };
 
   template <unsigned INITIAL, typename BUILDER>
