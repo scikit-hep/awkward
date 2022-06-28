@@ -400,6 +400,11 @@ template <unsigned INITIAL, typename BUILDER>
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
+    template<typename PRIMITIVE>
+    void append(PRIMITIVE x) {
+      content_.append(x);
+    }
+
     BUILDER*
     begin_list() {
       if (!begun_) {
@@ -467,7 +472,6 @@ template <unsigned INITIAL, typename BUILDER>
     IndexLayoutBuilder()
         : index_(awkward::GrowableBuffer<uint64_t>(INITIAL)) { }
 
-    // returns JSON string
     std::string
     form() {
       std::stringstream form_key;
@@ -516,7 +520,43 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
   private:
-    GrowableBuffer<uint64_t> index_; //int64_t??
+    GrowableBuffer<uint64_t> index_;
+    BUILDER content_;
+  };
+
+  template <unsigned INITIAL, typename BUILDER>
+  class UnmaskedLayoutBuilder {
+  public:
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << (++form_key_id);
+      return "{ \"class\": \"UnmaskedArray\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+    }
+
+    template<typename PRIMITIVE>
+    void append(PRIMITIVE x) {
+      content_.append(x);
+    }
+
+    void
+    clear() {
+      content_.clear();
+    }
+
+    int64_t
+    length() const {
+      return content_.length();
+    }
+
+    void
+    dump(std::string indent) const {
+      std::cout << indent << "UnmaskedLayoutBuilder" << std::endl;
+      content_.dump(indent + "    ");
+    }
+
+  private:
     BUILDER content_;
   };
 
