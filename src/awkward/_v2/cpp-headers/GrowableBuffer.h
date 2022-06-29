@@ -1,3 +1,5 @@
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
 #ifndef AWKWARD_GROWABLEBUFFER_H_
 #define AWKWARD_GROWABLEBUFFER_H_
 
