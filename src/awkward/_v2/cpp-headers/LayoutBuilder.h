@@ -14,27 +14,25 @@
 #include <complex>
 
 namespace awkward {
-  extern int64_t form_key_id;
-  int64_t form_key_id = -1;
 
   template<const char *str>
   struct field_name {
     const char* value = str;
   };
 
-  template<class field_name, typename BUILDER>
+  template<class field_name, class BUILDER>
   struct Record {
     const char* field() {
         return field_.value;
     }
 
     std::string
-    form(int64_t form_key_id) {
-      return builder_.form(form_key_id);
+    form(int64_t form_key_id = 0) {
+      return builder.form(form_key_id);
     }
 
     field_name field_;
-    BUILDER builder_;
+    BUILDER builder;
   };
 
   template <size_t INDEX>
@@ -189,7 +187,7 @@ namespace awkward {
     }
 
     std::string
-    form(int64_t form_key_id) {
+    form(int64_t form_key_id = 0) {
       std::stringstream form_key;
       form_key << "node" << form_key_id++;
       if (std::is_arithmetic<PRIMITIVE>::value) {
@@ -228,7 +226,7 @@ namespace awkward {
 
     // returns JSON string
     std::string
-    form(int64_t form_key_id) {
+    form(int64_t form_key_id = 0) {
       std::stringstream form_key;
       form_key << "node" << form_key_id++;
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
@@ -317,13 +315,13 @@ namespace awkward {
     clear() {
       length_ = -1;
       begun_ = false;
-      auto clear_contents = [](auto record) { record->builder_.clear(); };
+      auto clear_contents = [](auto record) { record->builder.clear(); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
         visit_at(contents, i, clear_contents);
     }
 
     std::string
-    form(int64_t form_key_id) {
+    form(int64_t form_key_id = 0) {
       std::stringstream form_key;
       form_key << "node" << form_key_id++;
       std::stringstream out;
@@ -367,7 +365,7 @@ namespace awkward {
     dump(std::string indent) const {
       std::cout << indent << "RecordLayoutBuilder" << std::endl;
       auto print_contents = [&indent](auto record) { std::cout << indent << "    field " << record->field() << std::endl;
-                                                     record->builder_.dump(indent + "    "); };
+                                                     record->builder.dump(indent + "    "); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++) {
         visit_at(contents, i, print_contents);
       }
@@ -392,7 +390,7 @@ template <unsigned INITIAL, typename BUILDER>
 
     // returns JSON string
     std::string
-    form(int64_t form_key_id) {
+    form(int64_t form_key_id = 0) {
       std::stringstream form_key;
       form_key << "node" << form_key_id++;
       return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
@@ -472,7 +470,7 @@ template <unsigned INITIAL, typename BUILDER>
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
     std::string
-    form(int64_t form_key_id) {
+    form(int64_t form_key_id = 0) {
       std::stringstream form_key;
       form_key << "node" << form_key_id++;
       return "{ \"class\": \"IndexArray\", \"index\": \"i64\", \"content\": "
@@ -531,7 +529,7 @@ template <unsigned INITIAL, typename BUILDER>
         , index_length_(0) { }
 
     std::string
-    form(int64_t form_key_id) {
+    form(int64_t form_key_id = 0) {
       std::stringstream form_key;
       form_key << "node" << form_key_id++;
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
@@ -594,7 +592,7 @@ template <unsigned INITIAL, typename BUILDER>
   class UnmaskedLayoutBuilder {
   public:
     std::string
-    form(int64_t form_key_id) {
+    form(int64_t form_key_id = 0) {
       std::stringstream form_key;
       form_key << "node" << form_key_id++;
       return "{ \"class\": \"UnmaskedArray\", \"content\": "

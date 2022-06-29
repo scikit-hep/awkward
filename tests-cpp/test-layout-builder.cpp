@@ -30,9 +30,9 @@ test_record()
         awkward::Record<awkward::field_name<three_field>, awkward::ListOffsetLayoutBuilder<initial, awkward::NumpyLayoutBuilder<initial, double>>>
         >();
 
-  auto x_builder = &(std::get<0>(builder.contents)->builder_);
-  auto y_builder = &(std::get<1>(builder.contents)->builder_);
-  auto z_builder = &(std::get<2>(builder.contents)->builder_);
+  auto x_builder = &(std::get<0>(builder.contents)->builder);
+  auto y_builder = &(std::get<1>(builder.contents)->builder);
+  auto z_builder = &(std::get<2>(builder.contents)->builder);
 
   builder.begin_record();
 
@@ -71,7 +71,7 @@ test_record()
 
   builder.end_record();
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   std::cout << form << std::endl;
   assert (form == "{ \"class\": \"RecordArray\", \"contents\": { \"one\": "
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"two\": "
@@ -91,7 +91,7 @@ test_nested_record()
   awkward::Record<awkward::field_name<y_field>, awkward::NumpyLayoutBuilder<initial, double>>
   >();
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   assert(form ==
   "{ "
       "\"class\": \"RecordArray\", "
@@ -125,7 +125,7 @@ test_record_of_record()
   awkward::Record<awkward::field_name<j_field>, awkward::NumpyLayoutBuilder<initial, int>>
   >>>();
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   std::cout << form << std::endl;
 }
 
@@ -140,7 +140,7 @@ test_numpy() {
   builder.append({1.4, 0.4});
   builder.append({1.5, 0.5});
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   assert (form == "{ \"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \"node0\" }");
 
   builder.dump(" ");
@@ -175,7 +175,7 @@ test_listoffset_of_numpy() {
   builder2->append(9.9);
   builder.end_list();
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   assert (form == "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"form_key\": \"node0\" }");
 
@@ -190,7 +190,7 @@ test_listoffset_of_record() {
                  awkward::Record<awkward::field_name<j_field>, awkward::ListOffsetLayoutBuilder<initial, awkward::NumpyLayoutBuilder<initial, double>>>
                  >>();
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   assert (form == "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
                   "{ \"class\": \"RecordArray\", \"contents\": { \"i\": "
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"int64\", \"form_key\": \"node2\" }, \"j\": "
@@ -243,7 +243,7 @@ test_listoffset_of_listoffset() {
   builder2->end_list();
   builder.end_list();
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   assert (form == "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
                   "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node2\" }, "
@@ -282,7 +282,7 @@ test_listarray_of_numpy() {
   builder2->append(9.9);
   builder.end_list();
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   assert (form == "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"form_key\": \"node0\" }");
 
@@ -300,7 +300,7 @@ test_indexarray() {
   builder.append(5.5);
   builder.append(6.6);
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   assert (form == "{ \"class\": \"IndexArray\", \"index\": \"i64\", \"content\": "
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"form_key\": \"node0\" }");
 
@@ -319,7 +319,7 @@ test_indexoptionarray() {
   builder.append(5.5);
   builder.null();
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   std::cout << form << std::endl;
   assert (form == "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"form_key\": \"node0\" }");
@@ -337,7 +337,7 @@ test_unmasked() {
   builder.append(4.4);
   builder.append(5.5);
 
-  auto form = builder.form(0);
+  auto form = builder.form();
   assert (form == "{ \"class\": \"UnmaskedArray\", \"content\": "
                   "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"form_key\": \"node0\" }");
 
