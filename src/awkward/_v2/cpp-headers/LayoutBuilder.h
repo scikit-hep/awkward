@@ -29,8 +29,8 @@ namespace awkward {
     }
 
     std::string
-    form(int64_t form_key_id) {
-      return builder_.form(form_key_id);
+    form() {
+      return builder_.form();
     }
 
     field_name field_;
@@ -153,7 +153,7 @@ namespace awkward {
   struct is_specialization<Ref<Args...>, Ref> : std::true_type {
   };
 
-  template <unsigned INITIAL, typename PRIMITIVE>
+  template <unsigned ID, unsigned INITIAL, typename PRIMITIVE>
   class NumpyLayoutBuilder {
   public:
     NumpyLayoutBuilder()
@@ -189,9 +189,9 @@ namespace awkward {
     }
 
     std::string
-    form(int64_t form_key_id) {
+    form() {
       std::stringstream form_key;
-      form_key << "node" << form_key_id++;
+      form_key << "node" << id_;
       if (std::is_arithmetic<PRIMITIVE>::value) {
         return "{ \"class\": \"NumpyArray\", \"primitive\": \""
           + type_to_name<PRIMITIVE>() + "\", " + "\"form_key\": \"" + form_key.str() + "\" }";
@@ -214,9 +214,10 @@ namespace awkward {
   private:
     size_t initial_;
     awkward::GrowableBuffer<PRIMITIVE> data_;
+    unsigned id_ = ID;
   };
 
-  template <unsigned INITIAL, typename BUILDER>
+  template <unsigned ID, unsigned INITIAL, typename BUILDER>
   class ListOffsetLayoutBuilder {
   public:
     ListOffsetLayoutBuilder()
@@ -228,11 +229,11 @@ namespace awkward {
 
     // returns JSON string
     std::string
-    form(int64_t form_key_id) {
+    form() {
       std::stringstream form_key;
-      form_key << "node" << form_key_id++;
+      form_key << "node" << id_;
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     template<typename PRIMITIVE>
@@ -298,9 +299,10 @@ namespace awkward {
     int64_t length_;
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
+    unsigned id_ = ID;
   };
 
-  template <typename... RECORD>
+  template <unsigned ID, typename... RECORD>
   class RecordLayoutBuilder {
   public:
     RecordLayoutBuilder()
@@ -323,17 +325,17 @@ namespace awkward {
     }
 
     std::string
-    form(int64_t form_key_id) {
+    form() {
       std::stringstream form_key;
-      form_key << "node" << form_key_id++;
+      form_key << "node" << id_;
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
       for (size_t i = 0;  i < std::tuple_size<decltype(contents)>::value;  i++) {
         if (i != 0) {
           out << ", ";
         }
-        auto contents_form = [&out, &form_key_id] (auto record) { out << "\"" << record->field() << + "\": ";
-                                                    out << record->form(form_key_id++); };
+        auto contents_form = [&out] (auto record) { out << "\"" << record->field() << + "\": ";
+                                                    out << record->form(); };
         visit_at(contents, i, contents_form);
       }
       out << " }, ";
@@ -378,10 +380,11 @@ namespace awkward {
     private:
     int64_t length_;
     bool begun_;
+    unsigned id_ = ID;
   };
 
 
-template <unsigned INITIAL, typename BUILDER>
+template <unsigned ID, unsigned INITIAL, typename BUILDER>
   class ListLayoutBuilder {
   public:
     ListLayoutBuilder()
@@ -392,11 +395,11 @@ template <unsigned INITIAL, typename BUILDER>
 
     // returns JSON string
     std::string
-    form(int64_t form_key_id) {
+    form() {
       std::stringstream form_key;
-      form_key << "node" << form_key_id++;
+      form_key << "node" << id_;
       return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
-      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     template<typename PRIMITIVE>
@@ -463,20 +466,21 @@ template <unsigned INITIAL, typename BUILDER>
     GrowableBuffer<int64_t> starts_;
     GrowableBuffer<int64_t> stops_;
     BUILDER content_;
+    unsigned id_ = ID;
   };
 
-template <unsigned INITIAL, typename BUILDER>
+template <unsigned ID, unsigned INITIAL, typename BUILDER>
   class IndexedLayoutBuilder {
   public:
     IndexedLayoutBuilder()
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
     std::string
-    form(int64_t form_key_id) {
+    form() {
       std::stringstream form_key;
-      form_key << "node" << form_key_id++;
+      form_key << "node" << id_;
       return "{ \"class\": \"IndexArray\", \"index\": \"i64\", \"content\": "
-      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
@@ -521,9 +525,10 @@ template <unsigned INITIAL, typename BUILDER>
   private:
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
+    unsigned id_ = ID;
   };
 
-template <unsigned INITIAL, typename BUILDER>
+template <unsigned ID, unsigned INITIAL, typename BUILDER>
   class IndexedOptionLayoutBuilder {
   public:
     IndexedOptionLayoutBuilder()
@@ -531,11 +536,11 @@ template <unsigned INITIAL, typename BUILDER>
         , index_length_(0) { }
 
     std::string
-    form(int64_t form_key_id) {
+    form() {
       std::stringstream form_key;
-      form_key << "node" << form_key_id++;
+      form_key << "node" << id_;
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
-      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
@@ -588,17 +593,18 @@ template <unsigned INITIAL, typename BUILDER>
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
     int64_t index_length_;
+    unsigned id_ = ID;
   };
 
-  template <unsigned INITIAL, typename BUILDER>
+  template <unsigned ID, unsigned INITIAL, typename BUILDER>
   class UnmaskedLayoutBuilder {
   public:
     std::string
-    form(int64_t form_key_id) {
+    form() {
       std::stringstream form_key;
-      form_key << "node" << form_key_id++;
+      form_key << "node" << id_;
       return "{ \"class\": \"UnmaskedArray\", \"content\": "
-      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     template<typename PRIMITIVE>
@@ -624,6 +630,7 @@ template <unsigned INITIAL, typename BUILDER>
 
   private:
     BUILDER content_;
+    unsigned id_ = ID;
   };
 
 }  // namespace awkward
