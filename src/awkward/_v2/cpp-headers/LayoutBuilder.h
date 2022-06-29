@@ -1,10 +1,9 @@
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
 #ifndef AWKWARD_LAYOUTBUILDER_H_
 #define AWKWARD_LAYOUTBUILDER_H_
 
-//#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("../src/awkward/_v2/cpp-headers/LayoutBuilder.h", line)
-
 #include "GrowableBuffer.h"
-//#include "rdataframe_jagged_builders.h"
 
 #include <stdexcept>
 #include <cassert>
@@ -30,8 +29,8 @@ namespace awkward {
     }
 
     std::string
-    form() {
-      return builder_.form();
+    form(int64_t form_key_id) {
+      return builder_.form(form_key_id);
     }
 
     field_name field_;
@@ -190,9 +189,9 @@ namespace awkward {
     }
 
     std::string
-    form() {
+    form(int64_t form_key_id) {
       std::stringstream form_key;
-      form_key << "node" << (++form_key_id);
+      form_key << "node" << form_key_id++;
       if (std::is_arithmetic<PRIMITIVE>::value) {
         return "{ \"class\": \"NumpyArray\", \"primitive\": \""
           + type_to_name<PRIMITIVE>() + "\", " + "\"form_key\": \"" + form_key.str() + "\" }";
@@ -229,11 +228,11 @@ namespace awkward {
 
     // returns JSON string
     std::string
-    form() {
+    form(int64_t form_key_id) {
       std::stringstream form_key;
-      form_key << "node" << (++form_key_id);
+      form_key << "node" << form_key_id++;
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     template<typename PRIMITIVE>
@@ -324,17 +323,17 @@ namespace awkward {
     }
 
     std::string
-    form() {
+    form(int64_t form_key_id) {
       std::stringstream form_key;
-      form_key << "node" << (++form_key_id);
+      form_key << "node" << form_key_id++;
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
       for (size_t i = 0;  i < std::tuple_size<decltype(contents)>::value;  i++) {
         if (i != 0) {
           out << ", ";
         }
-        auto contents_form = [&out] (auto record) { out << "\"" << record->field() << + "\": ";
-                                                    out << record->form(); };
+        auto contents_form = [&out, &form_key_id] (auto record) { out << "\"" << record->field() << + "\": ";
+                                                    out << record->form(form_key_id++); };
         visit_at(contents, i, contents_form);
       }
       out << " }, ";
@@ -393,11 +392,11 @@ template <unsigned INITIAL, typename BUILDER>
 
     // returns JSON string
     std::string
-    form() {
+    form(int64_t form_key_id) {
       std::stringstream form_key;
-      form_key << "node" << (++form_key_id);
+      form_key << "node" << form_key_id++;
       return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     template<typename PRIMITIVE>
@@ -473,11 +472,11 @@ template <unsigned INITIAL, typename BUILDER>
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
     std::string
-    form() {
+    form(int64_t form_key_id) {
       std::stringstream form_key;
-      form_key << "node" << (++form_key_id);
+      form_key << "node" << form_key_id++;
       return "{ \"class\": \"IndexArray\", \"index\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
@@ -532,11 +531,11 @@ template <unsigned INITIAL, typename BUILDER>
         , index_length_(0) { }
 
     std::string
-    form() {
+    form(int64_t form_key_id) {
       std::stringstream form_key;
-      form_key << "node" << (++form_key_id);
+      form_key << "node" << form_key_id++;
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
@@ -562,13 +561,9 @@ template <unsigned INITIAL, typename BUILDER>
 
     template<typename PRIMITIVE>
     void append(PRIMITIVE x) {
-      if (x == NULL) {
-        null();
-      }
-      else {
-        index_.append(index_length_);
-        index_length_++;
-      }
+      index_.append(index_length_);
+      index_length_++;
+
       content_.append(x);
     }
 
@@ -599,11 +594,11 @@ template <unsigned INITIAL, typename BUILDER>
   class UnmaskedLayoutBuilder {
   public:
     std::string
-    form() {
+    form(int64_t form_key_id) {
       std::stringstream form_key;
-      form_key << "node" << (++form_key_id);
+      form_key << "node" << form_key_id++;
       return "{ \"class\": \"UnmaskedArray\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+      + content_.form(form_key_id) + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     template<typename PRIMITIVE>
