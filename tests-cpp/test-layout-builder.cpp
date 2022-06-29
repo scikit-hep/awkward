@@ -87,12 +87,33 @@ void
 test_nested_record()
 {
   auto builder = awkward::RecordLayoutBuilder<
-  awkward::Record<awkward::field_name<x_field>, awkward::ListOffsetLayoutBuilder<initial, awkward::RecordLayoutBuilder<
+  awkward::Record<awkward::field_name<x_field>, awkward::ListOffsetLayoutBuilder<initial, awkward::NumpyLayoutBuilder<initial, double>>>,
   awkward::Record<awkward::field_name<y_field>, awkward::NumpyLayoutBuilder<initial, double>>
-  >>>>();
+  >();
 
   auto form = builder.form(0);
-  std::cout << form << std::endl;
+  assert(form ==
+  "{ "
+      "\"class\": \"RecordArray\", "
+      "\"contents\": { "
+          "\"x\": { "
+              "\"class\": \"ListOffsetArray\", "
+              "\"offsets\": \"i64\", "
+              "\"content\": { "
+                  "\"class\": \"NumpyArray\", "
+                  "\"primitive\": \"float64\", "
+                 "\"form_key\": \"node2\" "
+              "}, "
+              "\"form_key\": \"node1\" "
+          "}, "
+          "\"y\": { "
+              "\"class\": \"NumpyArray\", "
+              "\"primitive\": \"float64\", "
+              "\"form_key\": \"node3\" "
+          "} "
+      "}, "
+      "\"form_key\": \"node0\" "
+  "}");
 }
 
 void
