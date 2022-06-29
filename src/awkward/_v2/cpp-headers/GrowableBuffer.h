@@ -44,7 +44,7 @@ namespace awkward {
         actual = minreserve;
       }
       return GrowableBuffer(initial,
-        std::shared_ptr<PRIMITIVE>(new PRIMITIVE[actual]),
+        std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]),
         0, actual);
     }
 
@@ -62,12 +62,12 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::shared_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (size_t i = 0;  i < length;  i++) {
         rawptr[i] = 0;
       }
-      return GrowableBuffer(initial, ptr, length, actual);
+      return GrowableBuffer(initial, std::move(ptr), length, actual);
     }
 
     /// @brief Creates a GrowableBuffer in which all elements are initialized
@@ -86,12 +86,12 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::shared_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (size_t i = 0;  i < length;  i++) {
         rawptr[i] = value;
       }
-      return GrowableBuffer<PRIMITIVE>(initial, ptr, length, actual);
+      return GrowableBuffer<PRIMITIVE>(initial, std::move(ptr), length, actual);
     }
 
     /// @brief Creates a GrowableBuffer in which the elements are initialized
@@ -109,12 +109,12 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::shared_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (size_t i = 0;  i < length;  i++) {
         rawptr[i] = (PRIMITIVE)i;
       }
-      return GrowableBuffer(initial, ptr, length, actual);
+      return GrowableBuffer(initial, std::move(ptr), length, actual);
     }
 
     /// @brief Creates a GrowableBuffer from a full set of parameters.
@@ -128,11 +128,11 @@ namespace awkward {
     /// it is always less than or equal to #reserved because of
     /// allocations of new panels.
     GrowableBuffer(size_t initial,
-                   std::shared_ptr<PRIMITIVE> ptr,
+                   std::unique_ptr<PRIMITIVE> ptr,
                    size_t length,
                    size_t reserved)
         : initial_(initial) {
-      ptr_.push_back(ptr);
+      ptr_.push_back(std::move(ptr));
       length_.push_back(length);
       reserved_.push_back(reserved);
     }
@@ -141,7 +141,7 @@ namespace awkward {
     /// initial #reserved from #initial.
     GrowableBuffer(size_t initial)
         : GrowableBuffer(initial,
-                         std::shared_ptr<PRIMITIVE>(new PRIMITIVE[initial]),
+                         std::unique_ptr<PRIMITIVE>(new PRIMITIVE[initial]),
                          0,
                          initial) { }
 
@@ -174,7 +174,7 @@ namespace awkward {
       reserved_.clear();
       reserved_.push_back(initial_);
       ptr_.clear();
-      ptr_.push_back(std::shared_ptr<PRIMITIVE>(new PRIMITIVE[initial_]));
+      ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[initial_]));
     }
 
     /// @brief Inserts one `datum` into the panel.
@@ -189,7 +189,7 @@ namespace awkward {
     /// @brief Creates a new panel with slots equal to #reserved.
     void
     add_panel(size_t reserved) {
-      ptr_.push_back(std::shared_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
+      ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
       length_.push_back(0);
       reserved_.push_back(reserved);
     }
@@ -251,7 +251,7 @@ namespace awkward {
     size_t initial_;
 
     /// @brief Vector of unique pointers to the panels.
-    std::vector<std::shared_ptr<PRIMITIVE>> ptr_;
+    std::vector<std::unique_ptr<PRIMITIVE>> ptr_;
 
     /// @brief Vector containing the lengths of the panels.
     ///
