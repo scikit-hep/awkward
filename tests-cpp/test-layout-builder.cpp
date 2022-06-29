@@ -30,9 +30,9 @@ test_record()
         awkward::Record<awkward::field_name<three_field>, awkward::ListOffsetLayoutBuilder<3, initial, awkward::NumpyLayoutBuilder<4, initial, double>>>
         >();
 
-  auto x_builder = &(std::get<0>(builder.contents)->builder_);
-  auto y_builder = &(std::get<1>(builder.contents)->builder_);
-  auto z_builder = &(std::get<2>(builder.contents)->builder_);
+  auto x_builder = &(std::get<0>(builder.contents)->builder);
+  auto y_builder = &(std::get<1>(builder.contents)->builder);
+  auto z_builder = &(std::get<2>(builder.contents)->builder);
 
   builder.begin_record();
 
