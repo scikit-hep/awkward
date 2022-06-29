@@ -31,7 +31,7 @@ namespace awkward {
 
     std::string
     form() {
-      return(builder_.form());
+      return builder_.form();
     }
 
     field_name field_;
@@ -316,11 +316,11 @@ namespace awkward {
 
     void
     clear() {
-      auto clear_contents = [](auto record) { record->builder()->clear(); };
-      for (size_t i = 0; i < 3; i++)
-        visit_at( contents, i, clear_contents);
       length_ = -1;
       begun_ = false;
+      auto clear_contents = [](auto record) { record->builder_.clear(); };
+      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+        visit_at(contents, i, clear_contents);
     }
 
     std::string
@@ -334,7 +334,7 @@ namespace awkward {
           out << ", ";
         }
         auto contents_form = [&out] (auto record) { out << "\"" << record->field() << + "\": ";
-                                                 out << record->form(); };
+                                                    out << record->form(); };
         visit_at(contents, i, contents_form);
       }
       out << " }, ";
@@ -367,10 +367,10 @@ namespace awkward {
     void
     dump(std::string indent) const {
       std::cout << indent << "RecordLayoutBuilder" << std::endl;
-      auto print_contents = [&](auto record) { std::cout << indent << "  field " << record->field() << std::endl;
-                                               record->builder()->dump(indent + "    "); };
-      for (size_t i = 0; i < 3; i++) {
-        visit_at( contents, i, print_contents);
+      auto print_contents = [&indent](auto record) { std::cout << indent << "    field " << record->field() << std::endl;
+                                                     record->builder_.dump(indent + "    "); };
+      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++) {
+        visit_at(contents, i, print_contents);
       }
     }
 
