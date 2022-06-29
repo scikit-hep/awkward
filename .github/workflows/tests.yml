@@ -40,7 +40,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         path: dist/*.tar.gz
 
@@ -65,6 +65,6 @@ jobs:
         CIBW_BUILD: cp39-win_amd64 cp36-manylinux_x86_64 cp38-macosx_universal2
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: wheelhouse/*.whl
