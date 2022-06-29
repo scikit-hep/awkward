@@ -1,3 +1,5 @@
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
 #include "../src/awkward/_v2/cpp-headers/GrowableBuffer.h"
 
 #include <complex>

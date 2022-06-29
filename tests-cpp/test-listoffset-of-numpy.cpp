@@ -1,3 +1,5 @@
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
 #include "../src/awkward/_v2/cpp-headers/LayoutBuilder.h"
 
 #include <cassert>
@@ -34,7 +36,7 @@ int main(int argc, char **argv) {
   builder.append(9.9);
   builder.end_list();
 
-  auto form = builder.form();
+  auto form = builder.form(0);
   assert (form ==
   "{ "
       "\"class\": \"ListOffsetArray\", "
