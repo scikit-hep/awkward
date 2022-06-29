@@ -232,7 +232,7 @@ namespace awkward {
     form() {
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
-      return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"int64\", \"content\": "
+      return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
@@ -396,7 +396,7 @@ template <unsigned INITIAL, typename BUILDER>
     form() {
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
-      return "{ \"class\": \"ListArray\", \"starts\": \"int64\", \"stops\": \"int64\", \"content\": "
+      return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
@@ -470,13 +470,13 @@ template <unsigned INITIAL, typename BUILDER>
   class IndexedLayoutBuilder {
   public:
     IndexedLayoutBuilder()
-        : index_(awkward::GrowableBuffer<uint64_t>(INITIAL)) { }
+        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
     std::string
     form() {
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
-      return "{ \"class\": \"IndexArray\", \"index\": \"uint64\", \"content\": "
+      return "{ \"class\": \"IndexArray\", \"index\": \"i64\", \"content\": "
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
@@ -491,7 +491,7 @@ template <unsigned INITIAL, typename BUILDER>
       return content_.length();
     }
 
-    awkward::GrowableBuffer<uint64_t>
+    awkward::GrowableBuffer<int64_t>
     index() {
       return index_;
     }
@@ -502,9 +502,9 @@ template <unsigned INITIAL, typename BUILDER>
       content_.append(x);
     }
 
-    uint64_t*
+    int64_t*
     to_buffers() const {
-      uint64_t* ptr = new uint64_t[index_.length()];
+      int64_t* ptr = new int64_t[index_.length()];
       index_.concatenate(ptr);
       return ptr;
     }
@@ -520,7 +520,7 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
   private:
-    GrowableBuffer<uint64_t> index_;
+    GrowableBuffer<int64_t> index_;
     BUILDER content_;
   };
 
@@ -535,7 +535,7 @@ template <unsigned INITIAL, typename BUILDER>
     form() {
       std::stringstream form_key;
       form_key << "node" << (++form_key_id);
-      return "{ \"class\": \"IndexedOptionArray\", \"index\": \"int64\", \"content\": "
+      return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
