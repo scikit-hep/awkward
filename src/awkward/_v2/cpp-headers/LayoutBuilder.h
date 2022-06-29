@@ -14,15 +14,13 @@
 #include <complex>
 
 namespace awkward {
-  extern int64_t form_key_id;
-  int64_t form_key_id = -1;
 
   template<const char *str>
   struct field_name {
     const char* value = str;
   };
 
-  template<class field_name, typename BUILDER>
+  template<class field_name, class BUILDER>
   struct Record {
     const char* field() {
         return field_.value;
@@ -34,7 +32,7 @@ namespace awkward {
     }
 
     field_name field_;
-    BUILDER builder_;
+    BUILDER builder;
   };
 
   template <size_t INDEX>
@@ -319,7 +317,7 @@ namespace awkward {
     clear() {
       length_ = -1;
       begun_ = false;
-      auto clear_contents = [](auto record) { record->builder_.clear(); };
+      auto clear_contents = [](auto record) { record->builder.clear(); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
         visit_at(contents, i, clear_contents);
     }
@@ -369,7 +367,7 @@ namespace awkward {
     dump(std::string indent) const {
       std::cout << indent << "RecordLayoutBuilder" << std::endl;
       auto print_contents = [&indent](auto record) { std::cout << indent << "    field " << record->field() << std::endl;
-                                                     record->builder_.dump(indent + "    "); };
+                                                     record->builder.dump(indent + "    "); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++) {
         visit_at(contents, i, print_contents);
       }
