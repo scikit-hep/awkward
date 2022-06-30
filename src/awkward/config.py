@@ -41,4 +41,4 @@ if __name__ == "__main__":
         if arg == "--incdir":
             output.append(incdir)
 
-    print(" ".join(output))  # noqa: T001
+    print(" ".join(output))  # noqa: T201
