@@ -26,7 +26,9 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     output = []
-    incdir = pkg_resources.resource_filename("awkward", os.path.join("src", "_v2", "cpp-headers"))
+    incdir = pkg_resources.resource_filename(
+        "awkward", os.path.join("src", "_v2", "cpp-headers")
+    )
 
     # loop over original sys.argv to get optional arguments in order
     for arg in sys.argv:
