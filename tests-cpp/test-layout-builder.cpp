@@ -13,74 +13,37 @@ static const char three_field[] = "three";
 static const char x_field[] = "x";
 static const char y_field[] = "y";
 
-static const char i_field[] = "i";
-static const char j_field[] = "j";
-
 static const char u_field[] = "u";
 static const char v_field[] = "v";
+static const char w_field[] = "w";
+
+static const char i_field[] = "i";
+static const char j_field[] = "j";
 
 static const unsigned initial = 10;
 
 void
-test_record()
-{
-  auto builder = awkward::RecordLayoutBuilder<0,
-        awkward::Record<awkward::field_name<one_field>, awkward::NumpyLayoutBuilder<1, initial, double>>,
-        awkward::Record<awkward::field_name<two_field>, awkward::NumpyLayoutBuilder<2, initial, double>>,
-        awkward::Record<awkward::field_name<three_field>, awkward::ListOffsetLayoutBuilder<3, initial, awkward::NumpyLayoutBuilder<4, initial, double>>>
-        >();
+test_numpy_bool() {
+  auto builder = awkward::NumpyLayoutBuilder<0, initial, bool>();
 
-  auto x_builder = &(std::get<0>(builder.contents)->builder);
-  auto y_builder = &(std::get<1>(builder.contents)->builder);
-  auto z_builder = &(std::get<2>(builder.contents)->builder);
+  builder.append(true);
+  builder.append(false);
+  builder.append(true);
+  builder.append(true);
 
-  builder.begin_record();
-
-  x_builder->append(1.1);
-  y_builder->append(2.1);
-
-  z_builder->begin_list();
-  z_builder->append(3.1);
-  z_builder->append(3.2);
-  z_builder->append(3.3);
-  z_builder->end_list();
-
-  builder.end_record();
-
-  builder.clear();
-
-  builder.begin_record();
-
-  x_builder->append(1.2);
-  y_builder->append(2.2);
-
-  z_builder->begin_list();
-  z_builder->end_list();
-
-  builder.end_record();
-
-  builder.begin_record();
-
-  x_builder->append(1.3);
-  y_builder->append(2.3);
-
-  z_builder->begin_list();
-  z_builder->append(3.4);
-  z_builder->append(3.5);
-  z_builder->end_list();
-
-  builder.end_record();
+  // [True, False, True, True]
 
   auto form = builder.form();
-  std::cout << form << std::endl;
-  assert (form == "{ \"class\": \"RecordArray\", \"contents\": { \"one\": "
-                  "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, \"two\": "
-                  "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node2\" }, \"three\": "
-                  "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-                  "{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node4\" }, \"form_key\": \"node3\" } }, "
-                     "\"form_key\": \"node0\" }");
+
+  assert (form ==
+  "{ "
+      "\"class\": \"NumpyArray\", "
+      "\"primitive\": \"bool\", "
+      "\"form_key\": \"node0\" "
+  "}");
 
   builder.dump("");
+  std::cout<<std::endl;
 }
 
 void
@@ -96,11 +59,11 @@ test_nested_record()
 }
 
 void
-test_nested_record_1()
-{
-  auto builder = awkward::RecordLayoutBuilder<0,
-  awkward::Record<awkward::field_name<x_field>, awkward::ListOffsetLayoutBuilder<1, initial, awkward::NumpyLayoutBuilder<2, initial, double>>>,
-  awkward::Record<awkward::field_name<y_field>, awkward::NumpyLayoutBuilder<3, initial, double>>>();
+test_list_offset_of_list_offset() {
+  auto builder = awkward::ListOffsetLayoutBuilder<0,
+      initial, awkward::ListOffsetLayoutBuilder<1,
+          initial, awkward::NumpyLayoutBuilder<2, initial, double>
+  >>();
 
   int64_t form_key_id = 0;
   auto form = builder.form();
@@ -339,17 +302,21 @@ test_nested_record_1()
 // }
 
 int main(int argc, char **argv) {
+  test_numpy_bool();
+  test_numpy_char();
+  test_numpy_int();
+  test_numpy_double();
+  test_numpy_complex();
+  test_list_offset_of_numpy();
+  test_list_offset_of_list_offset();
   test_record();
+  test_list_offset_of_record();
+  test_record_of_record();
   test_nested_record();
-  test_nested_record_1();
-  // test_record_of_record();
-  // test_numpy();
-  // test_listoffset_of_numpy();
-  // test_listoffset_of_record();
-  // test_listoffset_of_listoffset();
-  // test_listarray_of_numpy();
-  // test_indexarray();
-  // test_indexoptionarray();
-  // test_unmasked();
+  test_list();
+  test_index_array();
+  test_indexoptionarray();
+  test_unmasked();
+
   return 0;
 }
