@@ -159,16 +159,6 @@ namespace awkward {
     NumpyLayoutBuilder()
         : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) { }
 
-    void
-    append(PRIMITIVE x) {
-      data_.append(x);
-    }
-
-    void
-    append(PRIMITIVE* ptr, size_t size) {
-      data_.append(ptr, size);
-    }
-
     int64_t
     length() const {
       return data_.length();
@@ -177,6 +167,16 @@ namespace awkward {
     void
     clear() {
       data_.clear();
+    }
+
+    void
+    append(PRIMITIVE x) {
+      data_.append(x);
+    }
+
+    void
+    append(PRIMITIVE* ptr, size_t size) {
+      data_.append(ptr, size);
     }
 
     PRIMITIVE*
@@ -225,13 +225,18 @@ namespace awkward {
       offsets_.append(0);
     }
 
-    // returns JSON string
-    std::string
-    form() {
-      std::stringstream form_key;
-      form_key << "node" << id_;
-      return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+    int64_t
+    length() const {
+      return length_;
+    }
+
+    void
+    clear() {
+      offsets_.clear();
+      offsets_.append(0);
+      content_.clear();
+      begun_ = false;
+      length_ = 0;
     }
 
     template<typename PRIMITIVE>
@@ -268,25 +273,19 @@ namespace awkward {
       }
     }
 
-    void
-    clear() {
-      offsets_.clear();
-      offsets_.append(0);
-      content_.clear();
-      begun_ = false;
-      length_ = 0;
-    }
-
-    int64_t
-    length() const {
-      return length_;
-    }
-
     int64_t*
     to_buffers() const {
       int64_t* ptr = new int64_t[offsets_.length()];
       offsets_.concatenate(ptr);
       return ptr;
+    }
+
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
@@ -312,7 +311,7 @@ namespace awkward {
   public:
     RecordLayoutBuilder()
         : contents({new RECORD}...)
-        , length_(-1)
+        , length_(0)
         , begun_(false) { }
 
     int64_t
@@ -322,11 +321,30 @@ namespace awkward {
 
     void
     clear() {
-      length_ = -1;
+      length_ = 0;
       begun_ = false;
       auto clear_contents = [](auto record) { record->builder.clear(); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
         visit_at(contents, i, clear_contents);
+    }
+
+    void
+    begin_record() {
+      if (!begun_) {
+        begun_ = true;
+      }
+    }
+
+    void
+    end_record() {
+      if (!begun_) {
+        throw std::invalid_argument(
+        std::string("called 'end_record' without 'begin_record' at the same level "
+                    "before it"));
+      } else {
+        length_++;
+        begun_ = false;
+      }
     }
 
     std::string
@@ -346,28 +364,6 @@ namespace awkward {
       out << " }, ";
       out << "\"form_key\": \"" + form_key.str() + "\" }";
       return out.str();
-    }
-
-    void
-    begin_record() {
-      if (length_ == -1) {
-        length_ = 0;
-      }
-      if (!begun_) {
-        begun_ = true;
-      }
-    }
-
-    void
-    end_record() {
-      if (!begun_) {
-        throw std::invalid_argument(
-        std::string("called 'end_record' without 'begin_record' at the same level "
-                    "before it"));
-      } else {
-        length_++;
-        begun_ = false;
-      }
     }
 
     void
@@ -398,13 +394,18 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
         , begun_(false)
         , length_(0) { }
 
-    // returns JSON string
-    std::string
-    form() {
-      std::stringstream form_key;
-      form_key << "node" << id_;
-      return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+    int64_t
+    length() const {
+      return length_;
+    }
+
+    void
+    clear() {
+      starts_.clear();
+      stops_.clear();
+      content_.clear();
+      begun_ = false;
+      length_ = 0;
     }
 
     template<typename PRIMITIVE>
@@ -441,19 +442,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       }
     }
 
-    void
-    clear() {
-      starts_.clear();
-      starts_.append(0);
-      stops_.clear();
-      content_.clear();
-      begun_ = false;
-      length_ = 0;
-    }
-
-    int64_t
-    length() const {
-      return length_;
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
@@ -487,20 +481,6 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     IndexedLayoutBuilder()
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
-    std::string
-    form() {
-      std::stringstream form_key;
-      form_key << "node" << id_;
-      return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
-    }
-
-    void
-    clear() {
-      index_.clear();
-      content_.clear();
-    }
-
     int64_t
     length() const {
       return content_.length();
@@ -509,6 +489,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     int64_t
     index_length() {
       return index_.length();
+    }
+
+    void
+    clear() {
+      index_.clear();
+      content_.clear();
     }
 
     template<typename PRIMITIVE>
@@ -532,6 +518,14 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       int64_t* ptr = new int64_t[index_.length()];
       index_.concatenate(ptr);
       return ptr;
+    }
+
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
@@ -556,20 +550,6 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     IndexedOptionLayoutBuilder()
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
-    std::string
-    form() {
-      std::stringstream form_key;
-      form_key << "node" << id_;
-      return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
-    }
-
-    void
-    clear() {
-      index_.clear();
-      content_.clear();
-    }
-
     int64_t
     length() const {
       return content_.length();
@@ -581,8 +561,9 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
     void
-    null() {
-      index_.append(-1);
+    clear() {
+      index_.clear();
+      content_.clear();
     }
 
     template<typename PRIMITIVE>
@@ -601,11 +582,24 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       }
     }
 
+    void
+    null() {
+      index_.append(-1);
+    }
+
     int64_t*
     to_buffers() const {
       int64_t* ptr = new int64_t[index_.length()];
       index_.concatenate(ptr);
       return ptr;
+    }
+
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
@@ -624,15 +618,17 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     unsigned id_ = ID;
   };
 
-  template <unsigned ID, unsigned INITIAL, typename BUILDER>
+  template <unsigned ID, typename BUILDER>
   class UnmaskedLayoutBuilder {
   public:
-    std::string
-    form() {
-      std::stringstream form_key;
-      form_key << "node" << id_;
-      return "{ \"class\": \"UnmaskedArray\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+    int64_t
+    length() const {
+      return content_.length();
+    }
+
+    void
+    clear() {
+      content_.clear();
     }
 
     template<typename PRIMITIVE>
@@ -647,14 +643,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       content_.append(ptr, size);
     }
 
-    void
-    clear() {
-      content_.clear();
-    }
-
-    int64_t
-    length() const {
-      return content_.length();
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      return "{ \"class\": \"UnmaskedArray\", \"content\": "
+      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
     void
