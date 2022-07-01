@@ -17,7 +17,10 @@ namespace awkward {
                                              const std::string attribute,
                                              const std::string partition)
     : parameters_(parameters),
-      form_primitive_(form_primitive) {
+      form_key_(form_key),
+      form_primitive_(form_primitive),
+      is_complex_(form_primitive.rfind("complex", 0) == 0) {
+    auto tmp_primitive = (is_complex_ ? "float64" : form_primitive);
     vm_error_ = std::string("s\" NumpyForm builder accepts only ")
       .append(form_primitive).append("\" ");
 
@@ -29,11 +32,11 @@ namespace awkward {
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
-      .append(form_primitive).append(" ");
+      .append(tmp_primitive).append(" ");
 
     vm_func_name_ = std::string(form_key)
       .append("-")
-      .append(form_primitive);
+      .append(tmp_primitive);
 
     vm_func_type_ = form_primitive_to_state;
 
@@ -50,6 +53,27 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder<T, I>::classname() const {
     return "NumpyArrayBuilder";
+  }
+
+  template <typename T, typename I>
+  const std::string
+  NumpyArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
+    auto search = outputs.find(vm_output_data());
+    if (search != outputs.end()) {
+      container.copy_buffer(form_key() + "-data",
+                            search->second.get()->ptr().get(),
+                            (int64_t)((ssize_t)search->second.get()->len() * itemsize()));
+
+      return "{\"class\": \"NumpyArray\", \"primitive\": \"" + form_primitive() + "\", "
+        + this->parameters_as_string(parameters_) + " \"form_key\": \""
+        + form_key() + "\"}";
+    }
+    throw std::invalid_argument(
+      std::string("Snapshot of a ") + classname()
+      + std::string(" needs data ")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>

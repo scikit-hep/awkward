@@ -32,7 +32,7 @@ namespace awkward {
       contents() const;
 
     bool
-      istuple() const;
+      istuple() const override;
 
     const FormPtr
       content(int64_t fieldindex) const;
@@ -177,7 +177,7 @@ namespace awkward {
 
     /// @brief Returns `true` if #recordlookup is `nullptr`; `false` otherwise.
     bool
-      istuple() const;
+      istuple() const override;
 
     /// @brief Returns a RecordArray with an additional or a replaced field
     /// at index `where` with value `what`.

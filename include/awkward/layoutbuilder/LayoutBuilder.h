@@ -73,6 +73,16 @@ namespace awkward {
                   const ArrayBuilderOptions& options,
                   bool vm_init = true);
 
+    const std::string&
+      json_form() const {
+        return json_form_;
+      }
+
+    /// @brief Copy the current snapshot into the BuffersContainer and
+    /// return a Form as a std::string (JSON).
+    const std::string
+      to_buffers(BuffersContainer& container) const;
+
     /// @brief Connects a Virtual Machine if it was not initialized before.
     void
       connect(const std::shared_ptr<ForthMachineOf<T, I>>& vm);
@@ -274,11 +284,11 @@ namespace awkward {
     void
       set_data(D x);
 
+    /// @brief The Form that defines the Array to be build.
+    const std::string json_form_;
+
     /// See #initial.
     int64_t initial_;
-
-    /// @brief length of an input buffer
-    int64_t length_;
 
     /// @brief Root node of the FormBuilder tree.
     FormBuilderPtr<T, I> builder_;

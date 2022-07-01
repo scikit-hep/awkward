@@ -193,8 +193,8 @@ namespace awkward {
   LayoutBuilder<T, I>::LayoutBuilder(const std::string& json_form,
                                      const ArrayBuilderOptions& options,
                                      bool vm_init)
-    : initial_(options.initial()),
-      length_(8),
+    : json_form_(json_form),
+      initial_(options.initial()),
       builder_(nullptr),
       vm_(nullptr),
       vm_input_data_("data"),
@@ -221,6 +221,12 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::string
+  LayoutBuilder<T, I>::to_buffers(BuffersContainer& container) const {
+    return builder_.get()->to_buffers(container, vm().get()->outputs());
+  }
+
+  template <typename T, typename I>
   void
   LayoutBuilder<T, I>::initialise_builder(const std::string& json_form) {
     try {
@@ -241,7 +247,7 @@ namespace awkward {
 
     if (json_doc.IsString()) {
       std::string primitive = json_doc.GetString();
-      std::string json_form_key = std::string("node-id")
+      std::string json_form_key = std::string("node")
         + std::to_string(LayoutBuilder<T, I>::next_id());
 
       return std::make_shared<NumpyArrayBuilder<T, I>>(util::Parameters(),
@@ -257,7 +263,7 @@ namespace awkward {
 
     if (json_doc.HasMember("form_key")) {
       if (json_doc["form_key"].IsNull()) {
-        json_form_key = std::string("node-id")
+        json_form_key = std::string("node")
           + std::to_string(LayoutBuilder<T, I>::next_id());
       }
       else if (json_doc["form_key"].IsString()) {
@@ -269,7 +275,7 @@ namespace awkward {
       }
     }
     else {
-      json_form_key = std::string("node-id")
+      json_form_key = std::string("node")
         + std::to_string(LayoutBuilder<T, I>::next_id());
     }
 
@@ -625,7 +631,6 @@ namespace awkward {
       std::cout << i.second.get()->toNumpyArray().get()->tostring();
       std::cout << "\n";
     }
-    // FIXME refactoring std::cout << "array:\n" << snapshot().get()->tostring() << "\n";
   }
 
   template <typename T, typename I>
@@ -662,7 +667,7 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   LayoutBuilder<T, I>::length() const {
-    return length_;
+    return builder_->len(vm().get()->outputs());
   }
 
   template <typename T, typename I>
@@ -759,7 +764,10 @@ namespace awkward {
   template<typename T, typename I>
   void
   LayoutBuilder<T, I>::add_complex(std::complex<double> x) {
-    set_data<std::complex<double>>(x);
+    set_data<std::complex<double>>(x.real());
+    vm_.get()->stack_push(static_cast<utype>(state::complex128));
+    resume();
+    set_data<std::complex<double>>(x.imag());
     vm_.get()->stack_push(static_cast<utype>(state::complex128));
     resume();
   }

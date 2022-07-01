@@ -48,7 +48,7 @@ namespace awkward {
 
     /// @brief Returns `true` if #recordlookup is `nullptr`; `false` otherwise.
     bool
-      istuple() const;
+      istuple() const override;
 
     /// @copydoc Content::isscalar()
     ///

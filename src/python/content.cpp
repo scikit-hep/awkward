@@ -1541,6 +1541,22 @@ make_LayoutBuilder(const py::handle& m, const std::string& name) {
       .def("__iter__", [](const ak::LayoutBuilder<T, I>& self) -> ak::Iterator {
         return ak::Iterator(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())));
       })
+      .def("json_form", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
+        return py::str(self.json_form());
+      })
+      .def("form", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
+        ::EmptyBuffersContainer container;
+        return py::str(self.to_buffers(container));
+      })
+      .def("to_buffers", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
+        ::NumpyBuffersContainer container;
+        std::string form = self.to_buffers(container);
+        py::tuple out(3);
+        out[0] = py::str(form);
+        out[1] = py::int_(self.length());
+        out[2] = container.container();
+        return out;
+      })
       .def("null", &ak::LayoutBuilder<T, I>::null)
       .def("boolean", &ak::LayoutBuilder<T, I>::boolean)
       .def("int64", &ak::LayoutBuilder<T, I>::int64)

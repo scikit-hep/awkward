@@ -24,6 +24,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
+    const std::string
+      to_buffers(BuffersContainer& container, const ForthOutputBufferMap& outputs) const override;
+
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
       vm_output() const override;
@@ -97,6 +100,11 @@ namespace awkward {
     /// double-quoted: e.g. `"\"actual_value\""`.
     const util::Parameters&
       form_parameters() const { return parameters_; }
+
+    ssize_t
+      len(const ForthOutputBufferMap& outputs) const override {
+        return content().get()->len(outputs);
+      }
 
   private:
     /// @brief This Json Form content builder
