@@ -9,10 +9,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <stdint.h>
-#include <string>
-#include <vector>
 #include <tuple>
-#include <complex>
 
 namespace awkward {
 
@@ -74,7 +71,7 @@ namespace awkward {
     NumpyLayoutBuilder()
         : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) { }
 
-    int64_t
+    size_t
     length() const {
       return data_.length();
     }
@@ -94,11 +91,9 @@ namespace awkward {
       data_.append(ptr, size);
     }
 
-    PRIMITIVE*
-    to_buffers() const {
-      PRIMITIVE* ptr = new PRIMITIVE[length()];
+    void
+    to_buffers(PRIMITIVE* ptr) const {
       data_.concatenate(ptr);
-      return ptr;
     }
 
     std::string
@@ -115,15 +110,6 @@ namespace awkward {
       return "unsupported type";
     }
 
-    void
-    dump(std::string indent) const {
-      std::cout << indent << "NumpyLayoutBuilder" << std::endl;
-      std::cout << indent << "  data: ";
-      auto ptr = to_buffers();
-      data_.dump(ptr);
-      std::cout << std::endl;
-    }
-
   private:
     size_t initial_;
     awkward::GrowableBuffer<PRIMITIVE> data_;
@@ -136,11 +122,11 @@ namespace awkward {
     ListOffsetLayoutBuilder()
         : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL))
         , begun_(false)
-        , length_(0) {
+        , length_(1) {
       offsets_.append(0);
     }
 
-    int64_t
+    size_t
     length() const {
       return length_;
     }
@@ -151,7 +137,12 @@ namespace awkward {
       offsets_.append(0);
       content_.clear();
       begun_ = false;
-      length_ = 0;
+      length_ = 1;
+    }
+
+    BUILDER*
+    content() {
+      return &content_;
     }
 
     template<typename PRIMITIVE>
@@ -182,17 +173,15 @@ namespace awkward {
           "in ListOffsetLayoutBuilder"));
       }
       else {
-        length_++;
         begun_ = false;
+        length_++;
         offsets_.append(content_.length());
       }
     }
 
-    int64_t*
-    to_buffers() const {
-      int64_t* ptr = new int64_t[offsets_.length()];
+    void
+    to_buffers(int64_t* ptr) const {
       offsets_.concatenate(ptr);
-      return ptr;
     }
 
     std::string
@@ -203,19 +192,9 @@ namespace awkward {
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
-    void
-    dump(std::string indent) const {
-      std::cout << indent << "ListOffsetLayoutBuilder" << std::endl;
-      std::cout << indent << "    offsets: ";
-      auto ptr = to_buffers();
-      offsets_.dump(ptr);
-      std::cout << std::endl;
-      content_.dump(indent + "    ");
-    }
-
   private:
     bool begun_;
-    int64_t length_;
+    size_t length_;
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
     unsigned id_ = ID;
@@ -229,7 +208,7 @@ namespace awkward {
         , length_(0)
         , begun_(false) { }
 
-    int64_t
+    size_t
     length() const {
       return length_;
     }
@@ -281,20 +260,10 @@ namespace awkward {
       return out.str();
     }
 
-    void
-    dump(std::string indent) const {
-      std::cout << indent << "RecordLayoutBuilder" << std::endl;
-      auto print_contents = [&indent](auto record) { std::cout << indent << "    field: " << record->field() << std::endl;
-                                                     record->builder.dump(indent + "    "); };
-      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++) {
-        visit_at(contents, i, print_contents);
-      }
-    }
-
-    std::tuple<RECORD*...>  contents;
+    std::tuple<RECORD*...> contents;
 
     private:
-    int64_t length_;
+    size_t length_;
     bool begun_;
     unsigned id_ = ID;
   };
@@ -309,7 +278,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
         , begun_(false)
         , length_(0) { }
 
-    int64_t
+    size_t
     length() const {
       return length_;
     }
@@ -321,6 +290,11 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       content_.clear();
       begun_ = false;
       length_ = 0;
+    }
+
+    BUILDER*
+    content() {
+      return &content_;
     }
 
     template<typename PRIMITIVE>
@@ -357,6 +331,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       }
     }
 
+    void
+    to_buffers(int64_t* starts, int64_t* stops) const {
+      starts_.concatenate(starts);
+      stops_.concatenate(stops);
+    }
+
     std::string
     form() {
       std::stringstream form_key;
@@ -365,25 +345,9 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
-    void
-    dump(std::string indent) const {
-      std::cout << indent << "ListLayoutBuilder" << std::endl;
-      std::cout << indent << "    starts: ";
-      int64_t* ptr1 = new int64_t[starts_.length()];
-      starts_.concatenate(ptr1);
-      starts_.dump(ptr1);
-      std::cout << std::endl;
-      std::cout << indent << "    stops: ";
-      int64_t* ptr2 = new int64_t[stops_.length()];
-      stops_.concatenate(ptr2);
-      stops_.dump(ptr2);
-      std::cout << std::endl;
-      content_.dump(indent + "    ");
-    }
-
   private:
     bool begun_;
-    int64_t length_;
+    size_t length_;
     GrowableBuffer<int64_t> starts_;
     GrowableBuffer<int64_t> stops_;
     BUILDER content_;
@@ -396,13 +360,8 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     IndexedLayoutBuilder()
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
-    int64_t
+    size_t
     length() const {
-      return content_.length();
-    }
-
-    int64_t
-    index_length() {
       return index_.length();
     }
 
@@ -410,6 +369,11 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     clear() {
       index_.clear();
       content_.clear();
+    }
+
+    BUILDER*
+    content() {
+      return &content_;
     }
 
     template<typename PRIMITIVE>
@@ -428,11 +392,9 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       }
     }
 
-    int64_t*
-    to_buffers() const {
-      int64_t* ptr = new int64_t[index_.length()];
+    void
+    to_buffers(int64_t* ptr) const {
       index_.concatenate(ptr);
-      return ptr;
     }
 
     std::string
@@ -441,16 +403,6 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       form_key << "node" << id_;
       return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
-    }
-
-    void
-    dump(std::string indent) const {
-      std::cout << indent << "IndexedLayoutBuilder" << std::endl;
-      std::cout << indent << "    index: ";
-      auto ptr = to_buffers();
-      index_.dump(ptr);
-      std::cout << std::endl;
-      content_.dump(indent + "    ");
     }
 
   private:
@@ -465,13 +417,8 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     IndexedOptionLayoutBuilder()
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
-    int64_t
+    size_t
     length() const {
-      return content_.length();
-    }
-
-    int64_t
-    index_length() {
       return index_.length();
     }
 
@@ -479,6 +426,11 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     clear() {
       index_.clear();
       content_.clear();
+    }
+
+    BUILDER*
+    content() {
+      return &content_;
     }
 
     template<typename PRIMITIVE>
@@ -502,11 +454,9 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       index_.append(-1);
     }
 
-    int64_t*
-    to_buffers() const {
-      int64_t* ptr = new int64_t[index_.length()];
+    void
+    to_buffers(int64_t* ptr) const {
       index_.concatenate(ptr);
-      return ptr;
     }
 
     std::string
@@ -515,16 +465,6 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       form_key << "node" << id_;
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
-    }
-
-    void
-    dump(std::string indent) const {
-      std::cout << indent << "IndexedOptionLayoutBuilder" << std::endl;
-      std::cout << indent << "    index: ";
-      auto ptr = to_buffers();
-      index_.dump(ptr);
-      std::cout << std::endl;
-      content_.dump(indent + "    ");
     }
 
   private:
@@ -536,7 +476,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   template <unsigned ID, typename BUILDER>
   class UnmaskedLayoutBuilder {
   public:
-    int64_t
+    size_t
     length() const {
       return content_.length();
     }
@@ -544,6 +484,11 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     void
     clear() {
       content_.clear();
+    }
+
+    BUILDER*
+    content() {
+      return &content_;
     }
 
     template<typename PRIMITIVE>
@@ -564,12 +509,6 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       form_key << "node" << id_;
       return "{ \"class\": \"UnmaskedArray\", \"content\": "
       + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
-    }
-
-    void
-    dump(std::string indent) const {
-      std::cout << indent << "UnmaskedLayoutBuilder" << std::endl;
-      content_.dump(indent + "    ");
     }
 
   private:
