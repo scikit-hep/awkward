@@ -211,7 +211,7 @@ namespace awkward {
     /// allocation of a new panel.
     void
     append(PRIMITIVE* ptr, size_t size) {
-      for (int64_t i = 0; i < size; i++) {
+      for (size_t i = 0; i < size; i++) {
         append(ptr[i]);
       }
     }
@@ -227,15 +227,15 @@ namespace awkward {
     /// contiguously allocated `external_pointer`.
     void
     concatenate(PRIMITIVE* external_pointer) const noexcept {
-      int64_t next_panel = 0;
-      for (int64_t i = 0;  i < ptr_.size();  i++) {
+      size_t next_panel = 0;
+      for (size_t i = 0;  i < ptr_.size();  i++) {
         memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_[i].get()), length_[i]*sizeof(PRIMITIVE));
         next_panel += length_[i];
       }
     }
 
     /// @brief Checks whether the array is contiguous.
-    int64_t is_contiguous() {
+    size_t is_contiguous() {
       return (ptr_.size() == 1);
     }
 
