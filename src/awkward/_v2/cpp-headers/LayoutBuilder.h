@@ -4,6 +4,7 @@
 #define AWKWARD_LAYOUTBUILDER_H_
 
 #include "GrowableBuffer.h"
+#include "utils.h"
 
 #include <stdexcept>
 #include <cassert>
@@ -66,92 +67,6 @@ namespace awkward {
   {
       visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
   }
-
-  template <typename T>
-  const std::string
-  type_to_name() {
-      return typeid(T).name();
-  }
-
-  template <>
-  const std::string
-  type_to_name<bool>() {
-      return "bool";
-  }
-
-  template <>
-  const std::string
-  type_to_name<int8_t>() {
-      return "int8";
-  }
-
-  template <>
-  const std::string
-  type_to_name<int16_t>() {
-      return "int16";
-  }
-
-  template <>
-  const std::string
-  type_to_name<int32_t>() {
-      return "int32";
-  }
-
-  template <>
-  const std::string
-  type_to_name<int64_t>() {
-      return "int64";
-  }
-
-  template <>
-  const std::string
-  type_to_name<uint8_t>() {
-      return "uint8";
-  }
-
-  template <>
-  const std::string
-  type_to_name<uint16_t>() {
-      return "uint16";
-  }
-
-  template <>
-  const std::string
-  type_to_name<uint32_t>() {
-      return "uint32";
-  }
-
-  template <>
-  const std::string
-  type_to_name<uint64_t>() {
-      return "uint64";
-  }
-
-  template <>
-  const std::string
-  type_to_name<float>() {
-      return "float32";
-  }
-
-  template <>
-  const std::string
-  type_to_name<double>() {
-      return "float64";
-  }
-
-  template <>
-  const std::string
-  type_to_name<char>() {
-      return "char";
-  }
-
-  template <typename Test, template <typename...> class Ref>
-  struct is_specialization : std::false_type {
-  };
-
-  template <template <typename...> class Ref, typename... Args>
-  struct is_specialization<Ref<Args...>, Ref> : std::true_type {
-  };
 
   template <unsigned ID, unsigned INITIAL, typename PRIMITIVE>
   class NumpyLayoutBuilder {
