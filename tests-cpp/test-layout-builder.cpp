@@ -3,8 +3,6 @@
 #include "../src/awkward/_v2/cpp-headers/LayoutBuilder.h"
 
 #include <iostream>
-#include <cassert>
-#include <complex>
 
 static const char one_field[] = "one";
 static const char two_field[] = "two";
@@ -21,6 +19,22 @@ static const char i_field[] = "i";
 static const char j_field[] = "j";
 
 static const unsigned initial = 10;
+
+template <class NODE, class PRIMITIVE, class LENGTH>
+void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
+  std::cout << node << ": ";
+  for (int at = 0; at < length; at++) {
+    std::cout << ptr[at] << " ";
+  }
+  std::cout<<std::endl;
+}
+
+template<class NODE, class PRIMITIVE, class LENGTH, class ... Args>
+void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length, Args&&...args)
+{
+    dump(node, ptr, length);
+    dump(args...);
+}
 
 void
 test_numpy_bool() {
@@ -42,7 +56,10 @@ test_numpy_bool() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  bool* ptr = new bool[builder.length()];
+  builder.to_buffers(ptr);
+
+  dump("node0", ptr, builder.length());
   std::cout<<std::endl;
 }
 
@@ -56,9 +73,9 @@ test_numpy_int() {
 
   builder.append(data, data_size);
 
-  auto form = builder.form();
-
  // [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4]
+
+  auto form = builder.form();
 
   assert (form ==
   "{ "
@@ -67,7 +84,10 @@ test_numpy_int() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  int64_t* ptr0 = new int64_t[builder.length()];
+  builder.to_buffers(ptr0);
+
+  dump("node0", ptr0, builder.length());
   std::cout<<std::endl;
 }
 
@@ -91,7 +111,10 @@ test_numpy_char() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  char* ptr0 = new char[builder.length()];
+  builder.to_buffers(ptr0);
+
+  dump("node0", ptr0, builder.length());
   std::cout<<std::endl;
 }
 
@@ -116,7 +139,10 @@ test_numpy_double() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  double* ptr0 = new double[builder.length()];
+  builder.to_buffers(ptr0);
+
+  dump("node0", ptr0, builder.length());
   std::cout<<std::endl;
 }
 
@@ -141,7 +167,10 @@ test_numpy_complex() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  std::complex<double>* ptr0 = new std::complex<double>[builder.length()];
+  builder.to_buffers(ptr0);
+
+  dump("node0", ptr0, builder.length());
   std::cout<<std::endl;
 }
 
@@ -151,7 +180,7 @@ test_list_offset_of_numpy() {
       initial, awkward::NumpyLayoutBuilder<1, initial, double>
   >();
 
-  builder.begin_list();
+  auto builder2 = builder.begin_list();
   builder.append(1.1);
   builder.append(2.2);
   builder.append(3.3);
@@ -181,7 +210,14 @@ test_list_offset_of_numpy() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  int64_t* ptr0 = new int64_t[builder.length()];
+  builder.to_buffers(ptr0);
+
+  double* ptr1 = new double[builder2->length()];
+  builder2->to_buffers(ptr1);
+
+  dump("node0", ptr0, builder.length(),
+       "node1", ptr1, builder2->length());
   std::cout<<std::endl;
 }
 
@@ -250,7 +286,18 @@ test_list_offset_of_list_offset() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  int64_t* ptr0 = new int64_t[builder.length()];
+  builder.to_buffers(ptr0);
+
+  int64_t* ptr1 = new int64_t[builder2->length()];
+  builder2->to_buffers(ptr1);
+
+  double* ptr2 = new double[builder3->length()];
+  builder3->to_buffers(ptr2);
+
+  dump("node0", ptr0, builder.length(),
+       "node1", ptr1, builder2->length(),
+       "node2", ptr2, builder3->length());
   std::cout<<std::endl;
 }
 
@@ -309,7 +356,18 @@ test_record()
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  double* ptr0 = new double[one_builder->length()];
+  one_builder->to_buffers(ptr0);
+
+  int64_t* ptr1 = new int64_t[two_builder->length()];
+  two_builder->to_buffers(ptr1);
+
+  char* ptr2 = new char[three_builder->length()];
+  three_builder->to_buffers(ptr2);
+
+  dump("node1", ptr0, one_builder->length(),
+       "node2", ptr1, two_builder->length(),
+       "node3", ptr2, three_builder->length());
   std::cout<<std::endl;
 }
 
@@ -329,7 +387,7 @@ test_list_offset_of_record() {
 
   builder2->begin_record();
   x_builder->append(1.1);
-  y_builder->begin_list();
+  auto y_builder2 = y_builder->begin_list();
   y_builder->append(1);
   y_builder->end_list();
   builder2->end_record();
@@ -396,7 +454,22 @@ test_list_offset_of_record() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  int64_t* ptr0 = new int64_t[builder.length()];
+  builder.to_buffers(ptr0);
+
+  double* ptr1 = new double[x_builder->length()];
+  x_builder->to_buffers(ptr1);
+
+  int64_t* ptr2 = new int64_t[y_builder->length()];
+  y_builder->to_buffers(ptr2);
+
+  int64_t* ptr3 = new int64_t[y_builder2->length()];
+  y_builder2->to_buffers(ptr3);
+
+  dump("node0", ptr0, builder.length(),
+       "node2", ptr1, x_builder->length(),
+       "node3", ptr2, y_builder->length(),
+       "node4", ptr3, y_builder2->length());
   std::cout<<std::endl;
 }
 
@@ -407,7 +480,7 @@ test_record_of_record()
       awkward::Record<awkward::field_name<x_field>, awkward::RecordLayoutBuilder<1,
           awkward::Record<awkward::field_name<u_field>, awkward::NumpyLayoutBuilder<2,initial, double>>,
           awkward::Record<awkward::field_name<v_field>, awkward::ListOffsetLayoutBuilder<3,
-              initial, awkward::NumpyLayoutBuilder<4, initial, double>>>>>,
+              initial, awkward::NumpyLayoutBuilder<4, initial, int64_t>>>>>,
       awkward::Record<awkward::field_name<y_field>, awkward::RecordLayoutBuilder<5,
           awkward::Record<awkward::field_name<w_field>, awkward::NumpyLayoutBuilder<6,initial, char>>>>
   >();
@@ -424,7 +497,7 @@ test_record_of_record()
 
   x_builder->begin_record();
   u_builder->append(1.1);
-  v_builder->begin_list();
+  auto v_builder2 = v_builder->begin_list();
   v_builder->append(1);
   v_builder->append(2);
   v_builder->append(3);
@@ -477,7 +550,7 @@ test_record_of_record()
                       "\"offsets\": \"i64\", "
                       "\"content\": { "
                           "\"class\": \"NumpyArray\", "
-                          "\"primitive\": \"float64\", "
+                          "\"primitive\": \"int64\", "
                           "\"form_key\": \"node4\" "
                       "}, "
                       "\"form_key\": \"node3\" "
@@ -500,8 +573,23 @@ test_record_of_record()
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
-  std::cout<<std::endl;
+  double* ptr0 = new double[u_builder->length()];
+  u_builder->to_buffers(ptr0);
+
+  int64_t* ptr1 = new int64_t[v_builder->length()];
+  v_builder->to_buffers(ptr1);
+
+  int64_t* ptr2 = new int64_t[v_builder2->length()];
+  v_builder2->to_buffers(ptr2);
+
+  char* ptr3 = new char[w_builder->length()];
+  w_builder->to_buffers(ptr3);
+
+  dump("node2", ptr0, u_builder->length(),
+       "node3", ptr1, v_builder->length(),
+       "node4", ptr2, v_builder2->length(),
+       "node6", ptr3, w_builder->length());
+  std::cout << std::endl;
 }
 
 void
@@ -530,7 +618,7 @@ test_nested_record()
 
   u_builder2->begin_record();
   i_builder->append(1.1);
-  j_builder->begin_list();
+  auto j_builder2 = j_builder->begin_list();
   j_builder->append(1);
   j_builder->append(2);
   j_builder->append(3);
@@ -613,8 +701,31 @@ test_nested_record()
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
-  std::cout<<std::endl;
+  int64_t* ptr0 = new int64_t[u_builder->length()];
+  u_builder->to_buffers(ptr0);
+
+  double* ptr1 = new double[i_builder->length()];
+  i_builder->to_buffers(ptr1);
+
+  int64_t* ptr2 = new int64_t[j_builder->length()];
+  j_builder->to_buffers(ptr2);
+
+  int64_t* ptr3 = new int64_t[j_builder2->length()];
+  j_builder2->to_buffers(ptr3);
+
+  int64_t* ptr4 = new int64_t[v_builder->length()];
+  v_builder->to_buffers(ptr4);
+
+  double* ptr5 = new double[w_builder->length()];
+  w_builder->to_buffers(ptr5);
+
+  dump("node1", ptr0, u_builder->length(),
+       "node3", ptr1, i_builder->length(),
+       "node4", ptr2, j_builder->length(),
+       "node5", ptr3, j_builder2->length(),
+       "node6", ptr4, v_builder->length(),
+       "node7", ptr5, w_builder->length());
+  std::cout << std::endl;
 }
 
 void
@@ -669,7 +780,14 @@ test_list() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  int64_t* ptr1 = new int64_t[builder.length()];
+  int64_t* ptr2 = new int64_t[builder.length()];
+  builder.to_buffers(ptr1, ptr2);
+  double* ptr3 = new double[builder2->length()];
+  builder2->to_buffers(ptr3);
+  dump("node0", ptr1, builder.length(),
+       "     ", ptr2, builder.length(),
+       "node1", ptr3, builder2->length());
   std::cout<<std::endl;
 }
 
@@ -698,7 +816,14 @@ test_index_array() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  int64_t* ptr0 = new int64_t[builder.length()];
+  builder.to_buffers(ptr0);
+
+  double* ptr1 = new double[builder.content()->length()];
+  builder.content()->to_buffers(ptr1);
+
+  dump("node0", ptr0, builder.length(),
+       "node1", ptr1, builder.content()->length());
   std::cout<<std::endl;
 }
 
@@ -733,7 +858,14 @@ test_indexoptionarray() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  int64_t* ptr0 = new int64_t[builder.length()];
+  builder.to_buffers(ptr0);
+
+  int64_t* ptr1 = new int64_t[builder.content()->length()];
+  builder.content()->to_buffers(ptr1);
+
+  dump("node0", ptr0, builder.length(),
+       "node1", ptr1, builder.content()->length());
   std::cout<<std::endl;
 }
 
@@ -762,7 +894,10 @@ test_unmasked() {
       "\"form_key\": \"node9\" "
   "}");
 
-  builder.dump("");
+  int64_t* ptr0 = new int64_t[builder.content()->length()];
+  builder.content()->to_buffers(ptr0);
+
+  dump("node0", ptr0, builder.content()->length());
   std::cout<<std::endl;
 }
 
