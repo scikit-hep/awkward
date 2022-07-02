@@ -109,7 +109,7 @@ struct is_specialization<Ref<Args...>, Ref> : std::true_type {
 template <typename T>
 std::string
 type_to_form(int64_t form_key_id) {
-  if (std::string(typeid(T).name()).find("awkward") != string::npos) {
+  if (std::string(typeid(T).name()).find("awkward") != std::string::npos) {
     return std::string("awkward type");
   }
 
