@@ -3,8 +3,6 @@
 #include "../src/awkward/_v2/cpp-headers/LayoutBuilder.h"
 
 #include <iostream>
-#include <cassert>
-#include <complex>
 
 static const char one_field[] = "one";
 static const char two_field[] = "two";
@@ -21,6 +19,22 @@ static const char i_field[] = "i";
 static const char j_field[] = "j";
 
 static const unsigned initial = 10;
+
+template <class NODE, class PRIMITIVE, class LENGTH>
+void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
+  std::cout << node << ": ";
+  for (int at = 0; at < length; at++) {
+    std::cout << ptr[at] << " ";
+  }
+  std::cout<<std::endl;
+}
+
+template<class NODE, class PRIMITIVE, class LENGTH, class ... Args>
+void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length, Args&&...args)
+{
+    dump(node, ptr, length);
+    dump(args...);
+}
 
 void
 test_numpy_bool() {
@@ -42,7 +56,10 @@ test_numpy_bool() {
       "\"form_key\": \"node0\" "
   "}");
 
-  builder.dump("");
+  bool* ptr = new bool[builder.length()];
+  builder.to_buffers(ptr);
+
+  dump("node0", ptr, builder.length());
   std::cout<<std::endl;
 }
 
