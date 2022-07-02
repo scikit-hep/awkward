@@ -3,8 +3,6 @@
 #ifndef AWKWARD_GROWABLEBUFFER_H_
 #define AWKWARD_GROWABLEBUFFER_H_
 
-#include <iostream>
-#include <stdint.h>
 #include <vector>
 #include <memory>
 #include <numeric>
@@ -239,13 +237,6 @@ namespace awkward {
     /// @brief Checks whether the array is contiguous.
     int64_t is_contiguous() {
       return (ptr_.size() == 1);
-    }
-
-    /// @brief Temporary debugging tool.
-    void dump(PRIMITIVE* external_pointer) const {
-      for (int at = 0; at < length(); at++) {
-        std::cout << external_pointer[at] << " ";
-      }
     }
 
   private:
