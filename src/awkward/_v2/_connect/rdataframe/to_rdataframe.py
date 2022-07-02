@@ -67,7 +67,9 @@ class DataSourceGenerator:
             self.generators[key] = ak._v2._connect.cling.togenerator(
                 layouts[key].form, flatlist_as_rvec=self.flatlist_as_rvec
             )
-            self.lookups[key] = ak._v2._lookup.Lookup(layouts[key])
+            self.lookups[key] = ak._v2._lookup.Lookup(
+                layouts[key], self.generators[key]
+            )
             self.generators[key].generate(ROOT.gInterpreter.Declare)
 
             self.entry_types[key] = self.generators[key].entry_type()
@@ -181,7 +183,7 @@ class DataSourceGenerator:
             cpp_code_entries = (
                 cpp_code_entries
                 + f"""
-        slots_{key}[slot] = awkward::{self.generators[key].class_type()}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}))[entry];
+        slots_{key}[slot] = awkward::{self.generators[key].class_type()}(0, fSize, 0, reinterpret_cast<ssize_t*>(fPtrs_{key}), fPyLookup)[entry];
     """
             )
 
@@ -243,15 +245,15 @@ namespace awkward {{
                 {cpp_code_init_slots}
             }}
 
-            ~{array_data_source}() {{
-                Py_DECREF(fPyLookup);
-            }}
+        ~{array_data_source}() {{
+            Py_DECREF(fPyLookup);
+        }}
 
-            void SetNSlots(unsigned int nSlots) {{
-                fNSlots = nSlots; // FIXME: always 1 slot for now
+        void SetNSlots(unsigned int nSlots) {{
+            fNSlots = nSlots;
 
-                {cpp_code_resize_slots}
-            }}
+            {cpp_code_resize_slots}
+        }}
 
         void Initialise() {{
             // initialize fEntryRanges
@@ -293,6 +295,7 @@ namespace awkward {{
             {cpp_code_entries}
             return true;
         }}
+
     }};
 
     ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source}(PyObject* lookup, ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{

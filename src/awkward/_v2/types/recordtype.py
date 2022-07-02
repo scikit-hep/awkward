@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import json
 from collections.abc import Iterable
 
 import awkward as ak
@@ -99,13 +100,38 @@ class RecordType(Type):
             params = self._str_parameters()
             name = self.parameter("__record__")
 
+            if name is not None:
+                if (
+                    not ak._v2._prettyprint.is_identifier.match(name)
+                    or name
+                    in (
+                        "unknown",
+                        "string",
+                        "bytes",
+                        "option",
+                        "tuple",
+                        "struct",
+                        "union",
+                        "categorical",
+                    )
+                    or name in ak._v2.types.numpytype._primitive_to_dtype_dict
+                ):
+                    if params is None:
+                        params = 'parameters={"__record__": ' + json.dumps(name) + "}"
+                    else:
+                        params = (
+                            'parameters={"__record__": '
+                            + json.dumps(name)
+                            + ", "
+                            + params[12:]
+                        )
+                    name = None
+
             if not self.is_tuple:
                 pairs = []
                 for k, v in zip(self._fields, children):
                     if ak._v2._prettyprint.is_identifier.match(k) is None:
-                        key_str = repr(k)
-                        if key_str.startswith("u"):
-                            key_str = key_str[1:]
+                        key_str = json.dumps(k)
                     else:
                         key_str = k
                     pairs.append([key_str, ": "] + v)
@@ -134,16 +160,16 @@ class RecordType(Type):
                             + [post, "], ", params, "]"]
                         )
                     else:
-                        out = (
-                            [name, "[", pre] + flat_children + [", ", post, params, "]"]
-                        )
+                        c = "" if len(self._contents) == 0 else ", "
+                        out = [name, "[", pre] + flat_children + [c, post, params, "]"]
                 else:
                     if name is None:
                         out = (
                             ["struct[{", pre] + flat_pairs + [post, "}, ", params, "]"]
                         )
                     else:
-                        out = [name, "[", pre] + flat_pairs + [", ", post, params, "]"]
+                        c = "" if len(self._contents) == 0 else ", "
+                        out = [name, "[", pre] + flat_pairs + [c, post, params, "]"]
 
         return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 

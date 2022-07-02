@@ -4,6 +4,7 @@
 
 #include "awkward/layoutbuilder/RegularArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
+#include "awkward/layoutbuilder/NumpyArrayBuilder.h"
 
 namespace awkward {
 
@@ -17,6 +18,7 @@ namespace awkward {
                                                  const std::string partition)
     : content_(content),
       parameters_(parameters),
+      form_key_(form_key),
       form_size_(size) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
@@ -39,6 +41,18 @@ namespace awkward {
   const std::string
   RegularArrayBuilder<T, I>::classname() const {
     return "RegularArrayBuilder";
+  }
+
+  template <typename T, typename I>
+  const std::string
+  RegularArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
+    return "{\"class\": \"RegularArray\", \"size\": " + std::to_string(form_size())
+      + ", \"content\": "
+      + content()->to_buffers(container, outputs) + ", "
+      + this->parameters_as_string(parameters_) + " \"form_key\": \""
+      + form_key() + "\"}";
   }
 
   template <typename T, typename I>

@@ -40,6 +40,12 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
+  ByteMaskedArrayBuilder<T, I>::to_buffers(BuffersContainer& container, const ForthOutputBufferMap& outputs) const {
+    return content().get()->to_buffers(container, outputs);
+  }
+
+  template <typename T, typename I>
+  const std::string
   ByteMaskedArrayBuilder<T, I>::vm_output() const {
     return vm_output_;
   }

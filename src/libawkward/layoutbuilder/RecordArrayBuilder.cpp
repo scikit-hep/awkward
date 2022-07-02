@@ -17,6 +17,7 @@ namespace awkward {
                                                const std::string partition)
     : form_recordlookup_(recordlookup),
       parameters_(parameters),
+      form_key_(form_key),
       field_index_(0),
       contents_size_((int64_t) contents.size()) {
     for (auto const& content : contents) {
@@ -25,6 +26,9 @@ namespace awkward {
       vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
       vm_func_.append(contents_.back().get()->vm_func());
       vm_error_.append(contents_.back().get()->vm_error());
+    }
+    for (auto const& it : *recordlookup) {
+      fields_.push_back(it);
     }
 
     vm_func_name_ = std::string(form_key).append(attribute);
@@ -45,6 +49,36 @@ namespace awkward {
   const std::string
   RecordArrayBuilder<T, I>::classname() const {
     return "RecordArrayBuilder";
+  }
+
+  template <typename T, typename I>
+  ssize_t
+  RecordArrayBuilder<T, I>::len(const ForthOutputBufferMap& outputs) const {
+    if (!contents_.empty()) {
+      return contents_.front().get()->len(outputs);
+    }
+    return 0;
+  }
+
+  template <typename T, typename I>
+  const std::string
+  RecordArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
+    std::stringstream out;
+    out << "{\"class\": \"RecordArray\", \"contents\": {";
+    for (size_t i = 0;  i < contents().size();  i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      out << "" + util::quote(fields_[i]) + ": ";
+      out << contents()[i].get()->to_buffers(container, outputs);
+    }
+    out << "}, ";
+    out << this->parameters_as_string(parameters_);
+    out << "\"form_key\": \"" + form_key() + "\"}";
+
+    return out.str();
   }
 
   template <typename T, typename I>

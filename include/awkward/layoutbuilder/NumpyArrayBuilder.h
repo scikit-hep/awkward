@@ -26,6 +26,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
+    const std::string
+      to_buffers(BuffersContainer& container, const ForthOutputBufferMap& outputs) const override;
+
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
       vm_output() const override;
@@ -93,12 +96,48 @@ namespace awkward {
       form_parameters() const { return parameters_; }
 
     const std::string&
+      form_key() const {return form_key_; }
+
+    const std::string&
       form_primitive() const {return form_primitive_; }
 
+    ssize_t
+      itemsize() const {
+        if (form_primitive() == "float64") {
+          return sizeof(double);
+        } else if (form_primitive() == "int64") {
+          return sizeof(int64_t);
+        } else if (form_primitive() == "complex128") {
+          return sizeof(std::complex<double>);
+        } else if (form_primitive() == "bool") {
+          return sizeof(bool);
+        }
+        return util::dtype_to_itemsize(util::name_to_dtype(form_primitive()));
+      }
+
+    ssize_t
+      len(const ForthOutputBufferMap& outputs) const override {
+        auto search = outputs.find(vm_output_data());
+        if (search != outputs.end()) {
+          return (is_complex() ?
+            (ssize_t)search->second.get()->len() >> 1 :
+            (ssize_t)search->second.get()->len());
+        }
+        return 0;
+      }
+
+    bool
+      is_complex() const override {
+        return is_complex_;
+    }
+
   private:
+
     /// @brief This Form parameters
     const util::Parameters parameters_;
+    const std::string form_key_;
     const std::string form_primitive_;
+    bool is_complex_;
 
     /// @brief AwkwardForth virtual machine instructions
     /// generated from the Form

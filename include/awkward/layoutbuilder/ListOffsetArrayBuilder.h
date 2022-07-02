@@ -26,6 +26,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
+    const std::string
+      to_buffers(BuffersContainer& container, const ForthOutputBufferMap& outputs) const override;
+
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
       vm_output() const override;
@@ -100,6 +103,18 @@ namespace awkward {
 
     const util::Parameters&
       form_parameters() const { return parameters_; }
+
+    const std::string&
+      form_key() const {return form_key_; }
+
+    ssize_t
+      len(const ForthOutputBufferMap& outputs) const override {
+        auto search = outputs.find(vm_output_data());
+        if (search != outputs.end()) {
+          return (ssize_t)search->second.get()->len() - 1;
+        }
+        return 0;
+      }
 
   private:
     /// @brief This Form content builder
