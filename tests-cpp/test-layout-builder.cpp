@@ -334,5 +334,8 @@ int main(int argc, char **argv) {
   test_index();
   test_index_option();
   test_unmasked();
+  test_empty();
+  test_list_offset_of_empty();
+
   return 0;
 }
