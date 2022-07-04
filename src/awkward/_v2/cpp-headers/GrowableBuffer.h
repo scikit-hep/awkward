@@ -7,6 +7,7 @@
 #include <memory>
 #include <numeric>
 #include <cmath>
+#include <iostream>
 
 namespace awkward {
   /// @class GrowableBuffer

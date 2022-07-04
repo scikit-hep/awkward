@@ -6,6 +6,7 @@
 #include <iterator>
 #include <complex>
 #include <type_traits>
+#include <cassert>
 
 namespace awkward {
 
@@ -140,6 +141,36 @@ type_to_form(int64_t form_key_id) {
       + ", " + parameters + "\"form_key\": \"" + form_key.str() + "\"}";
   }
   return "unsupported type";
+}
+
+template <size_t INDEX>
+struct visit_impl {
+  template <typename RECORD, typename FUNCTION>
+    static void visit(RECORD& contents, size_t index, FUNCTION fun) {
+      if (index == INDEX - 1) {
+        fun(std::get<INDEX - 1>(contents));
+      } else {
+        visit_impl<INDEX - 1>::visit(contents, index, fun);
+      }
+    }
+};
+
+template <>
+struct visit_impl<0> {
+  template <typename RECORD, typename FUNCTION>
+  static void visit(RECORD& contents, size_t index, FUNCTION fun) { assert(false); }
+};
+
+template <typename FUNCTION, typename... RECORDs>
+void
+visit_at(std::tuple<RECORDs...> const& contents, size_t index, FUNCTION fun) {
+  visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
+}
+
+template <typename FUNCTION, typename... RECORDs>
+void
+visit_at(std::tuple<RECORDs...>& contents, size_t index, FUNCTION fun) {
+  visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
 }
 
 }
