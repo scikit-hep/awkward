@@ -48,6 +48,14 @@ public:
     }
   }
 
+  int64_t
+  offsets_and_flatten_1() {
+    for (auto const& vec : result_) {
+      data_.insert(data_.end(), vec.begin(), vec.end());
+    }
+    return static_cast<int64_t>(data_.size());
+  }
+
   std::pair<int64_t, int64_t>
   offsets_and_flatten_2() {
     int64_t i = 0;

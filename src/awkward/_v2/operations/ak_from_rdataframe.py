@@ -3,7 +3,7 @@
 import awkward as ak
 
 
-def from_rdataframe(data_frame, column):
+def from_rdataframe(data_frame, columns):
     """
     Args:
         data_frame (`ROOT.RDataFrame`): ROOT RDataFrame to convert into an
@@ -18,22 +18,28 @@ def from_rdataframe(data_frame, column):
         "ak._v2.from_rdataframe",
         dict(
             data_frame=data_frame,
-            column=column,
+            columns=columns,
         ),
     ):
         return _impl(
             data_frame,
-            column,
+            columns,
         )
 
 
 def _impl(
     data_frame,
-    column,
+    columns,
 ):
     import awkward._v2._connect.rdataframe.from_rdataframe  # noqa: F401
 
+    columns_list = []
+    if isinstance(columns, str):
+        columns_list.append(columns)
+    else:
+        columns_list = columns
+
     return ak._v2._connect.rdataframe.from_rdataframe.from_rdataframe(
         data_frame,
-        column,
+        columns,
     )
