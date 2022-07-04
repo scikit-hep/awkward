@@ -331,9 +331,8 @@ int main(int argc, char **argv) {
   test_record_of_record();
   test_nested_record();
   test_list();
-  test_index_array();
-  test_indexoptionarray();
+  test_index();
+  test_index_option();
   test_unmasked();
-
   return 0;
 }
