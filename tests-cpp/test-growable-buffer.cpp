@@ -4,7 +4,6 @@
 
 #include <complex>
 #include <cassert>
-#include<iostream>
 
 void test_full() {
   size_t data_size = 100;
