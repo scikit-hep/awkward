@@ -210,13 +210,13 @@ test_list_offset_of_numpy() {
       "\"form_key\": \"node0\" "
   "}");
 
-  int64_t* ptr0 = new int64_t[builder.length()];
+  int64_t* ptr0 = new int64_t[builder.length() + 1];
   builder.to_buffers(ptr0);
 
   double* ptr1 = new double[builder2->length()];
   builder2->to_buffers(ptr1);
 
-  dump("node0", ptr0, builder.length(),
+  dump("node0", ptr0, builder.length() + 1,
        "node1", ptr1, builder2->length());
   std::cout<<std::endl;
 }
@@ -286,17 +286,17 @@ test_list_offset_of_list_offset() {
       "\"form_key\": \"node0\" "
   "}");
 
-  int64_t* ptr0 = new int64_t[builder.length()];
+  int64_t* ptr0 = new int64_t[builder.length() + 1];
   builder.to_buffers(ptr0);
 
-  int64_t* ptr1 = new int64_t[builder2->length()];
+  int64_t* ptr1 = new int64_t[builder2->length() + 1];
   builder2->to_buffers(ptr1);
 
   double* ptr2 = new double[builder3->length()];
   builder3->to_buffers(ptr2);
 
-  dump("node0", ptr0, builder.length(),
-       "node1", ptr1, builder2->length(),
+  dump("node0", ptr0, builder.length() + 1,
+       "node1", ptr1, builder2->length() + 1,
        "node2", ptr2, builder3->length());
   std::cout<<std::endl;
 }
@@ -454,21 +454,21 @@ test_list_offset_of_record() {
       "\"form_key\": \"node0\" "
   "}");
 
-  int64_t* ptr0 = new int64_t[builder.length()];
+  int64_t* ptr0 = new int64_t[builder.length() + 1];
   builder.to_buffers(ptr0);
 
   double* ptr1 = new double[x_builder->length()];
   x_builder->to_buffers(ptr1);
 
-  int64_t* ptr2 = new int64_t[y_builder->length()];
+  int64_t* ptr2 = new int64_t[y_builder->length() + 1];
   y_builder->to_buffers(ptr2);
 
   int64_t* ptr3 = new int64_t[y_builder2->length()];
   y_builder2->to_buffers(ptr3);
 
-  dump("node0", ptr0, builder.length(),
+  dump("node0", ptr0, builder.length() + 1,
        "node2", ptr1, x_builder->length(),
-       "node3", ptr2, y_builder->length(),
+       "node3", ptr2, y_builder->length() + 1,
        "node4", ptr3, y_builder2->length());
   std::cout<<std::endl;
 }
@@ -576,7 +576,7 @@ test_record_of_record()
   double* ptr0 = new double[u_builder->length()];
   u_builder->to_buffers(ptr0);
 
-  int64_t* ptr1 = new int64_t[v_builder->length()];
+  int64_t* ptr1 = new int64_t[v_builder->length() + 1];
   v_builder->to_buffers(ptr1);
 
   int64_t* ptr2 = new int64_t[v_builder2->length()];
@@ -586,7 +586,7 @@ test_record_of_record()
   w_builder->to_buffers(ptr3);
 
   dump("node2", ptr0, u_builder->length(),
-       "node3", ptr1, v_builder->length(),
+       "node3", ptr1, v_builder->length() + 1,
        "node4", ptr2, v_builder2->length(),
        "node6", ptr3, w_builder->length());
   std::cout << std::endl;
@@ -701,13 +701,13 @@ test_nested_record()
       "\"form_key\": \"node0\" "
   "}");
 
-  int64_t* ptr0 = new int64_t[u_builder->length()];
+  int64_t* ptr0 = new int64_t[u_builder->length() + 1];
   u_builder->to_buffers(ptr0);
 
   double* ptr1 = new double[i_builder->length()];
   i_builder->to_buffers(ptr1);
 
-  int64_t* ptr2 = new int64_t[j_builder->length()];
+  int64_t* ptr2 = new int64_t[j_builder->length() + 1];
   j_builder->to_buffers(ptr2);
 
   int64_t* ptr3 = new int64_t[j_builder2->length()];
@@ -719,9 +719,9 @@ test_nested_record()
   double* ptr5 = new double[w_builder->length()];
   w_builder->to_buffers(ptr5);
 
-  dump("node1", ptr0, u_builder->length(),
+  dump("node1", ptr0, u_builder->length() + 1,
        "node3", ptr1, i_builder->length(),
-       "node4", ptr2, j_builder->length(),
+       "node4", ptr2, j_builder->length() + 1,
        "node5", ptr3, j_builder2->length(),
        "node6", ptr4, v_builder->length(),
        "node7", ptr5, w_builder->length());
@@ -792,7 +792,7 @@ test_list() {
 }
 
 void
-test_index_array() {
+test_index() {
   auto builder = awkward::IndexedLayoutBuilder<0, initial, awkward::NumpyLayoutBuilder<1, initial, double>>();
 
   size_t data_size = 9;
@@ -828,7 +828,7 @@ test_index_array() {
 }
 
 void
-test_indexoptionarray() {
+test_index_option() {
   auto builder = awkward::IndexedOptionLayoutBuilder<0, initial, awkward::NumpyLayoutBuilder<1, initial, int64_t>>();
 
   builder.append(11);
@@ -914,9 +914,8 @@ int main(int argc, char **argv) {
   test_record_of_record();
   test_nested_record();
   test_list();
-  test_index_array();
-  test_indexoptionarray();
+  test_index();
+  test_index_option();
   test_unmasked();
-
   return 0;
 }

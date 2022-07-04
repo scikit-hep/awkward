@@ -102,10 +102,10 @@ namespace awkward {
       form_key << "node" << id_;
       if (std::is_arithmetic<PRIMITIVE>::value) {
         return "{ \"class\": \"NumpyArray\", \"primitive\": \""
-          + type_to_name<PRIMITIVE>() + "\", " + "\"form_key\": \"" + form_key.str() + "\" }";
+                  + type_to_name<PRIMITIVE>() + "\", " + "\"form_key\": \"" + form_key.str() + "\" }";
       } else if (is_specialization<PRIMITIVE, std::complex>::value) {
         return "{ \"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
-          + form_key.str() + "\" }";
+                  + form_key.str() + "\" }";
       }
       return "unsupported type";
     }
@@ -121,14 +121,13 @@ namespace awkward {
   public:
     ListOffsetLayoutBuilder()
         : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL))
-        , begun_(false)
-        , length_(1) {
+        , begun_(false) {
       offsets_.append(0);
     }
 
     size_t
     length() const {
-      return length_;
+      return offsets_.length() - 1;
     }
 
     void
@@ -137,7 +136,6 @@ namespace awkward {
       offsets_.append(0);
       content_.clear();
       begun_ = false;
-      length_ = 1;
     }
 
     BUILDER*
@@ -174,7 +172,6 @@ namespace awkward {
       }
       else {
         begun_ = false;
-        length_++;
         offsets_.append(content_.length());
       }
     }
@@ -189,12 +186,11 @@ namespace awkward {
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
     bool begun_;
-    size_t length_;
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
     unsigned id_ = ID;
@@ -342,7 +338,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
@@ -386,7 +382,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     template<typename PRIMITIVE>
     void
     append(PRIMITIVE* ptr, size_t size) {
-      for (int64_t i = 0; i < size; i++) {
+      for (size_t i = 0; i < size; i++) {
         index_.append(content_.length());
         content_.append(ptr[i]);
       }
@@ -402,7 +398,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
@@ -443,7 +439,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     template<typename PRIMITIVE>
     void
     append(PRIMITIVE* ptr, size_t size) {
-      for (int64_t i = 0; i < size; i++) {
+      for (size_t i = 0; i < size; i++) {
         index_.append(content_.length());
         content_.append(ptr[i]);
       }
@@ -464,7 +460,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
@@ -507,15 +503,14 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     form() {
       std::stringstream form_key;
       form_key << "node" << id_;
-      return "{ \"class\": \"UnmaskedArray\", \"content\": "
-      + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+      return "{ \"class\": \"UnmaskedArray\", \"content\": " + content_.form()
+                + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
     BUILDER content_;
     unsigned id_ = ID;
   };
-
 }  // namespace awkward
 
 #endif  // AWKWARD_LAYOUTBUILDER_H_
