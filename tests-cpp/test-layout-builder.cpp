@@ -870,6 +870,82 @@ test_index_option() {
 }
 
 void
+test_empty() {
+  auto builder = awkward::EmptyLayoutBuilder<1>();
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"EmptyArray\" "
+  "}");
+}
+
+void
+test_list_offset_of_empty() {
+  auto builder = awkward::ListOffsetLayoutBuilder<0,
+      initial, awkward::ListOffsetLayoutBuilder<1,
+          initial, awkward::EmptyLayoutBuilder<2>
+  >>();
+
+  builder.begin_list();
+  builder.end_list();
+
+  auto builder2 = builder.begin_list();
+  builder2->begin_list();
+  builder2->end_list();
+  builder2->begin_list();
+  builder2->end_list();
+  builder2->begin_list();
+  builder2->end_list();
+  builder.end_list();
+
+  builder.begin_list();
+  builder2->begin_list();
+  builder2->end_list();
+  builder2->begin_list();
+  builder2->end_list();
+  builder.end_list();
+
+  builder.begin_list();
+  builder.end_list();
+
+  builder.begin_list();
+  builder2->begin_list();
+  builder2->end_list();
+  builder.end_list();
+
+  //  [[], [[], [], []], [[], []], [], [[]]]
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"ListOffsetArray\", "
+      "\"offsets\": \"i64\", "
+      "\"content\": { "
+          "\"class\": \"ListOffsetArray\", "
+          "\"offsets\": \"i64\", "
+          "\"content\": { "
+              "\"class\": \"EmptyArray\" "
+          "}, "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "\"form_key\": \"node0\" "
+  "}");
+
+  int64_t* ptr0 = new int64_t[builder.length() + 1];
+  builder.to_buffers(ptr0);
+
+  int64_t* ptr1 = new int64_t[builder2->length() + 1];
+  builder2->to_buffers(ptr1);
+
+  dump("node0", ptr0, builder.length() + 1,
+       "node1", ptr1, builder2->length() + 1);
+  std::cout<<std::endl;
+}
+
+void
 test_unmasked() {
   auto builder = awkward::UnmaskedLayoutBuilder<9, awkward::NumpyLayoutBuilder<10, initial, int64_t>>();
 
@@ -917,5 +993,8 @@ int main(int argc, char **argv) {
   test_index();
   test_index_option();
   test_unmasked();
+  test_empty();
+  test_list_offset_of_empty();
+
   return 0;
 }

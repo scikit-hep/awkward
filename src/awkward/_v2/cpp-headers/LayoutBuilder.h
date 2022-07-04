@@ -8,7 +8,6 @@
 
 #include <stdexcept>
 #include <cassert>
-#include <stdint.h>
 #include <tuple>
 
 namespace awkward {
@@ -466,6 +465,25 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   private:
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
+    unsigned id_ = ID;
+  };
+
+  template <unsigned ID>
+  class EmptyLayoutBuilder {
+  public:
+    size_t
+    length() const {
+      return 0;
+    }
+
+    std::string
+    form() {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      return "{ \"class\": \"EmptyArray\" }";
+    }
+
+  private:
     unsigned id_ = ID;
   };
 
