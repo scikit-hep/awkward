@@ -7,6 +7,7 @@
 #include <memory>
 #include <numeric>
 #include <cmath>
+#include <iostream>
 
 namespace awkward {
   /// @class GrowableBuffer
@@ -177,23 +178,6 @@ namespace awkward {
       ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[initial_]));
     }
 
-    /// @brief Inserts one `datum` into the panel.
-    void
-    fill_panel(PRIMITIVE datum) {
-      if (length_[ptr_.size()-1] < reserved_[ptr_.size()-1]) {
-        ptr_[ptr_.size()-1].get()[length_[ptr_.size()-1]] = datum;
-        length_[ptr_.size()-1]++;
-      }
-    }
-
-    /// @brief Creates a new panel with slots equal to #reserved.
-    void
-    add_panel(size_t reserved) {
-      ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
-      length_.push_back(0);
-      reserved_.push_back(reserved);
-    }
-
     /// @brief Inserts one `datum` into the panel, possibly triggering
     /// allocation of a new panel.
     ///
@@ -209,18 +193,28 @@ namespace awkward {
 
     /// @brief Inserts an entire array into the panel(s), possibly triggering
     /// allocation of a new panel.
+    ///
+    /// If the size is larger than the empty slots in the current panel, then,
+    /// first, the empty slots are filled and then a new panel will be allocated
+    /// for the rest of the array elements.
     void
     append(PRIMITIVE* ptr, size_t size) {
-      for (size_t i = 0; i < size; i++) {
-        append(ptr[i]);
+      size_t empty_slots = reserved_[ptr_.size()-1] - length_[ptr_.size()-1];
+      if (size > empty_slots) {
+        for (size_t i = 0; i < empty_slots; i++) {
+          fill_panel(ptr[i]);
+        }
+        add_panel(size - empty_slots > reserved_[ptr_.size()-1] ?
+                  size - empty_slots : reserved_[ptr_.size()-1]);
+        for (size_t i = empty_slots; i < size; i++) {
+          fill_panel(ptr[i]);
+        }
       }
-    }
-
-    /// @brief Returns the element at a given position in the array, without
-    /// handling negative indexing or bounds-checking.
-    PRIMITIVE
-    getitem_at_nowrap(int64_t at) const {
-      return ptr_[floor(at/reserved_[0])].get()[at%reserved_[0]];
+      else {
+        for (size_t i = 0; i < size; i++) {
+          fill_panel(ptr[i]);
+        }
+      }
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
@@ -240,6 +234,21 @@ namespace awkward {
     }
 
   private:
+    /// @brief Inserts one `datum` into the panel.
+    void
+    fill_panel(PRIMITIVE datum) {
+        ptr_[ptr_.size()-1].get()[length_[ptr_.size()-1]] = datum;
+        length_[ptr_.size()-1]++;
+    }
+
+    /// @brief Creates a new panel with slots equal to #reserved.
+    void
+    add_panel(size_t reserved) {
+      ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
+      length_.push_back(0);
+      reserved_.push_back(reserved);
+    }
+
     /// @brief Initial size configuration for building a panel.
     size_t initial_;
 

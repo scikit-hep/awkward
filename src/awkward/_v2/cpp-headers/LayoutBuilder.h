@@ -7,7 +7,6 @@
 #include "utils.h"
 
 #include <stdexcept>
-#include <cassert>
 #include <tuple>
 
 namespace awkward {
@@ -31,38 +30,6 @@ namespace awkward {
     field_name field_;
     BUILDER builder;
   };
-
-  template <size_t INDEX>
-  struct visit_impl
-  {
-      template <typename RECORD, typename FUNCTION>
-      static void visit(RECORD& contents, size_t index, FUNCTION fun)
-      {
-          if (index == INDEX - 1) fun(std::get<INDEX - 1>(contents));
-          else visit_impl<INDEX - 1>::visit(contents, index, fun);
-      }
-  };
-
-  template <>
-  struct visit_impl<0>
-  {
-      template <typename RECORD, typename FUNCTION>
-      static void visit(RECORD& contents, size_t index, FUNCTION fun) { assert(false); }
-  };
-
-  template <typename FUNCTION, typename... RECORDs>
-  void
-  visit_at(std::tuple<RECORDs...> const& contents, size_t index, FUNCTION fun)
-  {
-      visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
-  }
-
-  template <typename FUNCTION, typename... RECORDs>
-  void
-  visit_at(std::tuple<RECORDs...>& contents, size_t index, FUNCTION fun)
-  {
-      visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
-  }
 
   template <unsigned ID, unsigned INITIAL, typename PRIMITIVE>
   class NumpyLayoutBuilder {
@@ -106,7 +73,7 @@ namespace awkward {
         return "{ \"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
                   + form_key.str() + "\" }";
       }
-      return "unsupported type";
+      return "type " + std::string(typeid(PRIMITIVE).name()) + "is not supported yet";
     }
 
   private:
@@ -382,8 +349,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     void
     append(PRIMITIVE* ptr, size_t size) {
       for (size_t i = 0; i < size; i++) {
-        index_.append(content_.length());
-        content_.append(ptr[i]);
+        append(ptr[i]);
       }
     }
 
@@ -439,8 +405,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     void
     append(PRIMITIVE* ptr, size_t size) {
       for (size_t i = 0; i < size; i++) {
-        index_.append(content_.length());
-        content_.append(ptr[i]);
+        append(ptr[i]);
       }
     }
 
