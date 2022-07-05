@@ -23,7 +23,7 @@ static const unsigned initial = 10;
 template <class NODE, class PRIMITIVE, class LENGTH>
 void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
   std::cout << node << ": ";
-  for (int at = 0; at < length; at++) {
+  for (size_t at = 0; at < length; at++) {
     std::cout << ptr[at] << " ";
   }
   std::cout<<std::endl;
@@ -977,7 +977,7 @@ test_unmasked() {
   std::cout<<std::endl;
 }
 
-int main(int argc, char **argv) {
+int main(int /* argc */, char ** /* argv */) {
   test_numpy_bool();
   test_numpy_char();
   test_numpy_int();

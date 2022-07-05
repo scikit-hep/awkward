@@ -156,10 +156,10 @@ namespace awkward {
     }
 
   private:
-    bool begun_;
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
     unsigned id_ = ID;
+    bool begun_;
   };
 
   template <unsigned ID, typename... RECORD>
@@ -226,8 +226,8 @@ namespace awkward {
 
     private:
     size_t length_;
-    bool begun_;
     unsigned id_ = ID;
+    bool begun_;
   };
 
 
@@ -237,8 +237,8 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     ListLayoutBuilder()
         : starts_(awkward::GrowableBuffer<int64_t>(INITIAL))
         , stops_(awkward::GrowableBuffer<int64_t>(INITIAL))
-        , begun_(false)
-        , length_(0) { }
+        , length_(0)
+        , begun_(false) { }
 
     size_t
     length() const {
@@ -308,12 +308,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
   private:
-    bool begun_;
-    size_t length_;
     GrowableBuffer<int64_t> starts_;
     GrowableBuffer<int64_t> stops_;
     BUILDER content_;
+    size_t length_;
     unsigned id_ = ID;
+    bool begun_;
   };
 
 template <unsigned ID, unsigned INITIAL, typename BUILDER>

@@ -74,7 +74,7 @@ void test_int64() {
 
   auto buffer = awkward::GrowableBuffer<int64_t>::empty(initial);
 
-  for (int i = 0; i < data_size; i++) {
+  for (size_t i = 0; i < data_size; i++) {
     buffer.append(data[i]);
   }
 
@@ -162,7 +162,7 @@ void test_append_array() {
   }
 }
 
-int main(int argc, const char ** argv) {
+int main(int /* argc */, const char ** /* argv */) {
   test_full();
   test_arange();
   test_zeros();

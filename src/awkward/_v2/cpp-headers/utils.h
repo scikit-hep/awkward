@@ -158,7 +158,7 @@ struct visit_impl {
 template <>
 struct visit_impl<0> {
   template <typename RECORD, typename FUNCTION>
-  static void visit(RECORD& contents, size_t index, FUNCTION fun) { assert(false); }
+  static void visit(RECORD& /* contents */, size_t /* index */, FUNCTION /* fun */) { assert(false); }
 };
 
 template <typename FUNCTION, typename... RECORDs>
