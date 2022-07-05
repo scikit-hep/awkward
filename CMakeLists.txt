@@ -92,6 +92,7 @@ include(CTest)
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
+  add_subdirectory(tests-cpp)
 endif()
 
 option(PYBUILD "Build Python modules")
