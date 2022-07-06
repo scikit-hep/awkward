@@ -746,7 +746,140 @@ class Unmasked:
 
 
 ############################### RecordForm
+
+
+class FieldPair:
+    """
+    I'm assuming that C++ templates can't be variadic without the repeated part
+    being a single type; hence, this Field class.
+    """
+    def __init__(self, name, content):
+        self.name = name
+        self.content = content
+
+
+class Record:
+    def __init__(self, field_pairs, parameters):
+        assert len(field_pairs) != 0
+        # C++ can actually do lookup by the compile-time constant field name.
+        # There really isn't an equivalent of that in Python. Pretend this is that.
+        self.field_pairs_ = {pair.name: pair for pair in field_pairs}
+        self.first_content_ = field_pairs[0].content
+        self.parameters_ = parameters
+        self.set_id(Ref(0))
+
+    def field(self, name):
+        return self.field_pairs_[name].content
+
+    def parameters(self):
+        return self.parameters_
+
+    def set_id(self, id: Ref(int)):
+        self.id_ = id.value
+        id.value += 1
+        for pair in self.field_pairs_.values():
+            pair.content.set_id(id)
+
+    def clear(self):
+        for pair in self.field_pairs_.values():
+            pair.content.clear()
+
+    def length(self):
+        return self.first_content_.length()
+
+    def is_valid(self, error: Ref(str)):
+        length = -1
+        for pair in self.field_pairs_.values():
+            if length == -1:
+                length = pair.content.length()
+            elif length != pair.content.length():
+                error.value = f"Record node{self.id_} has field {pair.name} length {self.content_.length()} which differs from the first length {length}"
+                return False
+        for pair in self.field_pairs_.values():
+            if not pair.content.is_valid(error):
+                return False
+        return True
+
+    def buffer_nbytes(self, names_nbytes):
+        for pair in self.field_pairs_.values():
+            pair.content.buffer_nbytes(names_nbytes)
+
+    def to_buffers(self, buffers):
+        for pair in self.field_pairs_.values():
+            pair.content.to_buffers(buffers)
+
+    def form(self):
+        params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
+        pairs = ", ".join(f"{json.dumps(pair.name)}: {pair.content.form()}" for pair in self.field_pairs_.values())
+        return f'{{"class": "RecordArray", "contents": {{{pairs}}}, "form_key": "node{self.id_}"{params}}}'
+
+
 ############################### UnionForm
+
+
+class Union:
+    def __init__(self, PRIMITIVE, contents, parameters):
+        self.last_valid_index_ = [-1] * len(contents)
+        self.tags_ = GrowableBuffer("int8")
+        self.index_ = GrowableBuffer(PRIMITIVE)
+        self.contents_ = contents
+        self.parameters_ = parameters
+        self.set_id(Ref(0))
+
+    def append_index(self, tag):
+        which_content = self.contents_[tag]
+        next_index = which_content.length()
+        self.last_valid_index_[tag] = next_index
+        self.tags_.append(tag)
+        self.index_.append(next_index)
+        return which_content
+
+    def parameters(self):
+        return self.parameters_
+
+    def set_id(self, id: Ref(int)):
+        self.id_ = id.value
+        id.value += 1
+        for content in self.contents_:
+            content.set_id(id)
+
+    def clear(self):
+        for tag in range(len(self.last_valid_index_)):
+            self.last_valid_index_[tag] = -1
+        self.tags_.clear()
+        self.index_.clear()
+        for content in self.contents_:
+            content.clear()
+
+    def length(self):
+        return self.tags_.length()
+
+    def is_valid(self, error: Ref(str)):
+        for tag in range(len(self.last_valid_index_)):
+            if self.contents_[tag].length() != self.last_valid_index_[tag] + 1:
+                error.value = f"Union node{self.id_} has content {tag} length {self.contents_[tag].length()} but last valid index is {self.last_valid_index_[tag]}"
+                return False
+        for content in self.contents_:
+            if not content.is_valid(error):
+                return False
+        return True
+
+    def buffer_nbytes(self, names_nbytes):
+        names_nbytes[f"node{self.id_}-tags"] = self.tags_.nbytes()
+        names_nbytes[f"node{self.id_}-index"] = self.index_.nbytes()
+        for content in self.contents_:
+            content.buffer_nbytes(names_nbytes)
+
+    def to_buffers(self, buffers):
+        self.tags_.concatenate(buffers[f"node{self.id_}-tags"])
+        self.index_.concatenate(buffers[f"node{self.id_}-index"])
+        for content in self.contents_:
+            content.to_buffers(buffers)
+
+    def form(self):
+        params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
+        contents = ", ".join(content.form() for content in self.contents_)
+        return f'{{"class": "UnionArray", "tags": "{self.tags_.index_form()}", "index": "{self.index_.index_form()}", "contents": [{contents}], "form_key": "node{self.id_}"{params}}}'
 
 
 ############################### tests
@@ -1086,3 +1219,97 @@ def test_Unmasked():
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+
+def test_Record_Numpy_ListOffset():
+    builder = Record([FieldPair("one", Numpy("float64", "")), FieldPair("two", ListOffset("int64", Numpy("int32", ""), ""))], "")
+
+    error = Ref("")
+    assert builder.is_valid(error), error.value
+
+    subbuilder_one = builder.field("one")
+    subbuilder_one.append(1.1)
+    subbuilder_two = builder.field("two")
+    subsubbuilder = subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder_one = builder.field("one")
+    subbuilder_one.append(2.2)
+    subbuilder_two = builder.field("two")
+    subsubbuilder = subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subsubbuilder.append(2)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder_one = builder.field("one")
+    subbuilder_one.append(3.3)
+    subbuilder_two = builder.field("two")
+    subsubbuilder = subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subsubbuilder.append(2)
+    subsubbuilder.append(3)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error), error.value
+
+    names_nbytes = {}
+    builder.buffer_nbytes(names_nbytes)
+    assert len(names_nbytes) == 3
+
+    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    builder.to_buffers(buffers)
+    assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3]
+    assert buffers["node2-offsets"].view("int64").tolist() == [0, 1, 3, 6]
+    assert buffers["node3-data"].view("int32").tolist() == [1, 1, 2, 1, 2, 3]
+
+    assert builder.form() == '{"class": "RecordArray", "contents": {"one": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "two": {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}}, "form_key": "node0"}'
+
+    array = ak.from_buffers(builder.form(), builder.length(), buffers)
+    assert array.tolist() == [{"one": 1.1, "two": [1]}, {"one": 2.2, "two": [1, 2]}, {"one": 3.3, "two": [1, 2, 3]}]
+
+
+def test_Union_Numpy_ListOffset():
+    builder = Union("uint32", [Numpy("float64", ""), ListOffset("int64", Numpy("int32", ""), "")], "")
+
+    error = Ref("")
+    assert builder.is_valid(error), error.value
+
+    subbuilder_one = builder.append_index(0)
+    subbuilder_one.append(1.1)
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder_two = builder.append_index(1)
+    subsubbuilder = subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subsubbuilder.append(2)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder_one = builder.append_index(0)
+    subbuilder_one.append(3.3)
+
+    assert builder.is_valid(error), error.value
+
+    names_nbytes = {}
+    builder.buffer_nbytes(names_nbytes)
+    assert len(names_nbytes) == 5
+
+    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    builder.to_buffers(buffers)
+    assert buffers["node0-tags"].view("int8").tolist() == [0, 1, 0]
+    assert buffers["node0-index"].view("uint32").tolist() == [0, 0, 1]
+    assert buffers["node1-data"].view("float64").tolist() == [1.1, 3.3]
+    assert buffers["node2-offsets"].view("int64").tolist() == [0, 2]
+    assert buffers["node3-data"].view("int32").tolist() == [1, 2]
+
+    assert builder.form() == '{"class": "UnionArray", "tags": "i8", "index": "u32", "contents": [{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}], "form_key": "node0"}'
+
+    array = ak.from_buffers(builder.form(), builder.length(), buffers)
+    assert array.tolist() == [1.1, [1, 2], 3.3]
