@@ -333,9 +333,9 @@ int main(int /* argc */, char ** /* argv */) {
   test_list();
   test_index();
   test_index_option();
-  test_unmasked();
   test_empty();
   test_list_offset_of_empty();
+  test_unmasked();
 
   return 0;
 }

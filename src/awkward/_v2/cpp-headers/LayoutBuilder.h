@@ -53,8 +53,8 @@ namespace awkward {
     }
 
     void
-    append(PRIMITIVE* ptr, size_t size) {
-      data_.append(ptr, size);
+    extend(PRIMITIVE* ptr, size_t size) {
+      data_.extend(ptr, size);
     }
 
     void
@@ -110,18 +110,6 @@ namespace awkward {
     BUILDER*
     content() {
       return &content_;
-    }
-
-    template<typename PRIMITIVE>
-    void
-    append(PRIMITIVE x) {
-      content_.append(x);
-    }
-
-    template<typename PRIMITIVE>
-    void
-    append(PRIMITIVE* ptr, size_t size) {
-      content_.append(ptr, size);
     }
 
     BUILDER*
@@ -236,18 +224,6 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       return &content_;
     }
 
-    template<typename PRIMITIVE>
-    void
-    append(PRIMITIVE x) {
-      content_.append(x);
-    }
-
-    template<typename PRIMITIVE>
-    void
-    append(PRIMITIVE* ptr, size_t size) {
-      content_.append(ptr, size);
-    }
-
     BUILDER*
     begin_list() {
       starts_.append(content_.length());
@@ -304,18 +280,16 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       return &content_;
     }
 
-    template<typename PRIMITIVE>
     void
-    append(PRIMITIVE x) {
+    append_index() {
       index_.append(content_.length());
-      content_.append(x);
     }
 
-    template<typename PRIMITIVE>
     void
-    append(PRIMITIVE* ptr, size_t size) {
-      for (size_t i = 0; i < size; i++) {
-        append(ptr[i]);
+    extend_index(size_t size) {
+      size_t start = content_.length();
+      for (size_t i = start; i < start + size; i++) {
+        index_.append(i);
       }
     }
 
@@ -360,18 +334,28 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       return &content_;
     }
 
-    template<typename PRIMITIVE>
     void
-    append(PRIMITIVE x) {
+    append_index() {
       index_.append(content_.length());
-      content_.append(x);
     }
 
-    template<typename PRIMITIVE>
     void
-    append(PRIMITIVE* ptr, size_t size) {
+    extend_index(size_t size) {
+      size_t start = content_.length();
+      for (size_t i = start; i < start + size; i++) {
+        index_.append(i);
+      }
+    }
+
+    void
+    append_null() {
+      index_.append(-1);
+    }
+
+    void
+    extend_null(size_t size) {
       for (size_t i = 0; i < size; i++) {
-        append(ptr[i]);
+        index_.append(-1);
       }
     }
 
@@ -438,14 +422,14 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
 
     template<typename PRIMITIVE>
     void
-    append(PRIMITIVE x) {
-      content_.append(x);
+    append_valid() {
+      return content_;
     }
 
     template<typename PRIMITIVE>
     void
-    append(PRIMITIVE* ptr, size_t size) {
-      content_.append(ptr, size);
+    extend_valid(size_t size) {
+      return content_;
     }
 
     std::string
