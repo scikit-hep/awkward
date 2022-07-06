@@ -13,6 +13,7 @@ class Ref:
     """
     Python can't pass some types by reference, so I'll do this to emulate 'int&' in C.
     """
+
     def __init__(self, value):
         self.value = value
 
@@ -21,6 +22,7 @@ class GenericRef(Ref):
     """
     Oh, the things you can do in C++!
     """
+
     def __init__(self, get, set):
         self.get = get
         self.set = set
@@ -38,6 +40,7 @@ class GrowableBuffer:
     """
     This is a MOCK GrowableBuffer, just so that I have something to use below.
     """
+
     def __init__(self, PRIMITIVE):
         self.fake = []
         self.PRIMITIVE = PRIMITIVE
@@ -254,7 +257,6 @@ class ListOffset:
     def form(self):
         params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
         return f'{{"class": "ListOffsetArray", "offsets": "{self.offsets_.index_form()}", "content": {self.content_.form()}, "form_key": "node{self.id_}"{params}}}'
-
 
 
 ############################### ListForm
@@ -570,7 +572,6 @@ class ByteMasked:
         return f'{{"class": "ByteMaskedArray", "mask": "{self.mask_.index_form()}", "valid_when": {json.dumps(self.valid_when_)}, "content": {self.content_.form()}, "form_key": "node{self.id_}"{params}}}'
 
 
-
 ############################### BitMaskedForm
 
 
@@ -584,27 +585,31 @@ class BitMasked:
         self.current_byte_ref_ = self.mask_.append_and_get_ref(self.current_byte_)
         self.current_index_ = 0
         if self.lsb_order_:
-            self.cast_ = np.array([
-                np.uint8(1 << 0),
-                np.uint8(1 << 1),
-                np.uint8(1 << 2),
-                np.uint8(1 << 3),
-                np.uint8(1 << 4),
-                np.uint8(1 << 5),
-                np.uint8(1 << 6),
-                np.uint8(1 << 7),
-            ])
+            self.cast_ = np.array(
+                [
+                    np.uint8(1 << 0),
+                    np.uint8(1 << 1),
+                    np.uint8(1 << 2),
+                    np.uint8(1 << 3),
+                    np.uint8(1 << 4),
+                    np.uint8(1 << 5),
+                    np.uint8(1 << 6),
+                    np.uint8(1 << 7),
+                ]
+            )
         else:
-            self.cast_ = np.array([
-                np.uint8(128 >> 0),
-                np.uint8(128 >> 1),
-                np.uint8(128 >> 2),
-                np.uint8(128 >> 3),
-                np.uint8(128 >> 4),
-                np.uint8(128 >> 5),
-                np.uint8(128 >> 6),
-                np.uint8(128 >> 7),
-            ])
+            self.cast_ = np.array(
+                [
+                    np.uint8(128 >> 0),
+                    np.uint8(128 >> 1),
+                    np.uint8(128 >> 2),
+                    np.uint8(128 >> 3),
+                    np.uint8(128 >> 4),
+                    np.uint8(128 >> 5),
+                    np.uint8(128 >> 6),
+                    np.uint8(128 >> 7),
+                ]
+            )
         self.parameters_ = parameters
         self.set_id(Ref(0))
 
@@ -641,7 +646,7 @@ class BitMasked:
     def append_valid(self):
         self._append_begin()
         # current_byte_ and cast_: 0 indicates null, 1 indicates valid
-        self.current_byte_ |= self.cast_[self.current_index_];
+        self.current_byte_ |= self.cast_[self.current_index_]
         self._append_end()
         return self.content_
 
@@ -698,7 +703,6 @@ class BitMasked:
         return f'{{"class": "BitMaskedArray", "mask": "{self.mask_.index_form()}", "valid_when": {json.dumps(self.valid_when_)}, "lsb_order": {json.dumps(self.lsb_order_)}, "content": {self.content_.form()}, "form_key": "node{self.id_}"{params}}}'
 
 
-
 ############################### UnmaskedForm
 
 
@@ -745,7 +749,6 @@ class Unmasked:
         return f'{{"class": "UnmaskedArray", "content": {self.content_.form()}, "form_key": "node{self.id_}"{params}}}'
 
 
-
 ############################### RecordForm
 
 
@@ -754,6 +757,7 @@ class FieldPair:
     I'm assuming that C++ templates can't be variadic without the repeated part
     being a single type; hence, this Field class.
     """
+
     def __init__(self, name, content):
         self.name = name
         self.content = content
@@ -811,7 +815,10 @@ class Record:
 
     def form(self):
         params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
-        pairs = ", ".join(f"{json.dumps(pair.name)}: {pair.content.form()}" for pair in self.field_pairs_.values())
+        pairs = ", ".join(
+            f"{json.dumps(pair.name)}: {pair.content.form()}"
+            for pair in self.field_pairs_.values()
+        )
         return f'{{"class": "RecordArray", "contents": {{{pairs}}}, "form_key": "node{self.id_}"{params}}}'
 
 
@@ -996,11 +1003,16 @@ def test_Numpy():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 1
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node0-data"].view("float64").tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert builder.form() == '{"class": "NumpyArray", "primitive": "float64", "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "NumpyArray", "primitive": "float64", "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -1016,7 +1028,9 @@ def test_Empty():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 0
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
 
     assert builder.form() == '{"class": "EmptyArray"}'
@@ -1049,12 +1063,17 @@ def test_ListOffset():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 2
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node0-offsets"].view("int64").tolist() == [0, 3, 3, 5]
     assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert builder.form() == '{"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
@@ -1084,13 +1103,18 @@ def test_List():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 3
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node0-starts"].view("int64").tolist() == [0, 3, 3]
     assert buffers["node0-stops"].view("int64").tolist() == [3, 3, 5]
     assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert builder.form() == '{"class": "ListArray", "starts": "i64", "stops": "i64", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "ListArray", "starts": "i64", "stops": "i64", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
@@ -1118,11 +1142,23 @@ def test_Regular():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 1
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
-    assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+    assert buffers["node1-data"].view("float64").tolist() == [
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+        6.6,
+    ]
 
-    assert builder.form() == '{"class": "RegularArray", "size": 3, "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "RegularArray", "size": 3, "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
@@ -1144,11 +1180,16 @@ def test_Regular_size0():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 1
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node1-data"].view("float64").tolist() == []
 
-    assert builder.form() == '{"class": "RegularArray", "size": 0, "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "RegularArray", "size": 0, "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [[], []]
@@ -1173,12 +1214,17 @@ def test_Indexed():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 2
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node0-index"].view("int64").tolist() == [0, 1, 2, 3, 4]
     assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert builder.form() == '{"class": "IndexedArray", "index": "i64", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "IndexedArray", "index": "i64", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -1204,12 +1250,17 @@ def test_IndexedOption():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 2
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node0-index"].view("int64").tolist() == [0, -1, 1, 2, 3, -1, -1]
     assert buffers["node1-data"].view("float64").tolist() == [1.1, 3.3, 4.4, 5.5]
 
-    assert builder.form() == '{"class": "IndexedOptionArray", "index": "i64", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "IndexedOptionArray", "index": "i64", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, None, 3.3, 4.4, 5.5, None, None]
@@ -1223,14 +1274,14 @@ def test_ByteMasked(valid_when):
     subbuilder.append(1.1)
 
     subbuilder = builder.append_null()
-    subbuilder.append(-1000)   # have to supply a "dummy" value
+    subbuilder.append(-1000)  # have to supply a "dummy" value
 
     subbuilder = builder.extend_valid(3)
     subbuilder.extend([3.3, 4.4, 5.5], 3)
 
     subbuilder = builder.extend_null(2)
     for _ in range(2):
-        subbuilder.append(-1000)   # have to supply a "dummy" value
+        subbuilder.append(-1000)  # have to supply a "dummy" value
 
     error = Ref("")
     assert builder.is_valid(error), error.value
@@ -1239,15 +1290,28 @@ def test_ByteMasked(valid_when):
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 2
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     if valid_when:
         assert buffers["node0-mask"].view("int8").tolist() == [1, 0, 1, 1, 1, 0, 0]
     else:
         assert buffers["node0-mask"].view("int8").tolist() == [0, 1, 0, 0, 0, 1, 1]
-    assert buffers["node1-data"].view("float64").tolist() == [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000]
+    assert buffers["node1-data"].view("float64").tolist() == [
+        1.1,
+        -1000,
+        3.3,
+        4.4,
+        5.5,
+        -1000,
+        -1000,
+    ]
 
-    assert builder.form() == f'{{"class": "ByteMaskedArray", "mask": "i8", "valid_when": {json.dumps(valid_when)}, "content": {{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}}, "form_key": "node0"}}'
+    assert (
+        builder.form()
+        == f'{{"class": "ByteMaskedArray", "mask": "i8", "valid_when": {json.dumps(valid_when)}, "content": {{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}}, "form_key": "node0"}}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, None, 3.3, 4.4, 5.5, None, None]
@@ -1267,7 +1331,7 @@ def test_BitMasked(valid_when, lsb_order):
     assert builder.is_valid(error), error.value
 
     subbuilder = builder.append_null()
-    subbuilder.append(-1000)   # have to supply a "dummy" value
+    subbuilder.append(-1000)  # have to supply a "dummy" value
 
     assert builder.is_valid(error), error.value
 
@@ -1278,7 +1342,7 @@ def test_BitMasked(valid_when, lsb_order):
 
     subbuilder = builder.extend_null(2)
     for _ in range(2):
-        subbuilder.append(-1000)   # have to supply a "dummy" value
+        subbuilder.append(-1000)  # have to supply a "dummy" value
 
     assert builder.is_valid(error), error.value
 
@@ -1297,7 +1361,9 @@ def test_BitMasked(valid_when, lsb_order):
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 2
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     if valid_when and lsb_order:
         assert buffers["node0-mask"].view("uint8").tolist() == [157, 3]
@@ -1307,9 +1373,23 @@ def test_BitMasked(valid_when, lsb_order):
         assert buffers["node0-mask"].view("uint8").tolist() == [98, 252]
     elif not valid_when and not lsb_order:
         assert buffers["node0-mask"].view("uint8").tolist() == [70, 63]
-    assert buffers["node1-data"].view("float64").tolist() == [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000, 8, 9, 10]
+    assert buffers["node1-data"].view("float64").tolist() == [
+        1.1,
+        -1000,
+        3.3,
+        4.4,
+        5.5,
+        -1000,
+        -1000,
+        8,
+        9,
+        10,
+    ]
 
-    assert builder.form() == f'{{"class": "BitMaskedArray", "mask": "u8", "valid_when": {json.dumps(valid_when)}, "lsb_order": {json.dumps(lsb_order)}, "content": {{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}}, "form_key": "node0"}}'
+    assert (
+        builder.form()
+        == f'{{"class": "BitMaskedArray", "mask": "u8", "valid_when": {json.dumps(valid_when)}, "lsb_order": {json.dumps(lsb_order)}, "content": {{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}}, "form_key": "node0"}}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, None, 3.3, 4.4, 5.5, None, None, 8, 9, 10]
@@ -1334,18 +1414,29 @@ def test_Unmasked():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 1
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert builder.form() == '{"class": "UnmaskedArray", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "UnmaskedArray", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
 
 
 def test_Record_Numpy_ListOffset():
-    builder = Record([FieldPair("one", Numpy("float64", "")), FieldPair("two", ListOffset("int64", Numpy("int32", ""), ""))], "")
+    builder = Record(
+        [
+            FieldPair("one", Numpy("float64", "")),
+            FieldPair("two", ListOffset("int64", Numpy("int32", ""), "")),
+        ],
+        "",
+    )
 
     error = Ref("")
     assert builder.is_valid(error), error.value
@@ -1384,20 +1475,31 @@ def test_Record_Numpy_ListOffset():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 3
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3]
     assert buffers["node2-offsets"].view("int64").tolist() == [0, 1, 3, 6]
     assert buffers["node3-data"].view("int32").tolist() == [1, 1, 2, 1, 2, 3]
 
-    assert builder.form() == '{"class": "RecordArray", "contents": {"one": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "two": {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}}, "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "RecordArray", "contents": {"one": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "two": {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}}, "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
-    assert array.tolist() == [{"one": 1.1, "two": [1]}, {"one": 2.2, "two": [1, 2]}, {"one": 3.3, "two": [1, 2, 3]}]
+    assert array.tolist() == [
+        {"one": 1.1, "two": [1]},
+        {"one": 2.2, "two": [1, 2]},
+        {"one": 3.3, "two": [1, 2, 3]},
+    ]
 
 
 def test_Tuple_Numpy_ListOffset():
-    builder = Tuple([Numpy("float64", ""), ListOffset("int64", Numpy("int32", ""), "")], "")
+    builder = Tuple(
+        [Numpy("float64", ""), ListOffset("int64", Numpy("int32", ""), "")], ""
+    )
 
     error = Ref("")
     assert builder.is_valid(error), error.value
@@ -1436,13 +1538,18 @@ def test_Tuple_Numpy_ListOffset():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 3
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3]
     assert buffers["node2-offsets"].view("int64").tolist() == [0, 1, 3, 6]
     assert buffers["node3-data"].view("int32").tolist() == [1, 1, 2, 1, 2, 3]
 
-    assert builder.form() == '{"class": "RecordArray", "contents": [{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}], "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "RecordArray", "contents": [{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}], "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
@@ -1467,13 +1574,21 @@ def test_EmptyRecord(is_tuple):
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 0
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
 
     if is_tuple:
-        assert builder.form() == '{"class": "RecordArray", "contents": [], "form_key": "node0"}'
+        assert (
+            builder.form()
+            == '{"class": "RecordArray", "contents": [], "form_key": "node0"}'
+        )
     else:
-        assert builder.form() == '{"class": "RecordArray", "contents": {}, "form_key": "node0"}'
+        assert (
+            builder.form()
+            == '{"class": "RecordArray", "contents": {}, "form_key": "node0"}'
+        )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     if is_tuple:
@@ -1483,7 +1598,11 @@ def test_EmptyRecord(is_tuple):
 
 
 def test_Union_Numpy_ListOffset():
-    builder = Union("uint32", [Numpy("float64", ""), ListOffset("int64", Numpy("int32", ""), "")], "")
+    builder = Union(
+        "uint32",
+        [Numpy("float64", ""), ListOffset("int64", Numpy("int32", ""), "")],
+        "",
+    )
 
     error = Ref("")
     assert builder.is_valid(error), error.value
@@ -1510,7 +1629,9 @@ def test_Union_Numpy_ListOffset():
     builder.buffer_nbytes(names_nbytes)
     assert len(names_nbytes) == 5
 
-    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    buffers = {
+        name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()
+    }
     builder.to_buffers(buffers)
     assert buffers["node0-tags"].view("int8").tolist() == [0, 1, 0]
     assert buffers["node0-index"].view("uint32").tolist() == [0, 0, 1]
@@ -1518,7 +1639,10 @@ def test_Union_Numpy_ListOffset():
     assert buffers["node2-offsets"].view("int64").tolist() == [0, 2]
     assert buffers["node3-data"].view("int32").tolist() == [1, 2]
 
-    assert builder.form() == '{"class": "UnionArray", "tags": "i8", "index": "u32", "contents": [{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}], "form_key": "node0"}'
+    assert (
+        builder.form()
+        == '{"class": "UnionArray", "tags": "i8", "index": "u32", "contents": [{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}], "form_key": "node0"}'
+    )
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, [1, 2], 3.3]
