@@ -1544,6 +1544,14 @@ class IndexedOptionArray(Content):
                     mask[~mask0] |= mask1
 
                 data[~mask0] = content
+
+                if content.dtype == bool:
+                    data[mask0] = False
+                elif content.dtype == float:
+                    data[mask0] = np.nan
+                else:
+                    data[mask0] = np.iinfo(content.dtype).max
+
                 return numpy.ma.MaskedArray(data, mask)
             else:
                 raise ak._v2._util.error(
