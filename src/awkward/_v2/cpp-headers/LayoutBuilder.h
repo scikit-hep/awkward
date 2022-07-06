@@ -68,12 +68,17 @@ namespace awkward {
       form_key << "node" << id_;
       if (std::is_arithmetic<PRIMITIVE>::value) {
         return "{ \"class\": \"NumpyArray\", \"primitive\": \""
-                  + type_to_name<PRIMITIVE>() + "\", " + "\"form_key\": \"" + form_key.str() + "\" }";
-      } else if (is_specialization<PRIMITIVE, std::complex>::value) {
-        return "{ \"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
-                  + form_key.str() + "\" }";
+                  + type_to_name<PRIMITIVE>()
+                  + "\", \"form_key\": \"" + form_key.str() + "\" }";
       }
-      return "type " + std::string(typeid(PRIMITIVE).name()) + "is not supported yet";
+      else if (is_specialization<PRIMITIVE, std::complex>::value) {
+        return "{ \"class\": \"NumpyArray\", \"primitive\": \""
+                  + type_to_name<PRIMITIVE>()
+                  + "\", \"form_key\": \"" + form_key.str() + "\" }";
+      }
+      else {
+        throw std::runtime_error("type " + std::string(typeid(PRIMITIVE).name()) + "is not supported");
+      }
     }
 
   private:
@@ -197,7 +202,8 @@ namespace awkward {
         throw std::invalid_argument(
         std::string("called 'end_record' without 'begin_record' at the same level "
                     "before it"));
-      } else {
+      }
+      else {
         length_++;
         begun_ = false;
       }
@@ -286,7 +292,8 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
         throw std::invalid_argument(
           std::string("called 'end_list' without 'begin_list' at the same level before it"
           "in ListLayoutBuilder"));
-      } else {
+      }
+      else {
         length_++;
         begun_ = false;
         stops_.append(content_.length());
