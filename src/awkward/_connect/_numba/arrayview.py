@@ -663,12 +663,12 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
         )
 
 
-class IteratorType(numba.types.common.SimpleIteratorType):
+class IteratorType(numba.types.common.SimpleIteratorType):  # noqa: B023
     def __init__(self, viewtype):
         super().__init__(
             f"ak.Iterator({viewtype.name})",
             viewtype.type.getitem_at_check(viewtype),
-        )
+        )   # noqa: B023
         self.viewtype = viewtype
 
 
@@ -676,7 +676,7 @@ class IteratorType(numba.types.common.SimpleIteratorType):
 class type_getiter(numba.core.typing.templates.AbstractTemplate):
     key = "getiter"
 
-    def generic(self, args, kwargs):
+    def generic(self, args, kwargs):  # noqa: B023
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             return IteratorType(args[0])(args[0])
 
@@ -907,12 +907,12 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
                     def generic(self, args, kwargs):
                         if len(kwargs) == 0:
-                            sig = typer(recordviewtype, args)
+                            sig = typer(recordviewtype, args)  # noqa: B023
                             sig = numba.core.typing.templates.Signature(
                                 sig.return_type, sig.args, recordviewtype
                             )
                             numba.extending.lower_builtin(
-                                methodname,
+                                methodname,  # noqa: B023
                                 recordviewtype,
                                 *[
                                     x.literal_type
@@ -920,7 +920,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                                     else x
                                     for x in args
                                 ],
-                            )(lower)
+                            )(lower)  # noqa: B023
                             return sig
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
