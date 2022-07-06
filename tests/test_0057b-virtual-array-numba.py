@@ -74,8 +74,8 @@ def test_listarray():
         counter = [0]
 
         def materialize():
-            counter[0] += 1
-            return layout
+            counter[0] += 1  # noqa: B023
+            return layout  # noqa: B023
 
         generator = ak.layout.ArrayGenerator(
             materialize, form=layout.form, length=len(layout)
