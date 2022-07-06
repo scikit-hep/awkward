@@ -668,7 +668,7 @@ class IteratorType(numba.types.common.SimpleIteratorType):  # noqa: B023
         super().__init__(
             f"ak.Iterator({viewtype.name})",
             viewtype.type.getitem_at_check(viewtype),
-        )   # noqa: B023
+        )  # noqa: B023
         self.viewtype = viewtype
 
 
@@ -920,7 +920,9 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                                     else x
                                     for x in args
                                 ],
-                            )(lower)  # noqa: B023
+                            )(
+                                lower
+                            )  # noqa: B023
                             return sig
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
