@@ -323,6 +323,7 @@ class List:
 
 class Regular:
     def __init__(self, content, size, parameters):
+        self.length_ = 0
         self.content_ = content
         self.size_ = size
         self.parameters_ = parameters
@@ -335,7 +336,7 @@ class Regular:
         return self.content_
 
     def end_list(self):
-        pass
+        self.length_ += 1
 
     def parameters(self):
         return self.parameters_
@@ -349,11 +350,11 @@ class Regular:
         self.content_.clear()
 
     def length(self):
-        return self.content_.length() // self.size_
+        return self.length_
 
     def is_valid(self, error: Ref(str)):
-        if self.content_.length() % self.size_ != 0:
-            error.value = f"Regular node{self.id_} has content length {self.content_.length()} but size {self.size_}"
+        if self.content_.length() != self.length_ * self.size_:
+            error.value = f"Regular node{self.id_} has content length {self.content_.length()}, but length {self.length_} and size {self.size_}"
             return False
         else:
             return self.content_.is_valid(error)
@@ -793,7 +794,7 @@ class Record:
             if length == -1:
                 length = pair.content.length()
             elif length != pair.content.length():
-                error.value = f"Record node{self.id_} has field {pair.name} length {self.content_.length()} which differs from the first length {length}"
+                error.value = f"Record node{self.id_} has field {pair.name} length {pair.content.length()} that differs from the first length {length}"
                 return False
         for pair in self.field_pairs_.values():
             if not pair.content.is_valid(error):
@@ -812,6 +813,102 @@ class Record:
         params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
         pairs = ", ".join(f"{json.dumps(pair.name)}: {pair.content.form()}" for pair in self.field_pairs_.values())
         return f'{{"class": "RecordArray", "contents": {{{pairs}}}, "form_key": "node{self.id_}"{params}}}'
+
+
+class Tuple:
+    def __init__(self, contents, parameters):
+        assert len(contents) != 0
+        self.contents_ = contents
+        self.first_content_ = contents[0]
+        self.parameters_ = parameters
+        self.set_id(Ref(0))
+
+    def index(self, at):
+        return self.contents_[at]
+
+    def parameters(self):
+        return self.parameters_
+
+    def set_id(self, id: Ref(int)):
+        self.id_ = id.value
+        id.value += 1
+        for content in self.contents_:
+            content.set_id(id)
+
+    def clear(self):
+        for content in self.contents_:
+            pair.content.clear()
+
+    def length(self):
+        return self.first_content_.length()
+
+    def is_valid(self, error: Ref(str)):
+        length = -1
+        for index, content in enumerate(self.contents_):
+            if length == -1:
+                length = content.length()
+            elif length != content.length():
+                error.value = f"Tuple node{self.id_} has index {index} length {content.length()} that differs from the first length {length}"
+                return False
+        for content in self.contents_:
+            if not content.is_valid(error):
+                return False
+        return True
+
+    def buffer_nbytes(self, names_nbytes):
+        for content in self.contents_:
+            content.buffer_nbytes(names_nbytes)
+
+    def to_buffers(self, buffers):
+        for content in self.contents_:
+            content.to_buffers(buffers)
+
+    def form(self):
+        params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
+        contents = ", ".join(content.form() for content in self.contents_)
+        return f'{{"class": "RecordArray", "contents": [{contents}], "form_key": "node{self.id_}"{params}}}'
+
+
+class EmptyRecord:
+    def __init__(self, is_tuple, parameters):
+        self.length_ = 0
+        self.is_tuple_ = is_tuple
+        self.parameters_ = parameters
+        self.set_id(Ref(0))
+
+    def append(self):
+        self.length_ += 1
+
+    def extend(self, size):
+        self.length_ += size
+
+    def parameters(self):
+        return self.parameters_
+
+    def set_id(self, id: Ref(int)):
+        self.id_ = id.value
+
+    def clear(self):
+        self.length_ = 0
+
+    def length(self):
+        return self.length_
+
+    def is_valid(self, error: Ref(str)):
+        return True
+
+    def buffer_nbytes(self, names_nbytes):
+        pass
+
+    def to_buffers(self, buffers):
+        pass
+
+    def form(self):
+        params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
+        if self.is_tuple_:
+            return f'{{"class": "RecordArray", "contents": [], "form_key": "node{self.id_}"{params}}}'
+        else:
+            return f'{{"class": "RecordArray", "contents": {{}}, "form_key": "node{self.id_}"{params}}}'
 
 
 ############################### UnionForm
@@ -1029,6 +1126,32 @@ def test_Regular():
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+
+
+def test_Regular_size0():
+    builder = Regular(Numpy("float64", ""), 0, "")
+
+    subbuilder = builder.begin_list()
+    builder.end_list()
+
+    subbuilder = builder.begin_list()
+    builder.end_list()
+
+    error = Ref("")
+    assert builder.is_valid(error), error.value
+
+    names_nbytes = {}
+    builder.buffer_nbytes(names_nbytes)
+    assert len(names_nbytes) == 1
+
+    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    builder.to_buffers(buffers)
+    assert buffers["node1-data"].view("float64").tolist() == []
+
+    assert builder.form() == '{"class": "RegularArray", "size": 0, "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+
+    array = ak.from_buffers(builder.form(), builder.length(), buffers)
+    assert array.tolist() == [[], []]
 
 
 def test_Indexed():
@@ -1271,6 +1394,92 @@ def test_Record_Numpy_ListOffset():
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [{"one": 1.1, "two": [1]}, {"one": 2.2, "two": [1, 2]}, {"one": 3.3, "two": [1, 2, 3]}]
+
+
+def test_Tuple_Numpy_ListOffset():
+    builder = Tuple([Numpy("float64", ""), ListOffset("int64", Numpy("int32", ""), "")], "")
+
+    error = Ref("")
+    assert builder.is_valid(error), error.value
+
+    subbuilder_one = builder.index(0)
+    subbuilder_one.append(1.1)
+    subbuilder_two = builder.index(1)
+    subsubbuilder = subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder_one = builder.index(0)
+    subbuilder_one.append(2.2)
+    subbuilder_two = builder.index(1)
+    subsubbuilder = subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subsubbuilder.append(2)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder_one = builder.index(0)
+    subbuilder_one.append(3.3)
+    subbuilder_two = builder.index(1)
+    subsubbuilder = subbuilder_two.begin_list()
+    subsubbuilder.append(1)
+    subsubbuilder.append(2)
+    subsubbuilder.append(3)
+    subbuilder_two.end_list()
+
+    assert builder.is_valid(error), error.value
+
+    names_nbytes = {}
+    builder.buffer_nbytes(names_nbytes)
+    assert len(names_nbytes) == 3
+
+    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    builder.to_buffers(buffers)
+    assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3]
+    assert buffers["node2-offsets"].view("int64").tolist() == [0, 1, 3, 6]
+    assert buffers["node3-data"].view("int32").tolist() == [1, 1, 2, 1, 2, 3]
+
+    assert builder.form() == '{"class": "RecordArray", "contents": [{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, {"class": "ListOffsetArray", "offsets": "i64", "content": {"class": "NumpyArray", "primitive": "int32", "form_key": "node3"}, "form_key": "node2"}], "form_key": "node0"}'
+
+    array = ak.from_buffers(builder.form(), builder.length(), buffers)
+    assert array.tolist() == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
+
+
+@pytest.mark.parametrize("is_tuple", [False, True])
+def test_EmptyRecord(is_tuple):
+    builder = EmptyRecord(is_tuple, "")
+
+    error = Ref("")
+    assert builder.is_valid(error), error.value
+
+    builder.append()
+
+    assert builder.is_valid(error), error.value
+
+    builder.extend(2)
+
+    assert builder.is_valid(error), error.value
+
+    names_nbytes = {}
+    builder.buffer_nbytes(names_nbytes)
+    assert len(names_nbytes) == 0
+
+    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    builder.to_buffers(buffers)
+
+    if is_tuple:
+        assert builder.form() == '{"class": "RecordArray", "contents": [], "form_key": "node0"}'
+    else:
+        assert builder.form() == '{"class": "RecordArray", "contents": {}, "form_key": "node0"}'
+
+    array = ak.from_buffers(builder.form(), builder.length(), buffers)
+    if is_tuple:
+        assert array.tolist() == [(), (), ()]
+    else:
+        assert array.tolist() == [{}, {}, {}]
 
 
 def test_Union_Numpy_ListOffset():
