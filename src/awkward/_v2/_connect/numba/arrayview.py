@@ -678,7 +678,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                                 ],
                             )(
                                 lower  # noqa: B023
-                            )  
+                            )
                             return sig
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
