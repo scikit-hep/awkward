@@ -663,12 +663,12 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
         )
 
 
-class IteratorType(numba.types.common.SimpleIteratorType):  # noqa: B023
+class IteratorType(numba.types.common.SimpleIteratorType): 
     def __init__(self, viewtype):
         super().__init__(
             f"ak.Iterator({viewtype.name})",
             viewtype.type.getitem_at_check(viewtype),
-        )  # noqa: B023
+        ) 
         self.viewtype = viewtype
 
 
@@ -676,7 +676,7 @@ class IteratorType(numba.types.common.SimpleIteratorType):  # noqa: B023
 class type_getiter(numba.core.typing.templates.AbstractTemplate):
     key = "getiter"
 
-    def generic(self, args, kwargs):  # noqa: B023
+    def generic(self, args, kwargs):
         if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], ArrayViewType):
             return IteratorType(args[0])(args[0])
 
@@ -921,8 +921,8 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                                     for x in args
                                 ],
                             )(
-                                lower
-                            )  # noqa: B023
+                                lower  # noqa: B023
+                            )
                             return sig
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
