@@ -663,12 +663,12 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
         )
 
 
-class IteratorType(numba.types.common.SimpleIteratorType): 
+class IteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, viewtype):
         super().__init__(
             f"ak.Iterator({viewtype.name})",
             viewtype.type.getitem_at_check(viewtype),
-        ) 
+        )
         self.viewtype = viewtype
 
 

@@ -676,7 +676,9 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                                     else x
                                     for x in args
                                 ],
-                            )(lower)  # noqa: B023
+                            )(
+                                lower
+                            )  # noqa: B023
                             return sig
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
