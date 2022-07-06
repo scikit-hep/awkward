@@ -91,8 +91,7 @@ namespace awkward {
   class ListOffsetLayoutBuilder {
   public:
     ListOffsetLayoutBuilder()
-        : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL))
-        , begun_(false) {
+        : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
       offsets_.append(0);
     }
 
@@ -106,7 +105,6 @@ namespace awkward {
       offsets_.clear();
       offsets_.append(0);
       content_.clear();
-      begun_ = false;
     }
 
     BUILDER*
@@ -128,23 +126,12 @@ namespace awkward {
 
     BUILDER*
     begin_list() {
-      if (!begun_) {
-        begun_ = true;
-      }
       return &content_;
     }
 
     void
     end_list() {
-      if (!begun_) {
-        throw std::invalid_argument(
-          std::string("called 'end_list' without 'begin_list' at the same level before it"
-          "in ListOffsetLayoutBuilder"));
-      }
-      else {
-        begun_ = false;
-        offsets_.append(content_.length());
-      }
+      offsets_.append(content_.length());
     }
 
     void
@@ -164,7 +151,6 @@ namespace awkward {
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
     unsigned id_ = ID;
-    bool begun_;
   };
 
   template <unsigned ID, typename... RECORD>
@@ -172,8 +158,7 @@ namespace awkward {
   public:
     RecordLayoutBuilder()
         : contents({new RECORD}...)
-        , length_(0)
-        , begun_(false) { }
+        , length_(0) { }
 
     size_t
     length() const {
@@ -183,7 +168,6 @@ namespace awkward {
     void
     clear() {
       length_ = 0;
-      begun_ = false;
       auto clear_contents = [](auto record) { record->builder.clear(); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
         visit_at(contents, i, clear_contents);
@@ -191,22 +175,12 @@ namespace awkward {
 
     void
     begin_record() {
-      if (!begun_) {
-        begun_ = true;
-      }
+
     }
 
     void
     end_record() {
-      if (!begun_) {
-        throw std::invalid_argument(
-        std::string("called 'end_record' without 'begin_record' at the same level "
-                    "before it"));
-      }
-      else {
-        length_++;
-        begun_ = false;
-      }
+      length_++;
     }
 
     std::string
@@ -233,7 +207,6 @@ namespace awkward {
     private:
     size_t length_;
     unsigned id_ = ID;
-    bool begun_;
   };
 
 
@@ -243,8 +216,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     ListLayoutBuilder()
         : starts_(awkward::GrowableBuffer<int64_t>(INITIAL))
         , stops_(awkward::GrowableBuffer<int64_t>(INITIAL))
-        , length_(0)
-        , begun_(false) { }
+        , length_(0) { }
 
     size_t
     length() const {
@@ -256,7 +228,6 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       starts_.clear();
       stops_.clear();
       content_.clear();
-      begun_ = false;
       length_ = 0;
     }
 
@@ -279,25 +250,14 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
 
     BUILDER*
     begin_list() {
-      if (!begun_) {
-        begun_ = true;
-        starts_.append(content_.length());
-      }
+      starts_.append(content_.length());
       return &content_;
     }
 
     void
     end_list() {
-      if (!begun_) {
-        throw std::invalid_argument(
-          std::string("called 'end_list' without 'begin_list' at the same level before it"
-          "in ListLayoutBuilder"));
-      }
-      else {
-        length_++;
-        begun_ = false;
-        stops_.append(content_.length());
-      }
+      length_++;
+      stops_.append(content_.length());
     }
 
     void
@@ -320,7 +280,6 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     BUILDER content_;
     size_t length_;
     unsigned id_ = ID;
-    bool begun_;
   };
 
 template <unsigned ID, unsigned INITIAL, typename BUILDER>
