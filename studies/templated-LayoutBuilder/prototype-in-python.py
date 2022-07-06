@@ -1,10 +1,38 @@
 import json
 
+import pytest
+
 import numpy as np
 import awkward._v2 as ak
 
 
 ############################### GrowableBuffer
+
+
+class Ref:
+    """
+    Python can't pass some types by reference, so I'll do this to emulate 'int&' in C.
+    """
+    def __init__(self, value):
+        self.value = value
+
+
+class GenericRef(Ref):
+    """
+    Oh, the things you can do in C++!
+    """
+    def __init__(self, get, set):
+        self.get = get
+        self.set = set
+
+    @property
+    def value(self):
+        return self.get()
+
+    @value.setter
+    def value(self, new_value):
+        return self.set(new_value)
+
 
 class GrowableBuffer:
     """
@@ -27,8 +55,31 @@ class GrowableBuffer:
         return len(self.fake)
 
     def last(self):
-        # throws an error if length == 0
+        # raise an error if length == 0
         return self.fake[-1]
+
+    def append_and_get_ref(self, x):
+        """
+        Like append, but the type signature returns '&PRIMITIVE'.
+
+        ```c++
+        template <typename PRIMITIVE>
+        &PRIMITIVE GrowableBuffer<PRIMITIVE>::append_and_get_ref(PRIMITIVE datum) {
+            append(datum);
+            return (&*ptr_.back())[length_.back()];
+        }
+        ```
+        """
+        index = len(self.fake)
+        self.fake.append(x)
+
+        def get():
+            return self.fake[index]
+
+        def set(new_value):
+            self.fake[index] = new_value
+
+        return GenericRef(get, set)
 
     def nbytes(self):
         return self.length() * np.dtype(self.PRIMITIVE).itemsize
@@ -70,14 +121,6 @@ class GrowableBuffer:
 #     * void to_buffers(std::map<std::string, void*> &buffers) noexcept const
 #
 #     * std::string form() noexcept const
-
-
-class Ref:
-    """
-    Python can't pass some types by reference, so I'll do this to emulate 'int&' in C.
-    """
-    def __init__(self, value):
-        self.value = value
 
 
 ############################### NumpyForm
@@ -198,7 +241,7 @@ class ListOffset:
             error.value = f"ListOffset node{self.id_} has content length {self.content_.length()} but last offset {self.offsets_.last()}"
             return False
         else:
-            return True
+            return self.content_.is_valid(error)
 
     def buffer_nbytes(self, names_nbytes):
         names_nbytes[f"node{self.id_}-offsets"] = self.offsets_.nbytes()
@@ -258,7 +301,7 @@ class List:
             error.value = f"List node{self.id_} has content length {self.content_.length()} but last stops {self.stops_.last()}"
             return False
         else:
-            return True
+            return self.content_.is_valid(error)
 
     def buffer_nbytes(self, names_nbytes):
         names_nbytes[f"node{self.id_}-starts"] = self.starts_.nbytes()
@@ -313,7 +356,7 @@ class Regular:
             error.value = f"Regular node{self.id_} has content length {self.content_.length()} but size {self.size_}"
             return False
         else:
-            return True
+            return self.content_.is_valid(error)
 
     def buffer_nbytes(self, names_nbytes):
         self.content_.buffer_nbytes(names_nbytes)
@@ -375,7 +418,7 @@ class Indexed:
         elif self.content_.length() != self.last_valid_ + 1:
             error.value = f"Indexed node{self.id_} has content length {self.content_.length()} but last valid index is {self.last_valid_}"
         else:
-            return True
+            return self.content_.is_valid(error)
 
     def buffer_nbytes(self, names_nbytes):
         names_nbytes[f"node{self.id_}-index"] = self.index_.nbytes()
@@ -443,7 +486,7 @@ class IndexedOption:
             error.value = f"Indexed node{self.id_} has content length {self.content_.length()} but last valid index is {self.last_valid_}"
             return False
         else:
-            return True
+            return self.content_.is_valid(error)
 
     def buffer_nbytes(self, names_nbytes):
         names_nbytes[f"node{self.id_}-index"] = self.index_.nbytes()
@@ -511,7 +554,7 @@ class ByteMasked:
             error.value = f"ByteMasked node{self.id_} has content length {self.content_.length()} but mask length {self.stops_.length()}"
             return False
         else:
-            return True
+            return self.content_.is_valid(error)
 
     def buffer_nbytes(self, names_nbytes):
         names_nbytes[f"node{self.id_}-mask"] = self.mask_.nbytes()
@@ -528,7 +571,180 @@ class ByteMasked:
 
 
 ############################### BitMaskedForm
+
+
+class BitMasked:
+    def __init__(self, content, valid_when, lsb_order, parameters):
+        self.mask_ = GrowableBuffer("uint8")
+        self.content_ = content
+        self.valid_when_ = valid_when
+        self.lsb_order_ = lsb_order
+        self.current_byte_ = np.uint8(0)
+        self.current_byte_ref_ = self.mask_.append_and_get_ref(self.current_byte_)
+        self.current_index_ = 0
+        if self.lsb_order_:
+            self.cast_ = np.array([
+                np.uint8(1 << 0),
+                np.uint8(1 << 1),
+                np.uint8(1 << 2),
+                np.uint8(1 << 3),
+                np.uint8(1 << 4),
+                np.uint8(1 << 5),
+                np.uint8(1 << 6),
+                np.uint8(1 << 7),
+            ])
+        else:
+            self.cast_ = np.array([
+                np.uint8(128 >> 0),
+                np.uint8(128 >> 1),
+                np.uint8(128 >> 2),
+                np.uint8(128 >> 3),
+                np.uint8(128 >> 4),
+                np.uint8(128 >> 5),
+                np.uint8(128 >> 6),
+                np.uint8(128 >> 7),
+            ])
+        self.parameters_ = parameters
+        self.set_id(Ref(0))
+
+    def content(self):
+        return self.content_
+
+    def valid_when(self):
+        return self.valid_when_
+
+    def lsb_order(self):
+        return self.lsb_order_
+
+    def _append_begin(self):
+        """
+        Private helper function.
+        """
+        if self.current_index_ == 8:
+            self.current_byte_ = np.uint8(0)
+            self.current_byte_ref_ = self.mask_.append_and_get_ref(self.current_byte_)
+            self.current_index_ = 0
+
+    def _append_end(self):
+        """
+        Private helper function.
+        """
+        self.current_index_ += 1
+        if self.valid_when_:
+            # 0 indicates null, 1 indicates valid
+            self.current_byte_ref_.value = self.current_byte_
+        else:
+            # 0 indicates valid, 1 indicates null
+            self.current_byte_ref_.value = ~self.current_byte_
+
+    def append_valid(self):
+        self._append_begin()
+        # current_byte_ and cast_: 0 indicates null, 1 indicates valid
+        self.current_byte_ |= self.cast_[self.current_index_];
+        self._append_end()
+        return self.content_
+
+    def extend_valid(self, size):
+        # Just an interface; not actually faster than calling append many times.
+        for _ in range(size):
+            self.append_valid()
+        return self.content_
+
+    def append_null(self):
+        self._append_begin()
+        # current_byte_ and cast_ default to null, no change
+        self._append_end()
+        return self.content_
+
+    def extend_null(self, size):
+        # Just an interface; not actually faster than calling append many times.
+        for _ in range(size):
+            self.append_null()
+        return self.content_
+
+    def parameters(self):
+        return self.parameters_
+
+    def set_id(self, id: Ref(int)):
+        self.id_ = id.value
+        id.value += 1
+        self.content_.set_id(id)
+
+    def clear(self):
+        self.mask_.clear()
+        self.content_.clear()
+
+    def length(self):
+        return (self.mask_.length() - 1) * 8 + self.current_index_
+
+    def is_valid(self, error: Ref(str)):
+        if self.content_.length() != self.length():
+            error.value = f"BitMasked node{self.id_} has content length {self.content_.length()} but bit mask length {self.length()}"
+            return False
+        else:
+            return self.content_.is_valid(error)
+
+    def buffer_nbytes(self, names_nbytes):
+        names_nbytes[f"node{self.id_}-mask"] = self.mask_.nbytes()
+        self.content_.buffer_nbytes(names_nbytes)
+
+    def to_buffers(self, buffers):
+        self.mask_.concatenate(buffers[f"node{self.id_}-mask"])
+        self.content_.to_buffers(buffers)
+
+    def form(self):
+        params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
+        return f'{{"class": "BitMaskedArray", "mask": "{self.mask_.index_form()}", "valid_when": {json.dumps(self.valid_when_)}, "lsb_order": {json.dumps(self.lsb_order_)}, "content": {self.content_.form()}, "form_key": "node{self.id_}"{params}}}'
+
+
+
 ############################### UnmaskedForm
+
+
+class Unmasked:
+    def __init__(self, content, parameters):
+        self.content_ = content
+        self.parameters_ = parameters
+        self.set_id(Ref(0))
+
+    def content(self):
+        return self.content_
+
+    def append_valid(self):
+        return self.content_
+
+    def extend_valid(self, size):
+        return self.content_
+
+    def parameters(self):
+        return self.parameters_
+
+    def set_id(self, id: Ref(int)):
+        self.id_ = id.value
+        id.value += 1
+        self.content_.set_id(id)
+
+    def clear(self):
+        self.content_.clear()
+
+    def length(self):
+        return self.content_.length()
+
+    def is_valid(self, error: Ref(str)):
+        return self.content_.is_valid(error)
+
+    def buffer_nbytes(self, names_nbytes):
+        self.content_.buffer_nbytes(names_nbytes)
+
+    def to_buffers(self, buffers):
+        self.content_.to_buffers(buffers)
+
+    def form(self):
+        params = "" if self.parameters_ == "" else f", parameters: {self.parameters_}"
+        return f'{{"class": "UnmaskedArray", "content": {self.content_.form()}, "form_key": "node{self.id_}"{params}}}'
+
+
+
 ############################### RecordForm
 ############################### UnionForm
 
@@ -743,8 +959,9 @@ def test_IndexedOption():
     assert array.tolist() == [1.1, None, 3.3, 4.4, 5.5, None, None]
 
 
-def test_ByteMasked():
-    builder = ByteMasked(Numpy("float64", ""), False, "")
+@pytest.mark.parametrize("valid_when", [False, True])
+def test_ByteMasked(valid_when):
+    builder = ByteMasked(Numpy("float64", ""), valid_when, "")
 
     subbuilder = builder.append_valid()
     subbuilder.append(1.1)
@@ -768,10 +985,104 @@ def test_ByteMasked():
 
     buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
     builder.to_buffers(buffers)
-    assert buffers["node0-mask"].view("int8").tolist() == [0, 1, 0, 0, 0, 1, 1]
+    if valid_when:
+        assert buffers["node0-mask"].view("int8").tolist() == [1, 0, 1, 1, 1, 0, 0]
+    else:
+        assert buffers["node0-mask"].view("int8").tolist() == [0, 1, 0, 0, 0, 1, 1]
     assert buffers["node1-data"].view("float64").tolist() == [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000]
 
-    assert builder.form() == '{"class": "ByteMaskedArray", "mask": "i8", "valid_when": false, "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+    assert builder.form() == f'{{"class": "ByteMaskedArray", "mask": "i8", "valid_when": {json.dumps(valid_when)}, "content": {{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}}, "form_key": "node0"}}'
 
     array = ak.from_buffers(builder.form(), builder.length(), buffers)
     assert array.tolist() == [1.1, None, 3.3, 4.4, 5.5, None, None]
+
+
+@pytest.mark.parametrize("valid_when", [False, True])
+@pytest.mark.parametrize("lsb_order", [False, True])
+def test_BitMasked(valid_when, lsb_order):
+    builder = BitMasked(Numpy("float64", ""), valid_when, lsb_order, "")
+
+    error = Ref("")
+    assert builder.is_valid(error), error.value
+
+    subbuilder = builder.append_valid()
+    subbuilder.append(1.1)
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder = builder.append_null()
+    subbuilder.append(-1000)   # have to supply a "dummy" value
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder = builder.extend_valid(3)
+    subbuilder.extend([3.3, 4.4, 5.5], 3)
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder = builder.extend_null(2)
+    for _ in range(2):
+        subbuilder.append(-1000)   # have to supply a "dummy" value
+
+    assert builder.is_valid(error), error.value
+
+    assert builder.is_valid(error), error.value
+
+    subbuilder = builder.append_valid()
+    subbuilder.append(8)
+    subbuilder = builder.append_valid()
+    subbuilder.append(9)
+    subbuilder = builder.append_valid()
+    subbuilder.append(10)
+
+    assert builder.is_valid(error), error.value
+
+    names_nbytes = {}
+    builder.buffer_nbytes(names_nbytes)
+    assert len(names_nbytes) == 2
+
+    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    builder.to_buffers(buffers)
+    if valid_when and lsb_order:
+        assert buffers["node0-mask"].view("uint8").tolist() == [157, 3]
+    elif valid_when and not lsb_order:
+        assert buffers["node0-mask"].view("uint8").tolist() == [185, 192]
+    elif not valid_when and lsb_order:
+        assert buffers["node0-mask"].view("uint8").tolist() == [98, 252]
+    elif not valid_when and not lsb_order:
+        assert buffers["node0-mask"].view("uint8").tolist() == [70, 63]
+    assert buffers["node1-data"].view("float64").tolist() == [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000, 8, 9, 10]
+
+    assert builder.form() == f'{{"class": "BitMaskedArray", "mask": "u8", "valid_when": {json.dumps(valid_when)}, "lsb_order": {json.dumps(lsb_order)}, "content": {{"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}}, "form_key": "node0"}}'
+
+    array = ak.from_buffers(builder.form(), builder.length(), buffers)
+    assert array.tolist() == [1.1, None, 3.3, 4.4, 5.5, None, None, 8, 9, 10]
+
+
+def test_Unmasked():
+    builder = Unmasked(Numpy("float64", ""), "")
+
+    subbuilder = builder.append_valid()
+    subbuilder.append(1.1)
+
+    subbuilder = builder.append_valid()
+    subbuilder.append(2.2)
+
+    subbuilder = builder.extend_valid(3)
+    subbuilder.extend([3.3, 4.4, 5.5], 3)
+
+    error = Ref("")
+    assert builder.is_valid(error), error.value
+
+    names_nbytes = {}
+    builder.buffer_nbytes(names_nbytes)
+    assert len(names_nbytes) == 1
+
+    buffers = {name: np.empty(nbytes, np.uint8) for name, nbytes in names_nbytes.items()}
+    builder.to_buffers(buffers)
+    assert buffers["node1-data"].view("float64").tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+    assert builder.form() == '{"class": "UnmaskedArray", "content": {"class": "NumpyArray", "primitive": "float64", "form_key": "node1"}, "form_key": "node0"}'
+
+    array = ak.from_buffers(builder.form(), builder.length(), buffers)
+    assert array.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
