@@ -1483,7 +1483,7 @@ class Content:
     def __deepcopy__(self, memo=None):
         cls = self.__class__
         new_instance = cls.__new__(cls)
-        memo = {"id(self)": new_instance}
+        memo = {id(self): new_instance}
         for k, v in self.__dict__.items():
             if k == "_nplike":
                 setattr(new_instance, k, v)
