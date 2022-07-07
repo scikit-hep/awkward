@@ -1486,7 +1486,7 @@ class Content:
         memo = {id(self): new_instance}
         for k, v in self.__dict__.items():
             if k == "_nplike":
-                setattr(new_instance, k, v)
+                new_instance._nplike = v
             else:
                 setattr(new_instance, k, copy.deepcopy(v, memo))
         return new_instance
