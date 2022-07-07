@@ -11,6 +11,8 @@
 
 namespace awkward {
 
+  namespace layout_builder {
+
   template<const char *str>
   struct field_name {
     const char* value = str;
@@ -32,9 +34,9 @@ namespace awkward {
   };
 
   template <unsigned ID, unsigned INITIAL, typename PRIMITIVE>
-  class NumpyLayoutBuilder {
+  class Numpy {
   public:
-    NumpyLayoutBuilder()
+    Numpy()
         : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) { }
 
     size_t
@@ -88,9 +90,9 @@ namespace awkward {
   };
 
   template <unsigned ID, unsigned INITIAL, typename BUILDER>
-  class ListOffsetLayoutBuilder {
+  class ListOffset {
   public:
-    ListOffsetLayoutBuilder()
+    ListOffset()
         : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
       offsets_.append(0);
     }
@@ -142,9 +144,9 @@ namespace awkward {
   };
 
   template <unsigned ID, typename... RECORD>
-  class RecordLayoutBuilder {
+  class Record {
   public:
-    RecordLayoutBuilder()
+    Record()
         : contents({new RECORD}...)
         , length_(0) { }
 
@@ -199,9 +201,9 @@ namespace awkward {
 
 
 template <unsigned ID, unsigned INITIAL, typename BUILDER>
-  class ListLayoutBuilder {
+  class List {
   public:
-    ListLayoutBuilder()
+    List()
         : starts_(awkward::GrowableBuffer<int64_t>(INITIAL))
         , stops_(awkward::GrowableBuffer<int64_t>(INITIAL))
         , length_(0) { }
@@ -259,9 +261,9 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   };
 
 template <unsigned ID, unsigned INITIAL, typename BUILDER>
-  class IndexedLayoutBuilder {
+  class Indexed {
   public:
-    IndexedLayoutBuilder()
+    Indexed()
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
     size_t
@@ -313,9 +315,9 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   };
 
 template <unsigned ID, unsigned INITIAL, typename BUILDER>
-  class IndexedOptionLayoutBuilder {
+  class IndexedOption {
   public:
-    IndexedOptionLayoutBuilder()
+    IndexedOption()
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
     size_t
@@ -384,7 +386,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   };
 
   template <unsigned ID>
-  class EmptyLayoutBuilder {
+  class Empty {
   public:
     size_t
     length() const noexcept {
@@ -403,7 +405,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   };
 
   template <unsigned ID, typename BUILDER>
-  class UnmaskedLayoutBuilder {
+  class Unmasked {
   public:
     size_t
     length() const noexcept {
@@ -444,6 +446,8 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     BUILDER content_;
     unsigned id_ = ID;
   };
+
+  }  // namespace layout_builder
 }  // namespace awkward
 
 #endif  // AWKWARD_LAYOUTBUILDER_H_
