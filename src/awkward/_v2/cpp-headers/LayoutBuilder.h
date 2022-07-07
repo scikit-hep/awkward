@@ -8,6 +8,7 @@
 
 #include <stdexcept>
 #include <tuple>
+#include <iostream>
 
 namespace awkward {
 
@@ -33,11 +34,14 @@ namespace awkward {
     BUILDER builder;
   };
 
-  template <unsigned ID, unsigned INITIAL, typename PRIMITIVE>
+  template <unsigned INITIAL, typename PRIMITIVE>
   class Numpy {
   public:
     Numpy()
-        : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) { }
+        : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) {
+      size_t id = 0;
+      set_id(id);
+    }
 
     size_t
     length() const noexcept {
@@ -47,6 +51,12 @@ namespace awkward {
     void
     clear() noexcept {
       data_.clear();
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
     }
 
     void
@@ -86,15 +96,17 @@ namespace awkward {
   private:
     size_t initial_;
     awkward::GrowableBuffer<PRIMITIVE> data_;
-    unsigned id_ = ID;
+    size_t id_;
   };
 
-  template <unsigned ID, unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename BUILDER>
   class ListOffset {
   public:
     ListOffset()
         : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
       offsets_.append(0);
+      size_t id = 0;
+      set_id(id);
     }
 
     size_t
@@ -112,6 +124,13 @@ namespace awkward {
     BUILDER*
     content() {
       return &content_;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      content_.set_id(id);
     }
 
     BUILDER*
@@ -140,15 +159,18 @@ namespace awkward {
   private:
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
-    unsigned id_ = ID;
+    size_t id_;
   };
 
-  template <unsigned ID, typename... RECORD>
+  template <typename... RECORD>
   class Record {
   public:
     Record()
         : contents({new RECORD}...)
-        , length_(0) { }
+        , length_(0) {
+      size_t id = 0;
+      set_id(id);
+    }
 
     size_t
     length() const noexcept {
@@ -164,8 +186,13 @@ namespace awkward {
     }
 
     void
-    begin_record() {
-
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      auto contents_id = [&id](auto record) {
+                                              record->builder.set_id(id); };
+      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+        visit_at(contents, i, contents_id);
     }
 
     void
@@ -196,17 +223,20 @@ namespace awkward {
 
     private:
     size_t length_;
-    unsigned id_ = ID;
+    size_t id_;
   };
 
 
-template <unsigned ID, unsigned INITIAL, typename BUILDER>
+template <unsigned INITIAL, typename BUILDER>
   class List {
   public:
     List()
         : starts_(awkward::GrowableBuffer<int64_t>(INITIAL))
         , stops_(awkward::GrowableBuffer<int64_t>(INITIAL))
-        , length_(0) { }
+        , length_(0) {
+      size_t id = 0;
+      set_id(id);
+    }
 
     size_t
     length() const noexcept {
@@ -219,6 +249,13 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
       stops_.clear();
       content_.clear();
       length_ = 0;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      content_.set_id(id);
     }
 
     BUILDER*
@@ -257,14 +294,17 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     GrowableBuffer<int64_t> stops_;
     BUILDER content_;
     size_t length_;
-    unsigned id_ = ID;
+    size_t id_;
   };
 
-template <unsigned ID, unsigned INITIAL, typename BUILDER>
+template <unsigned INITIAL, typename BUILDER>
   class Indexed {
   public:
     Indexed()
-        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
+        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+      size_t id = 0;
+      set_id(id);
+    }
 
     size_t
     length() const noexcept {
@@ -280,6 +320,13 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     BUILDER*
     content() {
       return &content_;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      content_.set_id(id);
     }
 
     void
@@ -311,14 +358,17 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   private:
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
-    unsigned id_ = ID;
+    size_t id_;
   };
 
-template <unsigned ID, unsigned INITIAL, typename BUILDER>
+template <unsigned INITIAL, typename BUILDER>
   class IndexedOption {
   public:
     IndexedOption()
-        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
+        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+      size_t id = 0;
+      set_id(id);
+    }
 
     size_t
     length() const noexcept {
@@ -334,6 +384,13 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     BUILDER*
     content() {
       return &content_;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      content_.set_id(id);
     }
 
     void
@@ -382,15 +439,25 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   private:
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
-    unsigned id_ = ID;
+    size_t id_;
   };
 
-  template <unsigned ID>
   class Empty {
   public:
+    Empty() {
+      size_t id = 0;
+      set_id(id);
+    }
+
     size_t
     length() const noexcept {
       return 0;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
     }
 
     std::string
@@ -401,12 +468,17 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
   private:
-    unsigned id_ = ID;
+    size_t id_;
   };
 
-  template <unsigned ID, typename BUILDER>
+  template <typename BUILDER>
   class Unmasked {
   public:
+    Unmasked() {
+      size_t id = 0;
+      set_id(id);
+    }
+
     size_t
     length() const noexcept {
       return content_.length();
@@ -420,6 +492,13 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     BUILDER*
     content() {
       return &content_;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      content_.set_id(id);
     }
 
     template<typename PRIMITIVE>
@@ -444,7 +523,7 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
 
   private:
     BUILDER content_;
-    unsigned id_ = ID;
+    size_t id_;
   };
 
   }  // namespace layout_builder
