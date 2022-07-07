@@ -10,7 +10,6 @@
 #include "awkward/common.h"
 #include "awkward/builder/Builder.h"
 #include "awkward/builder/ArrayBuilder.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace awkward {
   /// @class ToJson

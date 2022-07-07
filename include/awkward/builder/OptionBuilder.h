@@ -6,11 +6,10 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "../src/awkward/_v2/cpp-headers/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class OptionBuilder
   ///
@@ -18,32 +17,32 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL OptionBuilder: public Builder {
   public:
     /// @brief Create an OptionBuilder from a number of nulls (all missing).
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param nullcount Length of the purely missing data to create.
     /// @param content Builder for the non-missing data.
     static const BuilderPtr
-      fromnulls(const ArrayBuilderOptions& options,
+      fromnulls(const int64_t initial,
                 int64_t nullcount,
                 const BuilderPtr& content);
 
     /// @brief Create an OptionBuilder from an existing builder (all
     /// non-missing).
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param content Builder for the non-missing data.
     static const BuilderPtr
-      fromvalids(const ArrayBuilderOptions& options,
+      fromvalids(const int64_t initial,
                  const BuilderPtr& content);
 
     /// @brief Create a OptionBuilder from a full set of parameters.
     ///
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param index Contains the accumulated index (like
     /// {@link IndexedArrayOf#index IndexedOptionArray::index}).
     /// @param content Builder for the non-missing data.
-    OptionBuilder(const ArrayBuilderOptions& options,
+    OptionBuilder(const int64_t initial,
                   GrowableBuffer<int64_t> index,
                   const BuilderPtr content);
 
@@ -124,7 +123,7 @@ namespace awkward {
       maybeupdate(const BuilderPtr builder);
 
   private:
-    const ArrayBuilderOptions options_;
+    const int64_t initial_;
     GrowableBuffer<int64_t> index_;
     BuilderPtr content_;
   };

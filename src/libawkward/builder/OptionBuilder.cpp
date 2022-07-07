@@ -4,35 +4,34 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 
 #include "awkward/builder/OptionBuilder.h"
 
 namespace awkward {
   const BuilderPtr
-  OptionBuilder::fromnulls(const ArrayBuilderOptions& options,
+  OptionBuilder::fromnulls(const int64_t initial,
                            int64_t nullcount,
                            const BuilderPtr& content) {
     return std::make_shared<OptionBuilder>(
-      options,
-      GrowableBuffer<int64_t>::full(options,
+      initial,
+      GrowableBuffer<int64_t>::full(initial,
                                     -1,
                                     (size_t)nullcount),
      content);
   }
 
   const BuilderPtr
-  OptionBuilder::fromvalids(const ArrayBuilderOptions& options,
+  OptionBuilder::fromvalids(const int64_t initial,
                             const BuilderPtr& content) {
-    return std::make_shared<OptionBuilder>(options,
-                                           GrowableBuffer<int64_t>::arange(options, (size_t)content->length()),
+    return std::make_shared<OptionBuilder>(initial,
+                                           GrowableBuffer<int64_t>::arange(initial, (size_t)content->length()),
                                            content);
   }
 
-  OptionBuilder::OptionBuilder(const ArrayBuilderOptions& options,
+  OptionBuilder::OptionBuilder(const int64_t initial,
                                GrowableBuffer<int64_t> index,
                                const BuilderPtr content)
-    : options_(options)
+    : initial_(initial)
       , index_(std::move(index))
       , content_(content) { }
 
@@ -46,9 +45,10 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(form_key.str() + "-index",
-                          index_.ptr().get(),
-                          (int64_t)(index_.length() * sizeof(int64_t)));
+    void* ptr = container.empty_buffer(form_key.str() + "-index",
+      (int64_t)(index_.length() * sizeof(int64_t)));
+
+    index_.concatenate(reinterpret_cast<int64_t*>(ptr));
 
     return "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""

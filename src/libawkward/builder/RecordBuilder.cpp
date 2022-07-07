@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
@@ -14,8 +13,8 @@
 
 namespace awkward {
   const BuilderPtr
-  RecordBuilder::fromempty(const ArrayBuilderOptions& options) {
-    return std::make_shared<RecordBuilder>(options,
+  RecordBuilder::fromempty(const int64_t initial) {
+    return std::make_shared<RecordBuilder>(initial,
                                            std::vector<BuilderPtr>(),
                                            std::vector<std::string>(),
                                            std::vector<const char*>(),
@@ -27,7 +26,7 @@ namespace awkward {
                                            -1);
   }
 
-  RecordBuilder::RecordBuilder(const ArrayBuilderOptions& options,
+  RecordBuilder::RecordBuilder(const int64_t initial,
                                const std::vector<BuilderPtr>& contents,
                                const std::vector<std::string>& keys,
                                const std::vector<const char*>& pointers,
@@ -37,7 +36,7 @@ namespace awkward {
                                bool begun,
                                int64_t nextindex,
                                int64_t nexttotry)
-      : options_(options)
+      : initial_(initial)
       , contents_(contents)
       , keys_(keys)
       , pointers_(pointers)
@@ -116,7 +115,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::null() {
     if (!begun_) {
-      BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
+      BuilderPtr out = OptionBuilder::fromvalids(initial_, shared_from_this());
       out.get()->null();
       return std::move(out);
     }
@@ -137,7 +136,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::boolean(bool x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->boolean(x);
       return std::move(out);
     }
@@ -158,7 +157,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::integer(int64_t x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->integer(x);
       return std::move(out);
     }
@@ -179,7 +178,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::real(double x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->real(x);
       return std::move(out);
     }
@@ -200,7 +199,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::complex(std::complex<double> x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->complex(x);
       return std::move(out);
     }
@@ -221,7 +220,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::datetime(int64_t x, const std::string& unit) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->datetime(x, unit);
       return std::move(out);
     }
@@ -242,7 +241,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::timedelta(int64_t x, const std::string& unit) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->timedelta(x, unit);
       return std::move(out);
     }
@@ -263,7 +262,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->string(x, length, encoding);
       return std::move(out);
     }
@@ -287,7 +286,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::beginlist() {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->beginlist();
       return std::move(out);
     }
@@ -328,7 +327,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::begintuple(int64_t numfields) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->begintuple(numfields);
       return std::move(out);
     }
@@ -406,7 +405,7 @@ namespace awkward {
       nexttotry_ = 0;
     }
     else if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
       out.get()->beginrecord(name, check);
       return std::move(out);
     }
@@ -464,13 +463,13 @@ namespace awkward {
       nextindex_ = keys_size_;
       nexttotry_ = 0;
       if (length_ == 0) {
-        contents_.push_back(UnknownBuilder::fromempty(options_));
+        contents_.push_back(UnknownBuilder::fromempty(initial_));
       }
       else {
         contents_.push_back(
-          OptionBuilder::fromnulls(options_,
+          OptionBuilder::fromnulls(initial_,
                                    length_,
-                                   UnknownBuilder::fromempty(options_)));
+                                   UnknownBuilder::fromempty(initial_)));
       }
       keys_.push_back(std::string(key));
       pointers_.push_back(key);
@@ -510,13 +509,13 @@ namespace awkward {
       nextindex_ = keys_size_;
       nexttotry_ = 0;
       if (length_ == 0) {
-        contents_.emplace_back(UnknownBuilder::fromempty(options_));
+        contents_.emplace_back(UnknownBuilder::fromempty(initial_));
       }
       else {
         contents_.emplace_back(
-          OptionBuilder::fromnulls(options_,
+          OptionBuilder::fromnulls(initial_,
                                    length_,
-                                   UnknownBuilder::fromempty(options_)));
+                                   UnknownBuilder::fromempty(initial_)));
       }
       keys_.emplace_back(std::string(key));
       pointers_.emplace_back(nullptr);
