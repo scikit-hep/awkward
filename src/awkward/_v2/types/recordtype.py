@@ -174,17 +174,8 @@ class RecordType(Type):
         return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
-        if (
-            self._typestr != "override"
-            and self._parameters is not None
-            and len(self._parameters) == 1
-            and "__record__" in self._parameters
-        ):
-            args = dict(zip(self._fields, [x.primitive for x in self._contents]))
-            return "{}[{}]".format(self._parameters["__record__"], str(args)[1:-1])
-        else:
-            args = [repr(self._contents), repr(self._fields)] + self._repr_args()
-            return "{}({})".format(type(self).__name__, ", ".join(args))
+        args = [repr(self._contents), repr(self._fields)] + self._repr_args()
+        return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def __eq__(self, other):
         if isinstance(other, RecordType):
