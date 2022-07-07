@@ -17,13 +17,13 @@ namespace awkward {
   };
 
   template<class field_name, class BUILDER>
-  struct Record {
+  struct Field {
     const char* field() {
         return field_.value;
     }
 
     std::string
-    form() {
+    form() const noexcept {
       return builder.form();
     }
 
@@ -38,32 +38,32 @@ namespace awkward {
         : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) { }
 
     size_t
-    length() const {
+    length() const noexcept {
       return data_.length();
     }
 
     void
-    clear() {
+    clear() noexcept {
       data_.clear();
     }
 
     void
-    append(PRIMITIVE x) {
+    append(PRIMITIVE x) noexcept {
       data_.append(x);
     }
 
     void
-    extend(PRIMITIVE* ptr, size_t size) {
+    extend(PRIMITIVE* ptr, size_t size) noexcept {
       data_.extend(ptr, size);
     }
 
     void
-    to_buffers(PRIMITIVE* ptr) const {
+    to_buffers(PRIMITIVE* ptr) const noexcept {
       data_.concatenate(ptr);
     }
 
     std::string
-    form() {
+    form() const {
       std::stringstream form_key;
       form_key << "node" << id_;
       if (std::is_arithmetic<PRIMITIVE>::value) {
@@ -96,12 +96,12 @@ namespace awkward {
     }
 
     size_t
-    length() const {
+    length() const noexcept {
       return offsets_.length() - 1;
     }
 
     void
-    clear() {
+    clear() noexcept {
       offsets_.clear();
       offsets_.append(0);
       content_.clear();
@@ -113,22 +113,22 @@ namespace awkward {
     }
 
     BUILDER*
-    begin_list() {
+    begin_list() noexcept {
       return &content_;
     }
 
     void
-    end_list() {
+    end_list() noexcept {
       offsets_.append(content_.length());
     }
 
     void
-    to_buffers(int64_t* ptr) const {
+    to_buffers(int64_t* ptr) const noexcept {
       offsets_.concatenate(ptr);
     }
 
     std::string
-    form() {
+    form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
@@ -149,12 +149,12 @@ namespace awkward {
         , length_(0) { }
 
     size_t
-    length() const {
+    length() const noexcept {
       return length_;
     }
 
     void
-    clear() {
+    clear() noexcept {
       length_ = 0;
       auto clear_contents = [](auto record) { record->builder.clear(); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
@@ -172,7 +172,7 @@ namespace awkward {
     }
 
     std::string
-    form() {
+    form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
       std::stringstream out;
@@ -207,12 +207,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
         , length_(0) { }
 
     size_t
-    length() const {
+    length() const noexcept {
       return length_;
     }
 
     void
-    clear() {
+    clear() noexcept {
       starts_.clear();
       stops_.clear();
       content_.clear();
@@ -225,25 +225,25 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
     BUILDER*
-    begin_list() {
+    begin_list() noexcept {
       starts_.append(content_.length());
       return &content_;
     }
 
     void
-    end_list() {
+    end_list() noexcept {
       length_++;
       stops_.append(content_.length());
     }
 
     void
-    to_buffers(int64_t* starts, int64_t* stops) const {
+    to_buffers(int64_t* starts, int64_t* stops) const noexcept {
       starts_.concatenate(starts);
       stops_.concatenate(stops);
     }
 
     std::string
-    form() {
+    form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
@@ -265,12 +265,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
     size_t
-    length() const {
+    length() const noexcept {
       return index_.length();
     }
 
     void
-    clear() {
+    clear() noexcept {
       index_.clear();
       content_.clear();
     }
@@ -281,12 +281,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
     void
-    append_index() {
+    append_index() noexcept {
       index_.append(content_.length());
     }
 
     void
-    extend_index(size_t size) {
+    extend_index(size_t size) noexcept {
       size_t start = content_.length();
       for (size_t i = start; i < start + size; i++) {
         index_.append(i);
@@ -294,12 +294,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
     void
-    to_buffers(int64_t* ptr) const {
+    to_buffers(int64_t* ptr) const noexcept {
       index_.concatenate(ptr);
     }
 
     std::string
-    form() {
+    form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
@@ -319,12 +319,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
         : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) { }
 
     size_t
-    length() const {
+    length() const noexcept {
       return index_.length();
     }
 
     void
-    clear() {
+    clear() noexcept {
       index_.clear();
       content_.clear();
     }
@@ -335,12 +335,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
     void
-    append_index() {
+    append_index() noexcept {
       index_.append(content_.length());
     }
 
     void
-    extend_index(size_t size) {
+    extend_index(size_t size) noexcept {
       size_t start = content_.length();
       for (size_t i = start; i < start + size; i++) {
         index_.append(i);
@@ -348,12 +348,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
     void
-    append_null() {
+    append_null() noexcept {
       index_.append(-1);
     }
 
     void
-    extend_null(size_t size) {
+    extend_null(size_t size) noexcept {
       for (size_t i = 0; i < size; i++) {
         index_.append(-1);
       }
@@ -365,12 +365,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
     }
 
     void
-    to_buffers(int64_t* ptr) const {
+    to_buffers(int64_t* ptr) const noexcept {
       index_.concatenate(ptr);
     }
 
     std::string
-    form() {
+    form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
@@ -387,12 +387,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   class EmptyLayoutBuilder {
   public:
     size_t
-    length() const {
+    length() const noexcept {
       return 0;
     }
 
     std::string
-    form() {
+    form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"EmptyArray\" }";
@@ -406,12 +406,12 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
   class UnmaskedLayoutBuilder {
   public:
     size_t
-    length() const {
+    length() const noexcept {
       return content_.length();
     }
 
     void
-    clear() {
+    clear() noexcept {
       content_.clear();
     }
 
@@ -422,18 +422,18 @@ template <unsigned ID, unsigned INITIAL, typename BUILDER>
 
     template<typename PRIMITIVE>
     void
-    append_valid() {
+    append_valid() noexcept {
       return content_;
     }
 
     template<typename PRIMITIVE>
     void
-    extend_valid(size_t size) {
+    extend_valid(size_t size) noexcept {
       return content_;
     }
 
     std::string
-    form() {
+    form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
       return "{ \"class\": \"UnmaskedArray\", \"content\": " + content_.form()

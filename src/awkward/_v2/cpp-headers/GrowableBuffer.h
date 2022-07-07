@@ -258,6 +258,7 @@ namespace awkward {
       }
       return GrowableBuffer<TO_PRIMITIVE>(len, std::move(ptr), len, len);
     }
+
   private:
     /// @brief Inserts one `datum` into the panel.
     void
