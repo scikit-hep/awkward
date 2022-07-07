@@ -238,27 +238,26 @@ namespace awkward {
       return (ptr_.size() == 1);
     }
 
-    /// @brief Takes one (possibly multi-panels) GrowableBuffer<FROM_PRIMITIVE>
+    /// @brief Takes this (possibly multi-panels) GrowableBuffer<PRIMITIVE>
     /// and makes another (one panel) GrowableBuffer<TO_PRIMITIVE>.
     ///
-    /// Used to change the data type of buffer content from `FROM_PRIMITIVE`
+    /// Used to change the data type of buffer content from `PRIMITIVE`
     /// to `TO_PRIMITIVE` for building arrays.
-    template<typename FROM_PRIMITIVE>
-    static GrowableBuffer<PRIMITIVE>
-    fill_from(GrowableBuffer<FROM_PRIMITIVE>& from_buffer) {
-      auto length = from_buffer.length();
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[length]);
-      PRIMITIVE* rawptr = ptr.get();
+    template<typename TO_PRIMITIVE>
+    GrowableBuffer<TO_PRIMITIVE>
+    copy_as() {
+      auto len = length();
+      auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[len]);
+      TO_PRIMITIVE* rawptr = ptr.get();
       int64_t k = 0;
-      for (size_t i = 0;  i < from_buffer.ptr_.size(); i++) {
-        for (int64_t j = 0; j < from_buffer.length_[i]; j++) {
-          rawptr[k] = static_cast<PRIMITIVE>(from_buffer.ptr_[i].get()[j]);
+      for (size_t i = 0;  i < ptr_.size(); i++) {
+        for (int64_t j = 0; j < length_[i]; j++) {
+          rawptr[k] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
           k++;
         }
       }
-      return GrowableBuffer<PRIMITIVE>(length, std::move(ptr), length, length);
+      return GrowableBuffer<TO_PRIMITIVE>(len, std::move(ptr), len, len);
     }
-
   private:
     /// @brief Inserts one `datum` into the panel.
     void
