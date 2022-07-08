@@ -1,3 +1,4 @@
+
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -9,10 +10,13 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath("."))
+
+import sys
+import os
+import os.path
+sys.path.insert(0, os.path.dirname(os.getcwd()))
+
+import subprocess
 
 # -- Project information -----------------------------------------------------
 
@@ -25,10 +29,14 @@ author = "Jim Pivarski"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
-extensions = []
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.napoleon', 'sphinx.ext.linkcode']
+
+autosummary_generate = True
+autosummary_ignore_module_all = False
+autosummary_imported_members = True 
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = [ '_templates' ]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -54,16 +62,33 @@ html_static_path = ["_static"]
 # Additional stuff
 master_doc = "index"
 
-import os
-import sys
-import subprocess
+revision = (
+    subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE)
+              .stdout
+              .decode("utf-8")
+              .strip()
+)
 
-subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
 
-exec(open("prepare_docstrings.py").read(), dict(globals()))
+def linkcode_resolve(domain, info):
+    if domain != 'py':
+        return None
+    if not info['module']:
+        return None
+    filename = f"src/{info['module'].replace('.', '/')}.py"
+    return f"https://github.com/scikit-hep/awkward-1.0/blob/{revision}/{filename}"
 
-current_dir = os.path.dirname(os.path.realpath(__file__))
-docgen = os.path.join(current_dir, "..", "dev", "generate-kerneldocs.py")
-subprocess.check_call([sys.executable, docgen])
 
-exec(open("make_changelog.py").read(), dict(globals()))
+
+# https://stackoverflow.com/questions/38765577/overriding-sphinx-autodoc-alias-of-for-import-of-private-class
+def skip(*args):
+    ... 
+
+# https://stackoverflow.com/questions/14141170/how-can-i-just-list-undocumented-members-with-sphinx-autodoc
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+def modify_signatures(app, what, name, obj, options, signature, return_annotation):
+    print(what, name, obj, signature)
+
+
+def setup(app):
+    app.connect("autodoc-process-signature", modify_signatures)

@@ -32,8 +32,21 @@ import awkward._v2.behaviors.string
 
 # operations
 from awkward._v2.operations import *
+import awkward._v2.operations
 
 
 behavior = {}
 behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
 behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
+
+ 
+def __getattr__(name):
+    if name == "__all__":
+        return [
+            "Array",
+            "Record",
+            "ArrayBuilder",
+            "behavior",
+        ] + [n for n in dir(awkward._v2.operations) if not n.startswith("ak_")]
+    else:
+        raise AttributeError(name)
