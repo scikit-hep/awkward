@@ -20,3 +20,7 @@ def test_1417issue_is_none_check_axis():
         ak._v2.is_none(array, axis=3)
 
     assert str(ak._v2.type(ak._v2.is_none(array, axis=0)[0])) == "bool"
+
+    array = ak._v2.Array([[[[[1], [3]], [1]]], []])
+
+    assert to_list(ak._v2.is_none(array, axis=2)) == [[[False, False]], []]
