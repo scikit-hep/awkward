@@ -2,7 +2,6 @@
 
 import pytest  # noqa: F401
 import awkward as ak  # noqa: F401
-import numpy as np
 
 to_list = ak._v2.operations.to_list
 

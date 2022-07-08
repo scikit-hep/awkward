@@ -38,7 +38,9 @@ def _impl(array, axis, highlevel, behavior):
                 )
             )
         )
+
     # Determine the (potentially nested) bytemask
+
     def getfunction_inner(layout, depth, **kwargs):
 
         if not isinstance(layout, ak._v2.contents.Content):
