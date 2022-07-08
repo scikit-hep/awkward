@@ -9,11 +9,15 @@ to_list = ak._v2.operations.to_list
 
 def test_1417issue_is_none_check_axis():
     array = ak._v2.Array([[[1, 2, None], None], None])
-    
+
     assert to_list(ak._v2.is_none(array, axis=0)) == [False, True]
     assert to_list(ak._v2.is_none(array, axis=1)) == [[False, True], None]
-    assert to_list(ak._v2.is_none(array, axis=2)) == [[[False, False, True], None], None]
+    assert to_list(ak._v2.is_none(array, axis=2)) == [
+        [[False, False, True], None],
+        None,
+    ]
 
-    with pytest.raises(ValueError): ak._v2.is_none(array, axis=3)
+    with pytest.raises(ValueError):
+        ak._v2.is_none(array, axis=3)
 
-    assert str(ak._v2.type(ak._v2.is_none(array, axis=0)[0])) == 'bool'
+    assert str(ak._v2.type(ak._v2.is_none(array, axis=0)[0])) == "bool"
