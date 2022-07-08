@@ -13,27 +13,37 @@ def test():
         True,
         False,
     ]
-    assert ak._v2.operations.is_none(ak._v2.Array([[1, 2, 3], [], [None, 5]])).tolist() == [
+    assert ak._v2.operations.is_none(
+        ak._v2.Array([[1, 2, 3], [], [None, 5]])
+    ).tolist() == [
         False,
         False,
         False,
     ]
-    assert ak._v2.operations.is_none(ak._v2.Array([[1, 2, 3], [], [None, 5]]), axis=1).tolist() == [
+    assert ak._v2.operations.is_none(
+        ak._v2.Array([[1, 2, 3], [], [None, 5]]), axis=1
+    ).tolist() == [
         [False, False, False],
         [],
         [True, False],
     ]
-    assert ak._v2.operations.is_none(ak._v2.Array([[1, None, 2, 3], [], [None, 5]]), axis=1).tolist() == [
+    assert ak._v2.operations.is_none(
+        ak._v2.Array([[1, None, 2, 3], [], [None, 5]]), axis=1
+    ).tolist() == [
         [False, True, False, False],
         [],
         [True, False],
     ]
-    assert ak._v2.operations.is_none(ak._v2.Array([[1, None, 2, 3], [], [None, 5]]), axis=-1).tolist() == [
+    assert ak._v2.operations.is_none(
+        ak._v2.Array([[1, None, 2, 3], [], [None, 5]]), axis=-1
+    ).tolist() == [
         [False, True, False, False],
         [],
         [True, False],
     ]
-    assert ak._v2.operations.is_none(ak._v2.Array([[1, None, 2, 3], [], [None, 5]]), axis=-2).tolist() == [
+    assert ak._v2.operations.is_none(
+        ak._v2.Array([[1, None, 2, 3], [], [None, 5]]), axis=-2
+    ).tolist() == [
         False,
         False,
         False,
@@ -42,7 +52,9 @@ def test():
         ak._v2.Array([[1, None, 2, 3], None, [None, 5]]), axis=-2
     ).tolist() == [False, True, False]
     with pytest.raises(ValueError):
-        ak._v2.operations.is_none(ak._v2.Array([[1, None, 2, 3], [], [None, 5]]), axis=-3)
+        ak._v2.operations.is_none(
+            ak._v2.Array([[1, None, 2, 3], [], [None, 5]]), axis=-3
+        )
 
     one = ak._v2.operations.from_iter([1, None, 3], highlevel=False)
     two = ak._v2.operations.from_iter([[], [1], None, [3, 3, 3]], highlevel=False)
@@ -62,4 +74,3 @@ def test():
         True,
         False,
     ]
-
