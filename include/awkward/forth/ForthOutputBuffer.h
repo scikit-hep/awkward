@@ -24,6 +24,10 @@ namespace awkward {
   template <typename T>
   void byteswap64(int64_t num_items, T& value);
 
+  /// @brief HERE
+  template <typename T>
+  void byteswap_intp(int64_t num_items, T& value);
+
   /// @class ForthOutputBuffer
   ///
   /// @brief HERE

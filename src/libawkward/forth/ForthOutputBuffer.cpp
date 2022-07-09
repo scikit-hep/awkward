@@ -40,22 +40,6 @@ namespace awkward {
     }
   }
 
-//  void byteswap64(int64_t num_items, void* ptr) {
-//    while (num_items != 0) {
-//      uint64_t value = *reinterpret_cast<uint64_t*>(ptr);
-//      *reinterpret_cast<uint64_t*>(ptr) = ((value >> 56) & 0x00000000000000ff) |
-//                                          ((value >> 40) & 0x000000000000ff00) |
-//                                          ((value >> 24) & 0x0000000000ff0000) |
-//                                          ((value >>  8) & 0x00000000ff000000) |
-//                                          ((value <<  8) & 0x000000ff00000000) |
-//                                          ((value << 24) & 0x0000ff0000000000) |
-//                                          ((value << 40) & 0x00ff000000000000) |
-//                                          ((value << 56) & 0xff00000000000000);
-//      ptr = reinterpret_cast<void*>(reinterpret_cast<size_t>(ptr) + 8);
-//      num_items--;
-//    }
-//  }
-
   template <typename T>
   void byteswap64(int64_t num_items, T& value) {
     T* ptr = &value;
@@ -73,7 +57,40 @@ namespace awkward {
       ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
       num_items--;
     }
-}
+  }
+
+  template <typename T>
+  void byteswap_intp(int64_t num_items, T& value) {
+    T* ptr = &value;
+    if (sizeof(ssize_t) == 4) {
+      while (num_items != 0) {
+        uint32_t integer = *reinterpret_cast<uint32_t*>(ptr);
+        uint32_t output = ((integer >> 24) & 0x000000ff) |
+                          ((integer >>  8) & 0x0000ff00) |
+                          ((integer <<  8) & 0x00ff0000) |
+                          ((integer << 24) & 0xff000000);
+        *ptr = *reinterpret_cast<T*>(&output);
+        ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
+        num_items--;
+      }
+    }
+    else {
+      while (num_items != 0) {
+        uint64_t integer = *reinterpret_cast<uint64_t*>(ptr);
+        uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
+                          ((integer >> 40) & 0x000000000000ff00) |
+                          ((integer >> 24) & 0x0000000000ff0000) |
+                          ((integer >>  8) & 0x00000000ff000000) |
+                          ((integer <<  8) & 0x000000ff00000000) |
+                          ((integer << 24) & 0x0000ff0000000000) |
+                          ((integer << 40) & 0x00ff000000000000) |
+                          ((integer << 56) & 0xff00000000000000);
+        *ptr = *reinterpret_cast<T*>(&output);
+        ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
+        num_items--;
+      }
+    }
+  }
 
   ////////// abstract
 
@@ -787,8 +804,8 @@ namespace awkward {
   template void byteswap64<uint64_t>(int64_t num_items, uint64_t& value);
   template void byteswap64<double>(int64_t num_items, double& value);
 
-  template void byteswap64<size_t>(int64_t num_items, size_t& value);
-  template void byteswap64<ssize_t>(int64_t num_items, ssize_t& value);
+  template void byteswap_intp<size_t>(int64_t num_items, size_t& value);
+  template void byteswap_intp<ssize_t>(int64_t num_items, ssize_t& value);
 
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<bool>;
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<int8_t>;

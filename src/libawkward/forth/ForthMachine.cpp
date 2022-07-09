@@ -3421,12 +3421,7 @@ namespace awkward {
                 for (int64_t i = 0;  i < num_items;  i++) {                    \
                   TYPE value = ptr[i];                                         \
                   if (byteswap) {                                              \
-                    if (sizeof(ssize_t) == 4) {                                \
-                      byteswap32(1, value);                                    \
-                    }                                                          \
-                    else {                                                     \
-                      byteswap64(1, value);                                    \
-                    }                                                          \
+                    byteswap_intp(1, value);                                   \
                   }                                                            \
                   if (stack_cannot_push()) {                                   \
                     current_error_ = util::ForthError::stack_overflow;         \
