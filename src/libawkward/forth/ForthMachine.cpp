@@ -8,8 +8,6 @@
 
 #include "awkward/forth/ForthMachine.h"
 
-//just getting a PR number
-
 namespace awkward {
   // Instruction values are preprocessor macros to be equally usable in 32-bit and
   // 64-bit instruction sets.
@@ -3402,7 +3400,7 @@ namespace awkward {
                 for (int64_t i = 0;  i < num_items;  i++) {                    \
                   TYPE value = ptr[i];                                         \
                   if (byteswap) {                                              \
-                    SWAP(1, &value);                                           \
+                    SWAP(1, value);                                            \
                   }                                                            \
                   if (stack_cannot_push()) {                                   \
                     current_error_ = util::ForthError::stack_overflow;         \
@@ -3424,10 +3422,10 @@ namespace awkward {
                   TYPE value = ptr[i];                                         \
                   if (byteswap) {                                              \
                     if (sizeof(ssize_t) == 4) {                                \
-                      byteswap32(1, &value);                                   \
+                      byteswap32(1, value);                                    \
                     }                                                          \
                     else {                                                     \
-                      byteswap64(1, &value);                                   \
+                      byteswap64(1, value);                                    \
                     }                                                          \
                   }                                                            \
                   if (stack_cannot_push()) {                                   \
