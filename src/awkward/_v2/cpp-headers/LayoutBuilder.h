@@ -8,11 +8,11 @@
 
 #include <stdexcept>
 #include <tuple>
-#include <iostream>
+#include <map>
 
 namespace awkward {
 
-  namespace layout_builder {
+  namespace LayoutBuilder {
 
   template<const char *str>
   struct field_name {
@@ -20,7 +20,8 @@ namespace awkward {
   };
 
   template<class field_name, class BUILDER>
-  struct Field {
+  class Field {
+  public:
     const char* field() {
         return field_.value;
     }
@@ -30,8 +31,10 @@ namespace awkward {
       return builder.form();
     }
 
+  BUILDER builder;
+
+  private:
     field_name field_;
-    BUILDER builder;
   };
 
   template <unsigned INITIAL, typename PRIMITIVE>
@@ -57,6 +60,10 @@ namespace awkward {
     set_id(size_t &id) {
       id_ = id;
       id++;
+    }
+
+    bool is_valid() const noexcept {
+      return true;
     }
 
     void
@@ -94,7 +101,6 @@ namespace awkward {
     }
 
   private:
-    size_t initial_;
     awkward::GrowableBuffer<PRIMITIVE> data_;
     size_t id_;
   };
@@ -131,6 +137,17 @@ namespace awkward {
       id_ = id;
       id++;
       content_.set_id(id);
+    }
+
+    bool is_valid() const noexcept {
+      if (content_.length() != offsets_.last()) {
+        std::cout << "ListOffset node" << id_ << "has content length " << content_.length()
+                  << "but last offset " << offsets_.last();
+        return false;
+      }
+      else {
+        return content_.is_valid();
+      }
     }
 
     BUILDER*
@@ -251,6 +268,11 @@ template <unsigned INITIAL, typename BUILDER>
       length_ = 0;
     }
 
+    BUILDER*
+    content() {
+      return &content_;
+    }
+
     void
     set_id(size_t &id) {
       id_ = id;
@@ -258,9 +280,20 @@ template <unsigned INITIAL, typename BUILDER>
       content_.set_id(id);
     }
 
-    BUILDER*
-    content() {
-      return &content_;
+    bool is_valid() const noexcept {
+      if (starts_.length() != stops_.length()) {
+        std::cout << "List node" << id_ << " has starts length " << starts_.length()
+                  << " but stops length " << stops_.length();
+        return false;
+      }
+      else if (stops_.length() > 0 && content_.length() != stops_.last()) {
+        std::cout << "List node" << id_ << " has content length " << content_.length()
+                  << " but last stops " << stops_.last();
+        return false;
+      }
+      else {
+        return content_.is_valid();
+      }
     }
 
     BUILDER*
@@ -329,6 +362,22 @@ template <unsigned INITIAL, typename BUILDER>
       content_.set_id(id);
     }
 
+    bool is_valid() const noexcept {
+      if (content_.length() != index_.length()) {
+        std::cout << "Indexed node" << id_ << " has content length " << content_.length()
+                  << " but index length " << index_.length();
+        return false;
+      }
+      else if (content_.length() != index_.last() + 1) {
+        std::cout << "Indexed node" << id_ << " has content length " << content_.length()
+                  << " but last valid index is " << index_.last();
+        return false;
+      }
+      else {
+        return content_.is_valid();
+      }
+    }
+
     void
     append_index() noexcept {
       index_.append(content_.length());
@@ -391,6 +440,17 @@ template <unsigned INITIAL, typename BUILDER>
       id_ = id;
       id++;
       content_.set_id(id);
+    }
+
+    bool is_valid() const noexcept {
+      if (content_.length() != index_.last() + 1) {
+        std::cout << "IndexedOption node" << id_ << " has content length "<< content_.length()
+                  << " but last valid index is " << index_.last();
+        return false;
+      }
+      else {
+        return content_.is_valid();
+      }
     }
 
     void
@@ -456,14 +516,16 @@ template <unsigned INITIAL, typename BUILDER>
 
     void
     set_id(size_t &id) {
-      id_ = id;
-      id++;
+      // id_ = id;
+      // id++;
+    }
+
+    bool is_valid() const noexcept {
+      return true;
     }
 
     std::string
     form() const noexcept {
-      std::stringstream form_key;
-      form_key << "node" << id_;
       return "{ \"class\": \"EmptyArray\" }";
     }
 
@@ -501,6 +563,10 @@ template <unsigned INITIAL, typename BUILDER>
       content_.set_id(id);
     }
 
+    bool is_valid() const {
+      return content_.is_valid();
+    }
+
     template<typename PRIMITIVE>
     void
     append_valid() noexcept {
@@ -526,7 +592,7 @@ template <unsigned INITIAL, typename BUILDER>
     size_t id_;
   };
 
-  }  // namespace layout_builder
+  }  // namespace LayoutBuilder
 }  // namespace awkward
 
 #endif  // AWKWARD_LAYOUTBUILDER_H_

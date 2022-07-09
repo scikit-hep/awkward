@@ -177,6 +177,12 @@ namespace awkward {
       ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[initial_]));
     }
 
+    /// @brief Last element in last panel
+    PRIMITIVE
+    last() const {
+      return ptr_[ptr_.size()-1].get()[length_[ptr_.size()-1]-1];
+    }
+
     /// @brief Inserts one `datum` into the panel, possibly triggering
     /// allocation of a new panel.
     ///

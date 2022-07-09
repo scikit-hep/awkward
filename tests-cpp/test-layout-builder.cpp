@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-namespace lb = awkward::layout_builder;
+namespace lb = awkward::LayoutBuilder;
 
 static const char one_field[] = "one";
 static const char two_field[] = "two";
