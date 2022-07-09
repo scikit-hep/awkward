@@ -72,7 +72,7 @@ namespace awkward {
       *ptr = *reinterpret_cast<T*>(&output);
       ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
       num_items--;
-    }  
+    }
 }
 
   ////////// abstract
