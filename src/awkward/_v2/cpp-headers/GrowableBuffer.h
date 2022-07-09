@@ -228,6 +228,12 @@ namespace awkward {
       return (&*ptr_.back())[length_.back()];
     }
 
+    /// @brief Currently used number of bytes.
+    size_t
+    nbytes() const {
+      return length() * sizeof(PRIMITIVE);
+    }
+
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
     /// contiguously allocated `external_pointer`.
     void

@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <tuple>
 #include <map>
+#include <iostream>
 
 namespace awkward {
 
@@ -75,6 +76,16 @@ namespace awkward {
     extend(PRIMITIVE* ptr, size_t size) noexcept {
       data_.extend(ptr, size);
     }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      names_nbytes["node" + std::string(id_) + "-data"] = data_.nbytes();
+    }
+
+    // void
+    // to_buffers(std::map<std::string, PRIMITIVE*> &buffers) const noexcept {
+    //   data_.concatenate(buffers["node" + std::string(id_) + "-data"]);
+    // }
 
     void
     to_buffers(PRIMITIVE* ptr) const noexcept {
@@ -161,6 +172,12 @@ namespace awkward {
     }
 
     void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      names_nbytes["node" + std::string(id_) + "-offsets"] = offsets_.nbytes();
+      content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
     to_buffers(int64_t* ptr) const noexcept {
       offsets_.concatenate(ptr);
     }
@@ -206,8 +223,7 @@ namespace awkward {
     set_id(size_t &id) {
       id_ = id;
       id++;
-      auto contents_id = [&id](auto record) {
-                                              record->builder.set_id(id); };
+      auto contents_id = [&id](auto record) { record->builder.set_id(id); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
         visit_at(contents, i, contents_id);
     }
@@ -215,6 +231,13 @@ namespace awkward {
     void
     end_record() {
       length_++;
+    }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      auto contents_nbytes = [&names_nbytes](auto record) { record->builder.buffer_nbytes(names_nbytes); };
+      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+        visit_at(contents, i, contents_nbytes);
     }
 
     std::string
@@ -309,6 +332,13 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      names_nbytes["node" + std::string(id_) + "-starts"] = starts_.nbytes();
+      names_nbytes["node" + std::string(id_) + "-stops"] = stops_.nbytes();
+      content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
     to_buffers(int64_t* starts, int64_t* stops) const noexcept {
       starts_.concatenate(starts);
       stops_.concatenate(stops);
@@ -389,6 +419,12 @@ template <unsigned INITIAL, typename BUILDER>
       for (size_t i = start; i < start + size; i++) {
         index_.append(i);
       }
+    }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      names_nbytes["node" + std::string(id_) + "-index"] = index_.nbytes();
+      content_.buffer_nbytes(names_nbytes);
     }
 
     void
@@ -479,8 +515,9 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    null() {
-      index_.append(-1);
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      names_nbytes["node" + std::string(id_) + "-index"] = index_.nbytes();
+      content_.buffer_nbytes(names_nbytes);
     }
 
     void
@@ -577,6 +614,16 @@ template <unsigned INITIAL, typename BUILDER>
     void
     extend_valid(size_t size) noexcept {
       return content_;
+    }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    to_buffers(int64_t* ptr) const noexcept {
+      content_.to_buffers(ptr);
     }
 
     std::string
