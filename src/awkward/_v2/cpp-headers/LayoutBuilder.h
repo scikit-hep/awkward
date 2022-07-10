@@ -42,7 +42,8 @@ namespace awkward {
   class Numpy {
   public:
     Numpy()
-        : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) {
+        : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL))
+        , parameters_("") {
       size_t id = 0;
       set_id(id);
     }
@@ -61,6 +62,10 @@ namespace awkward {
     set_id(size_t &id) {
       id_ = id;
       id++;
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_;
     }
 
     bool is_valid() const noexcept {
@@ -96,15 +101,22 @@ namespace awkward {
     form() const {
       std::stringstream form_key;
       form_key << "node" << id_;
+
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
+
       if (std::is_arithmetic<PRIMITIVE>::value) {
         return "{ \"class\": \"NumpyArray\", \"primitive\": \""
-                  + type_to_name<PRIMITIVE>()
-                  + "\", \"form_key\": \"" + form_key.str() + "\" }";
+                  + type_to_name<PRIMITIVE>() +"\"" + params
+                  + ", \"form_key\": \"" + form_key.str() + "\" }";
       }
       else if (is_specialization<PRIMITIVE, std::complex>::value) {
         return "{ \"class\": \"NumpyArray\", \"primitive\": \""
-                  + type_to_name<PRIMITIVE>()
-                  + "\", \"form_key\": \"" + form_key.str() + "\" }";
+                  + type_to_name<PRIMITIVE>() + "\"" + params
+                  + ", \"form_key\": \"" + form_key.str() + "\" }";
       }
       else {
         throw std::runtime_error("type " + std::string(typeid(PRIMITIVE).name()) + "is not supported");
@@ -114,13 +126,15 @@ namespace awkward {
   private:
     awkward::GrowableBuffer<PRIMITIVE> data_;
     size_t id_;
+    std::string parameters_;
   };
 
   template <unsigned INITIAL, typename BUILDER>
   class ListOffset {
   public:
     ListOffset()
-        : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+        : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        , parameters_("") {
       offsets_.append(0);
       size_t id = 0;
       set_id(id);
@@ -148,6 +162,10 @@ namespace awkward {
       id_ = id;
       id++;
       content_.set_id(id);
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_;
     }
 
     bool is_valid() const noexcept {
@@ -186,14 +204,20 @@ namespace awkward {
     form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-                + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
     size_t id_;
+    std::string parameters_;
   };
 
   template <typename... RECORD>
@@ -201,6 +225,7 @@ namespace awkward {
   public:
     Record()
         : contents({new RECORD}...)
+        , parameters_("")
         , length_(0) {
       size_t id = 0;
       set_id(id);
@@ -228,6 +253,10 @@ namespace awkward {
         visit_at(contents, i, contents_id);
     }
 
+    std::string parameters() const noexcept {
+      return parameters_;
+    }
+
     void
     end_record() {
       length_++;
@@ -244,6 +273,11 @@ namespace awkward {
     form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
       for (size_t i = 0;  i < std::tuple_size<decltype(contents)>::value;  i++) {
@@ -255,7 +289,7 @@ namespace awkward {
         visit_at(contents, i, contents_form);
       }
       out << " }, ";
-      out << "\"form_key\": \"" + form_key.str() + "\" }";
+      out << params << "\"form_key\": \"" << form_key.str() << "\" }";
       return out.str();
     }
 
@@ -264,6 +298,7 @@ namespace awkward {
     private:
     size_t length_;
     size_t id_;
+    std::string parameters_;
   };
 
 
@@ -273,14 +308,14 @@ template <unsigned INITIAL, typename BUILDER>
     List()
         : starts_(awkward::GrowableBuffer<int64_t>(INITIAL))
         , stops_(awkward::GrowableBuffer<int64_t>(INITIAL))
-        , length_(0) {
+        , parameters_("") {
       size_t id = 0;
       set_id(id);
     }
 
     size_t
     length() const noexcept {
-      return length_;
+      return starts_.length();
     }
 
     void
@@ -288,7 +323,6 @@ template <unsigned INITIAL, typename BUILDER>
       starts_.clear();
       stops_.clear();
       content_.clear();
-      length_ = 0;
     }
 
     BUILDER*
@@ -301,6 +335,10 @@ template <unsigned INITIAL, typename BUILDER>
       id_ = id;
       id++;
       content_.set_id(id);
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_;
     }
 
     bool is_valid() const noexcept {
@@ -327,7 +365,6 @@ template <unsigned INITIAL, typename BUILDER>
 
     void
     end_list() noexcept {
-      length_++;
       stops_.append(content_.length());
     }
 
@@ -348,23 +385,29 @@ template <unsigned INITIAL, typename BUILDER>
     form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
       return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
-                + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
     GrowableBuffer<int64_t> starts_;
     GrowableBuffer<int64_t> stops_;
     BUILDER content_;
-    size_t length_;
     size_t id_;
+    std::string parameters_;
   };
 
 template <unsigned INITIAL, typename BUILDER>
   class Indexed {
   public:
     Indexed()
-        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+        : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        , parameters_("") {
       size_t id = 0;
       set_id(id);
     }
@@ -390,6 +433,10 @@ template <unsigned INITIAL, typename BUILDER>
       id_ = id;
       id++;
       content_.set_id(id);
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_;
     }
 
     bool is_valid() const noexcept {
@@ -436,21 +483,28 @@ template <unsigned INITIAL, typename BUILDER>
     form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
       return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
-                + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
     size_t id_;
+    std::string parameters_;
   };
 
 template <unsigned INITIAL, typename BUILDER>
   class IndexedOption {
   public:
     IndexedOption()
-        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+        : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        , parameters_("") {
       size_t id = 0;
       set_id(id);
     }
@@ -476,6 +530,10 @@ template <unsigned INITIAL, typename BUILDER>
       id_ = id;
       id++;
       content_.set_id(id);
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_;
     }
 
     bool is_valid() const noexcept {
@@ -529,19 +587,26 @@ template <unsigned INITIAL, typename BUILDER>
     form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
-                + content_.form() + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
     size_t id_;
+    std::string parameters_;
   };
 
   class Empty {
   public:
-    Empty() {
+    Empty()
+        : parameters_("") {
       size_t id = 0;
       set_id(id);
     }
@@ -557,23 +622,34 @@ template <unsigned INITIAL, typename BUILDER>
       // id++;
     }
 
+    std::string parameters() const noexcept {
+      return parameters_;
+    }
+
     bool is_valid() const noexcept {
       return true;
     }
 
     std::string
     form() const noexcept {
-      return "{ \"class\": \"EmptyArray\" }";
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
+      return "{ \"class\": \"EmptyArray\"" + params + " }";
     }
 
   private:
     size_t id_;
+    std::string parameters_;
   };
 
   template <typename BUILDER>
   class Unmasked {
   public:
-    Unmasked() {
+    Unmasked()
+      : parameters_("") {
       size_t id = 0;
       set_id(id);
     }
@@ -598,6 +674,10 @@ template <unsigned INITIAL, typename BUILDER>
       id_ = id;
       id++;
       content_.set_id(id);
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_;
     }
 
     bool is_valid() const {
@@ -630,13 +710,19 @@ template <unsigned INITIAL, typename BUILDER>
     form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
       return "{ \"class\": \"UnmaskedArray\", \"content\": " + content_.form()
-                + ", \"form_key\": \"" + form_key.str() + "\" }";
+                + params + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
     BUILDER content_;
     size_t id_;
+    std::string parameters_;
   };
 
   }  // namespace LayoutBuilder
