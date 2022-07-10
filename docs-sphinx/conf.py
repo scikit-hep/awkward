@@ -18,10 +18,11 @@ import operator
 import os
 import os.path
 
-sys.path.insert(0, "/home/angus/Git/awkward")#os.path.dirname(os.getcwd()))
 
+root_path = os.path.abspath(os.path.join(os.getcwd(), ".."))
+src_path = os.path.join(root_path, "src")
 
-src_path = os.path.abspath(os.path.join(os.getcwd(), "..", "src"))
+sys.path.insert(0, root_path)
 
 # -- Project information -----------------------------------------------------
 
@@ -48,7 +49,7 @@ copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: 
 copybutton_prompt_is_regexp = True
 
 autosummary_generate = True
-autosummary_ignore_module_all = True
+autosummary_ignore_module_all = False
 autosummary_imported_members = True
 
 # List of patterns, relative to source directory, that match files and
@@ -131,8 +132,9 @@ def linkcode_resolve(domain, info):
     else:
         line_spec = f"#L{line_num}-L{line_num + len(source) - 1}"
 
-    blob_path = os.path.relpath(path, start=src_path)
-    return f"https://github.com/scikit-hep/awkward-1.0/blob/{revision}/{blob_path}{line_spec}"
+    src_blob_path = os.path.relpath(path, start=root_path)
+    assert revision
+    return f"https://github.com/scikit-hep/awkward-1.0/blob/{revision}/src/{src_blob_path}{line_spec}"
 
 
 # https://stackoverflow.com/questions/38765577/overriding-sphinx-autodoc-alias-of-for-import-of-private-class
