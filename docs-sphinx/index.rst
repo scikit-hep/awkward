@@ -1,5 +1,7 @@
-..
-   Note: Items in this toctree form the top-level navigation. See `api.rst` for the `autosummary` directive, and for why `api.rst` isn't called directly.
+Awkward Array documentation
+===========================
 
 .. toctree::
    :hidden:
+
+   API reference <_autosummary/awkward._v2>
