@@ -7,6 +7,7 @@
 #include <memory>
 #include <numeric>
 #include <cmath>
+#include <stdexcept>
 
 namespace awkward {
   /// @class GrowableBuffer
@@ -180,7 +181,18 @@ namespace awkward {
     /// @brief Last element in last panel
     PRIMITIVE
     last() const {
-      return ptr_[ptr_.size()-1].get()[length_[ptr_.size()-1]-1];
+      if (length_[0] == 0) {
+        throw std::runtime_error("Buffer is empty");
+      }
+      else {
+        return ptr_[ptr_.size()-1].get()[length_[ptr_.size()-1]-1];
+      }
+    }
+
+    /// @brief Currently used number of bytes.
+    size_t
+    nbytes() const {
+      return length() * sizeof(PRIMITIVE);
     }
 
     /// @brief Inserts one `datum` into the panel, possibly triggering
@@ -226,12 +238,6 @@ namespace awkward {
     PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
       append(datum);
       return (&*ptr_.back())[length_.back()];
-    }
-
-    /// @brief Currently used number of bytes.
-    size_t
-    nbytes() const {
-      return length() * sizeof(PRIMITIVE);
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one

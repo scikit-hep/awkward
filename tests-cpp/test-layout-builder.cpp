@@ -2,9 +2,9 @@
 
 #include "../src/awkward/_v2/cpp-headers/LayoutBuilder.h"
 
-#include <iostream>
-
 namespace lb = awkward::LayoutBuilder;
+
+static const char param[] = "";
 
 static const char one_field[] = "one";
 static const char two_field[] = "two";
@@ -40,7 +40,7 @@ void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length, Args&&...args)
 
 void
 test_numpy_bool() {
-  auto builder = lb::Numpy<initial, bool>();
+  auto builder = lb::Numpy<lb::parameter<param>, initial, bool>();
 
   builder.append(true);
   builder.append(false);
@@ -67,7 +67,7 @@ test_numpy_bool() {
 
 void
 test_numpy_int() {
-  auto builder = lb::Numpy<initial, int64_t>();
+  auto builder = lb::Numpy<lb::parameter<param>, initial, int64_t>();
 
   size_t data_size = 10;
 
@@ -95,7 +95,7 @@ test_numpy_int() {
 
 void
 test_numpy_char() {
-  auto builder = lb::Numpy<initial, char>();
+  auto builder = lb::Numpy<lb::parameter<param>, initial, char>();
 
   builder.append('a');
   builder.append('b');
@@ -122,7 +122,7 @@ test_numpy_char() {
 
 void
 test_numpy_double() {
-  auto builder = lb::Numpy<initial, double>();
+  auto builder = lb::Numpy<lb::parameter<param>, initial, double>();
 
   size_t data_size = 9;
 
@@ -150,7 +150,7 @@ test_numpy_double() {
 
 void
 test_numpy_complex() {
-  auto builder = lb::Numpy<initial, std::complex<double>>();
+  auto builder = lb::Numpy<lb::parameter<param>, initial, std::complex<double>>();
 
   builder.append({1.1, 0.1});
   builder.append({2.2, 0.2});
@@ -179,7 +179,7 @@ test_numpy_complex() {
 void
 test_list_offset_of_numpy() {
   auto builder = lb::ListOffset<
-      initial, lb::Numpy<initial, double>
+      lb::parameter<param>, initial, lb::Numpy<lb::parameter<param>, initial, double>
   >();
 
   auto builder2 = builder.begin_list();
@@ -226,8 +226,8 @@ test_list_offset_of_numpy() {
 void
 test_list_offset_of_list_offset() {
   auto builder = lb::ListOffset<
-      initial, lb::ListOffset<
-          initial, lb::Numpy<initial, double>
+      lb::parameter<param>, initial, lb::ListOffset<
+          lb::parameter<param>, initial, lb::Numpy<lb::parameter<param>, initial, double>
   >>();
 
   auto builder2 = builder.begin_list();
@@ -306,10 +306,10 @@ test_list_offset_of_list_offset() {
 void
 test_record()
 {
-  auto builder = lb::Record<
-      lb::Field<lb::field_name<one_field>, lb::Numpy<initial, double>>,
-      lb::Field<lb::field_name<two_field>, lb::Numpy<initial, int64_t>>,
-      lb::Field<lb::field_name<three_field>, lb::Numpy<initial, char>>
+  auto builder = lb::Record<lb::parameter<param>,
+      lb::Field<lb::field_name<one_field>, lb::Numpy<lb::parameter<param>, initial, double>>,
+      lb::Field<lb::field_name<two_field>, lb::Numpy<lb::parameter<param>, initial, int64_t>>,
+      lb::Field<lb::field_name<three_field>, lb::Numpy<lb::parameter<param>, initial, char>>
   >();
 
   auto one_builder = &(std::get<0>(builder.contents)->builder);
@@ -319,12 +319,10 @@ test_record()
   one_builder->append(1.1);
   two_builder->append(2);
   three_builder->append('a');
-  builder.end_record();
 
   one_builder->append(3.3);
   two_builder->append(4);
   three_builder->append('b');
-  builder.end_record();
 
   // [
   //     {"one": 1.1, "two": 2, "three": 'a'},
@@ -374,10 +372,10 @@ test_record()
 void
 test_list_offset_of_record() {
   auto builder = lb::ListOffset<
-      initial, lb::Record<
-          lb::Field<lb::field_name<x_field>, lb::Numpy<initial, double>>,
+      lb::parameter<param>, initial, lb::Record<lb::parameter<param>,
+          lb::Field<lb::field_name<x_field>, lb::Numpy<lb::parameter<param>, initial, double>>,
           lb::Field<lb::field_name<y_field>, lb::ListOffset<
-              initial, lb::Numpy<initial, int64_t>>
+              lb::parameter<param>, initial, lb::Numpy<lb::parameter<param>, initial, int64_t>>
   >>>();
 
   auto builder2 = builder.begin_list();
@@ -389,14 +387,12 @@ test_list_offset_of_record() {
   auto y_builder2 = y_builder->begin_list();
   y_builder2->append(1);
   y_builder->end_list();
-  builder2->end_record();
 
   x_builder->append(2.2);
   y_builder->begin_list();
   y_builder2->append(1);
   y_builder2->append(2);
   y_builder->end_list();
-  builder2->end_record();
 
   builder.end_list();
 
@@ -411,7 +407,6 @@ test_list_offset_of_record() {
   y_builder2->append(2);
   y_builder2->append(3);
   y_builder->end_list();
-  builder2->end_record();
 
   builder.end_list();
 
@@ -473,13 +468,13 @@ test_list_offset_of_record() {
 void
 test_record_of_record()
 {
-  auto builder = lb::Record<
-      lb::Field<lb::field_name<x_field>, lb::Record<
-          lb::Field<lb::field_name<u_field>, lb::Numpy<initial, double>>,
+  auto builder = lb::Record<lb::parameter<param>,
+      lb::Field<lb::field_name<x_field>, lb::Record<lb::parameter<param>,
+          lb::Field<lb::field_name<u_field>, lb::Numpy<lb::parameter<param>, initial, double>>,
           lb::Field<lb::field_name<v_field>, lb::ListOffset<
-              initial, lb::Numpy<initial, int64_t>>>>>,
-      lb::Field<lb::field_name<y_field>, lb::Record<
-          lb::Field<lb::field_name<w_field>, lb::Numpy<initial, char>>>>
+              lb::parameter<param>, initial, lb::Numpy<lb::parameter<param>, initial, int64_t>>>>>,
+      lb::Field<lb::field_name<y_field>, lb::Record<lb::parameter<param>,
+          lb::Field<lb::field_name<w_field>, lb::Numpy<lb::parameter<param>, initial, char>>>>
   >();
 
   auto x_builder = &(std::get<0>(builder.contents)->builder);
@@ -497,24 +492,16 @@ test_record_of_record()
   v_builder2->append(2);
   v_builder2->append(3);
   v_builder->end_list();
-  x_builder->end_record();
 
   w_builder->append('a');
-  y_builder->end_record();
-
-  builder.end_record();
 
   u_builder->append(3.3);
   v_builder->begin_list();
   v_builder2->append(4);
   v_builder2->append(5);
   v_builder->end_list();
-  x_builder->end_record();
 
   w_builder->append('b');
-  y_builder->end_record();
-
-  builder.end_record();
 
   // [
   //     {"x": {"u": 1.1, "v": [1, 2, 3]}, "y": {"w": 'a'}},
@@ -585,14 +572,14 @@ test_record_of_record()
 void
 test_nested_record()
 {
-  auto builder = lb::Record<
+  auto builder = lb::Record<lb::parameter<param>,
       lb::Field<lb::field_name<u_field>, lb::ListOffset<
-          initial, lb::Record<
-              lb::Field<lb::field_name<i_field>, lb::Numpy<initial, double>>,
+          lb::parameter<param>, initial, lb::Record<lb::parameter<param>,
+              lb::Field<lb::field_name<i_field>, lb::Numpy<lb::parameter<param>, initial, double>>,
               lb::Field<lb::field_name<j_field>, lb::ListOffset<
-                  initial, lb::Numpy<initial, int64_t>>>>>>,
-      lb::Field<lb::field_name<v_field>, lb::Numpy<initial, int64_t>>,
-      lb::Field<lb::field_name<w_field>, lb::Numpy<initial, double>>
+                  lb::parameter<param>, initial, lb::Numpy<lb::parameter<param>, initial, int64_t>>>>>>,
+      lb::Field<lb::field_name<v_field>, lb::Numpy<lb::parameter<param>, initial, int64_t>>,
+      lb::Field<lb::field_name<w_field>, lb::Numpy<lb::parameter<param>, initial, double>>
   >();
 
   auto u_builder = &(std::get<0>(builder.contents)->builder);
@@ -610,14 +597,11 @@ test_nested_record()
   j_builder2->append(2);
   j_builder2->append(3);
   j_builder->end_list();
-  u_builder2->end_record();
 
   u_builder->end_list();
 
   v_builder->append(-1);
   w_builder->append(3.3);
-
-  builder.end_record();
 
   u_builder->begin_list();
 
@@ -626,14 +610,11 @@ test_nested_record()
   j_builder2->append(4);
   j_builder2->append(5);
   j_builder->end_list();
-  u_builder2->end_record();
 
   u_builder->end_list();
 
   v_builder->append(-2);
   w_builder->append(4.4);
-
-  builder.end_record();
 
   // [
   //     {"u": [{"i": 1.1, "j": [1, 2, 3]}], "v": -1, "w": 3.3},
@@ -714,7 +695,7 @@ test_nested_record()
 
 void
 test_list() {
-  auto builder = lb::List<initial, lb::Numpy<initial, double>>();
+  auto builder = lb::List<lb::parameter<param>, initial, lb::Numpy<lb::parameter<param>, initial, double>>();
 
   auto builder2 = builder.begin_list();
   builder2->append(1.1);
@@ -777,9 +758,9 @@ test_list() {
 
 void
 test_index() {
-  auto builder = lb::Indexed<initial, lb::Numpy<initial, double>>();
+  auto builder = lb::Indexed<lb::parameter<param>, initial, lb::Numpy<lb::parameter<param>, initial, double>>();
 
-  lb::Numpy<initial, double>* builder2 = builder.content();
+  lb::Numpy<lb::parameter<param>, initial, double>* builder2 = builder.content();
 
   size_t data_size = 9;
   double data[9] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9};
@@ -816,9 +797,9 @@ test_index() {
 
 void
 test_index_option() {
-  auto builder = lb::IndexedOption<initial, lb::Numpy<initial, int64_t>>();
+  auto builder = lb::IndexedOption<lb::parameter<param>, initial, lb::Numpy<lb::parameter<param>, initial, int64_t>>();
 
-  lb::Numpy<initial, int64_t>* builder2 = builder.content();
+  lb::Numpy<lb::parameter<param>, initial, int64_t>* builder2 = builder.content();
 
   builder.append_index();
   builder2->append(11);
@@ -863,7 +844,7 @@ test_index_option() {
 
 void
 test_empty() {
-  auto builder = lb::Empty();
+  auto builder = lb::Empty<lb::parameter<param>>();
 
   auto form = builder.form();
 
@@ -876,8 +857,8 @@ test_empty() {
 void
 test_list_offset_of_empty() {
   auto builder = lb::ListOffset<
-      initial, lb::ListOffset<
-          initial, lb::Empty
+      lb::parameter<param>, initial, lb::ListOffset<
+          lb::parameter<param>, initial, lb::Empty<lb::parameter<param>>
   >>();
 
   builder.begin_list();
@@ -939,7 +920,7 @@ test_list_offset_of_empty() {
 
 void
 test_unmasked() {
-  auto builder = lb::Unmasked<lb::Numpy<initial, int64_t>>();
+  auto builder = lb::Unmasked<lb::parameter<param>, lb::Numpy<lb::parameter<param>, initial, int64_t>>();
 
   auto builder2 = builder.content();
 
