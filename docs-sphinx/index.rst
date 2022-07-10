@@ -4,4 +4,4 @@ Awkward Array documentation
 .. toctree::
    :hidden:
 
-   API reference <_autosummary/awkward._v2>
+   API reference <_auto/awkward._v2>

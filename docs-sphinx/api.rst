@@ -1,5 +1,5 @@
 .. autosummary::
-   :toctree: _autosummary
+   :toctree: _auto
    :template: custom-module-template.rst
    :recursive:
 
