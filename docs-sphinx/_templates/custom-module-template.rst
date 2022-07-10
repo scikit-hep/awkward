@@ -1,4 +1,4 @@
-{{ fullname | replace("awkward", "ak", 1) | escape | underline}}
+{{ fullname | escape | underline}}
 
 .. automodule:: {{ fullname }}
 
