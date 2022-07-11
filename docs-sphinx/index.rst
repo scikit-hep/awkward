@@ -233,5 +233,6 @@ The kernels (cpu-kernels and cuda-kernels) are documented on the :doc:`_auto/ker
 .. toctree::
    :hidden:
 
-   User Guide <_auto/awkward._v2>
+   High Level <high-level>
+   Low Level <high-level>
    API reference <_auto/awkward._v2>

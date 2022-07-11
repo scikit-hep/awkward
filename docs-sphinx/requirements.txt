@@ -4,5 +4,6 @@ black
 pycparser
 lark-parser
 sphinx-copybutton
-sphinx_reredirects
+sphinx-reredirects
 pydata-sphinx-theme
+myst-nb

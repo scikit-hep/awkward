@@ -43,7 +43,14 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx_reredirects",
     'sphinx_copybutton',
+    'myst_nb',
 ]
+
+myst_enable_extensions = [
+  "colon_fence",
+]
+
+nb_execution_mode = "cache"
 
 copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
 copybutton_prompt_is_regexp = True
@@ -55,7 +62,7 @@ autosummary_imported_members = True
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_templates", "jupyter_execute"]
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
