@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "../src/awkward/_v2/cpp-headers/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {

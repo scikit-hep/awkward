@@ -9,7 +9,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
-#include "../src/awkward/_v2/cpp-headers/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 
 #include "awkward/io/uproot.h"
 
