@@ -124,7 +124,8 @@ namespace awkward {
                   + ", \"form_key\": \"" + form_key.str() + "\" }";
       }
       else {
-        throw std::runtime_error("type " + std::string(typeid(PRIMITIVE).name()) + "is not supported");
+        throw std::runtime_error
+          ("type " + std::string(typeid(PRIMITIVE).name()) + "is not supported");
       }
     }
 
@@ -400,7 +401,8 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
   class Indexed {
   public:
     Indexed()
-        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+        : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        , last_valid_(-1) {
       size_t id = 0;
       set_id(id);
     }
@@ -412,6 +414,7 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
 
     void
     clear() noexcept {
+      last_valid_ = -1;
       index_.clear();
       content_.clear();
     }
@@ -438,9 +441,9 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
                   << " but index length " << index_.length();
         return false;
       }
-      else if (content_.length() != index_.last() + 1) {
+      else if (content_.length() != last_valid_ + 1) {
         std::cout << "Indexed node" << id_ << " has content length " << content_.length()
-                  << " but last valid index is " << index_.last();
+                  << " but last valid index is " << last_valid_;
         return false;
       }
       else {
@@ -448,17 +451,22 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       }
     }
 
-    void
+    BUILDER*
     append_index() noexcept {
-      index_.append(content_.length());
+      last_valid_ = content_.length();
+      index_.append(last_valid_);
+      return &content_;
     }
 
-    void
+    BUILDER*
     extend_index(size_t size) noexcept {
       size_t start = content_.length();
-      for (size_t i = start; i < start + size; i++) {
+      size_t stop = start + size;
+      last_valid_ = stop - 1;
+      for (size_t i = start; i < stop; i++) {
         index_.append(i);
       }
+      return &content_;
     }
 
     void
@@ -490,13 +498,15 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     BUILDER content_;
     size_t id_;
     parameter parameters_;
+    size_t last_valid_;
   };
 
 template <class parameter, unsigned INITIAL, typename BUILDER>
   class IndexedOption {
   public:
     IndexedOption()
-        : index_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+        : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        , last_valid_(-1) {
       size_t id = 0;
       set_id(id);
     }
@@ -508,6 +518,7 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
 
     void
     clear() noexcept {
+      last_valid_ = -1;
       index_.clear();
       content_.clear();
     }
@@ -529,9 +540,9 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     }
 
     bool is_valid() const noexcept {
-      if (content_.length() != index_.last() + 1) {
+      if (content_.length() != last_valid_ + 1) {
         std::cout << "IndexedOption node" << id_ << " has content length "<< content_.length()
-                  << " but last valid index is " << index_.last();
+                  << " but last valid index is " << last_valid_;
         return false;
       }
       else {
@@ -539,17 +550,22 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       }
     }
 
-    void
+    BUILDER*
     append_index() noexcept {
-      index_.append(content_.length());
+      last_valid_ = content_.length();
+      index_.append(last_valid_);
+      return &content_;
     }
 
-    void
+    BUILDER*
     extend_index(size_t size) noexcept {
       size_t start = content_.length();
-      for (size_t i = start; i < start + size; i++) {
+      size_t stop = start + size;
+      last_valid_ = stop - 1;
+      for (size_t i = start; i < stop; i++) {
         index_.append(i);
       }
+      return &content_;
     }
 
     void
@@ -593,6 +609,7 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     BUILDER content_;
     size_t id_;
     parameter parameters_;
+    size_t last_valid_;
   };
 
   template<class parameter>
@@ -675,16 +692,14 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       return content_.is_valid();
     }
 
-    template<typename PRIMITIVE>
-    void
+    BUILDER*
     append_valid() noexcept {
-      return content_;
+      return &content_;
     }
 
-    template<typename PRIMITIVE>
-    void
+    BUILDER*
     extend_valid(size_t size) noexcept {
-      return content_;
+      return &content_;
     }
 
     void
@@ -714,6 +729,94 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     BUILDER content_;
     size_t id_;
     parameter parameters_;
+  };
+
+
+  template <class parameter, unsigned SIZE, typename BUILDER>
+  class Regular {
+  public:
+    Regular()
+        : length_(0) {
+      size_t id = 0;
+      set_id(id);
+    }
+
+    size_t
+    length() const noexcept {
+      return length_;
+    }
+
+    void
+    clear() noexcept {
+      content_.clear();
+    }
+
+    BUILDER*
+    content() {
+      return &content_;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      content_.set_id(id);
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_.value;
+    }
+
+    bool is_valid() const noexcept {
+      if (content_.length() != length_ * size_) {
+        std::cout << "Regular node" << id_ << "has content length " << content_.length()
+                  << ", but length " << length_ << " and size " << size_;
+        return false;
+      }
+      else {
+        return content_.is_valid();
+      }
+    }
+
+    BUILDER*
+    begin_list() noexcept {
+      return &content_;
+    }
+
+    void
+    end_list() noexcept {
+      length_++;
+    }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      content_.buffer_nbytes(names_nbytes);
+    }
+
+    // void
+    // to_buffers() const noexcept {
+
+    // }
+
+    std::string
+    form() const noexcept {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      std::string params("");
+      if (parameters_.value == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_.value);
+      }
+      return "{ \"class\": \"RegularArray\", \"content\": " + content_.form() + params + ", \"size\": "
+                + std::to_string(size_) + ", \"form_key\": \"" + form_key.str() + "\" }";
+    }
+
+  private:
+    BUILDER content_;
+    size_t id_;
+    size_t length_;
+    parameter parameters_;
+    size_t size_ = SIZE;
   };
 
   }  // namespace LayoutBuilder
