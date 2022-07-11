@@ -6,11 +6,10 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "../src/awkward/_v2/cpp-headers/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class RecordBuilder
   ///
@@ -18,14 +17,14 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL RecordBuilder: public Builder {
   public:
     /// @brief Create an empty RecordBuilder.
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const int64_t initial);
 
     /// @brief Create a RecordBuilder from a full set of parameters.
     ///
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param contents A Builder for each record field.
     /// @param keys Names for each record field.
@@ -37,7 +36,7 @@ namespace awkward {
     /// `false` otherwise.
     /// @param nextindex The next field index to fill with data.
     /// @param nexttotry The next field index to check against a key string.
-    RecordBuilder(const ArrayBuilderOptions& options,
+    RecordBuilder(const int64_t initial,
                   const std::vector<BuilderPtr>& contents,
                   const std::vector<std::string>& keys,
                   const std::vector<const char*>& pointers,
@@ -124,8 +123,8 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
-      options() const { return options_; }
+    const int64_t
+      initial() const { return initial_; }
 
     const std::vector<std::string>& keys() const { return keys_; }
 
@@ -145,7 +144,7 @@ namespace awkward {
     void
       field_check(const char* key);
 
-    const ArrayBuilderOptions options_;
+    const int64_t initial_;
     std::vector<BuilderPtr> contents_;
     std::vector<std::string> keys_;
     std::vector<const char*> pointers_;

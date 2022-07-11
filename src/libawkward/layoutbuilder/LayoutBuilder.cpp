@@ -3,7 +3,6 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/layoutbuilder/LayoutBuilder.cpp", line)
 
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
 #include "awkward/layoutbuilder/ByteMaskedArrayBuilder.h"
@@ -191,10 +190,10 @@ namespace awkward {
 
   template <typename T, typename I>
   LayoutBuilder<T, I>::LayoutBuilder(const std::string& json_form,
-                                     const ArrayBuilderOptions& options,
+                                     const int64_t initial,
                                      bool vm_init)
     : json_form_(json_form),
-      initial_(options.initial()),
+      initial_(initial),
       builder_(nullptr),
       vm_(nullptr),
       vm_input_data_("data"),

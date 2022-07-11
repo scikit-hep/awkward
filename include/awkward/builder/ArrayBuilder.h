@@ -13,7 +13,6 @@
 namespace awkward {
   class Content;
   using ContentPtr    = std::shared_ptr<Content>;
-  class ArrayBuilderOptions;
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
 
@@ -26,9 +25,9 @@ namespace awkward {
   public:
     /// @brief Creates an ArrayBuilder from a full set of parameters.
     ///
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
-    ArrayBuilder(const ArrayBuilderOptions& options);
+    ArrayBuilder(const int64_t initial);
 
     /// @brief Copy the current snapshot into the BuffersContainer and
     /// return a Form as a std::string (JSON).

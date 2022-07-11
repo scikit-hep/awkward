@@ -9,6 +9,7 @@
 #include <cmath>
 
 namespace awkward {
+
   /// @class GrowableBuffer
   ///
   /// @brief Discontiguous, one-dimensional buffer which consists of
@@ -28,7 +29,7 @@ namespace awkward {
     ///
     /// @param initial Initial size configuration for building a panel.
     static GrowableBuffer<PRIMITIVE>
-    empty(size_t initial) {
+    empty(int64_t initial) {
       return empty(initial, 0);
     }
 
@@ -38,8 +39,8 @@ namespace awkward {
     /// @param minreserve The initial reservation will be the maximum
     /// of `minreserve` and #initial.
     static GrowableBuffer<PRIMITIVE>
-    empty(size_t initial, size_t minreserve) {
-      size_t actual = initial;
+    empty(int64_t initial, int64_t minreserve) {
+      int64_t actual = initial;
       if (actual < minreserve) {
         actual = minreserve;
       }
@@ -57,14 +58,14 @@ namespace awkward {
     /// This is similar to NumPy's
     /// [zeros](https://docs.scipy.org/doc/numpy/reference/generated/numpy.zeros.html).
     static GrowableBuffer<PRIMITIVE>
-    zeros(size_t initial, size_t length) {
-      size_t actual = initial;
+    zeros(int64_t initial, int64_t length) {
+      int64_t actual = initial;
       if (actual < length) {
         actual = length;
       }
       auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
-      for (size_t i = 0;  i < length;  i++) {
+      for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = 0;
       }
       return GrowableBuffer(initial, std::move(ptr), length, actual);
@@ -81,14 +82,14 @@ namespace awkward {
     /// This is similar to NumPy's
     /// [full](https://docs.scipy.org/doc/numpy/reference/generated/numpy.full.html).
     static GrowableBuffer<PRIMITIVE>
-    full(size_t initial, PRIMITIVE value, size_t length) {
-      size_t actual = initial;
+    full(int64_t initial, PRIMITIVE value, int64_t length) {
+      int64_t actual = initial;
       if (actual < length) {
         actual = length;
       }
       auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
-      for (size_t i = 0;  i < length;  i++) {
+      for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = value;
       }
       return GrowableBuffer<PRIMITIVE>(initial, std::move(ptr), length, actual);
@@ -104,14 +105,14 @@ namespace awkward {
     /// This is similar to NumPy's
     /// [arange](https://docs.scipy.org/doc/numpy/reference/generated/numpy.arange.html).
     static GrowableBuffer<PRIMITIVE>
-    arange(size_t initial, size_t length) {
-      size_t actual = initial;
+    arange(int64_t initial, int64_t length) {
+      int64_t actual = initial;
       if (actual < length) {
         actual = length;
       }
       auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
-      for (size_t i = 0;  i < length;  i++) {
+      for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = (PRIMITIVE)i;
       }
       return GrowableBuffer(initial, std::move(ptr), length, actual);
@@ -127,19 +128,25 @@ namespace awkward {
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of
     /// allocations of new panels.
-    GrowableBuffer(size_t initial,
+    GrowableBuffer(int64_t initial,
                    std::unique_ptr<PRIMITIVE> ptr,
-                   size_t length,
-                   size_t reserved)
-        : initial_(initial) {
-      ptr_.push_back(std::move(ptr));
-      length_.push_back(length);
-      reserved_.push_back(reserved);
+                   int64_t length,
+                   int64_t reserved)
+        : initial_(initial),
+          total_length_(length),
+          current_length_((size_t)length),
+          current_reserved_((size_t)reserved) {
+      ptr_.emplace_back(std::move(ptr));
+      reserved_.emplace_back(reserved);
+
+      ptr_.reserve(1024);
+      length_.reserve(1024);
+      reserved_.reserve(1024);
     }
 
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
     /// initial #reserved from #initial.
-    GrowableBuffer(size_t initial)
+    GrowableBuffer(int64_t initial)
         : GrowableBuffer(initial,
                          std::unique_ptr<PRIMITIVE>(new PRIMITIVE[initial]),
                          0,
@@ -150,9 +157,9 @@ namespace awkward {
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of
     /// allocations of new panels.
-    size_t
+    int64_t
     length() const {
-      return std::accumulate(length_.begin(), length_.end(), (size_t)0);
+      return total_length_;
     }
 
     /// @brief Currently allocated number of elements.
@@ -160,9 +167,9 @@ namespace awkward {
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of
     /// allocations of new panels.
-    size_t
+    int64_t
     reserved() const {
-      return std::accumulate(reserved_.begin(), reserved_.end(), (size_t)0);
+      return std::accumulate(reserved_.begin(), reserved_.end(), (int64_t)0);
     }
 
     /// @brief Discards accumulated data, the #reserved returns to
@@ -170,11 +177,23 @@ namespace awkward {
     void
     clear() {
       length_.clear();
-      length_.push_back(0);
       reserved_.clear();
-      reserved_.push_back(initial_);
+      reserved_.emplace_back(initial_);
+
+      total_length_ = 0;
+      current_length_ = 0;
+      current_reserved_ = (size_t)initial_;
+    }
+
+    void
+    reset() {
+      length_.clear();
+      reserved_.clear();
       ptr_.clear();
-      ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[initial_]));
+
+      total_length_ = 0;
+      current_length_ = 0;
+      current_reserved_ = (size_t)initial_;
     }
 
     /// @brief Inserts one `datum` into the panel, possibly triggering
@@ -184,8 +203,8 @@ namespace awkward {
     /// #reserved, a new panel will be allocated.
     void
     append(PRIMITIVE datum) {
-      if (length_[ptr_.size()-1] == reserved_[ptr_.size()-1]) {
-        add_panel(reserved_[ptr_.size()-1]);
+      if (current_length_ == current_reserved_) {
+        add_panel(current_reserved_ << 1);
       }
       fill_panel(datum);
     }
@@ -198,13 +217,13 @@ namespace awkward {
     /// for the rest of the array elements.
     void
     extend(PRIMITIVE* ptr, size_t size) {
-      size_t empty_slots = reserved_[ptr_.size()-1] - length_[ptr_.size()-1];
+      size_t empty_slots = current_reserved_ - current_length_;
       if (size > empty_slots) {
         for (size_t i = 0; i < empty_slots; i++) {
           fill_panel(ptr[i]);
         }
-        add_panel(size - empty_slots > reserved_[ptr_.size()-1] ?
-                  size - empty_slots : reserved_[ptr_.size()-1]);
+        add_panel(size - empty_slots > current_reserved_ ?
+                  size - empty_slots : current_reserved_);
         for (size_t i = empty_slots; i < size; i++) {
           fill_panel(ptr[i]);
         }
@@ -219,23 +238,34 @@ namespace awkward {
     /// @brief Like append, but the type signature returns the reference to `PRIMITIVE`.
     PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
       append(datum);
-      return (&*ptr_.back())[length_.back()];
+      return (&*ptr_.back())[current_length_];
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
     /// contiguously allocated `external_pointer`.
     void
     concatenate(PRIMITIVE* external_pointer) const noexcept {
-      size_t next_panel = 0;
-      for (size_t i = 0;  i < ptr_.size();  i++) {
-        memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_[i].get()), length_[i]*sizeof(PRIMITIVE));
-        next_panel += length_[i];
+      if (!is_empty()) {
+        int64_t next_panel = 0;
+        size_t i = 0;
+        size_t num_full_panels = ptr_.size() - 1;
+        for ( ;  i < num_full_panels;  i++) {
+          memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_[i].get()), length_[i] * sizeof(PRIMITIVE));
+          next_panel += length_[i];
+        }
+        // and the last panel
+        memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_[i].get()), current_length_ * sizeof(PRIMITIVE));
       }
     }
 
     /// @brief Checks whether the array is contiguous.
-    size_t is_contiguous() {
+    bool is_contiguous() const {
       return (ptr_.size() == 1);
+    }
+
+    /// @brief Checks whether the GowableBuffer has any panels.
+    bool is_empty() const {
+      return (ptr_.size() == 0);
     }
 
     /// @brief Takes this (possibly multi-panels) GrowableBuffer<PRIMITIVE>
@@ -250,47 +280,68 @@ namespace awkward {
       auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[len]);
       TO_PRIMITIVE* rawptr = ptr.get();
       int64_t k = 0;
-      for (size_t i = 0;  i < ptr_.size(); i++) {
-        for (int64_t j = 0; j < length_[i]; j++) {
+      size_t i = 0;
+      for ( ;  i < ptr_.size() - 1; i++) {
+        for (size_t j = 0; j < length_[i]; j++) {
           rawptr[k] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
           k++;
         }
       }
+      // and the last one
+      for (size_t j = 0; j < current_length_; j++) {
+        rawptr[k] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
+        k++;
+      }
+      current_length_ += length_[i];
+
       return GrowableBuffer<TO_PRIMITIVE>(len, std::move(ptr), len, len);
     }
+
   private:
     /// @brief Inserts one `datum` into the panel.
     void
     fill_panel(PRIMITIVE datum) {
-        ptr_[ptr_.size()-1].get()[length_[ptr_.size()-1]] = datum;
-        length_[ptr_.size()-1]++;
+        ptr_.back().get()[current_length_++] = datum;
+        total_length_++;
     }
 
     /// @brief Creates a new panel with slots equal to #reserved.
     void
     add_panel(size_t reserved) {
-      ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
-      length_.push_back(0);
-      reserved_.push_back(reserved);
+      ptr_.emplace_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
+      length_.emplace_back(current_length_);
+      reserved_.emplace_back(reserved);
+      current_length_ = 0;
+      current_reserved_ = reserved;
     }
 
     /// @brief Initial size configuration for building a panel.
-    size_t initial_;
+    int64_t initial_;
 
     /// @brief Vector of unique pointers to the panels.
     std::vector<std::unique_ptr<PRIMITIVE>> ptr_;
 
-    /// @brief Vector containing the lengths of the panels.
+    /// @brief Vector containing the lengths of the filled panels.
     ///
     /// Each index of this vector is aligned with the index of the
-    /// vector of unique pointers to the panels.
+    /// vector of unique pointers to the filled panels.
     std::vector<size_t> length_;
+
+    /// @brief Total length of data in all panels including an unfilled one.
+    int64_t total_length_;
+
+    /// @brief Current length of an unfilled panel.
+    size_t current_length_;
 
     /// @brief Vector containing the reserved sizes of the panels.
     ///
     /// Each index of this vector is aligned with the index of the
     /// vector of unique pointers to the panels.
     std::vector<size_t> reserved_;
+
+    /// @brief Reserved size of a current panel.
+    size_t current_reserved_;
+
   };
 }
 
