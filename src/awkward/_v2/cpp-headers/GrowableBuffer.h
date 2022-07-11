@@ -45,7 +45,7 @@ namespace awkward {
         actual = minreserve;
       }
       return GrowableBuffer(initial,
-        std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]),
+        std::unique_ptr<PRIMITIVE>(new PRIMITIVE[(size_t)actual]),
         0, actual);
     }
 
@@ -63,7 +63,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = 0;
@@ -87,7 +87,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = value;
@@ -110,7 +110,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = (PRIMITIVE)i;
@@ -159,7 +159,7 @@ namespace awkward {
     /// allocations of new panels.
     int64_t
     length() const {
-      return total_length_;
+      return (is_contiguous() ? (int64_t)current_length_ : total_length_ + (int64_t)current_length_);
     }
 
     /// @brief Currently allocated number of elements.
@@ -276,12 +276,15 @@ namespace awkward {
     template<typename TO_PRIMITIVE>
     GrowableBuffer<TO_PRIMITIVE>
     copy_as() {
+      size_t num_full_panels = ptr_.size() - 1;
       auto len = length();
-      auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[len]);
+      int64_t actual = (len < initial_) ? initial_ : len;
+
+      auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[(size_t)actual]);
       TO_PRIMITIVE* rawptr = ptr.get();
       int64_t k = 0;
       size_t i = 0;
-      for ( ;  i < ptr_.size() - 1; i++) {
+      for ( ;  i < num_full_panels; i++) {
         for (size_t j = 0; j < length_[i]; j++) {
           rawptr[k] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
           k++;
@@ -292,17 +295,15 @@ namespace awkward {
         rawptr[k] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
         k++;
       }
-      current_length_ += length_[i];
 
-      return GrowableBuffer<TO_PRIMITIVE>(len, std::move(ptr), len, len);
+      return GrowableBuffer<TO_PRIMITIVE>(actual, std::move(ptr), len, actual);
     }
 
   private:
     /// @brief Inserts one `datum` into the panel.
     void
     fill_panel(PRIMITIVE datum) {
-        ptr_.back().get()[current_length_++] = datum;
-        total_length_++;
+        (&*ptr_.back())[current_length_++] = datum;
     }
 
     /// @brief Creates a new panel with slots equal to #reserved.
@@ -311,6 +312,7 @@ namespace awkward {
       ptr_.emplace_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
       length_.emplace_back(current_length_);
       reserved_.emplace_back(reserved);
+      total_length_ += current_length_;
       current_length_ = 0;
       current_reserved_ = reserved;
     }

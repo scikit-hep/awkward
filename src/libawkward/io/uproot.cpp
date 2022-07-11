@@ -89,7 +89,7 @@ namespace awkward {
       offsets1_ptr[entry + 1] = offsets1_ptr[entry] + count;
     }
 
-    std::unique_ptr<T> ptr(new T[content.length()]);
+    std::unique_ptr<T> ptr(new T[(size_t)content.length()]);
     content.concatenate(ptr.get());
 
     std::vector<ssize_t> shape = { (ssize_t)content.length() };
@@ -105,7 +105,7 @@ namespace awkward {
                                                          dtype,
                                                          kernel::lib::cpu);
 
-    std::unique_ptr<int64_t> offsets_ptr(new int64_t[offsets2.length()]);
+    std::unique_ptr<int64_t> offsets_ptr(new int64_t[(size_t)offsets2.length()]);
     offsets2.concatenate(offsets_ptr.get());
     Index64 outoffsets2(std::move(offsets_ptr), 0, offsets2.length(), kernel::lib::cpu);
     ContentPtr outlist2 = std::make_shared<ListOffsetArray64>(Identities::none(),
