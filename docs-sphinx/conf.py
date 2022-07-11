@@ -65,11 +65,19 @@ templates_path = ['_templates']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "pydata_sphinx_theme"
 
 html_show_sourcelink = False
-html_logo = "../docs-img/logo/logo-300px-white.png"
-html_theme_options = {"logo_only": True, "sticky_navigation": False}
+html_theme_options = {
+  "logo": {
+      "image_light": "logo-300px.png",
+      "image_dark": "logo-300px-white.png",
+  },
+  "github_url": "https://github.com/scikit-hep/awkward",
+  "collapse_navigation": True,
+  # Add light/dark mode and documentation version switcher:
+  "navbar_end": ["theme-switcher", "navbar-icon-links"],
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
