@@ -14,10 +14,14 @@ kernelspec:
 Restructuring data
 ==================
 
-   * **[Zip/unzip and project](how-to-restructure-zip-project)**
-   * **[Adding fields to records](how-to-restructure-add-fields)**
-   * **[Renaming records](how-to-restructure-rename-records)**
-   * **[Flattening for plots](how-to-restructure-flatten)**
-   * **[Padding/clipping for machine learning](how-to-restructure-pad)**
-   * **[Concatenating and interleaving](how-to-restructure-concatenate)**
-   * **[Sorting](how-to-restructure-sort)**
+:::{toctree}
+:maxdepth: 1
+
+how-to-restructure-zip-project
+how-to-restructure-add-fields
+how-to-restructure-rename-records
+how-to-restructure-flatten
+how-to-restructure-pad
+how-to-restructure-concatenate
+how-to-restructure-sort
+:::

@@ -14,8 +14,12 @@ kernelspec:
 Examining arrays
 ================
 
-   * **[Data type](how-to-examine-type)**
-   * **[Single item detail](how-to-examine-single-item)**
-   * **[Listing fields/keys/columns](how-to-examine-list-fields)**
-   * **[Simple slicing](how-to-examine-simple-slicing)**
-   * **[Checking validity](how-to-examine-checking-validity)**
+:::{toctree}
+:maxdepth: 1
+
+how-to-examine-type
+how-to-examine-single-item
+how-to-examine-list-fields
+how-to-examine-simple-slicing
+how-to-examine-checking-validity
+:::

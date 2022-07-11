@@ -14,5 +14,9 @@ kernelspec:
 Combinatorics
 =============
 
-   * **[Cartesian product and "n choose k"](how-to-combinatorics-cartesian-combinations)**
-   * **[Best match between collections](how-to-combinatorics-best-match)**
+:::{toctree}
+:maxdepth: 1
+
+how-to-combinatorics-cartesian-combinations
+how-to-combinatorics-best-match
+:::

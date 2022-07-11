@@ -14,5 +14,9 @@ kernelspec:
 Using arrays in Numba
 =====================
 
-   * **[Supported features](how-to-use-in-numba-features)**
-   * **[Building array output](how-to-use-in-numba-arraybuilder)**
+:::{toctree}
+:maxdepth: 1
+
+how-to-use-in-numba-features
+how-to-use-in-numba-arraybuilder
+:::
