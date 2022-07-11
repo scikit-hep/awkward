@@ -731,6 +731,119 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     parameter parameters_;
   };
 
+  template <class parameter, bool VALID_WHEN, unsigned INITIAL, typename BUILDER>
+  class ByteMasked {
+  public:
+    ByteMasked()
+        : mask_(awkward::GrowableBuffer<int8_t>(INITIAL)) {
+      size_t id = 0;
+      set_id(id);
+    }
+
+    size_t
+    length() const noexcept {
+      return mask_.length();
+    }
+
+    void
+    clear() noexcept {
+      mask_.clear();
+      content_.clear();
+    }
+
+    BUILDER*
+    content() {
+      return &content_;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      content_.set_id(id);
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_.value;
+    }
+
+    bool is_valid() const {
+      if (content_.length() != mask_.length()) {
+        std::cout << "ByteMasked node" << id_ << "has content length " << content_.length()
+                  << "but mask length " << mask_.length();
+        return false;
+      }
+      else {
+        return content_.is_valid();
+      }
+    }
+
+    bool
+    valid_when() {
+      return valid_when_;
+    }
+
+    BUILDER*
+    append_valid() noexcept {
+      mask_.append(valid_when_);
+      return &content_;
+    }
+
+    BUILDER*
+    extend_valid(size_t size) noexcept {
+      for (size_t i = 0; i < size; i++) {
+        mask_.append(valid_when_);
+      }
+      return &content_;
+    }
+
+    BUILDER*
+    append_null() noexcept {
+      mask_.append(!valid_when_);
+      return &content_;
+    }
+
+    BUILDER*
+    extend_null(size_t size) noexcept {
+      for (size_t i = 0; i < size; i++) {
+        mask_.append(!valid_when_);
+      }
+      return &content_;
+    }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      names_nbytes["node" + std::string(id_) + "-mask"] = mask_.nbytes();
+      content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    to_buffers(int8_t* ptr) const noexcept {
+      mask_.concatenate(ptr);
+    }
+
+    std::string
+    form() const noexcept {
+      std::stringstream form_key, form_valid_when;
+      form_key << "node" << id_;
+      form_valid_when << std::boolalpha << valid_when_;
+      std::string params("");
+      if (parameters_.value == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_.value);
+      }
+      return "{ \"class\": \"ByteMaskedArray\", \"mask\": \"i8\", \"content\": " + content_.form()
+                + ", \"valid_when\": " + form_valid_when.str()
+                + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+    }
+
+  private:
+    GrowableBuffer<int8_t> mask_;
+    BUILDER content_;
+    size_t id_;
+    parameter parameters_;
+    bool valid_when_ = VALID_WHEN;
+  };
 
   template <class parameter, unsigned SIZE, typename BUILDER>
   class Regular {
