@@ -14,8 +14,8 @@ kernelspec:
 Converting arrays
 =================
 
-
 :::{toctree}
+:maxdepth: 1
 
 how-to-convert-numpy.md
 how-to-convert-python.md

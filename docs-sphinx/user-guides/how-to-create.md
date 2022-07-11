@@ -14,12 +14,17 @@ kernelspec:
 Creating arrays
 ===============
 
-   * **[Arrays of lists](how-to-create-lists)**
-   * **[Arrays of records](how-to-create-records)**
-   * **[Arrays of missing data](how-to-create-missing)**
-   * **[Arrays of strings](how-to-create-strings)**
-   * **[Lazy arrays](how-to-create-lazy)**
-   * **[Unflattening and grouping](how-to-create-unflatten-group)**
-   * **[ArrayBuilder (easy & general)](how-to-create-arraybuilder)**
-   * **[LayoutBuilder (more control)](how-to-create-layoutbuilder)**
-   * **[Direct constructors (fastest)](how-to-create-constructors)**
+
+:::{toctree}
+:maxdepth: 1
+
+how-to-create-lists.md
+how-to-create-records.md
+how-to-create-missing.md
+how-to-create-strings.md
+how-to-create-lazy.md
+how-to-create-unflatten-group.md
+how-to-create-arraybuilder.md
+how-to-create-layoutbuilder.md
+how-to-create-constructors.md
+:::

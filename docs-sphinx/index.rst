@@ -234,5 +234,5 @@ The kernels (cpu-kernels and cuda-kernels) are documented on the :doc:`_auto/ker
    :hidden:
 
    High Level <high-level>
-   Low Level <high-level>
+   Low Level <low-level>
    API reference <_auto/awkward._v2>
