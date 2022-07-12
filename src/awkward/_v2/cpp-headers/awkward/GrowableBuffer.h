@@ -152,6 +152,18 @@ namespace awkward {
                          0,
                          initial) { }
 
+    /// @brief Move constructor
+    ///
+    /// ptr_ is move-only
+    GrowableBuffer(GrowableBuffer&& other) noexcept
+      : initial_(other.initial_),
+        ptr_(std::move(other.ptr_)),
+        length_(other.length_),
+        total_length_(other.total_length_),
+        current_length_(other.current_length_),
+        reserved_(std::move(other.reserved_)),
+        current_reserved_(other.current_reserved_) { }
+
     /// @brief Currently used number of elements.
     ///
     /// Although the #length increments every time #append is called,
