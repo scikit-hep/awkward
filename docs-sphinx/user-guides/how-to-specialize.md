@@ -13,12 +13,3 @@ kernelspec:
 
 Specialized behavior
 ====================
-
-:::{toctree}
-:maxdepth: 1
-
-how-to-specialize-subclass
-how-to-specialize-override-numpy
-how-to-specialize-in-numba
-how-to-specialize-lorentz
-:::

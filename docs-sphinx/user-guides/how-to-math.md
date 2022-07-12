@@ -14,15 +14,3 @@ kernelspec:
 Numerical math
 ==============
 
-:::{toctree}
-:maxdepth: 1
-
-how-to-math-numpy
-how-to-math-broadcasting
-sum/min/any/all
-how-to-math-reducing
-mean/var/std
-how-to-math-statistics
-how-to-math-argminmax
-how-to-math-gpu
-:::

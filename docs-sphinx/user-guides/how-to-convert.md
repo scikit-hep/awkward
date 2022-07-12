@@ -13,15 +13,3 @@ kernelspec:
 
 Converting arrays
 =================
-
-:::{toctree}
-:maxdepth: 1
-
-how-to-convert-numpy.md
-how-to-convert-python.md
-how-to-convert-json.md
-how-to-convert-uproot.md
-how-to-convert-arrow.md
-how-to-convert-pandas.md
-how-to-convert-buffers.md
-:::

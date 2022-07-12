@@ -14,17 +14,3 @@ kernelspec:
 Creating arrays
 ===============
 
-
-:::{toctree}
-:maxdepth: 1
-
-how-to-create-lists.md
-how-to-create-records.md
-how-to-create-missing.md
-how-to-create-strings.md
-how-to-create-lazy.md
-how-to-create-unflatten-group.md
-how-to-create-arraybuilder.md
-how-to-create-layoutbuilder.md
-how-to-create-constructors.md
-:::

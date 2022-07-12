@@ -13,12 +13,3 @@ kernelspec:
 
 Filtering data
 ==============
-
-:::{toctree}
-:maxdepth: 1
-
-how-to-filter-num
-how-to-filter-cut-mask
-how-to-filter-jagged
-how-to-filter-masked
-:::

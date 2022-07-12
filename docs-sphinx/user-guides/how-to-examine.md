@@ -13,13 +13,3 @@ kernelspec:
 
 Examining arrays
 ================
-
-:::{toctree}
-:maxdepth: 1
-
-how-to-examine-type
-how-to-examine-single-item
-how-to-examine-list-fields
-how-to-examine-simple-slicing
-how-to-examine-checking-validity
-:::

@@ -13,15 +13,3 @@ kernelspec:
 
 Restructuring data
 ==================
-
-:::{toctree}
-:maxdepth: 1
-
-how-to-restructure-zip-project
-how-to-restructure-add-fields
-how-to-restructure-rename-records
-how-to-restructure-flatten
-how-to-restructure-pad
-how-to-restructure-concatenate
-how-to-restructure-sort
-:::

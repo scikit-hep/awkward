@@ -42,6 +42,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.linkcode",
     "sphinx_reredirects",
+    "sphinx_external_toc",
     'sphinx_copybutton',
     'myst_nb',
 ]

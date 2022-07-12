@@ -13,10 +13,3 @@ kernelspec:
 
 Combinatorics
 =============
-
-:::{toctree}
-:maxdepth: 1
-
-how-to-combinatorics-cartesian-combinations
-how-to-combinatorics-best-match
-:::
