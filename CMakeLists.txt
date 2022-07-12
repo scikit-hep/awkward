@@ -94,7 +94,7 @@ target_link_libraries(awkward PUBLIC awkward-parent)
 include(CTest)
 
 if(BUILD_TESTING)
-  add_subdirectory(tests-cpp)
+  add_subdirectory(tests)
 endif()
 
 option(PYBUILD "Build Python modules")
