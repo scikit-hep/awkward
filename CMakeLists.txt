@@ -40,7 +40,7 @@ file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 add_library(awkward-parent INTERFACE)
 target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${VERSION_INFO}")
 target_include_directories(awkward-parent INTERFACE include)
-target_compile_features(awkward-parent INTERFACE cxx_std_17)
+target_compile_features(awkward-parent INTERFACE cxx_std_11)
 
 # C++ dependencies (header-only): RapidJSON and dlpack
 target_include_directories(awkward-parent INTERFACE rapidjson/include dlpack/include)

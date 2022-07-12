@@ -190,7 +190,7 @@ namespace awkward {
         ptr_(std::move(other.ptr_)),
         length_(std::move(other.length_)),
         total_length_(other.total_length_),
-        current_length_(std::exchange(other.current_length_, 0)),
+        current_length_(other.current_length_),
         reserved_(std::move(other.reserved_)),
         current_reserved_(other.current_reserved_) { std::cout << "Move it!" << std::endl; }
 
