@@ -18,6 +18,10 @@ import operator
 import os
 import os.path
 
+try:
+    import awkward
+except ImportError:
+    raise ImportError("Could not find Awkward on sys.path. Please ensure that it is installed.")
 
 root_path = os.path.abspath(os.path.join(os.getcwd(), ".."))
 src_path = os.path.join(root_path, "src")

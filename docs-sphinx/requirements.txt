@@ -7,3 +7,16 @@ sphinx-copybutton
 sphinx-reredirects
 pydata-sphinx-theme
 myst-nb
+
+numpy>=1.13.1
+numba>=0.50.0
+pandas>=0.24.0
+numexpr
+autograd
+pyarrow>=2.0.0
+h5py
+matplotlib
+uproot
+uproot3
+jax>=0.2.7;python_version>="3.6" and sys_platform != "win32"
+jaxlib>=0.1.57;python_version>="3.6" and sys_platform != "win32"
