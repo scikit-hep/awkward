@@ -280,8 +280,7 @@ namespace awkward {
       auto len = length();
       int64_t actual = (len < initial_) ? initial_ : len;
 
-      auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[(size_t)actual]);
-      TO_PRIMITIVE* rawptr = ptr.get();
+      TO_PRIMITIVE* rawptr = new TO_PRIMITIVE[(size_t)actual];
       int64_t k = 0;
       size_t i = 0;
       for ( ;  i < num_full_panels; i++) {
@@ -296,7 +295,7 @@ namespace awkward {
         k++;
       }
 
-      return GrowableBuffer<TO_PRIMITIVE>(actual, std::move(ptr), len, actual);
+      return GrowableBuffer<TO_PRIMITIVE>(actual, std::unique_ptr<TO_PRIMITIVE>(rawptr), len, actual);
     }
 
   private:
