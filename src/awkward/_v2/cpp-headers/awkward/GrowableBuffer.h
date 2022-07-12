@@ -192,7 +192,7 @@ namespace awkward {
         total_length_(other.total_length_),
         current_length_(other.current_length_),
         reserved_(std::move(other.reserved_)),
-        current_reserved_(other.current_reserved_) { std::cout << "Move it!" << std::endl; }
+        current_reserved_(other.current_reserved_) { }
 
     /// @brief Currently used number of elements.
     ///
