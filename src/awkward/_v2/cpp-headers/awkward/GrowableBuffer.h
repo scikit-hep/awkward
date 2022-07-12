@@ -45,7 +45,7 @@ namespace awkward {
         actual = minreserve;
       }
       return GrowableBuffer(initial,
-        std::unique_ptr<PRIMITIVE>(new PRIMITIVE[(size_t)actual]),
+        std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]),
         0, actual);
     }
 
@@ -63,7 +63,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[(size_t)actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = 0;
@@ -87,7 +87,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[(size_t)actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = value;
@@ -110,7 +110,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[(size_t)actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = (PRIMITIVE)i;
@@ -158,7 +158,7 @@ namespace awkward {
     GrowableBuffer(GrowableBuffer&& other) noexcept
       : initial_(other.initial_),
         ptr_(std::move(other.ptr_)),
-        length_(other.length_),
+        length_(std::move(other.length_)),
         total_length_(other.total_length_),
         current_length_(other.current_length_),
         reserved_(std::move(other.reserved_)),
@@ -172,16 +172,6 @@ namespace awkward {
     int64_t
     length() const {
       return (is_contiguous() ? (int64_t)current_length_ : total_length_ + (int64_t)current_length_);
-    }
-
-    /// @brief Currently allocated number of elements.
-    ///
-    /// Although the #length increments every time #append is called,
-    /// it is always less than or equal to #reserved because of
-    /// allocations of new panels.
-    int64_t
-    reserved() const {
-      return std::accumulate(reserved_.begin(), reserved_.end(), (int64_t)0);
     }
 
     /// @brief Discards accumulated data, the #reserved returns to
@@ -259,14 +249,12 @@ namespace awkward {
     concatenate(PRIMITIVE* external_pointer) const noexcept {
       if (!is_empty()) {
         int64_t next_panel = 0;
-        size_t i = 0;
-        size_t num_full_panels = ptr_.size() - 1;
-        for ( ;  i < num_full_panels;  i++) {
+        for (size_t i = 0;  i < ptr_.size() - 1;  i++) {
           memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_[i].get()), length_[i] * sizeof(PRIMITIVE));
           next_panel += length_[i];
         }
         // and the last panel
-        memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_[i].get()), current_length_ * sizeof(PRIMITIVE));
+        memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_.back().get()), current_length_ * sizeof(PRIMITIVE));
       }
     }
 
@@ -288,26 +276,24 @@ namespace awkward {
     template<typename TO_PRIMITIVE>
     GrowableBuffer<TO_PRIMITIVE>
     copy_as() {
-      size_t num_full_panels = ptr_.size() - 1;
       auto len = length();
       int64_t actual = (len < initial_) ? initial_ : len;
 
-      TO_PRIMITIVE* rawptr = new TO_PRIMITIVE[(size_t)actual];
+      auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[actual]);
+      TO_PRIMITIVE* rawptr = ptr.get();
+
       int64_t k = 0;
-      size_t i = 0;
-      for ( ;  i < num_full_panels; i++) {
+      for (size_t i = 0;  i < ptr_.size() - 1; i++) {
         for (size_t j = 0; j < length_[i]; j++) {
-          rawptr[k] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
-          k++;
+          rawptr[k++] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
         }
       }
       // and the last one
       for (size_t j = 0; j < current_length_; j++) {
-        rawptr[k] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
-        k++;
+        rawptr[k++] = static_cast<TO_PRIMITIVE>(ptr_.back().get()[j]);
       }
 
-      return GrowableBuffer<TO_PRIMITIVE>(actual, std::unique_ptr<TO_PRIMITIVE>(rawptr), len, actual);
+      return GrowableBuffer<TO_PRIMITIVE>(actual, std::move(ptr), len, actual);
     }
 
   private:

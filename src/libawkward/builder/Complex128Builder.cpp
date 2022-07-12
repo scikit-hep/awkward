@@ -21,7 +21,6 @@ namespace awkward {
                                GrowableBuffer<int64_t> old) {
     GrowableBuffer<std::complex<double>> buffer =
       old.copy_as<std::complex<double>>();
-    old.reset();
     return std::make_shared<Complex128Builder>(initial, std::move(buffer));
   }
 
@@ -30,7 +29,6 @@ namespace awkward {
                                  GrowableBuffer<double> old) {
     GrowableBuffer<std::complex<double>> buffer =
       old.copy_as<std::complex<double>>();
-    old.reset();
     return std::make_shared<Complex128Builder>(initial, std::move(buffer));
   }
 

@@ -22,7 +22,6 @@ namespace awkward {
                             GrowableBuffer<int64_t> old) {
     GrowableBuffer<double> buffer =
       old.copy_as<double>();
-    old.reset();
     return std::make_shared<Float64Builder>(initial, std::move(buffer));
   }
 
