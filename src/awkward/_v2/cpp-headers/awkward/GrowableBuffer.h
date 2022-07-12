@@ -118,6 +118,34 @@ namespace awkward {
       return GrowableBuffer(initial, std::move(ptr), length, actual);
     }
 
+    /// @brief Takes a (possibly multi-panels) GrowableBuffer<PRIMITIVE>
+    /// and makes another (one panel) GrowableBuffer<TO_PRIMITIVE>.
+    ///
+    /// Used to change the data type of buffer content from `PRIMITIVE`
+    /// to `TO_PRIMITIVE` for building arrays.
+    template<typename TO_PRIMITIVE>
+    static GrowableBuffer<TO_PRIMITIVE>
+    copy_as(const GrowableBuffer<PRIMITIVE>& other) {
+      auto len = other.length();
+      int64_t actual = (len < other.initial_) ? other.initial_ : len;
+
+      auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[actual]);
+      TO_PRIMITIVE* rawptr = ptr.get();
+
+      int64_t k = 0;
+      for (size_t i = 0;  i < other.ptr_.size() - 1; i++) {
+        for (size_t j = 0; j < other.length_[i]; j++) {
+          rawptr[k++] = static_cast<TO_PRIMITIVE>(other.ptr_[i].get()[j]);
+        }
+      }
+      // and the last one
+      for (size_t j = 0; j < other.current_length_; j++) {
+        rawptr[k++] = static_cast<TO_PRIMITIVE>(other.ptr_.back().get()[j]);
+      }
+
+      return GrowableBuffer<TO_PRIMITIVE>(actual, std::move(ptr), len, actual);
+    }
+
     /// @brief Creates a GrowableBuffer from a full set of parameters.
     ///
     /// @param initial Initial size configuration for building a panel.
@@ -266,34 +294,6 @@ namespace awkward {
     /// @brief Checks whether the GowableBuffer has any panels.
     bool is_empty() const {
       return (ptr_.size() == 0);
-    }
-
-    /// @brief Takes this (possibly multi-panels) GrowableBuffer<PRIMITIVE>
-    /// and makes another (one panel) GrowableBuffer<TO_PRIMITIVE>.
-    ///
-    /// Used to change the data type of buffer content from `PRIMITIVE`
-    /// to `TO_PRIMITIVE` for building arrays.
-    template<typename TO_PRIMITIVE>
-    GrowableBuffer<TO_PRIMITIVE>
-    copy_as() {
-      auto len = length();
-      int64_t actual = (len < initial_) ? initial_ : len;
-
-      auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[actual]);
-      TO_PRIMITIVE* rawptr = ptr.get();
-
-      int64_t k = 0;
-      for (size_t i = 0;  i < ptr_.size() - 1; i++) {
-        for (size_t j = 0; j < length_[i]; j++) {
-          rawptr[k++] = static_cast<TO_PRIMITIVE>(ptr_[i].get()[j]);
-        }
-      }
-      // and the last one
-      for (size_t j = 0; j < current_length_; j++) {
-        rawptr[k++] = static_cast<TO_PRIMITIVE>(ptr_.back().get()[j]);
-      }
-
-      return GrowableBuffer<TO_PRIMITIVE>(actual, std::move(ptr), len, actual);
     }
 
   private:

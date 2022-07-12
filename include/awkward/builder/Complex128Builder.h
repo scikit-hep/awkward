@@ -27,7 +27,7 @@ namespace awkward {
     /// @param old The Int64Builder's buffer.
     static const BuilderPtr
       fromint64(const int64_t initial,
-                GrowableBuffer<int64_t> old);
+                const GrowableBuffer<int64_t>& old);
 
     /// @brief Create a Complex128Builder from an existing Float64Builder.
     /// @param initial Configuration initial for building an array;
@@ -35,7 +35,7 @@ namespace awkward {
     /// @param old The Float64Builder's buffer.
     static const BuilderPtr
       fromfloat64(const int64_t initial,
-                  GrowableBuffer<double> old);
+                  const GrowableBuffer<double>& old);
 
     /// @brief Create a Complex128Builder from a full set of parameters.
     ///

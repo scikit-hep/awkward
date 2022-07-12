@@ -28,7 +28,7 @@ namespace awkward {
     /// @param old The Int64Builder's buffer.
     static const BuilderPtr
       fromint64(const int64_t initial,
-                GrowableBuffer<int64_t> old);
+                const GrowableBuffer<int64_t>& old);
 
     /// @brief Create a Float64Builder from a full set of parameters.
     ///

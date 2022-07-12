@@ -19,10 +19,10 @@ namespace awkward {
 
   const BuilderPtr
   Float64Builder::fromint64(const int64_t initial,
-                            GrowableBuffer<int64_t> old) {
-    GrowableBuffer<double> buffer =
-      old.copy_as<double>();
-    return std::make_shared<Float64Builder>(initial, std::move(buffer));
+                            const GrowableBuffer<int64_t>& old) {
+    return std::make_shared<Float64Builder>(
+      initial,
+      std::move(GrowableBuffer<int64_t>::copy_as<double>(old)));
   }
 
   Float64Builder::Float64Builder(const int64_t initial,

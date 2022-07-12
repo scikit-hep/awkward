@@ -18,18 +18,18 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::fromint64(const int64_t initial,
-                               GrowableBuffer<int64_t> old) {
-    GrowableBuffer<std::complex<double>> buffer =
-      old.copy_as<std::complex<double>>();
-    return std::make_shared<Complex128Builder>(initial, std::move(buffer));
+                               const GrowableBuffer<int64_t>& old) {
+    return std::make_shared<Complex128Builder>(
+      initial,
+      std::move(GrowableBuffer<int64_t>::copy_as<std::complex<double>>(old)));
   }
 
   const BuilderPtr
   Complex128Builder::fromfloat64(const int64_t initial,
-                                 GrowableBuffer<double> old) {
-    GrowableBuffer<std::complex<double>> buffer =
-      old.copy_as<std::complex<double>>();
-    return std::make_shared<Complex128Builder>(initial, std::move(buffer));
+                                 const GrowableBuffer<double>& old) {
+    return std::make_shared<Complex128Builder>(
+      initial,
+      std::move(GrowableBuffer<double>::copy_as<std::complex<double>>(old)));
   }
 
   Complex128Builder::Complex128Builder(const int64_t initial,
