@@ -85,14 +85,14 @@ namespace awkward {
 
   const BuilderPtr
   Int64Builder::real(double x) {
-    BuilderPtr out = Float64Builder::fromint64(initial_, std::move(buffer_));
+    BuilderPtr out = Float64Builder::fromint64(initial_, buffer_);
     out.get()->real(x);
     return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::complex(std::complex<double> x) {
-    BuilderPtr out = Complex128Builder::fromint64(initial_, std::move(buffer_));
+    BuilderPtr out = Complex128Builder::fromint64(initial_, buffer_);
     out.get()->complex(x);
     return std::move(out);
   }

@@ -7,7 +7,7 @@
 
 void test_full() {
   size_t data_size = 100;
-  size_t initial = 25;
+  size_t initial = 1024;
 
   auto buffer = awkward::GrowableBuffer<int16_t>::full(initial, -2, data_size);
 
@@ -21,7 +21,7 @@ void test_full() {
 
 void test_arange() {
   size_t data_size = 25;
-  size_t initial = 50;
+  size_t initial = 1024;
 
   auto buffer = awkward::GrowableBuffer<int64_t>::arange(initial, data_size);
 
@@ -35,7 +35,7 @@ void test_arange() {
 
 void test_zeros() {
   size_t data_size = 100;
-  size_t initial = 100;
+  size_t initial = 1024;
 
   auto buffer = awkward::GrowableBuffer<uint32_t>::zeros(initial, data_size);
 
@@ -49,22 +49,26 @@ void test_zeros() {
 
 void test_float() {
   size_t data_size = 18;
-  size_t initial = 4;
+  size_t initial = 1024;
   float data[18] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
                     2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9};
 
   auto buffer = awkward::GrowableBuffer<float>::empty(initial);
 
-  for (size_t i = 0; i < data_size; i++) {
-    buffer.append(data[i]);
+  for (int64_t x = 0; x < 10000000; x++) {
+    for (size_t i = 0; i < data_size; i++) {
+      buffer.append(data[i]);
+    }
   }
 
   float* ptr = new float[buffer.length()];
   buffer.concatenate(ptr);
 
-  for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == data[i]);
-  }
+  // for (int64_t x = 0; x < 1000; x++) {
+  //   for (size_t i = 0; i < buffer.length(); i++) {
+  //     assert(ptr[i] == data[i]);
+  //   }
+  // }
 }
 
 void test_int64() {

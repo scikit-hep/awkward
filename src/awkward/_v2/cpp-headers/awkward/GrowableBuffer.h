@@ -7,6 +7,8 @@
 #include <memory>
 #include <numeric>
 #include <cmath>
+#include <iostream>
+#include <utility>
 
 namespace awkward {
 
@@ -161,7 +163,7 @@ namespace awkward {
                    int64_t length,
                    int64_t reserved)
         : initial_(initial),
-          total_length_(length),
+          total_length_(0),
           current_length_((size_t)length),
           current_reserved_((size_t)reserved) {
       ptr_.emplace_back(std::move(ptr));
@@ -188,9 +190,9 @@ namespace awkward {
         ptr_(std::move(other.ptr_)),
         length_(std::move(other.length_)),
         total_length_(other.total_length_),
-        current_length_(other.current_length_),
+        current_length_(std::exchange(other.current_length_, 0)),
         reserved_(std::move(other.reserved_)),
-        current_reserved_(other.current_reserved_) { }
+        current_reserved_(other.current_reserved_) { std::cout << "Move it!" << std::endl; }
 
     /// @brief Currently used number of elements.
     ///

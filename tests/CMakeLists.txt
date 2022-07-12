@@ -1,7 +1,7 @@
 macro(addtest name filename)
   if(BUILD_TESTING)
     add_executable(${name} ${filename})
-    target_link_libraries(${name} PRIVATE awkward-parent)
+    target_link_libraries(${name} PRIVATE awkward-static awkward-cpu-kernels-static)
     set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
     set_target_properties(${name} PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
     add_test(${name} ${name})

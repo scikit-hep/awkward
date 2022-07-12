@@ -40,7 +40,7 @@ file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 add_library(awkward-parent INTERFACE)
 target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${VERSION_INFO}")
 target_include_directories(awkward-parent INTERFACE include)
-target_compile_features(awkward-parent INTERFACE cxx_std_11)
+target_compile_features(awkward-parent INTERFACE cxx_std_17)
 
 # C++ dependencies (header-only): RapidJSON and dlpack
 target_include_directories(awkward-parent INTERFACE rapidjson/include dlpack/include)
@@ -96,13 +96,15 @@ include(CTest)
 if(BUILD_TESTING)
   add_subdirectory(tests-cpp)
   add_subdirectory(tests)
+
+  addtest_nolibs(test_1542-growable-buffer tests-cpp/test_1542-growable-buffer.cpp)
+  addtest(test_1542-array-builder tests-cpp/test_1542-array-builder.cpp)
+
 endif()
 
 option(PYBUILD "Build Python modules")
 cmake_dependent_option(AWKWARD_EXTERNAL_PYBIND11 "Build against an external pybind11" OFF
                        "PYBUILD" OFF)
-
-addtest(test_1542-growable-buffer tests-cpp/test_1542-growable-buffer.cpp)
 
 # Third tier: Python modules.
 if(PYBUILD)
