@@ -77,7 +77,7 @@ Navigation
 
 **Adding methods, overloading operators:** :doc:`ak.behavior` for a global registry; see also for overloading individual arrays.
 
-**Describing an array:** :doc:`_auto/ak.is_valid`, :doc:`_auto/ak.validity_error`, :doc:`_auto/ak.type`, :doc:`_auto/ak.parameters`, :doc:`_auto/ak.keys`.
+**Describing an array:** :doc:`_auto/ak.is_valid`, :doc:`_auto/ak.validity_error`, :doc:`_auto/ak.type`, :doc:`_auto/ak.parameters`, :doc:`_auto/ak.fields`.
 
 **Converting from other formats:** :doc:`_auto/ak.from_numpy`, :doc:`_auto/ak.from_iter`, :doc:`_auto/ak.from_json`, :doc:`_auto/ak.from_awkward0`. Note that the :doc:`_auto/ak.Array` and :doc:`_auto/ak.Record` constructors use these functions.
 
