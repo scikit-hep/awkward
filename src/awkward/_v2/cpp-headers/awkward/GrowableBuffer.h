@@ -141,7 +141,7 @@ namespace awkward {
         }
       }
       // and the last one
-      for (size_t j = 0; j < other.current_length_; j++) {
+      for (size_t j = 0; j < other.current_panel_length_; j++) {
         rawptr[k++] = static_cast<TO_PRIMITIVE>(other.ptr_.back().get()[j]);
       }
 
@@ -163,8 +163,8 @@ namespace awkward {
                    int64_t length,
                    int64_t reserved)
         : initial_(initial),
-          total_length_(0),
-          current_length_((size_t)length),
+          filled_panels_length_(0),
+          current_panel_length_((size_t)length),
           current_reserved_((size_t)reserved) {
       ptr_.emplace_back(std::move(ptr));
       reserved_.emplace_back(reserved);
@@ -189,8 +189,8 @@ namespace awkward {
       : initial_(other.initial_),
         ptr_(std::move(other.ptr_)),
         length_(std::move(other.length_)),
-        total_length_(other.total_length_),
-        current_length_(other.current_length_),
+        filled_panels_length_(other.filled_panels_length_),
+        current_panel_length_(other.current_panel_length_),
         reserved_(std::move(other.reserved_)),
         current_reserved_(other.current_reserved_) { }
 
@@ -201,7 +201,7 @@ namespace awkward {
     /// allocations of new panels.
     int64_t
     length() const {
-      return (is_contiguous() ? (int64_t)current_length_ : total_length_ + (int64_t)current_length_);
+      return filled_panels_length_ + (int64_t)current_panel_length_;
     }
 
     /// @brief Discards accumulated data, the #reserved returns to
@@ -212,8 +212,8 @@ namespace awkward {
       reserved_.clear();
       reserved_.emplace_back(initial_);
 
-      total_length_ = 0;
-      current_length_ = 0;
+      filled_panels_length_ = 0;
+      current_panel_length_ = 0;
       current_reserved_ = (size_t)initial_;
     }
 
@@ -223,8 +223,8 @@ namespace awkward {
       reserved_.clear();
       ptr_.clear();
 
-      total_length_ = 0;
-      current_length_ = 0;
+      filled_panels_length_ = 0;
+      current_panel_length_ = 0;
       current_reserved_ = (size_t)initial_;
     }
 
@@ -235,7 +235,7 @@ namespace awkward {
     /// #reserved, a new panel will be allocated.
     void
     append(PRIMITIVE datum) {
-      if (current_length_ == current_reserved_) {
+      if (current_panel_length_ == current_reserved_) {
         add_panel(current_reserved_ << 1);
       }
       fill_panel(datum);
@@ -249,7 +249,7 @@ namespace awkward {
     /// for the rest of the array elements.
     void
     extend(PRIMITIVE* ptr, size_t size) {
-      size_t empty_slots = current_reserved_ - current_length_;
+      size_t empty_slots = current_reserved_ - current_panel_length_;
       if (size > empty_slots) {
         for (size_t i = 0; i < empty_slots; i++) {
           fill_panel(ptr[i]);
@@ -270,7 +270,7 @@ namespace awkward {
     /// @brief Like append, but the type signature returns the reference to `PRIMITIVE`.
     PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
       append(datum);
-      return (&*ptr_.back())[current_length_];
+      return (&*ptr_.back())[current_panel_length_];
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
@@ -284,7 +284,7 @@ namespace awkward {
           next_panel += length_[i];
         }
         // and the last panel
-        memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_.back().get()), current_length_ * sizeof(PRIMITIVE));
+        memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_.back().get()), current_panel_length_ * sizeof(PRIMITIVE));
       }
     }
 
@@ -302,17 +302,17 @@ namespace awkward {
     /// @brief Inserts one `datum` into the panel.
     void
     fill_panel(PRIMITIVE datum) {
-        (&*ptr_.back())[current_length_++] = datum;
+        (&*ptr_.back())[current_panel_length_++] = datum;
     }
 
     /// @brief Creates a new panel with slots equal to #reserved.
     void
     add_panel(size_t reserved) {
       ptr_.emplace_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
-      length_.emplace_back(current_length_);
+      length_.emplace_back(current_panel_length_);
       reserved_.emplace_back(reserved);
-      total_length_ += current_length_;
-      current_length_ = 0;
+      filled_panels_length_ += current_panel_length_;
+      current_panel_length_ = 0;
       current_reserved_ = reserved;
     }
 
@@ -328,17 +328,17 @@ namespace awkward {
     /// vector of unique pointers to the filled panels.
     std::vector<size_t> length_;
 
-    /// @brief Total length of data in all panels including an unfilled one.
-    int64_t total_length_;
-
-    /// @brief Current length of an unfilled panel.
-    size_t current_length_;
-
     /// @brief Vector containing the reserved sizes of the panels.
     ///
     /// Each index of this vector is aligned with the index of the
     /// vector of unique pointers to the panels.
     std::vector<size_t> reserved_;
+
+    /// @brief Total length of data in all panels including an unfilled one.
+    int64_t filled_panels_length_;
+
+    /// @brief Current length of an unfilled panel.
+    size_t current_panel_length_;
 
     /// @brief Reserved size of a current panel.
     size_t current_reserved_;
