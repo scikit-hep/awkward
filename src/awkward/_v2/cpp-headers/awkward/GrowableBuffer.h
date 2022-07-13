@@ -277,11 +277,6 @@ namespace awkward {
       // FIXME: implement
     }
 
-    void
-    reset() {
-      // FIXME: implement
-    }
-
     /// @brief Inserts one `datum` into the panel, possibly triggering
     /// allocation of a new panel.
     ///
@@ -322,11 +317,10 @@ namespace awkward {
     }
 
     /// @brief Like append, but the type signature returns the reference to `PRIMITIVE`.
-    // FIXME: implement
-    // PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
-    //   append(datum);
-    //   return (&*ptr_.back())[ptr_->length()];
-    // }
+    PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
+      append(datum);
+      return &*ptr_->ptr_.get()[ptr_->length()];
+    }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
     /// contiguously allocated `external_pointer`.
