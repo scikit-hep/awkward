@@ -241,8 +241,7 @@ namespace awkward {
                    int64_t reserved)
         : initial_(initial),
           panel_(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>(std::move(ptr), (size_t)length, (size_t)reserved))),
-          ptr_(panel_.get()),
-          filled_panels_length_(0) {
+          ptr_(panel_.get()) {
     }
 
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
@@ -259,8 +258,7 @@ namespace awkward {
     GrowableBuffer(GrowableBuffer&& other) noexcept
       : initial_(other.initial_),
         panel_(std::move(other.panel_)),
-        ptr_(other.ptr_),
-        filled_panels_length_(other.filled_panels_length_) { }
+        ptr_(other.ptr_) { }
 
     /// @brief Currently used number of elements.
     ///
@@ -269,7 +267,7 @@ namespace awkward {
     /// allocations of new panels.
     int64_t
     length() const {
-      return filled_panels_length_ + (int64_t)ptr_->length();
+      return (int64_t)panel_->length();
     }
 
     /// @brief Discards accumulated data, the #reserved returns to
@@ -277,13 +275,11 @@ namespace awkward {
     void
     clear() {
       // FIXME: implement
-      filled_panels_length_ = 0;
     }
 
     void
     reset() {
       // FIXME: implement
-      filled_panels_length_ = 0;
     }
 
     /// @brief Inserts one `datum` into the panel, possibly triggering
@@ -350,7 +346,6 @@ namespace awkward {
     /// and updates the current panel pointer to it.
     void
     add_panel(size_t reserved) {
-      filled_panels_length_ += ptr_->length();
       ptr_ = ptr_->append_panel(reserved);
     }
 
@@ -362,16 +357,6 @@ namespace awkward {
 
     /// @brief A pointer to a current panel.
     Panel<PRIMITIVE>* ptr_;
-
-    /// @brief Total length of data in all panels including an unfilled one.
-    int64_t filled_panels_length_;
-
-    /// @brief Current length of an unfilled panel.
-    size_t current_panel_length_;
-
-    /// @brief Reserved size of a current panel.
-    size_t current_reserved_;
-
   };
 }
 
