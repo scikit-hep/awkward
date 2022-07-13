@@ -158,3 +158,6 @@ subtrees:
     
       - file: api-reference
         title: "API Reference"
+    
+      - url: http://_static/index.html
+        title: "C++ Reference"
