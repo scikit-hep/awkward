@@ -31,7 +31,7 @@ Quickstart
 Getting started
 ^^^^^^^^^^^^^^^
 
-New to *Awkward Array*? Unsure what it can be used for? Check out the getting started guides. They contain an introduction to *Awkward Array's* features and links to additional help a.
+New to *Awkward Array*? Unsure what it can be used for? Check out the getting started guides. They contain an introduction to *Awkward Array's* features and links to additional help.
     
 :::
 
