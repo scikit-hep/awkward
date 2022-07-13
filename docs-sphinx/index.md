@@ -1,16 +1,3 @@
----
-jupytext:
-  text_representation:
-    extension: .md
-    format_name: myst
-    format_version: 0.13
-    jupytext_version: 1.10.3
-kernelspec:
-  display_name: Python 3
-  language: python
-  name: python3
----
-
 [![](https://raw.githubusercontent.com/scikit-hep/awkward-1.0/main/docs-img/logo/logo-300px.png)](https://github.com/scikit-hep/awkward-1.0)
 
 [![PyPI version](https://badge.fury.io/py/awkward.svg)](https://pypi.org/project/awkward)
@@ -33,44 +20,58 @@ Quickstart
 ==========
 
 % TODO mention left side-bar
+::::{grid} 2
+:class-container: intro-grid text-center
+
+:::{grid-item-card} 
+:img-top: _static/index_getting_started.png
+:link-type: doc
+:link: getting-started
+
+Getting started
+^^^^^^^^^^^^^^^
+
+New to *Awkward Array*? Unsure what it can be used for? Check out the getting started guides. They contain an introduction to *Awkward Array's* features and links to additional help a.
+    
+:::
+
+:::{grid-item-card}
+:img-top: _static/index_user_guide.png
+:link-type: doc
+:link: user-guide/index
+
+User guide
+^^^^^^^^^^
+
+The user guide provides in-depth information on the key concepts of Awkward Array with useful background information and explanation.
+
+:::
+
+:::{grid-item-card}
+:img-top: _static/index_api.png
+:link-type: doc
+:link: api-reference
+
+API reference
+^^^^^^^^^^^^^
+
+The reference guide contains a detailed description of the functions, modules, and objects included in Awkward Array. The reference describes how the methods work and which parameters can be used. It assumes that you have an understanding of the key concepts.
+
+:::
+
+:::{grid-item-card}
+:img-top: _static/index_contribute.png
+:link-type: doc
+:link: developer-guide
+
+Developer guide
+^^^^^^^^^^^^^^^
 
 
-Installation
-------------
+Spotted a typo in the documentation? Want to add to the codebase? The contributing guidelines will guide you through the process of improving Awkward Array.
 
-Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward/) using pip:
+:::
+    
+::::
 
-```bash
-pip install awkward
-```
 
-Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
-
-Getting help
-------------
-
-   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
-   * You can vote for issues by adding a "thumbs up" (👍) using the "smile/pick your reaction" menu on the top-right of the issue. See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-1.0/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+reactions%3A%3E0+).
-   * If you have a "How do I...?" question, start a [GitHub Discussion](https://github.com/scikit-hep/awkward-1.0/discussions) with category "Q&A".
-   * Alternatively, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
-   * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) chat room.
-
-For developers
---------------
-
-See Awkward Array's [GitHub page](https://github.com/scikit-hep/awkward-1.0) for more on the following.
-
-   * [Installation for developers](https://github.com/scikit-hep/awkward-1.0#installation-for-developers).
-   * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
-   * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
-   * [Roadmap](https://github.com/scikit-hep/awkward-1.0#roadmap) of future releases.
-   * [awkward-array.org](https://awkward-array.org) (this site) is hosted by [Netlify](https://www.netlify.com).
-   * [CONTRIBUTING.md](https://github.com/scikit-hep/awkward-1.0/blob/main/CONTRIBUTING.md) for technical information on how to contribute.
-   * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.
-   * The [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE) is BSD-3.
-
-See also [papers and talks about Awkward Array](https://github.com/scikit-hep/awkward-1.0#papers-and-talks-about-awkward-array) and a [table of contributors](https://github.com/scikit-hep/awkward-1.0#acknowledgements).
-
-----------
-
-Support for this work was provided by NSF cooperative agreement [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) (IRIS-HEP), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-1520942](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).

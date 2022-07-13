@@ -1,5 +1,14 @@
 # API Reference
 
+% Build toctree from generated summaries
+:::{toctree}   
+:maxdepth: 2
+:hidden:
+:glob:
+
+_auto/*
+:::
+
 *High-level data types:* {doc}`_auto/awkward._v2.Array` for an array of items (records, numbers, strings, etc.) and {doc}`_auto/awkward._v2.Record` for a single record. Arrays and records are read-only structures, but functions that manipulate them efficiently share data between the input and output.
 
 *Append-only data type:* {doc}`_auto/awkward._v2.ArrayBuilder` discovers its type from the sequence of append operations called on it.
@@ -150,3 +159,4 @@ The Awkward Array project is divided into 3 layers with 5 main components.
 The C++ classes, cpu-kernels, and gpu-kernels are described in the [C++ API reference](_static/index.html>).
 
 The kernels (cpu-kernels and cuda-kernels) are documented on the {doc}`_auto/kernels` page, with interfaces and normative Python implementations.
+

@@ -23,10 +23,7 @@ try:
 except ImportError:
     raise ImportError("Could not find Awkward on sys.path. Please ensure that it is installed.")
 
-root_path = os.path.abspath(os.path.join(os.getcwd(), ".."))
-src_path = os.path.join(root_path, "src")
-
-sys.path.insert(0, root_path)
+src_path = os.path.join(awkward.__path__[0], "..")
 
 # -- Project information -----------------------------------------------------
 
@@ -48,6 +45,7 @@ extensions = [
     "sphinx_reredirects",
     "sphinx_external_toc",
     'sphinx_copybutton',
+    'sphinx_design',
     'myst_nb',
 ]
 
@@ -78,7 +76,6 @@ templates_path = ['_templates']
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
-
 html_show_sourcelink = False
 html_theme_options = {
   "logo": {
@@ -89,12 +86,16 @@ html_theme_options = {
   "collapse_navigation": True,
   # Add light/dark mode and documentation version switcher:
   "navbar_end": ["theme-switcher", "navbar-icon-links"],
+  "footer_items": ["copyright", "sphinx-version", "funding"],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_css_files = [
+    'awkward.css',
+]
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
@@ -152,7 +153,8 @@ def linkcode_resolve(domain, info):
     else:
         line_spec = f"#L{line_num}-L{line_num + len(source) - 1}"
 
-    src_blob_path = os.path.relpath(path, start=root_path)
+    src_blob_path = os.path.relpath(path, start=src_path)
+
     assert revision
     return f"https://github.com/scikit-hep/awkward-1.0/blob/{revision}/src/{src_blob_path}{line_spec}"
 

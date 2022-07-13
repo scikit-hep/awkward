@@ -20,3 +20,4 @@ uproot
 uproot3
 jax>=0.2.7;python_version>="3.6" and sys_platform != "win32"
 jaxlib>=0.1.57;python_version>="3.6" and sys_platform != "win32"
+sphinx-design
