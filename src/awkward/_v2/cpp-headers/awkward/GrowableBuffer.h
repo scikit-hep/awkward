@@ -274,7 +274,8 @@ namespace awkward {
     /// initial, and a new #ptr is allocated.
     void
     clear() {
-      // FIXME: implement
+      panel_ = std::move(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>((size_t)initial_)));
+      ptr_ = panel_.get();
     }
 
     /// @brief Inserts one `datum` into the panel, possibly triggering
