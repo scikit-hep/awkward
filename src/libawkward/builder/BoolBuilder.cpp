@@ -19,7 +19,9 @@ namespace awkward {
   BoolBuilder::BoolBuilder(const int64_t initial,
                            GrowableBuffer<uint8_t> buffer)
       : initial_(initial)
-      , buffer_(std::move(buffer)) { }
+      , copy_no_(0)
+      , last_length_(0)
+      , buffer_(std::move(buffer)) { std::cout << "BoolBuilder " << initial << ", buffer " << buffer_.length() << std::endl;}
 
   const std::string
   BoolBuilder::classname() const {
@@ -30,6 +32,13 @@ namespace awkward {
   BoolBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
+
+    if (last_length_ < buffer_.length()) {
+      copy_no_++;
+      form_key << "-" << copy_no_;
+      last_length_ = buffer_.length();
+    }
+    std::cout << "BoolBuilder::to_buffers " << form_key.str() << " size " << buffer_.length() << std::endl;
 
     buffer_.concatenate(
       reinterpret_cast<uint8_t*>(
@@ -65,6 +74,7 @@ namespace awkward {
   const BuilderPtr
   BoolBuilder::boolean(bool x) {
     buffer_.append(x);
+    std::cout << "   add " << x << " to buffer " << buffer_.length() << std::endl;
     return nullptr;
   }
 
