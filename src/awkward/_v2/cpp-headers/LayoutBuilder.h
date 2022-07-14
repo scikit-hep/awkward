@@ -1037,7 +1037,6 @@ template <unsigned INITIAL, typename BUILDER>
     append_valid() noexcept {
       _append_begin();
       current_byte_ |= cast_[current_index_];
-      std::cout<<+current_byte_<<" Last: "<<+mask_.last()<<" Length: "<<+mask_.length()<<std::endl;
       _append_end();
       return &content_;
     }
@@ -1097,7 +1096,7 @@ template <unsigned INITIAL, typename BUILDER>
     _append_begin() {
       if (current_index_ == 8) {
         current_byte_ = uint8_t(0);
-        mask_.append_and_get_ref(current_byte_) = current_byte_ref_;
+        current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
         current_index_ = 0;
       }
     }
@@ -1120,7 +1119,7 @@ template <unsigned INITIAL, typename BUILDER>
     bool valid_when_ = VALID_WHEN;
     bool lsb_order_ = LSB_ORDER;
     uint8_t current_byte_;
-    uint8_t current_byte_ref_;
+    uint8_t& current_byte_ref_;
     size_t current_index_;
     uint8_t* cast_;
   };
