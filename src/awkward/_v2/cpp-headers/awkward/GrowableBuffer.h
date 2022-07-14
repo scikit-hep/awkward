@@ -16,12 +16,12 @@ namespace awkward {
   class Panel {
   public:
     Panel(size_t reserved)
-      : ptr_(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved])),
+      : ptr_(std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[reserved])),
         length_(0),
         reserved_(reserved),
         next_(nullptr) {  }
 
-    Panel(std::unique_ptr<PRIMITIVE> ptr, size_t length, size_t reserved)
+    Panel(std::unique_ptr<PRIMITIVE[]> ptr, size_t length, size_t reserved)
       : ptr_(std::move(ptr)),
         length_(length),
         reserved_(reserved),
@@ -86,7 +86,7 @@ namespace awkward {
 
   private:
     /// @brief Unique pointer to the panel data.
-    std::unique_ptr<PRIMITIVE> ptr_;
+    std::unique_ptr<PRIMITIVE[]> ptr_;
 
     /// @brief The length of the panel data.
     size_t length_;
@@ -133,7 +133,7 @@ namespace awkward {
         actual = minreserve;
       }
       return GrowableBuffer(initial,
-        std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]),
+        std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[actual]),
         0, actual);
     }
 
@@ -151,7 +151,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = 0;
@@ -175,7 +175,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = value;
@@ -198,7 +198,7 @@ namespace awkward {
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = (PRIMITIVE)i;
@@ -217,7 +217,7 @@ namespace awkward {
       auto len = other.length();
       int64_t actual = (len < other.initial_) ? other.initial_ : len;
 
-      auto ptr = std::unique_ptr<TO_PRIMITIVE>(new TO_PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<TO_PRIMITIVE[]>(new TO_PRIMITIVE[actual]);
       TO_PRIMITIVE* rawptr = ptr.get();
 
       other.panel_->copy_as(rawptr, 0);
@@ -236,7 +236,7 @@ namespace awkward {
     /// it is always less than or equal to #reserved because of
     /// allocations of new panels.
     GrowableBuffer(int64_t initial,
-                   std::unique_ptr<PRIMITIVE> ptr,
+                   std::unique_ptr<PRIMITIVE[]> ptr,
                    int64_t length,
                    int64_t reserved)
         : initial_(initial),
@@ -248,7 +248,7 @@ namespace awkward {
     /// initial #reserved from #initial.
     GrowableBuffer(int64_t initial)
         : GrowableBuffer(initial,
-                         std::unique_ptr<PRIMITIVE>(new PRIMITIVE[initial]),
+                         std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[initial]),
                          0,
                          initial) { }
 
