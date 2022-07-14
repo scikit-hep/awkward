@@ -281,7 +281,6 @@ namespace awkward {
     form() const noexcept {
       std::stringstream form_key;
       form_key << "node" << id_;
-
       std::string params("");
       if (parameters_ == "") { }
       else {
@@ -953,6 +952,168 @@ template <unsigned INITIAL, typename BUILDER>
 
   private:
     GrowableBuffer<int8_t> mask_;
+    BUILDER content_;
+    size_t id_;
+    std::string parameters_;
+    bool valid_when_ = VALID_WHEN;
+  };
+
+  template <bool VALID_WHEN, bool LSB_ORDER, unsigned INITIAL, typename BUILDER>
+  class BitMasked {
+  public:
+    BitMasked()
+        : mask_(awkward::GrowableBuffer<uint8_t>(INITIAL))
+        , current_byte_(uint8_t(0))
+        , current_byte_ref_(mask_.append_and_get_ref(current_byte_))
+        , current_index_(0) {
+      size_t id = 0;
+      set_id(id);
+      if (lsb_order_) {
+        for(size_t i = 0; i < 8; i++) {
+          cast_[i] = 1 << i;
+        }
+      }
+      else {
+        for(size_t i = 0; i < 8; i++) {
+          cast_[i] = 128 >> i;
+        }
+      }
+    }
+
+    size_t
+    length() const noexcept {
+      return mask_.length();
+    }
+
+    void
+    clear() noexcept {
+      mask_.clear();
+      content_.clear();
+    }
+
+    BUILDER*
+    content() {
+      return &content_;
+    }
+
+    void
+    set_id(size_t &id) {
+      id_ = id;
+      id++;
+      content_.set_id(id);
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
+    }
+
+    bool is_valid() const {
+      if (content_.length() != mask_.length()) {
+        std::cout << "BitMasked node" << id_ << "has content length " << content_.length()
+                  << "but bit mask length " << mask_.length();
+        return false;
+      }
+      else {
+        return content_.is_valid();
+      }
+    }
+
+    bool
+    valid_when() {
+      return valid_when_;
+    }
+
+    bool
+    lsb_order() {
+      return lsb_order_;
+    }
+
+    BUILDER*
+    append_valid() noexcept {
+      _append_begin();
+      current_byte_ |= cast_[current_index_];
+      std::cout<<+current_byte_<<" Last: "<<+mask_.last()<<" Length: "<<+mask_.length()<<std::endl;
+      _append_end();
+      return &content_;
+    }
+
+    BUILDER*
+    extend_valid(size_t size) noexcept {
+      for (size_t i = 0; i < size; i++) {
+        append_valid();
+      }
+      return &content_;
+    }
+
+    BUILDER*
+    append_null() noexcept {
+      _append_begin();
+      _append_end();
+      return &content_;
+    }
+
+    BUILDER*
+    extend_null(size_t size) noexcept {
+      for (size_t i = 0; i < size; i++) {
+      append_null();
+      }
+      return &content_;
+    }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      names_nbytes["node" + std::string(id_) + "-mask"] = mask_.nbytes();
+      content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    to_buffers(uint8_t* ptr) const noexcept {
+      mask_.concatenate(ptr);
+    }
+
+    std::string
+    form() const noexcept {
+      std::stringstream form_key, form_valid_when, form_lsb_order;
+      form_key << "node" << id_;
+      form_valid_when << std::boolalpha << valid_when_;
+      form_lsb_order << std::boolalpha << lsb_order_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
+      return "{ \"class\": \"BitMaskedArray\", \"mask\": \"u8\", \"content\": " + content_.form()
+                + ", \"valid_when\": " + form_valid_when.str() + ", \"lsb_order\": "
+                + form_lsb_order.str() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+    }
+
+  private:
+    void
+    _append_begin() {
+      if (current_index_ == 8) {
+        current_byte_ = uint8_t(0);
+        mask_.append_and_get_ref(current_byte_) = current_byte_ref_;
+        current_index_ = 0;
+      }
+    }
+
+    void
+    _append_end() {
+      current_index_ += 1;
+      if (valid_when_) {
+        current_byte_ref_ = current_byte_;
+      }
+      else {
+        current_byte_ref_ = ~current_byte_;
+      }
+    }
+
+    GrowableBuffer<uint8_t> mask_;
     BUILDER content_;
     size_t id_;
     std::string parameters_;
