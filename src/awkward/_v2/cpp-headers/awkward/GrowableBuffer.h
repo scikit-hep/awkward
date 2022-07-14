@@ -320,7 +320,7 @@ namespace awkward {
     /// @brief Like append, but the type signature returns the reference to `PRIMITIVE`.
     PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
       append(datum);
-      return &*ptr_->ptr_.get()[ptr_->length()];
+      return (*ptr_)[ptr_->length() - 1];
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
