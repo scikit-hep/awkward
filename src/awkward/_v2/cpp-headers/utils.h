@@ -159,8 +159,8 @@ type_to_form(int64_t form_key_id) {
 
 template <size_t INDEX>
 struct visit_impl {
-  template <typename RECORD, typename FUNCTION>
-    static void visit(RECORD& contents, size_t index, FUNCTION fun) {
+  template <typename FIELD, typename FUNCTION>
+    static void visit(FIELD& contents, size_t index, FUNCTION fun) {
       if (index == INDEX - 1) {
         fun(std::get<INDEX - 1>(contents));
       }
@@ -172,20 +172,20 @@ struct visit_impl {
 
 template <>
 struct visit_impl<0> {
-  template <typename RECORD, typename FUNCTION>
-  static void visit(RECORD& /* contents */, size_t /* index */, FUNCTION /* fun */) { assert(false); }
+  template <typename FIELD, typename FUNCTION>
+  static void visit(FIELD& /* contents */, size_t /* index */, FUNCTION /* fun */) { assert(false); }
 };
 
-template <typename FUNCTION, typename... RECORDs>
+template <typename FUNCTION, typename... FIELDs>
 void
-visit_at(std::tuple<RECORDs...> const& contents, size_t index, FUNCTION fun) {
-  visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
+visit_at(std::tuple<FIELDs...> const& contents, size_t index, FUNCTION fun) {
+  visit_impl<sizeof...(FIELDs)>::visit(contents, index, fun);
 }
 
-template <typename FUNCTION, typename... RECORDs>
+template <typename FUNCTION, typename... FIELDs>
 void
-visit_at(std::tuple<RECORDs...>& contents, size_t index, FUNCTION fun) {
-  visit_impl<sizeof...(RECORDs)>::visit(contents, index, fun);
+visit_at(std::tuple<FIELDs...>& contents, size_t index, FUNCTION fun) {
+  visit_impl<sizeof...(FIELDs)>::visit(contents, index, fun);
 }
 
 }

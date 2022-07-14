@@ -957,6 +957,11 @@ template <unsigned INITIAL, typename BUILDER>
     size_t id_;
     std::string parameters_;
     bool valid_when_ = VALID_WHEN;
+    bool lsb_order_ = LSB_ORDER;
+    uint8_t current_byte_;
+    uint8_t current_byte_ref_;
+    size_t current_index_;
+    uint8_t* cast_;
   };
 
   template <unsigned SIZE, typename BUILDER>
@@ -1051,6 +1056,109 @@ template <unsigned INITIAL, typename BUILDER>
     std::string parameters_;
     size_t size_ = SIZE;
   };
+
+// template <unsigned INITIAL,  typename... BUILDERS>
+//   class Union {
+//   public:
+//     Union()
+//         : tags_(awkward::GrowableBuffer<int8_t>(INITIAL))
+//         : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+//         , contents_({new BUILDERS}...)
+//         , last_valid_index_(-1) {
+//       size_t id = 0;
+//       set_id(id);
+//     }
+
+//     size_t
+//     length() const noexcept {
+//       return index_.length();
+//     }
+
+//     void
+//     clear() noexcept {
+//       last_valid_ = -1;
+//       index_.clear();
+//       content_.clear();
+//     }
+
+//     BUILDER*
+//     content() {
+//       return &content_;
+//     }
+
+//     void
+//     set_id(size_t &id) {
+//       id_ = id;
+//       id++;
+//       content_.set_id(id);
+//     }
+
+//     std::string parameters() const noexcept {
+//       return parameters_;
+//     }
+
+//     bool is_valid() const noexcept {
+//       if (content_.length() != index_.length()) {
+//         std::cout << "Union node" << id_ << " has content length " << content_.length()
+//                   << " but index length " << index_.length();
+//         return false;
+//       }
+//       else if (content_.length() != last_valid_index_ + 1) {
+//         std::cout << "Union node" << id_ << " has content length " << content_.length()
+//                   << " but last valid index is " << last_valid_index_;
+//         return false;
+//       }
+//       else {
+//         return content_.is_valid();
+//       }
+//     }
+
+//     BUILDER*
+//     append_index(int8_t tag) noexcept {
+//       auto get_content = [&tag] (auto which_content) {
+//       size_t next_index = which_content.length();
+//       last_valid_index_[tag] = next_index;
+//       tags_.append(tag);
+//       index_.append(next_index);};
+//       visit_at(contents_, tag, get_content);
+
+//       return &which_content;
+//     }
+
+//     void
+//     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+//       names_nbytes["node" + std::string(id_) + "-tags"] = tags_.nbytes();
+//       names_nbytes["node" + std::string(id_) + "-index"] = index_.nbytes();
+//       content_.buffer_nbytes(names_nbytes);
+//     }
+
+//     void
+//     to_buffers(int8_t* tags, int64_t* index) const noexcept {
+//       tags_.concatenate(tags);
+//       index_.concatenate(index);
+//     }
+
+//     std::string
+//     form() const noexcept {
+//       std::stringstream form_key;
+//       form_key << "node" << id_;
+//       std::string params("");
+//       if (parameters_ == "") { }
+//       else {
+//         params = std::string(", \"parameters\": " + parameters_);
+//       }
+//       return "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"content\": "
+//                 + contents_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+//     }
+
+//   private:
+//     GrowableBuffer<int8_t> tags_;
+//     GrowableBuffer<int64_t> index_;
+//     std::tuple<BUILDERS*...> contents_;
+//     size_t id_;
+//     std::string parameters_;
+//     size_t last_valid_index_;
+//   };
 
   }  // namespace LayoutBuilder
 }  // namespace awkward

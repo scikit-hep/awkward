@@ -1018,6 +1018,66 @@ test_ByteMasked() {
 }
 
 void
+test_BitMasked() {
+  auto builder = lb::BitMasked<true, true, initial,
+      lb::Numpy<initial, double>
+  >();
+
+  auto subbuilder = builder.append_valid();
+  subbuilder->append(1.1);
+
+  builder.append_null();
+  subbuilder->append(-1000); // have to supply a "dummy" value
+
+  double data[3] = {3.3, 4.4, 5.5};
+
+  builder.extend_valid(3);
+  subbuilder->extend(data, 3);
+
+  builder.extend_null(2);
+  for (size_t i = 0; i < 2; i++) {
+    subbuilder->append(-1000);  // have to supply a "dummy" value
+  }
+
+  builder.append_valid();
+  subbuilder->append(8);
+
+  builder.append_valid();
+  subbuilder->append(9);
+
+  builder.append_valid();
+  subbuilder->append(10);
+
+  // [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000, 8, 9, 10]
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"BitMaskedArray\", "
+      "\"mask\": \"u8\", "
+      "\"content\": { "
+          "\"class\": \"NumpyArray\", "
+          "\"primitive\": \"float64\", "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "\"valid_when\": true, "
+      "\"lsb_order\": true, "
+      "\"form_key\": \"node0\" "
+  "}");
+
+  uint8_t* ptr0 = new uint8_t[builder.length()];
+  builder.to_buffers(ptr0);
+
+  double* ptr1 = new double[builder.content()->length()];
+  builder.content()->to_buffers(ptr1);
+
+  dump("node0", ptr0, builder.length(),
+       "node1", ptr1, builder.content()->length());
+  std::cout<<std::endl;
+}
+
+void
 test_Regular() {
   auto builder = lb::Regular<3,
       lb::Numpy<initial, double>
@@ -1113,6 +1173,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_ListOffset_Empty();
   test_Unmasked();
   test_ByteMasked();
+  test_BitMasked();
   test_Regular();
   test_Regular_size0();
 

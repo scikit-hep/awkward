@@ -251,6 +251,15 @@ namespace awkward {
       }
     }
 
+    void
+    concatenate2(PRIMITIVE* external_pointer) const noexcept {
+      size_t next_panel = 0;
+      for (size_t i = 0;  i < ptr_.size();  i++) {
+        memcpy(external_pointer + next_panel, reinterpret_cast<void*>(ptr_[i].get()), length_[i]*sizeof(PRIMITIVE));
+        next_panel += length_[i];
+      }
+    }
+
     /// @brief Checks whether the array is contiguous.
     size_t is_contiguous() {
       return (ptr_.size() == 1);
