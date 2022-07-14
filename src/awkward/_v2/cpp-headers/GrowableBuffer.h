@@ -185,7 +185,7 @@ namespace awkward {
         throw std::runtime_error("Buffer is empty");
       }
       else {
-        return ptr_[ptr_.size()-1].get()[length_[ptr_.size()-1]-1];
+        return (ptr_.back()).get()[length_.back()-1];
       }
     }
 
@@ -203,9 +203,9 @@ namespace awkward {
     void
     append(PRIMITIVE datum) {
       if (length_[ptr_.size()-1] == reserved_[ptr_.size()-1]) {
-        add_panel(reserved_[ptr_.size()-1]);
+        _add_panel(reserved_[ptr_.size()-1]);
       }
-      fill_panel(datum);
+      _fill_panel(datum);
     }
 
     /// @brief Inserts an entire array into the panel(s), possibly triggering
@@ -219,17 +219,17 @@ namespace awkward {
       size_t empty_slots = reserved_[ptr_.size()-1] - length_[ptr_.size()-1];
       if (size > empty_slots) {
         for (size_t i = 0; i < empty_slots; i++) {
-          fill_panel(ptr[i]);
+          _fill_panel(ptr[i]);
         }
-        add_panel(size - empty_slots > reserved_[ptr_.size()-1] ?
+        _add_panel(size - empty_slots > reserved_[ptr_.size()-1] ?
                   size - empty_slots : reserved_[ptr_.size()-1]);
         for (size_t i = empty_slots; i < size; i++) {
-          fill_panel(ptr[i]);
+          _fill_panel(ptr[i]);
         }
       }
       else {
         for (size_t i = 0; i < size; i++) {
-          fill_panel(ptr[i]);
+          _fill_panel(ptr[i]);
         }
       }
     }
@@ -237,7 +237,7 @@ namespace awkward {
     /// @brief Like append, but the type signature returns the reference to `PRIMITIVE`.
     PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
       append(datum);
-      return (&*ptr_.back())[length_.back()];
+      return (&*ptr_.back())[length_.back() - 1];
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
@@ -280,14 +280,14 @@ namespace awkward {
   private:
     /// @brief Inserts one `datum` into the panel.
     void
-    fill_panel(PRIMITIVE datum) {
+    _fill_panel(PRIMITIVE datum) {
         ptr_[ptr_.size()-1].get()[length_[ptr_.size()-1]] = datum;
         length_[ptr_.size()-1]++;
     }
 
     /// @brief Creates a new panel with slots equal to #reserved.
     void
-    add_panel(size_t reserved) {
+    _add_panel(size_t reserved) {
       ptr_.push_back(std::unique_ptr<PRIMITIVE>(new PRIMITIVE[reserved]));
       length_.push_back(0);
       reserved_.push_back(reserved);

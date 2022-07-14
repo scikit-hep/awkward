@@ -15,12 +15,6 @@ namespace awkward {
   namespace LayoutBuilder {
 
   template<const char *str>
-  class parameter {
-  public:
-    std::string value = str;
-  };
-
-  template<const char *str>
   class field_name {
   public:
     const char* value = str;
@@ -44,7 +38,7 @@ namespace awkward {
     field_name field_;
   };
 
-  template <class parameter, unsigned INITIAL, typename PRIMITIVE>
+  template <unsigned INITIAL, typename PRIMITIVE>
   class Numpy {
   public:
     Numpy()
@@ -70,7 +64,12 @@ namespace awkward {
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const noexcept {
@@ -108,9 +107,9 @@ namespace awkward {
       form_key << "node" << id_;
 
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
 
       if (std::is_arithmetic<PRIMITIVE>::value) {
@@ -132,10 +131,10 @@ namespace awkward {
   private:
     awkward::GrowableBuffer<PRIMITIVE> data_;
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
   };
 
-  template <class parameter, unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename BUILDER>
   class ListOffset {
   public:
     ListOffset()
@@ -170,7 +169,12 @@ namespace awkward {
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const noexcept {
@@ -210,9 +214,9 @@ namespace awkward {
       std::stringstream form_key;
       form_key << "node" << id_;
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -222,14 +226,90 @@ namespace awkward {
     GrowableBuffer<int64_t> offsets_;
     BUILDER content_;
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
   };
 
-  template <class parameter, typename... RECORD>
+  template<bool IS_TUPLE>
+  class EmptyRecord {
+  public:
+    EmptyRecord()
+    : length_(0) {
+      size_t id = 0;
+      set_id(id);
+    }
+
+    size_t
+    length() const noexcept {
+      return length_;
+    }
+
+    void
+    clear() noexcept {
+      length_ = 0;
+    }
+
+    void
+    set_id(size_t &id) {
+      // id_ = id;
+      // id++;
+    }
+
+    std::string parameters() const noexcept {
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
+    }
+
+    bool is_valid() const noexcept {
+      return true;
+    }
+
+    void
+    append() noexcept {
+      length_++;
+    }
+
+    void
+    extend(size_t size) noexcept {
+      length_ += size;
+    }
+
+    std::string
+    form() const noexcept {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
+
+      if (is_tuple_) {
+        return "{ \"class\": \"RecordArray\", \"contents\": []" + params
+                  + ", \"form_key\": \"" + form_key.str() + "\" }";
+      }
+      else {
+        return "{ \"class\": \"RecordArray\", \"contents\": {}" + params
+                  + ", \"form_key\": \"" + form_key.str() + "\" }";
+      }
+    }
+
+  private:
+    size_t id_;
+    std::string parameters_;
+    size_t length_;
+    bool is_tuple_ = IS_TUPLE;
+  };
+
+  template <typename... BUILDERS>
   class Record {
   public:
     Record()
-        : contents({new RECORD}...) {
+        : contents({new BUILDERS}...) {
       size_t id = 0;
       set_id(id);
     }
@@ -256,7 +336,12 @@ namespace awkward {
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     void
@@ -271,9 +356,9 @@ namespace awkward {
       std::stringstream form_key;
       form_key << "node" << id_;
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string("\"parameters\": " + parameters_ + ", ");
       }
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
@@ -290,15 +375,15 @@ namespace awkward {
       return out.str();
     }
 
-    std::tuple<RECORD*...> contents;
+    std::tuple<BUILDERS*...> contents;
 
     private:
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
   };
 
 
-template <class parameter, unsigned INITIAL, typename BUILDER>
+template <unsigned INITIAL, typename BUILDER>
   class List {
   public:
     List()
@@ -333,7 +418,12 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const noexcept {
@@ -381,9 +471,9 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       std::stringstream form_key;
       form_key << "node" << id_;
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
       return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -394,10 +484,10 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     GrowableBuffer<int64_t> stops_;
     BUILDER content_;
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
   };
 
-template <class parameter, unsigned INITIAL, typename BUILDER>
+template <unsigned INITIAL, typename BUILDER>
   class Indexed {
   public:
     Indexed()
@@ -432,7 +522,12 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const noexcept {
@@ -485,9 +580,9 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       std::stringstream form_key;
       form_key << "node" << id_;
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
       return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -497,11 +592,11 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
     size_t last_valid_;
   };
 
-template <class parameter, unsigned INITIAL, typename BUILDER>
+template <unsigned INITIAL, typename BUILDER>
   class IndexedOption {
   public:
     IndexedOption()
@@ -536,7 +631,12 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const noexcept {
@@ -596,9 +696,9 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       std::stringstream form_key;
       form_key << "node" << id_;
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -608,11 +708,10 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     GrowableBuffer<int64_t> index_;
     BUILDER content_;
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
     size_t last_valid_;
   };
 
-  template<class parameter>
   class Empty {
   public:
     Empty() {
@@ -632,7 +731,12 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const noexcept {
@@ -642,19 +746,19 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     std::string
     form() const noexcept {
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
       return "{ \"class\": \"EmptyArray\"" + params + " }";
     }
 
   private:
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
   };
 
-  template <class parameter, typename BUILDER>
+  template <typename BUILDER>
   class Unmasked {
   public:
     Unmasked() {
@@ -685,7 +789,12 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const {
@@ -717,9 +826,9 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       std::stringstream form_key;
       form_key << "node" << id_;
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
       return "{ \"class\": \"UnmaskedArray\", \"content\": " + content_.form()
                 + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -728,10 +837,10 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
   private:
     BUILDER content_;
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
   };
 
-  template <class parameter, bool VALID_WHEN, unsigned INITIAL, typename BUILDER>
+  template <bool VALID_WHEN, unsigned INITIAL, typename BUILDER>
   class ByteMasked {
   public:
     ByteMasked()
@@ -764,7 +873,12 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const {
@@ -828,9 +942,9 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       form_key << "node" << id_;
       form_valid_when << std::boolalpha << valid_when_;
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
       return "{ \"class\": \"ByteMaskedArray\", \"mask\": \"i8\", \"content\": " + content_.form()
                 + ", \"valid_when\": " + form_valid_when.str()
@@ -841,11 +955,11 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     GrowableBuffer<int8_t> mask_;
     BUILDER content_;
     size_t id_;
-    parameter parameters_;
+    std::string parameters_;
     bool valid_when_ = VALID_WHEN;
   };
 
-  template <class parameter, unsigned SIZE, typename BUILDER>
+  template <unsigned SIZE, typename BUILDER>
   class Regular {
   public:
     Regular()
@@ -877,7 +991,12 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
     }
 
     std::string parameters() const noexcept {
-      return parameters_.value;
+      return parameters_;
+    }
+
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
     }
 
     bool is_valid() const noexcept {
@@ -916,19 +1035,20 @@ template <class parameter, unsigned INITIAL, typename BUILDER>
       std::stringstream form_key;
       form_key << "node" << id_;
       std::string params("");
-      if (parameters_.value == "") { }
+      if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_.value);
+        params = std::string(", \"parameters\": " + parameters_);
       }
-      return "{ \"class\": \"RegularArray\", \"content\": " + content_.form() + params + ", \"size\": "
-                + std::to_string(size_) + ", \"form_key\": \"" + form_key.str() + "\" }";
+      return "{ \"class\": \"RegularArray\", \"content\": " + content_.form()
+                + ", \"size\": " + std::to_string(size_)  + params
+                + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
     BUILDER content_;
     size_t id_;
     size_t length_;
-    parameter parameters_;
+    std::string parameters_;
     size_t size_ = SIZE;
   };
 
