@@ -38,7 +38,6 @@ namespace awkward {
       form_key << "-" << copy_no_;
       last_length_ = buffer_.length();
     }
-    std::cout << "BoolBuilder::to_buffers " << form_key.str() << " size " << buffer_.length() << std::endl;
 
     buffer_.concatenate(
       reinterpret_cast<uint8_t*>(
@@ -74,7 +73,6 @@ namespace awkward {
   const BuilderPtr
   BoolBuilder::boolean(bool x) {
     buffer_.append(x);
-    std::cout << "   add " << x << " to buffer " << buffer_.length() << std::endl;
     return nullptr;
   }
 
