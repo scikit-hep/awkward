@@ -1042,6 +1042,8 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         return py::str(self.to_buffers(container, form_key_id));
       })
       .def("to_buffers", [](const ak::ArrayBuilder& self) -> py::object {
+        std::cout << "ArrayBuilder to_buffers" << std::endl;
+
         ::NumpyBuffersContainer container;
         int64_t form_key_id = 0;
         std::string form = self.to_buffers(container, form_key_id);
@@ -1052,6 +1054,7 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         return out;
       })
       .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
+        std::cout << "ArrayBuilder snapshot" << std::endl;
         return ::builder_snapshot(self.builder());
       })
       .def("__getitem__", &getitem<ak::ArrayBuilder>)

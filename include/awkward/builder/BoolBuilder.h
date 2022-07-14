@@ -105,8 +105,6 @@ namespace awkward {
 
   private:
     const int64_t initial_;
-    mutable int64_t copy_no_;
-    mutable int64_t last_length_;
     GrowableBuffer<uint8_t> buffer_;
   };
 

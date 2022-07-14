@@ -327,7 +327,9 @@ namespace awkward {
     /// contiguously allocated `external_pointer`.
     void
     concatenate(PRIMITIVE* external_pointer) const noexcept {
-      panel_->concatenate_to(external_pointer, 0);
+      if (external_pointer) {
+        panel_->concatenate_to(external_pointer, 0);
+      }
     }
 
   private:
