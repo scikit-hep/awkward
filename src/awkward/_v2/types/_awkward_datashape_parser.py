@@ -398,8 +398,13 @@ try:
 except ImportError:
     regex = None
 
-import sre_parse
-import sre_constants
+if sys.version_info >= (3, 11):
+    import re._constants as sre_constants
+    import re._parser as sre_parse
+else:
+    import sre_constants
+    import sre_parse
+
 categ_pattern = re.compile(r'\\p{[A-Za-z_]+}')
 
 def get_regexp_width(expr):
