@@ -167,20 +167,35 @@ ak.Array(
 )
 ```
 
-## NumPy-like API
+## NumPy-like interface
 
-Awkward Array _looks like_ NumPy by providing a similar high-level API, and implementing the ufunc mechanism:
+Awkward Array _looks like_ NumPy. It behaves identically to NumPy for regular arrays
 
 ```{code-cell} ipython3
-x = ak.Array(
+x = ak.Array([
+    [1, 2, 3],
+    [4, 5, 6]
+]);
+```
+
+```{code-cell} ipython3
+ak.sum(x, axis=-1)
+```
+
+providing a similar high-level API, and implementing the [ufunc](https://numpy.org/doc/stable/reference/ufuncs.html) mechanism:
+
+```{code-cell} ipython3
+powers_of_two = ak.Array(
     [
         [1, 2, 4],
         [None, 8],
         [16],
     ]
-)
+);
+```
 
-ak.sum(x)
+```{code-cell} ipython3
+ak.sum(powers_of_two)
 ```
 
 But generalises to the tricky kinds of data that NumPy struggles to work with. It can perform reductions through varying length lists:
@@ -190,10 +205,10 @@ But generalises to the tricky kinds of data that NumPy struggles to work with. I
 ![](img/example-reduction-sum.svg)
 
 ```{code-cell} ipython3
-ak.sum(x, axis=0)
+ak.sum(powers_of_two, axis=0)
 ```
 
-## Lightweight Structures
+## Lightweight structures
 
 +++
 
@@ -266,3 +281,24 @@ sum(large_flat_array)
 ```
 
 These performance values are not benchmarks; they are only an indication of the speed of Awkward Array.
+
++++
+
+Some problems are hard to solve with array-oriented programming. Awkward Array supports [Numba](https://numba.pydata.org/) out of the box.
+
+```{code-cell} ipython3
+import numba as nb
+ak.numba.register()
+
+@nb.njit
+def cumulative_sum(arr):
+    result = 0
+    for x in arr:
+        for y in x:
+            result += y
+    return result
+```
+
+```{code-cell} ipython3
+cumulative_sum(large_array)
+```
