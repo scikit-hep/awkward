@@ -7,17 +7,21 @@ sphinx-copybutton
 sphinx-reredirects
 pydata-sphinx-theme
 myst-nb
+sphinx-design
+sphinx_external_toc
+ipyleaflet
 
 numpy>=1.13.1
 numba>=0.50.0
 pandas>=0.24.0
 numexpr
 autograd
-pyarrow>=2.0.0
+pyarrow>=7.0.0
+fsspec
+s3fs
 h5py
 matplotlib
 uproot
 uproot3
 jax>=0.2.7;python_version>="3.6" and sys_platform != "win32"
 jaxlib>=0.1.57;python_version>="3.6" and sys_platform != "win32"
-sphinx-design

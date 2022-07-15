@@ -1,5 +1,6 @@
-[![](https://raw.githubusercontent.com/scikit-hep/awkward-1.0/main/docs-img/logo/logo-300px.png)](https://github.com/scikit-hep/awkward-1.0)
+# Awkward Array documentation
 
+:::{card}
 [![PyPI version](https://badge.fury.io/py/awkward.svg)](https://pypi.org/project/awkward)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
 [![Python 3.6‒3.10](https://img.shields.io/badge/python-3.6%E2%80%923.10-blue)](https://www.python.org)
@@ -11,13 +12,11 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
 [![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.org)
 [![Gitter](https://img.shields.io/badge/chat-online-success)](https://gitter.im/Scikit-HEP/awkward-array)
+:::
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
 Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they’re not.
-
-Quickstart
-==========
 
 % TODO mention left side-bar
 ::::{grid} 2
@@ -26,10 +25,10 @@ Quickstart
 :::{grid-item-card} 
 :img-top: _static/index_getting_started.png
 :link-type: doc
-:link: getting-started
+:link: user-guide/absolute-beginners
 
-Getting started
-^^^^^^^^^^^^^^^
+Beginner's Guide
+^^^^^^^^^^^^^^^^
 
 New to *Awkward Array*? Unsure what it can be used for? Check out the getting started guides. They contain an introduction to *Awkward Array's* features and links to additional help.
     
@@ -62,12 +61,10 @@ The reference guide contains a detailed description of the functions, modules, a
 :::{grid-item-card}
 :img-top: _static/index_contribute.png
 :link-type: doc
-:link: developer-guide
+:link: contributor-guide
 
-Developer guide
-^^^^^^^^^^^^^^^
-
-
+Contributor's Guide
+^^^^^^^^^^^^^^^^^^^
 Spotted a typo in the documentation? Want to add to the codebase? The contributing guidelines will guide you through the process of improving Awkward Array.
 
 :::

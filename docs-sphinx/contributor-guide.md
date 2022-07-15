@@ -1,4 +1,4 @@
-# Developer Guide
+# Contributor Guide
 
 See Awkward Array's [GitHub page](https://github.com/scikit-hep/awkward-1.0) for more on the following.
 
