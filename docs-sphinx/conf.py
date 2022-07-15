@@ -23,8 +23,9 @@ if False:
         import awkward
     except ImportError:
         raise ImportError("Could not find Awkward on sys.path. Please ensure that it is installed.")
-
-src_path = os.path.join(awkward.__path__[0], "..")
+    src_path = os.path.join(awkward.__path__[0], "..")
+else:
+    src_path = "<MISSING>"
 
 # -- Project information -----------------------------------------------------
 
