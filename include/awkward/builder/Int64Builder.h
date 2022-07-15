@@ -4,11 +4,10 @@
 #define AWKWARD_INT64BUILDER_H_
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class Int64Builder
   ///
@@ -16,17 +15,17 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL Int64Builder: public Builder {
   public:
     /// @brief Create an empty Int64Builder.
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const int64_t initial);
 
     /// @brief Create an Int64Builder from a full set of parameters.
     ///
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated integers.
-    Int64Builder(const ArrayBuilderOptions& options,
+    Int64Builder(const int64_t initial,
                  GrowableBuffer<int64_t> buffer);
 
     /// @brief Contains the accumulated integers.
@@ -100,11 +99,11 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
-      options() const { return options_; }
+    const int64_t
+      initial() const { return initial_; }
 
   private:
-    const ArrayBuilderOptions options_;
+    const int64_t initial_;
     GrowableBuffer<int64_t> buffer_;
   };
 }

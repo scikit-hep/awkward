@@ -80,6 +80,15 @@ namespace {
       return container_;
     }
 
+    void*
+      empty_buffer(const std::string& name, int64_t num_bytes) override {
+        py::object pyarray = py::module::import("numpy").attr("empty")(num_bytes, "u1");
+        py::array_t<uint8_t> rawarray = pyarray.cast<py::array_t<uint8_t>>();
+        py::buffer_info rawinfo = rawarray.request();
+        container_[py::str(name)] = pyarray;
+        return rawinfo.ptr;
+      }
+
     void
       copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override {
         py::object pyarray = py::module::import("numpy").attr("empty")(num_bytes, "u1");
@@ -101,6 +110,11 @@ namespace {
 
   class EmptyBuffersContainer: public ak::BuffersContainer {
   public:
+    void*
+      empty_buffer(const std::string& name, int64_t num_bytes) override {
+        return nullptr;
+      }
+
     void
       copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override { }
 

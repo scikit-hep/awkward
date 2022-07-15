@@ -4,11 +4,10 @@
 #define AWKWARD_STRINGBUILDER_H_
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class StringBuilder
   ///
@@ -16,17 +15,17 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL StringBuilder: public Builder {
   public:
     /// @brief Create an empty StringBuilder.
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param encoding If `nullptr`, the string is an unencoded bytestring;
     /// if `"utf-8"`, it is encoded with variable-width UTF-8.
     /// Currently, no other encodings have been defined.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options, const char* encoding);
+      fromempty(const int64_t initial, const char* encoding);
 
     /// @brief Create a StringBuilder from a full set of parameters.
     ///
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param offsets Contains the accumulated offsets (like
     /// {@link ListOffsetArrayOf#offsets ListOffsetArray::offsets}).
@@ -35,7 +34,7 @@ namespace awkward {
     /// @param encoding If `nullptr`, the string is an unencoded bytestring;
     /// if `"utf-8"`, it is encoded with variable-width UTF-8.
     /// Currently, no other encodings have been defined.
-    StringBuilder(const ArrayBuilderOptions& options,
+    StringBuilder(const int64_t initial,
                   GrowableBuffer<int64_t> offsets,
                   GrowableBuffer<uint8_t> content,
                   const char* encoding);
@@ -113,15 +112,15 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
-      options() const { return options_; }
+    const int64_t
+      initial() const { return initial_; }
 
     const GrowableBuffer<int64_t>& buffer() const { return offsets_; }
 
     const GrowableBuffer<uint8_t>& content() const { return content_; }
 
   private:
-    const ArrayBuilderOptions options_;
+    const int64_t initial_;
     GrowableBuffer<int64_t> offsets_;
     GrowableBuffer<uint8_t> content_;
     const char* encoding_;

@@ -7,15 +7,14 @@
 
 #include "awkward/common.h"
 #include "awkward/Content.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Builder.h"
 #include "awkward/builder/UnknownBuilder.h"
 
 #include "awkward/builder/ArrayBuilder.h"
 
 namespace awkward {
-  ArrayBuilder::ArrayBuilder(const ArrayBuilderOptions& options)
-      : builder_(UnknownBuilder::fromempty(options)) { }
+  ArrayBuilder::ArrayBuilder(const int64_t initial)
+      : builder_(UnknownBuilder::fromempty(initial)) { }
 
   const std::string
   ArrayBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {

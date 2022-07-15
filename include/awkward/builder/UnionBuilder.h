@@ -6,11 +6,10 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
   class TupleBuilder;
   class RecordBuilder;
 
@@ -20,19 +19,19 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnionBuilder: public Builder {
   public:
     static const BuilderPtr
-      fromsingle(const ArrayBuilderOptions& options,
+      fromsingle(const int64_t initial,
                  const BuilderPtr& firstcontent);
 
     /// @brief Create a UnionBuilder from a full set of parameters.
     ///
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param tags Contains the accumulated tags (like
     /// {@link UnionArrayOf#tags UnionArray::tags}).
     /// @param index Contains the accumulated index (like
     /// {@link UnionArrayOf#index UnionArray::index}).
     /// @param contents A Builder for each of the union's possibilities.
-    UnionBuilder(const ArrayBuilderOptions& options,
+    UnionBuilder(const int64_t initial,
                  GrowableBuffer<int8_t> tags,
                  GrowableBuffer<int64_t> index,
                  std::vector<BuilderPtr>& contents);
@@ -105,8 +104,8 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
-      options() const { return options_; }
+    const int64_t
+      initial() const { return initial_; }
 
     const GrowableBuffer<int8_t>& tags() const {  return tags_; }
     GrowableBuffer<int8_t>& tags_buffer() {  return tags_; }
@@ -120,7 +119,7 @@ namespace awkward {
     int8_t current() { return current_;}
 
   private:
-    const ArrayBuilderOptions options_;
+    const int64_t initial_;
     GrowableBuffer<int8_t> tags_;
     GrowableBuffer<int64_t> index_;
     std::vector<BuilderPtr> contents_;

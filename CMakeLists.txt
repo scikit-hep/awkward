@@ -45,6 +45,9 @@ target_compile_features(awkward-parent INTERFACE cxx_std_11)
 # C++ dependencies (header-only): RapidJSON and dlpack
 target_include_directories(awkward-parent INTERFACE rapidjson/include dlpack/include)
 
+# C++ dependencies (header-only): GrowableBuffer
+target_include_directories(awkward-parent INTERFACE src/awkward/_v2/cpp-headers/)
+
 # First tier: cpu-kernels (object files, static library, and dynamic library).
 add_library(awkward-cpu-kernels-objects OBJECT ${CPU_KERNEL_SOURCES})
 set_target_properties(awkward-cpu-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -91,7 +94,12 @@ target_link_libraries(awkward PUBLIC awkward-parent)
 include(CTest)
 
 if(BUILD_TESTING)
+  add_subdirectory(tests-cpp)
   add_subdirectory(tests)
+
+  addtest_nolibs(test_1542-growable-buffer tests-cpp/test_1542-growable-buffer.cpp)
+  addtest(test_1542-array-builder tests-cpp/test_1542-array-builder.cpp)
+
 endif()
 
 option(PYBUILD "Build Python modules")

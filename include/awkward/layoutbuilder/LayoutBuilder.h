@@ -11,7 +11,6 @@
 #include <complex>
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
@@ -65,12 +64,12 @@ namespace awkward {
     /// @brief Creates an LayoutBuilder from a full set of parameters.
     ///
     /// @param form The Form that defines the Array to be build.
-    /// @param options The Array builder options.
+    /// @param initial The Array builder initial.
     /// @param vm_init If 'true' the Virtual Machine is instantiated on
     /// construction. If 'false' an external Virtial Machine must be connected
     /// to the builder. The flag is used for debugging.
     LayoutBuilder(const std::string& json_form,
-                  const ArrayBuilderOptions& options,
+                  const int64_t initial,
                   bool vm_init = true);
 
     const std::string&

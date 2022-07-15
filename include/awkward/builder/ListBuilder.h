@@ -6,11 +6,10 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class ListBuilder
   ///
@@ -18,14 +17,14 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL ListBuilder: public Builder {
   public:
     /// @brief Create an empty ListBuilder.
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const int64_t initial);
 
     /// @brief Create a ListBuilder from a full set of parameters.
     ///
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param offsets Contains the accumulated offsets (like
     /// {@link ListOffsetArrayOf#offsets ListOffsetArray::offsets}).
@@ -33,7 +32,7 @@ namespace awkward {
     /// @param begun If `true`, the ListBuilder is in a state after
     /// #beginlist and before #endlist and is #active; if `false`,
     /// it is not.
-    ListBuilder(const ArrayBuilderOptions& options,
+    ListBuilder(const int64_t initial,
                 GrowableBuffer<int64_t> offsets,
                 const BuilderPtr& content,
                 bool begun);
@@ -106,8 +105,8 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
-      options() const { return options_; }
+    const int64_t
+      initial() const { return initial_; }
 
     const GrowableBuffer<int64_t>& buffer() const { return offsets_; }
 
@@ -119,7 +118,7 @@ namespace awkward {
       maybeupdate(const BuilderPtr builder);
 
   private:
-    const ArrayBuilderOptions options_;
+    const int64_t initial_;
     GrowableBuffer<int64_t> offsets_;
     BuilderPtr content_;
     bool begun_;
