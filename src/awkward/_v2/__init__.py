@@ -39,7 +39,7 @@ behavior = {}
 behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
 behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
 
- 
+
 def __getattr__(name):
     if name == "__all__":
         return [
