@@ -26,7 +26,7 @@ import awkward._v2 as ak
 
 +++
 
-## Ragged (jagged) arrays
+## Versatile Arrays
 
 +++ {"tags": []}
 
@@ -34,13 +34,13 @@ Awkward Arrays are general tree-like data structures, like JSON, but contiguous 
 
 +++
 
-They look like lists:
+They look like NumPy arrays:
 
 ```{code-cell} ipython3
 ak.Array([1, 2, 3])
 ```
 
-They can contain sub-lists:
+Like NumPy, they can have multiple dimensions:
 
 ```{code-cell} ipython3
 ak.Array([
@@ -49,7 +49,7 @@ ak.Array([
 ])
 ```
 
-These lists can have different lengths; arrays can be [jagged](https://en.wikipedia.org/wiki/Jagged_array):
+These dimensions can have varying lengths; arrays can be [ragged](https://en.wikipedia.org/wiki/Jagged_array):
 
 ```{code-cell} ipython3
 ak.Array([
@@ -59,7 +59,7 @@ ak.Array([
 ])
 ```
 
-Each list can contain missing values:
+Each dimension can contain missing values:
 
 ```{code-cell} ipython3
 ak.Array([
@@ -72,20 +72,22 @@ ak.Array([
 Awkward Arrays can store _numbers_:
 
 ```{code-cell} ipython3
-digit_of_pi = ak.Array([
+ak.Array([
     [3, 141], 
-    [59, 26, 53], 
-    [58]
+    [59, 26, 535], 
+    [8]
 ])
 ```
 
 They can also work with _dates_:
 
 ```{code-cell} ipython3
-ak.Array([
-    [np.datetime64("1815-12-10"), np.datetime64("1969-07-16")], 
-    [np.datetime64("1564-04-26")]
-])
+ak.Array(
+    [
+        [np.datetime64("1815-12-10"), np.datetime64("1969-07-16")],
+        [np.datetime64("1564-04-26")],
+    ]
+)
 ```
 
 They can even work with _strings_:
@@ -94,10 +96,12 @@ They can even work with _strings_:
 ak.Array(
     [
         [
-            "Benjamin List", "David MacMillan",            
+            "Benjamin List",
+            "David MacMillan",
         ],
         [
-            "Emmanuelle Charpentier", "Jennifer A. Doudna",
+            "Emmanuelle Charpentier",
+            "Jennifer A. Doudna",
         ],
     ]
 )
@@ -106,96 +110,159 @@ ak.Array(
 Awkward Arrays can have structure through _records_:
 
 ```{code-cell} ipython3
-ak.Array([
+ak.Array(
     [
-        {"firstname":"Benjamin","surname":"List"},
-        {"firstname":"David","surname":"MacMillan"}
-    ],
-    [
-        {"firstname":"Emmanuelle","surname":"Charpentier"},
-        {"firstname":"Jennifer A.","surname":"Doudna"}
-    ],
-])
+        [
+            {"name": "Benjamin List", "age": 53},
+            {"name": "David MacMillan", "age": 53},
+        ],
+        [
+            {"name": "Emmanuelle Charpentier", "age": 52},
+            {"name": "Jennifer A. Doudna", "age": 57},
+        ],
+        [
+            {"name": "Akira Yoshino", "age": 73},
+            {"name": "M. Stanley Whittingham", "age": 79},
+            {"name": "John B. Goodenough", "age": 98},
+        ],
+    ]
+)
 ```
 
-In fact, Awkward Arrays can represent many kinds of jagged data. They can possess complex structures that mix lists, records, and primitive types. They can even contain _missing_ data and unions!
+In fact, Awkward Arrays can represent many kinds of jagged data. They can possess complex structures that mix records, and primitive types.
 
 ```{code-cell} ipython3
-taxi_trip = ak.from_parquet(
-    "https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet",
-    row_groups=[0]
+:tags: []
+
+ak.Array(
+    [
+        [
+            {
+                "name": "Benjamin List",
+                "age": 53,
+                "institutions": [
+                    "University of Cologne",
+                    "Max Planck Institute for Coal Research",
+                    "Hokkaido University",
+                ],
+            },
+            {
+                "name": "David MacMillan",
+                "age": 53,
+                "institutions": None,
+            },
+        ]
+    ]
 )
-taxi_trip.type.show()
+```
+
+They can even contain unions!
+
+```{code-cell} ipython3
+ak.Array(
+    [
+        [np.datetime64("1815-12-10"), "Cassini"],
+        [np.datetime64("1564-04-26")],
+    ]
+)
 ```
 
 ## NumPy-like API
 
-Awkward Array _looks like_ NumPy:
+Awkward Array _looks like_ NumPy by providing a similar high-level API, and implementing the ufunc mechanism:
 
 ```{code-cell} ipython3
-ak.mean(digit_of_pi)
-```
-
-But generalises to the tricky kinds of data that NumPy struggles to work with:
-
-```{code-cell} ipython3
-ak.mean(digit_of_pi, axis=0)
-```
-
-NumPy can be coerced to dealing with jagged arrays, but the ensuing code is often more complex, memory-hungry, and verbose:
-
-```{code-cell} ipython3
-np.mean(
-    np.ma.masked_invalid(
-        [
-            [3, 141, np.nan],
-            [59, 26, 53],
-            [58, np.nan, np.nan]
-        ]
-    ),
-    axis=0
+x = ak.Array(
+    [
+        [1, 2, 4],
+        [None, 8],
+        [16],
+    ]
 )
+
+ak.sum(x)
+```
+
+But generalises to the tricky kinds of data that NumPy struggles to work with. It can perform reductions through varying length lists:
+
++++
+
+![](img/example-reduction-sum.svg)
+
+```{code-cell} ipython3
+ak.sum(x, axis=0)
 ```
 
 ## Lightweight Structures
 
 +++
 
-Awkward makes it east to pull apart complex data structures:
+Awkward makes it east to pull apart record structures:
 
 ```{code-cell} ipython3
-taxi_trip.payment.fare
+nobel_prize_winner = ak.Array(
+    [
+        [
+            {"name": "Benjamin List", "age": 53},
+            {"name": "David MacMillan", "age": 53},
+        ],
+        [
+            {"name": "Emmanuelle Charpentier", "age": 52},
+            {"name": "Jennifer A. Doudna", "age": 57},
+        ],
+        [
+            {"name": "Akira Yoshino", "age": 73},
+            {"name": "M. Stanley Whittingham", "age": 79},
+            {"name": "John B. Goodenough", "age": 98},
+        ],
+    ]
+);
 ```
 
 ```{code-cell} ipython3
-taxi_trip.payment.fare + taxi_trip.payment.tips
+nobel_prize_winner.name
 ```
 
-Its records are lightweight and simple to compose:
+```{code-cell} ipython3
+nobel_prize_winner.age
+```
+
+These records are lightweight, and simple to compose:
 
 ```{code-cell} ipython3
-ak.zip({
-    "fare": taxi_trip.payment.fare,
-    "total": taxi_trip.payment.fare + taxi_trip.payment.tips
-})
+nobel_prize_winner_with_birth_year = ak.zip({
+    "name": nobel_prize_winner.name,
+    "age": nobel_prize_winner.age,
+    "birth_year": 2021 - nobel_prize_winner.age
+});
+```
+
+```{code-cell} ipython3
+nobel_prize_winner_with_birth_year.show()
 ```
 
 ## High performance
 
 +++
 
-Like NumPy, Awkward Array performs computations in fast, optimised kernels:
+Like NumPy, Awkward Array performs computations in fast, optimised kernels.
 
 ```{code-cell} ipython3
-%%timeit latdiff = taxi_trip.trip.path.latdiff
-
-ak.sum(latdiff)
+large_array = ak.Array([[1, 2, 3], [], [4, 5]] * 1_000_000)
 ```
 
-Look how much slower a pure-Python sum over the flattened array is:
+We can compute the sum in `3.37 ms ± 107 µs` on a reference CPU:
 
 ```{code-cell} ipython3
-%%timeit latdiff = ak.ravel(taxi_trip.trip.path.latdiff)
-
-sum(latdiff)
+ak.sum(large_array)
 ```
+
+The same sum can be computed with pure-Python over the flattened array in `369 ms ± 8.07 ms`:
+
+```{code-cell} ipython3
+large_flat_array = ak.ravel(large_array)
+
+sum(large_flat_array)
+```
+
+These performance values are not benchmarks; they are only an indication of the speed of Awkward Array.
