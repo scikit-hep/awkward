@@ -11,44 +11,30 @@
 
 namespace awkward {
   const BuilderPtr
-  Complex128Builder::fromempty(const ArrayBuilderOptions& options) {
-    return std::make_shared<Complex128Builder>(options,
-                                              GrowableBuffer<std::complex<double>>::empty(options));
+  Complex128Builder::fromempty(const int64_t initial) {
+    return std::make_shared<Complex128Builder>(initial,
+                                              GrowableBuffer<std::complex<double>>::empty(initial));
   }
 
   const BuilderPtr
-  Complex128Builder::fromint64(const ArrayBuilderOptions& options,
-                               GrowableBuffer<int64_t> old) {
-    GrowableBuffer<std::complex<double>> buffer =
-      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
-    int64_t* oldraw = old.ptr().get();
-    std::complex<double>* newraw = buffer.ptr().get();
-    for (size_t i = 0;  i < 2*old.length();  i++) {
-      newraw[i] = {static_cast<double>(oldraw[i]), 0};
-    }
-    buffer.set_length(old.length());
-    old.clear();
-    return std::make_shared<Complex128Builder>(options, std::move(buffer));
+  Complex128Builder::fromint64(const int64_t initial,
+                               const GrowableBuffer<int64_t>& old) {
+    return std::make_shared<Complex128Builder>(
+      initial,
+      std::move(GrowableBuffer<int64_t>::copy_as<std::complex<double>>(old)));
   }
 
   const BuilderPtr
-  Complex128Builder::fromfloat64(const ArrayBuilderOptions& options,
-                                 GrowableBuffer<double> old) {
-    GrowableBuffer<std::complex<double>> buffer =
-      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
-    double* oldraw = old.ptr().get();
-    std::complex<double>* newraw = buffer.ptr().get();
-    for (size_t i = 0;  i < old.length();  i++) {
-      newraw[i] = std::complex<double>(oldraw[i], 0);
-    }
-    buffer.set_length(old.length());
-    old.clear();
-    return std::make_shared<Complex128Builder>(options, std::move(buffer));
+  Complex128Builder::fromfloat64(const int64_t initial,
+                                 const GrowableBuffer<double>& old) {
+    return std::make_shared<Complex128Builder>(
+      initial,
+      std::move(GrowableBuffer<double>::copy_as<std::complex<double>>(old)));
   }
 
-  Complex128Builder::Complex128Builder(const ArrayBuilderOptions& options,
+  Complex128Builder::Complex128Builder(const int64_t initial,
                                        GrowableBuffer<std::complex<double>> buffer)
-      : options_(options)
+      : initial_(initial)
       , buffer_(std::move(buffer)) { }
 
   const std::string
@@ -61,9 +47,10 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(form_key.str() + "-data",
-                          buffer_.ptr().get(),
-                          (int64_t)(buffer_.length() * sizeof(double)) * 2);
+    void* ptr = container.empty_buffer(form_key.str() + "-data",
+      buffer_.length() * (int64_t)sizeof(std::complex<double>));
+
+    buffer_.concatenate(reinterpret_cast<std::complex<double>*>(ptr));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
            + form_key.str() + "\"}";
@@ -86,14 +73,14 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::null() {
-    BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
+    BuilderPtr out = OptionBuilder::fromvalids(initial_, shared_from_this());
     out.get()->null();
     return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::boolean(bool x) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
     out.get()->boolean(x);
     return std::move(out);
   }
@@ -118,28 +105,28 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::datetime(int64_t x, const std::string& unit) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
     out.get()->datetime(x, unit);
     return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::timedelta(int64_t x, const std::string& unit) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
     out.get()->timedelta(x, unit);
     return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::string(const char* x, int64_t length, const char* encoding) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
     out.get()->string(x, length, encoding);
     return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::beginlist() {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
     out.get()->beginlist();
     return std::move(out);
   }
@@ -153,7 +140,7 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::begintuple(int64_t numfields) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
     out.get()->begintuple(numfields);
     return std::move(out);
   }
@@ -174,7 +161,7 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::beginrecord(const char* name, bool check) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
     out.get()->beginrecord(name, check);
     return std::move(out);
   }

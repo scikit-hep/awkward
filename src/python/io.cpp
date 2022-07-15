@@ -5,7 +5,6 @@
 #include <pybind11/numpy.h>
 #include <string>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/io/json.h"
 #include "awkward/io/uproot.h"
 
