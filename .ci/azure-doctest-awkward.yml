@@ -47,3 +47,7 @@ jobs:
       - script: |
           sphinx-build docs-sphinx/ docs-sphinx/_build/
         displayName: "Generate documentation"
+
+      - publish: docs-sphinx/_build/
+        artifact: docs
+        displayName: "Publish documentation artefact"
