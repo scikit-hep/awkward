@@ -19,7 +19,7 @@ on:
     - studies/*
     - src/cuda-kernels
     - cuda-kernels
-  pull-request:
+  pull_request:
     branches-ignore:
     - '*'
   schedule:
