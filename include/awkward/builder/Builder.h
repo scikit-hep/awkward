@@ -10,8 +10,6 @@
 #include "awkward/common.h"
 
 namespace awkward {
-  class Content;
-  using ContentPtr = std::shared_ptr<Content>;
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
 
@@ -31,6 +29,9 @@ namespace awkward {
     /// @brief Create an array initialized to a given fill value.
     virtual void
       full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) = 0;
+
+    virtual void*
+      empty_buffer(const std::string& name, int64_t num_bytes) = 0;
   };
 
   /// @class Builder

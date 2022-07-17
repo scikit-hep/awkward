@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/BoolBuilder.h"
 #include "awkward/builder/DatetimeBuilder.h"
@@ -20,20 +19,20 @@
 
 namespace awkward {
   const BuilderPtr
-  UnionBuilder::fromsingle(const ArrayBuilderOptions& options,
+  UnionBuilder::fromsingle(const int64_t initial,
                            const BuilderPtr& firstcontent) {
     std::vector<BuilderPtr> contents({ firstcontent });
-    return std::make_shared<UnionBuilder>(options,
-                                          GrowableBuffer<int8_t>::full(options, 0, (size_t)firstcontent->length()),
-                                          GrowableBuffer<int64_t>::arange(options, (size_t)firstcontent->length()),
+    return std::make_shared<UnionBuilder>(initial,
+                                          GrowableBuffer<int8_t>::full(initial, 0, firstcontent->length()),
+                                          GrowableBuffer<int64_t>::arange(initial, firstcontent->length()),
                                           contents);
   }
 
-  UnionBuilder::UnionBuilder(const ArrayBuilderOptions& options,
+  UnionBuilder::UnionBuilder(const int64_t initial,
                              GrowableBuffer<int8_t> tags,
                              GrowableBuffer<int64_t> index,
                              std::vector<BuilderPtr>& contents)
-      : options_(options)
+      : initial_(initial)
       , tags_(std::move(tags))
       , index_(std::move(index))
       , contents_(contents)
@@ -49,13 +48,15 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(form_key.str() + "-tags",
-                          tags_.ptr().get(),
-                          (int64_t)(tags_.length() * sizeof(int8_t)));
+    tags_.concatenate(
+      reinterpret_cast<int8_t*>(
+        container.empty_buffer(form_key.str() + "-tags",
+        tags_.length() * (int64_t)sizeof(int8_t))));
 
-    container.copy_buffer(form_key.str() + "-index",
-                          index_.ptr().get(),
-                          (int64_t)(index_.length() * sizeof(int64_t)));
+    index_.concatenate(
+      reinterpret_cast<int64_t*>(
+        container.empty_buffer(form_key.str() + "-index",
+        index_.length() * (int64_t)sizeof(int64_t))));
 
     std::stringstream out;
     out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
@@ -91,7 +92,7 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::null() {
     if (current_ == -1) {
-      BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
+      BuilderPtr out = OptionBuilder::fromvalids(initial_, shared_from_this());
       out.get()->null();
       return std::move(out);
     }
@@ -108,7 +109,7 @@ namespace awkward {
         return dynamic_cast<BoolBuilder*>(p.get());
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(BoolBuilder::fromempty(options_));
+        contents_.emplace_back(BoolBuilder::fromempty(initial_));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -130,7 +131,7 @@ namespace awkward {
         return dynamic_cast<Int64Builder*>(p.get());
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(Int64Builder::fromempty(options_));
+        contents_.emplace_back(Int64Builder::fromempty(initial_));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -157,11 +158,11 @@ namespace awkward {
         });
         if (tofill != contents_.end()) {
           *tofill = Float64Builder::fromint64(
-              options_,
+              initial_,
               std::move(static_cast<Int64Builder*>(tofill->get())->buffer()));
         }
         else {
-          contents_.emplace_back(Float64Builder::fromempty(options_));
+          contents_.emplace_back(Float64Builder::fromempty(initial_));
           tofill = --contents_.end();
         }
       }
@@ -189,7 +190,7 @@ namespace awkward {
         });
         if (tofill != contents_.end()) {
           *tofill = std::move(Complex128Builder::fromfloat64(
-              options_,
+              initial_,
               std::move(static_cast<Float64Builder*>(tofill->get())->buffer())));
         }
       }
@@ -199,11 +200,11 @@ namespace awkward {
         });
         if (tofill != contents_.end()) {
           *tofill = std::move(Complex128Builder::fromint64(
-              options_,
+              initial_,
               std::move(static_cast<Int64Builder*>(tofill->get())->buffer())));
         }
         else {
-          contents_.emplace_back(Complex128Builder::fromempty(options_));
+          contents_.emplace_back(Complex128Builder::fromempty(initial_));
           tofill = --contents_.end();
         }
       }
@@ -227,7 +228,7 @@ namespace awkward {
         return raw != 0 && raw->units() == unit;
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(DatetimeBuilder::fromempty(options_, unit));
+        contents_.emplace_back(DatetimeBuilder::fromempty(initial_, unit));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -250,7 +251,7 @@ namespace awkward {
         return raw != 0 && raw->units() == unit;
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(DatetimeBuilder::fromempty(options_, unit));
+        contents_.emplace_back(DatetimeBuilder::fromempty(initial_, unit));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -273,7 +274,7 @@ namespace awkward {
         return raw != 0 && raw->encoding() == encoding;
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(StringBuilder::fromempty(options_, encoding));
+        contents_.emplace_back(StringBuilder::fromempty(initial_, encoding));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -295,7 +296,7 @@ namespace awkward {
         return dynamic_cast<ListBuilder*>(p.get());
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(ListBuilder::fromempty(options_));
+        contents_.emplace_back(ListBuilder::fromempty(initial_));
         tofill = --contents_.end();
       }
       tofill->get()->beginlist();
@@ -334,7 +335,7 @@ namespace awkward {
         return raw != nullptr  &&  (raw->length() == -1  ||  raw->numfields() == numfields);
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(TupleBuilder::fromempty(options_));
+        contents_.emplace_back(TupleBuilder::fromempty(initial_));
         tofill = --contents_.end();
       }
       tofill->get()->begintuple(numfields);
@@ -388,7 +389,7 @@ namespace awkward {
                  (!check  &&  raw->nameptr() == name)));
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(RecordBuilder::fromempty(options_));
+        contents_.emplace_back(RecordBuilder::fromempty(initial_));
         tofill = --contents_.end();
       }
       tofill->get()->beginrecord(name, check);

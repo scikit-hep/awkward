@@ -109,9 +109,7 @@ def test_record_name():
 
     a = builder.snapshot()
 
-    assert (
-        repr(a.layout.form._type(typestrs)) == "Dummy['one': 'int64', 'two': 'float64']"
-    )
+    assert str(a.layout.form._type(typestrs)) == "Dummy[one: int64, two: float64]"
     assert a.layout.form._type(typestrs).parameters == {"__record__": "Dummy"}
 
 

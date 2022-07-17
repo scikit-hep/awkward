@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#include "../src/awkward/_v2/cpp-headers/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 
 #include <complex>
 #include <cassert>
@@ -162,6 +162,24 @@ void test_extend() {
   }
 }
 
+void test_append_and_get_ref() {
+  size_t data_size = 15;
+  size_t initial = 5;
+  double data[15] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+                     2.1, 2.2, 2.3, 2.4, 2.5, 2.6};
+
+  int val;
+  int& ref = val;
+
+  auto buffer = awkward::GrowableBuffer<double>::empty(initial);
+
+  for (size_t i = 0; i < buffer.length(); i++) {
+    ref = buffer.append_and_get_ref(data[i]);
+    assert(ref == data[i]);
+    assert(val == data[i]);
+  }
+}
+
 int main(int /* argc */, const char ** /* argv */) {
   test_full();
   test_arange();
@@ -172,6 +190,7 @@ int main(int /* argc */, const char ** /* argv */) {
   test_double();
   test_complex();
   test_extend();
+  test_append_and_get_ref();
 
   return 0;
 }

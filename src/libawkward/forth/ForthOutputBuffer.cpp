@@ -12,41 +12,83 @@
 namespace awkward {
   ////////// helper functions
 
-  void byteswap16(int64_t num_items, void* ptr) {
+  template <typename T>
+  void byteswap16(int64_t num_items, T& value) {
+    T* ptr = &value;
     while (num_items != 0) {
-      uint16_t value = *reinterpret_cast<uint16_t*>(ptr);
-      *reinterpret_cast<uint16_t*>(ptr) = ((value >> 8) & 0x00ff) |
-                                          ((value << 8) & 0xff00);
-      ptr = reinterpret_cast<void*>(reinterpret_cast<size_t>(ptr) + 2);
+      uint16_t integer = *reinterpret_cast<uint16_t*>(ptr);
+      uint16_t output = ((integer >> 8) & 0x00ff) |
+                        ((integer << 8) & 0xff00);
+      *ptr = *reinterpret_cast<T*>(&output);
+      ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 2);
       num_items--;
     }
   }
 
-  void byteswap32(int64_t num_items, void* ptr) {
+  template <typename T>
+  void byteswap32(int64_t num_items, T& value) {
+    T* ptr = &value;
     while (num_items != 0) {
-      uint32_t value = *reinterpret_cast<uint32_t*>(ptr);
-      *reinterpret_cast<uint32_t*>(ptr) = ((value >> 24) & 0x000000ff) |
-                                          ((value >>  8) & 0x0000ff00) |
-                                          ((value <<  8) & 0x00ff0000) |
-                                          ((value << 24) & 0xff000000);
-      ptr = reinterpret_cast<void*>(reinterpret_cast<size_t>(ptr) + 4);
+      uint32_t integer = *reinterpret_cast<uint32_t*>(ptr);
+      uint32_t output = ((integer >> 24) & 0x000000ff) |
+                        ((integer >>  8) & 0x0000ff00) |
+                        ((integer <<  8) & 0x00ff0000) |
+                        ((integer << 24) & 0xff000000);
+      *ptr = *reinterpret_cast<T*>(&output);
+      ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
       num_items--;
     }
   }
 
-  void byteswap64(int64_t num_items, void* ptr) {
+  template <typename T>
+  void byteswap64(int64_t num_items, T& value) {
+    T* ptr = &value;
     while (num_items != 0) {
-      uint64_t value = *reinterpret_cast<uint64_t*>(ptr);
-      *reinterpret_cast<uint64_t*>(ptr) = ((value >> 56) & 0x00000000000000ff) |
-                                          ((value >> 40) & 0x000000000000ff00) |
-                                          ((value >> 24) & 0x0000000000ff0000) |
-                                          ((value >>  8) & 0x00000000ff000000) |
-                                          ((value <<  8) & 0x000000ff00000000) |
-                                          ((value << 24) & 0x0000ff0000000000) |
-                                          ((value << 40) & 0x00ff000000000000) |
-                                          ((value << 56) & 0xff00000000000000);
-      ptr = reinterpret_cast<void*>(reinterpret_cast<size_t>(ptr) + 8);
+      uint64_t integer = *reinterpret_cast<uint64_t*>(ptr);
+      uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
+                        ((integer >> 40) & 0x000000000000ff00) |
+                        ((integer >> 24) & 0x0000000000ff0000) |
+                        ((integer >>  8) & 0x00000000ff000000) |
+                        ((integer <<  8) & 0x000000ff00000000) |
+                        ((integer << 24) & 0x0000ff0000000000) |
+                        ((integer << 40) & 0x00ff000000000000) |
+                        ((integer << 56) & 0xff00000000000000);
+      *ptr = *reinterpret_cast<T*>(&output);
+      ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
       num_items--;
+    }
+  }
+
+  template <typename T>
+  void byteswap_intp(int64_t num_items, T& value) {
+    T* ptr = &value;
+    if (sizeof(ssize_t) == 4) {
+      while (num_items != 0) {
+        uint32_t integer = *reinterpret_cast<uint32_t*>(ptr);
+        uint32_t output = ((integer >> 24) & 0x000000ff) |
+                          ((integer >>  8) & 0x0000ff00) |
+                          ((integer <<  8) & 0x00ff0000) |
+                          ((integer << 24) & 0xff000000);
+        *ptr = *reinterpret_cast<T*>(&output);
+        ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
+        num_items--;
+      }
+    }
+    else {
+      while (num_items != 0) {
+        uint64_t integer = *reinterpret_cast<uint64_t*>(ptr);
+        uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
+                          ((integer >> 40) & 0x000000000000ff00) |
+                          ((integer >> 24) & 0x0000000000ff0000) |
+                          ((integer >>  8) & 0x00000000ff000000) |
+                          ((integer <<  8) & 0x000000ff00000000) |
+                          ((integer << 24) & 0x0000ff0000000000) |
+                          ((integer << 40) & 0x00ff000000000000) |
+                          ((integer << 56) & 0xff00000000000000);
+        *ptr = *reinterpret_cast<T*>(&output);
+        ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
+        num_items--;
+      }
     }
   }
 
@@ -256,7 +298,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_int16(int16_t value, bool byteswap) noexcept {
     if (byteswap) {
-      byteswap16(1, &value);
+      byteswap16(1, value);
     }
     write_one(value);
   }
@@ -265,7 +307,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_int32(int32_t value, bool byteswap) noexcept {
     if (byteswap) {
-      byteswap32(1, &value);
+      byteswap32(1, value);
     }
     write_one(value);
   }
@@ -274,7 +316,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_int64(int64_t value, bool byteswap) noexcept {
     if (byteswap) {
-      byteswap64(1, &value);
+      byteswap64(1, value);
     }
     write_one(value);
   }
@@ -284,10 +326,10 @@ namespace awkward {
   ForthOutputBufferOf<OUT>::write_one_intp(ssize_t value, bool byteswap) noexcept {
     if (byteswap) {
       if (sizeof(ssize_t) == 4) {
-        byteswap32(1, &value);
+        byteswap32(1, value);
       }
       else {
-        byteswap64(1, &value);
+        byteswap64(1, value);
       }
     }
     write_one(value);
@@ -303,7 +345,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_uint16(uint16_t value, bool byteswap) noexcept {
     if (byteswap) {
-      byteswap16(1, &value);
+      byteswap16(1, value);
     }
     write_one(value);
   }
@@ -312,7 +354,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_uint32(uint32_t value, bool byteswap) noexcept {
     if (byteswap) {
-      byteswap32(1, &value);
+      byteswap32(1, value);
     }
     write_one(value);
   }
@@ -321,7 +363,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_uint64(uint64_t value, bool byteswap) noexcept {
     if (byteswap) {
-      byteswap64(1, &value);
+      byteswap64(1, value);
     }
     write_one(value);
   }
@@ -331,10 +373,10 @@ namespace awkward {
   ForthOutputBufferOf<OUT>::write_one_uintp(size_t value, bool byteswap) noexcept {
     if (byteswap) {
       if (sizeof(size_t) == 4) {
-        byteswap32(1, &value);
+        byteswap32(1, value);
       }
       else {
-        byteswap64(1, &value);
+        byteswap64(1, value);
       }
     }
     write_one(value);
@@ -344,7 +386,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_float32(float value, bool byteswap) noexcept {
     if (byteswap) {
-      byteswap32(1, &value);
+      byteswap32(1, value);
     }
     write_one(value);
   }
@@ -352,11 +394,11 @@ namespace awkward {
   template <typename OUT>
   void
   ForthOutputBufferOf<OUT>::write_one_float64(double value, bool byteswap) noexcept {
-    if (byteswap) {
-      byteswap64(1, &value);
+     if (byteswap) {
+      byteswap64(1, value);
     }
     write_one(value);
-  }
+}
 
   template <typename OUT>
   void
@@ -389,11 +431,11 @@ namespace awkward {
                                         int16_t* values,
                                         bool byteswap) noexcept {
     if (byteswap) {
-      byteswap16(num_items, values);
+      byteswap16(num_items, *values);
     }
     write_copy(num_items, values);
     if (byteswap) {
-      byteswap16(num_items, values);
+      byteswap16(num_items, *values);
     }
   }
 
@@ -403,11 +445,11 @@ namespace awkward {
                                         int32_t* values,
                                         bool byteswap) noexcept {
     if (byteswap) {
-      byteswap32(num_items, values);
+      byteswap32(num_items, *values);
     }
     write_copy(num_items, values);
     if (byteswap) {
-      byteswap32(num_items, values);
+      byteswap32(num_items, *values);
     }
   }
 
@@ -417,11 +459,11 @@ namespace awkward {
                                         int64_t* values,
                                         bool byteswap) noexcept {
     if (byteswap) {
-      byteswap64(num_items, values);
+      byteswap64(num_items, *values);
     }
     write_copy(num_items, values);
     if (byteswap) {
-      byteswap64(num_items, values);
+      byteswap64(num_items, *values);
     }
   }
 
@@ -432,19 +474,19 @@ namespace awkward {
                                        bool byteswap) noexcept {
     if (byteswap) {
       if (sizeof(ssize_t) == 4) {
-        byteswap32(num_items, values);
+        byteswap32(num_items, *values);
       }
       else {
-        byteswap64(num_items, values);
+        byteswap64(num_items, *values);
       }
     }
     write_copy(num_items, values);
     if (byteswap) {
       if (sizeof(ssize_t) == 4) {
-        byteswap32(num_items, values);
+        byteswap32(num_items, *values);
       }
       else {
-        byteswap64(num_items, values);
+        byteswap64(num_items, *values);
       }
     }
   }
@@ -470,11 +512,11 @@ namespace awkward {
                                          uint16_t* values,
                                          bool byteswap) noexcept {
     if (byteswap) {
-      byteswap16(num_items, values);
+      byteswap16(num_items, *values);
     }
     write_copy(num_items, values);
     if (byteswap) {
-      byteswap16(num_items, values);
+      byteswap16(num_items, *values);
     }
   }
 
@@ -484,11 +526,11 @@ namespace awkward {
                                          uint32_t* values,
                                          bool byteswap) noexcept {
     if (byteswap) {
-      byteswap32(num_items, values);
+      byteswap32(num_items, *values);
     }
     write_copy(num_items, values);
     if (byteswap) {
-      byteswap32(num_items, values);
+      byteswap32(num_items, *values);
     }
   }
 
@@ -498,11 +540,11 @@ namespace awkward {
                                          uint64_t* values,
                                          bool byteswap) noexcept {
     if (byteswap) {
-      byteswap64(num_items, values);
+      byteswap64(num_items, *values);
     }
     write_copy(num_items, values);
     if (byteswap) {
-      byteswap64(num_items, values);
+      byteswap64(num_items, *values);
     }
   }
 
@@ -513,19 +555,19 @@ namespace awkward {
                                         bool byteswap) noexcept {
     if (byteswap) {
       if (sizeof(size_t) == 4) {
-        byteswap32(num_items, values);
+        byteswap32(num_items, *values);
       }
       else {
-        byteswap64(num_items, values);
+        byteswap64(num_items, *values);
       }
     }
     write_copy(num_items, values);
     if (byteswap) {
       if (sizeof(size_t) == 4) {
-        byteswap32(num_items, values);
+        byteswap32(num_items, *values);
       }
       else {
-        byteswap64(num_items, values);
+        byteswap64(num_items, *values);
       }
     }
   }
@@ -536,11 +578,11 @@ namespace awkward {
                                           float* values,
                                           bool byteswap) noexcept {
     if (byteswap) {
-      byteswap32(num_items, values);
+      byteswap32(num_items, *values);
     }
     write_copy(num_items, values);
     if (byteswap) {
-      byteswap32(num_items, values);
+      byteswap32(num_items, *values);
     }
   }
 
@@ -550,11 +592,11 @@ namespace awkward {
                                           double* values,
                                           bool byteswap) noexcept {
     if (byteswap) {
-      byteswap64(num_items, values);
+      byteswap64(num_items, *values);
     }
     write_copy(num_items, values);
     if (byteswap) {
-      byteswap64(num_items, values);
+      byteswap64(num_items, *values);
     }
   }
 
@@ -589,7 +631,7 @@ namespace awkward {
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(int16_t) * (size_t)num_items);
     if (byteswap) {
-      byteswap16(num_items, &ptr_.get()[length_]);
+      byteswap16(num_items, ptr_.get()[length_]);
     }
     length_ = next;
   }
@@ -603,7 +645,7 @@ namespace awkward {
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(int32_t) * (size_t)num_items);
     if (byteswap) {
-      byteswap32(num_items, &ptr_.get()[length_]);
+      byteswap32(num_items, ptr_.get()[length_]);
     }
     length_ = next;
   }
@@ -617,7 +659,7 @@ namespace awkward {
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(int64_t) * (size_t)num_items);
     if (byteswap) {
-      byteswap64(num_items, &ptr_.get()[length_]);
+      byteswap64(num_items, ptr_.get()[length_]);
     }
     length_ = next;
   }
@@ -652,7 +694,7 @@ namespace awkward {
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(uint16_t) * (size_t)num_items);
     if (byteswap) {
-      byteswap16(num_items, &ptr_.get()[length_]);
+      byteswap16(num_items, ptr_.get()[length_]);
     }
     length_ = next;
   }
@@ -666,7 +708,7 @@ namespace awkward {
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(uint32_t) * (size_t)num_items);
     if (byteswap) {
-      byteswap32(num_items, &ptr_.get()[length_]);
+      byteswap32(num_items, ptr_.get()[length_]);
     }
     length_ = next;
   }
@@ -680,7 +722,7 @@ namespace awkward {
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(uint64_t) * (size_t)num_items);
     if (byteswap) {
-      byteswap64(num_items, &ptr_.get()[length_]);
+      byteswap64(num_items, ptr_.get()[length_]);
     }
     length_ = next;
   }
@@ -694,7 +736,7 @@ namespace awkward {
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(float) * (size_t)num_items);
     if (byteswap) {
-      byteswap32(num_items, &ptr_.get()[length_]);
+      byteswap32(num_items, ptr_.get()[length_]);
     }
     length_ = next;
   }
@@ -708,7 +750,7 @@ namespace awkward {
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(double) * (size_t)num_items);
     if (byteswap) {
-      byteswap64(num_items, &ptr_.get()[length_]);
+      byteswap64(num_items, ptr_.get()[length_]);
     }
     length_ = next;
   }
@@ -752,6 +794,18 @@ namespace awkward {
       reserved_ = reservation;
     }
   }
+
+  template void byteswap16<int16_t>(int64_t num_items, int16_t& value);
+  template void byteswap16<uint16_t>(int64_t num_items, uint16_t& value);
+  template void byteswap32<int32_t>(int64_t num_items, int32_t& value);
+  template void byteswap32<uint32_t>(int64_t num_items, uint32_t& value);
+  template void byteswap32<float>(int64_t num_items, float& value);
+  template void byteswap64<int64_t>(int64_t num_items, int64_t& value);
+  template void byteswap64<uint64_t>(int64_t num_items, uint64_t& value);
+  template void byteswap64<double>(int64_t num_items, double& value);
+
+  template void byteswap_intp<size_t>(int64_t num_items, size_t& value);
+  template void byteswap_intp<ssize_t>(int64_t num_items, ssize_t& value);
 
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<bool>;
   template class EXPORT_TEMPLATE_INST ForthOutputBufferOf<int8_t>;

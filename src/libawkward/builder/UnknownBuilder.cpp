@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/BoolBuilder.h"
 #include "awkward/builder/DatetimeBuilder.h"
@@ -20,13 +19,13 @@
 
 namespace awkward {
   const BuilderPtr
-  UnknownBuilder::fromempty(const ArrayBuilderOptions& options) {
-    return std::make_shared<UnknownBuilder>(options, 0);
+  UnknownBuilder::fromempty(const int64_t initial) {
+    return std::make_shared<UnknownBuilder>(initial, 0);
   }
 
-  UnknownBuilder::UnknownBuilder(const ArrayBuilderOptions& options,
+  UnknownBuilder::UnknownBuilder(const int64_t initial,
                                  int64_t nullcount)
-      : options_(options)
+      : initial_(initial)
       , nullcount_(nullcount) { }
 
   const std::string
@@ -81,9 +80,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::boolean(bool x) {
-    BuilderPtr out = BoolBuilder::fromempty(options_);
+    BuilderPtr out = BoolBuilder::fromempty(initial_);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->boolean(x);
     return std::move(out);
@@ -91,9 +90,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::integer(int64_t x) {
-    BuilderPtr out = Int64Builder::fromempty(options_);
+    BuilderPtr out = Int64Builder::fromempty(initial_);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->integer(x);
     return std::move(out);
@@ -101,9 +100,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::real(double x) {
-    BuilderPtr out = Float64Builder::fromempty(options_);
+    BuilderPtr out = Float64Builder::fromempty(initial_);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->real(x);
     return std::move(out);
@@ -111,9 +110,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::complex(std::complex<double> x) {
-    BuilderPtr out = Complex128Builder::fromempty(options_);
+    BuilderPtr out = Complex128Builder::fromempty(initial_);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->complex(x);
     return std::move(out);
@@ -121,9 +120,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::datetime(int64_t x, const std::string& unit) {
-    BuilderPtr out = DatetimeBuilder::fromempty(options_, unit);
+    BuilderPtr out = DatetimeBuilder::fromempty(initial_, unit);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->datetime(x, unit);
     return std::move(out);
@@ -131,9 +130,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::timedelta(int64_t x, const std::string& unit) {
-    BuilderPtr out = DatetimeBuilder::fromempty(options_, unit);
+    BuilderPtr out = DatetimeBuilder::fromempty(initial_, unit);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->timedelta(x, unit);
     return std::move(out);
@@ -141,9 +140,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::string(const char* x, int64_t length, const char* encoding) {
-    BuilderPtr out = StringBuilder::fromempty(options_, encoding);
+    BuilderPtr out = StringBuilder::fromempty(initial_, encoding);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->string(x, length, encoding);
     return std::move(out);
@@ -151,9 +150,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::beginlist() {
-    BuilderPtr out = ListBuilder::fromempty(options_);
+    BuilderPtr out = ListBuilder::fromempty(initial_);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->beginlist();
     return std::move(out);
@@ -168,9 +167,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::begintuple(int64_t numfields) {
-    BuilderPtr out = TupleBuilder::fromempty(options_);
+    BuilderPtr out = TupleBuilder::fromempty(initial_);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->begintuple(numfields);
     return std::move(out);
@@ -192,9 +191,9 @@ namespace awkward {
 
   const BuilderPtr
   UnknownBuilder::beginrecord(const char* name, bool check) {
-    BuilderPtr out = RecordBuilder::fromempty(options_);
+    BuilderPtr out = RecordBuilder::fromempty(initial_);
     if (nullcount_ != 0) {
-      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+      out = OptionBuilder::fromnulls(initial_, nullcount_, out);
     }
     out.get()->beginrecord(name, check);
     return std::move(out);

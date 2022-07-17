@@ -29,8 +29,10 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
 
 
 def _impl(array, axis, highlevel, behavior):
+
     # Determine the (potentially nested) bytemask
     def getfunction_inner(layout, depth, **kwargs):
+
         if not isinstance(layout, ak._v2.contents.Content):
             return
 
@@ -70,6 +72,11 @@ def _impl(array, axis, highlevel, behavior):
             return layout.recursively_apply(getfunction_inner)
 
     layout = ak._v2.operations.to_layout(array)
+    max_axis = layout.branch_depth[1] - 1
+    if axis > max_axis:
+        raise ak._v2._util.error(
+            np.AxisError(f"axis={axis} exceeds the depth ({max_axis}) of this array")
+        )
     behavior = ak._v2._util.behavior_of(array, behavior=behavior)
     depth_context = {"posaxis": axis}
     out = layout.recursively_apply(getfunction_outer, depth_context=depth_context)
