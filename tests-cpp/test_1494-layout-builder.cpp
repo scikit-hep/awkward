@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#include "../src/awkward/_v2/cpp-headers/LayoutBuilder.h"
+#include "../src/awkward/_v2/cpp-headers/awkward/LayoutBuilder.h"
 
 namespace lb = awkward::LayoutBuilder;
 

@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iostream>
 #include <utility>
+#include <stdexcept>
 
 namespace awkward {
 
@@ -281,11 +282,11 @@ namespace awkward {
     /// @brief Last element in last panel
     PRIMITIVE
     last() const {
-      if (length_[0] == 0) {
+      if (ptr_->length() == 0) {
         throw std::runtime_error("Buffer is empty");
       }
       else {
-        return (ptr_.back()).get()[length_.back()-1];
+        return (*ptr_)[ptr_->length() - 1];
       }
     }
 
@@ -305,7 +306,7 @@ namespace awkward {
       if (ptr_->length() == ptr_->reserved()) {
         add_panel((size_t)ceil(ptr_->reserved() * 1.5));
       }
-      _fill_panel(datum);
+      fill_panel(datum);
     }
 
     /// @brief Inserts an entire array into the panel(s), possibly triggering
@@ -319,17 +320,17 @@ namespace awkward {
       size_t empty_slots = ptr_->reserved() - ptr_->length();
       if (size > empty_slots) {
         for (size_t i = 0; i < empty_slots; i++) {
-          _fill_panel(ptr[i]);
+          fill_panel(ptr[i]);
         }
         add_panel(size - empty_slots > ptr_->reserved() ?
                   size - empty_slots : ptr_->reserved());
         for (size_t i = empty_slots; i < size; i++) {
-          _fill_panel(ptr[i]);
+          fill_panel(ptr[i]);
         }
       }
       else {
         for (size_t i = 0; i < size; i++) {
-          _fill_panel(ptr[i]);
+          fill_panel(ptr[i]);
         }
       }
     }

@@ -4,7 +4,7 @@
 #define AWKWARD_LAYOUTBUILDER_H_
 
 #include "GrowableBuffer.h"
-#include "utils.h"
+#include "../utils.h"
 
 #include <tuple>
 #include <map>
@@ -250,8 +250,8 @@ namespace awkward {
 
     void
     set_id(size_t &id) {
-      // id_ = id;
-      // id++;
+      id_ = id;
+      id++;
     }
 
     std::string parameters() const noexcept {
