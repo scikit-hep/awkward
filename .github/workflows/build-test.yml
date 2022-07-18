@@ -86,7 +86,7 @@ jobs:
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ github.job }}-${{ matrix.os }}-${{matrix.python-version}}-${{matrix.numpy-version}}
+        key: ${{ github.job }}-${{matrix.python-version}}-${{matrix.numpy-version}}
     - name: Use ccache
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
@@ -137,7 +137,7 @@ jobs:
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ github.job }}-${{ matrix.os }}-${{matrix.python-version}}-${{matrix.numpy-version}}
+        key: ${{ github.job }}-${{matrix.python-version}}-${{matrix.numpy-version}}
     - name: Use ccache
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
