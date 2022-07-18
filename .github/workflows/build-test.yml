@@ -132,7 +132,8 @@ jobs:
         key: ${{ github.job }}-${{ matrix.os }}-${{matrix.python-version}}-${{matrix.numpy-version}}
     - name: Use ccache
       run: |
-        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
+        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
     - name: Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
