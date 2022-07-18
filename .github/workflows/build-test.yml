@@ -104,7 +104,7 @@ jobs:
     - name: Test CPU kernels
       run: python -m pytest -vv -rs tests-cpu-kernels
     - name: Test
-      run: python -m pytest -vv -rs test
+      run: python -m pytest -vv -rs tests
 
   Linux:
     strategy:
