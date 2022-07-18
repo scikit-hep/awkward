@@ -2,13 +2,10 @@ name: Build Test
 
 on:
   push:
-    branches-ignore:
-    - '*'
     paths-ignore:
     - README.md
     - VERSION_INFO
-    - .ci/azure-doctest-awkward.yml
-    - .ci/azure-deploy-awkward.yml
+    - .ci/*
     - .readthedocs.yml
     - docs-src/*
     - docs-img/*
@@ -19,9 +16,8 @@ on:
     - studies/*
     - src/cuda-kernels
     - cuda-kernels
+  # Don't run for any PR
   pull_request:
-    branches-ignore:
-    - '*'
   schedule:
   - cron: '0 12 1 * *'
 
