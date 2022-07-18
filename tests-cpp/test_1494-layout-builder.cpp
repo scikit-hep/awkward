@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#include "../src/awkward/_v2/cpp-headers/awkward/LayoutBuilder.h"
+#include "awkward/LayoutBuilder.h"
 
 namespace lb = awkward::LayoutBuilder;
 
@@ -372,18 +372,27 @@ test_EmptyRecord() {
 void
 test_Record()
 {
+  std::cout << "test_Record()\n";
   auto builder = lb::Record<
-      lb::Field<lb::field_name<one_field>, lb::Numpy<initial, double>>,
-      lb::Field<lb::field_name<two_field>, lb::Numpy<initial, int64_t>>,
-      lb::Field<lb::field_name<three_field>, lb::Numpy<initial, char>>
+      lb::Field<one_field, lb::Numpy<initial, double>>,
+      lb::Field<two_field, lb::Numpy<initial, int64_t>>,
+      lb::Field<three_field, lb::Numpy<initial, char>>
   >();
 
-  auto one_builder = &(std::get<0>(builder.contents)->builder);
-  auto two_builder = &(std::get<1>(builder.contents)->builder);
-  auto three_builder = &(std::get<2>(builder.contents)->builder);
+  auto names = builder.field_names();
+  for (auto i : names) {
+    std::cout << "+++=>> name " << i << std::endl;
+  }
 
-  one_builder->append(1.1);
-  two_builder->append(2);
+  builder.field_append("one", 1.1);
+
+  builder.field("two");
+  builder.append(2);
+
+  auto one_builder = &std::get<0>(builder.contents)->builder();
+  auto two_builder = &(std::get<1>(builder.contents)->builder());
+  auto three_builder = &(std::get<2>(builder.contents)->builder());
+
   three_builder->append('a');
 
   one_builder->append(3.3);
@@ -444,17 +453,19 @@ test_Record()
 
 void
 test_ListOffset_Record() {
+  std::cout << "test_ListOffset_Record(()\n";
+
   auto builder = lb::ListOffset<initial,
       lb::Record<
-          lb::Field<lb::field_name<x_field>, lb::Numpy<initial, double>>,
-          lb::Field<lb::field_name<y_field>, lb::ListOffset<initial,
+          lb::Field<x_field, lb::Numpy<initial, double>>,
+          lb::Field<y_field, lb::ListOffset<initial,
               lb::Numpy<initial, int32_t>>
   >>>();
 
   auto subbuilder = builder.begin_list();
 
-  auto x_builder = &(std::get<0>(subbuilder->contents)->builder);
-  auto y_builder = &(std::get<1>(subbuilder->contents)->builder);
+  auto x_builder = &(std::get<0>(subbuilder->contents)->builder());
+  auto y_builder = &(std::get<1>(subbuilder->contents)->builder());
 
   x_builder->append(1.1);
   auto y_subbuilder = y_builder->begin_list();
@@ -547,22 +558,24 @@ test_ListOffset_Record() {
 void
 test_Record_Record()
 {
+  std::cout << "test_Record_Record()\n";
+
   auto builder = lb::Record<
-      lb::Field<lb::field_name<x_field>, lb::Record<
-          lb::Field<lb::field_name<u_field>, lb::Numpy<initial, double>>,
-          lb::Field<lb::field_name<v_field>, lb::ListOffset<initial,
+      lb::Field<x_field, lb::Record<
+          lb::Field<u_field, lb::Numpy<initial, double>>,
+          lb::Field<v_field, lb::ListOffset<initial,
               lb::Numpy<initial, int64_t>>>>>,
-      lb::Field<lb::field_name<y_field>, lb::Record<
-          lb::Field<lb::field_name<w_field>, lb::Numpy<initial, char>>>>
+      lb::Field<y_field, lb::Record<
+          lb::Field<w_field, lb::Numpy<initial, char>>>>
   >();
 
-  auto x_builder = &(std::get<0>(builder.contents)->builder);
-  auto y_builder = &(std::get<1>(builder.contents)->builder);
+  auto x_builder = &(std::get<0>(builder.contents)->builder());
+  auto y_builder = &(std::get<1>(builder.contents)->builder());
 
-  auto u_builder = &(std::get<0>(x_builder->contents)->builder);
-  auto v_builder = &(std::get<1>(x_builder->contents)->builder);
+  auto u_builder = &(std::get<0>(x_builder->contents)->builder());
+  auto v_builder = &(std::get<1>(x_builder->contents)->builder());
 
-  auto w_builder = &(std::get<0>(y_builder->contents)->builder);
+  auto w_builder = &(std::get<0>(y_builder->contents)->builder());
 
 
   u_builder->append(1.1);
@@ -657,24 +670,25 @@ test_Record_Record()
 void
 test_Record_nested()
 {
+  std::cout << "test_Record_nested()\n";
   auto builder = lb::Record<
-      lb::Field<lb::field_name<u_field>, lb::ListOffset<initial,
+      lb::Field<u_field, lb::ListOffset<initial,
           lb::Record<
-              lb::Field<lb::field_name<i_field>, lb::Numpy<initial, double>>,
-              lb::Field<lb::field_name<j_field>, lb::ListOffset<initial,
+              lb::Field<i_field, lb::Numpy<initial, double>>,
+              lb::Field<j_field, lb::ListOffset<initial,
                   lb::Numpy<initial, int64_t>>>>>>,
-      lb::Field<lb::field_name<v_field>, lb::Numpy<initial, int64_t>>,
-      lb::Field<lb::field_name<w_field>, lb::Numpy<initial, double>>
+      lb::Field<v_field, lb::Numpy<initial, int64_t>>,
+      lb::Field<w_field, lb::Numpy<initial, double>>
   >();
 
-  auto u_builder = &(std::get<0>(builder.contents)->builder);
-  auto v_builder = &(std::get<1>(builder.contents)->builder);
-  auto w_builder = &(std::get<2>(builder.contents)->builder);
+  auto u_builder = &(std::get<0>(builder.contents)->builder());
+  auto v_builder = &(std::get<1>(builder.contents)->builder());
+  auto w_builder = &(std::get<2>(builder.contents)->builder());
 
   auto u_subbuilder = u_builder->begin_list();
 
-  auto i_builder = &(std::get<0>(u_subbuilder->contents)->builder);
-  auto j_builder = &(std::get<1>(u_subbuilder->contents)->builder);
+  auto i_builder = &(std::get<0>(u_subbuilder->contents)->builder());
+  auto j_builder = &(std::get<1>(u_subbuilder->contents)->builder());
 
   i_builder->append(1.1);
   auto j_subbuilder = j_builder->begin_list();
@@ -781,7 +795,7 @@ test_Record_nested()
        "node5", ptr3, j_subbuilder->length(),
        "node6", ptr4, v_builder->length(),
        "node7", ptr5, w_builder->length());
-  std::cout << std::endl;
+  std::cout << "DONE!" << std::endl;
 }
 
 void
