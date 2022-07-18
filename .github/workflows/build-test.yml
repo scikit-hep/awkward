@@ -48,10 +48,6 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Pip
-      run: python -m pip install --upgrade pip
-    - name: Print versions
-      run: python -m pip list
     - name: Build
       run: python -m pip install -v .[test,dev]
     - name: Check if kernel specification is sorted
@@ -86,7 +82,7 @@ jobs:
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: ${{ github.job }}-${{matrix.python-version}}-${{matrix.numpy-version}}
+        key: ${{ github.job }}-${{matrix.python-version}}
     - name: Use ccache
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
@@ -95,10 +91,6 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Pip
-      run: python -m pip install --upgrade pip
-    - name: Print versions
-      run: python -m pip list
     - name: Build
       run: python -m pip install -v .[test,dev]
     - name: Check if kernel specification is sorted
@@ -146,8 +138,6 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Pip
-      run: python -m pip install --upgrade pip
     - name: Install NumPy
       run: |
         if [[ -z "${NUMPY_VERSION}" ]]; then
