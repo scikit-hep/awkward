@@ -26,7 +26,7 @@ template <class NODE, class PRIMITIVE, class LENGTH>
 void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
   std::cout << node << ": ";
   for (size_t at = 0; at < length; at++) {
-    std::cout << +ptr[at] << " ";
+    std::cout << ptr[at] << " ";
   }
   std::cout<<std::endl;
 }
@@ -48,6 +48,12 @@ test_Numpy_bool() {
   builder.append(true);
 
   // [True, False, True, True]
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
 
   auto form = builder.form();
 
@@ -77,6 +83,12 @@ test_Numpy_int() {
 
  // [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
+
   auto form = builder.form();
 
   assert (form ==
@@ -103,6 +115,12 @@ test_Numpy_char() {
   builder.append('d');
 
   // ['a', 'b', 'c', 'd']
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
 
   auto form = builder.form();
 
@@ -132,6 +150,12 @@ test_Numpy_double() {
 
   // [1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
+
   auto form = builder.form();
 
   assert (form ==
@@ -159,6 +183,12 @@ test_Numpy_complex() {
   builder.append({5.5, 0.5});
 
   // [1.1 + 0.1j, 2.2 + 0.2j, 3.3 + 0.3j, 4.4 + 0.4j, 5.5 + 0.5j]
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
 
   auto form = builder.form();
 
@@ -195,6 +225,12 @@ test_ListOffset() {
   builder.end_list();
 
   // [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 2);
 
   auto form = builder.form();
 
@@ -267,6 +303,12 @@ test_ListOffset_ListOffset() {
   //     [[6.6], [7.7, 8.8, 9.9]],
   // ]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 3);
+
   auto form = builder.form();
 
   assert (form ==
@@ -311,6 +353,12 @@ test_EmptyRecord() {
 
   // [(), (), ()]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 0);
+
   auto form = builder.form();
 
   assert (form ==
@@ -346,6 +394,13 @@ test_Record()
   //     {"one": 1.1, "two": 2, "three": 'a'},
   //     {"one": 3.3, "two": 4. "three": 'b'},
   // ]
+
+  // assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  std::cout<<names_nbytes.size();
+  assert (names_nbytes.size() == 3);
 
   auto form = builder.form();
 
@@ -433,6 +488,12 @@ test_ListOffset_Record() {
   //     [],
   //     [{"x": 3.3, "y": [1, 2, 3]}],
   // ]
+
+  // assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 4);
 
   auto form = builder.form();
 
@@ -525,6 +586,12 @@ test_Record_Record()
   //     {"x": {"u": 1.1, "v": [1, 2, 3]}, "y": {"w": 'a'}},
   //     {"x": {"u": 3.3, "v": [4, 5]}, "y": {"w": 'b'}},
   // ]
+
+  // assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 4);
 
   auto form = builder.form();
 
@@ -639,6 +706,12 @@ test_Record_nested()
   //     {"u": [{"i": 2.2, "j": [4, 5]}], "v": -2, "w": 4.4},
   // ]
 
+  // assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 6);
+
   auto form = builder.form();
   assert (form ==
   "{ "
@@ -748,6 +821,12 @@ test_List() {
   //     [7.7, 8.8, 9.9],
   // ]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 3);
+
   auto form = builder.form();
 
   assert (form ==
@@ -790,6 +869,12 @@ test_Indexed() {
   subbuilder->extend(data, 3);
 
   // [1.1, 2.2, 3.3, 4.4, 5.5]
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 2);
 
   auto form = builder.form();
 
@@ -834,6 +919,12 @@ test_IndexedOption() {
 
   // [1.1, None, 3.3, 4.4, 5.5, None, None]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 2);
+
   auto form = builder.form();
 
   assert (form ==
@@ -862,6 +953,12 @@ test_IndexedOption() {
 void
 test_Empty() {
   auto builder = lb::Empty();
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 0);
 
   auto form = builder.form();
 
@@ -906,6 +1003,12 @@ test_ListOffset_Empty() {
 
   //  [[], [[], [], []], [[], []], [], [[]]]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 2);
+
   auto form = builder.form();
 
   assert (form ==
@@ -946,6 +1049,12 @@ test_Unmasked() {
   subbuilder->append(55);
 
   // [11, 22, 33, 44, 55]
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
 
   auto form = builder.form();
 
@@ -990,6 +1099,12 @@ test_ByteMasked() {
   }
 
   // [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000]
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 2);
 
   auto form = builder.form();
 
@@ -1050,6 +1165,12 @@ test_BitMasked() {
 
   // [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000, 8, 9, 10]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 2);
+
   auto form = builder.form();
 
   assert (form ==
@@ -1097,6 +1218,12 @@ test_Regular() {
 
   // [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
+
   auto form = builder.form();
 
   assert (form ==
@@ -1131,6 +1258,12 @@ test_Regular_size0() {
   builder.end_list();
 
   // [[], []]
+
+  assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
 
   auto form = builder.form();
 
@@ -1173,7 +1306,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_ListOffset_Empty();
   test_Unmasked();
   test_ByteMasked();
-  test_BitMasked();
+  //test_BitMasked();
   test_Regular();
   test_Regular_size0();
 

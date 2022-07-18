@@ -58,7 +58,7 @@ namespace awkward {
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
     }
@@ -88,13 +88,13 @@ namespace awkward {
 
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      names_nbytes["node" + std::string(id_) + "-data"] = data_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-data"] = data_.nbytes();
     }
 
-    // void
-    // to_buffers(std::map<std::string, PRIMITIVE*> &buffers) const noexcept {
-    //   data_.concatenate(buffers["node" + std::string(id_) + "-data"]);
-    // }
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      data_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-data"]));
+    }
 
     void
     to_buffers(PRIMITIVE* ptr) const noexcept {
@@ -162,7 +162,7 @@ namespace awkward {
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
       content_.set_id(id);
@@ -200,8 +200,14 @@ namespace awkward {
 
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      names_nbytes["node" + std::string(id_) + "-offsets"] = offsets_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-offsets"] = offsets_.nbytes();
       content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      offsets_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-offsets"]));
+      content_.from_buffers(buffers);
     }
 
     void
@@ -249,7 +255,7 @@ namespace awkward {
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
     }
@@ -276,6 +282,12 @@ namespace awkward {
     extend(size_t size) noexcept {
       length_ += size;
     }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept { }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept { }
 
     std::string
     form() const noexcept {
@@ -311,6 +323,9 @@ namespace awkward {
         : contents({new BUILDERS}...) {
       size_t id = 0;
       set_id(id);
+      auto clear_contents = [](auto content) { content->builder.clear(); };
+      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+        visit_at(contents, i, clear_contents);
     }
 
     size_t
@@ -320,16 +335,16 @@ namespace awkward {
 
     void
     clear() noexcept {
-      auto clear_contents = [](auto record) { record->builder.clear(); };
+      auto clear_contents = [](auto content) { content->builder.clear(); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
         visit_at(contents, i, clear_contents);
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
-      auto contents_id = [&id](auto record) { record->builder.set_id(id); };
+      auto contents_id = [&id](auto content) { content->builder.set_id(id); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
         visit_at(contents, i, contents_id);
     }
@@ -343,9 +358,14 @@ namespace awkward {
       parameters_ = parameter;
     }
 
+    // BUILDERS*
+    // field(const char* name) noexcept {
+
+    // }
+
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      auto contents_nbytes = [&names_nbytes](auto record) { record->builder.buffer_nbytes(names_nbytes); };
+      auto contents_nbytes = [&names_nbytes](auto content) { content->builder.buffer_nbytes(names_nbytes); };
       for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
         visit_at(contents, i, contents_nbytes);
     }
@@ -381,8 +401,7 @@ namespace awkward {
     std::string parameters_;
   };
 
-
-template <unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename BUILDER>
   class List {
   public:
     List()
@@ -410,7 +429,7 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
       content_.set_id(id);
@@ -454,9 +473,16 @@ template <unsigned INITIAL, typename BUILDER>
 
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      names_nbytes["node" + std::string(id_) + "-starts"] = starts_.nbytes();
-      names_nbytes["node" + std::string(id_) + "-stops"] = stops_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-starts"] = starts_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-stops"] = stops_.nbytes();
       content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      starts_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-starts"]));
+      stops_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-stops"]));
+      content_.from_buffers(buffers);
     }
 
     void
@@ -486,7 +512,7 @@ template <unsigned INITIAL, typename BUILDER>
     std::string parameters_;
   };
 
-template <unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename BUILDER>
   class Indexed {
   public:
     Indexed()
@@ -514,7 +540,7 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
       content_.set_id(id);
@@ -565,8 +591,14 @@ template <unsigned INITIAL, typename BUILDER>
 
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      names_nbytes["node" + std::string(id_) + "-index"] = index_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
       content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      index_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-index"]));
+      content_.from_buffers(buffers);
     }
 
     void
@@ -595,7 +627,7 @@ template <unsigned INITIAL, typename BUILDER>
     size_t last_valid_;
   };
 
-template <unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename BUILDER>
   class IndexedOption {
   public:
     IndexedOption()
@@ -623,7 +655,7 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
       content_.set_id(id);
@@ -681,8 +713,14 @@ template <unsigned INITIAL, typename BUILDER>
 
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      names_nbytes["node" + std::string(id_) + "-index"] = index_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
       content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      index_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-index"]));
+      content_.from_buffers(buffers);
     }
 
     void
@@ -724,7 +762,10 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    set_id(size_t &id) {
+    clear() { }
+
+    void
+    set_id(size_t &id) noexcept {
       // id_ = id;
       // id++;
     }
@@ -741,6 +782,12 @@ template <unsigned INITIAL, typename BUILDER>
     bool is_valid() const noexcept {
       return true;
     }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept { }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept { }
 
     std::string
     form() const noexcept {
@@ -781,7 +828,7 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
       content_.set_id(id);
@@ -813,6 +860,11 @@ template <unsigned INITIAL, typename BUILDER>
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
       content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      content_.from_buffers(buffers);
     }
 
     void
@@ -865,7 +917,7 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
       content_.set_id(id);
@@ -926,8 +978,14 @@ template <unsigned INITIAL, typename BUILDER>
 
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      names_nbytes["node" + std::string(id_) + "-mask"] = mask_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-mask"] = mask_.nbytes();
       content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      mask_.concatenate(static_cast<int8_t*>(buffers["node" + std::to_string(id_) + "-mask"]));
+      content_.from_buffers(buffers);
     }
 
     void
@@ -997,7 +1055,7 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
       content_.set_id(id);
@@ -1066,8 +1124,14 @@ template <unsigned INITIAL, typename BUILDER>
 
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      names_nbytes["node" + std::string(id_) + "-mask"] = mask_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-mask"] = mask_.nbytes();
       content_.buffer_nbytes(names_nbytes);
+    }
+
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      mask_.concatenate(static_cast<uint8_t*>(buffers["node" + std::to_string(id_) + "-mask"]));
+      content_.from_buffers(buffers);
     }
 
     void
@@ -1149,7 +1213,7 @@ template <unsigned INITIAL, typename BUILDER>
     }
 
     void
-    set_id(size_t &id) {
+    set_id(size_t &id) noexcept {
       id_ = id;
       id++;
       content_.set_id(id);
@@ -1190,10 +1254,10 @@ template <unsigned INITIAL, typename BUILDER>
       content_.buffer_nbytes(names_nbytes);
     }
 
-    // void
-    // to_buffers() const noexcept {
-
-    // }
+    void
+    from_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      content_.from_buffers(buffers);
+    }
 
     std::string
     form() const noexcept {
@@ -1217,108 +1281,116 @@ template <unsigned INITIAL, typename BUILDER>
     size_t size_ = SIZE;
   };
 
-// template <unsigned INITIAL,  typename... BUILDERS>
-//   class Union {
-//   public:
-//     Union()
-//         : tags_(awkward::GrowableBuffer<int8_t>(INITIAL))
-//         : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
-//         , contents_({new BUILDERS}...)
-//         , last_valid_index_(-1) {
-//       size_t id = 0;
-//       set_id(id);
-//     }
+  // template <unsigned INITIAL,  typename... BUILDERS>
+  // class Union {
+  // public:
+  //   Union()
+  //       : tags_(awkward::GrowableBuffer<int8_t>(INITIAL))
+  //       : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+  //       , contents_({new BUILDERS}...)
+  //       , last_valid_index_(-1) {
+  //     size_t id = 0;
+  //     set_id(id);
+  //     for (size_t i = 0; i < 5; i++)
+  //       last_valid_index_[i] = -1;
+  //   }
 
-//     size_t
-//     length() const noexcept {
-//       return index_.length();
-//     }
+  //   size_t
+  //   length() const noexcept {
+  //     return tags_.length();
+  //   }
 
-//     void
-//     clear() noexcept {
-//       last_valid_ = -1;
-//       index_.clear();
-//       content_.clear();
-//     }
+  //   void
+  //   clear() noexcept {
+  //     // for tag in range(len(last_valid_index_)):
+  //     //   last_valid_index_[tag] = -1
+  //     tags_.clear()
+  //     index_.clear()
+  //     auto clear_contents = [](auto content) { content->builder.clear(); };
+  //     for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+  //       visit_at(contents, i, clear_contents);
+  //   }
 
-//     BUILDER*
-//     content() {
-//       return &content_;
-//     }
+  //   BUILDER*
+  //   content() {
+  //     return &content_;
+  //   }
 
-//     void
-//     set_id(size_t &id) {
-//       id_ = id;
-//       id++;
-//       content_.set_id(id);
-//     }
+  //   void
+  //   set_id(size_t &id) noexcept {
+  //     id_ = id;
+  //     id++;
+  //     auto contents_id = [&id](auto content) { content->builder.set_id(id); };
+  //     for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+  //       visit_at(contents, i, contents_id);
+  //   }
 
-//     std::string parameters() const noexcept {
-//       return parameters_;
-//     }
+  //   std::string parameters() const noexcept {
+  //     return parameters_;
+  //   }
 
-//     bool is_valid() const noexcept {
-//       if (content_.length() != index_.length()) {
-//         std::cout << "Union node" << id_ << " has content length " << content_.length()
-//                   << " but index length " << index_.length();
-//         return false;
-//       }
-//       else if (content_.length() != last_valid_index_ + 1) {
-//         std::cout << "Union node" << id_ << " has content length " << content_.length()
-//                   << " but last valid index is " << last_valid_index_;
-//         return false;
-//       }
-//       else {
-//         return content_.is_valid();
-//       }
-//     }
+  //   bool is_valid() const noexcept {
+  //     if (content_.length() != index_.length()) {
+  //       std::cout << "Union node" << id_ << " has content length " << content_.length()
+  //                 << " but index length " << index_.length();
+  //       return false;
+  //     }
+  //     else if (content_.length() != last_valid_index_ + 1) {
+  //       std::cout << "Union node" << id_ << " has content length " << content_.length()
+  //                 << " but last valid index is " << last_valid_index_;
+  //       return false;
+  //     }
+  //     else {
+  //       return content_.is_valid();
+  //     }
+  //   }
 
-//     BUILDER*
-//     append_index(int8_t tag) noexcept {
-//       auto get_content = [&tag] (auto which_content) {
-//       size_t next_index = which_content.length();
-//       last_valid_index_[tag] = next_index;
-//       tags_.append(tag);
-//       index_.append(next_index);};
-//       visit_at(contents_, tag, get_content);
+  //   BUILDER*
+  //   append_index(int8_t tag) noexcept {
+  //     auto get_content = [&tag] (auto which_content) {
+  //     size_t next_index = which_content.length();
+  //     last_valid_index_[tag] = next_index;
+  //     tags_.append(tag);
+  //     index_.append(next_index);};
+  //     visit_at(contents_, tag, get_content);
 
-//       return &which_content;
-//     }
+  //     return &which_content;
+  //   }
 
-//     void
-//     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-//       names_nbytes["node" + std::string(id_) + "-tags"] = tags_.nbytes();
-//       names_nbytes["node" + std::string(id_) + "-index"] = index_.nbytes();
-//       content_.buffer_nbytes(names_nbytes);
-//     }
+  //   void
+  //   buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+  //     names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
+  //     names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
+  //     content_.buffer_nbytes(names_nbytes);
+  //   }
 
-//     void
-//     to_buffers(int8_t* tags, int64_t* index) const noexcept {
-//       tags_.concatenate(tags);
-//       index_.concatenate(index);
-//     }
+  //   void
+  //   to_buffers(int8_t* tags, int64_t* index) const noexcept {
+  //     tags_.concatenate(tags);
+  //     index_.concatenate(index);
+  //   }
 
-//     std::string
-//     form() const noexcept {
-//       std::stringstream form_key;
-//       form_key << "node" << id_;
-//       std::string params("");
-//       if (parameters_ == "") { }
-//       else {
-//         params = std::string(", \"parameters\": " + parameters_);
-//       }
-//       return "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"content\": "
-//                 + contents_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
-//     }
+  //   std::string
+  //   form() const noexcept {
+  //     std::stringstream form_key;
+  //     form_key << "node" << id_;
+  //     std::string params("");
+  //     if (parameters_ == "") { }
+  //     else {
+  //       params = std::string(", \"parameters\": " + parameters_);
+  //     }
+  //     return "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"content\": "
+  //               + contents_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+  //   }
 
-//   private:
-//     GrowableBuffer<int8_t> tags_;
-//     GrowableBuffer<int64_t> index_;
-//     std::tuple<BUILDERS*...> contents_;
-//     size_t id_;
-//     std::string parameters_;
-//     size_t last_valid_index_;
-//   };
+  // private:
+  //   GrowableBuffer<int8_t> tags_;
+  //   GrowableBuffer<int64_t> index_;
+  //   std::tuple<BUILDERS*...> contents_;
+  //   size_t id_;
+  //   std::string parameters_;
+  //   size_t* last_valid_index_;
+  // };
 
   }  // namespace LayoutBuilder
 }  // namespace awkward
