@@ -41,9 +41,11 @@ jobs:
     env:
       PIP_ONLY_BINARY: cmake
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
     - name: Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Pip
@@ -78,9 +80,11 @@ jobs:
     env:
       PIP_ONLY_BINARY: cmake
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
     - name: Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Pip
@@ -119,9 +123,11 @@ jobs:
       PIP_ONLY_BINARY: cmake
       NUMPY_VERSION: ${{ matrix.numpy-version }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
     - name: Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Pip
