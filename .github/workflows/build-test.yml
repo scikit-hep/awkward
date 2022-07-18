@@ -31,7 +31,7 @@ jobs:
   Windows:
     strategy:
       matrix:
-        python.version:
+        python-version:
         - '3.9'
         - '3.10'
         - '3.9'
@@ -43,10 +43,10 @@ jobs:
       PIP_ONLY_BINARY: cmake
     steps:
     - uses: actions/checkout@v2
-    - name: Python ${{ matrix.python.version }}
+    - name: Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python.version }}
+        python-version: ${{ matrix.python-version }}
     - name: Install Pip
       run: python -m pip install --upgrade pip
     - name: Print versions
@@ -80,10 +80,10 @@ jobs:
       PIP_ONLY_BINARY: cmake
     steps:
     - uses: actions/checkout@v2
-    - name: Python ${{ matrix.python.version }}
+    - name: Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python.version }}
+        python-version: ${{ matrix.python-version }}
     - name: Install Pip
       run: python -m pip install --upgrade pip
     - name: Print versions
@@ -106,32 +106,33 @@ jobs:
   Linux:
     strategy:
       matrix:
-        python.version:
+        python-version:
             - '3.10'
             - '3.9'
             - '3.8'
             - '3.7'
             - '3.6'
         include:
-            - python.version: '3.6'
+            - python-version: '3.6'
               numpy-version: '1.13.1'
     runs-on: ubuntu-18.04
     env:
       PIP_ONLY_BINARY: cmake
+      NUMPY_VERSION: ${{ matrix.numpy-version }}
     steps:
     - uses: actions/checkout@v2
-    - name: Python ${{ matrix.python.version }}
+    - name: Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python.version }}
+        python-version: ${{ matrix.python-version }}
     - name: Install Pip
       run: python -m pip install --upgrade pip
     - name: Install NumPy
       run: |
-        if [ ${{ matrix.numpy-version }} = "latest" ]; then
+        if [[ "${NUMPY_VERSION}" == "latest" ]]; then
           python -m pip install numpy;
         else
-          python -m pip install numpy==${{ matrix.numpy-version }};
+          python -m pip install "numpy==${NUMPY_VERSION}";
         fi
     - name: Build
       run: python -m pip install -v .[test,dev]
@@ -151,4 +152,4 @@ jobs:
       run: python -m pytest -vv -rs tests --cov=awkward._v2 --cov-report=term --cov-report=xml
     - name: Codecov
       run: bash <(curl -s https://codecov.io/bash)
-      if: matrix.python.version == '3.9'
+      if: matrix.python-version == '3.9'
