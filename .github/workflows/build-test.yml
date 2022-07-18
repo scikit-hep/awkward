@@ -1,7 +1,7 @@
 name: Build Test
 
 on:
-  push:
+  pull_request:
     paths-ignore:
     - README.md
     - VERSION_INFO
@@ -17,7 +17,6 @@ on:
     - src/cuda-kernels
     - cuda-kernels
   # Don't run for any PR
-  pull_request:
   schedule:
   - cron: '0 12 1 * *'
 
@@ -129,7 +128,7 @@ jobs:
       run: python -m pip install --upgrade pip
     - name: Install NumPy
       run: |
-        if [[ "${NUMPY_VERSION}" == "latest" ]]; then
+        if [[ -z "${NUMPY_VERSION}" ]]; then
           python -m pip install numpy;
         else
           python -m pip install "numpy==${NUMPY_VERSION}";
