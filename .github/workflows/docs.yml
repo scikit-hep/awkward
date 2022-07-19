@@ -5,6 +5,7 @@ on:
       - main
   release:
     types: [released]
+  workflow_dispatch:
 
 jobs:
   Sphinx:
