@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+"""Download and extract a GitHub asset by name and SHA"""
+
+import argparse
+import io
+import os
+import re
+import requests
+import subprocess
+import zipfile
+
+
+def get_sha_head():
+    result = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True)
+    if result.returncode:
+        raise RuntimeError
+    return result.stdout.decode().strip()
+
+
+def get_artefacts(repo, token, per_page=100):
+    response = requests.get(
+        f"https://api.github.com/repos/{repo}/actions/artifacts",
+        params={"per_page": per_page},
+        headers={"Authorization": f"token {token}"},
+    )
+    if response.status_code != 200:
+        raise ValueError(f"Couldn't list artefacts for {repo}: {response.status_code}")
+    return response.json()["artifacts"]
+
+
+def download_and_extract_artefact(artefact, dest, token):
+    response = requests.get(
+        artefact["archive_download_url"],
+        headers={"Authorization": f"token {token}"},
+    )
+
+    if response.status_code != 200:
+        raise RuntimeError(f"Couldn't download artefact: {response.status_code}")
+
+    with zipfile.ZipFile(io.BytesIO(response.content)) as f:
+        f.extractall(path=dest)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("repo", help="name of org/repo")
+    parser.add_argument("artefact", help="regex to match name of artefact")
+    parser.add_argument("-s", "--sha", help="SHA of commit. Default to (this) HEAD")
+    parser.add_argument("-t", "--token", help="GitHub token with correct scopes")
+    parser.add_argument("-d", "--dest", help="path to extract output", default=".")
+    args = parser.parse_args(argv)
+
+    if args.token is None:
+        token = os.environ["GITHUB_TOKEN"]
+    else:
+        token = args.token
+
+    if args.sha is None:
+        sha = get_sha_head()
+    else:
+        sha = args.sha
+
+    artefacts = get_artefacts(args.repo, token)
+
+    matching_artefacts = [
+        a
+        for a in artefacts
+        if a["workflow_run"]["head_sha"] == sha and re.match(args.artefact, a["name"])
+    ]
+    if len(matching_artefacts) != 1:
+        raise RuntimeError(
+            f"Expected 1 artefact for SHA and query, found {len(matching_artefacts)}"
+        )
+
+    download_and_extract_artefact(matching_artefacts[0], args.dest, token)
+
+
+if __name__ == "__main__":
+    main()
