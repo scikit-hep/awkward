@@ -4,10 +4,6 @@ on:
 
 jobs:
   Sphinx:
-    strategy:
-      matrix:
-        python-version:
-          - "3.8"
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v3
@@ -16,7 +12,7 @@ jobs:
     - name: Setup ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-        key: docs-${{ github.job }}-${{matrix.python-version}}
+        key: docs-${{ github.job }}
     - name: Use ccache
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
@@ -24,7 +20,7 @@ jobs:
     - name: Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.8
     - name: Install Pip
       run: python -m pip install --upgrade pip
     - name: Install requirements
@@ -39,3 +35,5 @@ jobs:
       with:
         name: docs
         path: docs-sphinx/_build/
+    - name: Trigger RTD Build
+      run: curl -X POST -d "branches=${{ github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
