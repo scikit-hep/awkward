@@ -4,7 +4,7 @@ on:
 
 jobs:
   Sphinx:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
@@ -33,8 +33,8 @@ jobs:
       run: sphinx-build docs-sphinx/ docs-sphinx/_build/
     - uses: actions/upload-artifact@v3
       with:
-        name: docs
-        path: docs-sphinx/_build/
-    - name: Trigger RTD Build
-      # NB: head_ref is only valid for PR triggers
-      run: curl -X POST -d "branches=${{ github.head_ref }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
+        name: jupyter-cache
+        path: docs-sphinx/_build/.jupyter_cache
+    # - name: Trigger RTD Build
+      # # NB: head_ref is only valid for PR triggers
+      # run: curl -X POST -d "branches=${{ github.head_ref }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
