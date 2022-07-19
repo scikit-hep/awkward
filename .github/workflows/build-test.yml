@@ -37,7 +37,8 @@ jobs:
           - '3.7'
           - '3.6'
 
-        python-architecture: x64
+        python-architecture:
+          - x64
 
         include:
           - python-version: '3.9'
