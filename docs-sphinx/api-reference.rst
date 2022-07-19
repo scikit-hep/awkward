@@ -48,7 +48,7 @@
 
 .. image:: https://img.shields.io/badge/docs-online-success
    :alt: Documentation
-   :target: https://awkward-array.org
+   :target: https://awkward-array.readthedocs.io
 
 .. image:: https://img.shields.io/badge/chat-online-success
    :alt: Gitter
@@ -63,7 +63,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 API Reference
 *************
 
-   * `Main page (quickstart) <https://awkward-array.org>`__
+   * `Main page (quickstart) <https://awkward-array.readthedocs.io>`__
    * `C++ API reference <_static/index.html>`__
    * Python API reference: **this site**
    * `GitHub repository <https://github.com/scikit-hep/awkward-1.0>`__
