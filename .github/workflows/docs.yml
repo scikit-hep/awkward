@@ -35,6 +35,10 @@ jobs:
       with:
         name: jupyter-cache
         path: docs-sphinx/_build/.jupyter_cache
+    - uses: actions/upload-artifact@v3
+      with:
+        name: docs
+        path: docs-sphinx/_build
     # - name: Trigger RTD Build
       # # NB: head_ref is only valid for PR triggers
       # run: curl -X POST -d "branches=${{ github.head_ref }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
