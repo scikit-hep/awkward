@@ -10,7 +10,7 @@ build:
   jobs:
     pre_build:
       - pip install requests
-      - dev/download-github-artefact scikit-hep/awkward-1.0 jupyter-cache -d docs-sphinx/_build/.jupyter_cache
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 jupyter-cache -d docs-sphinx/_build/.jupyter_cache
 
 python:
   install:
