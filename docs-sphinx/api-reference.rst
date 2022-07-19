@@ -60,7 +60,7 @@
 
 Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they're not.
 
-Documentation
+API Reference
 *************
 
    * `Main page (quickstart) <https://awkward-array.org>`__
