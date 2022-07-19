@@ -37,6 +37,8 @@ def download_and_extract_artefact(artefact, dest, token):
     if response.status_code != 200:
         raise RuntimeError(f"Couldn't download artefact: {response.status_code}")
 
+    os.makedirs(dest, exist_ok=True)
+
     with zipfile.ZipFile(io.BytesIO(response.content)) as f:
         f.extractall(path=dest)
 
