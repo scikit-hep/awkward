@@ -210,18 +210,18 @@ void
 test_ListOffset() {
   auto builder = lb::ListOffset<initial, lb::Numpy<initial, double>>();
 
-  auto subbuilder = builder.begin_list();
-  subbuilder->append(1.1);
-  subbuilder->append(2.2);
-  subbuilder->append(3.3);
+  auto& subbuilder = builder.begin_list();
+  subbuilder.append(1.1);
+  subbuilder.append(2.2);
+  subbuilder.append(3.3);
   builder.end_list();
 
   builder.begin_list();
   builder.end_list();
 
   builder.begin_list();
-  subbuilder->append(4.4);
-  subbuilder->append(5.5);
+  subbuilder.append(4.4);
+  subbuilder.append(5.5);
   builder.end_list();
 
   // [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
@@ -249,11 +249,11 @@ test_ListOffset() {
   int64_t* ptr0 = new int64_t[builder.length() + 1];
   builder.to_buffers(ptr0);
 
-  double* ptr1 = new double[subbuilder->length()];
-  subbuilder->to_buffers(ptr1);
+  double* ptr1 = new double[subbuilder.length()];
+  subbuilder.to_buffers(ptr1);
 
   dump("node0", ptr0, builder.length() + 1,
-       "node1", ptr1, subbuilder->length());
+       "node1", ptr1, subbuilder.length());
   std::cout<<std::endl;
 }
 
@@ -264,36 +264,36 @@ test_ListOffset_ListOffset() {
           lb::Numpy<initial, double>
   >>();
 
-  auto builder2 = builder.begin_list();
+  auto& builder2 = builder.begin_list();
 
-  auto builder3 = builder2->begin_list();
-  builder3->append(1.1);
-  builder3->append(2.2);
-  builder3->append(3.3);
-  builder2->end_list();
-  builder2->begin_list();
-  builder2->end_list();
+  auto& builder3 = builder2.begin_list();
+  builder3.append(1.1);
+  builder3.append(2.2);
+  builder3.append(3.3);
+  builder2.end_list();
+  builder2.begin_list();
+  builder2.end_list();
   builder.end_list();
 
   builder.begin_list();
-  builder2->begin_list();
-  builder3->append(4.4);
-  builder3->append(5.5);
-  builder2->end_list();
+  builder2.begin_list();
+  builder3.append(4.4);
+  builder3.append(5.5);
+  builder2.end_list();
   builder.end_list();
 
   builder.begin_list();
   builder.end_list();
 
   builder.begin_list();
-  builder2->begin_list();
-  builder3->append(6.6);
-  builder2->end_list();
-  builder2->begin_list();
-  builder3->append(7.7);
-  builder3->append(8.8);
-  builder3->append(9.9);
-  builder2->end_list();
+  builder2.begin_list();
+  builder3.append(6.6);
+  builder2.end_list();
+  builder2.begin_list();
+  builder3.append(7.7);
+  builder3.append(8.8);
+  builder3.append(9.9);
+  builder2.end_list();
   builder.end_list();
 
   // [
@@ -331,15 +331,15 @@ test_ListOffset_ListOffset() {
   int64_t* ptr0 = new int64_t[builder.length() + 1];
   builder.to_buffers(ptr0);
 
-  int64_t* ptr1 = new int64_t[builder2->length() + 1];
-  builder2->to_buffers(ptr1);
+  int64_t* ptr1 = new int64_t[builder2.length() + 1];
+  builder2.to_buffers(ptr1);
 
-  double* ptr2 = new double[builder3->length()];
-  builder3->to_buffers(ptr2);
+  double* ptr2 = new double[builder3.length()];
+  builder3.to_buffers(ptr2);
 
   dump("node0", ptr0, builder.length() + 1,
-       "node1", ptr1, builder2->length() + 1,
-       "node2", ptr2, builder3->length());
+       "node1", ptr1, builder2.length() + 1,
+       "node2", ptr2, builder3.length());
   std::cout<<std::endl;
 }
 
@@ -395,15 +395,15 @@ test_Record()
 
   // A faster way is by caching a Field builder
   // and appending the values to it
-  auto one_builder = &std::get<0>(builder.contents).builder;
-  auto two_builder = &(std::get<1>(builder.contents).builder);
-  auto three_builder = &(std::get<2>(builder.contents).builder);
+  auto& one_builder = std::get<0>(builder.contents).builder;
+  auto& two_builder = std::get<1>(builder.contents).builder;
+  auto& three_builder = std::get<2>(builder.contents).builder;
 
-  three_builder->append('a');
+  three_builder.append('a');
 
-  one_builder->append(3.3);
-  two_builder->append(4);
-  three_builder->append('b');
+  one_builder.append(3.3);
+  two_builder.append(4);
+  three_builder.append('b');
 
   // [
   //     {"one": 1.1, "two": 2, "three": 'a'},
@@ -442,18 +442,18 @@ test_Record()
       "\"form_key\": \"node0\" "
   "}");
 
-  double* ptr0 = new double[one_builder->length()];
-  one_builder->to_buffers(ptr0);
+  double* ptr0 = new double[one_builder.length()];
+  one_builder.to_buffers(ptr0);
 
-  int64_t* ptr1 = new int64_t[two_builder->length()];
-  two_builder->to_buffers(ptr1);
+  int64_t* ptr1 = new int64_t[two_builder.length()];
+  two_builder.to_buffers(ptr1);
 
-  char* ptr2 = new char[three_builder->length()];
-  three_builder->to_buffers(ptr2);
+  char* ptr2 = new char[three_builder.length()];
+  three_builder.to_buffers(ptr2);
 
-  dump("node1", ptr0, one_builder->length(),
-       "node2", ptr1, two_builder->length(),
-       "node3", ptr2, three_builder->length());
+  dump("node1", ptr0, one_builder.length(),
+       "node2", ptr1, two_builder.length(),
+       "node3", ptr2, three_builder.length());
   std::cout<<std::endl;
 }
 
@@ -468,21 +468,21 @@ test_ListOffset_Record() {
               lb::Numpy<initial, int32_t>>
   >>>();
 
-  auto subbuilder = builder.begin_list();
+  auto& subbuilder = builder.begin_list();
 
-  auto x_builder = &(std::get<0>(subbuilder->contents).builder);
-  auto y_builder = &(std::get<1>(subbuilder->contents).builder);
+  auto& x_builder = std::get<0>(subbuilder.contents).builder;
+  auto& y_builder = std::get<1>(subbuilder.contents).builder;
 
-  x_builder->append(1.1);
-  auto y_subbuilder = y_builder->begin_list();
-  y_subbuilder->append(1);
-  y_builder->end_list();
+  x_builder.append(1.1);
+  auto& y_subbuilder = y_builder.begin_list();
+  y_subbuilder.append(1);
+  y_builder.end_list();
 
-  x_builder->append(2.2);
-  y_builder->begin_list();
-  y_subbuilder->append(1);
-  y_subbuilder->append(2);
-  y_builder->end_list();
+  x_builder.append(2.2);
+  y_builder.begin_list();
+  y_subbuilder.append(1);
+  y_subbuilder.append(2);
+  y_builder.end_list();
 
   builder.end_list();
 
@@ -491,12 +491,12 @@ test_ListOffset_Record() {
 
   builder.begin_list();
 
-  x_builder->append(3.3);
-  y_builder->begin_list();
-  y_subbuilder->append(1);
-  y_subbuilder->append(2);
-  y_subbuilder->append(3);
-  y_builder->end_list();
+  x_builder.append(3.3);
+  y_builder.begin_list();
+  y_subbuilder.append(1);
+  y_subbuilder.append(2);
+  y_subbuilder.append(3);
+  y_builder.end_list();
 
   builder.end_list();
 
@@ -545,19 +545,19 @@ test_ListOffset_Record() {
   int64_t* ptr0 = new int64_t[builder.length() + 1];
   builder.to_buffers(ptr0);
 
-  double* ptr1 = new double[x_builder->length()];
-  x_builder->to_buffers(ptr1);
+  double* ptr1 = new double[x_builder.length()];
+  x_builder.to_buffers(ptr1);
 
-  int64_t* ptr2 = new int64_t[y_builder->length() + 1];
-  y_builder->to_buffers(ptr2);
+  int64_t* ptr2 = new int64_t[y_builder.length() + 1];
+  y_builder.to_buffers(ptr2);
 
-  int32_t* ptr3 = new int32_t[y_subbuilder->length()];
-  y_subbuilder->to_buffers(ptr3);
+  int32_t* ptr3 = new int32_t[y_subbuilder.length()];
+  y_subbuilder.to_buffers(ptr3);
 
   dump("node0", ptr0, builder.length() + 1,
-       "node2", ptr1, x_builder->length(),
-       "node3", ptr2, y_builder->length() + 1,
-       "node4", ptr3, y_subbuilder->length());
+       "node2", ptr1, x_builder.length(),
+       "node3", ptr2, y_builder.length() + 1,
+       "node4", ptr3, y_subbuilder.length());
   std::cout<<std::endl;
 }
 
@@ -575,31 +575,31 @@ test_Record_Record()
           lb::Field<w_field, lb::Numpy<initial, char>>>>
   >();
 
-  auto x_builder = &(std::get<0>(builder.contents).builder);
-  auto y_builder = &(std::get<1>(builder.contents).builder);
+  auto& x_builder = std::get<0>(builder.contents).builder;
+  auto& y_builder = std::get<1>(builder.contents).builder;
 
-  auto u_builder = &(std::get<0>(x_builder->contents).builder);
-  auto v_builder = &(std::get<1>(x_builder->contents).builder);
+  auto& u_builder = std::get<0>(x_builder.contents).builder;
+  auto& v_builder = std::get<1>(x_builder.contents).builder;
 
-  auto w_builder = &(std::get<0>(y_builder->contents).builder);
+  auto& w_builder = std::get<0>(y_builder.contents).builder;
 
 
-  u_builder->append(1.1);
-  auto v_subbuilder = v_builder->begin_list();
-  v_subbuilder->append(1);
-  v_subbuilder->append(2);
-  v_subbuilder->append(3);
-  v_builder->end_list();
+  u_builder.append(1.1);
+  auto& v_subbuilder = v_builder.begin_list();
+  v_subbuilder.append(1);
+  v_subbuilder.append(2);
+  v_subbuilder.append(3);
+  v_builder.end_list();
 
-  w_builder->append('a');
+  w_builder.append('a');
 
-  u_builder->append(3.3);
-  v_builder->begin_list();
-  v_subbuilder->append(4);
-  v_subbuilder->append(5);
-  v_builder->end_list();
+  u_builder.append(3.3);
+  v_builder.begin_list();
+  v_subbuilder.append(4);
+  v_subbuilder.append(5);
+  v_builder.end_list();
 
-  w_builder->append('b');
+  w_builder.append('b');
 
   // [
   //     {"x": {"u": 1.1, "v": [1, 2, 3]}, "y": {"w": 'a'}},
@@ -654,22 +654,22 @@ test_Record_Record()
       "\"form_key\": \"node0\" "
   "}");
 
-  double* ptr0 = new double[u_builder->length()];
-  u_builder->to_buffers(ptr0);
+  double* ptr0 = new double[u_builder.length()];
+  u_builder.to_buffers(ptr0);
 
-  int64_t* ptr1 = new int64_t[v_builder->length() + 1];
-  v_builder->to_buffers(ptr1);
+  int64_t* ptr1 = new int64_t[v_builder.length() + 1];
+  v_builder.to_buffers(ptr1);
 
-  int64_t* ptr2 = new int64_t[v_subbuilder->length()];
-  v_subbuilder->to_buffers(ptr2);
+  int64_t* ptr2 = new int64_t[v_subbuilder.length()];
+  v_subbuilder.to_buffers(ptr2);
 
-  char* ptr3 = new char[w_builder->length()];
-  w_builder->to_buffers(ptr3);
+  char* ptr3 = new char[w_builder.length()];
+  w_builder.to_buffers(ptr3);
 
-  dump("node2", ptr0, u_builder->length(),
-       "node3", ptr1, v_builder->length() + 1,
-       "node4", ptr2, v_subbuilder->length(),
-       "node6", ptr3, w_builder->length());
+  dump("node2", ptr0, u_builder.length(),
+       "node3", ptr1, v_builder.length() + 1,
+       "node4", ptr2, v_subbuilder.length(),
+       "node6", ptr3, w_builder.length());
   std::cout << std::endl;
 }
 
@@ -687,39 +687,39 @@ test_Record_nested()
       lb::Field<w_field, lb::Numpy<initial, double>>
   >();
 
-  auto u_builder = &(std::get<0>(builder.contents).builder);
-  auto v_builder = &(std::get<1>(builder.contents).builder);
-  auto w_builder = &(std::get<2>(builder.contents).builder);
+  auto& u_builder = std::get<0>(builder.contents).builder;
+  auto& v_builder = std::get<1>(builder.contents).builder;
+  auto& w_builder = std::get<2>(builder.contents).builder;
 
-  auto u_subbuilder = u_builder->begin_list();
+  auto& u_subbuilder = u_builder.begin_list();
 
-  auto i_builder = &(std::get<0>(u_subbuilder->contents).builder);
-  auto j_builder = &(std::get<1>(u_subbuilder->contents).builder);
+  auto& i_builder = std::get<0>(u_subbuilder.contents).builder;
+  auto& j_builder = std::get<1>(u_subbuilder.contents).builder;
 
-  i_builder->append(1.1);
-  auto j_subbuilder = j_builder->begin_list();
-  j_subbuilder->append(1);
-  j_subbuilder->append(2);
-  j_subbuilder->append(3);
-  j_builder->end_list();
+  i_builder.append(1.1);
+  auto& j_subbuilder = j_builder.begin_list();
+  j_subbuilder.append(1);
+  j_subbuilder.append(2);
+  j_subbuilder.append(3);
+  j_builder.end_list();
 
-  u_builder->end_list();
+  u_builder.end_list();
 
-  v_builder->append(-1);
-  w_builder->append(3.3);
+  v_builder.append(-1);
+  w_builder.append(3.3);
 
-  u_builder->begin_list();
+  u_builder.begin_list();
 
-  i_builder->append(2.2);
-  j_builder->begin_list();
-  j_subbuilder->append(4);
-  j_subbuilder->append(5);
-  j_builder->end_list();
+  i_builder.append(2.2);
+  j_builder.begin_list();
+  j_subbuilder.append(4);
+  j_subbuilder.append(5);
+  j_builder.end_list();
 
-  u_builder->end_list();
+  u_builder.end_list();
 
-  v_builder->append(-2);
-  w_builder->append(4.4);
+  v_builder.append(-2);
+  w_builder.append(4.4);
 
   // [
   //     {"u": [{"i": 1.1, "j": [1, 2, 3]}], "v": -1, "w": 3.3},
@@ -777,30 +777,30 @@ test_Record_nested()
       "\"form_key\": \"node0\" "
   "}");
 
-  int64_t* ptr0 = new int64_t[u_builder->length() + 1];
-  u_builder->to_buffers(ptr0);
+  int64_t* ptr0 = new int64_t[u_builder.length() + 1];
+  u_builder.to_buffers(ptr0);
 
-  double* ptr1 = new double[i_builder->length()];
-  i_builder->to_buffers(ptr1);
+  double* ptr1 = new double[i_builder.length()];
+  i_builder.to_buffers(ptr1);
 
-  int64_t* ptr2 = new int64_t[j_builder->length() + 1];
-  j_builder->to_buffers(ptr2);
+  int64_t* ptr2 = new int64_t[j_builder.length() + 1];
+  j_builder.to_buffers(ptr2);
 
-  int64_t* ptr3 = new int64_t[j_subbuilder->length()];
-  j_subbuilder->to_buffers(ptr3);
+  int64_t* ptr3 = new int64_t[j_subbuilder.length()];
+  j_subbuilder.to_buffers(ptr3);
 
-  int64_t* ptr4 = new int64_t[v_builder->length()];
-  v_builder->to_buffers(ptr4);
+  int64_t* ptr4 = new int64_t[v_builder.length()];
+  v_builder.to_buffers(ptr4);
 
-  double* ptr5 = new double[w_builder->length()];
-  w_builder->to_buffers(ptr5);
+  double* ptr5 = new double[w_builder.length()];
+  w_builder.to_buffers(ptr5);
 
-  dump("node1", ptr0, u_builder->length() + 1,
-       "node3", ptr1, i_builder->length(),
-       "node4", ptr2, j_builder->length() + 1,
-       "node5", ptr3, j_subbuilder->length(),
-       "node6", ptr4, v_builder->length(),
-       "node7", ptr5, w_builder->length());
+  dump("node1", ptr0, u_builder.length() + 1,
+       "node3", ptr1, i_builder.length(),
+       "node4", ptr2, j_builder.length() + 1,
+       "node5", ptr3, j_subbuilder.length(),
+       "node6", ptr4, v_builder.length(),
+       "node7", ptr5, w_builder.length());
   std::cout << "DONE!" << std::endl;
 }
 
@@ -808,29 +808,29 @@ void
 test_List() {
   auto builder = lb::List<initial, lb::Numpy<initial, double>>();
 
-  auto subbuilder = builder.begin_list();
-  subbuilder->append(1.1);
-  subbuilder->append(2.2);
-  subbuilder->append(3.3);
+  auto& subbuilder = builder.begin_list();
+  subbuilder.append(1.1);
+  subbuilder.append(2.2);
+  subbuilder.append(3.3);
   builder.end_list();
 
   builder.begin_list();
   builder.end_list();
 
   builder.begin_list();
-  subbuilder->append(4.4);
-  subbuilder->append(5.5);
+  subbuilder.append(4.4);
+  subbuilder.append(5.5);
   builder.end_list();
 
   builder.begin_list();
-  subbuilder->append(6.6);
+  subbuilder.append(6.6);
 
   builder.end_list();
 
   builder.begin_list();
-  subbuilder->append(7.7);
-  subbuilder->append(8.8);
-  subbuilder->append(9.9);
+  subbuilder.append(7.7);
+  subbuilder.append(8.8);
+  subbuilder.append(9.9);
   builder.end_list();
 
   // [
@@ -865,11 +865,11 @@ test_List() {
   int64_t* ptr1 = new int64_t[builder.length()];
   int64_t* ptr2 = new int64_t[builder.length()];
   builder.to_buffers(ptr1, ptr2);
-  double* ptr3 = new double[subbuilder->length()];
-  subbuilder->to_buffers(ptr3);
+  double* ptr3 = new double[subbuilder.length()];
+  subbuilder.to_buffers(ptr3);
   dump("node0", ptr1, builder.length(),
        "     ", ptr2, builder.length(),
-       "node1", ptr3, subbuilder->length());
+       "node1", ptr3, subbuilder.length());
   std::cout<<std::endl;
 }
 
@@ -877,16 +877,16 @@ void
 test_Indexed() {
   auto builder = lb::Indexed<initial, lb::Numpy<initial, double>>();
 
-  auto subbuilder = builder.append_index();
-  subbuilder->append(1.1);
+  auto& subbuilder = builder.append_index();
+  subbuilder.append(1.1);
 
   builder.append_index();
-  subbuilder->append(2.2);
+  subbuilder.append(2.2);
 
   double data[3] = {3.3, 4.4, 5.5};
 
   builder.extend_index(3);
-  subbuilder->extend(data, 3);
+  subbuilder.extend(data, 3);
 
   // [1.1, 2.2, 3.3, 4.4, 5.5]
 
@@ -913,11 +913,11 @@ test_Indexed() {
   int64_t* ptr0 = new int64_t[builder.length()];
   builder.to_buffers(ptr0);
 
-  double* ptr1 = new double[builder.content()->length()];
-  builder.content()->to_buffers(ptr1);
+  double* ptr1 = new double[builder.content().length()];
+  builder.content().to_buffers(ptr1);
 
   dump("node0", ptr0, builder.length(),
-       "node1", ptr1, builder.content()->length());
+       "node1", ptr1, builder.content().length());
   std::cout<<std::endl;
 }
 
@@ -925,15 +925,15 @@ void
 test_IndexedOption() {
   auto builder = lb::IndexedOption<initial, lb::Numpy<initial, double>>();
 
-  auto subbuilder = builder.append_index();
-  subbuilder->append(1.1);
+  auto& subbuilder = builder.append_index();
+  subbuilder.append(1.1);
 
   builder.append_null();
 
   double data[3] = {3.3, 4.4, 5.5};
 
   builder.extend_index(3);
-  subbuilder->extend(data, 3);
+  subbuilder.extend(data, 3);
 
   builder.extend_null(2);
 
@@ -962,11 +962,11 @@ test_IndexedOption() {
   int64_t* ptr0 = new int64_t[builder.length()];
   builder.to_buffers(ptr0);
 
-  double* ptr1 = new double[builder.content()->length()];
-  builder.content()->to_buffers(ptr1);
+  double* ptr1 = new double[builder.content().length()];
+  builder.content().to_buffers(ptr1);
 
   dump("node0", ptr0, builder.length(),
-       "node1", ptr1, builder.content()->length());
+       "node1", ptr1, builder.content().length());
   std::cout<<std::endl;
 }
 
@@ -997,28 +997,28 @@ test_ListOffset_Empty() {
   builder.begin_list();
   builder.end_list();
 
-  auto subbuilder = builder.begin_list();
-  subbuilder->begin_list();
-  subbuilder->end_list();
-  subbuilder->begin_list();
-  subbuilder->end_list();
-  subbuilder->begin_list();
-  subbuilder->end_list();
+  auto& subbuilder = builder.begin_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
   builder.end_list();
 
   builder.begin_list();
-  subbuilder->begin_list();
-  subbuilder->end_list();
-  subbuilder->begin_list();
-  subbuilder->end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
   builder.end_list();
 
   builder.begin_list();
   builder.end_list();
 
   builder.begin_list();
-  subbuilder->begin_list();
-  subbuilder->end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
   builder.end_list();
 
   //  [[], [[], [], []], [[], []], [], [[]]]
@@ -1049,11 +1049,11 @@ test_ListOffset_Empty() {
   int64_t* ptr0 = new int64_t[builder.length() + 1];
   builder.to_buffers(ptr0);
 
-  int64_t* ptr1 = new int64_t[subbuilder->length() + 1];
-  subbuilder->to_buffers(ptr1);
+  int64_t* ptr1 = new int64_t[subbuilder.length() + 1];
+  subbuilder.to_buffers(ptr1);
 
   dump("node0", ptr0, builder.length() + 1,
-       "node1", ptr1, subbuilder->length() + 1);
+       "node1", ptr1, subbuilder.length() + 1);
   std::cout<<std::endl;
 }
 
@@ -1061,12 +1061,12 @@ void
 test_Unmasked() {
   auto builder = lb::Unmasked<lb::Numpy<initial, int64_t>>();
 
-  auto subbuilder = builder.append_valid();
-  subbuilder->append(11);
-  subbuilder->append(22);
-  subbuilder->append(33);
-  subbuilder->append(44);
-  subbuilder->append(55);
+  auto& subbuilder = builder.append_valid();
+  subbuilder.append(11);
+  subbuilder.append(22);
+  subbuilder.append(33);
+  subbuilder.append(44);
+  subbuilder.append(55);
 
   // [11, 22, 33, 44, 55]
 
@@ -1089,10 +1089,10 @@ test_Unmasked() {
       "\"form_key\": \"node0\" "
   "}");
 
-  int64_t* ptr0 = new int64_t[builder.content()->length()];
-  builder.content()->to_buffers(ptr0);
+  int64_t* ptr0 = new int64_t[builder.content().length()];
+  builder.content().to_buffers(ptr0);
 
-  dump("node0", ptr0, builder.content()->length());
+  dump("node0", ptr0, builder.content().length());
   std::cout<<std::endl;
 }
 
@@ -1102,20 +1102,20 @@ test_ByteMasked() {
       lb::Numpy<initial, double>
   >();
 
-  auto subbuilder = builder.append_valid();
-  subbuilder->append(1.1);
+  auto& subbuilder = builder.append_valid();
+  subbuilder.append(1.1);
 
   builder.append_null();
-  subbuilder->append(-1000); // have to supply a "dummy" value
+  subbuilder.append(-1000); // have to supply a "dummy" value
 
   double data[3] = {3.3, 4.4, 5.5};
 
   builder.extend_valid(3);
-  subbuilder->extend(data, 3);
+  subbuilder.extend(data, 3);
 
   builder.extend_null(2);
   for (size_t i = 0; i < 2; i++) {
-    subbuilder->append(-1000);  // have to supply a "dummy" value
+    subbuilder.append(-1000);  // have to supply a "dummy" value
   }
 
   // [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000]
@@ -1144,11 +1144,11 @@ test_ByteMasked() {
   int8_t* ptr0 = new int8_t[builder.length()];
   builder.to_buffers(ptr0);
 
-  double* ptr1 = new double[builder.content()->length()];
-  builder.content()->to_buffers(ptr1);
+  double* ptr1 = new double[builder.content().length()];
+  builder.content().to_buffers(ptr1);
 
   dump("node0", ptr0, builder.length(),
-       "node1", ptr1, builder.content()->length());
+       "node1", ptr1, builder.content().length());
   std::cout<<std::endl;
 }
 
@@ -1158,30 +1158,30 @@ test_BitMasked() {
       lb::Numpy<initial, double>
   >();
 
-  auto subbuilder = builder.append_valid();
-  subbuilder->append(1.1);
+  auto& subbuilder = builder.append_valid();
+  subbuilder.append(1.1);
 
   builder.append_null();
-  subbuilder->append(-1000); // have to supply a "dummy" value
+  subbuilder.append(-1000); // have to supply a "dummy" value
 
   double data[3] = {3.3, 4.4, 5.5};
 
   builder.extend_valid(3);
-  subbuilder->extend(data, 3);
+  subbuilder.extend(data, 3);
 
   builder.extend_null(2);
   for (size_t i = 0; i < 2; i++) {
-    subbuilder->append(-1000);  // have to supply a "dummy" value
+    subbuilder.append(-1000);  // have to supply a "dummy" value
   }
 
   builder.append_valid();
-  subbuilder->append(8);
+  subbuilder.append(8);
 
   builder.append_valid();
-  subbuilder->append(9);
+  subbuilder.append(9);
 
   builder.append_valid();
-  subbuilder->append(10);
+  subbuilder.append(10);
 
   // [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000, 8, 9, 10]
 
@@ -1210,11 +1210,11 @@ test_BitMasked() {
   uint8_t* ptr0 = new uint8_t[builder.length()];
   builder.to_buffers(ptr0);
 
-  double* ptr1 = new double[builder.content()->length()];
-  builder.content()->to_buffers(ptr1);
+  double* ptr1 = new double[builder.content().length()];
+  builder.content().to_buffers(ptr1);
 
   dump("node0", ptr0, builder.length(),
-       "node1", ptr1, builder.content()->length());
+       "node1", ptr1, builder.content().length());
   std::cout<<std::endl;
 }
 
@@ -1224,16 +1224,16 @@ test_Regular() {
       lb::Numpy<initial, double>
   >();
 
-  auto subbuilder = builder.begin_list();
-  subbuilder->append(1.1);
-  subbuilder->append(2.2);
-  subbuilder->append(3.3);
+  auto& subbuilder = builder.begin_list();
+  subbuilder.append(1.1);
+  subbuilder.append(2.2);
+  subbuilder.append(3.3);
   builder.end_list();
 
   builder.begin_list();
-  subbuilder->append(4.4);
-  subbuilder->append(5.5);
-  subbuilder->append(6.6);
+  subbuilder.append(4.4);
+  subbuilder.append(5.5);
+  subbuilder.append(6.6);
   builder.end_list();
 
   // [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
@@ -1258,10 +1258,10 @@ test_Regular() {
       "\"form_key\": \"node0\" "
   "}");
 
-  double* ptr0 = new double[builder.content()->length()];
-  builder.content()->to_buffers(ptr0);
+  double* ptr0 = new double[builder.content().length()];
+  builder.content().to_buffers(ptr0);
 
-  dump("node0", ptr0, builder.content()->length());
+  dump("node0", ptr0, builder.content().length());
   std::cout<<std::endl;
 }
 
@@ -1271,7 +1271,7 @@ test_Regular_size0() {
       lb::Numpy<initial, double>
   >();
 
-  auto subbuilder = builder.begin_list();
+  auto& subbuilder = builder.begin_list();
   builder.end_list();
 
   builder.begin_list();
@@ -1299,10 +1299,10 @@ test_Regular_size0() {
       "\"form_key\": \"node0\" "
   "}");
 
-  double* ptr0 = new double[builder.content()->length()];
-  builder.content()->to_buffers(ptr0);
+  double* ptr0 = new double[builder.content().length()];
+  builder.content().to_buffers(ptr0);
 
-  dump("node0", ptr0, builder.content()->length());
+  dump("node0", ptr0, builder.content().length());
   std::cout<<std::endl;
 }
 

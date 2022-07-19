@@ -155,9 +155,9 @@ namespace awkward {
       content_.clear();
     }
 
-    BUILDER*
+    BUILDER&
     content() {
-      return &content_;
+      return content_;
     }
 
     void
@@ -187,9 +187,9 @@ namespace awkward {
       }
     }
 
-    BUILDER*
+    BUILDER&
     begin_list() noexcept {
-      return &content_;
+      return content_;
     }
 
     void
@@ -455,9 +455,9 @@ namespace awkward {
       content_.clear();
     }
 
-    BUILDER*
+    BUILDER&
     content() {
-      return &content_;
+      return content_;
     }
 
     void
@@ -492,10 +492,10 @@ namespace awkward {
       }
     }
 
-    BUILDER*
+    BUILDER&
     begin_list() noexcept {
       starts_.append(content_.length());
-      return &content_;
+      return content_;
     }
 
     void
@@ -566,9 +566,9 @@ namespace awkward {
       content_.clear();
     }
 
-    BUILDER*
+    BUILDER&
     content() {
-      return &content_;
+      return content_;
     }
 
     void
@@ -603,14 +603,14 @@ namespace awkward {
       }
     }
 
-    BUILDER*
+    BUILDER&
     append_index() noexcept {
       last_valid_ = content_.length();
       index_.append(last_valid_);
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     extend_index(size_t size) noexcept {
       size_t start = content_.length();
       size_t stop = start + size;
@@ -618,7 +618,7 @@ namespace awkward {
       for (size_t i = start; i < stop; i++) {
         index_.append(i);
       }
-      return &content_;
+      return content_;
     }
 
     void
@@ -681,9 +681,9 @@ namespace awkward {
       content_.clear();
     }
 
-    BUILDER*
+    BUILDER&
     content() {
-      return &content_;
+      return content_;
     }
 
     void
@@ -713,14 +713,14 @@ namespace awkward {
       }
     }
 
-    BUILDER*
+    BUILDER&
     append_index() noexcept {
       last_valid_ = content_.length();
       index_.append(last_valid_);
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     extend_index(size_t size) noexcept {
       size_t start = content_.length();
       size_t stop = start + size;
@@ -728,7 +728,7 @@ namespace awkward {
       for (size_t i = start; i < stop; i++) {
         index_.append(i);
       }
-      return &content_;
+      return content_;
     }
 
     void
@@ -854,9 +854,9 @@ namespace awkward {
       content_.clear();
     }
 
-    BUILDER*
+    BUILDER&
     content() {
-      return &content_;
+      return content_;
     }
 
     void
@@ -879,14 +879,14 @@ namespace awkward {
       return content_.is_valid();
     }
 
-    BUILDER*
+    BUILDER&
     append_valid() noexcept {
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     extend_valid(size_t size) noexcept {
-      return &content_;
+      return content_;
     }
 
     void
@@ -943,9 +943,9 @@ namespace awkward {
       content_.clear();
     }
 
-    BUILDER*
+    BUILDER&
     content() {
-      return &content_;
+      return content_;
     }
 
     void
@@ -980,32 +980,32 @@ namespace awkward {
       return valid_when_;
     }
 
-    BUILDER*
+    BUILDER&
     append_valid() noexcept {
       mask_.append(valid_when_);
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     extend_valid(size_t size) noexcept {
       for (size_t i = 0; i < size; i++) {
         mask_.append(valid_when_);
       }
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     append_null() noexcept {
       mask_.append(!valid_when_);
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     extend_null(size_t size) noexcept {
       for (size_t i = 0; i < size; i++) {
         mask_.append(!valid_when_);
       }
-      return &content_;
+      return content_;
     }
 
     void
@@ -1083,9 +1083,9 @@ namespace awkward {
       content_.clear();
     }
 
-    BUILDER*
+    BUILDER&
     content() {
-      return &content_;
+      return content_;
     }
 
     void
@@ -1125,35 +1125,35 @@ namespace awkward {
       return lsb_order_;
     }
 
-    BUILDER*
+    BUILDER&
     append_valid() noexcept {
       _append_begin();
       current_byte_ |= cast_[current_index_];
       _append_end();
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     extend_valid(size_t size) noexcept {
       for (size_t i = 0; i < size; i++) {
         append_valid();
       }
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     append_null() noexcept {
       _append_begin();
       _append_end();
-      return &content_;
+      return content_;
     }
 
-    BUILDER*
+    BUILDER&
     extend_null(size_t size) noexcept {
       for (size_t i = 0; i < size; i++) {
       append_null();
       }
-      return &content_;
+      return content_;
     }
 
     void
@@ -1241,9 +1241,9 @@ namespace awkward {
       content_.clear();
     }
 
-    BUILDER*
+    BUILDER&
     content() {
-      return &content_;
+      return content_;
     }
 
     void
@@ -1273,9 +1273,9 @@ namespace awkward {
       }
     }
 
-    BUILDER*
+    BUILDER&
     begin_list() noexcept {
-      return &content_;
+      return content_;
     }
 
     void
@@ -1345,7 +1345,7 @@ namespace awkward {
   //       visit_at(contents, i, clear_contents);
   //   }
 
-  //   BUILDER*
+  //   BUILDER&
   //   content() {
   //     return &content_;
   //   }
