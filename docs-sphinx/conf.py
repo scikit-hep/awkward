@@ -86,4 +86,4 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 docgen = os.path.join(current_dir, "..", "dev", "generate-kerneldocs.py")
 subprocess.check_call([sys.executable, docgen])
 
-# exec(open("make_changelog.py").read(), dict(globals()))
+exec(open("make_changelog.py").read(), dict(globals()))
