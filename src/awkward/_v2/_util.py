@@ -94,6 +94,19 @@ def little_endian(array):
     return array.astype(array.dtype.newbyteorder("<"), copy=False)
 
 
+def identifier_hash(str):
+    import base64
+    import struct
+
+    return (
+        base64.encodebytes(struct.pack("q", hash(str)))
+        .rstrip(b"=\n")
+        .replace(b"+", b"")
+        .replace(b"/", b"")
+        .decode("ascii")
+    )
+
+
 ###############################################################################
 
 

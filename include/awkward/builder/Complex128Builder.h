@@ -4,8 +4,7 @@
 #define AWKWARD_COMPLEX128BUILDER_H_
 
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 #include <complex>
@@ -17,33 +16,33 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL Complex128Builder: public Builder {
   public:
     /// @brief Create an empty Complex128Builder.
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const int64_t initial);
 
     /// @brief Create a Complex128Builder from an existing Int64Builder.
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param old The Int64Builder's buffer.
     static const BuilderPtr
-      fromint64(const ArrayBuilderOptions& options,
-                GrowableBuffer<int64_t> old);
+      fromint64(const int64_t initial,
+                const GrowableBuffer<int64_t>& old);
 
     /// @brief Create a Complex128Builder from an existing Float64Builder.
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param old The Float64Builder's buffer.
     static const BuilderPtr
-      fromfloat64(const ArrayBuilderOptions& options,
-                  GrowableBuffer<double> old);
+      fromfloat64(const int64_t initial,
+                  const GrowableBuffer<double>& old);
 
     /// @brief Create a Complex128Builder from a full set of parameters.
     ///
-    /// @param options Configuration options for building an array;
+    /// @param initial Configuration initial for building an array;
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated real numbers.
-    Complex128Builder(const ArrayBuilderOptions& options,
+    Complex128Builder(const int64_t initial,
                       GrowableBuffer<std::complex<double>> buffer);
 
     /// @brief User-friendly name of this class: `"Complex128Builder"`.
@@ -113,13 +112,13 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
-      options() const { return options_; }
+    const int64_t
+      initial() const { return initial_; }
 
     const GrowableBuffer<std::complex<double>>& buffer() const { return buffer_; }
 
   private:
-    const ArrayBuilderOptions options_;
+    const int64_t initial_;
     GrowableBuffer<std::complex<double>> buffer_;
   };
 

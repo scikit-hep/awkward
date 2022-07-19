@@ -250,6 +250,8 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <td align="center"><a href="https://github.com/SantamRC"><img src="https://avatars.githubusercontent.com/u/52635773?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Santam Roy Choudhury</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=SantamRC" title="Tests">⚠️</a></td>
     <td align="center"><a href="http://jeroen.vangoey.be"><img src="https://avatars.githubusercontent.com/u/59344?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jeroen Van Goey</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=BioGeek" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/Ahmad-AlSubaie"><img src="https://avatars.githubusercontent.com/u/32343365?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ahmad-AlSubaie</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Ahmad-AlSubaie" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/ManasviGoyal"><img src="https://avatars.githubusercontent.com/u/55101825?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Manasvi Goyal</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=ManasviGoyal" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/aryan26roy"><img src="https://avatars.githubusercontent.com/u/50577809?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aryan Roy</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=aryan26roy" title="Code">💻</a></td>
   </tr>
 </table>
 

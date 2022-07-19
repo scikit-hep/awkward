@@ -13,13 +13,20 @@ namespace awkward {
   #define NATIVELY_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
 
   /// @brief HERE
-  void byteswap16(int64_t num_items, void* ptr);
+  template <typename T>
+  void byteswap16(int64_t num_items, T& value);
 
   /// @brief HERE
-  void byteswap32(int64_t num_items, void* ptr);
+  template <typename T>
+  void byteswap32(int64_t num_items, T& value);
 
   /// @brief HERE
-  void byteswap64(int64_t num_items, void* ptr);
+  template <typename T>
+  void byteswap64(int64_t num_items, T& value);
+
+  /// @brief HERE
+  template <typename T>
+  void byteswap_intp(int64_t num_items, T& value);
 
   /// @class ForthOutputBuffer
   ///

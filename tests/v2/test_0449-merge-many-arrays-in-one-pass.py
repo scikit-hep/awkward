@@ -53,19 +53,26 @@ def test_numpyarray():
                     assert to_list(ak_combined) == combined.tolist()
                     assert ak_combined.dtype == combined.dtype
 
-                    # assert ak._v2.contents.NumpyArray(one).typetracer.mergemany(
-                    #     [
-                    #         ak._v2.contents.NumpyArray(two),
-                    #         ak._v2.contents.NumpyArray(three),
-                    #         ak._v2.contents.NumpyArray(four),
-                    #     ]
-                    # ).form == ak._v2.contents.NumpyArray(one).mergemany(
-                    #     [
-                    #         ak._v2.contents.NumpyArray(two),
-                    #         ak._v2.contents.NumpyArray(three),
-                    #         ak._v2.contents.NumpyArray(four),
-                    #     ]
-                    # ).form
+                    assert (
+                        ak._v2.contents.NumpyArray(one)
+                        .typetracer.mergemany(
+                            [
+                                ak._v2.contents.NumpyArray(two),
+                                ak._v2.contents.NumpyArray(three),
+                                ak._v2.contents.NumpyArray(four),
+                            ]
+                        )
+                        .form
+                        == ak._v2.contents.NumpyArray(one)
+                        .mergemany(
+                            [
+                                ak._v2.contents.NumpyArray(two),
+                                ak._v2.contents.NumpyArray(three),
+                                ak._v2.contents.NumpyArray(four),
+                            ]
+                        )
+                        .form
+                    )
 
                     ak_combined = ak._v2.contents.NumpyArray(one).mergemany(
                         [
@@ -78,19 +85,26 @@ def test_numpyarray():
                     assert to_list(ak_combined) == combined.tolist()
                     assert ak_combined.dtype == np.concatenate([one, two, four]).dtype
 
-                    # assert ak._v2.contents.NumpyArray(one).typetracer.mergemany(
-                    #     [
-                    #         ak._v2.contents.NumpyArray(two),
-                    #         ak._v2.contents.EmptyArray(),
-                    #         ak._v2.contents.NumpyArray(four),
-                    #     ]
-                    # ).form == ak._v2.contents.NumpyArray(one).mergemany(
-                    #     [
-                    #         ak._v2.contents.NumpyArray(two),
-                    #         ak._v2.contents.EmptyArray(),
-                    #         ak._v2.contents.NumpyArray(four),
-                    #     ]
-                    # ).form
+                    assert (
+                        ak._v2.contents.NumpyArray(one)
+                        .typetracer.mergemany(
+                            [
+                                ak._v2.contents.NumpyArray(two),
+                                ak._v2.contents.EmptyArray(),
+                                ak._v2.contents.NumpyArray(four),
+                            ]
+                        )
+                        .form
+                        == ak._v2.contents.NumpyArray(one)
+                        .mergemany(
+                            [
+                                ak._v2.contents.NumpyArray(two),
+                                ak._v2.contents.EmptyArray(),
+                                ak._v2.contents.NumpyArray(four),
+                            ]
+                        )
+                        .form
+                    )
 
 
 def test_lists():

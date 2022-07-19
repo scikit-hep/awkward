@@ -20,7 +20,8 @@ namespace awkward {
       parameters_(parameters),
       is_string_builder_(is_string_builder),
       form_offsets_(form_offsets),
-      begun_(false) {
+      begun_(false),
+      form_key_(form_key) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")
@@ -60,6 +61,31 @@ namespace awkward {
   const std::string
   ListOffsetArrayBuilder<T, I>::classname() const {
     return std::string("ListOffsetArrayBuilder ") + vm_func_name();
+  }
+
+  template <typename T, typename I>
+  const std::string
+  ListOffsetArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
+    auto search = outputs.find(vm_output_data());
+    auto offsets = search->second.get()->toIndex64();
+
+    // FIXME: deal with complex numbers in the builder itself
+    if (content().get()->is_complex()) {
+      for (int64_t i = 0; i < offsets.length(); i++) {
+        offsets.ptr().get()[i] = offsets.ptr().get()[i] >> 1;
+      }
+    }
+
+    container.copy_buffer(form_key() + "-offsets",
+                          offsets.ptr().get(),
+                          (int64_t)(offsets.length() * (int64_t)sizeof(int64_t)));
+
+    return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
+      + content()->to_buffers(container, outputs) + ", "
+      + this->parameters_as_string(parameters_) + " \"form_key\": \""
+      + form_key() + "\"}";
   }
 
   template <typename T, typename I>

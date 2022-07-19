@@ -19,7 +19,8 @@ namespace awkward {
     : content_(content),
       parameters_(parameters),
       is_categorical_(is_categorical),
-      form_index_(form_index) {
+      form_index_(form_index),
+      form_key_(form_key) {
     vm_output_data_ = std::string("part")
       .append(partition).append("-")
       .append(form_key).append("-")
@@ -75,6 +76,47 @@ namespace awkward {
   const std::string
   IndexedOptionArrayBuilder<T, I>::classname() const {
     return "IndexedOptionArrayBuilder";
+  }
+
+  template <typename T, typename I>
+  const std::string
+  IndexedOptionArrayBuilder<T, I>::to_buffers(
+    BuffersContainer& container,
+    const ForthOutputBufferMap& outputs) const {
+    auto search = outputs.find(vm_output_data());
+    if (search != outputs.end()) {
+      if (form_index() == "int32") {
+        container.copy_buffer(form_key() + "-index",
+          search->second.get()->ptr().get(),
+          (int32_t)((ssize_t)search->second.get()->len() * (ssize_t)sizeof(int32_t)));
+
+        return "{\"class\": \"IndexedOptionArray\", \"index\": \"i32\", \"content\": "
+          + content().get()->to_buffers(container, outputs) + ", "
+          + this->parameters_as_string(parameters_) + " \"form_key\": \""
+          + form_key() + "\"}";
+
+      } else if (form_index() == "int64") {
+        container.copy_buffer(form_key() + "-index",
+          search->second.get()->ptr().get(),
+          (int64_t)((ssize_t)search->second.get()->len() * (ssize_t)sizeof(int64_t)));
+
+        return "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
+          + content().get()->to_buffers(container, outputs) + ", "
+          + this->parameters_as_string(parameters_) + " \"form_key\": \""
+          + form_key() + "\"}";
+
+      } else {
+        throw std::invalid_argument(
+            std::string("Snapshot of a ") + classname()
+            + std::string(" index ") + form_index()
+            + std::string(" is not supported yet. ")
+            + FILENAME(__LINE__));
+      }
+    }
+    throw std::invalid_argument(
+      std::string("Snapshot of a ") + classname()
+      + std::string(" needs an index ")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>

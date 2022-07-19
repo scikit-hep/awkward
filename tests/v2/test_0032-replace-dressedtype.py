@@ -9,7 +9,7 @@ to_list = ak._v2.operations.to_list
 
 def test_types_with_parameters():
     t = ak._v2.types.UnknownType()
-    assert t.parameters is None
+    assert t.parameters == {}
 
     t = ak._v2.types.UnknownType(parameters={"__array__": ["val", "ue"]})
     assert t.parameters == {"__array__": ["val", "ue"]}
@@ -109,9 +109,7 @@ def test_record_name():
 
     a = builder.snapshot()
 
-    assert (
-        repr(a.layout.form._type(typestrs)) == "Dummy['one': 'int64', 'two': 'float64']"
-    )
+    assert str(a.layout.form._type(typestrs)) == "Dummy[one: int64, two: float64]"
     assert a.layout.form._type(typestrs).parameters == {"__record__": "Dummy"}
 
 

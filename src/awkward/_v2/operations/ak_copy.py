@@ -63,4 +63,4 @@ def _impl(array):
         allow_record=True,
         allow_other=False,
     )
-    return ak._v2._util.wrap(layout.deep_copy(), ak._v2._util.behavior_of(array))
+    return ak._v2._util.wrap(layout.__deepcopy__(), ak._v2._util.behavior_of(array))

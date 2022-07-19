@@ -25,6 +25,9 @@ namespace awkward {
     const std::string
       classname() const override;
 
+    const std::string
+      to_buffers(BuffersContainer& container, const ForthOutputBufferMap& outputs) const override;
+
     /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
       vm_output() const override;
@@ -100,12 +103,19 @@ namespace awkward {
     const util::Parameters&
       form_parameters() const { return parameters_; }
 
+    const std::string&
+      form_key() const {return form_key_; }
+
+    ssize_t
+      len(const ForthOutputBufferMap& outputs) const override;
+
   private:
     /// @brief Keeps track of a field index.
     int64_t field_index();
 
     /// @brief This Form content builders
     std::vector<FormBuilderPtr<T, I>> contents_;
+    std::vector<std::string> fields_;
     const util::RecordLookupPtr form_recordlookup_;
 
     /// @brief This Form parameters
@@ -113,6 +123,7 @@ namespace awkward {
 
     /// @brief This builder Form
     const std::string form_;
+    const std::string form_key_;
     int64_t field_index_;
     int64_t contents_size_;
     std::vector<int64_t> list_field_index_;

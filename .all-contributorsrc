@@ -302,10 +302,28 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ManasviGoyal",
+      "name": "Manasvi Goyal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/55101825?v=4",
+      "profile": "https://github.com/ManasviGoyal",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "aryan26roy",
+      "name": "Aryan Roy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50577809?v=4",
+      "profile": "https://github.com/aryan26roy",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "projectName": "awkward-1.0",
+  "projectName": "awkward",
   "projectOwner": "scikit-hep",
   "repoType": "github",
   "repoHost": "https://github.com",

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import copy
 from collections.abc import Iterable
 
 import awkward as ak
@@ -191,8 +190,8 @@ class Record:
 
         return self._array[self._at : self._at + 1]._to_list(behavior, None)[0]
 
-    def deep_copy(self):
-        return Record(self._array.deep_copy(), copy.deepcopy(self._at))
+    def __deepcopy__(self, memo=None):
+        return Record(self._array.__deepcopy__(memo), self._at)
 
     def recursively_apply(
         self,

@@ -999,7 +999,7 @@ def to_list(array):
             ak._v2.highlevel.ArrayBuilder,
         ),
     ):
-        raise TypeError("use ak._v2.operations.convert.to_list for v2 arrays (for now)")
+        raise TypeError("use ak._v2.operations.to_list for v2 arrays (for now)")
 
     elif isinstance(array, dict):
         return {n: to_list(x) for n, x in array.items()}

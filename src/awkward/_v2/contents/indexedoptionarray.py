@@ -1544,6 +1544,24 @@ class IndexedOptionArray(Content):
                     mask[~mask0] |= mask1
 
                 data[~mask0] = content
+
+                if issubclass(content.dtype.type, (bool, np.bool_)):
+                    data[mask0] = False
+                elif issubclass(content.dtype.type, np.floating):
+                    data[mask0] = np.nan
+                elif issubclass(content.dtype.type, np.complexfloating):
+                    data[mask0] = np.nan + np.nan * 1j
+                elif issubclass(content.dtype.type, np.integer):
+                    data[mask0] = np.iinfo(content.dtype).max
+                elif issubclass(content.dtype.type, (np.datetime64, np.timedelta64)):
+                    data[mask0] = numpy.array([np.iinfo(np.int64).max], content.dtype)[
+                        0
+                    ]
+                else:
+                    raise ak._v2._util.error(
+                        AssertionError(f"unrecognized dtype: {content.dtype}")
+                    )
+
                 return numpy.ma.MaskedArray(data, mask)
             else:
                 raise ak._v2._util.error(
