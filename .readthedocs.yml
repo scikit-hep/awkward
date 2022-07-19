@@ -1,9 +1,11 @@
 version: 2
 
-sphinx:
-  configuration: docs-sphinx/conf.py
+build:
+  os: "ubuntu-22.04"
+  tools:
+    python: "3.10"
 
-python:
-  version: 3.7
-  install:
-    - requirements: docs-sphinx/requirements.txt
+  commands:
+    - pip install requests
+    - mkdir -p _readthedocs/html
+    - dev/download-github-asset scikit-hep/awkward-1.0 docs --dest=_readthedocs/html
