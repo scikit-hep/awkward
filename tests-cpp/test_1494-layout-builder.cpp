@@ -381,17 +381,23 @@ test_Record()
 
   auto names = builder.field_names();
   for (auto i : names) {
-    std::cout << "+++=>> name " << i << std::endl;
+    std::cout << "field name " << i << std::endl;
   }
 
+  // One way of filling the Record is by specifying its
+  // field name and a value to append:
   builder.field_append("one", 1.1);
 
+  // This is similat to setting a current field and
+  // appending a value:
   builder.field("two");
   builder.append(2);
 
-  auto one_builder = &std::get<0>(builder.contents)->builder();
-  auto two_builder = &(std::get<1>(builder.contents)->builder());
-  auto three_builder = &(std::get<2>(builder.contents)->builder());
+  // A faster way is by caching a Field builder
+  // and appending the values to it
+  auto one_builder = &std::get<0>(builder.contents).builder;
+  auto two_builder = &(std::get<1>(builder.contents).builder);
+  auto three_builder = &(std::get<2>(builder.contents).builder);
 
   three_builder->append('a');
 
@@ -408,7 +414,7 @@ test_Record()
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
-  std::cout<<names_nbytes.size();
+  std::cout << names_nbytes.size();
   assert (names_nbytes.size() == 3);
 
   auto form = builder.form();
@@ -464,8 +470,8 @@ test_ListOffset_Record() {
 
   auto subbuilder = builder.begin_list();
 
-  auto x_builder = &(std::get<0>(subbuilder->contents)->builder());
-  auto y_builder = &(std::get<1>(subbuilder->contents)->builder());
+  auto x_builder = &(std::get<0>(subbuilder->contents).builder);
+  auto y_builder = &(std::get<1>(subbuilder->contents).builder);
 
   x_builder->append(1.1);
   auto y_subbuilder = y_builder->begin_list();
@@ -569,13 +575,13 @@ test_Record_Record()
           lb::Field<w_field, lb::Numpy<initial, char>>>>
   >();
 
-  auto x_builder = &(std::get<0>(builder.contents)->builder());
-  auto y_builder = &(std::get<1>(builder.contents)->builder());
+  auto x_builder = &(std::get<0>(builder.contents).builder);
+  auto y_builder = &(std::get<1>(builder.contents).builder);
 
-  auto u_builder = &(std::get<0>(x_builder->contents)->builder());
-  auto v_builder = &(std::get<1>(x_builder->contents)->builder());
+  auto u_builder = &(std::get<0>(x_builder->contents).builder);
+  auto v_builder = &(std::get<1>(x_builder->contents).builder);
 
-  auto w_builder = &(std::get<0>(y_builder->contents)->builder());
+  auto w_builder = &(std::get<0>(y_builder->contents).builder);
 
 
   u_builder->append(1.1);
@@ -681,14 +687,14 @@ test_Record_nested()
       lb::Field<w_field, lb::Numpy<initial, double>>
   >();
 
-  auto u_builder = &(std::get<0>(builder.contents)->builder());
-  auto v_builder = &(std::get<1>(builder.contents)->builder());
-  auto w_builder = &(std::get<2>(builder.contents)->builder());
+  auto u_builder = &(std::get<0>(builder.contents).builder);
+  auto v_builder = &(std::get<1>(builder.contents).builder);
+  auto w_builder = &(std::get<2>(builder.contents).builder);
 
   auto u_subbuilder = u_builder->begin_list();
 
-  auto i_builder = &(std::get<0>(u_subbuilder->contents)->builder());
-  auto j_builder = &(std::get<1>(u_subbuilder->contents)->builder());
+  auto i_builder = &(std::get<0>(u_subbuilder->contents).builder);
+  auto j_builder = &(std::get<1>(u_subbuilder->contents).builder);
 
   i_builder->append(1.1);
   auto j_subbuilder = j_builder->begin_list();

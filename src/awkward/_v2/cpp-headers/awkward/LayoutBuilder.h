@@ -8,12 +8,8 @@
 
 #include <map>
 #include <iostream>
-#include <variant>
 #include <tuple>
-#include <optional>
-#include <algorithm>
 #include <string>
-#include <array>
 
 namespace awkward {
 
@@ -23,28 +19,22 @@ namespace awkward {
   class Field {
   public:
 
-    const char* field() {
+    const char* field() const {
         return field_name;
     }
 
     std::string
     form() const noexcept {
-      return builder_.form();
+      return builder.form();
     }
 
     template<typename PRIMITIVE>
     void
     append(PRIMITIVE x) {
-      builder_.append(x);
+      builder.append(x);
     }
 
-    BUILDER &
-    builder() {
-      return builder_;
-    }
-
-  private:
-    BUILDER builder_;
+    BUILDER builder;
   };
 
   template <unsigned INITIAL, typename PRIMITIVE>
@@ -329,24 +319,21 @@ namespace awkward {
   class Record {
   public:
     Record()
-        : contents({new BUILDERS}...) {
+      : current_index_(0) {
       size_t id = 0;
       set_id(id);
       map_fields(std::index_sequence_for<BUILDERS...>());
-      auto clear_contents = [](auto content) { content->builder().clear(); };
-      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
-        visit_at(contents, i, clear_contents);
     }
 
-    size_t
-    length() const noexcept {
-      return (std::get<0>(contents)->builder().length());;
+    const size_t
+    length() const {
+      return (std::get<0>(contents).builder.length());
     }
 
     void
     clear() noexcept {
-      auto clear_contents = [](auto content) { content->builder().clear(); };
-      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+      auto clear_contents = [](auto& content) { content.builder.clear(); };
+      for (size_t i = 0; i < fields_count_; i++)
         visit_at(contents, i, clear_contents);
     }
 
@@ -354,8 +341,8 @@ namespace awkward {
     set_id(size_t &id) noexcept {
       id_ = id;
       id++;
-      auto contents_id = [&id](auto content) { content->builder().set_id(id); };
-      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+      auto contents_id = [&](auto& content) { content.builder.set_id(id); };
+      for (size_t i = 0; i < fields_count_; i++)
         visit_at(contents, i, contents_id);
     }
 
@@ -376,25 +363,24 @@ namespace awkward {
     template<typename PRIMITIVE>
     void
     field_append(const char* name, PRIMITIVE x) noexcept {
-      auto builder_variant = get(name);
-      std::visit([&](auto builder){ return builder->builder().append(x); }, builder_variant);
+      visit_at(contents, get_field_index(name), [&x] (auto& content) { content.builder.append(x); });
     }
 
     void
     field(const char* name) noexcept {
-      current_field_ = get(name);
+      current_index_ = get_field_index(name);
     }
 
     template<typename PRIMITIVE>
     void
     append(PRIMITIVE x) noexcept {
-      std::visit([&](auto builder){ return builder->builder().append(x); }, current_field_);
+      visit_at(contents, current_index_, [&x] (auto& content) { content.builder.append(x); });
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-      auto contents_nbytes = [&names_nbytes](auto content) { content->builder().buffer_nbytes(names_nbytes); };
-      for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const {
+      auto contents_nbytes = [&](auto& content) { content.builder.buffer_nbytes(names_nbytes); };
+      for (size_t i = 0; i < fields_count_; i++)
         visit_at(contents, i, contents_nbytes);
     }
 
@@ -413,8 +399,8 @@ namespace awkward {
         if (i != 0) {
           out << ", ";
         }
-        auto contents_form = [&out] (auto record) { out << "\"" << record->field() << + "\": ";
-                                                    out << record->form(); };
+        auto contents_form = [&] (auto& record) { out << "\"" << record.field() << + "\": ";
+                                                    out << record.form(); };
         visit_at(contents, i, contents_form);
       }
       out << " }, ";
@@ -422,20 +408,20 @@ namespace awkward {
       return out.str();
     }
 
-    std::tuple<BUILDERS*...> contents;
+    std::tuple<BUILDERS...> contents;
 
   private:
     size_t id_;
     std::string parameters_;
     std::vector<std::string> field_names_;
-    std::variant<BUILDERS*...> current_field_;
+    size_t current_index_;
 
     static constexpr size_t fields_count_ = sizeof...(BUILDERS);
 
     template <std::size_t... S>
     void
     map_fields(std::index_sequence<S...>) {
-      field_names_ = std::vector<std::string>({std::string(std::get<S>(contents)->field())...});
+      field_names_ = std::vector<std::string>({std::string(std::get<S>(contents).field())...});
     }
 
     size_t
@@ -443,21 +429,6 @@ namespace awkward {
       auto it = std::find(std::begin(field_names_), std::end(field_names_), name);
       if (it == std::end(field_names_)) throw std::runtime_error("invalid field name: " + name);
       return std::distance(std::begin(field_names_), it);
-    }
-
-    template <size_t N = 0>
-    std::variant<BUILDERS*...> runtime_get(size_t index) {
-      if (N == index) {
-        return std::variant<BUILDERS*...>(std::in_place_index_t<N>(), std::get<N>(contents));
-      }
-      if constexpr (N + 1 < fields_count_) {
-        return runtime_get<N + 1>(index);
-      }
-      return std::variant<BUILDERS*...>();
-    }
-
-    std::variant<BUILDERS*...> get(std::string const& name) {
-      return runtime_get(get_field_index(name));
     }
 
   };
@@ -1369,7 +1340,7 @@ namespace awkward {
   //     //   last_valid_index_[tag] = -1
   //     tags_.clear()
   //     index_.clear()
-  //     auto clear_contents = [](auto content) { content->builder().clear(); };
+  //     auto clear_contents = [](auto content) { content->builder.clear(); };
   //     for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
   //       visit_at(contents, i, clear_contents);
   //   }
@@ -1383,7 +1354,7 @@ namespace awkward {
   //   set_id(size_t &id) noexcept {
   //     id_ = id;
   //     id++;
-  //     auto contents_id = [&id](auto content) { content->builder().set_id(id); };
+  //     auto contents_id = [&id](auto content) { content->builder.set_id(id); };
   //     for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
   //       visit_at(contents, i, contents_id);
   //   }
