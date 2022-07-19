@@ -8,4 +8,4 @@ build:
   commands:
     - pip install requests
     - mkdir -p _readthedocs/html
-    - dev/download-github-asset scikit-hep/awkward-1.0 docs --dest=_readthedocs/html
+    - dev/download-github-artefact scikit-hep/awkward-1.0 docs --dest=_readthedocs/html
