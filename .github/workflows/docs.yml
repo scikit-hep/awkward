@@ -1,6 +1,10 @@
 name: Docs
 on:
-  pull_request:
+  push:
+    branches:
+      - main
+  release:
+    types: [released]
 
 jobs:
   Sphinx:
@@ -37,4 +41,4 @@ jobs:
         path: docs-sphinx/_build/.jupyter_cache
     - name: Trigger RTD Build
       # NB: head_ref is only valid for PR triggers
-      run: curl -X POST -d "branches=${{ github.head_ref }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
+      run: curl -X POST -d "branches=${{ github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
