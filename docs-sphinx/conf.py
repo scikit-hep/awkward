@@ -25,7 +25,11 @@ author = "Jim Pivarski"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
-extensions = []
+extensions = [
+    'sphinx_external_toc',
+    'sphinx_copybutton',
+    'myst_nb',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -40,16 +44,32 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
-
-html_show_sourcelink = False
-html_logo = "../docs-img/logo/logo-300px-white.png"
-html_theme_options = {"logo_only": True, "sticky_navigation": False}
+html_theme = "pydata_sphinx_theme"
+html_show_sourcelink = True
+html_theme_options = {
+  "logo": {
+      "image_light": "logo-300px.png",
+      "image_dark": "logo-300px-white.png",
+  },
+  "github_url": "https://github.com/scikit-hep/awkward",
+  "collapse_navigation": True,
+  # Add light/dark mode and documentation version switcher:
+  "navbar_end": ["theme-switcher", "navbar-icon-links"],
+  "footer_items": ["copyright", "sphinx-version"],
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+
+# MyST settings
+myst_enable_extensions = [
+  "colon_fence",
+]
+
+nb_execution_mode = "cache"
 
 # Additional stuff
 master_doc = "index"
@@ -66,4 +86,4 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 docgen = os.path.join(current_dir, "..", "dev", "generate-kerneldocs.py")
 subprocess.check_call([sys.executable, docgen])
 
-exec(open("make_changelog.py").read(), dict(globals()))
+# exec(open("make_changelog.py").read(), dict(globals()))
