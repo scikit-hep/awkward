@@ -3,6 +3,7 @@
 #ifndef AWKWARD_GROWABLEBUFFER_H_
 #define AWKWARD_GROWABLEBUFFER_H_
 
+#include <cstring>
 #include <vector>
 #include <memory>
 #include <numeric>
