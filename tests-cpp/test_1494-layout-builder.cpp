@@ -38,9 +38,16 @@ void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length, Args&&...args)
     dump(args...);
 }
 
+template<class PRIMITIVE>
+using NumpyBuilder = awkward::LayoutBuilder::Numpy<initial, PRIMITIVE>;
+
+template<class BUILDER>
+using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, BUILDER>;
+
 void
 test_Numpy_bool() {
-  auto builder = lb::Numpy<initial, bool>();
+
+  NumpyBuilder<bool> builder;
 
   builder.append(true);
   builder.append(false);
@@ -51,7 +58,7 @@ test_Numpy_bool() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
@@ -73,7 +80,7 @@ test_Numpy_bool() {
 
 void
 test_Numpy_int() {
-  auto builder = lb::Numpy<initial, int64_t>();
+  NumpyBuilder<int64_t> builder;
 
   size_t data_size = 10;
 
@@ -85,7 +92,7 @@ test_Numpy_int() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
@@ -107,7 +114,7 @@ test_Numpy_int() {
 
 void
 test_Numpy_char() {
-  auto builder = lb::Numpy<initial, char>();
+  NumpyBuilder<char> builder;
 
   builder.append('a');
   builder.append('b');
@@ -118,7 +125,7 @@ test_Numpy_char() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
@@ -140,7 +147,7 @@ test_Numpy_char() {
 
 void
 test_Numpy_double() {
-  auto builder = lb::Numpy<initial, double>();
+  NumpyBuilder<double> builder;
 
   size_t data_size = 9;
 
@@ -152,7 +159,7 @@ test_Numpy_double() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
@@ -174,7 +181,7 @@ test_Numpy_double() {
 
 void
 test_Numpy_complex() {
-  auto builder = lb::Numpy<initial, std::complex<double>>();
+  NumpyBuilder<std::complex<double>> builder;
 
   builder.append({1.1, 0.1});
   builder.append({2.2, 0.2});
@@ -186,7 +193,7 @@ test_Numpy_complex() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
@@ -208,7 +215,7 @@ test_Numpy_complex() {
 
 void
 test_ListOffset() {
-  auto builder = lb::ListOffset<initial, lb::Numpy<initial, double>>();
+  ListOffsetBuilder<NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.begin_list();
   subbuilder.append(1.1);
@@ -228,12 +235,12 @@ test_ListOffset() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 2);
 
   auto form = builder.form();
-
+  std::cout << form << std::endl;
   assert (form ==
   "{ "
       "\"class\": \"ListOffsetArray\", "
@@ -259,10 +266,8 @@ test_ListOffset() {
 
 void
 test_ListOffset_ListOffset() {
-  auto builder = lb::ListOffset<initial,
-      lb::ListOffset<initial,
-          lb::Numpy<initial, double>
-  >>();
+
+  ListOffsetBuilder<ListOffsetBuilder<NumpyBuilder<double>>> builder;
 
   auto& builder2 = builder.begin_list();
 
@@ -305,7 +310,7 @@ test_ListOffset_ListOffset() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 3);
 
@@ -345,7 +350,7 @@ test_ListOffset_ListOffset() {
 
 void
 test_EmptyRecord() {
-  auto builder = lb::EmptyRecord<true>();
+  lb::EmptyRecord<true> builder;
 
   builder.append();
 
@@ -355,7 +360,7 @@ test_EmptyRecord() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 0);
 
@@ -373,11 +378,11 @@ void
 test_Record()
 {
   std::cout << "test_Record()\n";
-  auto builder = lb::Record<
-      lb::Field<one_field, lb::Numpy<initial, double>>,
-      lb::Field<two_field, lb::Numpy<initial, int64_t>>,
-      lb::Field<three_field, lb::Numpy<initial, char>>
-  >();
+  lb::Record<
+      lb::Field<one_field, NumpyBuilder<double>>,
+      lb::Field<two_field, NumpyBuilder<int64_t>>,
+      lb::Field<three_field, NumpyBuilder<char>>
+  > builder;
 
   auto names = builder.field_names();
   for (auto i : names) {
@@ -388,7 +393,7 @@ test_Record()
   // field name and a value to append:
   builder.field_append("one", 1.1);
 
-  // This is similat to setting a current field and
+  // This is similar to setting a current field and
   // appending a value:
   builder.field("two");
   builder.append(2);
@@ -412,7 +417,7 @@ test_Record()
 
   // assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   std::cout << names_nbytes.size();
   assert (names_nbytes.size() == 3);
@@ -461,12 +466,12 @@ void
 test_ListOffset_Record() {
   std::cout << "test_ListOffset_Record(()\n";
 
-  auto builder = lb::ListOffset<initial,
+  ListOffsetBuilder<
       lb::Record<
-          lb::Field<x_field, lb::Numpy<initial, double>>,
-          lb::Field<y_field, lb::ListOffset<initial,
-              lb::Numpy<initial, int32_t>>
-  >>>();
+          lb::Field<x_field, NumpyBuilder<double>>,
+          lb::Field<y_field, ListOffsetBuilder<
+              NumpyBuilder<int32_t>>
+  >>> builder;
 
   auto& subbuilder = builder.begin_list();
 
@@ -508,7 +513,7 @@ test_ListOffset_Record() {
 
   // assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 4);
 
@@ -566,14 +571,13 @@ test_Record_Record()
 {
   std::cout << "test_Record_Record()\n";
 
-  auto builder = lb::Record<
+  lb::Record<
       lb::Field<x_field, lb::Record<
-          lb::Field<u_field, lb::Numpy<initial, double>>,
-          lb::Field<v_field, lb::ListOffset<initial,
-              lb::Numpy<initial, int64_t>>>>>,
+          lb::Field<u_field, NumpyBuilder<double>>,
+          lb::Field<v_field, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>,
       lb::Field<y_field, lb::Record<
-          lb::Field<w_field, lb::Numpy<initial, char>>>>
-  >();
+          lb::Field<w_field, NumpyBuilder<char>>>>
+  > builder;
 
   auto& x_builder = std::get<0>(builder.contents).builder;
   auto& y_builder = std::get<1>(builder.contents).builder;
@@ -608,7 +612,7 @@ test_Record_Record()
 
   // assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 4);
 
@@ -677,15 +681,15 @@ void
 test_Record_nested()
 {
   std::cout << "test_Record_nested()\n";
-  auto builder = lb::Record<
-      lb::Field<u_field, lb::ListOffset<initial,
+  lb::Record<
+      lb::Field<u_field, ListOffsetBuilder<
           lb::Record<
-              lb::Field<i_field, lb::Numpy<initial, double>>,
-              lb::Field<j_field, lb::ListOffset<initial,
-                  lb::Numpy<initial, int64_t>>>>>>,
-      lb::Field<v_field, lb::Numpy<initial, int64_t>>,
-      lb::Field<w_field, lb::Numpy<initial, double>>
-  >();
+              lb::Field<i_field, NumpyBuilder<double>>,
+              lb::Field<j_field, ListOffsetBuilder<
+                  NumpyBuilder<int64_t>>>>>>,
+      lb::Field<v_field, NumpyBuilder<int64_t>>,
+      lb::Field<w_field, NumpyBuilder<double>>
+  > builder;
 
   auto& u_builder = std::get<0>(builder.contents).builder;
   auto& v_builder = std::get<1>(builder.contents).builder;
@@ -728,7 +732,7 @@ test_Record_nested()
 
   // assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 6);
 
@@ -806,7 +810,7 @@ test_Record_nested()
 
 void
 test_List() {
-  auto builder = lb::List<initial, lb::Numpy<initial, double>>();
+  lb::List<initial, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.begin_list();
   subbuilder.append(1.1);
@@ -843,7 +847,7 @@ test_List() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 3);
 
@@ -875,7 +879,7 @@ test_List() {
 
 void
 test_Indexed() {
-  auto builder = lb::Indexed<initial, lb::Numpy<initial, double>>();
+  lb::Indexed<initial, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
@@ -892,7 +896,7 @@ test_Indexed() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 2);
 
@@ -923,7 +927,7 @@ test_Indexed() {
 
 void
 test_IndexedOption() {
-  auto builder = lb::IndexedOption<initial, lb::Numpy<initial, double>>();
+  lb::IndexedOption<initial, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
@@ -941,7 +945,7 @@ test_IndexedOption() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 2);
 
@@ -972,11 +976,11 @@ test_IndexedOption() {
 
 void
 test_Empty() {
-  auto builder = lb::Empty();
+  lb::Empty builder;
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 0);
 
@@ -990,9 +994,9 @@ test_Empty() {
 
 void
 test_ListOffset_Empty() {
-  auto builder = lb::ListOffset<initial,
-      lb::ListOffset<initial, lb::Empty
-  >>();
+  ListOffsetBuilder<
+      ListOffsetBuilder<lb::Empty
+  >> builder;
 
   builder.begin_list();
   builder.end_list();
@@ -1025,7 +1029,7 @@ test_ListOffset_Empty() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 2);
 
@@ -1059,7 +1063,7 @@ test_ListOffset_Empty() {
 
 void
 test_Unmasked() {
-  auto builder = lb::Unmasked<lb::Numpy<initial, int64_t>>();
+  lb::Unmasked<NumpyBuilder<int64_t>> builder;
 
   auto& subbuilder = builder.append_valid();
   subbuilder.append(11);
@@ -1072,7 +1076,7 @@ test_Unmasked() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
@@ -1098,9 +1102,9 @@ test_Unmasked() {
 
 void
 test_ByteMasked() {
-  auto builder = lb::ByteMasked<true, initial,
-      lb::Numpy<initial, double>
-  >();
+  lb::ByteMasked<true, initial,
+      NumpyBuilder<double>
+  > builder;
 
   auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
@@ -1122,7 +1126,7 @@ test_ByteMasked() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 2);
 
@@ -1154,9 +1158,9 @@ test_ByteMasked() {
 
 void
 test_BitMasked() {
-  auto builder = lb::BitMasked<true, true, initial,
-      lb::Numpy<initial, double>
-  >();
+  lb::BitMasked<true, true, initial,
+      NumpyBuilder<double>
+  > builder;
 
   auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
@@ -1187,7 +1191,7 @@ test_BitMasked() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 2);
 
@@ -1220,9 +1224,9 @@ test_BitMasked() {
 
 void
 test_Regular() {
-  auto builder = lb::Regular<3,
-      lb::Numpy<initial, double>
-  >();
+  lb::Regular<3,
+      NumpyBuilder<double>
+  > builder;
 
   auto& subbuilder = builder.begin_list();
   subbuilder.append(1.1);
@@ -1240,7 +1244,7 @@ test_Regular() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
@@ -1267,9 +1271,9 @@ test_Regular() {
 
 void
 test_Regular_size0() {
-  auto builder = lb::Regular<0,
-      lb::Numpy<initial, double>
-  >();
+  lb::Regular<0,
+      NumpyBuilder<double>
+  > builder;
 
   auto& subbuilder = builder.begin_list();
   builder.end_list();
@@ -1281,7 +1285,7 @@ test_Regular_size0() {
 
   assert (builder.is_valid() == true);
 
-  std::map<std::string, size_t> names_nbytes = {};
+  std::map<std::string, int64_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 

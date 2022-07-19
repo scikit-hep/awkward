@@ -86,7 +86,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       names_nbytes["node" + std::to_string(id_) + "-data"] = data_.nbytes();
     }
 
@@ -198,7 +198,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       names_nbytes["node" + std::to_string(id_) + "-offsets"] = offsets_.nbytes();
       content_.buffer_nbytes(names_nbytes);
     }
@@ -283,7 +283,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept { }
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept { }
 
     void
     from_buffers(std::map<std::string, void*> &buffers) const noexcept { }
@@ -378,7 +378,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const {
       auto contents_nbytes = [&](auto& content) { content.builder.buffer_nbytes(names_nbytes); };
       for (size_t i = 0; i < fields_count_; i++)
         visit_at(contents, i, contents_nbytes);
@@ -504,7 +504,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       names_nbytes["node" + std::to_string(id_) + "-starts"] = starts_.nbytes();
       names_nbytes["node" + std::to_string(id_) + "-stops"] = stops_.nbytes();
       content_.buffer_nbytes(names_nbytes);
@@ -622,7 +622,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
       content_.buffer_nbytes(names_nbytes);
     }
@@ -744,7 +744,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
       content_.buffer_nbytes(names_nbytes);
     }
@@ -816,7 +816,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept { }
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept { }
 
     void
     from_buffers(std::map<std::string, void*> &buffers) const noexcept { }
@@ -890,7 +890,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       content_.buffer_nbytes(names_nbytes);
     }
 
@@ -1009,7 +1009,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       names_nbytes["node" + std::to_string(id_) + "-mask"] = mask_.nbytes();
       content_.buffer_nbytes(names_nbytes);
     }
@@ -1157,7 +1157,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       names_nbytes["node" + std::to_string(id_) + "-mask"] = mask_.nbytes();
       content_.buffer_nbytes(names_nbytes);
     }
@@ -1284,7 +1284,7 @@ namespace awkward {
     }
 
     void
-    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+    buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
       content_.buffer_nbytes(names_nbytes);
     }
 
@@ -1392,7 +1392,7 @@ namespace awkward {
   //   }
 
   //   void
-  //   buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+  //   buffer_nbytes(std::map<std::string, int64_t> &names_nbytes) const noexcept {
   //     names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
   //     names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
   //     content_.buffer_nbytes(names_nbytes);
