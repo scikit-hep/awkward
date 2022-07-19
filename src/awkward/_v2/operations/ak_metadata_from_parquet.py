@@ -14,22 +14,23 @@ ParquetMetadata = collections.namedtuple(
 
 
 def metadata_from_parquet(
-    path,
-    storage_options=None,
-    max_gap=64_000,
-    max_block=256_000_000,
-    footer_sample_size=1_000_000,
+    path, storage_options=None, row_groups=None, ignore_metadata=False, scan_files=True
 ):
     """
+    This function differs from ak.from_parquet._metadata as follows:
+
+      * this function will always use a _metadata file, if present
+      * if there is no _metadata, the schema comes from _common_metadata or the first
+        data file
+      * the total number of rows is always known  # TODO: is this true?
+
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
-            May contain glob patterns.
-        storage_options: Passed to `fsspec.parquet.open_parquet_file`.
-        max_gap (int): Passed to `fsspec.parquet.open_parquet_file`.
-        max_block (int): Passed to `fsspec.parquet.open_parquet_file`.
-        footer_sample_size (int): Passed to `fsspec.parquet.open_parquet_file`.
+            May contain glob patterns. A list of paths is also allowed, but they
+            must be data files, not directories.
+        storage_options: Passed to `fsspec`.
 
-    Returns a named tuple containing
+    Returns dict containing
 
       * `form`: an Awkward Form representing the low-level type of the data
          (use `.type` to get a high-level type),
@@ -42,63 +43,43 @@ def metadata_from_parquet(
 
     See also #ak.from_parquet, #ak.to_parquet.
     """
+    import awkward._v2._connect.pyarrow  # noqa: F401
+
     with ak._v2._util.OperationErrorContext(
         "ak._v2.metadata_from_parquet",
         dict(
             path=path,
             storage_options=storage_options,
-            max_gap=max_gap,
-            max_block=max_block,
-            footer_sample_size=footer_sample_size,
         ),
     ):
         return _impl(
             path,
             storage_options,
-            max_gap,
-            max_block,
-            footer_sample_size,
+            row_groups=row_groups,
+            ignore_metadata=ignore_metadata,
+            scan_files=scan_files,
         )
 
 
 def _impl(
-    path,
-    storage_options,
-    max_gap,
-    max_block,
-    footer_sample_size,
+    path, storage_options, row_groups=None, ignore_metadata=False, scan_files=True
 ):
-    import awkward._v2._connect.pyarrow  # noqa: F401
-
-    name = "ak._v2.from_parquet"
-    pyarrow_parquet = ak._v2._connect.pyarrow.import_pyarrow_parquet(name)
-    fsspec = ak._v2._connect.pyarrow.import_fsspec(name)
-
-    import fsspec.parquet
-
-    fs, _, paths = fsspec.get_fs_token_paths(
-        path, mode="rb", storage_options=storage_options
+    results = ak._v2.operations.ak_from_parquet.metadata(
+        path, storage_options, row_groups, None, ignore_metadata, scan_files
     )
+    parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata = results
 
-    (
-        all_paths,
-        path_for_metadata,
-    ) = ak._v2.operations.ak_from_parquet._all_and_metadata_paths(path, fs, paths)
-
-    with fsspec.parquet.open_parquet_file(
-        path_for_metadata,
-        fs=fs,
-        engine="pyarrow",
-        row_groups=[],
-        storage_options=storage_options,
-        max_gap=max_gap,
-        max_block=max_block,
-        footer_sample_size=footer_sample_size,
-    ) as file_for_metadata:
-        parquetfile_for_metadata = pyarrow_parquet.ParquetFile(file_for_metadata)
-
-        form = ak._v2._connect.pyarrow.form_handle_arrow(
-            parquetfile_for_metadata.schema_arrow, pass_empty_field=True
-        )
-
-        return ParquetMetadata(form, fs, all_paths, parquetfile_for_metadata.metadata)
+    out = {
+        "form": subform,
+        "paths": actual_paths,
+        "col_counts": col_counts,
+        "columns": parquet_columns,
+    }
+    if col_counts:
+        out["num_row_groups"] = len(col_counts)
+        out["col_counts"] = col_counts
+        out["num_rows"] = sum(col_counts)
+    else:
+        out["num_rows"] = None
+        out["num_row_groups"] = None
+    return out
