@@ -17,15 +17,24 @@ def get_sha_head():
     return result.stdout.decode().strip()
 
 
-def get_artefacts(repo, token, per_page=100):
+def iter_artefacts(repo, token, per_page=100):
+    headers = {"Authorization": f"token {token}"}
     response = requests.get(
         f"https://api.github.com/repos/{repo}/actions/artifacts",
         params={"per_page": per_page},
-        headers={"Authorization": f"token {token}"},
+        headers=headers,
     )
-    if response.status_code != 200:
-        raise ValueError(f"Couldn't list artefacts for {repo}: {response.status_code}")
-    return response.json()["artifacts"]
+    response.raise_for_status()
+    yield from response.json()["artifacts"]
+
+    # Follow pagination
+    while "next" in response.links:
+        response = requests.get(
+            response.links["next"]["url"],
+            headers=headers,
+        )
+        response.raise_for_status()
+        yield from response.json()["artifacts"]
 
 
 def download_and_extract_artefact(artefact, dest, token):
@@ -33,9 +42,7 @@ def download_and_extract_artefact(artefact, dest, token):
         artefact["archive_download_url"],
         headers={"Authorization": f"token {token}"},
     )
-
-    if response.status_code != 200:
-        raise RuntimeError(f"Couldn't download artefact: {response.status_code}")
+    response.raise_for_status()
 
     os.makedirs(dest, exist_ok=True)
 
@@ -62,19 +69,25 @@ def main(argv=None):
     else:
         sha = args.sha
 
-    artefacts = get_artefacts(args.repo, token)
+    has_seen_sha = False
+    for artefact in iter_artefacts(args.repo, token):
+        # If SHA matches
+        if artefact["workflow_run"]["head_sha"] == sha:
+            has_seen_sha = True
 
-    matching_artefacts = [
-        a
-        for a in artefacts
-        if a["workflow_run"]["head_sha"] == sha and re.match(args.artefact, a["name"])
-    ]
-    if len(matching_artefacts) != 1:
-        raise RuntimeError(
-            f"Expected 1 artefact for SHA and query, found {len(matching_artefacts)}"
-        )
+            # If query matches
+            if re.match(args.artefact, artefact["name"]):
+                break
 
-    download_and_extract_artefact(matching_artefacts[0], args.dest, token)
+        # If we've walked past the SHA in question
+        elif has_seen_sha:
+            raise RuntimeError(
+                f"Couldn't find artefact matching {args.artefact!r} for SHA"
+            )
+    else:
+        raise RuntimeError(f"Couldn't find SHA matching {sha!r}")
+
+    download_and_extract_artefact(artefact, args.dest, token)
 
 
 if __name__ == "__main__":
