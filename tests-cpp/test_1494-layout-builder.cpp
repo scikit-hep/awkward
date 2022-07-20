@@ -994,6 +994,79 @@ test_IndexedOption() {
 }
 
 void
+test_IndexedOption_Record() {
+  IndexedOptionBuilder<RecordBuilder<
+      RecordField<x_field, NumpyBuilder<double>>,
+      RecordField<y_field, NumpyBuilder<int64_t>>
+  >> builder;
+
+  auto& subbuilder = builder.append_index();
+
+  auto& x_builder = std::get<0>(subbuilder.contents).builder;
+  auto& y_builder = std::get<1>(subbuilder.contents).builder;
+
+  x_builder.append(1.1);
+  y_builder.append(2);
+
+  builder.append_null();
+
+  builder.append_index();
+  x_builder.append(3.3);
+  y_builder.append(4);
+
+  // [
+  //   {x: 1.1, y: 2},
+  //   {},
+  //   {x: 3.3, y: 4},
+  // ]
+
+  // assert (builder.is_valid() == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 3);
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"IndexedOptionArray\", "
+      "\"index\": \"i64\", "
+      "\"content\": { "
+            "\"class\": \"RecordArray\", "
+            "\"contents\": { "
+                "\"x\": { "
+                    "\"class\": \"NumpyArray\", "
+                    "\"primitive\": \"float64\", "
+                    "\"form_key\": \"node2\" "
+                "}, "
+                "\"y\": { "
+                    "\"class\": \"NumpyArray\", "
+                    "\"primitive\": \"int64\", "
+                    "\"form_key\": \"node3\" "
+                "} "
+            "}, "
+            "\"form_key\": \"node1\" "
+        "}, "
+        "\"form_key\": \"node0\" "
+  "}");
+
+  int64_t* ptr0 = new int64_t[builder.length()];
+  builder.to_buffers(ptr0);
+
+  double* ptr1 = new double[x_builder.length()];
+  x_builder.to_buffers(ptr1);
+
+  int64_t* ptr2 = new int64_t[y_builder.length()];
+  y_builder.to_buffers(ptr2);
+
+  dump("node0", ptr0, builder.length(),
+       "node2", ptr1, x_builder.length(),
+       "node3", ptr2, y_builder.length());
+  std::cout << std::endl;
+}
+
+void
 test_Empty() {
   EmptyBuilder builder;
 
@@ -1335,6 +1408,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_List();
   test_Indexed();
   test_IndexedOption();
+  test_IndexedOption_Record();
   test_Empty();
   test_ListOffset_Empty();
   test_Unmasked();
