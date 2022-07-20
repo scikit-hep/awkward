@@ -3,10 +3,8 @@
 #ifndef AWKWARD_LAYOUTBUILDER_H_
 #define AWKWARD_LAYOUTBUILDER_H_
 
-// #include "awkward/GrowableBuffer.h"
-// #include "awkward/utils.h"
-#include "GrowableBuffer.h"
-#include "utils.h"
+#include "awkward/GrowableBuffer.h"
+#include "awkward/utils.h"
 
 #include <map>
 #include <algorithm>

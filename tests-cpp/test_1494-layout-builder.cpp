@@ -1,7 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-//#include "awkward/LayoutBuilder.h"
-#include "../src/awkward/_v2/cpp-headers/awkward/LayoutBuilder.h"
+#include "awkward/LayoutBuilder.h"
 
 static const char one_field[] = "one";
 static const char two_field[] = "two";
@@ -103,7 +102,7 @@ test_Numpy_bool() {
   assert (names_nbytes.size() == 1);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-data", (bool*)buffers["node0-data"], names_nbytes["node0-data"]/sizeof(bool));
 
@@ -138,7 +137,7 @@ test_Numpy_int() {
   assert (names_nbytes.size() == 1);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-data", (int64_t*)buffers["node0-data"], names_nbytes["node0-data"]/sizeof(int64_t));
 
@@ -172,7 +171,7 @@ test_Numpy_char() {
   assert (names_nbytes.size() == 1);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-data", (char*)buffers["node0-data"], names_nbytes["node0-data"]/sizeof(char));
 
@@ -207,7 +206,7 @@ test_Numpy_double() {
   assert (names_nbytes.size() == 1);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-data", (double*)buffers["node0-data"], names_nbytes["node0-data"]/sizeof(double));
 
@@ -242,7 +241,7 @@ test_Numpy_complex() {
   assert (names_nbytes.size() == 1);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-data", (std::complex<double>*)buffers["node0-data"], names_nbytes["node0-data"]/sizeof(std::complex<double>));
 
@@ -285,7 +284,7 @@ test_ListOffset() {
   assert (names_nbytes.size() == 2);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-offsets", (int64_t*)buffers["node0-offsets"], names_nbytes["node0-offsets"]/sizeof(int64_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
@@ -357,7 +356,7 @@ test_ListOffset_ListOffset() {
   assert (names_nbytes.size() == 3);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-offsets", (int64_t*)buffers["node0-offsets"], names_nbytes["node0-offsets"]/sizeof(int64_t),
        "node1-offsets", (int64_t*)buffers["node1-offsets"], names_nbytes["node1-offsets"]/sizeof(int64_t),
@@ -400,6 +399,9 @@ test_EmptyRecord() {
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 0);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
 
   auto form = builder.form();
 
@@ -460,7 +462,7 @@ test_Record()
   assert (names_nbytes.size() == 3);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double),
        "node2-data", (int64_t*)buffers["node2-data"], names_nbytes["node2-data"]/sizeof(int64_t),
@@ -546,7 +548,7 @@ test_ListOffset_Record() {
   assert (names_nbytes.size() == 4);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
  dump("node0-offsets", (int64_t*)buffers["node0-offsets"], names_nbytes["node0-offsets"]/sizeof(int64_t),
       "node2-data", (double*)buffers["node2-data"], names_nbytes["node2-data"]/sizeof(double),
@@ -634,7 +636,7 @@ test_Record_Record()
   assert (names_nbytes.size() == 4);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node2-data", (double*)buffers["node2-data"], names_nbytes["node2-data"]/sizeof(double),
        "node3-offsets", (int64_t*)buffers["node3-offsets"], names_nbytes["node3-offsets"]/sizeof(int64_t),
@@ -743,7 +745,7 @@ test_Record_nested()
   assert (names_nbytes.size() == 6);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node1-offsets", (int64_t*)buffers["node1-offsets"], names_nbytes["node1-offsets"]/sizeof(int64_t),
        "node3-data", (double*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(double),
@@ -845,7 +847,7 @@ test_List() {
   assert (names_nbytes.size() == 3);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-starts", (int64_t*)buffers["node0-starts"], names_nbytes["node0-starts"]/sizeof(int64_t),
        "node0-stops", (int64_t*)buffers["node0-stops"], names_nbytes["node0-stops"]/sizeof(int64_t),
@@ -893,7 +895,7 @@ test_Indexed() {
   assert (names_nbytes.size() == 2);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-index", (int64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(int64_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
@@ -913,14 +915,6 @@ test_Indexed() {
       "\"form_key\": \"node0\" "
   "}");
 
-  int64_t* ptr0 = new int64_t[builder.length()];
-  builder.to_buffers(ptr0);
-
-  double* ptr1 = new double[builder.content().length()];
-  builder.content().to_buffers(ptr1);
-
-  dump("node0", ptr0, builder.length(),
-       "node1", ptr1, builder.content().length());
   std::cout << std::endl;
 }
 
@@ -949,7 +943,7 @@ test_IndexedOption() {
   assert (names_nbytes.size() == 2);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-index", (int64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(int64_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
@@ -1005,7 +999,7 @@ test_IndexedOption_Record() {
   assert (names_nbytes.size() == 3);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-index", (int64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(int64_t),
        "node2-data", (double*)buffers["node2-data"], names_nbytes["node2-data"]/sizeof(double),
@@ -1048,6 +1042,9 @@ test_Empty() {
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 0);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
 
   auto form = builder.form();
 
@@ -1097,7 +1094,7 @@ test_ListOffset_Empty() {
   assert (names_nbytes.size() == 2);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-offsets", (int64_t*)buffers["node0-offsets"], names_nbytes["node0-offsets"]/sizeof(int64_t),
        "node1-offsets", (int64_t*)buffers["node1-offsets"], names_nbytes["node1-offsets"]/sizeof(int64_t));
@@ -1142,7 +1139,7 @@ test_Unmasked() {
   assert (names_nbytes.size() == 1);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node1-data", (int64_t*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(int64_t));
 
@@ -1191,7 +1188,7 @@ test_ByteMasked() {
   assert (names_nbytes.size() == 2);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-mask", (int8_t*)buffers["node0-mask"], names_nbytes["node0-mask"]/sizeof(int8_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
@@ -1252,7 +1249,7 @@ test_BitMasked() {
   assert (names_nbytes.size() == 2);
 
   auto buffers = empty_buffers(names_nbytes);
-  builder.from_buffers(buffers);
+  builder.to_buffers(buffers);
 
   dump("node0-mask", (uint8_t*)buffers["node0-mask"], names_nbytes["node0-mask"]/sizeof(uint8_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
@@ -1300,6 +1297,11 @@ test_Regular() {
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
+
   auto form = builder.form();
 
   assert (form ==
@@ -1314,10 +1316,6 @@ test_Regular() {
       "\"form_key\": \"node0\" "
   "}");
 
-  double* ptr0 = new double[builder.content().length()];
-  builder.content().to_buffers(ptr0);
-
-  dump("node0", ptr0, builder.content().length());
   std::cout << std::endl;
 }
 
@@ -1339,6 +1337,11 @@ test_Regular_size0() {
   builder.buffer_nbytes(names_nbytes);
   assert (names_nbytes.size() == 1);
 
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
+
   auto form = builder.form();
 
   assert (form ==
@@ -1353,10 +1356,6 @@ test_Regular_size0() {
       "\"form_key\": \"node0\" "
   "}");
 
-  double* ptr0 = new double[builder.content().length()];
-  builder.content().to_buffers(ptr0);
-
-  dump("node0", ptr0, builder.content().length());
   std::cout << std::endl;
 }
 
