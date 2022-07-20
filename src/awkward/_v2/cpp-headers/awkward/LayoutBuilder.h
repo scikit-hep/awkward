@@ -3,11 +3,13 @@
 #ifndef AWKWARD_LAYOUTBUILDER_H_
 #define AWKWARD_LAYOUTBUILDER_H_
 
-#include "awkward/GrowableBuffer.h"
-#include "awkward/utils.h"
+// #include "awkward/GrowableBuffer.h"
+// #include "awkward/utils.h"
+#include "GrowableBuffer.h"
+#include "utils.h"
 
 #include <map>
-#include <iostream>
+#include <algorithm>
 #include <tuple>
 #include <string>
 
@@ -21,11 +23,6 @@ namespace awkward {
 
     const char* field() const {
         return field_name;
-    }
-
-    std::string
-    form() const noexcept {
-      return builder.form();
     }
 
     template<typename PRIMITIVE>
@@ -332,18 +329,17 @@ namespace awkward {
 
     void
     clear() noexcept {
-      auto clear_contents = [](auto& content) { content.builder.clear(); };
       for (size_t i = 0; i < fields_count_; i++)
-        visit_at(contents, i, clear_contents);
+        visit_at(contents, i, [](auto& content) { content.builder.clear(); });
     }
 
     void
     set_id(size_t &id) noexcept {
       id_ = id;
       id++;
-      auto contents_id = [&](auto& content) { content.builder.set_id(id); };
-      for (size_t i = 0; i < fields_count_; i++)
-        visit_at(contents, i, contents_id);
+      for (size_t i = 0; i < fields_count_; i++) {
+        visit_at(contents, i, [&id] (auto& content) { content.builder.set_id(id); });
+      }
     }
 
     std::string parameters() const noexcept {
@@ -353,6 +349,31 @@ namespace awkward {
     void
     set_parameters(std::string parameter) noexcept {
       parameters_ = parameter;
+    }
+
+    bool is_valid() const noexcept {
+      size_t length = -1;
+      for (size_t i = 0; i < fields_count_; i++) {
+        visit_at(contents, i, [&](auto& content) {
+          if (length == -1) {
+            length = content.builder.length();
+          }
+          else if (length != content.builder.length()) {
+            std::cout << "Record node" << id_ << "has field " << content.field() << "length "
+                      << content.builder.length() << "that differs from the first length " << length;
+            return false;
+          }
+        });
+      }
+
+      for (size_t i = 0; i < fields_count_; i++) {
+        visit_at(contents, i, [&length](auto& content) {
+          if (!content.builder.is_valid()) {
+           return false;
+          }
+        });
+      }
+      return true;
     }
 
     const std::vector<std::string> &
@@ -379,9 +400,10 @@ namespace awkward {
 
     void
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const {
-      auto contents_nbytes = [&](auto& content) { content.builder.buffer_nbytes(names_nbytes); };
       for (size_t i = 0; i < fields_count_; i++)
-        visit_at(contents, i, contents_nbytes);
+        visit_at(contents, i, [&names_nbytes](auto& content) {
+          content.builder.buffer_nbytes(names_nbytes);
+        });
     }
 
     std::string
@@ -395,12 +417,14 @@ namespace awkward {
       }
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
-      for (size_t i = 0;  i < std::tuple_size<decltype(contents)>::value;  i++) {
+      for (size_t i = 0;  i < fields_count_;  i++) {
         if (i != 0) {
           out << ", ";
         }
-        auto contents_form = [&] (auto& record) { out << "\"" << record.field() << + "\": ";
-                                                    out << record.form(); };
+        auto contents_form = [&out] (auto& content) {
+          out << "\"" << content.field() << + "\": ";
+          out << content.builder.form();
+        };
         visit_at(contents, i, contents_form);
       }
       out << " }, ";
@@ -923,7 +947,7 @@ namespace awkward {
     std::string parameters_;
   };
 
-  template <bool VALID_WHEN, unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, bool VALID_WHEN, typename BUILDER>
   class ByteMasked {
   public:
     ByteMasked()
@@ -1048,7 +1072,7 @@ namespace awkward {
     bool valid_when_ = VALID_WHEN;
   };
 
-  template <bool VALID_WHEN, bool LSB_ORDER, unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
   class BitMasked {
   public:
     BitMasked()
@@ -1057,7 +1081,7 @@ namespace awkward {
         , current_byte_ref_(mask_.append_and_get_ref(current_byte_))
         , current_index_(0)
         , cast_(0)
-         {
+      {
       size_t id = 0;
       set_id(id);
       // if (lsb_order_) {

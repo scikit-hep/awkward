@@ -1,10 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#include "awkward/LayoutBuilder.h"
-
-namespace lb = awkward::LayoutBuilder;
-
-static const char param[] = "";
+//#include "awkward/LayoutBuilder.h"
+#include "../src/awkward/_v2/cpp-headers/awkward/LayoutBuilder.h"
 
 static const char one_field[] = "one";
 static const char two_field[] = "two";
@@ -28,7 +25,7 @@ void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
   for (size_t at = 0; at < length; at++) {
     std::cout << ptr[at] << " ";
   }
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 template<class NODE, class PRIMITIVE, class LENGTH, class ... Args>
@@ -38,9 +35,48 @@ void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length, Args&&...args)
     dump(args...);
 }
 
+template<class PRIMITIVE>
+using NumpyBuilder = awkward::LayoutBuilder::Numpy<initial, PRIMITIVE>;
+
+template<class BUILDER>
+using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, BUILDER>;
+
+template<class... BUILDERS>
+using RecordBuilder = awkward::LayoutBuilder::Record<BUILDERS...>;
+
+template<class BUILDER>
+using ListBuilder = awkward::LayoutBuilder::List<initial, BUILDER>;
+
+template<class BUILDER>
+using IndexedBuilder = awkward::LayoutBuilder::Indexed<initial, BUILDER>;
+
+template<class BUILDER>
+using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<initial, BUILDER>;
+
+template<class BUILDER>
+using UnmaskedBuilder = awkward::LayoutBuilder::Unmasked<BUILDER>;
+
+template<bool VALID_WHEN, class BUILDER>
+using ByteMaskedBuilder = awkward::LayoutBuilder::ByteMasked<initial, VALID_WHEN, BUILDER>;
+
+template<bool VALID_WHEN, bool LSB_ORDER, class BUILDER>
+using BitMaskedBuilder = awkward::LayoutBuilder::BitMasked<initial, VALID_WHEN, LSB_ORDER, BUILDER>;
+
+template <unsigned SIZE, class BUILDER>
+using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
+
+template<bool IS_TUPLE>
+using EmptyRecordBuilder = awkward::LayoutBuilder::EmptyRecord<IS_TUPLE>;
+
+using EmptyBuilder = awkward::LayoutBuilder::Empty;
+
+template<const char* field_name, class BUILDER>
+using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
+
 void
 test_Numpy_bool() {
-  auto builder = lb::Numpy<initial, bool>();
+
+  NumpyBuilder<bool> builder;
 
   builder.append(true);
   builder.append(false);
@@ -68,12 +104,12 @@ test_Numpy_bool() {
   builder.to_buffers(ptr);
 
   dump("node0", ptr, builder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Numpy_int() {
-  auto builder = lb::Numpy<initial, int64_t>();
+  NumpyBuilder<int64_t> builder;
 
   size_t data_size = 10;
 
@@ -102,12 +138,12 @@ test_Numpy_int() {
   builder.to_buffers(ptr0);
 
   dump("node0", ptr0, builder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Numpy_char() {
-  auto builder = lb::Numpy<initial, char>();
+  NumpyBuilder<char> builder;
 
   builder.append('a');
   builder.append('b');
@@ -135,12 +171,12 @@ test_Numpy_char() {
   builder.to_buffers(ptr0);
 
   dump("node0", ptr0, builder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Numpy_double() {
-  auto builder = lb::Numpy<initial, double>();
+  NumpyBuilder<double> builder;
 
   size_t data_size = 9;
 
@@ -169,12 +205,12 @@ test_Numpy_double() {
   builder.to_buffers(ptr0);
 
   dump("node0", ptr0, builder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Numpy_complex() {
-  auto builder = lb::Numpy<initial, std::complex<double>>();
+  NumpyBuilder<std::complex<double>> builder;
 
   builder.append({1.1, 0.1});
   builder.append({2.2, 0.2});
@@ -203,12 +239,12 @@ test_Numpy_complex() {
   builder.to_buffers(ptr0);
 
   dump("node0", ptr0, builder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_ListOffset() {
-  auto builder = lb::ListOffset<initial, lb::Numpy<initial, double>>();
+  ListOffsetBuilder<NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.begin_list();
   subbuilder.append(1.1);
@@ -254,15 +290,12 @@ test_ListOffset() {
 
   dump("node0", ptr0, builder.length() + 1,
        "node1", ptr1, subbuilder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_ListOffset_ListOffset() {
-  auto builder = lb::ListOffset<initial,
-      lb::ListOffset<initial,
-          lb::Numpy<initial, double>
-  >>();
+  ListOffsetBuilder<ListOffsetBuilder<NumpyBuilder<double>>> builder;
 
   auto& builder2 = builder.begin_list();
 
@@ -340,12 +373,12 @@ test_ListOffset_ListOffset() {
   dump("node0", ptr0, builder.length() + 1,
        "node1", ptr1, builder2.length() + 1,
        "node2", ptr2, builder3.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_EmptyRecord() {
-  auto builder = lb::EmptyRecord<true>();
+  EmptyRecordBuilder<true> builder;
 
   builder.append();
 
@@ -372,23 +405,24 @@ test_EmptyRecord() {
 void
 test_Record()
 {
-  std::cout << "test_Record()\n";
-  auto builder = lb::Record<
-      lb::Field<one_field, lb::Numpy<initial, double>>,
-      lb::Field<two_field, lb::Numpy<initial, int64_t>>,
-      lb::Field<three_field, lb::Numpy<initial, char>>
-  >();
+  RecordBuilder<
+      RecordField<one_field, NumpyBuilder<double>>,
+      RecordField<two_field, NumpyBuilder<int64_t>>,
+      RecordField<three_field, NumpyBuilder<char>>
+  > builder;
 
+  std::vector<std::string> fields {"one", "two", "three"};
   auto names = builder.field_names();
-  for (auto i : names) {
-    std::cout << "field name " << i << std::endl;
+
+  for (size_t i = 0; i < names.size(); i++) {
+    assert(names[i] == fields[i]);
   }
 
   // One way of filling the Record is by specifying its
   // field name and a value to append:
   builder.field_append("one", 1.1);
 
-  // This is similat to setting a current field and
+  // This is similar to setting a current field and
   // appending a value:
   builder.field("two");
   builder.append(2);
@@ -454,19 +488,15 @@ test_Record()
   dump("node1", ptr0, one_builder.length(),
        "node2", ptr1, two_builder.length(),
        "node3", ptr2, three_builder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_ListOffset_Record() {
-  std::cout << "test_ListOffset_Record(()\n";
-
-  auto builder = lb::ListOffset<initial,
-      lb::Record<
-          lb::Field<x_field, lb::Numpy<initial, double>>,
-          lb::Field<y_field, lb::ListOffset<initial,
-              lb::Numpy<initial, int32_t>>
-  >>>();
+  ListOffsetBuilder<RecordBuilder<
+      RecordField<x_field, NumpyBuilder<double>>,
+      RecordField<y_field, ListOffsetBuilder<NumpyBuilder<int32_t>>>
+  >> builder;
 
   auto& subbuilder = builder.begin_list();
 
@@ -558,22 +588,19 @@ test_ListOffset_Record() {
        "node2", ptr1, x_builder.length(),
        "node3", ptr2, y_builder.length() + 1,
        "node4", ptr3, y_subbuilder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Record_Record()
 {
-  std::cout << "test_Record_Record()\n";
-
-  auto builder = lb::Record<
-      lb::Field<x_field, lb::Record<
-          lb::Field<u_field, lb::Numpy<initial, double>>,
-          lb::Field<v_field, lb::ListOffset<initial,
-              lb::Numpy<initial, int64_t>>>>>,
-      lb::Field<y_field, lb::Record<
-          lb::Field<w_field, lb::Numpy<initial, char>>>>
-  >();
+  RecordBuilder<
+      RecordField<x_field, RecordBuilder<
+          RecordField<u_field, NumpyBuilder<double>>,
+          RecordField<v_field, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>,
+      RecordField<y_field, RecordBuilder<
+          RecordField<w_field, NumpyBuilder<char>>>>
+  > builder;
 
   auto& x_builder = std::get<0>(builder.contents).builder;
   auto& y_builder = std::get<1>(builder.contents).builder;
@@ -582,7 +609,6 @@ test_Record_Record()
   auto& v_builder = std::get<1>(x_builder.contents).builder;
 
   auto& w_builder = std::get<0>(y_builder.contents).builder;
-
 
   u_builder.append(1.1);
   auto& v_subbuilder = v_builder.begin_list();
@@ -676,16 +702,13 @@ test_Record_Record()
 void
 test_Record_nested()
 {
-  std::cout << "test_Record_nested()\n";
-  auto builder = lb::Record<
-      lb::Field<u_field, lb::ListOffset<initial,
-          lb::Record<
-              lb::Field<i_field, lb::Numpy<initial, double>>,
-              lb::Field<j_field, lb::ListOffset<initial,
-                  lb::Numpy<initial, int64_t>>>>>>,
-      lb::Field<v_field, lb::Numpy<initial, int64_t>>,
-      lb::Field<w_field, lb::Numpy<initial, double>>
-  >();
+  RecordBuilder<
+      RecordField<u_field, ListOffsetBuilder<RecordBuilder<
+          RecordField<i_field, NumpyBuilder<double>>,
+          RecordField<j_field, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>>,
+      RecordField<v_field, NumpyBuilder<int64_t>>,
+      RecordField<w_field, NumpyBuilder<double>>
+  > builder;
 
   auto& u_builder = std::get<0>(builder.contents).builder;
   auto& v_builder = std::get<1>(builder.contents).builder;
@@ -801,12 +824,12 @@ test_Record_nested()
        "node5", ptr3, j_subbuilder.length(),
        "node6", ptr4, v_builder.length(),
        "node7", ptr5, w_builder.length());
-  std::cout << "DONE!" << std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_List() {
-  auto builder = lb::List<initial, lb::Numpy<initial, double>>();
+  ListBuilder<NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.begin_list();
   subbuilder.append(1.1);
@@ -870,12 +893,12 @@ test_List() {
   dump("node0", ptr1, builder.length(),
        "     ", ptr2, builder.length(),
        "node1", ptr3, subbuilder.length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Indexed() {
-  auto builder = lb::Indexed<initial, lb::Numpy<initial, double>>();
+  IndexedBuilder<NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
@@ -918,12 +941,12 @@ test_Indexed() {
 
   dump("node0", ptr0, builder.length(),
        "node1", ptr1, builder.content().length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_IndexedOption() {
-  auto builder = lb::IndexedOption<initial, lb::Numpy<initial, double>>();
+  IndexedOptionBuilder<NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
@@ -967,12 +990,12 @@ test_IndexedOption() {
 
   dump("node0", ptr0, builder.length(),
        "node1", ptr1, builder.content().length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Empty() {
-  auto builder = lb::Empty();
+  EmptyBuilder builder;
 
   assert (builder.is_valid() == true);
 
@@ -990,9 +1013,7 @@ test_Empty() {
 
 void
 test_ListOffset_Empty() {
-  auto builder = lb::ListOffset<initial,
-      lb::ListOffset<initial, lb::Empty
-  >>();
+  ListOffsetBuilder<ListOffsetBuilder<EmptyBuilder>> builder;
 
   builder.begin_list();
   builder.end_list();
@@ -1054,12 +1075,12 @@ test_ListOffset_Empty() {
 
   dump("node0", ptr0, builder.length() + 1,
        "node1", ptr1, subbuilder.length() + 1);
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Unmasked() {
-  auto builder = lb::Unmasked<lb::Numpy<initial, int64_t>>();
+  UnmaskedBuilder<NumpyBuilder<int64_t>> builder;
 
   auto& subbuilder = builder.append_valid();
   subbuilder.append(11);
@@ -1093,14 +1114,12 @@ test_Unmasked() {
   builder.content().to_buffers(ptr0);
 
   dump("node0", ptr0, builder.content().length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_ByteMasked() {
-  auto builder = lb::ByteMasked<true, initial,
-      lb::Numpy<initial, double>
-  >();
+  ByteMaskedBuilder<true, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
@@ -1149,14 +1168,12 @@ test_ByteMasked() {
 
   dump("node0", ptr0, builder.length(),
        "node1", ptr1, builder.content().length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_BitMasked() {
-  auto builder = lb::BitMasked<true, true, initial,
-      lb::Numpy<initial, double>
-  >();
+  BitMaskedBuilder<true, true, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.append_valid();
   subbuilder.append(1.1);
@@ -1215,14 +1232,12 @@ test_BitMasked() {
 
   dump("node0", ptr0, builder.length(),
        "node1", ptr1, builder.content().length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Regular() {
-  auto builder = lb::Regular<3,
-      lb::Numpy<initial, double>
-  >();
+  RegularBuilder<3, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.begin_list();
   subbuilder.append(1.1);
@@ -1262,14 +1277,12 @@ test_Regular() {
   builder.content().to_buffers(ptr0);
 
   dump("node0", ptr0, builder.content().length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 void
 test_Regular_size0() {
-  auto builder = lb::Regular<0,
-      lb::Numpy<initial, double>
-  >();
+  RegularBuilder<0, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.begin_list();
   builder.end_list();
@@ -1303,7 +1316,7 @@ test_Regular_size0() {
   builder.content().to_buffers(ptr0);
 
   dump("node0", ptr0, builder.content().length());
-  std::cout<<std::endl;
+  std::cout << std::endl;
 }
 
 int main(int /* argc */, char ** /* argv */) {
@@ -1314,8 +1327,8 @@ int main(int /* argc */, char ** /* argv */) {
   test_Numpy_complex();
   test_ListOffset();
   test_ListOffset_ListOffset();
-  test_Record();
   test_EmptyRecord();
+  test_Record();
   test_ListOffset_Record();
   test_Record_Record();
   test_Record_nested();
