@@ -3,22 +3,9 @@
 #include "awkward/LayoutBuilder.h"
 
 namespace lb = awkward::LayoutBuilder;
+using UserDefinedMap = std::map<std::size_t, std::string>;
 
 static const char param[] = "";
-
-static const char one_field[] = "one";
-static const char two_field[] = "two";
-static const char three_field[] = "three";
-
-static const char x_field[] = "x";
-static const char y_field[] = "y";
-
-static const char u_field[] = "u";
-static const char v_field[] = "v";
-static const char w_field[] = "w";
-
-static const char i_field[] = "i";
-static const char j_field[] = "j";
 
 static const unsigned initial = 10;
 
@@ -43,6 +30,9 @@ using NumpyBuilder = awkward::LayoutBuilder::Numpy<initial, PRIMITIVE>;
 
 template<class BUILDER>
 using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, BUILDER>;
+
+template<typename... BUILDERS>
+using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>;
 
 void
 test_Numpy_bool() {
@@ -377,32 +367,32 @@ test_EmptyRecord() {
 void
 test_Record()
 {
-  std::cout << "test_Record()\n";
-  lb::Record<
-      lb::Field<one_field, NumpyBuilder<double>>,
-      lb::Field<two_field, NumpyBuilder<int64_t>>,
-      lb::Field<three_field, NumpyBuilder<char>>
-  > builder;
+  // A user has to provide the field names by mapping
+  // the enum values to std::strings:
+  //
+  using UserDefinedMap = std::map<std::size_t, std::string>;
+
+  enum Field : std::size_t {one, two, three};
+
+  UserDefinedMap fields_map({
+    {Field::one, "one"},
+    {Field::two, "two"},
+    {Field::three, "three"}});
+
+  RecordBuilder<
+      lb::Field<Field::one, NumpyBuilder<double>>,
+      lb::Field<Field::two, NumpyBuilder<int64_t>>,
+      lb::Field<Field::three, NumpyBuilder<char>>
+  > builder(fields_map);
 
   auto names = builder.field_names();
   for (auto i : names) {
     std::cout << "field name " << i << std::endl;
   }
 
-  // One way of filling the Record is by specifying its
-  // field name and a value to append:
-  builder.field_append("one", 1.1);
-
-  // This is similar to setting a current field and
-  // appending a value:
-  builder.field("two");
-  builder.append(2);
-
-  // A faster way is by caching a Field builder
-  // and appending the values to it
-  auto& one_builder = std::get<0>(builder.contents).builder;
-  auto& two_builder = std::get<1>(builder.contents).builder;
-  auto& three_builder = std::get<2>(builder.contents).builder;
+  auto& one_builder = builder.field<Field::one>();
+  auto& two_builder = builder.field<Field::two>();
+  auto& three_builder = builder.field<Field::three>();
 
   three_builder.append('a');
 
@@ -464,19 +454,25 @@ test_Record()
 
 void
 test_ListOffset_Record() {
-  std::cout << "test_ListOffset_Record(()\n";
+
+  enum Field : int {x, y};
+
+  UserDefinedMap fields_map({
+    {Field::x, "x"},
+    {Field::y, "y"}});
 
   ListOffsetBuilder<
-      lb::Record<
-          lb::Field<x_field, NumpyBuilder<double>>,
-          lb::Field<y_field, ListOffsetBuilder<
+      RecordBuilder<
+          lb::Field<Field::x, NumpyBuilder<double>>,
+          lb::Field<Field::y, ListOffsetBuilder<
               NumpyBuilder<int32_t>>
   >>> builder;
 
   auto& subbuilder = builder.begin_list();
+  subbuilder.set_field_names(fields_map);
 
-  auto& x_builder = std::get<0>(subbuilder.contents).builder;
-  auto& y_builder = std::get<1>(subbuilder.contents).builder;
+  auto& x_builder = subbuilder.field<Field::x>();
+  auto& y_builder = subbuilder.field<Field::y>();
 
   x_builder.append(1.1);
   auto& y_subbuilder = y_builder.begin_list();
@@ -571,21 +567,44 @@ test_Record_Record()
 {
   std::cout << "test_Record_Record()\n";
 
-  lb::Record<
-      lb::Field<x_field, lb::Record<
-          lb::Field<u_field, NumpyBuilder<double>>,
-          lb::Field<v_field, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>,
-      lb::Field<y_field, lb::Record<
-          lb::Field<w_field, NumpyBuilder<char>>>>
+  using UserDefinedMap = std::map<std::size_t, std::string>;
+
+  enum Field0 : std::size_t {x, y};
+
+  UserDefinedMap fields_map0({
+    {Field0::x, "x"},
+    {Field0::y, "y"}});
+
+  enum Field1 : std::size_t {u, v};
+
+  UserDefinedMap fields_map1({
+    {Field1::u, "u"},
+    {Field1::v, "v"}});
+
+  enum Field2 : std::size_t {w};
+
+  UserDefinedMap fields_map2({
+    {Field2::w, "w"}});
+
+  RecordBuilder<
+      lb::Field<Field0::x, RecordBuilder<
+          lb::Field<Field1::u, NumpyBuilder<double>>,
+          lb::Field<Field1::v, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>,
+      lb::Field<Field0::y, RecordBuilder<
+          lb::Field<Field2::w, NumpyBuilder<char>>>>
   > builder;
+  builder.set_field_names(fields_map0);
 
-  auto& x_builder = std::get<0>(builder.contents).builder;
-  auto& y_builder = std::get<1>(builder.contents).builder;
+  auto& x_builder = builder.field<Field0::x>();
+  x_builder.set_field_names(fields_map1);
 
-  auto& u_builder = std::get<0>(x_builder.contents).builder;
-  auto& v_builder = std::get<1>(x_builder.contents).builder;
+  auto& y_builder = builder.field<Field0::y>();
+  y_builder.set_field_names(fields_map2);
 
-  auto& w_builder = std::get<0>(y_builder.contents).builder;
+  auto& u_builder = x_builder.field<Field1::u>();
+  auto& v_builder = x_builder.field<Field1::v>();
+
+  auto& w_builder = y_builder.field<Field2::w>();
 
 
   u_builder.append(1.1);
@@ -681,24 +700,42 @@ void
 test_Record_nested()
 {
   std::cout << "test_Record_nested()\n";
-  lb::Record<
-      lb::Field<u_field, ListOffsetBuilder<
-          lb::Record<
-              lb::Field<i_field, NumpyBuilder<double>>,
-              lb::Field<j_field, ListOffsetBuilder<
-                  NumpyBuilder<int64_t>>>>>>,
-      lb::Field<v_field, NumpyBuilder<int64_t>>,
-      lb::Field<w_field, NumpyBuilder<double>>
-  > builder;
 
-  auto& u_builder = std::get<0>(builder.contents).builder;
-  auto& v_builder = std::get<1>(builder.contents).builder;
-  auto& w_builder = std::get<2>(builder.contents).builder;
+  using UserDefinedMap = std::map<std::size_t, std::string>;
+
+  enum Field0 : std::size_t {u, v, w};
+
+  UserDefinedMap fields_map0({
+    {Field0::u, "u"},
+    {Field0::v, "v"},
+    {Field0::w, "w"}});
+
+  enum Field1 : std::size_t {i, j};
+
+  UserDefinedMap fields_map1({
+    {Field1::i, "i"},
+    {Field1::j, "j"}});
+
+  RecordBuilder<
+      lb::Field<Field0::u, ListOffsetBuilder<
+          RecordBuilder<
+              lb::Field<Field1::i, NumpyBuilder<double>>,
+              lb::Field<Field1::j, ListOffsetBuilder<
+                  NumpyBuilder<int64_t>>>>>>,
+      lb::Field<Field0::v, NumpyBuilder<int64_t>>,
+      lb::Field<Field0::w, NumpyBuilder<double>>
+  > builder;
+  builder.set_field_names(fields_map0);
+
+  auto& u_builder = builder.field<Field0::u>();
+  auto& v_builder = builder.field<Field0::v>();
+  auto& w_builder = builder.field<Field0::w>();
 
   auto& u_subbuilder = u_builder.begin_list();
+  u_subbuilder.set_field_names(fields_map1);
 
-  auto& i_builder = std::get<0>(u_subbuilder.contents).builder;
-  auto& j_builder = std::get<1>(u_subbuilder.contents).builder;
+  auto& i_builder = u_subbuilder.field<Field1::i>();
+  auto& j_builder = u_subbuilder.field<Field1::j>();
 
   i_builder.append(1.1);
   auto& j_subbuilder = j_builder.begin_list();
@@ -1330,7 +1367,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_ListOffset_Empty();
   test_Unmasked();
   test_ByteMasked();
-  //test_BitMasked();
+  test_BitMasked();
   test_Regular();
   test_Regular_size0();
 

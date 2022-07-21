@@ -15,12 +15,13 @@ namespace awkward {
 
   namespace LayoutBuilder {
 
-  template<const char* field_name, class BUILDER>
+  template<std::size_t ENUM, typename BUILDER>
   class Field {
   public:
+    using Builder = BUILDER;
 
-    const char* field() const {
-        return field_name;
+    std::string index_as_field() const {
+      return std::to_string(static_cast<int>(index));
     }
 
     std::string
@@ -34,7 +35,8 @@ namespace awkward {
       builder.append(x);
     }
 
-    BUILDER builder;
+    const std::size_t index = ENUM;
+    Builder builder;
   };
 
   template <unsigned INITIAL, typename PRIMITIVE>
@@ -315,14 +317,25 @@ namespace awkward {
     bool is_tuple_ = IS_TUPLE;
   };
 
-  template <typename... BUILDERS>
+  template <class MAP = std::map<std::size_t, std::string>, typename... BUILDERS>
   class Record {
   public:
-    Record()
-      : current_index_(0) {
+    using RecordContents = typename std::tuple<BUILDERS...>;
+
+    template<std::size_t INDEX>
+    using RecordFieldType = std::tuple_element_t<INDEX, RecordContents>;
+
+    Record() {
       size_t id = 0;
       set_id(id);
       map_fields(std::index_sequence_for<BUILDERS...>());
+    }
+
+    Record(MAP user_defined_field_id_to_name_map)
+      : content_names_(user_defined_field_id_to_name_map) {
+      assert(content_names_.size() == fields_count_);
+      size_t id = 0;
+      set_id(id);
     }
 
     const size_t
@@ -355,26 +368,22 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    const std::vector<std::string> &
+    const std::vector<std::string>
     field_names() const {
-      return field_names_;
+      if (content_names_.empty()) {
+        return field_names_;
+      } else {
+        std::vector<std::string> result;
+        for(auto it : content_names_) {
+          result.emplace_back(it.second);
+        }
+        return result;
+      }
     }
 
-    template<typename PRIMITIVE>
     void
-    field_append(const char* name, PRIMITIVE x) noexcept {
-      visit_at(contents, get_field_index(name), [&x] (auto& content) { content.builder.append(x); });
-    }
-
-    void
-    field(const char* name) noexcept {
-      current_index_ = get_field_index(name);
-    }
-
-    template<typename PRIMITIVE>
-    void
-    append(PRIMITIVE x) noexcept {
-      visit_at(contents, current_index_, [&x] (auto& content) { content.builder.append(x); });
+    set_field_names(MAP user_defined_field_id_to_name_map) {
+        content_names_ = user_defined_field_id_to_name_map;
     }
 
     void
@@ -395,12 +404,15 @@ namespace awkward {
       }
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
-      for (size_t i = 0;  i < std::tuple_size<decltype(contents)>::value;  i++) {
+      for (size_t i = 0;  i < fields_count_;  i++) {
         if (i != 0) {
           out << ", ";
         }
-        auto contents_form = [&] (auto& record) { out << "\"" << record.field() << + "\": ";
-                                                    out << record.form(); };
+        auto contents_form = [&] (auto& record) { out << "\""
+          << (!content_names_.empty() ? content_names_.at(record.index)
+          : record.index_as_field())
+          << + "\": ";
+          out << record.form(); };
         visit_at(contents, i, contents_form);
       }
       out << " }, ";
@@ -408,27 +420,26 @@ namespace awkward {
       return out.str();
     }
 
-    std::tuple<BUILDERS...> contents;
+    template<std::size_t INDEX>
+    typename RecordFieldType<INDEX>::Builder&
+    field() {
+      return std::get<INDEX>(contents).builder;
+    }
+
+    RecordContents contents;
 
   private:
     size_t id_;
     std::string parameters_;
     std::vector<std::string> field_names_;
-    size_t current_index_;
+    MAP content_names_;
 
     static constexpr size_t fields_count_ = sizeof...(BUILDERS);
 
     template <std::size_t... S>
     void
     map_fields(std::index_sequence<S...>) {
-      field_names_ = std::vector<std::string>({std::string(std::get<S>(contents).field())...});
-    }
-
-    size_t
-    get_field_index(std::string const& name) {
-      auto it = std::find(std::begin(field_names_), std::end(field_names_), name);
-      if (it == std::end(field_names_)) throw std::runtime_error("invalid field name: " + name);
-      return std::distance(std::begin(field_names_), it);
+      field_names_ = std::vector<std::string>({std::string(std::get<S>(contents).index_as_field())...});
     }
 
   };
@@ -1056,25 +1067,24 @@ namespace awkward {
         , current_byte_(uint8_t(0))
         , current_byte_ref_(mask_.append_and_get_ref(current_byte_))
         , current_index_(0)
-        , cast_(0)
          {
       size_t id = 0;
       set_id(id);
-      // if (lsb_order_) {
-      //   for(size_t i = 0; i < 8; i++) {
-      //     cast_[i] = 1 << i;
-      //   }
-      // }
-      // else {
-      //   for(size_t i = 0; i < 8; i++) {
-      //     cast_[i] = 128 >> i;
-      //   }
-      // }
+      if (lsb_order_) {
+        for(size_t i = 0; i < 8; i++) {
+          cast_[i] = 1 << i;
+        }
+      }
+      else {
+        for(size_t i = 0; i < 8; i++) {
+          cast_[i] = 128 >> i;
+        }
+      }
     }
 
     size_t
     length() const noexcept {
-      return mask_.length();
+      return (mask_.length()  - 1) * 8 + current_index_;
     }
 
     void
@@ -1105,7 +1115,7 @@ namespace awkward {
     }
 
     bool is_valid() const {
-      if (content_.length() != mask_.length()) {
+      if (content_.length() != length()) {
         std::cout << "BitMasked node" << id_ << "has content length " << content_.length()
                   << "but bit mask length " << mask_.length();
         return false;
@@ -1219,7 +1229,7 @@ namespace awkward {
     uint8_t current_byte_;
     uint8_t& current_byte_ref_;
     size_t current_index_;
-    uint8_t* cast_;
+    uint8_t cast_[8];
   };
 
   template <unsigned SIZE, typename BUILDER>
