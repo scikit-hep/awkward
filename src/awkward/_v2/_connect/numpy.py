@@ -271,7 +271,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 return result[0]
 
         out = inputs[where].recursively_apply(
-            unary_action, function_name=ufunc.__name__
+            unary_action, function_name=ufunc.__name__, allow_records=False
         )
 
     else:

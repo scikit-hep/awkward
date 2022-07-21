@@ -949,6 +949,10 @@ class RecordArray(Content):
     def _recursively_apply(
         self, action, depth, depth_context, lateral_context, options
     ):
+        if not options["allow_records"]:
+            raise ak._v2._util.error(
+                ValueError(f"cannot broadcast records in {options['function_name']}")
+            )
         if self._nplike.known_shape:
             contents = [x[: self._length] for x in self._contents]
         else:

@@ -1321,6 +1321,7 @@ class Content:
         action,
         depth_context=None,
         lateral_context=None,
+        allow_records=True,
         keep_parameters=True,
         numpy_to_regular=True,
         return_array=True,
@@ -1332,6 +1333,7 @@ class Content:
             depth_context,
             lateral_context,
             {
+                "allow_records": allow_records,
                 "keep_parameters": keep_parameters,
                 "numpy_to_regular": numpy_to_regular,
                 "return_array": return_array,
