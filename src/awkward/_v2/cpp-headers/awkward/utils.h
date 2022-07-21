@@ -107,7 +107,7 @@ constexpr bool is_iterable{};
 // std::void_t is part of C++17, define it ourselves until we switch to it
 template<typename...>
     struct voider { using type = void; };
-    
+
 template<typename... T>
     using void_t = typename voider<T...>::type;
 
