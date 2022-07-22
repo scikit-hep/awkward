@@ -304,9 +304,9 @@ namespace awkward {
     void
     append(PRIMITIVE datum) {
       if (ptr_->length() == ptr_->reserved()) {
-        add_panel((size_t)ceil(ptr_->reserved() * 1.5));
+        _add_panel((size_t)ceil(ptr_->reserved() * 1.5));
       }
-      fill_panel(datum);
+      _fill_panel(datum);
     }
 
     /// @brief Inserts an entire array into the panel(s), possibly triggering
@@ -320,17 +320,17 @@ namespace awkward {
       size_t empty_slots = ptr_->reserved() - ptr_->length();
       if (size > empty_slots) {
         for (size_t i = 0; i < empty_slots; i++) {
-          fill_panel(ptr[i]);
+          _fill_panel(ptr[i]);
         }
-        add_panel(size - empty_slots > ptr_->reserved() ?
+        _add_panel(size - empty_slots > ptr_->reserved() ?
                   size - empty_slots : ptr_->reserved());
         for (size_t i = empty_slots; i < size; i++) {
-          fill_panel(ptr[i]);
+          _fill_panel(ptr[i]);
         }
       }
       else {
         for (size_t i = 0; i < size; i++) {
-          fill_panel(ptr[i]);
+          _fill_panel(ptr[i]);
         }
       }
     }
@@ -353,14 +353,14 @@ namespace awkward {
   private:
     /// @brief Inserts one `datum` into the panel.
     void
-    fill_panel(PRIMITIVE datum) {
+    _fill_panel(PRIMITIVE datum) {
       ptr_->fill_panel(datum);
     }
 
     /// @brief Creates a new panel with slots equal to #reserved.
     /// and updates the current panel pointer to it.
     void
-    add_panel(size_t reserved) {
+    _add_panel(size_t reserved) {
       ptr_ = ptr_->append_panel(reserved);
     }
 

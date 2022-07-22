@@ -8,7 +8,7 @@ template <class NODE, class PRIMITIVE, class LENGTH>
 void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
   std::cout << node << ": ";
   for (size_t i = 0; i < length; i++) {
-    std::cout << +ptr[i] << " ";
+    std::cout << ptr[i] << " ";
   }
   std::cout << std::endl;
 }
@@ -39,11 +39,25 @@ using NumpyBuilder = awkward::LayoutBuilder::Numpy<initial, PRIMITIVE>;
 template<class BUILDER>
 using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, BUILDER>;
 
+template<class BUILDER>
+using ListBuilder = awkward::LayoutBuilder::List<initial, BUILDER>;
+
+using EmptyBuilder = awkward::LayoutBuilder::Empty;
+
+template<bool IS_TUPLE>
+using EmptyRecordBuilder = awkward::LayoutBuilder::EmptyRecord<IS_TUPLE>;
+
 template<class... BUILDERS>
 using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>;
 
-template<class BUILDER>
-using ListBuilder = awkward::LayoutBuilder::List<initial, BUILDER>;
+template<std::size_t field_name, class BUILDER>
+using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
+
+template<class... BUILDERS>
+using TupleBuilder = awkward::LayoutBuilder::Tuple<BUILDERS...>;
+
+template <unsigned SIZE, class BUILDER>
+using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
 
 template<class BUILDER>
 using IndexedBuilder = awkward::LayoutBuilder::Indexed<initial, BUILDER>;
@@ -60,19 +74,8 @@ using ByteMaskedBuilder = awkward::LayoutBuilder::ByteMasked<initial, VALID_WHEN
 template<bool VALID_WHEN, bool LSB_ORDER, class BUILDER>
 using BitMaskedBuilder = awkward::LayoutBuilder::BitMasked<initial, VALID_WHEN, LSB_ORDER, BUILDER>;
 
-template <unsigned SIZE, class BUILDER>
-using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
-
-template<bool IS_TUPLE>
-using EmptyRecordBuilder = awkward::LayoutBuilder::EmptyRecord<IS_TUPLE>;
-
-using EmptyBuilder = awkward::LayoutBuilder::Empty;
-
-template<std::size_t field_name, class BUILDER>
-using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
-
 template<class... BUILDERS>
-using TupleBuilder = awkward::LayoutBuilder::Tuple<BUILDERS...>;
+using UnionBuilder = awkward::LayoutBuilder::Union<initial, BUILDERS...>;
 
 
 void
@@ -186,13 +189,16 @@ void
 test_Numpy_double() {
   NumpyBuilder<double> builder;
 
-  size_t data_size = 9;
+  builder.append(1.1);
+  builder.append(2.2);
 
-  double data[9] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9};
+  size_t data_size = 3;
+
+  double data[3] = {3.3, 4.4, 5.5};
 
   builder.extend(data, data_size);
 
-  // [1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9]
+  // [1.1, 2.2, 3.3, 4.4, 5.5]
 
   std::string error;
   assert (builder.is_valid(error) == true);
@@ -384,6 +390,163 @@ test_ListOffset_ListOffset() {
 }
 
 void
+test_List() {
+  ListBuilder<NumpyBuilder<double>> builder;
+
+  auto& subbuilder = builder.begin_list();
+  subbuilder.append(1.1);
+  subbuilder.append(2.2);
+  subbuilder.append(3.3);
+  builder.end_list();
+
+  builder.begin_list();
+  builder.end_list();
+
+  builder.begin_list();
+  subbuilder.append(4.4);
+  subbuilder.append(5.5);
+  builder.end_list();
+
+  builder.begin_list();
+  subbuilder.append(6.6);
+
+  builder.end_list();
+
+  builder.begin_list();
+  subbuilder.append(7.7);
+  subbuilder.append(8.8);
+  subbuilder.append(9.9);
+  builder.end_list();
+
+  // [
+  //     [1.1, 2.2, 3.3],
+  //     [],
+  //     [4.4, 5.5],
+  //     [6.6],
+  //     [7.7, 8.8, 9.9],
+  // ]
+
+  std::string error;
+  assert (builder.is_valid(error) == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 3);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node0-starts", (int64_t*)buffers["node0-starts"], names_nbytes["node0-starts"]/sizeof(int64_t),
+       "node0-stops", (int64_t*)buffers["node0-stops"], names_nbytes["node0-stops"]/sizeof(int64_t),
+       "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"ListArray\", "
+      "\"starts\": \"i64\", "
+      "\"stops\": \"i64\", "
+      "\"content\": { "
+          "\"class\": \"NumpyArray\", "
+          "\"primitive\": \"float64\", "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "\"form_key\": \"node0\" "
+  "}");
+
+  std::cout << std::endl;
+}
+
+void
+test_Empty() {
+  EmptyBuilder builder;
+
+  std::string error;
+  assert (builder.is_valid(error) == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 0);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"EmptyArray\" "
+  "}");
+}
+
+void
+test_ListOffset_Empty() {
+  ListOffsetBuilder<ListOffsetBuilder<EmptyBuilder>> builder;
+
+  builder.begin_list();
+  builder.end_list();
+
+  auto& subbuilder = builder.begin_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  builder.end_list();
+
+  builder.begin_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  builder.end_list();
+
+  builder.begin_list();
+  builder.end_list();
+
+  builder.begin_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
+  builder.end_list();
+
+  //  [[], [[], [], []], [[], []], [], [[]]]
+
+  std::string error;
+  assert (builder.is_valid(error) == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 2);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node0-offsets", (int64_t*)buffers["node0-offsets"], names_nbytes["node0-offsets"]/sizeof(int64_t),
+       "node1-offsets", (int64_t*)buffers["node1-offsets"], names_nbytes["node1-offsets"]/sizeof(int64_t));
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"ListOffsetArray\", "
+      "\"offsets\": \"i64\", "
+      "\"content\": { "
+          "\"class\": \"ListOffsetArray\", "
+          "\"offsets\": \"i64\", "
+          "\"content\": { "
+              "\"class\": \"EmptyArray\" "
+          "}, "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "\"form_key\": \"node0\" "
+  "}");
+
+  std::cout << std::endl;
+}
+
+void
 test_EmptyRecord() {
   EmptyRecordBuilder<true> builder;
 
@@ -430,6 +593,7 @@ test_Record()
     > builder(fields_map);
 
   std::vector<std::string> fields {"one", "two", "three"};
+
   auto names = builder.field_names();
 
   for (size_t i = 0; i < names.size(); i++) {
@@ -456,7 +620,7 @@ test_Record()
 
   // [
   //     {"one": 1.1, "two": 2, "three": 'a'},
-  //     {"one": 3.3, "two": 4. "three": 'b'},
+  //     {"one": 3.3, "two": 4, "three": 'b'},
   // ]
 
   assert (builder.is_valid(error) == true);
@@ -858,43 +1022,41 @@ test_Record_nested()
 }
 
 void
-test_List() {
-  ListBuilder<NumpyBuilder<double>> builder;
-
-  auto& subbuilder = builder.begin_list();
-  subbuilder.append(1.1);
-  subbuilder.append(2.2);
-  subbuilder.append(3.3);
-  builder.end_list();
-
-  builder.begin_list();
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(4.4);
-  subbuilder.append(5.5);
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(6.6);
-
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(7.7);
-  subbuilder.append(8.8);
-  subbuilder.append(9.9);
-  builder.end_list();
-
-  // [
-  //     [1.1, 2.2, 3.3],
-  //     [],
-  //     [4.4, 5.5],
-  //     [6.6],
-  //     [7.7, 8.8, 9.9],
-  // ]
+test_Tuple_Numpy_ListOffset() {
+  TupleBuilder<
+      NumpyBuilder<double>,
+      ListOffsetBuilder<NumpyBuilder<int32_t>>
+  > builder;
 
   std::string error;
+  assert (builder.is_valid(error) == true);
+
+  auto& subbuilder_one = builder.index<0>();
+  subbuilder_one.append(1.1);
+  auto& subbuilder_two = builder.index<1>();
+  auto& subsubbuilder = subbuilder_two.begin_list();
+  subsubbuilder.append(1);
+  subbuilder_two.end_list();
+
+  assert (builder.is_valid(error) == true);
+
+  subbuilder_one.append(2.2);
+  subbuilder_two.begin_list();
+  subsubbuilder.append(1);
+  subsubbuilder.append(2);
+  subbuilder_two.end_list();
+
+  assert (builder.is_valid(error) == true);
+
+  subbuilder_one.append(3.3);
+  subbuilder_two.begin_list();
+  subsubbuilder.append(1);
+  subsubbuilder.append(2);
+  subsubbuilder.append(3);
+  subbuilder_two.end_list();
+
+  // [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
+
   assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
@@ -904,22 +1066,118 @@ test_List() {
   auto buffers = empty_buffers(names_nbytes);
   builder.to_buffers(buffers);
 
-  dump("node0-starts", (int64_t*)buffers["node0-starts"], names_nbytes["node0-starts"]/sizeof(int64_t),
-       "node0-stops", (int64_t*)buffers["node0-stops"], names_nbytes["node0-stops"]/sizeof(int64_t),
-       "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
+  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double),
+       "node2-offsets", (int64_t*)buffers["node2-offsets"], names_nbytes["node2-offsets"]/sizeof(int64_t),
+       "node3-data", (int32_t*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(int32_t));
+
+  auto form = builder.form();
+  assert (form ==
+  "{ "
+      "\"class\": \"RecordArray\", "
+      "\"contents\": ["
+        "{ "
+            "\"class\": \"NumpyArray\", "
+            "\"primitive\": \"float64\", "
+            "\"form_key\": \"node1\" "
+        "}, "
+        "{ "
+            "\"class\": \"ListOffsetArray\", "
+            "\"offsets\": \"i64\", "
+            "\"content\": { "
+                "\"class\": \"NumpyArray\", "
+                "\"primitive\": \"int32\", "
+                "\"form_key\": \"node3\" "
+            "}, "
+            "\"form_key\": \"node2\" "
+        "}], "
+      "\"form_key\": \"node0\" "
+  "}");
+
+  std::cout << std::endl;
+}
+
+void
+test_Regular() {
+  RegularBuilder<3, NumpyBuilder<double>> builder;
+
+  auto& subbuilder = builder.begin_list();
+  subbuilder.append(1.1);
+  subbuilder.append(2.2);
+  subbuilder.append(3.3);
+  builder.end_list();
+
+  builder.begin_list();
+  subbuilder.append(4.4);
+  subbuilder.append(5.5);
+  subbuilder.append(6.6);
+  builder.end_list();
+
+  // [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
+
+  std::string error;
+  assert (builder.is_valid(error) == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
 
   auto form = builder.form();
 
   assert (form ==
   "{ "
-      "\"class\": \"ListArray\", "
-      "\"starts\": \"i64\", "
-      "\"stops\": \"i64\", "
+      "\"class\": \"RegularArray\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
           "\"primitive\": \"float64\", "
           "\"form_key\": \"node1\" "
       "}, "
+      "\"size\": 3, "
+      "\"form_key\": \"node0\" "
+  "}");
+
+  std::cout << std::endl;
+}
+
+void
+test_Regular_size0() {
+  RegularBuilder<0, NumpyBuilder<double>> builder;
+
+  auto& subbuilder = builder.begin_list();
+  builder.end_list();
+
+  builder.begin_list();
+  builder.end_list();
+
+  // [[], []]
+
+  std::string error;
+  assert (builder.is_valid(error) == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"RegularArray\", "
+      "\"content\": { "
+          "\"class\": \"NumpyArray\", "
+          "\"primitive\": \"float64\", "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "\"size\": 0, "
       "\"form_key\": \"node0\" "
   "}");
 
@@ -955,7 +1213,6 @@ test_Indexed() {
 
   dump("node0-index", (int64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(int64_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
-
 
   auto form = builder.form();
 
@@ -1093,94 +1350,6 @@ test_IndexedOption_Record() {
             "\"form_key\": \"node1\" "
         "}, "
         "\"form_key\": \"node0\" "
-  "}");
-
-  std::cout << std::endl;
-}
-
-void
-test_Empty() {
-  EmptyBuilder builder;
-
-  std::string error;
-  assert (builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert (names_nbytes.size() == 0);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  auto form = builder.form();
-
-  assert (form ==
-  "{ "
-      "\"class\": \"EmptyArray\" "
-  "}");
-}
-
-void
-test_ListOffset_Empty() {
-  ListOffsetBuilder<ListOffsetBuilder<EmptyBuilder>> builder;
-
-  builder.begin_list();
-  builder.end_list();
-
-  auto& subbuilder = builder.begin_list();
-  subbuilder.begin_list();
-  subbuilder.end_list();
-  subbuilder.begin_list();
-  subbuilder.end_list();
-  subbuilder.begin_list();
-  subbuilder.end_list();
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.begin_list();
-  subbuilder.end_list();
-  subbuilder.begin_list();
-  subbuilder.end_list();
-  builder.end_list();
-
-  builder.begin_list();
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.begin_list();
-  subbuilder.end_list();
-  builder.end_list();
-
-  //  [[], [[], [], []], [[], []], [], [[]]]
-
-  std::string error;
-  assert (builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert (names_nbytes.size() == 2);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  dump("node0-offsets", (int64_t*)buffers["node0-offsets"], names_nbytes["node0-offsets"]/sizeof(int64_t),
-       "node1-offsets", (int64_t*)buffers["node1-offsets"], names_nbytes["node1-offsets"]/sizeof(int64_t));
-
-  auto form = builder.form();
-
-  assert (form ==
-  "{ "
-      "\"class\": \"ListOffsetArray\", "
-      "\"offsets\": \"i64\", "
-      "\"content\": { "
-          "\"class\": \"ListOffsetArray\", "
-          "\"offsets\": \"i64\", "
-          "\"content\": { "
-              "\"class\": \"EmptyArray\" "
-          "}, "
-          "\"form_key\": \"node1\" "
-      "}, "
-      "\"form_key\": \"node0\" "
   "}");
 
   std::cout << std::endl;
@@ -1344,149 +1513,11 @@ test_BitMasked() {
 }
 
 void
-test_Regular() {
-  RegularBuilder<3, NumpyBuilder<double>> builder;
-
-  auto& subbuilder = builder.begin_list();
-  subbuilder.append(1.1);
-  subbuilder.append(2.2);
-  subbuilder.append(3.3);
-  builder.end_list();
-
-  builder.begin_list();
-  subbuilder.append(4.4);
-  subbuilder.append(5.5);
-  subbuilder.append(6.6);
-  builder.end_list();
-
-  // [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
-
-  std::string error;
-  assert (builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert (names_nbytes.size() == 1);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
-
-  auto form = builder.form();
-
-  assert (form ==
-  "{ "
-      "\"class\": \"RegularArray\", "
-      "\"content\": { "
-          "\"class\": \"NumpyArray\", "
-          "\"primitive\": \"float64\", "
-          "\"form_key\": \"node1\" "
-      "}, "
-      "\"size\": 3, "
-      "\"form_key\": \"node0\" "
-  "}");
-
-  std::cout << std::endl;
-}
-
-void
-test_Regular_size0() {
-  RegularBuilder<0, NumpyBuilder<double>> builder;
-
-  auto& subbuilder = builder.begin_list();
-  builder.end_list();
-
-  builder.begin_list();
-  builder.end_list();
-
-  // [[], []]
-
-  std::string error;
-  assert (builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert (names_nbytes.size() == 1);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
-
-  auto form = builder.form();
-
-  assert (form ==
-  "{ "
-      "\"class\": \"RegularArray\", "
-      "\"content\": { "
-          "\"class\": \"NumpyArray\", "
-          "\"primitive\": \"float64\", "
-          "\"form_key\": \"node1\" "
-      "}, "
-      "\"size\": 0, "
-      "\"form_key\": \"node0\" "
-  "}");
-
-  std::cout << std::endl;
-}
-
-void
-test_Tuple_Numpy_ListOffset() {
-    TupleBuilder<NumpyBuilder<double>, ListOffsetBuilder<NumpyBuilder<int32_t>>> builder;
-
-    std::string error;
-    assert (builder.is_valid(error) == true);
-
-    auto& subbuilder_one = builder.index<0>();
-    subbuilder_one.append(1.1);
-    auto& subbuilder_two = builder.index<1>();
-    auto& subsubbuilder = subbuilder_two.begin_list();
-    subsubbuilder.append(1);
-    subbuilder_two.end_list();
-
-    assert (builder.is_valid(error) == true);
-
-    subbuilder_one.append(2.2);
-    subbuilder_two.begin_list();
-    subsubbuilder.append(1);
-    subsubbuilder.append(2);
-    subbuilder_two.end_list();
-
-    assert (builder.is_valid(error) == true);
-
-    subbuilder_one.append(3.3);
-    subbuilder_two.begin_list();
-    subsubbuilder.append(1);
-    subsubbuilder.append(2);
-    subsubbuilder.append(3);
-    subbuilder_two.end_list();
-
-    assert (builder.is_valid(error) == true);
-
-    std::map<std::string, size_t> names_nbytes = {};
-    builder.buffer_nbytes(names_nbytes);
-    assert (names_nbytes.size() == 3);
-
-    auto buffers = empty_buffers(names_nbytes);
-    builder.to_buffers(buffers);
-
-    dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
-    dump("node2-offsets", (int64_t*)buffers["node2-offsets"], names_nbytes["node2-offsets"]/sizeof(int64_t));
-    dump("node3-data", (int32_t*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(int32_t));
-
-    auto form = builder.form();
-    assert (form ==
-      "{ \"class\": \"RecordArray\", \"contents\": [{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, { \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": { \"class\": \"NumpyArray\", \"primitive\": \"int32\", \"form_key\": \"node3\" }, \"form_key\": \"node2\" }], \"form_key\": \"node0\" }"
-    );
-
-    // [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
-
-}
-
-void
 test_Union_Numpy_ListOffset() {
-  awkward::LayoutBuilder::Union<2, NumpyBuilder<double>, ListOffsetBuilder<NumpyBuilder<int32_t>>> builder;
+  UnionBuilder<
+      NumpyBuilder<double>,
+      ListOffsetBuilder<NumpyBuilder<int32_t>>
+  > builder;
 
   std::string error;
   assert (builder.is_valid(error) == true);
@@ -1517,15 +1548,35 @@ test_Union_Numpy_ListOffset() {
   auto buffers = empty_buffers(names_nbytes);
   builder.to_buffers(buffers);
 
-  dump("node0-tags", (int8_t*)buffers["node0-tags"], names_nbytes["node0-tags"]/sizeof(int8_t));
-  dump("node0-index", (uint64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(uint64_t));
-  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
-  dump("node2-offsets", (int64_t*)buffers["node2-offsets"], names_nbytes["node2-offsets"]/sizeof(int64_t));
-  dump("node3-data", (int32_t*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(int32_t));
+  dump("node0-tags", (int8_t*)buffers["node0-tags"], names_nbytes["node0-tags"]/sizeof(int8_t),
+       "node0-index", (uint64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(uint64_t),
+       "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double),
+       "node2-offsets", (int64_t*)buffers["node2-offsets"], names_nbytes["node2-offsets"]/sizeof(int64_t),
+       "node3-data", (int32_t*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(int32_t));
 
   auto form = builder.form();
   assert (form ==
-    "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, { \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": { \"class\": \"NumpyArray\", \"primitive\": \"int32\", \"form_key\": \"node3\" }, \"form_key\": \"node2\" }], \"form_key\": \"node0\" }");
+  "{ "
+      "\"class\": \"UnionArray\", "
+      "\"tags\": \"i8\", "
+      "\"index\": \"i64\", "
+      "\"contents\": [{ "
+          "\"class\": \"NumpyArray\", "
+          "\"primitive\": \"float64\", "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "{ "
+          "\"class\": \"ListOffsetArray\", "
+          "\"offsets\": \"i64\", "
+          "\"content\": { "
+              "\"class\": \"NumpyArray\", "
+              "\"primitive\": \"int32\", "
+              "\"form_key\": \"node3\" "
+          "}, "
+          "\"form_key\": \"node2\" "
+      "}], "
+      "\"form_key\": \"node0\" "
+  "}");
 }
 
 int main(int /* argc */, char ** /* argv */) {
@@ -1536,23 +1587,23 @@ int main(int /* argc */, char ** /* argv */) {
   test_Numpy_complex();
   test_ListOffset();
   test_ListOffset_ListOffset();
+  test_List();
+  test_Empty();
+  test_ListOffset_Empty();
   test_EmptyRecord();
   test_Record();
   test_ListOffset_Record();
   test_Record_Record();
   test_Record_nested();
-  test_List();
+  test_Tuple_Numpy_ListOffset();
+  test_Regular();
+  test_Regular_size0();
   test_Indexed();
   test_IndexedOption();
   test_IndexedOption_Record();
-  test_Empty();
-  test_ListOffset_Empty();
   test_Unmasked();
   test_ByteMasked();
   test_BitMasked();
-  test_Regular();
-  test_Regular_size0();
-  test_Tuple_Numpy_ListOffset();
   test_Union_Numpy_ListOffset();
 
   return 0;
