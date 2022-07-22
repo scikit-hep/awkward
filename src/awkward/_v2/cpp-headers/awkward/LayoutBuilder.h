@@ -491,158 +491,144 @@ namespace awkward {
 
   };
 
-  // template <typename... BUILDERS>
-  // class Tuple {
-  // public:
-  //   Tuple()
-  //     : current_index_(0) {
-  //     size_t id = 0;
-  //     set_id(id);
-  //     map_fields(std::index_sequence_for<BUILDERS...>());
-  //   }
+  template <typename... BUILDERS>
+  class Tuple {
+    using TupleContents = typename std::tuple<BUILDERS...>;
 
-  //   const size_t
-  //   length() const {
-  //     return (std::get<0>(contents).builder.length());
-  //   }
+    template<std::size_t INDEX>
+    using TupleContentType = std::tuple_element_t<INDEX, TupleContents>;
 
-  //   void
-  //   clear() noexcept {
-  //     for (size_t i = 0; i < fields_count_; i++)
-  //       visit_at(contents, i, [](auto& content) { content.builder.clear(); });
-  //   }
+  public:
+    Tuple() {
+      size_t id = 0;
+      set_id(id);
+    }
 
-  //   void
-  //   set_id(size_t &id) noexcept {
-  //     id_ = id;
-  //     id++;
-  //     for (size_t i = 0; i < fields_count_; i++) {
-  //       visit_at(contents, i, [&id] (auto& content) { content.builder.set_id(id); });
-  //     }
-  //   }
+    template<std::size_t INDEX>
+    TupleContentType<INDEX>&
+    index_at() {
+      return std::get<INDEX>(contents);
+    }
 
-  //   std::string parameters() const noexcept {
-  //     return parameters_;
-  //   }
+    const size_t
+    length() const {
+      return (std::get<0>(contents).builder.length());
+    }
 
-  //   void
-  //   set_parameters(std::string parameter) noexcept {
-  //     parameters_ = parameter;
-  //   }
+    void
+    clear() noexcept {
+      for (size_t i = 0; i < fields_count_; i++)
+        visit_at(contents, i, [](auto& content) { content.builder.clear(); });
+    }
 
-  //   bool is_valid(std::string& error) const noexcept {
-  //     size_t length = -1;
-  //     for (size_t i = 0; i < fields_count_; i++) {
-  //       visit_at(contents, i, [&](auto& content) {
-  //         if (length == -1) {
-  //           length = content.builder.length();
-  //         }
-  //         else if (length != content.builder.length()) {
-  //           std::cout << "Record node" << id_ << "has field " << content.field() << "length "
-  //                     << content.builder.length() << "that differs from the first length " << length;
-  //           return false;
-  //         }
-  //       });
-  //     }
+    void
+    set_id(size_t &id) noexcept {
+      id_ = id;
+      id++;
+      for (size_t i = 0; i < fields_count_; i++) {
+        visit_at(contents, i, [&id] (auto& content) { content.set_id(id); });
+      }
+    }
 
-  //     for (size_t i = 0; i < fields_count_; i++) {
-  //       visit_at(contents, i, [&length](auto& content) {
-  //         if (!content.builder.is_valid(error)) {
-  //          return false;
-  //         }
-  //       });
-  //     }
-  //     return true;
-  //   }
+    const std::string&
+    parameters() const noexcept {
+      return parameters_;
+    }
 
-  //   const std::vector<std::string> &
-  //   field_names() const {
-  //     return field_names_;
-  //   }
+    void
+    set_parameters(std::string parameter) noexcept {
+      parameters_ = parameter;
+    }
 
-  //   template<typename PRIMITIVE>
-  //   void
-  //   field_append(const char* name, PRIMITIVE x) noexcept {
-  //     visit_at(contents, get_field_index(name), [&x] (auto& content) { content.builder.append(x); });
-  //   }
+    bool
+    is_valid(std::string& error) const noexcept {
+      auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-  //   void
-  //   field(const char* name) noexcept {
-  //     current_index_ = get_field_index(name);
-  //   }
+      size_t length = -1;
+      bool result = false;
+      std::vector<size_t> lengths = content_lengths(index_sequence);
+      for (size_t i = 0; i < lengths.size(); i++) {
+        if (length == -1) {
+          length = lengths[i];
+        }
+        else if (length != lengths[i]) {
+          std::stringstream out;
+          out << "Record node" << id_ << " has index \"" << i << "\" length "
+              << lengths[i] << " that differs from the first length "
+              << length << "\n";
+          error.append(out.str());
 
-  //   template<typename PRIMITIVE>
-  //   void
-  //   append(PRIMITIVE x) noexcept {
-  //     visit_at(contents, current_index_, [&x] (auto& content) { content.builder.append(x); });
-  //   }
+          return false;
+        }
+      }
 
-  //   void
-  //   buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-  //     for (size_t i = 0; i < fields_count_; i++)
-  //       visit_at(contents, i, [&names_nbytes](auto& content) {
-  //         content.builder.buffer_nbytes(names_nbytes);
-  //       });
-  //   }
+      std::vector<bool> valid_fields = content_is_valid(index_sequence, error);
+      return std::none_of(std::cbegin(valid_fields), std::cend(valid_fields), std::logical_not<bool>());
+    }
 
-  //   void
-  //   to_buffers(std::map<std::string, void*> &buffers) const noexcept {
-  //     for (size_t i = 0; i < fields_count_; i++)
-  //       visit_at(contents, i, [&buffers](auto& content) {
-  //         content.builder.to_buffers(buffers);
-  //       });
-  //   }
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      for (size_t i = 0; i < fields_count_; i++)
+        visit_at(contents, i, [&names_nbytes](auto& content) {
+          content.builder.buffer_nbytes(names_nbytes);
+        });
+    }
 
-  //   std::string
-  //   form() const noexcept {
-  //     std::stringstream form_key;
-  //     form_key << "node" << id_;
-  //     std::string params("");
-  //     if (parameters_ == "") { }
-  //     else {
-  //       params = std::string("\"parameters\": " + parameters_ + ", ");
-  //     }
-  //     std::stringstream out;
-  //     out << "{ \"class\": \"RecordArray\", \"contents\": { ";
-  //     for (size_t i = 0;  i < fields_count_;  i++) {
-  //       if (i != 0) {
-  //         out << ", ";
-  //       }
-  //       auto contents_form = [&out] (auto& content) {
-  //         out << "\"" << content.field() << + "\": ";
-  //         out << content.builder.form();
-  //       };
-  //       visit_at(contents, i, contents_form);
-  //     }
-  //     out << " }, ";
-  //     out << params << "\"form_key\": \"" << form_key.str() << "\" }";
-  //     return out.str();
-  //   }
+    void
+    to_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      for (size_t i = 0; i < fields_count_; i++)
+        visit_at(contents, i, [&buffers](auto& content) {
+          content.builder.to_buffers(buffers);
+        });
+    }
 
-  //   std::tuple<BUILDERS...> contents;
+    std::string
+    form() const noexcept {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string("\"parameters\": " + parameters_ + ", ");
+      }
+      std::stringstream out;
+      out << "{ \"class\": \"RecordArray\", \"contents\": { ";
+      for (size_t i = 0;  i < fields_count_;  i++) {
+        if (i != 0) {
+          out << ", ";
+        }
+        auto contents_form = [&out] (auto& content) {
+          out << "\"" << content.field() << + "\": ";
+          out << content.builder.form();
+        };
+        visit_at(contents, i, contents_form);
+      }
+      out << " }, ";
+      out << params << "\"form_key\": \"" << form_key.str() << "\" }";
+      return out.str();
+    }
 
-  // private:
-  //   size_t id_;
-  //   std::string parameters_;
-  //   std::vector<int64_t> field_index_;
-  //   size_t current_index_;
+    std::tuple<BUILDERS...> contents;
 
-  //   static constexpr size_t fields_count_ = sizeof...(BUILDERS);
+  private:
+    size_t id_;
+    std::string parameters_;
+    std::vector<int64_t> field_index_;
 
-  //   template <std::size_t... S>
-  //   void
-  //   map_fields(std::index_sequence<S...>) {
-  //     field_index_ = std::vector<int64_t>({S...});
-  //   }
+    static constexpr size_t fields_count_ = sizeof...(BUILDERS);
 
-  //   size_t
-  //   get_field_index(std::string const& name) {
-  //     auto it = std::find(std::begin(field_names_), std::end(field_names_), name);
-  //     if (it == std::end(field_names_)) throw std::runtime_error("invalid field name: " + name);
-  //     return std::distance(std::begin(field_names_), it);
-  //   }
+    template <std::size_t... S>
+    std::vector<size_t>
+    content_lengths(std::index_sequence<S...>) const {
+      return std::vector<size_t>({std::get<S>(contents).length()...});
+    }
 
-  // };
+    template <std::size_t... S>
+    std::vector<bool>
+    content_is_valid(std::index_sequence<S...>, std::string& error) const {
+      return std::vector<bool>({std::get<S>(contents).is_valid(error)...});
+    }
+  };
 
   template <unsigned INITIAL, typename BUILDER>
   class List {

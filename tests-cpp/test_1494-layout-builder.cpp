@@ -71,6 +71,10 @@ using EmptyBuilder = awkward::LayoutBuilder::Empty;
 template<std::size_t field_name, class BUILDER>
 using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
 
+template<class... BUILDERS>
+using TupleBuilder = awkward::LayoutBuilder::Tuple<BUILDERS...>;
+
+
 void
 test_Numpy_bool() {
 
@@ -1427,6 +1431,16 @@ test_Regular_size0() {
   std::cout << std::endl;
 }
 
+void
+test_Tuple_Numpy_ListOffset() {
+    TupleBuilder<NumpyBuilder<double>, ListOffsetBuilder<NumpyBuilder<int32_t>>> builder;
+
+    std::string error;
+    assert (builder.is_valid(error) == true);
+
+    // FIXME: add the test from Jim's prototype
+}
+
 int main(int /* argc */, char ** /* argv */) {
   test_Numpy_bool();
   test_Numpy_int();
@@ -1451,6 +1465,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_BitMasked();
   test_Regular();
   test_Regular_size0();
+  test_Tuple_Numpy_ListOffset();
 
   return 0;
 }
