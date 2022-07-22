@@ -169,7 +169,6 @@ def test_nested_array_builder():
     builder.end_record()
 
     array = builder.snapshot()
-    print(array.layout.form)
 
     assert ak._v2.to_list(array) == [
         {"u": [{"i": 1, "j": [9, 8, 7]}], "v": 2, "w": 3, "x": 4},

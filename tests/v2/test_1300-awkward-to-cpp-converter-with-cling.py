@@ -107,7 +107,7 @@ def test_RegularArray_NumpyArray(flatlist_as_rvec):
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
     lookup = ak._v2._lookup.Lookup(layout, generator)
-    generator.generate(debug_compiler)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""
@@ -1051,7 +1051,7 @@ def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
     lookup = ak._v2._lookup.Lookup(layout, generator)
-    generator.generate(debug_compiler)
+    generator.generate(compiler)
 
     ROOT.gInterpreter.Declare(
         f"""

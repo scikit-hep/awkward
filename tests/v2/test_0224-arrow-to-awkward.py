@@ -1122,7 +1122,6 @@ def test_arrow_dictarray_null():
         pyarrow.array([0, 0, 2, None, 1, None, 2, 1, 1]),
         pyarrow.array(["one", "two", "three"]),
     )
-    print(a)
     assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "one",
