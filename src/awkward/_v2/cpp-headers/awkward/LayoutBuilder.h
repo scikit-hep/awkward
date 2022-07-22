@@ -25,12 +25,6 @@ namespace awkward {
       return std::to_string(static_cast<int>(index));
     }
 
-    template<typename PRIMITIVE>
-    void
-    append(PRIMITIVE x) {
-      builder.append(x);
-    }
-
     const std::size_t index = ENUM;
     Builder builder;
   };
