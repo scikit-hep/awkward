@@ -58,7 +58,7 @@ jobs:
       with:
         submodules: true
 
-    - uses: pypa/cibuildwheel@v2.8.0
+    - uses: pypa/cibuildwheel@v2.8.1
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
