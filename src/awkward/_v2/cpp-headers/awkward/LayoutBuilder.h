@@ -1539,116 +1539,156 @@ namespace awkward {
     size_t size_ = SIZE;
   };
 
-  // template <unsigned INITIAL,  typename... BUILDERS>
-  // class Union {
-  // public:
-  //   Union()
-  //       : tags_(awkward::GrowableBuffer<int8_t>(INITIAL))
-  //       : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
-  //       , contents_({new BUILDERS}...)
-  //       , last_valid_index_(-1) {
-  //     size_t id = 0;
-  //     set_id(id);
-  //     for (size_t i = 0; i < 5; i++)
-  //       last_valid_index_[i] = -1;
-  //   }
+  template <unsigned INITIAL,  typename... BUILDERS>
+  class Union {
+  public:
+    using Contents = typename std::tuple<BUILDERS...>;
 
-  //   size_t
-  //   length() const noexcept {
-  //     return tags_.length();
-  //   }
+    template<std::size_t INDEX>
+    using ContentType = std::tuple_element_t<INDEX, Contents>;
 
-  //   void
-  //   clear() noexcept {
-  //     // for tag in range(len(last_valid_index_)):
-  //     //   last_valid_index_[tag] = -1
-  //     tags_.clear()
-  //     index_.clear()
-  //     auto clear_contents = [](auto content) { content->builder.clear(); };
-  //     for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
-  //       visit_at(contents, i, clear_contents);
-  //   }
+    Union()
+        : tags_(awkward::GrowableBuffer<int8_t>(INITIAL))
+        , index_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+      size_t id = 0;
+      set_id(id);
+      for (size_t i = 0; i < contents_count_; i++)
+        last_valid_index_[i] = -1;
+    }
 
-  //   BUILDER&
-  //   content() {
-  //     return &content_;
-  //   }
+    size_t
+    length() const noexcept {
+      return tags_.length();
+    }
 
-  //   void
-  //   set_id(size_t &id) noexcept {
-  //     id_ = id;
-  //     id++;
-  //     auto contents_id = [&id](auto content) { content->builder.set_id(id); };
-  //     for (size_t i = 0; i < std::tuple_size<decltype(contents)>::value; i++)
-  //       visit_at(contents, i, contents_id);
-  //   }
+    void
+    clear() noexcept {
+      for (size_t i = 0; i < contents_count_; i++)
+        last_valid_index_[i] = -1;
+      tags_.clear();
+      index_.clear();
+      auto clear_contents = [](auto& content) { content.builder.clear(); };
+      for (size_t i = 0; i < contents_count_; i++)
+        visit_at(contents_, i, clear_contents);
+    }
 
-  //   std::string parameters() const noexcept {
-  //     return parameters_;
-  //   }
+    template<std::size_t INDEX>
+    ContentType<INDEX>&
+    content() {
+      return std::get<INDEX>(contents_);
+    }
 
-  //   bool is_valid(std::string& error) const noexcept {
-  //     if (content_.length() != index_.length()) {
-  //       std::cout << "Union node" << id_ << " has content length " << content_.length()
-  //                 << " but index length " << index_.length();
-  //       return false;
-  //     }
-  //     else if (content_.length() != last_valid_index_ + 1) {
-  //       std::cout << "Union node" << id_ << " has content length " << content_.length()
-  //                 << " but last valid index is " << last_valid_index_;
-  //       return false;
-  //     }
-  //     else {
-  //       return content_.is_valid(error);
-  //     }
-  //   }
+    void
+    set_id(size_t &id) noexcept {
+      id_ = id;
+      id++;
+      auto contents_id = [&id](auto& content) { content.set_id(id); };
+      for (size_t i = 0; i < contents_count_; i++)
+        visit_at(contents_, i, contents_id);
+    }
 
-  //   BUILDER*
-  //   append_index(int8_t tag) noexcept {
-  //     auto get_content = [&tag] (auto which_content) {
-  //     size_t next_index = which_content.length();
-  //     last_valid_index_[tag] = next_index;
-  //     tags_.append(tag);
-  //     index_.append(next_index);};
-  //     visit_at(contents_, tag, get_content);
+    const std::string&
+    parameters() const noexcept {
+      return parameters_;
+    }
 
-  //     return &which_content;
-  //   }
+    bool
+    is_valid(std::string& error) const noexcept {
+      auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-  //   void
-  //   buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
-  //     names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
-  //     names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
-  //     content_.buffer_nbytes(names_nbytes);
-  //   }
+      std::vector<size_t> lengths = content_lengths(index_sequence);
+      for (size_t tag = 0; tag < contents_count_; tag++) {
+        if (lengths[tag] != last_valid_index_[tag] + 1) {
+          std::stringstream out;
+          out << "Union node" << id_ << " has content length " << lengths[tag]
+              << " but index length " << last_valid_index_[tag];
+          error.append(out.str());
+          return false;
+        }
+      }
 
-  //   void
-  //   to_buffer(int8_t* tags, int64_t* index) const noexcept {
-  //     tags_.concatenate(tags);
-  //     index_.concatenate(index);
-  //   }
+      std::vector<bool> valid_contents = content_is_valid(index_sequence, error);
+      return std::none_of(std::cbegin(valid_contents), std::cend(valid_contents), std::logical_not<bool>());
+    }
 
-  //   std::string
-  //   form() const noexcept {
-  //     std::stringstream form_key;
-  //     form_key << "node" << id_;
-  //     std::string params("");
-  //     if (parameters_ == "") { }
-  //     else {
-  //       params = std::string(", \"parameters\": " + parameters_);
-  //     }
-  //     return "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"content\": "
-  //               + contents_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
-  //   }
+    template<std::size_t TAG>
+    ContentType<TAG>&
+    append_index() noexcept {
+      auto& which_content = std::get<TAG>(contents_);
+      size_t next_index = which_content.length();
 
-  // private:
-  //   GrowableBuffer<int8_t> tags_;
-  //   GrowableBuffer<int64_t> index_;
-  //   std::tuple<BUILDERS*...> contents_;
-  //   size_t id_;
-  //   std::string parameters_;
-  //   size_t* last_valid_index_;
-  // };
+      int8_t tag = (int8_t)TAG;
+      last_valid_index_[tag] = next_index;
+      tags_.append(tag);
+      index_.append(next_index);
+
+      return which_content;
+    }
+
+    void
+    buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
+      auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+
+      names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
+      names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
+      content_buffer_nbytes(index_sequence, names_nbytes);
+    }
+
+    void
+    to_buffers(std::map<std::string, void*> &buffers) const noexcept {
+      auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+
+      tags_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-tags"]));
+      index_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-index"]));
+      for (size_t i = 0; i < contents_count_; i++)
+        visit_at(contents_, i, [&buffers](auto& content) {
+          content.builder.to_buffers(buffers);
+        });
+    }
+
+    std::string
+    form() const noexcept {
+      std::stringstream form_key;
+      form_key << "node" << id_;
+      std::string params("");
+      if (parameters_ == "") { }
+      else {
+        params = std::string(", \"parameters\": " + parameters_);
+      }
+      return "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"content\": "
+                + contents_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+    }
+
+  private:
+    static constexpr size_t contents_count_ = sizeof...(BUILDERS);
+
+    GrowableBuffer<int8_t> tags_;
+    GrowableBuffer<int64_t> index_;
+    Contents contents_;
+    size_t id_;
+    std::string parameters_;
+    size_t last_valid_index_[sizeof...(BUILDERS)];
+
+    template <std::size_t... S>
+    std::vector<size_t>
+    content_lengths(std::index_sequence<S...>) const {
+      return std::vector<size_t>({std::get<S>(contents_).length()...});
+    }
+
+    template <std::size_t... S>
+    std::vector<bool>
+    content_is_valid(std::index_sequence<S...>, std::string& error) const {
+      return std::vector<bool>({std::get<S>(contents_).is_valid(error)...});
+    }
+
+    template <std::size_t... S>
+    void
+    content_buffer_nbytes(std::index_sequence<S...>, std::map<std::string, size_t> &names_nbytes) const {
+      std::initializer_list<int> expander{std::get<S>(contents_).buffer_nbytes(names_nbytes)...};
+      (void)expander; // avoid unused variable warnings
+    }
+
+  };
 
   }  // namespace LayoutBuilder
 }  // namespace awkward

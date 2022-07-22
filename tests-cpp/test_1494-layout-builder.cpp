@@ -1441,6 +1441,16 @@ test_Tuple_Numpy_ListOffset() {
     // FIXME: add the test from Jim's prototype
 }
 
+void
+test_Union_Numpy_ListOffset() {
+  awkward::LayoutBuilder::Union<2, NumpyBuilder<double>, ListOffsetBuilder<NumpyBuilder<int64_t>>> builder;
+
+  std::string error;
+  assert (builder.is_valid(error) == true);
+
+  // FIXME: add the test from Jim's prototype
+}
+
 int main(int /* argc */, char ** /* argv */) {
   test_Numpy_bool();
   test_Numpy_int();
@@ -1466,6 +1476,7 @@ int main(int /* argc */, char ** /* argv */) {
   test_Regular();
   test_Regular_size0();
   test_Tuple_Numpy_ListOffset();
+  test_Union_Numpy_ListOffset();
 
   return 0;
 }
