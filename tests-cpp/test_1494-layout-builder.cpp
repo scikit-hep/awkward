@@ -1443,12 +1443,43 @@ test_Tuple_Numpy_ListOffset() {
 
 void
 test_Union_Numpy_ListOffset() {
-  awkward::LayoutBuilder::Union<2, NumpyBuilder<double>, ListOffsetBuilder<NumpyBuilder<int64_t>>> builder;
+  awkward::LayoutBuilder::Union<2, NumpyBuilder<double>, ListOffsetBuilder<NumpyBuilder<int32_t>>> builder;
 
   std::string error;
   assert (builder.is_valid(error) == true);
 
-  // FIXME: add the test from Jim's prototype
+  auto &subbuilder_one = builder.append_index<0>();
+  subbuilder_one.append(1.1);
+
+  assert (builder.is_valid(error) == true);
+
+  auto& subbuilder_two = builder.append_index<1>();
+  auto& subsubbuilder = subbuilder_two.begin_list();
+  subsubbuilder.append(1);
+  subsubbuilder.append(2);
+  subbuilder_two.end_list();
+
+  assert (builder.is_valid(error) == true);
+
+  builder.append_index<0>();
+  subbuilder_one.append(3.3);
+
+  assert (builder.is_valid(error) == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+
+  assert (names_nbytes.size() == 5);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node0-tags", (int8_t*)buffers["node0-tags"], names_nbytes["node0-tags"]/sizeof(int8_t));
+  dump("node0-index", (uint64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(uint64_t));
+  dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
+  dump("node2-offsets", (int64_t*)buffers["node2-offsets"], names_nbytes["node2-offsets"]/sizeof(int64_t));
+  dump("node3-data", (int32_t*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(int32_t));
+
 }
 
 int main(int /* argc */, char ** /* argv */) {

@@ -1539,6 +1539,7 @@ namespace awkward {
     size_t size_ = SIZE;
   };
 
+  // FIXME: template index: int64_t and int32_t
   template <unsigned INITIAL,  typename... BUILDERS>
   class Union {
   public:
@@ -1631,18 +1632,23 @@ namespace awkward {
 
       names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
       names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
-      content_buffer_nbytes(index_sequence, names_nbytes);
+
+      for (size_t i = 0; i < contents_count_; i++)
+        visit_at(contents_, i, [&names_nbytes](auto& content) {
+          content.buffer_nbytes(names_nbytes);
+        });
     }
 
     void
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
       auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-      tags_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-tags"]));
+      tags_.concatenate(static_cast<int8_t*>(buffers["node" + std::to_string(id_) + "-tags"]));
       index_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-index"]));
+
       for (size_t i = 0; i < contents_count_; i++)
         visit_at(contents_, i, [&buffers](auto& content) {
-          content.builder.to_buffers(buffers);
+          content.to_buffers(buffers);
         });
     }
 
@@ -1679,13 +1685,6 @@ namespace awkward {
     std::vector<bool>
     content_is_valid(std::index_sequence<S...>, std::string& error) const {
       return std::vector<bool>({std::get<S>(contents_).is_valid(error)...});
-    }
-
-    template <std::size_t... S>
-    void
-    content_buffer_nbytes(std::index_sequence<S...>, std::map<std::string, size_t> &names_nbytes) const {
-      std::initializer_list<int> expander{std::get<S>(contents_).buffer_nbytes(names_nbytes)...};
-      (void)expander; // avoid unused variable warnings
     }
 
   };
