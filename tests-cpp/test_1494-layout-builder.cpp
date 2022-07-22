@@ -1438,7 +1438,50 @@ test_Tuple_Numpy_ListOffset() {
     std::string error;
     assert (builder.is_valid(error) == true);
 
-    // FIXME: add the test from Jim's prototype
+    auto& subbuilder_one = builder.index<0>();
+    subbuilder_one.append(1.1);
+    auto& subbuilder_two = builder.index<1>();
+    auto& subsubbuilder = subbuilder_two.begin_list();
+    subsubbuilder.append(1);
+    subbuilder_two.end_list();
+
+    assert (builder.is_valid(error) == true);
+
+    subbuilder_one.append(2.2);
+    subbuilder_two.begin_list();
+    subsubbuilder.append(1);
+    subsubbuilder.append(2);
+    subbuilder_two.end_list();
+
+    assert (builder.is_valid(error) == true);
+
+    subbuilder_one.append(3.3);
+    subbuilder_two.begin_list();
+    subsubbuilder.append(1);
+    subsubbuilder.append(2);
+    subsubbuilder.append(3);
+    subbuilder_two.end_list();
+
+    assert (builder.is_valid(error) == true);
+
+    std::map<std::string, size_t> names_nbytes = {};
+    builder.buffer_nbytes(names_nbytes);
+    assert (names_nbytes.size() == 3);
+
+    auto buffers = empty_buffers(names_nbytes);
+    builder.to_buffers(buffers);
+
+    dump("node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
+    dump("node2-offsets", (int64_t*)buffers["node2-offsets"], names_nbytes["node2-offsets"]/sizeof(int64_t));
+    dump("node3-data", (int32_t*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(int32_t));
+
+    auto form = builder.form();
+    assert (form ==
+      "{ \"class\": \"RecordArray\", \"contents\": [{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, { \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": { \"class\": \"NumpyArray\", \"primitive\": \"int32\", \"form_key\": \"node3\" }, \"form_key\": \"node2\" }], \"form_key\": \"node0\" }"
+    );
+
+    // [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
+
 }
 
 void

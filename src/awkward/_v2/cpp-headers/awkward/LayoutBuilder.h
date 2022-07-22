@@ -506,7 +506,7 @@ namespace awkward {
 
     template<std::size_t INDEX>
     TupleContentType<INDEX>&
-    index_at() {
+    index() {
       return std::get<INDEX>(contents);
     }
 
@@ -570,7 +570,7 @@ namespace awkward {
     buffer_nbytes(std::map<std::string, size_t> &names_nbytes) const noexcept {
       for (size_t i = 0; i < fields_count_; i++)
         visit_at(contents, i, [&names_nbytes](auto& content) {
-          content.builder.buffer_nbytes(names_nbytes);
+          content.buffer_nbytes(names_nbytes);
         });
     }
 
@@ -578,7 +578,7 @@ namespace awkward {
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
       for (size_t i = 0; i < fields_count_; i++)
         visit_at(contents, i, [&buffers](auto& content) {
-          content.builder.to_buffers(buffers);
+          content.to_buffers(buffers);
         });
     }
 
@@ -592,18 +592,17 @@ namespace awkward {
         params = std::string("\"parameters\": " + parameters_ + ", ");
       }
       std::stringstream out;
-      out << "{ \"class\": \"RecordArray\", \"contents\": { ";
+      out << "{ \"class\": \"RecordArray\", \"contents\": [";
       for (size_t i = 0;  i < fields_count_;  i++) {
         if (i != 0) {
           out << ", ";
         }
         auto contents_form = [&out] (auto& content) {
-          out << "\"" << content.field() << + "\": ";
-          out << content.builder.form();
+          out << content.form();
         };
         visit_at(contents, i, contents_form);
       }
-      out << " }, ";
+      out << "], ";
       out << params << "\"form_key\": \"" << form_key.str() << "\" }";
       return out.str();
     }
@@ -1672,7 +1671,8 @@ namespace awkward {
         };
         visit_at(contents_, i, contents_form);
       }
-      out << params << "], \"form_key\": \"" << form_key.str() << "\" }";
+      out << "], ";
+      out << params << "\"form_key\": \"" << form_key.str() << "\" }";
       return out.str();
     }
 
