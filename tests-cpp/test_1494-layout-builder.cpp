@@ -1480,6 +1480,9 @@ test_Union_Numpy_ListOffset() {
   dump("node2-offsets", (int64_t*)buffers["node2-offsets"], names_nbytes["node2-offsets"]/sizeof(int64_t));
   dump("node3-data", (int32_t*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(int32_t));
 
+  auto form = builder.form();
+  assert (form ==
+    "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [{ \"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \"node1\" }, { \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": { \"class\": \"NumpyArray\", \"primitive\": \"int32\", \"form_key\": \"node3\" }, \"form_key\": \"node2\" }], \"form_key\": \"node0\" }");
 }
 
 int main(int /* argc */, char ** /* argv */) {

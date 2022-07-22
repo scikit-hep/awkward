@@ -1661,8 +1661,19 @@ namespace awkward {
       else {
         params = std::string(", \"parameters\": " + parameters_);
       }
-      return "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"content\": "
-                + contents_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+      std::stringstream out;
+      out << "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
+      for (size_t i = 0;  i < contents_count_;  i++) {
+        if (i != 0) {
+          out << ", ";
+        }
+        auto contents_form = [&] (auto& content) {
+          out << content.form();
+        };
+        visit_at(contents_, i, contents_form);
+      }
+      out << params << "], \"form_key\": \"" << form_key.str() << "\" }";
+      return out.str();
     }
 
   private:
