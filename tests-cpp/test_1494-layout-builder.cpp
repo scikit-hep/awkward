@@ -430,8 +430,12 @@ test_Record()
 
   three_builder.append('a');
 
+  one_builder.append(1.1);
   one_builder.append(3.3);
+
+  two_builder.append(2);
   two_builder.append(4);
+
   three_builder.append('b');
 
   // [
@@ -439,7 +443,7 @@ test_Record()
   //     {"one": 3.3, "two": 4. "three": 'b'},
   // ]
 
-  // assert (builder.is_valid() == true);
+  assert (builder.is_valid() == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -534,7 +538,7 @@ test_ListOffset_Record() {
   //     [{"x": 3.3, "y": [1, 2, 3]}],
   // ]
 
-  // assert (builder.is_valid() == true);
+  assert (builder.is_valid() == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -643,7 +647,7 @@ test_Record_Record()
   //     {"x": {"u": 3.3, "v": [4, 5]}, "y": {"w": 'b'}},
   // ]
 
-  // assert (builder.is_valid() == true);
+  assert (builder.is_valid() == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -769,7 +773,7 @@ test_Record_nested()
   //     {"u": [{"i": 2.2, "j": [4, 5]}], "v": -2, "w": 4.4},
   // ]
 
-  // assert (builder.is_valid() == true);
+  assert (builder.is_valid() == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1030,7 +1034,7 @@ test_IndexedOption_Record() {
   //   {x: 3.3, y: 4},
   // ]
 
-  // assert (builder.is_valid() == true);
+  assert (builder.is_valid() == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);

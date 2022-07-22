@@ -363,29 +363,27 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool
+    is_valid() const noexcept {
+      auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+
       size_t length = -1;
-      for (size_t i = 0; i < fields_count_; i++) {
-        visit_at(contents, i, [&](auto& content) {
-          if (length == -1) {
-            length = content.builder.length();
-          }
-          else if (length != content.builder.length()) {
-            std::cout << "Record node" << id_ << "has field " << content.field() << "length "
-                      << content.builder.length() << "that differs from the first length " << length;
-            return false;
-          }
-        });
+      bool result = false;
+      std::vector<size_t> lengths = field_lengths(index_sequence);
+      for (size_t i = 0; i < lengths.size(); i++) {
+        if (length == -1) {
+          length = lengths[i];
+        }
+        else if (length != lengths[i]) {
+          std::cout << "Record node" << id_ << " has field \"" << field_names().at(i) << "\" length "
+                    << lengths[i] << " that differs from the first length "
+                    << length << "\n";
+          return false;
+        }
       }
 
-      for (size_t i = 0; i < fields_count_; i++) {
-        visit_at(contents, i, [&length](auto& content) {
-          if (!content.builder.is_valid()) {
-           return false;
-          }
-        });
-      }
-      return true;
+      std::vector<bool> valid_fields = field_is_valid(index_sequence);
+      return std::none_of(std::cbegin(valid_fields), std::cend(valid_fields), std::logical_not<bool>());
     }
 
     const std::vector<std::string>
@@ -471,6 +469,18 @@ namespace awkward {
     void
     map_fields(std::index_sequence<S...>) {
       field_names_ = std::vector<std::string>({std::string(std::get<S>(contents).index_as_field())...});
+    }
+
+    template <std::size_t... S>
+    std::vector<size_t>
+    field_lengths(std::index_sequence<S...>) const {
+      return std::vector<size_t>({std::get<S>(contents).builder.length()...});
+    }
+
+    template <std::size_t... S>
+    std::vector<bool>
+    field_is_valid(std::index_sequence<S...>) const {
+      return std::vector<bool>({std::get<S>(contents).builder.is_valid()...});
     }
 
   };
