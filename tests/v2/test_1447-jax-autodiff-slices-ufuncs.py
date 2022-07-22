@@ -307,7 +307,6 @@ def test_recordarray_2():
         func_recordarray_2, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(func_recordarray_2, test_recordarray)
-    print(ak._v2.to_list(vjp_func(value_vjp)[0]))
     assert ak._v2.to_list(value_jvp) == [12.0, 14.0, 16.0]
     assert ak._v2.to_list(value_vjp) == [12.0, 14.0, 16.0]
     assert ak._v2.to_list(jvp_grad) == [4.0, 1.0, 2.0]
@@ -326,7 +325,6 @@ def test_recordarray_3():
         test_recordarray_3, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_3, test_recordarray)
-    print(ak._v2.to_list(vjp_func(value_vjp)[0]))
     assert ak._v2.to_list(value_jvp) == [2.0]
     assert ak._v2.to_list(value_vjp) == [2.0]
     assert ak._v2.to_list(jvp_grad) == [4.0]
@@ -345,7 +343,6 @@ def test_recordarray_4():
         test_recordarray_4, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_4, test_recordarray)
-    print(ak._v2.to_list(vjp_func(value_vjp)[0]))
     assert ak._v2.to_list(value_jvp) == [[12.0, 14.0, 16.0]]
     assert ak._v2.to_list(value_vjp) == [[12.0, 14.0, 16.0]]
     assert ak._v2.to_list(jvp_grad) == [[4.0, 1.0, 2.0]]
@@ -364,7 +361,6 @@ def test_recordarray_5():
         test_recordarray_5, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_5, test_recordarray)
-    print(ak._v2.to_list(vjp_func(value_vjp)[0]))
     assert ak._v2.to_list(value_jvp) == [[[2.0], [2.0, 4.4]], [], [[2.0, 4.0, 6.0]]]
     assert ak._v2.to_list(value_vjp) == [[[2.0], [2.0, 4.4]], [], [[2.0, 4.0, 6.0]]]
     assert ak._v2.to_list(jvp_grad) == [[[2.0], [3.0, 0.0]], [], [[4.0, 1.0, 2.0]]]
@@ -383,7 +379,6 @@ def test_recordarray_6():
         test_recordarray_6, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_6, test_recordarray)
-    print(ak._v2.to_list(vjp_func(value_vjp)[0]))
     assert ak._v2.to_list(value_jvp) == [
         [[2.0], [2.0, 9.680000000000001]],
         [],
@@ -428,7 +423,6 @@ def test_recordarray_8():
         func_recordarray_8, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(func_recordarray_8, test_recordarray)
-    print(ak._v2.to_list(vjp_func(value_vjp)[0]))
     assert ak._v2.to_list(value_jvp) == [12.0, 14.0, 16.0]
     assert ak._v2.to_list(value_vjp) == [12.0, 14.0, 16.0]
     assert ak._v2.to_list(jvp_grad) == [4.0, 1.0, 2.0]
