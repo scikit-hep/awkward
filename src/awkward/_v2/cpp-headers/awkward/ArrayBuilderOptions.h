@@ -3,6 +3,8 @@
 #ifndef AWKWARD_ARRAYBUILDEROPTIONS_H_
 #define AWKWARD_ARRAYBUILDEROPTIONS_H_
 
+#include <cstring>
+
 namespace awkward {
   /// @class ArrayBuilderOptions
   ///
