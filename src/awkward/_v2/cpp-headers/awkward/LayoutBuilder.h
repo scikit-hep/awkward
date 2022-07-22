@@ -513,7 +513,7 @@ namespace awkward {
     Record() {
       size_t id = 0;
       set_id(id);
-      _map_fields(std::index_sequence_for<BUILDERS...>());
+      map_fields(std::index_sequence_for<BUILDERS...>());
     }
 
     Record(UserDefinedMap user_defined_field_id_to_name_map)
@@ -583,7 +583,7 @@ namespace awkward {
 
       size_t length = -1;
       bool result = false;
-      std::vector<size_t> lengths = _field_lengths(index_sequence);
+      std::vector<size_t> lengths = field_lengths(index_sequence);
       for (size_t i = 0; i < lengths.size(); i++) {
         if (length == -1) {
           length = lengths[i];
@@ -599,7 +599,7 @@ namespace awkward {
         }
       }
 
-      std::vector<bool> valid_fields = _field_is_valid(index_sequence, error);
+      std::vector<bool> valid_fields = field_is_valid(index_sequence, error);
       return std::none_of(std::cbegin(valid_fields), std::cend(valid_fields), std::logical_not<bool>());
     }
 
@@ -660,19 +660,19 @@ namespace awkward {
 
     template <std::size_t... S>
     void
-    _map_fields(std::index_sequence<S...>) noexcept {
+    map_fields(std::index_sequence<S...>) noexcept {
       field_names_ = std::vector<std::string>({std::string(std::get<S>(contents).index_as_field())...});
     }
 
     template <std::size_t... S>
     std::vector<size_t>
-    _field_lengths(std::index_sequence<S...>) const noexcept {
+    field_lengths(std::index_sequence<S...>) const noexcept {
       return std::vector<size_t>({std::get<S>(contents).builder.length()...});
     }
 
     template <std::size_t... S>
     std::vector<bool>
-    _field_is_valid(std::index_sequence<S...>, std::string& error) const noexcept {
+    field_is_valid(std::index_sequence<S...>, std::string& error) const noexcept {
       return std::vector<bool>({std::get<S>(contents).builder.is_valid(error)...});
     }
 
@@ -734,7 +734,7 @@ namespace awkward {
 
       size_t length = -1;
       bool result = false;
-      std::vector<size_t> lengths = _content_lengths(index_sequence);
+      std::vector<size_t> lengths = content_lengths(index_sequence);
       for (size_t i = 0; i < lengths.size(); i++) {
         if (length == -1) {
           length = lengths[i];
@@ -750,7 +750,7 @@ namespace awkward {
         }
       }
 
-      std::vector<bool> valid_fields = _content_is_valid(index_sequence, error);
+      std::vector<bool> valid_fields = content_is_valid(index_sequence, error);
       return std::none_of(std::cbegin(valid_fields), std::cend(valid_fields), std::logical_not<bool>());
     }
 
@@ -806,13 +806,13 @@ namespace awkward {
 
     template <std::size_t... S>
     std::vector<size_t>
-    _content_lengths(std::index_sequence<S...>) const noexcept {
+    content_lengths(std::index_sequence<S...>) const noexcept {
       return std::vector<size_t>({std::get<S>(contents).length()...});
     }
 
     template <std::size_t... S>
     std::vector<bool>
-    _content_is_valid(std::index_sequence<S...>, std::string& error) const noexcept {
+    content_is_valid(std::index_sequence<S...>, std::string& error) const noexcept {
       return std::vector<bool>({std::get<S>(contents).is_valid(error)...});
     }
   };
@@ -1426,9 +1426,9 @@ namespace awkward {
 
     BUILDER&
     append_valid() noexcept {
-      _append_begin();
+      append_begin();
       current_byte_ |= cast_[current_index_];
-      _append_end();
+      append_end();
       return content_;
     }
 
@@ -1442,8 +1442,8 @@ namespace awkward {
 
     BUILDER&
     append_null() noexcept {
-      _append_begin();
-      _append_end();
+      append_begin();
+      append_end();
       return content_;
     }
 
@@ -1534,7 +1534,7 @@ namespace awkward {
 
   private:
     void
-    _append_begin() {
+    append_begin() {
       if (current_index_ == 8) {
         current_byte_ = uint8_t(0);
         current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
@@ -1543,7 +1543,7 @@ namespace awkward {
     }
 
     void
-    _append_end() {
+    append_end() {
       current_index_ += 1;
       if (valid_when_) {
         current_byte_ref_ = current_byte_;
@@ -1643,7 +1643,7 @@ namespace awkward {
     is_valid(std::string& error) const noexcept {
       auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-      std::vector<size_t> lengths = _content_lengths(index_sequence);
+      std::vector<size_t> lengths = content_lengths(index_sequence);
       for (size_t tag = 0; tag < contents_count_; tag++) {
         if (lengths[tag] != last_valid_index_[tag] + 1) {
           std::stringstream out;
@@ -1655,7 +1655,7 @@ namespace awkward {
         }
       }
 
-      std::vector<bool> valid_contents = _content_is_valid(index_sequence, error);
+      std::vector<bool> valid_contents = content_is_valid(index_sequence, error);
       return std::none_of(std::cbegin(valid_contents), std::cend(valid_contents), std::logical_not<bool>());
     }
 
@@ -1722,13 +1722,13 @@ namespace awkward {
 
     template <std::size_t... S>
     std::vector<size_t>
-    _content_lengths(std::index_sequence<S...>) const {
+    content_lengths(std::index_sequence<S...>) const {
       return std::vector<size_t>({std::get<S>(contents_).length()...});
     }
 
     template <std::size_t... S>
     std::vector<bool>
-    _content_is_valid(std::index_sequence<S...>, std::string& error) const {
+    content_is_valid(std::index_sequence<S...>, std::string& error) const {
       return std::vector<bool>({std::get<S>(contents_).is_valid(error)...});
     }
 
