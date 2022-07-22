@@ -15,12 +15,13 @@ namespace awkward {
 
   namespace LayoutBuilder {
 
-  template<const char* field_name, class BUILDER>
+  template<std::size_t ENUM, typename BUILDER>
   class Field {
   public:
+    using Builder = BUILDER;
 
-    const char* field() const {
-        return field_name;
+    std::string index_as_field() const {
+      return std::to_string(static_cast<int>(index));
     }
 
     template<typename PRIMITIVE>
@@ -29,7 +30,8 @@ namespace awkward {
       builder.append(x);
     }
 
-    BUILDER builder;
+    const std::size_t index = ENUM;
+    Builder builder;
   };
 
   template <unsigned INITIAL, typename PRIMITIVE>
@@ -310,14 +312,26 @@ namespace awkward {
     bool is_tuple_ = IS_TUPLE;
   };
 
-  template <typename... BUILDERS>
+  template <class MAP = std::map<std::size_t, std::string>, typename... BUILDERS>
   class Record {
   public:
-    Record()
-      : current_index_(0) {
+    using RecordContents = typename std::tuple<BUILDERS...>;
+    using UserDefinedMap = MAP;
+
+    template<std::size_t INDEX>
+    using RecordFieldType = std::tuple_element_t<INDEX, RecordContents>;
+
+    Record() {
       size_t id = 0;
       set_id(id);
       map_fields(std::index_sequence_for<BUILDERS...>());
+    }
+
+    Record(UserDefinedMap user_defined_field_id_to_name_map)
+      : content_names_(user_defined_field_id_to_name_map) {
+      assert(content_names_.size() == fields_count_);
+      size_t id = 0;
+      set_id(id);
     }
 
     const size_t
@@ -374,26 +388,28 @@ namespace awkward {
       return true;
     }
 
-    const std::vector<std::string> &
+    const std::vector<std::string>
     field_names() const {
-      return field_names_;
+      if (content_names_.empty()) {
+        return field_names_;
+      } else {
+        std::vector<std::string> result;
+        for(auto it : content_names_) {
+          result.emplace_back(it.second);
+        }
+        return result;
+      }
     }
 
-    template<typename PRIMITIVE>
     void
-    field_append(const char* name, PRIMITIVE x) noexcept {
-      visit_at(contents, get_field_index(name), [&x] (auto& content) { content.builder.append(x); });
+    set_field_names(MAP user_defined_field_id_to_name_map) {
+        content_names_ = user_defined_field_id_to_name_map;
     }
 
-    void
-    field(const char* name) noexcept {
-      current_index_ = get_field_index(name);
-    }
-
-    template<typename PRIMITIVE>
-    void
-    append(PRIMITIVE x) noexcept {
-      visit_at(contents, current_index_, [&x] (auto& content) { content.builder.append(x); });
+    template<std::size_t INDEX>
+    typename RecordFieldType<INDEX>::Builder&
+    field() {
+      return std::get<INDEX>(contents).builder;
     }
 
     void
@@ -427,8 +443,11 @@ namespace awkward {
         if (i != 0) {
           out << ", ";
         }
-        auto contents_form = [&out] (auto& content) {
-          out << "\"" << content.field() << + "\": ";
+        auto contents_form = [&] (auto& content) {
+          out << "\""
+          << (!content_names_.empty() ? content_names_.at(content.index)
+          : content.index_as_field())
+          << + "\": ";
           out << content.builder.form();
         };
         visit_at(contents, i, contents_form);
@@ -438,27 +457,20 @@ namespace awkward {
       return out.str();
     }
 
-    std::tuple<BUILDERS...> contents;
+    RecordContents contents;
 
   private:
     size_t id_;
     std::string parameters_;
     std::vector<std::string> field_names_;
-    size_t current_index_;
+    UserDefinedMap content_names_;
 
     static constexpr size_t fields_count_ = sizeof...(BUILDERS);
 
     template <std::size_t... S>
     void
     map_fields(std::index_sequence<S...>) {
-      field_names_ = std::vector<std::string>({std::string(std::get<S>(contents).field())...});
-    }
-
-    size_t
-    get_field_index(std::string const& name) {
-      auto it = std::find(std::begin(field_names_), std::end(field_names_), name);
-      if (it == std::end(field_names_)) throw std::runtime_error("invalid field name: " + name);
-      return std::distance(std::begin(field_names_), it);
+      field_names_ = std::vector<std::string>({std::string(std::get<S>(contents).index_as_field())...});
     }
 
   };

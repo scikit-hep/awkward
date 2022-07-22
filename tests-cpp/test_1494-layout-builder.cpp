@@ -2,20 +2,6 @@
 
 #include "awkward/LayoutBuilder.h"
 
-static const char one_field[] = "one";
-static const char two_field[] = "two";
-static const char three_field[] = "three";
-
-static const char x_field[] = "x";
-static const char y_field[] = "y";
-
-static const char u_field[] = "u";
-static const char v_field[] = "v";
-static const char w_field[] = "w";
-
-static const char i_field[] = "i";
-static const char j_field[] = "j";
-
 static const unsigned initial = 10;
 
 template <class NODE, class PRIMITIVE, class LENGTH>
@@ -45,6 +31,8 @@ empty_buffers(std::map<std::string, size_t> &names_nbytes)
   return buffers;
 }
 
+using UserDefinedMap = std::map<std::size_t, std::string>;
+
 template<class PRIMITIVE>
 using NumpyBuilder = awkward::LayoutBuilder::Numpy<initial, PRIMITIVE>;
 
@@ -52,7 +40,7 @@ template<class BUILDER>
 using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, BUILDER>;
 
 template<class... BUILDERS>
-using RecordBuilder = awkward::LayoutBuilder::Record<BUILDERS...>;
+using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>;
 
 template<class BUILDER>
 using ListBuilder = awkward::LayoutBuilder::List<initial, BUILDER>;
@@ -80,7 +68,7 @@ using EmptyRecordBuilder = awkward::LayoutBuilder::EmptyRecord<IS_TUPLE>;
 
 using EmptyBuilder = awkward::LayoutBuilder::Empty;
 
-template<const char* field_name, class BUILDER>
+template<std::size_t field_name, class BUILDER>
 using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
 
 void
@@ -416,11 +404,18 @@ test_EmptyRecord() {
 void
 test_Record()
 {
-  RecordBuilder<
-      RecordField<one_field, NumpyBuilder<double>>,
-      RecordField<two_field, NumpyBuilder<int64_t>>,
-      RecordField<three_field, NumpyBuilder<char>>
-  > builder;
+  enum Field : std::size_t {one, two, three};
+
+  UserDefinedMap fields_map({
+    {Field::one, "one"},
+    {Field::two, "two"},
+    {Field::three, "three"}});
+
+    RecordBuilder<
+        RecordField<Field::one, NumpyBuilder<double>>,
+        RecordField<Field::two, NumpyBuilder<int64_t>>,
+        RecordField<Field::three, NumpyBuilder<char>>
+    > builder(fields_map);
 
   std::vector<std::string> fields {"one", "two", "three"};
   auto names = builder.field_names();
@@ -429,20 +424,9 @@ test_Record()
     assert(names[i] == fields[i]);
   }
 
-  // One way of filling the Record is by specifying its
-  // field name and a value to append:
-  builder.field_append("one", 1.1);
-
-  // This is similar to setting a current field and
-  // appending a value:
-  builder.field("two");
-  builder.append(2);
-
-  // A faster way is by caching a Field builder
-  // and appending the values to it
-  auto& one_builder = std::get<0>(builder.contents).builder;
-  auto& two_builder = std::get<1>(builder.contents).builder;
-  auto& three_builder = std::get<2>(builder.contents).builder;
+  auto& one_builder = builder.field<Field::one>();
+  auto& two_builder = builder.field<Field::two>();
+  auto& three_builder = builder.field<Field::three>();
 
   three_builder.append('a');
 
@@ -498,15 +482,24 @@ test_Record()
 
 void
 test_ListOffset_Record() {
-  ListOffsetBuilder<RecordBuilder<
-      RecordField<x_field, NumpyBuilder<double>>,
-      RecordField<y_field, ListOffsetBuilder<NumpyBuilder<int32_t>>>
-  >> builder;
+  enum Field : std::size_t {x, y};
+
+  UserDefinedMap fields_map({
+    {Field::x, "x"},
+    {Field::y, "y"}});
+
+  ListOffsetBuilder<
+      RecordBuilder<
+          RecordField<Field::x, NumpyBuilder<double>>,
+          RecordField<Field::y, ListOffsetBuilder<
+              NumpyBuilder<int32_t>>
+  >>> builder;
 
   auto& subbuilder = builder.begin_list();
+  subbuilder.set_field_names(fields_map);
 
-  auto& x_builder = std::get<0>(subbuilder.contents).builder;
-  auto& y_builder = std::get<1>(subbuilder.contents).builder;
+  auto& x_builder = subbuilder.field<Field::x>();
+  auto& y_builder = subbuilder.field<Field::y>();
 
   x_builder.append(1.1);
   auto& y_subbuilder = y_builder.begin_list();
@@ -591,21 +584,42 @@ test_ListOffset_Record() {
 void
 test_Record_Record()
 {
+  enum Field0 : std::size_t {x, y};
+
+  UserDefinedMap fields_map0({
+    {Field0::x, "x"},
+    {Field0::y, "y"}});
+
+  enum Field1 : std::size_t {u, v};
+
+  UserDefinedMap fields_map1({
+    {Field1::u, "u"},
+    {Field1::v, "v"}});
+
+  enum Field2 : std::size_t {w};
+
+  UserDefinedMap fields_map2({
+    {Field2::w, "w"}});
+
   RecordBuilder<
-      RecordField<x_field, RecordBuilder<
-          RecordField<u_field, NumpyBuilder<double>>,
-          RecordField<v_field, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>,
-      RecordField<y_field, RecordBuilder<
-          RecordField<w_field, NumpyBuilder<char>>>>
+      RecordField<Field0::x, RecordBuilder<
+          RecordField<Field1::u, NumpyBuilder<double>>,
+          RecordField<Field1::v, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>,
+      RecordField<Field0::y, RecordBuilder<
+          RecordField<Field2::w, NumpyBuilder<char>>>>
   > builder;
+  builder.set_field_names(fields_map0);
 
-  auto& x_builder = std::get<0>(builder.contents).builder;
-  auto& y_builder = std::get<1>(builder.contents).builder;
+  auto& x_builder = builder.field<Field0::x>();
+  x_builder.set_field_names(fields_map1);
 
-  auto& u_builder = std::get<0>(x_builder.contents).builder;
-  auto& v_builder = std::get<1>(x_builder.contents).builder;
+  auto& y_builder = builder.field<Field0::y>();
+  y_builder.set_field_names(fields_map2);
 
-  auto& w_builder = std::get<0>(y_builder.contents).builder;
+  auto& u_builder = x_builder.field<Field1::u>();
+  auto& v_builder = x_builder.field<Field1::v>();
+
+  auto& w_builder = y_builder.field<Field2::w>();
 
   u_builder.append(1.1);
   auto& v_subbuilder = v_builder.begin_list();
@@ -691,22 +705,39 @@ test_Record_Record()
 void
 test_Record_nested()
 {
-  RecordBuilder<
-      RecordField<u_field, ListOffsetBuilder<RecordBuilder<
-          RecordField<i_field, NumpyBuilder<double>>,
-          RecordField<j_field, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>>,
-      RecordField<v_field, NumpyBuilder<int64_t>>,
-      RecordField<w_field, NumpyBuilder<double>>
-  > builder;
+  enum Field0 : std::size_t {u, v, w};
 
-  auto& u_builder = std::get<0>(builder.contents).builder;
-  auto& v_builder = std::get<1>(builder.contents).builder;
-  auto& w_builder = std::get<2>(builder.contents).builder;
+  UserDefinedMap fields_map0({
+    {Field0::u, "u"},
+    {Field0::v, "v"},
+    {Field0::w, "w"}});
+
+  enum Field1 : std::size_t {i, j};
+
+  UserDefinedMap fields_map1({
+    {Field1::i, "i"},
+    {Field1::j, "j"}});
+
+  RecordBuilder<
+      RecordField<Field0::u, ListOffsetBuilder<
+          RecordBuilder<
+              RecordField<Field1::i, NumpyBuilder<double>>,
+              RecordField<Field1::j, ListOffsetBuilder<
+                  NumpyBuilder<int64_t>>>>>>,
+      RecordField<Field0::v, NumpyBuilder<int64_t>>,
+      RecordField<Field0::w, NumpyBuilder<double>>
+  > builder;
+  builder.set_field_names(fields_map0);
+
+  auto& u_builder = builder.field<Field0::u>();
+  auto& v_builder = builder.field<Field0::v>();
+  auto& w_builder = builder.field<Field0::w>();
 
   auto& u_subbuilder = u_builder.begin_list();
+  u_subbuilder.set_field_names(fields_map1);
 
-  auto& i_builder = std::get<0>(u_subbuilder.contents).builder;
-  auto& j_builder = std::get<1>(u_subbuilder.contents).builder;
+  auto& i_builder = u_subbuilder.field<Field1::i>();
+  auto& j_builder = u_subbuilder.field<Field1::j>();
 
   i_builder.append(1.1);
   auto& j_subbuilder = j_builder.begin_list();
@@ -967,15 +998,22 @@ test_IndexedOption() {
 
 void
 test_IndexedOption_Record() {
+  enum Field : std::size_t {x, y};
+
+  UserDefinedMap fields_map({
+    {Field::x, "x"},
+    {Field::y, "y"}});
+
   IndexedOptionBuilder<RecordBuilder<
-      RecordField<x_field, NumpyBuilder<double>>,
-      RecordField<y_field, NumpyBuilder<int64_t>>
+      RecordField<Field::x, NumpyBuilder<double>>,
+      RecordField<Field::y, NumpyBuilder<int64_t>>
   >> builder;
 
   auto& subbuilder = builder.append_index();
+  subbuilder.set_field_names(fields_map);
 
-  auto& x_builder = std::get<0>(subbuilder.contents).builder;
-  auto& y_builder = std::get<1>(subbuilder.contents).builder;
+  auto& x_builder = subbuilder.field<Field::x>();
+  auto& y_builder = subbuilder.field<Field::y>();
 
   x_builder.append(1.1);
   y_builder.append(2);
