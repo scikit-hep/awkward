@@ -83,7 +83,8 @@ test_Numpy_bool() {
 
   // [True, False, True, True]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -118,7 +119,8 @@ test_Numpy_int() {
 
  // [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -152,7 +154,8 @@ test_Numpy_char() {
 
   // ['a', 'b', 'c', 'd']
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -187,7 +190,8 @@ test_Numpy_double() {
 
   // [1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -222,7 +226,8 @@ test_Numpy_complex() {
 
   // [1.1 + 0.1j, 2.2 + 0.2j, 3.3 + 0.3j, 4.4 + 0.4j, 5.5 + 0.5j]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -265,7 +270,8 @@ test_ListOffset() {
 
   // [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -337,7 +343,8 @@ test_ListOffset_ListOffset() {
   //     [[6.6], [7.7, 8.8, 9.9]],
   // ]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -382,7 +389,8 @@ test_EmptyRecord() {
 
   // [(), (), ()]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -436,6 +444,10 @@ test_Record()
   two_builder.append(2);
   two_builder.append(4);
 
+  std::string error;
+  assert (builder.is_valid(error) == false);
+  assert (error == "Record node0 has field \"three\" length 1 that differs from the first length 2\n");
+
   three_builder.append('b');
 
   // [
@@ -443,7 +455,7 @@ test_Record()
   //     {"one": 3.3, "two": 4. "three": 'b'},
   // ]
 
-  assert (builder.is_valid() == true);
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -538,7 +550,8 @@ test_ListOffset_Record() {
   //     [{"x": 3.3, "y": [1, 2, 3]}],
   // ]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -647,7 +660,8 @@ test_Record_Record()
   //     {"x": {"u": 3.3, "v": [4, 5]}, "y": {"w": 'b'}},
   // ]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -773,7 +787,8 @@ test_Record_nested()
   //     {"u": [{"i": 2.2, "j": [4, 5]}], "v": -2, "w": 4.4},
   // ]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -875,7 +890,8 @@ test_List() {
   //     [7.7, 8.8, 9.9],
   // ]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -923,7 +939,8 @@ test_Indexed() {
 
   // [1.1, 2.2, 3.3, 4.4, 5.5]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -971,7 +988,8 @@ test_IndexedOption() {
 
   // [1.1, None, 3.3, 4.4, 5.5, None, None]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1034,7 +1052,8 @@ test_IndexedOption_Record() {
   //   {x: 3.3, y: 4},
   // ]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1079,7 +1098,8 @@ void
 test_Empty() {
   EmptyBuilder builder;
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1129,7 +1149,8 @@ test_ListOffset_Empty() {
 
   //  [[], [[], [], []], [[], []], [], [[]]]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1174,7 +1195,8 @@ test_Unmasked() {
 
   // [11, 22, 33, 44, 55]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1223,7 +1245,8 @@ test_ByteMasked() {
 
   // [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1284,7 +1307,8 @@ test_BitMasked() {
 
   // [1.1, -1000, 3.3, 4.4, 5.5, -1000, -1000, 8, 9, 10]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1333,7 +1357,8 @@ test_Regular() {
 
   // [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
@@ -1373,7 +1398,8 @@ test_Regular_size0() {
 
   // [[], []]
 
-  assert (builder.is_valid() == true);
+  std::string error;
+  assert (builder.is_valid(error) == true);
 
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);

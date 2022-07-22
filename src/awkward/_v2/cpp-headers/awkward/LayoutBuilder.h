@@ -68,7 +68,7 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool is_valid(std::string& error) const noexcept {
       return true;
     }
 
@@ -173,14 +173,17 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool is_valid(std::string& error) const noexcept {
       if (content_.length() != offsets_.last()) {
-        std::cout << "ListOffset node" << id_ << "has content length " << content_.length()
-                  << "but last offset " << offsets_.last();
+        std::stringstream out;
+        out << "ListOffset node" << id_ << "has content length " << content_.length()
+            << "but last offset " << offsets_.last();
+        error.append(out.str());
+
         return false;
       }
       else {
-        return content_.is_valid();
+        return content_.is_valid(error);
       }
     }
 
@@ -265,7 +268,7 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool is_valid(std::string& /* error */) const noexcept {
       return true;
     }
 
@@ -364,7 +367,7 @@ namespace awkward {
     }
 
     bool
-    is_valid() const noexcept {
+    is_valid(std::string& error) const noexcept {
       auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
       size_t length = -1;
@@ -375,14 +378,17 @@ namespace awkward {
           length = lengths[i];
         }
         else if (length != lengths[i]) {
-          std::cout << "Record node" << id_ << " has field \"" << field_names().at(i) << "\" length "
-                    << lengths[i] << " that differs from the first length "
-                    << length << "\n";
+          std::stringstream out;
+          out << "Record node" << id_ << " has field \"" << field_names().at(i) << "\" length "
+              << lengths[i] << " that differs from the first length "
+              << length << "\n";
+          error.append(out.str());
+
           return false;
         }
       }
 
-      std::vector<bool> valid_fields = field_is_valid(index_sequence);
+      std::vector<bool> valid_fields = field_is_valid(index_sequence, error);
       return std::none_of(std::cbegin(valid_fields), std::cend(valid_fields), std::logical_not<bool>());
     }
 
@@ -479,8 +485,8 @@ namespace awkward {
 
     template <std::size_t... S>
     std::vector<bool>
-    field_is_valid(std::index_sequence<S...>) const {
-      return std::vector<bool>({std::get<S>(contents).builder.is_valid()...});
+    field_is_valid(std::index_sequence<S...>, std::string& error) const {
+      return std::vector<bool>({std::get<S>(contents).builder.is_valid(error)...});
     }
 
   };
@@ -524,7 +530,7 @@ namespace awkward {
   //     parameters_ = parameter;
   //   }
 
-  //   bool is_valid() const noexcept {
+  //   bool is_valid(std::string& error) const noexcept {
   //     size_t length = -1;
   //     for (size_t i = 0; i < fields_count_; i++) {
   //       visit_at(contents, i, [&](auto& content) {
@@ -541,7 +547,7 @@ namespace awkward {
 
   //     for (size_t i = 0; i < fields_count_; i++) {
   //       visit_at(contents, i, [&length](auto& content) {
-  //         if (!content.builder.is_valid()) {
+  //         if (!content.builder.is_valid(error)) {
   //          return false;
   //         }
   //       });
@@ -681,19 +687,26 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool
+    is_valid(std::string& error) const noexcept {
       if (starts_.length() != stops_.length()) {
-        std::cout << "List node" << id_ << " has starts length " << starts_.length()
-                  << " but stops length " << stops_.length();
+        std::stringstream out;
+        out << "List node" << id_ << " has starts length " << starts_.length()
+            << " but stops length " << stops_.length();
+        error.append(out.str());
+
         return false;
       }
       else if (stops_.length() > 0 && content_.length() != stops_.last()) {
-        std::cout << "List node" << id_ << " has content length " << content_.length()
-                  << " but last stops " << stops_.last();
+        std::stringstream out;
+        out << "List node" << id_ << " has content length " << content_.length()
+            << " but last stops " << stops_.last();
+        error.append(out.str());
+
         return false;
       }
       else {
-        return content_.is_valid();
+        return content_.is_valid(error);
       }
     }
 
@@ -792,19 +805,25 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool is_valid(std::string& error) const noexcept {
       if (content_.length() != index_.length()) {
-        std::cout << "Indexed node" << id_ << " has content length " << content_.length()
-                  << " but index length " << index_.length();
+        std::stringstream out;
+        out << "Indexed node" << id_ << " has content length " << content_.length()
+            << " but index length " << index_.length();
+        error.append(out.str());
+
         return false;
       }
       else if (content_.length() != last_valid_ + 1) {
-        std::cout << "Indexed node" << id_ << " has content length " << content_.length()
-                  << " but last valid index is " << last_valid_;
+        std::stringstream out;
+        out << "Indexed node" << id_ << " has content length " << content_.length()
+            << " but last valid index is " << last_valid_;
+        error.append(out.str());
+
         return false;
       }
       else {
-        return content_.is_valid();
+        return content_.is_valid(error);
       }
     }
 
@@ -907,14 +926,18 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool
+    is_valid(std::string& error) const noexcept {
       if (content_.length() != last_valid_ + 1) {
-        std::cout << "IndexedOption node" << id_ << " has content length "<< content_.length()
-                  << " but last valid index is " << last_valid_;
+        std::stringstream out;
+        out << "IndexedOption node" << id_ << " has content length "<< content_.length()
+            << " but last valid index is " << last_valid_;
+        error.append(out.str());
+
         return false;
       }
       else {
-        return content_.is_valid();
+        return content_.is_valid(error);
       }
     }
 
@@ -1016,7 +1039,7 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool is_valid(std::string& error) const noexcept {
       return true;
     }
 
@@ -1080,8 +1103,8 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const {
-      return content_.is_valid();
+    bool is_valid(std::string& error) const {
+      return content_.is_valid(error);
     }
 
     BUILDER&
@@ -1169,14 +1192,18 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const {
+    bool
+    is_valid(std::string& error) const {
       if (content_.length() != mask_.length()) {
-        std::cout << "ByteMasked node" << id_ << "has content length " << content_.length()
-                  << "but mask length " << mask_.length();
+        std::stringstream out;
+        out << "ByteMasked node" << id_ << "has content length " << content_.length()
+            << "but mask length " << mask_.length();
+        error.append(out.str());
+
         return false;
       }
       else {
-        return content_.is_valid();
+        return content_.is_valid(error);
       }
     }
 
@@ -1308,14 +1335,17 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const {
+    bool
+    is_valid(std::string& error) const {
       if (content_.length() != length()) {
-        std::cout << "BitMasked node" << id_ << "has content length " << content_.length()
-                  << "but bit mask length " << mask_.length();
+        std::stringstream out;
+        out << "BitMasked node" << id_ << "has content length " << content_.length()
+            << "but bit mask length " << mask_.length();
+        error.append(out.str());
         return false;
       }
       else {
-        return content_.is_valid();
+        return content_.is_valid(error);
       }
     }
 
@@ -1466,14 +1496,18 @@ namespace awkward {
       parameters_ = parameter;
     }
 
-    bool is_valid() const noexcept {
+    bool
+    is_valid(std::string& error) const noexcept {
       if (content_.length() != length_ * size_) {
-        std::cout << "Regular node" << id_ << "has content length " << content_.length()
-                  << ", but length " << length_ << " and size " << size_;
+        std::stringstream out;
+        out << "Regular node" << id_ << "has content length " << content_.length()
+            << ", but length " << length_ << " and size " << size_;
+        error.append(out.str());
+
         return false;
       }
       else {
-        return content_.is_valid();
+        return content_.is_valid(error);
       }
     }
 
@@ -1567,7 +1601,7 @@ namespace awkward {
   //     return parameters_;
   //   }
 
-  //   bool is_valid() const noexcept {
+  //   bool is_valid(std::string& error) const noexcept {
   //     if (content_.length() != index_.length()) {
   //       std::cout << "Union node" << id_ << " has content length " << content_.length()
   //                 << " but index length " << index_.length();
@@ -1579,7 +1613,7 @@ namespace awkward {
   //       return false;
   //     }
   //     else {
-  //       return content_.is_valid();
+  //       return content_.is_valid(error);
   //     }
   //   }
 
