@@ -103,7 +103,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
 
       if (std::is_arithmetic<PRIMITIVE>::value) {
@@ -140,7 +140,7 @@ namespace awkward {
     }
 
     BUILDER&
-    content() const noexcept {
+    content() noexcept {
       return content_;
     }
 
@@ -222,7 +222,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -247,7 +247,7 @@ namespace awkward {
     }
 
     BUILDER&
-    content() const noexcept {
+    content() noexcept {
       return content_;
     }
 
@@ -342,7 +342,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -401,7 +401,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"EmptyArray\"" + params + " }";
     }
@@ -474,7 +474,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
 
       if (is_tuple_) {
@@ -620,7 +620,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string("\"parameters\": " + parameters_ + ", ");
+        params = std::string("\"parameters\": { " + parameters_ + " }, ");
       }
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": { ";
@@ -771,7 +771,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string("\"parameters\": " + parameters_ + ", ");
+        params = std::string("\"parameters\": { " + parameters_ + " }, ");
       }
       std::stringstream out;
       out << "{ \"class\": \"RecordArray\", \"contents\": [";
@@ -822,7 +822,7 @@ namespace awkward {
     }
 
     BUILDER&
-    content() const noexcept {
+    content() noexcept {
       return content_;
     }
 
@@ -895,7 +895,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"RegularArray\", \"content\": " + content_.form()
                 + ", \"size\": " + std::to_string(size_)  + params
@@ -922,7 +922,7 @@ namespace awkward {
     }
 
     BUILDER&
-    content() const noexcept {
+    content() noexcept {
       return content_;
     }
 
@@ -1020,7 +1020,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -1046,7 +1046,7 @@ namespace awkward {
     }
 
     BUILDER&
-    content() const noexcept {
+    content() noexcept {
       return content_;
     }
 
@@ -1149,7 +1149,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -1173,7 +1173,7 @@ namespace awkward {
     }
 
     BUILDER&
-    content() const noexcept {
+    content() noexcept {
       return content_;
     }
 
@@ -1235,7 +1235,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"UnmaskedArray\", \"content\": " + content_.form()
                 + params + ", \"form_key\": \"" + form_key.str() + "\" }";
@@ -1258,7 +1258,7 @@ namespace awkward {
     }
 
     BUILDER&
-    content() const noexcept {
+    content() noexcept {
       return content_;
     }
 
@@ -1364,7 +1364,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"ByteMaskedArray\", \"mask\": \"i8\", \"content\": " + content_.form()
                 + ", \"valid_when\": " + form_valid_when.str()
@@ -1379,6 +1379,7 @@ namespace awkward {
     bool valid_when_ = VALID_WHEN;
   };
 
+  // FIXME: mask value incorrect
   // BitMaskedLayoutBuilder
   template <unsigned INITIAL, bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
   class BitMasked {
@@ -1404,7 +1405,7 @@ namespace awkward {
     }
 
     BUILDER&
-    content() const noexcept {
+    content() noexcept {
       return content_;
     }
 
@@ -1519,7 +1520,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       return "{ \"class\": \"BitMaskedArray\", \"mask\": \"u8\", \"content\": " + content_.form()
                 + ", \"valid_when\": " + form_valid_when.str() + ", \"lsb_order\": "
@@ -1580,7 +1581,7 @@ namespace awkward {
 
     template<std::size_t INDEX>
     ContentType<INDEX>&
-    content() const noexcept {
+    content() noexcept {
       return std::get<INDEX>(contents_);
     }
 
@@ -1686,7 +1687,7 @@ namespace awkward {
       std::string params("");
       if (parameters_ == "") { }
       else {
-        params = std::string(", \"parameters\": " + parameters_);
+        params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       std::stringstream out;
       out << "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";

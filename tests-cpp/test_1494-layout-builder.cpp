@@ -261,6 +261,45 @@ test_Numpy_complex() {
 }
 
 void
+test_Numpy_string() {
+  NumpyBuilder<double> builder;
+
+  builder.append(1.1);
+  builder.append(2.2);
+
+  size_t data_size = 3;
+
+  double data[3] = {3.3, 4.4, 5.5};
+
+  builder.extend(data, data_size);
+
+  // [1.1, 2.2, 3.3, 4.4, 5.5]
+
+  std::string error;
+  assert (builder.is_valid(error) == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+  assert (names_nbytes.size() == 1);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node0-data", (double*)buffers["node0-data"], names_nbytes["node0-data"]/sizeof(double));
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"NumpyArray\", "
+      "\"primitive\": \"float64\", "
+      "\"form_key\": \"node0\" "
+  "}");
+
+  std::cout << std::endl;
+}
+
+void
 test_ListOffset() {
   ListOffsetBuilder<NumpyBuilder<double>> builder;
 
@@ -1577,7 +1616,84 @@ test_Union_Numpy_ListOffset() {
       "}], "
       "\"form_key\": \"node0\" "
   "}");
+
+  std::cout << std::endl;
 }
+
+void
+test_char_form() {
+  NumpyBuilder<uint8_t> builder;
+
+  builder.set_parameters("\"__array__\": \"char\"");
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"NumpyArray\", "
+      "\"primitive\": \"uint8\", "
+      "\"parameters\": { "
+          "\"__array__\": \"char\" "
+      "}, "
+      "\"form_key\": \"node0\" "
+  "}");
+}
+
+void
+test_string_form() {
+  ListOffsetBuilder<NumpyBuilder<uint8_t>> builder;
+
+  auto& subbuilder = builder.content();
+
+  builder.set_parameters("\"__array__\": \"string\"");
+
+  subbuilder.set_parameters("\"__array__\": \"char\"");
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"ListOffsetArray\", "
+      "\"offsets\": \"i64\", "
+      "\"content\": { "
+          "\"class\": \"NumpyArray\", "
+          "\"primitive\": \"uint8\", "
+          "\"parameters\": { "
+              "\"__array__\": \"char\" "
+          "}, "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "\"parameters\": { "
+          "\"__array__\": \"string\" "
+      "}, "
+      "\"form_key\": \"node0\" "
+  "}");
+}
+
+void
+test_categorical_form() {
+  IndexedBuilder<NumpyBuilder<int64_t>> builder;
+
+  builder.set_parameters("\"__array__\": \"categorical\"");
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"IndexedArray\", "
+      "\"index\": \"i64\", "
+      "\"content\": { "
+          "\"class\": \"NumpyArray\", "
+          "\"primitive\": \"int64\", "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "\"parameters\": { "
+          "\"__array__\": \"categorical\" "
+      "}, "
+      "\"form_key\": \"node0\" "
+  "}");
+}
+
 
 int main(int /* argc */, char ** /* argv */) {
   test_Numpy_bool();
@@ -1605,6 +1721,9 @@ int main(int /* argc */, char ** /* argv */) {
   test_ByteMasked();
   test_BitMasked();
   test_Union_Numpy_ListOffset();
+  test_char_form();
+  test_string_form();
+  test_categorical_form();
 
   return 0;
 }
