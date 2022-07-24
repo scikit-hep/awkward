@@ -28,6 +28,7 @@ author = "Jim Pivarski"
 extensions = [
     'sphinx_external_toc',
     'sphinx_copybutton',
+    'sphinx_design',
     'myst_nb',
 ]
 
@@ -62,7 +63,7 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static", "_assets"]
-
+html_css_files = ['css/awkward.css']
 
 # MyST settings
 myst_enable_extensions = [
@@ -87,4 +88,4 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 docgen = os.path.join(current_dir, "..", "dev", "generate-kerneldocs.py")
 subprocess.check_call([sys.executable, docgen])
 
-exec(open("make_changelog.py").read(), dict(globals()))
+#exec(open("make_changelog.py").read(), dict(globals()))

@@ -4,6 +4,7 @@ black
 pycparser
 lark-parser
 sphinx-copybutton
+sphinx-design
 pydata-sphinx-theme
 myst-nb
 sphinx-external-toc
