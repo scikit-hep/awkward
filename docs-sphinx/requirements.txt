@@ -7,6 +7,7 @@ sphinx-copybutton
 pydata-sphinx-theme
 myst-nb
 sphinx-external-toc
+ipyleaflet
 
 numpy>=1.13.1
 numba>=0.50.0

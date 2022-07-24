@@ -10,12 +10,9 @@ subtrees:
       - file: user-guide/index
         title: "User Guide"
         subtrees:
-            - maxdepth: -1
-              entries:
-              - file: user-guide/what-is-awkward-array
-                title: "What is an Awkward Array?"
-
             - entries:
+              - file: user-guide/what-is-an-awkward-array
+                title: "What is an Awkward Array?"
               - file: user-guide/how-to-convert
                 title: "Converting arrays"
                 subtrees:
