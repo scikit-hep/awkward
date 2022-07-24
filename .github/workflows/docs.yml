@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - docs
+      - docs-phase-2
   release:
     types: [released]
   workflow_dispatch:
