@@ -13,6 +13,10 @@ subtrees:
             - entries:
               - file: user-guide/what-is-an-awkward-array
                 title: "What is an Awkward Array?"
+                
+              - file: user-guide/absolute-beginners
+                title: "Beginners guide to Awkward Array"
+                
               - file: user-guide/how-to-convert
                 title: "Converting arrays"
                 subtrees:
