@@ -16,8 +16,6 @@
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
-Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they’re not.
-
 % TODO mention left side-bar
 ::::{grid} 2
 :class-container: intro-grid text-center
