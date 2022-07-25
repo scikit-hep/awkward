@@ -102,6 +102,13 @@ class Record:
         branch, depth = self._array.branch_depth
         return branch, depth - 1
 
+    def axis_wrap_if_negative(self, axis):
+        if axis == 0:
+            raise ak._v2._util.error(
+                np.AxisError("Record type at axis=0 is a scalar, not an array")
+            )
+        return self._array.axis_wrap_if_negative(axis)
+
     def __getitem__(self, where):
         with ak._v2._util.SlicingErrorContext(self, where):
             return self._getitem(where)
