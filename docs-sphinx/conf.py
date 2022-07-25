@@ -60,7 +60,6 @@ html_theme_options = {
       "image_dark": "logo-300px-white.png",
   },
   "github_url": "https://github.com/scikit-hep/awkward",
-  "collapse_navigation": True,
   # Add light/dark mode and documentation version switcher:
   "navbar_end": ["theme-switcher", "navbar-icon-links"],
   "footer_items": ["copyright", "sphinx-version", "funding"],
