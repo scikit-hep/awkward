@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#include "awkward/LayoutBuilder.h"
+// #include "awkward/LayoutBuilder.h"
+#include "../src/awkward/_v2/cpp-headers/awkward/LayoutBuilder.h"
 
 static const unsigned initial = 10;
 
@@ -8,7 +9,7 @@ template <class NODE, class PRIMITIVE, class LENGTH>
 void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
   std::cout << node << ": ";
   for (size_t i = 0; i < length; i++) {
-    std::cout << ptr[i] << " ";
+    std::cout << +ptr[i] << " ";
   }
   std::cout << std::endl;
 }
@@ -36,11 +37,11 @@ using UserDefinedMap = std::map<std::size_t, std::string>;
 template<class PRIMITIVE>
 using NumpyBuilder = awkward::LayoutBuilder::Numpy<initial, PRIMITIVE>;
 
-template<class BUILDER>
-using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, BUILDER>;
+template<class PRIMITIVE, class BUILDER>
+using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, PRIMITIVE, BUILDER>;
 
-template<class BUILDER>
-using ListBuilder = awkward::LayoutBuilder::List<initial, BUILDER>;
+template<class PRIMITIVE, class BUILDER>
+using ListBuilder = awkward::LayoutBuilder::List<initial, PRIMITIVE, BUILDER>;
 
 using EmptyBuilder = awkward::LayoutBuilder::Empty;
 
@@ -59,11 +60,11 @@ using TupleBuilder = awkward::LayoutBuilder::Tuple<BUILDERS...>;
 template <unsigned SIZE, class BUILDER>
 using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
 
-template<class BUILDER>
-using IndexedBuilder = awkward::LayoutBuilder::Indexed<initial, BUILDER>;
+template<class PRIMITIVE, class BUILDER>
+using IndexedBuilder = awkward::LayoutBuilder::Indexed<initial, PRIMITIVE, BUILDER>;
 
-template<class BUILDER>
-using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<initial, BUILDER>;
+template<class PRIMITIVE, class BUILDER>
+using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<initial, PRIMITIVE, BUILDER>;
 
 template<class BUILDER>
 using UnmaskedBuilder = awkward::LayoutBuilder::Unmasked<BUILDER>;
@@ -75,7 +76,10 @@ template<bool VALID_WHEN, bool LSB_ORDER, class BUILDER>
 using BitMaskedBuilder = awkward::LayoutBuilder::BitMasked<initial, VALID_WHEN, LSB_ORDER, BUILDER>;
 
 template<class... BUILDERS>
-using UnionBuilder = awkward::LayoutBuilder::Union<initial, BUILDERS...>;
+using UnionBuilder8_U32 = awkward::LayoutBuilder::Union<initial, int8_t, uint32_t, BUILDERS...>;
+
+template<class... BUILDERS>
+using UnionBuilder8_64 = awkward::LayoutBuilder::Union<initial, int8_t, int64_t, BUILDERS...>;
 
 
 void
@@ -261,47 +265,8 @@ test_Numpy_complex() {
 }
 
 void
-test_Numpy_string() {
-  NumpyBuilder<double> builder;
-
-  builder.append(1.1);
-  builder.append(2.2);
-
-  size_t data_size = 3;
-
-  double data[3] = {3.3, 4.4, 5.5};
-
-  builder.extend(data, data_size);
-
-  // [1.1, 2.2, 3.3, 4.4, 5.5]
-
-  std::string error;
-  assert (builder.is_valid(error) == true);
-
-  std::map<std::string, size_t> names_nbytes = {};
-  builder.buffer_nbytes(names_nbytes);
-  assert (names_nbytes.size() == 1);
-
-  auto buffers = empty_buffers(names_nbytes);
-  builder.to_buffers(buffers);
-
-  dump("node0-data", (double*)buffers["node0-data"], names_nbytes["node0-data"]/sizeof(double));
-
-  auto form = builder.form();
-
-  assert (form ==
-  "{ "
-      "\"class\": \"NumpyArray\", "
-      "\"primitive\": \"float64\", "
-      "\"form_key\": \"node0\" "
-  "}");
-
-  std::cout << std::endl;
-}
-
-void
 test_ListOffset() {
-  ListOffsetBuilder<NumpyBuilder<double>> builder;
+  ListOffsetBuilder<int64_t, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.begin_list();
   subbuilder.append(1.1);
@@ -351,7 +316,9 @@ test_ListOffset() {
 
 void
 test_ListOffset_ListOffset() {
-  ListOffsetBuilder<ListOffsetBuilder<NumpyBuilder<double>>> builder;
+  ListOffsetBuilder<int64_t,
+      ListOffsetBuilder<int32_t, NumpyBuilder<double>>
+  > builder;
 
   auto& builder2 = builder.begin_list();
 
@@ -403,7 +370,7 @@ test_ListOffset_ListOffset() {
   builder.to_buffers(buffers);
 
   dump("node0-offsets", (int64_t*)buffers["node0-offsets"], names_nbytes["node0-offsets"]/sizeof(int64_t),
-       "node1-offsets", (int64_t*)buffers["node1-offsets"], names_nbytes["node1-offsets"]/sizeof(int64_t),
+       "node1-offsets", (int32_t*)buffers["node1-offsets"], names_nbytes["node1-offsets"]/sizeof(int32_t),
        "node2-data", (double*)buffers["node2-data"], names_nbytes["node2-data"]/sizeof(double));
 
   auto form = builder.form();
@@ -414,7 +381,7 @@ test_ListOffset_ListOffset() {
       "\"offsets\": \"i64\", "
       "\"content\": { "
           "\"class\": \"ListOffsetArray\", "
-          "\"offsets\": \"i64\", "
+          "\"offsets\": \"i32\", "
           "\"content\": { "
               "\"class\": \"NumpyArray\", "
               "\"primitive\": \"float64\", "
@@ -430,7 +397,7 @@ test_ListOffset_ListOffset() {
 
 void
 test_List() {
-  ListBuilder<NumpyBuilder<double>> builder;
+  ListBuilder<uint32_t, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.begin_list();
   subbuilder.append(1.1);
@@ -475,8 +442,8 @@ test_List() {
   auto buffers = empty_buffers(names_nbytes);
   builder.to_buffers(buffers);
 
-  dump("node0-starts", (int64_t*)buffers["node0-starts"], names_nbytes["node0-starts"]/sizeof(int64_t),
-       "node0-stops", (int64_t*)buffers["node0-stops"], names_nbytes["node0-stops"]/sizeof(int64_t),
+  dump("node0-starts", (uint32_t*)buffers["node0-starts"], names_nbytes["node0-starts"]/sizeof(uint32_t),
+       "node0-stops", (uint32_t*)buffers["node0-stops"], names_nbytes["node0-stops"]/sizeof(uint32_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
 
   auto form = builder.form();
@@ -484,8 +451,8 @@ test_List() {
   assert (form ==
   "{ "
       "\"class\": \"ListArray\", "
-      "\"starts\": \"i64\", "
-      "\"stops\": \"i64\", "
+      "\"starts\": \"u32\", "
+      "\"stops\": \"u32\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
           "\"primitive\": \"float64\", "
@@ -521,7 +488,9 @@ test_Empty() {
 
 void
 test_ListOffset_Empty() {
-  ListOffsetBuilder<ListOffsetBuilder<EmptyBuilder>> builder;
+  ListOffsetBuilder<int64_t,
+      ListOffsetBuilder<int64_t, EmptyBuilder>
+  > builder;
 
   builder.begin_list();
   builder.end_list();
@@ -711,10 +680,10 @@ test_ListOffset_Record() {
     {Field::x, "x"},
     {Field::y, "y"}});
 
-  ListOffsetBuilder<
+  ListOffsetBuilder<int64_t,
       RecordBuilder<
           RecordField<Field::x, NumpyBuilder<double>>,
-          RecordField<Field::y, ListOffsetBuilder<
+          RecordField<Field::y, ListOffsetBuilder<int64_t,
               NumpyBuilder<int32_t>>
   >>> builder;
 
@@ -828,7 +797,8 @@ test_Record_Record()
   RecordBuilder<
       RecordField<Field0::x, RecordBuilder<
           RecordField<Field1::u, NumpyBuilder<double>>,
-          RecordField<Field1::v, ListOffsetBuilder<NumpyBuilder<int64_t>>>>>,
+          RecordField<Field1::v, ListOffsetBuilder<int64_t,
+              NumpyBuilder<int64_t>>>>>,
       RecordField<Field0::y, RecordBuilder<
           RecordField<Field2::w, NumpyBuilder<char>>>>
   > builder;
@@ -944,11 +914,12 @@ test_Record_nested()
     {Field1::j, "j"}});
 
   RecordBuilder<
-      RecordField<Field0::u, ListOffsetBuilder<
+      RecordField<Field0::u, ListOffsetBuilder<int64_t,
           RecordBuilder<
               RecordField<Field1::i, NumpyBuilder<double>>,
-              RecordField<Field1::j, ListOffsetBuilder<
-                  NumpyBuilder<int64_t>>>>>>,
+              RecordField<Field1::j, ListOffsetBuilder<int64_t,
+                  NumpyBuilder<int64_t>>>
+      >>>,
       RecordField<Field0::v, NumpyBuilder<int64_t>>,
       RecordField<Field0::w, NumpyBuilder<double>>
   > builder;
@@ -1064,7 +1035,7 @@ void
 test_Tuple_Numpy_ListOffset() {
   TupleBuilder<
       NumpyBuilder<double>,
-      ListOffsetBuilder<NumpyBuilder<int32_t>>
+      ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>
   > builder;
 
   std::string error;
@@ -1225,7 +1196,7 @@ test_Regular_size0() {
 
 void
 test_Indexed() {
-  IndexedBuilder<NumpyBuilder<double>> builder;
+  IndexedBuilder<uint32_t, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
@@ -1250,7 +1221,7 @@ test_Indexed() {
   auto buffers = empty_buffers(names_nbytes);
   builder.to_buffers(buffers);
 
-  dump("node0-index", (int64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(int64_t),
+  dump("node0-index", (uint32_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(uint32_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
 
   auto form = builder.form();
@@ -1258,7 +1229,7 @@ test_Indexed() {
   assert (form ==
   "{ "
       "\"class\": \"IndexedArray\", "
-      "\"index\": \"i64\", "
+      "\"index\": \"u32\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
           "\"primitive\": \"float64\", "
@@ -1272,7 +1243,7 @@ test_Indexed() {
 
 void
 test_IndexedOption() {
-  IndexedOptionBuilder<NumpyBuilder<double>> builder;
+  IndexedOptionBuilder<int32_t, NumpyBuilder<double>> builder;
 
   auto& subbuilder = builder.append_index();
   subbuilder.append(1.1);
@@ -1298,7 +1269,7 @@ test_IndexedOption() {
   auto buffers = empty_buffers(names_nbytes);
   builder.to_buffers(buffers);
 
-  dump("node0-index", (int64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(int64_t),
+  dump("node0-index", (int32_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(int32_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double));
 
   auto form = builder.form();
@@ -1306,7 +1277,7 @@ test_IndexedOption() {
   assert (form ==
   "{ "
       "\"class\": \"IndexedOptionArray\", "
-      "\"index\": \"i64\", "
+      "\"index\": \"i32\", "
       "\"content\": { "
           "\"class\": \"NumpyArray\", "
           "\"primitive\": \"float64\", "
@@ -1326,7 +1297,7 @@ test_IndexedOption_Record() {
     {Field::x, "x"},
     {Field::y, "y"}});
 
-  IndexedOptionBuilder<RecordBuilder<
+  IndexedOptionBuilder<int64_t, RecordBuilder<
       RecordField<Field::x, NumpyBuilder<double>>,
       RecordField<Field::y, NumpyBuilder<int64_t>>
   >> builder;
@@ -1552,10 +1523,10 @@ test_BitMasked() {
 }
 
 void
-test_Union_Numpy_ListOffset() {
-  UnionBuilder<
+test_Union8_U32_Numpy_ListOffset() {
+  UnionBuilder8_U32<
       NumpyBuilder<double>,
-      ListOffsetBuilder<NumpyBuilder<int32_t>>
+      ListOffsetBuilder<int64_t, NumpyBuilder<int32_t>>
   > builder;
 
   std::string error;
@@ -1574,11 +1545,6 @@ test_Union_Numpy_ListOffset() {
 
   assert (builder.is_valid(error) == true);
 
-  builder.append_index<0>();
-  subbuilder_one.append(3.3);
-
-  assert (builder.is_valid(error) == true);
-
   std::map<std::string, size_t> names_nbytes = {};
   builder.buffer_nbytes(names_nbytes);
 
@@ -1588,7 +1554,7 @@ test_Union_Numpy_ListOffset() {
   builder.to_buffers(buffers);
 
   dump("node0-tags", (int8_t*)buffers["node0-tags"], names_nbytes["node0-tags"]/sizeof(int8_t),
-       "node0-index", (uint64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(uint64_t),
+       "node0-index", (uint32_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(uint32_t),
        "node1-data", (double*)buffers["node1-data"], names_nbytes["node1-data"]/sizeof(double),
        "node2-offsets", (int64_t*)buffers["node2-offsets"], names_nbytes["node2-offsets"]/sizeof(int64_t),
        "node3-data", (int32_t*)buffers["node3-data"], names_nbytes["node3-data"]/sizeof(int32_t));
@@ -1598,8 +1564,9 @@ test_Union_Numpy_ListOffset() {
   "{ "
       "\"class\": \"UnionArray\", "
       "\"tags\": \"i8\", "
-      "\"index\": \"i64\", "
-      "\"contents\": [{ "
+      "\"index\": \"u32\", "
+      "\"contents\": ["
+      "{ "
           "\"class\": \"NumpyArray\", "
           "\"primitive\": \"float64\", "
           "\"form_key\": \"node1\" "
@@ -1613,6 +1580,111 @@ test_Union_Numpy_ListOffset() {
               "\"form_key\": \"node3\" "
           "}, "
           "\"form_key\": \"node2\" "
+      "}], "
+      "\"form_key\": \"node0\" "
+  "}");
+
+  std::cout << std::endl;
+}
+
+void
+  test_Union8_64_ListOffset_Record() {
+  enum Field : std::size_t {x, y};
+
+  UserDefinedMap fields_map({
+    {Field::x, "x"},
+    {Field::y, "y"}});
+
+  UnionBuilder8_64<
+      ListOffsetBuilder<int64_t, NumpyBuilder<double>>,
+      RecordBuilder<
+          RecordField<Field::x, NumpyBuilder<int64_t>>,
+          RecordField<Field::y, NumpyBuilder<char>>
+  >> builder;
+
+  std::string error;
+  assert (builder.is_valid(error) == true);
+
+  auto& subbuilder_one = builder.append_index<0>();
+  auto& subsubbuilder = subbuilder_one.begin_list();
+  subsubbuilder.append(1.1);
+  subsubbuilder.append(3.3);
+  subbuilder_one.end_list();
+
+  assert (builder.is_valid(error) == true);
+
+  auto &subbuilder_two = builder.append_index<1>();
+  subbuilder_two.set_field_names(fields_map);
+
+  auto& x_builder = subbuilder_two.field<Field::x>();
+  auto& y_builder = subbuilder_two.field<Field::y>();
+
+  x_builder.append(1);
+  y_builder.append('a');
+
+  assert (builder.is_valid(error) == true);
+
+  builder.append_index<0>();
+  subbuilder_one.begin_list();
+  subsubbuilder.append(5.5);
+  subbuilder_one.end_list();
+
+  assert (builder.is_valid(error) == true);
+
+  builder.append_index<1>();
+  x_builder.append(2);
+  y_builder.append('b');
+
+  assert (builder.is_valid(error) == true);
+
+  std::map<std::string, size_t> names_nbytes = {};
+  builder.buffer_nbytes(names_nbytes);
+
+  assert (names_nbytes.size() == 6);
+
+  auto buffers = empty_buffers(names_nbytes);
+  builder.to_buffers(buffers);
+
+  dump("node0-tags", (int8_t*)buffers["node0-tags"], names_nbytes["node0-tags"]/sizeof(int8_t),
+       "node0-index", (int64_t*)buffers["node0-index"], names_nbytes["node0-index"]/sizeof(int64_t),
+       "node1-offsets", (int64_t*)buffers["node1-offsets"], names_nbytes["node1-offsets"]/sizeof(int64_t),
+       "node2-data", (double*)buffers["node2-data"], names_nbytes["node2-data"]/sizeof(double),
+       "node4-data", (int64_t*)buffers["node4-data"], names_nbytes["node4-data"]/sizeof(int64_t),
+       "node5-data", (char*)buffers["node5-data"], names_nbytes["node5-data"]/sizeof(char));
+
+  auto form = builder.form();
+
+  assert (form ==
+  "{ "
+      "\"class\": \"UnionArray\", "
+      "\"tags\": \"i8\", "
+      "\"index\": \"i64\", "
+      "\"contents\": ["
+      "{ "
+          "\"class\": \"ListOffsetArray\", "
+          "\"offsets\": \"i64\", "
+          "\"content\": { "
+              "\"class\": \"NumpyArray\", "
+              "\"primitive\": \"float64\", "
+              "\"form_key\": \"node2\" "
+          "}, "
+          "\"form_key\": \"node1\" "
+      "}, "
+      "{ "
+          "\"class\": \"RecordArray\", "
+          "\"contents\": { "
+              "\"x\": { "
+                  "\"class\": \"NumpyArray\", "
+                  "\"primitive\": \"int64\", "
+                  "\"form_key\": \"node4\" "
+              "}, "
+              "\"y\": { "
+                  "\"class\": \"NumpyArray\", "
+                  "\"primitive\": \"char\", "
+                  "\"form_key\": \"node5\" "
+              "} "
+          "}, "
+          "\"form_key\": \"node3\" "
       "}], "
       "\"form_key\": \"node0\" "
   "}");
@@ -1641,7 +1713,7 @@ test_char_form() {
 
 void
 test_string_form() {
-  ListOffsetBuilder<NumpyBuilder<uint8_t>> builder;
+  ListOffsetBuilder<int64_t, NumpyBuilder<uint8_t>> builder;
 
   auto& subbuilder = builder.content();
 
@@ -1672,7 +1744,7 @@ test_string_form() {
 
 void
 test_categorical_form() {
-  IndexedBuilder<NumpyBuilder<int64_t>> builder;
+  IndexedBuilder<int64_t, NumpyBuilder<int64_t>> builder;
 
   builder.set_parameters("\"__array__\": \"categorical\"");
 
@@ -1720,7 +1792,8 @@ int main(int /* argc */, char ** /* argv */) {
   test_Unmasked();
   test_ByteMasked();
   test_BitMasked();
-  test_Union_Numpy_ListOffset();
+  test_Union8_U32_Numpy_ListOffset();
+  test_Union8_64_ListOffset_Record();
   test_char_form();
   test_string_form();
   test_categorical_form();

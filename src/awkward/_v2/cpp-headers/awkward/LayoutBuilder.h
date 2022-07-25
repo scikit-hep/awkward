@@ -3,8 +3,10 @@
 #ifndef AWKWARD_LAYOUTBUILDER_H_
 #define AWKWARD_LAYOUTBUILDER_H_
 
-#include "awkward/GrowableBuffer.h"
-#include "awkward/utils.h"
+// #include "awkward/GrowableBuffer.h"
+// #include "awkward/utils.h"
+#include "GrowableBuffer.h"
+#include "utils.h"
 
 #include <map>
 #include <algorithm>
@@ -22,7 +24,7 @@ namespace awkward {
     using Builder = BUILDER;
 
     std::string index_as_field() const {
-      return std::to_string(static_cast<int>(index));
+      return std::to_string(static_cast<size_t>(index));
     }
 
     const std::size_t index = ENUM;
@@ -129,11 +131,11 @@ namespace awkward {
   };
 
   // ListOffsetLayoutBuilder
-  template <unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename PRIMITIVE, typename BUILDER>
   class ListOffset {
   public:
     ListOffset()
-        : offsets_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+        : offsets_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) {
       offsets_.append(0);
       size_t id = 0;
       set_id(id);
@@ -205,13 +207,13 @@ namespace awkward {
 
     void
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
-      offsets_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-offsets"]));
+      offsets_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-offsets"]));
       content_.to_buffers(buffers);
     }
 
     // temporary
     void
-    to_buffer(int64_t* ptr) const noexcept {
+    to_buffer(PRIMITIVE* ptr) const noexcept {
       offsets_.concatenate(ptr);
     }
 
@@ -224,24 +226,26 @@ namespace awkward {
       else {
         params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
-      return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
-                + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+      return "{ \"class\": \"ListOffsetArray\", \"offsets\": \""
+                + type_to_numpy_like<PRIMITIVE>()
+                + "\", \"content\": "+ content_.form() + params
+                + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
-    GrowableBuffer<int64_t> offsets_;
+    GrowableBuffer<PRIMITIVE> offsets_;
     BUILDER content_;
     std::string parameters_;
     size_t id_;
   };
 
   // ListLayoutBuilder
-  template <unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename PRIMITIVE, typename BUILDER>
   class List {
   public:
     List()
-        : starts_(awkward::GrowableBuffer<int64_t>(INITIAL))
-        , stops_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+        : starts_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL))
+        , stops_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) {
       size_t id = 0;
       set_id(id);
     }
@@ -323,14 +327,14 @@ namespace awkward {
 
     void
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
-      starts_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-starts"]));
-      stops_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-stops"]));
+      starts_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-starts"]));
+      stops_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-stops"]));
       content_.to_buffers(buffers);
     }
 
     // temporary
     void
-    to_buffer(int64_t* starts, int64_t* stops) const noexcept {
+    to_buffer(PRIMITIVE* starts, PRIMITIVE* stops) const noexcept {
       starts_.concatenate(starts);
       stops_.concatenate(stops);
     }
@@ -344,13 +348,14 @@ namespace awkward {
       else {
         params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
-      return "{ \"class\": \"ListArray\", \"starts\": \"i64\", \"stops\": \"i64\", \"content\": "
+      return "{ \"class\": \"ListArray\", \"starts\": \"" + type_to_numpy_like<PRIMITIVE>()
+                + "\", \"stops\": \"" + type_to_numpy_like<PRIMITIVE>() + "\", \"content\": "
                 + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
-    GrowableBuffer<int64_t> starts_;
-    GrowableBuffer<int64_t> stops_;
+    GrowableBuffer<PRIMITIVE> starts_;
+    GrowableBuffer<PRIMITIVE> stops_;
     BUILDER content_;
     std::string parameters_;
     size_t id_;
@@ -911,11 +916,11 @@ namespace awkward {
   };
 
   // IndexedLayoutBuilder
-  template <unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename PRIMITIVE, typename BUILDER>
   class Indexed {
   public:
     Indexed()
-        : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        : index_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL))
         , last_valid_(-1) {
       size_t id = 0;
       set_id(id);
@@ -1003,13 +1008,13 @@ namespace awkward {
 
     void
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
-      index_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-index"]));
+      index_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-index"]));
       content_.to_buffers(buffers);
     }
 
     // temporary
     void
-    to_buffer(int64_t* ptr) const noexcept {
+    to_buffer(PRIMITIVE* ptr) const noexcept {
       index_.concatenate(ptr);
     }
 
@@ -1022,12 +1027,14 @@ namespace awkward {
       else {
         params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
-      return "{ \"class\": \"IndexedArray\", \"index\": \"i64\", \"content\": "
-                + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+      return "{ \"class\": \"IndexedArray\", \"index\": \""
+                + type_to_numpy_like<PRIMITIVE>()
+                + "\", \"content\": " + content_.form() + params
+                + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
-    GrowableBuffer<int64_t> index_;
+    GrowableBuffer<PRIMITIVE> index_;
     BUILDER content_;
     std::string parameters_;
     size_t id_;
@@ -1035,11 +1042,11 @@ namespace awkward {
   };
 
   // IndexedOptionLayoutBuilder
-  template <unsigned INITIAL, typename BUILDER>
+  template <unsigned INITIAL, typename PRIMITIVE, typename BUILDER>
   class IndexedOption {
   public:
     IndexedOption()
-        : index_(awkward::GrowableBuffer<int64_t>(INITIAL))
+        : index_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL))
         , last_valid_(-1) {
       size_t id = 0;
       set_id(id);
@@ -1132,13 +1139,13 @@ namespace awkward {
 
     void
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
-      index_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-index"]));
+      index_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-index"]));
       content_.to_buffers(buffers);
     }
 
     // temporary
     void
-    to_buffer(int64_t* ptr) const noexcept {
+    to_buffer(PRIMITIVE* ptr) const noexcept {
       index_.concatenate(ptr);
     }
 
@@ -1151,12 +1158,14 @@ namespace awkward {
       else {
         params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
-      return "{ \"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
-                + content_.form() + params + ", \"form_key\": \"" + form_key.str() + "\" }";
+      return "{ \"class\": \"IndexedOptionArray\", \"index\": \""
+                + type_to_numpy_like<PRIMITIVE>()
+                + "\", \"content\": " + content_.form() + params
+                + ", \"form_key\": \"" + form_key.str() + "\" }";
     }
 
   private:
-    GrowableBuffer<int64_t> index_;
+    GrowableBuffer<PRIMITIVE> index_;
     BUILDER content_;
     std::string parameters_;
     size_t id_;
@@ -1531,8 +1540,8 @@ namespace awkward {
     void
     append_begin() {
       if (current_index_ == 8) {
-        current_byte_ = uint8_t(0);
         current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
+        current_byte_ = uint8_t(0);
         current_index_ = 0;
       }
     }
@@ -1560,38 +1569,37 @@ namespace awkward {
     bool lsb_order_ = LSB_ORDER;
   };
 
-  // FIXME: template index: int64_t and int32_t
   // UnionLayoutBuilder
-  template <unsigned INITIAL,  typename... BUILDERS>
+  template <unsigned INITIAL, typename TAGS, typename INDEX,  typename... BUILDERS>
   class Union {
   public:
     using Contents = typename std::tuple<BUILDERS...>;
 
-    template<std::size_t INDEX>
-    using ContentType = std::tuple_element_t<INDEX, Contents>;
+    template<std::size_t I>
+    using ContentType = std::tuple_element_t<I, Contents>;
 
     Union()
-        : tags_(awkward::GrowableBuffer<int8_t>(INITIAL))
-        , index_(awkward::GrowableBuffer<int64_t>(INITIAL)) {
+        : tags_(awkward::GrowableBuffer<TAGS>(INITIAL))
+        , index_(awkward::GrowableBuffer<INDEX>(INITIAL)) {
       size_t id = 0;
       set_id(id);
       for (size_t i = 0; i < contents_count_; i++)
         last_valid_index_[i] = -1;
     }
 
-    template<std::size_t INDEX>
-    ContentType<INDEX>&
+    template<std::size_t I>
+    ContentType<I>&
     content() noexcept {
-      return std::get<INDEX>(contents_);
+      return std::get<I>(contents_);
     }
 
     template<std::size_t TAG>
     ContentType<TAG>&
     append_index() noexcept {
       auto& which_content = std::get<TAG>(contents_);
-      size_t next_index = which_content.length();
+      INDEX next_index = which_content.length();
 
-      int8_t tag = (int8_t)TAG;
+      TAGS tag = (TAGS)TAG;
       last_valid_index_[tag] = next_index;
       tags_.append(tag);
       index_.append(next_index);
@@ -1671,8 +1679,8 @@ namespace awkward {
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
       auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-      tags_.concatenate(static_cast<int8_t*>(buffers["node" + std::to_string(id_) + "-tags"]));
-      index_.concatenate(static_cast<int64_t*>(buffers["node" + std::to_string(id_) + "-index"]));
+      tags_.concatenate(static_cast<TAGS*>(buffers["node" + std::to_string(id_) + "-tags"]));
+      index_.concatenate(static_cast<INDEX*>(buffers["node" + std::to_string(id_) + "-index"]));
 
       for (size_t i = 0; i < contents_count_; i++)
         visit_at(contents_, i, [&buffers](auto& content) {
@@ -1690,7 +1698,9 @@ namespace awkward {
         params = std::string(", \"parameters\": { " + parameters_ + " }");
       }
       std::stringstream out;
-      out << "{ \"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
+      out << "{ \"class\": \"UnionArray\", \"tags\": \""
+                + type_to_numpy_like<TAGS>() + "\", \"index\": \""
+                + type_to_numpy_like<INDEX>() + "\", \"contents\": [";
       for (size_t i = 0;  i < contents_count_;  i++) {
         if (i != 0) {
           out << ", ";
@@ -1708,8 +1718,8 @@ namespace awkward {
   private:
     static constexpr size_t contents_count_ = sizeof...(BUILDERS);
 
-    GrowableBuffer<int8_t> tags_;
-    GrowableBuffer<int64_t> index_;
+    GrowableBuffer<TAGS> tags_;
+    GrowableBuffer<INDEX> index_;
     Contents contents_;
     size_t id_;
     std::string parameters_;

@@ -8,8 +8,10 @@
 #include <type_traits>
 #include <cassert>
 #include <utility>
+#include <stdexcept>
 
 namespace awkward {
+
 
 template <typename T>
 const std::string
@@ -99,6 +101,21 @@ template <>
 const std::string
 type_to_name<std::complex<double>>() {
     return "complex128";
+}
+
+template <typename PRIMITIVE>
+const std::string
+type_to_numpy_like() {
+  if (std::is_same<PRIMITIVE, uint8_t>::value)
+    return "u8";
+  else if (std::is_same<PRIMITIVE, int8_t>::value)
+    return "i8";
+  else if (std::is_same<PRIMITIVE, uint32_t>::value)
+    return "u32";
+  else if (std::is_same<PRIMITIVE, int32_t>::value)
+    return "i32";
+  else if (std::is_same<PRIMITIVE, int64_t>::value)
+    return "i64";
 }
 
 template <typename, typename = void>
