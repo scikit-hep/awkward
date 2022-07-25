@@ -3,7 +3,7 @@
 #ifndef AWKWARD_GROWABLEBUFFER_H_
 #define AWKWARD_GROWABLEBUFFER_H_
 
-#include "awkward/ArrayBuilderOptions.h"
+#include "awkward/BuilderOptions.h"
 
 #include <cstring>
 #include <vector>
@@ -116,7 +116,7 @@ namespace awkward {
     ///
     /// @param options Initial size configuration for building a panel.
     static GrowableBuffer<PRIMITIVE>
-    empty(const ArrayBuilderOptions& options) {
+    empty(const BuilderOptions& options) {
       return empty(options, 0);
     }
 
@@ -126,7 +126,7 @@ namespace awkward {
     /// @param minreserve The initial reservation will be the maximum
     /// of `minreserve` and #initial.
     static GrowableBuffer<PRIMITIVE>
-    empty(const ArrayBuilderOptions& options, int64_t minreserve) {
+    empty(const BuilderOptions& options, int64_t minreserve) {
       int64_t actual = options.initial;
       if (actual < minreserve) {
         actual = minreserve;
@@ -145,7 +145,7 @@ namespace awkward {
     /// This is similar to NumPy's
     /// [zeros](https://docs.scipy.org/doc/numpy/reference/generated/numpy.zeros.html).
     static GrowableBuffer<PRIMITIVE>
-    zeros(const ArrayBuilderOptions& options, int64_t length) {
+    zeros(const BuilderOptions& options, int64_t length) {
       int64_t actual = options.initial;
       if (actual < length) {
         actual = length;
@@ -169,7 +169,7 @@ namespace awkward {
     /// This is similar to NumPy's
     /// [full](https://docs.scipy.org/doc/numpy/reference/generated/numpy.full.html).
     static GrowableBuffer<PRIMITIVE>
-    full(const ArrayBuilderOptions& options, PRIMITIVE value, int64_t length) {
+    full(const BuilderOptions& options, PRIMITIVE value, int64_t length) {
       int64_t actual = options.initial;
       if (actual < length) {
         actual = length;
@@ -192,7 +192,7 @@ namespace awkward {
     /// This is similar to NumPy's
     /// [arange](https://docs.scipy.org/doc/numpy/reference/generated/numpy.arange.html).
     static GrowableBuffer<PRIMITIVE>
-    arange(const ArrayBuilderOptions& options, int64_t length) {
+    arange(const BuilderOptions& options, int64_t length) {
       int64_t actual = options.initial;
       if (actual < length) {
         actual = length;
@@ -221,7 +221,7 @@ namespace awkward {
 
       other.panel_->copy_as(rawptr, 0);
 
-      return GrowableBuffer<TO_PRIMITIVE>(actual, std::move(ptr), len, actual);
+      return GrowableBuffer<TO_PRIMITIVE>(BuilderOptions(actual, other.options().resize), std::move(ptr), len, actual);
     }
 
     /// @brief Creates a GrowableBuffer from a full set of parameters.
@@ -234,22 +234,23 @@ namespace awkward {
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of
     /// allocations of new panels.
-    GrowableBuffer(const ArrayBuilderOptions& options,
+    GrowableBuffer(const BuilderOptions& options,
                    std::unique_ptr<PRIMITIVE[]> ptr,
                    int64_t length,
                    int64_t reserved)
         : options_(options),
+          length_(0),
           panel_(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>(std::move(ptr), (size_t)length, (size_t)reserved))),
           ptr_(panel_.get()) {
     }
 
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
     /// options #reserved from #options.
-    GrowableBuffer(const ArrayBuilderOptions& options)
+    GrowableBuffer(const BuilderOptions& options)
         : GrowableBuffer(options,
                          std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[options.initial]),
                          0,
-                         options) { }
+                         options.initial) { }
 
     /// @brief Move constructor
     ///
@@ -268,6 +269,12 @@ namespace awkward {
     int64_t
     length() const {
       return length_ + (int64_t)ptr_->current_length();
+    }
+
+    /// @brief Return options of this GrowableBuffer.
+    const BuilderOptions&
+    options() const {
+      return options_;
     }
 
     /// @brief Discards accumulated data, the #reserved returns to
@@ -302,7 +309,7 @@ namespace awkward {
     /// #reserved, a new panel will be allocated.
     void
     append(PRIMITIVE datum) {
-      if (ptr_->length() == ptr_->reserved()) {
+      if (ptr_->current_length() == ptr_->reserved()) {
         add_panel((size_t)ceil(ptr_->reserved() * options_.resize));
       }
       fill_panel(datum);
@@ -365,7 +372,10 @@ namespace awkward {
     }
 
     /// @brief Initial size configuration for building a panel.
-    const ArrayBuilderOptions& options_;
+    const BuilderOptions options_;
+
+    /// @brief Filled panels data length.
+    int64_t length_;
 
     /// @brief Filled panels data length.
     int64_t length_;

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "awkward/common.h"
+#include "awkward/BuilderOptions.h"
 #include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
@@ -17,32 +18,32 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL OptionBuilder: public Builder {
   public:
     /// @brief Create an OptionBuilder from a number of nulls (all missing).
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param nullcount Length of the purely missing data to create.
     /// @param content Builder for the non-missing data.
     static const BuilderPtr
-      fromnulls(const int64_t initial,
+      fromnulls(const BuilderOptions& options,
                 int64_t nullcount,
                 const BuilderPtr& content);
 
     /// @brief Create an OptionBuilder from an existing builder (all
     /// non-missing).
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param content Builder for the non-missing data.
     static const BuilderPtr
-      fromvalids(const int64_t initial,
+      fromvalids(const BuilderOptions& options,
                  const BuilderPtr& content);
 
     /// @brief Create a OptionBuilder from a full set of parameters.
     ///
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param index Contains the accumulated index (like
     /// {@link IndexedArrayOf#index IndexedOptionArray::index}).
     /// @param content Builder for the non-missing data.
-    OptionBuilder(const int64_t initial,
+    OptionBuilder(const BuilderOptions& options,
                   GrowableBuffer<int64_t> index,
                   const BuilderPtr content);
 

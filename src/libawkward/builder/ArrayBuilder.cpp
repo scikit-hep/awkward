@@ -11,10 +11,10 @@
 #include "awkward/builder/UnknownBuilder.h"
 
 #include "awkward/builder/ArrayBuilder.h"
-#include "awkward/ArrayBuilderOptions.h"
+#include "awkward/BuilderOptions.h"
 
 namespace awkward {
-  ArrayBuilder::ArrayBuilder(const ArrayBuilderOptions& options)
+  ArrayBuilder::ArrayBuilder(const BuilderOptions& options)
       : builder_(UnknownBuilder::fromempty(options)) { }
 
   const std::string

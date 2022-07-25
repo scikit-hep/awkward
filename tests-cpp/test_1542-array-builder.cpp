@@ -7,7 +7,7 @@
 
 int main(int /* argc */, const char ** /* argv */) {
 
-  auto a = awkward::ArrayBuilder(10);
+  auto a = awkward::ArrayBuilder({10, 1});
   for (int64_t i = 0; i < 100; i++) {
     a.integer(1);
     a.integer(2);

@@ -9,11 +9,11 @@
 
 #include "awkward/common.h"
 #include "awkward/builder/Builder.h"
+#include "awkward/BuilderOptions.h"
 
 namespace awkward {
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
-  class ArrayBuilderOptions;
 
   /// @class ArrayBuilder
   ///
@@ -26,7 +26,7 @@ namespace awkward {
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
-    ArrayBuilder(const ArrayBuilderOptions& options);
+    ArrayBuilder(const BuilderOptions& options);
 
     /// @brief Copy the current snapshot into the BuffersContainer and
     /// return a Form as a std::string (JSON).
