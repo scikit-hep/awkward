@@ -1,20 +1,17 @@
 # Awkward Array documentation
 
-:::{card}
-[![PyPI version](https://badge.fury.io/py/awkward.svg)](https://pypi.org/project/awkward)
-[![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
-[![Python 3.6‒3.10](https://img.shields.io/badge/python-3.6%E2%80%923.10-blue)](https://www.python.org)
-[![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Continuous integration tests](https://img.shields.io/azure-devops/build/jpivarski/Scikit-HEP/3/main?label=tests)](https://dev.azure.com/jpivarski/Scikit-HEP/_build)
+::::{card}
 
-[![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
-[![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
-[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.org)
-[![Gitter](https://img.shields.io/badge/chat-online-success)](https://gitter.im/Scikit-HEP/awkward-array)
+Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**. 
+
+:::{button-link} https://awkward-array.readthedocs.io/en/docs-phase-2/user-guide/what-is-an-awkward-array.html
+:color: primary
+:shadow:
+
+What is an Awkward Array?
 :::
 
-Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
+::::
 
 % TODO mention left side-bar
 ::::{grid} 2
