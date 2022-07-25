@@ -1319,6 +1319,7 @@ class Content:
     def recursively_apply(
         self,
         action,
+        behavior=None,
         depth_context=None,
         lateral_context=None,
         allow_records=True,
@@ -1329,6 +1330,7 @@ class Content:
     ):
         return self._recursively_apply(
             action,
+            behavior,
             1,
             depth_context,
             lateral_context,

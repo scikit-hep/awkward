@@ -196,6 +196,7 @@ class Record:
     def recursively_apply(
         self,
         action,
+        behavior=None,
         depth_context=None,
         lateral_context=None,
         allow_records=True,
@@ -207,6 +208,7 @@ class Record:
 
         out = self._array.recursively_apply(
             action,
+            behavior,
             depth_context,
             lateral_context,
             allow_records,

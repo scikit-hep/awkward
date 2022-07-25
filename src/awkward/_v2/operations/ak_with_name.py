@@ -35,6 +35,7 @@ def with_name(array, name, highlevel=True, behavior=None):
 
 
 def _impl(array, name, highlevel, behavior):
+    behavior = ak._v2._util.behavior_of(array, behavior=behavior)
     layout = ak._v2.operations.to_layout(array)
 
     def action(layout, **ignore):
@@ -51,7 +52,7 @@ def _impl(array, name, highlevel, behavior):
         else:
             return None
 
-    out = layout.recursively_apply(action)
+    out = layout.recursively_apply(action, behavior)
 
     def action2(layout, **ignore):
         if layout.is_UnionType:
@@ -59,6 +60,6 @@ def _impl(array, name, highlevel, behavior):
         else:
             return None
 
-    out2 = out.recursively_apply(action2)
+    out2 = out.recursively_apply(action2, behavior)
 
     return ak._v2._util.wrap(out2, behavior, highlevel)

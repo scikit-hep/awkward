@@ -57,7 +57,7 @@ def _impl(array, highlevel, behavior):
         elif hasattr(layout, "content"):
             check_for_union(layout.content)
 
-    layout.recursively_apply(check_for_union, return_array=False)
+    layout.recursively_apply(check_for_union, behavior, return_array=False)
 
     if len(fields) == 0:
         return (ak._v2._util.wrap(layout, behavior, highlevel),)

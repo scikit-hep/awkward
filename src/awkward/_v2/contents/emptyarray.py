@@ -313,7 +313,7 @@ class EmptyArray(Content):
         return []
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if options["return_array"]:
 
