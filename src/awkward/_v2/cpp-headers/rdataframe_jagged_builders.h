@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 #include <string>
-#include "utils.h"
+#include "awkward/utils.h"
 
 
 namespace awkward {

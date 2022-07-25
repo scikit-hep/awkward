@@ -10,6 +10,7 @@
 #include <cmath>
 #include <iostream>
 #include <utility>
+#include <stdexcept>
 
 namespace awkward {
 
@@ -52,13 +53,8 @@ namespace awkward {
     }
 
     size_t
-    length() {
-      if (next_) {
-        return next_->length() + length_;
-      }
-      else {
-        return length_;
-      }
+    current_length() {
+      return length_;
     }
 
     size_t
@@ -241,6 +237,7 @@ namespace awkward {
                    int64_t length,
                    int64_t reserved)
         : initial_(initial),
+          length_(0),
           panel_(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>(std::move(ptr), (size_t)length, (size_t)reserved))),
           ptr_(panel_.get()) {
     }
@@ -258,6 +255,7 @@ namespace awkward {
     /// panel_ is move-only
     GrowableBuffer(GrowableBuffer&& other) noexcept
       : initial_(other.initial_),
+        length_(other.length_),
         panel_(std::move(other.panel_)),
         ptr_(other.ptr_) { }
 
@@ -268,7 +266,7 @@ namespace awkward {
     /// allocations of new panels.
     int64_t
     length() const {
-      return (int64_t)panel_->length();
+      return length_ + (int64_t)ptr_->current_length();
     }
 
     /// @brief Discards accumulated data, the #reserved returns to
@@ -279,6 +277,23 @@ namespace awkward {
       ptr_ = panel_.get();
     }
 
+    /// @brief Last element in last panel
+    PRIMITIVE
+    last() const {
+      if (ptr_->current_length() == 0) {
+        throw std::runtime_error("Buffer is empty");
+      }
+      else {
+        return (*ptr_)[ptr_->current_length() - 1];
+      }
+    }
+
+    /// @brief Currently used number of bytes.
+    size_t
+    nbytes() const {
+      return length() * sizeof(PRIMITIVE);
+    }
+
     /// @brief Inserts one `datum` into the panel, possibly triggering
     /// allocation of a new panel.
     ///
@@ -286,7 +301,7 @@ namespace awkward {
     /// #reserved, a new panel will be allocated.
     void
     append(PRIMITIVE datum) {
-      if (ptr_->length() == ptr_->reserved()) {
+      if (ptr_->current_length() == ptr_->reserved()) {
         add_panel((size_t)ceil(ptr_->reserved() * 1.5));
       }
       fill_panel(datum);
@@ -300,7 +315,7 @@ namespace awkward {
     /// for the rest of the array elements.
     void
     extend(PRIMITIVE* ptr, size_t size) {
-      size_t empty_slots = ptr_->reserved() - ptr_->length();
+      size_t empty_slots = ptr_->reserved() - ptr_->current_length();
       if (size > empty_slots) {
         for (size_t i = 0; i < empty_slots; i++) {
           fill_panel(ptr[i]);
@@ -321,7 +336,7 @@ namespace awkward {
     /// @brief Like append, but the type signature returns the reference to `PRIMITIVE`.
     PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
       append(datum);
-      return (*ptr_)[ptr_->length() - 1];
+      return (*ptr_)[ptr_->current_length() - 1];
     }
 
     /// @brief Copies and concatenates all accumulated data from multiple panels to one
@@ -344,11 +359,15 @@ namespace awkward {
     /// and updates the current panel pointer to it.
     void
     add_panel(size_t reserved) {
+      length_ += ptr_->current_length();
       ptr_ = ptr_->append_panel(reserved);
     }
 
     /// @brief Initial size configuration for building a panel.
     int64_t initial_;
+
+    /// @brief Filled panels data length.
+    int64_t length_;
 
     /// @brief The first panel.
     std::unique_ptr<Panel<PRIMITIVE>> panel_;
