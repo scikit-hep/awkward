@@ -311,8 +311,8 @@ namespace awkward {
   const int64_t
   Record::axis_wrap_if_negative(int64_t axis) const {
     if (axis == 0) {
-        throw std::invalid_argument(
-          std::string("Record at axis=0 is a scalar, not an array.") + FILENAME(__LINE__));
+      throw std::invalid_argument(
+        std::string("Record at axis=0 is a scalar, not an array") + FILENAME(__LINE__));
     }
     return array_.get()->axis_wrap_if_negative(axis);
   }

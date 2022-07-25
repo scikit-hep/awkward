@@ -54,8 +54,7 @@ def test_axis_wrap_if_negative_record_v1():
 
     r = ak.Record(dict_cell_chain_field)
 
-    # with pytest.raises(np.AxisError):
-    #     r = ak.to_regular(r, 0)
+    r = ak.to_regular(r, 0)
     r = ak.to_regular(r, 2)
 
     list_cell_chain_field = [
