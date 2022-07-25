@@ -1,1 +1,4 @@
 # User Guide
+
+```{tableofcontents}
+```
