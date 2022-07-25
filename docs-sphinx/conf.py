@@ -79,7 +79,19 @@ myst_enable_extensions = [
 
 nb_execution_mode = "cache"
 nb_execution_raise_on_error = True
-
+# unpkg is currently _very_ slow
+nb_ipywidgets_js = {
+    # Load RequireJS, used by the IPywidgets for dependency management
+    "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js": {
+        "integrity": "sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=",
+        "crossorigin": "anonymous",
+    },
+    # Load IPywidgets bundle for embedding.
+    "https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@0.20.0/dist/embed-amd.js": {
+        "data-jupyter-widgets-cdn": "https://cdn.jsdelivr.net/npm/",
+        "crossorigin": "anonymous",
+    },
+}
 # Additional stuff
 master_doc = "index"
 
