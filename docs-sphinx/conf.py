@@ -10,7 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
+import os
 # import sys
 # sys.path.insert(0, os.path.abspath("."))
 
@@ -45,6 +45,13 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_templates", "jupyter_e
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
+html_context = {
+    # "github_url": "https://github.com", # or your GitHub Enterprise interprise
+    "github_user": "scikit-hep",
+    "github_repo": "awkward",
+    "github_version": os.environ.get("READTHEDOCS_VERSION", "latest"),
+    "doc_path": "docs-sphinx",
+}
 html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = True
 html_theme_options = {
@@ -57,6 +64,7 @@ html_theme_options = {
   # Add light/dark mode and documentation version switcher:
   "navbar_end": ["theme-switcher", "navbar-icon-links"],
   "footer_items": ["copyright", "sphinx-version", "funding"],
+  "use_edit_page_button": True,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
