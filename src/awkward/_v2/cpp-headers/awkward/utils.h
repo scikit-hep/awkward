@@ -6,8 +6,12 @@
 #include <iterator>
 #include <complex>
 #include <type_traits>
+#include <cassert>
+#include <utility>
+#include <stdexcept>
 
 namespace awkward {
+
 
 template <typename T>
 const std::string
@@ -87,6 +91,33 @@ type_to_name<char>() {
     return "char";
 }
 
+template <>
+const std::string
+type_to_name<std::complex<float>>() {
+    return "complex64";
+}
+
+template <>
+const std::string
+type_to_name<std::complex<double>>() {
+    return "complex128";
+}
+
+template <typename PRIMITIVE>
+const std::string
+type_to_numpy_like() {
+  if (std::is_same<PRIMITIVE, uint8_t>::value)
+    return "u8";
+  else if (std::is_same<PRIMITIVE, int8_t>::value)
+    return "i8";
+  else if (std::is_same<PRIMITIVE, uint32_t>::value)
+    return "u32";
+  else if (std::is_same<PRIMITIVE, int32_t>::value)
+    return "i32";
+  else if (std::is_same<PRIMITIVE, int64_t>::value)
+    return "i64";
+}
+
 template <typename, typename = void>
 constexpr bool is_iterable{};
 
@@ -109,7 +140,7 @@ struct is_specialization<Ref<Args...>, Ref> : std::true_type {
 template <typename T>
 std::string
 type_to_form(int64_t form_key_id) {
-  if (std::string(typeid(T).name()).find("awkward") != string::npos) {
+  if (std::string(typeid(T).name()).find("awkward") != std::string::npos) {
     return std::string("awkward type");
   }
 
@@ -117,15 +148,16 @@ type_to_form(int64_t form_key_id) {
   form_key << "node" << (form_key_id++);
 
   if (std::is_arithmetic<T>::value) {
-    std::string parameters(type_to_name<T>() + "\",");
+    std::string parameters(type_to_name<T>() + "\", ");
     if (std::is_same<T, char>::value) {
       parameters = std::string("uint8\", \"parameters\": { \"__array__\": \"char\" }, ");
     }
     return "{\"class\": \"NumpyArray\", \"primitive\": \""
       + parameters + "\"form_key\": \"" + form_key.str() + "\"}";
-  } else if (is_specialization<T, std::complex>::value) {
-    return "{\"class\": \"NumpyArray\", \"primitive\": \"complex128\", \"form_key\": \""
-      + form_key.str() + "\"}";
+  }
+  else if (is_specialization<T, std::complex>::value) {
+    return "{\"class\": \"NumpyArray\", \"primitive\": \""
+      + type_to_name<T>() + "\", \"form_key\": \"" + form_key.str() + "\"}";
   }
 
   typedef typename T::value_type value_type;
@@ -140,6 +172,37 @@ type_to_form(int64_t form_key_id) {
       + ", " + parameters + "\"form_key\": \"" + form_key.str() + "\"}";
   }
   return "unsupported type";
+}
+
+template <size_t INDEX>
+struct visit_impl {
+  template <typename FIELD, typename FUNCTION>
+    static void visit(FIELD& contents, size_t index, FUNCTION fun) {
+      if (index == INDEX - 1) {
+        fun(std::get<INDEX - 1>(contents));
+      }
+      else {
+        visit_impl<INDEX - 1>::visit(contents, index, fun);
+      }
+    }
+};
+
+template <>
+struct visit_impl<0> {
+  template <typename FIELD, typename FUNCTION>
+  static void visit(FIELD& /* contents */, size_t /* index */, FUNCTION /* fun */) { assert(false); }
+};
+
+template <typename FUNCTION, typename... FIELDs>
+void
+visit_at(std::tuple<FIELDs...> const& contents, size_t index, FUNCTION fun) {
+  visit_impl<sizeof...(FIELDs)>::visit(contents, index, fun);
+}
+
+template <typename FUNCTION, typename... FIELDs>
+void
+visit_at(std::tuple<FIELDs...>& contents, size_t index, FUNCTION fun) {
+  visit_impl<sizeof...(FIELDs)>::visit(contents, index, fun);
 }
 
 }
