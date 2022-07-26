@@ -162,6 +162,3 @@ subtrees:
 
       - file: api-reference
         title: "API Reference"
-    
-      - url: https://awkward-array.readthedocs.io/en/latest/_static/doxygen/index.html
-        title: "C++ Reference"
