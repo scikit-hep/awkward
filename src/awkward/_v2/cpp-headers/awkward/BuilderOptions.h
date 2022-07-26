@@ -15,7 +15,7 @@ namespace awkward {
   ///
   /// @brief Container for all configuration options needed by ArrayBuilder,
   /// GrowableBuffer, LayoutBuilder and the Builder subclasses.
-  template<typename... OPTIONS>
+  template <typename... OPTIONS>
   struct Options {
     static constexpr std::size_t value = sizeof...(OPTIONS);
 
@@ -27,19 +27,16 @@ namespace awkward {
     // template<std::size_t INDEX>
     // using OptionType = std::tuple_element_t<INDEX, OptionsPack>;
 
-    template<std::size_t INDEX>
-    using OptionType = typename std::tuple_element<INDEX, decltype(OptionsPack())>::type;
+    template <std::size_t INDEX>
+    using OptionType =
+        typename std::tuple_element<INDEX, decltype(OptionsPack())>::type;
 
     /// @brief Creates an Options tuple with a default set of parameters:
     /// an initial number and a resize factor.
-    Options()
-      : pars({1024, 1}) {
-    }
+    Options() : pars({1024, 1}) {}
 
     /// @brief Creates an Options tuple from a full set of parameters.
-    Options(OPTIONS... options)
-      : pars({options...}) {
-    }
+    Options(OPTIONS... options) : pars({options...}) {}
 
     /// @brief The initial number of
     /// {@link GrowableBuffer#reserved reserved} entries for a GrowableBuffer.
@@ -57,7 +54,7 @@ namespace awkward {
     }
 
     /// @brief Access to all other options.
-    template<std::size_t INDEX>
+    template <std::size_t INDEX>
     const OptionType<INDEX>&
     option() const noexcept {
       return std::get<INDEX>(pars);
@@ -67,6 +64,6 @@ namespace awkward {
   };
 
   using BuilderOptions = Options<int64_t, double>;
-}
+}  // namespace awkward
 
-#endif // AWKWARD_BUILDEROPTIONS_H_
+#endif  // AWKWARD_BUILDEROPTIONS_H_

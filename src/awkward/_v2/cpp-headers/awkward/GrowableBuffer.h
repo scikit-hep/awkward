@@ -20,26 +20,22 @@ namespace awkward {
   class Panel {
   public:
     Panel(size_t reserved)
-      : ptr_(std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[reserved])),
-        length_(0),
-        reserved_(reserved),
-        next_(nullptr) {  }
+        : ptr_(std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[reserved])),
+          length_(0),
+          reserved_(reserved),
+          next_(nullptr) {}
 
     Panel(std::unique_ptr<PRIMITIVE[]> ptr, size_t length, size_t reserved)
-      : ptr_(std::move(ptr)),
-        length_(length),
-        reserved_(reserved),
-        next_(nullptr) {
-    }
+        : ptr_(std::move(ptr)),
+          length_(length),
+          reserved_(reserved),
+          next_(nullptr) {}
 
-    PRIMITIVE &operator[](size_t i) {
-      return ptr_.get()[i];
-    }
+    PRIMITIVE& operator[](size_t i) { return ptr_.get()[i]; }
 
     Panel*
     append_panel(size_t reserved) {
-      next_ = std::move(std::unique_ptr<Panel>(
-        new Panel(reserved)));
+      next_ = std::move(std::unique_ptr<Panel>(new Panel(reserved)));
       return next_.get();
     }
 
@@ -66,13 +62,15 @@ namespace awkward {
 
     void
     concatenate_to(PRIMITIVE* to_ptr, size_t offset) const noexcept {
-      memcpy(to_ptr + offset, reinterpret_cast<void*>(ptr_.get()), length_ * sizeof(PRIMITIVE));
+      memcpy(to_ptr + offset,
+             reinterpret_cast<void*>(ptr_.get()),
+             length_ * sizeof(PRIMITIVE));
       if (next_) {
         next_->concatenate_to(to_ptr, offset + length_);
       }
     }
 
-    template<typename TO_PRIMITIVE>
+    template <typename TO_PRIMITIVE>
     void
     copy_as(TO_PRIMITIVE* to_ptr, size_t offset) {
       for (size_t i = 0; i < length_; i++) {
@@ -131,9 +129,11 @@ namespace awkward {
       if (actual < minreserve) {
         actual = minreserve;
       }
-      return GrowableBuffer(options,
-        std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]),
-        0, actual);
+      return GrowableBuffer(
+          options,
+          std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]),
+          0,
+          actual);
     }
 
     /// @brief Creates a GrowableBuffer in which all elements are initialized to `0`.
@@ -152,7 +152,7 @@ namespace awkward {
       }
       auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
-      for (int64_t i = 0;  i < length;  i++) {
+      for (int64_t i = 0; i < length; i++) {
         rawptr[i] = 0;
       }
       return GrowableBuffer(options, std::move(ptr), length, actual);
@@ -176,7 +176,7 @@ namespace awkward {
       }
       auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
-      for (int64_t i = 0;  i < length;  i++) {
+      for (int64_t i = 0; i < length; i++) {
         rawptr[i] = value;
       }
       return GrowableBuffer<PRIMITIVE>(options, std::move(ptr), length, actual);
@@ -199,7 +199,7 @@ namespace awkward {
       }
       auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
-      for (int64_t i = 0;  i < length;  i++) {
+      for (int64_t i = 0; i < length; i++) {
         rawptr[i] = (PRIMITIVE)i;
       }
       return GrowableBuffer(options, std::move(ptr), length, actual);
@@ -210,18 +210,24 @@ namespace awkward {
     ///
     /// Used to change the data type of buffer content from `PRIMITIVE`
     /// to `TO_PRIMITIVE` for building arrays.
-    template<typename TO_PRIMITIVE>
+    template <typename TO_PRIMITIVE>
     static GrowableBuffer<TO_PRIMITIVE>
     copy_as(const GrowableBuffer<PRIMITIVE>& other) {
       auto len = other.length();
-      int64_t actual = (len < other.options_.initial()) ? other.options_.initial() : len;
+      int64_t actual =
+          (len < other.options_.initial()) ? other.options_.initial() : len;
 
-      auto ptr = std::unique_ptr<TO_PRIMITIVE[]>(new TO_PRIMITIVE[(size_t)actual]);
+      auto ptr =
+          std::unique_ptr<TO_PRIMITIVE[]>(new TO_PRIMITIVE[(size_t)actual]);
       TO_PRIMITIVE* rawptr = ptr.get();
 
       other.panel_->copy_as(rawptr, 0);
 
-      return GrowableBuffer<TO_PRIMITIVE>(BuilderOptions(actual, other.options().resize()), std::move(ptr), len, actual);
+      return GrowableBuffer<TO_PRIMITIVE>(
+          BuilderOptions(actual, other.options().resize()),
+          std::move(ptr),
+          len,
+          actual);
     }
 
     /// @brief Creates a GrowableBuffer from a full set of parameters.
@@ -240,26 +246,27 @@ namespace awkward {
                    int64_t reserved)
         : options_(options),
           length_(0),
-          panel_(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>(std::move(ptr), (size_t)length, (size_t)reserved))),
-          ptr_(panel_.get()) {
-    }
+          panel_(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>(
+              std::move(ptr), (size_t)length, (size_t)reserved))),
+          ptr_(panel_.get()) {}
 
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
     /// options #reserved from #options.
     GrowableBuffer(const BuilderOptions& options)
         : GrowableBuffer(options,
-                         std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)options.initial()]),
+                         std::unique_ptr<PRIMITIVE[]>(
+                             new PRIMITIVE[(size_t)options.initial()]),
                          0,
-                         options.initial()) { }
+                         options.initial()) {}
 
     /// @brief Move constructor
     ///
     /// panel_ is move-only
     GrowableBuffer(GrowableBuffer&& other) noexcept
-      : options_(other.options_),
-        length_(other.length_),
-        panel_(std::move(other.panel_)),
-        ptr_(other.ptr_) { }
+        : options_(other.options_),
+          length_(other.length_),
+          panel_(std::move(other.panel_)),
+          ptr_(other.ptr_) {}
 
     /// @brief Currently used number of elements.
     ///
@@ -281,7 +288,8 @@ namespace awkward {
     /// options.initial(), and a new #ptr is allocated.
     void
     clear() {
-      panel_ = std::move(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>((size_t)options_.initial())));
+      panel_ = std::move(std::unique_ptr<Panel<PRIMITIVE>>(
+          new Panel<PRIMITIVE>((size_t)options_.initial())));
       ptr_ = panel_.get();
     }
 
@@ -290,8 +298,7 @@ namespace awkward {
     last() const {
       if (ptr_->current_length() == 0) {
         throw std::runtime_error("Buffer is empty");
-      }
-      else {
+      } else {
         return (*ptr_)[ptr_->current_length() - 1];
       }
     }
@@ -328,13 +335,12 @@ namespace awkward {
         for (size_t i = 0; i < empty_slots; i++) {
           fill_panel(ptr[i]);
         }
-        add_panel(size - empty_slots > ptr_->reserved() ?
-                  size - empty_slots : ptr_->reserved());
+        add_panel(size - empty_slots > ptr_->reserved() ? size - empty_slots
+                                                        : ptr_->reserved());
         for (size_t i = empty_slots; i < size; i++) {
           fill_panel(ptr[i]);
         }
-      }
-      else {
+      } else {
         for (size_t i = 0; i < size; i++) {
           fill_panel(ptr[i]);
         }
@@ -342,7 +348,8 @@ namespace awkward {
     }
 
     /// @brief Like append, but the type signature returns the reference to `PRIMITIVE`.
-    PRIMITIVE& append_and_get_ref(PRIMITIVE datum) {
+    PRIMITIVE&
+    append_and_get_ref(PRIMITIVE datum) {
       append(datum);
       return (*ptr_)[ptr_->current_length() - 1];
     }
@@ -383,6 +390,6 @@ namespace awkward {
     /// @brief A pointer to a current panel.
     Panel<PRIMITIVE>* ptr_;
   };
-}
+}  // namespace awkward
 
-#endif // AWKWARD_GROWABLEBUFFER_H_
+#endif  // AWKWARD_GROWABLEBUFFER_H_
