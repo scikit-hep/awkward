@@ -16,61 +16,61 @@ namespace awkward {
 template <typename T>
 const std::string
 type_to_name() {
-    return typeid(T).name();
+  return typeid(T).name();
 }
 
 template <>
 const std::string
 type_to_name<bool>() {
-    return "bool";
+  return "bool";
 }
 
 template <>
 const std::string
 type_to_name<int8_t>() {
-    return "int8";
+  return "int8";
 }
 
 template <>
 const std::string
 type_to_name<int16_t>() {
-    return "int16";
+  return "int16";
 }
 
 template <>
 const std::string
 type_to_name<int32_t>() {
-    return "int32";
+  return "int32";
 }
 
 template <>
 const std::string
 type_to_name<int64_t>() {
-    return "int64";
+  return "int64";
 }
 
 template <>
 const std::string
 type_to_name<uint8_t>() {
-    return "uint8";
+  return "uint8";
 }
 
 template <>
 const std::string
 type_to_name<uint16_t>() {
-    return "uint16";
+  return "uint16";
 }
 
 template <>
 const std::string
 type_to_name<uint32_t>() {
-    return "uint32";
+  return "uint32";
 }
 
 template <>
 const std::string
 type_to_name<uint64_t>() {
-    return "uint64";
+  return "uint64";
 }
 
 template <>
@@ -82,51 +82,79 @@ type_to_name<float>() {
 template <>
 const std::string
 type_to_name<double>() {
-    return "float64";
+  return "float64";
 }
 
 template <>
 const std::string
 type_to_name<char>() {
-    return "char";
+  return "char";
 }
 
 template <>
 const std::string
 type_to_name<std::complex<float>>() {
-    return "complex64";
+  return "complex64";
 }
 
 template <>
 const std::string
 type_to_name<std::complex<double>>() {
-    return "complex128";
+  return "complex128";
 }
 
-template <typename PRIMITIVE>
+template <typename T>
 const std::string
 type_to_numpy_like() {
-  if (std::is_same<PRIMITIVE, uint8_t>::value)
-    return "u8";
-  else if (std::is_same<PRIMITIVE, int8_t>::value)
-    return "i8";
-  else if (std::is_same<PRIMITIVE, uint32_t>::value)
-    return "u32";
-  else if (std::is_same<PRIMITIVE, int32_t>::value)
-    return "i32";
-  else if (std::is_same<PRIMITIVE, int64_t>::value)
-    return "i64";
+  return type_to_name<T>();
+}
+
+template <>
+const std::string
+type_to_numpy_like<uint8_t>() {
+  return "u8";
+}
+
+template <>
+const std::string
+type_to_numpy_like<int8_t>() {
+  return "i8";
+}
+
+template <>
+const std::string
+type_to_numpy_like<uint32_t>() {
+  return "u32";
+}
+
+template <>
+const std::string
+type_to_numpy_like<int32_t>() {
+  return "i32";
+}
+
+template <>
+const std::string
+type_to_numpy_like<int64_t>() {
+  return "i64";
 }
 
 template <typename, typename = void>
 constexpr bool is_iterable{};
 
+// std::void_t is part of C++17, define it ourselves until we switch to it
+template<typename...>
+  struct voider { using type = void; };
+
+template<typename... T>
+  using void_t = typename voider<T...>::type;
+
 template <typename T>
 constexpr bool is_iterable<
-    T,
-    std::void_t< decltype(std::declval<T>().begin()),
-                 decltype(std::declval<T>().end())
-    >
+  T,
+  void_t< decltype(std::declval<T>().begin()),
+          decltype(std::declval<T>().end())
+  >
 > = true;
 
 template <typename Test, template <typename...> class Ref>
