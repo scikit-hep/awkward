@@ -98,12 +98,6 @@ namespace awkward {
       data_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-data"]));
     }
 
-    // temporary
-    void
-    to_buffer(PRIMITIVE* ptr) const noexcept {
-      data_.concatenate(ptr);
-    }
-
     std::string
     form() const {
       std::stringstream form_key;
@@ -227,12 +221,6 @@ namespace awkward {
       content_.to_buffers(buffers);
     }
 
-    // temporary
-    void
-    to_buffer(PRIMITIVE* ptr) const noexcept {
-      offsets_.concatenate(ptr);
-    }
-
     std::string
     form() const noexcept {
       std::stringstream form_key;
@@ -354,13 +342,6 @@ namespace awkward {
       starts_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-starts"]));
       stops_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-stops"]));
       content_.to_buffers(buffers);
-    }
-
-    // temporary
-    void
-    to_buffer(PRIMITIVE* starts, PRIMITIVE* stops) const noexcept {
-      starts_.concatenate(starts);
-      stops_.concatenate(stops);
     }
 
     std::string
@@ -1046,12 +1027,6 @@ namespace awkward {
       content_.to_buffers(buffers);
     }
 
-    // temporary
-    void
-    to_buffer(PRIMITIVE* ptr) const noexcept {
-      index_.concatenate(ptr);
-    }
-
     std::string
     form() const noexcept {
       std::stringstream form_key;
@@ -1183,12 +1158,6 @@ namespace awkward {
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
       index_.concatenate(static_cast<PRIMITIVE*>(buffers["node" + std::to_string(id_) + "-index"]));
       content_.to_buffers(buffers);
-    }
-
-    // temporary
-    void
-    to_buffer(PRIMITIVE* ptr) const noexcept {
-      index_.concatenate(ptr);
     }
 
     std::string
@@ -1408,12 +1377,6 @@ namespace awkward {
       content_.to_buffers(buffers);
     }
 
-    // temporary
-    void
-    to_buffer(int8_t* ptr) const noexcept {
-      mask_.concatenate(ptr);
-    }
-
     std::string
     form() const noexcept {
       std::stringstream form_key, form_valid_when;
@@ -1582,12 +1545,6 @@ namespace awkward {
     to_buffers(std::map<std::string, void*> &buffers) const noexcept {
       mask_.concatenate(static_cast<uint8_t*>(buffers["node" + std::to_string(id_) + "-mask"]));
       content_.to_buffers(buffers);
-    }
-
-    // temporary
-    void
-    to_buffer(uint8_t* ptr) const noexcept {
-      mask_.concatenate(ptr);
     }
 
     std::string
