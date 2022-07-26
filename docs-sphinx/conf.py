@@ -56,8 +56,8 @@ html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = True
 html_theme_options = {
   "logo": {
-      "image_light": "logo-300px.png",
-      "image_dark": "logo-300px-white.png",
+      "image_light": "image/logo-300px.png",
+      "image_dark": "image/logo-300px-white.png",
   },
   "github_url": "https://github.com/scikit-hep/awkward",
   # Add light/dark mode and documentation version switcher:
@@ -69,7 +69,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static", "_assets"]
+html_static_path = ["_static"]
 html_css_files = ['css/awkward.css']
 
 # MyST settings

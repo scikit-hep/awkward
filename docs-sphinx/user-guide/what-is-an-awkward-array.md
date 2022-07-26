@@ -206,7 +206,7 @@ But generalises to the tricky kinds of data that NumPy struggles to work with. I
 
 +++
 
-![](img/example-reduction-sum.svg)
+![](../image/example-reduction-sum.svg)
 
 ```{code-cell} ipython3
 ak.sum(powers_of_two, axis=0)

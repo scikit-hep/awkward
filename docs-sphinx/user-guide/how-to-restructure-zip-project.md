@@ -18,6 +18,6 @@ How to restructure arrays with zip/unzip and project
 
 If you need it soon, create an issue saying so and I'll make it a higher priority.
 
-[![](img/github-issues-documentation.png)](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=docs&template=documentation.md&title=)
+[![](../image/github-issues-documentation.png)](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=docs&template=documentation.md&title=)
 
 The text of your issue doesn't have to be much more than a link to this page, so I can be sure which page you're referring to. If you add details about how and why you need it, however, I may be able to tailor the text to help you more.

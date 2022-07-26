@@ -160,9 +160,10 @@ Additional documentation
 """"""""""""""""""""""""
 The Awkward Array project is divided into 3 layers with 5 main components.
 
-.. raw:: html
-
-    <img src="_static/image/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+.. figure:: image/awkward-1-0-layers.svg
+   :alt: map to buried treasure
+   :align: center
+ 
 
 The C++ classes, cpu-kernels, and gpu-kernels are described in the `C++ API reference <_static/index.html>`__.
 
