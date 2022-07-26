@@ -162,3 +162,6 @@ subtrees:
 
       - file: api-reference
         title: "API Reference"
+
+      - file: _auto/changelog
+        title: "Release Notes"
