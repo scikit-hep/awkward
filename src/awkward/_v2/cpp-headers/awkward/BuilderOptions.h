@@ -32,7 +32,7 @@ namespace awkward {
         typename std::tuple_element<INDEX, decltype(OptionsPack())>::type;
 
     /// @brief Creates an Options tuple from a full set of parameters.
-    Options(OPTIONS... options) : pars({options...}) {}
+    Options(OPTIONS... options) : pars(options...) {}
 
     /// @brief The initial number of
     /// {@link GrowableBuffer#reserved reserved} entries for a GrowableBuffer.
