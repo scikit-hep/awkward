@@ -27,6 +27,9 @@ class Index:
         if len(self._data.shape) != 1:
             raise ak._v2._util.error(TypeError("Index data must be one-dimensional"))
 
+        if self._data.dtype.type == np.longlong:
+            self._data = self._data.astype(np.int64)
+
         if self._expected_dtype is None:
             if self._data.dtype == np.dtype(np.int8):
                 self.__class__ = Index8
