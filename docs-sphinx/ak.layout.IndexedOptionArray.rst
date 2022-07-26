@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.IndexedOptionArray
 ----------------------------
 
@@ -101,32 +103,34 @@ which represents the following logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 an IndexedOptionArray has the following.
 
+.. py:class:: IndexedOptionArray(index, content, identities=None, parameters=None)
+
 ak.layout.IndexedOptionArray.__init__
 =====================================
 
-.. py:method:: ak.layout.IndexedOptionArray.__init__(index, content, identities=None, parameters=None)
+.. py:method:: IndexedOptionArray.__init__(index, content, identities=None, parameters=None)
 
 ak.layout.IndexedOptionArray.index
 ==================================
 
-.. py:attribute:: ak.layout.IndexedOptionArray.index
+.. py:attribute:: IndexedOptionArray.index
 
 ak.layout.IndexedOptionArray.content
 ====================================
 
-.. py:attribute:: ak.layout.IndexedOptionArray.content
+.. py:attribute:: IndexedOptionArray.content
 
 ak.layout.IndexedOptionArray.isoption
 =====================================
 
-.. py:attribute:: ak.layout.IndexedOptionArray.isoption
+.. py:attribute:: IndexedOptionArray.isoption
 
 Returns True because this is an IndexedOptionArray.
 
 ak.layout.IndexedOptionArray.project
 ====================================
 
-.. py:method:: ak.layout.IndexedOptionArray.project(mask=None)
+.. py:method:: IndexedOptionArray.project(mask=None)
 
 Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements
 with the ``index`` applied to reorder/duplicate elements.
@@ -138,14 +142,14 @@ mask (after converting to 8-bit and to ``valid_when=False`` to match this ``mask
 ak.layout.IndexedOptionArray.bytemask
 =====================================
 
-.. py:method:: ak.layout.IndexedOptionArray.bytemask()
+.. py:method:: IndexedOptionArray.bytemask()
 
 Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
 
 ak.layout.IndexedOptionArray.simplify
 =====================================
 
-.. py:method:: ak.layout.IndexedOptionArray.simplify()
+.. py:method:: IndexedOptionArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
 :doc:`ak.types.OptionType` or is an :doc:`ak.layout.IndexedArray`; otherwise, this is

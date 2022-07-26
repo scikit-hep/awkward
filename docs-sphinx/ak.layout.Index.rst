@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.Index
 ---------------
 
@@ -23,10 +25,12 @@ This distinction is made because the C++ layer needs to make stronger
 assumptions about the arrays used to define structure than any content at the
 leaves of the structure.
 
+.. py:class:: Index(numpy_array)
+
 ak.layout.Index.__init__
 ========================
 
-.. py:method:: ak.layout.Index.__init__(numpy_array)
+.. py:method:: Index.__init__(numpy_array)
 
 Creates an Index from a NumPy array. If the array has the wrong type for
 this specialization, or if it is not C-contiguous, the array is copied.
@@ -35,27 +39,27 @@ Otherwise, it is a view (shares data).
 ak.layout.Index.__getitem__
 ===========================
 
-.. py:method:: ak.layout.Index.__getitem__(at)
+.. py:method:: Index.__getitem__(at)
 
 Extracts one element from the Index.
 
 ak.layout.Index.__getitem__
 ===========================
 
-.. py:method:: ak.layout.Index.__getitem__(start, stop)
+.. py:method:: Index.__getitem__(start, stop)
 
 Slices the Index between ``start`` and ``stop``.
 
 ak.layout.Index.__len__
 =======================
 
-.. py:method:: ak.layout.Index.__len__()
+.. py:method:: Index.__len__()
 
 The length of the Index.
 
 ak.layout.Index.__repr__
 ========================
 
-.. py:method:: ak.layout.Index.__repr__()
+.. py:method:: Index.__repr__()
 
 A string representation of the Index (single-line XML, trucated middle).

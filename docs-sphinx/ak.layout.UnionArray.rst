@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.UnionArray
 --------------------
 
@@ -168,54 +170,56 @@ which represents the following logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a UnionArray has the following.
 
+.. py:class:: UnionArray(tags, index, contents, identities=None, parameters=None)
+
 ak.layout.UnionArray.__init__
 =============================
 
-.. py:method:: ak.layout.UnionArray.__init__(tags, index, contents, identities=None, parameters=None)
+.. py:method:: UnionArray.__init__(tags, index, contents, identities=None, parameters=None)
 
 ak.layout.UnionArray.sparse_index
 =================================
 
-.. py:method:: ak.layout.UnionArray.sparse_index(length)
+.. py:method:: UnionArray.sparse_index(length)
 
 ak.layout.UnionArray.regular_index
 ==================================
 
-.. py:method:: ak.layout.UnionArray.regular_index(tags)
+.. py:method:: UnionArray.regular_index(tags)
 
 ak.layout.UnionArray.tags
 =========================
 
-.. py:attribute:: ak.layout.UnionArray.tags
+.. py:attribute:: UnionArray.tags
 
 ak.layout.UnionArray.index
 ==========================
 
-.. py:attribute:: ak.layout.UnionArray.index
+.. py:attribute:: UnionArray.index
 
 ak.layout.UnionArray.contents
 =============================
 
-.. py:attribute:: ak.layout.UnionArray.contents
+.. py:attribute:: UnionArray.contents
 
 ak.layout.UnionArray.numcontents
 ================================
 
-.. py:attribute:: ak.layout.UnionArray.numcontents
+.. py:attribute:: UnionArray.numcontents
 
 Returns the number of ``contents``.
 
 ak.layout.UnionArray.content
 ============================
 
-.. py:method:: ak.layout.UnionArray.content(i)
+.. py:method:: UnionArray.content(i)
 
 Returns one of the ``contents`` by index.
 
 ak.layout.UnionArray.project
 ============================
 
-.. py:method:: ak.layout.UnionArray.project(i)
+.. py:method:: UnionArray.project(i)
 
 Returns an array of only one of the possibilities, like selecting
 
@@ -229,7 +233,7 @@ to present the result in its logical order, not its physical order.
 ak.layout.UnionArray.simplify
 =============================
 
-.. py:method:: ak.layout.UnionArray.simplify(mergebool=False)
+.. py:method:: UnionArray.simplify(mergebool=False)
 
 If any of the ``contents`` have :doc:`ak.types.UnionType` and/or any
 of the ``contents`` are

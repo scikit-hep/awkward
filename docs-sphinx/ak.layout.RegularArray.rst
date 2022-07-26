@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.RegularArray
 ----------------------
 
@@ -124,25 +126,27 @@ which represents the following logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a RegularArray has the following.
 
+.. py:class:: RegularArray(content, size, identities=None, parameters=None)
+
 ak.layout.RegularArray.__init__
 ===============================
 
-.. py:method:: ak.layout.RegularArray.__init__(content, size, identities=None, parameters=None)
+.. py:method:: RegularArray.__init__(content, size, identities=None, parameters=None)
 
 ak.layout.RegularArray.content
 ==============================
 
-.. py:attribute:: ak.layout.RegularArray.content
+.. py:attribute:: RegularArray.content
 
 ak.layout.RegularArray.size
 ===========================
 
-.. py:attribute:: ak.layout.RegularArray.size
+.. py:attribute:: RegularArray.size
 
 ak.layout.RegularArray.compact_offsets64
 ========================================
 
-.. py:method:: ak.layout.RegularArray.compact_offsets64(start_at_zero=True)
+.. py:method:: RegularArray.compact_offsets64(start_at_zero=True)
 
 Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` by prefix summing
 in steps of ``size``.
@@ -150,7 +154,7 @@ in steps of ``size``.
 ak.layout.RegularArray.broadcast_tooffsets64
 ============================================
 
-.. py:method:: ak.layout.RegularArray.broadcast_tooffsets64(offsets)
+.. py:method:: RegularArray.broadcast_tooffsets64(offsets)
 
 Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
 returns a :doc:`ak.layout.ListOffsetArray` with the results. This is used in
@@ -161,6 +165,6 @@ operated upon.
 ak.layout.RegularArray.simplify
 ===============================
 
-.. py:method:: ak.layout.RegularArray.simplify()
+.. py:method:: RegularArray.simplify()
 
 Pass-through; returns the original array.

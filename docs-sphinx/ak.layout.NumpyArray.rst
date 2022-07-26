@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.NumpyArray
 --------------------
 
@@ -163,42 +165,44 @@ NumPy array.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a NumpyArray has the following.
 
+.. py:class:: NumpyArray(array, identities=None, parameters=None)
+
 ak.layout.NumpyArray.__init__
 =============================
 
-.. py:method:: ak.layout.NumpyArray.__init__(array, identities=None, parameters=None)
+.. py:method:: NumpyArray.__init__(array, identities=None, parameters=None)
 
 ak.layout.NumpyArray.shape
 ==========================
 
-.. py:attribute:: ak.layout.NumpyArray.shape
+.. py:attribute:: NumpyArray.shape
 
 ak.layout.NumpyArray.strides
 ============================
 
-.. py:attribute:: ak.layout.NumpyArray.strides
+.. py:attribute:: NumpyArray.strides
 
 ak.layout.NumpyArray.itemsize
 =============================
 
-.. py:attribute:: ak.layout.NumpyArray.itemsize
+.. py:attribute:: NumpyArray.itemsize
 
 ak.layout.NumpyArray.format
 ===========================
 
-.. py:attribute:: ak.layout.NumpyArray.format
+.. py:attribute:: NumpyArray.format
 
 ak.layout.NumpyArray.ndim
 =========================
 
-.. py:attribute:: ak.layout.NumpyArray.ndim
+.. py:attribute:: NumpyArray.ndim
 
 Returns ``len(shape)``.
 
 ak.layout.NumpyArray.isscalar
 =============================
 
-.. py:attribute:: ak.layout.NumpyArray.isscalar
+.. py:attribute:: NumpyArray.isscalar
 
 Should always return False (``len(shape) == 0`` NumpyArrays in C++ are converted into
 scalar numbers and booleans before they appear in Python).
@@ -206,14 +210,14 @@ scalar numbers and booleans before they appear in Python).
 ak.layout.NumpyArray.isempty
 ============================
 
-.. py:attribute:: ak.layout.NumpyArray.isempty
+.. py:attribute:: NumpyArray.isempty
 
 Returns True if any ``shape`` element is ``0``; False otherwise.
 
 ak.layout.NumpyArray.iscontiguous
 =================================
 
-.. py:attribute:: ak.layout.NumpyArray.iscontiguous
+.. py:attribute:: NumpyArray.iscontiguous
 
 Contiguous arrays have no gaps between elements and are sequenced in increasing
 order in memory. This is the same as NumPy's notion of
@@ -235,7 +239,7 @@ and ``itemsize``:
 ak.layout.NumpyArray.toRegularArray
 ===================================
 
-.. py:method:: ak.layout.NumpyArray.toRegularArray()
+.. py:method:: NumpyArray.toRegularArray()
 
 Returns a contiguous version of this array with any multidimensional ``shape`` replaced by
 nested :doc:`ak.layout.RegularArray` nodes.
@@ -243,13 +247,13 @@ nested :doc:`ak.layout.RegularArray` nodes.
 ak.layout.NumpyArray.contiguous
 ===============================
 
-.. py:method:: ak.layout.NumpyArray.contiguous()
+.. py:method:: NumpyArray.contiguous()
 
 Returns a contiguous version of this array (possibly the original array, unchanged).
 
 ak.layout.NumpyArray.simplify
 =============================
 
-.. py:method:: ak.layout.NumpyArray.simplify()
+.. py:method:: NumpyArray.simplify()
 
 Pass-through; returns the original array.

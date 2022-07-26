@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.ListArray
 -------------------
 
@@ -140,30 +142,32 @@ which represents the following logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a ListArray has the following.
 
+.. py:class:: ListArray(starts, stops, content, identities=None, parameters=None)
+
 ak.layout.ListArray.__init__
 ============================
 
-.. py:method:: ak.layout.ListArray.__init__(starts, stops, content, identities=None, parameters=None)
+.. py:method:: ListArray.__init__(starts, stops, content, identities=None, parameters=None)
 
 ak.layout.ListArray.starts
 ==========================
 
-.. py:attribute:: ak.layout.ListArray.starts
+.. py:attribute:: ListArray.starts
 
 ak.layout.ListArray.stops
 =========================
 
-.. py:attribute:: ak.layout.ListArray.stops
+.. py:attribute:: ListArray.stops
 
 ak.layout.ListArray.content
 ===========================
 
-.. py:attribute:: ak.layout.ListArray.content
+.. py:attribute:: ListArray.content
 
 ak.layout.ListArray.compact_offsets64
 =====================================
 
-.. py:method:: ak.layout.ListArray.compact_offsets64(start_at_zero=True)
+.. py:method:: ListArray.compact_offsets64(start_at_zero=True)
 
 Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` that represent the same lengths
 of this array's ``starts`` and ``stops`` (though not the physical order in memory).
@@ -171,7 +175,7 @@ of this array's ``starts`` and ``stops`` (though not the physical order in memor
 ak.layout.ListArray.broadcast_tooffsets64
 =========================================
 
-.. py:method:: ak.layout.ListArray.broadcast_tooffsets64(offsets)
+.. py:method:: ListArray.broadcast_tooffsets64(offsets)
 
 Reorders ``contents`` to match a given set of ``offsets`` (if possible) and
 returns a :doc:`ak.layout.ListOffsetArray` with the results. This is used in
@@ -182,7 +186,7 @@ operated upon.
 ak.layout.ListArray.toRegularArray
 ==================================
 
-.. py:method:: ak.layout.ListArray.toRegularArray()
+.. py:method:: ListArray.toRegularArray()
 
 Converts this :doc:`ak.types.ListType` into a :doc:`ak.types.RegularType` array
 if possible.
@@ -190,6 +194,6 @@ if possible.
 ak.layout.ListArray.simplify
 ============================
 
-.. py:method:: ak.layout.ListArray.simplify()
+.. py:method:: ListArray.simplify()
 
 Pass-through; returns the original array.

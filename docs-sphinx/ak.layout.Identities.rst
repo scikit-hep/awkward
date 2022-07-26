@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.Identities
 --------------------
 
@@ -90,15 +92,17 @@ ak.layout.Identities.newref
 Static method to create a new reference (int). This reference is globally
 unique in the process, as it is implemented with an atomic integer.
 
+.. py:class:: Identities(ref, fieldloc, array)
+
 ak.layout.Identities.__init__
 =============================
 
-.. py:method:: ak.layout.Identities.__init__(ref, fieldloc, array)
+.. py:method:: Identities.__init__(ref, fieldloc, array)
 
 Creates a new Identities from a reference (int), fieldloc (list of int-str
 pairs), and a 2-dimensional array (np.ndarray) of integers.
 
-.. py:method:: ak.layout.Identities.__init__(ref, fieldloc, width, length)
+.. py:method:: Identities.__init__(ref, fieldloc, width, length)
 
 Allocates a new Identities from a reference (int), fieldloc (list of int-str
 pairs), and a width and height for the 2-dimensional array.
@@ -110,43 +114,43 @@ from the ``array`` property to set its values.
 ak.layout.Identities.array
 ==========================
 
-.. py:attribute:: ak.layout.Identities.array
+.. py:attribute:: Identities.array
 
 The 2-dimensional array containing all the numeric row data.
 
 ak.layout.Identities.fieldloc
 =============================
 
-.. py:attribute:: ak.layout.Identities.fieldloc
+.. py:attribute:: Identities.fieldloc
 
 The list of int-str pairs containing all the string field data.
 
 ak.layout.Identities.__getitem__
 ================================
 
-.. py:method:: ak.layout.Identities.__getitem__(at)
+.. py:method:: Identities.__getitem__(at)
 
 ak.layout.Identities.__getitem__
 ================================
 
-.. py:method:: ak.layout.Identities.__getitem__(start, stop)
+.. py:method:: Identities.__getitem__(start, stop)
 
 ak.layout.Identities.__len__
 ============================
 
-.. py:method:: ak.layout.Identities.__len__()
+.. py:method:: Identities.__len__()
 
 ak.layout.Identities.__repr__
 =============================
 
-.. py:method:: ak.layout.Identities.__repr__()
+.. py:method:: Identities.__repr__()
 
 ak.layout.Identities.identity_at
 ================================
 
-.. py:method:: ak.layout.Identities.identity_at(at)
+.. py:method:: Identities.identity_at(at)
 
 ak.layout.Identities.identity_at_str
 ====================================
 
-.. py:method:: ak.layout.Identities.identity_at_str(at)
+.. py:method:: Identities.identity_at_str(at)

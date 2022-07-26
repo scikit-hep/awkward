@@ -180,6 +180,7 @@ def doclass(link, linelink, shortname, name, astcls):
 
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
+    outfile.write(f".. py:module: {qualname}\n\n")
     outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
     outfile.write(".. py:class:: {0}({1})\n\n".format(qualname, dosig(init)))
 
@@ -231,6 +232,7 @@ def dofunction(link, linelink, shortname, name, astfcn):
 
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
+    outfile.write(f".. py:module: {qualname}\n\n")
     outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
 
     functiontext = "{0}({1})".format(qualname, dosig(astfcn))

@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.IndexedArray
 ----------------------
 
@@ -102,32 +104,34 @@ which represents the following logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 an IndexedArray has the following.
 
+.. py:class:: IndexedArray(index, content, identities=None, parameters=None)
+
 ak.layout.IndexedArray.__init__
 ===============================
 
-.. py:method:: ak.layout.IndexedArray.__init__(index, content, identities=None, parameters=None)
+.. py:method:: IndexedArray.__init__(index, content, identities=None, parameters=None)
 
 ak.layout.IndexedArray.index
 ============================
 
-.. py:attribute:: ak.layout.IndexedArray.index
+.. py:attribute:: IndexedArray.index
 
 ak.layout.IndexedArray.content
 ==============================
 
-.. py:attribute:: ak.layout.IndexedArray.content
+.. py:attribute:: IndexedArray.content
 
 ak.layout.IndexedArray.isoption
 ===============================
 
-.. py:attribute:: ak.layout.IndexedArray.isoption
+.. py:attribute:: IndexedArray.isoption
 
 Returns False because this is not an IndexedOptionArray.
 
 ak.layout.IndexedArray.project
 ==============================
 
-.. py:method:: ak.layout.IndexedArray.project(mask=None)
+.. py:method:: IndexedArray.project(mask=None)
 
 Returns an array with the ``index`` applied to reorder/duplicate elements.
 
@@ -138,7 +142,7 @@ returned.
 ak.layout.IndexedArray.bytemask
 ===============================
 
-.. py:method:: ak.layout.IndexedArray.bytemask()
+.. py:method:: IndexedArray.bytemask()
 
 Returns an 8-bit signed :doc:`ak.layout.Index` of all zeros, because this
 IndexedArray does not have :doc:`ak.types.OptionType`.
@@ -146,7 +150,7 @@ IndexedArray does not have :doc:`ak.types.OptionType`.
 ak.layout.IndexedArray.simplify
 ===============================
 
-.. py:method:: ak.layout.IndexedArray.simplify()
+.. py:method:: IndexedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
 :doc:`ak.types.OptionType` or is an :doc:`ak.layout.IndexedArray`; otherwise, this is

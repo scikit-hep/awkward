@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.VirtualArray
 ----------------------
 
@@ -55,36 +57,38 @@ that.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a VirtualArray has the following.
 
+.. py:class:: VirtualArray(generator, cache=None, cache_key=None, identities=None, parameters=None)
+
 ak.layout.VirtualArray.__init__
 ===============================
 
-.. py:method:: ak.layout.VirtualArray.__init__(generator, cache=None, cache_key=None, identities=None, parameters=None)
+.. py:method:: VirtualArray.__init__(generator, cache=None, cache_key=None, identities=None, parameters=None)
 
 ak.layout.VirtualArray.generator
 ================================
 
-.. py:attribute:: ak.layout.VirtualArray.generator
+.. py:attribute:: VirtualArray.generator
 
 ak.layout.VirtualArray.cache
 ============================
 
-.. py:attribute:: ak.layout.VirtualArray.cache
+.. py:attribute:: VirtualArray.cache
 
 ak.layout.VirtualArray.cache_key
 ================================
 
-.. py:attribute:: ak.layout.VirtualArray.cache_key
+.. py:attribute:: VirtualArray.cache_key
 
 ak.layout.VirtualArray.peek_array
 =================================
 
-.. py:attribute:: ak.layout.VirtualArray.peek_array
+.. py:attribute:: VirtualArray.peek_array
 
 Does not materialize the array; might return None.
 
 ak.layout.VirtualArray.array
 ============================
 
-.. py:attribute:: ak.layout.VirtualArray.array
+.. py:attribute:: VirtualArray.array
 
 Materializes the array if necessary; never returns None.

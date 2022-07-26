@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.ByteMaskedArray
 -------------------------
 
@@ -106,30 +108,32 @@ which represents the following logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a ByteMaskedArray has the following.
 
+.. py:class:: ByteMaskedArray(mask, content, valid_when, identities=None, parameters=None)
+
 ak.layout.ByteMaskedArray.__init__
 ==================================
 
-.. py:method:: ak.layout.ByteMaskedArray.__init__(mask, content, valid_when, identities=None, parameters=None)
+.. py:method:: ByteMaskedArray.__init__(mask, content, valid_when, identities=None, parameters=None)
 
 ak.layout.ByteMaskedArray.mask
 ==============================
 
-.. py:attribute:: ak.layout.ByteMaskedArray.mask
+.. py:attribute:: ByteMaskedArray.mask
 
 ak.layout.ByteMaskedArray.content
 =================================
 
-.. py:attribute:: ak.layout.ByteMaskedArray.content
+.. py:attribute:: ByteMaskedArray.content
 
 ak.layout.ByteMaskedArray.valid_when
 ====================================
 
-.. py:attribute:: ak.layout.ByteMaskedArray.valid_when
+.. py:attribute:: ByteMaskedArray.valid_when
 
 ak.layout.ByteMaskedArray.project
 =================================
 
-.. py:method:: ak.layout.ByteMaskedArray.project(mask=None)
+.. py:method:: ByteMaskedArray.project(mask=None)
 
 Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
 If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
@@ -139,14 +143,14 @@ mask (after converting to ``valid_when=False`` to match this ``mask``).
 ak.layout.ByteMaskedArray.bytemask
 ==================================
 
-.. py:method:: ak.layout.ByteMaskedArray.bytemask()
+.. py:method:: ByteMaskedArray.bytemask()
 
 Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
 
 ak.layout.ByteMaskedArray.simplify
 ==================================
 
-.. py:method:: ak.layout.ByteMaskedArray.simplify()
+.. py:method:: ByteMaskedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
 :doc:`ak.types.OptionType`; otherwise, this is a pass-through.

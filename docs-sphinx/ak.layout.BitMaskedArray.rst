@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.BitMaskedArray
 ------------------------
 
@@ -152,35 +154,37 @@ to mask their data, with ``valid_when=True`` and ``lsb_order=True``.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a BitMaskedArray has the following.
 
+.. py:class:: BitMaskedArray(mask, content, valid_when, length, lsb_order, identities=None, parameters=None)
+
 ak.layout.BitMaskedArray.__init__
 =================================
 
-.. py:method:: ak.layout.BitMaskedArray.__init__(mask, content, valid_when, length, lsb_order, identities=None, parameters=None)
+.. py:method:: BitMaskedArray.__init__(mask, content, valid_when, length, lsb_order, identities=None, parameters=None)
 
 ak.layout.BitMaskedArray.mask
 =============================
 
-.. py:attribute:: ak.layout.BitMaskedArray.mask
+.. py:attribute:: BitMaskedArray.mask
 
 ak.layout.BitMaskedArray.content
 ================================
 
-.. py:attribute:: ak.layout.BitMaskedArray.content
+.. py:attribute:: BitMaskedArray.content
 
 ak.layout.BitMaskedArray.valid_when
 ===================================
 
-.. py:attribute:: ak.layout.BitMaskedArray.valid_when
+.. py:attribute:: BitMaskedArray.valid_when
 
 ak.layout.BitMaskedArray.lsb_order
 ==================================
 
-.. py:attribute:: ak.layout.BitMaskedArray.lsb_order
+.. py:attribute:: BitMaskedArray.lsb_order
 
 ak.layout.BitMaskedArray.project
 ================================
 
-.. py:method:: ak.layout.BitMaskedArray.project(mask=None)
+.. py:method:: BitMaskedArray.project(mask=None)
 
 Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
 If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
@@ -190,14 +194,14 @@ mask (after converting to 8-bit and to ``valid_when=False`` to match this ``mask
 ak.layout.BitMaskedArray.bytemask
 =================================
 
-.. py:method:: ak.layout.BitMaskedArray.bytemask()
+.. py:method:: BitMaskedArray.bytemask()
 
 Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
 
 ak.layout.BitMaskedArray.simplify
 =================================
 
-.. py:method:: ak.layout.BitMaskedArray.simplify()
+.. py:method:: BitMaskedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
 :doc:`ak.types.OptionType`; otherwise, this is a pass-through.
@@ -208,13 +212,13 @@ This method only operates one level deep.
 ak.layout.BitMaskedArray.toByteMaskedArray
 ==========================================
 
-.. py:method:: ak.layout.BitMaskedArray.toByteMaskedArray()
+.. py:method:: BitMaskedArray.toByteMaskedArray()
 
 Converts to the equivalent :doc:`ak.layout.ByteMaskedArray`.
 
 ak.layout.BitMaskedArray.toIndexedOptionArray
 =============================================
 
-.. py:method:: ak.layout.BitMaskedArray.toIndexedOptionArray()
+.. py:method:: BitMaskedArray.toIndexedOptionArray()
 
 Converts to the equivalent :doc:`ak.layout.IndexedOptionArray`.

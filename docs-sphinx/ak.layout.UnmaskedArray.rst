@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.UnmaskedArray
 -----------------------
 
@@ -77,20 +79,22 @@ which represents the following logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a UnmaskedArray has the following.
 
+.. py:class:: UnmaskedArray(content, identities=None, parameters=None)
+
 ak.layout.UnmaskedArray.__init__
 ================================
 
-.. py:method:: ak.layout.UnmaskedArray.__init__(content, identities=None, parameters=None)
+.. py:method:: UnmaskedArray.__init__(content, identities=None, parameters=None)
 
 ak.layout.UnmaskedArray.content
 ===============================
 
-.. py:attribute:: ak.layout.UnmaskedArray.content
+.. py:attribute:: UnmaskedArray.content
 
 ak.layout.UnmaskedArray.project
 ===============================
 
-.. py:method:: ak.layout.UnmaskedArray.project(mask=None)
+.. py:method:: UnmaskedArray.project(mask=None)
 
 Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
 If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
@@ -100,7 +104,7 @@ has no effect.
 ak.layout.UnmaskedArray.bytemask
 ================================
 
-.. py:method:: ak.layout.UnmaskedArray.bytemask()
+.. py:method:: UnmaskedArray.bytemask()
 
 Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
 
@@ -109,7 +113,7 @@ Since this array is unmasked, the output is all ``0``.
 ak.layout.UnmaskedArray.simplify
 ================================
 
-.. py:method:: ak.layout.UnmaskedArray.simplify()
+.. py:method:: UnmaskedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
 :doc:`ak.types.OptionType`; otherwise, this is a pass-through.

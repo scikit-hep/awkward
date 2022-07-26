@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.ListOffsetArray
 -------------------------
 
@@ -116,25 +118,27 @@ which represents the following logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a ListOffsetArray has the following.
 
+.. py:class:: ListOffsetArray(offsets, content, identities=None, parameters=None)
+
 ak.layout.ListOffsetArray.__init__
 ==================================
 
-.. py:method:: ak.layout.ListOffsetArray.__init__(offsets, content, identities=None, parameters=None)
+.. py:method:: ListOffsetArray.__init__(offsets, content, identities=None, parameters=None)
 
 ak.layout.ListOffsetArray.offsets
 =================================
 
-.. py:attribute:: ak.layout.ListOffsetArray.offsets
+.. py:attribute:: ListOffsetArray.offsets
 
 ak.layout.ListOffsetArray.content
 =================================
 
-.. py:attribute:: ak.layout.ListOffsetArray.content
+.. py:attribute:: ListOffsetArray.content
 
 ak.layout.ListOffsetArray.starts
 ================================
 
-.. py:attribute:: ak.layout.ListOffsetArray.starts
+.. py:attribute:: ListOffsetArray.starts
 
 Derives ``starts`` as a view of ``offsets``:
 
@@ -145,7 +149,7 @@ Derives ``starts`` as a view of ``offsets``:
 ak.layout.ListOffsetArray.stops
 ===============================
 
-.. py:attribute:: ak.layout.ListOffsetArray.stops
+.. py:attribute:: ListOffsetArray.stops
 
 Derives ``stops`` as a view of ``offsets``:
 
@@ -156,7 +160,7 @@ Derives ``stops`` as a view of ``offsets``:
 ak.layout.ListOffsetArray.compact_offsets64
 ===========================================
 
-.. py:method:: ak.layout.ListOffsetArray.compact_offsets64(start_at_zero=True)
+.. py:method:: ListOffsetArray.compact_offsets64(start_at_zero=True)
 
 Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` that represent the same lengths
 of this array's ``offsets``. If this ``offsets[0] == 0 or not start_at_zero``, the
@@ -165,7 +169,7 @@ return value is a view of this array's ``offsets``.
 ak.layout.ListOffsetArray.broadcast_tooffsets64
 ===============================================
 
-.. py:method:: ak.layout.ListOffsetArray.broadcast_tooffsets64(offsets)
+.. py:method:: ListOffsetArray.broadcast_tooffsets64(offsets)
 
 Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
 returns a :doc:`ak.layout.ListOffsetArray` with the results. This is used in
@@ -176,7 +180,7 @@ operated upon.
 ak.layout.ListOffsetArray.toRegularArray
 ========================================
 
-.. py:method:: ak.layout.ListOffsetArray.toRegularArray()
+.. py:method:: ListOffsetArray.toRegularArray()
 
 Converts this :doc:`ak.types.ListType` into a :doc:`ak.types.RegularType` array
 if possible.
@@ -184,6 +188,6 @@ if possible.
 ak.layout.ListOffsetArray.simplify
 ==================================
 
-.. py:method:: ak.layout.ListOffsetArray.simplify()
+.. py:method:: ListOffsetArray.simplify()
 
 Pass-through; returns the original array.

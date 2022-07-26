@@ -1,6 +1,8 @@
 ak.layout.Content
 -----------------
 
+.. py:currentmodule:: ak.layout
+
 Superclass of array nodes that build up the structure of an
 :doc:`_auto/ak.Array`; the array layout returned by the
 `ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`__ property.
@@ -43,10 +45,12 @@ In Python, :doc:`ak.layout.Record` is not a subclass of
 All :doc:`ak.layout.Content` nodes have the following properties and methods
 in common.
 
+.. py:class:: Content
+
 ak.layout.Content.identities
 ============================
 
-.. py:attribute:: ak.layout.Content.identities
+.. py:attribute:: Content.identities
 
 Returns the :doc:`ak.layout.Identities` object associated with this array node
 (if any).
@@ -54,7 +58,7 @@ Returns the :doc:`ak.layout.Identities` object associated with this array node
 ak.layout.Content.identity
 ==========================
 
-.. py:attribute:: ak.layout.Content.identity
+.. py:attribute:: Content.identity
 
 Returns the single element of an :doc:`ak.layout.Identities` associated with
 this array node (if any).
@@ -62,7 +66,7 @@ this array node (if any).
 ak.layout.Content.nbytes
 ========================
 
-.. py:attribute:: ak.layout.Content.nbytes
+.. py:attribute:: Content.nbytes
 
 The total number of bytes in all the :doc:`ak.layout.Index`,
 :doc:`ak.layout.Identities`, and :doc:`ak.layout.NumpyArray` buffers in this
@@ -82,7 +86,7 @@ array buffers.
 ak.layout.Content.numfields
 ===========================
 
-.. py:attribute:: ak.layout.Content.numfields
+.. py:attribute:: Content.numfields
 
 Number of fields in the outermost records or tuples, or `-1` if the array does
 not contain records or tuples.
@@ -90,7 +94,7 @@ not contain records or tuples.
 ak.layout.Content.parameters
 ============================
 
-.. py:attribute:: ak.layout.Content.parameters
+.. py:attribute:: Content.parameters
 
 Free-form parameters associated with every array node as a dict from parameter
 name to its JSON-like value. Some parameters are special and are used to assign
@@ -104,7 +108,7 @@ See :doc:`ak.behavior` and :doc:`_auto/ak.Array`.
 ak.layout.Content.purelist_depth
 ================================
 
-.. py:attribute:: ak.layout.Content.purelist_depth
+.. py:attribute:: Content.purelist_depth
 
 Number of dimensions of nested lists, not counting anything deeper than the
 first record or tuple layer, if any. The depth of a one-dimensional array is
@@ -117,7 +121,7 @@ depths, the return value is `-1`.
 ak.layout.Content.purelist_isregular
 ====================================
 
-.. py:attribute:: ak.layout.Content.purelist_isregular
+.. py:attribute:: Content.purelist_isregular
 
 Returns True if all dimensions down to the first record or tuple layer have
 :doc:`ak.types.RegularType`; False otherwise.
@@ -125,28 +129,28 @@ Returns True if all dimensions down to the first record or tuple layer have
 ak.layout.Content.__getitem__
 =============================
 
-.. py:method:: ak.layout.Content.__getitem__(where)
+.. py:method:: Content.__getitem__(where)
 
 See `ak.Array.__getitem__ <_auto/ak.Array.html#ak-array-getitem>`_.
 
 ak.layout.Content.__iter__
 ==========================
 
-.. py:method:: ak.layout.Content.__iter__()
+.. py:method:: Content.__iter__()
 
 See `ak.Array.__iter__ <_auto/ak.Array.html#ak-array-iter>`_.
 
 ak.layout.Content.__len__
 =========================
 
-.. py:method:: ak.layout.Content.__len__()
+.. py:method:: Content.__len__()
 
 See `ak.Array.__len__ <_auto/ak.Array.html#ak-array-len>`_.
 
 ak.layout.Content.__repr__
 ==========================
 
-.. py:method:: ak.layout.Content.__repr__()
+.. py:method:: Content.__repr__()
 
 A multi-line XML representation of the array structure.
 
@@ -155,56 +159,56 @@ See (for contrast) `ak.Array.__repr__ <_auto/ak.Array.html#ak-array-repr>`_.
 ak.layout.Content.all
 =====================
 
-.. py:method:: ak.layout.Content.all(axis=-1, mask=False, keepdims=False)
+.. py:method:: Content.all(axis=-1, mask=False, keepdims=False)
 
 Implements :doc:`_auto/ak.all`.
 
 ak.layout.Content.any
 =====================
 
-.. py:method:: ak.layout.Content.any(axis=-1, mask=False, keepdims=False)
+.. py:method:: Content.any(axis=-1, mask=False, keepdims=False)
 
 Implements :doc:`_auto/ak.any`.
 
 ak.layout.Content.argmax
 ========================
 
-.. py:method:: ak.layout.Content.argmax(axis=-1, mask=True, keepdims=False)
+.. py:method:: Content.argmax(axis=-1, mask=True, keepdims=False)
 
 Implements :doc:`_auto/ak.argmax`.
 
 ak.layout.Content.argmin
 ========================
 
-.. py:method:: ak.layout.Content.argmin(axis=-1, mask=True, keepdims=False)
+.. py:method:: Content.argmin(axis=-1, mask=True, keepdims=False)
 
 Implements :doc:`_auto/ak.argmin`.
 
 ak.layout.Content.combinations
 ==============================
 
-.. py:method:: ak.layout.Content.combinations(n, replacement=False, keys=None, parameters=None, axis=1)
+.. py:method:: Content.combinations(n, replacement=False, keys=None, parameters=None, axis=1)
 
 Implements :doc:`_auto/ak.combinations`.
 
 ak.layout.Content.count
 =======================
 
-.. py:method:: ak.layout.Content.count(axis=-1, mask=False, keepdims=False)
+.. py:method:: Content.count(axis=-1, mask=False, keepdims=False)
 
 Implements :doc:`_auto/ak.count`.
 
 ak.layout.Content.count_nonzero
 ===============================
 
-.. py:method:: ak.layout.Content.count_nonzero(axis=-1, mask=False, keepdims=False)
+.. py:method:: Content.count_nonzero(axis=-1, mask=False, keepdims=False)
 
 Implements :doc:`_auto/ak.count_nonzero`.
 
 ak.layout.Content.deep_copy
 ===========================
 
-.. py:method:: ak.layout.Content.deep_copy(copyarrays=True, copyindexes=True, copyidentities=True)
+.. py:method:: Content.deep_copy(copyarrays=True, copyindexes=True, copyidentities=True)
 
 Returns a copy of the array node and its children.
 
@@ -220,7 +224,7 @@ copied, not (large) array buffers.
 ak.layout.Content.fieldindex
 ============================
 
-.. py:method:: ak.layout.Content.fieldindex(key)
+.. py:method:: Content.fieldindex(key)
 
 Returns the ``fieldindex`` (int) associated with a ``key`` (str) of the
 outermost record or tuple. If the array does not contain records or tuples,
@@ -229,21 +233,21 @@ this method raises an error.
 ak.layout.Content.fillna
 ========================
 
-.. py:method:: ak.layout.Content.fillna(value)
+.. py:method:: Content.fillna(value)
 
 Implements :doc:`_auto/ak.fill_none`.
 
 ak.layout.Content.flatten
 =========================
 
-.. py:method:: ak.layout.Content.flatten(axis=1)
+.. py:method:: Content.flatten(axis=1)
 
 Implements :doc:`_auto/ak.flatten`.
 
 ak.layout.Content.getitem_nothing
 =================================
 
-.. py:method:: ak.layout.Content.getitem_nothing()
+.. py:method:: Content.getitem_nothing()
 
 Returns an empty array with this array structure. Used for a corner-case of
 ``__getitem__``.
@@ -251,7 +255,7 @@ Returns an empty array with this array structure. Used for a corner-case of
 ak.layout.Content.haskey
 ========================
 
-.. py:method:: ak.layout.Content.haskey(key)
+.. py:method:: Content.haskey(key)
 
 Returns True if the outermost record or tuple has a given ``key``; False
 otherwise (including the case of not containing records or tuples).
@@ -259,7 +263,7 @@ otherwise (including the case of not containing records or tuples).
 ak.layout.Content.key
 =====================
 
-.. py:method:: ak.layout.Content.key(fieldindex)
+.. py:method:: Content.key(fieldindex)
 
 Returns the ``key`` (str) associated with a ``fieldindex`` (int) of the
 outermost record or tuple. If the array does not contain records or tuples,
@@ -268,14 +272,14 @@ this method raises an error.
 ak.layout.Content.keys
 ======================
 
-.. py:method:: ak.layout.Content.keys()
+.. py:method:: Content.keys()
 
 Returns the keys of the outermost record or tuple or an empty list.
 
 ak.layout.Content.localindex
 ============================
 
-.. py:method:: ak.layout.Content.localindex(axis=1)
+.. py:method:: Content.localindex(axis=1)
 
 Returns nested lists of integers (down to the chosen ``axis``) that count
 from `0` to the `length - 1` of the innermost list.
@@ -286,14 +290,14 @@ This is used internally to generate :doc:`_auto/ak.argcartesian` from
 ak.layout.Content.max
 =====================
 
-.. py:method:: ak.layout.Content.max(axis=-1, mask=True, keepdims=False)
+.. py:method:: Content.max(axis=-1, mask=True, keepdims=False)
 
 Implements :doc:`_auto/ak.max`.
 
 ak.layout.Content.merge
 =======================
 
-.. py:method:: ak.layout.Content.merge(other)
+.. py:method:: Content.merge(other)
 
 Concatenate this array node with the ``other`` array node (``axis=0``) by
 sharing buffers; i.e. without using a :doc:`ak.layout.UnionArray`. If this
@@ -302,7 +306,7 @@ is not possible, this method raises an error.
 ak.layout.Content.merge_as_union
 ================================
 
-.. py:method:: ak.layout.Content.merge_as_union(other)
+.. py:method:: Content.merge_as_union(other)
 
 Concatenate this array node with the ``other`` array node (``axis=0``) using
 a :doc:`ak.layout.UnionArray` instead of attempting to share buffers.
@@ -310,7 +314,7 @@ a :doc:`ak.layout.UnionArray` instead of attempting to share buffers.
 ak.layout.Content.mergeable
 ===========================
 
-.. py:method:: ak.layout.Content.mergeable(other, mergebool=False)
+.. py:method:: Content.mergeable(other, mergebool=False)
 
 If True, this array node can be concatenated (``axis=0``) with the ``other``
 array node without resorting to a :doc:`ak.layout.UnionArray`; otherwise,
@@ -322,21 +326,21 @@ be merged with numeric arrays (integers and floating-point).
 ak.layout.Content.min
 =====================
 
-.. py:method:: ak.layout.Content.min(axis=-1, mask=True, keepdims=False)
+.. py:method:: Content.min(axis=-1, mask=True, keepdims=False)
 
 Implements :doc:`_auto/ak.min`.
 
 ak.layout.Content.num
 =====================
 
-.. py:method:: ak.layout.Content.num(axis=1)
+.. py:method:: Content.num(axis=1)
 
 Implements :doc:`_auto/ak.num`.
 
 ak.layout.Content.offsets_and_flatten
 =====================================
 
-.. py:method:: ak.layout.Content.offsets_and_flatten(axis=1)
+.. py:method:: Content.offsets_and_flatten(axis=1)
 
 Implements :doc:`_auto/ak.flatten`, though it returns a set of ``offsets``
 along with the flattened array.
@@ -344,7 +348,7 @@ along with the flattened array.
 ak.layout.Content.parameter
 ===========================
 
-.. py:method:: ak.layout.Content.parameter(key)
+.. py:method:: Content.parameter(key)
 
 Get one parameter by its ``key`` (outermost node only). If a ``key`` is not
 found, None is returned.
@@ -352,14 +356,14 @@ found, None is returned.
 ak.layout.Content.prod
 ======================
 
-.. py:method:: ak.layout.Content.prod(axis=-1, mask=False, keepdims=False)
+.. py:method:: Content.prod(axis=-1, mask=False, keepdims=False)
 
 Implements :doc:`_auto/ak.prod`.
 
 ak.layout.Content.purelist_parameter
 ====================================
 
-.. py:method:: ak.layout.Content.purelist_parameter(key)
+.. py:method:: Content.purelist_parameter(key)
 
 Return the value of the outermost parameter matching ``key`` in a sequence
 of nested lists, stopping at the first record or tuple layer.
@@ -370,23 +374,23 @@ possibilities have the same value.
 ak.layout.Content.rpad
 ======================
 
-.. py:method:: ak.layout.Content.rpad(arg0, arg1)
+.. py:method:: Content.rpad(arg0, arg1)
 
 Implements :doc:`_auto/ak.pad_none` with ``clip=False``.
 
 ak.layout.Content.rpad_and_clip
 ===============================
 
-.. py:method:: ak.layout.Content.rpad_and_clip(arg0, arg1)
+.. py:method:: Content.rpad_and_clip(arg0, arg1)
 
 Implements :doc:`_auto/ak.pad_none` with ``clip=True``.
 
 ak.layout.Content.setidentities
 ===============================
 
-.. py:method:: ak.layout.Content.setidentities()
+.. py:method:: Content.setidentities()
 
-.. py:method:: ak.layout.Content.setidentities(identities)
+.. py:method:: Content.setidentities(identities)
 
 Sets identities in-place.
 
@@ -396,7 +400,7 @@ Sets identities in-place.
 ak.layout.Content.setparameter
 ==============================
 
-.. py:method:: ak.layout.Content.setparameter(key, value)
+.. py:method:: Content.setparameter(key, value)
 
 Sets one parameter in-place.
 
@@ -406,7 +410,7 @@ parameters in the constructor only.
 ak.layout.Content.simplify
 ==========================
 
-.. py:method:: ak.layout.Content.simplify()
+.. py:method:: Content.simplify()
 
 Flattens one extraneous level of :doc:`ak.types.OptionType` or
 :doc:`ak.types.UnionType`. If there is no such level, this is a pass-through.
@@ -415,27 +419,27 @@ In all cases, the output has the same logical meaning as the input.
 ak.layout.Content.sum
 =====================
 
-.. py:method:: ak.layout.Content.sum(axis=-1, mask=False, keepdims=False)
+.. py:method:: Content.sum(axis=-1, mask=False, keepdims=False)
 
 Implements :doc:`_auto/ak.sum`.
 
 ak.layout.Content.toRegularArray
 ================================
 
-.. py:method:: ak.layout.Content.toRegularArray()
+.. py:method:: Content.toRegularArray()
 
 Converts the data to a :doc:`ak.layout.RegularArray`, if possible.
 
 ak.layout.Content.tojson
 ========================
 
-.. py:method:: ak.layout.Content.tojson(pretty=False, maxdecimals=None)
+.. py:method:: Content.tojson(pretty=False, maxdecimals=None)
 
 Converts this array node to JSON and returns it as a string.
 
 See :doc:`_auto/ak.to_json`.
 
-.. py:method:: ak.layout.Content.tojson(destination, pretty=False, maxdecimals=None, buffersize=65536)
+.. py:method:: Content.tojson(destination, pretty=False, maxdecimals=None, buffersize=65536)
 
 Converts this array node to JSON and writes it to a file (``destination``).
 
@@ -444,6 +448,6 @@ See :doc:`_auto/ak.to_json`.
 ak.layout.Content.type
 ======================
 
-.. py:method:: ak.layout.Content.type()
+.. py:method:: Content.type()
 
 Returns the high-level :doc:`ak.types.Type` of this array node.

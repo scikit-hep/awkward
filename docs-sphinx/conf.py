@@ -26,9 +26,10 @@ author = "Jim Pivarski"
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 extensions = [
-    'sphinx_external_toc',
     'sphinx_copybutton',
     'sphinx_design',
+    'sphinx_external_toc',
+    "sphinx.ext.intersphinx",
     'myst_nb',
 ]
 
@@ -95,7 +96,16 @@ nb_ipywidgets_js = {
 # Additional stuff
 master_doc = "index"
 
-import os
+# Cross-reference existing Python objects
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    "numba": ("https://numba.pydata.org/numba-doc/latest", None),
+}
+
+
 import sys
 import subprocess
 

@@ -1,3 +1,5 @@
+.. py:currentmodule:: ak.layout
+
 ak.layout.RecordArray
 ---------------------
 
@@ -216,39 +218,41 @@ which represents the following block of logical data.
 In addition to the properties and methods described in :doc:`ak.layout.Content`,
 a RecordArray has the following.
 
+.. py:class:: RecordArray(contents, keys=None, length=None, identities=None, parameters=None)
+
 ak.layout.RecordArray.__init__
 ==============================
 
-.. py:method:: ak.layout.RecordArray.__init__(contents, keys=None, length=None, identities=None, parameters=None)
+.. py:method:: RecordArray.__init__(contents, keys=None, length=None, identities=None, parameters=None)
 
 ak.layout.RecordArray.contents
 ==============================
 
-.. py:attribute:: ak.layout.RecordArray.contents
+.. py:attribute:: RecordArray.contents
 
 ak.layout.RecordArray.recordlookup
 ==================================
 
-.. py:attribute:: ak.layout.RecordArray.recordlookup
+.. py:attribute:: RecordArray.recordlookup
 
 ak.layout.RecordArray.istuple
 =============================
 
-.. py:attribute:: ak.layout.RecordArray.istuple
+.. py:attribute:: RecordArray.istuple
 
 Returns True if ``recordlookup`` does not exist; False if it does.
 
 ak.layout.RecordArray.astuple
 =============================
 
-.. py:attribute:: ak.layout.RecordArray.astuple
+.. py:attribute:: RecordArray.astuple
 
 Returns a RecordArray with the ``recordlookup`` removed.
 
 ak.layout.RecordArray.setitem_field
 ===================================
 
-.. py:method:: ak.layout.RecordArray.setitem_field(where, what)
+.. py:method:: RecordArray.setitem_field(where, what)
 
 Sets a field in-place.
 
@@ -258,34 +262,34 @@ instead.
 ak.layout.RecordArray.field
 ===========================
 
-.. py:method:: ak.layout.RecordArray.field(fieldindex)
+.. py:method:: RecordArray.field(fieldindex)
 
 Gets a field by index number.
 
 ak.layout.RecordArray.field
 ===========================
 
-.. py:method:: ak.layout.RecordArray.field(key)
+.. py:method:: RecordArray.field(key)
 
 Gets a field by str name.
 
 ak.layout.RecordArray.fields
 ============================
 
-.. py:method:: ak.layout.RecordArray.fields()
+.. py:method:: RecordArray.fields()
 
 Returns a list of the fields themselves; equivalent to ``contents``.
 
 ak.layout.RecordArray.fielditems
 ================================
 
-.. py:method:: ak.layout.RecordArray.fielditems()
+.. py:method:: RecordArray.fielditems()
 
 Returns a list of key-value pairs, where the values are ``contents``.
 
 ak.layout.RecordArray.simplify
 ==============================
 
-.. py:method:: ak.layout.RecordArray.simplify()
+.. py:method:: RecordArray.simplify()
 
 Pass-through; returns the original array.
