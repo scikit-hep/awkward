@@ -1,13 +1,11 @@
 API Reference
 *************
 
-   * `Main page (quickstart) <https://awkward-array.readthedocs.io>`__
-   * `C++ API reference <_static/index.html>`__
-   * Python API reference: **this site**
-   * `GitHub repository <https://github.com/scikit-hep/awkward-1.0>`__
+.. card:: C++ Documentation :fas:`external-link-alt`
+    :link: _static/doxygen/index.html
 
-Navigation
-**********
+    The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click here to go to the C++ API reference
+
 
 **High-level data types:** :doc:`_auto/ak.Array` for an array of items (records, numbers, strings, etc.) and :doc:`_auto/ak.Record` for a single record. Arrays and records are read-only structures, but functions that manipulate them efficiently share data between the input and output.
 
@@ -157,14 +155,14 @@ Internal implementation
 
 The rest of the classes and functions described here are not part of the public interface. Either the objects or the submodules begin with an underscore, indicating that they can freely change from one version to the next.
 
-More documentation
-""""""""""""""""""
 
+Additional documentation
+""""""""""""""""""""""""
 The Awkward Array project is divided into 3 layers with 5 main components.
 
 .. raw:: html
 
-    <img src="_static/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+    <img src="_static/image/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;">
 
 The C++ classes, cpu-kernels, and gpu-kernels are described in the `C++ API reference <_static/index.html>`__.
 
