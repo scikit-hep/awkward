@@ -16,6 +16,8 @@ namespace awkward {
 
   namespace LayoutBuilder {
 
+    awkward::BuilderOptions default_options(1024, 1);
+
     // helper class for RecordLayoutBuilder
     template <std::size_t ENUM, typename BUILDER>
     class Field {
@@ -37,7 +39,7 @@ namespace awkward {
     public:
       Numpy()
           : data_(
-                awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())) {
+                awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
         size_t id = 0;
         set_id(id);
       }
@@ -139,7 +141,7 @@ namespace awkward {
     public:
       ListOffset()
           : offsets_(
-                awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())) {
+                awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
         offsets_.append(0);
         size_t id = 0;
         set_id(id);
@@ -254,9 +256,9 @@ namespace awkward {
     public:
       List()
           : starts_(
-                awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())),
+                awkward::GrowableBuffer<PRIMITIVE>(default_options)),
             stops_(
-                awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())) {
+                awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
         size_t id = 0;
         set_id(id);
       }
@@ -955,7 +957,7 @@ namespace awkward {
     public:
       Indexed()
           : index_(
-                awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())),
+                awkward::GrowableBuffer<PRIMITIVE>(default_options)),
             last_valid_(-1) {
         size_t id = 0;
         set_id(id);
@@ -1086,7 +1088,7 @@ namespace awkward {
     public:
       IndexedOption()
           : index_(
-                awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())),
+                awkward::GrowableBuffer<PRIMITIVE>(default_options)),
             last_valid_(-1) {
         size_t id = 0;
         set_id(id);
@@ -1307,7 +1309,7 @@ namespace awkward {
     class ByteMasked {
     public:
       ByteMasked()
-          : mask_(awkward::GrowableBuffer<int8_t>(awkward::BuilderOptions())) {
+          : mask_(awkward::GrowableBuffer<int8_t>(default_options)) {
         size_t id = 0;
         set_id(id);
       }
@@ -1443,7 +1445,7 @@ namespace awkward {
     class BitMasked {
     public:
       BitMasked()
-          : mask_(awkward::GrowableBuffer<uint8_t>(awkward::BuilderOptions())),
+          : mask_(awkward::GrowableBuffer<uint8_t>(default_options)),
             current_byte_(uint8_t(0)),
             current_byte_ref_(mask_.append_and_get_ref(current_byte_)),
             current_index_(0) {
@@ -1641,8 +1643,8 @@ namespace awkward {
       using ContentType = std::tuple_element_t<I, Contents>;
 
       Union()
-          : tags_(awkward::GrowableBuffer<TAGS>(awkward::BuilderOptions())),
-            index_(awkward::GrowableBuffer<INDEX>(awkward::BuilderOptions())) {
+          : tags_(awkward::GrowableBuffer<TAGS>(default_options)),
+            index_(awkward::GrowableBuffer<INDEX>(default_options)) {
         size_t id = 0;
         set_id(id);
         for (size_t i = 0; i < contents_count_; i++)

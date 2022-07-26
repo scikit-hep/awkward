@@ -31,10 +31,6 @@ namespace awkward {
     using OptionType =
         typename std::tuple_element<INDEX, decltype(OptionsPack())>::type;
 
-    /// @brief Creates an Options tuple with a default set of parameters:
-    /// an initial number and a resize factor.
-    Options() : pars({1024, 1}) {}
-
     /// @brief Creates an Options tuple from a full set of parameters.
     Options(OPTIONS... options) : pars({options...}) {}
 
