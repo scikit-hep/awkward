@@ -127,12 +127,12 @@ namespace awkward {
     /// of `minreserve` and #initial.
     static GrowableBuffer<PRIMITIVE>
     empty(const BuilderOptions& options, int64_t minreserve) {
-      int64_t actual = options.initial;
+      int64_t actual = options.initial();
       if (actual < minreserve) {
         actual = minreserve;
       }
       return GrowableBuffer(options,
-        std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[actual]),
+        std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]),
         0, actual);
     }
 
@@ -146,11 +146,11 @@ namespace awkward {
     /// [zeros](https://docs.scipy.org/doc/numpy/reference/generated/numpy.zeros.html).
     static GrowableBuffer<PRIMITIVE>
     zeros(const BuilderOptions& options, int64_t length) {
-      int64_t actual = options.initial;
+      int64_t actual = options.initial();
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = 0;
@@ -170,11 +170,11 @@ namespace awkward {
     /// [full](https://docs.scipy.org/doc/numpy/reference/generated/numpy.full.html).
     static GrowableBuffer<PRIMITIVE>
     full(const BuilderOptions& options, PRIMITIVE value, int64_t length) {
-      int64_t actual = options.initial;
+      int64_t actual = options.initial();
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = value;
@@ -193,11 +193,11 @@ namespace awkward {
     /// [arange](https://docs.scipy.org/doc/numpy/reference/generated/numpy.arange.html).
     static GrowableBuffer<PRIMITIVE>
     arange(const BuilderOptions& options, int64_t length) {
-      int64_t actual = options.initial;
+      int64_t actual = options.initial();
       if (actual < length) {
         actual = length;
       }
-      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)actual]);
       PRIMITIVE* rawptr = ptr.get();
       for (int64_t i = 0;  i < length;  i++) {
         rawptr[i] = (PRIMITIVE)i;
@@ -214,14 +214,14 @@ namespace awkward {
     static GrowableBuffer<TO_PRIMITIVE>
     copy_as(const GrowableBuffer<PRIMITIVE>& other) {
       auto len = other.length();
-      int64_t actual = (len < other.options_.initial) ? other.options_.initial : len;
+      int64_t actual = (len < other.options_.initial()) ? other.options_.initial() : len;
 
-      auto ptr = std::unique_ptr<TO_PRIMITIVE[]>(new TO_PRIMITIVE[actual]);
+      auto ptr = std::unique_ptr<TO_PRIMITIVE[]>(new TO_PRIMITIVE[(size_t)actual]);
       TO_PRIMITIVE* rawptr = ptr.get();
 
       other.panel_->copy_as(rawptr, 0);
 
-      return GrowableBuffer<TO_PRIMITIVE>(BuilderOptions(actual, other.options().resize), std::move(ptr), len, actual);
+      return GrowableBuffer<TO_PRIMITIVE>(BuilderOptions(actual, other.options().resize()), std::move(ptr), len, actual);
     }
 
     /// @brief Creates a GrowableBuffer from a full set of parameters.
@@ -248,9 +248,9 @@ namespace awkward {
     /// options #reserved from #options.
     GrowableBuffer(const BuilderOptions& options)
         : GrowableBuffer(options,
-                         std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[options.initial]),
+                         std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[(size_t)options.initial()]),
                          0,
-                         options.initial) { }
+                         options.initial()) { }
 
     /// @brief Move constructor
     ///
@@ -278,10 +278,10 @@ namespace awkward {
     }
 
     /// @brief Discards accumulated data, the #reserved returns to
-    /// options.initial, and a new #ptr is allocated.
+    /// options.initial(), and a new #ptr is allocated.
     void
     clear() {
-      panel_ = std::move(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>((size_t)options_.initial)));
+      panel_ = std::move(std::unique_ptr<Panel<PRIMITIVE>>(new Panel<PRIMITIVE>((size_t)options_.initial())));
       ptr_ = panel_.get();
     }
 
@@ -310,7 +310,7 @@ namespace awkward {
     void
     append(PRIMITIVE datum) {
       if (ptr_->current_length() == ptr_->reserved()) {
-        add_panel((size_t)ceil(ptr_->reserved() * options_.resize));
+        add_panel((size_t)ceil(ptr_->reserved() * options_.resize()));
       }
       fill_panel(datum);
     }
@@ -373,9 +373,6 @@ namespace awkward {
 
     /// @brief Initial size configuration for building a panel.
     const BuilderOptions options_;
-
-    /// @brief Filled panels data length.
-    int64_t length_;
 
     /// @brief Filled panels data length.
     int64_t length_;

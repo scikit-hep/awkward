@@ -2,8 +2,6 @@
 
 #include "awkward/LayoutBuilder.h"
 
-static const unsigned initial = 10;
-
 template <class NODE, class PRIMITIVE, class LENGTH>
 void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
   std::cout << node << ": ";
@@ -34,13 +32,13 @@ empty_buffers(std::map<std::string, size_t> &names_nbytes)
 using UserDefinedMap = std::map<std::size_t, std::string>;
 
 template<class PRIMITIVE>
-using NumpyBuilder = awkward::LayoutBuilder::Numpy<initial, PRIMITIVE>;
+using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
 template<class PRIMITIVE, class BUILDER>
-using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, PRIMITIVE, BUILDER>;
+using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
-using ListBuilder = awkward::LayoutBuilder::List<initial, PRIMITIVE, BUILDER>;
+using ListBuilder = awkward::LayoutBuilder::List<PRIMITIVE, BUILDER>;
 
 using EmptyBuilder = awkward::LayoutBuilder::Empty;
 
@@ -60,25 +58,25 @@ template <unsigned SIZE, class BUILDER>
 using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
-using IndexedBuilder = awkward::LayoutBuilder::Indexed<initial, PRIMITIVE, BUILDER>;
+using IndexedBuilder = awkward::LayoutBuilder::Indexed<PRIMITIVE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
-using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<initial, PRIMITIVE, BUILDER>;
+using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
 
 template<class BUILDER>
 using UnmaskedBuilder = awkward::LayoutBuilder::Unmasked<BUILDER>;
 
 template<bool VALID_WHEN, class BUILDER>
-using ByteMaskedBuilder = awkward::LayoutBuilder::ByteMasked<initial, VALID_WHEN, BUILDER>;
+using ByteMaskedBuilder = awkward::LayoutBuilder::ByteMasked<VALID_WHEN, BUILDER>;
 
 template<bool VALID_WHEN, bool LSB_ORDER, class BUILDER>
-using BitMaskedBuilder = awkward::LayoutBuilder::BitMasked<initial, VALID_WHEN, LSB_ORDER, BUILDER>;
+using BitMaskedBuilder = awkward::LayoutBuilder::BitMasked<VALID_WHEN, LSB_ORDER, BUILDER>;
 
 template<class... BUILDERS>
-using UnionBuilder8_U32 = awkward::LayoutBuilder::Union<initial, int8_t, uint32_t, BUILDERS...>;
+using UnionBuilder8_U32 = awkward::LayoutBuilder::Union<int8_t, uint32_t, BUILDERS...>;
 
 template<class... BUILDERS>
-using UnionBuilder8_64 = awkward::LayoutBuilder::Union<initial, int8_t, int64_t, BUILDERS...>;
+using UnionBuilder8_64 = awkward::LayoutBuilder::Union<int8_t, int64_t, BUILDERS...>;
 
 
 void
@@ -1796,6 +1794,9 @@ int main(int /* argc */, char ** /* argv */) {
   test_char_form();
   test_string_form();
   test_categorical_form();
+
+  awkward::Options<int64_t, int64_t> options(1024, 1);
+  std::cout << options.initial() << " " << options.resize() << std::endl;
 
   return 0;
 }

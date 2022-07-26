@@ -3,6 +3,7 @@
 #ifndef AWKWARD_LAYOUTBUILDER_H_
 #define AWKWARD_LAYOUTBUILDER_H_
 
+#include "awkward/BuilderOptions.h"
 #include "awkward/GrowableBuffer.h"
 #include "awkward/utils.h"
 
@@ -30,11 +31,18 @@ namespace awkward {
   };
 
   // NumpyLayoutBuilder
-  template <unsigned INITIAL, typename PRIMITIVE>
+  template <typename PRIMITIVE>
   class Numpy {
   public:
+
     Numpy()
-        : data_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) {
+        : data_(awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())) {
+      size_t id = 0;
+      set_id(id);
+    }
+
+    Numpy(const awkward::BuilderOptions& options)
+        : data_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
       size_t id = 0;
       set_id(id);
     }
@@ -75,7 +83,8 @@ namespace awkward {
       return data_.length();
     }
 
-    bool is_valid(std::string& error) const noexcept {
+    bool
+    is_valid(std::string& error) const noexcept {
       return true;
     }
 
@@ -129,11 +138,19 @@ namespace awkward {
   };
 
   // ListOffsetLayoutBuilder
-  template <unsigned INITIAL, typename PRIMITIVE, typename BUILDER>
+  template <typename PRIMITIVE, typename BUILDER>
   class ListOffset {
   public:
+
     ListOffset()
-        : offsets_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) {
+        : offsets_(awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())) {
+      offsets_.append(0);
+      size_t id = 0;
+      set_id(id);
+    }
+
+    ListOffset(const awkward::BuilderOptions& options)
+        : offsets_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
       offsets_.append(0);
       size_t id = 0;
       set_id(id);
@@ -183,7 +200,8 @@ namespace awkward {
       return offsets_.length() - 1;
     }
 
-    bool is_valid(std::string& error) const noexcept {
+    bool
+    is_valid(std::string& error) const noexcept {
       if (content_.length() != offsets_.last()) {
         std::stringstream out;
         out << "ListOffset node" << id_ << "has content length " << content_.length()
@@ -238,12 +256,20 @@ namespace awkward {
   };
 
   // ListLayoutBuilder
-  template <unsigned INITIAL, typename PRIMITIVE, typename BUILDER>
+  template <typename PRIMITIVE, typename BUILDER>
   class List {
   public:
+
     List()
-        : starts_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL))
-        , stops_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL)) {
+        : starts_(awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions()))
+        , stops_(awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions())) {
+      size_t id = 0;
+      set_id(id);
+    }
+
+    List(const awkward::BuilderOptions& options)
+        : starts_(awkward::GrowableBuffer<PRIMITIVE>(options))
+        , stops_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
       size_t id = 0;
       set_id(id);
     }
@@ -389,7 +415,8 @@ namespace awkward {
       return 0;
     }
 
-    bool is_valid(std::string& /* error */) const noexcept {
+    bool
+    is_valid(std::string& /* error */) const noexcept {
       return true;
     }
 
@@ -460,7 +487,8 @@ namespace awkward {
       return length_;
     }
 
-    bool is_valid(std::string& /* error */) const noexcept {
+    bool
+    is_valid(std::string& /* error */) const noexcept {
       return true;
     }
 
@@ -914,11 +942,19 @@ namespace awkward {
   };
 
   // IndexedLayoutBuilder
-  template <unsigned INITIAL, typename PRIMITIVE, typename BUILDER>
+  template <typename PRIMITIVE, typename BUILDER>
   class Indexed {
   public:
+
     Indexed()
-        : index_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL))
+        : index_(awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions()))
+        , last_valid_(-1) {
+      size_t id = 0;
+      set_id(id);
+    }
+
+    Indexed(const awkward::BuilderOptions& options)
+        : index_(awkward::GrowableBuffer<PRIMITIVE>(options))
         , last_valid_(-1) {
       size_t id = 0;
       set_id(id);
@@ -1040,11 +1076,19 @@ namespace awkward {
   };
 
   // IndexedOptionLayoutBuilder
-  template <unsigned INITIAL, typename PRIMITIVE, typename BUILDER>
+  template <typename PRIMITIVE, typename BUILDER>
   class IndexedOption {
   public:
+
     IndexedOption()
-        : index_(awkward::GrowableBuffer<PRIMITIVE>(INITIAL))
+        : index_(awkward::GrowableBuffer<PRIMITIVE>(awkward::BuilderOptions()))
+        , last_valid_(-1) {
+      size_t id = 0;
+      set_id(id);
+    }
+
+    IndexedOption(const awkward::BuilderOptions& options)
+        : index_(awkward::GrowableBuffer<PRIMITIVE>(options))
         , last_valid_(-1) {
       size_t id = 0;
       set_id(id);
@@ -1255,11 +1299,18 @@ namespace awkward {
   };
 
   // ByteMaskedLayoutBuilder
-  template <unsigned INITIAL, bool VALID_WHEN, typename BUILDER>
+  template <bool VALID_WHEN, typename BUILDER>
   class ByteMasked {
   public:
+
     ByteMasked()
-        : mask_(awkward::GrowableBuffer<int8_t>(INITIAL)) {
+        : mask_(awkward::GrowableBuffer<int8_t>(awkward::BuilderOptions())) {
+      size_t id = 0;
+      set_id(id);
+    }
+
+    ByteMasked(const awkward::BuilderOptions& options)
+        : mask_(awkward::GrowableBuffer<int8_t>(options)) {
       size_t id = 0;
       set_id(id);
     }
@@ -1388,11 +1439,32 @@ namespace awkward {
 
   // FIXME: mask value incorrect
   // BitMaskedLayoutBuilder
-  template <unsigned INITIAL, bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
+  template <bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
   class BitMasked {
   public:
+
     BitMasked()
-        : mask_(awkward::GrowableBuffer<uint8_t>(INITIAL))
+        : mask_(awkward::GrowableBuffer<uint8_t>(awkward::BuilderOptions()))
+        , current_byte_(uint8_t(0))
+        , current_byte_ref_(mask_.append_and_get_ref(current_byte_))
+        , current_index_(0)
+      {
+      size_t id = 0;
+      set_id(id);
+      if (lsb_order_) {
+        for(size_t i = 0; i < 8; i++) {
+          cast_[i] = 1 << i;
+        }
+      }
+      else {
+        for(size_t i = 0; i < 8; i++) {
+          cast_[i] = 128 >> i;
+        }
+      }
+    }
+
+    BitMasked(const awkward::BuilderOptions& options)
+        : mask_(awkward::GrowableBuffer<uint8_t>(options))
         , current_byte_(uint8_t(0))
         , current_byte_ref_(mask_.append_and_get_ref(current_byte_))
         , current_index_(0)
@@ -1452,7 +1524,7 @@ namespace awkward {
     BUILDER&
     extend_null(size_t size) noexcept {
       for (size_t i = 0; i < size; i++) {
-      append_null();
+        append_null();
       }
       return content_;
     }
@@ -1568,7 +1640,7 @@ namespace awkward {
   };
 
   // UnionLayoutBuilder
-  template <unsigned INITIAL, typename TAGS, typename INDEX,  typename... BUILDERS>
+  template <typename TAGS, typename INDEX,  typename... BUILDERS>
   class Union {
   public:
     using Contents = typename std::tuple<BUILDERS...>;
@@ -1577,8 +1649,17 @@ namespace awkward {
     using ContentType = std::tuple_element_t<I, Contents>;
 
     Union()
-        : tags_(awkward::GrowableBuffer<TAGS>(INITIAL))
-        , index_(awkward::GrowableBuffer<INDEX>(INITIAL)) {
+        : tags_(awkward::GrowableBuffer<TAGS>(awkward::BuilderOptions()))
+        , index_(awkward::GrowableBuffer<INDEX>(awkward::BuilderOptions())) {
+      size_t id = 0;
+      set_id(id);
+      for (size_t i = 0; i < contents_count_; i++)
+        last_valid_index_[i] = -1;
+    }
+
+    Union(const awkward::BuilderOptions& options)
+        : tags_(awkward::GrowableBuffer<TAGS>(options))
+        , index_(awkward::GrowableBuffer<INDEX>(options)) {
       size_t id = 0;
       set_id(id);
       for (size_t i = 0; i < contents_count_; i++)
