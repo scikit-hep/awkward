@@ -1439,7 +1439,6 @@ namespace awkward {
       bool valid_when_ = VALID_WHEN;
     };
 
-    // FIXME: mask value incorrect
     // BitMaskedLayoutBuilder
     template <bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
     class BitMasked {
@@ -1578,8 +1577,10 @@ namespace awkward {
 
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        mask_.concatenate(static_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]));
+        mask_.concatenate_from(static_cast<uint8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]), 0, 1);
+        mask_.append(static_cast<uint8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]), mask_.length() - 1, 0, 1);
         content_.to_buffers(buffers);
       }
 

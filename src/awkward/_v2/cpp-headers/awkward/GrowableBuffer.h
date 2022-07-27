@@ -61,6 +61,23 @@ namespace awkward {
     }
 
     void
+    append(PRIMITIVE* to_ptr, size_t offset, size_t from, int64_t length) const noexcept {
+      memcpy(to_ptr + offset,
+             reinterpret_cast<void*>(ptr_.get() + from),
+             length * sizeof(PRIMITIVE) - from);
+    }
+
+    void
+    concatenate_to_from(PRIMITIVE* to_ptr, size_t offset, size_t from) const noexcept {
+      memcpy(to_ptr + offset,
+             reinterpret_cast<void*>(ptr_.get() + from),
+             length_ * sizeof(PRIMITIVE) - from);
+      if (next_) {
+        next_->concatenate_to(to_ptr, offset + length_);
+      }
+    }
+
+    void
     concatenate_to(PRIMITIVE* to_ptr, size_t offset) const noexcept {
       memcpy(to_ptr + offset,
              reinterpret_cast<void*>(ptr_.get()),
@@ -360,6 +377,24 @@ namespace awkward {
     concatenate(PRIMITIVE* external_pointer) const noexcept {
       if (external_pointer) {
         panel_->concatenate_to(external_pointer, 0);
+      }
+    }
+
+    /// @brief Copies and concatenates all accumulated data from multiple panels to one
+    /// contiguously allocated `external_pointer`.
+    void
+    concatenate_from(PRIMITIVE* external_pointer, size_t to, size_t from) const noexcept {
+      if (external_pointer) {
+        panel_->concatenate_to_from(external_pointer, to, from);
+      }
+    }
+
+    /// @brief Copies and concatenates all accumulated data from multiple panels to one
+    /// contiguously allocated `external_pointer`.
+    void
+    append(PRIMITIVE* external_pointer, size_t offset, size_t from, int64_t length) const noexcept {
+      if (external_pointer) {
+        panel_->append(external_pointer, offset, from, length);
       }
     }
 

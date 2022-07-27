@@ -1795,8 +1795,5 @@ int main(int /* argc */, char ** /* argv */) {
   test_string_form();
   test_categorical_form();
 
-  awkward::Options<int64_t, int64_t> options(1024, 1);
-  std::cout << options.initial() << " " << options.resize() << std::endl;
-
   return 0;
 }
