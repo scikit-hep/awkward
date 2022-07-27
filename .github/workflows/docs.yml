@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - feat-merge-docs
+      - docs
   release:
     types: [released]
   workflow_dispatch:
