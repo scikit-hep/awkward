@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - main
-      - docs
       - docs-phase-2
+      - docs
   release:
     types: [released]
   workflow_dispatch:
