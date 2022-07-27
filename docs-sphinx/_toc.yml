@@ -163,5 +163,5 @@ subtrees:
       - file: reference/index
         title: "API Reference"
 
-      - file: _auto/changelog
+      - file: release/index
         title: "Release Notes"

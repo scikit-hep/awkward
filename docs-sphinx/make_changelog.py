@@ -6,6 +6,7 @@ import subprocess
 import re
 import http.client
 import datetime
+import io
 
 tagslist_text = subprocess.run(["git", "show-ref", "--tags"], stdout=subprocess.PIPE).stdout
 tagslist = dict(re.findall(rb"([0-9a-f]{40}) refs/tags/([0-9\.rc]+)", tagslist_text))
@@ -45,98 +46,113 @@ def pypi_exists(tag, old):
     response.read()
     return response.status == 200
 
-with open("_auto/changelog.rst", "w") as outfile:
-    outfile.write("Release history\n")
-    outfile.write("---------------\n")
 
-    first = True
-    numprs = None
 
-    for taghash, subject in subjects:
-        if taghash in tagslist:
-            tag = tagslist[taghash].decode()
-            tagurl = "https://github.com/scikit-hep/awkward-1.0/releases/tag/{0}".format(tag)
 
-            if numprs == 0:
-                outfile.write("*(no pull requests)*\n")
+first = True
+numprs = None
+
+outfile = open(f"release/index.rst", "w")
+outfile.write("Release Notes\n")
+outfile.write("-------------\n")
+
+for taghash, subject in subjects:
+    if taghash in tagslist:
+        tag = tagslist[taghash].decode()
+        tagurl = "https://github.com/scikit-hep/awkward-1.0/releases/tag/{0}".format(tag)
+
+        if numprs == 0:
+            outfile.write("*(no pull requests)*\n")
+        numprs = 0
+        outfile = open(f"release/{tag}.rst", "w")
+
+        header_text = "\nRelease `{0} <{1}>`__\n".format(tag, tagurl)
+        outfile.write(header_text)
+        outfile.write("="*len(header_text) + "\n\n")
+
+        if tag in dates:
+            date_text = "**" + dates[tag] + "**"
+        else:
+            date_text = ""
+
+        assets = []
+        if tag.startswith("0."):
+            if pypi_exists(tag, True):
+                assets.append("`pip <https://pypi.org/project/awkward1/{0}/>`__".format(tag))
+        else:
+            if pypi_exists(tag, False):
+                assets.append("`pip <https://pypi.org/project/awkward/{0}/>`__".format(tag))
+        if tag in tarballs:
+            assets.append("`tar <{0}>`__".format(tarballs[tag]))
+        if tag in zipballs:
+            assets.append("`zip <{0}>`__".format(zipballs[tag]))
+        if len(assets) == 0:
+            assets_text = ""
+        else:
+            assets_text = " ({0})".format(", ".join(assets))
+
+        if len(date_text) + len(assets_text) > 0:
+            outfile.write("{0}{1}\n\n".format(date_text, assets_text))
+
+        if tag in releases:
+            text = releases[tag].strip().replace("For details, see the [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html).", "")
+            text = re.sub(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", r"`\1#\2 <https://github.com/\1/issues/\2>`__", text)
+            text = re.sub(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", r"\1`#\2 <https://github.com/scikit-hep/awkward-1.0/issues/\2>`__", text)
+            outfile.write(text + "\n\n")
+
+        first = False
+
+    m = re.match(rb"(.*) \(#([1-9][0-9]*)\)", subject)
+    if m is not None:
+        if numprs is None:
             numprs = 0
+        numprs += 1
 
-            header_text = "\nRelease `{0} <{1}>`__\n".format(tag, tagurl)
+        if first:
+            header_text = "\nUnreleased (`main branch <https://github.com/scikit-hep/awkward-1.0>`__ on GitHub)\n"
             outfile.write(header_text)
             outfile.write("="*len(header_text) + "\n\n")
 
-            if tag in dates:
-                date_text = "**" + dates[tag] + "**"
-            else:
-                date_text = ""
+        text = m.group(1).decode().strip()
+        prnum = m.group(2).decode()
+        prurl = "https://github.com/scikit-hep/awkward-1.0/pull/{0}".format(prnum)
 
-            assets = []
-            if tag.startswith("0."):
-                if pypi_exists(tag, True):
-                    assets.append("`pip <https://pypi.org/project/awkward1/{0}/>`__".format(tag))
-            else:
-                if pypi_exists(tag, False):
-                    assets.append("`pip <https://pypi.org/project/awkward/{0}/>`__".format(tag))
-            if tag in tarballs:
-                assets.append("`tar <{0}>`__".format(tarballs[tag]))
-            if tag in zipballs:
-                assets.append("`zip <{0}>`__".format(zipballs[tag]))
-            if len(assets) == 0:
-                assets_text = ""
-            else:
-                assets_text = " ({0})".format(", ".join(assets))
+        known = [prnum]
+        for issue in re.findall(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", text):
+            known.append(issue)
+        for issue in re.findall(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", text):
+            known.append(issue[1])
 
-            if len(date_text) + len(assets_text) > 0:
-                outfile.write("{0}{1}\n\n".format(date_text, assets_text))
+        text = re.sub(r"`", "``", text)
+        text = re.sub(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", r"`\1#\2 <https://github.com/\1/issues/\2>`__", text)
+        text = re.sub(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", r"\1`#\2 <https://github.com/scikit-hep/awkward-1.0/issues/\2>`__", text)
+        if re.match(r".*[a-zA-Z0-9_]$", text):
+            text = text + "."
 
-            if tag in releases:
-                text = releases[tag].strip().replace("For details, see the [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html).", "")
-                text = re.sub(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", r"`\1#\2 <https://github.com/\1/issues/\2>`__", text)
-                text = re.sub(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", r"\1`#\2 <https://github.com/scikit-hep/awkward-1.0/issues/\2>`__", text)
-                outfile.write(text + "\n\n")
+        body_text = subprocess.run(["git", "log", "-1", taghash.decode(), "--format='format:%b'"], stdout=subprocess.PIPE).stdout.decode()
+        addresses = []
+        for issue in re.findall(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", body_text):
+            if issue not in known:
+                addresses.append("`{0}#{1} <https://github.com/{0}/issues/{1}>`__".format(issue[0], issue[1]))
+        for issue in re.findall(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", body_text):
+            if issue[1] not in known:
+                addresses.append("`#{0} <https://github.com/scikit-hep/awkward-1.0/issues/{0}>`__".format(issue[1]))
+        if len(addresses) == 0:
+            addresses_text = ""
+        else:
+            addresses_text = " (**also:** {0})".format(", ".join(addresses))
 
-            first = False
+        outfile.write("* PR `#{0} <{1}>`__: {2}{3}\n".format(prnum, prurl, text, addresses_text))
 
-        m = re.match(rb"(.*) \(#([1-9][0-9]*)\)", subject)
-        if m is not None:
-            if numprs is None:
-                numprs = 0
-            numprs += 1
+        first = False
 
-            if first:
-                header_text = "\nUnreleased (`main branch <https://github.com/scikit-hep/awkward-1.0>`__ on GitHub)\n"
-                outfile.write(header_text)
-                outfile.write("="*len(header_text) + "\n\n")
 
-            text = m.group(1).decode().strip()
-            prnum = m.group(2).decode()
-            prurl = "https://github.com/scikit-hep/awkward-1.0/pull/{0}".format(prnum)
-
-            known = [prnum]
-            for issue in re.findall(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", text):
-                known.append(issue)
-            for issue in re.findall(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", text):
-                known.append(issue[1])
-
-            text = re.sub(r"`", "``", text)
-            text = re.sub(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", r"`\1#\2 <https://github.com/\1/issues/\2>`__", text)
-            text = re.sub(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", r"\1`#\2 <https://github.com/scikit-hep/awkward-1.0/issues/\2>`__", text)
-            if re.match(r".*[a-zA-Z0-9_]$", text):
-                text = text + "."
-
-            body_text = subprocess.run(["git", "log", "-1", taghash.decode(), "--format='format:%b'"], stdout=subprocess.PIPE).stdout.decode()
-            addresses = []
-            for issue in re.findall(r"([a-zA-Z0-9\-_]+/[a-zA-Z0-9\-_]+)#([1-9][0-9]*)", body_text):
-                if issue not in known:
-                    addresses.append("`{0}#{1} <https://github.com/{0}/issues/{1}>`__".format(issue[0], issue[1]))
-            for issue in re.findall(r"([^a-zA-Z0-9\-_])#([1-9][0-9]*)", body_text):
-                if issue[1] not in known:
-                    addresses.append("`#{0} <https://github.com/scikit-hep/awkward-1.0/issues/{0}>`__".format(issue[1]))
-            if len(addresses) == 0:
-                addresses_text = ""
-            else:
-                addresses_text = " (**also:** {0})".format(", ".join(addresses))
-
-            outfile.write("* PR `#{0} <{1}>`__: {2}{3}\n".format(prnum, prurl, text, addresses_text))
-
-            first = False
+# Generate toctree
+with open("release/index.rst", "a") as f:
+    f.write("""Released\n========""")
+    f.write("\n\n.. toctree::\n")
+    for taghash, subject in subjects:
+        if taghash not in tagslist:
+            continue
+        tag = tagslist[taghash].decode()
+        f.write(f"\n  {tag}")
