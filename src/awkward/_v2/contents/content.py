@@ -522,7 +522,10 @@ class Content:
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
             if out.length == 0:
                 if isinstance(items[0], slice):
-                    if sum(int(x is None) for x in [items[0].start, items[0].stop]) >= 1:
+                    if (
+                        sum(int(x is None) for x in [items[0].start, items[0].stop])
+                        >= 1
+                    ):
                         return ak._v2.contents.RegularArray(
                             out,
                             0,
