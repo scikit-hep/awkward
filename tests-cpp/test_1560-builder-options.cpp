@@ -6,7 +6,7 @@
 int main(int /* argc */, char ** /* argv */) {
 
   awkward::Options<int64_t, double> options(1024, 1.0);
-  
+
   assert(options.initial() == 1024);
   assert(options.resize() == 1.0);
 
