@@ -52,9 +52,7 @@ def pypi_exists(tag, old):
 first = True
 numprs = None
 
-outfile = open(f"release/index.rst", "w")
-outfile.write("Release Notes\n")
-outfile.write("-------------\n")
+outfile = open(f"release/_unreleased.rst", "w")
 
 for taghash, subject in subjects:
     if taghash in tagslist:
@@ -148,8 +146,7 @@ for taghash, subject in subjects:
 
 
 # Generate toctree
-with open("release/index.rst", "a") as f:
-    f.write("""Released\n========""")
+with open("release/_toctree.rst", "w") as f:
     f.write("\n\n.. toctree::\n")
     for taghash, subject in subjects:
         if taghash not in tagslist:
