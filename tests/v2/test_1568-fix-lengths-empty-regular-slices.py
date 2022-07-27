@@ -6,7 +6,7 @@ import awkward as ak  # noqa: F401
 to_list = ak._v2.operations.to_list
 
 
-def test_1999():
+def test_lengths_empty_regular_slices():
     a = ak._v2.Array([[1, 2, 3], [4, 5, 6]])
     assert to_list(a[:, []]) == [[], []]
 

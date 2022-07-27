@@ -508,7 +508,6 @@ class Content:
                 return self
 
             items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
-
             nextwhere = ak._v2._slicing.getitem_broadcast(items)
 
             next = ak._v2.contents.RegularArray(
@@ -521,17 +520,17 @@ class Content:
             )
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
-            print("out ", out)
             if out.length == 0:
-                if isinstance(out, ak._v2.contents.RegularArray) and out.size > 0:
-                    return ak._v2.contents.RegularArray(
-                        out,
-                        0,
-                        out.size,
-                        None,
-                        None,
-                        self._nplike,
-                    )
+                if isinstance(items[0], slice):
+                    if sum(int(x is None) for x in [items[0].start, items[0].stop]) >= 1:
+                        return ak._v2.contents.RegularArray(
+                            out,
+                            0,
+                            out.size,
+                            None,
+                            None,
+                            self._nplike,
+                        )
                 return out._getitem_nothing()
             else:
                 return out._getitem_at(0)
