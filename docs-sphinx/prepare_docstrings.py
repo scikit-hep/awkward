@@ -128,7 +128,7 @@ tostr.op = {
 
 def dosig(node):
     if node is None:
-        return "(self)"
+        return "self"
     else:
         argnames = [x.arg for x in node.args.args]
         defaults = ["=" + tostr(x) for x in node.args.defaults]
