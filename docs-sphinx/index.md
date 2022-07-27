@@ -22,7 +22,7 @@ kernelspec:
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
-[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.org)
+[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.readthedocs.io/)
 [![Gitter](https://img.shields.io/badge/chat-online-success)](https://gitter.im/Scikit-HEP/awkward-array)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
@@ -32,32 +32,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Quickstart
 ==========
 
-Use the left-bar for tutorials (≡ button on mobile), click below for reference documentation, or [here for GitHub](https://github.com/scikit-hep/awkward-1.0). Note that the most complete documentation can be found in the [Python API reference](https://awkward-array.readthedocs.io/en/latest/index.html): each function has a thorough docstring, usually with examples.
-
-<table style="margin-top: 30px">
-  <tr>
-    <td width="50%" valign="top" align="center">
-      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-sphinx.png" width="80%">
-      </a>
-      <p align="center" style="margin-top: 10px"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python<br>API reference
-        </a>
-      </b></p>
-    </td>
-    <td width="50%" valign="top" align="center">
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-doxygen.png" width="80%">
-      </a>
-      <p align="center" style="margin-top: 10px"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
-        </a>
-      </b></p>
-    </td>
-  </tr>
-</table>
+Use the left-bar for tutorials (≡ button on mobile), click below for reference documentation, or [here for GitHub](https://github.com/scikit-hep/awkward-1.0). Note that the most complete documentation can be found in the {doc}`api-reference`: each function has a thorough docstring, usually with examples. Documentation for the compiled portion of Awkward Array can be found in the [C++ API Reference](https://awkward-array.readthedocs.io/en/latest/_static/index.html). User Guides can be found in {doc}`user-guide`.
 
 Installation
 ------------
@@ -88,13 +63,9 @@ See Awkward Array's [GitHub page](https://github.com/scikit-hep/awkward-1.0) for
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
    * [Roadmap](https://github.com/scikit-hep/awkward-1.0#roadmap) of future releases.
-   * [awkward-array.org](https://awkward-array.org) (this site) is hosted by [Netlify](https://www.netlify.com).
    * [CONTRIBUTING.md](https://github.com/scikit-hep/awkward-1.0/blob/main/CONTRIBUTING.md) for technical information on how to contribute.
    * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.
    * The [LICENSE](https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE) is BSD-3.
 
 See also [papers and talks about Awkward Array](https://github.com/scikit-hep/awkward-1.0#papers-and-talks-about-awkward-array) and a [table of contributors](https://github.com/scikit-hep/awkward-1.0#acknowledgements).
 
-----------
-
-Support for this work was provided by NSF cooperative agreement [OAC-1836650](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650) (IRIS-HEP), grant [OAC-1450377](https://nsf.gov/awardsearch/showAward?AWD_ID=1450377) (DIANA/HEP), [PHY-1520942](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942) (US-CMS LHC Ops), and [OAC-2103945](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945) (Awkward Array).
