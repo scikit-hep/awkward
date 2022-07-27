@@ -160,7 +160,7 @@ subtrees:
               - file: user-guide/how-to-differentiate-using-jax
                 title: "Differentiation using JAX"
 
-      - file: api-reference
+      - file: reference/index
         title: "API Reference"
 
       - file: _auto/changelog

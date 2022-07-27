@@ -44,7 +44,7 @@ The user guide provides in-depth information on the key concepts of Awkward Arra
 
 :::{grid-item-card}
 :link-type: doc
-:link: api-reference
+:link: reference/index
 
 {fas}`code`
 

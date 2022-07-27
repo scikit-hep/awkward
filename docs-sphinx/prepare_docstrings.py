@@ -1,19 +1,20 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import re
-import os
 import ast
 import glob
 import io
 import subprocess
+import pathlib
 
 import sphinx.ext.napoleon
 
 config = sphinx.ext.napoleon.Config(napoleon_use_param=True,
                                     napoleon_use_rtype=True)
 
-if not os.path.exists("_auto"):
-    os.mkdir("_auto")
+reference_path = pathlib.Path("reference")
+output_path = reference_path / "generated"
+output_path.mkdir(exist_ok=True)
 
 latest_commit = (
     subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE)
@@ -217,12 +218,12 @@ def doclass(link, linelink, shortname, name, astcls):
         if docstring is not None:
             outfile.write(dodoc(docstring, qualname, names) + "\n\n")
 
-    toctree.append(os.path.join("_auto", qualname + ".rst"))
+    toctree.append(os.path.join("generated", qualname + ".rst"))
     out = outfile.getvalue()
-    if not os.path.exists(toctree[-1]) or open(toctree[-1]).read() != out:
+    entry_path = reference_path / toctree[-1]
+    if not (entry_path.exists() and entry_path.read_text() == out):
         print("writing", toctree[-1])
-        with open(toctree[-1], "w") as outfile:
-            outfile.write(out)
+        entry_path.write_text(out)
 
 def dofunction(link, linelink, shortname, name, astfcn):
     if name.startswith("_"):
@@ -244,11 +245,12 @@ def dofunction(link, linelink, shortname, name, astfcn):
 
     out = outfile.getvalue()
 
-    toctree.append(os.path.join("_auto", qualname + ".rst"))
-    if not os.path.exists(toctree[-1]) or open(toctree[-1]).read() != out:
+    toctree.append(os.path.join("generated", qualname + ".rst"))
+
+    entry_path = reference_path / toctree[-1]
+    if not (entry_path.exists() and entry_path.read_text() == out):
         print("writing", toctree[-1])
-        with open(toctree[-1], "w") as outfile:
-            outfile.write(out)
+        entry_path.write_text(out)
 
 done_extra = False
 for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
@@ -364,8 +366,7 @@ for x in toctree:
     outfile.write("    " + x + "\n")
 
 out = outfile.getvalue()
-outfilename = os.path.join("_auto", "toctree.txt")
-if not os.path.exists(outfilename) or open(outfilename).read() != out:
-    print("writing", outfilename)
-    with open(outfilename, "w") as outfile:
-        outfile.write(out)
+toctree_path = output_path / "toctree.txt"
+if not (toctree_path.exists() and toctree_path.read_text() == out):
+    print("writing", toctree_path)
+    toctree_path.write_text(out)

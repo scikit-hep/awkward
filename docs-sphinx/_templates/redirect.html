@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Redirect using meta mechanism in absence of scripts-->
+    <noscript><meta id="redirect" http-equiv="refresh" content="0; url=${to_uri}"></noscript>
+  </head>
+
+  <body>
+  This page has moved. Redirecting to the new destination ...
+    
+  <!-- Redirect using JS to preserve the fragment -->
+  <script>
+  window.location.href = "${to_uri}" + (window.location.search || '') + (window.location.hash || '');
+  </script>
+  </body>
+</html>

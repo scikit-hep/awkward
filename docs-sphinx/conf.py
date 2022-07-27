@@ -11,6 +11,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import json
+
 # import sys
 # sys.path.insert(0, os.path.abspath("."))
 
@@ -31,6 +33,8 @@ extensions = [
     'sphinx_external_toc',
     "sphinx.ext.intersphinx",
     'myst_nb',
+    # Preserve old links
+    'sphinx_reredirects'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -105,6 +109,11 @@ intersphinx_mapping = {
     "numba": ("https://numba.pydata.org/numba-doc/latest", None),
 }
 
+# Preserve legacy routes
+with open("redirects.json") as f:
+    redirects = json.load(f)
+
+redirect_html_template_file = "_templates/redirect.html"
 
 import sys
 import subprocess
