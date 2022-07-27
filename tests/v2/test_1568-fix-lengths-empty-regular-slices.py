@@ -11,4 +11,4 @@ def test_lengths_empty_regular_slices():
     assert to_list(a[:, []]) == [[], []]
 
     b = ak._v2.operations.to_regular(a, axis=1)
-    assert  to_list(b[:, []]) == [[], []]
+    assert to_list(b[:, []]) == [[], []]

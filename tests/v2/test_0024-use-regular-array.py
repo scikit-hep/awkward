@@ -52,8 +52,14 @@ def test_empty_array_slice():
     )
     assert to_list(listarray[2, 1, []]) == []
     assert listarray.typetracer[2, 1, []].form == listarray[2, 1, []].form
+<<<<<<< HEAD
     assert to_list(listarray[2, [1], []]) == []
     assert listarray.typetracer[2, [1], []].form == listarray[2, [1], []].form
+=======
+    assert to_list(listarray[2, [1], []]) == [[]]
+    # FIXME
+    # assert listarray.typetracer[2, [1], []].form == listarray[2, [1], []].form
+>>>>>>> 0c477f49cdcb3ed31fb70655391633b007e739fb
     assert to_list(listarray[2, [], []]) == []
     assert listarray.typetracer[2, [], []].form == listarray[2, [], []].form
 
