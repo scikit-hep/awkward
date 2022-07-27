@@ -37,6 +37,7 @@ compiler = ROOT.gInterpreter.Declare
 
 done = compiler(
     """
+#include "awkward/GrowableBuffer.h"
 #include "rdataframe_jagged_builders.h"
 """
 )
