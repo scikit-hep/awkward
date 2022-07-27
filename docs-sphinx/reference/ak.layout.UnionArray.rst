@@ -172,52 +172,43 @@ a UnionArray has the following.
 
 .. py:class:: UnionArray(tags, index, contents, identities=None, parameters=None)
 
-ak.layout.UnionArray.__init__
-=============================
+.. _ak.layout.UnionArray.__init__:
 
 .. py:method:: UnionArray.__init__(tags, index, contents, identities=None, parameters=None)
 
-ak.layout.UnionArray.sparse_index
-=================================
+.. _ak.layout.UnionArray.sparse_index:
 
 .. py:method:: UnionArray.sparse_index(length)
 
-ak.layout.UnionArray.regular_index
-==================================
+.. _ak.layout.UnionArray.regular_index:
 
 .. py:method:: UnionArray.regular_index(tags)
 
-ak.layout.UnionArray.tags
-=========================
+.. _ak.layout.UnionArray.tags:
 
 .. py:attribute:: UnionArray.tags
 
-ak.layout.UnionArray.index
-==========================
+.. _ak.layout.UnionArray.index:
 
 .. py:attribute:: UnionArray.index
 
-ak.layout.UnionArray.contents
-=============================
+.. _ak.layout.UnionArray.contents:
 
 .. py:attribute:: UnionArray.contents
 
-ak.layout.UnionArray.numcontents
-================================
+.. _ak.layout.UnionArray.numcontents:
 
 .. py:attribute:: UnionArray.numcontents
 
 Returns the number of ``contents``.
 
-ak.layout.UnionArray.content
-============================
+.. _ak.layout.UnionArray.content:
 
 .. py:method:: UnionArray.content(i)
 
 Returns one of the ``contents`` by index.
 
-ak.layout.UnionArray.project
-============================
+.. _ak.layout.UnionArray.project:
 
 .. py:method:: UnionArray.project(i)
 
@@ -230,8 +221,7 @@ Returns an array of only one of the possibilities, like selecting
 Note that this is different from the ``content(i)`` method because this reindexes
 to present the result in its logical order, not its physical order.
 
-ak.layout.UnionArray.simplify
-=============================
+.. _ak.layout.UnionArray.simplify:
 
 .. py:method:: UnionArray.simplify(mergebool=False)
 

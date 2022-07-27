@@ -24,35 +24,29 @@ not match this ``length``.
 
 .. py:class:: SliceGenerator(content, slice, form=None, length=None)
 
-ak.layout.SliceGenerator.__init__
-=================================
+.. _ak.layout.SliceGenerator.__init__:
 
 .. py:method:: SliceGenerator.__init__(content, slice, form=None, length=None)
 
-ak.layout.SliceGenerator.content
-================================
+.. _ak.layout.SliceGenerator.content:
 
 .. py:attribute:: SliceGenerator.content
 
-ak.layout.SliceGenerator.form
-=============================
+.. _ak.layout.SliceGenerator.form:
 
 .. py:attribute:: SliceGenerator.form
 
-ak.layout.SliceGenerator.length
-===============================
+.. _ak.layout.SliceGenerator.length:
 
 .. py:attribute:: SliceGenerator.length
 
-ak.layout.SliceGenerator.__call__
-=================================
+.. _ak.layout.SliceGenerator.__call__:
 
 .. py:method:: SliceGenerator.__call__()
 
 Generates the array and checks it against the :doc:`ak.forms.Form` and
 ``length``, if given.
 
-ak.layout.SliceGenerator.__repr__
-=================================
+.. _ak.layout.SliceGenerator.__repr__:
 
 .. py:method:: SliceGenerator.__repr__()

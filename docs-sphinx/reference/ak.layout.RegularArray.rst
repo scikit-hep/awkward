@@ -128,31 +128,26 @@ a RegularArray has the following.
 
 .. py:class:: RegularArray(content, size, identities=None, parameters=None)
 
-ak.layout.RegularArray.__init__
-===============================
+.. _ak.layout.RegularArray.__init__:
 
 .. py:method:: RegularArray.__init__(content, size, identities=None, parameters=None)
 
-ak.layout.RegularArray.content
-==============================
+.. _ak.layout.RegularArray.content:
 
 .. py:attribute:: RegularArray.content
 
-ak.layout.RegularArray.size
-===========================
+.. _ak.layout.RegularArray.size:
 
 .. py:attribute:: RegularArray.size
 
-ak.layout.RegularArray.compact_offsets64
-========================================
+.. _ak.layout.RegularArray.compact_offsets64:
 
 .. py:method:: RegularArray.compact_offsets64(start_at_zero=True)
 
 Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` by prefix summing
 in steps of ``size``.
 
-ak.layout.RegularArray.broadcast_tooffsets64
-============================================
+.. _ak.layout.RegularArray.broadcast_tooffsets64:
 
 .. py:method:: RegularArray.broadcast_tooffsets64(offsets)
 
@@ -162,8 +157,7 @@ broadcasting because a set of :doc:`ak.types.ListType` and :doc:`ak.types.Regula
 arrays have to be reordered to a common ``offsets`` before they can be directly
 operated upon.
 
-ak.layout.RegularArray.simplify
-===============================
+.. _ak.layout.RegularArray.simplify:
 
 .. py:method:: RegularArray.simplify()
 

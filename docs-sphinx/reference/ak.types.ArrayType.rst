@@ -33,17 +33,14 @@ an ArrayType has the following.
 
 .. py:class:: ArrayType(type, length, parameters=None, typestr=None)
 
-ak.types.ArrayType.__init__
-===========================
+.. _ak.types.ArrayType.__init__:
 
 .. py:method:: ArrayType.__init__(type, length, parameters=None, typestr=None)
 
-ak.types.ArrayType.type
-=======================
+.. _ak.types.ArrayType.type:
 
 .. py:attribute:: ArrayType.type
 
-ak.types.ArrayType.length
-=========================
+.. _ak.types.ArrayType.length:
 
 .. py:attribute:: ArrayType.length

@@ -32,51 +32,44 @@ in common.
 
 .. py:class:: Form
 
-ak.forms.Form.__eq__
-====================
+.. _ak.forms.Form.__eq__:
 
 .. py:method:: Form.__eq__(other)
 
 True if two forms are equal; False otherwise.
 
-ak.forms.Form.__ne__
-====================
+.. _ak.forms.Form.__ne__:
 
 .. py:method:: Form.__ne__()
 
 True if two forms are not equal; False otherwise.
 
-ak.forms.Form.__repr__
-======================
+.. _ak.forms.Form.__repr__:
 
 .. py:method:: Form.__repr__()
 
 String representation of the form, which is pretty, non-verbose #ak.forms.Form.tojson.
 
-ak.forms.Form.__getstate__
-==========================
+.. _ak.forms.Form.__getstate__:
 
 .. py:method:: Form.__getstate__()
 
 Forms can be pickled.
 
-ak.forms.Form.__setstate__
-==========================
+.. _ak.forms.Form.__setstate__:
 
 .. py:method:: Form.__setstate__(arg0)
 
 Forms can be pickled.
 
-ak.forms.Form.tojson
-====================
+.. _ak.forms.Form.tojson:
 
 .. py:method:: Form.tojson(pretty, verbose)
 
 Converts to a JSON string. If ``pretty`` (bool), it will be multi-line and indented;
 if ``verbose``, all fields will be shown, even defaults.
 
-ak.forms.Form.type
-==================
+.. _ak.forms.Form.type:
 
 .. py:method:: Form.type(typestrs)
 
@@ -84,15 +77,13 @@ The single high-level type associated with this low-level form. Conversion in th
 other direction is not unique. ``typestrs`` is a dict of ``__record__`` to type-string
 names (see `Custom type names <ak.behavior.html#custom-type-names>`_).
 
-ak.forms.Form.parameters
-========================
+.. _ak.forms.Form.parameters:
 
 .. py:attribute:: Form.parameters
 
 Returns the parameters associated with this form.
 
-ak.forms.Form.parameter
-=======================
+.. _ak.forms.Form.parameter:
 
 .. py:method:: Form.parameter(key)
 

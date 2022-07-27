@@ -10,17 +10,14 @@ a RegularType has the following.
 
 .. py:class:: RegularType(type, size, parameters=None, typestr=None)
 
-ak.types.RegularType.__init__
-=============================
+.. _ak.types.RegularType.__init__:
 
 .. py:method:: RegularType.__init__(type, size, parameters=None, typestr=None)
 
-ak.types.RegularType.type
-=========================
+.. _ak.types.RegularType.type:
 
 .. py:attribute:: RegularType.type
 
-ak.types.RegularType.size
-=========================
+.. _ak.types.RegularType.size:
 
 .. py:attribute:: RegularType.size

@@ -167,55 +167,46 @@ a NumpyArray has the following.
 
 .. py:class:: NumpyArray(array, identities=None, parameters=None)
 
-ak.layout.NumpyArray.__init__
-=============================
+.. _ak.layout.NumpyArray.__init__:
 
 .. py:method:: NumpyArray.__init__(array, identities=None, parameters=None)
 
-ak.layout.NumpyArray.shape
-==========================
+.. _ak.layout.NumpyArray.shape:
 
 .. py:attribute:: NumpyArray.shape
 
-ak.layout.NumpyArray.strides
-============================
+.. _ak.layout.NumpyArray.strides:
 
 .. py:attribute:: NumpyArray.strides
 
-ak.layout.NumpyArray.itemsize
-=============================
+.. _ak.layout.NumpyArray.itemsize:
 
 .. py:attribute:: NumpyArray.itemsize
 
-ak.layout.NumpyArray.format
-===========================
+.. _ak.layout.NumpyArray.format:
 
 .. py:attribute:: NumpyArray.format
 
-ak.layout.NumpyArray.ndim
-=========================
+.. _ak.layout.NumpyArray.ndim:
 
 .. py:attribute:: NumpyArray.ndim
 
 Returns ``len(shape)``.
 
-ak.layout.NumpyArray.isscalar
-=============================
+.. _ak.layout.NumpyArray.isscalar:
 
 .. py:attribute:: NumpyArray.isscalar
 
 Should always return False (``len(shape) == 0`` NumpyArrays in C++ are converted into
 scalar numbers and booleans before they appear in Python).
 
-ak.layout.NumpyArray.isempty
-============================
+.. _ak.layout.NumpyArray.isempty:
 
 .. py:attribute:: NumpyArray.isempty
 
 Returns True if any ``shape`` element is ``0``; False otherwise.
 
-ak.layout.NumpyArray.iscontiguous
-=================================
+.. _ak.layout.NumpyArray.iscontiguous:
 
 .. py:attribute:: NumpyArray.iscontiguous
 
@@ -236,23 +227,20 @@ and ``itemsize``:
     else:
         return True
 
-ak.layout.NumpyArray.toRegularArray
-===================================
+.. _ak.layout.NumpyArray.toRegularArray:
 
 .. py:method:: NumpyArray.toRegularArray()
 
 Returns a contiguous version of this array with any multidimensional ``shape`` replaced by
 nested :doc:`ak.layout.RegularArray` nodes.
 
-ak.layout.NumpyArray.contiguous
-===============================
+.. _ak.layout.NumpyArray.contiguous:
 
 .. py:method:: NumpyArray.contiguous()
 
 Returns a contiguous version of this array (possibly the original array, unchanged).
 
-ak.layout.NumpyArray.simplify
-=============================
+.. _ak.layout.NumpyArray.simplify:
 
 .. py:method:: NumpyArray.simplify()
 

@@ -81,18 +81,15 @@ a UnmaskedArray has the following.
 
 .. py:class:: UnmaskedArray(content, identities=None, parameters=None)
 
-ak.layout.UnmaskedArray.__init__
-================================
+.. _ak.layout.UnmaskedArray.__init__:
 
 .. py:method:: UnmaskedArray.__init__(content, identities=None, parameters=None)
 
-ak.layout.UnmaskedArray.content
-===============================
+.. _ak.layout.UnmaskedArray.content:
 
 .. py:attribute:: UnmaskedArray.content
 
-ak.layout.UnmaskedArray.project
-===============================
+.. _ak.layout.UnmaskedArray.project:
 
 .. py:method:: UnmaskedArray.project(mask=None)
 
@@ -101,8 +98,7 @@ If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is used to select the data. Otherwise, ``project``
 has no effect.
 
-ak.layout.UnmaskedArray.bytemask
-================================
+.. _ak.layout.UnmaskedArray.bytemask:
 
 .. py:method:: UnmaskedArray.bytemask()
 
@@ -110,8 +106,7 @@ Returns an array of 8-bit values in which ``0`` means valid and ``1`` means miss
 
 Since this array is unmasked, the output is all ``0``.
 
-ak.layout.UnmaskedArray.simplify
-================================
+.. _ak.layout.UnmaskedArray.simplify:
 
 .. py:method:: UnmaskedArray.simplify()
 

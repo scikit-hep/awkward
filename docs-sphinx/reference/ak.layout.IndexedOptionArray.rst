@@ -105,30 +105,25 @@ an IndexedOptionArray has the following.
 
 .. py:class:: IndexedOptionArray(index, content, identities=None, parameters=None)
 
-ak.layout.IndexedOptionArray.__init__
-=====================================
+.. _ak.layout.IndexedOptionArray.__init__:
 
 .. py:method:: IndexedOptionArray.__init__(index, content, identities=None, parameters=None)
 
-ak.layout.IndexedOptionArray.index
-==================================
+.. _ak.layout.IndexedOptionArray.index:
 
 .. py:attribute:: IndexedOptionArray.index
 
-ak.layout.IndexedOptionArray.content
-====================================
+.. _ak.layout.IndexedOptionArray.content:
 
 .. py:attribute:: IndexedOptionArray.content
 
-ak.layout.IndexedOptionArray.isoption
-=====================================
+.. _ak.layout.IndexedOptionArray.isoption:
 
 .. py:attribute:: IndexedOptionArray.isoption
 
 Returns True because this is an IndexedOptionArray.
 
-ak.layout.IndexedOptionArray.project
-====================================
+.. _ak.layout.IndexedOptionArray.project:
 
 .. py:method:: IndexedOptionArray.project(mask=None)
 
@@ -139,15 +134,13 @@ If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is unioned with the BitMaskedArray's
 mask (after converting to 8-bit and to ``valid_when=False`` to match this ``mask``).
 
-ak.layout.IndexedOptionArray.bytemask
-=====================================
+.. _ak.layout.IndexedOptionArray.bytemask:
 
 .. py:method:: IndexedOptionArray.bytemask()
 
 Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
 
-ak.layout.IndexedOptionArray.simplify
-=====================================
+.. _ak.layout.IndexedOptionArray.simplify:
 
 .. py:method:: IndexedOptionArray.simplify()
 

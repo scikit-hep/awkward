@@ -10,71 +10,58 @@ this has the following.
 
 .. py:class:: RecordForm(contents, has_identities=False, parameters=None)
 
-ak.forms.RecordForm.__init__
-============================
+.. _ak.forms.RecordForm.__init__:
 
 .. py:method:: RecordForm.__init__(contents, has_identities=False, parameters=None)
 
 The ``contents`` is a list of Forms.
 
-ak.forms.RecordForm.contents
-============================
+.. _ak.forms.RecordForm.contents:
 
 .. py:attribute:: RecordForm.contents
 
-ak.forms.RecordForm.has_identities
-===================================
+.. _ak.forms.RecordForm.has_identities:
 
 .. py:attribute:: RecordForm.has_identities
 
-ak.forms.RecordForm.parameters
-===============================
+.. _ak.forms.RecordForm.parameters:
 
 .. py:attribute:: RecordForm.parameters
 
-ak.forms.RecordForm.istuple
-===========================
+.. _ak.forms.RecordForm.istuple:
 
 .. py:attribute:: RecordForm.istuple
 
-ak.forms.RecordForm.numfields
-=============================
+.. _ak.forms.RecordForm.numfields:
 
 .. py:attribute:: RecordForm.numfields
 
-ak.forms.RecordForm.fieldindex
-==============================
+.. _ak.forms.RecordForm.fieldindex:
 
 .. py:method:: RecordForm.fieldindex(key)
 
-ak.forms.RecordForm.key
-=======================
+.. _ak.forms.RecordForm.key:
 
 .. py:method:: RecordForm.key(fieldindex)
 
-ak.forms.RecordForm.haskey
-==========================
+.. _ak.forms.RecordForm.haskey:
 
 .. py:method:: RecordForm.haskey(key)
 
-ak.forms.RecordForm.keys
-========================
+.. _ak.forms.RecordForm.keys:
 
 .. py:method:: RecordForm.keys()
 
-ak.forms.RecordForm.content
-===========================
+.. _ak.forms.RecordForm.content:
 
 .. py:method:: RecordForm.content(fieldindex)
 
 .. py:method:: RecordForm.content(key)
 
-ak.forms.RecordForm.items
-=========================
+.. _ak.forms.RecordForm.items:
 
 .. py:method:: RecordForm.items()
 
-ak.forms.RecordForm.values
-==========================
+.. _ak.forms.RecordForm.values:
 
 .. py:method:: RecordForm.values()

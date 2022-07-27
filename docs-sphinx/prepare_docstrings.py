@@ -159,6 +159,13 @@ def dodoc(docstring, qualname, names):
     out = re.sub(r"(\n:raises|^:raises)",   "\n    :raises",  out)
     return out
 
+
+def make_anchor(name):
+    name = name.lower()
+    parts = name.split(".")
+    anchor = "-".join(parts)
+    return f'\n\n.. _{anchor}:\n\n'
+
 def doclass(link, linelink, shortname, name, astcls):
     if name.startswith("_"):
         return
@@ -192,7 +199,7 @@ def doclass(link, linelink, shortname, name, astcls):
     for node in rest:
         if isinstance(node, ast.Assign):
             attrtext = "{0}.{1}".format(qualname, node.targets[0].id)
-            outfile.write(attrtext + "\n" + "="*len(attrtext) + "\n\n")
+            outfile.write(make_anchor(attrtext))
             outfile.write(".. py:attribute:: " + attrtext + "\n")
             outfile.write("    :value: {0}\n\n".format(tostr(node.value)))
             docstring = None
@@ -200,7 +207,7 @@ def doclass(link, linelink, shortname, name, astcls):
         elif any(isinstance(x, ast.Name) and x.id == "property"
                  for x in node.decorator_list):
             attrtext = "{0}.{1}".format(qualname, node.name)
-            outfile.write(attrtext + "\n" + "="*len(attrtext) + "\n\n")
+            outfile.write(make_anchor(attrtext))
             outfile.write(".. py:attribute:: " + attrtext + "\n\n")
             docstring = ast.get_docstring(node)
 
@@ -211,7 +218,7 @@ def doclass(link, linelink, shortname, name, astcls):
         else:
             methodname = "{0}.{1}".format(qualname, node.name)
             methodtext = "{0}({1})".format(methodname, dosig(node))
-            outfile.write(methodname + "\n" + "="*len(methodname) + "\n\n")
+            outfile.write(make_anchor(methodname))
             outfile.write(".. py:method:: " + methodtext + "\n\n")
             docstring = ast.get_docstring(node)
 

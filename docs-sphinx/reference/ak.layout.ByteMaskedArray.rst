@@ -110,28 +110,23 @@ a ByteMaskedArray has the following.
 
 .. py:class:: ByteMaskedArray(mask, content, valid_when, identities=None, parameters=None)
 
-ak.layout.ByteMaskedArray.__init__
-==================================
+.. _ak.layout.ByteMaskedArray.__init__:
 
 .. py:method:: ByteMaskedArray.__init__(mask, content, valid_when, identities=None, parameters=None)
 
-ak.layout.ByteMaskedArray.mask
-==============================
+.. _ak.layout.ByteMaskedArray.mask:
 
 .. py:attribute:: ByteMaskedArray.mask
 
-ak.layout.ByteMaskedArray.content
-=================================
+.. _ak.layout.ByteMaskedArray.content:
 
 .. py:attribute:: ByteMaskedArray.content
 
-ak.layout.ByteMaskedArray.valid_when
-====================================
+.. _ak.layout.ByteMaskedArray.valid_when:
 
 .. py:attribute:: ByteMaskedArray.valid_when
 
-ak.layout.ByteMaskedArray.project
-=================================
+.. _ak.layout.ByteMaskedArray.project:
 
 .. py:method:: ByteMaskedArray.project(mask=None)
 
@@ -140,15 +135,13 @@ If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is unioned with the ByteMaskedArray's
 mask (after converting to ``valid_when=False`` to match this ``mask``).
 
-ak.layout.ByteMaskedArray.bytemask
-==================================
+.. _ak.layout.ByteMaskedArray.bytemask:
 
 .. py:method:: ByteMaskedArray.bytemask()
 
 Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
 
-ak.layout.ByteMaskedArray.simplify
-==================================
+.. _ak.layout.ByteMaskedArray.simplify:
 
 .. py:method:: ByteMaskedArray.simplify()
 

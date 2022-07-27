@@ -10,42 +10,34 @@ a RecordType has the following.
 
 .. py:class:: RecordType(types, keys=None, parameters=None, typestr=None)
 
-ak.types.RecordType.__init__
-============================
+.. _ak.types.RecordType.__init__:
 
 .. py:method:: RecordType.__init__(types, keys=None, parameters=None, typestr=None)
 
-ak.types.RecordType.types
-=========================
+.. _ak.types.RecordType.types:
 
 .. py:attribute:: RecordType.types
 
-ak.types.RecordType.__getitem__
-===============================
+.. _ak.types.RecordType.__getitem__:
 
 .. py:method:: RecordType.__getitem__(where)
 
-ak.types.RecordType.field
-=========================
+.. _ak.types.RecordType.field:
 
 .. py:method:: RecordType.field(fieldindex)
 
-ak.types.RecordType.field
-=========================
+.. _ak.types.RecordType.field:
 
 .. py:method:: RecordType.field(key)
 
-ak.types.RecordType.fielditems
-==============================
+.. _ak.types.RecordType.fielditems:
 
 .. py:method:: RecordType.fielditems()
 
-ak.types.RecordType.fields
-==========================
+.. _ak.types.RecordType.fields:
 
 .. py:method:: RecordType.fields()
 
-ak.types.RecordType.istuple
-===========================
+.. _ak.types.RecordType.istuple:
 
 .. py:attribute:: RecordType.istuple

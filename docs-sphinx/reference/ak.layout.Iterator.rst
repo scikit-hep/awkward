@@ -7,27 +7,22 @@ Iterates over :doc:`ak.layout.Content` arrays.
 
 .. py:class:: Iterator(arg0)
 
-ak.layout.Iterator.__init__
-===========================
+.. _ak.layout.Iterator.__init__:
 
 .. py:method:: Iterator.__init__(arg0)
 
-ak.layout.Iterator.__iter__
-===========================
+.. _ak.layout.Iterator.__iter__:
 
 .. py:method:: Iterator.__iter__()
 
-ak.layout.Iterator.__next__
-===========================
+.. _ak.layout.Iterator.__next__:
 
 .. py:method:: Iterator.__next__()
 
-ak.layout.Iterator.__repr__
-===========================
+.. _ak.layout.Iterator.__repr__:
 
 .. py:method:: Iterator.__repr__()
 
-ak.layout.Iterator.next
-=======================
+.. _ak.layout.Iterator.next:
 
 .. py:method:: Iterator.next()

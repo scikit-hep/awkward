@@ -10,27 +10,22 @@ this has the following.
 
 .. py:class:: RegularForm(content, size, has_identities=False, parameters=None)
 
-ak.forms.RegularForm.__init__
-=============================
+.. _ak.forms.RegularForm.__init__:
 
 .. py:method:: RegularForm.__init__(content, size, has_identities=False, parameters=None)
 
-ak.forms.RegularForm.content
-============================
+.. _ak.forms.RegularForm.content:
 
 .. py:attribute:: RegularForm.content
 
-ak.forms.RegularForm.size
-=========================
+.. _ak.forms.RegularForm.size:
 
 .. py:attribute:: RegularForm.size
 
-ak.forms.RegularForm.has_identities
-===================================
+.. _ak.forms.RegularForm.has_identities:
 
 .. py:attribute:: RegularForm.has_identities
 
-ak.forms.RegularForm.parameters
-===============================
+.. _ak.forms.RegularForm.parameters:
 
 .. py:attribute:: RegularForm.parameters

@@ -11,12 +11,10 @@ a PrimitiveType has the following.
 
 .. py:class:: PrimitiveType(dtype, parameters=None, typestr=None)
 
-ak.types.PrimitiveType.__init__
-===============================
+.. _ak.types.PrimitiveType.__init__:
 
 .. py:method:: PrimitiveType.__init__(dtype, parameters=None, typestr=None)
 
-ak.types.PrimitiveType.dtype
-============================
+.. _ak.types.PrimitiveType.dtype:
 
 .. py:attribute:: PrimitiveType.dtype

@@ -120,23 +120,19 @@ a ListOffsetArray has the following.
 
 .. py:class:: ListOffsetArray(offsets, content, identities=None, parameters=None)
 
-ak.layout.ListOffsetArray.__init__
-==================================
+.. _ak.layout.ListOffsetArray.__init__:
 
 .. py:method:: ListOffsetArray.__init__(offsets, content, identities=None, parameters=None)
 
-ak.layout.ListOffsetArray.offsets
-=================================
+.. _ak.layout.ListOffsetArray.offsets:
 
 .. py:attribute:: ListOffsetArray.offsets
 
-ak.layout.ListOffsetArray.content
-=================================
+.. _ak.layout.ListOffsetArray.content:
 
 .. py:attribute:: ListOffsetArray.content
 
-ak.layout.ListOffsetArray.starts
-================================
+.. _ak.layout.ListOffsetArray.starts:
 
 .. py:attribute:: ListOffsetArray.starts
 
@@ -146,8 +142,7 @@ Derives ``starts`` as a view of ``offsets``:
 
     starts = offsets[:-1]
 
-ak.layout.ListOffsetArray.stops
-===============================
+.. _ak.layout.ListOffsetArray.stops:
 
 .. py:attribute:: ListOffsetArray.stops
 
@@ -157,8 +152,7 @@ Derives ``stops`` as a view of ``offsets``:
 
     stops = offsets[1:]
 
-ak.layout.ListOffsetArray.compact_offsets64
-===========================================
+.. _ak.layout.ListOffsetArray.compact_offsets64:
 
 .. py:method:: ListOffsetArray.compact_offsets64(start_at_zero=True)
 
@@ -166,8 +160,7 @@ Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` that represent the same l
 of this array's ``offsets``. If this ``offsets[0] == 0 or not start_at_zero``, the
 return value is a view of this array's ``offsets``.
 
-ak.layout.ListOffsetArray.broadcast_tooffsets64
-===============================================
+.. _ak.layout.ListOffsetArray.broadcast_tooffsets64:
 
 .. py:method:: ListOffsetArray.broadcast_tooffsets64(offsets)
 
@@ -177,16 +170,14 @@ broadcasting because a set of :doc:`ak.types.ListType` and :doc:`ak.types.Regula
 arrays have to be reordered to a common ``offsets`` before they can be directly
 operated upon.
 
-ak.layout.ListOffsetArray.toRegularArray
-========================================
+.. _ak.layout.ListOffsetArray.toRegularArray:
 
 .. py:method:: ListOffsetArray.toRegularArray()
 
 Converts this :doc:`ak.types.ListType` into a :doc:`ak.types.RegularType` array
 if possible.
 
-ak.layout.ListOffsetArray.simplify
-==================================
+.. _ak.layout.ListOffsetArray.simplify:
 
 .. py:method:: ListOffsetArray.simplify()
 

@@ -144,36 +144,30 @@ a ListArray has the following.
 
 .. py:class:: ListArray(starts, stops, content, identities=None, parameters=None)
 
-ak.layout.ListArray.__init__
-============================
+.. _ak.layout.ListArray.__init__:
 
 .. py:method:: ListArray.__init__(starts, stops, content, identities=None, parameters=None)
 
-ak.layout.ListArray.starts
-==========================
+.. _ak.layout.ListArray.starts:
 
 .. py:attribute:: ListArray.starts
 
-ak.layout.ListArray.stops
-=========================
+.. _ak.layout.ListArray.stops:
 
 .. py:attribute:: ListArray.stops
 
-ak.layout.ListArray.content
-===========================
+.. _ak.layout.ListArray.content:
 
 .. py:attribute:: ListArray.content
 
-ak.layout.ListArray.compact_offsets64
-=====================================
+.. _ak.layout.ListArray.compact_offsets64:
 
 .. py:method:: ListArray.compact_offsets64(start_at_zero=True)
 
 Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` that represent the same lengths
 of this array's ``starts`` and ``stops`` (though not the physical order in memory).
 
-ak.layout.ListArray.broadcast_tooffsets64
-=========================================
+.. _ak.layout.ListArray.broadcast_tooffsets64:
 
 .. py:method:: ListArray.broadcast_tooffsets64(offsets)
 
@@ -183,16 +177,14 @@ broadcasting because a set of :doc:`ak.types.ListType` and :doc:`ak.types.Regula
 arrays have to be reordered to a common ``offsets`` before they can be directly
 operated upon.
 
-ak.layout.ListArray.toRegularArray
-==================================
+.. _ak.layout.ListArray.toRegularArray:
 
 .. py:method:: ListArray.toRegularArray()
 
 Converts this :doc:`ak.types.ListType` into a :doc:`ak.types.RegularType` array
 if possible.
 
-ak.layout.ListArray.simplify
-============================
+.. _ak.layout.ListArray.simplify:
 
 .. py:method:: ListArray.simplify()
 

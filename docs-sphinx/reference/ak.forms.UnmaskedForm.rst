@@ -10,22 +10,18 @@ this has the following.
 
 .. py:class:: UnmaskedForm(content, has_identities=False, parameters=None)
 
-ak.forms.UnmaskedForm.__init__
-==============================
+.. _ak.forms.UnmaskedForm.__init__:
 
 .. py:method:: UnmaskedForm.__init__(content, has_identities=False, parameters=None)
 
-ak.forms.UnmaskedForm.content
-=============================
+.. _ak.forms.UnmaskedForm.content:
 
 .. py:attribute:: UnmaskedForm.content
 
-ak.forms.UnmaskedForm.has_identities
-====================================
+.. _ak.forms.UnmaskedForm.has_identities:
 
 .. py:attribute:: UnmaskedForm.has_identities
 
-ak.forms.UnmaskedForm.parameters
-================================
+.. _ak.forms.UnmaskedForm.parameters:
 
 .. py:attribute:: UnmaskedForm.parameters

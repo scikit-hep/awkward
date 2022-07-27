@@ -30,67 +30,58 @@ in common.
 
 .. py:class:: Type
 
-ak.types.Type.__eq__
-====================
+.. _ak.types.Type.__eq__:
 
 .. py:method:: Type.__eq__(other)
 
 True if two types are equal; False otherwise.
 
-ak.types.Type.__ne__
-====================
+.. _ak.types.Type.__ne__:
 
 .. py:method:: Type.__ne__()
 
 True if two types are not equal; False otherwise.
 
-ak.types.Type.__repr__
-======================
+.. _ak.types.Type.__repr__:
 
 .. py:method:: Type.__repr__()
 
 String representation of the type, mostly following the
 `Datashape <https://datashape.readthedocs.io/>`__ grammar.
 
-ak.types.Type.__getstate__
-==========================
+.. _ak.types.Type.__getstate__:
 
 .. py:method:: Type.__getstate__()
 
 Types can be pickled.
 
-ak.types.Type.__setstate__
-==========================
+.. _ak.types.Type.__setstate__:
 
 .. py:method:: Type.__setstate__(arg0)
 
 Types can be pickled.
 
-ak.types.Type.empty
-===================
+.. _ak.types.Type.empty:
 
 .. py:method:: Type.empty()
 
 Creates an empty :doc:`ak.layout.Content` array with this type.
 
-ak.types.Type.fieldindex
-========================
+.. _ak.types.Type.fieldindex:
 
 .. py:method:: Type.fieldindex(key)
 
 Returns the index position of a ``key`` if the type contains
 :doc:`ak.types.RecordType` and ``key`` is in the record.
 
-ak.types.Type.haskey
-====================
+.. _ak.types.Type.haskey:
 
 .. py:method:: Type.haskey(key)
 
 Returns True if the type contains :doc:`ak.types.RecordType` and ``key`` is
 in the record; False otherwise.
 
-ak.types.Type.key
-=================
+.. _ak.types.Type.key:
 
 .. py:method:: Type.key(fieldindex)
 
@@ -98,16 +89,14 @@ Returns the ``key`` name at a given index position in the record if the
 type contains :doc:`ak.types.RecordType` with more than ``fieldindex``
 fields.
 
-ak.types.Type.keys
-==================
+.. _ak.types.Type.keys:
 
 .. py:method:: Type.keys()
 
 Returns a list of keys in the record if the type contains
 :doc:`ak.types.RecordType`.
 
-ak.types.Type.setparameter
-==========================
+.. _ak.types.Type.setparameter:
 
 .. py:method:: Type.setparameter(key, value)
 
@@ -115,23 +104,20 @@ Sets a parameter.
 
 **Do not use this method!** Mutable parameters are deprecated.
 
-ak.types.Type.numfields
-=======================
+.. _ak.types.Type.numfields:
 
 .. py:attribute:: Type.numfields
 
 Returns the number of fields in the record if this type contains a
 :doc:`ak.types.RecordType`.
 
-ak.types.Type.parameters
-========================
+.. _ak.types.Type.parameters:
 
 .. py:attribute:: Type.parameters
 
 Returns the parameters associated with this type.
 
-ak.types.Type.typestr
-=====================
+.. _ak.types.Type.typestr:
 
 .. py:attribute:: Type.typestr
 

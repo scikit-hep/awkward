@@ -22,127 +22,102 @@ in some cases because Record is a scalar.
 
 .. py:class:: Record(array, at)
 
-ak.layout.Record.__init__
-=========================
+.. _ak.layout.Record.__init__:
 
 .. py:method:: Record.__init__(array, at)
 
-ak.layout.Record.array
-======================
+.. _ak.layout.Record.array:
 
 .. py:attribute:: Record.array
 
-ak.layout.Record.at
-===================
+.. _ak.layout.Record.at:
 
 .. py:attribute:: Record.at
 
-ak.layout.Record.__getitem__
-============================
+.. _ak.layout.Record.__getitem__:
 
 .. py:method:: Record.__getitem__(where)
 
-ak.layout.Record.__repr__
-=========================
+.. _ak.layout.Record.__repr__:
 
 .. py:method:: Record.__repr__()
 
-ak.layout.Record.field
-======================
+.. _ak.layout.Record.field:
 
 .. py:method:: Record.field(index)
 
-ak.layout.Record.field
-======================
+.. _ak.layout.Record.field:
 
 .. py:method:: Record.field(key)
 
-ak.layout.Record.fieldindex
-===========================
+.. _ak.layout.Record.fieldindex:
 
 .. py:method:: Record.fieldindex(key)
 
-ak.layout.Record.fielditems
-===========================
+.. _ak.layout.Record.fielditems:
 
 .. py:method:: Record.fielditems()
 
-ak.layout.Record.fields
-=======================
+.. _ak.layout.Record.fields:
 
 .. py:method:: Record.fields()
 
-ak.layout.Record.haskey
-=======================
+.. _ak.layout.Record.haskey:
 
 .. py:method:: Record.haskey(key)
 
-ak.layout.Record.keys
-=====================
+.. _ak.layout.Record.keys:
 
 .. py:method:: Record.keys()
 
-ak.layout.Record.parameter
-==========================
+.. _ak.layout.Record.parameter:
 
 .. py:method:: Record.parameter(arg0)
 
-ak.layout.Record.purelist_parameter
-===================================
+.. _ak.layout.Record.purelist_parameter:
 
 .. py:method:: Record.purelist_parameter(arg0)
 
-ak.layout.Record.setparameter
-=============================
+.. _ak.layout.Record.setparameter:
 
 .. py:method:: Record.setparameter(arg0, arg1)
 
-ak.layout.Record.simplify
-=========================
+.. _ak.layout.Record.simplify:
 
 .. py:method:: Record.simplify()
 
-ak.layout.Record.tojson
-=======================
+.. _ak.layout.Record.tojson:
 
 .. py:method:: Record.tojson(pretty=False, maxdecimals=None)
 
-ak.layout.Record.tojson
-=======================
+.. _ak.layout.Record.tojson:
 
 .. py:method:: Record.tojson(destination, pretty=False, maxdecimals=None, buffersize=65536)
 
-ak.layout.Record.type
-=====================
+.. _ak.layout.Record.type:
 
 .. py:method:: Record.type(arg0)
 
-ak.layout.Record.astuple
-========================
+.. _ak.layout.Record.astuple:
 
 .. py:attribute:: Record.astuple
 
-ak.layout.Record.identities
-===========================
+.. _ak.layout.Record.identities:
 
 .. py:attribute:: Record.identities
 
-ak.layout.Record.identity
-=========================
+.. _ak.layout.Record.identity:
 
 .. py:attribute:: Record.identity
 
-ak.layout.Record.istuple
-========================
+.. _ak.layout.Record.istuple:
 
 .. py:attribute:: Record.istuple
 
-ak.layout.Record.numfields
-==========================
+.. _ak.layout.Record.numfields:
 
 .. py:attribute:: Record.numfields
 
-ak.layout.Record.parameters
-===========================
+.. _ak.layout.Record.parameters:
 
 .. py:attribute:: Record.parameters

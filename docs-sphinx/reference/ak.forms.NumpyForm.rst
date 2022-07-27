@@ -11,8 +11,7 @@ this has the following.
 
 .. py:class:: NumpyForm(inner_shape, itemsize, format, has_identities=False, parameters=None)
 
-ak.forms.NumpyForm.__init__
-===========================
+.. _ak.forms.NumpyForm.__init__:
 
 .. py:method:: NumpyForm.__init__(inner_shape, itemsize, format, has_identities=False, parameters=None)
 
@@ -24,27 +23,22 @@ needs to be specified.
 
 The ``itemsize`` is redundant, but included for safety because of the platform-dependence of ``format``.
 
-ak.forms.NumpyForm.inner_shape
-==============================
+.. _ak.forms.NumpyForm.inner_shape:
 
 .. py:attribute:: NumpyForm.inner_shape
 
-ak.forms.NumpyForm.itemsize
-===========================
+.. _ak.forms.NumpyForm.itemsize:
 
 .. py:attribute:: NumpyForm.itemsize
 
-ak.forms.NumpyForm.format
-=========================
+.. _ak.forms.NumpyForm.format:
 
 .. py:attribute:: NumpyForm.format
 
-ak.forms.NumpyForm.has_identities
-=================================
+.. _ak.forms.NumpyForm.has_identities:
 
 .. py:attribute:: NumpyForm.has_identities
 
-ak.forms.NumpyForm.parameters
-=============================
+.. _ak.forms.NumpyForm.parameters:
 
 .. py:attribute:: NumpyForm.parameters

@@ -165,5 +165,5 @@ The C++ classes, cpu-kernels, and gpu-kernels are described in the [C++ API refe
 The kernels (cpu-kernels and cuda-kernels) are documented on the {func}`ak.kernels` page, with interfaces and normative Python implementations.
 
 :::{eval-rst}
-.. include:: toctree.txt
+.. include:: generated/toctree.txt
 :::

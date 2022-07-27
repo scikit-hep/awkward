@@ -10,27 +10,22 @@ this has the following.
 
 .. py:class:: ListOffsetForm(offsets, content, has_identities=False, parameters=None)
 
-ak.forms.ListOffsetForm.__init__
-===================================
+.. _ak.forms.ListOffsetForm.__init__:
 
 .. py:method:: ListOffsetForm.__init__(offsets, content, has_identities=False, parameters=None)
 
-ak.forms.ListOffsetForm.offsets
-===============================
+.. _ak.forms.ListOffsetForm.offsets:
 
 .. py:attribute:: ListOffsetForm.offsets
 
-ak.forms.ListOffsetForm.content
-===============================
+.. _ak.forms.ListOffsetForm.content:
 
 .. py:attribute:: ListOffsetForm.content
 
-ak.forms.ListOffsetForm.has_identities
-======================================
+.. _ak.forms.ListOffsetForm.has_identities:
 
 .. py:attribute:: ListOffsetForm.has_identities
 
-ak.forms.ListOffsetForm.parameters
-==================================
+.. _ak.forms.ListOffsetForm.parameters:
 
 .. py:attribute:: ListOffsetForm.parameters

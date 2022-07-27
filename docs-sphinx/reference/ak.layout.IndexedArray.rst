@@ -106,30 +106,25 @@ an IndexedArray has the following.
 
 .. py:class:: IndexedArray(index, content, identities=None, parameters=None)
 
-ak.layout.IndexedArray.__init__
-===============================
+.. _ak.layout.IndexedArray.__init__:
 
 .. py:method:: IndexedArray.__init__(index, content, identities=None, parameters=None)
 
-ak.layout.IndexedArray.index
-============================
+.. _ak.layout.IndexedArray.index:
 
 .. py:attribute:: IndexedArray.index
 
-ak.layout.IndexedArray.content
-==============================
+.. _ak.layout.IndexedArray.content:
 
 .. py:attribute:: IndexedArray.content
 
-ak.layout.IndexedArray.isoption
-===============================
+.. _ak.layout.IndexedArray.isoption:
 
 .. py:attribute:: IndexedArray.isoption
 
 Returns False because this is not an IndexedOptionArray.
 
-ak.layout.IndexedArray.project
-==============================
+.. _ak.layout.IndexedArray.project:
 
 .. py:method:: IndexedArray.project(mask=None)
 
@@ -139,16 +134,14 @@ If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, only valid elements according to this ``mask`` are
 returned.
 
-ak.layout.IndexedArray.bytemask
-===============================
+.. _ak.layout.IndexedArray.bytemask:
 
 .. py:method:: IndexedArray.bytemask()
 
 Returns an 8-bit signed :doc:`ak.layout.Index` of all zeros, because this
 IndexedArray does not have :doc:`ak.types.OptionType`.
 
-ak.layout.IndexedArray.simplify
-===============================
+.. _ak.layout.IndexedArray.simplify:
 
 .. py:method:: IndexedArray.simplify()
 

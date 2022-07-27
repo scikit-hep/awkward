@@ -10,27 +10,22 @@ this has the following.
 
 .. py:class:: IndexedForm(index, content, has_identities=False, parameters=None)
 
-ak.forms.IndexedForm.__init__
-=============================
+.. _ak.forms.IndexedForm.__init__:
 
 .. py:method:: IndexedForm.__init__(index, content, has_identities=False, parameters=None)
 
-ak.forms.IndexedForm.index
-==========================
+.. _ak.forms.IndexedForm.index:
 
 .. py:attribute:: IndexedForm.index
 
-ak.forms.IndexedForm.content
-============================
+.. _ak.forms.IndexedForm.content:
 
 .. py:attribute:: IndexedForm.content
 
-ak.forms.IndexedForm.has_identities
-===================================
+.. _ak.forms.IndexedForm.has_identities:
 
 .. py:attribute:: IndexedForm.has_identities
 
-ak.forms.IndexedForm.parameters
-===============================
+.. _ak.forms.IndexedForm.parameters:
 
 .. py:attribute:: IndexedForm.parameters

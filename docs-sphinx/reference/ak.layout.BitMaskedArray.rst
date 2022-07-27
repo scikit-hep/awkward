@@ -156,33 +156,27 @@ a BitMaskedArray has the following.
 
 .. py:class:: BitMaskedArray(mask, content, valid_when, length, lsb_order, identities=None, parameters=None)
 
-ak.layout.BitMaskedArray.__init__
-=================================
+.. _ak.layout.BitMaskedArray.__init__:
 
 .. py:method:: BitMaskedArray.__init__(mask, content, valid_when, length, lsb_order, identities=None, parameters=None)
 
-ak.layout.BitMaskedArray.mask
-=============================
+.. _ak.layout.BitMaskedArray.mask:
 
 .. py:attribute:: BitMaskedArray.mask
 
-ak.layout.BitMaskedArray.content
-================================
+.. _ak.layout.BitMaskedArray.content:
 
 .. py:attribute:: BitMaskedArray.content
 
-ak.layout.BitMaskedArray.valid_when
-===================================
+.. _ak.layout.BitMaskedArray.valid_when:
 
 .. py:attribute:: BitMaskedArray.valid_when
 
-ak.layout.BitMaskedArray.lsb_order
-==================================
+.. _ak.layout.BitMaskedArray.lsb_order:
 
 .. py:attribute:: BitMaskedArray.lsb_order
 
-ak.layout.BitMaskedArray.project
-================================
+.. _ak.layout.BitMaskedArray.project:
 
 .. py:method:: BitMaskedArray.project(mask=None)
 
@@ -191,15 +185,13 @@ If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is unioned with the BitMaskedArray's
 mask (after converting to 8-bit and to ``valid_when=False`` to match this ``mask``).
 
-ak.layout.BitMaskedArray.bytemask
-=================================
+.. _ak.layout.BitMaskedArray.bytemask:
 
 .. py:method:: BitMaskedArray.bytemask()
 
 Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
 
-ak.layout.BitMaskedArray.simplify
-=================================
+.. _ak.layout.BitMaskedArray.simplify:
 
 .. py:method:: BitMaskedArray.simplify()
 
@@ -209,15 +201,13 @@ In all cases, the output has the same logical meaning as the input.
 
 This method only operates one level deep.
 
-ak.layout.BitMaskedArray.toByteMaskedArray
-==========================================
+.. _ak.layout.BitMaskedArray.toByteMaskedArray:
 
 .. py:method:: BitMaskedArray.toByteMaskedArray()
 
 Converts to the equivalent :doc:`ak.layout.ByteMaskedArray`.
 
-ak.layout.BitMaskedArray.toIndexedOptionArray
-=============================================
+.. _ak.layout.BitMaskedArray.toIndexedOptionArray:
 
 .. py:method:: BitMaskedArray.toIndexedOptionArray()
 

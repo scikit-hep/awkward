@@ -10,32 +10,26 @@ this has the following.
 
 .. py:class:: ListForm(starts, stops, content, has_identities=False, parameters=None)
 
-ak.forms.ListForm.__init__
-==========================
+.. _ak.forms.ListForm.__init__:
 
 .. py:method:: ListForm.__init__(starts, stops, content, has_identities=False, parameters=None)
 
-ak.forms.ListForm.starts
-========================
+.. _ak.forms.ListForm.starts:
 
 .. py:attribute:: ListForm.starts
 
-ak.forms.ListForm.stops
-=======================
+.. _ak.forms.ListForm.stops:
 
 .. py:attribute:: ListForm.stops
 
-ak.forms.ListForm.content
-=========================
+.. _ak.forms.ListForm.content:
 
 .. py:attribute:: ListForm.content
 
-ak.forms.ListForm.has_identities
-================================
+.. _ak.forms.ListForm.has_identities:
 
 .. py:attribute:: ListForm.has_identities
 
-ak.forms.ListForm.parameters
-============================
+.. _ak.forms.ListForm.parameters:
 
 .. py:attribute:: ListForm.parameters
