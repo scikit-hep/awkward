@@ -23,7 +23,7 @@ latest_commit = (
               .strip()
 )
 
-toctree = ["_auto/changelog.rst"]
+toctree = []
 
 def tostr(node):
     if isinstance(node, ast.NameConstant):
