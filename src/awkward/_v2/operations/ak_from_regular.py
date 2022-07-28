@@ -50,7 +50,7 @@ def _impl(array, axis, highlevel, behavior):
             if layout.is_RegularType:
                 return continuation().toListOffsetArray64(False)
 
-        out = layout.recursively_apply(action, numpy_to_regular=True)
+        out = layout.recursively_apply(action, behavior, numpy_to_regular=True)
 
     elif posaxis == 0:
         out = layout  # the top-level is already regular (ArrayType)
@@ -73,6 +73,8 @@ def _impl(array, axis, highlevel, behavior):
             depth_context["posaxis"] = posaxis
 
         depth_context = {"posaxis": posaxis}
-        out = layout.recursively_apply(action, depth_context, numpy_to_regular=True)
+        out = layout.recursively_apply(
+            action, behavior, depth_context, numpy_to_regular=True
+        )
 
     return ak._v2._util.wrap(out, behavior, highlevel)

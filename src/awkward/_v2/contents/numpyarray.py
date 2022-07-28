@@ -1285,11 +1285,11 @@ class NumpyArray(Content):
         return [self.raw(nplike).reshape(-1)]
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._data.ndim != 1 and options["numpy_to_regular"]:
             return self.toRegularArray()._recursively_apply(
-                action, depth, depth_context, lateral_context, options
+                action, behavior, depth, depth_context, lateral_context, options
             )
 
         if options["return_array"]:
