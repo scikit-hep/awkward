@@ -2,18 +2,23 @@
 
 import pytest  # noqa: F401
 import awkward as ak  # noqa: F401
-import skhep_testdata  # noqa: F401
-import uproot  # noqa: F401
-
-to_list = ak._v2.operations.to_list
+import numpy as np  # noqa: F401
 
 
-def test_1417issue_is_none_check_axis():
-    tree = uproot.open(skhep_testdata.data_path("uproot-issue413.root"))["mytree"]
-    assert ak._v2.to_list(tree["Str"].array()) == [
-        "evt-0",
-        "evt-1",
-        "evt-2",
-        "evt-3",
-        "evt-4",
+def test_fix_longlong_type_passed_to_index_1530():
+    a = np.asarray([0, 5, 10, 15, 20, 25], dtype=np.longlong)
+    index = ak._v2.index.Index64(a)
+    content = ak._v2.contents.NumpyArray(
+        np.asarray(
+            [101, 118, 116, 45, 48, 101, 118, 116, 45, 49, 101, 118], dtype=np.int64
+        )
+    )
+    listoffsetarray = ak._v2.contents.ListOffsetArray(index, content)
+
+    assert ak._v2.to_list(listoffsetarray) == [
+        [101, 118, 116, 45, 48],
+        [101, 118, 116, 45, 49],
+        [101, 118],
+        [],
+        [],
     ]
