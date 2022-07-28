@@ -10,10 +10,5 @@ a ListType has the following.
 
 .. py:class:: ListType(type, parameters=None, typestr=None)
 
-.. _ak.types.ListType.__init__:
-
-.. py:method:: ListType.__init__(type, parameters=None, typestr=None)
-
-.. _ak.types.ListType.type:
-
-.. py:attribute:: ListType.type
+    .. py:method:: ListType.__init__(type, parameters=None, typestr=None)
+        

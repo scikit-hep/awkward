@@ -27,33 +27,23 @@ leaves of the structure.
 
 .. py:class:: Index(numpy_array)
 
-.. _ak.layout.Index.__init__:
-
 .. py:method:: Index.__init__(numpy_array)
 
 Creates an Index from a NumPy array. If the array has the wrong type for
 this specialization, or if it is not C-contiguous, the array is copied.
 Otherwise, it is a view (shares data).
 
-.. _ak.layout.Index.__getitem__:
-
 .. py:method:: Index.__getitem__(at)
 
 Extracts one element from the Index.
-
-.. _ak.layout.Index.__getitem__:
 
 .. py:method:: Index.__getitem__(start, stop)
 
 Slices the Index between ``start`` and ``stop``.
 
-.. _ak.layout.Index.__len__:
-
 .. py:method:: Index.__len__()
 
 The length of the Index.
-
-.. _ak.layout.Index.__repr__:
 
 .. py:method:: Index.__repr__()
 

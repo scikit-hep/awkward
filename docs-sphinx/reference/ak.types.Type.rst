@@ -30,97 +30,67 @@ in common.
 
 .. py:class:: Type
 
-.. _ak.types.Type.__eq__:
-
-.. py:method:: Type.__eq__(other)
-
-True if two types are equal; False otherwise.
-
-.. _ak.types.Type.__ne__:
-
-.. py:method:: Type.__ne__()
-
-True if two types are not equal; False otherwise.
-
-.. _ak.types.Type.__repr__:
-
-.. py:method:: Type.__repr__()
-
-String representation of the type, mostly following the
-`Datashape <https://datashape.readthedocs.io/>`__ grammar.
-
-.. _ak.types.Type.__getstate__:
-
-.. py:method:: Type.__getstate__()
-
-Types can be pickled.
-
-.. _ak.types.Type.__setstate__:
-
-.. py:method:: Type.__setstate__(arg0)
-
-Types can be pickled.
-
-.. _ak.types.Type.empty:
-
-.. py:method:: Type.empty()
-
-Creates an empty :class:`ak.layout.Content` array with this type.
-
-.. _ak.types.Type.fieldindex:
-
-.. py:method:: Type.fieldindex(key)
-
-Returns the index position of a ``key`` if the type contains
-:class:`ak.types.RecordType` and ``key`` is in the record.
-
-.. _ak.types.Type.haskey:
-
-.. py:method:: Type.haskey(key)
-
-Returns True if the type contains :class:`ak.types.RecordType` and ``key`` is
-in the record; False otherwise.
-
-.. _ak.types.Type.key:
-
-.. py:method:: Type.key(fieldindex)
-
-Returns the ``key`` name at a given index position in the record if the
-type contains :class:`ak.types.RecordType` with more than ``fieldindex``
-fields.
-
-.. _ak.types.Type.keys:
-
-.. py:method:: Type.keys()
-
-Returns a list of keys in the record if the type contains
-:class:`ak.types.RecordType`.
-
-.. _ak.types.Type.setparameter:
-
-.. py:method:: Type.setparameter(key, value)
-
-Sets a parameter.
-
-**Do not use this method!** Mutable parameters are deprecated.
-
-.. _ak.types.Type.numfields:
-
-.. py:attribute:: Type.numfields
-
-Returns the number of fields in the record if this type contains a
-:class:`ak.types.RecordType`.
-
-.. _ak.types.Type.parameters:
-
-.. py:attribute:: Type.parameters
-
-Returns the parameters associated with this type.
-
-.. _ak.types.Type.typestr:
-
-.. py:attribute:: Type.typestr
-
+    .. py:method:: Type.__eq__(other)
+        
+        True if two types are equal; False otherwise.
+        
+    .. py:method:: Type.__ne__()
+        
+        True if two types are not equal; False otherwise.
+        
+    .. py:method:: Type.__repr__()
+        
+        String representation of the type, mostly following the
+        `Datashape <https://datashape.readthedocs.io/>`__ grammar.
+        
+    .. py:method:: Type.__getstate__()
+        
+        Types can be pickled.
+        
+    .. py:method:: Type.__setstate__(arg0)
+        
+        Types can be pickled.
+        
+    .. py:method:: Type.empty()
+        
+        Creates an empty :class:`ak.layout.Content` array with this type.
+        
+    .. py:method:: Type.fieldindex(key)
+        
+        Returns the index position of a ``key`` if the type contains
+        :class:`ak.types.RecordType` and ``key`` is in the record.
+        
+    .. py:method:: Type.haskey(key)
+        
+        Returns True if the type contains :class:`ak.types.RecordType` and ``key`` is
+        in the record; False otherwise.
+        
+    .. py:method:: Type.key(fieldindex)
+        
+        Returns the ``key`` name at a given index position in the record if the
+        type contains :class:`ak.types.RecordType` with more than ``fieldindex``
+        fields.
+        
+    .. py:method:: Type.keys()
+        
+        Returns a list of keys in the record if the type contains
+        :class:`ak.types.RecordType`.
+        
+    .. py:method:: Type.setparameter(key, value)
+        
+        Sets a parameter.
+        
+        **Do not use this method!** Mutable parameters are deprecated.
+        
+    .. py:attribute:: Type.numfields
+        
+        Returns the number of fields in the record if this type contains a
+        :class:`ak.types.RecordType`.
+        
+    .. py:attribute:: Type.parameters
+        
+        Returns the parameters associated with this type.
+        
 Returns the custom type string if overridden with :data:`ak.behavior`.
 
 See `Custom type names <ak.behavior.html#custom-type-names>`_.

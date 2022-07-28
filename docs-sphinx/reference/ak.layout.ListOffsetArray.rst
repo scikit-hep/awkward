@@ -120,65 +120,45 @@ a ListOffsetArray has the following.
 
 .. py:class:: ListOffsetArray(offsets, content, identities=None, parameters=None)
 
-.. _ak.layout.ListOffsetArray.__init__:
-
-.. py:method:: ListOffsetArray.__init__(offsets, content, identities=None, parameters=None)
-
-.. _ak.layout.ListOffsetArray.offsets:
-
-.. py:attribute:: ListOffsetArray.offsets
-
-.. _ak.layout.ListOffsetArray.content:
-
-.. py:attribute:: ListOffsetArray.content
-
-.. _ak.layout.ListOffsetArray.starts:
-
-.. py:attribute:: ListOffsetArray.starts
-
-Derives ``starts`` as a view of ``offsets``:
-
-.. code-block:: python
-
-    starts = offsets[:-1]
-
-.. _ak.layout.ListOffsetArray.stops:
-
-.. py:attribute:: ListOffsetArray.stops
-
-Derives ``stops`` as a view of ``offsets``:
-
-.. code-block:: python
-
-    stops = offsets[1:]
-
-.. _ak.layout.ListOffsetArray.compact_offsets64:
-
-.. py:method:: ListOffsetArray.compact_offsets64(start_at_zero=True)
-
-Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` that represent the same lengths
-of this array's ``offsets``. If this ``offsets[0] == 0 or not start_at_zero``, the
-return value is a view of this array's ``offsets``.
-
-.. _ak.layout.ListOffsetArray.broadcast_tooffsets64:
-
-.. py:method:: ListOffsetArray.broadcast_tooffsets64(offsets)
-
-Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
-returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
-broadcasting because a set of :class:`ak.types.ListType` and :class:`ak.types.RegularType`
-arrays have to be reordered to a common ``offsets`` before they can be directly
-operated upon.
-
-.. _ak.layout.ListOffsetArray.toRegularArray:
-
-.. py:method:: ListOffsetArray.toRegularArray()
-
-Converts this :class:`ak.types.ListType` into a :class:`ak.types.RegularType` array
-if possible.
-
-.. _ak.layout.ListOffsetArray.simplify:
-
-.. py:method:: ListOffsetArray.simplify()
-
+    .. py:method:: ListOffsetArray.__init__(offsets, content, identities=None, parameters=None)
+        
+    .. py:attribute:: ListOffsetArray.offsets
+        
+    .. py:attribute:: ListOffsetArray.content
+        
+    .. py:attribute:: ListOffsetArray.starts
+        
+        Derives ``starts`` as a view of ``offsets``:
+        
+        .. code-block:: python
+        
+            starts = offsets[:-1]
+        
+    .. py:attribute:: ListOffsetArray.stops
+        
+        Derives ``stops`` as a view of ``offsets``:
+        
+        .. code-block:: python
+        
+            stops = offsets[1:]
+        
+    .. py:method:: ListOffsetArray.compact_offsets64(start_at_zero=True)
+        
+        Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` that represent the same lengths
+        of this array's ``offsets``. If this ``offsets[0] == 0 or not start_at_zero``, the
+        return value is a view of this array's ``offsets``.
+        
+    .. py:method:: ListOffsetArray.broadcast_tooffsets64(offsets)
+        
+        Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
+        returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
+        broadcasting because a set of :class:`ak.types.ListType` and :class:`ak.types.RegularType`
+        arrays have to be reordered to a common ``offsets`` before they can be directly
+        operated upon.
+        
+    .. py:method:: ListOffsetArray.toRegularArray()
+        
+        Converts this :class:`ak.types.ListType` into a :class:`ak.types.RegularType` array
+        if possible.
+        
 Pass-through; returns the original array.

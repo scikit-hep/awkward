@@ -128,37 +128,23 @@ a RegularArray has the following.
 
 .. py:class:: RegularArray(content, size, identities=None, parameters=None)
 
-.. _ak.layout.RegularArray.__init__:
-
-.. py:method:: RegularArray.__init__(content, size, identities=None, parameters=None)
-
-.. _ak.layout.RegularArray.content:
-
-.. py:attribute:: RegularArray.content
-
-.. _ak.layout.RegularArray.size:
-
-.. py:attribute:: RegularArray.size
-
-.. _ak.layout.RegularArray.compact_offsets64:
-
-.. py:method:: RegularArray.compact_offsets64(start_at_zero=True)
-
-Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` by prefix summing
-in steps of ``size``.
-
-.. _ak.layout.RegularArray.broadcast_tooffsets64:
-
-.. py:method:: RegularArray.broadcast_tooffsets64(offsets)
-
-Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
-returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
-broadcasting because a set of :class:`ak.types.ListType` and :class:`ak.types.RegularType`
-arrays have to be reordered to a common ``offsets`` before they can be directly
-operated upon.
-
-.. _ak.layout.RegularArray.simplify:
-
-.. py:method:: RegularArray.simplify()
-
+    .. py:method:: RegularArray.__init__(content, size, identities=None, parameters=None)
+        
+    .. py:attribute:: RegularArray.content
+        
+    .. py:attribute:: RegularArray.size
+        
+    .. py:method:: RegularArray.compact_offsets64(start_at_zero=True)
+        
+        Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` by prefix summing
+        in steps of ``size``.
+        
+    .. py:method:: RegularArray.broadcast_tooffsets64(offsets)
+        
+        Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
+        returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
+        broadcasting because a set of :class:`ak.types.ListType` and :class:`ak.types.RegularType`
+        arrays have to be reordered to a common ``offsets`` before they can be directly
+        operated upon.
+        
 Pass-through; returns the original array.

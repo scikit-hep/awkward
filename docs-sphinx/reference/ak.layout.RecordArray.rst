@@ -220,65 +220,41 @@ a RecordArray has the following.
 
 .. py:class:: RecordArray(contents, keys=None, length=None, identities=None, parameters=None)
 
-.. _ak.layout.RecordArray.__init__:
-
-.. py:method:: RecordArray.__init__(contents, keys=None, length=None, identities=None, parameters=None)
-
-.. _ak.layout.RecordArray.contents:
-
-.. py:attribute:: RecordArray.contents
-
-.. _ak.layout.RecordArray.recordlookup:
-
-.. py:attribute:: RecordArray.recordlookup
-
-.. _ak.layout.RecordArray.istuple:
-
-.. py:attribute:: RecordArray.istuple
-
-Returns True if ``recordlookup`` does not exist; False if it does.
-
-.. _ak.layout.RecordArray.astuple:
-
-.. py:attribute:: RecordArray.astuple
-
-Returns a RecordArray with the ``recordlookup`` removed.
-
-.. _ak.layout.RecordArray.setitem_field:
-
-.. py:method:: RecordArray.setitem_field(where, what)
-
-Sets a field in-place.
-
-**Do not use this function.** It is deprecated. Use :func:`ak.with_field`
-instead.
-
-.. _ak.layout.RecordArray.field:
-
-.. py:method:: RecordArray.field(fieldindex)
-
-Gets a field by index number.
-
-.. _ak.layout.RecordArray.field:
-
-.. py:method:: RecordArray.field(key)
-
-Gets a field by str name.
-
-.. _ak.layout.RecordArray.fields:
-
-.. py:method:: RecordArray.fields()
-
-Returns a list of the fields themselves; equivalent to ``contents``.
-
-.. _ak.layout.RecordArray.fielditems:
-
-.. py:method:: RecordArray.fielditems()
-
-Returns a list of key-value pairs, where the values are ``contents``.
-
-.. _ak.layout.RecordArray.simplify:
-
-.. py:method:: RecordArray.simplify()
-
+    .. py:method:: RecordArray.__init__(contents, keys=None, length=None, identities=None, parameters=None)
+        
+    .. py:attribute:: RecordArray.contents
+        
+    .. py:attribute:: RecordArray.recordlookup
+        
+    .. py:attribute:: RecordArray.istuple
+        
+        Returns True if ``recordlookup`` does not exist; False if it does.
+        
+    .. py:attribute:: RecordArray.astuple
+        
+        Returns a RecordArray with the ``recordlookup`` removed.
+        
+    .. py:method:: RecordArray.setitem_field(where, what)
+        
+        Sets a field in-place.
+        
+        **Do not use this function.** It is deprecated. Use :func:`ak.with_field`
+        instead.
+        
+    .. py:method:: RecordArray.field(fieldindex)
+        
+        Gets a field by index number.
+        
+    .. py:method:: RecordArray.field(key)
+        
+        Gets a field by str name.
+        
+    .. py:method:: RecordArray.fields()
+        
+        Returns a list of the fields themselves; equivalent to ``contents``.
+        
+    .. py:method:: RecordArray.fielditems()
+        
+        Returns a list of key-value pairs, where the values are ``contents``.
+        
 Pass-through; returns the original array.

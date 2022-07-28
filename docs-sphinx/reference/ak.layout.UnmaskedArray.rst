@@ -81,35 +81,23 @@ a UnmaskedArray has the following.
 
 .. py:class:: UnmaskedArray(content, identities=None, parameters=None)
 
-.. _ak.layout.UnmaskedArray.__init__:
-
-.. py:method:: UnmaskedArray.__init__(content, identities=None, parameters=None)
-
-.. _ak.layout.UnmaskedArray.content:
-
-.. py:attribute:: UnmaskedArray.content
-
-.. _ak.layout.UnmaskedArray.project:
-
-.. py:method:: UnmaskedArray.project(mask=None)
-
-Returns a non-:class:`ak.types.OptionType` array containing only the valid elements.
-If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
-and ``1`` means missing, this ``mask`` is used to select the data. Otherwise, ``project``
-has no effect.
-
-.. _ak.layout.UnmaskedArray.bytemask:
-
-.. py:method:: UnmaskedArray.bytemask()
-
-Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
-
-Since this array is unmasked, the output is all ``0``.
-
-.. _ak.layout.UnmaskedArray.simplify:
-
-.. py:method:: UnmaskedArray.simplify()
-
+    .. py:method:: UnmaskedArray.__init__(content, identities=None, parameters=None)
+        
+    .. py:attribute:: UnmaskedArray.content
+        
+    .. py:method:: UnmaskedArray.project(mask=None)
+        
+        Returns a non-:class:`ak.types.OptionType` array containing only the valid elements.
+        If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
+        and ``1`` means missing, this ``mask`` is used to select the data. Otherwise, ``project``
+        has no effect.
+        
+    .. py:method:: UnmaskedArray.bytemask()
+        
+        Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
+        
+        Since this array is unmasked, the output is all ``0``.
+        
 Combines this node with its ``content`` if the ``content`` also has
 :class:`ak.types.OptionType`; otherwise, this is a pass-through.
 In all cases, the output has the same logical meaning as the input.

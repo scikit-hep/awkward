@@ -110,41 +110,25 @@ a ByteMaskedArray has the following.
 
 .. py:class:: ByteMaskedArray(mask, content, valid_when, identities=None, parameters=None)
 
-.. _ak.layout.ByteMaskedArray.__init__:
-
-.. py:method:: ByteMaskedArray.__init__(mask, content, valid_when, identities=None, parameters=None)
-
-.. _ak.layout.ByteMaskedArray.mask:
-
-.. py:attribute:: ByteMaskedArray.mask
-
-.. _ak.layout.ByteMaskedArray.content:
-
-.. py:attribute:: ByteMaskedArray.content
-
-.. _ak.layout.ByteMaskedArray.valid_when:
-
-.. py:attribute:: ByteMaskedArray.valid_when
-
-.. _ak.layout.ByteMaskedArray.project:
-
-.. py:method:: ByteMaskedArray.project(mask=None)
-
-Returns a non-:class:`ak.types.OptionType` array containing only the valid elements.
-If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
-and ``1`` means missing, this ``mask`` is unioned with the ByteMaskedArray's
-mask (after converting to ``valid_when=False`` to match this ``mask``).
-
-.. _ak.layout.ByteMaskedArray.bytemask:
-
-.. py:method:: ByteMaskedArray.bytemask()
-
-Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
-
-.. _ak.layout.ByteMaskedArray.simplify:
-
-.. py:method:: ByteMaskedArray.simplify()
-
+    .. py:method:: ByteMaskedArray.__init__(mask, content, valid_when, identities=None, parameters=None)
+        
+    .. py:attribute:: ByteMaskedArray.mask
+        
+    .. py:attribute:: ByteMaskedArray.content
+        
+    .. py:attribute:: ByteMaskedArray.valid_when
+        
+    .. py:method:: ByteMaskedArray.project(mask=None)
+        
+        Returns a non-:class:`ak.types.OptionType` array containing only the valid elements.
+        If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
+        and ``1`` means missing, this ``mask`` is unioned with the ByteMaskedArray's
+        mask (after converting to ``valid_when=False`` to match this ``mask``).
+        
+    .. py:method:: ByteMaskedArray.bytemask()
+        
+        Returns an array of 8-bit values in which ``0`` means valid and ``1`` means missing.
+        
 Combines this node with its ``content`` if the ``content`` also has
 :class:`ak.types.OptionType`; otherwise, this is a pass-through.
 In all cases, the output has the same logical meaning as the input.

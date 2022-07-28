@@ -59,30 +59,16 @@ a VirtualArray has the following.
 
 .. py:class:: VirtualArray(generator, cache=None, cache_key=None, identities=None, parameters=None)
 
-.. _ak.layout.VirtualArray.__init__:
-
-.. py:method:: VirtualArray.__init__(generator, cache=None, cache_key=None, identities=None, parameters=None)
-
-.. _ak.layout.VirtualArray.generator:
-
-.. py:attribute:: VirtualArray.generator
-
-.. _ak.layout.VirtualArray.cache:
-
-.. py:attribute:: VirtualArray.cache
-
-.. _ak.layout.VirtualArray.cache_key:
-
-.. py:attribute:: VirtualArray.cache_key
-
-.. _ak.layout.VirtualArray.peek_array:
-
-.. py:attribute:: VirtualArray.peek_array
-
-Does not materialize the array; might return None.
-
-.. _ak.layout.VirtualArray.array:
-
-.. py:attribute:: VirtualArray.array
-
+    .. py:method:: VirtualArray.__init__(generator, cache=None, cache_key=None, identities=None, parameters=None)
+        
+    .. py:attribute:: VirtualArray.generator
+        
+    .. py:attribute:: VirtualArray.cache
+        
+    .. py:attribute:: VirtualArray.cache_key
+        
+    .. py:attribute:: VirtualArray.peek_array
+        
+        Does not materialize the array; might return None.
+        
 Materializes the array if necessary; never returns None.

@@ -172,59 +172,37 @@ a UnionArray has the following.
 
 .. py:class:: UnionArray(tags, index, contents, identities=None, parameters=None)
 
-.. _ak.layout.UnionArray.__init__:
-
-.. py:method:: UnionArray.__init__(tags, index, contents, identities=None, parameters=None)
-
-.. _ak.layout.UnionArray.sparse_index:
-
-.. py:method:: UnionArray.sparse_index(length)
-
-.. _ak.layout.UnionArray.regular_index:
-
-.. py:method:: UnionArray.regular_index(tags)
-
-.. _ak.layout.UnionArray.tags:
-
-.. py:attribute:: UnionArray.tags
-
-.. _ak.layout.UnionArray.index:
-
-.. py:attribute:: UnionArray.index
-
-.. _ak.layout.UnionArray.contents:
-
-.. py:attribute:: UnionArray.contents
-
-.. _ak.layout.UnionArray.numcontents:
-
-.. py:attribute:: UnionArray.numcontents
-
-Returns the number of ``contents``.
-
-.. _ak.layout.UnionArray.content:
-
-.. py:method:: UnionArray.content(i)
-
-Returns one of the ``contents`` by index.
-
-.. _ak.layout.UnionArray.project:
-
-.. py:method:: UnionArray.project(i)
-
-Returns an array of only one of the possibilities, like selecting
-
-.. code-block:: python
-
-    union_array[union_array.tags == i]
-
-Note that this is different from the ``content(i)`` method because this reindexes
-to present the result in its logical order, not its physical order.
-
-.. _ak.layout.UnionArray.simplify:
-
-.. py:method:: UnionArray.simplify(mergebool=False)
-
+    .. py:method:: UnionArray.__init__(tags, index, contents, identities=None, parameters=None)
+        
+    .. py:method:: UnionArray.sparse_index(length)
+        
+    .. py:method:: UnionArray.regular_index(tags)
+        
+    .. py:attribute:: UnionArray.tags
+        
+    .. py:attribute:: UnionArray.index
+        
+    .. py:attribute:: UnionArray.contents
+        
+    .. py:attribute:: UnionArray.numcontents
+        
+        Returns the number of ``contents``.
+        
+    .. py:method:: UnionArray.content(i)
+        
+        Returns one of the ``contents`` by index.
+        
+    .. py:method:: UnionArray.project(i)
+        
+        Returns an array of only one of the possibilities, like selecting
+        
+        .. code-block:: python
+        
+            union_array[union_array.tags == i]
+        
+        Note that this is different from the ``content(i)`` method because this reindexes
+        to present the result in its logical order, not its physical order.
+        
 If any of the ``contents`` have :class:`ak.types.UnionType` and/or any
 of the ``contents`` are
 `ak.layout.Content.mergeable <ak.layout.Content.html#ak-layout-content-mergeable>`__,

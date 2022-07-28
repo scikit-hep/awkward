@@ -10,22 +10,11 @@ a UnionType has the following.
 
 .. py:class:: UnionType(types, parameters=None, typestr=None)
 
-.. _ak.types.UnionType.__init__:
-
-.. py:method:: UnionType.__init__(types, parameters=None, typestr=None)
-
-.. _ak.types.UnionType.types:
-
-.. py:attribute:: UnionType.types
-
-.. _ak.types.UnionType.__getitem__:
-
-.. py:method:: UnionType.__getitem__(where)
-
-.. _ak.types.UnionType.type:
-
-.. py:method:: UnionType.type(index)
-
-.. _ak.types.UnionType.numtypes:
-
-.. py:attribute:: UnionType.numtypes
+    .. py:method:: UnionType.__init__(types, parameters=None, typestr=None)
+        
+    .. py:attribute:: UnionType.types
+        
+    .. py:method:: UnionType.__getitem__(where)
+        
+    .. py:method:: UnionType.type(index)
+        

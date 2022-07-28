@@ -12,10 +12,5 @@ an OptionType has the following.
 
 .. py:class:: OptionType(type, parameters=None, typestr=None)
 
-.. _ak.types.OptionType.__init__:
-
-.. py:method:: OptionType.__init__(type, parameters=None, typestr=None)
-
-.. _ak.types.OptionType.type:
-
-.. py:attribute:: OptionType.type
+    .. py:method:: OptionType.__init__(type, parameters=None, typestr=None)
+        

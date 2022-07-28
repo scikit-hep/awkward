@@ -144,48 +144,30 @@ a ListArray has the following.
 
 .. py:class:: ListArray(starts, stops, content, identities=None, parameters=None)
 
-.. _ak.layout.ListArray.__init__:
-
-.. py:method:: ListArray.__init__(starts, stops, content, identities=None, parameters=None)
-
-.. _ak.layout.ListArray.starts:
-
-.. py:attribute:: ListArray.starts
-
-.. _ak.layout.ListArray.stops:
-
-.. py:attribute:: ListArray.stops
-
-.. _ak.layout.ListArray.content:
-
-.. py:attribute:: ListArray.content
-
-.. _ak.layout.ListArray.compact_offsets64:
-
-.. py:method:: ListArray.compact_offsets64(start_at_zero=True)
-
-Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` that represent the same lengths
-of this array's ``starts`` and ``stops`` (though not the physical order in memory).
-
-.. _ak.layout.ListArray.broadcast_tooffsets64:
-
-.. py:method:: ListArray.broadcast_tooffsets64(offsets)
-
-Reorders ``contents`` to match a given set of ``offsets`` (if possible) and
-returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
-broadcasting because a set of :class:`ak.types.ListType` and :class:`ak.types.RegularType`
-arrays have to be reordered to a common ``offsets`` before they can be directly
-operated upon.
-
-.. _ak.layout.ListArray.toRegularArray:
-
-.. py:method:: ListArray.toRegularArray()
-
-Converts this :class:`ak.types.ListType` into a :class:`ak.types.RegularType` array
-if possible.
-
-.. _ak.layout.ListArray.simplify:
-
-.. py:method:: ListArray.simplify()
-
+    .. py:method:: ListArray.__init__(starts, stops, content, identities=None, parameters=None)
+        
+    .. py:attribute:: ListArray.starts
+        
+    .. py:attribute:: ListArray.stops
+        
+    .. py:attribute:: ListArray.content
+        
+    .. py:method:: ListArray.compact_offsets64(start_at_zero=True)
+        
+        Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` that represent the same lengths
+        of this array's ``starts`` and ``stops`` (though not the physical order in memory).
+        
+    .. py:method:: ListArray.broadcast_tooffsets64(offsets)
+        
+        Reorders ``contents`` to match a given set of ``offsets`` (if possible) and
+        returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
+        broadcasting because a set of :class:`ak.types.ListType` and :class:`ak.types.RegularType`
+        arrays have to be reordered to a common ``offsets`` before they can be directly
+        operated upon.
+        
+    .. py:method:: ListArray.toRegularArray()
+        
+        Converts this :class:`ak.types.ListType` into a :class:`ak.types.RegularType` array
+        if possible.
+        
 Pass-through; returns the original array.

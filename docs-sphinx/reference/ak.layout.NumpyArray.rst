@@ -167,81 +167,55 @@ a NumpyArray has the following.
 
 .. py:class:: NumpyArray(array, identities=None, parameters=None)
 
-.. _ak.layout.NumpyArray.__init__:
-
-.. py:method:: NumpyArray.__init__(array, identities=None, parameters=None)
-
-.. _ak.layout.NumpyArray.shape:
-
-.. py:attribute:: NumpyArray.shape
-
-.. _ak.layout.NumpyArray.strides:
-
-.. py:attribute:: NumpyArray.strides
-
-.. _ak.layout.NumpyArray.itemsize:
-
-.. py:attribute:: NumpyArray.itemsize
-
-.. _ak.layout.NumpyArray.format:
-
-.. py:attribute:: NumpyArray.format
-
-.. _ak.layout.NumpyArray.ndim:
-
-.. py:attribute:: NumpyArray.ndim
-
-Returns ``len(shape)``.
-
-.. _ak.layout.NumpyArray.isscalar:
-
-.. py:attribute:: NumpyArray.isscalar
-
-Should always return False (``len(shape) == 0`` NumpyArrays in C++ are converted into
-scalar numbers and booleans before they appear in Python).
-
-.. _ak.layout.NumpyArray.isempty:
-
-.. py:attribute:: NumpyArray.isempty
-
-Returns True if any ``shape`` element is ``0``; False otherwise.
-
-.. _ak.layout.NumpyArray.iscontiguous:
-
-.. py:attribute:: NumpyArray.iscontiguous
-
-Contiguous arrays have no gaps between elements and are sequenced in increasing
-order in memory. This is the same as NumPy's notion of
-`"C contiguous" <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ascontiguousarray.html>`__.
-
-A NumpyArray is contiguous if the following are true of its ``shape``, ``strides``,
-and ``itemsize``:
-
-.. code-block:: python
-
-    x = itemsize
-    for i in range(len(shape) - 1, 0, -1):
-        if x != strides[i]:
-            return False
-        x *= shape[i]
-    else:
-        return True
-
-.. _ak.layout.NumpyArray.toRegularArray:
-
-.. py:method:: NumpyArray.toRegularArray()
-
-Returns a contiguous version of this array with any multidimensional ``shape`` replaced by
-nested :class:`ak.layout.RegularArray` nodes.
-
-.. _ak.layout.NumpyArray.contiguous:
-
-.. py:method:: NumpyArray.contiguous()
-
-Returns a contiguous version of this array (possibly the original array, unchanged).
-
-.. _ak.layout.NumpyArray.simplify:
-
-.. py:method:: NumpyArray.simplify()
-
+    .. py:method:: NumpyArray.__init__(array, identities=None, parameters=None)
+        
+    .. py:attribute:: NumpyArray.shape
+        
+    .. py:attribute:: NumpyArray.strides
+        
+    .. py:attribute:: NumpyArray.itemsize
+        
+    .. py:attribute:: NumpyArray.format
+        
+    .. py:attribute:: NumpyArray.ndim
+        
+        Returns ``len(shape)``.
+        
+    .. py:attribute:: NumpyArray.isscalar
+        
+        Should always return False (``len(shape) == 0`` NumpyArrays in C++ are converted into
+        scalar numbers and booleans before they appear in Python).
+        
+    .. py:attribute:: NumpyArray.isempty
+        
+        Returns True if any ``shape`` element is ``0``; False otherwise.
+        
+    .. py:attribute:: NumpyArray.iscontiguous
+        
+        Contiguous arrays have no gaps between elements and are sequenced in increasing
+        order in memory. This is the same as NumPy's notion of
+        `"C contiguous" <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ascontiguousarray.html>`__.
+        
+        A NumpyArray is contiguous if the following are true of its ``shape``, ``strides``,
+        and ``itemsize``:
+        
+        .. code-block:: python
+        
+            x = itemsize
+            for i in range(len(shape) - 1, 0, -1):
+                if x != strides[i]:
+                    return False
+                x *= shape[i]
+            else:
+                return True
+        
+    .. py:method:: NumpyArray.toRegularArray()
+        
+        Returns a contiguous version of this array with any multidimensional ``shape`` replaced by
+        nested :class:`ak.layout.RegularArray` nodes.
+        
+    .. py:method:: NumpyArray.contiguous()
+        
+        Returns a contiguous version of this array (possibly the original array, unchanged).
+        
 Pass-through; returns the original array.

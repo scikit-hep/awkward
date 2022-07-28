@@ -67,19 +67,11 @@ an EmptyArray has the following.
 
 .. py:class:: EmptyArray(identities=None, parameters=None)
 
-.. _ak.layout.EmptyArray.__init__:
-
-.. py:method:: EmptyArray.__init__(identities=None, parameters=None)
-
-.. _ak.layout.EmptyArray.toNumpyArray:
-
-.. py:method:: EmptyArray.toNumpyArray()
-
-Converts this EmptyArray into a :class:`ak.layout.NumpyArray` with 64-bit
-floating-point type.
-
-.. _ak.layout.EmptyArray.simplify:
-
-.. py:method:: EmptyArray.simplify()
-
+    .. py:method:: EmptyArray.__init__(identities=None, parameters=None)
+        
+    .. py:method:: EmptyArray.toNumpyArray()
+        
+        Converts this EmptyArray into a :class:`ak.layout.NumpyArray` with 64-bit
+        floating-point type.
+        
 Pass-through; returns the original array.

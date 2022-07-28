@@ -32,59 +32,39 @@ in common.
 
 .. py:class:: Form
 
-.. _ak.forms.Form.__eq__:
-
-.. py:method:: Form.__eq__(other)
-
-True if two forms are equal; False otherwise.
-
-.. _ak.forms.Form.__ne__:
-
-.. py:method:: Form.__ne__()
-
-True if two forms are not equal; False otherwise.
-
-.. _ak.forms.Form.__repr__:
-
-.. py:method:: Form.__repr__()
-
-String representation of the form, which is pretty, non-verbose #ak.forms.Form.tojson.
-
-.. _ak.forms.Form.__getstate__:
-
-.. py:method:: Form.__getstate__()
-
-Forms can be pickled.
-
-.. _ak.forms.Form.__setstate__:
-
-.. py:method:: Form.__setstate__(arg0)
-
-Forms can be pickled.
-
-.. _ak.forms.Form.tojson:
-
-.. py:method:: Form.tojson(pretty, verbose)
-
-Converts to a JSON string. If ``pretty`` (bool), it will be multi-line and indented;
-if ``verbose``, all fields will be shown, even defaults.
-
-.. _ak.forms.Form.type:
-
-.. py:method:: Form.type(typestrs)
-
-The single high-level type associated with this low-level form. Conversion in the
-other direction is not unique. ``typestrs`` is a dict of ``__record__`` to type-string
-names (see `Custom type names <ak.behavior.html#custom-type-names>`_).
-
-.. _ak.forms.Form.parameters:
-
-.. py:attribute:: Form.parameters
-
-Returns the parameters associated with this form.
-
-.. _ak.forms.Form.parameter:
-
-.. py:method:: Form.parameter(key)
-
+    .. py:method:: Form.__eq__(other)
+        
+        True if two forms are equal; False otherwise.
+        
+    .. py:method:: Form.__ne__()
+        
+        True if two forms are not equal; False otherwise.
+        
+    .. py:method:: Form.__repr__()
+        
+        String representation of the form, which is pretty, non-verbose #ak.forms.Form.tojson.
+        
+    .. py:method:: Form.__getstate__()
+        
+        Forms can be pickled.
+        
+    .. py:method:: Form.__setstate__(arg0)
+        
+        Forms can be pickled.
+        
+    .. py:method:: Form.tojson(pretty, verbose)
+        
+        Converts to a JSON string. If ``pretty`` (bool), it will be multi-line and indented;
+        if ``verbose``, all fields will be shown, even defaults.
+        
+    .. py:method:: Form.type(typestrs)
+        
+        The single high-level type associated with this low-level form. Conversion in the
+        other direction is not unique. ``typestrs`` is a dict of ``__record__`` to type-string
+        names (see `Custom type names <ak.behavior.html#custom-type-names>`_).
+        
+    .. py:attribute:: Form.parameters
+        
+        Returns the parameters associated with this form.
+        
 Returns the parameter associated with ``key``. (Always returns, possibly None.)

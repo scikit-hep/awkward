@@ -13,6 +13,3 @@ an UnknownType has the following.
 
 .. py:class:: UnknownType(parameters=None, typestr=None)
 
-.. _ak.types.UnknownType.__init__:
-
-.. py:method:: UnknownType.__init__(parameters=None, typestr=None)

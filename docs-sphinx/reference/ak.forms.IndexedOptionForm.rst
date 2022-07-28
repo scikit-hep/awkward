@@ -10,22 +10,11 @@ this has the following.
 
 .. py:class:: IndexedOptionForm(index, content, has_identities=False, parameters=None)
 
-.. _ak.forms.IndexedOptionForm.__init__:
-
-.. py:method:: IndexedOptionForm.__init__(index, content, has_identities=False, parameters=None)
-
-.. _ak.forms.IndexedOptionForm.index:
-
-.. py:attribute:: IndexedOptionForm.index
-
-.. _ak.forms.IndexedOptionForm.content:
-
-.. py:attribute:: IndexedOptionForm.content
-
-.. _ak.forms.IndexedOptionForm.has_identities:
-
-.. py:attribute:: IndexedOptionForm.has_identities
-
-.. _ak.forms.IndexedOptionForm.parameters:
-
-.. py:attribute:: IndexedOptionForm.parameters
+    .. py:method:: IndexedOptionForm.__init__(index, content, has_identities=False, parameters=None)
+        
+    .. py:attribute:: IndexedOptionForm.index
+        
+    .. py:attribute:: IndexedOptionForm.content
+        
+    .. py:attribute:: IndexedOptionForm.has_identities
+        
