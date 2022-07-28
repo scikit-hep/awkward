@@ -19,20 +19,20 @@
 
 namespace awkward {
   const BuilderPtr
-  UnionBuilder::fromsingle(const int64_t initial,
+  UnionBuilder::fromsingle(const BuilderOptions& options,
                            const BuilderPtr& firstcontent) {
     std::vector<BuilderPtr> contents({ firstcontent });
-    return std::make_shared<UnionBuilder>(initial,
-                                          GrowableBuffer<int8_t>::full(initial, 0, firstcontent->length()),
-                                          GrowableBuffer<int64_t>::arange(initial, firstcontent->length()),
+    return std::make_shared<UnionBuilder>(options,
+                                          GrowableBuffer<int8_t>::full(options, 0, firstcontent->length()),
+                                          GrowableBuffer<int64_t>::arange(options, firstcontent->length()),
                                           contents);
   }
 
-  UnionBuilder::UnionBuilder(const int64_t initial,
+  UnionBuilder::UnionBuilder(const BuilderOptions& options,
                              GrowableBuffer<int8_t> tags,
                              GrowableBuffer<int64_t> index,
                              std::vector<BuilderPtr>& contents)
-      : initial_(initial)
+      : options_(options)
       , tags_(std::move(tags))
       , index_(std::move(index))
       , contents_(contents)
@@ -92,7 +92,7 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::null() {
     if (current_ == -1) {
-      BuilderPtr out = OptionBuilder::fromvalids(initial_, shared_from_this());
+      BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
       return std::move(out);
     }
@@ -109,7 +109,7 @@ namespace awkward {
         return dynamic_cast<BoolBuilder*>(p.get());
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(BoolBuilder::fromempty(initial_));
+        contents_.emplace_back(BoolBuilder::fromempty(options_));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -131,7 +131,7 @@ namespace awkward {
         return dynamic_cast<Int64Builder*>(p.get());
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(Int64Builder::fromempty(initial_));
+        contents_.emplace_back(Int64Builder::fromempty(options_));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -158,11 +158,11 @@ namespace awkward {
         });
         if (tofill != contents_.end()) {
           *tofill = Float64Builder::fromint64(
-              initial_,
+              options_,
               std::move(static_cast<Int64Builder*>(tofill->get())->buffer()));
         }
         else {
-          contents_.emplace_back(Float64Builder::fromempty(initial_));
+          contents_.emplace_back(Float64Builder::fromempty(options_));
           tofill = --contents_.end();
         }
       }
@@ -190,7 +190,7 @@ namespace awkward {
         });
         if (tofill != contents_.end()) {
           *tofill = std::move(Complex128Builder::fromfloat64(
-              initial_,
+              options_,
               std::move(static_cast<Float64Builder*>(tofill->get())->buffer())));
         }
       }
@@ -200,11 +200,11 @@ namespace awkward {
         });
         if (tofill != contents_.end()) {
           *tofill = std::move(Complex128Builder::fromint64(
-              initial_,
+              options_,
               std::move(static_cast<Int64Builder*>(tofill->get())->buffer())));
         }
         else {
-          contents_.emplace_back(Complex128Builder::fromempty(initial_));
+          contents_.emplace_back(Complex128Builder::fromempty(options_));
           tofill = --contents_.end();
         }
       }
@@ -228,7 +228,7 @@ namespace awkward {
         return raw != 0 && raw->units() == unit;
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(DatetimeBuilder::fromempty(initial_, unit));
+        contents_.emplace_back(DatetimeBuilder::fromempty(options_, unit));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -251,7 +251,7 @@ namespace awkward {
         return raw != 0 && raw->units() == unit;
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(DatetimeBuilder::fromempty(initial_, unit));
+        contents_.emplace_back(DatetimeBuilder::fromempty(options_, unit));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -274,7 +274,7 @@ namespace awkward {
         return raw != 0 && raw->encoding() == encoding;
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(StringBuilder::fromempty(initial_, encoding));
+        contents_.emplace_back(StringBuilder::fromempty(options_, encoding));
         tofill = --contents_.end();
       }
       int8_t i = (int8_t)std::distance(contents_.begin(), tofill);
@@ -296,7 +296,7 @@ namespace awkward {
         return dynamic_cast<ListBuilder*>(p.get());
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(ListBuilder::fromempty(initial_));
+        contents_.emplace_back(ListBuilder::fromempty(options_));
         tofill = --contents_.end();
       }
       tofill->get()->beginlist();
@@ -335,7 +335,7 @@ namespace awkward {
         return raw != nullptr  &&  (raw->length() == -1  ||  raw->numfields() == numfields);
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(TupleBuilder::fromempty(initial_));
+        contents_.emplace_back(TupleBuilder::fromempty(options_));
         tofill = --contents_.end();
       }
       tofill->get()->begintuple(numfields);
@@ -389,7 +389,7 @@ namespace awkward {
                  (!check  &&  raw->nameptr() == name)));
       });
       if (tofill == contents_.end()) {
-        contents_.emplace_back(RecordBuilder::fromempty(initial_));
+        contents_.emplace_back(RecordBuilder::fromempty(options_));
         tofill = --contents_.end();
       }
       tofill->get()->beginrecord(name, check);

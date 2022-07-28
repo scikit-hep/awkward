@@ -11,30 +11,30 @@
 
 namespace awkward {
   const BuilderPtr
-  Complex128Builder::fromempty(const int64_t initial) {
-    return std::make_shared<Complex128Builder>(initial,
-                                              GrowableBuffer<std::complex<double>>::empty(initial));
+  Complex128Builder::fromempty(const BuilderOptions& options) {
+    return std::make_shared<Complex128Builder>(options,
+                                              GrowableBuffer<std::complex<double>>::empty(options));
   }
 
   const BuilderPtr
-  Complex128Builder::fromint64(const int64_t initial,
+  Complex128Builder::fromint64(const BuilderOptions& options,
                                const GrowableBuffer<int64_t>& old) {
     return std::make_shared<Complex128Builder>(
-      initial,
+      options,
       std::move(GrowableBuffer<int64_t>::copy_as<std::complex<double>>(old)));
   }
 
   const BuilderPtr
-  Complex128Builder::fromfloat64(const int64_t initial,
+  Complex128Builder::fromfloat64(const BuilderOptions& options,
                                  const GrowableBuffer<double>& old) {
     return std::make_shared<Complex128Builder>(
-      initial,
+      options,
       std::move(GrowableBuffer<double>::copy_as<std::complex<double>>(old)));
   }
 
-  Complex128Builder::Complex128Builder(const int64_t initial,
+  Complex128Builder::Complex128Builder(const BuilderOptions& options,
                                        GrowableBuffer<std::complex<double>> buffer)
-      : initial_(initial)
+      : options_(options)
       , buffer_(std::move(buffer)) { }
 
   const std::string
@@ -73,14 +73,14 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::null() {
-    BuilderPtr out = OptionBuilder::fromvalids(initial_, shared_from_this());
+    BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
     return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::boolean(bool x) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
     return std::move(out);
   }
@@ -105,28 +105,28 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::datetime(int64_t x, const std::string& unit) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
     return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::timedelta(int64_t x, const std::string& unit) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
     return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::string(const char* x, int64_t length, const char* encoding) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return std::move(out);
   }
 
   const BuilderPtr
   Complex128Builder::beginlist() {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
     return std::move(out);
   }
@@ -140,7 +140,7 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::begintuple(int64_t numfields) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return std::move(out);
   }
@@ -161,7 +161,7 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::beginrecord(const char* name, bool check) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
     return std::move(out);
   }
