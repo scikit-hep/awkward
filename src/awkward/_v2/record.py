@@ -203,8 +203,10 @@ class Record:
     def recursively_apply(
         self,
         action,
+        behavior=None,
         depth_context=None,
         lateral_context=None,
+        allow_records=True,
         keep_parameters=True,
         numpy_to_regular=True,
         return_array=True,
@@ -213,8 +215,10 @@ class Record:
 
         out = self._array.recursively_apply(
             action,
+            behavior,
             depth_context,
             lateral_context,
+            allow_records,
             keep_parameters,
             numpy_to_regular,
             return_array,

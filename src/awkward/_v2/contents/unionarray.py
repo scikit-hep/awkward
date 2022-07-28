@@ -1318,7 +1318,7 @@ class UnionArray(Content):
         return out
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if options["return_array"]:
 
@@ -1329,6 +1329,7 @@ class UnionArray(Content):
                     [
                         content._recursively_apply(
                             action,
+                            behavior,
                             depth,
                             copy.copy(depth_context),
                             lateral_context,
@@ -1347,6 +1348,7 @@ class UnionArray(Content):
                 for content in self._contents:
                     content._recursively_apply(
                         action,
+                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,

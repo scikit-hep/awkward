@@ -125,7 +125,7 @@ def _impl(array, value, axis, highlevel, behavior):
                 return maybe_fillna(layout)
 
     depth_context = {"posaxis": axis}
-    out = arraylayout.recursively_apply(action, depth_context=depth_context)
+    out = arraylayout.recursively_apply(action, behavior, depth_context=depth_context)
 
     return ak._v2._util.wrap(
         out, ak._v2._util.behavior_of(array, behavior=behavior), highlevel
