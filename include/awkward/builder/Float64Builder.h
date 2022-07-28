@@ -6,6 +6,7 @@
 #include <string>
 
 #include "awkward/common.h"
+#include "awkward/BuilderOptions.h"
 #include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
@@ -17,25 +18,25 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL Float64Builder: public Builder {
   public:
     /// @brief Create an empty Float64Builder.
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const int64_t initial);
+      fromempty(const BuilderOptions& options);
 
     /// @brief Create a Float64Builder from an existing Int64Builder.
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param old The Int64Builder's buffer.
     static const BuilderPtr
-      fromint64(const int64_t initial,
+      fromint64(const BuilderOptions& options,
                 const GrowableBuffer<int64_t>& old);
 
     /// @brief Create a Float64Builder from a full set of parameters.
     ///
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated real numbers.
-    Float64Builder(const int64_t initial,
+    Float64Builder(const BuilderOptions& options,
                    GrowableBuffer<double> buffer);
 
     /// @brief Contains the accumulated real numbers (`double`).
@@ -109,11 +110,11 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const int64_t
-      initial() const { return initial_; }
+    const BuilderOptions&
+      options() const { return options_; }
 
   private:
-    const int64_t initial_;
+    const BuilderOptions options_;
     GrowableBuffer<double> buffer_;
   };
 
