@@ -3107,6 +3107,9 @@ make_Record(const py::handle& m, const std::string& name) {
      .def("simplify", [](const ak::Record& self) {
        return box(self.shallow_simplify());
      })
+     .def("axis_wrap_if_negative",
+               &ak::Record::axis_wrap_if_negative,
+               py::arg("axis"))
      .def("copy_to",
           [](const ak::Record& self, const std::string& ptr_lib) -> py::object {
           if (ptr_lib == "cpu") {
