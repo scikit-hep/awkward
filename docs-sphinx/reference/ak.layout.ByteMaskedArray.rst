@@ -105,7 +105,7 @@ which represents the following logical data.
 
     [None, None, 8.3, 4.1, None, 4.1, 0.3, None, None, None, None, None]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a ByteMaskedArray has the following.
 
 .. py:class:: ByteMaskedArray(mask, content, valid_when, identities=None, parameters=None)
@@ -131,7 +131,7 @@ a ByteMaskedArray has the following.
 .. py:method:: ByteMaskedArray.project(mask=None)
 
 Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
-If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
+If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is unioned with the ByteMaskedArray's
 mask (after converting to ``valid_when=False`` to match this ``mask``).
 

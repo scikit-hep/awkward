@@ -3,7 +3,7 @@
 ak.types.UnknownType
 --------------------
 
-The type of a :doc:`ak.layout.EmptyArray`.
+The type of a :class:`ak.layout.EmptyArray`.
 
 Types can be unknown if created with an :class:`ak.ArrayBuilder` and
 no instances are encountered to resolve the type.

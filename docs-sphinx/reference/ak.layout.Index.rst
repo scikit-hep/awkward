@@ -15,10 +15,10 @@ Index supports the buffer protocol, so it can be directly cast as a NumPy array.
 
 An Index represents a contiguous, one-dimensional array of integers that is
 fully interpreted in the C++ layer. The structure of all
-:doc:`ak.layout.Content` nodes is implemented in Indexes, such as a
-:doc:`ak.layout.ListArray`'s ``starts`` and ``stops``. Only data at the leaves
-of a structure, such as :doc:`ak.layout.NumpyArray` content, are not implemented
-in an Index. (This allows :doc:`ak.layout.NumpyArray` to handle non-contiguous,
+:class:`ak.layout.Content` nodes is implemented in Indexes, such as a
+:class:`ak.layout.ListArray`'s ``starts`` and ``stops``. Only data at the leaves
+of a structure, such as :class:`ak.layout.NumpyArray` content, are not implemented
+in an Index. (This allows :class:`ak.layout.NumpyArray` to handle non-contiguous,
 non-integer data.)
 
 This distinction is made because the C++ layer needs to make stronger

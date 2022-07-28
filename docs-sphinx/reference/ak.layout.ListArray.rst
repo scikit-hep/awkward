@@ -12,7 +12,7 @@ The ListArray concept is implemented in 3 specialized classes:
     * ``ak.layout.ListArrayU32``: ``starts`` and ``stops`` values are 32-bit
       unsigned integers.
 
-The ListArray class generalizes :doc:`ak.layout.ListOffsetArray` by not
+The ListArray class generalizes :class:`ak.layout.ListOffsetArray` by not
 requiring its ``content`` to be in increasing order and by allowing it to
 have unreachable elements between lists. Instead of a single ``offsets`` array,
 ListArray has
@@ -20,7 +20,7 @@ ListArray has
    * ``starts``: The starting index of each list.
    * ``stops``: The stopping index of each list.
 
-:doc:`ak.layout.ListOffsetArray` ``offsets`` may be related to ``starts`` and
+:class:`ak.layout.ListOffsetArray` ``offsets`` may be related to ``starts`` and
 ``stops``:
 
 .. code-block:: python
@@ -139,7 +139,7 @@ which represents the following logical data.
      [],
      [9.3]]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a ListArray has the following.
 
 .. py:class:: ListArray(starts, stops, content, identities=None, parameters=None)
@@ -164,7 +164,7 @@ a ListArray has the following.
 
 .. py:method:: ListArray.compact_offsets64(start_at_zero=True)
 
-Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` that represent the same lengths
+Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` that represent the same lengths
 of this array's ``starts`` and ``stops`` (though not the physical order in memory).
 
 .. _ak.layout.ListArray.broadcast_tooffsets64:
@@ -172,7 +172,7 @@ of this array's ``starts`` and ``stops`` (though not the physical order in memor
 .. py:method:: ListArray.broadcast_tooffsets64(offsets)
 
 Reorders ``contents`` to match a given set of ``offsets`` (if possible) and
-returns a :doc:`ak.layout.ListOffsetArray` with the results. This is used in
+returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
 broadcasting because a set of :doc:`ak.types.ListType` and :doc:`ak.types.RegularType`
 arrays have to be reordered to a common ``offsets`` before they can be directly
 operated upon.

@@ -9,10 +9,10 @@ The IndexedOptionArray concept is implemented in 2 specialized classes:
     * ``ak.layout.IndexOptionArray32``: ``index`` values are 32-bit signed
       integers.
 
-The IndexedOptionArray class is an :doc:`ak.layout.IndexedArray` for which
+The IndexedOptionArray class is an :class:`ak.layout.IndexedArray` for which
 negative values in the index are interpreted as missing. It represents
-:doc:`ak.types.OptionType` data like :doc:`ak.layout.ByteMaskedArray`,
-:doc:`ak.layout.BitMaskedArray`, and :doc:`ak.layout.UnmaskedArray`, but
+:doc:`ak.types.OptionType` data like :class:`ak.layout.ByteMaskedArray`,
+:class:`ak.layout.BitMaskedArray`, and :class:`ak.layout.UnmaskedArray`, but
 the flexibility of the arbitrary ``index`` makes it a common output of
 many operations.
 
@@ -100,7 +100,7 @@ which represents the following logical data.
 
     [None, 4.3, 3.8, 6.8, None, 5.8, -0.7, 4.2, -0.7, 0.3, None, 8.7]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 an IndexedOptionArray has the following.
 
 .. py:class:: IndexedOptionArray(index, content, identities=None, parameters=None)
@@ -130,7 +130,7 @@ Returns True because this is an IndexedOptionArray.
 Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements
 with the ``index`` applied to reorder/duplicate elements.
 
-If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
+If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is unioned with the BitMaskedArray's
 mask (after converting to 8-bit and to ``valid_when=False`` to match this ``mask``).
 
@@ -145,7 +145,7 @@ Returns an array of 8-bit values in which ``0`` means valid and ``1`` means miss
 .. py:method:: IndexedOptionArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
-:doc:`ak.types.OptionType` or is an :doc:`ak.layout.IndexedArray`; otherwise, this is
+:doc:`ak.types.OptionType` or is an :class:`ak.layout.IndexedArray`; otherwise, this is
 a pass-through.  In all cases, the output has the same logical meaning as the input.
 
 This method only operates one level deep.

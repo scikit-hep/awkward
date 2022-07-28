@@ -3,7 +3,7 @@
 ak.layout.ArrayBuilder
 ----------------------
 
-The low-level ArrayBuilder that builds :doc:`ak.layout.Content` arrays. This
+The low-level ArrayBuilder that builds :class:`ak.layout.Content` arrays. This
 object is wrapped by :class:`ak.ArrayBuilder`.
 
 (Method names in the high-level interface have been chnaged to include

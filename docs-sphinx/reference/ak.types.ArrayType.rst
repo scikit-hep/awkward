@@ -7,7 +7,7 @@ Type of a high-level :class:`ak.Array`, which includes the length of the
 array.
 
 Consider, for instance the distinction between this :class:`ak.Array` and
-the :doc:`ak.layout.Content` in its
+the :class:`ak.layout.Content` in its
 `ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_:
 
 .. code-block:: python

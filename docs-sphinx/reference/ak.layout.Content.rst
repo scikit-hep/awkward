@@ -9,40 +9,40 @@ Superclass of array nodes that build up the structure of an
 
 The array node types are listed below.
 
-   * :doc:`ak.layout.EmptyArray`: array with zero length and
+   * :class:`ak.layout.EmptyArray`: array with zero length and
      :doc:`ak.types.UnknownType`.
-   * :doc:`ak.layout.NumpyArray`: complete equivalent to a NumPy np.ndarray,
+   * :class:`ak.layout.NumpyArray`: complete equivalent to a NumPy np.ndarray,
      usually with :doc:`ak.types.PrimitiveType`.
-   * :doc:`ak.layout.RegularArray`: nested lists of equal length; has
+   * :class:`ak.layout.RegularArray`: nested lists of equal length; has
      :doc:`ak.types.RegularType`.
-   * :doc:`ak.layout.ListArray` (64-bit, 32-bit, and unsigned 32-bit
+   * :class:`ak.layout.ListArray` (64-bit, 32-bit, and unsigned 32-bit
      specializations): nested lists of any length (built with two indexes,
      ``starts`` and ``stops``), has :doc:`ak.types.ListType`.
-   * :doc:`ak.layout.ListOffsetArray` (64-bit, 32-bit, and unsigned 32-bit
+   * :class:`ak.layout.ListOffsetArray` (64-bit, 32-bit, and unsigned 32-bit
      specializations): nested lists of any length (built with one index,
      ``offsets``), has :doc:`ak.types.ListType`.
-   * :doc:`ak.layout.RecordArray`: array of records or tuples; has
+   * :class:`ak.layout.RecordArray`: array of records or tuples; has
      :doc:`ak.types.RecordType`.
-   * :doc:`ak.layout.IndexedArray` (64-bit, 32-bit, and unsigned 32-bit
+   * :class:`ak.layout.IndexedArray` (64-bit, 32-bit, and unsigned 32-bit
      specializations): contains any array and reorders/duplicates it with an
      arbitrary integer ``index``; has the same type as its content.
-   * :doc:`ak.layout.IndexedOptionArray` (64-bit and 32-bit specializations):
+   * :class:`ak.layout.IndexedOptionArray` (64-bit and 32-bit specializations):
      same as above but ``-1`` values in the ``index`` are interpreted as None;
      has :doc:`ak.types.OptionType`.
-   * :doc:`ak.layout.ByteMaskedArray`: boolean bytes in a ``mask`` are
+   * :class:`ak.layout.ByteMaskedArray`: boolean bytes in a ``mask`` are
      interpreted as valid contents or None; has :doc:`ak.types.OptionType`.
-   * :doc:`ak.layout.BitMaskedArray`: boolean bits in a ``mask`` are
+   * :class:`ak.layout.BitMaskedArray`: boolean bits in a ``mask`` are
      interpreted as valid contents or None; has :doc:`ak.types.OptionType`.
-   * :doc:`ak.layout.UnmaskedArray`: formally has :doc:`ak.types.OptionType`,
+   * :class:`ak.layout.UnmaskedArray`: formally has :doc:`ak.types.OptionType`,
      but all data are valid (no ``mask``).
-   * :doc:`ak.layout.UnionArray` (8-bit signed ``tags`` with 64-bit, 32-bit, and
+   * :class:`ak.layout.UnionArray` (8-bit signed ``tags`` with 64-bit, 32-bit, and
      unsigned 32-bit ``index`` specializations): heterogeneous data represented
      as a tagged union; has :doc:`ak.types.UnionType`.
 
-In Python, :doc:`ak.layout.Record` is not a subclass of
-:doc:`ak.layout.Content` (though it is in C++ for technical reasons).
+In Python, :class:`ak.layout.Record` is not a subclass of
+:class:`ak.layout.Content` (though it is in C++ for technical reasons).
 
-All :doc:`ak.layout.Content` nodes have the following properties and methods
+All :class:`ak.layout.Content` nodes have the following properties and methods
 in common.
 
 .. py:class:: Content
@@ -51,22 +51,22 @@ in common.
 
 .. py:attribute:: Content.identities
 
-Returns the :doc:`ak.layout.Identities` object associated with this array node
+Returns the :class:`ak.layout.Identities` object associated with this array node
 (if any).
 
 .. _ak.layout.Content.identity:
 
 .. py:attribute:: Content.identity
 
-Returns the single element of an :doc:`ak.layout.Identities` associated with
+Returns the single element of an :class:`ak.layout.Identities` associated with
 this array node (if any).
 
 .. _ak.layout.Content.nbytes:
 
 .. py:attribute:: Content.nbytes
 
-The total number of bytes in all the :doc:`ak.layout.Index`,
-:doc:`ak.layout.Identities`, and :doc:`ak.layout.NumpyArray` buffers in this
+The total number of bytes in all the :class:`ak.layout.Index`,
+:class:`ak.layout.Identities`, and :class:`ak.layout.NumpyArray` buffers in this
 array tree.
 
 Note: this calculation takes overlapping buffers into account, to the
@@ -193,10 +193,10 @@ Implements :func:`ak.count_nonzero`.
 
 Returns a copy of the array node and its children.
 
-   * If ``copyarrays``, then :doc:`ak.layout.NumpyArray` buffers are also
+   * If ``copyarrays``, then :class:`ak.layout.NumpyArray` buffers are also
      copied.
-   * If ``copyindexes``, then :doc:`ak.layout.Index` buffers are also copied.
-   * If ``copyidentities``, then :doc:`ak.layout.Identities` buffers are also
+   * If ``copyindexes``, then :class:`ak.layout.Index` buffers are also copied.
+   * If ``copyidentities``, then :class:`ak.layout.Identities` buffers are also
      copied.
 
 If all three flags are False, then only (small) C++ and Pyhton objects are
@@ -271,7 +271,7 @@ Implements :func:`ak.max`.
 .. py:method:: Content.merge(other)
 
 Concatenate this array node with the ``other`` array node (``axis=0``) by
-sharing buffers; i.e. without using a :doc:`ak.layout.UnionArray`. If this
+sharing buffers; i.e. without using a :class:`ak.layout.UnionArray`. If this
 is not possible, this method raises an error.
 
 .. _ak.layout.Content.merge_as_union:
@@ -279,14 +279,14 @@ is not possible, this method raises an error.
 .. py:method:: Content.merge_as_union(other)
 
 Concatenate this array node with the ``other`` array node (``axis=0``) using
-a :doc:`ak.layout.UnionArray` instead of attempting to share buffers.
+a :class:`ak.layout.UnionArray` instead of attempting to share buffers.
 
 .. _ak.layout.Content.mergeable:
 
 .. py:method:: Content.mergeable(other, mergebool=False)
 
 If True, this array node can be concatenated (``axis=0``) with the ``other``
-array node without resorting to a :doc:`ak.layout.UnionArray`; otherwise,
+array node without resorting to a :class:`ak.layout.UnionArray`; otherwise,
 they cannot.
 
 If ``mergebool`` is True, consider booleans to be a numeric type that can
@@ -355,7 +355,7 @@ Implements :func:`ak.pad_none` with ``clip=True``.
 Sets identities in-place.
 
 **Do not use this function:** it is deprecated and will be removed. Assign
-:doc:`ak.layout.Identities` in the constructor only.
+:class:`ak.layout.Identities` in the constructor only.
 
 .. _ak.layout.Content.setparameter:
 
@@ -384,7 +384,7 @@ Implements :func:`ak.sum`.
 
 .. py:method:: Content.toRegularArray()
 
-Converts the data to a :doc:`ak.layout.RegularArray`, if possible.
+Converts the data to a :class:`ak.layout.RegularArray`, if possible.
 
 .. _ak.layout.Content.tojson:
 

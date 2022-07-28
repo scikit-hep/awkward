@@ -76,7 +76,7 @@ which represents the following logical data.
     [6.0, 4.6, 4.2, 2.2, 2.4, 2.0, 8.3, 5.8, 6.8, 5.3, 0.4, 7.4, 0.9, 3.4, 7.6, 3.9, 8.9, 4.2,
      4.0, 5.3, 1.9, 8.8]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a UnmaskedArray has the following.
 
 .. py:class:: UnmaskedArray(content, identities=None, parameters=None)
@@ -94,7 +94,7 @@ a UnmaskedArray has the following.
 .. py:method:: UnmaskedArray.project(mask=None)
 
 Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
-If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
+If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is used to select the data. Otherwise, ``project``
 has no effect.
 

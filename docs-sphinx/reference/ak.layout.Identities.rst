@@ -9,7 +9,7 @@ The Identities concept is implemented in 2 specialized classes:
     * ``ak.layout.Identities32``: values are 32-bit signed integers.
 
 Identities are optional auxiliary arrays that can be attached to any
-:doc:`ak.layout.Content` node. The Identities label every element of an
+:class:`ak.layout.Content` node. The Identities label every element of an
 array (at every node of the tree) with the original ``__getitem__`` path
 from the root of a data structure to that element, the original "identity"
 of the element. As data are filtered with selections, shuffled with

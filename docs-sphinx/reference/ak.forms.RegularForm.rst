@@ -3,9 +3,9 @@
 ak.forms.RegularForm
 --------------------
 
-The form of a :doc:`ak.layout.RegularArray`, which has :doc:`ak.types.RegularType`.
+The form of a :class:`ak.layout.RegularArray`, which has :doc:`ak.types.RegularType`.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 .. py:class:: RegularForm(content, size, has_identities=False, parameters=None)

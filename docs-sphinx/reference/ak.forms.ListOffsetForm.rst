@@ -3,9 +3,9 @@
 ak.forms.ListOffsetForm
 -----------------------
 
-The form of a :doc:`ak.layout.ListOffsetArray`, which has :doc:`ak.types.ListType`.
+The form of a :class:`ak.layout.ListOffsetArray`, which has :doc:`ak.types.ListType`.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 .. py:class:: ListOffsetForm(offsets, content, has_identities=False, parameters=None)

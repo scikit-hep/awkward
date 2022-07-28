@@ -4,15 +4,15 @@ ak.layout.ArrayGenerator
 ------------------------
 
 An ArrayGenerator takes a Python callable, arguments, and optionally
-an expected :doc:`ak.forms.Form` and/or ``length``.
+an expected :class:`ak.forms.Form` and/or ``length``.
 
-It can only be used in a :doc:`ak.layout.VirtualArray` to generate
+It can only be used in a :class:`ak.layout.VirtualArray` to generate
 arrays.
 
-If a :doc:`ak.forms.Form` is given, there are fewer
+If a :class:`ak.forms.Form` is given, there are fewer
 circumstances in which the generator would need to be executed,
 but it is an error if the generated array does not match this
-:doc:`ak.forms.Form`.
+:class:`ak.forms.Form`.
 
 If a ``length`` is given (as a non-negative
 int), there are fewer circumstances in which the generator would
@@ -49,7 +49,7 @@ not match this ``length``.
 
 .. py:method:: ArrayGenerator.__call__()
 
-Generates the array and checks it against the :doc:`ak.forms.Form` and
+Generates the array and checks it against the :class:`ak.forms.Form` and
 ``length``, if given.
 
 .. _ak.layout.ArrayGenerator.__repr__:

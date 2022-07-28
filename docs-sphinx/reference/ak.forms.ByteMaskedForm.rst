@@ -3,9 +3,9 @@
 ak.forms.ByteMaskedForm
 -----------------------
 
-The form of a :doc:`ak.layout.ByteMaskedArray`, which has :doc:`ak.types.OptionType`.
+The form of a :class:`ak.layout.ByteMaskedArray`, which has :doc:`ak.types.OptionType`.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 .. py:class:: ByteMaskedForm(mask, content, valid_when, has_identities=False, parameters=None)

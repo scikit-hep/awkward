@@ -62,7 +62,7 @@ which represents the following logical data.
 
     []
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 an EmptyArray has the following.
 
 .. py:class:: EmptyArray(identities=None, parameters=None)
@@ -75,7 +75,7 @@ an EmptyArray has the following.
 
 .. py:method:: EmptyArray.toNumpyArray()
 
-Converts this EmptyArray into a :doc:`ak.layout.NumpyArray` with 64-bit
+Converts this EmptyArray into a :class:`ak.layout.NumpyArray` with 64-bit
 floating-point type.
 
 .. _ak.layout.EmptyArray.simplify:

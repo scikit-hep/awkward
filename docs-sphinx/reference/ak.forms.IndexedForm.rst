@@ -3,9 +3,9 @@
 ak.forms.IndexedForm
 --------------------
 
-The form of a :doc:`ak.layout.IndexedArray`, which has the same type as its ``content``.
+The form of a :class:`ak.layout.IndexedArray`, which has the same type as its ``content``.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 .. py:class:: IndexedForm(index, content, has_identities=False, parameters=None)

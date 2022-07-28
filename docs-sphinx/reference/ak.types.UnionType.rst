@@ -3,7 +3,7 @@
 ak.types.UnionType
 ------------------
 
-The type of a :doc:`ak.layout.UnionArray`.
+The type of a :class:`ak.layout.UnionArray`.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a UnionType has the following.

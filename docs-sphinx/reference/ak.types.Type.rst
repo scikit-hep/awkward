@@ -17,7 +17,7 @@ The type subclasses are listed below.
      which includes the length of the array (and hence is not composable with
      other types).
    * :doc:`ak.types.UnknownType`: a type that is not known, for example in
-     :doc:`ak.layout.EmptyArray`.
+     :class:`ak.layout.EmptyArray`.
    * :doc:`ak.types.PrimitiveType`: numbers and booleans.
    * :doc:`ak.types.RegularType`: nested lists, each with the same length.
    * :doc:`ak.types.ListType`: nested lists with unconstrained lengths.
@@ -65,7 +65,7 @@ Types can be pickled.
 
 .. py:method:: Type.empty()
 
-Creates an empty :doc:`ak.layout.Content` array with this type.
+Creates an empty :class:`ak.layout.Content` array with this type.
 
 .. _ak.types.Type.fieldindex:
 

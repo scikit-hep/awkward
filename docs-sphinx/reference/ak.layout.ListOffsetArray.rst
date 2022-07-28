@@ -13,14 +13,14 @@ The ListOffsetArray concept is implemented in 3 specialized classes:
       unsigned integers.
 
 The ListOffsetArray class describes unequal-length lists (often called a
-"jagged" or "ragged" array). Like :doc:`ak.layout.RegularArray`, the
+"jagged" or "ragged" array). Like :class:`ak.layout.RegularArray`, the
 underlying data for all lists are in a contiguous ``content``. It is
 subdivided into lists according to an ``offsets`` array, which specifies
 the starting and stopping index of each list.
 
 The ``offsets`` must have at least length 1 (corresponding to an empty array),
 but it need not start with ``0`` or include all of the ``content``. Just as
-:doc:`ak.layout.RegularArray` can have unreachable ``content`` if it is not
+:class:`ak.layout.RegularArray` can have unreachable ``content`` if it is not
 an integer multiple of ``size``, a ListOffsetArray can have unreachable
 content before the first list and after the last list.
 
@@ -115,7 +115,7 @@ which represents the following logical data.
      [7.4, 3.4, 2.7, 7.2, 6.6, 8.6, 8.2],
      [5.5, 3.8, 3.0, 8.4, 5.1, 1.2, -0.9, 3.7]]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a ListOffsetArray has the following.
 
 .. py:class:: ListOffsetArray(offsets, content, identities=None, parameters=None)
@@ -156,7 +156,7 @@ Derives ``stops`` as a view of ``offsets``:
 
 .. py:method:: ListOffsetArray.compact_offsets64(start_at_zero=True)
 
-Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` that represent the same lengths
+Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` that represent the same lengths
 of this array's ``offsets``. If this ``offsets[0] == 0 or not start_at_zero``, the
 return value is a view of this array's ``offsets``.
 
@@ -165,7 +165,7 @@ return value is a view of this array's ``offsets``.
 .. py:method:: ListOffsetArray.broadcast_tooffsets64(offsets)
 
 Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
-returns a :doc:`ak.layout.ListOffsetArray` with the results. This is used in
+returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
 broadcasting because a set of :doc:`ak.types.ListType` and :doc:`ak.types.RegularType`
 arrays have to be reordered to a common ``offsets`` before they can be directly
 operated upon.

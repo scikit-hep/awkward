@@ -3,7 +3,7 @@
 ak.layout.BitMaskedArray
 ------------------------
 
-Like :doc:`ak.layout.ByteMaskedArray`, BitMaskedArray implements an
+Like :class:`ak.layout.ByteMaskedArray`, BitMaskedArray implements an
 :doc:`ak.types.OptionType` with two arrays, ``mask`` and ``content``.
 However, the boolean ``mask`` values are packed into a bitmap.
 
@@ -151,7 +151,7 @@ This is equivalent to *all* of Apache Arrow's array types because they all
 `use bitmaps <https://arrow.apache.org/docs/format/Columnar.html#validity-bitmaps>`__
 to mask their data, with ``valid_when=True`` and ``lsb_order=True``.
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a BitMaskedArray has the following.
 
 .. py:class:: BitMaskedArray(mask, content, valid_when, length, lsb_order, identities=None, parameters=None)
@@ -181,7 +181,7 @@ a BitMaskedArray has the following.
 .. py:method:: BitMaskedArray.project(mask=None)
 
 Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
-If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
+If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is unioned with the BitMaskedArray's
 mask (after converting to 8-bit and to ``valid_when=False`` to match this ``mask``).
 
@@ -205,10 +205,10 @@ This method only operates one level deep.
 
 .. py:method:: BitMaskedArray.toByteMaskedArray()
 
-Converts to the equivalent :doc:`ak.layout.ByteMaskedArray`.
+Converts to the equivalent :class:`ak.layout.ByteMaskedArray`.
 
 .. _ak.layout.BitMaskedArray.toIndexedOptionArray:
 
 .. py:method:: BitMaskedArray.toIndexedOptionArray()
 
-Converts to the equivalent :doc:`ak.layout.IndexedOptionArray`.
+Converts to the equivalent :class:`ak.layout.IndexedOptionArray`.

@@ -3,9 +3,9 @@
 ak.forms.ListForm
 -----------------
 
-The form of a :doc:`ak.layout.ListArray`, which has :doc:`ak.types.ListType`.
+The form of a :class:`ak.layout.ListArray`, which has :doc:`ak.types.ListType`.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 .. py:class:: ListForm(starts, stops, content, has_identities=False, parameters=None)

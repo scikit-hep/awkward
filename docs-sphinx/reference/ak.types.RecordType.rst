@@ -3,7 +3,7 @@
 ak.types.RecordType
 -------------------
 
-The type of a :doc:`ak.layout.RecordArray`.
+The type of a :class:`ak.layout.RecordArray`.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a RecordType has the following.

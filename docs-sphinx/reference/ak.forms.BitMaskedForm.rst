@@ -3,9 +3,9 @@
 ak.forms.BitMaskedForm
 ----------------------
 
-The form of a :doc:`ak.layout.BitMaskedArray`, which has :doc:`ak.types.OptionType`.
+The form of a :class:`ak.layout.BitMaskedArray`, which has :doc:`ak.types.OptionType`.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 .. py:class:: BitMaskedForm(mask, content, valid_when, lsb_order, has_identities=False, parameters=None)

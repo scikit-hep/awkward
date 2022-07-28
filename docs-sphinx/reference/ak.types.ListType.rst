@@ -3,7 +3,7 @@
 ak.types.ListType
 -----------------
 
-The type of a :doc:`ak.layout.ListArray` or :doc:`ak.layout.ListOffsetArray`.
+The type of a :class:`ak.layout.ListArray` or :class:`ak.layout.ListOffsetArray`.
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 a ListType has the following.

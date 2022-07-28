@@ -5,18 +5,18 @@ ak.layout.VirtualArray
 
 A VirtualArray is an array that may be generated later.
 
-It requires a :doc:`ak.layout.ArrayGenerator` or :doc:`ak.layout.SliceGenerator`,
+It requires a :class:`ak.layout.ArrayGenerator` or :class:`ak.layout.SliceGenerator`,
 a function with arguments that generates and checks the generated array against
-an expected :doc:`ak.forms.Form`.
+an expected :class:`ak.forms.Form`.
 
-It can optionally take a :doc:`ak.layout.ArrayCache`, which wraps a MutableMapping
+It can optionally take a :class:`ak.layout.ArrayCache`, which wraps a MutableMapping
 with ``__getitem__`` and ``__setitem__`` methods to store arrays. Without this
 cache, the VirtualArray would call its generator every time an array is needed.
 With the cache, it first checks to see if the array is already in the cache
 (though it is assumed that arrays might get evicted from this cache at any time).
 
 It can optionally be given a ``cache_key`` (str), which is the string it passes
-to the ``__getitem__`` of its :doc:`ak.layout.ArrayCache`. This key ought to be
+to the ``__getitem__`` of its :class:`ak.layout.ArrayCache`. This key ought to be
 unique in the cache. If a ``cache_key`` is not provided, a string will be generated
 that is unique in the currently running process.
 
@@ -54,7 +54,7 @@ that.
         def xml(self, indent="", pre="", post=""):
             raise NotImplementedError("FIXME!")
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a VirtualArray has the following.
 
 .. py:class:: VirtualArray(generator, cache=None, cache_key=None, identities=None, parameters=None)

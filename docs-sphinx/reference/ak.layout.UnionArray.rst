@@ -167,7 +167,7 @@ which represents the following logical data.
      6.2,
      4.7]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a UnionArray has the following.
 
 .. py:class:: UnionArray(tags, index, contents, identities=None, parameters=None)

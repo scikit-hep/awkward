@@ -162,7 +162,7 @@ which represents the following logical data.
 NumpyArray supports the buffer protocol, so it can be directly cast as a
 NumPy array.
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a NumpyArray has the following.
 
 .. py:class:: NumpyArray(array, identities=None, parameters=None)
@@ -232,7 +232,7 @@ and ``itemsize``:
 .. py:method:: NumpyArray.toRegularArray()
 
 Returns a contiguous version of this array with any multidimensional ``shape`` replaced by
-nested :doc:`ak.layout.RegularArray` nodes.
+nested :class:`ak.layout.RegularArray` nodes.
 
 .. _ak.layout.NumpyArray.contiguous:
 

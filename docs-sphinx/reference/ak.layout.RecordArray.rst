@@ -215,7 +215,7 @@ which represents the following block of logical data.
 
     [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a RecordArray has the following.
 
 .. py:class:: RecordArray(contents, keys=None, length=None, identities=None, parameters=None)

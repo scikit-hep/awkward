@@ -3,20 +3,20 @@
 ak.layout.Record
 ----------------
 
-Represents a single value from a :doc:`ak.layout.RecordArray`.
+Represents a single value from a :class:`ak.layout.RecordArray`.
 
 As this is a columnar representation, the Record contains a
-:doc:`ak.layout.RecordArray`, rather than the other way around.
+:class:`ak.layout.RecordArray`, rather than the other way around.
 Its two fields are
 
-   * ``array``: the :doc:`ak.layout.RecordArray` and
+   * ``array``: the :class:`ak.layout.RecordArray` and
    * ``at``: the index posiion where this Record is found.
 
-The Record shares a reference with its :doc:`ak.layout.RecordArray`;
+The Record shares a reference with its :class:`ak.layout.RecordArray`;
 it is not a copy (not even a shallow-copied node object).
 
-A :doc:`ak.layout.Record` node has the following properties and methods.
-See their definitions in :doc:`ak.layout.Content` and :doc:`ak.layout.RecordArray`
+A :class:`ak.layout.Record` node has the following properties and methods.
+See their definitions in :class:`ak.layout.Content` and :class:`ak.layout.RecordArray`
 as a guide. They pass through to the underlying ``array`` with adjustments
 in some cases because Record is a scalar.
 

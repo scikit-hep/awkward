@@ -101,7 +101,7 @@ which represents the following logical data.
 
     [9.8, 1.9, 3.2, 3.2, 1.9, 9.8]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 an IndexedArray has the following.
 
 .. py:class:: IndexedArray(index, content, identities=None, parameters=None)
@@ -130,7 +130,7 @@ Returns False because this is not an IndexedOptionArray.
 
 Returns an array with the ``index`` applied to reorder/duplicate elements.
 
-If ``mask`` is a signed 8-bit :doc:`ak.layout.Index` in which ``0`` means valid
+If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, only valid elements according to this ``mask`` are
 returned.
 
@@ -138,7 +138,7 @@ returned.
 
 .. py:method:: IndexedArray.bytemask()
 
-Returns an 8-bit signed :doc:`ak.layout.Index` of all zeros, because this
+Returns an 8-bit signed :class:`ak.layout.Index` of all zeros, because this
 IndexedArray does not have :doc:`ak.types.OptionType`.
 
 .. _ak.layout.IndexedArray.simplify:
@@ -146,7 +146,7 @@ IndexedArray does not have :doc:`ak.types.OptionType`.
 .. py:method:: IndexedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
-:doc:`ak.types.OptionType` or is an :doc:`ak.layout.IndexedArray`; otherwise, this is
+:doc:`ak.types.OptionType` or is an :class:`ak.layout.IndexedArray`; otherwise, this is
 a pass-through.  In all cases, the output has the same logical meaning as the input.
 
 This method only operates one level deep.

@@ -15,8 +15,8 @@ An extra field ``zeros_length`` is ignored unless the ``size`` is zero. This set
 length of the RegularArray in only those cases, so that it is possible for an
 array to contain a non-zero number of zero-length lists with regular type.
 
-A multidimensional :doc:`ak.layout.NumpyArray` is equivalent to a one-dimensional
-:doc:`ak.layout.NumpyArray` nested within several RegularArrays, one for each
+A multidimensional :class:`ak.layout.NumpyArray` is equivalent to a one-dimensional
+:class:`ak.layout.NumpyArray` nested within several RegularArrays, one for each
 dimension. However, RegularArrays can be used to make lists of any other type.
 
 RegularArray corresponds to an Apache Arrow `Tensor <https://arrow.apache.org/docs/python/generated/pyarrow.Tensor.html>`__.
@@ -123,7 +123,7 @@ which represents the following logical data.
      [13.4, 6.7, -1.0, 6.4, 1.3],
      [6.8, 5.1, 3.2, 9.5, 2.8]]
 
-In addition to the properties and methods described in :doc:`ak.layout.Content`,
+In addition to the properties and methods described in :class:`ak.layout.Content`,
 a RegularArray has the following.
 
 .. py:class:: RegularArray(content, size, identities=None, parameters=None)
@@ -144,7 +144,7 @@ a RegularArray has the following.
 
 .. py:method:: RegularArray.compact_offsets64(start_at_zero=True)
 
-Returns a 64-bit :doc:`ak.layout.Index` of ``offsets`` by prefix summing
+Returns a 64-bit :class:`ak.layout.Index` of ``offsets`` by prefix summing
 in steps of ``size``.
 
 .. _ak.layout.RegularArray.broadcast_tooffsets64:
@@ -152,7 +152,7 @@ in steps of ``size``.
 .. py:method:: RegularArray.broadcast_tooffsets64(offsets)
 
 Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
-returns a :doc:`ak.layout.ListOffsetArray` with the results. This is used in
+returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
 broadcasting because a set of :doc:`ak.types.ListType` and :doc:`ak.types.RegularType`
 arrays have to be reordered to a common ``offsets`` before they can be directly
 operated upon.

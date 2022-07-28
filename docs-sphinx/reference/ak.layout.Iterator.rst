@@ -3,7 +3,7 @@
 ak.layout.Iterator
 ------------------
 
-Iterates over :doc:`ak.layout.Content` arrays.
+Iterates over :class:`ak.layout.Content` arrays.
 
 .. py:class:: Iterator(arg0)
 
