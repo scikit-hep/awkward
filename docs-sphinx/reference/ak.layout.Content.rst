@@ -4,7 +4,7 @@ ak.layout.Content
 .. py:currentmodule:: ak.layout
 
 Superclass of array nodes that build up the structure of an
-:func:`ak.Array`; the array layout returned by the
+:class:`ak.Array`; the array layout returned by the
 `ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`__ property.
 
 The array node types are listed below.
@@ -98,7 +98,7 @@ behaviors to the data.
 Note that the dict returned by this property is a *copy* of the array node's
 parameters. *Changing the dict will not change the array!*
 
-See :doc:`ak.behavior` and :func:`ak.Array`.
+See :doc:`ak.behavior` and :class:`ak.Array`.
 
 .. _ak.layout.Content.purelist_depth:
 

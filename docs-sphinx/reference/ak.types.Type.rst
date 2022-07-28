@@ -13,7 +13,7 @@ specification can express, so we extend the Datashape language in natural ways.
 
 The type subclasses are listed below.
 
-   * :doc:`ak.types.ArrayType`: type of a high-level :func:`ak.Array`,
+   * :doc:`ak.types.ArrayType`: type of a high-level :class:`ak.Array`,
      which includes the length of the array (and hence is not composable with
      other types).
    * :doc:`ak.types.UnknownType`: a type that is not known, for example in

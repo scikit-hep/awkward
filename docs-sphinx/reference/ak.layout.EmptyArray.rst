@@ -4,7 +4,7 @@ ak.layout.EmptyArray
 --------------------
 
 An EmptyArray is used whenever an array's type is not known because it is empty
-(such as data from :func:`ak.ArrayBuilder` without enough sample points
+(such as data from :class:`ak.ArrayBuilder` without enough sample points
 to resolve the type).
 
 EmptyArray has no equivalent in Apache Arrow.

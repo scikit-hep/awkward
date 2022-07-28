@@ -5,7 +5,7 @@ ak.numexpr.evaluate
 
 See `numexpr.evaluate <https://numexpr.readthedocs.io/projects/NumExpr3/en/latest/api.html#numexpr.evaluate>`__
 for a description of each parameter. This function reproduces NumExpr's interface, except that
-the expression can contain references to :func:`ak.Array` objects as well as NumPy arrays.
+the expression can contain references to :class:`ak.Array` objects as well as NumPy arrays.
 
 The arrays are broadcasted according to rules described in :func:`ak.broadcast_arrays`. The
 expression applies to the numeric leaves of the data structure and the output maintains that

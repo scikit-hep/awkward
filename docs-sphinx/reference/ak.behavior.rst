@@ -59,8 +59,8 @@ In Awkward Array, metadata are embedded in data using an array node's
     >>> import awkward as ak
     >>> ak.behavior
 
-but behavior dicts can also be loaded into :func:`ak.Array`,
-:func:`ak.Record`, and :func:`ak.ArrayBuilder` objects as a
+but behavior dicts can also be loaded into :class:`ak.Array`,
+:class:`ak.Record`, and :class:`ak.ArrayBuilder` objects as a
 constructor argument. See
 `ak.Array.behavior <_auto/ak.Array.html#ak-array-behavior>`_.
 
@@ -126,7 +126,7 @@ We have to dig into the layout's content because the ``"__record__"`` parameter
 is set on the :doc:`ak.layout.RecordArray`, which is buried inside of a
 :doc:`ak.layout.ListOffsetArray`.
 
-Alternatively, we can navigate to a single :func:`ak.Record` first:
+Alternatively, we can navigate to a single :class:`ak.Record` first:
 
 .. code-block:: python
 
@@ -140,7 +140,7 @@ Adding behavior to records
 
 Suppose we want the points in the above example to be able to calculate
 distances to other points. We can do this by creating a subclass of
-:func:`ak.Record` that has the new methods and associating it with
+:class:`ak.Record` that has the new methods and associating it with
 the ``"__record__"`` name.
 
 .. code-block:: python
@@ -177,7 +177,7 @@ and it has the ``distance`` method.
 
 Looping over data in Python is inconvenient and slow; we want to compute
 quantities like this with array-at-a-time methods, but ``distance`` is
-bound to a :func:`ak.Record`, not an :func:`ak.Array` of records.
+bound to a :class:`ak.Record`, not an :class:`ak.Array` of records.
 
 .. code-block:: python
 
@@ -185,7 +185,7 @@ bound to a :func:`ak.Record`, not an :func:`ak.Array` of records.
     AttributeError: no field named 'distance'
 
 To add ``distance`` as a method on arrays of points, create a subclass of
-:func:`ak.Array` and attach that as ``ak.behavior[".", "point"]`` for
+:class:`ak.Array` and attach that as ``ak.behavior[".", "point"]`` for
 "array of points."
 
 .. code-block:: python
@@ -227,7 +227,7 @@ instead of a ``"."``.
 
 One last caveat: our ``one`` array was created *before* this behavior was
 assigned, so it needs to be recreated to be a member of the new class. The
-normal :func:`ak.Array` constructor is sufficient for this. This is only
+normal :class:`ak.Array` constructor is sufficient for this. This is only
 an issue if you're working interactively (but something to think about when
 debugging!).
 
@@ -251,7 +251,7 @@ for ``distance`` based on ufuncs works equally well on Awkward Arrays.
 Overriding NumPy ufuncs and binary operators
 ============================================
 
-The :func:`ak.Array` class overrides Python's binary operators with the
+The :class:`ak.Array` class overrides Python's binary operators with the
 equivalent ufuncs, so ``__eq__`` actually calls ``np.equal``, for instance.
 This is also true of other basic functions, like ``__abs__`` for overriding
 ``abs`` with ``np.absolute``. Each ufunc is then passed down to the leaves
@@ -386,7 +386,7 @@ Mixin decorators
 ================
 The pattern of adding additional properties and function overrides to records
 and arrays of records is quite common, and can be nicely described by the "mixin"
-idiom: a class with no constructor that is mixed with both the :func:`ak.Array` and :func:`ak.Record`
+idiom: a class with no constructor that is mixed with both the :class:`ak.Array` and :class:`ak.Record`
 class as to create new derived classes. The :func:`ak.behaviors.mixins.mixin_class` and :func:`ak.behaviors.mixins.mixin_class_method`
 python decorators assist with some of this boilerplate. Consider the ``Point`` class
 from above; we can implement all the functionality so far described as follows:
