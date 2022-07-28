@@ -4,7 +4,7 @@ ak.layout.BitMaskedArray
 ------------------------
 
 Like :class:`ak.layout.ByteMaskedArray`, BitMaskedArray implements an
-:doc:`ak.types.OptionType` with two arrays, ``mask`` and ``content``.
+:class:`ak.types.OptionType` with two arrays, ``mask`` and ``content``.
 However, the boolean ``mask`` values are packed into a bitmap.
 
 BitMaskedArray has an additional parameter, ``lsb_order``; if True,
@@ -180,7 +180,7 @@ a BitMaskedArray has the following.
 
 .. py:method:: BitMaskedArray.project(mask=None)
 
-Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
+Returns a non-:class:`ak.types.OptionType` array containing only the valid elements.
 If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is unioned with the BitMaskedArray's
 mask (after converting to 8-bit and to ``valid_when=False`` to match this ``mask``).
@@ -196,7 +196,7 @@ Returns an array of 8-bit values in which ``0`` means valid and ``1`` means miss
 .. py:method:: BitMaskedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
-:doc:`ak.types.OptionType`; otherwise, this is a pass-through.
+:class:`ak.types.OptionType`; otherwise, this is a pass-through.
 In all cases, the output has the same logical meaning as the input.
 
 This method only operates one level deep.

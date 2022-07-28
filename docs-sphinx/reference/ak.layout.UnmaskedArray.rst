@@ -3,7 +3,7 @@
 ak.layout.UnmaskedArray
 -----------------------
 
-UnmaskedArray implements an :doc:`ak.types.OptionType` for which the values are
+UnmaskedArray implements an :class:`ak.types.OptionType` for which the values are
 never, in fact, missing. It exists to satisfy systems that formally require this
 high-level type without the overhead of generating an array of all True or all
 False values.
@@ -93,7 +93,7 @@ a UnmaskedArray has the following.
 
 .. py:method:: UnmaskedArray.project(mask=None)
 
-Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
+Returns a non-:class:`ak.types.OptionType` array containing only the valid elements.
 If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is used to select the data. Otherwise, ``project``
 has no effect.
@@ -111,7 +111,7 @@ Since this array is unmasked, the output is all ``0``.
 .. py:method:: UnmaskedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
-:doc:`ak.types.OptionType`; otherwise, this is a pass-through.
+:class:`ak.types.OptionType`; otherwise, this is a pass-through.
 In all cases, the output has the same logical meaning as the input.
 
 This method only operates one level deep.

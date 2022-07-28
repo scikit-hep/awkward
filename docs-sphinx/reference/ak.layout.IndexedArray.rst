@@ -139,14 +139,14 @@ returned.
 .. py:method:: IndexedArray.bytemask()
 
 Returns an 8-bit signed :class:`ak.layout.Index` of all zeros, because this
-IndexedArray does not have :doc:`ak.types.OptionType`.
+IndexedArray does not have :class:`ak.types.OptionType`.
 
 .. _ak.layout.IndexedArray.simplify:
 
 .. py:method:: IndexedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
-:doc:`ak.types.OptionType` or is an :class:`ak.layout.IndexedArray`; otherwise, this is
+:class:`ak.types.OptionType` or is an :class:`ak.layout.IndexedArray`; otherwise, this is
 a pass-through.  In all cases, the output has the same logical meaning as the input.
 
 This method only operates one level deep.

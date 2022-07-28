@@ -3,8 +3,8 @@
 ak.forms.NumpyForm
 ------------------
 
-The form of a :class:`ak.layout.NumpyArray`, which has :doc:`ak.types.PrimitiveType`, possibly wrapped
-in one or more layers of :doc:`ak.types.RegularType`.
+The form of a :class:`ak.layout.NumpyArray`, which has :class:`ak.types.PrimitiveType`, possibly wrapped
+in one or more layers of :class:`ak.types.RegularType`.
 
 In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.

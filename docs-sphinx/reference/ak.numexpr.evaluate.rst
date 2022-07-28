@@ -15,4 +15,4 @@ preserves structure through NumPy
 
 To do: examples.
 
-See also :doc:`ak.numexpr.re_evaluate`.
+See also :func:`ak.numexpr.re_evaluate`.

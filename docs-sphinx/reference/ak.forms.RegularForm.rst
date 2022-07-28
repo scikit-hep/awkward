@@ -3,7 +3,7 @@
 ak.forms.RegularForm
 --------------------
 
-The form of a :class:`ak.layout.RegularArray`, which has :doc:`ak.types.RegularType`.
+The form of a :class:`ak.layout.RegularArray`, which has :class:`ak.types.RegularType`.
 
 In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.

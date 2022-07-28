@@ -3,7 +3,7 @@
 ak.layout.ByteMaskedArray
 -------------------------
 
-The ByteMaskedArray implements an :doc:`ak.types.OptionType` with two aligned
+The ByteMaskedArray implements an :class:`ak.types.OptionType` with two aligned
 arrays, a boolean ``mask`` and ``content``. At any element ``i`` where
 ``mask[i] == valid_when``, the value can be found at ``content[i]``. If
 ``mask[i] != valid_when``, the value is missing (None).
@@ -130,7 +130,7 @@ a ByteMaskedArray has the following.
 
 .. py:method:: ByteMaskedArray.project(mask=None)
 
-Returns a non-:doc:`ak.types.OptionType` array containing only the valid elements.
+Returns a non-:class:`ak.types.OptionType` array containing only the valid elements.
 If ``mask`` is a signed 8-bit :class:`ak.layout.Index` in which ``0`` means valid
 and ``1`` means missing, this ``mask`` is unioned with the ByteMaskedArray's
 mask (after converting to ``valid_when=False`` to match this ``mask``).
@@ -146,7 +146,7 @@ Returns an array of 8-bit values in which ``0`` means valid and ``1`` means miss
 .. py:method:: ByteMaskedArray.simplify()
 
 Combines this node with its ``content`` if the ``content`` also has
-:doc:`ak.types.OptionType`; otherwise, this is a pass-through.
+:class:`ak.types.OptionType`; otherwise, this is a pass-through.
 In all cases, the output has the same logical meaning as the input.
 
 This method only operates one level deep.

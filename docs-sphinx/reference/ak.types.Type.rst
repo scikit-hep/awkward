@@ -13,19 +13,19 @@ specification can express, so we extend the Datashape language in natural ways.
 
 The type subclasses are listed below.
 
-   * :doc:`ak.types.ArrayType`: type of a high-level :class:`ak.Array`,
+   * :class:`ak.types.ArrayType`: type of a high-level :class:`ak.Array`,
      which includes the length of the array (and hence is not composable with
      other types).
-   * :doc:`ak.types.UnknownType`: a type that is not known, for example in
+   * :class:`ak.types.UnknownType`: a type that is not known, for example in
      :class:`ak.layout.EmptyArray`.
-   * :doc:`ak.types.PrimitiveType`: numbers and booleans.
-   * :doc:`ak.types.RegularType`: nested lists, each with the same length.
-   * :doc:`ak.types.ListType`: nested lists with unconstrained lengths.
-   * :doc:`ak.types.RecordType`: records or tuples.
-   * :doc:`ak.types.OptionType`: data that might be missing (None in Python).
-   * :doc:`ak.types.UnionType`: heterogeneous data; one of several types.
+   * :class:`ak.types.PrimitiveType`: numbers and booleans.
+   * :class:`ak.types.RegularType`: nested lists, each with the same length.
+   * :class:`ak.types.ListType`: nested lists with unconstrained lengths.
+   * :class:`ak.types.RecordType`: records or tuples.
+   * :class:`ak.types.OptionType`: data that might be missing (None in Python).
+   * :class:`ak.types.UnionType`: heterogeneous data; one of several types.
 
-All :doc:`ak.types.Type` instances have the following properties and methods
+All :class:`ak.types.Type` instances have the following properties and methods
 in common.
 
 .. py:class:: Type
@@ -72,13 +72,13 @@ Creates an empty :class:`ak.layout.Content` array with this type.
 .. py:method:: Type.fieldindex(key)
 
 Returns the index position of a ``key`` if the type contains
-:doc:`ak.types.RecordType` and ``key`` is in the record.
+:class:`ak.types.RecordType` and ``key`` is in the record.
 
 .. _ak.types.Type.haskey:
 
 .. py:method:: Type.haskey(key)
 
-Returns True if the type contains :doc:`ak.types.RecordType` and ``key`` is
+Returns True if the type contains :class:`ak.types.RecordType` and ``key`` is
 in the record; False otherwise.
 
 .. _ak.types.Type.key:
@@ -86,7 +86,7 @@ in the record; False otherwise.
 .. py:method:: Type.key(fieldindex)
 
 Returns the ``key`` name at a given index position in the record if the
-type contains :doc:`ak.types.RecordType` with more than ``fieldindex``
+type contains :class:`ak.types.RecordType` with more than ``fieldindex``
 fields.
 
 .. _ak.types.Type.keys:
@@ -94,7 +94,7 @@ fields.
 .. py:method:: Type.keys()
 
 Returns a list of keys in the record if the type contains
-:doc:`ak.types.RecordType`.
+:class:`ak.types.RecordType`.
 
 .. _ak.types.Type.setparameter:
 
@@ -109,7 +109,7 @@ Sets a parameter.
 .. py:attribute:: Type.numfields
 
 Returns the number of fields in the record if this type contains a
-:doc:`ak.types.RecordType`.
+:class:`ak.types.RecordType`.
 
 .. _ak.types.Type.parameters:
 
@@ -121,6 +121,6 @@ Returns the parameters associated with this type.
 
 .. py:attribute:: Type.typestr
 
-Returns the custom type string if overridden with :doc:`ak.behavior`.
+Returns the custom type string if overridden with :data:`ak.behavior`.
 
 See `Custom type names <ak.behavior.html#custom-type-names>`_.

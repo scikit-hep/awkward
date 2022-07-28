@@ -10,34 +10,34 @@ Superclass of array nodes that build up the structure of an
 The array node types are listed below.
 
    * :class:`ak.layout.EmptyArray`: array with zero length and
-     :doc:`ak.types.UnknownType`.
+     :class:`ak.types.UnknownType`.
    * :class:`ak.layout.NumpyArray`: complete equivalent to a NumPy np.ndarray,
-     usually with :doc:`ak.types.PrimitiveType`.
+     usually with :class:`ak.types.PrimitiveType`.
    * :class:`ak.layout.RegularArray`: nested lists of equal length; has
-     :doc:`ak.types.RegularType`.
+     :class:`ak.types.RegularType`.
    * :class:`ak.layout.ListArray` (64-bit, 32-bit, and unsigned 32-bit
      specializations): nested lists of any length (built with two indexes,
-     ``starts`` and ``stops``), has :doc:`ak.types.ListType`.
+     ``starts`` and ``stops``), has :class:`ak.types.ListType`.
    * :class:`ak.layout.ListOffsetArray` (64-bit, 32-bit, and unsigned 32-bit
      specializations): nested lists of any length (built with one index,
-     ``offsets``), has :doc:`ak.types.ListType`.
+     ``offsets``), has :class:`ak.types.ListType`.
    * :class:`ak.layout.RecordArray`: array of records or tuples; has
-     :doc:`ak.types.RecordType`.
+     :class:`ak.types.RecordType`.
    * :class:`ak.layout.IndexedArray` (64-bit, 32-bit, and unsigned 32-bit
      specializations): contains any array and reorders/duplicates it with an
      arbitrary integer ``index``; has the same type as its content.
    * :class:`ak.layout.IndexedOptionArray` (64-bit and 32-bit specializations):
      same as above but ``-1`` values in the ``index`` are interpreted as None;
-     has :doc:`ak.types.OptionType`.
+     has :class:`ak.types.OptionType`.
    * :class:`ak.layout.ByteMaskedArray`: boolean bytes in a ``mask`` are
-     interpreted as valid contents or None; has :doc:`ak.types.OptionType`.
+     interpreted as valid contents or None; has :class:`ak.types.OptionType`.
    * :class:`ak.layout.BitMaskedArray`: boolean bits in a ``mask`` are
-     interpreted as valid contents or None; has :doc:`ak.types.OptionType`.
-   * :class:`ak.layout.UnmaskedArray`: formally has :doc:`ak.types.OptionType`,
+     interpreted as valid contents or None; has :class:`ak.types.OptionType`.
+   * :class:`ak.layout.UnmaskedArray`: formally has :class:`ak.types.OptionType`,
      but all data are valid (no ``mask``).
    * :class:`ak.layout.UnionArray` (8-bit signed ``tags`` with 64-bit, 32-bit, and
      unsigned 32-bit ``index`` specializations): heterogeneous data represented
-     as a tagged union; has :doc:`ak.types.UnionType`.
+     as a tagged union; has :class:`ak.types.UnionType`.
 
 In Python, :class:`ak.layout.Record` is not a subclass of
 :class:`ak.layout.Content` (though it is in C++ for technical reasons).
@@ -98,7 +98,7 @@ behaviors to the data.
 Note that the dict returned by this property is a *copy* of the array node's
 parameters. *Changing the dict will not change the array!*
 
-See :doc:`ak.behavior` and :class:`ak.Array`.
+See :data:`ak.behavior` and :class:`ak.Array`.
 
 .. _ak.layout.Content.purelist_depth:
 
@@ -108,7 +108,7 @@ Number of dimensions of nested lists, not counting anything deeper than the
 first record or tuple layer, if any. The depth of a one-dimensional array is
 `1`.
 
-If the array contains :doc:`ak.types.UnionType` data and its contents have
+If the array contains :class:`ak.types.UnionType` data and its contents have
 equal depths, the return value is that depth. If they do not have equal
 depths, the return value is `-1`.
 
@@ -117,7 +117,7 @@ depths, the return value is `-1`.
 .. py:attribute:: Content.purelist_isregular
 
 Returns True if all dimensions down to the first record or tuple layer have
-:doc:`ak.types.RegularType`; False otherwise.
+:class:`ak.types.RegularType`; False otherwise.
 
 .. _ak.layout.Content.__getitem__:
 
@@ -331,7 +331,7 @@ Implements :func:`ak.prod`.
 Return the value of the outermost parameter matching ``key`` in a sequence
 of nested lists, stopping at the first record or tuple layer.
 
-If a layer has :doc:`ak.types.UnionType`, the value is only returned if all
+If a layer has :class:`ak.types.UnionType`, the value is only returned if all
 possibilities have the same value.
 
 .. _ak.layout.Content.rpad:
@@ -370,8 +370,8 @@ parameters in the constructor only.
 
 .. py:method:: Content.simplify()
 
-Flattens one extraneous level of :doc:`ak.types.OptionType` or
-:doc:`ak.types.UnionType`. If there is no such level, this is a pass-through.
+Flattens one extraneous level of :class:`ak.types.OptionType` or
+:class:`ak.types.UnionType`. If there is no such level, this is a pass-through.
 In all cases, the output has the same logical meaning as the input.
 
 .. _ak.layout.Content.sum:
@@ -404,4 +404,4 @@ See :func:`ak.to_json`.
 
 .. py:method:: Content.type()
 
-Returns the high-level :doc:`ak.types.Type` of this array node.
+Returns the high-level :class:`ak.types.Type` of this array node.

@@ -3,7 +3,7 @@
 ak.forms.IndexedOptionForm
 --------------------------
 
-The form of a :class:`ak.layout.IndexedOptionArray`, which has :doc:`ak.types.OptionType`.
+The form of a :class:`ak.layout.IndexedOptionArray`, which has :class:`ak.types.OptionType`.
 
 In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.

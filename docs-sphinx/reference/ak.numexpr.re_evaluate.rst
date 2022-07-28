@@ -7,4 +7,4 @@ See `numexpr.re_evaluate <https://numexpr.readthedocs.io/projects/NumExpr3/en/la
 for a description of each parameter. This function reproduces NumExpr's interface, except that
 the expression can contain references to :class:`ak.Array` objects as well as NumPy arrays.
 
-See also :doc:`ak.numexpr.evaluate`.
+See also :func:`ak.numexpr.evaluate`.

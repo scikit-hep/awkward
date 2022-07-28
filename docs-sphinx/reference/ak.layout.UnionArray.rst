@@ -225,7 +225,7 @@ to present the result in its logical order, not its physical order.
 
 .. py:method:: UnionArray.simplify(mergebool=False)
 
-If any of the ``contents`` have :doc:`ak.types.UnionType` and/or any
+If any of the ``contents`` have :class:`ak.types.UnionType` and/or any
 of the ``contents`` are
 `ak.layout.Content.mergeable <ak.layout.Content.html#ak-layout-content-mergeable>`__,
 they are combined to return the simplest possible node structure.

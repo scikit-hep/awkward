@@ -3,7 +3,7 @@
 ak.forms.ListOffsetForm
 -----------------------
 
-The form of a :class:`ak.layout.ListOffsetArray`, which has :doc:`ak.types.ListType`.
+The form of a :class:`ak.layout.ListOffsetArray`, which has :class:`ak.types.ListType`.
 
 In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.

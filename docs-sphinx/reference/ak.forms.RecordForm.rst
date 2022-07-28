@@ -3,7 +3,7 @@
 ak.forms.RecordForm
 -------------------
 
-The form of a :class:`ak.layout.RecordArray`, which has :doc:`ak.types.RecordType`.
+The form of a :class:`ak.layout.RecordArray`, which has :class:`ak.types.RecordType`.
 
 In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.

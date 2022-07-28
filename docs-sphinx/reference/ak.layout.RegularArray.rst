@@ -153,7 +153,7 @@ in steps of ``size``.
 
 Shifts ``contents`` to match a given set of ``offsets`` (if possible) and
 returns a :class:`ak.layout.ListOffsetArray` with the results. This is used in
-broadcasting because a set of :doc:`ak.types.ListType` and :doc:`ak.types.RegularType`
+broadcasting because a set of :class:`ak.types.ListType` and :class:`ak.types.RegularType`
 arrays have to be reordered to a common ``offsets`` before they can be directly
 operated upon.
 

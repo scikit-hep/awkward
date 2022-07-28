@@ -18,8 +18,8 @@ the :class:`ak.layout.Content` in its
     >>> ak.type(array.layout)
     var * float64
 
-This distinction is between an :doc:`ak.types.ArrayType` and the
-:doc:`ak.types.ListType` it contains.
+This distinction is between an :class:`ak.types.ArrayType` and the
+:class:`ak.types.ListType` it contains.
 
 .. code-block:: python
 
@@ -28,7 +28,7 @@ This distinction is between an :doc:`ak.types.ArrayType` and the
     >>> type(ak.type(array.layout))
     <class 'awkward.types.ListType'>
 
-In addition to the properties and methods described in :doc:`ak.types.Type`,
+In addition to the properties and methods described in :class:`ak.types.Type`,
 an ArrayType has the following.
 
 .. py:class:: ArrayType(type, length, parameters=None, typestr=None)

@@ -5,7 +5,7 @@ ak.types.RecordType
 
 The type of a :class:`ak.layout.RecordArray`.
 
-In addition to the properties and methods described in :doc:`ak.types.Type`,
+In addition to the properties and methods described in :class:`ak.types.Type`,
 a RecordType has the following.
 
 .. py:class:: RecordType(types, keys=None, parameters=None, typestr=None)

@@ -5,7 +5,7 @@ ak.types.ListType
 
 The type of a :class:`ak.layout.ListArray` or :class:`ak.layout.ListOffsetArray`.
 
-In addition to the properties and methods described in :doc:`ak.types.Type`,
+In addition to the properties and methods described in :class:`ak.types.Type`,
 a ListType has the following.
 
 .. py:class:: ListType(type, parameters=None, typestr=None)

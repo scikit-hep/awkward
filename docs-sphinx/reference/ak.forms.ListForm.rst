@@ -3,7 +3,7 @@
 ak.forms.ListForm
 -----------------
 
-The form of a :class:`ak.layout.ListArray`, which has :doc:`ak.types.ListType`.
+The form of a :class:`ak.layout.ListArray`, which has :class:`ak.types.ListType`.
 
 In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
