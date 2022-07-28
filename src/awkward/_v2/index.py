@@ -28,7 +28,9 @@ class Index:
             raise ak._v2._util.error(TypeError("Index data must be one-dimensional"))
 
         if issubclass(self._data.dtype.type, np.longlong):
-            assert np.dtype(np.longlong).itemsize == 8, "longlong is always 64-bit, right?"
+            assert (
+                np.dtype(np.longlong).itemsize == 8
+            ), "longlong is always 64-bit, right?"
             self._data = self._data.view(np.int64)
 
         if self._expected_dtype is None:
