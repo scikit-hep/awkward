@@ -347,14 +347,14 @@ namespace awkward {
     /// for the rest of the array elements.
     void
     extend(PRIMITIVE* ptr, size_t size) {
-      size_t empty_slots = ptr_->reserved() - ptr_->current_length();
-      if (size > empty_slots) {
-        for (size_t i = 0; i < empty_slots; i++) {
+      size_t unfilled_items = ptr_->reserved() - ptr_->current_length();
+      if (size > unfilled_items) {
+        for (size_t i = 0; i < unfilled_items; i++) {
           fill_panel(ptr[i]);
         }
-        add_panel(size - empty_slots > ptr_->reserved() ? size - empty_slots
+        add_panel(size - unfilled_items > ptr_->reserved() ? size - unfilled_items
                                                         : ptr_->reserved());
-        for (size_t i = empty_slots; i < size; i++) {
+        for (size_t i = unfilled_items; i < size; i++) {
           fill_panel(ptr[i]);
         }
       } else {
