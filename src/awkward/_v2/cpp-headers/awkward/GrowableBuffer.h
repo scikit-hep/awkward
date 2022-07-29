@@ -13,6 +13,7 @@
 #include <iostream>
 #include <utility>
 #include <stdexcept>
+#include <stdint.h>
 
 namespace awkward {
 
