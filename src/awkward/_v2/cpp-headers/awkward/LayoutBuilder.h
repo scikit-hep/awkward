@@ -18,7 +18,9 @@ namespace awkward {
 
     awkward::BuilderOptions default_options(1024, 1);
 
-    // helper class for RecordLayoutBuilder
+    /// @class Field
+    ///
+    /// Helper class for Record Layout Builder
     template <std::size_t ENUM, typename BUILDER>
     class Field {
     public:
@@ -33,7 +35,7 @@ namespace awkward {
       Builder builder;
     };
 
-    // NumpyLayoutBuilder
+    /// @class Numpy
     template <typename PRIMITIVE>
     class Numpy {
     public:
@@ -60,16 +62,19 @@ namespace awkward {
         data_.extend(ptr, size);
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -81,11 +86,13 @@ namespace awkward {
         data_.clear();
       }
 
+      /// @brief Current length of the data.
       size_t
       length() const noexcept {
         return data_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         return true;
@@ -103,6 +110,8 @@ namespace awkward {
             buffers["node" + std::to_string(id_) + "-data"]));
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const {
         std::stringstream form_key;
@@ -154,6 +163,7 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the content of the builder.
       BUILDER&
       content() noexcept {
         return content_;
@@ -169,16 +179,19 @@ namespace awkward {
         offsets_.append(content_.length());
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -193,11 +206,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the content.
       size_t
       length() const noexcept {
         return offsets_.length() - 1;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != offsets_.last()) {
@@ -228,6 +243,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -270,6 +287,7 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the content of the builder.
       BUILDER&
       content() noexcept {
         return content_;
@@ -286,16 +304,19 @@ namespace awkward {
         stops_.append(content_.length());
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -310,11 +331,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the content and `starts_` bufffer.
       size_t
       length() const noexcept {
         return starts_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (starts_.length() != stops_.length()) {
@@ -355,6 +378,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -387,27 +412,32 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {}
 
       void
       clear() noexcept {}
 
+      /// @brief Current length of the content.
       size_t
       length() const noexcept {
         return 0;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& /* error */) const noexcept {
         return true;
@@ -420,6 +450,8 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {}
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::string params("");
@@ -454,16 +486,19 @@ namespace awkward {
         length_ += size;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -475,11 +510,13 @@ namespace awkward {
         length_ = 0;
       }
 
+      /// @brief Current number of records.
       size_t
       length() const noexcept {
         return length_;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& /* error */) const noexcept {
         return true;
@@ -492,6 +529,8 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {}
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -566,16 +605,19 @@ namespace awkward {
         return std::get<INDEX>(contents).builder;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -595,11 +637,13 @@ namespace awkward {
           });
       }
 
+      /// @brief Current number of records in first field.
       const size_t
       length() const noexcept {
         return (std::get<0>(contents).builder.length());
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
@@ -644,6 +688,8 @@ namespace awkward {
           });
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -725,16 +771,19 @@ namespace awkward {
         return std::get<INDEX>(contents);
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -754,11 +803,13 @@ namespace awkward {
           });
       }
 
+      /// @brief Current number of records in the first index of the tuple.
       const size_t
       length() const noexcept {
         return (std::get<0>(contents).builder.length());
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
@@ -804,6 +855,8 @@ namespace awkward {
           });
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -861,6 +914,7 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the content of the builder.
       BUILDER&
       content() noexcept {
         return content_;
@@ -876,16 +930,19 @@ namespace awkward {
         length_++;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -898,11 +955,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current number of lists of length `SIZE`.
       size_t
       length() const noexcept {
         return length_;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != length_ * size_) {
@@ -929,6 +988,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -970,6 +1031,7 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the content of the builder.
       BUILDER&
       content() noexcept {
         return content_;
@@ -993,16 +1055,19 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1017,11 +1082,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the content and the `index_` buffer.
       size_t
       length() const noexcept {
         return index_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != index_.length()) {
@@ -1059,6 +1126,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -1101,6 +1170,7 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the content of the builder.
       BUILDER&
       content() noexcept {
         return content_;
@@ -1136,16 +1206,19 @@ namespace awkward {
         }
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1160,11 +1233,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the `index_` buffer.
       size_t
       length() const noexcept {
         return index_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != last_valid_ + 1) {
@@ -1194,6 +1269,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -1226,6 +1303,7 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the content of the builder.
       BUILDER&
       content() noexcept {
         return content_;
@@ -1241,16 +1319,19 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1263,11 +1344,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the content.
       size_t
       length() const noexcept {
         return content_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         return content_.is_valid(error);
@@ -1284,6 +1367,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -1320,6 +1405,7 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the content of the builder.
       BUILDER&
       content() noexcept {
         return content_;
@@ -1358,16 +1444,19 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1381,11 +1470,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the `mask_` buffer.
       size_t
       length() const noexcept {
         return mask_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != mask_.length()) {
@@ -1415,6 +1506,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key, form_valid_when;
@@ -1479,6 +1572,7 @@ namespace awkward {
         }
       }
 
+      /// @brief Returns the reference to the content of the builder.
       BUILDER&
       content() noexcept {
         return content_;
@@ -1525,16 +1619,19 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1548,11 +1645,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the `mask_` buffer.
       size_t
       length() const noexcept {
         return (mask_.length() - 1) * 8 + current_index_;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != length()) {
@@ -1584,6 +1683,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key, form_valid_when, form_lsb_order;
@@ -1681,16 +1782,19 @@ namespace awkward {
         return which_content;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique id to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1715,11 +1819,13 @@ namespace awkward {
           visit_at(contents_, i, clear_contents);
       }
 
+      /// @brief Current length of the `tags_` buffer.
       size_t
       length() const noexcept {
         return tags_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
@@ -1772,6 +1878,8 @@ namespace awkward {
           });
       }
 
+      /// @brief Generates a unique description of the builder and its contents
+      /// in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
