@@ -51,7 +51,7 @@ def docs(session):
     Build the docs. Pass "serve" to serve.
     """
 
-    session.chdir("docs")
+    session.chdir("docs-sphinx")
     session.install("-r", "requirements.txt")
     session.run("sphinx-build", "-M", "html", ".", "_build")
 
