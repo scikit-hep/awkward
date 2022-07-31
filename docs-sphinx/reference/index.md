@@ -154,7 +154,6 @@ This is the type of a {class}`ak.layout.Content` array expressed with low-level 
 The Awkward Array project is divided into 3 layers with 5 main components.
 
 :::{figure} ../image/awkward-1-0-layers.svg
-:alt: map to buried treasure
 :align: center
 
 :::
@@ -162,7 +161,7 @@ The Awkward Array project is divided into 3 layers with 5 main components.
 
 The C++ classes, cpu-kernels, and gpu-kernels are described in the [C++ API reference](../_static/doxygen/index.html).
 
-The kernels (cpu-kernels and cuda-kernels) are documented on the {func}`ak.kernels` page, with interfaces and normative Python implementations.
+The kernels (cpu-kernels and cuda-kernels) are documented on the {doc}`generated/kernels` page, with interfaces and normative Python implementations.
 
 :::{eval-rst}
 .. include:: generated/toctree.txt
