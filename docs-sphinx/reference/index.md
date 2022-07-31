@@ -158,8 +158,9 @@ The Awkward Array project is divided into 3 layers with 5 main components.
 
 :::
  
+% Use HTML link as HTML files are considered assets, not source files
 
-The C++ classes, cpu-kernels, and gpu-kernels are described in the [C++ API reference](../_static/doxygen/index.html).
+The C++ classes, cpu-kernels, and gpu-kernels are described in the  <a href="../_static/doxygen/index.html">C++ API reference</a>.
 
 The kernels (cpu-kernels and cuda-kernels) are documented on the {doc}`generated/kernels` page, with interfaces and normative Python implementations.
 
