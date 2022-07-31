@@ -23,7 +23,7 @@ namespace awkward {
   /// Creates a contiguous, one-dimensional panel.
   class Panel {
   public:
-    
+
     /// @brief Creates a Panel by allocating a new panel, taking a
     /// #reserved number of slots.
     ///
