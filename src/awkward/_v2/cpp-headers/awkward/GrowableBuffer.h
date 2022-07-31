@@ -18,22 +18,38 @@
 namespace awkward {
 
   template <typename PRIMITIVE>
+  /// @class Panel
+  ///
+  /// Creates a contiguous, one-dimensional panel.
   class Panel {
   public:
+    
+    /// @brief Creates a Panel by allocating a new panel, taking a
+    /// #reserved number of slots.
+    ///
+    /// @param reserved Currently allocated number of elements in the panel.
     Panel(size_t reserved)
         : ptr_(std::unique_ptr<PRIMITIVE[]>(new PRIMITIVE[reserved])),
           length_(0),
           reserved_(reserved),
           next_(nullptr) {}
 
+    /// @brief Creates a Panel from a full set of parameters.
+    ///
+    /// @param ptr Unique reference to the panel data.
+    /// @param length Currently number used of elements in the panel.
+    /// @param reserved Currently allocated number of elements in the panel.
     Panel(std::unique_ptr<PRIMITIVE[]> ptr, size_t length, size_t reserved)
         : ptr_(std::move(ptr)),
           length_(length),
           reserved_(reserved),
           next_(nullptr) {}
 
+    /// @brief Overloads [] operator to access elements like an array.
     PRIMITIVE& operator[](size_t i) { return ptr_.get()[i]; }
 
+    /// @brief Creates a new panel with slots equal to #reserved and
+    /// appends it after the current panel.
     Panel*
     append_panel(size_t reserved) {
       next_ = std::move(std::unique_ptr<Panel>(new Panel(reserved)));
@@ -46,21 +62,31 @@ namespace awkward {
       ptr_.get()[length_++] = datum;
     }
 
+    /// @brief Pointer to the next panel.
     std::unique_ptr<Panel>&
     next() {
       return next_;
     }
 
+    /// @brief Currently used number of elements in the panel.
     size_t
     current_length() {
       return length_;
     }
 
+    /// @brief Currently allocated number of elements in the panel.
     size_t
     reserved() {
       return reserved_;
     }
 
+    /// @brief Copies the data from a panel to one contiguously allocated `to_ptr`.
+    ///
+    /// @param to_ptr One contiguously allocated panel.
+    /// @param offset Distance between `to_ptr` and the pointer to the destination where the
+    /// accumulated data is copied.
+    /// @param from Distance between `ptr` and pointer to the source of the data to be copied.
+    /// @param length Length of the data to be copied.
     void
     append(PRIMITIVE* to_ptr, size_t offset, size_t from, int64_t length) const noexcept {
       memcpy(to_ptr + offset,
@@ -68,6 +94,13 @@ namespace awkward {
              length * sizeof(PRIMITIVE) - from);
     }
 
+    /// @brief Copies and concatenates the accumulated data from multiple panels `ptr_` to one
+    /// contiguously allocated `to_ptr`.
+    ///
+    /// @param to_ptr One contiguously allocated panel.
+    /// @param offset Distance between `to_ptr` and the pointer to the destination where the
+    /// accumulated data is copied.
+    /// @param from Distance between `ptr` and pointer to the source of the data to be copied.
     void
     concatenate_to_from(PRIMITIVE* to_ptr, size_t offset, size_t from) const noexcept {
       memcpy(to_ptr + offset,
@@ -78,6 +111,12 @@ namespace awkward {
       }
     }
 
+    /// @brief Copies and concatenates the accumulated data from multiple panels `ptr_` to one
+    /// contiguously allocated `to_ptr`.
+    ///
+    /// @param to_ptr One contiguously allocated panel.
+    /// @param offset Distance between `to_ptr` and the pointer to the destination where the
+    /// accumulated data is copied.
     void
     concatenate_to(PRIMITIVE* to_ptr, size_t offset) const noexcept {
       memcpy(to_ptr + offset,
@@ -88,6 +127,10 @@ namespace awkward {
       }
     }
 
+    /// @brief Fills (one panel) GrowableBuffer<TO_PRIMITIVE> with the
+    /// elements of (possibly multi-panels) GrowableBuffer<PRIMITIVE>.
+    ///
+    /// Changes the data type from `PRIMITIVE` to `TO_PRIMITIVE`/
     template <typename TO_PRIMITIVE>
     void
     copy_as(TO_PRIMITIVE* to_ptr, size_t offset) {
@@ -115,13 +158,15 @@ namespace awkward {
 
   /// @class GrowableBuffer
   ///
-  /// @brief Discontiguous, one-dimensional buffer which consists of
-  /// multiple contiguous, one-dimensional arrays that can grow
+  /// @brief Discontiguous, one-dimensional buffer (which consists of
+  /// multiple contiguous, one-dimensional panels) that can grow
   /// indefinitely by calling #append.
   ///
-  /// The buffer starts by reserving #initial number of slots. When the
-  /// number of slots used reaches the number reserved, a new panel is
-  /// allocated that has a size equal to #initial.
+  /// Configured by BuilderOptions, the buffer starts by reserving
+  /// {@link BuilderOptions#initial initial} slots.
+  /// When the number of slots used reaches the number reserved, a new
+  /// panel is allocated that is
+  /// {@link BuilderOptions#resize resize} times larger.
   ///
   /// When {@link ArrayBuilder#snapshot ArrayBuilder::snapshot} is called,
   /// these buffers are copied to the new Content array.
@@ -140,7 +185,8 @@ namespace awkward {
     ///
     /// @param options Initial size configuration for building a panel.
     /// @param minreserve The initial reservation will be the maximum
-    /// of `minreserve` and #initial.
+    /// of `minreserve` and
+    /// {@link BuilderOptions#initial initial}.
     static GrowableBuffer<PRIMITIVE>
     empty(const BuilderOptions& options, int64_t minreserve) {
       int64_t actual = options.initial();
@@ -390,8 +436,7 @@ namespace awkward {
       }
     }
 
-    /// @brief Copies and concatenates all accumulated data from multiple panels to one
-    /// contiguously allocated `external_pointer`.
+    /// @brief Copies data from a panel to one contiguously allocated `external_pointer`.
     void
     append(PRIMITIVE* external_pointer, size_t offset, size_t from, int64_t length) const noexcept {
       if (external_pointer) {
@@ -400,13 +445,13 @@ namespace awkward {
     }
 
   private:
-    /// @brief Inserts one `datum` into the panel.
+    /// @brief Fills the data into the panel one by one.
     void
     fill_panel(PRIMITIVE datum) {
       ptr_->fill_panel(datum);
     }
 
-    /// @brief Creates a new panel with slots equal to #reserved.
+    /// @brief Adds a new panel with slots equal to #reserved.
     /// and updates the current panel pointer to it.
     void
     add_panel(size_t reserved) {
@@ -424,6 +469,8 @@ namespace awkward {
     std::unique_ptr<Panel<PRIMITIVE>> panel_;
 
     /// @brief A pointer to a current panel.
+    ///
+    /// Points to the address of the first byte of the current panel
     Panel<PRIMITIVE>* ptr_;
   };
 }  // namespace awkward
