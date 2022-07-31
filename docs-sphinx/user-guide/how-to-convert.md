@@ -14,10 +14,5 @@ kernelspec:
 Converting arrays
 =================
 
-   * **[NumPy](how-to-convert-numpy)**
-   * **[Python objects](how-to-convert-python)**
-   * **[JSON](how-to-convert-json)**
-   * **[ROOT via Uproot](how-to-convert-uproot)**
-   * **[Arrow and Parquet](how-to-convert-arrow)**
-   * **[Pandas](how-to-convert-pandas)**
-   * **[Generic buffers](how-to-convert-buffers)**
+```{tableofcontents}
+```
