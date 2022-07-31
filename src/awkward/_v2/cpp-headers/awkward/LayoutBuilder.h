@@ -52,11 +52,15 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Inserts a `PRIMITIVE` type data.
       void
       append(PRIMITIVE x) noexcept {
         data_.append(x);
       }
 
+      /// @brief Inserts an entire array of `PRIMITIVE` type data.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       void
       extend(PRIMITIVE* ptr, size_t size) noexcept {
         data_.extend(ptr, size);
@@ -144,7 +148,7 @@ namespace awkward {
       size_t id_;
     };
 
-    // ListOffsetLayoutBuilder
+    /// @class ListOffset
     template <typename PRIMITIVE, typename BUILDER>
     class ListOffset {
     public:
@@ -267,7 +271,7 @@ namespace awkward {
       size_t id_;
     };
 
-    // ListLayoutBuilder
+    /// @class List
     template <typename PRIMITIVE, typename BUILDER>
     class List {
     public:
@@ -331,7 +335,7 @@ namespace awkward {
         content_.clear();
       }
 
-      /// @brief Current length of the content and `starts_` bufffer.
+      /// @brief Current length of the content and `starts_` buffer.
       size_t
       length() const noexcept {
         return starts_.length();
@@ -404,7 +408,7 @@ namespace awkward {
       size_t id_;
     };
 
-    // EmptyLayoutBuilder
+    /// @class Empty
     class Empty {
     public:
       Empty() {
@@ -467,7 +471,7 @@ namespace awkward {
       size_t id_;
     };
 
-    // EmptyRecordLayoutBuilder
+    /// @class EmptyRecord
     template <bool IS_TUPLE>
     class EmptyRecord {
     public:
@@ -481,6 +485,7 @@ namespace awkward {
         length_++;
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       void
       extend(size_t size) noexcept {
         length_ += size;
@@ -557,7 +562,7 @@ namespace awkward {
       bool is_tuple_ = IS_TUPLE;
     };
 
-    // RecordLayoutBuilder
+    /// @class Record
     template <class MAP = std::map<std::size_t, std::string>,
               typename... BUILDERS>
     class Record {
@@ -751,7 +756,7 @@ namespace awkward {
       }
     };
 
-    // TupleLayoutBuilder
+    /// @class Tuple
     template <typename... BUILDERS>
     class Tuple {
       using TupleContents = typename std::tuple<BUILDERS...>;
@@ -905,7 +910,7 @@ namespace awkward {
       }
     };
 
-    // RegularLayoutBuilder
+    /// @class Regular
     template <unsigned SIZE, typename BUILDER>
     class Regular {
     public:
@@ -1012,7 +1017,7 @@ namespace awkward {
       size_t size_ = SIZE;
     };
 
-    // IndexedLayoutBuilder
+    /// @class Indexed
     template <typename PRIMITIVE, typename BUILDER>
     class Indexed {
     public:
@@ -1044,6 +1049,7 @@ namespace awkward {
         return content_;
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_index(size_t size) noexcept {
         size_t start = content_.length();
@@ -1151,7 +1157,7 @@ namespace awkward {
       size_t last_valid_;
     };
 
-    // IndexedOptionLayoutBuilder
+    /// @class IndexedOption
     template <typename PRIMITIVE, typename BUILDER>
     class IndexedOption {
     public:
@@ -1183,6 +1189,7 @@ namespace awkward {
         return content_;
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_index(size_t size) noexcept {
         size_t start = content_.length();
@@ -1199,6 +1206,7 @@ namespace awkward {
         index_.append(-1);
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       void
       extend_null(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1294,7 +1302,7 @@ namespace awkward {
       size_t last_valid_;
     };
 
-    // UnmaskedLayoutBuilder
+    /// @class Unmasked
     template <typename BUILDER>
     class Unmasked {
     public:
@@ -1314,6 +1322,7 @@ namespace awkward {
         return content_;
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_valid(size_t size) noexcept {
         return content_;
@@ -1389,7 +1398,7 @@ namespace awkward {
       size_t id_;
     };
 
-    // ByteMaskedLayoutBuilder
+    /// @class ByteMasked
     template <bool VALID_WHEN, typename BUILDER>
     class ByteMasked {
     public:
@@ -1422,6 +1431,7 @@ namespace awkward {
         return content_;
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_valid(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1436,6 +1446,7 @@ namespace awkward {
         return content_;
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_null(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1532,7 +1543,7 @@ namespace awkward {
       bool valid_when_ = VALID_WHEN;
     };
 
-    // BitMaskedLayoutBuilder
+    /// @class BitMasked
     template <bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
     class BitMasked {
     public:
@@ -1596,6 +1607,7 @@ namespace awkward {
         return content_;
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_valid(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1611,6 +1623,7 @@ namespace awkward {
         return content_;
       }
 
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_null(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1735,7 +1748,7 @@ namespace awkward {
       bool lsb_order_ = LSB_ORDER;
     };
 
-    // UnionLayoutBuilder
+    /// @class Union
     template <typename TAGS, typename INDEX, typename... BUILDERS>
     class Union {
     public:

@@ -470,7 +470,7 @@ namespace awkward {
 
     /// @brief A pointer to a current panel.
     ///
-    /// Points to the address of the first byte of the current panel
+    /// Points to the address of the first byte of the current panel.
     Panel<PRIMITIVE>* ptr_;
   };
 }  // namespace awkward
