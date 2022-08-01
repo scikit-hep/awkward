@@ -265,6 +265,14 @@ class TypeTracerArray:
     def ndim(self):
         return len(self._shape)
 
+    def view(self, dtype, **kwargs):
+        if not self.itemsize() == np.dtype(dtype).itemsize or not self._shape == (
+            UnknownLength,
+        ):
+            length = self._shape[0] * int(self.itemsize() / np.dtype(dtype).itemsize)
+        self._dtype = np.dtype(dtype)
+        return self
+
     def forget_length(self):
         return type(self)(self._dtype, (UnknownLength,) + self._shape[1:])
 

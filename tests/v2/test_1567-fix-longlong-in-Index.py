@@ -22,3 +22,15 @@ def test_fix_longlong_type_passed_to_index_1530():
         [],
         [],
     ]
+
+
+def test_typetracer_view_method():
+    a = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype=np.longlong)
+    b = ak._v2.contents.NumpyArray(a)
+    c = np.array([7, 3, 3, 5], dtype=np.longlong)
+    e = ak._v2.index.Index(b.typetracer[c])
+    f = ak._v2.index.Index(a)
+
+    assert e.form == f.form
+    assert ak._v2.to_list(b[c]) == ak._v2.to_list(a[c])
+    assert b.typetracer[c].form == b[c].form
