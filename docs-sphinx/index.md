@@ -4,7 +4,7 @@
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**. 
 
-:::{button-link} https://awkward-array.readthedocs.io/en/docs-phase-2/user-guide/what-is-an-awkward-array.html
+:::{button-ref} getting-started/what-is-an-awkward-array
 :color: primary
 :shadow:
 
@@ -14,20 +14,21 @@ What is an Awkward Array?
 ::::
 
 % TODO mention left side-bar
-::::{grid} 2
+:::::{grid} 2
 :class-container: intro-grid text-center
 
-:::{grid-item-card} 
+::::{grid-item-card} 
 :link-type: doc
-:link: user-guide/absolute-beginners
+:link: getting-started/index
 
 {fas}`running`
 
-Beginner's Guide 
-^^^^^^^^^^^^^^^^
+Getting started 
+^^^^^^^^^^^^^^^
 New to *Awkward Array*? Unsure what it can be used for? Check out the getting started guides. They contain an introduction to *Awkward Array's* features and links to additional help.
-    
-:::
+   
+
+::::
 
 :::{grid-item-card}
 :link-type: doc
@@ -67,6 +68,6 @@ Spotted a typo in the documentation? Want to add to the codebase? The contributi
 
 :::
     
-::::
+:::::
 
 

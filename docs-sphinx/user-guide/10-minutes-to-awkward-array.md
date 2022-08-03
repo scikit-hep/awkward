@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# Beginners guide to Awkward Array
+# 10 minutes to Awkward Array
 
 The City of Chicago has a [Data Portal](https://data.cityofchicago.org/) with lots of interesting datasets. This guide uses a dataset of [Chicago taxi trips](https://data.cityofchicago.org/Transportation/Taxi-Trips/wrvz-psew) taken from 2019 through 2021 (3 years).
 
