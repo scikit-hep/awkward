@@ -10,16 +10,10 @@ subtrees:
       - file: user-guide/index
         title: "User Guide"
         subtrees:
-            - caption: Getting Started
-              entries:
-              - file: user-guide/what-is-an-awkward-array
-                title: "What is an Awkward Array?"
-                
-              - file: user-guide/absolute-beginners
-                title: "Beginners guide to Awkward Array"
-                
-            - caption: Fundamentals of Awkward Array
-              entries:
+            - entries:
+              - file: user-guide/10-minutes-to-awkward-array
+                title: "10 minutes to Awkward Array"
+            
               - file: user-guide/how-to-convert
                 title: "Converting arrays"
                 subtrees:
