@@ -270,6 +270,7 @@ class TypeTracerArray:
             UnknownLength,
         ):
             length = self._shape[0] * int(self.itemsize() / np.dtype(dtype).itemsize)
+            self._shape = self.shape[:-1] + (self.shape[-1] * length,)
         self._dtype = np.dtype(dtype)
         return self
 
