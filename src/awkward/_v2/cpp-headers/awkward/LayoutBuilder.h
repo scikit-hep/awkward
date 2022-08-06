@@ -85,6 +85,7 @@ namespace awkward {
         id++;
       }
 
+      /// @brief Discards the accumulated data in the builder.
       void
       clear() noexcept {
         data_.clear();
@@ -203,6 +204,7 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated offsets and clears the content of the builder.
       void
       clear() noexcept {
         offsets_.clear();
@@ -328,6 +330,8 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated starts and stops, and clears
+      /// the content of the builder.
       void
       clear() noexcept {
         starts_.clear();
@@ -411,6 +415,7 @@ namespace awkward {
     /// @class Empty
     class Empty {
     public:
+      /// @brief Creates an Empty Layout Builder
       Empty() {
         size_t id = 0;
         set_id(id);
@@ -432,6 +437,7 @@ namespace awkward {
       void
       set_id(size_t& id) noexcept {}
 
+      /// @brief Clears the content of the builder.
       void
       clear() noexcept {}
 
@@ -510,6 +516,8 @@ namespace awkward {
         id++;
       }
 
+      /// @brief Clears the contents of the builder, the #length
+      /// returns to zero.
       void
       clear() noexcept {
         length_ = 0;
@@ -634,6 +642,9 @@ namespace awkward {
         }
       }
 
+      /// @brief Clears the contents of the builder.
+      ///
+      /// Discards the accumulated data and the contents in each field of the record.
       void
       clear() noexcept {
         for (size_t i = 0; i < fields_count_; i++)
@@ -800,6 +811,9 @@ namespace awkward {
         }
       }
 
+      /// @brief Clears the contents of the builder.
+      ///
+      /// Discards the accumulated data and the contents in each index of the tuple.
       void
       clear() noexcept {
         for (size_t i = 0; i < fields_count_; i++)
@@ -955,8 +969,10 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Clears the content of the builder.
       void
       clear() noexcept {
+        length_ = 0;
         content_.clear();
       }
 
@@ -1081,6 +1097,8 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated index and clears the content
+      /// of the builder. Also, `last_valid_` returns to -1.
       void
       clear() noexcept {
         last_valid_ = -1;
@@ -1234,6 +1252,8 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated index and clears the content
+      /// of the builder. Also, `last_valid_` returns to -1.
       void
       clear() noexcept {
         last_valid_ = -1;
@@ -1348,6 +1368,7 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Clears the content of the builder.
       void
       clear() noexcept {
         content_.clear();
@@ -1475,6 +1496,8 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated mask and clears the content
+      /// of the builder.
       void
       clear() noexcept {
         mask_.clear();
@@ -1652,6 +1675,8 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated mask and clears the content
+      /// of the builder.
       void
       clear() noexcept {
         mask_.clear();
@@ -1819,6 +1844,10 @@ namespace awkward {
           visit_at(contents_, i, contents_id);
       }
 
+      /// @brief Discards the accumulated tags and index, and clears
+      /// the contents of the builder.
+      ///
+      /// Also, resets the `last_valid_index_` array to -1.
       void
       clear() noexcept {
         for (size_t i = 0; i < contents_count_; i++)
