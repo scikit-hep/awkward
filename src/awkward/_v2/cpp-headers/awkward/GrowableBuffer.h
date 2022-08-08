@@ -316,6 +316,8 @@ namespace awkward {
 
     /// @brief Creates a GrowableBuffer by allocating a new buffer, taking an
     /// options #reserved from #options.
+    ///
+    /// @param options Initial size configuration for building a panel.
     GrowableBuffer(const BuilderOptions& options)
         : GrowableBuffer(options,
                          std::unique_ptr<PRIMITIVE[]>(
@@ -325,7 +327,7 @@ namespace awkward {
 
     /// @brief Move constructor
     ///
-    /// panel_ is move-only
+    /// panel_ is move-only.
     GrowableBuffer(GrowableBuffer&& other) noexcept
         : options_(other.options_),
           length_(other.length_),
