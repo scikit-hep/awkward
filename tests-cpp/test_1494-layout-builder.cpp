@@ -317,36 +317,36 @@ test_ListOffset_ListOffset() {
       ListOffsetBuilder<int32_t, NumpyBuilder<double>>
   > builder;
 
-  auto& builder2 = builder.begin_list();
+  auto& subbuilder = builder.begin_list();
 
-  auto& builder3 = builder2.begin_list();
-  builder3.append(1.1);
-  builder3.append(2.2);
-  builder3.append(3.3);
-  builder2.end_list();
-  builder2.begin_list();
-  builder2.end_list();
+  auto& subsubbuilder = subbuilder.begin_list();
+  subsubbuilder.append(1.1);
+  subsubbuilder.append(2.2);
+  subsubbuilder.append(3.3);
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
   builder.end_list();
 
   builder.begin_list();
-  builder2.begin_list();
-  builder3.append(4.4);
-  builder3.append(5.5);
-  builder2.end_list();
+  subbuilder.begin_list();
+  subsubbuilder.append(4.4);
+  subsubbuilder.append(5.5);
+  subbuilder.end_list();
   builder.end_list();
 
   builder.begin_list();
   builder.end_list();
 
   builder.begin_list();
-  builder2.begin_list();
-  builder3.append(6.6);
-  builder2.end_list();
-  builder2.begin_list();
-  builder3.append(7.7);
-  builder3.append(8.8);
-  builder3.append(9.9);
-  builder2.end_list();
+  subbuilder.begin_list();
+  subsubbuilder.append(6.6);
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subsubbuilder.append(7.7);
+  subsubbuilder.append(8.8);
+  subsubbuilder.append(9.9);
+  subbuilder.end_list();
   builder.end_list();
 
   // [
