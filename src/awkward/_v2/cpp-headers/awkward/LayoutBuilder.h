@@ -16,27 +16,45 @@ namespace awkward {
 
   namespace LayoutBuilder {
 
+    /// @brief Object of {@link BuilderOptions BuilderOptions} with sets
+    // the values of the default options.
     awkward::BuilderOptions default_options(1024, 1);
 
-    // helper class for RecordLayoutBuilder
+    /// @class Field
+    ///
+    /// @brief Helper class for sending a pair of field names (as enum) and field
+    /// type as template parameters in {@link Record RecordLayoutBuilder}.
+    ///
+    /// @tparam ENUM Enumerated type which assigns index values to field names.
+    /// @tparam BUILDER Type of Field.
     template <std::size_t ENUM, typename BUILDER>
     class Field {
     public:
       using Builder = BUILDER;
 
+      /// @brief Converts index as field string.
       std::string
       index_as_field() const {
         return std::to_string(static_cast<size_t>(index));
       }
 
+      /// @brief The index of a Record Field.
       const std::size_t index = ENUM;
+      /// @brief The content type of Field in a Record.
       Builder builder;
     };
 
-    // NumpyLayoutBuilder
+    /// @class Numpy
+    ///
+    /// @brief Builds a NumpyArray which describes multidimensional data
+    /// of `PRIMITIVE` type.
+    ///
+    /// @tparam PRIMITIVE Type of Numpy Builder buffer (data).
     template <typename PRIMITIVE>
     class Numpy {
     public:
+      /// @brief Creates a new Numpy Layout Builder by allocating a new buffer,
+      /// using default_options for initializing the buffer.
       Numpy()
           : data_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
@@ -44,65 +62,87 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Creates a new Numpy Layout Builder by allocating a new buffer, taking
+      /// {@link BuilderOptions#options options} for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
       Numpy(const awkward::BuilderOptions& options)
           : data_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
         size_t id = 0;
         set_id(id);
       }
 
+      /// @brief Inserts a `PRIMITIVE` type data.
       void
       append(PRIMITIVE x) noexcept {
         data_.append(x);
       }
 
+      /// @brief Inserts an entire array of `PRIMITIVE` type data.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       void
       extend(PRIMITIVE* ptr, size_t size) noexcept {
         data_.extend(ptr, size);
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
         id++;
       }
 
+      /// @brief Discards the accumulated data in the builder.
       void
       clear() noexcept {
         data_.clear();
       }
 
+      /// @brief Current length of the data.
       size_t
       length() const noexcept {
         return data_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         return true;
       }
 
+      /// @brief Retrieves the name and size (in bytes) of the buffer.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
         names_nbytes["node" + std::to_string(id_) + "-data"] = data_.nbytes();
       }
 
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a user-defined pointer.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same name and size (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         data_.concatenate(static_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-data"]));
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const {
         std::stringstream form_key;
@@ -130,15 +170,35 @@ namespace awkward {
       }
 
     private:
+      /// @brief Buffer of `PRIMITIVE` type.
       awkward::GrowableBuffer<PRIMITIVE> data_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
     };
 
-    // ListOffsetLayoutBuilder
+    /// @class ListOffset
+    ///
+    /// @brief Builds a ListOffsetArray which describes unequal-length lists
+    /// (often called a "jagged" or "ragged" array). The underlying data for
+    /// all lists are in a BUILDER content. It is subdivided into lists according
+    /// to an offsets array, which specifies the starting and stopping index of each list.
+    ///
+    /// The offsets must have at least length 1 (corresponding to an empty array).
+    ///
+    /// The offsets values can be 64-bit signed integers `int64`, 32-bit signed integers
+    /// `int32` or 32-bit unsigned integers `uint32`.
+    ///
+    /// @tparam PRIMITIVE Type of offsets buffer.
+    /// @tparam BUILDER Type of builder content.
     template <typename PRIMITIVE, typename BUILDER>
     class ListOffset {
     public:
+      /// @brief Creates a new ListOffset Layout Builder by allocating a new offset buffer,
+      /// using default_options for initializing the buffer.
       ListOffset()
           : offsets_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
@@ -147,6 +207,10 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Creates a new ListOffset Layout Builder by allocating a new offset buffer,
+      /// taking {@link BuilderOptions#options options} for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
       ListOffset(const awkward::BuilderOptions& options)
           : offsets_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
         offsets_.append(0);
@@ -154,31 +218,38 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder content.
       BUILDER&
       content() noexcept {
         return content_;
       }
 
+      /// @brief Begins a list and returns the reference to the builder content.
       BUILDER&
       begin_list() noexcept {
         return content_;
       }
 
+      /// @brief Ends a list and appends the current length of the list
+      /// contents in the offsets buffer.
       void
       end_list() noexcept {
         offsets_.append(content_.length());
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -186,6 +257,7 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated offsets and clears the builder content.
       void
       clear() noexcept {
         offsets_.clear();
@@ -193,11 +265,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the content.
       size_t
       length() const noexcept {
         return offsets_.length() - 1;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != offsets_.last()) {
@@ -213,6 +287,8 @@ namespace awkward {
         }
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -221,6 +297,11 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         offsets_.concatenate(static_cast<PRIMITIVE*>(
@@ -228,6 +309,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -244,16 +327,38 @@ namespace awkward {
       }
 
     private:
+      /// @brief Buffer of `PRIMITIVE` type.
+      ///
+      /// It specifies the starting and stopping index of each list.
       GrowableBuffer<PRIMITIVE> offsets_;
+
+      /// @brief The content of the ListOffset Builder.
       BUILDER content_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
     };
 
-    // ListLayoutBuilder
+    /// @class List
+    ///
+    /// @brief Builds a ListArray which generalizes ListOffsetArray.
+    /// Instead of a single offsets array, ListArray has -
+    /// starts which is the starting index of each list and
+    /// stops  which is the stopping index of each list.
+    ///
+    /// The starts and stops values can be 64-bit signed integers `int64`, 32-bit signed
+    /// integers `int32` or 32-bit unsigned integers `uint32`.
+    ///
+    /// @tparam PRIMITIVE Type of starts and stops buffer.
+    /// @tparam BUILDER Type of builder content.
     template <typename PRIMITIVE, typename BUILDER>
     class List {
     public:
+      /// @brief Creates a new List Layout Builder by allocating new starts
+      /// and stops buffer, using default_options for initializing the buffer.
       List()
           : starts_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)),
@@ -263,6 +368,11 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Creates a new List Layout Builder by allocating new starts
+      /// and stops buffer, taking {@link BuilderOptions#options options}
+      /// for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
       List(const awkward::BuilderOptions& options)
           : starts_(awkward::GrowableBuffer<PRIMITIVE>(options)),
             stops_(awkward::GrowableBuffer<PRIMITIVE>(options)) {
@@ -270,32 +380,41 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder content.
       BUILDER&
       content() noexcept {
         return content_;
       }
 
+      /// @brief Begins a list, appends the current length of the list
+      /// contents in the starts buffer and returns the reference to the
+      /// builder content.
       BUILDER&
       begin_list() noexcept {
         starts_.append(content_.length());
         return content_;
       }
 
+      /// @brief Ends a list and appends the current length of the list
+      /// contents in the stops buffer.
       void
       end_list() noexcept {
         stops_.append(content_.length());
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -303,6 +422,8 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated starts and stops, and clears
+      /// the builder content.
       void
       clear() noexcept {
         starts_.clear();
@@ -310,11 +431,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the content and `starts_` buffer.
       size_t
       length() const noexcept {
         return starts_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (starts_.length() != stops_.length()) {
@@ -337,6 +460,8 @@ namespace awkward {
         }
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -346,6 +471,11 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         starts_.concatenate(static_cast<PRIMITIVE*>(
@@ -355,6 +485,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -372,26 +504,45 @@ namespace awkward {
       }
 
     private:
+      /// @brief Buffer of `PRIMITIVE` type.
+      ///
+      /// It specifies the starting index of each list.
       GrowableBuffer<PRIMITIVE> starts_;
+
+      /// @brief Buffer of `PRIMITIVE` type.
+      ///
+      /// It specifies the stopping index of each list.
       GrowableBuffer<PRIMITIVE> stops_;
+
+      /// @brief The content of the List Builder.
       BUILDER content_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
     };
 
-    // EmptyLayoutBuilder
+    /// @class Empty
+    ///
+    /// @brief Builds an EmptyArray which has no content in it.
+    /// It is used whenever an array's type is not known because it is empty.
     class Empty {
     public:
+      /// @brief Creates a new Empty Layout Builder
       Empty() {
         size_t id = 0;
         set_id(id);
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
@@ -403,11 +554,13 @@ namespace awkward {
       void
       clear() noexcept {}
 
+      /// @brief Current length of the content.
       size_t
       length() const noexcept {
         return 0;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& /* error */) const noexcept {
         return true;
@@ -420,6 +573,8 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {}
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::string params("");
@@ -431,55 +586,76 @@ namespace awkward {
       }
 
     private:
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
     };
 
-    // EmptyRecordLayoutBuilder
+    /// @class EmptyRecord
+    ///
+    /// @brief Builds an Empty RecordArray which has has zero contents.
+    /// It still represents a non-empty array. In this case, its length
+    /// is specified by #length.
+    ///
+    /// @tparam IS_TUPLE A boolean value which determines whether the builder
+    /// contains Tuples or Records.
     template <bool IS_TUPLE>
     class EmptyRecord {
     public:
+      /// @brief Creates a new EmptyRecord Layout Builder.
       EmptyRecord() : length_(0) {
         size_t id = 0;
         set_id(id);
       }
 
+      /// @brief Inserts an empty record.
       void
       append() noexcept {
         length_++;
       }
 
+      /// @brief Inserts `size` number of empty records.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       void
       extend(size_t size) noexcept {
         length_ += size;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
         id++;
       }
 
+      /// @brief Clears the builder contents, the #length returns to zero.
       void
       clear() noexcept {
         length_ = 0;
       }
 
+      /// @brief Current number of records.
       size_t
       length() const noexcept {
         return length_;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& /* error */) const noexcept {
         return true;
@@ -492,6 +668,8 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {}
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -512,13 +690,31 @@ namespace awkward {
       }
 
     private:
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
+
+      /// @brief Current number of records.
       size_t length_;
+
+      /// @brief Determines whether the builder contains Tuples or not.
+      ///
+      /// If the value is true, then the builder contains Tuples and if false,
+      /// it contains Records.
       bool is_tuple_ = IS_TUPLE;
     };
 
-    // RecordLayoutBuilder
+    /// @class Record
+    ///
+    /// @brief Builds a RecordArray which represents an array of records, which
+    /// can be of same or different types. Its contents is an ordered list of arrays
+    /// with the same length as the length of its shortest content; all are aligned
+    /// element-by-element, associating a field name to every content.
+    ///
+    /// @tparam MAP Map of index keys and field name.
+    /// @tparam BUILDERS Types of builder contents.
     template <class MAP = std::map<std::size_t, std::string>,
               typename... BUILDERS>
     class Record {
@@ -529,12 +725,19 @@ namespace awkward {
       template <std::size_t INDEX>
       using RecordFieldType = std::tuple_element_t<INDEX, RecordContents>;
 
+      /// @brief Creates a new Record Layout Builder.
       Record() {
         size_t id = 0;
         set_id(id);
         map_fields(std::index_sequence_for<BUILDERS...>());
       }
 
+      /// @brief Creates a new Record Layout Builder, taking a user-defined
+      /// map with enumerated type field ID as keys and field names as value
+      /// which sets the field names.
+      ///
+      /// @param user_defined_field_id_to_name_map A user-defined field ID
+      /// field name map.
       Record(UserDefinedMap user_defined_field_id_to_name_map)
           : content_names_(user_defined_field_id_to_name_map) {
         assert(content_names_.size() == fields_count_);
@@ -542,6 +745,7 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns a vector of strings sontaining all the field names.
       const std::vector<std::string>
       field_names() const noexcept {
         if (content_names_.empty()) {
@@ -555,27 +759,35 @@ namespace awkward {
         }
       }
 
+      /// @brief Sets the field names.
+      ///
+      /// Alternative method to set the field names besides passing the
+      /// user-defined map as constructor parameter.
       void
       set_field_names(MAP user_defined_field_id_to_name_map) noexcept {
         content_names_ = user_defined_field_id_to_name_map;
       }
 
+      /// @brief Returns the reference to the builder contents at `INDEX`.
       template <std::size_t INDEX>
       typename RecordFieldType<INDEX>::Builder&
       field() noexcept {
         return std::get<INDEX>(contents).builder;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -587,6 +799,9 @@ namespace awkward {
         }
       }
 
+      /// @brief Clears the builder contents.
+      ///
+      /// Discards the accumulated data and the contents in each field of the record.
       void
       clear() noexcept {
         for (size_t i = 0; i < fields_count_; i++)
@@ -595,11 +810,13 @@ namespace awkward {
           });
       }
 
+      /// @brief Current number of records in first field.
       const size_t
       length() const noexcept {
         return (std::get<0>(contents).builder.length());
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
@@ -627,6 +844,8 @@ namespace awkward {
                             std::logical_not<bool>());
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -636,6 +855,11 @@ namespace awkward {
           });
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         for (size_t i = 0; i < fields_count_; i++)
@@ -644,6 +868,8 @@ namespace awkward {
           });
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -673,16 +899,12 @@ namespace awkward {
         return out.str();
       }
 
+      /// @brief The contents of the Record Builder.
       RecordContents contents;
 
     private:
-      std::vector<std::string> field_names_;
-      UserDefinedMap content_names_;
-      std::string parameters_;
-      size_t id_;
-
-      static constexpr size_t fields_count_ = sizeof...(BUILDERS);
-
+      /// @brief Inserts the field names of all the record fields in a vector
+      /// of strings.
       template <std::size_t... S>
       void
       map_fields(std::index_sequence<S...>) noexcept {
@@ -690,12 +912,15 @@ namespace awkward {
             {std::string(std::get<S>(contents).index_as_field())...});
       }
 
+      /// @brief Inserts the lengths of all the record fields in a vector and
+      /// returns the vector.
       template <std::size_t... S>
       std::vector<size_t>
       field_lengths(std::index_sequence<S...>) const noexcept {
         return std::vector<size_t>({std::get<S>(contents).builder.length()...});
       }
 
+      /// @brief Helper function of #is_valid for checking the validity.
       template <std::size_t... S>
       std::vector<bool>
       field_is_valid(std::index_sequence<S...>, std::string& error) const
@@ -703,9 +928,29 @@ namespace awkward {
         return std::vector<bool>(
             {std::get<S>(contents).builder.is_valid(error)...});
       }
+
+      /// @brief Vector of strings of field names.
+      std::vector<std::string> field_names_;
+
+      /// @brief User-defined map of record field names.
+      UserDefinedMap content_names_;
+
+      /// @brief Form parameters.
+      std::string parameters_;
+
+      /// @brief Unique form ID.
+      size_t id_;
+
+      /// @brief The count of the fields in the builder.
+      static constexpr size_t fields_count_ = sizeof...(BUILDERS);
     };
 
-    // TupleLayoutBuilder
+    /// @class Tuple
+    ///
+    /// @brief Builds a RecordArray which represents an array of tuples which can be
+    /// of same or different types without field names, indexed only by their order.
+    ///
+    /// @tparam BUILDERS Types of builder contents.
     template <typename... BUILDERS>
     class Tuple {
       using TupleContents = typename std::tuple<BUILDERS...>;
@@ -714,27 +959,32 @@ namespace awkward {
       using TupleContentType = std::tuple_element_t<INDEX, TupleContents>;
 
     public:
+      /// @brief Creates a new Tuple Layout Builder.
       Tuple() {
         size_t id = 0;
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder contents at `INDEX`.
       template <std::size_t INDEX>
       TupleContentType<INDEX>&
       index() noexcept {
         return std::get<INDEX>(contents);
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -746,6 +996,9 @@ namespace awkward {
         }
       }
 
+      /// @brief Clears the builder contents.
+      ///
+      /// Discards the accumulated data and the contents in each index of the tuple.
       void
       clear() noexcept {
         for (size_t i = 0; i < fields_count_; i++)
@@ -754,11 +1007,13 @@ namespace awkward {
           });
       }
 
+      /// @brief Current number of records in the first index of the tuple.
       const size_t
       length() const noexcept {
         return (std::get<0>(contents).builder.length());
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
@@ -787,6 +1042,8 @@ namespace awkward {
                             std::logical_not<bool>());
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -796,6 +1053,11 @@ namespace awkward {
           });
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         for (size_t i = 0; i < fields_count_; i++)
@@ -804,6 +1066,8 @@ namespace awkward {
           });
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -829,63 +1093,93 @@ namespace awkward {
         return out.str();
       }
 
+      /// @brief The contents of the Tuple Builder.
       TupleContents contents;
 
     private:
-      std::vector<int64_t> field_index_;
-      std::string parameters_;
-      size_t id_;
-
-      static constexpr size_t fields_count_ = sizeof...(BUILDERS);
-
+      /// @brief Inserts the lengths of all the builder contents in a vector
+      /// and returns the vector.
       template <std::size_t... S>
       std::vector<size_t>
       content_lengths(std::index_sequence<S...>) const noexcept {
         return std::vector<size_t>({std::get<S>(contents).length()...});
       }
 
+      /// @brief Helper function of #is_valid for checking the validity.
       template <std::size_t... S>
       std::vector<bool>
       content_is_valid(std::index_sequence<S...>, std::string& error) const
           noexcept {
         return std::vector<bool>({std::get<S>(contents).is_valid(error)...});
       }
+
+      /// @brief Vector of integers of field index.
+      std::vector<int64_t> field_index_;
+
+      /// @brief Form parameters.
+      std::string parameters_;
+
+      /// @brief Unique form ID.
+      size_t id_;
+
+      /// @brief The count of the fields in the builder.
+      static constexpr size_t fields_count_ = sizeof...(BUILDERS);
     };
 
-    // RegularLayoutBuilder
+    /// @class Regular
+    ///
+    /// @brief Builds a RegularArray that describes lists that have the same
+    /// length, a single integer size. Its underlying content is a flattened
+    /// view of the data; that is, each list is not stored separately in memory,
+    /// but is inferred as a subinterval of the underlying data.
+    ///
+    /// A multidimensional {@link Numpy NumpyArray} is equivalent to a one-dimensional
+    /// {@link Numpy NumpyArray} nested within several RegularArrays, one for each
+    /// dimension. However, RegularArrays can be used to make lists of any other type.
+    ///
+    /// @tparam SIZE
+    /// @tparam BUILDER Type of builder content.
     template <unsigned SIZE, typename BUILDER>
     class Regular {
     public:
+      /// @brief Creates a new Regular Layout Builder.
       Regular() : length_(0) {
         size_t id = 0;
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder content.
       BUILDER&
       content() noexcept {
         return content_;
       }
 
+      /// @brief Begins a list and returns the reference to the content
+      /// of the builder.
       BUILDER&
       begin_list() noexcept {
         return content_;
       }
 
+      /// @brief Ends a list and increments the number of lists.
       void
       end_list() noexcept {
         length_++;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -893,16 +1187,20 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Clears the builder content.
       void
       clear() noexcept {
+        length_ = 0;
         content_.clear();
       }
 
+      /// @brief Current number of lists of length `SIZE`.
       size_t
       length() const noexcept {
         return length_;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != length_ * size_) {
@@ -918,17 +1216,26 @@ namespace awkward {
         }
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -944,17 +1251,37 @@ namespace awkward {
       }
 
     private:
+      /// @brief The content of the Regular Builder.
       BUILDER content_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
+
+      /// @brief Current number of lists of length `SIZE`.
       size_t length_;
+
+      /// @brief Length of each list.
       size_t size_ = SIZE;
     };
 
-    // IndexedLayoutBuilder
+    /// @class Indexed
+    ///
+    /// @brief Builds an IndexedArray which consists of an index buffer. It is a
+    /// general-purpose tool for changing the order of and/or duplicating some content.
+    ///
+    /// The index values can be 64-bit signed integers `int64`, 32-bit signed integers
+    /// `int32` or 32-bit unsigned integers `uint32`.
+    ///
+    /// @tparam PRIMITIVE Type of index buffer.
+    /// @tparam BUILDER Type of builder content.
     template <typename PRIMITIVE, typename BUILDER>
     class Indexed {
     public:
+      /// @brief Creates a new Indexed Layout Builder by allocating a new index buffer,
+      /// using default_options for initializing the buffer.
       Indexed()
           : index_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)),
@@ -963,6 +1290,10 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Creates a new Indexed Layout Builder by allocating a new index buffer,
+      /// taking {@link BuilderOptions#options options} for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
       Indexed(const awkward::BuilderOptions& options)
           : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
             last_valid_(-1) {
@@ -970,11 +1301,14 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder content.
       BUILDER&
       content() noexcept {
         return content_;
       }
 
+      /// @brief Inserts the last valid index in the index buffer and
+      /// returns the reference to the builder content.
       BUILDER&
       append_index() noexcept {
         last_valid_ = content_.length();
@@ -982,6 +1316,10 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Inserts `size` number of valid index in the index buffer
+      /// and returns the reference to the builder content.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_index(size_t size) noexcept {
         size_t start = content_.length();
@@ -993,16 +1331,19 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1010,6 +1351,8 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated index and clears the content
+      /// of the builder. Also, `last_valid_` returns to -1.
       void
       clear() noexcept {
         last_valid_ = -1;
@@ -1017,11 +1360,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the content and the `index_` buffer.
       size_t
       length() const noexcept {
         return index_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != index_.length()) {
@@ -1045,6 +1390,8 @@ namespace awkward {
         }
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -1052,6 +1399,11 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         index_.concatenate(static_cast<PRIMITIVE*>(
@@ -1059,6 +1411,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -1075,17 +1429,39 @@ namespace awkward {
       }
 
     private:
+      /// @brief Buffer of `PRIMITIVE` type.
+      ///
+      /// It specifies the index of each element.
       GrowableBuffer<PRIMITIVE> index_;
+
+      /// @brief The content of the Indexed Builder.
       BUILDER content_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
+
+      /// @brief Last valid index.
       size_t last_valid_;
     };
 
-    // IndexedOptionLayoutBuilder
+    /// @class IndexedOption
+    ///
+    /// @brief Builds an IndexedOptionArray which consists of an index buffer.
+    /// The negative values in the index are interpreted as missing.
+    ///
+    /// The index values can be 64-bit signed integers `int64`, 32-bit signed
+    /// integers `int32`.
+    ///
+    /// @tparam PRIMITIVE Type of index buffer.
+    /// @tparam BUILDER Type of builder content.
     template <typename PRIMITIVE, typename BUILDER>
     class IndexedOption {
     public:
+      /// @brief Creates a new IndexedOption Layout Builder by allocating a new index
+      /// buffer, using default_options for initializing the buffer.
       IndexedOption()
           : index_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)),
@@ -1094,6 +1470,10 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Creates a new IndexedOption Layout Builder by allocating a new index
+      /// buffer, taking {@link BuilderOptions#options options} for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
       IndexedOption(const awkward::BuilderOptions& options)
           : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
             last_valid_(-1) {
@@ -1101,11 +1481,14 @@ namespace awkward {
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder content.
       BUILDER&
       content() noexcept {
         return content_;
       }
 
+      /// @brief Inserts the last valid index in the index buffer and
+      /// returns the reference to the builder content.
       BUILDER&
       append_index() noexcept {
         last_valid_ = content_.length();
@@ -1113,6 +1496,10 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Inserts `size` number of valid index in the index buffer
+      /// and returns the reference to the builder content.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_index(size_t size) noexcept {
         size_t start = content_.length();
@@ -1124,11 +1511,15 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Inserts -1 in the index buffer.
       void
       append_null() noexcept {
         index_.append(-1);
       }
 
+      /// @brief Inserts -1 in the index buffer `size` number of times
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       void
       extend_null(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1136,16 +1527,19 @@ namespace awkward {
         }
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1153,6 +1547,8 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated index and clears the content
+      /// of the builder. Also, `last_valid_` returns to -1.
       void
       clear() noexcept {
         last_valid_ = -1;
@@ -1160,11 +1556,13 @@ namespace awkward {
         content_.clear();
       }
 
+      /// @brief Current length of the `index_` buffer.
       size_t
       length() const noexcept {
         return index_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != last_valid_ + 1) {
@@ -1180,6 +1578,8 @@ namespace awkward {
         }
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -1187,6 +1587,11 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         index_.concatenate(static_cast<PRIMITIVE*>(
@@ -1194,6 +1599,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -1210,47 +1617,80 @@ namespace awkward {
       }
 
     private:
+      /// @brief Buffer of `PRIMITIVE` type.
+      ///
+      /// It specifies the index of each element.
       GrowableBuffer<PRIMITIVE> index_;
+
+      /// @brief The content of the Indexed Builder.
       BUILDER content_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
+
+      /// @brief Last valid index.
       size_t last_valid_;
     };
 
-    // UnmaskedLayoutBuilder
+    /// @class Unmasked
+    ///
+    /// @brief Builds an UnmaskedArray which the values are never, in fact, missing.
+    /// It exists to satisfy systems that formally require this high-level type without
+    /// the overhead of generating an array of all True or all False values.
+    ///
+    /// This is similar to NumPy's
+    /// [masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html)
+    /// with mask=None.
+    ///
+    /// @tparam BUILDER Type of builder content.
     template <typename BUILDER>
     class Unmasked {
     public:
+      /// @brief Creates a new Unmasked Layout Builder.
       Unmasked() {
         size_t id = 0;
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder content.
       BUILDER&
       content() noexcept {
         return content_;
       }
 
+      /// @brief Returns the reference to the builder content.
+      ///
+      /// After this, avalid element is inserted in the builder content.
       BUILDER&
       append_valid() noexcept {
         return content_;
       }
-
+      /// @brief Returns the reference to the builder content.
+      ///
+      /// After this, `size` number of valid elements are inserted in the builder content.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_valid(size_t size) noexcept {
         return content_;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1258,32 +1698,44 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Clears the builder content.
       void
       clear() noexcept {
         content_.clear();
       }
 
+      /// @brief Current length of the content.
       size_t
       length() const noexcept {
         return content_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         return content_.is_valid(error);
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -1299,43 +1751,79 @@ namespace awkward {
       }
 
     private:
+      /// @brief The content of the Unmasked Builder.
       BUILDER content_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
     };
 
-    // ByteMaskedLayoutBuilder
+    /// @class ByteMasked
+    ///
+    /// @brief Builds a ByteMaskedArray using a mask which is an array
+    /// of booleans that determines whether the corresponding value in the
+    /// contents array is valid or not.
+    ///
+    /// If an element of the mask is equal to #valid_when, the corresponding
+    /// element of the builder content is valid and unmasked, else it is
+    /// invalid (missing) and masked.
+    ///
+    /// This is similar to NumPy's
+    /// [masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html)
+    /// if #valid_when = false.
+    ///
+    /// @tparam VALID_WHEN A boolean value which determines when the builder content are valid.
+    /// @tparam BUILDER Type of builder content.
     template <bool VALID_WHEN, typename BUILDER>
     class ByteMasked {
     public:
+      /// @brief Creates a new ByteMasked Layout Builder by allocating a new mask buffer,
+      /// using default_options for initializing the buffer.
       ByteMasked()
           : mask_(awkward::GrowableBuffer<int8_t>(default_options)) {
         size_t id = 0;
         set_id(id);
       }
 
+      /// @brief Creates a new ByteMasked Layout Builder by allocating a new mask buffer,
+      /// taking {@link BuilderOptions#options options} for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
       ByteMasked(const awkward::BuilderOptions& options)
           : mask_(awkward::GrowableBuffer<int8_t>(options)) {
         size_t id = 0;
         set_id(id);
       }
 
+      /// @brief Returns the reference to the builder content.
       BUILDER&
       content() noexcept {
         return content_;
       }
 
+      /// @brief Determines when the builder content are valid.
       bool
       valid_when() const noexcept {
         return valid_when_;
       }
 
+      /// @brief Inserts #valid_when in the mask.
+      ///
+      /// After this, a valid element is inserted in the builder content.
       BUILDER&
       append_valid() noexcept {
         mask_.append(valid_when_);
         return content_;
       }
 
+      /// @brief Inserts `size` number of #valid_when in the mask.
+      ///
+      /// After this, `size` number of valid elements are inserted in the builder content.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_valid(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1344,12 +1832,20 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Inserts !valid_when in the mask.
+      ///
+      /// After this, a dummy (invalid) value is inserted in the builder content.
       BUILDER&
       append_null() noexcept {
         mask_.append(!valid_when_);
         return content_;
       }
 
+      /// @brief Inserts `size` number of !valid_when in the mask.
+      ///
+      /// After this, `size` number of dummy (invalid) values are inserted in the builder content.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_null(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1358,16 +1854,19 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1375,17 +1874,21 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated mask and clears the content
+      /// of the builder.
       void
       clear() noexcept {
         mask_.clear();
         content_.clear();
       }
 
+      /// @brief Current length of the `mask_` buffer.
       size_t
       length() const noexcept {
         return mask_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != mask_.length()) {
@@ -1401,6 +1904,8 @@ namespace awkward {
         }
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -1408,6 +1913,11 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         mask_.concatenate(static_cast<int8_t*>(
@@ -1415,6 +1925,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key, form_valid_when;
@@ -1432,17 +1944,44 @@ namespace awkward {
       }
 
     private:
+      /// @brief Buffer of `int8` type.
+      ///
+      /// It specifies the mask value of each element.
       GrowableBuffer<int8_t> mask_;
+
+      /// @brief The content of the ByteMasked Builder.
       BUILDER content_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
+
+      /// @brief Determines when the builder content are valid.
       bool valid_when_ = VALID_WHEN;
     };
 
-    // BitMaskedLayoutBuilder
+    /// @class BitMasked
+    ///
+    /// @brief Builds a BitMaskedArray in which mask values are packed into a bitmap.
+    ///
+    /// It has an additional parameter, #lsb_order; If true, the position of each bit is in
+    /// Least-Significant Bit order (LSB) and if it is false, then in Most-Significant Bit order (MSB).
+    ///
+    /// This is similar to NumPy's
+    /// [unpackbits](https://numpy.org/doc/stable/reference/generated/numpy.unpackbits.html)
+    /// with `bitorder="little"` for LSB, `bitorder="big"` for MSB.
+    ///
+    /// @tparam VALID_WHEN A boolean value which determines when the builder content are valid.
+    /// @tparam LSB_ORDER A boolean value which determines whether the position of each bit is
+    /// in LSB order or not.
+    /// @tparam BUILDER Type of builder content.
     template <bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
     class BitMasked {
     public:
+      /// @brief Creates a new BitMasked Layout Builder by allocating a new mask buffer,
+      /// using default_options for initializing the buffer.
       BitMasked()
           : mask_(awkward::GrowableBuffer<uint8_t>(default_options)),
             current_byte_(uint8_t(0)),
@@ -1461,6 +2000,10 @@ namespace awkward {
         }
       }
 
+      /// @brief Creates a new BitMasked Layout Builder by allocating a new mask buffer,
+      /// taking {@link BuilderOptions#options options} for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
       BitMasked(const awkward::BuilderOptions& options)
           : mask_(awkward::GrowableBuffer<uint8_t>(options)),
             current_byte_(uint8_t(0)),
@@ -1479,21 +2022,29 @@ namespace awkward {
         }
       }
 
+      /// @brief Returns the reference to the builder content.
       BUILDER&
       content() noexcept {
         return content_;
       }
 
+      /// @brief Determines when the builder content are valid.
       bool
       valid_when() const noexcept {
         return valid_when_;
       }
 
+      /// @brief Determines whether the position of each bit is in
+      /// Least-Significant Bit order (LSB) or not.
       bool
       lsb_order() const noexcept {
         return lsb_order_;
       }
 
+      /// @brief Sets a bit in the mask.
+      /// If current_byte_ and cast_: 0 indicates null, 1 indicates valid and vice versa.
+      ///
+      /// After this, a valid element is inserted in the builder content.
       BUILDER&
       append_valid() noexcept {
         append_begin();
@@ -1502,6 +2053,12 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Sets `size` number of bits in the mask.
+      /// If current_byte_ and cast_: 0 indicates null, 1 indicates valid and vice versa.
+      ///
+      /// After this, `size` number of valid elements are inserted in the builder content.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_valid(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1510,6 +2067,9 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Sets current_byte_ and cast_ default to null, no change in current_byte_.
+      ///
+      /// After this, a dummy (invalid) value is inserted in the builder content.
       BUILDER&
       append_null() noexcept {
         append_begin();
@@ -1517,6 +2077,11 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Sets current_byte_ and cast_ default to null, no change in current_byte_.
+      ///
+      /// After this, `size` number of dummy (invalid) values are inserted in the builder content.
+      ///
+      /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_null(size_t size) noexcept {
         for (size_t i = 0; i < size; i++) {
@@ -1525,16 +2090,19 @@ namespace awkward {
         return content_;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1542,17 +2110,21 @@ namespace awkward {
         content_.set_id(id);
       }
 
+      /// @brief Discards the accumulated mask and clears the content
+      /// of the builder.
       void
       clear() noexcept {
         mask_.clear();
         content_.clear();
       }
 
+      /// @brief Current length of the `mask_` buffer.
       size_t
       length() const noexcept {
         return (mask_.length() - 1) * 8 + current_index_;
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         if (content_.length() != length()) {
@@ -1568,6 +2140,8 @@ namespace awkward {
         }
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -1575,6 +2149,11 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         mask_.concatenate_from(static_cast<uint8_t*>(
@@ -1584,6 +2163,8 @@ namespace awkward {
         content_.to_buffers(buffers);
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key, form_valid_when, form_lsb_order;
@@ -1603,6 +2184,9 @@ namespace awkward {
       }
 
     private:
+      /// @brief Inserts a byte in the mask buffer when current_index_ equals 8,
+      /// returns it reference to the current_byte_ref_ and resets current_byte_
+      /// and current_index_.
       void
       append_begin() {
         if (current_index_ == 8) {
@@ -1612,6 +2196,11 @@ namespace awkward {
         }
       }
 
+      /// @brief Updates the current_index_ and current_byte_ref_ according to
+      /// the value of #valid_when.
+      ///
+      /// If #valid_when equals true: 0 indicates null, 1 indicates valid.
+      /// If #valid_when equals false: 0 indicates valid, 1 indicates null.
       void
       append_end() {
         current_index_ += 1;
@@ -1622,19 +2211,55 @@ namespace awkward {
         }
       }
 
+      /// @brief Buffer of `uint8` type.
+      ///
+      /// It specifies the mask value of each element.
       GrowableBuffer<uint8_t> mask_;
+
+      /// @brief The content of the ByteMasked Builder.
       BUILDER content_;
+
+      /// @brief Form parameters.
       std::string parameters_;
+
+      /// @brief Unique form ID.
       size_t id_;
+
+      /// @brief The current byte.
       uint8_t current_byte_;
+
+      /// @brief Stores the reference to the current byte.
       uint8_t& current_byte_ref_;
+
+      /// @brief The current index.
       size_t current_index_;
+
+      /// @brief Array of bytes used to set the bit.
       uint8_t cast_[8];
+
+      /// @brief Determines when the builder content are valid.
       bool valid_when_ = VALID_WHEN;
+
+      /// @brief Determines whether the position of each bit is in
+      /// Least-Significant Bit order (LSB) or not.
       bool lsb_order_ = LSB_ORDER;
     };
 
-    // UnionLayoutBuilder
+    /// @class Union
+    ///
+    /// @brief Builds a UnionArray which represents data drawn from an ordered
+    /// list of contents, which can have different types, using tags, which is an
+    /// array of integers indicating which content each array element draws from and
+    /// index, which is an array of integers indicating which element from the content
+    /// to draw from.
+    ///
+    /// The index values can be 64-bit signed integers `int64`, 32-bit signed integers
+    /// `int32` or 32-bit unsigned integers `uint32` and the tags values can be 8-bit
+    /// signed integers.
+    ///
+    /// @tparam TAGS Type of tags buffer.
+    /// @tparam INDEX Type of index buffer.
+    /// @tparam BUILDERS Types of builder contents.
     template <typename TAGS, typename INDEX, typename... BUILDERS>
     class Union {
     public:
@@ -1643,6 +2268,8 @@ namespace awkward {
       template <std::size_t I>
       using ContentType = std::tuple_element_t<I, Contents>;
 
+      /// @brief Creates a new Union Layout Builder by allocating new tags and
+      /// index buffers, using default_options for initializing the buffer.
       Union()
           : tags_(awkward::GrowableBuffer<TAGS>(default_options)),
             index_(awkward::GrowableBuffer<INDEX>(default_options)) {
@@ -1652,6 +2279,11 @@ namespace awkward {
           last_valid_index_[i] = -1;
       }
 
+      /// @brief Creates a new Union Layout Builder by allocating new tags and
+      /// index buffers, taking {@link BuilderOptions#options options}
+      /// for initializing the buffer.
+      ///
+      /// @param options Initial size configuration of a buffer.
       Union(const awkward::BuilderOptions& options)
           : tags_(awkward::GrowableBuffer<TAGS>(options)),
             index_(awkward::GrowableBuffer<INDEX>(options)) {
@@ -1667,6 +2299,8 @@ namespace awkward {
         return std::get<I>(contents_);
       }
 
+      /// @brief Inserts the current tag in the tags buffer and the next index in the
+      /// index buffer and returns the reference to the content of the current builder.
       template <std::size_t TAG>
       ContentType<TAG>&
       append_index() noexcept {
@@ -1681,16 +2315,19 @@ namespace awkward {
         return which_content;
       }
 
+      /// @brief Parameters for the builder form.
       const std::string&
       parameters() const noexcept {
         return parameters_;
       }
 
+      /// @brief Sets the form parameters.
       void
       set_parameters(std::string parameter) noexcept {
         parameters_ = parameter;
       }
 
+      /// @brief Assigns a unique ID to each node.
       void
       set_id(size_t& id) noexcept {
         id_ = id;
@@ -1702,6 +2339,10 @@ namespace awkward {
           visit_at(contents_, i, contents_id);
       }
 
+      /// @brief Discards the accumulated tags and index, and clears
+      /// the builder contents.
+      ///
+      /// Also, resets the `last_valid_index_` array to -1.
       void
       clear() noexcept {
         for (size_t i = 0; i < contents_count_; i++)
@@ -1715,11 +2356,13 @@ namespace awkward {
           visit_at(contents_, i, clear_contents);
       }
 
+      /// @brief Current length of the `tags_` buffer.
       size_t
       length() const noexcept {
         return tags_.length();
       }
 
+      /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
@@ -1743,6 +2386,8 @@ namespace awkward {
                             std::logical_not<bool>());
       }
 
+      /// @brief Retrieves the names and sizes (in bytes) of the buffers used
+      /// in the builder and its contents.
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
@@ -1757,6 +2402,11 @@ namespace awkward {
           });
       }
 
+      /// @brief Copies and concatenates all the accumulated data in each of the buffers
+      /// of the builder and its contents to user-defined pointers.
+      ///
+      /// Used to fill the buffers map by allocating it with user-defined pointers
+      /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
@@ -1772,6 +2422,8 @@ namespace awkward {
           });
       }
 
+      /// @brief Generates a unique description of the builder and its
+      /// contents in the form of a JSON-like string.
       std::string
       form() const noexcept {
         std::stringstream form_key;
@@ -1800,26 +2452,45 @@ namespace awkward {
       }
 
     private:
-      static constexpr size_t contents_count_ = sizeof...(BUILDERS);
-
-      GrowableBuffer<TAGS> tags_;
-      GrowableBuffer<INDEX> index_;
-      Contents contents_;
-      size_t id_;
-      std::string parameters_;
-      size_t last_valid_index_[sizeof...(BUILDERS)];
-
+      /// @brief Inserts the lengths of all the builder contents in a vector
+      /// and returns the vector.
       template <std::size_t... S>
       std::vector<size_t>
       content_lengths(std::index_sequence<S...>) const {
         return std::vector<size_t>({std::get<S>(contents_).length()...});
       }
 
+      /// @brief Helper function of #is_valid for checking the validity.
       template <std::size_t... S>
       std::vector<bool>
       content_is_valid(std::index_sequence<S...>, std::string& error) const {
         return std::vector<bool>({std::get<S>(contents_).is_valid(error)...});
       }
+
+      /// @brief Buffer of `TAGS` type.
+      ///
+      /// It specifies the index of each Tuple content.
+      GrowableBuffer<TAGS> tags_;
+
+      /// @brief Buffer of `INDEX` type.
+      ///
+      /// It specifies the index of each element.
+      GrowableBuffer<INDEX> index_;
+
+      /// @brief The contents of the Union Builder.
+      Contents contents_;
+
+      /// @brief Form parameters.
+      std::string parameters_;
+
+      /// @brief Unique form ID.
+      size_t id_;
+
+      /// @brief Last valid index array.
+      size_t last_valid_index_[sizeof...(BUILDERS)];
+
+      /// @brief The count of the Tuple contents in the builder.
+      static constexpr size_t contents_count_ = sizeof...(BUILDERS);
     };
 
   }  // namespace LayoutBuilder
