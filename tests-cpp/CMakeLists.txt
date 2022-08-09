@@ -1,6 +1,6 @@
 macro(addtest_nolibs name filename)
   if(BUILD_TESTING)
-    target_compile_features(awkward-parent INTERFACE cxx_std_17)
+    target_compile_features(awkward-parent INTERFACE cxx_std_14)
 
     add_executable(${name} ${filename})
     target_link_libraries(${name} PRIVATE awkward-parent)

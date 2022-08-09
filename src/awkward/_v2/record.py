@@ -102,6 +102,13 @@ class Record:
         branch, depth = self._array.branch_depth
         return branch, depth - 1
 
+    def axis_wrap_if_negative(self, axis):
+        if axis == 0:
+            raise ak._v2._util.error(
+                np.AxisError("Record type at axis=0 is a scalar, not an array")
+            )
+        return self._array.axis_wrap_if_negative(axis)
+
     def __getitem__(self, where):
         with ak._v2._util.SlicingErrorContext(self, where):
             return self._getitem(where)
@@ -196,8 +203,10 @@ class Record:
     def recursively_apply(
         self,
         action,
+        behavior=None,
         depth_context=None,
         lateral_context=None,
+        allow_records=True,
         keep_parameters=True,
         numpy_to_regular=True,
         return_array=True,
@@ -206,8 +215,10 @@ class Record:
 
         out = self._array.recursively_apply(
             action,
+            behavior,
             depth_context,
             lateral_context,
+            allow_records,
             keep_parameters,
             numpy_to_regular,
             return_array,
