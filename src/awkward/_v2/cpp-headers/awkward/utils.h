@@ -251,7 +251,7 @@ namespace awkward {
 
   /// @class visit_impl
   ///
-  /// @brief Class to Index tuple at runtime.
+  /// @brief Class to index tuple at runtime.
   ///
   /// @tparam INDEX Index of the tuple contents.
   template <size_t INDEX>
@@ -272,7 +272,7 @@ namespace awkward {
     }
   };
 
-  /// @brief `INDEX` reached 0, which means the runtime index did not
+  /// @brief `INDEX` reached `0`, which means the runtime index did not
   /// exist in the tuple.
   template <>
   struct visit_impl<0> {

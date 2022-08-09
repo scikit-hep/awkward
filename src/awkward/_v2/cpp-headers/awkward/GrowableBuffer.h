@@ -168,7 +168,7 @@ namespace awkward {
   /// panel is allocated that is
   /// {@link BuilderOptions#resize resize} times larger.
   ///
-  /// When {@link ArrayBuilder#snapshot ArrayBuilder::snapshot} is called,
+  /// When {@link ArrayBuilder#to_buffers ArrayBuilder::to_buffers} is called,
   /// these buffers are copied to the new Content array.
   template <typename PRIMITIVE>
   class GrowableBuffer {

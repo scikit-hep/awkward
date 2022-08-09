@@ -16,17 +16,17 @@ namespace awkward {
 
   namespace LayoutBuilder {
 
-    /// @brief Object of {@link BuilderOptions BuilderOptions} with sets
-    // the values of the default options.
+    /// @brief Object of {@link BuilderOptions BuilderOptions} which sets the
+    /// values of the default options.
     awkward::BuilderOptions default_options(1024, 1);
 
     /// @class Field
     ///
     /// @brief Helper class for sending a pair of field names (as enum) and field
-    /// type as template parameters in {@link Record RecordLayoutBuilder}.
+    /// type as template parameters in {@link Record Record}.
     ///
     /// @tparam ENUM Enumerated type which assigns index values to field names.
-    /// @tparam BUILDER Type of Field.
+    /// @tparam BUILDER The type of field.
     template <std::size_t ENUM, typename BUILDER>
     class Field {
     public:
@@ -38,23 +38,23 @@ namespace awkward {
         return std::to_string(static_cast<size_t>(index));
       }
 
-      /// @brief The index of a Record Field.
+      /// @brief The index of a Record field.
       const std::size_t index = ENUM;
-      /// @brief The content type of Field in a Record.
+      /// @brief The content type of field in a Record.
       Builder builder;
     };
 
     /// @class Numpy
     ///
-    /// @brief Builds a NumpyArray which describes multidimensional data
+    /// @brief Builds a NumpyArray which describes multi-dimensional data
     /// of `PRIMITIVE` type.
     ///
-    /// @tparam PRIMITIVE Type of Numpy Builder buffer (data).
+    /// @tparam PRIMITIVE The type of data in NumpyArray.
     template <typename PRIMITIVE>
     class Numpy {
     public:
-      /// @brief Creates a new Numpy Layout Builder by allocating a new buffer,
-      /// using default_options for initializing the buffer.
+      /// @brief Creates a new Numpy layout builder by allocating a new buffer,
+      /// using `default_options` for initializing the buffer.
       Numpy()
           : data_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
@@ -62,8 +62,9 @@ namespace awkward {
         set_id(id);
       }
 
-      /// @brief Creates a new Numpy Layout Builder by allocating a new buffer, taking
-      /// {@link BuilderOptions#options options} for initializing the buffer.
+      /// @brief Creates a new Numpy layout builder by allocating a new buffer,
+      /// taking `options` from {@link BuilderOptions BuilderOptions}
+      /// for initializing the buffer.
       ///
       /// @param options Initial size configuration of a buffer.
       Numpy(const awkward::BuilderOptions& options)
@@ -187,18 +188,18 @@ namespace awkward {
     /// all lists are in a BUILDER content. It is subdivided into lists according
     /// to an offsets array, which specifies the starting and stopping index of each list.
     ///
-    /// The offsets must have at least length 1 (corresponding to an empty array).
+    /// The offsets must have at least length `1` (corresponding to an empty array).
     ///
     /// The offsets values can be 64-bit signed integers `int64`, 32-bit signed integers
     /// `int32` or 32-bit unsigned integers `uint32`.
     ///
-    /// @tparam PRIMITIVE Type of offsets buffer.
-    /// @tparam BUILDER Type of builder content.
+    /// @tparam PRIMITIVE The type of `offsets` buffer.
+    /// @tparam BUILDER The type of builder content.
     template <typename PRIMITIVE, typename BUILDER>
     class ListOffset {
     public:
-      /// @brief Creates a new ListOffset Layout Builder by allocating a new offset buffer,
-      /// using default_options for initializing the buffer.
+      /// @brief Creates a new ListOffset layout builder by allocating a new `offset`
+      ///  buffer, using `default_options` for initializing the buffer.
       ListOffset()
           : offsets_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)) {
@@ -207,8 +208,9 @@ namespace awkward {
         set_id(id);
       }
 
-      /// @brief Creates a new ListOffset Layout Builder by allocating a new offset buffer,
-      /// taking {@link BuilderOptions#options options} for initializing the buffer.
+      /// @brief Creates a new ListOffset layout builder by allocating a new `offset`
+      /// buffer, taking `options` from {@link BuilderOptions BuilderOptions} for
+      /// initializing the buffer.
       ///
       /// @param options Initial size configuration of a buffer.
       ListOffset(const awkward::BuilderOptions& options)
@@ -231,7 +233,7 @@ namespace awkward {
       }
 
       /// @brief Ends a list and appends the current length of the list
-      /// contents in the offsets buffer.
+      /// contents in the `offsets` buffer.
       void
       end_list() noexcept {
         offsets_.append(content_.length());
@@ -297,8 +299,8 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -332,7 +334,7 @@ namespace awkward {
       /// It specifies the starting and stopping index of each list.
       GrowableBuffer<PRIMITIVE> offsets_;
 
-      /// @brief The content of the ListOffset Builder.
+      /// @brief The content of the ListOffsetArray.
       BUILDER content_;
 
       /// @brief Form parameters.
@@ -349,16 +351,16 @@ namespace awkward {
     /// starts which is the starting index of each list and
     /// stops  which is the stopping index of each list.
     ///
-    /// The starts and stops values can be 64-bit signed integers `int64`, 32-bit signed
-    /// integers `int32` or 32-bit unsigned integers `uint32`.
+    /// The starts and stops values can be 64-bit signed integers `int64`,
+    /// 32-bit signed integers `int32` or 32-bit unsigned integers `uint32`.
     ///
-    /// @tparam PRIMITIVE Type of starts and stops buffer.
-    /// @tparam BUILDER Type of builder content.
+    /// @tparam PRIMITIVE The type of `starts` and `stops` buffer.
+    /// @tparam BUILDER The type of builder content.
     template <typename PRIMITIVE, typename BUILDER>
     class List {
     public:
-      /// @brief Creates a new List Layout Builder by allocating new starts
-      /// and stops buffer, using default_options for initializing the buffer.
+      /// @brief Creates a new List layout builder by allocating new `starts`
+      /// and `stops` buffer, using `default_options` for initializing the buffer.
       List()
           : starts_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)),
@@ -368,9 +370,9 @@ namespace awkward {
         set_id(id);
       }
 
-      /// @brief Creates a new List Layout Builder by allocating new starts
-      /// and stops buffer, taking {@link BuilderOptions#options options}
-      /// for initializing the buffer.
+      /// @brief Creates a new List layout builder by allocating new `starts`
+      /// and `stops` buffer, taking `options` from
+      /// {@link BuilderOptions BuilderOptions} for initializing the buffer.
       ///
       /// @param options Initial size configuration of a buffer.
       List(const awkward::BuilderOptions& options)
@@ -387,8 +389,8 @@ namespace awkward {
       }
 
       /// @brief Begins a list, appends the current length of the list
-      /// contents in the starts buffer and returns the reference to the
-      /// builder content.
+      /// contents in the `starts` buffer and returns the reference to
+      /// the builder content.
       BUILDER&
       begin_list() noexcept {
         starts_.append(content_.length());
@@ -396,7 +398,7 @@ namespace awkward {
       }
 
       /// @brief Ends a list and appends the current length of the list
-      /// contents in the stops buffer.
+      /// contents in the `stops` buffer.
       void
       end_list() noexcept {
         stops_.append(content_.length());
@@ -431,7 +433,7 @@ namespace awkward {
         content_.clear();
       }
 
-      /// @brief Current length of the content and `starts_` buffer.
+      /// @brief Current length of the content and `starts` buffer.
       size_t
       length() const noexcept {
         return starts_.length();
@@ -471,8 +473,8 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -514,7 +516,7 @@ namespace awkward {
       /// It specifies the stopping index of each list.
       GrowableBuffer<PRIMITIVE> stops_;
 
-      /// @brief The content of the List Builder.
+      /// @brief The content of the ListArray.
       BUILDER content_;
 
       /// @brief Form parameters.
@@ -530,7 +532,7 @@ namespace awkward {
     /// It is used whenever an array's type is not known because it is empty.
     class Empty {
     public:
-      /// @brief Creates a new Empty Layout Builder
+      /// @brief Creates a new Empty layout builder.
       Empty() {
         size_t id = 0;
         set_id(id);
@@ -595,7 +597,7 @@ namespace awkward {
 
     /// @class EmptyRecord
     ///
-    /// @brief Builds an Empty RecordArray which has has zero contents.
+    /// @brief Builds an Empty RecordArray which has has `zero` contents.
     /// It still represents a non-empty array. In this case, its length
     /// is specified by #length.
     ///
@@ -604,7 +606,7 @@ namespace awkward {
     template <bool IS_TUPLE>
     class EmptyRecord {
     public:
-      /// @brief Creates a new EmptyRecord Layout Builder.
+      /// @brief Creates a new EmptyRecord layout builder.
       EmptyRecord() : length_(0) {
         size_t id = 0;
         set_id(id);
@@ -714,7 +716,7 @@ namespace awkward {
     /// element-by-element, associating a field name to every content.
     ///
     /// @tparam MAP Map of index keys and field name.
-    /// @tparam BUILDERS Types of builder contents.
+    /// @tparam BUILDERS The types of builder contents.
     template <class MAP = std::map<std::size_t, std::string>,
               typename... BUILDERS>
     class Record {
@@ -725,14 +727,14 @@ namespace awkward {
       template <std::size_t INDEX>
       using RecordFieldType = std::tuple_element_t<INDEX, RecordContents>;
 
-      /// @brief Creates a new Record Layout Builder.
+      /// @brief Creates a new Record layout builder.
       Record() {
         size_t id = 0;
         set_id(id);
         map_fields(std::index_sequence_for<BUILDERS...>());
       }
 
-      /// @brief Creates a new Record Layout Builder, taking a user-defined
+      /// @brief Creates a new Record layout builder, taking a user-defined
       /// map with enumerated type field ID as keys and field names as value
       /// which sets the field names.
       ///
@@ -801,7 +803,8 @@ namespace awkward {
 
       /// @brief Clears the builder contents.
       ///
-      /// Discards the accumulated data and the contents in each field of the record.
+      /// Discards the accumulated data and the contents in each
+      /// field of the record.
       void
       clear() noexcept {
         for (size_t i = 0; i < fields_count_; i++)
@@ -855,8 +858,8 @@ namespace awkward {
           });
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -899,7 +902,7 @@ namespace awkward {
         return out.str();
       }
 
-      /// @brief The contents of the Record Builder.
+      /// @brief The contents of the RecordArray.
       RecordContents contents;
 
     private:
@@ -950,7 +953,7 @@ namespace awkward {
     /// @brief Builds a RecordArray which represents an array of tuples which can be
     /// of same or different types without field names, indexed only by their order.
     ///
-    /// @tparam BUILDERS Types of builder contents.
+    /// @tparam BUILDERS The types of builder contents.
     template <typename... BUILDERS>
     class Tuple {
       using TupleContents = typename std::tuple<BUILDERS...>;
@@ -959,7 +962,7 @@ namespace awkward {
       using TupleContentType = std::tuple_element_t<INDEX, TupleContents>;
 
     public:
-      /// @brief Creates a new Tuple Layout Builder.
+      /// @brief Creates a new Tuple layout builder.
       Tuple() {
         size_t id = 0;
         set_id(id);
@@ -998,7 +1001,7 @@ namespace awkward {
 
       /// @brief Clears the builder contents.
       ///
-      /// Discards the accumulated data and the contents in each index of the tuple.
+      /// Discards the accumulated data and the contents at each tuple index.
       void
       clear() noexcept {
         for (size_t i = 0; i < fields_count_; i++)
@@ -1053,8 +1056,8 @@ namespace awkward {
           });
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -1093,7 +1096,7 @@ namespace awkward {
         return out.str();
       }
 
-      /// @brief The contents of the Tuple Builder.
+      /// @brief The contents of the RecordArray without fields.
       TupleContents contents;
 
     private:
@@ -1138,11 +1141,11 @@ namespace awkward {
     /// dimension. However, RegularArrays can be used to make lists of any other type.
     ///
     /// @tparam SIZE
-    /// @tparam BUILDER Type of builder content.
+    /// @tparam BUILDER The type of builder content.
     template <unsigned SIZE, typename BUILDER>
     class Regular {
     public:
-      /// @brief Creates a new Regular Layout Builder.
+      /// @brief Creates a new Regular layout builder.
       Regular() : length_(0) {
         size_t id = 0;
         set_id(id);
@@ -1224,8 +1227,8 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -1251,7 +1254,7 @@ namespace awkward {
       }
 
     private:
-      /// @brief The content of the Regular Builder.
+      /// @brief The content of the RegularArray.
       BUILDER content_;
 
       /// @brief Form parameters.
@@ -1269,19 +1272,19 @@ namespace awkward {
 
     /// @class Indexed
     ///
-    /// @brief Builds an IndexedArray which consists of an index buffer. It is a
+    /// @brief Builds an IndexedArray which consists of an `index` buffer. It is a
     /// general-purpose tool for changing the order of and/or duplicating some content.
     ///
     /// The index values can be 64-bit signed integers `int64`, 32-bit signed integers
     /// `int32` or 32-bit unsigned integers `uint32`.
     ///
-    /// @tparam PRIMITIVE Type of index buffer.
-    /// @tparam BUILDER Type of builder content.
+    /// @tparam PRIMITIVE The type of `index` buffer.
+    /// @tparam BUILDER The type of builder content.
     template <typename PRIMITIVE, typename BUILDER>
     class Indexed {
     public:
-      /// @brief Creates a new Indexed Layout Builder by allocating a new index buffer,
-      /// using default_options for initializing the buffer.
+      /// @brief Creates a new Indexed layout builder by allocating a new `index` buffer,
+      /// using `default_options` for initializing the buffer.
       Indexed()
           : index_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)),
@@ -1290,8 +1293,9 @@ namespace awkward {
         set_id(id);
       }
 
-      /// @brief Creates a new Indexed Layout Builder by allocating a new index buffer,
-      /// taking {@link BuilderOptions#options options} for initializing the buffer.
+      /// @brief Creates a new Indexed layout builder by allocating a new `index`
+      /// buffer, taking `options` from {@link BuilderOptions BuilderOptions}
+      /// for initializing the buffer.
       ///
       /// @param options Initial size configuration of a buffer.
       Indexed(const awkward::BuilderOptions& options)
@@ -1307,7 +1311,7 @@ namespace awkward {
         return content_;
       }
 
-      /// @brief Inserts the last valid index in the index buffer and
+      /// @brief Inserts the last valid index in the `index` buffer and
       /// returns the reference to the builder content.
       BUILDER&
       append_index() noexcept {
@@ -1316,7 +1320,7 @@ namespace awkward {
         return content_;
       }
 
-      /// @brief Inserts `size` number of valid index in the index buffer
+      /// @brief Inserts `size` number of valid index in the `index` buffer
       /// and returns the reference to the builder content.
       ///
       /// Just an interface; not actually faster than calling append many times.
@@ -1352,7 +1356,7 @@ namespace awkward {
       }
 
       /// @brief Discards the accumulated index and clears the content
-      /// of the builder. Also, `last_valid_` returns to -1.
+      /// of the builder. Also, last valid returns to `-1`.
       void
       clear() noexcept {
         last_valid_ = -1;
@@ -1360,7 +1364,7 @@ namespace awkward {
         content_.clear();
       }
 
-      /// @brief Current length of the content and the `index_` buffer.
+      /// @brief Current length of the content and the `index` buffer.
       size_t
       length() const noexcept {
         return index_.length();
@@ -1399,8 +1403,8 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -1434,7 +1438,7 @@ namespace awkward {
       /// It specifies the index of each element.
       GrowableBuffer<PRIMITIVE> index_;
 
-      /// @brief The content of the Indexed Builder.
+      /// @brief The content of the IndexedArray.
       BUILDER content_;
 
       /// @brief Form parameters.
@@ -1449,19 +1453,19 @@ namespace awkward {
 
     /// @class IndexedOption
     ///
-    /// @brief Builds an IndexedOptionArray which consists of an index buffer.
+    /// @brief Builds an IndexedOptionArray which consists of an `index` buffer.
     /// The negative values in the index are interpreted as missing.
     ///
     /// The index values can be 64-bit signed integers `int64`, 32-bit signed
     /// integers `int32`.
     ///
-    /// @tparam PRIMITIVE Type of index buffer.
-    /// @tparam BUILDER Type of builder content.
+    /// @tparam PRIMITIVE The type of `index` buffer.
+    /// @tparam BUILDER The type of builder content.
     template <typename PRIMITIVE, typename BUILDER>
     class IndexedOption {
     public:
-      /// @brief Creates a new IndexedOption Layout Builder by allocating a new index
-      /// buffer, using default_options for initializing the buffer.
+      /// @brief Creates a new IndexedOption layout builder by allocating a new `index`
+      /// buffer, using `default_options` for initializing the buffer.
       IndexedOption()
           : index_(
                 awkward::GrowableBuffer<PRIMITIVE>(default_options)),
@@ -1470,8 +1474,9 @@ namespace awkward {
         set_id(id);
       }
 
-      /// @brief Creates a new IndexedOption Layout Builder by allocating a new index
-      /// buffer, taking {@link BuilderOptions#options options} for initializing the buffer.
+      /// @brief Creates a new IndexedOption layout builder by allocating a new `index`
+      /// buffer, taking `options` from {@link BuilderOptions BuilderOptions}
+      /// for initializing the buffer.
       ///
       /// @param options Initial size configuration of a buffer.
       IndexedOption(const awkward::BuilderOptions& options)
@@ -1487,7 +1492,7 @@ namespace awkward {
         return content_;
       }
 
-      /// @brief Inserts the last valid index in the index buffer and
+      /// @brief Inserts the last valid index in the `index` buffer and
       /// returns the reference to the builder content.
       BUILDER&
       append_index() noexcept {
@@ -1496,7 +1501,7 @@ namespace awkward {
         return content_;
       }
 
-      /// @brief Inserts `size` number of valid index in the index buffer
+      /// @brief Inserts `size` number of valid index in the `index` buffer
       /// and returns the reference to the builder content.
       ///
       /// Just an interface; not actually faster than calling append many times.
@@ -1511,13 +1516,13 @@ namespace awkward {
         return content_;
       }
 
-      /// @brief Inserts -1 in the index buffer.
+      /// @brief Inserts `-1` in the `index` buffer.
       void
       append_null() noexcept {
         index_.append(-1);
       }
 
-      /// @brief Inserts -1 in the index buffer `size` number of times
+      /// @brief Inserts `-1` in the `index` buffer `size` number of times
       ///
       /// Just an interface; not actually faster than calling append many times.
       void
@@ -1548,7 +1553,7 @@ namespace awkward {
       }
 
       /// @brief Discards the accumulated index and clears the content
-      /// of the builder. Also, `last_valid_` returns to -1.
+      /// of the builder. Also, last valid returns to `-1`.
       void
       clear() noexcept {
         last_valid_ = -1;
@@ -1556,7 +1561,7 @@ namespace awkward {
         content_.clear();
       }
 
-      /// @brief Current length of the `index_` buffer.
+      /// @brief Current length of the `index` buffer.
       size_t
       length() const noexcept {
         return index_.length();
@@ -1587,8 +1592,8 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -1622,7 +1627,7 @@ namespace awkward {
       /// It specifies the index of each element.
       GrowableBuffer<PRIMITIVE> index_;
 
-      /// @brief The content of the Indexed Builder.
+      /// @brief The content of the IndexedOptionArray.
       BUILDER content_;
 
       /// @brief Form parameters.
@@ -1645,11 +1650,11 @@ namespace awkward {
     /// [masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html)
     /// with mask=None.
     ///
-    /// @tparam BUILDER Type of builder content.
+    /// @tparam BUILDER The type of builder content.
     template <typename BUILDER>
     class Unmasked {
     public:
-      /// @brief Creates a new Unmasked Layout Builder.
+      /// @brief Creates a new Unmasked layout builder.
       Unmasked() {
         size_t id = 0;
         set_id(id);
@@ -1724,8 +1729,8 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -1751,7 +1756,7 @@ namespace awkward {
       }
 
     private:
-      /// @brief The content of the Unmasked Builder.
+      /// @brief The content of the UnmaskedArray.
       BUILDER content_;
 
       /// @brief Form parameters.
@@ -1773,23 +1778,24 @@ namespace awkward {
     ///
     /// This is similar to NumPy's
     /// [masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html)
-    /// if #valid_when = false.
+    /// if #valid_when = `false`.
     ///
     /// @tparam VALID_WHEN A boolean value which determines when the builder content are valid.
-    /// @tparam BUILDER Type of builder content.
+    /// @tparam BUILDER The type of builder content.
     template <bool VALID_WHEN, typename BUILDER>
     class ByteMasked {
     public:
-      /// @brief Creates a new ByteMasked Layout Builder by allocating a new mask buffer,
-      /// using default_options for initializing the buffer.
+      /// @brief Creates a new ByteMasked layout builder by allocating a new `mask`
+      ///  buffer, using `default_options` for initializing the buffer.
       ByteMasked()
           : mask_(awkward::GrowableBuffer<int8_t>(default_options)) {
         size_t id = 0;
         set_id(id);
       }
 
-      /// @brief Creates a new ByteMasked Layout Builder by allocating a new mask buffer,
-      /// taking {@link BuilderOptions#options options} for initializing the buffer.
+      /// @brief Creates a new ByteMasked layout builder by allocating a new `mask`
+      /// buffer, taking `options` from {@link BuilderOptions BuilderOptions}
+      /// for initializing the buffer.
       ///
       /// @param options Initial size configuration of a buffer.
       ByteMasked(const awkward::BuilderOptions& options)
@@ -1882,7 +1888,7 @@ namespace awkward {
         content_.clear();
       }
 
-      /// @brief Current length of the `mask_` buffer.
+      /// @brief Current length of the `mask` buffer.
       size_t
       length() const noexcept {
         return mask_.length();
@@ -1913,8 +1919,8 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -1949,7 +1955,7 @@ namespace awkward {
       /// It specifies the mask value of each element.
       GrowableBuffer<int8_t> mask_;
 
-      /// @brief The content of the ByteMasked Builder.
+      /// @brief The content of the ByteMaskedArray.
       BUILDER content_;
 
       /// @brief Form parameters.
@@ -1966,8 +1972,9 @@ namespace awkward {
     ///
     /// @brief Builds a BitMaskedArray in which mask values are packed into a bitmap.
     ///
-    /// It has an additional parameter, #lsb_order; If true, the position of each bit is in
-    /// Least-Significant Bit order (LSB) and if it is false, then in Most-Significant Bit order (MSB).
+    /// It has an additional parameter, #lsb_order; If `true`, the position of each bit is in
+    /// `Least-Significant Bit order (LSB)` and if it is `false`, then in `Most-Significant Bit
+    /// order (MSB)`.
     ///
     /// This is similar to NumPy's
     /// [unpackbits](https://numpy.org/doc/stable/reference/generated/numpy.unpackbits.html)
@@ -1976,12 +1983,12 @@ namespace awkward {
     /// @tparam VALID_WHEN A boolean value which determines when the builder content are valid.
     /// @tparam LSB_ORDER A boolean value which determines whether the position of each bit is
     /// in LSB order or not.
-    /// @tparam BUILDER Type of builder content.
+    /// @tparam BUILDER The type of builder content.
     template <bool VALID_WHEN, bool LSB_ORDER, typename BUILDER>
     class BitMasked {
     public:
-      /// @brief Creates a new BitMasked Layout Builder by allocating a new mask buffer,
-      /// using default_options for initializing the buffer.
+      /// @brief Creates a new BitMasked layout builder by allocating a new `mask`
+      /// buffer, using `default_options` for initializing the buffer.
       BitMasked()
           : mask_(awkward::GrowableBuffer<uint8_t>(default_options)),
             current_byte_(uint8_t(0)),
@@ -2000,8 +2007,9 @@ namespace awkward {
         }
       }
 
-      /// @brief Creates a new BitMasked Layout Builder by allocating a new mask buffer,
-      /// taking {@link BuilderOptions#options options} for initializing the buffer.
+      /// @brief Creates a new BitMasked layout builder by allocating a new `mask`
+      /// buffer, taking `options` from {@link BuilderOptions BuilderOptions}
+      /// for initializing the buffer.
       ///
       /// @param options Initial size configuration of a buffer.
       BitMasked(const awkward::BuilderOptions& options)
@@ -2042,7 +2050,7 @@ namespace awkward {
       }
 
       /// @brief Sets a bit in the mask.
-      /// If current_byte_ and cast_: 0 indicates null, 1 indicates valid and vice versa.
+      /// If current_byte_ and cast_: `0` indicates `null`, `1` indicates `valid` and vice versa.
       ///
       /// After this, a valid element is inserted in the builder content.
       BUILDER&
@@ -2054,7 +2062,7 @@ namespace awkward {
       }
 
       /// @brief Sets `size` number of bits in the mask.
-      /// If current_byte_ and cast_: 0 indicates null, 1 indicates valid and vice versa.
+      /// If current_byte_ and cast_: `0` indicates `null`, `1` indicates `valid` and vice versa.
       ///
       /// After this, `size` number of valid elements are inserted in the builder content.
       ///
@@ -2118,7 +2126,7 @@ namespace awkward {
         content_.clear();
       }
 
-      /// @brief Current length of the `mask_` buffer.
+      /// @brief Current length of the `mask` buffer.
       size_t
       length() const noexcept {
         return (mask_.length() - 1) * 8 + current_index_;
@@ -2149,8 +2157,8 @@ namespace awkward {
         content_.buffer_nbytes(names_nbytes);
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -2184,9 +2192,9 @@ namespace awkward {
       }
 
     private:
-      /// @brief Inserts a byte in the mask buffer when current_index_ equals 8,
-      /// returns it reference to the current_byte_ref_ and resets current_byte_
-      /// and current_index_.
+      /// @brief Inserts a byte in the mask buffer when `current_index_` equals `8`,
+      /// returns it reference to the `current_byte_ref_` and resets `current_byte_`
+      /// and `current_index_`.
       void
       append_begin() {
         if (current_index_ == 8) {
@@ -2196,11 +2204,11 @@ namespace awkward {
         }
       }
 
-      /// @brief Updates the current_index_ and current_byte_ref_ according to
+      /// @brief Updates the `current_index_` and `current_byte_ref_` according to
       /// the value of #valid_when.
       ///
-      /// If #valid_when equals true: 0 indicates null, 1 indicates valid.
-      /// If #valid_when equals false: 0 indicates valid, 1 indicates null.
+      /// If #valid_when equals `true`: `0` indicates `null`, `1` indicates `valid`.
+      /// If #valid_when equals `false`: `0` indicates `valid`, `1` indicates `null`.
       void
       append_end() {
         current_index_ += 1;
@@ -2216,7 +2224,7 @@ namespace awkward {
       /// It specifies the mask value of each element.
       GrowableBuffer<uint8_t> mask_;
 
-      /// @brief The content of the ByteMasked Builder.
+      /// @brief The content of the BitMaskedArray.
       BUILDER content_;
 
       /// @brief Form parameters.
@@ -2257,9 +2265,9 @@ namespace awkward {
     /// `int32` or 32-bit unsigned integers `uint32` and the tags values can be 8-bit
     /// signed integers.
     ///
-    /// @tparam TAGS Type of tags buffer.
-    /// @tparam INDEX Type of index buffer.
-    /// @tparam BUILDERS Types of builder contents.
+    /// @tparam TAGS The type of `tags` buffer.
+    /// @tparam INDEX The type of `index` buffer.
+    /// @tparam BUILDERS The types of builder contents.
     template <typename TAGS, typename INDEX, typename... BUILDERS>
     class Union {
     public:
@@ -2268,8 +2276,8 @@ namespace awkward {
       template <std::size_t I>
       using ContentType = std::tuple_element_t<I, Contents>;
 
-      /// @brief Creates a new Union Layout Builder by allocating new tags and
-      /// index buffers, using default_options for initializing the buffer.
+      /// @brief Creates a new Union layout builder by allocating new tags and
+      /// index buffers, using `default_options` for initializing the buffer.
       Union()
           : tags_(awkward::GrowableBuffer<TAGS>(default_options)),
             index_(awkward::GrowableBuffer<INDEX>(default_options)) {
@@ -2279,8 +2287,8 @@ namespace awkward {
           last_valid_index_[i] = -1;
       }
 
-      /// @brief Creates a new Union Layout Builder by allocating new tags and
-      /// index buffers, taking {@link BuilderOptions#options options}
+      /// @brief Creates a new Union layout builder by allocating new tags and index
+      /// buffers, taking `options` from {@link BuilderOptions BuilderOptions}
       /// for initializing the buffer.
       ///
       /// @param options Initial size configuration of a buffer.
@@ -2299,8 +2307,8 @@ namespace awkward {
         return std::get<I>(contents_);
       }
 
-      /// @brief Inserts the current tag in the tags buffer and the next index in the
-      /// index buffer and returns the reference to the content of the current builder.
+      /// @brief Inserts the current tag in the `tags` buffer and the next index in the
+      /// `index` buffer and returns the reference to the content of the current builder.
       template <std::size_t TAG>
       ContentType<TAG>&
       append_index() noexcept {
@@ -2342,7 +2350,7 @@ namespace awkward {
       /// @brief Discards the accumulated tags and index, and clears
       /// the builder contents.
       ///
-      /// Also, resets the `last_valid_index_` array to -1.
+      /// Also, resets the last valid index array to `-1`.
       void
       clear() noexcept {
         for (size_t i = 0; i < contents_count_; i++)
@@ -2356,7 +2364,7 @@ namespace awkward {
           visit_at(contents_, i, clear_contents);
       }
 
-      /// @brief Current length of the `tags_` buffer.
+      /// @brief Current length of the `tags` buffer.
       size_t
       length() const noexcept {
         return tags_.length();
@@ -2402,8 +2410,8 @@ namespace awkward {
           });
       }
 
-      /// @brief Copies and concatenates all the accumulated data in each of the buffers
-      /// of the builder and its contents to user-defined pointers.
+      /// @brief Copies and concatenates all the accumulated data in each of the
+      /// buffers of the builder and its contents to user-defined pointers.
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
@@ -2477,7 +2485,7 @@ namespace awkward {
       /// It specifies the index of each element.
       GrowableBuffer<INDEX> index_;
 
-      /// @brief The contents of the Union Builder.
+      /// @brief The contents of the UnionArray.
       Contents contents_;
 
       /// @brief Form parameters.
