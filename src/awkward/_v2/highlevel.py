@@ -1044,7 +1044,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __delitem__(self, where):
         """
         Args:
-            where (str): Field name to add to records in the array.
+            where (str): Field name to remove from records in the array.
 
         Removes a field from records in the array.
         """
@@ -1062,6 +1062,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     def __getattr__(self, where):
         """
+        Args:
+            where (str): Attribute name to lookup
+
         Whenever possible, fields can be accessed as attributes.
 
         For example, the fields of an `array` like
@@ -1089,15 +1092,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
              keyword.
 
         Note that while fields can be accessed as attributes, they cannot be
-        *assigned* as attributes: the following doesn't work.
-
-            array.z = new_field
-
-        Always use
-
-            array["z"] = new_field
-
-        to add a field.
+        *assigned* as attributes. See #ak.Array.__setitem__ for more.
         """
         if where in dir(type(self)):
             return super().__getattribute__(where)
@@ -1114,6 +1109,45 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     ) from err
             else:
                 raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
+
+    def __setattr__(self, name, value):
+        """
+        Args:
+            where (str): Attribute name to set
+
+        Set an attribute on the array.
+
+        Only existing public attributes e.g. #ak.Array.layout, or private
+        attributes (with leading underscores), can be set.
+
+        Fields are not assignable to as attributes, i.e. the following doesn't work:
+
+            array.z = new_field
+
+        Instead, always use #ak.Array.__setitem__:
+
+            array["z"] = new_field
+
+        or #ak.with_field:
+
+            array = ak.with_field(array, new_field, "z")
+
+        to add or modify a field.
+        """
+        if name in dir(type(self)) or name.startswith("_"):
+            super().__setattr__(name, value)
+        elif name in self._layout.fields:
+            raise ak._v2._util.error(
+                AttributeError(
+                    "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
+                )
+            )
+        else:
+            raise ak._v2._util.error(
+                AttributeError(
+                    "only private attributes (started with an underscore) can be set on arrays"
+                )
+            )
 
     def __dir__(self):
         """
