@@ -253,7 +253,7 @@ class UnionArray(Content):
             nexttags = self._tags[carry.data]
             nextindex = self._index[: self._tags.length][carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return UnionArray(
             nexttags,
@@ -1288,17 +1288,17 @@ class UnionArray(Content):
         if any(isinstance(x, self._nplike.ma.MaskedArray) for x in contents):
             try:
                 out = self._nplike.ma.concatenate(contents)
-            except Exception:
+            except Exception as err:
                 raise ak._v2._util.error(
                     ValueError(f"cannot convert {self} into numpy.ma.MaskedArray")
-                )
+                ) from err
         else:
             try:
                 out = numpy.concatenate(contents)
-            except Exception:
+            except Exception as err:
                 raise ak._v2._util.error(
                     ValueError(f"cannot convert {self} into np.ndarray")
-                )
+                ) from err
 
         tags = numpy.asarray(self.tags)
         for tag, content in enumerate(contents):

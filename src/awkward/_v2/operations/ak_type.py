@@ -97,13 +97,13 @@ def _impl(array):
         else:
             try:
                 out = ak._v2.types.numpytype._dtype_to_primitive_dict[array.dtype.type]
-            except KeyError:
+            except KeyError as err:
                 raise ak._v2._util.error(
                     TypeError(
                         "numpy array type is unrecognized by awkward: %r"
                         % array.dtype.type
                     )
-                )
+                ) from err
             out = ak._v2.types.NumpyType(out)
             for x in array.shape[-1:0:-1]:
                 out = ak._v2.types.RegularType(out, x)
