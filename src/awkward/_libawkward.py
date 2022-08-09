@@ -4,7 +4,7 @@
 
 import ctypes
 import platform
-import pkg_resources
+import importlib_resources
 
 if platform.system() == "Windows":
     name = "awkward.dll"
@@ -12,9 +12,10 @@ elif platform.system() == "Darwin":
     name = "libawkward.dylib"
 else:
     name = "libawkward.so"
-libpath = pkg_resources.resource_filename("awkward", name)
 
-lib = ctypes.cdll.LoadLibrary(libpath)
+libpath_ref = importlib_resources.files("awkward") / name
+with importlib_resources.as_file(libpath_ref) as libpath:
+    lib = ctypes.cdll.LoadLibrary(str(libpath))
 
 # bool awkward_ArrayBuilder_length(void* arraybuilder,
 #                                  int64_t* result);

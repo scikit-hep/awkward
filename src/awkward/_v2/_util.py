@@ -9,7 +9,7 @@ import os
 import re
 import threading
 import traceback
-import packaging
+import packaging.version
 
 from collections.abc import Sequence, Mapping, Iterable
 
