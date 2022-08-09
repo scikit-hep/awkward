@@ -15,7 +15,7 @@ def import_numexpr():
     global checked_version
     try:
         import numexpr
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as err:
         raise ModuleNotFoundError(
             """install the 'numexpr' package with:
 
@@ -24,7 +24,7 @@ def import_numexpr():
 or
 
     conda install numexpr"""
-        ) from None
+        ) from err
     else:
         if not checked_version and ak._v2._util.parse_version(
             numexpr.__version__
@@ -121,11 +121,11 @@ def re_evaluate(local_dict=None):
 
     try:
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
-    except KeyError:
+    except KeyError as err:
         raise RuntimeError(
             "not a previous evaluate() execution found"
             + ak._util.exception_suffix(__file__)
-        )
+        ) from err
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 

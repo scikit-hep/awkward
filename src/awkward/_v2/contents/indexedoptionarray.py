@@ -197,7 +197,7 @@ class IndexedOptionArray(Content):
         try:
             nextindex = self._index[carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return IndexedOptionArray(
             nextindex,

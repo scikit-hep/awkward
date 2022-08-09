@@ -11,7 +11,7 @@ def register_and_check():
     if not checked_version:
         try:
             import numba
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
                 """install the 'numba' package with:
 
@@ -20,7 +20,7 @@ def register_and_check():
 or
 
     conda install numba"""
-            )
+            ) from err
 
         checked_version = True
         if ak._v2._util.parse_version(numba.__version__) < ak._v2._util.parse_version(

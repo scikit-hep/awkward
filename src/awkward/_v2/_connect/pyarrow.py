@@ -52,7 +52,7 @@ def import_fsspec(name):
     try:
         import fsspec
 
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as err:
         raise ImportError(
             f"""to use {name}, you must install fsspec:
 
@@ -62,7 +62,7 @@ or
 
     conda install -c conda-forge fsspec
 """
-        )
+        ) from err
 
     import_pyarrow_parquet(name)
 
