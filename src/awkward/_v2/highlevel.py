@@ -1111,7 +1111,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             "while trying to get field {}, an exception "
                             "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         )
-                    )
+                    ) from err
             else:
                 raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
 
@@ -1791,7 +1791,7 @@ class Record(NDArrayOperatorsMixin):
                             "while trying to get field {}, an exception "
                             "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         )
-                    )
+                    ) from err
             else:
                 raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
 

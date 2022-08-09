@@ -244,7 +244,7 @@ class ListOffsetArray(Content):
             nextstarts = self.starts[carry.data]
             nextstops = self.stops[carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return ak._v2.contents.listarray.ListArray(
             nextstarts,

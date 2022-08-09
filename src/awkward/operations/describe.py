@@ -171,10 +171,10 @@ def type(array):
         else:
             try:
                 out = type.dtype2primitive[array.dtype.type]
-            except KeyError:
+            except KeyError as err:
                 raise TypeError(
                     "numpy array type is unrecognized by awkward: %r" % array.dtype.type
-                )
+                ) from err
             out = ak.types.PrimitiveType(out)
             for x in array.shape[-1:0:-1]:
                 out = ak.types.RegularType(out, x)
