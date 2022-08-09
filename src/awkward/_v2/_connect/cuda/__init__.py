@@ -135,8 +135,16 @@ def populate_kernel_errors(kernel_name, cu_file):
 
 class Invocation:
     def __init__(self, name, error_context):
-        self.name = name
-        self.error_context = error_context
+        self._name = name
+        self._error_context = error_context
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def error_context(self):
+        return self._error_context
 
 
 def import_cupy(name="Awkward Arrays with CUDA"):
