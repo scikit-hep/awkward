@@ -240,7 +240,7 @@ class NumpyArray(Content):
         try:
             out = self._data[where]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, where, str(err))
+            raise ak._v2._util.indexerror(self, where, str(err)) from err
 
         if hasattr(out, "shape") and len(out.shape) != 0:
             return NumpyArray(out, None, None, self._nplike)
@@ -257,7 +257,7 @@ class NumpyArray(Content):
         try:
             out = self._data[where]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, where, str(err))
+            raise ak._v2._util.indexerror(self, where, str(err)) from err
 
         return NumpyArray(
             out,
@@ -279,7 +279,7 @@ class NumpyArray(Content):
         try:
             nextdata = self._data[carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
         return NumpyArray(
             nextdata,
             self._carry_identifier(carry),
@@ -312,7 +312,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._v2._util.indexerror(self, (head,) + tail, str(err))
+                raise ak._v2._util.indexerror(self, (head,) + tail, str(err)) from err
 
             if hasattr(out, "shape") and len(out.shape) != 0:
                 return NumpyArray(out, None, None, self._nplike)
@@ -324,7 +324,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._v2._util.indexerror(self, (head,) + tail, str(err))
+                raise ak._v2._util.indexerror(self, (head,) + tail, str(err)) from err
             out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 
@@ -346,7 +346,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._v2._util.indexerror(self, (head,) + tail, str(err))
+                raise ak._v2._util.indexerror(self, (head,) + tail, str(err)) from err
 
             return NumpyArray(out, None, self._parameters, self._nplike)
 
@@ -355,7 +355,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._v2._util.indexerror(self, (head,) + tail, str(err))
+                raise ak._v2._util.indexerror(self, (head,) + tail, str(err)) from err
             out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 
@@ -1285,11 +1285,11 @@ class NumpyArray(Content):
         return [self.raw(nplike).reshape(-1)]
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._data.ndim != 1 and options["numpy_to_regular"]:
             return self.toRegularArray()._recursively_apply(
-                action, depth, depth_context, lateral_context, options
+                action, behavior, depth, depth_context, lateral_context, options
             )
 
         if options["return_array"]:

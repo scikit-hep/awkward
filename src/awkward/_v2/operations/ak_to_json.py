@@ -288,7 +288,7 @@ def _impl(
                     )
 
     except Exception as err:
-        raise ak._v2._util.error(err)
+        raise ak._v2._util.error(err) from err
 
 
 class _NoContextManager:

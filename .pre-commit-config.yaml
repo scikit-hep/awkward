@@ -16,12 +16,12 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/asottile/setup-cfg-fmt
-  rev: v1.20.1
+  rev: v2.0.0
   hooks:
   - id: setup-cfg-fmt
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: "v2.37.1"
+  rev: "v2.37.3"
   hooks:
   - id: pyupgrade
     args: ["--py36-plus"]
@@ -38,7 +38,7 @@ repos:
     additional_dependencies: [pyyaml]
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 4.0.1
+  rev: 5.0.4
   hooks:
   - id: flake8
     additional_dependencies: [flake8-bugbear, flake8-print>=5]

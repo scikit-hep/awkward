@@ -15,17 +15,17 @@
 
 namespace awkward {
   const BuilderPtr
-  DatetimeBuilder::fromempty(const int64_t initial, const std::string& units) {
-    GrowableBuffer<int64_t> content = GrowableBuffer<int64_t>::empty(initial);
-    return std::make_shared<DatetimeBuilder>(initial,
+  DatetimeBuilder::fromempty(const BuilderOptions& options, const std::string& units) {
+    GrowableBuffer<int64_t> content = GrowableBuffer<int64_t>::empty(options);
+    return std::make_shared<DatetimeBuilder>(options,
                                              std::move(content),
                                              units);
   }
 
-  DatetimeBuilder::DatetimeBuilder(const int64_t initial,
+  DatetimeBuilder::DatetimeBuilder(const BuilderOptions& options,
                                    GrowableBuffer<int64_t> content,
                                    const std::string& units)
-      : initial_(initial)
+      : options_(options)
       , content_(std::move(content))
       , units_(units) { }
 
@@ -82,35 +82,35 @@ namespace awkward {
 
   const BuilderPtr
   DatetimeBuilder::null() {
-    BuilderPtr out = OptionBuilder::fromvalids(initial_, shared_from_this());
+    BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
     return std::move(out);
   }
 
   const BuilderPtr
   DatetimeBuilder::boolean(bool x) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
     return std::move(out);
   }
 
   const BuilderPtr
   DatetimeBuilder::integer(int64_t x) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->integer(x);
     return std::move(out);
   }
 
   const BuilderPtr
   DatetimeBuilder::real(double x) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->real(x);
     return std::move(out);
   }
 
   const BuilderPtr
   DatetimeBuilder::complex(std::complex<double> x) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->complex(x);
     return std::move(out);
   }
@@ -122,7 +122,7 @@ namespace awkward {
       return nullptr;
     }
     else {
-      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->datetime(x, unit);
       return std::move(out);
     }
@@ -135,7 +135,7 @@ namespace awkward {
       return nullptr;
     }
     else {
-      BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->timedelta(x, unit);
       return std::move(out);
     }
@@ -143,14 +143,14 @@ namespace awkward {
 
   const BuilderPtr
   DatetimeBuilder::string(const char* x, int64_t length, const char* encoding) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return std::move(out);
   }
 
   const BuilderPtr
   DatetimeBuilder::beginlist() {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
     return std::move(out);
   }
@@ -164,7 +164,7 @@ namespace awkward {
 
   const BuilderPtr
   DatetimeBuilder::begintuple(int64_t numfields) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return std::move(out);
   }
@@ -185,7 +185,7 @@ namespace awkward {
 
   const BuilderPtr
   DatetimeBuilder::beginrecord(const char* name, bool check) {
-    BuilderPtr out = UnionBuilder::fromsingle(initial_, shared_from_this());
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
     return std::move(out);
   }

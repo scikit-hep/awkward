@@ -197,7 +197,7 @@ class IndexedOptionArray(Content):
         try:
             nextindex = self._index[carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return IndexedOptionArray(
             nextindex,
@@ -1581,7 +1581,7 @@ class IndexedOptionArray(Content):
         return self.project()._completely_flatten(nplike, options)
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
             self._nplike.known_shape
@@ -1606,6 +1606,7 @@ class IndexedOptionArray(Content):
                     index,
                     content._recursively_apply(
                         action,
+                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1621,6 +1622,7 @@ class IndexedOptionArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
+                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,

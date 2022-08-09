@@ -85,7 +85,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
             else:
                 return None
 
-        out = layout.recursively_apply(action)
+        out = layout.recursively_apply(action, behavior)
 
     else:
 
