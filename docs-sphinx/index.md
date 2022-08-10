@@ -14,7 +14,7 @@ What is an Awkward Array?
 ::::
 
 % TODO mention left side-bar
-:::::{grid} 2
+:::::{grid} 1 1 2 2
 :class-container: intro-grid text-center
 
 ::::{grid-item-card} 
