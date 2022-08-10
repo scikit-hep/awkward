@@ -13,11 +13,13 @@ kernelspec:
 
 # 10 minutes to Awkward Array
 
+This is a short, tutorial-style introduction to Awkward Array, aimed towards new users. For details of how to perform specific operations in Awkward Array, e.g. _filtering data_, see the user-guide [index](index.md), or use the search tool to identify relevant pages.
+
 The City of Chicago has a [Data Portal](https://data.cityofchicago.org/) with lots of interesting datasets. This guide uses a dataset of [Chicago taxi trips](https://data.cityofchicago.org/Transportation/Taxi-Trips/wrvz-psew) taken from 2019 through 2021 (3 years).
 
 The dataset that the Data Portal provides has trip start and stop points as longitude, latitude pairs, as well as start and end times (date-stamps), payment details, and the name of each taxi company. To make the example more interesting, an estimated route of each taxi trip has been computed by [Open Source Routing Machine (OSRM)](http://project-osrm.org/) and added to the dataset.
 
-In this guide, we\'ll look at how to manipulate a jagged dataset to plot taxi routes in Chicago.
+In this guide, we'll look at how to manipulate a jagged dataset to plot taxi routes in Chicago.
 
 
 ## Loading the dataset
