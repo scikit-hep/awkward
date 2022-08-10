@@ -2258,7 +2258,7 @@ def to_arrow(
                 recurse(x[: len(layout)], mask, is_option) for x in layout.contents
             ]
 
-            min_list_len = min(map(len, values))
+            min_list_len = min(map(len, values), default=len(layout))
 
             types = pyarrow.struct(
                 [
