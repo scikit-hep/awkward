@@ -11,12 +11,11 @@ subtrees:
         subtrees:
             - entries:
               - file: getting-started/what-is-an-awkward-array
-                title: "What is an Awkward Array?"
+              - file: getting-started/community-tutorials
       - file: user-guide/index
         subtrees:
             - entries:
               - file: user-guide/10-minutes-to-awkward-array
-                title: "10 minutes to Awkward Array"
             
               - file: user-guide/how-to-convert
                 title: "Converting arrays"
