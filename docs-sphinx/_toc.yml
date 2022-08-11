@@ -158,4 +158,5 @@ subtrees:
                 title: "Differentiation using JAX"
 
       - file: reference/index
+      - file: contributor-guide
       - file: release/index
