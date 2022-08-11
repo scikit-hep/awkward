@@ -259,7 +259,7 @@ class NumpyArray(Content):
         except IndexError as err:
 <<<<<<< HEAD
             raise ak._v2._util.indexerror(self, where, str(err))
-        
+
         a = NumpyArray(
 =======
             raise ak._v2._util.indexerror(self, where, str(err)) from err
@@ -272,7 +272,7 @@ class NumpyArray(Content):
             self._nplike,
         )
         print("getitem ", a)
-        
+
 
         return a
 

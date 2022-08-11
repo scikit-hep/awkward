@@ -527,7 +527,11 @@ class Content:
                 a = out._getitem_nothing()
                 a_numpy = a.to_numpy(allow_missing=True)
 
-                if any(isinstance(x, slice) for x in items) and a_numpy.shape != (0,) and not a_numpy.shape == out.to_numpy(allow_missing=True).shape:
+                if (
+                    any(isinstance(x, slice) for x in items)
+                    and a_numpy.shape != (0,)
+                    and not a_numpy.shape == out.to_numpy(allow_missing=True).shape
+                ):
                     print("out ", out)
                     print("a ", a)
                     print("in out shape", out.to_numpy(allow_missing=True).shape)
