@@ -4,6 +4,7 @@
 
 import ctypes
 import platform
+
 try:
     import importlib.resources as importlib_resources
 except ModuleNotFoundError:

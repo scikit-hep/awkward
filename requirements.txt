@@ -1,3 +1,3 @@
+importlib_resources;python_version < "3.7"
 numpy>=1.13.1
 packaging
-importlib_resources;python_version < "3.7"
