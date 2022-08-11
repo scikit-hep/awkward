@@ -9,7 +9,7 @@ An HSF-provided tutorial aimed at High Energy Physics (HEP) researchers on using
 ### Objectives
 - Filter ragged arrays using innermost lists.
 - Compute quantities on combinations of fields with {func}`ak.combinations`.
-- Unzip arrays with {func}`ak.unzip`
+- Unzip arrays with {func}`ak.unzip`.
 - Ravel (flatten) ragged arrays with {func}`ak.ravel`.
 
 ## Loopy and Unloopy Programming Techniques (SciPy 2022)
@@ -50,9 +50,9 @@ Tutorials for Uproot Awkward Columnar HATS, a hands-on tutorial hosted by the [F
 - Perform ragged reduction and broadcasting.
 - Restructure/reformat arrays with {func}`ak.zip`.
 - Write high-performance imperative routines that operate upon Awkward Arrays with Numba.
-- Build Awkward Arrays imperatively with {class}`ak.ArrayBuilder`
+- Build Awkward Arrays imperatively with {class}`ak.ArrayBuilder`.
 - Flatten ragged arrays with {func}`ak.flatten`.
-- Unzip arrays with {func}`ak.unzip`
+- Unzip arrays with {func}`ak.unzip`.
 - Explore combinatorics with {func}`ak.cartesian` and {func}`ak.combinations`.
 - Mask and slice ragged array with {func}`ak.mask`.
 - Explode Awkward Arrays into DataFrames with {func}`ak.pandas.df`.

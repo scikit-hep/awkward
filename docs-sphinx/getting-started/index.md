@@ -26,10 +26,9 @@ pip install awkward
 :::::{grid-item} 
 ::::{dropdown} What kind of data does Awkward Array handle?
 
-Awkward Array is designed to make working with [_ragged_ arrays](https://en.wikipedia.org/wiki/Jagged_array) as trivial as manipulating regular (non-ragged) N-dimensional arrays in NumPy. 
+Awkward Array is designed to make working with [_ragged_ arrays](https://en.wikipedia.org/wiki/Jagged_array) as trivial as manipulating regular (non-ragged) N-dimensional arrays in NumPy. It understands variable-length lists and missing ({data}`None`) values.
 
-:::{figure} https://hdmf-common-schema.readthedocs.io/en/latest/_images/ragged-array-goal.png
-
+:::{figure} ../image/example-array.svg
 :::
 ::::
 :::::
@@ -70,7 +69,7 @@ Awkward Array extends the rich indexing syntax used by NumPy to support named fi
 
 
 :::::{grid-item} 
-::::{dropdown} How do I `reshape` ragged arrays to change their dimensions?
+::::{dropdown} How do I reshape ragged arrays to change their dimensions?
 
 Ragged arrays do not have shapes that can be described by a collection of integers. Instead, the {func}`ak.flatten` and {func}`ak.ravel` functions can be used to remove surplus dimensions from Awkward Arrays. New, regular, dimensions can be added using {data}`numpy.newaxis`, whilst {func}`ak.unflatten` can be used to introduce a new _ragged_ axis.
 ::::
@@ -80,9 +79,9 @@ Ragged arrays do not have shapes that can be described by a collection of intege
 :::::{grid-item} 
 ::::{dropdown} How do I compute reductions or summary statistics?
 
-Awkward Array supports NumPy's {np:doc}`reference/ufuncs` mechanism, and extends the reduction mechanism to support missing ({class}`None`) values.
+Awkward Array supports NumPy's {np:doc}`reference/ufuncs` mechanism, and many of the high-level NumPy reducers (e.g. {func}`numpy.sum`).
 
-:::{figure} ../image/example-reduction-sum.svg
+:::{figure} ../image/example-reduction-sum-only.svg
 
 ::::
 :::::
