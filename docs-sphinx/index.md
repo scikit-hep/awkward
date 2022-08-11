@@ -62,7 +62,7 @@ The reference guide contains a detailed description of the functions, modules, a
 
 {fas}`terminal`
 
-Contributor's Guide
+Contributor's guide
 ^^^^^^^^^^^^^^^^^^^
 Spotted a typo in the documentation? Want to add to the codebase? The contributing guidelines will guide you through the process of improving Awkward Array.
 

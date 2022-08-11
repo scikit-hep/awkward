@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# 10 Minutes to Awkward Array
+# 10 minutes to Awkward Array
 
 This is a short, tutorial-style introduction to Awkward Array, aimed towards new users. For details of how to perform specific operations in Awkward Array, e.g. _filtering data_, see the user-guide [index](index.md), or use the search tool to identify relevant pages.
 

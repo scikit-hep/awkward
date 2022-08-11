@@ -1,4 +1,4 @@
-# API Reference
+# API reference
 
 :::{card} C++ Documentation {fas}`external-link-alt`
 :link: ../_static/doxygen/index.html
