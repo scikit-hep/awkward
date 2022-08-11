@@ -1,4 +1,4 @@
-# Community Tutorials
+# Community tutorials
 
 ## Jagged, ragged, Awkward Arrays
 An HSF-provided tutorial aimed at High Energy Physics (HEP) researchers on using Awkward Array to obtain a dimuon-mass spectrum.
@@ -12,7 +12,7 @@ An HSF-provided tutorial aimed at High Energy Physics (HEP) researchers on using
 - Unzip arrays with {func}`ak.unzip`.
 - Ravel (flatten) ragged arrays with {func}`ak.ravel`.
 
-## Loopy and Unloopy Programming Techniques (SciPy 2022)
+## Loopy and unloopy programming tchniques (SciPy 2022)
 A tutorial presented at the SciPy conference on July 11, 2022.
 
 ### Format
@@ -27,7 +27,7 @@ A tutorial presented at the SciPy conference on July 11, 2022.
 - Perform ragged reduction and broadcasting.
 - Flatten ragged arrays with {func}`ak.flatten`.
 
-## Columnar Data Analysis (CoDaS-HEP 2022)
+## Columnar data analysis (CoDaS-HEP 2022)
 A tutorial aimed at HEP researchers, given at CODAS-HEP, to reconstruct Z masses and the Higgs mass from four leptons (4μ, 4e, 2μ2e) using Awkward Array and uproot.
 
 ### Format
@@ -39,7 +39,7 @@ A tutorial aimed at HEP researchers, given at CODAS-HEP, to reconstruct Z masses
 - Add new fields to an array.
 - Explore combinatorics with {func}`ak.cartesian` and {func}`ak.combinations`.
 
-## Uproot Awkward Columnar HATS (2020)
+## Uproot-Awkward columnar HATS (2020)
 Tutorials for Uproot Awkward Columnar HATS, a hands-on tutorial hosted by the [Fermilab LPC](https://lpc.fnal.gov/).
 
 ### Format
