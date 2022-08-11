@@ -257,24 +257,14 @@ class NumpyArray(Content):
         try:
             out = self._data[where]
         except IndexError as err:
-<<<<<<< HEAD
-            raise ak._v2._util.indexerror(self, where, str(err))
-
-        a = NumpyArray(
-=======
             raise ak._v2._util.indexerror(self, where, str(err)) from err
 
         return NumpyArray(
->>>>>>> a31add8c7c6c64c0615a10c5a7ce6e8d93e0bec8
             out,
             self._range_identifier(start, stop),
             self._parameters,
             self._nplike,
         )
-        print("getitem ", a)
-
-
-        return a
 
     def _getitem_field(self, where, only_fields=()):
         raise ak._v2._util.indexerror(self, where, "not an array of records")
