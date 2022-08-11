@@ -53,12 +53,12 @@ namespace awkward {
     uint8_t* data_ptr = reinterpret_cast<uint8_t*>(data.data());
     int32_t* byte_offsets_ptr = byte_offsets.data();
 
-    const int64_t initial(1024);
+    awkward::BuilderOptions options { 1024, 1 };
 
     Index64 offsets1(byte_offsets.length());
     int64_t* offsets1_ptr = offsets1.data();
-    GrowableBuffer<int64_t> offsets2 = GrowableBuffer<int64_t>::empty(initial);
-    GrowableBuffer<T> content = GrowableBuffer<T>::empty(initial);
+    GrowableBuffer<int64_t> offsets2 = GrowableBuffer<int64_t>::empty(options);
+    GrowableBuffer<T> content = GrowableBuffer<T>::empty(options);
 
     offsets1_ptr[0] = 0;
     offsets2.append(0);

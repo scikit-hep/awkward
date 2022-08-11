@@ -2,8 +2,6 @@
 
 #include "awkward/LayoutBuilder.h"
 
-static const unsigned initial = 10;
-
 template <class NODE, class PRIMITIVE, class LENGTH>
 void dump(NODE&& node, PRIMITIVE&& ptr, LENGTH&& length) {
   std::cout << node << ": ";
@@ -34,13 +32,13 @@ empty_buffers(std::map<std::string, size_t> &names_nbytes)
 using UserDefinedMap = std::map<std::size_t, std::string>;
 
 template<class PRIMITIVE>
-using NumpyBuilder = awkward::LayoutBuilder::Numpy<initial, PRIMITIVE>;
+using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
 template<class PRIMITIVE, class BUILDER>
-using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<initial, PRIMITIVE, BUILDER>;
+using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
-using ListBuilder = awkward::LayoutBuilder::List<initial, PRIMITIVE, BUILDER>;
+using ListBuilder = awkward::LayoutBuilder::List<PRIMITIVE, BUILDER>;
 
 using EmptyBuilder = awkward::LayoutBuilder::Empty;
 
@@ -60,25 +58,25 @@ template <unsigned SIZE, class BUILDER>
 using RegularBuilder = awkward::LayoutBuilder::Regular<SIZE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
-using IndexedBuilder = awkward::LayoutBuilder::Indexed<initial, PRIMITIVE, BUILDER>;
+using IndexedBuilder = awkward::LayoutBuilder::Indexed<PRIMITIVE, BUILDER>;
 
 template<class PRIMITIVE, class BUILDER>
-using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<initial, PRIMITIVE, BUILDER>;
+using IndexedOptionBuilder = awkward::LayoutBuilder::IndexedOption<PRIMITIVE, BUILDER>;
 
 template<class BUILDER>
 using UnmaskedBuilder = awkward::LayoutBuilder::Unmasked<BUILDER>;
 
 template<bool VALID_WHEN, class BUILDER>
-using ByteMaskedBuilder = awkward::LayoutBuilder::ByteMasked<initial, VALID_WHEN, BUILDER>;
+using ByteMaskedBuilder = awkward::LayoutBuilder::ByteMasked<VALID_WHEN, BUILDER>;
 
 template<bool VALID_WHEN, bool LSB_ORDER, class BUILDER>
-using BitMaskedBuilder = awkward::LayoutBuilder::BitMasked<initial, VALID_WHEN, LSB_ORDER, BUILDER>;
+using BitMaskedBuilder = awkward::LayoutBuilder::BitMasked<VALID_WHEN, LSB_ORDER, BUILDER>;
 
 template<class... BUILDERS>
-using UnionBuilder8_U32 = awkward::LayoutBuilder::Union<initial, int8_t, uint32_t, BUILDERS...>;
+using UnionBuilder8_U32 = awkward::LayoutBuilder::Union<int8_t, uint32_t, BUILDERS...>;
 
 template<class... BUILDERS>
-using UnionBuilder8_64 = awkward::LayoutBuilder::Union<initial, int8_t, int64_t, BUILDERS...>;
+using UnionBuilder8_64 = awkward::LayoutBuilder::Union<int8_t, int64_t, BUILDERS...>;
 
 
 void
@@ -319,36 +317,36 @@ test_ListOffset_ListOffset() {
       ListOffsetBuilder<int32_t, NumpyBuilder<double>>
   > builder;
 
-  auto& builder2 = builder.begin_list();
+  auto& subbuilder = builder.begin_list();
 
-  auto& builder3 = builder2.begin_list();
-  builder3.append(1.1);
-  builder3.append(2.2);
-  builder3.append(3.3);
-  builder2.end_list();
-  builder2.begin_list();
-  builder2.end_list();
+  auto& subsubbuilder = subbuilder.begin_list();
+  subsubbuilder.append(1.1);
+  subsubbuilder.append(2.2);
+  subsubbuilder.append(3.3);
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subbuilder.end_list();
   builder.end_list();
 
   builder.begin_list();
-  builder2.begin_list();
-  builder3.append(4.4);
-  builder3.append(5.5);
-  builder2.end_list();
+  subbuilder.begin_list();
+  subsubbuilder.append(4.4);
+  subsubbuilder.append(5.5);
+  subbuilder.end_list();
   builder.end_list();
 
   builder.begin_list();
   builder.end_list();
 
   builder.begin_list();
-  builder2.begin_list();
-  builder3.append(6.6);
-  builder2.end_list();
-  builder2.begin_list();
-  builder3.append(7.7);
-  builder3.append(8.8);
-  builder3.append(9.9);
-  builder2.end_list();
+  subbuilder.begin_list();
+  subsubbuilder.append(6.6);
+  subbuilder.end_list();
+  subbuilder.begin_list();
+  subsubbuilder.append(7.7);
+  subsubbuilder.append(8.8);
+  subsubbuilder.append(9.9);
+  subbuilder.end_list();
   builder.end_list();
 
   // [

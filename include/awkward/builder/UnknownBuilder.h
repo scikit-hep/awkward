@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "awkward/common.h"
+#include "awkward/BuilderOptions.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
@@ -16,17 +17,17 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnknownBuilder: public Builder {
   public:
     /// @brief Create an empty UnknownBuilder.
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const int64_t initial);
+      fromempty(const BuilderOptions& options);
 
     /// @brief Create a ListBuilder from a full set of parameters.
     ///
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param nullcount The number of null values encountered so far.
-    UnknownBuilder(const int64_t initial, int64_t nullcount);
+    UnknownBuilder(const BuilderOptions& options, int64_t nullcount);
 
     /// @brief User-friendly name of this class: `"UnknownBuilder"`.
     const std::string
@@ -95,13 +96,13 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const int64_t
-      initial() const { return initial_; }
+    const BuilderOptions&
+      options() const { return options_; }
 
     const int64_t nullcount() const { return nullcount_; }
 
   private:
-    const int64_t initial_;
+    const BuilderOptions options_;
     int64_t nullcount_;
   };
 }

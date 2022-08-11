@@ -100,6 +100,7 @@ if(BUILD_TESTING)
   addtest_nolibs(test_1494-layout-builder tests-cpp/test_1494-layout-builder.cpp)
   addtest_nolibs(test_1542-growable-buffer tests-cpp/test_1542-growable-buffer.cpp)
   addtest(test_1542-array-builder tests-cpp/test_1542-array-builder.cpp)
+  addtest_nolibs(test_1560-builder-options tests-cpp/test_1560-builder-options.cpp)
 
 endif()
 

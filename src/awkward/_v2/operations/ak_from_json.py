@@ -119,7 +119,7 @@ def _impl(
     layout = (
         layout
         if complex_imag_string is None
-        else layout.recursively_apply(record_to_complex)
+        else layout.recursively_apply(record_to_complex, behavior)
     )
 
     if highlevel:

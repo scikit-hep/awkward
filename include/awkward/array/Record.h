@@ -181,6 +181,9 @@ namespace awkward {
     const ContentPtr
       shallow_simplify() const override;
 
+    const int64_t
+      axis_wrap_if_negative(int64_t axis) const;
+
     const ContentPtr
       num(int64_t axis, int64_t depth) const override;
 

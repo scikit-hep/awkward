@@ -241,7 +241,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
 
         if with_name is not None:
-            layout = ak._v2.operations.with_name(layout, with_name, highlevel=False)
+            layout = ak._v2.operations.with_name(
+                layout, with_name, highlevel=False, behavior=behavior
+            )
 
         if backend is not None and backend != ak._v2.operations.backend(layout):
             layout = ak._v2.operations.to_backend(layout, backend, highlevel=False)
@@ -1109,7 +1111,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             "while trying to get field {}, an exception "
                             "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         )
-                    )
+                    ) from err
             else:
                 raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
 
@@ -1789,7 +1791,7 @@ class Record(NDArrayOperatorsMixin):
                             "while trying to get field {}, an exception "
                             "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         )
-                    )
+                    ) from err
             else:
                 raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
 

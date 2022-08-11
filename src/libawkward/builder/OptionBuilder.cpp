@@ -9,26 +9,26 @@
 
 namespace awkward {
   const BuilderPtr
-  OptionBuilder::fromnulls(const int64_t initial,
+  OptionBuilder::fromnulls(const BuilderOptions& options,
                            int64_t nullcount,
                            const BuilderPtr& content) {
     return std::make_shared<OptionBuilder>(
-      initial,
-      GrowableBuffer<int64_t>::full(initial,
+      options,
+      GrowableBuffer<int64_t>::full(options,
                                     -1,
                                     nullcount),
      content);
   }
 
   const BuilderPtr
-  OptionBuilder::fromvalids(const int64_t initial,
+  OptionBuilder::fromvalids(const BuilderOptions& options,
                             const BuilderPtr& content) {
-    return std::make_shared<OptionBuilder>(initial,
-                                           GrowableBuffer<int64_t>::arange(initial, content->length()),
+    return std::make_shared<OptionBuilder>(options,
+                                           GrowableBuffer<int64_t>::arange(options, content->length()),
                                            content);
   }
 
-  OptionBuilder::OptionBuilder(const int64_t initial,
+  OptionBuilder::OptionBuilder(const BuilderOptions& options,
                                GrowableBuffer<int64_t> index,
                                const BuilderPtr content)
     : index_(std::move(index))

@@ -947,7 +947,7 @@ class RecordArray(Content):
             )
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._nplike.known_shape:
             contents = [x[: self._length] for x in self._contents]
@@ -957,10 +957,17 @@ class RecordArray(Content):
         if options["return_array"]:
 
             def continuation():
+                if not options["allow_records"]:
+                    raise ak._v2._util.error(
+                        ValueError(
+                            f"cannot broadcast records in {options['function_name']}"
+                        )
+                    )
                 return RecordArray(
                     [
                         content._recursively_apply(
                             action,
+                            behavior,
                             depth,
                             copy.copy(depth_context),
                             lateral_context,
@@ -981,6 +988,7 @@ class RecordArray(Content):
                 for content in contents:
                     content._recursively_apply(
                         action,
+                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,

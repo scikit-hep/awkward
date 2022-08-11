@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "awkward/common.h"
+#include "awkward/BuilderOptions.h"
 #include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
@@ -17,21 +18,21 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL TupleBuilder: public Builder {
   public:
     /// @brief Create an empty TupleBuilder.
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const int64_t initial);
+      fromempty(const BuilderOptions& options);
 
     /// @brief Create a TupleBuilder from a full set of parameters.
     ///
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param contents A Builder for each tuple field.
     /// @param length Length of accumulated array (same as #length).
     /// @param begun If `true`, the TupleBuilder is in an active state;
     /// `false` otherwise.
     /// @param nextindex The next field index to fill with data.
-    TupleBuilder(const int64_t initial,
+    TupleBuilder(const BuilderOptions& options,
                  const std::vector<BuilderPtr>& contents,
                  int64_t length,
                  bool begun,
@@ -109,8 +110,8 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const int64_t
-      initial() const { return initial_; }
+    const BuilderOptions&
+      options() const { return options_; }
 
     const std::vector<BuilderPtr>& contents() const { return contents_; }
 
@@ -122,7 +123,7 @@ namespace awkward {
       maybeupdate(int64_t i, const BuilderPtr builder);
 
   private:
-    const int64_t initial_;
+    const BuilderOptions options_;
     std::vector<BuilderPtr> contents_;
     int64_t length_;
     bool begun_;

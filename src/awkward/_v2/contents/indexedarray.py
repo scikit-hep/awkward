@@ -184,7 +184,7 @@ class IndexedArray(Content):
         try:
             nextindex = self._index[carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return IndexedArray(
             nextindex,
@@ -1175,7 +1175,7 @@ class IndexedArray(Content):
         return self.project()._completely_flatten(nplike, options)
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if (
             self._nplike.known_shape
@@ -1196,6 +1196,7 @@ class IndexedArray(Content):
                     index,
                     content._recursively_apply(
                         action,
+                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1211,6 +1212,7 @@ class IndexedArray(Content):
             def continuation():
                 content._recursively_apply(
                     action,
+                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
