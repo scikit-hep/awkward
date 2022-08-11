@@ -510,6 +510,7 @@ class Content:
             items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
 
             nextwhere = ak._v2._slicing.getitem_broadcast(items)
+            print("self ", self)
 
             next = ak._v2.contents.RegularArray(
                 self,
@@ -519,20 +520,31 @@ class Content:
                 None,
                 self._nplike,
             )
+            print("next ", next)
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
             if out.length == 0:
-                if isinstance(items[0], slice):
-                    if items[0].start is None or items[0].stop is None:
-                        return ak._v2.contents.RegularArray(
-                            out,
-                            0,
-                            out.size,
-                            None,
-                            None,
-                            self._nplike,
-                        )
-                return out._getitem_nothing()
+                a = out._getitem_nothing()
+                a_numpy = a.to_numpy(allow_missing=True)
+
+                if any(isinstance(x, slice) for x in items) and a_numpy.shape != (0,) and not a_numpy.shape == out.to_numpy(allow_missing=True).shape:
+                    print("out ", out)
+                    print("a ", a)
+                    print("in out shape", out.to_numpy(allow_missing=True).shape)
+                    print("a shape", a_numpy.shape)
+                    print("out size", out.size)
+                    b = ak._v2.contents.RegularArray(
+                        a,
+                        0,
+                        out.size,
+                        None,
+                        None,
+                        self._nplike,
+                    )
+                    print("b shape ", b.to_numpy(allow_missing=True).shape)
+                    return b
+
+                return a
             else:
                 return out._getitem_at(0)
 
