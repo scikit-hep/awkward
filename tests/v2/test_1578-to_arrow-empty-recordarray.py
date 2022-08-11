@@ -4,6 +4,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+pytest.importorskip("pyarrow")
+
 
 def test():
     layout = ak._v2.contents.RecordArray([], fields=[], length=3)
