@@ -27,9 +27,6 @@ class Index:
         if len(self._data.shape) != 1:
             raise ak._v2._util.error(TypeError("Index data must be one-dimensional"))
 
-        print("data type = ", type(self._data))
-        print("data = ", self._data)
-
         if issubclass(self._data.dtype.type, np.longlong):
             assert (
                 np.dtype(np.longlong).itemsize == 8

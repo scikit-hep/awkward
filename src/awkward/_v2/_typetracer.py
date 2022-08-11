@@ -266,7 +266,7 @@ class TypeTracerArray:
         return len(self._shape)
 
     def view(self, dtype):
-        if not self.itemsize() == np.dtype(dtype).itemsize or not self._shape == (
+        if not self.itemsize() == np.dtype(dtype).itemsize and not self._shape == (
             UnknownLength,
         ):
             length = self._shape[0] * int(self.itemsize() / np.dtype(dtype).itemsize)
