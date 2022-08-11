@@ -1078,9 +1078,9 @@ class RegularArray(Content):
 
         out = ak._v2.operations.to_numpy(self.content, allow_missing=allow_missing)
         head, tail = out.shape[0], out.shape[1:]
-        
+
         if self.size == 0:
-            shape = (0,0) + tail
+            shape = (0, 0) + tail
         else:
             shape = (head // self.size, self.size) + tail
         return out[: shape[0] * self.size].reshape(shape)
