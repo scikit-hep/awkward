@@ -31,9 +31,7 @@ class Index:
             assert (
                 np.dtype(np.longlong).itemsize == 8
             ), "longlong is always 64-bit, right?"
-            assert (
-                np.dtype(np.int64).itemsize == 8
-            ), "int64 is not 64-bits on Windows?"
+            assert np.dtype(np.int64).itemsize == 8, "int64 is not 64-bits on Windows?"
 
             self._data = self._data.view(np.int64)
 
