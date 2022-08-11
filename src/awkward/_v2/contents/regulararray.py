@@ -1078,7 +1078,7 @@ class RegularArray(Content):
 
         out = ak._v2.operations.to_numpy(self.content, allow_missing=allow_missing)
         head, tail = out.shape[0], out.shape[1:]
-        
+
         if self.size == 0:
             shape = (0, 0) + tail
         else:
