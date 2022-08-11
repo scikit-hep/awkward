@@ -2,7 +2,10 @@
 
 import sys
 import argparse
-import importlib_resources
+try:
+    import importlib.resources as importlib_resources
+except ModuleNotFoundError:
+    import importlib_resources
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(

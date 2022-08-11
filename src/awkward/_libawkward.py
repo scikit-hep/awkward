@@ -4,7 +4,10 @@
 
 import ctypes
 import platform
-import importlib_resources
+try:
+    import importlib.resources as importlib_resources
+except ModuleNotFoundError:
+    import importlib_resources
 
 if platform.system() == "Windows":
     name = "awkward.dll"
