@@ -523,9 +523,10 @@ class Content:
             if (
                 any(isinstance(x, list) and len(x) == 0 for x in items)
                 and any(isinstance(x, slice) for x in items)
-                and next.maybe_toNumpyArray() is not None
             ):
-                next = next.maybe_toNumpyArray()
+                attempt = next.maybe_toNumpyArray()
+                if attempt is not None:
+                    next = attempt
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
