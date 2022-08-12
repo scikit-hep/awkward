@@ -520,9 +520,8 @@ class Content:
                 self._nplike,
             )
 
-            if (
-                any(isinstance(x, list) and len(x) == 0 for x in items)
-                and any(isinstance(x, slice) for x in items)
+            if any(isinstance(x, list) and len(x) == 0 for x in items) and any(
+                isinstance(x, slice) for x in items
             ):
                 attempt = next.maybe_toNumpyArray()
                 if attempt is not None:
