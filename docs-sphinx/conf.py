@@ -118,6 +118,9 @@ redirect_html_template_file = "_templates/redirect.html"
 
 jupyterlite_dir = "./lite"
 
+import sys
+import subprocess
+
 subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
 
 exec(open("prepare_docstrings.py").read(), dict(globals()))
