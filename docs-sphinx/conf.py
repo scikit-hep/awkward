@@ -34,7 +34,8 @@ extensions = [
     "sphinx.ext.intersphinx",
     'myst_nb',
     # Preserve old links
-    'sphinx_reredirects'
+    'sphinx_reredirects',
+    'jupyterlite_sphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -115,8 +116,7 @@ with open("redirects.json") as f:
 
 redirect_html_template_file = "_templates/redirect.html"
 
-import sys
-import subprocess
+jupyterlite_dir = "./lite"
 
 subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
 
