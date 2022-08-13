@@ -43,8 +43,8 @@ jobs:
         python -m pip install jupyterlite/py/jupyterlite
     - name: Install EMSDK
       uses: mymindstorm/setup-emsdk@v11
-       with:
-         version: 3.1.14
+      with:
+        version: 3.1.14
     - name: Build WASM package
       run: |
         rm -rf build
