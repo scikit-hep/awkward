@@ -42,7 +42,7 @@ jobs:
         git clone --depth=1 --branch feat-update-pyodide https://github.com/agoose77/jupyterlite.git
         python -m pip install jupyterlite/py/jupyterlite
     - name: Build WASM package
-      run:
+      run: |
         rm -rf build
         AR="emar" CXX="em++" CC="emcc" CMAKE_ARGS="-DEMSCRIPTEN=1" CXXFLAGS="-sDISABLE_EXCEPTION_CATCHING=0" LDFLAGS="-sDISABLE_EXCEPTION_CATCHING=0" pyodide build --exports whole_archive
         mkdir -p docs-sphinx/lite/pypi
