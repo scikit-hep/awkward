@@ -44,7 +44,7 @@ jobs:
     - name: Build WASM package
       run: |
         rm -rf build
-        AR="emar" CXX="em++" CC="emcc" CMAKE_ARGS="-DEMSCRIPTEN=1" CXXFLAGS="-sDISABLE_EXCEPTION_CATCHING=0" LDFLAGS="-sDISABLE_EXCEPTION_CATCHING=0" python -m pyodide build --exports whole_archive
+        AR="emar" CXX="em++" CC="emcc" CMAKE_ARGS="-DEMSCRIPTEN=1" CXXFLAGS="-sDISABLE_EXCEPTION_CATCHING=0" LDFLAGS="-sDISABLE_EXCEPTION_CATCHING=0" pyodide build --exports whole_archive
         mkdir -p docs-sphinx/lite/pypi
         cp dist/awkward*wasm32.whl docs-sphinx/lite/pypi/
     - name: Generate documentation
