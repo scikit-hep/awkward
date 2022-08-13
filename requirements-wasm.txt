@@ -1,2 +1,1 @@
-./extern/jupyterlite-0.1.0b11-py3-none-any.whl
 pyodide-build
