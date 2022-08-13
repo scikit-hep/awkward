@@ -39,7 +39,7 @@ jobs:
     - name: Install WASM requirements
       run: |
         python -m pip install -r requirements-wasm.txt
-        git clone --depth=1 --branch feat-update-pyodide git@github.com:agoose77/jupyterlite.git
+        git clone --depth=1 --branch feat-update-pyodide https://github.com/agoose77/jupyterlite.git
         python -m pip install jupyterlite/py/jupyterlite
     - name: Build WASM package
       run:
