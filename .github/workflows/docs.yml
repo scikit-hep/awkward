@@ -41,6 +41,10 @@ jobs:
         python -m pip install -r requirements-wasm.txt
         git clone --depth=1 --branch feat-update-pyodide https://github.com/agoose77/jupyterlite.git
         python -m pip install jupyterlite/py/jupyterlite
+    - name: Install EMSDK
+      uses: mymindstorm/setup-emsdk@v11
+       with:
+         version: 3.1.14
     - name: Build WASM package
       run: |
         rm -rf build
