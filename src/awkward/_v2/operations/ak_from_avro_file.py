@@ -47,10 +47,10 @@ def from_avro_file(
                         opened_file, limit_entries, debug_forth
                     ).outcontents
                     return _impl(form, length, container, highlevel, behavior)
-            except ImportError:
+            except ImportError as err:
                 raise ak._v2._util.error(
                     "the filename is incorrect or the file does not exist"
-                )
+                ) from err
 
         else:
             if not hasattr(file, "read"):

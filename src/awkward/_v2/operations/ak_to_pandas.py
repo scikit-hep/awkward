@@ -135,7 +135,7 @@ def to_pandas(
 def _impl(array, how, levelname, anonymous):
     try:
         import pandas
-    except ImportError:
+    except ImportError as err:
         raise ak._v2._util.error(
             ImportError(
                 """install the 'pandas' package with:
@@ -146,7 +146,7 @@ or
 
     conda install pandas"""
             )
-        )
+        ) from err
 
     if how is not None:
         out = None

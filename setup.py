@@ -65,11 +65,11 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
     def build_extensions(self):
         try:
             subprocess.check_output([CMAKE, "--version"])
-        except OSError:
+        except OSError as err:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: "
                 + ", ".join(x.name for x in self.extensions)
-            )
+            ) from err
 
         setuptools.command.build_ext.build_ext.build_extensions(self)
 

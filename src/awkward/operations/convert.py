@@ -252,19 +252,19 @@ def to_numpy(array, allow_missing=True):
         if any(isinstance(x, numpy.ma.MaskedArray) for x in contents):
             try:
                 out = numpy.ma.concatenate(contents)
-            except Exception:
+            except Exception as err:
                 raise ValueError(
                     f"cannot convert {array} into numpy.ma.MaskedArray"
                     + ak._util.exception_suffix(__file__)
-                )
+                ) from err
         else:
             try:
                 out = numpy.concatenate(contents)
-            except Exception:
+            except Exception as err:
                 raise ValueError(
                     f"cannot convert {array} into np.ndarray"
                     + ak._util.exception_suffix(__file__)
-                )
+                ) from err
 
         tags = numpy.asarray(array.tags)
         for tag, content in enumerate(contents):
@@ -2258,7 +2258,7 @@ def to_arrow(
                 recurse(x[: len(layout)], mask, is_option) for x in layout.contents
             ]
 
-            min_list_len = min(map(len, values))
+            min_list_len = min(map(len, values), default=len(layout))
 
             types = pyarrow.struct(
                 [

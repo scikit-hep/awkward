@@ -237,7 +237,7 @@ class ByteMaskedArray(Content):
         try:
             nextmask = self._mask[carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return ByteMaskedArray(
             nextmask,

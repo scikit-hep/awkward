@@ -67,6 +67,7 @@ class NumpyMetadata(Singleton):
     uint16 = numpy.uint16
     uint32 = numpy.uint32
     uint64 = numpy.uint64
+    longlong = numpy.longlong
     float32 = numpy.float32
     float64 = numpy.float64
     complex64 = numpy.complex64
