@@ -20,6 +20,8 @@ class Index:
         if nplike is None:
             nplike = ak.nplike.of(data)
         self._nplike = nplike
+        if metadata is not None and not isinstance(metadata, dict):
+            raise ak._v2._util.error(TypeError("Index metadata must be None or a dict"))
         self._metadata = metadata
         self._data = self._nplike.index_nplike.asarray(
             data, dtype=self._expected_dtype, order="C"
