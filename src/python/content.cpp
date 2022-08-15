@@ -1025,7 +1025,7 @@ py::class_<ak::ArrayBuilder>
 make_ArrayBuilder(const py::handle& m, const std::string& name) {
   return (py::class_<ak::ArrayBuilder>(m, name.c_str())
       .def(py::init([](const int64_t initial, double resize) -> ak::ArrayBuilder {
-        return ak::ArrayBuilder(initial);
+        return ak::ArrayBuilder({initial, resize});
       }), py::arg("initial") = 1024, py::arg("resize") = 1.5)
       .def_property_readonly("_ptr",
                              [](const ak::ArrayBuilder* self) -> size_t {
@@ -1042,8 +1042,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         return py::str(self.to_buffers(container, form_key_id));
       })
       .def("to_buffers", [](const ak::ArrayBuilder& self) -> py::object {
-        std::cout << "ArrayBuilder to_buffers" << std::endl;
-
         ::NumpyBuffersContainer container;
         int64_t form_key_id = 0;
         std::string form = self.to_buffers(container, form_key_id);
@@ -1054,7 +1052,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         return out;
       })
       .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
-        std::cout << "ArrayBuilder snapshot" << std::endl;
         return ::builder_snapshot(self.builder());
       })
       .def("__getitem__", &getitem<ak::ArrayBuilder>)
@@ -3110,6 +3107,9 @@ make_Record(const py::handle& m, const std::string& name) {
      .def("simplify", [](const ak::Record& self) {
        return box(self.shallow_simplify());
      })
+     .def("axis_wrap_if_negative",
+               &ak::Record::axis_wrap_if_negative,
+               py::arg("axis"))
      .def("copy_to",
           [](const ak::Record& self, const std::string& ptr_lib) -> py::object {
           if (ptr_lib == "cpu") {

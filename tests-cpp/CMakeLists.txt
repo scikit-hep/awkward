@@ -1,5 +1,7 @@
 macro(addtest_nolibs name filename)
   if(BUILD_TESTING)
+    target_compile_features(awkward-parent INTERFACE cxx_std_14)
+
     add_executable(${name} ${filename})
     target_link_libraries(${name} PRIVATE awkward-parent)
     set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)

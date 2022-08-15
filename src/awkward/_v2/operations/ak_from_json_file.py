@@ -131,7 +131,7 @@ def _impl(
     layout = (
         layout
         if complex_imag_string is None
-        else layout.recursively_apply(record_to_complex)
+        else layout.recursively_apply(record_to_complex, behavior)
     )
 
     nonfinite_dict = {}
@@ -147,7 +147,11 @@ def _impl(
             if node.parameter("__array__") == "string":
                 return node._awkward_strings_to_nonfinite(nonfinite_dict)
 
-    layout = layout.recursively_apply(string_to_nonfinite) if nonfinite_dict else layout
+    layout = (
+        layout.recursively_apply(string_to_nonfinite, behavior)
+        if nonfinite_dict
+        else layout
+    )
 
     layout = (
         layout.content

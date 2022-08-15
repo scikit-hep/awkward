@@ -4,6 +4,7 @@
 #define AWKWARD_DATETIMEBUILDER_H_
 
 #include "awkward/common.h"
+#include "awkward/BuilderOptions.h"
 #include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
@@ -15,17 +16,17 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL DatetimeBuilder: public Builder {
   public:
     /// @brief Create an empty DatetimeBuilder.
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const int64_t initial, const std::string& units);
+      fromempty(const BuilderOptions& options, const std::string& units);
 
     /// @brief Create an DatetimeBuilder from a full set of parameters.
     ///
-    /// @param initial Configuration initial for building an array;
+    /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated integers.
-    DatetimeBuilder(const int64_t initial,
+    DatetimeBuilder(const BuilderOptions& options,
                     GrowableBuffer<int64_t> content,
                     const std::string& units);
 
@@ -96,8 +97,8 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const int64_t
-      initial() const { return initial_; }
+    const BuilderOptions&
+      options() const { return options_; }
 
     const std::string&
       units() const;
@@ -107,7 +108,7 @@ namespace awkward {
     const std::string& unit() const { return units_; }
 
   private:
-    const int64_t initial_;
+    const BuilderOptions options_;
     GrowableBuffer<int64_t> content_;
     const std::string units_;
   };

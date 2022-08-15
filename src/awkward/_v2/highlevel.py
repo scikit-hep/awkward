@@ -241,7 +241,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
 
         if with_name is not None:
-            layout = ak._v2.operations.with_name(layout, with_name, highlevel=False)
+            layout = ak._v2.operations.with_name(
+                layout, with_name, highlevel=False, behavior=behavior
+            )
 
         if backend is not None and backend != ak._v2.operations.backend(layout):
             layout = ak._v2.operations.to_backend(layout, backend, highlevel=False)

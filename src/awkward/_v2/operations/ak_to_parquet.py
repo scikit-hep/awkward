@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from collections.abc import Iterable, Sized, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 
 import numpy as np
 
@@ -32,7 +32,40 @@ def to_parquet(
     parquet_compliant_nested=False,  # https://issues.apache.org/jira/browse/ARROW-16348
     parquet_extra_options=None,
     hook_after_write=None,
+    storage_options=None,
 ):
+    """
+
+    Args:
+        data: ak.Array or ak.Record
+        destination: str
+        list_to32: bool
+        string_to32: bool
+        bytestring_to32: bool
+        emptyarray_to:
+        categorical_as_dictionary: bool
+        extensionarray: bool
+        count_nulls:
+        compression: str | dict
+        compression_level:
+        row_group_size: int
+        data_page_size:
+        parquet_flavor:
+        parquet_version:
+        parquet_page_version:
+        parquet_metadata_statistics:
+        parquet_dictionary_encoding:
+        parquet_byte_stream_split:
+        parquet_coerce_timestamps:
+        parquet_old_int96_timestamps:
+        parquet_compliant_nested:
+        parquet_extra_options:
+        hook_after_write: callable
+
+    Returns:
+
+    ``pyarrow._parquet.FileMetaData`` instance
+    """
     import awkward._v2._connect.pyarrow
 
     pyarrow_parquet = awkward._v2._connect.pyarrow.import_pyarrow_parquet(
@@ -40,23 +73,8 @@ def to_parquet(
     )
     fsspec = awkward._v2._connect.pyarrow.import_fsspec("ak.to_parquet")
 
-    if isinstance(data, (ak._v2.highlevel.Record, ak._v2.record.Record)):
-        iterator = iter([data])
-    elif isinstance(data, Iterable) and not isinstance(data, Sized):
-        iterator = iter(data)
-    elif isinstance(data, Iterable):
-        iterator = iter([data])
-    else:
-        raise ak._v2._util.error(
-            TypeError(
-                "'data' must be an array (one row group) or iterable of arrays (row group per array)"
-            )
-        )
-
-    row_group = 0
-    array = next(iterator)
     layout = ak._v2.operations.ak_to_layout.to_layout(
-        array, allow_record=True, allow_other=False
+        data, allow_record=True, allow_other=False
     )
     table = ak._v2.operations.ak_to_arrow_table._impl(
         layout,
@@ -79,7 +97,7 @@ def to_parquet(
     else:
         column_prefix = ()
 
-    if isinstance(layout, ak._v2.record.Record):
+    if isinstance(data, ak._v2.Record):
         form = layout.array.form
     else:
         form = layout.form
@@ -169,51 +187,48 @@ def to_parquet(
     if parquet_extra_options is None:
         parquet_extra_options = {}
 
-    with fsspec.open(destination, "wb") as file:
-        with pyarrow_parquet.ParquetWriter(
-            destination,
-            table.schema,
-            filesystem=file.fs,
-            flavor=parquet_flavor,
-            version=parquet_version,
-            use_dictionary=parquet_dictionary_encoding,
-            compression=compression,
-            write_statistics=parquet_metadata_statistics,
-            use_deprecated_int96_timestamps=parquet_old_int96_timestamps,
-            compression_level=compression_level,
-            use_byte_stream_split=parquet_byte_stream_split,
-            data_page_version=parquet_page_version,
-            use_compliant_nested_type=parquet_compliant_nested,
-            data_page_size=data_page_size,
-            coerce_timestamps=parquet_coerce_timestamps,
-            **parquet_extra_options,
-        ) as writer:
-            while True:
-                writer.write_table(table, row_group_size=row_group_size)
-                if hook_after_write is not None:
-                    hook_after_write(
-                        row_group=row_group,
-                        array=array,
-                        layout=layout,
-                        table=table,
-                        writer=writer,
-                    )
+    fs, destination = fsspec.core.url_to_fs(destination, **(storage_options or {}))
+    metalist = []
+    with pyarrow_parquet.ParquetWriter(
+        destination,
+        table.schema,
+        filesystem=fs,
+        flavor=parquet_flavor,
+        version=parquet_version,
+        use_dictionary=parquet_dictionary_encoding,
+        compression=compression,
+        write_statistics=parquet_metadata_statistics,
+        use_deprecated_int96_timestamps=parquet_old_int96_timestamps,
+        compression_level=compression_level,
+        use_byte_stream_split=parquet_byte_stream_split,
+        data_page_version=parquet_page_version,
+        use_compliant_nested_type=parquet_compliant_nested,
+        data_page_size=data_page_size,
+        coerce_timestamps=parquet_coerce_timestamps,
+        metadata_collector=metalist,
+        **parquet_extra_options,
+    ) as writer:
+        writer.write_table(table, row_group_size=row_group_size)
+        if hook_after_write is not None:
+            hook_after_write(
+                array=data,
+                layout=layout,
+                table=table,
+                writer=writer,
+            )
+    meta = metalist[0]
+    meta.set_file_path(destination.rsplit("/", 1)[-1])
+    return meta
 
-                row_group += 1
-                try:
-                    array = next(iterator)
-                except StopIteration:
-                    break
-                layout = ak._v2.operations.ak_to_layout.to_layout(
-                    array, allow_record=True, allow_other=False
-                )
-                table = ak._v2.operations.ak_to_arrow_table._impl(
-                    layout,
-                    list_to32,
-                    string_to32,
-                    bytestring_to32,
-                    emptyarray_to,
-                    categorical_as_dictionary,
-                    extensionarray,
-                    count_nulls,
-                )
+
+def write_metadata(dir_path, fs, *metas, global_metadata=True):
+    """Generate metadata file(s) from list of arrow metadata instances"""
+    assert metas
+    md = metas[0]
+    with fs.open("/".join([dir_path, "_common_metadata"]), "wb") as fil:
+        md.write_metadata_file(fil)
+    if global_metadata:
+        for meta in metas[1:]:
+            md.append_row_groups(meta)
+        with fs.open("/".join([dir_path, "_metadata"]), "wb") as fil:
+            md.write_metadata_file(fil)
