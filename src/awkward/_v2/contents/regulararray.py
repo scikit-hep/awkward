@@ -349,7 +349,22 @@ class RegularArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, int):
+        if not any(
+            isinstance(
+                x,
+                (
+                    ak._v2.contents.IndexedOptionArray,
+                    ak._v2.contents.ListOffsetArray,
+                    ak._v2.index.Index,
+                ),
+            )
+            for x in (head,) + tail
+        ):
+            attempt = self.maybe_toNumpyArray()
+            if attempt is not None:
+                return attempt._getitem_next(head, tail, advanced)
+
+        if isinstance(head, int):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             nextcarry = ak._v2.index.Index64.empty(self._length, self._nplike)
             assert nextcarry.nplike is self._nplike
