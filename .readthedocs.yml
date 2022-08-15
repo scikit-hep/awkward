@@ -1,17 +1,10 @@
 version: 2
 
-sphinx:
-  configuration: docs-sphinx/conf.py
-
 build:
   os: ubuntu-22.04
   tools:
-    python: "3.8"
-  jobs:
-    pre_build:
-      - pip install requests
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 jupyter-cache -d docs-sphinx/_build/.jupyter_cache
-
-python:
-  install:
-    - requirements: docs-sphinx/requirements.txt
+    python: "3.10"
+  commands:
+    - pip install requests
+    - mkdir --parents _readthedocs/html/
+    - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 docs -d _readthedocs/html/
