@@ -1,19 +1,20 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import re
-import os
 import ast
 import glob
 import io
 import subprocess
+import pathlib
 
 import sphinx.ext.napoleon
 
 config = sphinx.ext.napoleon.Config(napoleon_use_param=True,
                                     napoleon_use_rtype=True)
 
-if not os.path.exists("_auto"):
-    os.mkdir("_auto")
+reference_path = pathlib.Path("reference")
+output_path = reference_path / "generated"
+output_path.mkdir(exist_ok=True)
 
 latest_commit = (
     subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE)
@@ -22,7 +23,7 @@ latest_commit = (
               .strip()
 )
 
-toctree = ["_auto/changelog.rst", "ak.behavior.rst"]
+toctree = ["ak.behavior.rst"]
 
 def tostr(node):
     if isinstance(node, ast.NameConstant):
@@ -127,7 +128,7 @@ tostr.op = {
 
 def dosig(node):
     if node is None:
-        return "(self)"
+        return "self"
     else:
         argnames = [x.arg for x in node.args.args]
         defaults = ["=" + tostr(x) for x in node.args.defaults]
@@ -158,6 +159,13 @@ def dodoc(docstring, qualname, names):
     out = re.sub(r"(\n:raises|^:raises)",   "\n    :raises",  out)
     return out
 
+
+def make_anchor(name):
+    name = name.lower()
+    parts = name.split(".")
+    anchor = "-".join(parts)
+    return f'\n\n.. _{anchor}:\n\n'
+
 def doclass(link, linelink, shortname, name, astcls):
     if name.startswith("_"):
         return
@@ -180,6 +188,7 @@ def doclass(link, linelink, shortname, name, astcls):
 
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
+    outfile.write(f".. py:module: {qualname}\n\n")
     outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
     outfile.write(".. py:class:: {0}({1})\n\n".format(qualname, dosig(init)))
 
@@ -190,7 +199,7 @@ def doclass(link, linelink, shortname, name, astcls):
     for node in rest:
         if isinstance(node, ast.Assign):
             attrtext = "{0}.{1}".format(qualname, node.targets[0].id)
-            outfile.write(attrtext + "\n" + "="*len(attrtext) + "\n\n")
+            outfile.write(make_anchor(attrtext))
             outfile.write(".. py:attribute:: " + attrtext + "\n")
             outfile.write("    :value: {0}\n\n".format(tostr(node.value)))
             docstring = None
@@ -198,7 +207,7 @@ def doclass(link, linelink, shortname, name, astcls):
         elif any(isinstance(x, ast.Name) and x.id == "property"
                  for x in node.decorator_list):
             attrtext = "{0}.{1}".format(qualname, node.name)
-            outfile.write(attrtext + "\n" + "="*len(attrtext) + "\n\n")
+            outfile.write(make_anchor(attrtext))
             outfile.write(".. py:attribute:: " + attrtext + "\n\n")
             docstring = ast.get_docstring(node)
 
@@ -209,19 +218,19 @@ def doclass(link, linelink, shortname, name, astcls):
         else:
             methodname = "{0}.{1}".format(qualname, node.name)
             methodtext = "{0}({1})".format(methodname, dosig(node))
-            outfile.write(methodname + "\n" + "="*len(methodname) + "\n\n")
+            outfile.write(make_anchor(methodname))
             outfile.write(".. py:method:: " + methodtext + "\n\n")
             docstring = ast.get_docstring(node)
 
         if docstring is not None:
             outfile.write(dodoc(docstring, qualname, names) + "\n\n")
 
-    toctree.append(os.path.join("_auto", qualname + ".rst"))
+    toctree.append(os.path.join("generated", qualname + ".rst"))
     out = outfile.getvalue()
-    if not os.path.exists(toctree[-1]) or open(toctree[-1]).read() != out:
+    entry_path = reference_path / toctree[-1]
+    if not (entry_path.exists() and entry_path.read_text() == out):
         print("writing", toctree[-1])
-        with open(toctree[-1], "w") as outfile:
-            outfile.write(out)
+        entry_path.write_text(out)
 
 def dofunction(link, linelink, shortname, name, astfcn):
     if name.startswith("_"):
@@ -231,6 +240,7 @@ def dofunction(link, linelink, shortname, name, astfcn):
 
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
+    outfile.write(f".. py:module: {qualname}\n\n")
     outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
 
     functiontext = "{0}({1})".format(qualname, dosig(astfcn))
@@ -242,11 +252,12 @@ def dofunction(link, linelink, shortname, name, astfcn):
 
     out = outfile.getvalue()
 
-    toctree.append(os.path.join("_auto", qualname + ".rst"))
-    if not os.path.exists(toctree[-1]) or open(toctree[-1]).read() != out:
+    toctree.append(os.path.join("generated", qualname + ".rst"))
+
+    entry_path = reference_path / toctree[-1]
+    if not (entry_path.exists() and entry_path.read_text() == out):
         print("writing", toctree[-1])
-        with open(toctree[-1], "w") as outfile:
-            outfile.write(out)
+        entry_path.write_text(out)
 
 done_extra = False
 for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
@@ -309,8 +320,7 @@ for x in toctree:
     outfile.write("    " + x + "\n")
 
 out = outfile.getvalue()
-outfilename = os.path.join("_auto", "toctree.txt")
-if not os.path.exists(outfilename) or open(outfilename).read() != out:
-    print("writing", outfilename)
-    with open(outfilename, "w") as outfile:
-        outfile.write(out)
+toctree_path = output_path / "toctree.txt"
+if not (toctree_path.exists() and toctree_path.read_text() == out):
+    print("writing", toctree_path)
+    toctree_path.write_text(out)

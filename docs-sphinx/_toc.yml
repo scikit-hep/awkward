@@ -7,15 +7,16 @@ defaults:
 
 subtrees:
   - entries:
-      - file: user-guide/index
-        title: "User Guide"
+      - file: getting-started/index
         subtrees:
-            - maxdepth: -1
-              entries:
-              - file: user-guide/what-is-awkward-array
-                title: "What is an Awkward Array?"
-
             - entries:
+              - file: getting-started/what-is-an-awkward-array
+              - file: getting-started/community-tutorials
+      - file: user-guide/index
+        subtrees:
+            - entries:
+              - file: user-guide/10-minutes-to-awkward-array
+            
               - file: user-guide/how-to-convert
                 title: "Converting arrays"
                 subtrees:
@@ -155,9 +156,7 @@ subtrees:
 
               - file: user-guide/how-to-differentiate-using-jax
                 title: "Differentiation using JAX"
-    
-      - file: api-reference
-        title: "API Reference"
-    
-      - url: https://awkward-array.readthedocs.io/en/latest/_static/index.html
-        title: "C++ Reference"
+
+      - file: reference/index
+      - file: contributor-guide
+      - file: release/index

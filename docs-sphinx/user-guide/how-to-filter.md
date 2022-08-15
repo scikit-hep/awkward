@@ -14,7 +14,5 @@ kernelspec:
 Filtering data
 ==============
 
-   * **[By number of items](how-to-filter-num)**
-   * **[Cuts vs. masks](how-to-filter-cut-mask)**
-   * **[Slicing lists within arrays](how-to-filter-jagged)**
-   * **[Slices with missing values](how-to-filter-masked)**
+```{tableofcontents}
+```

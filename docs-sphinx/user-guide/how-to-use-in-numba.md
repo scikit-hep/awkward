@@ -14,5 +14,5 @@ kernelspec:
 Using arrays in Numba
 =====================
 
-   * **[Supported features](how-to-use-in-numba-features)**
-   * **[Building array output](how-to-use-in-numba-arraybuilder)**
+```{tableofcontents}
+```

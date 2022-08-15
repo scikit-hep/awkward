@@ -14,8 +14,5 @@ kernelspec:
 Examining arrays
 ================
 
-   * **[Data type](how-to-examine-type)**
-   * **[Single item detail](how-to-examine-single-item)**
-   * **[Listing fields/keys/columns](how-to-examine-list-fields)**
-   * **[Simple slicing](how-to-examine-simple-slicing)**
-   * **[Checking validity](how-to-examine-checking-validity)**
+```{tableofcontents}
+```

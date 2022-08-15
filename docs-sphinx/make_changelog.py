@@ -45,7 +45,7 @@ def pypi_exists(tag, old):
     response.read()
     return response.status == 200
 
-with open("_auto/changelog.rst", "w") as outfile:
+with open("release/index.rst", "w") as outfile:
     outfile.write("Release history\n")
     outfile.write("---------------\n")
 

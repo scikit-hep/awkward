@@ -14,7 +14,5 @@ kernelspec:
 Specialized behavior
 ====================
 
-   * **[Subclassing Array/Record](how-to-specialize-subclass)**
-   * **[Overriding NumPy functions](how-to-specialize-override-numpy)**
-   * **[In Numba](how-to-specialize-in-numba)**
-   * **[For physics: Lorentz vectors](how-to-specialize-lorentz)**
+```{tableofcontents}
+```
