@@ -102,3 +102,13 @@ def test_lengths_empty_regular_slices():
         == ak._v2.to_numpy(e[1:4, [], -3:, []]).shape
         == ak._v2.to_numpy(f[1:4, [], -3:, []]).shape
     )
+
+    np1 = np.ones((5, 7))
+    a = ak._v2.Array(np.ones((5, 7)))
+    assert (
+        ak._v2.to_list(np1[:, []]) == ak._v2.to_list(a[:, []]) == [[], [], [], [], []]
+    )
+    assert ak._v2.to_list(np1[[], :]) == ak._v2.to_list(a[[], :]) == []
+
+    assert np1[:, []].shape == ak._v2.to_numpy(a[:, []]).shape == (5, 0)
+    assert np1[[], :].shape == ak._v2.to_numpy(a[[], :]).shape == (0, 7)
