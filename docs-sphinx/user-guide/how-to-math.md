@@ -14,9 +14,5 @@ kernelspec:
 Numerical math
 ==============
 
-   * **[NumPy functions](how-to-math-numpy)**
-   * **[Awkward broadcasting](how-to-math-broadcasting)**
-   * **[Reducing (sum/min/any/all)](how-to-math-reducing)**
-   * **[Statistics (mean/var/std)](how-to-math-statistics)**
-   * **[Using argmin/argmax](how-to-math-argminmax)**
-   * **[On GPUs](how-to-math-gpu)**
+```{tableofcontents}
+```
