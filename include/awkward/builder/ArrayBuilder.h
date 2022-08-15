@@ -8,13 +8,10 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/util.h"
 #include "awkward/builder/Builder.h"
+#include "awkward/BuilderOptions.h"
 
 namespace awkward {
-  class Content;
-  using ContentPtr    = std::shared_ptr<Content>;
-  class ArrayBuilderOptions;
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
 
@@ -29,7 +26,7 @@ namespace awkward {
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
-    ArrayBuilder(const ArrayBuilderOptions& options);
+    ArrayBuilder(const BuilderOptions& options);
 
     /// @brief Copy the current snapshot into the BuffersContainer and
     /// return a Form as a std::string (JSON).

@@ -185,3 +185,9 @@ class RegularForm(Form):
             self._parameters,
             self._form_key,
         )
+
+    def _column_types(self):
+        if self.parameter("__array__") in ("string", "bytestring"):
+            return ("string",)
+        else:
+            return self._content._column_types()

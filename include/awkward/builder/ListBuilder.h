@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/BuilderOptions.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class ListBuilder
   ///
@@ -21,7 +21,7 @@ namespace awkward {
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const BuilderOptions& options);
 
     /// @brief Create a ListBuilder from a full set of parameters.
     ///
@@ -33,7 +33,7 @@ namespace awkward {
     /// @param begun If `true`, the ListBuilder is in a state after
     /// #beginlist and before #endlist and is #active; if `false`,
     /// it is not.
-    ListBuilder(const ArrayBuilderOptions& options,
+    ListBuilder(const BuilderOptions& options,
                 GrowableBuffer<int64_t> offsets,
                 const BuilderPtr& content,
                 bool begun);
@@ -106,7 +106,7 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
+    const BuilderOptions&
       options() const { return options_; }
 
     const GrowableBuffer<int64_t>& buffer() const { return offsets_; }
@@ -119,7 +119,7 @@ namespace awkward {
       maybeupdate(const BuilderPtr builder);
 
   private:
-    const ArrayBuilderOptions options_;
+    const BuilderOptions options_;
     GrowableBuffer<int64_t> offsets_;
     BuilderPtr content_;
     bool begun_;

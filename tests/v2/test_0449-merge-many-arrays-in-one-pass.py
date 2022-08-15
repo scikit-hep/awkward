@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_numpyarray():
@@ -53,19 +53,26 @@ def test_numpyarray():
                     assert to_list(ak_combined) == combined.tolist()
                     assert ak_combined.dtype == combined.dtype
 
-                    # assert ak._v2.contents.NumpyArray(one).typetracer.mergemany(
-                    #     [
-                    #         ak._v2.contents.NumpyArray(two),
-                    #         ak._v2.contents.NumpyArray(three),
-                    #         ak._v2.contents.NumpyArray(four),
-                    #     ]
-                    # ).form == ak._v2.contents.NumpyArray(one).mergemany(
-                    #     [
-                    #         ak._v2.contents.NumpyArray(two),
-                    #         ak._v2.contents.NumpyArray(three),
-                    #         ak._v2.contents.NumpyArray(four),
-                    #     ]
-                    # ).form
+                    assert (
+                        ak._v2.contents.NumpyArray(one)
+                        .typetracer.mergemany(
+                            [
+                                ak._v2.contents.NumpyArray(two),
+                                ak._v2.contents.NumpyArray(three),
+                                ak._v2.contents.NumpyArray(four),
+                            ]
+                        )
+                        .form
+                        == ak._v2.contents.NumpyArray(one)
+                        .mergemany(
+                            [
+                                ak._v2.contents.NumpyArray(two),
+                                ak._v2.contents.NumpyArray(three),
+                                ak._v2.contents.NumpyArray(four),
+                            ]
+                        )
+                        .form
+                    )
 
                     ak_combined = ak._v2.contents.NumpyArray(one).mergemany(
                         [
@@ -78,26 +85,33 @@ def test_numpyarray():
                     assert to_list(ak_combined) == combined.tolist()
                     assert ak_combined.dtype == np.concatenate([one, two, four]).dtype
 
-                    # assert ak._v2.contents.NumpyArray(one).typetracer.mergemany(
-                    #     [
-                    #         ak._v2.contents.NumpyArray(two),
-                    #         ak._v2.contents.EmptyArray(),
-                    #         ak._v2.contents.NumpyArray(four),
-                    #     ]
-                    # ).form == ak._v2.contents.NumpyArray(one).mergemany(
-                    #     [
-                    #         ak._v2.contents.NumpyArray(two),
-                    #         ak._v2.contents.EmptyArray(),
-                    #         ak._v2.contents.NumpyArray(four),
-                    #     ]
-                    # ).form
+                    assert (
+                        ak._v2.contents.NumpyArray(one)
+                        .typetracer.mergemany(
+                            [
+                                ak._v2.contents.NumpyArray(two),
+                                ak._v2.contents.EmptyArray(),
+                                ak._v2.contents.NumpyArray(four),
+                            ]
+                        )
+                        .form
+                        == ak._v2.contents.NumpyArray(one)
+                        .mergemany(
+                            [
+                                ak._v2.contents.NumpyArray(two),
+                                ak._v2.contents.EmptyArray(),
+                                ak._v2.contents.NumpyArray(four),
+                            ]
+                        )
+                        .form
+                    )
 
 
 def test_lists():
     one = ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]]).layout
     two = ak._v2.highlevel.Array([[1.1, 2.2], [3.3, 4.4]]).layout
     three = ak._v2.contents.EmptyArray()
-    four = ak._v2.operations.convert.from_numpy(
+    four = ak._v2.operations.from_numpy(
         np.array([[10], [20]]), regulararray=True, highlevel=False
     )
     assert to_list(one.mergemany([two, three, four])) == [
@@ -951,9 +965,7 @@ def test_concatenate():
     three = ak._v2.highlevel.Array([6, 7, 8]).layout
     four = ak._v2.highlevel.Array([[9, 9, 9], [10, 10, 10]]).layout
 
-    assert to_list(
-        ak._v2.operations.structure.concatenate([one, two, three, four])
-    ) == [
+    assert to_list(ak._v2.operations.concatenate([one, two, three, four])) == [
         1,
         2,
         3,
@@ -965,9 +977,7 @@ def test_concatenate():
         [9, 9, 9],
         [10, 10, 10],
     ]
-    assert to_list(
-        ak._v2.operations.structure.concatenate([four, one, two, three])
-    ) == [
+    assert to_list(ak._v2.operations.concatenate([four, one, two, three])) == [
         [9, 9, 9],
         [10, 10, 10],
         1,
@@ -979,9 +989,7 @@ def test_concatenate():
         7,
         8,
     ]
-    assert to_list(
-        ak._v2.operations.structure.concatenate([one, two, four, three])
-    ) == [
+    assert to_list(ak._v2.operations.concatenate([one, two, four, three])) == [
         1,
         2,
         3,
@@ -995,9 +1003,7 @@ def test_concatenate():
     ]
 
     five = ak._v2.highlevel.Array(["nine", "ten"]).layout
-    assert to_list(
-        ak._v2.operations.structure.concatenate([one, two, three, five])
-    ) == [
+    assert to_list(ak._v2.operations.concatenate([one, two, three, five])) == [
         1,
         2,
         3,
@@ -1009,9 +1015,7 @@ def test_concatenate():
         "nine",
         "ten",
     ]
-    assert to_list(
-        ak._v2.operations.structure.concatenate([five, one, two, three])
-    ) == [
+    assert to_list(ak._v2.operations.concatenate([five, one, two, three])) == [
         "nine",
         "ten",
         1,
@@ -1023,9 +1027,7 @@ def test_concatenate():
         7,
         8,
     ]
-    assert to_list(
-        ak._v2.operations.structure.concatenate([one, two, five, three])
-    ) == [
+    assert to_list(ak._v2.operations.concatenate([one, two, five, three])) == [
         1,
         2,
         3,

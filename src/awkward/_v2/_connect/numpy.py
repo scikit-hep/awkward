@@ -14,7 +14,7 @@ if not numpy_at_least("1.13.1"):
 
 
 def convert_to_array(layout, args, kwargs):
-    out = ak._v2.operations.convert.to_numpy(layout, allow_missing=False)
+    out = ak._v2.operations.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
         return out
     else:
@@ -74,7 +74,7 @@ def _array_ufunc_custom_cast(inputs, behavior):
         if cast_fcn is not None:
             x = cast_fcn(x)
         nextinputs.append(
-            ak._v2.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+            ak._v2.operations.to_layout(x, allow_record=True, allow_other=True)
         )
     return nextinputs
 
@@ -190,7 +190,14 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         args.append(x.raw(nplike))
                     else:
                         args.append(x)
-                result = getattr(ufunc, method)(*args, **kwargs)
+
+                if isinstance(nplike, ak.nplike.Jax):
+                    from awkward._v2._connect.jax import import_jax
+
+                    jax = import_jax()
+                    result = getattr(jax.numpy, ufunc.__name__)(*args, **kwargs)
+                else:
+                    result = getattr(ufunc, method)(*args, **kwargs)
 
             else:
                 shape = None
@@ -264,7 +271,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 return result[0]
 
         out = inputs[where].recursively_apply(
-            unary_action, function_name=ufunc.__name__
+            unary_action, behavior, function_name=ufunc.__name__, allow_records=False
         )
 
     else:

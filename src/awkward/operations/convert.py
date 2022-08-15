@@ -252,19 +252,19 @@ def to_numpy(array, allow_missing=True):
         if any(isinstance(x, numpy.ma.MaskedArray) for x in contents):
             try:
                 out = numpy.ma.concatenate(contents)
-            except Exception:
+            except Exception as err:
                 raise ValueError(
                     f"cannot convert {array} into numpy.ma.MaskedArray"
                     + ak._util.exception_suffix(__file__)
-                )
+                ) from err
         else:
             try:
                 out = numpy.concatenate(contents)
-            except Exception:
+            except Exception as err:
                 raise ValueError(
                     f"cannot convert {array} into np.ndarray"
                     + ak._util.exception_suffix(__file__)
-                )
+                ) from err
 
         tags = numpy.asarray(array.tags)
         for tag, content in enumerate(contents):
@@ -999,7 +999,7 @@ def to_list(array):
             ak._v2.highlevel.ArrayBuilder,
         ),
     ):
-        raise TypeError("use ak._v2.operations.convert.to_list for v2 arrays (for now)")
+        raise TypeError("use ak._v2.operations.to_list for v2 arrays (for now)")
 
     elif isinstance(array, dict):
         return {n: to_list(x) for n, x in array.items()}
@@ -1882,8 +1882,14 @@ def to_layout(
     if isinstance(array, ak.highlevel.Array):
         return array.layout
 
-    elif allow_record and isinstance(array, ak.highlevel.Record):
-        return array.layout
+    elif isinstance(array, ak.highlevel.Record):
+        if not allow_record:
+            raise TypeError(
+                "ak.Record objects are not allowed in this function"
+                + ak._util.exception_suffix(__file__)
+            )
+        else:
+            return array.layout
 
     elif isinstance(array, ak.highlevel.ArrayBuilder):
         return array.snapshot().layout
@@ -1894,8 +1900,14 @@ def to_layout(
     elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         return array
 
-    elif allow_record and isinstance(array, ak.layout.Record):
-        return array
+    elif isinstance(array, ak.layout.Record):
+        if not allow_record:
+            raise TypeError(
+                "ak.Record objects are not allowed in this function"
+                + ak._util.exception_suffix(__file__)
+            )
+        else:
+            return array
 
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
@@ -2014,7 +2026,9 @@ def to_arrow(
     """
     pyarrow = _import_pyarrow("ak.to_arrow")
 
-    layout = to_layout(array, allow_record=False, allow_other=False)
+    layout = to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.layout.Record):
+        layout = layout.array[layout.at : layout.at + 1]
 
     def recurse(layout, mask, is_option):
         if isinstance(layout, ak.layout.NumpyArray):
@@ -2244,7 +2258,7 @@ def to_arrow(
                 recurse(x[: len(layout)], mask, is_option) for x in layout.contents
             ]
 
-            min_list_len = min(map(len, values))
+            min_list_len = min(map(len, values), default=len(layout))
 
             types = pyarrow.struct(
                 [
@@ -2541,7 +2555,9 @@ def to_arrow_table(
     """
     pyarrow = _import_pyarrow("ak.to_arrow_table")
 
-    layout = to_layout(array, allow_record=False, allow_other=False)
+    layout = to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.layout.Record):
+        layout = layout.array[layout.at : layout.at + 1]
 
     if explode_records or isinstance(
         ak.operations.describe.type(layout), ak.types.RecordType
@@ -3041,7 +3057,10 @@ def to_parquet(
                 pa_arrays, schema=pyarrow.schema(pa_fields)
             )
 
-    layout = to_layout(array, allow_record=False, allow_other=False)
+    layout = to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.layout.Record):
+        layout = layout.array[layout.at : layout.at + 1]
+
     iterator = batch_iterator(layout)
     first = next(iterator)
 

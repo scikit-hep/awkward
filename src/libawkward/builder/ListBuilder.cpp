@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
@@ -13,7 +12,7 @@
 
 namespace awkward {
   const BuilderPtr
-  ListBuilder::fromempty(const ArrayBuilderOptions& options) {
+  ListBuilder::fromempty(const BuilderOptions& options) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
     return std::make_shared<ListBuilder>(options,
@@ -22,7 +21,7 @@ namespace awkward {
                                          false);
   }
 
-  ListBuilder::ListBuilder(const ArrayBuilderOptions& options,
+  ListBuilder::ListBuilder(const BuilderOptions& options,
                            GrowableBuffer<int64_t> offsets,
                            const BuilderPtr& content,
                            bool begun)
@@ -41,9 +40,10 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(form_key.str() + "-offsets",
-                          offsets_.ptr().get(),
-                          (int64_t)(offsets_.length() * sizeof(int64_t)));
+    void* ptr = container.empty_buffer(form_key.str() + "-offsets",
+      offsets_.length() * (int64_t)sizeof(int64_t));
+
+    offsets_.concatenate(reinterpret_cast<int64_t*>(ptr));
 
     return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""

@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -30,7 +30,7 @@ jobs:
     name: "Make SDist"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
@@ -40,7 +40,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         path: dist/*.tar.gz
 
@@ -54,17 +54,17 @@ jobs:
         os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
-    - uses: pypa/cibuildwheel@v2.4.0
+    - uses: pypa/cibuildwheel@v2.8.1
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
         CIBW_BUILD: cp39-win_amd64 cp36-manylinux_x86_64 cp38-macosx_universal2
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: wheelhouse/*.whl

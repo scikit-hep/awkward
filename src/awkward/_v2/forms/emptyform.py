@@ -105,3 +105,6 @@ class EmptyForm(Form):
         if any(match and index >= len(item) for item, match in zip(specifier, matches)):
             output.append(None)
         return self
+
+    def _column_types(self):
+        return ("empty",)

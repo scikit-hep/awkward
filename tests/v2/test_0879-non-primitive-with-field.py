@@ -7,10 +7,8 @@ import awkward as ak  # noqa: F401
 
 def test_unknown_type():
     array = ak._v2.Array({"x": np.arange(10)})
-    array = ak._v2.operations.structure.with_field(
-        base=array, what=None, where="unknown field1"
-    )
-    array = ak._v2.operations.structure.with_field(
+    array = ak._v2.operations.with_field(base=array, what=None, where="unknown field1")
+    array = ak._v2.operations.with_field(
         base=array, what=[None], where="unknown field2"
     )
 
@@ -27,4 +25,4 @@ def test_in_place_wrapper_broadcasting():
     array["unknown field"] = None
 
     assert array["unknown field"].tolist() == [None, None, None]
-    assert ak._v2.operations.describe.fields(array) == ["x", "unknown field"]
+    assert ak._v2.operations.fields(array) == ["x", "unknown field"]

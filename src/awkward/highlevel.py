@@ -1118,7 +1118,7 @@ class Array(
                         "while trying to get field {}, an exception "
                         "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         + ak._util.exception_suffix(__file__)
-                    )
+                    ) from err
             else:
                 raise AttributeError(
                     f"no field named {where!r}" + ak._util.exception_suffix(__file__)
@@ -1840,7 +1840,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                         "while trying to get field {}, an exception "
                         "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         + ak._util.exception_suffix(__file__)
-                    )
+                    ) from err
             else:
                 raise AttributeError(
                     f"no field named {where!r}" + ak._util.exception_suffix(__file__)

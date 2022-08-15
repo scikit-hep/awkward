@@ -16,6 +16,8 @@ project(
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
+include(CMakeDependentOption)
+
 # Defaults for properties in this directory (and below)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -42,6 +44,9 @@ target_compile_features(awkward-parent INTERFACE cxx_std_11)
 
 # C++ dependencies (header-only): RapidJSON and dlpack
 target_include_directories(awkward-parent INTERFACE rapidjson/include dlpack/include)
+
+# C++ dependencies (header-only): GrowableBuffer
+target_include_directories(awkward-parent INTERFACE src/awkward/_v2/cpp-headers/)
 
 # First tier: cpu-kernels (object files, static library, and dynamic library).
 add_library(awkward-cpu-kernels-objects OBJECT ${CPU_KERNEL_SOURCES})
@@ -89,14 +94,27 @@ target_link_libraries(awkward PUBLIC awkward-parent)
 include(CTest)
 
 if(BUILD_TESTING)
+  add_subdirectory(tests-cpp)
   add_subdirectory(tests)
+
+  addtest_nolibs(test_1494-layout-builder tests-cpp/test_1494-layout-builder.cpp)
+  addtest_nolibs(test_1542-growable-buffer tests-cpp/test_1542-growable-buffer.cpp)
+  addtest(test_1542-array-builder tests-cpp/test_1542-array-builder.cpp)
+  addtest_nolibs(test_1560-builder-options tests-cpp/test_1560-builder-options.cpp)
+
 endif()
 
 option(PYBUILD "Build Python modules")
+cmake_dependent_option(AWKWARD_EXTERNAL_PYBIND11 "Build against an external pybind11" OFF
+                       "PYBUILD" OFF)
 
 # Third tier: Python modules.
 if(PYBUILD)
-  add_subdirectory(pybind11)
+  if(AWKWARD_EXTERNAL_PYBIND11)
+    find_package(pybind11 CONFIG REQUIRED)
+  else()
+    add_subdirectory(pybind11)
+  endif()
 
   file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
   pybind11_add_module(_ext ${LAYOUT_SOURCES})

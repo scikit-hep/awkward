@@ -237,7 +237,7 @@ class ByteMaskedArray(Content):
         try:
             nextmask = self._mask[carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return ByteMaskedArray(
             nextmask,
@@ -333,7 +333,8 @@ class ByteMaskedArray(Content):
                 reducedstarts.data,
                 reducedstops.data,
                 self.length,
-            )
+            ),
+            slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
         )
 
         next = self._content._carry(nextcarry, True)
@@ -353,7 +354,9 @@ class ByteMaskedArray(Content):
         if head == ():
             return self
 
-        elif isinstance(head, (int, slice, ak._v2.index.Index64)):
+        elif isinstance(
+            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+        ):
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
@@ -380,9 +383,6 @@ class ByteMaskedArray(Content):
 
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
-
-        elif isinstance(head, ak._v2.contents.ListOffsetArray):
-            return self._getitem_next_jagged_generic(head, tail, advanced)
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)
@@ -587,19 +587,19 @@ class ByteMaskedArray(Content):
             return self
         return self.toIndexedOptionArray64().mergemany(others)
 
-    def fillna(self, value):
-        return self.toIndexedOptionArray64().fillna(value)
+    def fill_none(self, value):
+        return self.toIndexedOptionArray64().fill_none(value)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             numnull = ak._v2.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
 
             next = self._content._carry(nextcarry, False)
-            out = next._localindex(posaxis, depth)
+            out = next._local_index(posaxis, depth)
             out2 = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 outindex,
                 out,
@@ -855,7 +855,7 @@ class ByteMaskedArray(Content):
                     )
                 )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self._nplike.known_shape and self._content.length < self.mask.length:
             return f'at {path} ("{type(self)}"): len(content) < len(mask)'
         elif isinstance(
@@ -870,7 +870,7 @@ class ByteMaskedArray(Content):
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.mask._nbytes_part() + self.content._nbytes_part()
@@ -878,32 +878,12 @@ class ByteMaskedArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def bytemask(self):
-        if not self._valid_when:
-            return self._mask
-        else:
-            out = ak._v2.index.Index64.empty(self.length, self._nplike)
-            assert out.nplike is self._nplike and self._mask.nplike is self._nplike
-            self._handle_error(
-                self._nplike[
-                    "awkward_ByteMaskedArray_mask",
-                    out.dtype.type,
-                    self._mask.dtype.type,
-                ](
-                    out.data,
-                    self._mask.data,
-                    self._mask.length,
-                    self._valid_when,
-                )
-            )
-            return out
-
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
-            mask = self.bytemask()
+            mask = ak._v2.index.Index8(self.mask_as_bool(valid_when=False))
             index = ak._v2.index.Index64.empty(mask.length, self._nplike)
             assert index.nplike is self._nplike and self._mask.nplike is self._nplike
             self._handle_error(
@@ -917,7 +897,7 @@ class ByteMaskedArray(Content):
                     self._mask.length,
                 )
             )
-            next = self.project()._rpad(target, posaxis, depth, clip)
+            next = self.project()._pad_none(target, posaxis, depth, clip)
             return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
                 index,
                 next,
@@ -928,7 +908,7 @@ class ByteMaskedArray(Content):
         else:
             return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
                 self._mask,
-                self._content._rpad(target, posaxis, depth, clip),
+                self._content._pad_none(target, posaxis, depth, clip),
                 self._valid_when,
                 None,
                 self._parameters,
@@ -953,15 +933,21 @@ class ByteMaskedArray(Content):
         return self.project()._completely_flatten(nplike, options)
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
+        if self._nplike.known_shape:
+            content = self._content[0 : self._mask.length]
+        else:
+            content = self._content
+
         if options["return_array"]:
 
             def continuation():
                 return ByteMaskedArray(
                     self._mask,
-                    self._content._recursively_apply(
+                    content._recursively_apply(
                         action,
+                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -976,8 +962,9 @@ class ByteMaskedArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply(
+                content._recursively_apply(
                     action,
+                    behavior,
                     depth,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1029,17 +1016,20 @@ class ByteMaskedArray(Content):
                 self._nplike,
             )
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)
-        content = self._content._to_list(behavior)
-        out = [None] * self._mask.length
+        out = self._content._getitem_range(slice(0, len(mask)))._to_list(
+            behavior, json_conversions
+        )
+
         for i, isvalid in enumerate(mask):
-            if isvalid:
-                out[i] = content[i]
+            if not isvalid:
+                out[i] = None
+
         return out
 
     def _to_nplike(self, nplike):
@@ -1054,30 +1044,9 @@ class ByteMaskedArray(Content):
             nplike=nplike,
         )
 
-    def _to_json(
-        self,
-        behavior,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        out = self._to_list_custom(behavior)
-        if out is not None:
-            return out
-
-        mask = self.mask_as_bool(valid_when=True, nplike=self.nplike)
-        content = self._content._to_json(
-            behavior,
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.valid_when == other.valid_when
+            and self.mask.layout_equal(other.mask, index_dtype, numpyarray)
+            and self.content.layout_equal(other.content, index_dtype, numpyarray)
         )
-        out = [None] * self._mask.length
-        for i, isvalid in enumerate(mask):
-            if isvalid:
-                out[i] = content[i]
-        return out

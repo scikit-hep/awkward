@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Complex128Builder.h"
 #include "awkward/builder/Float64Builder.h"
 #include "awkward/builder/OptionBuilder.h"
@@ -14,12 +13,12 @@
 
 namespace awkward {
   const BuilderPtr
-  Int64Builder::fromempty(const ArrayBuilderOptions& options) {
+  Int64Builder::fromempty(const BuilderOptions& options) {
     return std::make_shared<Int64Builder>(options,
                                           GrowableBuffer<int64_t>::empty(options));
   }
 
-  Int64Builder::Int64Builder(const ArrayBuilderOptions& options,
+  Int64Builder::Int64Builder(const BuilderOptions& options,
                              GrowableBuffer<int64_t> buffer)
       : options_(options)
       , buffer_(std::move(buffer)) { }
@@ -40,9 +39,10 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(form_key.str() + "-data",
-                          buffer_.ptr().get(),
-                          (int64_t)(buffer_.length() * sizeof(int64_t)));
+    buffer_.concatenate(
+      reinterpret_cast<int64_t*>(
+        container.empty_buffer(form_key.str() + "-data",
+        buffer_.length() * (int64_t)sizeof(int64_t))));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"int64\", \"form_key\": \""
            + form_key.str() + "\"}";
@@ -85,14 +85,14 @@ namespace awkward {
 
   const BuilderPtr
   Int64Builder::real(double x) {
-    BuilderPtr out = Float64Builder::fromint64(options_, std::move(buffer_));
+    BuilderPtr out = Float64Builder::fromint64(options_, buffer_);
     out.get()->real(x);
     return std::move(out);
   }
 
   const BuilderPtr
   Int64Builder::complex(std::complex<double> x) {
-    BuilderPtr out = Complex128Builder::fromint64(options_, std::move(buffer_));
+    BuilderPtr out = Complex128Builder::fromint64(options_, buffer_);
     out.get()->complex(x);
     return std::move(out);
   }

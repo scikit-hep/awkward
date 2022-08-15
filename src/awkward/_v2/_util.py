@@ -11,7 +11,7 @@ import setuptools
 import threading
 import traceback
 
-from collections.abc import Sequence, Mapping
+from collections.abc import Sequence, Mapping, Iterable
 
 import awkward as ak
 
@@ -32,6 +32,7 @@ kMaxLevels = 48
 _backends = {
     "cpu": ak.nplike.Numpy,
     "cuda": ak.nplike.Cupy,
+    "jax": ak.nplike.Jax,
 }
 
 
@@ -91,6 +92,19 @@ def tobytes(array):
 
 def little_endian(array):
     return array.astype(array.dtype.newbyteorder("<"), copy=False)
+
+
+def identifier_hash(str):
+    import base64
+    import struct
+
+    return (
+        base64.encodebytes(struct.pack("q", hash(str)))
+        .rstrip(b"=\n")
+        .replace(b"+", b"")
+        .replace(b"/", b"")
+        .decode("ascii")
+    )
 
 
 ###############################################################################
@@ -512,8 +526,6 @@ def custom_ufunc(ufunc, layout, behavior):
     custom = layout.parameter("__array__")
     if not isstr(custom):
         custom = layout.parameter("__record__")
-    if not isstr(custom):
-        custom = layout.purelist_parameter("__record__")
     if isstr(custom):
         for key, fcn in behavior.items():
             if (
@@ -831,9 +843,7 @@ def union_to_record(unionarray, anonymous):
             contents.append(union_to_record(layout, anonymous))
         elif layout.is_OptionType:
             contents.append(
-                ak._v2.operations.structure.fill_none(
-                    layout, np.nan, axis=0, highlevel=False
-                )
+                ak._v2.operations.fill_none(layout, np.nan, axis=0, highlevel=False)
             )
         else:
             contents.append(layout)
@@ -959,3 +969,236 @@ def expand_braces(text, seen=None):
 
 
 expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
+
+
+def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
+    np = ak.nplike.NumpyMetadata.instance()
+    numpy = ak.nplike.Numpy.instance()
+
+    def recurse(array, mask=None):
+        if regulararray and len(array.shape) > 1:
+            return ak._v2.contents.RegularArray(
+                recurse(array.reshape((-1,) + array.shape[2:])),
+                array.shape[1],
+                array.shape[0],
+            )
+
+        if len(array.shape) == 0:
+            array = ak._v2.contents.NumpyArray(array.reshape(1))
+
+        if array.dtype.kind == "S":
+            asbytes = array.reshape(-1)
+            itemsize = asbytes.dtype.itemsize
+            starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
+            stops = starts + numpy.char.str_len(asbytes)
+            data = ak._v2.contents.ListArray(
+                ak._v2.index.Index64(starts),
+                ak._v2.index.Index64(stops),
+                ak._v2.contents.NumpyArray(
+                    asbytes.view("u1"), parameters={"__array__": "byte"}, nplike=numpy
+                ),
+                parameters={"__array__": "bytestring"},
+            )
+            for i in range(len(array.shape) - 1, 0, -1):
+                data = ak._v2.contents.RegularArray(
+                    data, array.shape[i], array.shape[i - 1]
+                )
+
+        elif array.dtype.kind == "U":
+            asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
+            itemsize = asbytes.dtype.itemsize
+            starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
+            stops = starts + numpy.char.str_len(asbytes)
+            data = ak._v2.contents.ListArray(
+                ak._v2.index.Index64(starts),
+                ak._v2.index.Index64(stops),
+                ak._v2.contents.NumpyArray(
+                    asbytes.view("u1"), parameters={"__array__": "char"}, nplike=numpy
+                ),
+                parameters={"__array__": "string"},
+            )
+            for i in range(len(array.shape) - 1, 0, -1):
+                data = ak._v2.contents.RegularArray(
+                    data, array.shape[i], array.shape[i - 1]
+                )
+
+        else:
+            data = ak._v2.contents.NumpyArray(array)
+
+        if mask is None:
+            return data
+
+        elif mask is False or (isinstance(mask, np.bool_) and not mask):
+            # NumPy's MaskedArray with mask == False is an UnmaskedArray
+            if len(array.shape) == 1:
+                return ak._v2.contents.UnmaskedArray(data)
+            else:
+
+                def attach(x):
+                    if isinstance(x, ak._v2.contents.NumpyArray):
+                        return ak._v2.contents.UnmaskedArray(x)
+                    else:
+                        return ak._v2.contents.RegularArray(
+                            attach(x.content), x.size, len(x)
+                        )
+
+                return attach(data.toRegularArray())
+
+        else:
+            # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
+            return ak._v2.contents.ByteMaskedArray(
+                ak._v2.index.Index8(mask), data, valid_when=False
+            )
+
+        return data
+
+    if isinstance(array, numpy.ma.MaskedArray):
+        mask = numpy.ma.getmask(array)
+        array = numpy.ma.getdata(array)
+        if isinstance(mask, np.ndarray) and len(mask.shape) > 1:
+            regulararray = True
+            mask = mask.reshape(-1)
+    else:
+        mask = None
+
+    if not recordarray or array.dtype.names is None:
+        layout = recurse(array, mask)
+
+    else:
+        contents = []
+        for name in array.dtype.names:
+            contents.append(recurse(array[name], mask))
+        layout = ak._v2.contents.RecordArray(contents, array.dtype.names)
+
+    return ak._v2._util.wrap(layout, behavior, highlevel)
+
+
+def to_arraylib(module, array, allow_missing):
+    def _impl(array):
+        if isinstance(array, (bool, numbers.Number)):
+            return module.array(array)
+
+        elif isinstance(array, module.ndarray):
+            return array
+
+        elif isinstance(array, np.ndarray):
+            return module.asarray(array)
+
+        elif isinstance(array, ak._v2.highlevel.Array):
+            return _impl(array.layout)
+
+        elif isinstance(array, ak._v2.highlevel.Record):
+            raise ak._v2._util.error(
+                ValueError(f"{module.__name__} does not support record structures")
+            )
+
+        elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
+            return _impl(array.snapshot().layout)
+
+        elif isinstance(array, ak.layout.ArrayBuilder):
+            return _impl(array.snapshot())
+
+        elif ak._v2.operations.parameters(array).get("__array__") in (
+            "bytestring",
+            "string",
+        ):
+            raise ak._v2._util.error(
+                ValueError(f"{module.__name__} does not support arrays of strings")
+            )
+
+        elif isinstance(array, ak._v2.contents.EmptyArray):
+            return module.array([])
+
+        elif isinstance(array, ak._v2.contents.IndexedArray):
+            return _impl(array.project())
+
+        elif isinstance(array, ak._v2.contents.UnionArray):
+            contents = [_impl(array.project(i)) for i in range(len(array.contents))]
+            out = module.concatenate(contents)
+
+            tags = module.asarray(array.tags)
+            for tag, content in enumerate(contents):
+                mask = tags == tag
+                if type(out).__module__.startswith("jaxlib."):
+                    out = out.at[mask].set(content)
+                else:
+                    out[mask] = content
+            return out
+
+        elif isinstance(array, ak._v2.contents.UnmaskedArray):
+            return _impl(array.content)
+
+        elif isinstance(array, ak._v2.contents.IndexedOptionArray):
+            content = _impl(array.project())
+
+            mask0 = array.mask_as_bool(valid_when=False)
+            if mask0.any():
+                raise ak._v2._util.error(
+                    ValueError(f"{module.__name__} does not support masked arrays")
+                )
+            else:
+                return content
+
+        elif isinstance(array, ak._v2.contents.RegularArray):
+            out = _impl(array.content)
+            head, tail = out.shape[0], out.shape[1:]
+            shape = (head // array.size, array.size) + tail
+            return out[: shape[0] * array.size].reshape(shape)
+
+        elif isinstance(
+            array, (ak._v2.contents.ListArray, ak._v2.contents.ListOffsetArray)
+        ):
+            return _impl(array.toRegularArray())
+
+        elif isinstance(array, ak._v2.contents.recordarray.RecordArray):
+            raise ak._v2._util.error(
+                ValueError(f"{module.__name__} does not support record structures")
+            )
+
+        elif isinstance(array, ak._v2.contents.NumpyArray):
+            return module.asarray(array.data)
+
+        elif isinstance(array, ak._v2.contents.Content):
+            raise ak._v2._util.error(
+                AssertionError(f"unrecognized Content type: {type(array)}")
+            )
+
+        elif isinstance(array, Iterable):
+            return module.asarray(array)
+
+        else:
+            raise ak._v2._util.error(
+                ValueError(f"cannot convert {array} into {type(module.array([]))}")
+            )
+
+    if module.__name__ in ("jax.numpy", "cupy"):
+        return _impl(array)
+    elif module.__name__ == "numpy":
+        layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=True)
+
+        if isinstance(layout, (ak._v2.contents.Content, ak._v2.record.Record)):
+            return layout.to_numpy(allow_missing=allow_missing)
+        else:
+            return module.asarray(array)
+    else:
+        raise ak._v2._util.error(
+            ValueError(f"{module.__name__} is not supported by to_arraylib")
+        )
+
+
+def is_numpy_buffer(array):
+    import numpy as np
+
+    return isinstance(array, np.ndarray)
+
+
+def is_cupy_buffer(array):
+    return type(array).__module__.startswith("cupy.")
+
+
+def is_jax_buffer(array):
+    return type(array).__module__.startswith("jaxlib.")
+
+
+def is_jax_tracer(tracer):
+    return type(tracer).__module__.startswith("jax.")

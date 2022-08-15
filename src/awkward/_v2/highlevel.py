@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import io
 import sys
 import re
 import keyword
@@ -198,13 +199,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = data._layout
 
         elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
-            layout = ak._v2.operations.convert.from_numpy(data, highlevel=False)
+            layout = ak._v2.operations.from_numpy(data, highlevel=False)
 
         elif ak._v2._util.in_module(data, "cupy"):
-            layout = ak._v2.operations.convert.from_cupy(data, highlevel=False)
+            layout = ak._v2.operations.from_cupy(data, highlevel=False)
 
         elif ak._v2._util.in_module(data, "pyarrow"):
-            layout = ak._v2.operations.convert.from_arrow(data, highlevel=False)
+            layout = ak._v2.operations.from_arrow(data, highlevel=False)
 
         elif isinstance(data, dict):
             fields = []
@@ -227,10 +228,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = ak._v2.contents.RecordArray(contents, fields)
 
         elif isinstance(data, str):
-            layout = ak._v2.operations.convert.from_json(data, highlevel=False)
+            layout = ak._v2.operations.from_json(data, highlevel=False)
 
         else:
-            layout = ak._v2.operations.convert.from_iter(
+            layout = ak._v2.operations.from_iter(
                 data, highlevel=False, allow_record=False
             )
 
@@ -240,16 +241,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
 
         if with_name is not None:
-            layout = ak._v2.operations.structure.with_name(
-                layout, with_name, highlevel=False
+            layout = ak._v2.operations.with_name(
+                layout, with_name, highlevel=False, behavior=behavior
             )
 
-        if backend is not None and backend != ak._v2.operations.describe.backend(
-            layout
-        ):
-            layout = ak._v2.operations.describe.to_backend(
-                layout, backend, highlevel=False
-            )
+        if backend is not None and backend != ak._v2.operations.backend(layout):
+            layout = ak._v2.operations.to_backend(layout, backend, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -259,7 +256,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self.__doc__ = docstr
 
         if check_valid:
-            ak._v2.operations.describe.validity_error(self, exception=True)
+            ak._v2.operations.validity_error(self, exception=True)
 
     @property
     def layout(self):
@@ -274,7 +271,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
            * node types, such as #ak.layout.ListArray64 and
              #ak.layout.ListOffsetArray64,
            * integer type specialization, such as #ak.layout.ListArray64
-             and #ak.layout.ListArray32,
+             and #ak.layout.ListArray64,
            * or specific values, such as gaps in a #ak.layout.ListArray64.
 
         The #ak.layout.Content elements are fully composable, whereas an
@@ -350,7 +347,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             with ak._v2._util.OperationErrorContext(
                 "ak._v2.Array.mask", {0: self._array, 1: where}
             ):
-                return ak._v2.operations.structure.mask(self._array, where, True)
+                return ak._v2.operations.mask(self._array, where, True)
 
     @property
     def mask(self):
@@ -390,7 +387,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         Converts this Array into a NumPy array, if possible; same as #ak.to_numpy.
         """
-        return ak._v2.operations.convert.to_numpy(self, allow_missing=allow_missing)
+        return ak._v2.operations.to_numpy(self, allow_missing=allow_missing)
 
     @property
     def nbytes(self):
@@ -436,6 +433,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         See also #ak.fields.
         """
         return self._layout.fields
+
+    @property
+    def is_tuple(self):
+        """
+        If True, the top-most record structure has no named fields, i.e. it's a tuple.
+        """
+        return self._layout.is_tuple
 
     def _ipython_key_completions_(self):
         return self._layout.fields
@@ -533,7 +537,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             errors="surrogateescape"
                         )
                     else:
-                        yield x
+                        yield ak._v2._util.wrap(x, self._behavior)
                 elif isinstance(x, (ak._v2.contents.Content, ak._v2.record.Record)):
                     yield ak._v2._util.wrap(x, self._behavior)
                 else:
@@ -969,7 +973,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __setitem__(self, where, what):
         """
         Args:
-            where (str): Field name to add to records in the array.
+            where (str or tuple of str): Field name to add to records in the array.
             what (#ak.Array): Array to add as the new field.
 
         Unlike #__getitem__, which allows a wide variety of slice types,
@@ -1032,13 +1036,35 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
-            self._layout = ak._v2.operations.structure.with_field(
+            self._layout = ak._v2.operations.with_field(
                 self._layout, what, where, highlevel=False
             )
             self._numbaview = None
 
+    def __delitem__(self, where):
+        """
+        Args:
+            where (str): Field name to remove from records in the array.
+
+        Removes a field from records in the array.
+        """
+        with ak._v2._util.OperationErrorContext(
+            "ak._v2.Array.__delitem__",
+            dict(self=self, field_name=where),
+        ):
+            names = ak._v2.operations.fields(self._layout)
+            if where not in names:
+                raise ak._v2._util.error(
+                    TypeError(f"array fields do not contain {where!r}")
+                )
+            self._layout = self._layout[[x for x in names if x != where]]
+            self._numbaview = None
+
     def __getattr__(self, where):
         """
+        Args:
+            where (str): Attribute name to lookup
+
         Whenever possible, fields can be accessed as attributes.
 
         For example, the fields of an `array` like
@@ -1066,15 +1092,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
              keyword.
 
         Note that while fields can be accessed as attributes, they cannot be
-        *assigned* as attributes: the following doesn't work.
-
-            array.z = new_field
-
-        Always use
-
-            array["z"] = new_field
-
-        to add a field.
+        *assigned* as attributes. See #ak.Array.__setitem__ for more.
         """
         if where in dir(type(self)):
             return super().__getattribute__(where)
@@ -1088,9 +1106,48 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                             "while trying to get field {}, an exception "
                             "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         )
-                    )
+                    ) from err
             else:
                 raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
+
+    def __setattr__(self, name, value):
+        """
+        Args:
+            where (str): Attribute name to set
+
+        Set an attribute on the array.
+
+        Only existing public attributes e.g. #ak.Array.layout, or private
+        attributes (with leading underscores), can be set.
+
+        Fields are not assignable to as attributes, i.e. the following doesn't work:
+
+            array.z = new_field
+
+        Instead, always use #ak.Array.__setitem__:
+
+            array["z"] = new_field
+
+        or #ak.with_field:
+
+            array = ak.with_field(array, new_field, "z")
+
+        to add or modify a field.
+        """
+        if name in dir(type(self)) or name.startswith("_"):
+            super().__setattr__(name, value)
+        elif name in self._layout.fields:
+            raise ak._v2._util.error(
+                AttributeError(
+                    "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
+                )
+            )
+        else:
+            raise ak._v2._util.error(
+                AttributeError(
+                    "only private attributes (started with an underscore) can be set on arrays"
+                )
+            )
 
     def __dir__(self):
         """
@@ -1120,16 +1177,24 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def _repr(self, limit_cols):
         import awkward._v2._prettyprint
 
-        pytype = type(self).__name__
+        try:
+            pytype = super().__getattribute__("__name__")
+        except AttributeError:
+            pytype = type(self).__name__
 
         if self._layout.nplike.known_shape and self._layout.nplike.known_data:
             typestr = repr(str(self.type))[1:-1]
-            strwidth = max(
-                0, min(40, limit_cols - len(pytype) - len(" type='...'") - 3)
-            )
-            if len(pytype) - len(" type=''") - len(typestr) - 3 < limit_cols:
+            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+                strwidth = limit_cols - (
+                    len(typestr) + len(pytype) + len(" type=''") + 3
+                )
+            else:
                 strwidth = max(
-                    0, limit_cols - len(pytype) - len(" type=''") - len(typestr) - 3
+                    0,
+                    min(
+                        limit_cols // 2,
+                        limit_cols - len(pytype) - len(" type='...'") - 3,
+                    ),
                 )
             valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, strwidth)
 
@@ -1164,7 +1229,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         valuestr = awkward._v2._prettyprint.valuestr(self, limit_rows, limit_cols)
         if type:
-            out = "type: " + str(self.type) + "\n" + valuestr
+            tmp = io.StringIO()
+            self.type.show(stream=tmp)
+            out = "type: " + tmp.getvalue() + valuestr
         else:
             out = valuestr
 
@@ -1308,8 +1375,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
-        form, length, container = ak._v2.operations.convert.to_buffers(
+        packed = ak._v2.operations.packed(self._layout, highlevel=False)
+        form, length, container = ak._v2.operations.to_buffers(
             packed, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
         )
         if self._behavior is ak._v2.behavior:
@@ -1328,7 +1395,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             form, length, container, behavior = state
             if ak._v2._util.isint(length):
-                layout = ak._v2.operations.convert.from_buffers(
+                layout = ak._v2.operations.from_buffers(
                     form,
                     length,
                     container,
@@ -1337,7 +1404,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 )
             else:
                 layouts = [
-                    ak._v2.operations.convert.from_buffers(
+                    ak._v2.operations.from_buffers(
                         form,
                         length,
                         container,
@@ -1346,9 +1413,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     )
                     for i in length
                 ]
-                layout = ak._v2.operations.structure.concatenate(
-                    layouts, highlevel=False
-                )
+                layout = ak._v2.operations.concatenate(layouts, highlevel=False)
         self.layout = layout
         self.behavior = behavior
 
@@ -1374,6 +1439,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             if element in test:
                 return True
         return False
+
+    def _jax_flatten_layout(self):
+        return self._layout._jax_flatten()
+
+    @classmethod
+    def _jax_flatten(cls, array):
+        assert type(array) is cls
+        return array._jax_flatten_layout()
+
+    @classmethod
+    def _jax_unflatten(cls, aux_data, children):
+        layout_cls = aux_data.layout.__class__
+        return ak._v2._util.wrap(layout_cls.jax_unflatten(aux_data, children))
 
 
 class Record(NDArrayOperatorsMixin):
@@ -1425,10 +1503,10 @@ class Record(NDArrayOperatorsMixin):
             layout = data._layout
 
         elif isinstance(data, str):
-            layout = ak._v2.operations.convert.from_json(data, highlevel=False)
+            layout = ak._v2.operations.from_json(data, highlevel=False)
 
         elif isinstance(data, dict):
-            layout = ak._v2.operations.convert.from_iter([data], highlevel=False)[0]
+            layout = ak._v2.operations.from_iter([data], highlevel=False)[0]
 
         elif isinstance(data, Iterable):
             raise ak._v2._util.error(
@@ -1444,14 +1522,10 @@ class Record(NDArrayOperatorsMixin):
             )
 
         if with_name is not None:
-            layout = ak._v2.operations.structure.with_name(
-                layout, with_name, highlevel=False
-            )
+            layout = ak._v2.operations.with_name(layout, with_name, highlevel=False)
 
-        if library is not None and library != ak._v2.operations.convert.library(layout):
-            layout = ak._v2.operations.convert.to_library(
-                layout, library, highlevel=False
-            )
+        if library is not None and library != ak._v2.operations.library(layout):
+            layout = ak._v2.operations.to_library(layout, library, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -1461,7 +1535,7 @@ class Record(NDArrayOperatorsMixin):
             self.__doc__ = docstr
 
         if check_valid:
-            ak._v2.operations.describe.validity_error(self, exception=True)
+            ak._v2.operations.validity_error(self, exception=True)
 
     @property
     def layout(self):
@@ -1580,6 +1654,13 @@ class Record(NDArrayOperatorsMixin):
         """
         return self._layout.array.fields
 
+    @property
+    def is_tuple(self):
+        """
+        If True, the top-most record structure has no named fields, i.e. it's a tuple.
+        """
+        return self._layout.array.is_tuple
+
     def _ipython_key_completions_(self):
         return self._layout.array.fields
 
@@ -1650,7 +1731,7 @@ class Record(NDArrayOperatorsMixin):
     def __setitem__(self, where, what):
         """
         Args:
-            where (str): Field name to add data to the record.
+            where (str or tuple of str): Field name to add data to the record.
             what: Data to add as the new field.
 
         For example:
@@ -1680,9 +1761,28 @@ class Record(NDArrayOperatorsMixin):
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
-            self._layout = ak._v2.operations.structure.with_field(
+            self._layout = ak._v2.operations.with_field(
                 self._layout, what, where, highlevel=False
             )
+            self._numbaview = None
+
+    def __delitem__(self, where):
+        """
+        Args:
+            where (str): Field name to add to records in the array.
+
+        Removes a field from records in the array.
+        """
+        with ak._v2._util.OperationErrorContext(
+            "ak._v2.Record.__delitem__",
+            dict(self=self, field_name=where),
+        ):
+            names = ak._v2.operations.fields(self._layout)
+            if where not in names:
+                raise ak._v2._util.error(
+                    TypeError(f"array fields do not contain {where!r}")
+                )
+            self._layout = self._layout[[x for x in names if x != where]]
             self._numbaview = None
 
     def __getattr__(self, where):
@@ -1725,7 +1825,7 @@ class Record(NDArrayOperatorsMixin):
                             "while trying to get field {}, an exception "
                             "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         )
-                    )
+                    ) from err
             else:
                 raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
 
@@ -1764,12 +1864,17 @@ class Record(NDArrayOperatorsMixin):
             and self._layout.array.nplike.known_data
         ):
             typestr = repr(str(self.type))[1:-1]
-            strwidth = max(
-                0, min(40, limit_cols - len(pytype) - len(" type='...'") - 3)
-            )
-            if len(pytype) - len(" type=''") - len(typestr) - 3 < limit_cols:
+            if len(typestr) + len(pytype) + len(" type=''") + 3 < limit_cols // 2:
+                strwidth = limit_cols - (
+                    len(typestr) + len(pytype) + len(" type=''") + 3
+                )
+            else:
                 strwidth = max(
-                    0, limit_cols - len(pytype) - len(" type=''") - len(typestr) - 3
+                    0,
+                    min(
+                        limit_cols // 2,
+                        limit_cols - len(pytype) - len(" type='...'") - 3,
+                    ),
                 )
             valuestr = " " + awkward._v2._prettyprint.valuestr(self, 1, strwidth)
 
@@ -1804,7 +1909,9 @@ class Record(NDArrayOperatorsMixin):
 
         valuestr = awkward._v2._prettyprint.valuestr(self, limit_rows, limit_cols)
         if type:
-            out = "type: " + str(self.type) + "\n" + valuestr
+            tmp = io.StringIO()
+            self.type.show(stream=tmp)
+            out = "type: " + tmp.getvalue() + valuestr
         else:
             out = valuestr
 
@@ -1856,8 +1963,8 @@ class Record(NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        packed = ak._v2.operations.structure.packed(self._layout, highlevel=False)
-        form, length, container = ak._v2.operations.convert.to_buffers(
+        packed = ak._v2.operations.packed(self._layout, highlevel=False)
+        form, length, container = ak._v2.operations.to_buffers(
             packed.array, buffer_key="part0-{form_key}-{attribute}", form_key="node{id}"
         )
         if self._behavior is ak._v2.behavior:
@@ -1876,7 +1983,7 @@ class Record(NDArrayOperatorsMixin):
         else:
             form, length, container, behavior, at = state
             if ak._v2._util.isint(length):
-                layout = ak._v2.operations.convert.from_buffers(
+                layout = ak._v2.operations.from_buffers(
                     form,
                     length,
                     container,
@@ -1885,7 +1992,7 @@ class Record(NDArrayOperatorsMixin):
                 )
             else:
                 layouts = [
-                    ak._v2.operations.convert.from_buffers(
+                    ak._v2.operations.from_buffers(
                         form,
                         length,
                         container,
@@ -1894,9 +2001,7 @@ class Record(NDArrayOperatorsMixin):
                     )
                     for i in length
                 ]
-                layout = ak._v2.operations.structure.concatenate(
-                    layouts, highlevel=False
-                )
+                layout = ak._v2.operations.concatenate(layouts, highlevel=False)
         layout = ak._v2.record.Record(layout, at)
         self.layout = layout
         self.behavior = behavior
@@ -1920,6 +2025,19 @@ class Record(NDArrayOperatorsMixin):
             if element in test:
                 return True
         return False
+
+    def _jax_flatten_layout(self):
+        return self._layout._jax_flatten()
+
+    @classmethod
+    def _jax_flatten(cls, array):
+        assert type(array) is cls
+        return array._jax_flatten_layout()
+
+    @classmethod
+    def _jax_unflatten(cls, aux_data, children):
+        layout_cls = aux_data.layout.__class__
+        return ak._v2._util.wrap(layout_cls.jax_unflatten(aux_data, children))
 
 
 class ArrayBuilder(Sized):
@@ -2233,7 +2351,7 @@ class ArrayBuilder(Sized):
         """
         formstr, length, container = self._layout.to_buffers()
         form = ak._v2.forms.from_json(formstr)
-        return ak._v2.operations.convert.from_buffers(form, length, container)
+        return ak._v2.operations.from_buffers(form, length, container, highlevel=True)
 
     def null(self):
         """
@@ -2548,6 +2666,446 @@ class ArrayBuilder(Sized):
 
         def __exit__(self, type, value, traceback):
             self._arraybuilder.end_record()
+
+    def record(self, name=None):
+        """
+        Context manager to prevent unpaired #begin_record and #end_record. The
+        example in the #begin_record documentation can be rewritten as
+
+            with builder.record("points"):
+                builder.field("x").real(1)
+                builder.field("y").real(1.1)
+            with builder.record("points"):
+                builder.field("x").real(2)
+                builder.field("y").real(2.2)
+
+        to produce the same result.
+
+            [{"x": 1.0, "y": 1.1}, {"x": 2.0, "y": 2.2}]
+
+        Since context managers aren't yet supported by Numba, this method
+        can't be used in Numba.
+        """
+        return self.Record(self, name)
+
+
+class LayoutBuilder(Sized):
+    """
+    Args:
+        behavior (None or dict): Custom #ak.behavior for arrays built by
+            this LayoutBuilder.
+        form (str): Form describing an Array to build.
+
+    General tool for building arrays of nested data structures from a sequence
+    of commands. Most data types can be constructed by calling commands in the
+    right order, similar to printing tokens to construct JSON output.
+
+    The full set of filling commands is the following.
+
+       * #null: appends a None value.
+       * #boolean: appends True or False.
+       * #integer: appends an integer.
+       * #real: appends a floating-point value.
+       * #complex: appends a complex value.
+       * #datetime: appends a datetime value.
+       * #timedelta: appends a timedelta value.
+       * #bytestring: appends an unencoded string (raw bytes).
+       * #string: appends a UTF-8 encoded string.
+       * #begin_list: begins filling a list; must be closed with #end_list.
+       * #end_list: ends a list.
+       * #begin_tuple: begins filling a tuple; must be closed with #end_tuple.
+       * #index: selects a tuple slot to fill; must be followed by a command
+         that actually fills that slot.
+       * #end_tuple: ends a tuple.
+       * #begin_record: begins filling a record; must be closed with
+         #end_record.
+       * #field: selects a record field to fill; must be followed by a command
+         that actually fills that field.
+       * #end_record: ends a record.
+       * #append: generic method for filling #null, #boolean, #integer, #real,
+         #bytestring, #string, #ak.Array, #ak.Record, or arbitrary Python data.
+       * #extend: appends all the items from an iterable.
+       * #list: context manager for #begin_list and #end_list.
+       * #tuple: context manager for #begin_tuple and #end_tuple.
+       * #record: context manager for #begin_record and #end_record.
+
+    Note that it is a specialized procedurer: the type is known in advance.
+    """
+
+    def __init__(self, form=None, behavior=None):
+        self._layout = ak.layout.LayoutBuilder64(form=form)
+        self.form = form
+        self.behavior = behavior
+
+    @classmethod
+    def _wrap(cls, layout, behavior=None):
+        """
+        Args:
+            layout (#ak.layout.LayoutBuilder64): Low-level builder to wrap.
+            behavior (None or dict): Custom #ak.behavior for arrays built by
+                this LayoutBuilder.
+
+        Wraps a low-level #ak.layout.LayoutBuilder64 as a high-level
+        #ak.LayoutBuilder.
+
+        The #ak.LayoutBuilder constructor creates a new #ak.layout.LayoutBuilder
+        with no accumulated data.
+        """
+        assert isinstance(layout, ak.layout.LayoutBuilder)
+        out = cls.__new__(cls)
+        out._layout = layout
+        out.behavior = behavior
+        return out
+
+    @property
+    def behavior(self):
+        """
+        The `behavior` parameter passed into this LayoutBuilder's constructor.
+
+           * If a dict, this `behavior` overrides the global #ak.behavior.
+             Any keys in the global #ak.behavior but not this `behavior` are
+             still valid, but any keys in both are overridden by this
+             `behavior`. Keys with a None value are equivalent to missing keys,
+             so this `behavior` can effectively remove keys from the
+             global #ak.behavior.
+
+           * If None, the Array defaults to the global #ak.behavior.
+
+        See #ak.behavior for a list of recognized key patterns and their
+        meanings.
+        """
+        return self._behavior
+
+    @behavior.setter
+    def behavior(self, behavior):
+        if behavior is None or isinstance(behavior, dict):
+            self._behavior = behavior
+        else:
+            raise ak._v2._util.error(TypeError("behavior must be None or a dict"))
+
+    def tolist(self):
+        """
+        Converts this Array into Python objects; same as #ak.to_list
+        (but without the underscore, like NumPy's
+        [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
+        """
+        return self.to_list()
+
+    def to_list(self):
+        """
+        Converts this Array into Python objects; same as #ak.to_list.
+        """
+        return self.snapshot().to_list()
+
+    def to_numpy(self, allow_missing=True):
+        """
+        Converts this Array into a NumPy array, if possible; same as #ak.to_numpy.
+        """
+        return self.snapshot().to_numpy(allow_missing=allow_missing)
+
+    @property
+    def type(self):
+        """
+        The high-level type of the accumulated array; same as #ak.type.
+
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
+
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
+        """
+        form = ak._v2.forms.from_json(self._layout.form())
+        return ak._v2.types.ArrayType(
+            form.type_from_behavior(self._behavior), len(self._layout)
+        )
+
+    @property
+    def typestr(self):
+        """
+        The high-level type of this accumulated array, presented as a string.
+
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
+
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
+        """
+        return str(self.type)
+
+    def __len__(self):
+        """
+        The current length of the accumulated array.
+        """
+        return len(self._layout)
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return self._repr(80)
+
+    def _repr(self, limit_cols):
+        typestr = repr(self.typestr)
+
+        limit_type = limit_cols - len("<LayoutBuilder type=>")
+        if len(typestr) > limit_type:
+            typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
+
+        return f"<LayoutBuilder type={typestr}>"
+
+    def show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout):
+        """
+        Args:
+            limit_rows (int): Maximum number of rows (lines) to use in the output.
+            limit_cols (int): Maximum number of columns (characters wide).
+            type (bool): If True, print the type as well. (Doesn't count toward number
+                of rows/lines limit.)
+            stream (object with a ``write(str)`` method or None): Stream to write the
+                output to. If None, return a string instead of writing to a stream.
+
+        Display the contents of the array within `limit_rows` and `limit_cols`, using
+        ellipsis (`...`) for hidden nested data.
+
+        This method takes a snapshot of the data and calls show on it, and a snapshot
+        copies data.
+        """
+        return self.snapshot().show(
+            limit_rows=limit_rows, limit_cols=limit_cols, type=type, stream=stream
+        )
+
+    def __array__(self, *args, **kwargs):
+        """
+        Intercepts attempts to convert a #snapshot of this array into a
+        NumPy array and either performs a zero-copy conversion or raises
+        an error.
+
+        See #ak.Array.__array__ for a more complete description.
+        """
+        arguments = {0: self}
+        for i, arg in enumerate(args):
+            arguments[i + 1] = arg
+        arguments.update(kwargs)
+        with ak._v2._util.OperationErrorContext("numpy.asarray", arguments):
+            return ak._v2._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
+
+    def __bool__(self):
+        if len(self) == 1:
+            return bool(self[0])
+        else:
+            raise ak._v2._util.error(
+                ValueError(
+                    "the truth value of an array whose length is not 1 is ambiguous; "
+                    "use ak.any() or ak.all()"
+                )
+            )
+
+    def snapshot(self):
+        """
+        Converts the currently accumulated data into an #ak.Array.
+
+        The currently accumulated data are *copied* into the new array.
+        """
+        formstr, length, container = self._layout.to_buffers()
+        form = ak._v2.forms.from_json(formstr)
+        return ak._v2.operations.from_buffers(form, length, container)
+
+    def null(self):
+        """
+        Appends a None value at the current position in the accumulated array.
+        """
+        self._layout.null()
+
+    def boolean(self, x):
+        """
+        Appends a boolean value `x` at the current position in the accumulated
+        array.
+        """
+        self._layout.boolean(x)
+
+    def int64(self, x):
+        """
+        Appends an integer `x` at the current position in the accumulated
+        array.
+        """
+        self._layout.int64(x)
+
+    def float64(self, x):
+        """
+        Appends a floating point number `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.float64(x)
+
+    def complex(self, x):
+        """
+        Appends a floating point number `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.complex(x)
+
+    def bytestring(self, x):
+        """
+        Appends an unencoded string (raw bytes) `x` at the current position
+        in the accumulated array.
+        """
+        self._layout.bytestring(x)
+
+    def string(self, x):
+        """
+        Appends a UTF-8 encoded string `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.string(x)
+
+    def begin_list(self):
+        """
+        Begins filling a list; must be closed with #end_list.
+
+        For example,
+
+            builder.begin_list()
+            builder.real(1.1)
+            builder.real(2.2)
+            builder.real(3.3)
+            builder.end_list()
+            builder.begin_list()
+            builder.end_list()
+            builder.begin_list()
+            builder.real(4.4)
+            builder.real(5.5)
+            builder.end_list()
+
+        produces
+
+            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+        """
+        self._layout.begin_list()
+
+    def end_list(self):
+        """
+        Ends a list.
+        """
+        self._layout.end_list()
+
+    def index(self, x):
+        """
+        Args:
+            x (int): The index slot to fill.
+
+        Issues an 'index' vm command. The value 'x' is pushed to
+        the VM stack, it is not added to the accumulated data, e.g.
+        the VM output buffer.
+
+        This is used to build a 'categorical' array.
+        """
+        self._layout.index(x)
+        return self
+
+    def tag(self, tag):
+        """
+        Args:
+            tag (int8): The pointer tag to fill.
+
+        Sets the pointer to a given tag `tag`; the next
+        command will fill that slot.
+        """
+        self._layout.tag(tag)
+        return self
+
+    class _Nested:
+        def __init__(self, LayoutBuilder):
+            self._layoutBuilder = LayoutBuilder
+
+        def __repr__(self):
+            typestr = repr(self._layoutBuilder.typestr)
+
+            limit_type = 80 - len("<LayoutBuilder. type=>") - len(self._name)
+            if len(typestr) > limit_type:
+                typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
+
+            return f"<LayoutBuilder.{self._name} type={typestr}>"
+
+    class List(_Nested):
+        _name = "list"
+
+        def __enter__(self):
+            self._layoutBuilder.begin_list()
+
+        def __exit__(self, type, value, traceback):
+            self._layoutBuilder.end_list()
+
+    def list(self):
+        """
+        Context manager to prevent unpaired #begin_list and #end_list. The
+        example in the #begin_list documentation can be rewritten as
+
+            with builder.list():
+                builder.real(1.1)
+                builder.real(2.2)
+                builder.real(3.3)
+            with builder.list():
+                pass
+            with builder.list():
+                builder.real(4.4)
+                builder.real(5.5)
+
+        to produce the same result.
+
+            [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+        Since context managers aren't yet supported by Numba, this method
+        can't be used in Numba.
+        """
+        return self.List(self)
+
+    class Tuple(_Nested):
+        _name = "tuple"
+
+        def __init__(self, LayoutBuilder, numfields):
+            super(LayoutBuilder.Tuple, self).__init__(LayoutBuilder)
+            self._numfields = numfields
+
+        def __enter__(self):
+            self._layoutBuilder.begin_tuple(self._numfields)
+
+        def __exit__(self, type, value, traceback):
+            self._layoutBuilder.end_tuple()
+
+    def tuple(self, numfields):
+        """
+        Context manager to prevent unpaired #begin_tuple and #end_tuple. The
+        example in the #begin_tuple documentation can be rewritten as
+
+            with builder.tuple(3):
+                builder.index(0).integer(1)
+                builder.index(1).real(1.1)
+                builder.index(2).string("one")
+            with builder.tuple(3):
+                builder.index(0).integer(2)
+                builder.index(1).real(2.2)
+                builder.index(2).string("two")
+
+        to produce the same result.
+
+            [(1, 1.1, "one"), (2, 2.2, "two")]
+
+        Since context managers aren't yet supported by Numba, this method
+        can't be used in Numba.
+        """
+        return self.Tuple(self, numfields)
+
+    class Record(_Nested):
+        _name = "record"
+
+        def __init__(self, LayoutBuilder, name):
+            super(LayoutBuilder.Record, self).__init__(LayoutBuilder)
+            self._name = name
+
+        def __enter__(self):
+            self._layoutBuilder.begin_record(name=self._name)
+
+        def __exit__(self, type, value, traceback):
+            self._layoutBuilder.end_record()
 
     def record(self, name=None):
         """

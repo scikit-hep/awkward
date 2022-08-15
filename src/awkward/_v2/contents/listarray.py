@@ -156,15 +156,17 @@ class ListArray(Content):
     def toListOffsetArray64(self, start_at_zero=False):
         starts = self._starts.data
         stops = self._stops.data
-        if self._nplike.array_equal(starts[1:], stops[:-1]):
-            offsets = self._nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
+        if self._nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
+            offsets = self._nplike.index_nplike.empty(
+                starts.shape[0] + 1, dtype=starts.dtype
+            )
             if offsets.shape[0] == 1:
                 offsets[0] = 0
             else:
                 offsets[:-1] = starts
                 offsets[-1] = stops[-1]
             return ListOffsetArray(
-                ak._v2.index.Index(offsets),
+                ak._v2.index.Index(offsets, nplike=self.nplike),
                 self._content,
                 self._identifier,
                 self._parameters,
@@ -235,7 +237,7 @@ class ListArray(Content):
             nextstarts = self._starts[carry.data]
             nextstops = self._stops[: self._starts.length][carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return ListArray(
             nextstarts,
@@ -313,6 +315,7 @@ class ListArray(Content):
                     self._starts.data,
                     self._stops.data,
                 ),
+                slicer=ListArray(slicestarts, slicestops, slicecontent),
             )
 
             asListOffsetArray64 = self.toListOffsetArray64(True)
@@ -346,7 +349,8 @@ class ListArray(Content):
                     slicestarts.data,
                     slicestops.data,
                     slicestarts.length,
-                )
+                ),
+                slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
             sliceindex = ak._v2.index.Index64(slicecontent._data)
             outoffsets = ak._v2.index.Index64.empty(
@@ -384,7 +388,8 @@ class ListArray(Content):
                     self._starts.data,
                     self._stops.data,
                     self._content.length,
-                )
+                ),
+                slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
             nextcontent = self._content._carry(nextcarry, True)
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
@@ -428,7 +433,8 @@ class ListArray(Content):
                     slicestarts.length,
                     missing.data,
                     missing.length,
-                )
+                ),
+                slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
 
             nextcarry = ak._v2.index.Index64.empty(numvalid[0], self._nplike)
@@ -465,7 +471,8 @@ class ListArray(Content):
                     slicestops.data,
                     slicestarts.length,
                     missing.data,
-                )
+                ),
+                slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
 
             if isinstance(
@@ -567,7 +574,7 @@ class ListArray(Content):
                     lenstarts,
                     head,
                 ),
-                head,
+                slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
@@ -604,7 +611,8 @@ class ListArray(Content):
                         start,
                         stop,
                         step,
-                    )
+                    ),
+                    slicer=head,
                 )
                 nextcarry = ak._v2.index.Index64.empty(carrylength[0], self._nplike)
             else:
@@ -641,7 +649,8 @@ class ListArray(Content):
                     start,
                     stop,
                     step,
-                )
+                ),
+                slicer=head,
             )
 
             nextcontent = self._content._carry(nextcarry, True)
@@ -670,7 +679,8 @@ class ListArray(Content):
                             total.data,
                             nextoffsets.data,
                             lenstarts,
-                        )
+                        ),
+                        slicer=head,
                     )
                     nextadvanced = ak._v2.index.Index64.empty(total[0], self._nplike)
                 else:
@@ -694,7 +704,8 @@ class ListArray(Content):
                         advanced.data,
                         nextoffsets.data,
                         lenstarts,
-                    )
+                    ),
+                    slicer=head,
                 )
                 return ak._v2.contents.listoffsetarray.ListOffsetArray(
                     nextoffsets,
@@ -720,8 +731,8 @@ class ListArray(Content):
             lenstarts = self._starts.length
 
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            flathead = self._nplike.asarray(head.data.reshape(-1))
-            regular_flathead = ak._v2.index.Index64(flathead)
+            flathead = self._nplike.index_nplike.asarray(head.data.reshape(-1))
+            regular_flathead = ak._v2.index.Index64(flathead, nplike=self.nplike)
             if advanced is None or advanced.length == 0:
                 nextcarry = ak._v2.index.Index64.empty(
                     lenstarts * flathead.shape[0], self._nplike
@@ -754,7 +765,7 @@ class ListArray(Content):
                         regular_flathead.length,
                         self._content.length,
                     ),
-                    head,
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
@@ -797,7 +808,8 @@ class ListArray(Content):
                         lenstarts,
                         regular_flathead.length,
                         self._content.length,
-                    )
+                    ),
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
@@ -845,6 +857,7 @@ class ListArray(Content):
                     head.length,
                     length,
                 ),
+                slicer=head,
             )
             carried = self._content._carry(nextcarry, True)
             down = carried._getitem_next_jagged(
@@ -1072,20 +1085,20 @@ class ListArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-    def fillna(self, value):
+    def fill_none(self, value):
         return ListArray(
             self._starts,
             self._stops,
-            self._content.fillna(value),
+            self._content.fill_none(value),
             self._identifier,
             self._parameters,
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         elif posaxis == depth + 1:
             offsets = self._compact_offsets64(True)
             if self._nplike.known_data:
@@ -1116,7 +1129,7 @@ class ListArray(Content):
             return ak._v2.contents.listarray.ListArray(
                 self._starts,
                 self._stops,
-                self._content._localindex(posaxis, depth + 1),
+                self._content._local_index(posaxis, depth + 1),
                 self._identifier,
                 self._parameters,
                 self._nplike,
@@ -1214,7 +1227,7 @@ class ListArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self._nplike.known_shape and self.stops.length < self.starts.length:
             return f'at {path} ("{type(self)}"): len(stops) < len(starts)'
         assert self.starts.nplike is self._nplike and self.stops.nplike is self._nplike
@@ -1244,7 +1257,7 @@ class ListArray(Content):
             ):
                 return ""
             else:
-                return self._content.validityerror(path + ".content")
+                return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = (
@@ -1256,11 +1269,11 @@ class ListArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         if not clip:
             posaxis = self.axis_wrap_if_negative(axis)
             if posaxis == depth:
-                return self.rpad_axis0(target, clip)
+                return self.pad_none_axis0(target, clip)
             elif posaxis == depth + 1:
                 min_ = ak._v2.index.Index64.empty(1, self._nplike)
                 assert (
@@ -1359,13 +1372,15 @@ class ListArray(Content):
                 return ak._v2.contents.listarray.ListArray(
                     self._starts,
                     self._stops,
-                    self._content._rpad(target, posaxis, depth + 1, clip),
+                    self._content._pad_none(target, posaxis, depth + 1, clip),
                     None,
                     self._parameters,
                     self._nplike,
                 )
         else:
-            return self.toListOffsetArray64(True)._rpad(target, axis, depth, clip=True)
+            return self.toListOffsetArray64(True)._pad_none(
+                target, axis, depth, clip=True
+            )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         return self.toListOffsetArray64(False)._to_arrow(
@@ -1373,30 +1388,47 @@ class ListArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        return ak._v2.operations.convert.to_numpy(self.toRegularArray(), allow_missing)
+        return ak._v2.operations.to_numpy(self.toRegularArray(), allow_missing)
 
     def _completely_flatten(self, nplike, options):
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
         ):
-            return [ak._v2.operations.convert.to_numpy(self)]
+            return [ak._v2.operations.to_numpy(self)]
         else:
             next = self.toListOffsetArray64(False)
             flat = next.content[next.offsets[0] : next.offsets[-1]]
             return flat._completely_flatten(nplike, options)
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
+        if (
+            self._nplike.known_shape
+            and self._nplike.known_data
+            and self._starts.length != 0
+        ):
+            startsmin = self._starts.data.min()
+            starts = ak._v2.index.Index(
+                self._starts.data - startsmin, nplike=self._nplike
+            )
+            stops = ak._v2.index.Index(
+                self._stops.data - startsmin, nplike=self._nplike
+            )
+            content = self._content[startsmin : self._stops.data.max()]
+        else:
+            starts, stops, content = self._starts, self._stops, self._content
+
         if options["return_array"]:
 
             def continuation():
                 return ListArray(
-                    self._starts,
-                    self._stops,
-                    self._content._recursively_apply(
+                    starts,
+                    stops,
+                    content._recursively_apply(
                         action,
+                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1410,8 +1442,9 @@ class ListArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply(
+                content._recursively_apply(
                     action,
+                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1437,8 +1470,8 @@ class ListArray(Content):
     def packed(self):
         return self.toListOffsetArray64(True).packed()
 
-    def _to_list(self, behavior):
-        return ListOffsetArray._to_list(self, behavior)
+    def _to_list(self, behavior, json_conversions):
+        return ListOffsetArray._to_list(self, behavior, json_conversions)
 
     def _to_nplike(self, nplike):
         starts = self._starts._to_nplike(nplike)
@@ -1453,19 +1486,9 @@ class ListArray(Content):
             nplike=nplike,
         )
 
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        return ListOffsetArray._to_json(
-            self,
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.starts.layout_equal(other.starts, index_dtype, numpyarray)
+            and self.stops.layout_equal(other.stops, index_dtype, numpyarray)
+            and self.content.layout_equal(other.content, index_dtype, numpyarray)
         )

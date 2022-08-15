@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/util.h"
@@ -13,7 +12,7 @@
 
 namespace awkward {
   const BuilderPtr
-  StringBuilder::fromempty(const ArrayBuilderOptions& options,
+  StringBuilder::fromempty(const BuilderOptions& options,
                            const char* encoding) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
@@ -24,7 +23,7 @@ namespace awkward {
                                            encoding);
   }
 
-  StringBuilder::StringBuilder(const ArrayBuilderOptions& options,
+  StringBuilder::StringBuilder(const BuilderOptions& options,
                                GrowableBuffer<int64_t> offsets,
                                GrowableBuffer<uint8_t> content,
                                const char* encoding)
@@ -50,13 +49,15 @@ namespace awkward {
     outer_form_key << "node" << (form_key_id++);
     inner_form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(outer_form_key.str() + "-offsets",
-                          offsets_.ptr().get(),
-                          (int64_t)(offsets_.length() * sizeof(int64_t)));
+    offsets_.concatenate(
+      reinterpret_cast<int64_t*>(
+        container.empty_buffer(outer_form_key.str() + "-offsets",
+        offsets_.length() * (int64_t)sizeof(int64_t))));
 
-    container.copy_buffer(inner_form_key.str() + "-data",
-                          content_.ptr().get(),
-                          (int64_t)(content_.length() * sizeof(uint8_t)));
+    content_.concatenate(
+      reinterpret_cast<uint8_t*>(
+        container.empty_buffer(inner_form_key.str() + "-data",
+        content_.length() * (int64_t)sizeof(uint8_t))));
 
     std::string char_parameter;
     std::string string_parameter;

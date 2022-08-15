@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_BitMaskedArray():
@@ -79,7 +79,7 @@ def test_BitMaskedArray():
 
 
 def test_ByteMaskedArray_0():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
@@ -106,7 +106,7 @@ def test_ByteMaskedArray_0():
 
 
 def test_ByteMaskedArray_1():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [1.1, 2.2], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
@@ -134,7 +134,7 @@ def test_ByteMaskedArray_1():
 
 
 def test_ByteMaskedArray_2():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[1.1, 1.1, 2.2], [], [1.1, 2.2], [5.5], [1.1, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
@@ -198,11 +198,11 @@ def test_subranges_equal():
     # assert array.sort(axis=-1).content._subranges_equal(starts, stops, 15) is True
 
 
-@pytest.mark.skip("FIXME: highlevel v2 to_categorical not defined")
 def test_categorical():
     array = ak._v2.highlevel.Array(["1chchc", "1chchc", "2sss", "3", "4", "5"])
     categorical = ak._v2.behaviors.categorical.to_categorical(array)
-    assert ak._v2.operations.describe.is_valid(categorical) is True
+
+    assert ak._v2.operations.is_valid(categorical) is True
     assert categorical.layout.is_unique() is False
 
 
@@ -388,7 +388,7 @@ def test_3d_non_unique():
 
 
 def test_ListOffsetArray():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         ["one", "two", "three", "four", "five"], highlevel=False
     )
 
@@ -408,7 +408,7 @@ def test_ListOffsetArray():
         "two",
     ]
 
-    array2 = ak._v2.operations.convert.from_iter(
+    array2 = ak._v2.operations.from_iter(
         ["one", "two", "one", "four", "two"], highlevel=False
     )
     assert to_list(array2.sort(0, True, True)) == [
@@ -668,7 +668,15 @@ def test_RegularArray():
 
 
 def test_IndexedArray():
-    listoffsetarray = ak._v2.operations.convert.from_iter(
+    content = ak.from_iter(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
+    )
+    index = ak.layout.Index64(np.array([4, 3, 2, 1, 0], dtype=np.int64))
+    indexedarray = ak.layout.IndexedArray64(index, content)
+
+    assert indexedarray.is_unique() is True
+
+    listoffsetarray = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
 
@@ -795,15 +803,23 @@ def test_same_categories():
         "two",
     ]
 
-    # FIXME: TypeError: no numpy.equal overloads for custom types: categorical, categorical
-    # assert (array1 == array2) is False
+    assert (array1 == array2).tolist() == [
+        False,
+        False,
+        True,
+        True,
+        False,
+        True,
+        False,
+        False,
+    ]
 
 
 def test_UnionArray():
-    content1 = ak._v2.operations.convert.from_iter(
+    content1 = ak._v2.operations.from_iter(
         [[], [1], [2, 2], [3, 3, 3]], highlevel=False
     )
-    content2 = ak._v2.operations.convert.from_iter(
+    content2 = ak._v2.operations.from_iter(
         [[3.3, 3.3, 3.3], [2.2, 2.2], [1.1], []], highlevel=False
     )
     tags = ak._v2.index.Index8(np.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=np.int8))

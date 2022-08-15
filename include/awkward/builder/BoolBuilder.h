@@ -7,11 +7,11 @@
 #include <string>
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/BuilderOptions.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class BoolBuilder
   ///
@@ -22,14 +22,14 @@ namespace awkward {
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const BuilderOptions& options);
 
     /// @brief Create a BoolBuilder from a full set of parameters.
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated boolean values.
-    BoolBuilder(const ArrayBuilderOptions& options,
+    BoolBuilder(const BuilderOptions& options,
                 GrowableBuffer<uint8_t> buffer);
 
     /// @brief User-friendly name of this class: `"BoolBuilder"`.
@@ -99,13 +99,13 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
+    const BuilderOptions&
       options() const { return options_; }
 
     const GrowableBuffer<uint8_t>& buffer() const { return buffer_; }
 
   private:
-    const ArrayBuilderOptions options_;
+    const BuilderOptions options_;
     GrowableBuffer<uint8_t> buffer_;
   };
 

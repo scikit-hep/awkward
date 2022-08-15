@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import numbers
+import math
 import copy
 from collections.abc import Iterable
 
@@ -323,7 +325,7 @@ class Content:
     def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        index = ak._v2.index.Index64(head.index)
+        index = ak._v2.index.Index64(head.index, nplike=self.nplike)
         indexlength = index.length
         index = index._to_nplike(self.nplike)
         outindex = ak._v2.index.Index64.empty(index.length * length, self._nplike)
@@ -338,7 +340,8 @@ class Content:
                 index.length,
                 length,
                 raw._size,
-            )
+            ),
+            slicer=head,
         )
 
         out = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
@@ -358,7 +361,7 @@ class Content:
         head = head._to_nplike(self._nplike)
         jagged = head.content.toListOffsetArray64()
 
-        index = ak._v2.index.Index64(head._index)
+        index = ak._v2.index.Index64(head._index, nplike=self.nplike)
         content = that._getitem_at(0)
         if self._nplike.known_shape and content.length < index.length:
             raise ak._v2._util.indexerror(
@@ -395,7 +398,8 @@ class Content:
                 starts.data,
                 stops.data,
                 index.length,
-            )
+            ),
+            slicer=head,
         )
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
@@ -516,6 +520,13 @@ class Content:
                 self._nplike,
             )
 
+            if any(isinstance(x, list) and len(x) == 0 for x in items) and any(
+                isinstance(x, slice) for x in items
+            ):
+                attempt = next.maybe_toNumpyArray()
+                if attempt is not None:
+                    next = attempt
+
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
             if out.length == 0:
@@ -537,7 +548,7 @@ class Content:
             and where._parameters is not None
             and (where._parameters.get("__array__") in ("string", "bytestring"))
         ):
-            return self._getitem_fields(ak._v2.operations.convert.to_list(where))
+            return self._getitem_fields(ak._v2.operations.to_list(where))
 
         elif isinstance(where, ak._v2.contents.emptyarray.EmptyArray):
             return where.toNumpyArray(np.int64)
@@ -547,12 +558,14 @@ class Content:
                 carry = ak._v2.index.Index64(where.data.reshape(-1))
                 allow_lazy = True
             elif issubclass(where.dtype.type, np.integer):
-                carry = ak._v2.index.Index64(where.data.astype(np.int64).reshape(-1))
+                carry = ak._v2.index.Index64(
+                    where.data.astype(np.int64).reshape(-1), nplike=self.nplike
+                )
                 allow_lazy = "copied"  # True, but also can be modified in-place
             elif issubclass(where.dtype.type, (np.bool_, bool)):
                 if len(where.data.shape) == 1:
                     where = self._nplike.nonzero(where.data)[0]
-                    carry = ak._v2.index.Index64(where)
+                    carry = ak._v2.index.Index64(where, nplike=self.nplike)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     wheres = self._nplike.nonzero(where.data)
@@ -577,11 +590,16 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
+        elif isinstance(where, Iterable) and len(where) == 0:
+            return self._carry(
+                ak._v2.index.Index64.empty(0, self._nplike), allow_lazy=True
+            )
+
+        elif isinstance(where, Iterable) and all(ak._v2._util.isstr(x) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):
-            layout = ak._v2.operations.convert.to_layout(where)
+            layout = ak._v2.operations.to_layout(where)
             as_array = layout.maybe_to_array(layout.nplike)
             if as_array is None:
                 return self._getitem(layout)
@@ -604,7 +622,7 @@ class Content:
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak._v2.index.Index)
 
-        result = self._nplike.empty(1, dtype=np.bool_)
+        result = self._nplike.index_nplike.empty(1, dtype=np.bool_)
         assert carry.nplike is self._nplike
         self._handle_error(
             self._nplike[
@@ -615,7 +633,8 @@ class Content:
                 result,
                 carry.data,
                 carry.length,
-            )
+            ),
+            slicer=carry.data,
         )
         if result[0]:
             if carry.length == self.length:
@@ -684,7 +703,7 @@ class Content:
 
         return axis
 
-    def _localindex_axis0(self):
+    def _local_index_axis0(self):
         localindex = ak._v2.index.Index64.empty(self.length, self._nplike)
         self._handle_error(
             self._nplike["awkward_localindex", np.int64](
@@ -783,8 +802,8 @@ class Content:
 
         return (head, tail)
 
-    def localindex(self, axis):
-        return self._localindex(axis, 0)
+    def local_index(self, axis):
+        return self._local_index(axis, 0)
 
     def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
         if axis is None:
@@ -976,7 +995,7 @@ class Content:
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        tocarryraw = self._nplike.empty(n, dtype=np.intp)
+        tocarryraw = self._nplike.index_nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
             ptr = ak._v2.index.Index64.empty(
@@ -1033,7 +1052,7 @@ class Content:
                 )
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
-    def validityerror_parameters(self, path):
+    def validity_error_parameters(self, path):
         if self.parameter("__array__") == "string":
             content = None
             if isinstance(
@@ -1123,18 +1142,21 @@ class Content:
             ):
                 content = self.content
             else:
-                return 'at {} ("{}"): __array__ = "string" only allowed for IndexedArray and IndexedOptionArray'.format(
+                return 'at {} ("{}"): __array__ = "categorical" only allowed for IndexedArray and IndexedOptionArray'.format(
                     path, type(self)
                 )
-            return NotImplementedError("TODO: Implement is_unique")
+            if not content.is_unique():
+                return 'at {} ("{}"): __array__ = "categorical" requires contents to be unique'.format(
+                    path, type(self)
+                )
 
         return ""
 
-    def validityerror(self, path="layout"):
-        paramcheck = self.validityerror_parameters(path)
+    def validity_error(self, path="layout"):
+        paramcheck = self.validity_error_parameters(path)
         if paramcheck != "":
             return paramcheck
-        return self._validityerror(path)
+        return self._validity_error(path)
 
     @property
     def nbytes(self):
@@ -1225,10 +1247,11 @@ class Content:
     def dimension_optiontype(self):
         return self.Form.dimension_optiontype.__get__(self)
 
-    def rpad_axis0(self, target, clip):
+    def pad_none_axis0(self, target, clip):
         if not clip and target < self.length:
             index = ak._v2.index.Index64(
-                self._nplike.arange(self.length, dtype=np.int64)
+                self._nplike.index_nplike.arange(self.length, dtype=np.int64),
+                nplike=self.nplike,
             )
 
         else:
@@ -1251,8 +1274,8 @@ class Content:
         )
         return next.simplify_optiontype()
 
-    def rpad(self, length, axis, clip=False):
-        return self._rpad(length, axis, 0, clip)
+    def pad_none(self, length, axis, clip=False):
+        return self._pad_none(length, axis, 0, clip)
 
     def to_arrow(
         self,
@@ -1263,6 +1286,7 @@ class Content:
         categorical_as_dictionary=False,
         extensionarray=True,
         count_nulls=True,
+        record_is_scalar=False,
     ):
         import awkward._v2._connect.pyarrow
 
@@ -1280,6 +1304,7 @@ class Content:
                 "categorical_as_dictionary": categorical_as_dictionary,
                 "extensionarray": extensionarray,
                 "count_nulls": count_nulls,
+                "record_is_scalar": record_is_scalar,
             },
         )
 
@@ -1301,8 +1326,10 @@ class Content:
     def recursively_apply(
         self,
         action,
+        behavior=None,
         depth_context=None,
         lateral_context=None,
+        allow_records=True,
         keep_parameters=True,
         numpy_to_regular=True,
         return_array=True,
@@ -1310,10 +1337,12 @@ class Content:
     ):
         return self._recursively_apply(
             action,
+            behavior,
             1,
             depth_context,
             lateral_context,
             {
+                "allow_records": allow_records,
                 "keep_parameters": keep_parameters,
                 "numpy_to_regular": numpy_to_regular,
                 "return_array": return_array,
@@ -1321,19 +1350,123 @@ class Content:
             },
         )
 
+    def to_json(
+        self,
+        nan_string=None,
+        infinity_string=None,
+        minus_infinity_string=None,
+        complex_record_fields=None,
+        convert_bytes=None,
+        behavior=None,
+    ):
+        if complex_record_fields is None:
+            complex_real_string = None
+            complex_imag_string = None
+        elif (
+            isinstance(complex_record_fields, tuple)
+            and len(complex_record_fields) == 2
+            and isinstance(complex_record_fields[0], str)
+            and isinstance(complex_record_fields[1], str)
+        ):
+            complex_real_string, complex_imag_string = complex_record_fields
+
+        return self.packed()._to_list(
+            behavior,
+            {
+                "nan_string": nan_string,
+                "infinity_string": infinity_string,
+                "minus_infinity_string": minus_infinity_string,
+                "complex_real_string": complex_real_string,
+                "complex_imag_string": complex_imag_string,
+                "convert_bytes": convert_bytes,
+            },
+        )
+
     def tolist(self, behavior=None):
         return self.to_list(behavior)
 
     def to_list(self, behavior=None):
-        return self.packed()._to_list(behavior)
+        return self.packed()._to_list(behavior, None)
 
-    def _to_list_custom(self, behavior):
+    def _to_list_custom(self, behavior, json_conversions):
         cls = ak._v2._util.arrayclass(self, behavior)
         if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
             array = cls(self)
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]
+
+            if json_conversions is not None:
+                convert_bytes = json_conversions["convert_bytes"]
+                if convert_bytes is not None:
+                    for i, x in enumerate(out):
+                        if isinstance(x, bytes):
+                            out[i] = convert_bytes(x)
+
+                outimag = None
+                complex_real_string = json_conversions["complex_real_string"]
+                complex_imag_string = json_conversions["complex_imag_string"]
+                if complex_real_string is not None:
+                    Real = numbers.Real
+                    Complex = numbers.Complex
+                    if any(
+                        not isinstance(x, Real) and isinstance(x, Complex) for x in out
+                    ):
+                        outimag = [None] * len(out)
+                        for i, x in enumerate(out):
+                            if isinstance(x, Complex):
+                                out[i] = x.real
+                                outimag[i] = x.imag
+                            else:
+                                out[i] = x
+                                outimag[i] = None
+
+                filters = []
+
+                nan_string = json_conversions["nan_string"]
+                if nan_string is not None:
+                    isnan = math.isnan
+                    filters.append(lambda x: nan_string if isnan(x) else x)
+
+                infinity_string = json_conversions["infinity_string"]
+                if infinity_string is not None:
+                    inf = float("inf")
+                    filters.append(lambda x: infinity_string if x == inf else x)
+
+                minus_infinity_string = json_conversions["minus_infinity_string"]
+                if minus_infinity_string is not None:
+                    minf = float("-inf")
+                    filters.append(lambda x: minus_infinity_string if x == minf else x)
+
+                if len(filters) == 1:
+                    f0 = filters[0]
+                    for i, x in enumerate(out):
+                        out[i] = f0(x)
+                    if outimag is not None:
+                        for i, x in enumerate(outimag):
+                            outimag[i] = f0(x)
+                elif len(filters) == 2:
+                    f0 = filters[0]
+                    f1 = filters[1]
+                    for i, x in enumerate(out):
+                        out[i] = f1(f0(x))
+                    if outimag is not None:
+                        for i, x in enumerate(outimag):
+                            outimag[i] = f1(f0(x))
+                elif len(filters) == 3:
+                    f0 = filters[0]
+                    f1 = filters[1]
+                    f2 = filters[2]
+                    for i, x in enumerate(out):
+                        out[i] = f2(f1(f0(x)))
+                    if outimag is not None:
+                        for i, x in enumerate(outimag):
+                            outimag[i] = f2(f1(f0(x)))
+
+                if outimag is not None:
+                    for i, (real, imag) in enumerate(zip(out, outimag)):
+                        out[i] = {complex_real_string: real, complex_imag_string: imag}
+
             return out
 
     def flatten(self, axis=1, depth=0):
@@ -1346,48 +1479,7 @@ class Content:
         else:
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
 
-    def _to_json_custom(self):
-        cls = ak._v2._util.arrayclass(self, None)
-        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
-            array = cls(self)
-            out = [None] * self.length
-            for i in range(self.length):
-                out[i] = array[i]
-            return out
-
-    def tojson(
-        self,
-        nan_string=None,
-        infinity_string=None,
-        minus_infinity_string=None,
-        complex_real_string=None,
-        complex_imag_string=None,
-    ):
-        return self.to_json(
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
-        )
-
-    def to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        return self.packed()._to_json(
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-            complex_real_string,
-            complex_imag_string,
-        )
-
-    def withparameter(self, key, value):
+    def with_parameter(self, key, value):
         out = copy.copy(self)
 
         if self._parameters is None:
@@ -1399,15 +1491,43 @@ class Content:
 
         return out
 
-    def deep_copy(self, memo=None):
+    def __deepcopy__(self, memo=None):
         cls = self.__class__
         new_instance = cls.__new__(cls)
-        memo = {"id(self)": new_instance}
+        memo = {id(self): new_instance}
         for k, v in self.__dict__.items():
             if k == "_nplike":
-                setattr(new_instance, k, v)
-            # elif isinstance(v, ak._v2.index.Index):
-            #     setattr(new_instance, k, copy.copy(v))
+                new_instance._nplike = v
             else:
                 setattr(new_instance, k, copy.deepcopy(v, memo))
         return new_instance
+
+    def _jax_flatten(self):
+        from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData
+
+        layout = ak._v2.operations.to_layout(self, allow_record=True, allow_other=False)
+
+        numpyarray_nodes = _find_numpyarray_nodes(layout)
+        return (numpyarray_nodes, AuxData(layout))
+
+    @classmethod
+    def jax_flatten(cls, array):
+        assert type(array) is cls
+        return array._jax_flatten()
+
+    @classmethod
+    def jax_unflatten(cls, aux_data, children):
+        from awkward._v2._connect.jax import _replace_numpyarray_nodes
+
+        return _replace_numpyarray_nodes(aux_data.layout, list(children))
+
+    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.__class__ is other.__class__
+            and len(self) == len(other)
+            and ak._v2.identifier._identifiers_equal(self.identifier, other.identifier)
+            and ak._v2.forms.form._parameters_equal(
+                self.parameters, other.parameters, only_array_record=False
+            )
+            and self._layout_equal(other, index_dtype, numpyarray)
+        )

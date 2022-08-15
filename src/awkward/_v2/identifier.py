@@ -5,6 +5,15 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
+def _identifiers_equal(one, two):
+    if one is None and two is None:
+        return True
+    elif isinstance(one, Identifier) and isinstance(two, Identifier):
+        return one.layout_equal(two, index_dtype=True)
+    else:
+        return False
+
+
 class Identifier:
     _numrefs = 0
 
@@ -118,3 +127,10 @@ class Identifier:
 
     def _nbytes_part(self):
         return self.data.nbytes
+
+    def layout_equal(self, other, index_dtype=True):
+        if self._ref != other._ref or self._fieldloc != other._fieldloc:
+            return False
+        if index_dtype and self._data.dtype != other._data.dtype:
+            return False
+        return self._nplike.array_equal(self._data, other._data)

@@ -19,34 +19,32 @@ class ByteBehavior(Array):
     def __str__(self):
         return str(self.__bytes__())
 
+    def __repr__(self):
+        return repr(self.__bytes__())
 
-#     def __repr__(self):
-#         return repr(self.__bytes__())
+    def __iter__(self):
+        yield from self.__bytes__()
 
-#     def __iter__(self):
-#         for x in self.__bytes__():
-#             yield x
+    def __eq__(self, other):
+        if isinstance(other, (bytes, ByteBehavior)):
+            return bytes(self) == bytes(other)
+        else:
+            return False
 
-#     def __eq__(self, other):
-#         if isinstance(other, (bytes, ByteBehavior)):
-#             return bytes(self) == bytes(other)
-#         else:
-#             return False
+    def __ne__(self, other):
+        return not self.__eq__(self, other)
 
-#     def __ne__(self, other):
-#         return not self.__eq__(self, other)
+    def __add__(self, other):
+        if isinstance(other, (bytes, ByteBehavior)):
+            return bytes(self) + bytes(other)
+        else:
+            raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
 
-#     def __add__(self, other):
-#         if isinstance(other, (bytes, ByteBehavior)):
-#             return bytes(self) + bytes(other)
-#         else:
-#             raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
-
-#     def __radd__(self, other):
-#         if isinstance(other, (bytes, ByteBehavior)):
-#             return bytes(other) + bytes(self)
-#         else:
-#             raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
+    def __radd__(self, other):
+        if isinstance(other, (bytes, ByteBehavior)):
+            return bytes(other) + bytes(self)
+        else:
+            raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
 
 
 class CharBehavior(Array):
@@ -62,42 +60,40 @@ class CharBehavior(Array):
     def __str__(self):
         return self.__bytes__().decode("utf-8", "surrogateescape")
 
+    def __repr__(self):
+        return repr(self.__bytes__().decode("utf-8", "surrogateescape"))
 
-#     def __repr__(self):
-#         return repr(self.__bytes__().decode("utf-8", "surrogateescape"))
+    def __iter__(self):
+        yield from self.__str__()
 
-#     def __iter__(self):
-#         for x in self.__str__():
-#             yield x
+    def __eq__(self, other):
+        if isinstance(other, (str, CharBehavior)):
+            return str(self) == str(other)
+        else:
+            return False
 
-#     def __eq__(self, other):
-#         if isinstance(other, (str, CharBehavior)):
-#             return str(self) == str(other)
-#         else:
-#             return False
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
-#     def __ne__(self, other):
-#         return not self.__eq__(other)
+    def __add__(self, other):
+        if isinstance(other, (str, CharBehavior)):
+            return str(self) + str(other)
+        else:
+            raise ak._v2._util.error(TypeError("can only concatenate str to str"))
 
-#     def __add__(self, other):
-#         if isinstance(other, (str, CharBehavior)):
-#             return str(self) + str(other)
-#         else:
-#             raise ak._v2._util.error(TypeError("can only concatenate str to str"))
-
-#     def __radd__(self, other):
-#         if isinstance(other, (str, CharBehavior)):
-#             return str(other) + str(self)
-#         else:
-#             raise ak._v2._util.error(TypeError("can only concatenate str to str"))
+    def __radd__(self, other):
+        if isinstance(other, (str, CharBehavior)):
+            return str(other) + str(self)
+        else:
+            raise ak._v2._util.error(TypeError("can only concatenate str to str"))
 
 
-# class ByteStringBehavior(ak._v2.highlevel.Array):
-#     __name__ = "Array"
+class ByteStringBehavior(Array):
+    __name__ = "Array"
 
-#     def __iter__(self):
-#         for x in super(ByteStringBehavior, self).__iter__():
-#             yield x.__bytes__()
+    def __iter__(self):
+        for x in super().__iter__():
+            yield x.__bytes__()
 
 
 class StringBehavior(Array):
@@ -113,8 +109,8 @@ def _string_equal(one, two):
     behavior = ak._v2._util.behavior_of(one, two)
 
     one, two = (
-        ak._v2.operations.structure.without_parameters(one).layout,
-        ak._v2.operations.structure.without_parameters(two).layout,
+        ak._v2.operations.without_parameters(one).layout,
+        ak._v2.operations.without_parameters(two).layout,
     )
 
     # first condition: string lengths must be the same
@@ -131,7 +127,7 @@ def _string_equal(one, two):
         onepossible = one[possible]
         twopossible = two[possible]
 
-        reduced = ak._v2.operations.reducers.all(
+        reduced = ak._v2.operations.all(
             ak._v2.Array(onepossible) == ak._v2.Array(twopossible), axis=-1
         ).layout
         # update same-length strings with a verdict about their characters
@@ -144,14 +140,16 @@ def _string_notequal(one, two):
     return ~_string_equal(one, two)
 
 
-# def _string_broadcast(layout, offsets):
-#     nplike = ak.nplike.of(offsets)
-#     offsets = nplike.asarray(offsets)
-#     counts = offsets[1:] - offsets[:-1]
-#     if ak._v2._util.win or ak._v2._util.bits32:
-#         counts = counts.astype(np.int32)
-#     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
-#     return ak._v2.contents.IndexedArray64(ak._v2.index.Index64(parents), layout).project()
+def _string_broadcast(layout, offsets):
+    nplike = ak.nplike.of(offsets)
+    offsets = nplike.asarray(offsets)
+    counts = offsets[1:] - offsets[:-1]
+    if ak._v2._util.win or ak._v2._util.bits32:
+        counts = counts.astype(np.int32)
+    parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
+    return ak._v2.contents.IndexedArray(
+        ak._v2.index.Index64(parents, nplike=nplike), layout
+    ).project()
 
 
 def _string_numba_typer(viewtype):
@@ -167,7 +165,7 @@ def _string_numba_lower(
     context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
 ):
     import numba
-    import llvmlite.llvmpy.core
+    import llvmlite.ir
 
     whichpos = ak._v2._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.CONTENT
@@ -213,9 +211,7 @@ def _string_numba_lower(
     )
     rawptr_cast = builder.inttoptr(
         rawptr,
-        llvmlite.llvmpy.core.Type.pointer(
-            llvmlite.llvmpy.core.Type.int(numba.intp.bitwidth // 8)
-        ),
+        llvmlite.ir.PointerType(llvmlite.ir.IntType(numba.intp.bitwidth // 8)),
     )
     strsize = builder.sub(stop, start)
     strsize_cast = ak._v2._connect.numba.layout.castint(
@@ -241,23 +237,23 @@ def _string_numba_lower(
 
 
 def register(behavior):
-    # behavior["byte"] = ByteBehavior
-    # behavior["__typestr__", "byte"] = "byte"
-    # behavior["char"] = CharBehavior
-    # behavior["__typestr__", "char"] = "char"
+    behavior["byte"] = ByteBehavior
+    behavior["__typestr__", "byte"] = "byte"
+    behavior["char"] = CharBehavior
+    behavior["__typestr__", "char"] = "char"
 
-    # behavior["bytestring"] = ByteStringBehavior
-    # behavior["__typestr__", "bytestring"] = "bytes"
-    # behavior["string"] = StringBehavior
-    # behavior["__typestr__", "string"] = "string"
+    behavior["bytestring"] = ByteStringBehavior
+    behavior["__typestr__", "bytestring"] = "bytes"
+    behavior["string"] = StringBehavior
+    behavior["__typestr__", "string"] = "string"
 
-    # behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
-    # behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
-    # behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
+    behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
+    behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
+    behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
     behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
 
-    # behavior["__broadcast__", "bytestring"] = _string_broadcast
-    # behavior["__broadcast__", "string"] = _string_broadcast
+    behavior["__broadcast__", "bytestring"] = _string_broadcast
+    behavior["__broadcast__", "string"] = _string_broadcast
 
     behavior["__numba_typer__", "bytestring"] = _string_numba_typer
     behavior["__numba_lower__", "bytestring"] = _string_numba_lower

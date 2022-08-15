@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
@@ -13,7 +12,7 @@
 
 namespace awkward {
   const BuilderPtr
-  TupleBuilder::fromempty(const ArrayBuilderOptions& options) {
+  TupleBuilder::fromempty(const BuilderOptions& options) {
     return std::make_shared<TupleBuilder>(options,
                                           std::vector<BuilderPtr>(),
                                           -1,
@@ -21,7 +20,7 @@ namespace awkward {
                                           -1);
   }
 
-  TupleBuilder::TupleBuilder(const ArrayBuilderOptions& options,
+  TupleBuilder::TupleBuilder(const BuilderOptions& options,
                              const std::vector<BuilderPtr>& contents,
                              int64_t length,
                              bool begun,

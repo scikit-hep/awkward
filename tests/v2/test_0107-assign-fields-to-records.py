@@ -4,12 +4,11 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
-@pytest.mark.skip(reason="FIXME:  setitem changes in v2")
 def test_record():
-    array1 = ak._v2.operations.convert.from_iter(
+    array1 = ak._v2.operations.from_iter(
         [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], highlevel=False
     )
     assert to_list(array1) == [
@@ -18,8 +17,10 @@ def test_record():
         {"x": 3, "y": 3.3},
     ]
 
-    array2 = array1.setitem_field(
-        "z", ak._v2.operations.convert.from_iter([[], [1], [2, 2]], highlevel=False)
+    array2 = ak._v2.operations.with_field(
+        array1,
+        ak._v2.operations.from_iter([[], [1], [2, 2]], highlevel=False),
+        "z",
     )
     assert to_list(array2) == [
         {"x": 1, "y": 1.1, "z": []},
@@ -27,8 +28,8 @@ def test_record():
         {"x": 3, "y": 3.3, "z": [2, 2]},
     ]
 
-    array3 = array1.setitem_field(
-        None, ak._v2.operations.convert.from_iter([[], [1], [2, 2]], highlevel=False)
+    array3 = ak._v2.operations.with_field(
+        array1, ak._v2.operations.from_iter([[], [1], [2, 2]], highlevel=False)
     )
     assert to_list(array3) == [
         {"x": 1, "y": 1.1, "2": []},
@@ -36,8 +37,10 @@ def test_record():
         {"x": 3, "y": 3.3, "2": [2, 2]},
     ]
 
-    array3 = array1.setitem_field(
-        0, ak._v2.operations.convert.from_iter([[], [1], [2, 2]], highlevel=False)
+    array3 = ak._v2.operations.with_field(
+        array1,
+        ak._v2.operations.from_iter([[], [1], [2, 2]], highlevel=False),
+        "0",
     )
     assert to_list(array3) == [
         {"x": 1, "y": 1.1, "0": []},
@@ -45,13 +48,15 @@ def test_record():
         {"x": 3, "y": 3.3, "0": [2, 2]},
     ]
 
-    array1 = ak._v2.operations.convert.from_iter(
+    array1 = ak._v2.operations.from_iter(
         [(1, 1.1), (2, 2.2), (3, 3.3)], highlevel=False
     )
     assert to_list(array1) == [(1, 1.1), (2, 2.2), (3, 3.3)]
 
-    array2 = array1.setitem_field(
-        "z", ak._v2.operations.convert.from_iter([[], [1], [2, 2]], highlevel=False)
+    array2 = ak._v2.operations.with_field(
+        array1,
+        ak._v2.operations.from_iter([[], [1], [2, 2]], highlevel=False),
+        "z",
     )
     assert to_list(array2) == [
         {"0": 1, "1": 1.1, "z": []},
@@ -59,36 +64,54 @@ def test_record():
         {"0": 3, "1": 3.3, "z": [2, 2]},
     ]
 
-    array3 = array1.setitem_field(
-        None, ak._v2.operations.convert.from_iter([[], [1], [2, 2]], highlevel=False)
+    array3 = ak._v2.operations.with_field(
+        array1, ak._v2.operations.from_iter([[], [1], [2, 2]], highlevel=False)
     )
     assert to_list(array3) == [(1, 1.1, []), (2, 2.2, [1]), (3, 3.3, [2, 2])]
 
-    array3 = array1.setitem_field(
-        0, ak._v2.operations.convert.from_iter([[], [1], [2, 2]], highlevel=False)
+    array3 = ak._v2.operations.with_field(
+        array1,
+        ak._v2.operations.from_iter([[], [1], [2, 2]], highlevel=False),
+        "0",
     )
-    assert to_list(array3) == [([], 1, 1.1), ([1], 2, 2.2), ([2, 2], 3, 3.3)]
+    assert to_list(array3) == [
+        {"0": [], "1": 1.1},
+        {"0": [1], "1": 2.2},
+        {"0": [2, 2], "1": 3.3},
+    ]
 
-    array3 = array1.setitem_field(
-        1, ak._v2.operations.convert.from_iter([[], [1], [2, 2]], highlevel=False)
+    array3 = ak._v2.operations.with_field(
+        array1,
+        ak._v2.operations.from_iter([[], [1], [2, 2]], highlevel=False),
+        "1",
     )
-    assert to_list(array3) == [(1, [], 1.1), (2, [1], 2.2), (3, [2, 2], 3.3)]
+    assert to_list(array3) == [
+        {"0": 1, "1": []},
+        {"0": 2, "1": [1]},
+        {"0": 3, "1": [2, 2]},
+    ]
 
-    array3 = array1.setitem_field(
-        100, ak._v2.operations.convert.from_iter([[], [1], [2, 2]], highlevel=False)
+    array3 = ak._v2.operations.with_field(
+        array1,
+        ak._v2.operations.from_iter([[], [1], [2, 2]], highlevel=False),
+        "100",
     )
-    assert to_list(array3) == [(1, 1.1, []), (2, 2.2, [1]), (3, 3.3, [2, 2])]
+    assert to_list(array3) == [
+        {"0": 1, "1": 1.1, "100": []},
+        {"0": 2, "1": 2.2, "100": [1]},
+        {"0": 3, "1": 3.3, "100": [2, 2]},
+    ]
 
 
 def test_withfield():
     base = ak._v2.Array([{"x": 1}, {"x": 2}, {"x": 3}], check_valid=True)
     what = ak._v2.Array([1.1, 2.2, 3.3], check_valid=True)
-    assert to_list(ak._v2.operations.structure.with_field(base, what)) == [
+    assert to_list(ak._v2.operations.with_field(base, what)) == [
         {"x": 1, "1": 1.1},
         {"x": 2, "1": 2.2},
         {"x": 3, "1": 3.3},
     ]
-    assert to_list(ak._v2.operations.structure.with_field(base, what, where="y")) == [
+    assert to_list(ak._v2.operations.with_field(base, what, where="y")) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
         {"x": 3, "y": 3.3},
@@ -109,7 +132,7 @@ def test_withfield():
     ]
 
     base = ak._v2.Array([{"x": 1}, {"x": 2}, {"x": 3}], check_valid=True)[2]
-    assert to_list(ak._v2.operations.structure.with_field(base, 100, "y")) == {
+    assert to_list(ak._v2.operations.with_field(base, 100, "y")) == {
         "x": 3,
         "y": 100,
     }
@@ -128,9 +151,7 @@ def test_regulararray():
     regulararray2 = ak._v2.Array(
         ak._v2.contents.RegularArray(content2, 1, zeros_length=0), check_valid=True
     )
-    assert to_list(
-        ak._v2.operations.structure.with_field(regulararray, regulararray2, "y")
-    ) == [
+    assert to_list(ak._v2.operations.with_field(regulararray, regulararray2, "y")) == [
         [{"x": 0.0, "y": 100}, {"x": 1.1, "y": 100}, {"x": 2.2, "y": 100}],
         [{"x": 3.3, "y": 200}, {"x": 4.4, "y": 200}, {"x": 5.5, "y": 200}],
         [{"x": 6.6, "y": 300}, {"x": 7.7, "y": 300}, {"x": 8.8, "y": 300}],
@@ -142,9 +163,7 @@ def test_regulararray():
     regulararray2 = ak._v2.Array(
         ak._v2.contents.RegularArray(content2, 3, zeros_length=0), check_valid=True
     )
-    assert to_list(
-        ak._v2.operations.structure.with_field(regulararray, regulararray2, "y")
-    ) == [
+    assert to_list(ak._v2.operations.with_field(regulararray, regulararray2, "y")) == [
         [{"x": 0.0, "y": 100}, {"x": 1.1, "y": 200}, {"x": 2.2, "y": 300}],
         [{"x": 3.3, "y": 400}, {"x": 4.4, "y": 500}, {"x": 5.5, "y": 600}],
         [{"x": 6.6, "y": 700}, {"x": 7.7, "y": 800}, {"x": 8.8, "y": 900}],
@@ -153,9 +172,7 @@ def test_regulararray():
     content2 = ak._v2.Array(
         ak._v2.contents.NumpyArray(np.array([[100], [200], [300]])), check_valid=True
     )
-    assert to_list(
-        ak._v2.operations.structure.with_field(regulararray, content2, "y")
-    ) == [
+    assert to_list(ak._v2.operations.with_field(regulararray, content2, "y")) == [
         [{"x": 0.0, "y": 100}, {"x": 1.1, "y": 100}, {"x": 2.2, "y": 100}],
         [{"x": 3.3, "y": 200}, {"x": 4.4, "y": 200}, {"x": 5.5, "y": 200}],
         [{"x": 6.6, "y": 300}, {"x": 7.7, "y": 300}, {"x": 8.8, "y": 300}],
@@ -167,9 +184,7 @@ def test_regulararray():
         ),
         check_valid=True,
     )
-    assert to_list(
-        ak._v2.operations.structure.with_field(regulararray, content2, "y")
-    ) == [
+    assert to_list(ak._v2.operations.with_field(regulararray, content2, "y")) == [
         [{"x": 0.0, "y": 100}, {"x": 1.1, "y": 200}, {"x": 2.2, "y": 300}],
         [{"x": 3.3, "y": 400}, {"x": 4.4, "y": 500}, {"x": 5.5, "y": 600}],
         [{"x": 6.6, "y": 700}, {"x": 7.7, "y": 800}, {"x": 8.8, "y": 900}],
@@ -181,22 +196,20 @@ def test_listarray():
         [[{"x": 1}, {"x": 2}, {"x": 3}], [], [{"x": 4}, {"x": 5}]], check_valid=True
     )
     two = ak._v2.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
-    assert to_list(ak._v2.operations.structure.with_field(one, two, "y")) == [
+    assert to_list(ak._v2.operations.with_field(one, two, "y")) == [
         [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
         [],
         [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
     ]
 
     three = ak._v2.Array([100, 200, 300], check_valid=True)
-    assert to_list(ak._v2.operations.structure.with_field(one, three, "y")) == [
+    assert to_list(ak._v2.operations.with_field(one, three, "y")) == [
         [{"x": 1, "y": 100}, {"x": 2, "y": 100}, {"x": 3, "y": 100}],
         [],
         [{"x": 4, "y": 300}, {"x": 5, "y": 300}],
     ]
 
-    assert to_list(
-        ak._v2.operations.structure.with_field(one, [100, 200, 300], "y")
-    ) == [
+    assert to_list(ak._v2.operations.with_field(one, [100, 200, 300], "y")) == [
         [{"x": 1, "y": 100}, {"x": 2, "y": 100}, {"x": 3, "y": 100}],
         [],
         [{"x": 4, "y": 300}, {"x": 5, "y": 300}],

@@ -103,6 +103,15 @@ class EmptyArray(Content):
         else:
             raise ak._v2._util.indexerror(self, carry.data, "array is empty")
 
+    def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
+        raise ak._v2._util.indexerror(
+            self,
+            ak._v2.contents.ListArray(
+                slicestarts, slicestops, slicecontent, None, None, self._nplike
+            ),
+            "too many jagged slice dimensions for array",
+        )
+
     def _getitem_next(self, head, tail, advanced):
         if head == ():
             return self
@@ -176,10 +185,10 @@ class EmptyArray(Content):
             tail_others = others[1:]
             return others[0].mergemany(tail_others)
 
-    def fillna(self, value):
+    def fill_none(self, value):
         return EmptyArray(None, self._parameters, self._nplike)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         return ak._v2.contents.numpyarray.NumpyArray(
             self._nplike.empty(0, np.int64), None, None, self._nplike
         )
@@ -253,7 +262,7 @@ class EmptyArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         return ""
 
     def _nbytes_part(self):
@@ -261,20 +270,24 @@ class EmptyArray(Content):
             return self.identifier._nbytes_part()
         return 0
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ak._v2._util.error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
             )
         else:
-            return self.rpad_axis0(target, True)
+            return self.pad_none_axis0(target, True)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if options["emptyarray_to"] is None:
             return pyarrow.Array.from_buffers(
                 ak._v2._connect.pyarrow.to_awkwardarrow_type(
-                    pyarrow.null(), options["extensionarray"], mask_node, self
+                    pyarrow.null(),
+                    options["extensionarray"],
+                    options["record_is_scalar"],
+                    mask_node,
+                    self,
                 ),
                 length,
                 [
@@ -300,7 +313,7 @@ class EmptyArray(Content):
         return []
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if options["return_array"]:
 
@@ -334,18 +347,11 @@ class EmptyArray(Content):
     def packed(self):
         return self
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         return []
 
     def _to_nplike(self, nplike):
         return EmptyArray(self._identifier, self._parameters, nplike=nplike)
 
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        return []
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return True

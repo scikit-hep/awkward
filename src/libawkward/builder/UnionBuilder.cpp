@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/BoolBuilder.h"
 #include "awkward/builder/DatetimeBuilder.h"
@@ -20,16 +19,16 @@
 
 namespace awkward {
   const BuilderPtr
-  UnionBuilder::fromsingle(const ArrayBuilderOptions& options,
+  UnionBuilder::fromsingle(const BuilderOptions& options,
                            const BuilderPtr& firstcontent) {
     std::vector<BuilderPtr> contents({ firstcontent });
     return std::make_shared<UnionBuilder>(options,
-                                          GrowableBuffer<int8_t>::full(options, 0, (size_t)firstcontent->length()),
-                                          GrowableBuffer<int64_t>::arange(options, (size_t)firstcontent->length()),
+                                          GrowableBuffer<int8_t>::full(options, 0, firstcontent->length()),
+                                          GrowableBuffer<int64_t>::arange(options, firstcontent->length()),
                                           contents);
   }
 
-  UnionBuilder::UnionBuilder(const ArrayBuilderOptions& options,
+  UnionBuilder::UnionBuilder(const BuilderOptions& options,
                              GrowableBuffer<int8_t> tags,
                              GrowableBuffer<int64_t> index,
                              std::vector<BuilderPtr>& contents)
@@ -49,13 +48,15 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(form_key.str() + "-tags",
-                          tags_.ptr().get(),
-                          (int64_t)(tags_.length() * sizeof(int8_t)));
+    tags_.concatenate(
+      reinterpret_cast<int8_t*>(
+        container.empty_buffer(form_key.str() + "-tags",
+        tags_.length() * (int64_t)sizeof(int8_t))));
 
-    container.copy_buffer(form_key.str() + "-index",
-                          index_.ptr().get(),
-                          (int64_t)(index_.length() * sizeof(int64_t)));
+    index_.concatenate(
+      reinterpret_cast<int64_t*>(
+        container.empty_buffer(form_key.str() + "-index",
+        index_.length() * (int64_t)sizeof(int64_t))));
 
     std::stringstream out;
     out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";

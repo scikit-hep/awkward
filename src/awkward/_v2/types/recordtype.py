@@ -1,10 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import json
 from collections.abc import Iterable
 
-import json
-
 import awkward as ak
+import awkward._v2._prettyprint
 from awkward._v2.types.type import Type
 from awkward._v2.forms.form import _parameters_equal
 
@@ -73,53 +73,105 @@ class RecordType(Type):
 
     _str_parameters_exclude = ("__categorical__", "__record__")
 
-    def __str__(self):
+    def _str(self, indent, compact):
         if self._typestr is not None:
-            out = self._typestr
+            out = [self._typestr]
 
         else:
-            children = [str(x) for x in self._contents]
+            if compact:
+                pre, post = "", ""
+            else:
+                pre, post = "\n" + indent + "    ", "\n" + indent
+
+            children = []
+            for i, x in enumerate(self._contents):
+                if i + 1 < len(self._contents):
+                    if compact:
+                        y = x._str(indent, compact) + [", "]
+                    else:
+                        y = x._str(indent + "    ", compact) + [",\n", indent, "    "]
+                else:
+                    if compact:
+                        y = x._str(indent, compact)
+                    else:
+                        y = x._str(indent + "    ", compact)
+                children.append(y)
+
             params = self._str_parameters()
             name = self.parameter("__record__")
 
+            if name is not None:
+                if (
+                    not ak._v2._prettyprint.is_identifier.match(name)
+                    or name
+                    in (
+                        "unknown",
+                        "string",
+                        "bytes",
+                        "option",
+                        "tuple",
+                        "struct",
+                        "union",
+                        "categorical",
+                    )
+                    or name in ak._v2.types.numpytype._primitive_to_dtype_dict
+                ):
+                    if params is None:
+                        params = 'parameters={"__record__": ' + json.dumps(name) + "}"
+                    else:
+                        params = (
+                            'parameters={"__record__": '
+                            + json.dumps(name)
+                            + ", "
+                            + params[12:]
+                        )
+                    name = None
+
+            if not self.is_tuple:
+                pairs = []
+                for k, v in zip(self._fields, children):
+                    if ak._v2._prettyprint.is_identifier.match(k) is None:
+                        key_str = json.dumps(k)
+                    else:
+                        key_str = k
+                    pairs.append([key_str, ": "] + v)
+                flat_pairs = [y for x in pairs for y in x]
+
             if params is None:
                 if self.is_tuple:
+                    flat_children = [y for x in children for y in x]
                     if name is None:
-                        out = "(" + ", ".join(children) + ")"
+                        out = ["(", pre] + flat_children + [post, ")"]
                     else:
-                        out = name + "[" + ", ".join(children) + "]"
+                        out = [name, "[", pre] + flat_children + [post, "]"]
                 else:
-                    pairs = []
-                    for k, v in zip(self._fields, children):
-                        if ak._v2._prettyprint.is_identifier.match(k) is None:
-                            key_str = repr(k)
-                            if key_str.startswith("u"):
-                                key_str = key_str[1:]
-                        else:
-                            key_str = k
-                        pairs.append(key_str + ": " + v)
                     if name is None:
-                        out = "{" + ", ".join(pairs) + "}"
+                        out = ["{", pre] + flat_pairs + [post, "}"]
                     else:
-                        out = name + "[" + ", ".join(pairs) + "]"
+                        out = [name, "[", pre] + flat_pairs + [post, "]"]
 
             else:
                 if self.is_tuple:
+                    flat_children = [y for x in children for y in x]
                     if name is None:
-                        out = "tuple[[{}], {}]".format(", ".join(children), params)
-                    else:
-                        out = "{}[{}, {}]".format(name, ", ".join(children), params)
-                else:
-                    if name is None:
-                        fields = [json.dumps(x) for x in self._fields]
-                        out = "struct[[{}], [{}], {}]".format(
-                            ", ".join(fields), ", ".join(children), params
+                        out = (
+                            ["tuple[[", pre]
+                            + flat_children
+                            + [post, "], ", params, "]"]
                         )
                     else:
-                        pairs = [k + ": " + v for k, v in zip(self._fields, children)]
-                        out = "{}[{}, {}]".format(name, ", ".join(pairs), params)
+                        c = "" if len(self._contents) == 0 else ", "
+                        out = [name, "[", pre] + flat_children + [c, post, params, "]"]
+                else:
+                    if name is None:
+                        out = (
+                            ["struct[{", pre] + flat_pairs + [post, "}, ", params, "]"]
+                        )
+                    else:
+                        c = "" if len(self._contents) == 0 else ", "
+                        out = [name, "[", pre] + flat_pairs + [c, post, params, "]"]
 
-        return self._str_categorical_begin() + out + self._str_categorical_end()
+        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._contents), repr(self._fields)] + self._repr_args()

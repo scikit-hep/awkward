@@ -234,17 +234,17 @@ class UnionArray(Content):
             self._field_identifier(where),
             None,
             self._nplike,
-        )
+        ).simplify_uniontype()
 
     def _getitem_fields(self, where, only_fields=()):
         return UnionArray(
             self._tags,
             self._index,
             [x._getitem_fields(where, only_fields) for x in self._contents],
-            self._fields_identifer(where),
+            self._fields_identifier(where),
             None,
             self._nplike,
-        )
+        ).simplify_uniontype()
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak._v2.index.Index)
@@ -253,7 +253,7 @@ class UnionArray(Content):
             nexttags = self._tags[carry.data]
             nextindex = self._index[: self._tags.length][carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err))
+            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
 
         return UnionArray(
             nexttags,
@@ -665,7 +665,9 @@ class UnionArray(Content):
 
         else:
             has_offsets = False
-            offsetsraws = self._nplike.empty(len(self._contents), dtype=np.intp)
+            offsetsraws = self._nplike.index_nplike.empty(
+                len(self._contents), dtype=np.intp
+            )
             contents = []
 
             for i in range(len(self._contents)):
@@ -744,7 +746,7 @@ class UnionArray(Content):
                 )
 
             else:
-                offsets = ak._v2.index.Index64.zeros(1, self._nplike, dtype=np.int64)
+                offsets = ak._v2.index.Index64.zeros(0, self._nplike, dtype=np.int64)
                 return (
                     offsets,
                     UnionArray(
@@ -970,10 +972,10 @@ class UnionArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-    def fillna(self, value):
+    def fill_none(self, value):
         contents = []
         for content in self._contents:
-            contents.append(content.fillna(value))
+            contents.append(content.fill_none(value))
         out = UnionArray(
             self._tags,
             self._index,
@@ -984,14 +986,14 @@ class UnionArray(Content):
         )
         return out.simplify_uniontype(True, False)
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._localindex(posaxis, depth))
+                contents.append(content._local_index(posaxis, depth))
             return UnionArray(
                 self._tags,
                 self._index,
@@ -1129,7 +1131,7 @@ class UnionArray(Content):
             keepdims,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         for i in range(len(self.contents)):
             if isinstance(self.contents[i], ak._v2.contents.unionarray.UnionArray):
                 return "{} contains {}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
@@ -1138,7 +1140,9 @@ class UnionArray(Content):
             if self._nplike.known_shape and self.index.length < self.tags.length:
                 return f'at {path} ("{type(self)}"): len(index) < len(tags)'
 
-            lencontents = self._nplike.empty(len(self.contents), dtype=np.int64)
+            lencontents = self._nplike.index_nplike.empty(
+                len(self.contents), dtype=np.int64
+            )
             if self._nplike.known_shape:
                 for i in range(len(self.contents)):
                     lencontents[i] = self.contents[i].length
@@ -1169,7 +1173,7 @@ class UnionArray(Content):
                 )
 
             for i in range(len(self.contents)):
-                sub = self.contents[i].validityerror(path + f".content({i})")
+                sub = self.contents[i].validity_error(path + f".content({i})")
                 if sub != "":
                     return sub
 
@@ -1183,14 +1187,14 @@ class UnionArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._rpad(target, posaxis, depth, clip))
+                contents.append(content._pad_none(target, posaxis, depth, clip))
             out = ak._v2.contents.unionarray.UnionArray(
                 self.tags,
                 self.index,
@@ -1260,7 +1264,11 @@ class UnionArray(Content):
 
         return pyarrow.Array.from_buffers(
             ak._v2._connect.pyarrow.to_awkwardarrow_type(
-                types, options["extensionarray"], None, self
+                types,
+                options["extensionarray"],
+                options["record_is_scalar"],
+                None,
+                self,
             ),
             nptags.shape[0],
             [
@@ -1273,26 +1281,24 @@ class UnionArray(Content):
 
     def _to_numpy(self, allow_missing):
         contents = [
-            ak._v2.operations.convert.to_numpy(
-                self.project(i), allow_missing=allow_missing
-            )
+            ak._v2.operations.to_numpy(self.project(i), allow_missing=allow_missing)
             for i in range(len(self.contents))
         ]
 
         if any(isinstance(x, self._nplike.ma.MaskedArray) for x in contents):
             try:
                 out = self._nplike.ma.concatenate(contents)
-            except Exception:
+            except Exception as err:
                 raise ak._v2._util.error(
                     ValueError(f"cannot convert {self} into numpy.ma.MaskedArray")
-                )
+                ) from err
         else:
             try:
                 out = numpy.concatenate(contents)
-            except Exception:
+            except Exception as err:
                 raise ak._v2._util.error(
                     ValueError(f"cannot convert {self} into np.ndarray")
-                )
+                ) from err
 
         tags = numpy.asarray(self.tags)
         for tag, content in enumerate(contents):
@@ -1312,7 +1318,7 @@ class UnionArray(Content):
         return out
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if options["return_array"]:
 
@@ -1323,6 +1329,7 @@ class UnionArray(Content):
                     [
                         content._recursively_apply(
                             action,
+                            behavior,
                             depth,
                             copy.copy(depth_context),
                             lateral_context,
@@ -1341,6 +1348,7 @@ class UnionArray(Content):
                 for content in self._contents:
                     content._recursively_apply(
                         action,
+                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1371,33 +1379,35 @@ class UnionArray(Content):
 
         for tag in range(len(self._contents)):
             is_tag = tags == tag
-            num_tag = self._nplike.count_nonzero(is_tag)
+            num_tag = self._nplike.index_nplike.count_nonzero(is_tag)
 
             if len(contents[tag]) > num_tag:
                 if original_index is index:
                     index = index.copy()
-                index[is_tag] = self._nplike.arange(num_tag, dtype=index.dtype)
+                index[is_tag] = self._nplike.index_nplike.arange(
+                    num_tag, dtype=index.dtype
+                )
                 contents[tag] = self.project(tag)
 
             contents[tag] = contents[tag].packed()
 
         return UnionArray(
-            ak._v2.index.Index8(tags),
-            ak._v2.index.Index(index),
+            ak._v2.index.Index8(tags, nplike=self.nplike),
+            ak._v2.index.Index(index, nplike=self.nplike),
             contents,
             self._identifier,
             self._parameters,
             self._nplike,
         )
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
         tags = self._tags.raw(numpy)
         index = self._index.raw(numpy)
-        contents = [x._to_list(behavior) for x in self._contents]
+        contents = [x._to_list(behavior, json_conversions) for x in self._contents]
 
         out = [None] * tags.shape[0]
         for i, tag in enumerate(tags):
@@ -1416,32 +1426,17 @@ class UnionArray(Content):
             nplike=nplike,
         )
 
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        out = self._to_json_custom()
-        if out is not None:
-            return out
-
-        tags = self._tags.raw(numpy)
-        index = self._index.raw(numpy)
-        contents = [
-            x._to_json(
-                nan_string,
-                infinity_string,
-                minus_infinity_string,
-                complex_real_string,
-                complex_imag_string,
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.tags == other.tags
+            and self.index.layout_equal(other.index, index_dtype, numpyarray)
+            and len(self.contents) == len(other.contents)
+            and all(
+                [
+                    self.contents[i].layout_equal(
+                        other.contents[i], index_dtype, numpyarray
+                    )
+                    for i in range(len(self.contents))
+                ]
             )
-            for x in self._contents
-        ]
-
-        out = [None] * tags.shape[0]
-        for i, tag in enumerate(tags):
-            out[i] = contents[tag][index[i]]
-        return out
+        )

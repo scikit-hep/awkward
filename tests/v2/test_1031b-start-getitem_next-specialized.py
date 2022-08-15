@@ -4,14 +4,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_NumpyArray():
     a = ak._v2.contents.RegularArray(
-        ak._v2.operations.convert.from_numpy(
-            np.arange(2 * 3 * 5).reshape(-1, 5)
-        ).layout,
+        ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
         3,
     )
     assert to_list(a[1]) == [
@@ -49,9 +47,7 @@ def test_NumpyArray():
 
 def test_RegularArray():
     new = ak._v2.contents.RegularArray(
-        ak._v2.operations.convert.from_numpy(
-            np.arange(2 * 3 * 5).reshape(-1, 5)
-        ).layout,
+        ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
         3,
     )
 
@@ -96,6 +92,15 @@ def test_RegularArray():
     assert to_list(new[[1, 0]]) == expectation
 
     assert to_list(new[1, [2, 0]]) == [[25, 26, 27, 28, 29], [15, 16, 17, 18, 19]]
+
+    array = ak._v2.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    assert (
+        repr(array[[True, False, True]])
+        == "<Array [[1.1, 2.2, 3.3], [4.4, 5.5]] type='2 * var * float64'>"
+    )
+    assert (
+        repr(array[[True, False, True], 1]) == "<Array [2.2, 5.5] type='2 * float64'>"
+    )
 
 
 def test_RecordArray():
@@ -212,13 +217,13 @@ def test_UnionArray():
         ak._v2.index.Index64(np.array([1, 0], np.int64)),
         [
             ak._v2.contents.RegularArray(
-                ak._v2.operations.convert.from_numpy(
+                ak._v2.operations.from_numpy(
                     np.arange(2 * 3 * 5).reshape(-1, 5)
                 ).layout,
                 3,
             ),
             ak._v2.contents.RegularArray(
-                ak._v2.operations.convert.from_numpy(
+                ak._v2.operations.from_numpy(
                     np.arange(2 * 3 * 5).reshape(-1, 5)
                 ).layout,
                 3,
@@ -279,9 +284,7 @@ def test_IndexedArray():
     new = ak._v2.contents.IndexedArray(
         ak._v2.index.Index64(np.array([1, 0], np.int64)),
         ak._v2.contents.RegularArray(
-            ak._v2.operations.convert.from_numpy(
-                np.arange(2 * 3 * 5).reshape(-1, 5)
-            ).layout,
+            ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
             3,
         ),
     )

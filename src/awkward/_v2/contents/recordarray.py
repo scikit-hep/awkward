@@ -353,13 +353,13 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._nplike.any(negative, prefer=False):
+            if self._nplike.index_nplike.any(negative, prefer=False):
                 where[negative] += self._length
 
-            if self._nplike.any(where >= self._length, prefer=False):
+            if self._nplike.index_nplike.any(where >= self._length, prefer=False):
                 raise ak._v2._util.indexerror(self, where)
 
-            nextindex = ak._v2.index.Index64(where)
+            nextindex = ak._v2.index.Index64(where, nplike=self.nplike)
             return ak._v2.contents.indexedarray.IndexedArray(
                 nextindex,
                 self,
@@ -444,7 +444,7 @@ class RecordArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            npsingle = self._nplike.full((1,), self.length, np.int64)
+            npsingle = self._nplike.index_nplike.full((1,), self.length, np.int64)
             single = ak._v2.index.Index64(npsingle, nplike=self._nplike)
             singleton = ak._v2.contents.numpyarray.NumpyArray(
                 single, None, None, self._nplike
@@ -677,10 +677,10 @@ class RecordArray(Content):
             )
         )
 
-    def fillna(self, value):
+    def fill_none(self, value):
         contents = []
         for content in self._contents:
-            contents.append(content.fillna(value))
+            contents.append(content.fill_none(value))
         return RecordArray(
             contents,
             self._fields,
@@ -690,14 +690,14 @@ class RecordArray(Content):
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._localindex(posaxis, depth))
+                contents.append(content._local_index(posaxis, depth))
             return RecordArray(
                 contents,
                 self._fields,
@@ -825,12 +825,12 @@ class RecordArray(Content):
             self._nplike,
         )
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
             if cont.length < self.length:
                 return f'at {path} ("{type(self)}"): len(field({i})) < len(recordarray)'
         for i, cont in enumerate(self.contents):
-            sub = cont.validityerror(f"{path}.field({i})")
+            sub = cont.validity_error(f"{path}.field({i})")
             if sub != "":
                 return sub
         return ""
@@ -843,14 +843,14 @@ class RecordArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
         else:
             contents = []
             for content in self._contents:
-                contents.append(content._rpad(target, posaxis, depth, clip))
+                contents.append(content._pad_none(target, posaxis, depth, clip))
             if len(contents) == 0:
                 return ak._v2.contents.recordarray.RecordArray(
                     contents,
@@ -889,7 +889,11 @@ class RecordArray(Content):
 
         return pyarrow.Array.from_buffers(
             ak._v2._connect.pyarrow.to_awkwardarrow_type(
-                types, options["extensionarray"], mask_node, self
+                types,
+                options["extensionarray"],
+                options["record_is_scalar"],
+                mask_node,
+                self,
             ),
             length,
             [ak._v2._connect.pyarrow.to_validbits(validbytes)],
@@ -912,7 +916,7 @@ class RecordArray(Content):
         for n, x in zip(self.fields, contents):
             if isinstance(x, self._nplike.ma.MaskedArray):
                 if mask is None:
-                    mask = self._nplike.ma.zeros(
+                    mask = self._nplike.index_nplike.ma.zeros(
                         self.length, [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
@@ -943,21 +947,33 @@ class RecordArray(Content):
             )
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
+        if self._nplike.known_shape:
+            contents = [x[: self._length] for x in self._contents]
+        else:
+            contents = self._contents
+
         if options["return_array"]:
 
             def continuation():
+                if not options["allow_records"]:
+                    raise ak._v2._util.error(
+                        ValueError(
+                            f"cannot broadcast records in {options['function_name']}"
+                        )
+                    )
                 return RecordArray(
                     [
                         content._recursively_apply(
                             action,
+                            behavior,
                             depth,
                             copy.copy(depth_context),
                             lateral_context,
                             options,
                         )
-                        for content in self._contents
+                        for content in contents
                     ],
                     self._fields,
                     self._length,
@@ -969,9 +985,10 @@ class RecordArray(Content):
         else:
 
             def continuation():
-                for content in self._contents:
+                for content in contents:
                     content._recursively_apply(
                         action,
+                        behavior,
                         depth,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1007,21 +1024,13 @@ class RecordArray(Content):
             self._nplike,
         )
 
-    def _to_list(self, behavior):
-        out = self._to_list_custom(behavior)
+    def _to_list(self, behavior, json_conversions):
+        out = self._to_list_custom(behavior, json_conversions)
         if out is not None:
             return out
 
-        cls = ak._v2._util.recordclass(self, behavior)
-        if cls is not ak._v2.highlevel.Record:
-            length = self._length
-            out = [None] * length
-            for i in range(length):
-                out[i] = cls(self[i])
-            return out
-
-        if self.is_tuple:
-            contents = [x._to_list(behavior) for x in self._contents]
+        if self.is_tuple and json_conversions is None:
+            contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             length = self._length
             out = [None] * length
             for i in range(length):
@@ -1030,7 +1039,9 @@ class RecordArray(Content):
 
         else:
             fields = self._fields
-            contents = [x._to_list(behavior) for x in self._contents]
+            if fields is None:
+                fields = [str(i) for i in range(len(self._contents))]
+            contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             length = self._length
             out = [None] * length
             for i in range(length):
@@ -1048,60 +1059,16 @@ class RecordArray(Content):
             nplike=nplike,
         )
 
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        out = self._to_json_custom()
-        if out is not None:
-            return out
-
-        cls = ak._v2._util.recordclass(self, None)
-        if cls is not ak._v2.highlevel.Record:
-            length = self._length
-            out = [None] * length
-            for i in range(length):
-                out[i] = cls(self[i])
-            return out
-
-        if self.is_tuple:
-            contents = [
-                x._to_json(
-                    nan_string,
-                    infinity_string,
-                    minus_infinity_string,
-                    complex_real_string,
-                    complex_imag_string,
-                )
-                for x in self._contents
-            ]
-            length = self._length
-            out = [None] * length
-            fields = []
-            for i in range(length):
-                fields.append(str(i))
-            for i in range(length):
-                out[i] = dict(zip(fields, [x[i] for x in contents]))
-            return out
-
-        else:
-            fields = self._fields
-            contents = [
-                x._to_json(
-                    nan_string,
-                    infinity_string,
-                    minus_infinity_string,
-                    complex_real_string,
-                    complex_imag_string,
-                )
-                for x in self._contents
-            ]
-            length = self._length
-            out = [None] * length
-            for i in range(length):
-                out[i] = dict(zip(fields, [x[i] for x in contents]))
-            return out
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return (
+            self.fields == other.fields
+            and len(self.contents) == len(other.contents)
+            and all(
+                [
+                    self.contents[i].layout_equal(
+                        other.contents[i], index_dtype, numpyarray
+                    )
+                    for i in range(len(self.contents))
+                ]
+            )
+        )

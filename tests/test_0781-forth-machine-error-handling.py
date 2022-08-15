@@ -92,3 +92,12 @@ again
         str(err.value)
         == "'user halt' in AwkwardForth runtime: user-defined error or stopping condition"
     )
+
+
+def test_mac_endian_bug():
+    a = "input stream output out float64 stream !d-> out"
+    b = np.array([1.34452], np.dtype("float64"))
+    c = awkward.forth.ForthMachine64(a)
+    c.run({"stream": np.array(b)})
+    out = c.output_NumpyArray("out")
+    assert out[0] == pytest.approx(1.35535e-62)

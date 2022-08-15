@@ -17,8 +17,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 def code_to_function(code, function_name, externals=None, debug=False):
     if debug:
-        print("################### " + function_name)  # noqa: T001
-        print(code)  # noqa: T001
+        print("################### " + function_name)  # noqa: T201
+        print(code)  # noqa: T201
     namespace = {} if externals is None else dict(externals)
     exec(code, namespace)
     return namespace[function_name]
@@ -907,12 +907,12 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
                     def generic(self, args, kwargs):
                         if len(kwargs) == 0:
-                            sig = typer(recordviewtype, args)
+                            sig = typer(recordviewtype, args)  # noqa: B023
                             sig = numba.core.typing.templates.Signature(
                                 sig.return_type, sig.args, recordviewtype
                             )
                             numba.extending.lower_builtin(
-                                methodname,
+                                methodname,  # noqa: B023
                                 recordviewtype,
                                 *[
                                     x.literal_type
@@ -920,7 +920,9 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                                     else x
                                     for x in args
                                 ],
-                            )(lower)
+                            )(
+                                lower  # noqa: B023
+                            )
                             return sig
 
                 return numba.types.BoundFunction(type_method, recordviewtype)

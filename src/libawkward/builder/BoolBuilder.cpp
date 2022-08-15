@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 
@@ -12,12 +11,12 @@
 
 namespace awkward {
   const BuilderPtr
-  BoolBuilder::fromempty(const ArrayBuilderOptions& options) {
+  BoolBuilder::fromempty(const BuilderOptions& options) {
     return std::make_shared<BoolBuilder>(options,
                                          std::move(GrowableBuffer<uint8_t>::empty(options)));
   }
 
-  BoolBuilder::BoolBuilder(const ArrayBuilderOptions& options,
+  BoolBuilder::BoolBuilder(const BuilderOptions& options,
                            GrowableBuffer<uint8_t> buffer)
       : options_(options)
       , buffer_(std::move(buffer)) { }
@@ -32,9 +31,10 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(form_key.str() + "-data",
-                          buffer_.ptr().get(),
-                          (int64_t)(buffer_.length() * sizeof(bool)));
+    buffer_.concatenate(
+      reinterpret_cast<uint8_t*>(
+        container.empty_buffer(form_key.str() + "-data",
+        buffer_.length() * (int64_t)sizeof(bool))));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"bool\", \"form_key\": \""
            + form_key.str() + "\"}";

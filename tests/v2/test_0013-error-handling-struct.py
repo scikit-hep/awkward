@@ -132,16 +132,16 @@ def test_listarray_numpyarray():
     with pytest.raises(IndexError):
         array[1:][2, -20]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[2, [1, 0, 0, 20]]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[2, [1, 0, 0, -20]]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[1:][2, [0, 20]]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         array[1:][2, [0, -20]]
 
 

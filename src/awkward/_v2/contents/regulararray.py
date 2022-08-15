@@ -33,7 +33,7 @@ class RegularArray(Content):
                 )
             )
         if not isinstance(size, ak._v2._typetracer.UnknownLengthType):
-            if not (ak._util.isint(size) and size >= 0):
+            if not (ak._v2._util.isint(size) and size >= 0):
                 raise ak._v2._util.error(
                     TypeError(
                         "{} 'size' must be a non-negative integer, not {}".format(
@@ -44,7 +44,7 @@ class RegularArray(Content):
             else:
                 size = int(size)
         if not isinstance(zeros_length, ak._v2._typetracer.UnknownLengthType):
-            if not (ak._util.isint(zeros_length) and zeros_length >= 0):
+            if not (ak._v2._util.isint(zeros_length) and zeros_length >= 0):
                 raise ak._v2._util.error(
                     TypeError(
                         "{} 'zeros_length' must be a non-negative integer, not {}".format(
@@ -151,9 +151,9 @@ class RegularArray(Content):
     def maybe_toNumpyArray(self):
         content = None
         if isinstance(self._content, ak._v2.contents.NumpyArray):
-            content = self._content
+            content = self._content[: self._length * self._size]
         elif isinstance(self._content, RegularArray):
-            content = self._content.maybe_toNumpyArray()
+            content = self._content[: self._length * self._size].maybe_toNumpyArray()
 
         if isinstance(content, ak._v2.contents.NumpyArray):
             shape = (self._length, self._size) + content.data.shape[1:]
@@ -226,13 +226,13 @@ class RegularArray(Content):
             copied = True
 
         negative = where < 0
-        if self._nplike.any(negative, prefer=False):
+        if self._nplike.index_nplike.any(negative, prefer=False):
             if not copied:
                 where = where.copy()
                 copied = True
             where[negative] += self._length
 
-        if self._nplike.any(where >= self._length, prefer=False):
+        if self._nplike.index_nplike.any(where >= self._length, prefer=False):
             raise ak._v2._util.indexerror(self, where)
 
         nextcarry = ak._v2.index.Index64.empty(
@@ -251,7 +251,7 @@ class RegularArray(Content):
                 where.shape[0],
                 self._size,
             ),
-            carry,
+            slicer=carry,
         )
 
         return RegularArray(
@@ -362,7 +362,7 @@ class RegularArray(Content):
                     self._length,
                     self._size,
                 ),
-                head,
+                slicer=head,
             )
             nextcontent = self._content._carry(nextcarry, True)
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
@@ -399,7 +399,7 @@ class RegularArray(Content):
                     self._size,
                     nextsize,
                 ),
-                head,
+                slicer=head,
             )
 
             nextcontent = self._content._carry(nextcarry, True)
@@ -433,7 +433,7 @@ class RegularArray(Content):
                         self._length,
                         nextsize,
                     ),
-                    head,
+                    slicer=head,
                 )
                 return RegularArray(
                     nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
@@ -459,7 +459,7 @@ class RegularArray(Content):
         elif isinstance(head, ak._v2.index.Index64):
             head = head._to_nplike(self.nplike)
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
-            flathead = self._nplike.asarray(head.data.reshape(-1))
+            flathead = self._nplike.index_nplike.asarray(head.data.reshape(-1))
 
             regular_flathead = ak._v2.index.Index64.empty(
                 flathead.shape[0], self._nplike
@@ -476,7 +476,7 @@ class RegularArray(Content):
                     flathead.shape[0],
                     self._size,
                 ),
-                head,
+                slicer=head,
             )
 
             if advanced is None or advanced.length == 0:
@@ -505,7 +505,7 @@ class RegularArray(Content):
                         regular_flathead.length,
                         self._size,
                     ),
-                    head,
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
 
@@ -549,7 +549,7 @@ class RegularArray(Content):
                         regular_flathead.length,
                         self._size,
                     ),
-                    head,
+                    slicer=head,
                 )
                 nextcontent = self._content._carry(nextcarry, True)
                 return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
@@ -597,6 +597,7 @@ class RegularArray(Content):
                     head.length,
                     regularlength,
                 ),
+                slicer=head,
             )
             down = self._content._getitem_next_jagged(
                 multistarts, multistops, head._content, tail
@@ -683,9 +684,9 @@ class RegularArray(Content):
             return self
         return self.toListOffsetArray64(True).mergemany(others)
 
-    def fillna(self, value):
+    def fill_none(self, value):
         return RegularArray(
-            self._content.fillna(value),
+            self._content.fill_none(value),
             self._size,
             self._length,
             self._identifier,
@@ -693,10 +694,10 @@ class RegularArray(Content):
             self._nplike,
         )
 
-    def _localindex(self, axis, depth):
+    def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self._localindex_axis0()
+            return self._local_index_axis0()
         elif posaxis == depth + 1:
             localindex = ak._v2.index.Index64.empty(
                 self._length * self._size, self._nplike
@@ -718,7 +719,7 @@ class RegularArray(Content):
             )
         else:
             return ak._v2.contents.RegularArray(
-                self._content._localindex(posaxis, depth + 1),
+                self._content._local_index(posaxis, depth + 1),
                 self._size,
                 self._length,
                 self._identifier,
@@ -868,7 +869,7 @@ class RegularArray(Content):
                     combinationslen = combinationslen // j
 
             totallen = combinationslen * self.length
-            tocarryraw = self._nplike.empty(n, dtype=np.intp)
+            tocarryraw = self._nplike.index_nplike.empty(n, dtype=np.intp)
             tocarry = []
             for i in range(n):
                 ptr = ak._v2.index.Index64.empty(totallen, self._nplike, dtype=np.int64)
@@ -1007,7 +1008,7 @@ class RegularArray(Content):
 
         return out
 
-    def _validityerror(self, path):
+    def _validity_error(self, path):
         if self.size < 0:
             return f'at {path} ("{type(self)}"): size < 0'
         if (
@@ -1016,7 +1017,7 @@ class RegularArray(Content):
         ):
             return ""
         else:
-            return self._content.validityerror(path + ".content")
+            return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
         result = self.content._nbytes_part()
@@ -1024,17 +1025,17 @@ class RegularArray(Content):
             result = result + self.identifier._nbytes_part()
         return result
 
-    def _rpad(self, target, axis, depth, clip):
+    def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            return self.rpad_axis0(target, clip)
+            return self.pad_none_axis0(target, clip)
 
         elif posaxis == depth + 1:
             if not clip:
                 if target < self._size:
                     return self
                 else:
-                    return self._rpad(target, posaxis, depth, True)
+                    return self._pad_none(target, posaxis, depth, True)
 
             else:
                 index = ak._v2.index.Index64.empty(self.length * target, self._nplike)
@@ -1062,7 +1063,7 @@ class RegularArray(Content):
 
         else:
             return ak._v2.contents.regulararray.RegularArray(
-                self._content._rpad(target, posaxis, depth + 1, clip),
+                self._content._pad_none(target, posaxis, depth + 1, clip),
                 self._size,
                 self.length,
                 None,
@@ -1075,9 +1076,7 @@ class RegularArray(Content):
         if array_param in {"bytestring", "string"}:
             return self._nplike.array(self.to_list())
 
-        out = ak._v2.operations.convert.to_numpy(
-            self.content, allow_missing=allow_missing
-        )
+        out = ak._v2.operations.to_numpy(self.content, allow_missing=allow_missing)
         head, tail = out.shape[0], out.shape[1:]
         if self.size == 0:
             shape = (0, 0) + tail
@@ -1102,6 +1101,7 @@ class RegularArray(Content):
                 ak._v2._connect.pyarrow.to_awkwardarrow_type(
                     pyarrow.binary(self._size),
                     options["extensionarray"],
+                    options["record_is_scalar"],
                     mask_node,
                     self,
                 ),
@@ -1125,6 +1125,7 @@ class RegularArray(Content):
                 ak._v2._connect.pyarrow.to_awkwardarrow_type(
                     pyarrow.list_(content_type, self._size),
                     options["extensionarray"],
+                    options["record_is_scalar"],
                     mask_node,
                     self,
                 ),
@@ -1143,20 +1144,26 @@ class RegularArray(Content):
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
         ):
-            return [ak._v2.operations.convert.to_numpy(self)]
+            return [ak._v2.operations.to_numpy(self)]
         else:
             flat = self._content[: self._length * self._size]
             return flat._completely_flatten(nplike, options)
 
     def _recursively_apply(
-        self, action, depth, depth_context, lateral_context, options
+        self, action, behavior, depth, depth_context, lateral_context, options
     ):
+        if self._nplike.known_shape:
+            content = self._content[: self._length * self._size]
+        else:
+            content = self._content
+
         if options["return_array"]:
 
             def continuation():
                 return RegularArray(
-                    self._content._recursively_apply(
+                    content._recursively_apply(
                         action,
+                        behavior,
                         depth + 1,
                         copy.copy(depth_context),
                         lateral_context,
@@ -1172,8 +1179,9 @@ class RegularArray(Content):
         else:
 
             def continuation():
-                self._content._recursively_apply(
+                content._recursively_apply(
                     action,
+                    behavior,
                     depth + 1,
                     copy.copy(depth_context),
                     lateral_context,
@@ -1212,31 +1220,46 @@ class RegularArray(Content):
             self._nplike,
         )
 
-    def _to_list(self, behavior):
+    def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "bytestring":
+            convert_bytes = (
+                None if json_conversions is None else json_conversions["convert_bytes"]
+            )
             content = ak._v2._util.tobytes(self._content.data)
             length, size = self._length, self._size
             out = [None] * length
-            for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size]
+            if convert_bytes is None:
+                for i in range(length):
+                    out[i] = content[(i) * size : (i + 1) * size]
+            else:
+                for i in range(length):
+                    out[i] = convert_bytes(content[(i) * size : (i + 1) * size])
             return out
 
         elif self.parameter("__array__") == "string":
-            content = ak._v2._util.tobytes(self._content.data)
+            data = self._content.data
+            if hasattr(data, "tobytes"):
+
+                def tostring(x):
+                    return x.tobytes().decode(errors="surrogateescape")
+
+            else:
+
+                def tostring(x):
+                    return x.tostring().decode(errors="surrogateescape")
+
             length, size = self._length, self._size
             out = [None] * length
             for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size].decode(
-                    errors="surrogateescape"
-                )
+                out[i] = tostring(data[(i) * size : (i + 1) * size])
             return out
 
         else:
-            out = self._to_list_custom(behavior)
+            out = self._to_list_custom(behavior, json_conversions)
             if out is not None:
                 return out
 
-            content = self._content._to_list(behavior)
+            content = self._content._to_list(behavior, json_conversions)
             length, size = self._length, self._size
             out = [None] * length
             for i in range(length):
@@ -1254,41 +1277,7 @@ class RegularArray(Content):
             nplike=nplike,
         )
 
-    def _to_json(
-        self,
-        nan_string,
-        infinity_string,
-        minus_infinity_string,
-        complex_real_string,
-        complex_imag_string,
-    ):
-        if (
-            self.parameter("__array__") == "bytestring"
-            or self.parameter("__array__") == "string"
-        ):
-            content = ak._v2._util.tobytes(self._content.data)
-            length, size = self._length, self._size
-            out = [None] * length
-            for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size].decode(
-                    errors="surrogateescape"
-                )
-            return out
-
-        else:
-            out = self._to_json_custom()
-            if out is not None:
-                return out
-
-            content = self._content._to_json(
-                nan_string,
-                infinity_string,
-                minus_infinity_string,
-                complex_real_string,
-                complex_imag_string,
-            )
-            length, size = self._length, self._size
-            out = [None] * length
-            for i in range(length):
-                out[i] = content[(i) * size : (i + 1) * size]
-            return out
+    def _layout_equal(self, other, index_dtype=True, numpyarray=True):
+        return self.size == other.size and self.content.layout_equal(
+            self.content, index_dtype, numpyarray
+        )

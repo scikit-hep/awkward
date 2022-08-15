@@ -22,7 +22,7 @@ def test_unmasked():
     content = ak._v2.highlevel.Array([{"x": 1}, {"x": 2}, {"x": 3}]).layout
     unmasked = ak._v2.contents.UnmaskedArray(content)
     array = ak._v2.highlevel.Array(unmasked)
-    assert ak._v2.operations.convert.to_list(find_it(array)) == {"x": 3}
+    assert ak._v2.operations.to_list(find_it(array)) == {"x": 3}
 
 
 def test_indexedoption():
@@ -36,7 +36,7 @@ def test_indexedoption():
         return None
 
     array = ak._v2.highlevel.Array([{"x": 1}, {"x": 2}, None, {"x": 3}])
-    assert ak._v2.operations.convert.to_list(find_it(array)) == {"x": 3}
+    assert ak._v2.operations.to_list(find_it(array)) == {"x": 3}
 
 
 def test_indexed_1():

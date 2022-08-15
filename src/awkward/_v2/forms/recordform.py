@@ -334,3 +334,6 @@ class RecordForm(Form):
             self._parameters,
             self._form_key,
         )
+
+    def _column_types(self):
+        return sum((x._column_types() for x in self._contents), ())

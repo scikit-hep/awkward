@@ -9,6 +9,7 @@
 #include <string>
 #include "awkward/forth/ForthMachine.h"
 #include "awkward/forth/ForthOutputBuffer.h"
+#include "awkward/builder/Builder.h"
 
 namespace awkward {
 
@@ -36,6 +37,20 @@ namespace awkward {
     /// @brief User-friendly name of this class.
     virtual const std::string
       classname() const = 0;
+
+    /// @brief Copy the current snapshot into the BuffersContainer and
+    /// return a Form as a std::string (JSON).
+    virtual const std::string
+      to_buffers(BuffersContainer& container, const ForthOutputBufferMap& outputs) const = 0;
+
+    /// @brief The builder's output buffer length.
+    virtual ssize_t
+      len(const ForthOutputBufferMap& outputs) const = 0;
+
+    virtual bool
+      is_complex() const {
+        return false;
+      }
 
     // /// @brief The Form describing the array.
     // virtual const FormPtr
@@ -141,6 +156,20 @@ namespace awkward {
       active() {
         return false;
       }
+
+    /// @brief FIXME: find if it's already implemented in utils
+    virtual std::string
+    parameters_as_string(const util::Parameters& parameters) const {
+      std::stringstream p;
+      if (!parameters.empty()) {
+        p << "\"parameters\": {";
+        for (auto const &pair: parameters) {
+          p << "\"" << pair.first << "\": " << pair.second << " ";
+        }
+        p << "}, ";
+      }
+      return p.str();
+    }
 
   };
 

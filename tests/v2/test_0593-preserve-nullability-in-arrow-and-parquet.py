@@ -8,7 +8,7 @@ import awkward as ak  # noqa: F401
 
 pyarrow = pytest.importorskip("pyarrow")
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_list_to_arrow():
@@ -75,25 +75,25 @@ def test_union_to_arrow():
 def test_list_from_arrow():
     original = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
     pa_array = original.to_arrow()
-    reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
+    reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert str(reconstituted.form.type) == "var * float64"
     assert to_list(reconstituted) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     original = ak._v2.highlevel.Array([[1.1, 2.2, None], [], [4.4, 5.5]]).layout
     pa_array = original.to_arrow()
-    reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
+    reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert str(reconstituted.form.type) == "var * ?float64"
     assert to_list(reconstituted) == [[1.1, 2.2, None], [], [4.4, 5.5]]
 
     original = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]).layout
     pa_array = original.to_arrow()
-    reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
+    reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert str(reconstituted.form.type) == "option[var * float64]"
     assert to_list(reconstituted) == [[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]
 
     original = ak._v2.highlevel.Array([[1.1, 2.2, None], [], None, [4.4, 5.5]]).layout
     pa_array = original.to_arrow()
-    reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
+    reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert str(reconstituted.form.type) == "option[var * ?float64]"
     assert to_list(reconstituted) == [[1.1, 2.2, None], [], None, [4.4, 5.5]]
 
@@ -111,7 +111,7 @@ def test_record_from_arrow():
         ["x", "y", "z"],
     )
     pa_array = original.to_arrow()
-    reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
+    reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert str(reconstituted.form.type) == "{x: float64, y: ?float64, z: ?int64}"
     assert to_list(reconstituted) == [
         {"x": 1.1, "y": 1.1, "z": 1},
@@ -127,7 +127,7 @@ def test_record_from_arrow():
         valid_when=False,
     )
     pa_array = original.to_arrow()
-    reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
+    reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert str(reconstituted.form.type) == "?{x: float64, y: ?float64, z: ?int64}"
     assert to_list(reconstituted) == [
         {"x": 1.1, "y": 1.1, "z": 1},
@@ -141,15 +141,14 @@ def test_record_from_arrow():
 def test_union_from_arrow():
     original = ak._v2.highlevel.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout
     pa_array = original.to_arrow()
-    reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
+    reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert str(reconstituted.form.type) == "union[float64, var * int64, string]"
     assert to_list(reconstituted) == [1.1, 2.2, [1, 2, 3], "hello"]
 
     original = ak._v2.highlevel.Array([1.1, 2.2, None, [1, 2, 3], "hello"]).layout
     pa_array = original.to_arrow()
-    reconstituted = ak._v2._connect.pyarrow.handle_arrow(pa_array)
+    reconstituted = ak._v2.from_arrow(pa_array, highlevel=False)
     assert (
-        str(reconstituted.form.type)
-        == "union[?float64, option[var * int64], option[string]]"
+        str(reconstituted.form.type) == "union[?float64, option[var * int64], ?string]"
     )
     assert to_list(reconstituted) == [1.1, 2.2, None, [1, 2, 3], "hello"]

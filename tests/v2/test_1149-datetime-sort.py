@@ -6,7 +6,7 @@ import awkward as ak  # noqa: F401
 
 import datetime
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_date_time():
@@ -30,7 +30,7 @@ def test_date_time():
     )
     assert np.datetime64(array1[0], "us") == date_time
 
-    assert to_list(ak._v2.operations.convert.from_iter(array1)) == [
+    assert to_list(ak._v2.operations.from_iter(array1)) == [
         np.datetime64("2020-07-27T10:41:11.200000")
     ]
 

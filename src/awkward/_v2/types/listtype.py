@@ -39,24 +39,26 @@ class ListType(Type):
     def content(self):
         return self._content
 
-    def __str__(self):
+    def _str(self, indent, compact):
         if self._typestr is not None:
-            out = self._typestr
+            out = [self._typestr]
 
         elif self.parameter("__array__") == "string":
-            return "string"
+            return ["string"]
 
         elif self.parameter("__array__") == "bytestring":
-            return "bytes"
+            return ["bytes"]
 
         else:
             params = self._str_parameters()
             if params is None:
-                out = f"var * {str(self._content)}"
+                out = ["var * "] + self._content._str(indent, compact)
             else:
-                out = f"[var * {str(self._content)}, {params}]"
+                out = (
+                    ["[var * "] + self._content._str(indent, compact) + [f", {params}]"]
+                )
 
-        return self._str_categorical_begin() + out + self._str_categorical_end()
+        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._content)] + self._repr_args()

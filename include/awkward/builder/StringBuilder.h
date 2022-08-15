@@ -4,11 +4,11 @@
 #define AWKWARD_STRINGBUILDER_H_
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/BuilderOptions.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class StringBuilder
   ///
@@ -22,7 +22,7 @@ namespace awkward {
     /// if `"utf-8"`, it is encoded with variable-width UTF-8.
     /// Currently, no other encodings have been defined.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options, const char* encoding);
+      fromempty(const BuilderOptions& options, const char* encoding);
 
     /// @brief Create a StringBuilder from a full set of parameters.
     ///
@@ -35,7 +35,7 @@ namespace awkward {
     /// @param encoding If `nullptr`, the string is an unencoded bytestring;
     /// if `"utf-8"`, it is encoded with variable-width UTF-8.
     /// Currently, no other encodings have been defined.
-    StringBuilder(const ArrayBuilderOptions& options,
+    StringBuilder(const BuilderOptions& options,
                   GrowableBuffer<int64_t> offsets,
                   GrowableBuffer<uint8_t> content,
                   const char* encoding);
@@ -113,7 +113,7 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
+    const BuilderOptions&
       options() const { return options_; }
 
     const GrowableBuffer<int64_t>& buffer() const { return offsets_; }
@@ -121,7 +121,7 @@ namespace awkward {
     const GrowableBuffer<uint8_t>& content() const { return content_; }
 
   private:
-    const ArrayBuilderOptions options_;
+    const BuilderOptions options_;
     GrowableBuffer<int64_t> offsets_;
     GrowableBuffer<uint8_t> content_;
     const char* encoding_;

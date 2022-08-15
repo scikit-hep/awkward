@@ -4,11 +4,11 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test_ByteMaskedArray():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
@@ -21,7 +21,7 @@ def test_ByteMaskedArray():
     assert to_list(array[2:, 1]) == [None, None, 7.7]
     assert to_list(array[2:, [2, 1, 1, 0]]) == [None, None, [8.8, 7.7, 7.7, 6.6]]
 
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
@@ -51,7 +51,7 @@ def test_ByteMaskedArray():
 
 
 def test_ByteMaskedArray_jaggedslice0():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     index = ak._v2.index.Index64(np.array([0, 1, 2, 3], dtype=np.int64))
@@ -212,9 +212,7 @@ def test_ByteMaskedArray_as_slice():
     array = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
     )
-    slicecontent = ak._v2.operations.convert.from_iter(
-        [3, 6, 999, 123, -2, 6], highlevel=False
-    )
+    slicecontent = ak._v2.operations.from_iter([3, 6, 999, 123, -2, 6], highlevel=False)
     slicemask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0, 0], dtype=np.int8))
     slicearray = ak._v2.contents.ByteMaskedArray(
         slicemask, slicecontent, valid_when=False
@@ -224,7 +222,7 @@ def test_ByteMaskedArray_as_slice():
 
 
 def test_ByteMaskedArray_setidentities():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [321]],
         highlevel=False,
     )
@@ -232,11 +230,11 @@ def test_ByteMaskedArray_setidentities():
     array = ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     assert to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
 
-    assert ak._v2.operations.describe.is_valid(ak._v2.highlevel.Array(array))
+    assert ak._v2.operations.is_valid(ak._v2.highlevel.Array(array))
 
 
 def test_ByteMaskedArray_num():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
             [],
@@ -257,30 +255,30 @@ def test_ByteMaskedArray_num():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert ak._v2.operations.structure.num(array, axis=0) == 5
-    assert ak._v2.operations.structure.num(array, axis=-3) == 5
-    assert to_list(ak._v2.operations.structure.num(array, axis=1)) == [
+    assert ak._v2.operations.num(array, axis=0) == 5
+    assert ak._v2.operations.num(array, axis=-3) == 5
+    assert to_list(ak._v2.operations.num(array, axis=1)) == [
         3,
         0,
         None,
         None,
         2,
     ]
-    assert to_list(ak._v2.operations.structure.num(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.num(array, axis=-2)) == [
         3,
         0,
         None,
         None,
         2,
     ]
-    assert to_list(ak._v2.operations.structure.num(array, axis=2)) == [
+    assert to_list(ak._v2.operations.num(array, axis=2)) == [
         [3, 0, 2],
         [],
         None,
         None,
         [0, 3],
     ]
-    assert to_list(ak._v2.operations.structure.num(array, axis=-1)) == [
+    assert to_list(ak._v2.operations.num(array, axis=-1)) == [
         [3, 0, 2],
         [],
         None,
@@ -290,7 +288,7 @@ def test_ByteMaskedArray_num():
 
 
 def test_ByteMaskedArray_flatten():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
             [],
@@ -311,28 +309,28 @@ def test_ByteMaskedArray_flatten():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(ak._v2.operations.structure.flatten(array, axis=1)) == [
+    assert to_list(ak._v2.operations.flatten(array, axis=1)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
         [],
         [10.0, 11.1, 12.2],
     ]
-    assert to_list(ak._v2.operations.structure.flatten(array, axis=-2)) == [
+    assert to_list(ak._v2.operations.flatten(array, axis=-2)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
         [],
         [10.0, 11.1, 12.2],
     ]
-    assert to_list(ak._v2.operations.structure.flatten(array, axis=2)) == [
+    assert to_list(ak._v2.operations.flatten(array, axis=2)) == [
         [0.0, 1.1, 2.2, 3.3, 4.4],
         [],
         None,
         None,
         [10.0, 11.1, 12.2],
     ]
-    assert to_list(ak._v2.operations.structure.flatten(array, axis=-1)) == [
+    assert to_list(ak._v2.operations.flatten(array, axis=-1)) == [
         [0.0, 1.1, 2.2, 3.3, 4.4],
         [],
         None,
@@ -352,7 +350,7 @@ def test_IndexedOptionArray_pad_none():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 7, axis=0)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 7, axis=0)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
@@ -361,7 +359,7 @@ def test_IndexedOptionArray_pad_none():
         None,
         None,
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 7, axis=-3)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 7, axis=-3)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
@@ -370,78 +368,66 @@ def test_IndexedOptionArray_pad_none():
         None,
         None,
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 3, axis=1)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=1)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [None, None, None],
         None,
         None,
         [[], [10.0, 11.1, 12.2], None],
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 3, axis=-2)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=-2)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [None, None, None],
         None,
         None,
         [[], [10.0, 11.1, 12.2], None],
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 3, axis=2)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=2)) == [
         [[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]],
         [],
         None,
         None,
         [[None, None, None], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 3, axis=-1)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=-1)) == [
         [[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]],
         [],
         None,
         None,
         [[None, None, None], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 3, axis=0, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=0, clip=True)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 3, axis=-3, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=-3, clip=True)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 2, axis=1, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 2, axis=1, clip=True)) == [
         [[0.0, 1.1, 2.2], []],
         [None, None],
         None,
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 2, axis=-2, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 2, axis=-2, clip=True)) == [
         [[0.0, 1.1, 2.2], []],
         [None, None],
         None,
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 2, axis=2, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 2, axis=2, clip=True)) == [
         [[0.0, 1.1], [None, None], [3.3, 4.4]],
         [],
         None,
         None,
         [[None, None], [10.0, 11.1]],
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 2, axis=-1, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 2, axis=-1, clip=True)) == [
         [[0.0, 1.1], [None, None], [3.3, 4.4]],
         [],
         None,
@@ -451,7 +437,7 @@ def test_IndexedOptionArray_pad_none():
 
 
 def test_ByteMaskedArray_pad_none():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
             [],
@@ -472,7 +458,7 @@ def test_ByteMaskedArray_pad_none():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 7, axis=0)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 7, axis=0)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
@@ -481,7 +467,7 @@ def test_ByteMaskedArray_pad_none():
         None,
         None,
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 7, axis=-3)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 7, axis=-3)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
@@ -490,78 +476,66 @@ def test_ByteMaskedArray_pad_none():
         None,
         None,
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 3, axis=1)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=1)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [None, None, None],
         None,
         None,
         [[], [10.0, 11.1, 12.2], None],
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 3, axis=-2)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=-2)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [None, None, None],
         None,
         None,
         [[], [10.0, 11.1, 12.2], None],
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 3, axis=2)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=2)) == [
         [[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]],
         [],
         None,
         None,
         [[None, None, None], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(ak._v2.operations.structure.pad_none(array, 3, axis=-1)) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=-1)) == [
         [[0.0, 1.1, 2.2], [None, None, None], [3.3, 4.4, None]],
         [],
         None,
         None,
         [[None, None, None], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 3, axis=0, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=0, clip=True)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 3, axis=-3, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 3, axis=-3, clip=True)) == [
         [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
         [],
         None,
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 2, axis=1, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 2, axis=1, clip=True)) == [
         [[0.0, 1.1, 2.2], []],
         [None, None],
         None,
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 2, axis=-2, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 2, axis=-2, clip=True)) == [
         [[0.0, 1.1, 2.2], []],
         [None, None],
         None,
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 2, axis=2, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 2, axis=2, clip=True)) == [
         [[0.0, 1.1], [None, None], [3.3, 4.4]],
         [],
         None,
         None,
         [[None, None], [10.0, 11.1]],
     ]
-    assert to_list(
-        ak._v2.operations.structure.pad_none(array, 2, axis=-1, clip=True)
-    ) == [
+    assert to_list(ak._v2.operations.pad_none(array, 2, axis=-1, clip=True)) == [
         [[0.0, 1.1], [None, None], [3.3, 4.4]],
         [],
         None,
@@ -751,7 +725,7 @@ def test_ByteMaskedArray_reduce():
 
 
 def test_ByteMaskedArray_localindex():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             [[0.0, 1.1, 2.2], [], [3.3, 4.4]],
             [],
@@ -770,18 +744,18 @@ def test_ByteMaskedArray_localindex():
         None,
         [[], [10.0, 11.1, 12.2]],
     ]
-    assert to_list(array.localindex(axis=0)) == [0, 1, 2, 3, 4]
-    assert to_list(array.localindex(axis=-3)) == [0, 1, 2, 3, 4]
-    assert to_list(array.localindex(axis=1)) == [[0, 1, 2], [], None, None, [0, 1]]
-    assert to_list(array.localindex(axis=-2)) == [[0, 1, 2], [], None, None, [0, 1]]
-    assert to_list(array.localindex(axis=2)) == [
+    assert to_list(array.local_index(axis=0)) == [0, 1, 2, 3, 4]
+    assert to_list(array.local_index(axis=-3)) == [0, 1, 2, 3, 4]
+    assert to_list(array.local_index(axis=1)) == [[0, 1, 2], [], None, None, [0, 1]]
+    assert to_list(array.local_index(axis=-2)) == [[0, 1, 2], [], None, None, [0, 1]]
+    assert to_list(array.local_index(axis=2)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         None,
         None,
         [[], [0, 1, 2]],
     ]
-    assert to_list(array.localindex(axis=-1)) == [
+    assert to_list(array.local_index(axis=-1)) == [
         [[0, 1, 2], [], [0, 1]],
         [],
         None,
@@ -791,7 +765,7 @@ def test_ByteMaskedArray_localindex():
 
 
 def test_ByteMaskedArray_combinations():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
     )
@@ -806,7 +780,7 @@ def test_ByteMaskedArray_combinations():
         None,
         [[], [10, 11, 12]],
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=0)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=0)) == [
         ([[0, 1, 2], [], [3, 4]], []),
         ([[0, 1, 2], [], [3, 4]], None),
         ([[0, 1, 2], [], [3, 4]], None),
@@ -818,7 +792,7 @@ def test_ByteMaskedArray_combinations():
         (None, [[], [10, 11, 12]]),
         (None, [[], [10, 11, 12]]),
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=-3)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=-3)) == [
         ([[0, 1, 2], [], [3, 4]], []),
         ([[0, 1, 2], [], [3, 4]], None),
         ([[0, 1, 2], [], [3, 4]], None),
@@ -830,28 +804,28 @@ def test_ByteMaskedArray_combinations():
         (None, [[], [10, 11, 12]]),
         (None, [[], [10, 11, 12]]),
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=1)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=1)) == [
         [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
         [],
         None,
         None,
         [([], [10, 11, 12])],
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=-2)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=-2)) == [
         [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
         [],
         None,
         None,
         [([], [10, 11, 12])],
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=2)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=2)) == [
         [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
         [],
         None,
         None,
         [[], [(10, 11), (10, 12), (11, 12)]],
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=-1)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=-1)) == [
         [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
         [],
         None,
@@ -861,7 +835,7 @@ def test_ByteMaskedArray_combinations():
 
 
 def test_IndexedOptionArray_combinations():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[[0, 1, 2], [], [3, 4]], [], [[5]], [[6, 7, 8, 9]], [[], [10, 11, 12]]],
         highlevel=False,
     )
@@ -874,7 +848,7 @@ def test_IndexedOptionArray_combinations():
         None,
         [[], [10, 11, 12]],
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=0)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=0)) == [
         ([[0, 1, 2], [], [3, 4]], []),
         ([[0, 1, 2], [], [3, 4]], None),
         ([[0, 1, 2], [], [3, 4]], None),
@@ -886,7 +860,7 @@ def test_IndexedOptionArray_combinations():
         (None, [[], [10, 11, 12]]),
         (None, [[], [10, 11, 12]]),
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=-3)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=-3)) == [
         ([[0, 1, 2], [], [3, 4]], []),
         ([[0, 1, 2], [], [3, 4]], None),
         ([[0, 1, 2], [], [3, 4]], None),
@@ -898,28 +872,28 @@ def test_IndexedOptionArray_combinations():
         (None, [[], [10, 11, 12]]),
         (None, [[], [10, 11, 12]]),
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=1)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=1)) == [
         [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
         [],
         None,
         None,
         [([], [10, 11, 12])],
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=-2)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=-2)) == [
         [([0, 1, 2], []), ([0, 1, 2], [3, 4]), ([], [3, 4])],
         [],
         None,
         None,
         [([], [10, 11, 12])],
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=2)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=2)) == [
         [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
         [],
         None,
         None,
         [[], [(10, 11), (10, 12), (11, 12)]],
     ]
-    assert to_list(ak._v2.operations.structure.combinations(array, 2, axis=-1)) == [
+    assert to_list(ak._v2.operations.combinations(array, 2, axis=-1)) == [
         [[(0, 1), (0, 2), (1, 2)], [], [(3, 4)]],
         [],
         None,
@@ -929,7 +903,7 @@ def test_IndexedOptionArray_combinations():
 
 
 def test_merge():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask = ak._v2.index.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
@@ -938,7 +912,7 @@ def test_merge():
     array2 = ak._v2.highlevel.Array(
         [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
     )
-    array12 = ak._v2.operations.structure.concatenate([array1, array2], highlevel=False)
+    array12 = ak._v2.operations.concatenate([array1, array2], highlevel=False)
     assert to_list(array12) == [
         [0.0, 1.1, 2.2],
         [],
@@ -1029,7 +1003,7 @@ def test_BitMaskedArray():
         None,
     ]
     assert (
-        ak._v2.operations.convert.to_json(array)
+        ak._v2.operations.to_json(array)
         == "[0,1,null,null,null,5,null,7,8,9,null,null,null]"
     )
     assert to_list(array[1:-1]) == [
@@ -1096,7 +1070,7 @@ def test_BitMaskedArray():
         None,
     ]
     assert (
-        ak._v2.operations.convert.to_json(array)
+        ak._v2.operations.to_json(array)
         == "[0,null,2,null,null,null,6,7,null,null,10,null,null]"
     )
     assert to_list(array[1:-1]) == [
@@ -1121,16 +1095,10 @@ def test_UnmaskedArray():
     )
     array = ak._v2.contents.UnmaskedArray(content)
     assert to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert str(ak._v2.operations.describe.type(content)) == "float64"
-    assert (
-        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(content)))
-        == "5 * float64"
-    )
-    assert str(ak._v2.operations.describe.type(array)) == "?float64"
-    assert (
-        str(ak._v2.operations.describe.type(ak._v2.highlevel.Array(array)))
-        == "5 * ?float64"
-    )
+    assert str(ak._v2.operations.type(content)) == "float64"
+    assert str(ak._v2.operations.type(ak._v2.highlevel.Array(content))) == "5 * float64"
+    assert str(ak._v2.operations.type(array)) == "?float64"
+    assert str(ak._v2.operations.type(ak._v2.highlevel.Array(array))) == "5 * ?float64"
 
 
 def test_tomask():
@@ -1139,7 +1107,7 @@ def test_tomask():
     )
     mask1 = ak._v2.highlevel.Array([True, True, False, False, True])
     assert to_list(array[mask1]) == [[0.0, 1.1, 2.2], [], [6.6, 7.7, 8.8, 9.9]]
-    assert to_list(ak._v2.operations.structure.mask(array, mask1)) == [
+    assert to_list(ak._v2.operations.mask(array, mask1)) == [
         [0.0, 1.1, 2.2],
         [],
         None,
@@ -1151,7 +1119,7 @@ def test_tomask():
         [[False, True, False], [], [True, True], [False], [True, False, False, True]]
     )
     assert to_list(array[mask2]) == [[1.1], [], [3.3, 4.4], [], [6.6, 9.9]]
-    assert to_list(ak._v2.operations.structure.mask(array, mask2)) == [
+    assert to_list(ak._v2.operations.mask(array, mask2)) == [
         [None, 1.1, None],
         [],
         [3.3, 4.4],

@@ -242,3 +242,65 @@ def test_specialized_case():
     vm.stack_push(2)
     vm.resume()
     assert vm.stack == [10, 20, 30]
+
+
+def test_case_corner_case():
+    vm = ForthMachine32(
+        r"case 0 of 1000 dup 0 do 1000 drop loop endof 1 of 1001 endof 2 of 1002 endof 9999 swap endcase 10 20 30"
+    )
+
+    vm.begin()
+    vm.stack_push(0)
+    vm.resume()
+    assert vm.stack == [1000, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(1)
+    vm.resume()
+    assert vm.stack == [1001, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(2)
+    vm.resume()
+    assert vm.stack == [1002, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(3)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(-1)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+
+def test_case_corner_case_2():
+    vm = ForthMachine32(
+        r"case 0 of 1000 dup 0 do 1000 drop loop endof 1 of 1001 endof 1 1 + of 1002 endof 9999 swap endcase 10 20 30"
+    )
+
+    vm.begin()
+    vm.stack_push(0)
+    vm.resume()
+    assert vm.stack == [1000, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(1)
+    vm.resume()
+    assert vm.stack == [1001, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(2)
+    vm.resume()
+    assert vm.stack == [1002, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(3)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]
+
+    vm.begin()
+    vm.stack_push(-1)
+    vm.resume()
+    assert vm.stack == [9999, 10, 20, 30]

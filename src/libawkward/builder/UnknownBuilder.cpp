@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/BoolBuilder.h"
 #include "awkward/builder/DatetimeBuilder.h"
@@ -20,11 +19,11 @@
 
 namespace awkward {
   const BuilderPtr
-  UnknownBuilder::fromempty(const ArrayBuilderOptions& options) {
+  UnknownBuilder::fromempty(const BuilderOptions& options) {
     return std::make_shared<UnknownBuilder>(options, 0);
   }
 
-  UnknownBuilder::UnknownBuilder(const ArrayBuilderOptions& options,
+  UnknownBuilder::UnknownBuilder(const BuilderOptions& options,
                                  int64_t nullcount)
       : options_(options)
       , nullcount_(nullcount) { }

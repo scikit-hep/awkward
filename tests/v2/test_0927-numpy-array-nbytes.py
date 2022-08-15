@@ -7,7 +7,7 @@ import awkward as ak  # noqa: F401
 
 def test():
     np_data = np.random.random(size=(4, 100 * 1024 * 1024 // 8 // 4))
-    array = ak._v2.operations.convert.from_numpy(np_data, regulararray=False)
+    array = ak._v2.operations.from_numpy(np_data, regulararray=False)
 
     assert np_data.nbytes == array.nbytes
 
@@ -26,7 +26,7 @@ def test_NumpyArray_nbytes():
 
 
 def test_ByteMaskedArray_nbytes():
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [
             [[1.1, 0.0, 2.2], [], [3.3, 4.4]],
             [],

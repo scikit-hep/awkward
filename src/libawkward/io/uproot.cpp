@@ -9,8 +9,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/GrowableBuffer.h"
 
 #include "awkward/io/uproot.h"
 
@@ -54,7 +53,7 @@ namespace awkward {
     uint8_t* data_ptr = reinterpret_cast<uint8_t*>(data.data());
     int32_t* byte_offsets_ptr = byte_offsets.data();
 
-    ArrayBuilderOptions options(1024, 1.5);
+    awkward::BuilderOptions options { 1024, 1 };
 
     Index64 offsets1(byte_offsets.length());
     int64_t* offsets1_ptr = offsets1.data();
@@ -90,11 +89,14 @@ namespace awkward {
       offsets1_ptr[entry + 1] = offsets1_ptr[entry] + count;
     }
 
+    std::unique_ptr<T> ptr(new T[(size_t)content.length()]);
+    content.concatenate(ptr.get());
+
     std::vector<ssize_t> shape = { (ssize_t)content.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(T) };
     ContentPtr outcontent = std::make_shared<NumpyArray>(Identities::none(),
                                                          util::Parameters(),
-                                                         std::move(content.get_ptr()),
+                                                         std::move(ptr),
                                                          shape,
                                                          strides,
                                                          0,
@@ -103,7 +105,9 @@ namespace awkward {
                                                          dtype,
                                                          kernel::lib::cpu);
 
-    Index64 outoffsets2(std::move(offsets2.get_ptr()), 0, offsets2.length(), kernel::lib::cpu);
+    std::unique_ptr<int64_t> offsets_ptr(new int64_t[(size_t)offsets2.length()]);
+    offsets2.concatenate(offsets_ptr.get());
+    Index64 outoffsets2(std::move(offsets_ptr), 0, offsets2.length(), kernel::lib::cpu);
     ContentPtr outlist2 = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                               util::Parameters(),
                                                               outoffsets2,

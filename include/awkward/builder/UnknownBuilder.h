@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "awkward/common.h"
+#include "awkward/BuilderOptions.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class UnknownBuilder
   ///
@@ -20,14 +20,14 @@ namespace awkward {
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const BuilderOptions& options);
 
     /// @brief Create a ListBuilder from a full set of parameters.
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param nullcount The number of null values encountered so far.
-    UnknownBuilder(const ArrayBuilderOptions& options, int64_t nullcount);
+    UnknownBuilder(const BuilderOptions& options, int64_t nullcount);
 
     /// @brief User-friendly name of this class: `"UnknownBuilder"`.
     const std::string
@@ -96,13 +96,13 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
+    const BuilderOptions&
       options() const { return options_; }
 
     const int64_t nullcount() const { return nullcount_; }
 
   private:
-    const ArrayBuilderOptions options_;
+    const BuilderOptions options_;
     int64_t nullcount_;
   };
 }

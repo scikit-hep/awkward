@@ -42,21 +42,31 @@ class OptionType(Type):
     def content(self):
         return self._content
 
-    def __str__(self):
+    def _str(self, indent, compact):
         if self._typestr is not None:
-            out = self._typestr
+            out = [self._typestr]
 
         else:
             params = self._str_parameters()
             if params is None:
-                if not isinstance(self._content, (RegularType, ListType)):
-                    out = f"?{str(self._content)}"
+                if isinstance(
+                    self._content, (RegularType, ListType)
+                ) and not self._content.parameter("__array__") in (
+                    "string",
+                    "bytestring",
+                    "char",
+                    "byte",
+                ):
+                    out = ["option["] + self._content._str(indent, compact) + ["]"]
                 else:
-                    out = f"option[{str(self._content)}]"
-            else:
-                out = f"option[{str(self._content)}, {params}]"
+                    out = ["?"] + self._content._str(indent, compact)
 
-        return self._str_categorical_begin() + out + self._str_categorical_end()
+            else:
+                out = (
+                    ["option["] + self._content._str(indent, compact) + [f", {params}]"]
+                )
+
+        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
 
     def __repr__(self):
         args = [repr(self._content)] + self._repr_args()

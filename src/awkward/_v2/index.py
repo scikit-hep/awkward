@@ -21,9 +21,18 @@ class Index:
             nplike = ak.nplike.of(data)
         self._nplike = nplike
         self._metadata = metadata
-        self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
+        self._data = self._nplike.index_nplike.asarray(
+            data, dtype=self._expected_dtype, order="C"
+        )
         if len(self._data.shape) != 1:
             raise ak._v2._util.error(TypeError("Index data must be one-dimensional"))
+
+        if issubclass(self._data.dtype.type, np.longlong):
+            assert (
+                np.dtype(np.longlong).itemsize == 8
+            ), "longlong is always 64-bit, right?"
+
+            self._data = self._data.view(np.int64)
 
         if self._expected_dtype is None:
             if self._data.dtype == np.dtype(np.int8):
@@ -56,13 +65,13 @@ class Index:
     def zeros(cls, length, nplike, dtype=None):
         if dtype is None:
             dtype = cls._expected_dtype
-        return Index(nplike.zeros(length, dtype=dtype))
+        return Index(nplike.index_nplike.zeros(length, dtype=dtype), nplike=nplike)
 
     @classmethod
     def empty(cls, length, nplike, dtype=None):
         if dtype is None:
             dtype = cls._expected_dtype
-        return Index(nplike.empty(length, dtype=dtype), nplike=nplike)
+        return Index(nplike.index_nplike.empty(length, dtype=dtype), nplike=nplike)
 
     @property
     def data(self):
@@ -99,13 +108,13 @@ class Index:
         return type(self)(data.forget_length(), self._metadata, tt)
 
     def raw(self, nplike):
-        return self.nplike.raw(self.data, nplike)
+        return self.nplike.index_nplike.raw(self.data, nplike.index_nplike)
 
     def __len__(self):
         return self.length
 
     def __array__(self, *args, **kwargs):
-        return self._nplike.asarray(self._data, *args, **kwargs)
+        return self._nplike.index_nplike.asarray(self._data, *args, **kwargs)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -116,11 +125,11 @@ class Index:
         out.append(" len=")
         out.append(repr(str(self._data.shape[0])))
 
-        arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
-            "\n"
-        )
+        arraystr_lines = self._nplike.index_nplike.array_str(
+            self._data, max_line_width=30
+        ).split("\n")
         if len(arraystr_lines) > 1 or self._metadata is not None:
-            arraystr_lines = self._nplike.array_str(
+            arraystr_lines = self._nplike.index_nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
@@ -149,9 +158,11 @@ class Index:
 
     def __getitem__(self, where):
         out = self._data[where]
+        from awkward._v2._util import is_cupy_buffer, is_jax_buffer
+
         if hasattr(out, "shape") and len(out.shape) != 0:
-            return type(self)(out)
-        elif type(out).__module__.startswith("cupy.") and len(out.shape) == 0:
+            return Index(out, metadata=self.metadata, nplike=self.nplike)
+        elif (is_jax_buffer(out) or is_cupy_buffer(out)) and len(out.shape) == 0:
             return out.item()
         else:
             return out
@@ -181,7 +192,18 @@ class Index:
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
 
     def _to_nplike(self, nplike):
+        # if isinstance(nplike, ak.nplike.Jax):
+        #     print("YES OFFICER, this nplike right here")
         return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
+
+    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+        if index_dtype:
+            return (
+                self.nplike.index_nplike.array_equal(self.data, other.data)
+                and self._data.dtype == other.data.dtype
+            )
+        else:
+            return self.nplike.index_nplike.array_equal(self.data, other.data)
 
 
 class Index8(Index):

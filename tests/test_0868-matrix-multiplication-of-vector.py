@@ -6,6 +6,7 @@ import awkward as ak  # noqa: F401
 
 
 vector = pytest.importorskip("vector")
+vector_backends_awkward = pytest.importorskip("vector.backends.awkward")
 
 
 def awkward_isnt_installed_globally():
@@ -27,6 +28,6 @@ def test():
     point = ak.Record(
         {"x": 1, "y": 2, "z": 3},
         with_name="Vector3D",
-        behavior=vector._backends.awkward_.behavior,
+        behavior=vector_backends_awkward.behavior,
     )
     assert np.matmul(point, vector.obj(x=1, y=0, z=2)) == 7

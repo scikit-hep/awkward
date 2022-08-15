@@ -8,7 +8,6 @@
 
 #include "awkward/type/Type.h"
 #include "awkward/Reducer.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
 #include "awkward/layoutbuilder/ByteMaskedArrayBuilder.h"
@@ -1025,8 +1024,8 @@ getitem<ak::ArrayBuilder>(const ak::ArrayBuilder& self, const py::object& obj) {
 py::class_<ak::ArrayBuilder>
 make_ArrayBuilder(const py::handle& m, const std::string& name) {
   return (py::class_<ak::ArrayBuilder>(m, name.c_str())
-      .def(py::init([](int64_t initial, double resize) -> ak::ArrayBuilder {
-        return ak::ArrayBuilder(ak::ArrayBuilderOptions(initial, resize));
+      .def(py::init([](const int64_t initial, double resize) -> ak::ArrayBuilder {
+        return ak::ArrayBuilder({initial, resize});
       }), py::arg("initial") = 1024, py::arg("resize") = 1.5)
       .def_property_readonly("_ptr",
                              [](const ak::ArrayBuilder* self) -> size_t {
@@ -1523,8 +1522,8 @@ template <typename T, typename I>
 py::class_<ak::LayoutBuilder<T, I>>
 make_LayoutBuilder(const py::handle& m, const std::string& name) {
   return (py::class_<ak::LayoutBuilder<T, I>>(m, name.c_str())
-      .def(py::init([](const std::string& form, int64_t initial, double resize, bool vm_init) -> ak::LayoutBuilder<T, I> {
-        return ak::LayoutBuilder<T, I>(form, ak::ArrayBuilderOptions(initial, resize), vm_init);
+      .def(py::init([](const std::string& form, const int64_t initial, double resize, bool vm_init) -> ak::LayoutBuilder<T, I> {
+        return ak::LayoutBuilder<T, I>(form, initial, vm_init);
       }), py::arg("form"), py::arg("initial") = 8, py::arg("resize") = 1.5, py::arg("vm_init") = true)
       .def_property_readonly("_ptr",
                              [](const ak::LayoutBuilder<T, I>* self) -> size_t {
@@ -1540,6 +1539,22 @@ make_LayoutBuilder(const py::handle& m, const std::string& name) {
       .def("__getitem__", &getitem<ak::LayoutBuilder<T, I>>)
       .def("__iter__", [](const ak::LayoutBuilder<T, I>& self) -> ak::Iterator {
         return ak::Iterator(unbox_content(::layoutbuilder_snapshot(self.builder(), self.vm().get()->outputs())));
+      })
+      .def("json_form", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
+        return py::str(self.json_form());
+      })
+      .def("form", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
+        ::EmptyBuffersContainer container;
+        return py::str(self.to_buffers(container));
+      })
+      .def("to_buffers", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
+        ::NumpyBuffersContainer container;
+        std::string form = self.to_buffers(container);
+        py::tuple out(3);
+        out[0] = py::str(form);
+        out[1] = py::int_(self.length());
+        out[2] = container.container();
+        return out;
       })
       .def("null", &ak::LayoutBuilder<T, I>::null)
       .def("boolean", &ak::LayoutBuilder<T, I>::boolean)
@@ -3092,6 +3107,9 @@ make_Record(const py::handle& m, const std::string& name) {
      .def("simplify", [](const ak::Record& self) {
        return box(self.shallow_simplify());
      })
+     .def("axis_wrap_if_negative",
+               &ak::Record::axis_wrap_if_negative,
+               py::arg("axis"))
      .def("copy_to",
           [](const ak::Record& self, const std::string& ptr_lib) -> py::object {
           if (ptr_lib == "cpu") {

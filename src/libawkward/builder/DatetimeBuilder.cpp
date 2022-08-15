@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Complex128Builder.h"
 #include "awkward/builder/Float64Builder.h"
 #include "awkward/builder/OptionBuilder.h"
@@ -16,14 +15,14 @@
 
 namespace awkward {
   const BuilderPtr
-  DatetimeBuilder::fromempty(const ArrayBuilderOptions& options, const std::string& units) {
+  DatetimeBuilder::fromempty(const BuilderOptions& options, const std::string& units) {
     GrowableBuffer<int64_t> content = GrowableBuffer<int64_t>::empty(options);
     return std::make_shared<DatetimeBuilder>(options,
                                              std::move(content),
                                              units);
   }
 
-  DatetimeBuilder::DatetimeBuilder(const ArrayBuilderOptions& options,
+  DatetimeBuilder::DatetimeBuilder(const BuilderOptions& options,
                                    GrowableBuffer<int64_t> content,
                                    const std::string& units)
       : options_(options)
@@ -40,9 +39,10 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    container.copy_buffer(form_key.str() + "-data",
-                          content_.ptr().get(),
-                          (int64_t)(content_.length() * sizeof(int64_t)));
+    content_.concatenate(
+      reinterpret_cast<int64_t*>(
+        container.empty_buffer(form_key.str() + "-data",
+        content_.length() * (int64_t)sizeof(int64_t))));
 
     std::string primitive(units_);
 

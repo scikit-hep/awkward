@@ -4,33 +4,31 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
-@pytest.mark.skip(
-    reason="AssertionError: assert '3 * union[var * int64, var * int64]' == '3 * var * int64'"
-)
 def test_getitem_field():
-    a1 = ak._v2.operations.structure.zip(
+    a1 = ak._v2.operations.zip(
         {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
     )
-    a2 = ak._v2.operations.structure.zip(
+    a2 = ak._v2.operations.zip(
         {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
     )
-    union = ak._v2.operations.structure.where([True, False, True], a1, a2)
+    union = ak._v2.operations.where([True, False, True], a1, a2)
+
     assert str(union.a.type) == "3 * var * int64"
 
 
 def test_flatten_axis_none():
-    a1 = ak._v2.operations.structure.zip(
+    a1 = ak._v2.operations.zip(
         {"a": [[1], [], [2, 3]], "b": [[4], [], [5, 6]]}, with_name="a1"
     )
-    a2 = ak._v2.operations.structure.zip(
+    a2 = ak._v2.operations.zip(
         {"a": [[7, 8], [9], []], "b": [[10, 11], [12], []]}, with_name="a2"
     )
 
-    union = ak._v2.operations.structure.where([True, False, True], a1, a2)
-    assert set(ak._v2.operations.structure.flatten(union, axis=None)) == {
+    union = ak._v2.operations.where([True, False, True], a1, a2)
+    assert set(ak._v2.operations.flatten(union, axis=None)) == {
         1,
         2,
         3,

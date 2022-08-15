@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/BuilderOptions.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class OptionBuilder
   ///
@@ -23,7 +23,7 @@ namespace awkward {
     /// @param nullcount Length of the purely missing data to create.
     /// @param content Builder for the non-missing data.
     static const BuilderPtr
-      fromnulls(const ArrayBuilderOptions& options,
+      fromnulls(const BuilderOptions& options,
                 int64_t nullcount,
                 const BuilderPtr& content);
 
@@ -33,7 +33,7 @@ namespace awkward {
     /// these are passed to every Builder's constructor.
     /// @param content Builder for the non-missing data.
     static const BuilderPtr
-      fromvalids(const ArrayBuilderOptions& options,
+      fromvalids(const BuilderOptions& options,
                  const BuilderPtr& content);
 
     /// @brief Create a OptionBuilder from a full set of parameters.
@@ -43,7 +43,7 @@ namespace awkward {
     /// @param index Contains the accumulated index (like
     /// {@link IndexedArrayOf#index IndexedOptionArray::index}).
     /// @param content Builder for the non-missing data.
-    OptionBuilder(const ArrayBuilderOptions& options,
+    OptionBuilder(const BuilderOptions& options,
                   GrowableBuffer<int64_t> index,
                   const BuilderPtr content);
 
@@ -124,7 +124,6 @@ namespace awkward {
       maybeupdate(const BuilderPtr builder);
 
   private:
-    const ArrayBuilderOptions options_;
     GrowableBuffer<int64_t> index_;
     BuilderPtr content_;
   };

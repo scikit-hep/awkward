@@ -6,11 +6,11 @@
 #include <string>
 
 #include "awkward/common.h"
-#include "awkward/builder/GrowableBuffer.h"
+#include "awkward/BuilderOptions.h"
+#include "awkward/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  class ArrayBuilderOptions;
 
   /// @class Float64Builder
   ///
@@ -21,22 +21,22 @@ namespace awkward {
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
-      fromempty(const ArrayBuilderOptions& options);
+      fromempty(const BuilderOptions& options);
 
     /// @brief Create a Float64Builder from an existing Int64Builder.
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param old The Int64Builder's buffer.
     static const BuilderPtr
-      fromint64(const ArrayBuilderOptions& options,
-                GrowableBuffer<int64_t> old);
+      fromint64(const BuilderOptions& options,
+                const GrowableBuffer<int64_t>& old);
 
     /// @brief Create a Float64Builder from a full set of parameters.
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     /// @param buffer Contains the accumulated real numbers.
-    Float64Builder(const ArrayBuilderOptions& options,
+    Float64Builder(const BuilderOptions& options,
                    GrowableBuffer<double> buffer);
 
     /// @brief Contains the accumulated real numbers (`double`).
@@ -110,11 +110,11 @@ namespace awkward {
     const BuilderPtr
       endrecord() override;
 
-    const ArrayBuilderOptions&
+    const BuilderOptions&
       options() const { return options_; }
 
   private:
-    const ArrayBuilderOptions options_;
+    const BuilderOptions options_;
     GrowableBuffer<double> buffer_;
   };
 

@@ -10,7 +10,6 @@
 #include "awkward/common.h"
 #include "awkward/builder/Builder.h"
 #include "awkward/builder/ArrayBuilder.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace awkward {
   /// @class ToJson
@@ -329,14 +328,13 @@ namespace awkward {
   /// ArrayBuilder.
   ///
   /// @param source Null-terminated string containing any valid JSON data.
-  /// @param options Configuration options for building an array with an
-  /// ArrayBuilder.
-  /// @param nan_string user-defined string for a not-a-number (NaN) value
-  /// representation in JSON format
-  /// @param infinity_string user-defined string for a positive infinity
-  /// representation in JSON format
-  /// @param minus_infinity_string user-defined string for a negative
-  /// infinity representation in JSON format
+  /// @param builder To build the array.
+  /// @param nan_string User-defined string for a not-a-number (NaN) value
+  /// representation in JSON format.
+  /// @param infinity_string User-defined string for a positive infinity
+  /// representation in JSON format.
+  /// @param minus_infinity_string User-defined string for a negative
+  /// infinity representation in JSON format.
   LIBAWKWARD_EXPORT_SYMBOL int64_t
     FromJsonString(const char* source,
                    ArrayBuilder& builder,
@@ -348,15 +346,14 @@ namespace awkward {
   /// ArrayBuilder.
   ///
   /// @param source C file handle to a file containing any valid JSON data.
-  /// @param options Configuration options for building an array with an
-  /// ArrayBuilder.
+  /// @param builder To build the array.
   /// @param buffersize Number of bytes for an intermediate buffer.
-  /// @param nan_string user-defined string for a not-a-number (NaN) value
-  /// representation in JSON format
-  /// @param infinity_string user-defined string for a positive infinity
-  /// representation in JSON format
-  /// @param minus_infinity_string user-defined string for a negative
-  /// infinity representation in JSON format
+  /// @param nan_string User-defined string for a not-a-number (NaN) value
+  /// representation in JSON format.
+  /// @param infinity_string User-defined string for a positive infinity
+  /// representation in JSON format.
+  /// @param minus_infinity_string User-defined string for a negative
+  /// infinity representation in JSON format.
   LIBAWKWARD_EXPORT_SYMBOL int64_t
     FromJsonFile(FILE* source,
                  ArrayBuilder& builder,
@@ -364,6 +361,40 @@ namespace awkward {
                  const char* nan_string = nullptr,
                  const char* infinity_string = nullptr,
                  const char* minus_infinity_string = nullptr);
+
+  /// @class FileLikeObject
+  ///
+  /// @brief Abstract class to represent a file-like object, something with
+  /// a `read(num_bytes)` method. Satisfies RapidJSON's Stream interface.
+  class FileLikeObject {
+  public:
+    virtual int64_t read(int64_t num_bytes, char* buffer) = 0;
+  };
+
+  /// @brief Parses a JSON-encoded file-like object using an
+  /// ArrayBuilder.
+  ///
+  /// @param source File-like object wrapped with the FileLikeObject
+  /// abstraction (borrowed reference).
+  /// @param builder To build the array.
+  /// @param buffersize Number of bytes for an intermediate buffer.
+  /// @param read_one If true, read only one JSON object (with an error if
+  /// there's more); otherwise, read a stream of concatenated objects (may
+  /// be separated by newlines, but we don't check).
+  /// @param nan_string User-defined string for a not-a-number (NaN) value
+  /// representation in JSON format.
+  /// @param infinity_string User-defined string for a positive infinity
+  /// representation in JSON format.
+  /// @param minus_infinity_string User-defined string for a negative
+  /// infinity representation in JSON format.
+  LIBAWKWARD_EXPORT_SYMBOL int64_t
+    FromJsonObject(FileLikeObject* source,
+                   ArrayBuilder& builder,
+                   int64_t buffersize,
+                   bool read_one,
+                   const char* nan_string = nullptr,
+                   const char* infinity_string = nullptr,
+                   const char* minus_infinity_string = nullptr);
 
 }
 

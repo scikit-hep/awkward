@@ -6,7 +6,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 content = ak._v2.contents.NumpyArray(
     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
@@ -20,11 +20,11 @@ listarray = ak._v2.contents.ListArray(starts, stops, regulararray)
 
 
 def test_simple_type():
-    assert str(ak._v2.operations.describe.type(content)) == "float64"
+    assert str(ak._v2.operations.type(content)) == "float64"
 
 
 def test_type():
-    assert str(ak._v2.operations.describe.type(regulararray)) == "2 * var * float64"
+    assert str(ak._v2.operations.type(regulararray)) == "2 * var * float64"
 
 
 def test_iteration():
@@ -221,3 +221,55 @@ def test_numpy():
             assert to_list(modelB[cuts]) == to_list(regulararrayB[cuts])
             if depth < 4:
                 assert regulararrayB.typetracer[cuts].form == regulararrayB[cuts].form
+
+
+def test_maybe_toNumpy():
+    array = ak._v2.highlevel.Array(
+        [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
+    ).layout
+    array2 = ak._v2.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
+    assert to_list(array[array2]) == [
+        3.3,
+        6.6,
+        None,
+        None,
+        8.8,
+        6.6,
+    ]
+    assert array.typetracer[array2].form == array[array2].form
+
+    content = ak._v2.contents.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
+    )
+    regulararray = ak._v2.contents.RegularArray(content, 4, zeros_length=0)
+
+    array3 = ak._v2.highlevel.Array([2, 1, 1, None, -1], check_valid=True).layout
+    numpyarray = regulararray.maybe_toNumpyArray()
+    assert to_list(numpyarray[array3]) == [
+        [8.8, 9.9, 10.0, 11.1],
+        [4.4, 5.5, 6.6, 7.7],
+        [4.4, 5.5, 6.6, 7.7],
+        None,
+        [8.8, 9.9, 10.0, 11.1],
+    ]
+    assert numpyarray.typetracer[array3].form == numpyarray[array3].form
+    assert to_list(numpyarray[:, array3]) == [
+        [2.2, 1.1, 1.1, None, 3.3],
+        [6.6, 5.5, 5.5, None, 7.7],
+        [10.0, 9.9, 9.9, None, 11.1],
+    ]
+
+    a = ak._v2.contents.regulararray.RegularArray(
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
+        ),
+        3,
+    )
+    assert len(a) == 2
+    a = a.maybe_toNumpyArray()
+    assert isinstance(
+        a[
+            1,
+        ],
+        ak._v2.contents.numpyarray.NumpyArray,
+    )

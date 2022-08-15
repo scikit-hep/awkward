@@ -48,7 +48,7 @@ namespace awkward {
 
     /// @brief Returns `true` if #recordlookup is `nullptr`; `false` otherwise.
     bool
-      istuple() const;
+      istuple() const override;
 
     /// @copydoc Content::isscalar()
     ///
@@ -180,6 +180,9 @@ namespace awkward {
     /// For Record, this method returns #shallow_copy (pass-through).
     const ContentPtr
       shallow_simplify() const override;
+
+    const int64_t
+      axis_wrap_if_negative(int64_t axis) const;
 
     const ContentPtr
       num(int64_t axis, int64_t depth) const override;

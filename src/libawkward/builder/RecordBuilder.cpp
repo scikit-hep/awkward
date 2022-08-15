@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 #include "awkward/builder/UnknownBuilder.h"
@@ -14,7 +13,7 @@
 
 namespace awkward {
   const BuilderPtr
-  RecordBuilder::fromempty(const ArrayBuilderOptions& options) {
+  RecordBuilder::fromempty(const BuilderOptions& options) {
     return std::make_shared<RecordBuilder>(options,
                                            std::vector<BuilderPtr>(),
                                            std::vector<std::string>(),
@@ -27,7 +26,7 @@ namespace awkward {
                                            -1);
   }
 
-  RecordBuilder::RecordBuilder(const ArrayBuilderOptions& options,
+  RecordBuilder::RecordBuilder(const BuilderOptions& options,
                                const std::vector<BuilderPtr>& contents,
                                const std::vector<std::string>& keys,
                                const std::vector<const char*>& pointers,

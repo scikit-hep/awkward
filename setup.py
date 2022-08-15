@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
+import glob
 
 import setuptools
 import setuptools.command.build_ext
@@ -64,11 +65,11 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
     def build_extensions(self):
         try:
             subprocess.check_output([CMAKE, "--version"])
-        except OSError:
+        except OSError as err:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: "
                 + ", ".join(x.name for x in self.extensions)
-            )
+            ) from err
 
         setuptools.command.build_ext.build_ext.build_extensions(self)
 
@@ -206,18 +207,15 @@ class Install(setuptools.command.install.install):
 
         if platform.system() == "Windows":
             print("--- copying libraries -----------------------------------------")
-            dlldir = os.path.join(
+            dlldir = glob.glob(
                 os.path.join(
                     "build",
-                    "temp.%s-%d.%d"
-                    % (
-                        get_platform(),
-                        sys.version_info[0],
-                        sys.version_info[1],
-                    ),
-                ),
-                "Release",
+                    f"temp.*-{sys.version_info[0]}*{sys.version_info[1]}",
+                    "Release",
+                )
             )
+            assert len(dlldir) == 1, f"glob returned {dlldir!r}"
+            dlldir = dlldir[0]
             found = False
             for x in os.listdir(dlldir):
                 if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):

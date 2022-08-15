@@ -9,5 +9,5 @@ def test():
     simple = {"what": "ever"}
     one = ak._v2.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], behavior=simple)
     two = ak._v2.Array([["one", "two"], ["three"], ["four", "five"]], behavior=simple)
-    three = ak._v2.operations.structure.cartesian({"one": one, "two": two})
+    three = ak._v2.operations.cartesian({"one": one, "two": two})
     assert three.behavior == {"what": "ever"}

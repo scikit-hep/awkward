@@ -25,9 +25,7 @@ def through_arrow(
         bytestring_to32=bytestring_to32,
         categorical_as_dictionary=categorical_as_dictionary,
     )
-    array_form = ak._v2.from_arrow(
-        arrow_table, conservative_optiontype=True
-    ).layout.form
+    array_form = ak._v2.from_arrow(arrow_table, generate_bitmasks=True).layout.form
     return arrow_table.schema, array_form
 
 
@@ -54,7 +52,7 @@ def through_parquet(
     )
     parquet_file = pyarrow_parquet.ParquetFile(filename)
     array_form = ak._v2.from_arrow(
-        parquet_file.read_row_groups([0]), conservative_optiontype=True
+        parquet_file.read_row_groups([0]), generate_bitmasks=True
     ).layout.form
     return parquet_file.schema_arrow, array_form
 
@@ -294,13 +292,11 @@ def test_indexedoptionarray_emptyarray(tmp_path, through, extensionarray):
         parameters={"which": "outer"},
     )
 
-    # https://issues.apache.org/jira/browse/ARROW-14522
-    if through is through_arrow or not extensionarray:
-        schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
-            schema_arrow, pass_empty_field=True
-        )
-        assert predicted_form == array_form
+    schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
+    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        schema_arrow, pass_empty_field=True
+    )
+    assert predicted_form == array_form
 
 
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])
@@ -831,3 +827,96 @@ def test_unionarray(tmp_path, through, extensionarray):
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
+
+
+# Test cases
+#  - list of data files, scanned
+#  - list of data files, not scanned
+#  - list of directories -> exception
+#  - directory with _metadata, used
+#  - directory with _metadata, not used, files scanned
+#  - directory with _metadata, not used, files not scanned
+#  - directory without _metadata but with _common_metadata
+#  - directory with only data files, scanned
+#  - directory with only data files, not scanned
+
+
+@pytest.fixture()
+def generate_datafiles(tmp_path):
+    import fsspec
+
+    fs = fsspec.filesystem("file")
+    data1 = ak.from_iter([[1, 2, 3], [4, 5]])
+    data2 = data1 + 1
+    md1 = ak._v2.to_parquet(data1, os.path.join(tmp_path, "data1.parq"))
+    md2 = ak._v2.to_parquet(data2, os.path.join(tmp_path, "data2.parq"))
+    return str(tmp_path), [md1, md2], fs
+
+
+@pytest.fixture()
+def with_common_metadata(generate_datafiles):
+    path, mdlist, fs = generate_datafiles
+    ak._v2.operations.ak_to_parquet.write_metadata(
+        path, fs, *mdlist, global_metadata=False
+    )
+    return path
+
+
+@pytest.fixture()
+def with_global_metadata(generate_datafiles):
+    path, mdlist, fs = generate_datafiles
+    ak._v2.operations.ak_to_parquet.write_metadata(
+        path, fs, *mdlist, global_metadata=True
+    )
+    return path
+
+
+@pytest.fixture()
+def with_corrupted_global_metadata(generate_datafiles):
+    path, mdlist, fs = generate_datafiles
+    ak._v2.operations.ak_to_parquet.write_metadata(path, fs, *mdlist)
+    with open(os.path.join("path", "_metadata"), "wb") as f:
+        f.write(b"not parquet")
+    return path
+
+
+def test_defaults_global(with_global_metadata):
+    arr = ak._v2.metadata_from_parquet(with_global_metadata)
+    assert arr["num_rows"] == 4
+    assert arr["col_counts"] == [2, 2]
+
+
+def test_defaults_common(with_common_metadata):
+    arr = ak._v2.metadata_from_parquet(with_common_metadata)
+    assert arr["num_rows"] == 4
+    assert arr["col_counts"] == [2, 2]
+
+
+def test_dont_scan(with_global_metadata):
+    arr = ak._v2.metadata_from_parquet(
+        with_global_metadata, ignore_metadata=True, scan_files=False
+    )
+    assert arr["col_counts"] is None
+
+
+def test_cant_select(with_common_metadata):
+    # strictly, tow_groups=[0] could be allowed, since that file is first and may be scanned
+    # anyway
+    with pytest.raises(ValueError):
+        ak._v2.metadata_from_parquet(
+            with_common_metadata, scan_files=False, row_groups=[1]
+        )
+
+
+def test_select(with_global_metadata):
+    arr = ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[1])
+    assert arr["col_counts"] == [2]
+
+    with pytest.raises(ValueError):
+        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[1, 1])
+
+    with pytest.raises(ValueError):
+        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[-1])
+
+    with pytest.raises(ValueError):
+        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[4])

@@ -3,7 +3,7 @@
 import pytest  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
 def test():
@@ -12,13 +12,13 @@ def test():
     )
 
     assert to_list(
-        ak._v2.operations.structure.nan_to_num(
+        ak._v2.operations.nan_to_num(
             array, nan=999, posinf=float("-inf"), neginf=float("inf")
         )
     ) == [[1.1, 2.2], [], [3.3, 999.0], [float("inf"), float("-inf"), 7.7]]
 
     assert to_list(
-        ak._v2.operations.structure.nan_to_num(
+        ak._v2.operations.nan_to_num(
             array,
             nan=[[-1, -2], [], [-3, -4], [-5, -6, -7]],
             posinf=float("-inf"),
@@ -27,7 +27,7 @@ def test():
     ) == [[1.1, 2.2], [], [3.3, -4], [float("inf"), float("-inf"), 7.7]]
 
     assert to_list(
-        ak._v2.operations.structure.nan_to_num(
+        ak._v2.operations.nan_to_num(
             array,
             nan=[[-1, -2], [], [-3, -4], [-5, -6, -7]],
             posinf=[[1, 2], [], [3, 4], [5, 6, 7]],
@@ -36,7 +36,7 @@ def test():
     ) == [[1.1, 2.2], [], [3.3, -4], [float("inf"), 6.0, 7.7]]
 
     assert to_list(
-        ak._v2.operations.structure.nan_to_num(
+        ak._v2.operations.nan_to_num(
             array,
             nan=[[-1, -2], [], [-3, -4], [-5, -6, -7]],
             posinf=[[1, 2], [], [3, 4], [5, 6, 7]],
@@ -45,7 +45,7 @@ def test():
     ) == [[1.1, 2.2], [], [3.3, -4], [50.0, 6.0, 7.7]]
 
     assert to_list(
-        ak._v2.operations.structure.nan_to_num(
+        ak._v2.operations.nan_to_num(
             array,
             nan=[[-1, -2], [], [-3, -4], [-5, -6, -7]],
             posinf=float("-inf"),
@@ -54,7 +54,7 @@ def test():
     ) == [[1.1, 2.2], [], [3.3, -4], [50.0, float("-inf"), 7.7]]
 
     assert to_list(
-        ak._v2.operations.structure.nan_to_num(
+        ak._v2.operations.nan_to_num(
             array,
             nan=999,
             posinf=float("-inf"),

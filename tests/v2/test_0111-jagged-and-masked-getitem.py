@@ -4,10 +4,9 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.convert.to_list
+to_list = ak._v2.operations.to_list
 
 
-@pytest.mark.skip(reason="FIXME: need to implement UnionArray as a slice")
 def test_array_slice_with_union():
     array = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
@@ -179,9 +178,7 @@ def test_array_slice_1():
         ],
         check_valid=True,
     ).layout
-    assert to_list(
-        array[ak._v2.operations.convert.from_iter(["y", "x"], highlevel=False)]
-    ) == [
+    assert to_list(array[ak._v2.operations.from_iter(["y", "x"], highlevel=False)]) == [
         {"y": 1.1, "x": 1},
         {"y": 2.2, "x": 2},
         {"y": 3.3, "x": 3},
@@ -190,7 +187,6 @@ def test_array_slice_1():
     ]
 
 
-@pytest.mark.skip(reason="FIXME: UnionArray as a slice has not been implemented")
 def test_array_slice_2():
     array = ak._v2.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
@@ -538,7 +534,7 @@ def test_bool_missing2():
     ]
     assert array.typetracer[array2].form == array[array2].form
 
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
 
@@ -553,9 +549,7 @@ def test_bool_missing2():
         [8.8, 9.9, 10.0, 11.1],
     ]
 
-    array1 = ak._v2.operations.convert.from_iter(
-        [True, None, False, True], highlevel=False
-    )
+    array1 = ak._v2.operations.from_iter([True, None, False, True], highlevel=False)
 
     assert to_list(regulararray[:, array1]) == [
         [0.0, None, 3.3],
@@ -714,7 +708,7 @@ def test_double_jagged():
     ]
     assert array.typetracer[array2].form == array[array2].form
 
-    content = ak._v2.operations.convert.from_iter(
+    content = ak._v2.operations.from_iter(
         [[0, 1, 2, 3], [4, 5], [6, 7, 8], [9, 10, 11, 12, 13]], highlevel=False
     )
     regulararray = ak._v2.contents.RegularArray(content, 2, zeros_length=0)
@@ -839,7 +833,7 @@ def test_emptyarray():
     assert to_list(listoffsetarray[array4]) == [[], [None], None, []]
     assert listoffsetarray.typetracer[array4].form == listoffsetarray[array4].form
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         listoffsetarray[array5]
 
 
@@ -893,7 +887,7 @@ def test_record():
 
 
 def test_indexedarray():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     index = ak._v2.index.Index64(np.array([3, 2, 1, 0], dtype=np.int64))
@@ -987,7 +981,7 @@ def test_indexedarray():
 
 
 def test_indexedarray2():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     index = ak._v2.index.Index64(np.array([3, 2, -1, 0], dtype=np.int64))
@@ -1010,7 +1004,7 @@ def test_indexedarray2():
 
 
 def test_indexedarray2b():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     index = ak._v2.index.Index64(np.array([0, -1, 2, 3], dtype=np.int64))
@@ -1033,7 +1027,7 @@ def test_indexedarray2b():
 
 
 def test_bytemaskedarray2b():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask = ak._v2.index.Index8(np.array([0, 1, 0, 0], dtype=np.int8))
@@ -1056,7 +1050,7 @@ def test_bytemaskedarray2b():
 
 
 def test_bitmaskedarray2b():
-    array = ak._v2.operations.convert.from_iter(
+    array = ak._v2.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
     mask = ak._v2.index.IndexU8(np.array([66], dtype=np.uint8))
@@ -1159,10 +1153,10 @@ def test_sequential():
 
 
 def test_union():
-    one = ak._v2.operations.convert.from_iter(
+    one = ak._v2.operations.from_iter(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
     )
-    two = ak._v2.operations.convert.from_iter(
+    two = ak._v2.operations.from_iter(
         [[6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]], highlevel=False
     )
     tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
@@ -1181,10 +1175,10 @@ def test_union():
 
 
 def test_union_2():
-    one = ak._v2.operations.convert.from_iter(
+    one = ak._v2.operations.from_iter(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
     )
-    two = ak._v2.operations.convert.from_iter(
+    two = ak._v2.operations.from_iter(
         [[6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]], highlevel=False
     )
     tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
@@ -1367,14 +1361,14 @@ def test_jagged_missing_mask():
 
 
 def test_array_boolean_to_int():
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [[True, True, True], [], [True, True], [True], [True, True, True, True]],
         highlevel=False,
     )
     b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
     assert to_list(b) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
 
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [
             [True, True, False],
             [],
@@ -1387,7 +1381,7 @@ def test_array_boolean_to_int():
     b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
     assert to_list(b) == [[0, 1], [], [0], [], [0, 1, 2]]
 
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [
             [False, True, True],
             [],
@@ -1400,7 +1394,7 @@ def test_array_boolean_to_int():
     b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
     assert to_list(b) == [[1, 2], [], [1], [], [1, 2, 3]]
 
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [[True, True, None], [], [True, None], [None], [True, True, True, None]],
         highlevel=False,
     )
@@ -1411,7 +1405,7 @@ def test_array_boolean_to_int():
         == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
     )
 
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [[None, True, True], [], [None, True], [None], [None, True, True, True]],
         highlevel=False,
     )
@@ -1422,7 +1416,7 @@ def test_array_boolean_to_int():
         == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
     )
 
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [[False, True, None], [], [False, None], [None], [False, True, True, None]],
         highlevel=False,
     )
@@ -1433,7 +1427,7 @@ def test_array_boolean_to_int():
         == np.arange(3).tolist()  # kernels expect nonnegative entries to be arange
     )
 
-    a = ak._v2.operations.convert.from_iter(
+    a = ak._v2.operations.from_iter(
         [[None, True, False], [], [None, False], [None], [None, True, True, False]],
         highlevel=False,
     )

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import copy
 from collections.abc import Iterable
 
 import awkward as ak
@@ -15,7 +14,7 @@ class Record:
             raise ak._v2._util.error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )
-        if not ak._util.isint(at):
+        if not ak._v2._util.isint(at):
             raise ak._v2._util.error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
@@ -72,8 +71,8 @@ class Record:
         out.append(post)
         return "".join(out)
 
-    def validityerror(self, path="layout.array"):
-        return self._array.validityerror(path)
+    def validity_error(self, path="layout.array"):
+        return self._array.validity_error(path)
 
     @property
     def parameters(self):
@@ -102,6 +101,13 @@ class Record:
     def branch_depth(self):
         branch, depth = self._array.branch_depth
         return branch, depth - 1
+
+    def axis_wrap_if_negative(self, axis):
+        if axis == 0:
+            raise ak._v2._util.error(
+                np.AxisError("Record type at axis=0 is a scalar, not an array")
+            )
+        return self._array.axis_wrap_if_negative(axis)
 
     def __getitem__(self, where):
         with ak._v2._util.SlicingErrorContext(self, where):
@@ -189,7 +195,56 @@ class Record:
         if cls is not ak._v2.highlevel.Record:
             return cls(self)
 
-        return self._array[self._at : self._at + 1].to_list(behavior)[0]
+        return self._array[self._at : self._at + 1]._to_list(behavior, None)[0]
 
-    def deep_copy(self):
-        return Record(self._array.deep_copy(), copy.deepcopy(self._at))
+    def __deepcopy__(self, memo=None):
+        return Record(self._array.__deepcopy__(memo), self._at)
+
+    def recursively_apply(
+        self,
+        action,
+        behavior=None,
+        depth_context=None,
+        lateral_context=None,
+        allow_records=True,
+        keep_parameters=True,
+        numpy_to_regular=True,
+        return_array=True,
+        function_name=None,
+    ):
+
+        out = self._array.recursively_apply(
+            action,
+            behavior,
+            depth_context,
+            lateral_context,
+            allow_records,
+            keep_parameters,
+            numpy_to_regular,
+            return_array,
+            function_name,
+        )
+
+        if return_array:
+            return Record(out, self._at)
+        else:
+            return None
+
+    def _jax_flatten(self):
+        from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData
+
+        numpyarray_nodes = _find_numpyarray_nodes(self)
+        return (numpyarray_nodes, AuxData(self))
+
+    @classmethod
+    def jax_flatten(cls, array):
+        assert type(array) is cls
+        return array._jax_flatten()
+
+    @classmethod
+    def jax_unflatten(cls, aux_data, children):
+        from awkward._v2._connect.jax import _replace_numpyarray_nodes
+
+        return ak._v2._util.wrap(
+            _replace_numpyarray_nodes(aux_data.layout, list(children))
+        )
