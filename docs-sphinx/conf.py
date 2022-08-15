@@ -51,9 +51,9 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_templates", "jupyter_e
 # a list of builtin themes.
 #
 html_context = {
-    # "github_url": "https://github.com", # or your GitHub Enterprise interprise
     "github_user": "scikit-hep",
     "github_repo": "awkward",
+    # TODO: set this
     "github_version": os.environ.get("READTHEDOCS_VERSION", "latest"),
     "doc_path": "docs-sphinx",
 }
