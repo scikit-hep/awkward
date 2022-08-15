@@ -18,13 +18,16 @@ def headtail(oldtail):
 def getitem_broadcast(items):
     lookup = []
     broadcastable = []
+    awkward_items = 0
     for item in items:
+        if isinstance(item, ak._v2.contents.Content):
+            awkward_items += 1
         if (
             isinstance(
                 item,
                 (
                     slice,
-                    list,
+                    list,  # of strings
                     ak._v2.contents.ListOffsetArray,
                     ak._v2.contents.IndexedOptionArray,
                 ),
@@ -35,8 +38,16 @@ def getitem_broadcast(items):
         ):
             lookup.append(None)
         else:
+            # this includes integers (which broadcast to arrays)
             lookup.append(len(broadcastable))
             broadcastable.append(item)
+
+    if awkward_items > 1 or (awkward_items == 1 and len(broadcastable) != 0):
+        raise ak._v2._util.error(
+            TypeError(
+                "cannot mix Awkward slicing (using an array with missing or variable-length lists in the slice) with NumPy advanced slicing (using more than one broadcastable array or integer in the slice), though you can perform multiple slices"
+            )
+        )
 
     nplike = ak.nplike.of(*broadcastable)
 
@@ -354,7 +365,7 @@ def prepare_tuple_bool_to_int(item):
             if item.content.content.data.shape[0] > 0:
                 expanded = item.content.content.data[safeindex]
             else:
-                expanded = item.content.content.data.nplike.ones(
+                expanded = item.content.content.nplike.ones(
                     safeindex.shape[0], np.bool_
                 )
 
@@ -423,9 +434,7 @@ def prepare_tuple_bool_to_int(item):
                 if item.content.data.shape[0] > 0:
                     expanded = item.content.data[safeindex]
                 else:
-                    expanded = item.content.data.nplike.ones(
-                        safeindex.shape[0], np.bool_
-                    )
+                    expanded = item.content.nplike.ones(safeindex.shape[0], np.bool_)
 
                 # nextcontent does not include missing values
                 expanded[isnegative] = False
@@ -448,7 +457,7 @@ def prepare_tuple_bool_to_int(item):
                 )
 
             return ak._v2.contents.IndexedOptionArray(
-                ak._v2.index.Index(outindex, item.nplike),
+                ak._v2.index.Index(outindex, nplike=item.nplike),
                 ak._v2.contents.NumpyArray(nextcontent, nplike=item.nplike),
             )
 
