@@ -3,8 +3,10 @@ on:
   push:
     branches:
       - main
-      - docs-phase-2
       - docs
+  pull_request:
+    branches:
+      - 'docs'
   release:
     types: [released]
   workflow_dispatch:
@@ -40,8 +42,8 @@ jobs:
       run: sphinx-build -M html docs-sphinx/ docs-sphinx/_build/
     - uses: actions/upload-artifact@v3
       with:
-        name: jupyter-cache
-        path: docs-sphinx/_build/.jupyter_cache
+        name: docs
+        path: docs-sphinx/_build/html
     - name: Trigger RTD Build
       # NB: head_ref is only valid for PR triggers
       run: curl -X POST -d "branches=${{ github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
