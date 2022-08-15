@@ -291,7 +291,9 @@ class UnionArray(Content):
                 index,
             )
         )
-        nextcarry = ak._v2.index.Index64(tmpcarry.data[: lenout[0]], self._nplike)
+        nextcarry = ak._v2.index.Index64(
+            tmpcarry.data[: lenout[0]], nplike=self._nplike
+        )
         return self._contents[index]._carry(nextcarry, False)
 
     @staticmethod
