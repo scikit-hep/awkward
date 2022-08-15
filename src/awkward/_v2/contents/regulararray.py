@@ -151,9 +151,9 @@ class RegularArray(Content):
     def maybe_toNumpyArray(self):
         content = None
         if isinstance(self._content, ak._v2.contents.NumpyArray):
-            content = self._content
+            content = self._content[: self._length * self._size]
         elif isinstance(self._content, RegularArray):
-            content = self._content.maybe_toNumpyArray()
+            content = self._content[: self._length * self._size].maybe_toNumpyArray()
 
         if isinstance(content, ak._v2.contents.NumpyArray):
             shape = (self._length, self._size) + content.data.shape[1:]
