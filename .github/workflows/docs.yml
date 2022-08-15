@@ -4,9 +4,8 @@ on:
     branches:
       - main
       - docs
-  pull_request:
-    branches:
-      - 'docs'
+    paths:
+      - 'docs-sphinx/**'
   release:
     types: [released]
   workflow_dispatch:
