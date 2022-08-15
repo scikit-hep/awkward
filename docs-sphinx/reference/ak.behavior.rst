@@ -59,10 +59,10 @@ In Awkward Array, metadata are embedded in data using an array node's
     >>> import awkward as ak
     >>> ak.behavior
 
-but behavior dicts can also be loaded into :doc:`_auto/ak.Array`,
-:doc:`_auto/ak.Record`, and :doc:`_auto/ak.ArrayBuilder` objects as a
+but behavior dicts can also be loaded into :class:`ak.Array`,
+:class:`ak.Record`, and :class:`ak.ArrayBuilder` objects as a
 constructor argument. See
-`ak.Array.behavior <_auto/ak.Array.html#ak-array-behavior>`_.
+:attr:`ak.Array.behavior`.
 
 The general flow is
 
@@ -100,7 +100,7 @@ The name appears in the way the type is presented as a string (a departure from
     5 * var * point["x": int64, "y": float64]
 
 and it may be accessed as the ``"__record__"`` property, through the
-`ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_:
+:attr:`ak.Array.layout`:
 
 .. code-block:: python
 
@@ -126,7 +126,7 @@ We have to dig into the layout's content because the ``"__record__"`` parameter
 is set on the :class:`ak.contents.RecordArray`, which is buried inside of a
 :class:`ak.contents.ListOffsetArray`.
 
-Alternatively, we can navigate to a single :doc:`_auto/ak.Record` first:
+Alternatively, we can navigate to a single :class:`ak.Record` first:
 
 .. code-block:: python
 
@@ -140,7 +140,7 @@ Adding behavior to records
 
 Suppose we want the points in the above example to be able to calculate
 distances to other points. We can do this by creating a subclass of
-:doc:`_auto/ak.Record` that has the new methods and associating it with
+:class:`ak.Record` that has the new methods and associating it with
 the ``"__record__"`` name.
 
 .. code-block:: python
@@ -151,7 +151,7 @@ the ``"__record__"`` name.
 
     ak.behavior["point"] = Point
 
-Now ``one[0, 0]`` is instantiated as a ``Point``, rather than a ``Record``,
+Now ``one[0, 0]`` is instantiated as a ``Point``, rather than a :class:`ak.Record`,
 
 .. code-block:: python
 
@@ -177,7 +177,7 @@ and it has the ``distance`` method.
 
 Looping over data in Python is inconvenient and slow; we want to compute
 quantities like this with array-at-a-time methods, but ``distance`` is
-bound to a :doc:`_auto/ak.Record`, not an :doc:`_auto/ak.Array` of records.
+bound to a :class:`ak.Record`, not an :class:`ak.Array` of records.
 
 .. code-block:: python
 
@@ -185,7 +185,7 @@ bound to a :doc:`_auto/ak.Record`, not an :doc:`_auto/ak.Array` of records.
     AttributeError: no field named 'distance'
 
 To add ``distance`` as a method on arrays of points, create a subclass of
-:doc:`_auto/ak.Array` and attach that as ``ak.behavior[".", "point"]`` for
+:class:`ak.Array` and attach that as ``ak.behavior[".", "point"]`` for
 "array of points."
 
 .. code-block:: python
@@ -227,7 +227,7 @@ instead of a ``"."``.
 
 One last caveat: our ``one`` array was created *before* this behavior was
 assigned, so it needs to be recreated to be a member of the new class. The
-normal :doc:`_auto/ak.Array` constructor is sufficient for this. This is only
+normal :class:`ak.Array` constructor is sufficient for this. This is only
 an issue if you're working interactively (but something to think about when
 debugging!).
 
@@ -251,10 +251,10 @@ for ``distance`` based on ufuncs works equally well on Awkward Arrays.
 Overriding NumPy ufuncs and binary operators
 ============================================
 
-The :doc:`_auto/ak.Array` class overrides Python's binary operators with the
-equivalent ufuncs, so ``__eq__`` actually calls ``np.equal``, for instance.
+The :class:`ak.Array` class overrides Python's binary operators with the
+equivalent ufuncs, so ``__eq__`` actually calls :data:`numpy.equal`, for instance.
 This is also true of other basic functions, like ``__abs__`` for overriding
-``abs`` with ``np.absolute``. Each ufunc is then passed down to the leaves
+:func:`abs` with :data:`numpy.absolute`. Each ufunc is then passed down to the leaves
 (deepest sub-elements) of an Awkward data structure.
 
 For example,
@@ -282,7 +282,7 @@ it by adding ``__eq__`` as a method on ``PointArray``, it would work if the
 ``PointArray`` is the top of the data structure, but not if it's nested within
 another structure.
 
-Instead, we should override ``np.equal`` itself. Custom ufunc overrides are
+Instead, we should override :data:`numpy.equal` itself. Custom ufunc overrides are
 checked at every step in broadcasting, so the override would be applied if
 point objects are discovered at any level.
 
@@ -293,7 +293,7 @@ point objects are discovered at any level.
 
     ak.behavior[np.equal, "point", "point"] = point_equal
 
-The above should be read as "override ``np.equal`` for cases in which both
+The above should be read as "override :data`np.equal` for cases in which both
 arguments are ``"point"``."
 
 .. code-block:: python
@@ -301,7 +301,7 @@ arguments are ``"point"``."
     >>> ak.to_list(one == two)
     [[False, True, False], [], [False, True], [False], [False, True, False]]
 
-Similarly for overriding ``abs``
+Similarly for overriding :func:`abs`
 
 .. code-block:: python
 
@@ -318,13 +318,13 @@ Similarly for overriding ``abs``
 
 and all other ufuncs.
 
-If you need a placeholder for "any number," use ``numbers.Real``,
-``numbers.Integral``, etc. Non-arrays are resolved by type; builtin Python
+If you need a placeholder for "any number," use :class:`numbers.Real`,
+:class:`numbers.Integral`, etc. Non-arrays are resolved by type; builtin Python
 numbers and NumPy numbers are subclasses of the generic number types in the
-``numbers`` library.
+:mod:`numbers` library.
 
 Also, for commutative operations, be sure to override both operator orders.
-(Function signatures are matched to ``ak.behavior`` using multiple dispatch.)
+(Function signatures are matched to :data:`ak.behavior` using multiple dispatch.)
 
 .. code-block:: python
 
@@ -345,7 +345,7 @@ Also, for commutative operations, be sure to override both operator orders.
      [{'x': 70, 'y': 77.0}, {'x': 80, 'y': 88.0}, {'x': 90, 'y': 99.0}]]
 
 If you need to override ufuncs in more generality, you can use the
-"apply_ufunc" interface:
+:class:`numpy.ufunc` interface:
 
 .. code-block:: python
 
@@ -386,8 +386,8 @@ Mixin decorators
 ================
 The pattern of adding additional properties and function overrides to records
 and arrays of records is quite common, and can be nicely described by the "mixin"
-idiom: a class with no constructor that is mixed with both the :doc:`_auto/ak.Array` and :doc:`_auto/ak.Record`
-class as to create new derived classes. The :doc:`_auto/ak.behaviors.mixins.mixin_class` and :doc:`_auto/ak.behaviors.mixins.mixin_class_method`
+idiom: a class with no constructor that is mixed with both the :class:`ak.Array` and :class:`ak.Record`
+class as to create new derived classes. The :func:`ak.mixin_class` and :func:`ak.mixin_class_method`
 python decorators assist with some of this boilerplate. Consider the ``Point`` class
 from above; we can implement all the functionality so far described as follows:
 
@@ -461,10 +461,10 @@ are a behavior overlaid on arrays.
 
 There are four predefined string behaviors:
 
-   * :doc:`_auto/ak.CharBehavior`: an array of UTF-8 encoded characters;
-   * :doc:`_auto/ak.ByteBehavior`: an array of unencoded characters;
-   * :doc:`_auto/ak.StringBehavior`: an array of variable-length UTF-8 encoded strings;
-   * :doc:`_auto/ak.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
+   * :class:`ak.CharBehavior`: an array of UTF-8 encoded characters;
+   * :class:`ak.ByteBehavior`: an array of unencoded characters;
+   * :class:`ak.StringBehavior`: an array of variable-length UTF-8 encoded strings;
+   * :class:`ak.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
 
 All four override the string representations (``__str__`` and ``__repr__``),
 but the string behaviors additionally override equality:
@@ -558,7 +558,7 @@ want the string to be taken as an object. That is fixed (in
 
     awkward.behavior["__broadcast__", "string"] = _string_broadcast
 
-Very few applications would need to do this, but the ``ak.behavior`` object
+Very few applications would need to do this, but the :data:`ak.behavior` object
 provides a lot of room for customization hooks like this.
 
 Overriding behavior in Numba
@@ -574,7 +574,7 @@ The documentation on
 introduces **typing**, **lowering**, and **models**, which are necessary for
 reimplementing the behavior of a Python object in the compiled environment.
 To apply the same to records and arrays from an Awkward data structure, we
-use ``ak.behavior`` hooks that start with ``"__numba_typer__"`` and
+use :data:`ak.behavior` hooks that start with ``"__numba_typer__"`` and
 ``"__numba_lower__"``.
 
 **Case 1:** Adding a property, such as ``rec.property_name``.
@@ -585,7 +585,7 @@ use ``ak.behavior`` hooks that start with ``"__numba_typer__"`` and
     ak.behavior["__numba_lower__", record_name, property_name] = lower
 
 The ``typer`` function takes an
-:doc:`_auto/ak._connect._numba.arrayview.ArrayViewType` as its only argument
+:func:`ak._connect._numba.arrayview.ArrayViewType` as its only argument
 and returns the property's type.
 
 The ``lower`` function takes the standard ``context, builder, sig, args``
@@ -608,7 +608,7 @@ The last item is an *empty* tuple, ``()`` (regardless of whether the method
 takes any arguments).
 
 In this case, the ``typer`` takes an
-:doc:`_auto/ak._connect._numba.arrayview.ArrayViewType` as well as any arguments
+:func:`ak._connect._numba.arrayview.ArrayViewType` as well as any arguments
 and returns the property's type, and the ``sig`` and ``args`` in ``lower``
 include these arguments.
 
@@ -654,14 +654,14 @@ For this case, the signatures are
     ak.behavior["__numba_lower__", array_name] = lower
 
 The ``typer`` function takes an
-:doc:`_auto/ak._connect._numba.arrayview.ArrayViewType` as its only argument
+:func:`ak._connect._numba.arrayview.ArrayViewType` as its only argument
 and returns the Numba type of its replacement, while the ``lower``
 function takes
 
    * ``context``: Numba context
    * ``builder``: Numba builder
    * ``rettype``: the Numba type of its replacement
-   * ``viewtype``: an :doc:`_auto/ak._connect._numba.arrayview.ArrayViewType`
+   * ``viewtype``: an :func:`ak._connect._numba.arrayview.ArrayViewType`
    * ``viewval``: a Numba value of the view
    * ``viewproxy``: a Numba proxy (``context.make_helper``) of the view
    * ``attype``: the Numba integer type of the index position

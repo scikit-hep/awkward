@@ -5,6 +5,6 @@ ak.numexpr.re_evaluate
 
 See `numexpr.re_evaluate <https://numexpr.readthedocs.io/projects/NumExpr3/en/latest/api.html#numexpr.re_evaluate>`__
 for a description of each parameter. This function reproduces NumExpr's interface, except that
-the expression can contain references to :doc:`_auto/ak.Array` objects as well as NumPy arrays.
+the expression can contain references to :class:`ak.Array` objects as well as NumPy arrays.
 
-See also :doc:`ak.numexpr.evaluate`.
+See also :func:`ak.numexpr.evaluate`.

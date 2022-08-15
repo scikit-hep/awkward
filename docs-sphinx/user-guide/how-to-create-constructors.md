@@ -78,7 +78,7 @@ To build arrays using the layout constructors, you need to be able to write them
 
 +++
 
-![](img/example-hierarchy.svg)
+![](../image/example-hierarchy.svg)
 
 +++
 
