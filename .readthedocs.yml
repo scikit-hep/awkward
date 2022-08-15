@@ -6,4 +6,5 @@ build:
     python: "3.10"
   commands:
     - pip install requests
+    - mkdir --parents _readthedocs/html/
     - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 docs -d _readthedocs/html/
