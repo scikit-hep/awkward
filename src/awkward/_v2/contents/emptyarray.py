@@ -147,7 +147,10 @@ class EmptyArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            raise ak._v2._util.indexerror(self, head, "array is empty")
+            if not head.nplike.known_shape or head.length == 0:
+                return self
+            else:
+                raise ak._v2._util.indexerror(self, head.data, "array is empty")
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise ak._v2._util.indexerror(self, head, "array is empty")
