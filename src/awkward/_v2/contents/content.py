@@ -508,7 +508,7 @@ class Content:
             if len(where) == 0:
                 return self
 
-            items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
+            items = [ak._v2._slicing.prepare_tuple_item(x, self._nplike) for x in where]
 
             nextwhere = ak._v2._slicing.getitem_broadcast(items)
 

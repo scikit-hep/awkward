@@ -86,7 +86,7 @@ def getitem_broadcast(items):
     return tuple(out)
 
 
-def prepare_tuple_item(item):
+def prepare_tuple_item(item, nplike):
     if ak._util.isint(item):
         return int(item)
 
@@ -103,16 +103,16 @@ def prepare_tuple_item(item):
         return item
 
     elif isinstance(item, ak.highlevel.Array):
-        return prepare_tuple_item(item.layout)
+        return prepare_tuple_item(item.layout, nplike)
 
     elif isinstance(item, ak.layout.Content):
-        return prepare_tuple_item(v1_to_v2(item))
+        return prepare_tuple_item(v1_to_v2(item), nplike)
 
     elif isinstance(item, ak._v2.highlevel.Array):
-        return prepare_tuple_item(item.layout)
+        return prepare_tuple_item(item.layout, nplike)
 
     elif isinstance(item, ak._v2.contents.EmptyArray):
-        return prepare_tuple_item(item.toNumpyArray(np.int64))
+        return prepare_tuple_item(item.toNumpyArray(np.int64), nplike)
 
     elif isinstance(item, ak._v2.contents.NumpyArray):
         return item.data
@@ -125,7 +125,7 @@ def prepare_tuple_item(item):
             return out
 
     elif ak._util.is_sized_iterable(item) and len(item) == 0:
-        return slice(0, 0)
+        return ak._v2.index.Index64.empty(0, nplike)
 
     elif ak._util.is_sized_iterable(item) and all(ak._util.isstr(x) for x in item):
         return list(item)
@@ -134,7 +134,7 @@ def prepare_tuple_item(item):
         layout = ak._v2.operations.to_layout(item)
         as_array = layout.maybe_to_array(layout.nplike)
         if as_array is None:
-            return prepare_tuple_item(layout)
+            return prepare_tuple_item(layout, nplike)
         else:
             return as_array
 
