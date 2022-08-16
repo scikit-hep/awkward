@@ -125,7 +125,7 @@ def prepare_tuple_item(item, nplike):
             return out
 
     elif ak._util.is_sized_iterable(item) and len(item) == 0:
-        return ak._v2.index.Index64.empty(0, nplike)
+        return nplike.empty(0, dtype=np.int64)
 
     elif ak._util.is_sized_iterable(item) and all(ak._util.isstr(x) for x in item):
         return list(item)
