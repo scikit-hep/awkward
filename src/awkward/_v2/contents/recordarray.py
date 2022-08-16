@@ -333,11 +333,7 @@ class RecordArray(Content):
                 return self.content(where)._getitem_fields(nexthead, nexttail)
 
     def _getitem_fields(self, where, only_fields=()):
-        if len(where) == 0:
-            indexes = range(len(self._contents))
-        else:
-            indexes = [self.field_to_index(field) for field in where]
-
+        indexes = [self.field_to_index(field) for field in where]
         if self._fields is None:
             fields = None
         else:

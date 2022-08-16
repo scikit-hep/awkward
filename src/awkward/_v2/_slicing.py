@@ -1,7 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from collections.abc import Iterable
-
 import awkward as ak
 from awkward._v2.tmp_for_testing import v1_to_v2
 
@@ -126,10 +124,13 @@ def prepare_tuple_item(item):
         else:
             return out
 
-    elif isinstance(item, Iterable) and all(ak._util.isstr(x) for x in item):
+    elif ak._util.is_sized_iterable(item) and len(item) == 0:
+        return slice(0, 0)
+
+    elif ak._util.is_sized_iterable(item) and all(ak._util.isstr(x) for x in item):
         return list(item)
 
-    elif isinstance(item, Iterable):
+    elif ak._util.is_sized_iterable(item):
         layout = ak._v2.operations.to_layout(item)
         as_array = layout.maybe_to_array(layout.nplike)
         if as_array is None:
