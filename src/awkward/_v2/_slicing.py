@@ -14,6 +14,13 @@ def headtail(oldtail):
 
 
 def getitem_broadcast(items):
+    """Broadcast index objects to satisfy NumPy indexing rules
+
+    Args:
+        items: iterable of index items.
+
+    Returns a tuple of broadcasted index items.
+    """
     lookup = []
     broadcastable = []
     awkward_items = 0
