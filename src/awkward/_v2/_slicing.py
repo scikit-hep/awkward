@@ -482,17 +482,11 @@ def prepare_tuple_bool_to_int(item):
         raise ak._v2._util.error(AssertionError(type(item)))
 
 
-def getitem_next_array_wrap(outcontent, shape):
-    length = shape[-2] if len(shape) >= 2 else 0
-    size = shape[-1]
-    if isinstance(size, ak._v2._typetracer.UnknownLengthType):
-        size = 1
-    out = ak._v2.contents.RegularArray(outcontent, size, length, None, None)
-
-    for i in range(len(shape) - 2, -1, -1):
-        length = shape[i - 1] if i > 0 else 0
+def getitem_next_array_wrap(outcontent, shape, outer_length=0):
+    for i in range(len(shape))[::-1]:
+        length = shape[i - 1] if i > 0 else outer_length
         size = shape[i]
         if isinstance(size, ak._v2._typetracer.UnknownLengthType):
             size = 1
-        out = ak._v2.contents.RegularArray(out, size, length, None, None)
-    return out
+        outcontent = ak._v2.contents.RegularArray(outcontent, size, length, None, None)
+    return outcontent
