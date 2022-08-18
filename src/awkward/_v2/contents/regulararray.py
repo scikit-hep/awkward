@@ -682,7 +682,31 @@ class RegularArray(Content):
     def mergemany(self, others):
         if len(others) == 0:
             return self
-        return self.toListOffsetArray64(True).mergemany(others)
+
+        if any(x.is_OptionType for x in others):
+            return ak._v2.contents.UnmaskedArray(self).mergemany(others)
+
+        elif all(x.is_RegularType and x.size == self.size for x in others):
+            parameters = self._parameters
+            tail_contents = []
+            zeros_length = 0
+            for x in others:
+                parameters = ak._v2._util.merge_parameters(
+                    parameters, x._parameters, True
+                )
+                tail_contents.append(x._content[: x._length * x._size])
+                zeros_length += x._length
+
+            return RegularArray(
+                self._content.mergemany(tail_contents),
+                self._size,
+                zeros_length,
+                None,
+                parameters,
+            )
+
+        else:
+            return self.toListOffsetArray64(True).mergemany(others)
 
     def fill_none(self, value):
         return RegularArray(
