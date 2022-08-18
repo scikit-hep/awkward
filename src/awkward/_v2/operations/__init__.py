@@ -75,7 +75,7 @@ from awkward._v2.operations.ak_to_json import to_json
 from awkward._v2.operations.ak_to_layout import to_layout
 from awkward._v2.operations.ak_to_list import to_list
 from awkward._v2.operations.ak_to_numpy import to_numpy
-from awkward._v2.operations.ak_to_pandas import to_pandas
+from awkward._v2.operations.ak_to_dataframe import to_dataframe
 from awkward._v2.operations.ak_to_parquet import to_parquet
 from awkward._v2.operations.ak_to_rdataframe import to_rdataframe
 from awkward._v2.operations.ak_to_regular import to_regular
