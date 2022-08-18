@@ -570,9 +570,10 @@ class RecordArray(Content):
             for_each_field.append([field])
 
         if self.is_tuple:
+            parameters = self._parameters
             for array in headless:
                 parameters = ak._v2._util.merge_parameters(
-                    self._parameters, array._parameters, True
+                    parameters, array._parameters, True
                 )
 
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
@@ -607,7 +608,12 @@ class RecordArray(Content):
             these_fields = self._fields.copy()
             these_fields.sort()
 
+            parameters = self._parameters
             for array in headless:
+                parameters = ak._v2._util.merge_parameters(
+                    parameters, array._parameters, True
+                )
+
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
                     if not array.is_tuple:
                         those_fields = array._fields.copy()
