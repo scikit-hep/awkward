@@ -9,6 +9,7 @@ pydata-sphinx-theme
 myst-nb
 sphinx-external-toc
 sphinx-reredirects
+jupyterlite-sphinx
 ipyleaflet
 
 numpy>=1.13.1

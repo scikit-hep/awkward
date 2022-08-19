@@ -34,7 +34,8 @@ extensions = [
     "sphinx.ext.intersphinx",
     'myst_nb',
     # Preserve old links
-    'sphinx_reredirects'
+    'sphinx_reredirects',
+    'jupyterlite_sphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -114,6 +115,8 @@ with open("redirects.json") as f:
     redirects = json.load(f)
 
 redirect_html_template_file = "_templates/redirect.html"
+
+jupyterlite_dir = "./lite"
 
 import sys
 import subprocess
