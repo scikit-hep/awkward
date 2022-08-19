@@ -696,9 +696,10 @@ class IndexedOptionArray(Content):
         nextindex = ak._v2.index.Index64.empty(total_length, self._nplike)
         parameters = self._parameters
 
+        parameters = self._parameters
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters, True
+                parameters, array._parameters, True
             )
 
             if isinstance(
