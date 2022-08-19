@@ -156,7 +156,20 @@ class ListArray(Content):
     def toListOffsetArray64(self, start_at_zero=False):
         starts = self._starts.data
         stops = self._stops.data
-        if self._nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
+
+        if not self._nplike.known_data:
+            offsets = self._nplike.index_nplike.empty(
+                starts.shape[0] + 1, dtype=starts.dtype
+            )
+            return ListOffsetArray(
+                ak._v2.index.Index(offsets, nplike=self._nplike),
+                self._content,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
+
+        elif self._nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
             offsets = self._nplike.index_nplike.empty(
                 starts.shape[0] + 1, dtype=starts.dtype
             )
@@ -166,7 +179,7 @@ class ListArray(Content):
                 offsets[:-1] = starts
                 offsets[-1] = stops[-1]
             return ListOffsetArray(
-                ak._v2.index.Index(offsets, nplike=self.nplike),
+                ak._v2.index.Index(offsets, nplike=self._nplike),
                 self._content,
                 self._identifier,
                 self._parameters,
@@ -948,9 +961,10 @@ class ListArray(Content):
 
         contents = []
 
+        parameters = self._parameters
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters, True
+                parameters, array._parameters, True
             )
 
             if isinstance(

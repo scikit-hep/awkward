@@ -883,9 +883,10 @@ class UnionArray(Content):
         length_so_far = 0
         parameters = self._parameters
 
+        parameters = self._parameters
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters, True
+                parameters, array._parameters, True
             )
             if isinstance(array, ak._v2.contents.unionarray.UnionArray):
                 union_tags = ak._v2.index.Index(array.tags)

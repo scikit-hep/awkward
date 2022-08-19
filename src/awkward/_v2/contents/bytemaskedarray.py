@@ -2,6 +2,7 @@
 
 import json
 import copy
+import math
 
 import awkward as ak
 from awkward._v2.index import Index
@@ -168,6 +169,53 @@ class ByteMaskedArray(Content):
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             index, self._content, self._identifier, self._parameters, self._nplike
         )
+
+    def toByteMaskedArray(self, valid_when):
+        if valid_when == self._valid_when:
+            return self
+        else:
+            return ByteMaskedArray(
+                ak._v2.Index8(~self._mask.data),
+                self._content,
+                valid_when,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
+
+    def toBitMaskedArray(self, valid_when, lsb_order):
+        if not self._nplike.known_data:
+            if self._nplike.known_shape:
+                excess_length = int(math.ceil(self.length / 8.0))
+            else:
+                excess_length = ak._v2._typetracer.UnknownLength
+            return ak._v2.contents.BitMaskedArray(
+                ak._v2.index.IndexU8(self._nplike.empty(excess_length, dtype=np.uint8)),
+                self._content,
+                valid_when,
+                self.length,
+                lsb_order,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
+
+        else:
+            import awkward._v2._connect.pyarrow
+
+            bytearray = self.mask_as_bool(valid_when, self._nplike).view(np.uint8)
+            bitarray = awkward._v2._connect.pyarrow.packbits(bytearray, lsb_order)
+
+            return ak._v2.contents.BitMaskedArray(
+                ak._v2.index.IndexU8(bitarray),
+                self._content,
+                valid_when,
+                self.length,
+                lsb_order,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
 
     def mask_as_bool(self, valid_when=None, nplike=None):
         if valid_when is None:
@@ -585,7 +633,34 @@ class ByteMaskedArray(Content):
     def mergemany(self, others):
         if len(others) == 0:
             return self
-        return self.toIndexedOptionArray64().mergemany(others)
+
+        if all(
+            isinstance(x, ByteMaskedArray) and x._valid_when == self._valid_when
+            for x in others
+        ):
+            parameters = self._parameters
+            masks = [self._mask.data]
+            tail_contents = []
+            length = 0
+            for x in others:
+                parameters = ak._v2._util.merge_parameters(
+                    parameters, x._parameters, True
+                )
+                masks.append(x._mask.data)
+                tail_contents.append(x._content[: self.length])
+                length += x.length
+
+            return ByteMaskedArray(
+                ak._v2.index.Index8(self._nplike.concatenate(masks)),
+                self._content[: self.length].mergemany(tail_contents),
+                self._valid_when,
+                None,
+                parameters,
+                self._nplike,
+            )
+
+        else:
+            return self.toIndexedOptionArray64().mergemany(others)
 
     def fill_none(self, value):
         return self.toIndexedOptionArray64().fill_none(value)

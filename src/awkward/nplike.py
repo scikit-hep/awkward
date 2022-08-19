@@ -348,6 +348,7 @@ class NumpyLike(Singleton):
 
     def all(self, *args, **kwargs):
         # array
+        kwargs.pop("prefer", None)
         return self._module.all(*args, **kwargs)
 
     def any(self, *args, **kwargs):
