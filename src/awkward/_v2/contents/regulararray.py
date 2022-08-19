@@ -943,6 +943,7 @@ class RegularArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         out = self.toListOffsetArray64(True)._reduce_next(
             reducer,
@@ -953,6 +954,7 @@ class RegularArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
         if not self._content.dimension_optiontype:

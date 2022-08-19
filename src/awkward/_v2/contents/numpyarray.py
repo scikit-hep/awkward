@@ -1107,6 +1107,7 @@ class NumpyArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         if len(self._data.shape) != 1 or not self.is_contiguous:
             return self.toRegularArray()._reduce_next(
@@ -1118,6 +1119,7 @@ class NumpyArray(Content):
                 outlength,
                 mask,
                 keepdims,
+                behavior,
             )
 
         if isinstance(self.nplike, ak.nplike.Jax):

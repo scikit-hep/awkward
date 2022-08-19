@@ -805,7 +805,7 @@ class Content:
     def local_index(self, axis):
         return self._local_index(axis, 0)
 
-    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
+    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
         if axis is None:
             raise ak._v2._util.error(NotImplementedError)
 
@@ -852,6 +852,7 @@ class Content:
             1,
             mask,
             keepdims,
+            behavior,
         )
 
         return next[0]
@@ -868,8 +869,10 @@ class Content:
     def count_nonzero(self, axis=-1, mask=False, keepdims=False):
         return self._reduce(awkward._v2._reducers.CountNonzero, axis, mask, keepdims)
 
-    def sum(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Sum, axis, mask, keepdims)
+    def sum(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.Sum, axis, mask, keepdims, behavior=behavior
+        )
 
     def prod(self, axis=-1, mask=False, keepdims=False):
         return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims)

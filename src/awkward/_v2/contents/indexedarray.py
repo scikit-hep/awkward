@@ -953,6 +953,7 @@ class IndexedArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         branch, depth = self.branch_depth
 
@@ -996,6 +997,7 @@ class IndexedArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
         # If we are reducing the contents of this layout,

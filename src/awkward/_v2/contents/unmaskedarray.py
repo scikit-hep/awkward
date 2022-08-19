@@ -437,6 +437,7 @@ class UnmaskedArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         next = self._content
         if isinstance(next, ak._v2.contents.RegularArray):
@@ -451,6 +452,7 @@ class UnmaskedArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):

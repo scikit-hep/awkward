@@ -709,12 +709,12 @@ def test_complicated():
     ]
     assert complicated.typetracer["y"].form == complicated["y"].form
 
-    assert to_list(complicated.prod(-1)) == [
-        {"x": [30], "y": [[30, 1, 77, 13]]},
-        {"x": [], "y": []},
-        {"x": [1, 77], "y": [[], [323, 23]]},
-    ]
-    assert complicated.typetracer.prod(-1).form == complicated.prod(-1).form
+    with pytest.raises(TypeError):
+        to_list(complicated.prod(-1))
+
+    with pytest.raises(TypeError):
+        complicated.typetracer.prod(-1).form
+
     assert to_list(complicated["x"].prod(-1)) == [[30], [], [1, 77]]
     assert complicated.typetracer["x"].prod(-1).form == complicated["x"].prod(-1).form
     assert to_list(complicated["y"].prod(-1)) == [
@@ -724,12 +724,11 @@ def test_complicated():
     ]
     assert complicated.typetracer["y"].prod(-1).form == complicated["y"].prod(-1).form
 
-    assert to_list(complicated.prod(-2)) == [
-        {"x": [2, 3, 5], "y": [[182, 33, 5]]},
-        {"x": [], "y": []},
-        {"x": [7, 11], "y": [[], [391, 19]]},
-    ]
-    assert complicated.typetracer.prod(-2).form == complicated.prod(-2).form
+    with pytest.raises(TypeError):
+        to_list(complicated.prod(-2))
+
+    with pytest.raises(TypeError):
+        complicated.typetracer.prod(-2).form
     assert to_list(complicated["x"].prod(-2)) == [[2, 3, 5], [], [7, 11]]
     assert complicated.typetracer["x"].prod(-2).form == complicated["x"].prod(-2).form
     assert to_list(complicated["y"].prod(-2)) == [
@@ -743,11 +742,12 @@ def test_complicated():
         {"x": [2, 3, 5], "y": [[2, 3, 5], [], [7, 11], [13]]}
     ]
     assert complicated.typetracer[0].form == complicated[0].form
-    assert to_list(complicated[0].prod(-1)) == {"x": [30], "y": [[30, 1, 77, 13]]}
-    assert (
-        complicated.typetracer[0].prod(-1).array.form
-        == complicated[0].prod(-1).array.form
-    )
+
+    with pytest.raises(TypeError):
+        to_list(complicated[0].prod(-1))
+
+    with pytest.raises(TypeError):
+        to_list(complicated.typetracer[0].prod(-1))
 
 
 def test_EmptyArray():

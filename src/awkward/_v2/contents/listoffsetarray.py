@@ -1443,6 +1443,7 @@ class ListOffsetArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         if self._offsets.dtype != np.dtype(np.int64) or (
             self._offsets.nplike.known_data and self._offsets[0] != 0
@@ -1457,6 +1458,7 @@ class ListOffsetArray(Content):
                 outlength,
                 mask,
                 keepdims,
+                behavior,
             )
 
         branch, depth = self.branch_depth
@@ -1562,6 +1564,7 @@ class ListOffsetArray(Content):
                 maxnextparents[0] + 1,
                 mask,
                 False,
+                behavior,
             )
 
             out = ak._v2.contents.ListArray(
@@ -1617,6 +1620,7 @@ class ListOffsetArray(Content):
                 globalstarts_length,
                 mask,
                 keepdims,
+                behavior,
             )
 
             outoffsets = ak._v2.index.Index64.empty(outlength + 1, self._nplike)

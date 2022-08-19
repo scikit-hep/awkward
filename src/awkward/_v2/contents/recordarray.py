@@ -800,30 +800,29 @@ class RecordArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
-        contents = []
-        for content in self._contents:
-            contents.append(
-                content[: self._length]._reduce_next(
-                    reducer,
-                    negaxis,
-                    starts,
-                    shifts,
-                    parents,
-                    outlength,
-                    mask,
-                    keepdims,
+        reducer_name = reducer.__name__.split(".")[0].lower()
+
+        if behavior is None or not (
+            any(
+                x[0].__module__.split(".")[-1].split("_")[-1] == reducer_name
+                for x in behavior.keys()
+            )
+        ):
+            raise ak._v2._util.error(
+                TypeError(
+                    "no ak.{} overloads for custom types: {}".format(
+                        reducer_name, ", ".join(self._fields)
+                    )
                 )
             )
-
-        return ak._v2.contents.RecordArray(
-            contents,
-            self._fields,
-            outlength,
-            None,
-            None,
-            self._nplike,
-        )
+        else:
+            raise ak._v2._util.error(
+                NotImplementedError(
+                    "overloading reducers for RecordArrays has not been implemented yet"
+                )
+            )
 
     def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
