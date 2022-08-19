@@ -9,7 +9,9 @@ from awkward._v2.forms import (
     ByteMaskedForm,
     BitMaskedForm,
     UnmaskedForm,
+    IndexedForm,
     NumpyForm,
+    EmptyForm,
 )
 
 
@@ -183,4 +185,33 @@ def test_UnmaskedArray():
     assert c.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert isinstance(c.layout, ak._v2.contents.UnmaskedArray)
     assert c.layout.form == UnmaskedForm(NumpyForm("float64"))
+    assert c.layout.form == ctt.layout.form
+
+
+def test_EmptyArray():
+    a = ak._v2.contents.emptyarray.EmptyArray()
+    c = ak._v2.concatenate([a, a])
+    ctt = ak._v2.concatenate([a.typetracer, a.typetracer])
+
+    assert c.tolist() == []
+    assert isinstance(c.layout, ak._v2.contents.EmptyArray)
+    assert c.layout.form == EmptyForm()
+    assert c.layout.form == ctt.layout.form
+
+
+def test_IndexedArray():
+    a = ak._v2.contents.indexedarray.IndexedArray(
+        ak._v2.index.Index(np.array([5, 4, 3, 2, 1, 0], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    )
+    b = ak._v2.contents.indexedarray.IndexedArray(
+        ak._v2.index.Index(np.array([0, 1, 2], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([7.7, 8.8, 9.9])),
+    )
+    c = ak._v2.concatenate([a, b])
+    ctt = ak._v2.concatenate([a.typetracer, b.typetracer])
+
+    assert c.tolist() == [6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 7.7, 8.8, 9.9]
+    assert isinstance(c.layout, ak._v2.contents.IndexedArray)
+    assert c.layout.form == IndexedForm("i64", NumpyForm("float64"))
     assert c.layout.form == ctt.layout.form
