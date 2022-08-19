@@ -750,6 +750,10 @@ class TypeTracer(ak.nplike.NumpyLike):
         # array1, array2
         raise ak._v2._util.error(NotImplementedError)
 
+    def tile(self, *args, **kwargs):
+        # array, int
+        raise ak._v2._util.error(NotImplementedError)
+
     def stack(self, *args, **kwargs):
         # arrays
         raise ak._v2._util.error(NotImplementedError)
