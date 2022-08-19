@@ -157,7 +157,11 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
     else:
         behavior = ak._v2._util.behavior_of(array)
         out = layout.min(
-            axis=axis, mask=mask_identity, keepdims=keepdims, initial=initial
+            axis=axis,
+            mask=mask_identity,
+            keepdims=keepdims,
+            initial=initial,
+            behavior=behavior,
         )
         if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
             return ak._v2._util.wrap(out, behavior)

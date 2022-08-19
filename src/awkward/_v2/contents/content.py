@@ -864,37 +864,45 @@ class Content:
 
         return next[0]
 
-    def argmin(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce(awkward._v2._reducers.ArgMin, axis, mask, keepdims)
-
-    def argmax(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce(awkward._v2._reducers.ArgMax, axis, mask, keepdims)
-
-    def count(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Count, axis, mask, keepdims)
-
-    def count_nonzero(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.CountNonzero, axis, mask, keepdims)
-
-    def sum(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def argmin(self, axis=-1, mask=True, keepdims=False, behavior=None):
         return self._reduce(
-            awkward._v2._reducers.Sum, axis, mask, keepdims, behavior=behavior
+            awkward._v2._reducers.ArgMin, axis, mask, keepdims, behavior
         )
 
-    def prod(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims)
+    def argmax(self, axis=-1, mask=True, keepdims=False, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.ArgMax, axis, mask, keepdims, behavior
+        )
 
-    def any(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Any, axis, mask, keepdims)
+    def count(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.Count, axis, mask, keepdims, behavior)
 
-    def all(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims)
+    def count_nonzero(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.CountNonzero, axis, mask, keepdims, behavior
+        )
 
-    def min(self, axis=-1, mask=True, keepdims=False, initial=None):
-        return self._reduce(awkward._v2._reducers.Min(initial), axis, mask, keepdims)
+    def sum(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.Sum, axis, mask, keepdims, behavior)
 
-    def max(self, axis=-1, mask=True, keepdims=False, initial=None):
-        return self._reduce(awkward._v2._reducers.Max(initial), axis, mask, keepdims)
+    def prod(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims, behavior)
+
+    def any(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.Any, axis, mask, keepdims, behavior)
+
+    def all(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims, behavior)
+
+    def min(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.Min(initial), axis, mask, keepdims, behavior
+        )
+
+    def max(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.Max(initial), axis, mask, keepdims, behavior
+        )
 
     def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
