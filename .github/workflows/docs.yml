@@ -16,11 +16,15 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: true
-    - name: Setup ccache
+    - name: Install ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: docs-${{ github.job }}
-    - name: Use ccache
+    - name: Install EMSDK
+      uses: mymindstorm/setup-emsdk@v11
+      with:
+        version: 3.1.14
+    - name: Setup ccache
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
@@ -34,14 +38,10 @@ jobs:
       run: python -m pip install -v .
     - name: Install WASM requirements
       run: python -m pip install -r requirements-wasm.txt
-    - name: Install EMSDK
-      uses: mymindstorm/setup-emsdk@v11
-      with:
-        version: 3.1.14
     - name: Build WASM package
       run: |
         rm -rf build
-        CMAKE_ARGS="-DEMSCRIPTEN=1" pyodide build --exports whole_archive
+        CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache" pyodide build --exports whole_archive
         mkdir -p docs-sphinx/lite/pypi
         cp dist/awkward*wasm32.whl docs-sphinx/lite/pypi/
     - name: Install requirements
