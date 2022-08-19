@@ -7,11 +7,24 @@ import awkward as ak  # noqa: F401
 from awkward._v2.forms import ListOffsetForm, NumpyForm
 
 
-# def test_ListOffsetArray():
-#     a = ak._v2.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4]])
-#     b = ak._v2.Array([[5.5], [6.6, 7.7, 8.8, 9.9]])
-#     c = ak._v2.concatenate([a, b])
-#     assert c.layout.form == ListOffsetForm("i64", NumpyForm("float64"))
+def test_ListOffsetArray():
+    a = ak._v2.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4]])
+    b = ak._v2.Array([[5.5], [6.6, 7.7, 8.8, 9.9]])
+    c = ak._v2.concatenate([a, b])
+    ctt = ak._v2.concatenate([a.layout.typetracer, b.layout.typetracer])
+    assert c.layout.form == ListOffsetForm("i64", NumpyForm("float64"))
+    assert c.layout.form == ctt.layout.form
+
+
+def test_ListOffsetArray_ListOffsetArray():
+    a = ak._v2.Array([[[0.0, 1.1, 2.2], []], [[3.3, 4.4]]])
+    b = ak._v2.Array([[[5.5], [6.6, 7.7, 8.8, 9.9]]])
+    c = ak._v2.concatenate([a, b])
+    ctt = ak._v2.concatenate([a.layout.typetracer, b.layout.typetracer])
+    assert c.layout.form == ListOffsetForm(
+        "i64", ListOffsetForm("i64", NumpyForm("float64"))
+    )
+    assert c.layout.form == ctt.layout.form
 
 
 def test_OptionType_transformations():
@@ -34,7 +47,9 @@ def test_OptionType_transformations():
             assert bitmaskedarray.lsb_order is lsb_order
             assert ak._v2.Array(bitmaskedarray).tolist() == expected
 
-    unmaskedarray = ak._v2.contents.UnmaskedArray(ak._v2.contents.NumpyArray(np.arange(13)))
+    unmaskedarray = ak._v2.contents.UnmaskedArray(
+        ak._v2.contents.NumpyArray(np.arange(13))
+    )
 
     for valid_when in [False, True]:
         bytemaskedarray = unmaskedarray.toByteMaskedArray(valid_when)
@@ -49,7 +64,6 @@ def test_OptionType_transformations():
             assert bitmaskedarray.valid_when is valid_when
             assert bitmaskedarray.lsb_order is lsb_order
             assert ak._v2.Array(bitmaskedarray).tolist() == list(range(13))
-
 
 
 # def test_BitMaskedArray():
@@ -85,4 +99,3 @@ def test_OptionType_transformations():
 #         length=13,
 #         lsb_order=False,
 #     )
-

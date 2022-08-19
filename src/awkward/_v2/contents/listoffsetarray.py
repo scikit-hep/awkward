@@ -753,15 +753,13 @@ class ListOffsetArray(Content):
         )
         out = listarray.mergemany(others)
 
-        return out
-
-        # if all(
-        #     isinstance(x, ListOffsetArray) and x._offsets.dtype == self._offsets.dtype
-        #     for x in others
-        # ):
-        #     return out.toListOffsetArray64(False)
-        # else:
-        #     return out
+        if all(
+            isinstance(x, ListOffsetArray) and x._offsets.dtype == self._offsets.dtype
+            for x in others
+        ):
+            return out.toListOffsetArray64(False)
+        else:
+            return out
 
     def fill_none(self, value):
         return ListOffsetArray(
