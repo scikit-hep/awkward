@@ -751,7 +751,17 @@ class ListOffsetArray(Content):
         listarray = ak._v2.contents.listarray.ListArray(
             self.starts, self.stops, self._content, None, self._parameters, self._nplike
         )
-        return listarray.mergemany(others)
+        out = listarray.mergemany(others)
+
+        return out
+
+        # if all(
+        #     isinstance(x, ListOffsetArray) and x._offsets.dtype == self._offsets.dtype
+        #     for x in others
+        # ):
+        #     return out.toListOffsetArray64(False)
+        # else:
+        #     return out
 
     def fill_none(self, value):
         return ListOffsetArray(

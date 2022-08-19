@@ -169,6 +169,36 @@ class ByteMaskedArray(Content):
             index, self._content, self._identifier, self._parameters, self._nplike
         )
 
+    def toByteMaskedArray(self, valid_when):
+        if valid_when == self._valid_when:
+            return self
+        else:
+            return ByteMaskedArray(
+                ak._v2.Index8(~self._mask.data),
+                self._content,
+                valid_when,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
+
+    def toBitMaskedArray(self, valid_when, lsb_order):
+        import awkward._v2._connect.pyarrow
+
+        bytearray = self.mask_as_bool(valid_when, self._nplike).view(np.uint8)
+        bitarray = awkward._v2._connect.pyarrow.packbits(bytearray, lsb_order)
+
+        return ak._v2.contents.BitMaskedArray(
+            ak._v2.index.IndexU8(bitarray),
+            self._content,
+            valid_when,
+            self.length,
+            lsb_order,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
+
     def mask_as_bool(self, valid_when=None, nplike=None):
         if valid_when is None:
             valid_when = self._valid_when

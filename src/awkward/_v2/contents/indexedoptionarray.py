@@ -134,6 +134,35 @@ class IndexedOptionArray(Content):
                 self._nplike,
             )
 
+    def toByteMaskedArray(self, valid_when):
+        mask = ak._v2.index.Index8(self.mask_as_bool(valid_when, self._nplike))
+
+        carry = self._index.data
+        too_negative = carry < -1
+        if self._nplike.any(too_negative):
+            carry = carry.copy()
+            carry[too_negative] = -1
+        carry = ak._v2.index.Index(carry)
+
+        if self._content.length == 0:
+            content = self._content.dummy()._carry(carry, False)
+        else:
+            content = self._content._carry(carry, False)
+
+        return ak._v2.contents.ByteMaskedArray(
+            mask,
+            content,
+            valid_when,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
+
+    def toBitMaskedArray(self, valid_when, lsb_order):
+        return self.toByteMaskedArray(valid_when).toBitMaskedArray(
+            valid_when, lsb_order
+        )
+
     def mask_as_bool(self, valid_when=True, nplike=None):
         if nplike is None:
             nplike = self._nplike
