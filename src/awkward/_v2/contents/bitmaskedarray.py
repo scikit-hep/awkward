@@ -446,7 +446,18 @@ class BitMaskedArray(Content):
     def mergemany(self, others):
         if len(others) == 0:
             return self
-        return self.toIndexedOptionArray64().mergemany(others)
+
+        out = self.toIndexedOptionArray64().mergemany(others)
+
+        if all(
+            isinstance(x, BitMaskedArray)
+            and x._valid_when == self._valid_when
+            and x._lsb_order == self._lsb_order
+            for x in others
+        ):
+            return out.toBitMaskedArray(self._valid_when, self._lsb_order)
+        else:
+            return out
 
     def fill_none(self, value):
         return self.toIndexedOptionArray64().fill_none(value)

@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.forms import ListOffsetForm, NumpyForm
+from awkward._v2.forms import ListOffsetForm, ByteMaskedForm, BitMaskedForm, NumpyForm
 
 
 def test_ListOffsetArray():
@@ -12,6 +12,7 @@ def test_ListOffsetArray():
     b = ak._v2.Array([[5.5], [6.6, 7.7, 8.8, 9.9]])
     c = ak._v2.concatenate([a, b])
     ctt = ak._v2.concatenate([a.layout.typetracer, b.layout.typetracer])
+    assert c.tolist() == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
     assert c.layout.form == ListOffsetForm("i64", NumpyForm("float64"))
     assert c.layout.form == ctt.layout.form
 
@@ -21,6 +22,11 @@ def test_ListOffsetArray_ListOffsetArray():
     b = ak._v2.Array([[[5.5], [6.6, 7.7, 8.8, 9.9]]])
     c = ak._v2.concatenate([a, b])
     ctt = ak._v2.concatenate([a.layout.typetracer, b.layout.typetracer])
+    assert c.tolist() == [
+        [[0.0, 1.1, 2.2], []],
+        [[3.3, 4.4]],
+        [[5.5], [6.6, 7.7, 8.8, 9.9]],
+    ]
     assert c.layout.form == ListOffsetForm(
         "i64", ListOffsetForm("i64", NumpyForm("float64"))
     )
@@ -66,36 +72,93 @@ def test_OptionType_transformations():
             assert ak._v2.Array(bitmaskedarray).tolist() == list(range(13))
 
 
-# def test_BitMaskedArray():
-#     v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-#         ak._v2.index.Index(
-#             np.packbits(
-#                 np.array(
-#                     [
-#                         1,
-#                         1,
-#                         1,
-#                         1,
-#                         0,
-#                         0,
-#                         0,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                         0,
-#                         1,
-#                     ],
-#                     np.uint8,
-#                 )
-#             )
-#         ),
-#         ak._v2.contents.numpyarray.NumpyArray(
-#             np.array(
-#                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
-#             )
-#         ),
-#         valid_when=True,
-#         length=13,
-#         lsb_order=False,
-#     )
+def test_ByteMaskedArray():
+    a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+        valid_when=True,
+    )
+    b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+        ak._v2.index.Index(np.array([1, 1, 0], np.int8)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([7.7, 8.8, 9.9])),
+        valid_when=True,
+    )
+    c = ak._v2.concatenate([a, b])
+    ctt = ak._v2.concatenate([a.typetracer, b.typetracer])
+
+    assert c.tolist() == [1.1, None, 3.3, None, 5.5, 7.7, 8.8, None]
+    assert isinstance(c.layout, ak._v2.contents.ByteMaskedArray)
+    assert c.layout.valid_when
+    assert c.layout.form == ByteMaskedForm("i8", NumpyForm("float64"), True)
+    assert c.layout.form == ctt.layout.form
+
+
+def test_BitMaskedArray():
+    a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+        ak._v2.index.Index(
+            np.packbits(
+                np.array(
+                    [
+                        1,
+                        1,
+                        1,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        1,
+                    ],
+                    np.uint8,
+                )
+            )
+        ),
+        ak._v2.contents.numpyarray.NumpyArray(
+            np.array(
+                [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
+            )
+        ),
+        valid_when=True,
+        length=13,
+        lsb_order=False,
+    )
+    c = ak._v2.concatenate([a, a])
+    ctt = ak._v2.concatenate([a.typetracer, a.typetracer])
+
+    assert c.tolist() == [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        None,
+        None,
+        None,
+        None,
+        1.1,
+        None,
+        3.3,
+        None,
+        5.5,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        None,
+        None,
+        None,
+        None,
+        1.1,
+        None,
+        3.3,
+        None,
+        5.5,
+    ]
+    assert isinstance(c.layout, ak._v2.contents.BitMaskedArray)
+    assert c.layout.valid_when
+    assert not c.layout.lsb_order
+    assert c.layout.form == BitMaskedForm("u8", NumpyForm("float64"), True, False)
+    assert c.layout.form == ctt.layout.form
