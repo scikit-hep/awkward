@@ -319,7 +319,25 @@ class UnmaskedArray(Content):
     def mergemany(self, others):
         if len(others) == 0:
             return self
-        return self.toIndexedOptionArray64().mergemany(others)
+
+        if all(isinstance(x, UnmaskedArray) for x in others):
+            parameters = self._parameters
+            tail_contents = []
+            for x in others:
+                parameters = ak._v2._util.merge_parameters(
+                    parameters, x._parameters, True
+                )
+                tail_contents.append(x._content)
+
+            return UnmaskedArray(
+                self._content.mergemany(tail_contents),
+                None,
+                parameters,
+                self._nplike,
+            )
+
+        else:
+            return self.toIndexedOptionArray64().mergemany(others)
 
     def fill_none(self, value):
         return self._content.fill_none(value)

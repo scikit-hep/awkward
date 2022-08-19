@@ -647,12 +647,12 @@ class ByteMaskedArray(Content):
                     parameters, x._parameters, True
                 )
                 masks.append(x._mask.data)
-                tail_contents.append(x._content[:self.length])
+                tail_contents.append(x._content[: self.length])
                 length += x.length
 
             return ByteMaskedArray(
                 ak._v2.index.Index8(self._nplike.concatenate(masks)),
-                self._content[:self.length].mergemany(tail_contents),
+                self._content[: self.length].mergemany(tail_contents),
                 self._valid_when,
                 None,
                 parameters,

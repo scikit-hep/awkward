@@ -698,7 +698,7 @@ class RegularArray(Content):
                 zeros_length += x._length
 
             return RegularArray(
-                self._content.mergemany(tail_contents),
+                self._content[: self._length * self._size].mergemany(tail_contents),
                 self._size,
                 zeros_length,
                 None,

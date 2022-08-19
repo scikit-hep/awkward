@@ -4,7 +4,13 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-from awkward._v2.forms import ListOffsetForm, ByteMaskedForm, BitMaskedForm, NumpyForm
+from awkward._v2.forms import (
+    ListOffsetForm,
+    ByteMaskedForm,
+    BitMaskedForm,
+    UnmaskedForm,
+    NumpyForm,
+)
 
 
 def test_ListOffsetArray():
@@ -161,4 +167,20 @@ def test_BitMaskedArray():
     assert c.layout.valid_when
     assert not c.layout.lsb_order
     assert c.layout.form == BitMaskedForm("u8", NumpyForm("float64"), True, False)
+    assert c.layout.form == ctt.layout.form
+
+
+def test_UnmaskedArray():
+    a = ak._v2.contents.unmaskedarray.UnmaskedArray(
+        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    )
+    b = ak._v2.contents.unmaskedarray.UnmaskedArray(
+        ak._v2.contents.numpyarray.NumpyArray(np.array([7.7, 8.8, 9.9])),
+    )
+    c = ak._v2.concatenate([a, b])
+    ctt = ak._v2.concatenate([a.typetracer, b.typetracer])
+
+    assert c.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+    assert isinstance(c.layout, ak._v2.contents.UnmaskedArray)
+    assert c.layout.form == UnmaskedForm(NumpyForm("float64"))
     assert c.layout.form == ctt.layout.form
