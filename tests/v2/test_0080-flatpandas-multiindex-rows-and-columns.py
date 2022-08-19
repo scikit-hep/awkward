@@ -31,7 +31,7 @@ def test():
     array = ak._v2.Array(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, None, 8.8, 9.9]]
     )
-    assert regularize(json.loads(ak._v2.operations.to_pandas(array).to_json())) == {
+    assert regularize(json.loads(ak._v2.operations.to_dataframe(array).to_json())) == {
         "values": {
             (0, 0): 0.0,
             (0, 1): 1.1,
@@ -49,7 +49,7 @@ def test():
     array = ak._v2.Array(
         [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [[5.5]], [[6.6, None, 8.8, 9.9]]]
     )
-    assert regularize(json.loads(ak._v2.operations.to_pandas(array).to_json())) == {
+    assert regularize(json.loads(ak._v2.operations.to_dataframe(array).to_json())) == {
         "values": {
             (0, 0, 0): 0.0,
             (0, 0, 1): 1.1,
@@ -73,7 +73,7 @@ def test():
             [[], None, [6.6, None, 8.8, 9.9]],
         ]
     )
-    assert regularize(json.loads(ak._v2.operations.to_pandas(array).to_json())) == {
+    assert regularize(json.loads(ak._v2.operations.to_dataframe(array).to_json())) == {
         "values": {
             (0, 0, 0): 0.0,
             (0, 0, 1): 1.1,
@@ -99,7 +99,7 @@ def test():
             [[{"x": 5.5, "y": [5, 5, 5, 5, 5]}]],
         ]
     )
-    assert regularize(json.loads(ak._v2.operations.to_pandas(array).to_json())) == {
+    assert regularize(json.loads(ak._v2.operations.to_dataframe(array).to_json())) == {
         "x": {
             (0, 0, 1, 0): 1.1,
             (0, 0, 2, 0): 2.2,
@@ -137,7 +137,7 @@ def test():
     }
 
     assert regularize(
-        json.loads(ak._v2.operations.to_pandas(array, how="outer").to_json())
+        json.loads(ak._v2.operations.to_dataframe(array, how="outer").to_json())
     ) == {
         "x": {
             (0, 0, 0, None): 0.0,
@@ -188,7 +188,7 @@ def test():
             [[{"x": 5.5, "y": 5}]],
         ]
     )
-    assert regularize(json.loads(ak._v2.operations.to_pandas(array).to_json())) == {
+    assert regularize(json.loads(ak._v2.operations.to_dataframe(array).to_json())) == {
         "x": {
             (0, 0, 0): 0.0,
             (0, 0, 1): 1.1,
@@ -222,7 +222,7 @@ def test():
             [[{"x": 5.5, "y": {"z": 5}}]],
         ]
     )
-    assert regularize(json.loads(ak._v2.operations.to_pandas(array).to_json())) == {
+    assert regularize(json.loads(ak._v2.operations.to_dataframe(array).to_json())) == {
         ("x", ""): {
             (0, 0, 0): 0.0,
             (0, 0, 1): 1.1,
@@ -245,7 +245,7 @@ def test():
     two = ak._v2.Array([[100, 200], [300], [400, 500]])
     assert [
         regularize(json.loads(x.to_json()))
-        for x in ak._v2.operations.to_pandas({"x": one, "y": two}, how=None)
+        for x in ak._v2.operations.to_dataframe({"x": one, "y": two}, how=None)
     ] == [
         {"x": {(0, 0): 1.1, (0, 1): 2.2, (0, 2): 3.3, (2, 0): 4.4, (2, 1): 5.5}},
         {"y": {(0, 0): 100, (0, 1): 200, (1, 0): 300, (2, 0): 400, (2, 1): 500}},

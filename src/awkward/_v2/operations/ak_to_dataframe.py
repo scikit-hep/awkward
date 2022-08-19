@@ -7,7 +7,7 @@ numpy = ak.nplike.Numpy.instance()
 np = ak.nplike.NumpyMetadata.instance()
 
 
-def to_pandas(
+def to_dataframe(
     array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
 ):
     """
@@ -41,11 +41,11 @@ def to_pandas(
     assigned because this array has no fields; it can be controlled with the
     `anonymous` parameter.
 
-        >>> ak.to_pandas(ak.Array([[[1.1, 2.2], [], [3.3]],
-        ...                        [],
-        ...                        [[4.4], [5.5, 6.6]],
-        ...                        [[7.7]],
-        ...                        [[8.8]]]))
+        >>> ak.to_dataframe(ak.Array([[[1.1, 2.2], [], [3.3]],
+        ...                           [],
+        ...                           [[4.4], [5.5, 6.6]],
+        ...                           [[7.7]],
+        ...                           [[8.8]]]))
                                     values
         entry subentry subsubentry
         0     0        0               1.1
@@ -61,7 +61,7 @@ def to_pandas(
     (MultiIndex rows and columns can be mixed; these examples are deliberately
     simple.)
 
-        >>> ak.to_pandas(ak.Array([
+        >>> ak.to_dataframe(ak.Array([
         ...     {"I": {"a": _, "b": {"i": _}}, "II": {"x": {"y": {"z": _}}}}
         ...     for _ in range(0, 50, 10)]))
                 I      II
@@ -80,12 +80,12 @@ def to_pandas(
     fields are preserved; with `how="outer"`, all subentries are preserved at
     the expense of requiring missing values.
 
-        >>> ak.to_pandas(ak.Array([{"x": [], "y": [4.4, 3.3, 2.2, 1.1]},
-        ...                        {"x": [1], "y": [3.3, 2.2, 1.1]},
-        ...                        {"x": [1, 2], "y": [2.2, 1.1]},
-        ...                        {"x": [1, 2, 3], "y": [1.1]},
-        ...                        {"x": [1, 2, 3, 4], "y": []}]),
-        ...                        how="inner")
+        >>> ak.to_dataframe(ak.Array([{"x": [], "y": [4.4, 3.3, 2.2, 1.1]},
+        ...                           {"x": [1], "y": [3.3, 2.2, 1.1]},
+        ...                           {"x": [1, 2], "y": [2.2, 1.1]},
+        ...                           {"x": [1, 2, 3], "y": [1.1]},
+        ...                           {"x": [1, 2, 3, 4], "y": []}]),
+        ...                          how="inner")
                         x    y
         entry subentry
         1     0         1  3.3
@@ -95,12 +95,12 @@ def to_pandas(
 
     The same with `how="outer"`:
 
-        >>> ak.to_pandas(ak.Array([{"x": [], "y": [4.4, 3.3, 2.2, 1.1]},
-        ...                        {"x": [1], "y": [3.3, 2.2, 1.1]},
-        ...                        {"x": [1, 2], "y": [2.2, 1.1]},
-        ...                        {"x": [1, 2, 3], "y": [1.1]},
-        ...                        {"x": [1, 2, 3, 4], "y": []}]),
-        ...                        how="outer")
+        >>> ak.to_dataframe(ak.Array([{"x": [], "y": [4.4, 3.3, 2.2, 1.1]},
+        ...                           {"x": [1], "y": [3.3, 2.2, 1.1]},
+        ...                           {"x": [1, 2], "y": [2.2, 1.1]},
+        ...                           {"x": [1, 2, 3], "y": [1.1]},
+        ...                           {"x": [1, 2, 3, 4], "y": []}]),
+        ...                          how="outer")
                           x    y
         entry subentry
         0     0         NaN  4.4
@@ -150,7 +150,9 @@ or
 
     if how is not None:
         out = None
-        for df in to_pandas(array, how=None, levelname=levelname, anonymous=anonymous):
+        for df in to_dataframe(
+            array, how=None, levelname=levelname, anonymous=anonymous
+        ):
             if out is None:
                 out = df
             else:
