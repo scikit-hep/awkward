@@ -94,11 +94,13 @@ jobs:
         path: dist
     - name: Install requirements
       run: |
+        ls -R docs-sphinx/lite
         sudo apt-get install -y doxygen
         python -m pip install -r docs-sphinx/requirements.txt
         python -m pip install dist/awkward*.whl
     - name: Generate documentation
-      run: sphinx-build -M html docs-sphinx/ docs-sphinx/_build/
+      run: sphinx-build -M html . _build/
+      working-directory: docs-sphinx
     - name: Upload documentation
       uses: actions/upload-artifact@v3
       with:
