@@ -60,6 +60,11 @@ jobs:
       with:
         name: jupyter-cache
         path: docs-sphinx/_build/.jupyter_cache
+    - name: Upload Awkward WASM wheel
+      uses: actions/upload-artifact@v3
+      with:
+        name: awkward-wasm-wheel
+        path: dist/awkward*wasm32.whl
     - name: Trigger RTD Build
       # NB: head_ref is only valid for PR triggers
       run: curl -X POST -d "branches=${{ github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
