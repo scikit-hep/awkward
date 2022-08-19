@@ -78,13 +78,12 @@ def main(argv=None):
             # If query matches
             if re.match(args.artefact, artefact["name"]):
                 break
-
+    else:
         # If we've walked past the SHA in question
-        elif has_seen_sha:
+        if has_seen_sha:
             raise RuntimeError(
                 f"Couldn't find artefact matching {args.artefact!r} for SHA"
             )
-    else:
         raise RuntimeError(f"Couldn't find SHA matching {sha!r}")
 
     download_and_extract_artefact(artefact, args.dest, token)

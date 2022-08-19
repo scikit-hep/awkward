@@ -11,6 +11,7 @@ subtrees:
         subtrees:
             - entries:
               - file: getting-started/what-is-an-awkward-array
+              - file: getting-started/try-awkward-array
               - file: getting-started/community-tutorials
       - file: user-guide/index
         subtrees:
