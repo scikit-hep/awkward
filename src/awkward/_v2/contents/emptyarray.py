@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.emptyform import EmptyForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -12,6 +12,18 @@ numpy = ak.nplike.Numpy.instance()
 class EmptyArray(Content):
     is_NumpyType = True
     is_UnknownType = True
+
+    def copy(
+        self,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return EmptyArray(
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(self, identifier=None, parameters=None, nplike=None):
         if nplike is None:
