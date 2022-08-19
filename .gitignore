@@ -33,7 +33,7 @@ docs-sphinx/_build
 docs-sphinx/_static/doxygen
 docs-sphinx/reference/generated
 docs-sphinx/release/*
-!docs-sphinx/release/index.rst
+!docs-sphinx/release/.gitignore
 docs-sphinx/.jupyter_cache
 docs-sphinx/jupyter_execute
 

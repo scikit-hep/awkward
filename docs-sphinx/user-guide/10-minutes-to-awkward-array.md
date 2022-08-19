@@ -46,7 +46,7 @@ Of particular interest here is the `num_row_groups` value. Parquet has the conce
 We can also look at the `type` of the data to see the structure of the dataset:
 
 ```{code-cell} ipython3
-metadata.form.type.show()
+metadata['form'].type.show()
 ```
 
 There are a lot of different columns here (`trip.sec`, `trip.begin.lon`, `trip.payment.fare`, etc.). For this example, we only want a small subset of them. Additionally, we don't need to load *all* of the data, as we are only interested in a representative sample. Let's use `ak.from_parquet` with the `row_groups` argument to read (download) only a single group, and the `columns` argument to read only the necessary columns.
