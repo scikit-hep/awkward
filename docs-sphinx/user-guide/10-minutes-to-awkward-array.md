@@ -9,6 +9,8 @@ kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
+execution:
+  allow_errors: true
 ---
 
 # 10 minutes to Awkward Array
