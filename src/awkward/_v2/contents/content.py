@@ -1346,7 +1346,7 @@ class Content:
             action,
             behavior,
             1,
-            depth_context,
+            copy.copy(depth_context),
             lateral_context,
             {
                 "allow_records": allow_records,
