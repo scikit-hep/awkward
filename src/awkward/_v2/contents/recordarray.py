@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._v2.record import Record
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.recordform import RecordForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -17,6 +17,24 @@ numpy = ak.nplike.Numpy.instance()
 
 class RecordArray(Content):
     is_RecordType = True
+
+    def copy(
+        self,
+        contents=unset,
+        fields=unset,
+        length=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return RecordArray(
+            self._contents if contents is unset else contents,
+            self._fields if fields is unset else fields,
+            self._length if length is unset else length,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self,
@@ -1007,6 +1025,8 @@ class RecordArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

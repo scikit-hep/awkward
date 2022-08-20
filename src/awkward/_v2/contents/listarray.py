@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
 from awkward._v2.forms.form import _parameters_equal
@@ -14,6 +14,24 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class ListArray(Content):
     is_ListType = True
+
+    def copy(
+        self,
+        starts=unset,
+        stops=unset,
+        content=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return ListArray(
+            self._starts if starts is unset else starts,
+            self._stops if stops is unset else stops,
+            self._content if content is unset else content,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self, starts, stops, content, identifier=None, parameters=None, nplike=None
@@ -1458,6 +1476,8 @@ class ListArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 
