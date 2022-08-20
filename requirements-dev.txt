@@ -3,7 +3,7 @@ flake8
 fsspec;python_version > "3.6" and sys_platform != "win32"
 jax>=0.2.7;sys_platform != "win32" and python_version > "3.6"
 jaxlib>=0.1.57,!=0.1.68;sys_platform != "win32" and python_version > "3.6"
-numba>=0.50.0
+numba>=0.50.0;python_version<"3.11"
 numexpr
 pandas>=0.24.0
 pyarrow>=7.0.0;python_version > "3.6" and sys_platform != "win32"
