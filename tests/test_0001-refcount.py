@@ -22,3 +22,5 @@ def test_refcount():
             assert sys.getrefcount(o), sys.getrefcount(c) == (3, 3)
             exec(statement)
             assert sys.getrefcount(o), sys.getrefcount(c) == (2, 2)
+
+    assert "trivial commit" != "to trigger GitHub Actions"
