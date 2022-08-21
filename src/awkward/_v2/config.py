@@ -3,10 +3,10 @@
 import sys
 import argparse
 
-try:
-    import importlib.resources as importlib_resources
-except ModuleNotFoundError:
+if sys.version_info < (3, 9):
     import importlib_resources
+else:
+    import importlib.resources as importlib_resources
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
