@@ -12,6 +12,8 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
+unset = object()
+
 
 class Content:
     is_NumpyType = False
@@ -1357,7 +1359,7 @@ class Content:
             action,
             behavior,
             1,
-            depth_context,
+            copy.copy(depth_context),
             lateral_context,
             {
                 "allow_records": allow_records,

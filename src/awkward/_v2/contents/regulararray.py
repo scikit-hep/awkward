@@ -3,7 +3,7 @@
 import copy
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.regularform import RegularForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -14,6 +14,24 @@ numpy = ak.nplike.Numpy.instance()
 class RegularArray(Content):
     is_ListType = True
     is_RegularType = True
+
+    def copy(
+        self,
+        content=unset,
+        size=unset,
+        zeros_length=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return RegularArray(
+            self._content if content is unset else content,
+            self._size if size is unset else size,
+            self._zeros_length if zeros_length is unset else zeros_length,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self,
@@ -1220,6 +1238,8 @@ class RegularArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

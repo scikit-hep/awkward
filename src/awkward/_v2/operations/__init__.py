@@ -79,6 +79,7 @@ from awkward._v2.operations.ak_to_dataframe import to_dataframe
 from awkward._v2.operations.ak_to_parquet import to_parquet
 from awkward._v2.operations.ak_to_rdataframe import to_rdataframe
 from awkward._v2.operations.ak_to_regular import to_regular
+from awkward._v2.operations.ak_transform import transform
 from awkward._v2.operations.ak_type import type
 from awkward._v2.operations.ak_unflatten import unflatten
 from awkward._v2.operations.ak_unzip import unzip

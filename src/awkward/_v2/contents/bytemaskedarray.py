@@ -6,7 +6,7 @@ import math
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.bytemaskedform import ByteMaskedForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -16,6 +16,24 @@ numpy = ak.nplike.Numpy.instance()
 
 class ByteMaskedArray(Content):
     is_OptionType = True
+
+    def copy(
+        self,
+        mask=unset,
+        content=unset,
+        valid_when=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return ByteMaskedArray(
+            self._mask if mask is unset else mask,
+            self._content if content is unset else content,
+            self._valid_when if valid_when is unset else valid_when,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self, mask, content, valid_when, identifier=None, parameters=None, nplike=None
@@ -1054,6 +1072,8 @@ class ByteMaskedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

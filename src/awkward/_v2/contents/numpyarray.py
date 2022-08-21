@@ -2,7 +2,7 @@
 
 import copy
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.numpyform import NumpyForm
 from awkward._v2.forms.form import _parameters_equal
 from awkward._v2.types.numpytype import primitive_to_dtype
@@ -13,6 +13,20 @@ numpy = ak.nplike.Numpy.instance()
 
 class NumpyArray(Content):
     is_NumpyType = True
+
+    def copy(
+        self,
+        data=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return NumpyArray(
+            self._data if data is unset else data,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(self, data, identifier=None, parameters=None, nplike=None):
         if nplike is None:
@@ -1314,6 +1328,8 @@ class NumpyArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 
