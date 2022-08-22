@@ -45,6 +45,22 @@ class ContentType(numba.types.Type):
         else:
             raise AssertionError(f"unrecognized Form index type: {index_string!r}")
 
+    def IndexOf(self, arraytype):
+        if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
+            return ak._v2.index.Index8
+        elif arraytype.dtype.bitwidth == 8:
+            return ak._v2.index.IndexU8
+        elif arraytype.dtype.bitwidth == 32 and arraytype.dtype.signed:
+            return ak._v2.index.Index32
+        elif arraytype.dtype.bitwidth == 32:
+            return ak._v2.index.IndexU32
+        elif arraytype.dtype.bitwidth == 64:
+            return ak._v2.index.Index64
+        else:
+            raise ak._v2._util.error(
+                AssertionError(f"no Index* type for array: {arraytype}")
+            )
+
     def getitem_at_check(self, viewtype):
         typer = ak._v2._util.numba_array_typer(viewtype.type, viewtype.behavior)
         if typer is None:
