@@ -1424,6 +1424,8 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
 
     def __init__(self, contents, fields, identifier, parameters, flatlist_as_rvec):
         self.contents = tuple(contents)
+        # FIXME: attribute in Numba
+        self.contenttypes = self.contents
         self.fields = None if fields is None else tuple(fields)
         self.identifier = identifier
         self.parameters = parameters
@@ -1465,6 +1467,14 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
 
     def value_type(self):
         return self.record.class_type()
+
+    # FIXME: attribute in Numba
+    def fieldindex(self, field):
+        fieldindex_ = {}
+        for index in range(len(self.fields)):
+            fieldindex_[self.fields[index]] = index
+
+        return fieldindex_[field]
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
