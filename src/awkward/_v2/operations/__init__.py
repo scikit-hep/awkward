@@ -28,8 +28,7 @@ from awkward._v2.operations.ak_from_buffers import from_buffers
 from awkward._v2.operations.ak_from_cupy import from_cupy
 from awkward._v2.operations.ak_from_iter import from_iter
 from awkward._v2.operations.ak_from_jax import from_jax
-from awkward._v2.operations.ak_from_json_file import from_json_file
-from awkward._v2.operations.ak_from_json import from_json
+from awkward._v2.operations.ak_from_json_new import from_json
 from awkward._v2.operations.ak_from_json_schema import from_json_schema
 from awkward._v2.operations.ak_from_numpy import from_numpy
 from awkward._v2.operations.ak_from_parquet import from_parquet

@@ -871,6 +871,57 @@ namespace awkward {
       return count_ + static_cast<size_t>(current_ - buffer_);
     }
 
+    std::string error_context() const {
+      int64_t current = (int64_t)current_ - (int64_t)buffer_;
+      int64_t bufferafter = (int64_t)bufferlast_ - (int64_t)buffer_;
+      if (*bufferlast_ != 0) {
+        bufferafter++;
+      }
+
+      int64_t start = current - 40;
+      if (start < 0) {
+        start = 0;
+      }
+      int64_t stop = current + 20;
+      if (stop > bufferafter) {
+        stop = bufferafter;
+      }
+
+      std::string context = std::string(buffer_, (size_t)stop).substr(start);
+      int64_t arrow = current - start;
+
+      size_t pos;
+
+      pos = 0;
+      while ((pos = context.find(9, pos)) != std::string::npos) {
+        context.replace(pos, 1, "\\t");
+        pos++;
+        if (pos < arrow) {
+          arrow++;
+        }
+      }
+
+      pos = 0;
+      while ((pos = context.find(10, pos)) != std::string::npos) {
+        context.replace(pos, 1, "\\n");
+        pos++;
+        if (pos < arrow) {
+          arrow++;
+        }
+      }
+
+      pos = 0;
+      while ((pos = context.find(13, pos)) != std::string::npos) {
+        context.replace(pos, 1, "\\r");
+        pos++;
+        if (pos < arrow) {
+          arrow++;
+        }
+      }
+
+      return std::string("\nJSON: ") + context + std::string("\n") + std::string(arrow + 6, '-') + "^";
+    }
+
     // not implemented
     void Put(Ch) { assert(false); }
     void Flush() { assert(false); }
@@ -928,6 +979,8 @@ namespace awkward {
         throw std::invalid_argument(
           std::string("JSON syntax error at char ")
           + std::to_string(stream.Tell())
+          + std::string("\n")
+          + stream.error_context()
           + FILENAME(__LINE__));
       }
       return 1;

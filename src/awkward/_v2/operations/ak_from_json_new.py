@@ -13,8 +13,8 @@ def from_json(
     line_delimited=False,
     schema=None,
     nan_string=None,
-    infinity_string=None,
-    minus_infinity_string=None,
+    posinf_string=None,
+    neginf_string=None,
     complex_record_fields=None,
     buffersize=65536,
     initial=1024,
@@ -41,15 +41,15 @@ def from_json(
             parse the JSON more quickly by skipping type-discovery.
         nan_string (None or str): If not None, strings with this value will be
             interpreted as floating-point NaN values.
-        infinity_string (None or str): If not None, strings with this value will
+        posinf_string (None or str): If not None, strings with this value will
             be interpreted as floating-point positive infinity values.
-        minus_infinity_string (None or str): If not None, strings with this value
+        neginf_string (None or str): If not None, strings with this value
             will be interpreted as floating-point negative infinity values.
         complex_record_fields (None or (str, str)): If not None, defines a pair of
             field names to interpret 2-field records as complex numbers.
         buffersize (int): Number of bytes in each read from source: larger
-            values use more memory but read less frequently. (Python GIL is released
-            between read events.)
+            values use more memory but read less frequently. (Python GIL is
+            released before and after read events.)
         initial (int): Initial size (in bytes) of buffers used by
             #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
         resize (float): Resize multiplier for buffers used by
@@ -73,8 +73,8 @@ def from_json(
             line_delimited=line_delimited,
             schema=schema,
             nan_string=nan_string,
-            infinity_string=infinity_string,
-            minus_infinity_string=minus_infinity_string,
+            posinf_string=posinf_string,
+            neginf_string=neginf_string,
             complex_record_fields=complex_record_fields,
             buffersize=buffersize,
             initial=initial,
@@ -88,8 +88,8 @@ def from_json(
                 source,
                 line_delimited,
                 nan_string,
-                infinity_string,
-                minus_infinity_string,
+                posinf_string,
+                neginf_string,
                 complex_record_fields,
                 buffersize,
                 initial,
@@ -165,17 +165,25 @@ def _record_to_complex(layout, complex_record_fields):
 
         def action(node, **kwargs):
             if isinstance(node, ak._v2.contents.RecordArray):
-                if set(node.fields) == set(complex_record_fields):
+                if set(complex_record_fields).issubset(node.fields):
                     real = node._getitem_field(complex_record_fields[0])
                     imag = node._getitem_field(complex_record_fields[1])
                     if (
                         isinstance(real, ak._v2.contents.NumpyArray)
                         and len(real.shape) == 1
+                        and issubclass(real.dtype.type, (np.integer, np.floating))
                         and isinstance(imag, ak._v2.contents.NumpyArray)
                         and len(imag.shape) == 1
+                        and issubclass(imag.dtype.type, (np.integer, np.floating))
                     ):
                         return ak._v2.contents.NumpyArray(
                             node._nplike.asarray(real) + node._nplike.asarray(imag) * 1j
+                        )
+                    else:
+                        raise ak._v2._util.error(
+                            ValueError(
+                                f"expected record with fields {complex_record_fields[0]!r} and {complex_record_fields[1]!r} to have integer or floating point types, not {str(real.form.type)!r} and {str(imag.form.type)!r}"
+                            )
                         )
 
         return layout.recursively_apply(action)
@@ -190,8 +198,8 @@ def _no_schema(
     source,
     line_delimited,
     nan_string,
-    infinity_string,
-    minus_infinity_string,
+    posinf_string,
+    neginf_string,
     complex_record_fields,
     buffersize,
     initial,
@@ -204,15 +212,18 @@ def _no_schema(
     read_one = not line_delimited
 
     with _get_reader(source)() as obj:
-        ak._ext.fromjsonobj(
-            obj,
-            builder,
-            read_one,
-            buffersize,
-            nan_string,
-            infinity_string,
-            minus_infinity_string,
-        )
+        try:
+            ak._ext.fromjsonobj(
+                obj,
+                builder,
+                read_one,
+                buffersize,
+                nan_string,
+                posinf_string,
+                neginf_string,
+            )
+        except Exception as err:
+            raise ak._v2._util.error(ValueError(str(err))) from None
 
     formstr, length, buffers = builder.to_buffers()
     form = ak._v2.forms.from_json(formstr)
@@ -223,7 +234,9 @@ def _no_schema(
     if read_one:
         layout = layout[0]
 
-    if highlevel:
+    if highlevel and isinstance(
+        layout, (ak._v2.contents.Content, ak._v2.record.Record)
+    ):
         return ak._v2._util.wrap(layout, behavior, highlevel)
     else:
         return layout

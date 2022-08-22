@@ -2,6 +2,7 @@
 
 import os
 import json
+import pathlib
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -32,17 +33,17 @@ def test_fromfile(tmp_path):
     with open(os.path.join(str(tmp_path), "tmp1.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], [], [4, 5.5]]")
 
-    array = ak._v2.operations.from_json_file(os.path.join(str(tmp_path), "tmp1.json"))
+    array = ak._v2.operations.from_json(tmp_path / "tmp1.json")
     assert array.tolist() == [[1.1, 2.2, 3.0], [], [4.0, 5.5]]
 
     with pytest.raises(IOError):
-        ak._v2.operations.from_json_file("nonexistent.json")
+        ak._v2.operations.from_json(pathlib.Path("nonexistent.json"))
 
     with open(os.path.join(str(tmp_path), "tmp2.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], []], [4, 5.5]]")
 
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json_file(os.path.join(str(tmp_path), "tmp2.json"))
+        ak._v2.operations.from_json(tmp_path / "tmp2.json")
 
 
 def test_tostring():
