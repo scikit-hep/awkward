@@ -120,31 +120,64 @@ make_fromjsonobj(py::module& m, const std::string& name) {
            bool read_one,
            int64_t buffersize,
            const char* nan_string,
-           const char* infinity_string,
-           const char* minus_infinity_string) -> int64_t {
+           const char* posinf_string,
+           const char* neginf_string) -> void {
 
     PythonFileLikeObject obj(source);
 
     py::gil_scoped_release release;
 
-    int64_t out = ak::FromJsonObject(&obj,
-                                     builder,
-                                     buffersize,
-                                     read_one,
-                                     nan_string,
-                                     infinity_string,
-                                     minus_infinity_string);
+    ak::FromJsonObject(&obj,
+                       builder,
+                       buffersize,
+                       read_one,
+                       nan_string,
+                       posinf_string,
+                       neginf_string);
 
     py::gil_scoped_acquire acquire;
 
-    return out;
   }, py::arg("source"),
      py::arg("builder"),
      py::arg("read_one"),
      py::arg("buffersize"),
      py::arg("nan_string"),
-     py::arg("infinity_string"),
-     py::arg("minus_infinity_string"));
+     py::arg("posinf_string"),
+     py::arg("neginf_string"));
+}
+
+void
+make_fromjsonobj_schema(py::module& m, const std::string& name) {
+  m.def(name.c_str(),
+        [](py::object& source,
+           py::dict& container,
+           bool read_one,
+           int64_t buffersize,
+           const char* nan_string,
+           const char* posinf_string,
+           const char* neginf_string,
+           std::string instructions,
+           int64_t initial,
+           double resize) -> int64_t {
+
+    PythonFileLikeObject obj(source);
+
+    py::gil_scoped_release release;
+
+    py::gil_scoped_acquire acquire;
+
+    return 0;
+
+  }, py::arg("source"),
+     py::arg("container"),
+     py::arg("read_one"),
+     py::arg("buffersize"),
+     py::arg("nan_string"),
+     py::arg("posinf_string"),
+     py::arg("neginf_string"),
+     py::arg("instructions"),
+     py::arg("initial"),
+     py::arg("resize"));
 }
 
 ////////// Uproot connector

@@ -136,6 +136,7 @@ PYBIND11_MODULE(_ext, m) {
   make_fromjson(m, "fromjson");
   make_fromjsonfile(m, "fromjsonfile");
   make_fromjsonobj(m, "fromjsonobj");
+  make_fromjsonobj_schema(m, "fromjsonobj_schema");
 
   make_uproot_issue_90(m);
 
