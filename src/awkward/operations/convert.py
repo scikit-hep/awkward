@@ -887,10 +887,8 @@ def from_iter(
             )
 
     out = ak.layout.ArrayBuilder(initial=initial, resize=resize)
-    for x in iterable:
-        out.fromiter(x)
-    layout = out.snapshot()
-    return ak._util.maybe_wrap(layout, behavior, highlevel)
+    out.fromiter(iterable)
+    return ak._util.maybe_wrap(out[0], behavior, highlevel)
 
 
 def to_list(array):
