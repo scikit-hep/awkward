@@ -272,7 +272,7 @@ def test_array_tojson():
 
     assert (
         ak._v2.operations.to_json(
-            array, nan_string="NaN", infinity_string="inf", minus_infinity_string="-inf"
+            array, nan_string="NaN", posinf_string="inf", neginf_string="-inf"
         )
         == '[["NaN","NaN",1.1],["inf",3.3,"-inf"]]'
     )

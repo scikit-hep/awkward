@@ -138,8 +138,8 @@ def test_complex_with_nan_and_inf():
             content,
             complex_record_fields=("r", "i"),
             nan_string="Not a number",
-            infinity_string="Inf",
-            minus_infinity_string="-Inf",
+            posinf_string="Inf",
+            neginf_string="-Inf",
         )
         == """[{"r":1.1,"i":0.1},{"r":2.2,"i":0.0},{"r":3.3,"i":0.0},{"r":"Not a number","i":"Not a number"},{"r":5.5,"i":0.0},{"r":"-Inf","i":0.0},{"r":7.7,"i":0.0},{"r":"Not a number","i":"Inf"},{"r":9.9,"i":0.0}]"""
     )
@@ -235,8 +235,8 @@ def test_numpy():
         ak._v2.operations.to_json(
             b2,
             nan_string="Not a number",
-            infinity_string="Inf",
-            minus_infinity_string="-Inf",
+            posinf_string="Inf",
+            neginf_string="-Inf",
         )
         == """[[[1.1,2.2,3.3],[4.4,"Inf",6.6]],[[10.1,20.2,"Not a number"],[40.4,50.5,"-Inf"]]]"""
     )
@@ -249,7 +249,7 @@ def test_numpy():
         )
     )
     assert (
-        ak._v2.operations.to_json(b3, infinity_string="Infinity")
+        ak._v2.operations.to_json(b3, posinf_string="Infinity")
         == '[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,"Infinity"],[40.4,50.5,60.6]]]'
     )
     b4 = ak._v2.contents.NumpyArray(
@@ -261,7 +261,7 @@ def test_numpy():
         )
     )
     assert (
-        ak._v2.operations.to_json(b4, minus_infinity_string="-Infinity")
+        ak._v2.operations.to_json(b4, neginf_string="-Infinity")
         == '[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,"-Infinity"],[40.4,50.5,60.6]]]'
     )
     c = ak._v2.contents.NumpyArray(
