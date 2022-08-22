@@ -835,17 +835,6 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         else:
             return self.content.class_type()
 
-    # FIXME: override the IndexOf method in the ContentLookup super-class
-    def IndexOf(self, arraytype):
-        if self.index_type == "int32_t":
-            return ak._v2.index.Index32
-        elif self.index_type == "uint32_t":
-            return ak._v2.index.Index32
-        elif self.index_type == "int64_t":
-            return ak._v2.index.Index64
-        else:
-            raise ak._v2._util.error(AssertionError(self.index_type))
-
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
         if not self.is_string and not (self.flatlist_as_rvec and self.is_flatlist):
@@ -1025,18 +1014,19 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
             self.index_type = "int64_t"
         else:
             raise ak._v2._util.error(AssertionError(index_type))
-        self.content = content
+        self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        self.indextype = self.index_type
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
             (
                 type(self),
                 self.index_type,
-                self.content,
+                self.contenttype,
                 self.identifier,
                 json.dumps(self.parameters),
             )
@@ -1046,7 +1036,7 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         return (
             isinstance(other, type(self))
             and self.index_type == other.index_type
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -1055,11 +1045,11 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         return f"IndexedOptionArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return f"std::optional<{self.content.value_type()}>"
+        return f"std::optional<{self.contenttype.value_type()}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1078,7 +1068,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
       if (index >= 0) {{
-        return value_type{{ {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0] }};
+        return value_type{{ {self.contenttype.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0] }};
       }}
       else {{
         return std::nullopt;
@@ -1527,27 +1517,28 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         )
 
     def __init__(self, index_type, contents, identifier, parameters, flatlist_as_rvec):
+        self.tagstype = "int8_t"
         if index_type == "i32":
-            self.index_type = "int32_t"
+            self.indextype = "int32_t"
         elif index_type == "u32":
-            self.index_type = "uint32_t"
+            self.indextype = "uint32_t"
         elif index_type == "i64":
-            self.index_type = "int64_t"
+            self.indextype = "int64_t"
         else:
             raise ak._v2._util.error(AssertionError(index_type))
-        self.contents = tuple(contents)
+        self.contenttypes = tuple(contents)
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        for content in self.contents:
+        for content in self.contenttypes:
             assert self.flatlist_as_rvec == content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.index_type,
-                self.contents,
+                self.indextype,
+                self.contenttypes,
                 self.identifier,
                 json.dumps(self.parameters),
             )
@@ -1556,8 +1547,8 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.index_type == other.index_type
-            and self.contents == other.contents
+            and self.indextype == other.indextype
+            and self.contenttypes == other.contenttypes
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -1566,17 +1557,17 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         return f"UnionArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return f"std::variant<{','.join(x.value_type() for x in self.contents)}>"
+        return f"std::variant<{','.join(x.value_type() for x in self.contenttypes)}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        for content in self.contents:
+        for content in self.contenttypes:
             content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             cases = []
-            for i, content in enumerate(self.contents):
+            for i, content in enumerate(self.contenttypes):
                 cases.append(
                     f"""
         case {i}:
@@ -1599,11 +1590,11 @@ namespace awkward {{
 
     value_type operator[](size_t at) const noexcept {{
       int8_t tag = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.TAGS}])[start_ + at];
-      {self.index_type} index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
+      {self.indextype} index = reinterpret_cast<{self.indextype}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
       switch (tag) {{
         {eoln.join(cases)}
         default:
-          return value_type{{ {self.contents[0].class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_, lookup_)[0] }};
+          return value_type{{ {self.contenttypes[0].class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_, lookup_)[0] }};
       }}
     }}
   }};
