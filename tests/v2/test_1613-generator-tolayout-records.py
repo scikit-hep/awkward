@@ -14,7 +14,8 @@ compiler = ROOT.gInterpreter.Declare
 cpp17 = hasattr(ROOT.std, "optional")
 
 
-def test_RecordArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_RecordArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.RecordArray(
         [
             ak._v2.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
@@ -24,7 +25,9 @@ def test_RecordArray_NumpyArray():
         parameters={"__record__": "Something"},
     )
     layout = array
-    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout)
     generator.generate(compiler)
 
@@ -43,14 +46,17 @@ def test_RecordArray_NumpyArray():
 
 
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
-def test_IndexedArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_IndexedArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.IndexedArray(
         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
         ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
@@ -58,14 +64,17 @@ def test_IndexedArray_NumpyArray():
     assert array.to_list() == array_out.to_list()
 
 
-def test_IndexedOptionArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_IndexedOptionArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.IndexedOptionArray(
         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
@@ -74,7 +83,8 @@ def test_IndexedOptionArray_NumpyArray():
 
 
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
-def test_ByteMaskedArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_ByteMaskedArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
@@ -82,7 +92,9 @@ def test_ByteMaskedArray_NumpyArray():
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
@@ -91,7 +103,8 @@ def test_ByteMaskedArray_NumpyArray():
 
 
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
-def test_BitMaskedArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_BitMaskedArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.BitMaskedArray(
         ak._v2.index.Index(
             np.packbits(
@@ -126,7 +139,9 @@ def test_BitMaskedArray_NumpyArray():
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
@@ -134,7 +149,8 @@ def test_BitMaskedArray_NumpyArray():
     assert array.to_list() == array_out.to_list()
 
 
-def test_nested_UnmaskedArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_nested_UnmaskedArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
         ak._v2.contents.UnmaskedArray(
@@ -143,7 +159,9 @@ def test_nested_UnmaskedArray_NumpyArray():
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
@@ -151,7 +169,8 @@ def test_nested_UnmaskedArray_NumpyArray():
     assert array.to_list() == array_out.to_list()
 
 
-def test_UnionArray_NumpyArray():
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_UnionArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.UnionArray(
         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
         ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
@@ -162,7 +181,9 @@ def test_UnionArray_NumpyArray():
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
     lookup = ak._v2._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
