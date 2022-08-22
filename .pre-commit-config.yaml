@@ -50,7 +50,7 @@ repos:
     stages: [manual]
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.1.0
+  rev: v2.2.1
   hooks:
   - id: codespell
     args: ["-L", "ue,subjet,parms,fo,numer,thre"]
