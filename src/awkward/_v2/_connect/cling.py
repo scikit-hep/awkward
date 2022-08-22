@@ -177,6 +177,11 @@ namespace awkward {
     RecordView(ssize_t at, ssize_t which, ssize_t* ptrs, PyObject* lookup)
       : at_(at), which_(which), ptrs_(ptrs), lookup_(lookup) { }
 
+    PyObject* lookup() {
+        Py_INCREF(lookup_);
+        return lookup_;
+    }
+
   protected:
     ssize_t at_;
     ssize_t which_;
