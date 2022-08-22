@@ -85,6 +85,27 @@ def test_ListArray_NumpyArray(flatlist_as_rvec):
 
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
+    array = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
+        ak._v2.contents.ListOffsetArray(
+            ak._v2.index.Index(np.array([1, 1, 4, 4, 6, 7], np.int64)),
+            ak._v2.contents.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+        ),
+    )
+
+    layout = array
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
+    lookup = ak._v2._lookup.Lookup(layout, generator)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert array.to_list() == array_out.to_list()
+
+
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_RecordArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.RecordArray(
         [
@@ -108,6 +129,47 @@ def test_RecordArray_NumpyArray(flatlist_as_rvec):
     array_out = generator.tolayout(lookup, 0, ("y"))
     # [0.0, 1.1, 2.2, 3.3, 4.4] == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]
     assert array["y"].to_list() == array_out[: len(array["y"])].to_list()
+
+
+@pytest.mark.skip(
+    reason="AttributeError: 'Record' object has no attribute 'form', 'Record' object has no attribute 'identifier'"
+)
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_Record(flatlist_as_rvec):
+    array = ak._v2.contents.RecordArray(
+        [
+            ak._v2.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        ],
+        ["x", "y"],
+        parameters={"__record__": "Something"},
+    )
+    assert isinstance(array[2], ak._v2.record.Record)
+
+    layout = array[2]
+    generator = ak._v2._connect.cling.togenerator(
+        array.form, flatlist_as_rvec=flatlist_as_rvec
+    )
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert layout.to_list() == array_out.to_list()
+
+
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_RecordArray_tuple(flatlist_as_rvec):
+    array = ak._v2.Array([(1, 2)])
+
+    layout = array.layout
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
+    lookup = ak._v2._lookup.Lookup(layout)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert layout.to_list() == array_out.to_list()
 
 
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
