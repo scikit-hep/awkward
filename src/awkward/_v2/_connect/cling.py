@@ -1468,13 +1468,21 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
     def value_type(self):
         return self.record.class_type()
 
-    # FIXME: attribute in Numba
-    def fieldindex(self, field):
-        fieldindex_ = {}
-        for index in range(len(self.fields)):
-            fieldindex_[self.fields[index]] = index
-
-        return fieldindex_[field]
+    def fieldindex(self, key):
+        out = -1
+        if self.fields is not None:
+            for i, x in enumerate(self.fields):
+                if x == key:
+                    out = i
+                    break
+        if out == -1:
+            try:
+                out = int(key)
+            except ValueError:
+                return None
+            if not 0 <= out < len(self.contenttypes):
+                return None
+        return out
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
