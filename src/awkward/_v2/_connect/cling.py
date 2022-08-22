@@ -1423,14 +1423,12 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
         )
 
     def __init__(self, contents, fields, identifier, parameters, flatlist_as_rvec):
-        self.contents = tuple(contents)
-        # FIXME: attribute in Numba
-        self.contenttypes = self.contents
+        self.contenttypes = tuple(contents)
         self.fields = None if fields is None else tuple(fields)
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        for content in self.contents:
+        for content in self.contenttypes:
             assert self.flatlist_as_rvec == content.flatlist_as_rvec
 
         self.record = RecordGenerator(contents, fields, parameters, flatlist_as_rvec)
@@ -1439,7 +1437,7 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
         return hash(
             (
                 type(self),
-                self.contents,
+                self.contenttypes,
                 self.fields,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -1449,7 +1447,7 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.contents == other.contents
+            and self.contenttypes == other.contenttypes
             and self.fields == other.fields
             and self.identifier == other.identifier
             and self.parameters == other.parameters
