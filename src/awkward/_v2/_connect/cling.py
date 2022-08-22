@@ -1093,18 +1093,19 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
         )
 
     def __init__(self, content, valid_when, identifier, parameters, flatlist_as_rvec):
-        self.content = content
+        self.contenttype = content
         self.valid_when = valid_when
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
+        self.masktype = "int8_t"
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.content,
+                self.contenttype,
                 self.valid_when,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -1114,7 +1115,7 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.valid_when == other.valid_when
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -1126,11 +1127,11 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
         )
 
     def value_type(self):
-        return f"std::optional<{self.content.value_type()}>"
+        return f"std::optional<{self.contenttype.value_type()}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1149,7 +1150,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       int8_t mask = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.MASK}])[start_ + at];
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
+        return value_type{{ {self.contenttype.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -1183,18 +1184,19 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
         parameters,
         flatlist_as_rvec,
     ):
-        self.content = content
+        self.contenttype = content
         self.valid_when = valid_when
         self.lsb_order = lsb_order
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
+        self.masktype = "uint8_t"
 
     def __hash__(self):
         return hash(
             (
-                self.content,
+                self.contenttype,
                 self.valid_when,
                 self.lsb_order,
                 self.identifier,
@@ -1205,7 +1207,7 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.valid_when == other.valid_when
             and self.lsb_order == other.lsb_order
             and self.identifier == other.identifier
@@ -1216,11 +1218,11 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
         return f"BitMaskedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return f"std::optional<{self.content.value_type()}>"
+        return f"std::optional<{self.contenttype.value_type()}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1244,7 +1246,7 @@ namespace awkward {{
       uint8_t mask = {"(byte >> shift) & 1" if self.lsb_order else "(byte << shift) & 128"};
 
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
+        return value_type{{ {self.contenttype.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
       }}
       else {{
         return std::nullopt;

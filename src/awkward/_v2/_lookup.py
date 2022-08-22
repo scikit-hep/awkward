@@ -85,15 +85,15 @@ class ContentLookup:
             if arraytype == "int8_t":
                 return ak._v2.index.Index8
             elif arraytype == "uint8_t":
-                return ak._v2.index.Index8
+                return ak._v2.index.IndexU8
             elif arraytype == "int32_t":
                 return ak._v2.index.Index32
             elif arraytype == "uint32_t":
-                return ak._v2.index.Index32
+                return ak._v2.index.IndexU32
             elif arraytype == "int64_t":
                 return ak._v2.index.Index64
             elif arraytype == "uint64_t":
-                return ak._v2.index.Index64
+                return ak._v2.index.IndexU64
             else:
                 raise ak._v2._util.error(AssertionError(arraytype))
 
