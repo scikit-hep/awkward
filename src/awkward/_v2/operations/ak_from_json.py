@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import pathlib
+import json
 from urllib.parse import urlparse
 
 import awkward as ak
@@ -322,6 +323,9 @@ def _yes_schema(
         )
 
     read_one = not line_delimited
+
+    print(form)
+    print(instructions)
 
     with _get_reader(source)() as obj:
         try:
