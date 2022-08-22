@@ -124,11 +124,6 @@ def test_RecordArray_NumpyArray(flatlist_as_rvec):
 
     array_out = generator.tolayout(lookup, 0, ())
     assert array.to_list() == array_out.to_list()
-    array_out = generator.tolayout(lookup, 0, ("x"))
-    assert array["x"].to_list() == array_out.to_list()
-    array_out = generator.tolayout(lookup, 0, ("y"))
-    # [0.0, 1.1, 2.2, 3.3, 4.4] == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]
-    assert array["y"].to_list() == array_out[: len(array["y"])].to_list()
 
 
 @pytest.mark.skip(

@@ -126,7 +126,7 @@ class NumpyLookup(ContentLookup):
 
     def tolayout(self, lookup, pos, fields):
         assert lookup.positions[pos + self.IDENTIFIER] == -1
-        assert fields in ((), "")
+        assert fields == ()
         return ak._v2.contents.NumpyArray(
             lookup.positions[pos + self.ARRAY], parameters=self.parameters
         )
