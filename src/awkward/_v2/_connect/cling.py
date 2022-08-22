@@ -928,25 +928,25 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
 
     def __init__(self, index_type, content, identifier, parameters, flatlist_as_rvec):
         if index_type == "i32":
-            self.index_type = "int32_t"
+            self.indextype = "int32_t"
         elif index_type == "u32":
-            self.index_type = "uint32_t"
+            self.indextype = "uint32_t"
         elif index_type == "i64":
-            self.index_type = "int64_t"
+            self.indextype = "int64_t"
         else:
             raise ak._v2._util.error(AssertionError(index_type))
-        self.content = content
+        self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.index_type,
-                self.content,
+                self.indextype,
+                self.contenttype,
                 self.identifier,
                 json.dumps(self.parameters),
             )
@@ -955,8 +955,8 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.index_type == other.index_type
-            and self.content == other.content
+            and self.indextype == other.indextype
+            and self.contenttype == other.contenttype
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -965,11 +965,11 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
         return f"IndexedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return self.content.value_type()
+        return self.contenttype.value_type()
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -986,8 +986,8 @@ namespace awkward {{
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
-      ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
-      return {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0];
+      ssize_t index = reinterpret_cast<{self.indextype}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
+      return {self.contenttype.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0];
     }}
   }};
 }}

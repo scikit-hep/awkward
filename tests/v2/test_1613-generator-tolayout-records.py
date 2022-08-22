@@ -11,6 +11,7 @@ ROOT = pytest.importorskip("ROOT")
 
 
 compiler = ROOT.gInterpreter.Declare
+cpp17 = hasattr(ROOT.std, "optional")
 
 
 def test_RecordArray_NumpyArray():
@@ -41,6 +42,22 @@ def test_RecordArray_NumpyArray():
     assert str(data_frame_one.GetColumnType("one")).startswith(
         "awkward::Record_Something_"
     )
+
+
+@pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
+def test_IndexedArray_NumpyArray():
+    array = ak._v2.contents.indexedarray.IndexedArray(
+        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+    )
+
+    layout = array
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert array.to_list() == array_out.to_list()
 
 
 def test_IndexedOptionArray_NumpyArray():
