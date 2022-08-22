@@ -15,6 +15,57 @@ cpp17 = hasattr(ROOT.std, "optional")
 
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_EmptyArray(flatlist_as_rvec):
+    array = ak._v2.contents.EmptyArray()
+
+    layout = array
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
+    lookup = ak._v2._lookup.Lookup(layout, generator)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert array.to_list() == array_out.to_list()
+
+
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_NumpyArray(flatlist_as_rvec):
+    array = ak._v2.contents.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3]),
+        parameters={"some": "stuff", "other": [1, 2, "three"]},
+    )
+
+    layout = array
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
+    lookup = ak._v2._lookup.Lookup(layout, generator)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert array.to_list() == array_out.to_list()
+
+
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_RegularArray_NumpyArray(flatlist_as_rvec):
+    array = ak._v2.contents.RegularArray(
+        ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        3,
+    )
+
+    layout = array
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
+    lookup = ak._v2._lookup.Lookup(layout, generator)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert array.to_list() == array_out.to_list()
+
+
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_RecordArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.RecordArray(
         [
@@ -38,11 +89,6 @@ def test_RecordArray_NumpyArray(flatlist_as_rvec):
     array_out = generator.tolayout(lookup, 0, ("y"))
     # [0.0, 1.1, 2.2, 3.3, 4.4] == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]
     assert array["y"].to_list() == array_out[: len(array["y"])].to_list()
-
-    data_frame_one = ak._v2.to_rdataframe({"one": array})
-    assert str(data_frame_one.GetColumnType("one")).startswith(
-        "awkward::Record_Something_"
-    )
 
 
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")

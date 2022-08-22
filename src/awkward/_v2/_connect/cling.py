@@ -631,18 +631,18 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
         )
 
     def __init__(self, content, size, identifier, parameters, flatlist_as_rvec):
-        self.content = content
+        self.contenttype = content
         self.size = size
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.content,
+                self.contenttype,
                 self.size,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -652,7 +652,7 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.size == other.size
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -665,22 +665,22 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
         ) in ("string", "bytestring")
 
     def is_flatlist(self):
-        return isinstance(self.content, NumpyArrayGenerator)
+        return isinstance(self.contenttype, NumpyArrayGenerator)
 
     def class_type(self):
         return f"RegularArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         if self.flatlist_as_rvec and self.is_flatlist:
-            nested_type = self.content.value_type()
+            nested_type = self.contenttype.value_type()
             return f"ROOT::VecOps::RVec<{nested_type}>"
         else:
-            return self.content.class_type()
+            return self.contenttype.class_type()
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
         if not self.is_string and not (self.flatlist_as_rvec and self.is_flatlist):
-            self.content.generate(compiler, use_cached)
+            self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -708,7 +708,7 @@ namespace awkward {{
 }}
 """.strip()
             elif self.flatlist_as_rvec and self.is_flatlist:
-                nested_type = self.content.value_type()
+                nested_type = self.contenttype.value_type()
                 value_type = f"ROOT::VecOps::RVec<{nested_type}>"
                 out = f"""
 namespace awkward {{
