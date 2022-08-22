@@ -66,6 +66,25 @@ def test_RegularArray_NumpyArray(flatlist_as_rvec):
 
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
+def test_ListArray_NumpyArray(flatlist_as_rvec):
+    array = ak._v2.contents.ListArray(
+        ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
+        ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak._v2.contents.NumpyArray(np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])),
+    )
+
+    layout = array
+    generator = ak._v2._connect.cling.togenerator(
+        layout.form, flatlist_as_rvec=flatlist_as_rvec
+    )
+    lookup = ak._v2._lookup.Lookup(layout, generator)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert array.to_list() == array_out.to_list()
+
+
+@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_RecordArray_NumpyArray(flatlist_as_rvec):
     array = ak._v2.contents.RecordArray(
         [
