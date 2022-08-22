@@ -1270,21 +1270,21 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
         )
 
     def __init__(self, content, identifier, parameters, flatlist_as_rvec):
-        self.content = content
+        self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
-            (type(self), self.content, self.identifier, json.dumps(self.parameters))
+            (type(self), self.contenttype, self.identifier, json.dumps(self.parameters))
         )
 
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -1293,11 +1293,11 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
         return f"UnmaskedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return f"std::optional<{self.content.value_type()}>"
+        return f"std::optional<{self.contenttype.value_type()}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1314,7 +1314,7 @@ namespace awkward {{
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
-      return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
+      return value_type{{ {self.contenttype.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
     }}
   }};
 }}

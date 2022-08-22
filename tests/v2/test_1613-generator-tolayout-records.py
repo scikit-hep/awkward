@@ -15,12 +15,10 @@ cpp17 = hasattr(ROOT.std, "optional")
 
 
 def test_RecordArray_NumpyArray():
-    array = ak._v2.contents.recordarray.RecordArray(
+    array = ak._v2.contents.RecordArray(
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-            ak._v2.contents.numpyarray.NumpyArray(
-                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-            ),
+            ak._v2.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
         ["x", "y"],
         parameters={"__record__": "Something"},
@@ -46,9 +44,9 @@ def test_RecordArray_NumpyArray():
 
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_IndexedArray_NumpyArray():
-    array = ak._v2.contents.indexedarray.IndexedArray(
+    array = ak._v2.contents.IndexedArray(
         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+        ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
     )
 
     layout = array
@@ -61,7 +59,7 @@ def test_IndexedArray_NumpyArray():
 
 
 def test_IndexedOptionArray_NumpyArray():
-    array = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+    array = ak._v2.contents.IndexedOptionArray(
         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
     )
@@ -77,7 +75,7 @@ def test_IndexedOptionArray_NumpyArray():
 
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_ByteMaskedArray_NumpyArray():
-    array = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+    array = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
@@ -94,7 +92,7 @@ def test_ByteMaskedArray_NumpyArray():
 
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 def test_BitMaskedArray_NumpyArray():
-    array = ak._v2.contents.bitmaskedarray.BitMaskedArray(
+    array = ak._v2.contents.BitMaskedArray(
         ak._v2.index.Index(
             np.packbits(
                 np.array(
@@ -117,7 +115,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak._v2.contents.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -136,13 +134,30 @@ def test_BitMaskedArray_NumpyArray():
     assert array.to_list() == array_out.to_list()
 
 
+def test_nested_UnmaskedArray_NumpyArray():
+    array = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
+        ak._v2.contents.UnmaskedArray(
+            ak._v2.contents.NumpyArray(np.array([999, 0.0, 1.1, 2.2, 3.3]))
+        ),
+    )
+
+    layout = array
+    generator = ak._v2._connect.cling.togenerator(layout.form, flatlist_as_rvec=False)
+    lookup = ak._v2._lookup.Lookup(layout, generator)
+    generator.generate(compiler)
+
+    array_out = generator.tolayout(lookup, 0, ())
+    assert array.to_list() == array_out.to_list()
+
+
 def test_UnionArray_NumpyArray():
-    array = ak._v2.contents.unionarray.UnionArray(
+    array = ak._v2.contents.UnionArray(
         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
         ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64)),
-            ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+            ak._v2.contents.NumpyArray(np.array([1, 2, 3], np.int64)),
+            ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
 
