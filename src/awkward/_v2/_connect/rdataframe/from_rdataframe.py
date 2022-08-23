@@ -105,7 +105,6 @@ def from_rdataframe(data_frame, column):
             return buffers
 
         dtype = form_dtype(form)
-        buffers = {}
 
         # pull in the CppBuffers (after which we can import from it)
         CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type]
@@ -118,17 +117,8 @@ def from_rdataframe(data_frame, column):
             ]
             builder = NumpyBuilder()
             builder_type = type(builder).__cpp_name__
-            builder_form = ak._v2.forms.from_json(builder.form())
-            assert builder_form == form
-            form = builder_form
 
             cpp_buffers_self.fill_from[builder_type](builder)
-
-            names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
-            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-            cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
-                builder
-            )
 
         elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
             form.content, ak._v2.forms.NumpyForm
@@ -140,16 +130,8 @@ def from_rdataframe(data_frame, column):
             ]
             builder = ListOffsetBuilder()
             builder_type = type(builder).__cpp_name__
-            builder_form = ak._v2.forms.from_json(builder.form())
-            # FIXME: set parameters here to use the builder form
-            # assert builder_form == form
 
             cpp_buffers_self.fill_offsets_and_flatten_2[builder_type](builder)
-            names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
-            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-            cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
-                builder
-            )
 
         elif list_depth == 3:
             ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
@@ -158,14 +140,8 @@ def from_rdataframe(data_frame, column):
             ]
             builder = ListOffsetBuilder()
             builder_type = type(builder).__cpp_name__
-            builder_form = ak._v2.forms.from_json(builder.form())
-            assert builder_form == form
+
             cpp_buffers_self.fill_offsets_and_flatten_3[builder_type](builder)
-            names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
-            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-            cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
-                builder
-            )
 
         else:
             ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
@@ -173,20 +149,18 @@ def from_rdataframe(data_frame, column):
                 f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{cpp_type_of[dtype.name]}>>",
             ]
             builder = ListOffsetBuilder()
-
             builder_type = type(builder).__cpp_name__
-            builder_form = ak._v2.forms.from_json(builder.form())
-            assert builder_form == form
 
             cpp_buffers_self.fill_offsets_and_flatten_4[builder_type](builder)
-            names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
-            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-            cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
-                builder
-            )
+
+        names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
+        buffers = empty_buffers(cpp_buffers_self, names_nbytes)
+        cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
+            builder
+        )
 
         array = ak._v2.from_buffers(
-            form,  # FIXME: see above - builder_form,
+            form,
             builder.length(),
             buffers,
         )
