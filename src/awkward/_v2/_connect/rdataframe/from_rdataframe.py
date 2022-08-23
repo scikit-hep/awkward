@@ -104,7 +104,7 @@ def from_rdataframe(data_frame, column):
                 )
             return buffers
 
-        dtype = form_dtype(form)
+        data_type = cpp_type_of[form_dtype(form).name]
 
         # pull in the CppBuffers (after which we can import from it)
         CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type]
@@ -112,9 +112,7 @@ def from_rdataframe(data_frame, column):
 
         if isinstance(form, ak._v2.forms.NumpyForm):
 
-            NumpyBuilder = cppyy.gbl.awkward.LayoutBuilder.Numpy[
-                cpp_type_of[dtype.name]
-            ]
+            NumpyBuilder = cppyy.gbl.awkward.LayoutBuilder.Numpy[data_type]
             builder = NumpyBuilder()
             builder_type = type(builder).__cpp_name__
 
@@ -126,7 +124,7 @@ def from_rdataframe(data_frame, column):
             # NOTE: list_depth == 2 or 1 if its the list of strings
             ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
                 "int64_t",
-                f"awkward::LayoutBuilder::Numpy<{cpp_type_of[dtype.name]}",
+                f"awkward::LayoutBuilder::Numpy<{data_type}",
             ]
             builder = ListOffsetBuilder()
             builder_type = type(builder).__cpp_name__
@@ -136,7 +134,7 @@ def from_rdataframe(data_frame, column):
         elif list_depth == 3:
             ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
                 "int64_t",
-                f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{cpp_type_of[dtype.name]}>",
+                f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{data_type}>",
             ]
             builder = ListOffsetBuilder()
             builder_type = type(builder).__cpp_name__
@@ -146,7 +144,7 @@ def from_rdataframe(data_frame, column):
         else:
             ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
                 "int64_t",
-                f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{cpp_type_of[dtype.name]}>>",
+                f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{data_type}>>",
             ]
             builder = ListOffsetBuilder()
             builder_type = type(builder).__cpp_name__
@@ -155,9 +153,7 @@ def from_rdataframe(data_frame, column):
 
         names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
         buffers = empty_buffers(cpp_buffers_self, names_nbytes)
-        cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
-            builder
-        )
+        cpp_buffers_self.to_char_buffers[builder_type, data_type](builder)
 
         array = ak._v2.from_buffers(
             form,

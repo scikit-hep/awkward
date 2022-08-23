@@ -33,9 +33,9 @@ namespace awkward {
     }
 
     void
-    check_buffers() {
-      std::cout << "CPPBuffers check buffers: " << buffers_uint8_ptr_.size() << "!!! ";
-      for (auto it : buffers_uint8_ptr_) {
+    check_buffers() const {
+      std::cout << "CPPBuffers check buffers: " << buffers_uint8_ptr_.size() << ".";
+      for (auto const& it : buffers_uint8_ptr_) {
         uint8_t* data = it.second;
         for (int i = 0; i < map_names_nbytes_[it.first]; i++) {
           std::cout << (int64_t)data[i] << ",";
@@ -46,7 +46,7 @@ namespace awkward {
 
     template<class BUILDER>
     void
-    fill_from(BUILDER& builder) {
+    fill_from(BUILDER& builder) const {
       for (auto it : result_) {
         builder.append(it);
       }
@@ -60,7 +60,7 @@ namespace awkward {
 
     template<class BUILDER>
     void
-    fill_offsets_and_flatten_2(BUILDER& builder) {
+    fill_offsets_and_flatten_2(BUILDER& builder) const {
       for (auto const& vec : result_) {
         auto& subbuilder = builder.begin_list();
         for (auto it : vec) {
@@ -72,7 +72,7 @@ namespace awkward {
 
     template<class BUILDER>
     void
-    fill_offsets_and_flatten_3(BUILDER& builder) {
+    fill_offsets_and_flatten_3(BUILDER& builder) const {
       for (auto const& vec_of_vecs : result_) {
         auto& builder1 = builder.begin_list();
         for (auto const& vec : vec_of_vecs) {
@@ -88,12 +88,12 @@ namespace awkward {
 
     template<class BUILDER>
     void
-    fill_offsets_and_flatten_4(BUILDER& builder) {
+    fill_offsets_and_flatten_4(BUILDER& builder) const {
       for (auto const& vec_of_vecs_of_vecs : result_) {
         auto& builder1 = builder.begin_list();
         for (auto const& vec_of_vecs : vec_of_vecs_of_vecs) {
           auto& builder2 = builder1.begin_list();
-          for (auto vec : vec_of_vecs) {
+          for (auto const& vec : vec_of_vecs) {
             auto& builder3 = builder2.begin_list();
             for (auto it : vec) {
               builder3.append(it);
