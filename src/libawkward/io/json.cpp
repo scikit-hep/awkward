@@ -1333,6 +1333,28 @@ namespace awkward {
             specializedjson_->write_int64(specializedjson_->argument1(), enumi);
             return true;
           }
+        case FillNumber:
+          if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+            specializedjson_->write_float64(
+              specializedjson_->argument1(), std::numeric_limits<double>::quiet_NaN()
+            );
+            return true;
+          }
+          else if (posinf_string_ != nullptr  &&  strcmp(str, posinf_string_) == 0) {
+            specializedjson_->write_float64(
+              specializedjson_->argument1(), std::numeric_limits<double>::infinity()
+            );
+            return true;
+          }
+          else if (neginf_string_ != nullptr  &&  strcmp(str, neginf_string_) == 0) {
+            specializedjson_->write_float64(
+              specializedjson_->argument1(), -std::numeric_limits<double>::infinity()
+            );
+            return true;
+          }
+          else {
+            return schema_okay_ = false;
+          }
         default:
           return schema_okay_ = false;
       }
