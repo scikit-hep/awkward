@@ -646,11 +646,7 @@ class NumpyArray(Content):
 
     def numbers_to_type(self, name):
         dtype = primitive_to_dtype(name)
-        if (
-            self.parameter("__array__") == "string"
-            or self.parameter("__array__") == "bytestring"
-            or dtype == self._data.dtype
-        ):
+        if dtype == self._data.dtype:
             return self
         else:
             # Char/byte arrays are no longer char/byte arrays
