@@ -15,7 +15,7 @@ def where(condition, *args, **kwargs):
             values in `condition` select values from `y`.
         x: Data with the same length as `condition`.
         y: Data with the same length as `condition`.
-        mergebool (bool, default is True): If True, boolean and nummeric data
+        mergebool (bool, default is True): If True, boolean and numeric data
             can be combined into the same buffer, losing information about
             False vs `0` and True vs `1`; otherwise, they are kept in separate
             buffers with distinct types (using an #ak.layout.UnionArray8_64).

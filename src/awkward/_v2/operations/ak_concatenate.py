@@ -21,7 +21,7 @@ def concatenate(
         merge (bool): If True, combine data into the same buffers wherever
             possible, eliminating unnecessary #ak.layout.UnionArray8_64 types
             at the expense of materializing #ak.layout.VirtualArray nodes.
-        mergebool (bool): If True, boolean and nummeric data can be combined
+        mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
             distinct types (using an #ak.layout.UnionArray8_64).
