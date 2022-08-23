@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 def from_json(
@@ -324,9 +325,6 @@ def _yes_schema(
 
     read_one = not line_delimited
 
-    print(form)
-    print(instructions)
-
     with _get_reader(source)() as obj:
         try:
             length = ak._ext.fromjsonobj_schema(
@@ -346,9 +344,6 @@ def _yes_schema(
 
     layout = ak._v2.operations.from_buffers(form, length, container, highlevel=False)
     layout = _record_to_complex(layout, complex_record_fields)
-
-    if read_one:
-        layout = layout[0]
 
     if highlevel and isinstance(
         layout, (ak._v2.contents.Content, ak._v2.record.Record)

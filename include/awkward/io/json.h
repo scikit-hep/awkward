@@ -402,14 +402,14 @@ namespace awkward {
   class FromJsonObjectSchema {
   public:
     FromJsonObjectSchema(FileLikeObject* source,
-                         int64_t buffersize,
-                         bool read_one,
-                         const char* nan_string,
-                         const char* posinf_string,
-                         const char* neginf_string,
-                         const char* jsonassembly,
-                         int64_t initial,
-                         double resize);
+             int64_t buffersize,
+             bool read_one,
+             const char* nan_string,
+             const char* posinf_string,
+             const char* neginf_string,
+             const char* jsonassembly,
+             int64_t initial,
+             double resize);
 
     /// @brief HERE
     inline int64_t current_stack_depth() const noexcept {
@@ -601,18 +601,22 @@ namespace awkward {
           buffers_uint8_[output_which_[i]].concatenate(
             reinterpret_cast<uint8_t*>(external_pointer)
           );
+          break;
         case util::dtype::uint8:
           buffers_uint8_[output_which_[i]].concatenate(
             reinterpret_cast<uint8_t*>(external_pointer)
           );
+          break;
         case util::dtype::int64:
           buffers_int64_[output_which_[i]].concatenate(
             reinterpret_cast<int64_t*>(external_pointer)
           );
+          break;
         case util::dtype::float64:
           buffers_float64_[output_which_[i]].concatenate(
             reinterpret_cast<double*>(external_pointer)
           );
+          break;
       }
     }
 

@@ -994,12 +994,16 @@ namespace awkward {
             if (stream.Peek() == 0) {
               throw std::invalid_argument(
                   std::string("incomplete JSON object at the end of the stream")
+                  + std::string("\n")
+                  + stream.error_context()
                   + FILENAME(__LINE__));
             }
             else {
               throw std::invalid_argument(
                 std::string("JSON syntax error at char ")
                 + std::to_string(stream.Tell())
+                + std::string("\n")
+                + stream.error_context()
                 + FILENAME(__LINE__));
             }
           }
@@ -1008,6 +1012,8 @@ namespace awkward {
           throw std::invalid_argument(
             std::string("JSON syntax error at char ")
             + std::to_string(stream.Tell())
+            + std::string("\n")
+            + stream.error_context()
             + FILENAME(__LINE__));
         }
       }
@@ -1029,17 +1035,18 @@ namespace awkward {
   #define KeyTableHeader 11         // arg1: number of items
   #define KeyTableItem 12           // arg1: string index, arg2: jump to instruction
 
-  class SpecializedJSONHandler: public rj::BaseReaderHandler<rj::UTF8<>, SpecializedJSONHandler> {
+  class HandlerSchema: public rj::BaseReaderHandler<rj::UTF8<>, HandlerSchema> {
   public:
-    SpecializedJSONHandler(FromJsonObjectSchema* specializedjson,
-                           const char* nan_string,
-                           const char* posinf_string,
-                           const char* neginf_string)
+    HandlerSchema(FromJsonObjectSchema* specializedjson,
+                  const char* nan_string,
+                  const char* posinf_string,
+                  const char* neginf_string)
       : specializedjson_(specializedjson)
       , nan_string_(nan_string)
       , posinf_string_(posinf_string)
       , neginf_string_(neginf_string)
-      , moved_(false) { }
+      , moved_(false)
+      , schema_okay_(true) { }
 
     void
     reset_moved() {
@@ -1051,16 +1058,21 @@ namespace awkward {
       return moved_;
     }
 
+    bool
+    schema_failure() const {
+      return !schema_okay_;
+    }
+
     bool Null() {
       moved_ = true;
-      std::cout << "null " << specializedjson_->debug() << std::endl;
+      // std::cout << "null " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
         case FillByteMaskedArray:
           specializedjson_->write_int8(specializedjson_->argument1(), 0);
           specializedjson_->step_forward();
 
-          std::cout << "  FillByteMaskedArray " << specializedjson_->debug() << std::endl;
+          // std::cout << "  FillByteMaskedArray " << specializedjson_->debug() << std::endl;
 
           switch (specializedjson_->instruction()) {
             case FillBoolean:
@@ -1079,7 +1091,7 @@ namespace awkward {
               specializedjson_->write_add_int64(specializedjson_->argument1(), 0);
               break;
             default:
-              return false;
+              return schema_okay_ = false;
           }
           specializedjson_->step_backward();
           return true;
@@ -1090,13 +1102,13 @@ namespace awkward {
           specializedjson_->write_int64(specializedjson_->argument1(), -1);
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool Bool(bool x) {
       moved_ = true;
-      std::cout << "bool " << x << " " << specializedjson_->debug() << std::endl;
+      // std::cout << "bool " << x << " " << specializedjson_->debug() << std::endl;
 
       bool out;
       switch (specializedjson_->instruction()) {
@@ -1105,7 +1117,7 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Bool(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
             specializedjson_->argument1(),
@@ -1114,18 +1126,18 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Bool(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillBoolean:
           specializedjson_->write_int8(specializedjson_->argument1(), x);
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool Int(int x) {
       moved_ = true;
-      std::cout << "int " << x << " " << specializedjson_->debug() << std::endl;
+      // std::cout << "int " << x << " " << specializedjson_->debug() << std::endl;
 
       bool out;
       switch (specializedjson_->instruction()) {
@@ -1134,7 +1146,7 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Int(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
             specializedjson_->argument1(),
@@ -1143,21 +1155,21 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Int(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillInteger:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          specializedjson_->write_float64(specializedjson_->argument1(), x);
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool Uint(unsigned int x) {
       moved_ = true;
-      std::cout << "uint " << x << " " << specializedjson_->debug() << std::endl;
+      // std::cout << "uint " << x << " " << specializedjson_->debug() << std::endl;
 
       bool out;
       switch (specializedjson_->instruction()) {
@@ -1166,7 +1178,7 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Uint(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
             specializedjson_->argument1(),
@@ -1175,21 +1187,21 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Uint(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillInteger:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          specializedjson_->write_float64(specializedjson_->argument1(), x);
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool Int64(int64_t x) {
       moved_ = true;
-      std::cout << "int64 " << x << " " << specializedjson_->debug() << std::endl;
+      // std::cout << "int64 " << x << " " << specializedjson_->debug() << std::endl;
 
       bool out;
       switch (specializedjson_->instruction()) {
@@ -1198,7 +1210,7 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Int64(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
             specializedjson_->argument1(),
@@ -1207,21 +1219,21 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Int64(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillInteger:
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          specializedjson_->write_float64(specializedjson_->argument1(), x);
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool Uint64(uint64_t x) {
       moved_ = true;
-      std::cout << "uint64 " << x << " " << specializedjson_->debug() << std::endl;
+      // std::cout << "uint64 " << x << " " << specializedjson_->debug() << std::endl;
 
       bool out;
       switch (specializedjson_->instruction()) {
@@ -1230,7 +1242,7 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Uint64(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
             specializedjson_->argument1(),
@@ -1239,21 +1251,21 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Uint64(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillInteger:
-          specializedjson_->write_uint64(specializedjson_->argument1(), x);
+          specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
-          specializedjson_->write_uint64(specializedjson_->argument1(), x);
+          specializedjson_->write_float64(specializedjson_->argument1(), x);
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool Double(double x) {
       moved_ = true;
-      std::cout << "double " << x << " " << specializedjson_->debug() << std::endl;
+      // std::cout << "double " << x << " " << specializedjson_->debug() << std::endl;
 
       bool out;
       switch (specializedjson_->instruction()) {
@@ -1262,7 +1274,7 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Double(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
             specializedjson_->argument1(),
@@ -1271,22 +1283,21 @@ namespace awkward {
           specializedjson_->step_forward();
           out = Double(x);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillInteger:
-          specializedjson_->write_float64(specializedjson_->argument1(), x);
-          return true;
+          return schema_okay_ = false;
         case FillNumber:
           specializedjson_->write_float64(specializedjson_->argument1(), x);
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
       moved_ = true;
-      std::cout << "string " << str << " " << specializedjson_->debug() << std::endl;
+      // std::cout << "string " << str << " " << specializedjson_->debug() << std::endl;
 
       bool out;
       int64_t enumi;
@@ -1296,7 +1307,7 @@ namespace awkward {
           specializedjson_->step_forward();
           out = String(str, length, copy);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
             specializedjson_->argument1(),
@@ -1305,7 +1316,7 @@ namespace awkward {
           specializedjson_->step_forward();
           out = String(str, length, copy);
           specializedjson_->step_backward();
-          return out;
+          return schema_okay_ = out;
         case FillString:
           specializedjson_->write_add_int64(specializedjson_->argument1(), length);
           specializedjson_->write_many_uint8(
@@ -1316,21 +1327,21 @@ namespace awkward {
         case FillNullEnumString:
           enumi = specializedjson_->find_enum(str);
           if (enumi == -1) {
-            return false;
+            return schema_okay_ = false;
           }
           else {
             specializedjson_->write_int64(specializedjson_->argument1(), enumi);
             return true;
           }
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool
     StartArray() {
       moved_ = true;
-      std::cout << "startarray " << specializedjson_->debug() << std::endl;
+      // std::cout << "startarray " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
@@ -1354,19 +1365,19 @@ namespace awkward {
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool
     EndArray(rj::SizeType numfields) {
       moved_ = true;
-      std::cout << "endarray " << specializedjson_->debug() << std::endl;
+      // std::cout << "endarray " << specializedjson_->debug() << std::endl;
 
       bool out;
       specializedjson_->pop_stack();
 
-      std::cout << "  pop " << specializedjson_->debug() << std::endl;
+      // std::cout << "  pop " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
@@ -1384,7 +1395,7 @@ namespace awkward {
               out = numfields == specializedjson_->argument1();
               break;
             default:
-              return false;
+              return schema_okay_ = false;
           }
           specializedjson_->step_backward();
           return out;
@@ -1394,14 +1405,14 @@ namespace awkward {
         case FixedLengthList:
           return numfields == specializedjson_->argument1();
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool
     StartObject() {
       moved_ = true;
-      std::cout << "startobject " << specializedjson_->debug() << std::endl;
+      // std::cout << "startobject " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
@@ -1415,18 +1426,18 @@ namespace awkward {
           specializedjson_->push_stack(specializedjson_->current_instruction());
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool
     EndObject(rj::SizeType numfields) {
       moved_ = true;
-      std::cout << "endobject " << specializedjson_->debug() << std::endl;
+      // std::cout << "endobject " << specializedjson_->debug() << std::endl;
 
       specializedjson_->pop_stack();
 
-      std::cout << "  pop " << specializedjson_->debug() << std::endl;
+      // std::cout << "  pop " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
@@ -1434,26 +1445,26 @@ namespace awkward {
         case KeyTableHeader:
           return true;
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
       moved_ = true;
-      std::cout << "key " << specializedjson_->debug() << std::endl;
+      // std::cout << "key " << specializedjson_->debug() << std::endl;
 
       int64_t jump_to;
       specializedjson_->pop_stack();
 
-      std::cout << "  pop " << specializedjson_->debug() << std::endl;
+      // std::cout << "  pop " << specializedjson_->debug() << std::endl;
 
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
           specializedjson_->step_forward();
           jump_to = specializedjson_->find_key(str);
           if (jump_to == -1) {
-            return false;
+            return schema_okay_ = false;
           }
           else {
             specializedjson_->step_backward();
@@ -1463,14 +1474,14 @@ namespace awkward {
         case KeyTableHeader:
           jump_to = specializedjson_->find_key(str);
           if (jump_to == -1) {
-            return false;
+            return schema_okay_ = false;
           }
           else {
             specializedjson_->push_stack(jump_to);
             return true;
           }
         default:
-          return false;
+          return schema_okay_ = false;
       }
     }
 
@@ -1480,6 +1491,7 @@ namespace awkward {
     const char* posinf_string_;
     const char* neginf_string_;
     bool moved_;
+    bool schema_okay_;
   };
 
   FromJsonObjectSchema::FromJsonObjectSchema(FileLikeObject* source,
@@ -1791,10 +1803,6 @@ namespace awkward {
       }
     }
 
-    for (int64_t i = 0;  i < instruction_stack_max_depth;  i++) {
-      instruction_stack_.push_back(-1);
-    }
-
     string_offsets_.push_back(0);
     for (auto string : strings) {
       string_offsets_.push_back(string_offsets_[string_offsets_.size() - 1] + string.length());
@@ -1803,22 +1811,27 @@ namespace awkward {
       }
     }
 
+    for (int64_t i = 0;  i < instruction_stack_max_depth;  i++) {
+      instruction_stack_.push_back(-1);
+    }
+
     current_instruction_ = 0;
     current_stack_depth_ = 0;
     length_ = 0;
 
     rj::Reader reader;
     FileLikeObjectStream stream(source, buffersize);
-    SpecializedJSONHandler handler(this,
-                                   nan_string,
-                                   posinf_string,
-                                   neginf_string);
+    HandlerSchema handler(this,
+                          nan_string,
+                          posinf_string,
+                          neginf_string);
 
     if (read_one) {
       bool fully_parsed = reader.Parse(stream, handler);
       if (!fully_parsed) {
+        std::string reason(handler.schema_failure() ? "JSON schema mismatch before char " : "JSON syntax error at char ");
         throw std::invalid_argument(
-          std::string("JSON syntax error at char ")
+          reason
           + std::to_string(stream.Tell())
           + std::string("\n")
           + stream.error_context()
@@ -1827,6 +1840,8 @@ namespace awkward {
     }
 
     else {
+      int64_t length = 0;
+      handler.StartArray();
       while (stream.Peek() != 0) {
         handler.reset_moved();
         bool fully_parsed = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
@@ -1835,23 +1850,33 @@ namespace awkward {
             if (stream.Peek() == 0) {
               throw std::invalid_argument(
                   std::string("incomplete JSON object at the end of the stream")
+                  + std::string("\n")
+                  + stream.error_context()
                   + FILENAME(__LINE__));
             }
             else {
+              std::string reason(handler.schema_failure() ? "JSON schema mismatch before char " : "JSON syntax error at char ");
               throw std::invalid_argument(
-                std::string("JSON syntax error at char ")
+                reason
                 + std::to_string(stream.Tell())
+                + std::string("\n")
+                + stream.error_context()
                 + FILENAME(__LINE__));
             }
           }
+          length++;
         }
         else if (stream.Peek() != 0) {
+          std::string reason(handler.schema_failure() ? "JSON schema mismatch before char " : "JSON syntax error at char ");
           throw std::invalid_argument(
-            std::string("JSON syntax error at char ")
+            reason
             + std::to_string(stream.Tell())
+            + std::string("\n")
+            + stream.error_context()
             + FILENAME(__LINE__));
         }
       }
+      handler.EndArray(length);
     }
 
   }

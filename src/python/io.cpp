@@ -164,15 +164,15 @@ make_fromjsonobj_schema(py::module& m, const std::string& name) {
 
     py::gil_scoped_release release;
 
-    ak::FromJsonObjectSchema out = ak::FromJsonObjectSchema(&obj,
-                                                            buffersize,
-                                                            read_one,
-                                                            nan_string,
-                                                            posinf_string,
-                                                            neginf_string,
-                                                            instructions,
-                                                            initial,
-                                                            resize);
+    ak::FromJsonObjectSchema out(&obj,
+                                 buffersize,
+                                 read_one,
+                                 nan_string,
+                                 posinf_string,
+                                 neginf_string,
+                                 instructions,
+                                 initial,
+                                 resize);
 
     py::gil_scoped_acquire acquire;
 
@@ -180,9 +180,12 @@ make_fromjsonobj_schema(py::module& m, const std::string& name) {
       py::str key = out.output_name(i);
       std::string dtype = out.output_dtype(i);
       int64_t num_items = out.output_num_items(i);
+
       py::object value = py::module::import("numpy").attr("empty")(num_items, dtype);
-      int64_t data_pointer = value.attr("ctypes").attr("data").cast<int64_t>();
+      size_t data_pointer = value.attr("ctypes").attr("data").cast<size_t>();
+
       out.output_fill(i, reinterpret_cast<void*>(data_pointer));
+
       container[key] = value;
     }
 
