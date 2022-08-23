@@ -17,7 +17,10 @@ def from_raggedtensor(tensor, highlevel=True, behavior=None):
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
-    Perform a zero-copy conversion from a `tensorflow.RaggedTensor` to an {class}`ak.Array`
+    Perform a zero-copy (where possible) conversion from a `tensorflow.RaggedTensor` to an {class}`ak.Array`.
+
+    RaggedArrays with primitive dtypes (int, bool, float) can be converted without a copy. Strings must first be
+    decoded into UTF-8 codepoints before conversion.
     """
     with ak._v2._util.OperationErrorContext(
         "ak._v2.from_ragggedtensor",
@@ -48,14 +51,34 @@ def _impl(
         return layout
 
 
-def _tensor_to_layout(tensor, tensorflow):
-    if tensor.ragged_rank > 0:
-        stops = tensor.row_limits().numpy()
-        offsets = numpy.zeros(len(stops) + 1, dtype=np.int64)
-        offsets[1:] = stops
+def stops_to_offsets(stops):
+    offsets = numpy.zeros(len(stops) + 1, dtype=np.int64)
+    offsets[1:] = stops
+    return offsets
+
+
+def _tensor_to_layout(tensor, tensorflow, parameters=None, child_parameters=None):
+    if isinstance(tensor, tensorflow.RaggedTensor):
+        offsets = stops_to_offsets(tensor.row_limits().numpy())
         return ak._v2.contents.ListOffsetArray(
             ak._v2.index.Index64(offsets),
             _tensor_to_layout(tensor.values, tensorflow),
+            parameters=parameters,
+        )
+    # Strings are not treated as a ragged dimension, but instead a regular dimension with
+    # a tensorflow.string dtype
+    elif tensor.dtype == tensorflow.string:
+        tensor = tensorflow.cast(
+            tensorflow.strings.unicode_decode(tensor, "UTF-8"), tensorflow.uint8
+        )
+        offsets = stops_to_offsets(tensor.row_limits().numpy())
+        return ak._v2.contents.ListOffsetArray(
+            ak._v2.index.Index64(offsets),
+            ak._v2.contents.NumpyArray(
+                tensor.values.numpy(),
+                parameters={"__array__": "char"},
+            ),
+            parameters={"__array__": "string"},
         )
     else:
-        return ak._v2.contents.NumpyArray(tensor.numpy())
+        return ak._v2.contents.NumpyArray(tensor.numpy(), parameters=parameters)
