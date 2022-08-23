@@ -43,7 +43,7 @@ done = compiler(
 assert done is True
 
 
-def from_rdataframe(data_frame, column):
+def from_rdataframe(data_frame, column, initial=1024):
     def _wrap_as_record_array(array):
         layout = array.layout if isinstance(array, ak._v2.highlevel.Array) else array
         return ak._v2._util.wrap(
@@ -66,7 +66,7 @@ def from_rdataframe(data_frame, column):
     if form_str.startswith("{"):
         form = ak._v2.forms.from_json(form_str)
         list_depth = form.purelist_depth
-        if list_depth > 3:
+        if list_depth > 4:
             raise ak._v2._util.error(NotImplementedError)
 
         def supported(form):
@@ -94,6 +94,16 @@ def from_rdataframe(data_frame, column):
             else:
                 return form_dtype(form.content)
 
+        def empty_buffers(cpp_buffers_self, names_nbytes):
+            buffers = {}
+            for item in names_nbytes:
+                buffers[item.first] = ak.nplike.numpy.empty(item.second)
+                cpp_buffers_self.append(
+                    item.first,
+                    buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
+                )
+            return buffers
+
         dtype = form_dtype(form)
         buffers = {}
         depths = 0
@@ -104,51 +114,85 @@ def from_rdataframe(data_frame, column):
         cpp_buffers_self = CppBuffers(result_ptrs)
 
         if isinstance(form, ak._v2.forms.NumpyForm):
-            distance = CppBuffers.result_distance(cpp_buffers_self)
-            data = ak.nplike.numpy.empty(distance, dtype)
-            CppBuffers.fill_data_array(
-                cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p)
-            )
-            layout = ak._v2.contents.numpyarray.NumpyArray(
-                data,
-                parameters=form.parameters,
-            )
 
-            return _wrap_as_record_array(layout)
+            NumpyBuilder = cppyy.gbl.awkward.LayoutBuilder.Numpy[
+                initial, cpp_type_of[dtype.name]
+            ]
+            builder = NumpyBuilder()
+            builder_type = type(builder).__cpp_name__
+            builder_form = ak._v2.forms.from_json(builder.form())
+            assert builder_form == form
+            form = builder_form
+
+            cpp_buffers_self.fill_from[builder_type](builder)
+
+            names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
+            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
+            cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
+                builder
+            )
 
         elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
             form.content, ak._v2.forms.NumpyForm
         ):
-            # list_depth == 2 or 1 if its the list of strings
-            # copy data from RDF and make nested offsets
-            depths, offsets_length = CppBuffers.offsets_and_flatten_2(cpp_buffers_self)
+            # NOTE: list_depth == 2 or 1 if its the list of strings
+            ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
+                initial,
+                "int64_t",
+                f"awkward::LayoutBuilder::Numpy<{initial},{cpp_type_of[dtype.name]}",
+            ]
+            builder = ListOffsetBuilder()
+            builder_type = type(builder).__cpp_name__
+            builder_form = ak._v2.forms.from_json(builder.form())
+            # FIXME: set parameters here to use the builder form
+            # assert builder_form == form
+
+            cpp_buffers_self.fill_offsets_and_flatten_2[builder_type](builder)
+            names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
+            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
+            cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
+                builder
+            )
 
         elif list_depth == 3:
-            depths, offsets_length = CppBuffers.offsets_and_flatten_3(cpp_buffers_self)
-        else:
-            depths, offsets_length = CppBuffers.offsets_and_flatten_4(cpp_buffers_self)
-
-        for depth in range(depths):
-            length = CppBuffers.offsets_length(cpp_buffers_self, depth)
-            offsets = ak.nplike.numpy.empty(length, np.int64)
-            CppBuffers.copy_offsets(
-                cpp_buffers_self,
-                offsets.ctypes.data_as(ctypes.c_void_p),
-                length,
-                depth,
+            ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
+                initial,
+                "int64_t",
+                f"awkward::LayoutBuilder::ListOffset<{initial}, int64_t, awkward::LayoutBuilder::Numpy<{initial},{cpp_type_of[dtype.name]}>",
+            ]
+            builder = ListOffsetBuilder()
+            builder_type = type(builder).__cpp_name__
+            builder_form = ak._v2.forms.from_json(builder.form())
+            assert builder_form == form
+            cpp_buffers_self.fill_offsets_and_flatten_3[builder_type](builder)
+            names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
+            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
+            cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
+                builder
             )
-            buffers[f"node{depth}-offsets"] = offsets
 
-        data_length = CppBuffers.data_length(cpp_buffers_self)
-        data = ak.nplike.numpy.empty(data_length, dtype=dtype)
-        CppBuffers.copy_data(
-            cpp_buffers_self, data.ctypes.data_as(ctypes.c_void_p), data_length
-        )
-        buffers[f"node{depths}-data"] = data
+        else:
+            ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
+                initial,
+                "int64_t",
+                f"awkward::LayoutBuilder::ListOffset<{initial}, int64_t, awkward::LayoutBuilder::ListOffset<{initial}, int64_t, awkward::LayoutBuilder::Numpy<{initial},{cpp_type_of[dtype.name]}>>",
+            ]
+            builder = ListOffsetBuilder()
+
+            builder_type = type(builder).__cpp_name__
+            builder_form = ak._v2.forms.from_json(builder.form())
+            assert builder_form == form
+
+            cpp_buffers_self.fill_offsets_and_flatten_4[builder_type](builder)
+            names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
+            buffers = empty_buffers(cpp_buffers_self, names_nbytes)
+            cpp_buffers_self.to_char_buffers[builder_type, cpp_type_of[dtype.name]](
+                builder
+            )
 
         array = ak._v2.from_buffers(
-            form,
-            offsets_length - 1,
+            form, # FIXME: see above - builder_form,
+            builder.length(),
             buffers,
         )
         return _wrap_as_record_array(array)

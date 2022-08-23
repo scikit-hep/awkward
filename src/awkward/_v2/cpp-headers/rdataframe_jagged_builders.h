@@ -5,6 +5,8 @@
 
 #include <stdlib.h>
 #include <string>
+#include "awkward/GrowableBuffer.h"
+#include "awkward/LayoutBuilder.h"
 #include "awkward/utils.h"
 
 namespace awkward {
