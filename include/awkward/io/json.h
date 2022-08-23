@@ -545,8 +545,8 @@ namespace awkward {
     }
 
     /// @brief HERE
-    inline void set_length(int64_t length) noexcept {
-      length_ = length;
+    inline void add_to_length(int64_t length) noexcept {
+      length_ += length;
     }
 
     /// @brief HERE

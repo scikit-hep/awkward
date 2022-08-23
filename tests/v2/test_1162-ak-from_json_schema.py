@@ -11,12 +11,30 @@ def test_boolean():
         schema={"type": "array", "items": {"type": "boolean"}},
     )
     assert result.tolist() == [True, False, True, True, False]
+    assert str(result.type) == "5 * bool"
+
+    result = ak._v2.operations.from_json(
+        " [ true ,false, true, true, false]    " * 2,
+        schema={"type": "array", "items": {"type": "boolean"}},
+        line_delimited=True,
+    )
+    assert result.tolist() == [True, False, True, True, False] * 2
+    assert str(result.type) == "10 * bool"
+
+    result = ak._v2.operations.from_json(
+        "",
+        schema={"type": "array", "items": {"type": "boolean"}},
+        line_delimited=True,
+    )
+    assert result.tolist() == []
+    assert str(result.type) == "0 * bool"
 
     result = ak._v2.operations.from_json(
         "[]",
         schema={"type": "array", "items": {"type": "boolean"}},
     )
     assert result.tolist() == []
+    assert str(result.type) == "0 * bool"
 
 
 def test_integer():
@@ -32,6 +50,14 @@ def test_integer():
     )
     assert result.tolist() == [1, 2, 3, 4, 5]
     assert str(result.type) == "5 * int64"
+
+    result = ak._v2.operations.from_json(
+        " [ 1 ,2 ,3, 4, 5]  \n  " * 2,
+        schema={"type": "array", "items": {"type": "integer"}},
+        line_delimited=True,
+    )
+    assert result.tolist() == [1, 2, 3, 4, 5] * 2
+    assert str(result.type) == "10 * int64"
 
     result = ak._v2.operations.from_json(
         "[ ]",
@@ -50,6 +76,14 @@ def test_number():
     assert str(result.type) == "5 * float64"
 
     result = ak._v2.operations.from_json(
+        " [ 1 ,2,3.14, 4, 5]" * 2,
+        schema={"type": "array", "items": {"type": "number"}},
+        line_delimited=True,
+    )
+    assert result.tolist() == [1, 2, 3.14, 4, 5] * 2
+    assert str(result.type) == "10 * float64"
+
+    result = ak._v2.operations.from_json(
         " [ ]",
         schema={"type": "array", "items": {"type": "number"}},
     )
@@ -64,6 +98,14 @@ def test_option_boolean():
     )
     assert result.tolist() == [True, False, None, True, False]
     assert str(result.type) == "5 * ?bool"
+
+    result = ak._v2.operations.from_json(
+        " [ true ,false ,null , true, false]" * 2,
+        schema={"type": "array", "items": {"type": ["boolean", "null"]}},
+        line_delimited=True,
+    )
+    assert result.tolist() == [True, False, None, True, False] * 2
+    assert str(result.type) == "10 * ?bool"
 
     result = ak._v2.operations.from_json(
         " [ ]",
@@ -82,6 +124,14 @@ def test_option_integer():
     assert str(result.type) == "5 * ?int64"
 
     result = ak._v2.operations.from_json(
+        " [ 1 ,2,null,4, 5]" * 2,
+        schema={"type": "array", "items": {"type": ["null", "integer"]}},
+        line_delimited=True,
+    )
+    assert result.tolist() == [1, 2, None, 4, 5] * 2
+    assert str(result.type) == "10 * ?int64"
+
+    result = ak._v2.operations.from_json(
         " [ ]",
         schema={"type": "array", "items": {"type": ["null", "integer"]}},
     )
@@ -95,12 +145,22 @@ def test_string():
         schema={"type": "array", "items": {"type": "string"}},
     )
     assert result.tolist() == ["", "two", "three \u2192 3", '"four"', "fi\nve"]
+    assert str(result.type) == "5 * string"
+
+    result = ak._v2.operations.from_json(
+        r' [ "" ,"two","three \u2192 3", "\"four\"", "fi\nve"]' * 2,
+        schema={"type": "array", "items": {"type": "string"}},
+        line_delimited=True,
+    )
+    assert result.tolist() == ["", "two", "three \u2192 3", '"four"', "fi\nve"] * 2
+    assert str(result.type) == "10 * string"
 
     result = ak._v2.operations.from_json(
         r"[]",
         schema={"type": "array", "items": {"type": "string"}},
     )
     assert result.tolist() == []
+    assert str(result.type) == "0 * string"
 
 
 def test_option_string():
@@ -109,30 +169,61 @@ def test_option_string():
         schema={"type": "array", "items": {"type": ["null", "string"]}},
     )
     assert result.tolist() == ["", None, "three \u2192 3", '"four"', "fi\nve"]
+    assert str(result.type) == "5 * ?string"
+
+    result = ak._v2.operations.from_json(
+        r' [ "" ,null ,"three \u2192 3", "\"four\"", "fi\nve"]' * 2,
+        schema={"type": "array", "items": {"type": ["null", "string"]}},
+        line_delimited=True,
+    )
+    assert result.tolist() == ["", None, "three \u2192 3", '"four"', "fi\nve"] * 2
+    assert str(result.type) == "10 * ?string"
 
     result = ak._v2.operations.from_json(
         r"[]",
         schema={"type": "array", "items": {"type": ["null", "string"]}},
     )
     assert result.tolist() == []
+    assert str(result.type) == "0 * ?string"
 
 
 def test_enum_string():
     result = ak._v2.operations.from_json(
         r'["three", "two", "one", "one", "two", "three"]',
-        schema={"type": "array", "items": {"type": "string", "enum": ["one", "two", "three"]}},
+        schema={
+            "type": "array",
+            "items": {"type": "string", "enum": ["one", "two", "three"]},
+        },
     )
     assert result.tolist() == ["three", "two", "one", "one", "two", "three"]
     assert isinstance(result.layout, ak._v2.contents.IndexedArray)
     assert result.layout.index.data.tolist() == [2, 1, 0, 0, 1, 2]
+    assert str(result.type) == "6 * string"
 
     result = ak._v2.operations.from_json(
-        r'[]',
-        schema={"type": "array", "items": {"type": "string", "enum": ["one", "two", "three"]}},
+        r'["three", "two", "one", "one", "two", "three"]' * 2,
+        schema={
+            "type": "array",
+            "items": {"type": "string", "enum": ["one", "two", "three"]},
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == ["three", "two", "one", "one", "two", "three"] * 2
+    assert isinstance(result.layout, ak._v2.contents.IndexedArray)
+    assert result.layout.index.data.tolist() == [2, 1, 0, 0, 1, 2] * 2
+    assert str(result.type) == "12 * string"
+
+    result = ak._v2.operations.from_json(
+        r"[]",
+        schema={
+            "type": "array",
+            "items": {"type": "string", "enum": ["one", "two", "three"]},
+        },
     )
     assert result.tolist() == []
     assert isinstance(result.layout, ak._v2.contents.IndexedArray)
     assert result.layout.index.data.tolist() == []
+    assert str(result.type) == "0 * string"
 
 
 def test_option_enum_string():
@@ -146,9 +237,23 @@ def test_option_enum_string():
     assert result.tolist() == ["three", "two", None, "one", "one", "two", "three"]
     assert isinstance(result.layout, ak._v2.contents.IndexedOptionArray)
     assert result.layout.index.data.tolist() == [2, 1, -1, 0, 0, 1, 2]
+    assert str(result.type) == "7 * ?string"
 
     result = ak._v2.operations.from_json(
-        r'[]',
+        r'["three", "two", null, "one", "one", "two", "three"]' * 2,
+        schema={
+            "type": "array",
+            "items": {"type": ["null", "string"], "enum": ["one", "two", "three"]},
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == ["three", "two", None, "one", "one", "two", "three"] * 2
+    assert isinstance(result.layout, ak._v2.contents.IndexedOptionArray)
+    assert result.layout.index.data.tolist() == [2, 1, -1, 0, 0, 1, 2] * 2
+    assert str(result.type) == "14 * ?string"
+
+    result = ak._v2.operations.from_json(
+        r"[]",
         schema={
             "type": "array",
             "items": {"type": ["null", "string"], "enum": ["one", "two", "three"]},
@@ -157,29 +262,40 @@ def test_option_enum_string():
     assert result.tolist() == []
     assert isinstance(result.layout, ak._v2.contents.IndexedOptionArray)
     assert result.layout.index.data.tolist() == []
+    assert str(result.type) == "0 * ?string"
 
 
 def test_array_integer():
     result = ak._v2.operations.from_json(
         " [ [ 1 ,2, 3], [], [4, 5]]",
-        schema={"type": "array", "items": {"type": "array", "items": {"type": "integer"}}},
+        schema={
+            "type": "array",
+            "items": {"type": "array", "items": {"type": "integer"}},
+        },
     )
     assert result.tolist() == [[1, 2, 3], [], [4, 5]]
     assert str(result.type) == "3 * var * int64"
+
+    result = ak._v2.operations.from_json(
+        " [ [ 1 ,2, 3], [], [4, 5]]" * 2,
+        schema={
+            "type": "array",
+            "items": {"type": "array", "items": {"type": "integer"}},
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == [[1, 2, 3], [], [4, 5]] * 2
+    assert str(result.type) == "6 * var * int64"
 
     result = ak._v2.operations.from_json(
         "[]",
-        schema={"type": "array", "items": {"type": "array", "items": {"type": "integer"}}},
+        schema={
+            "type": "array",
+            "items": {"type": "array", "items": {"type": "integer"}},
+        },
     )
     assert result.tolist() == []
-
-    result = ak._v2.operations.from_json(
-        "  [ 1 ,2, 3] [] [4, 5]",
-        schema={"type": "array", "items": {"type": "array", "items": {"type": "integer"}}},
-        line_delimited=True,
-    )
-    assert result.tolist() == [[1, 2, 3], [], [4, 5]]
-    assert str(result.type) == "3 * var * int64"
+    assert str(result.type) == "0 * var * int64"
 
 
 def test_regulararray_integer():
@@ -197,6 +313,22 @@ def test_regulararray_integer():
     )
     assert result.tolist() == [[1, 2, 3], [4, 5, 6]]
     assert str(result.type) == "2 * 3 * int64"
+
+    result = ak._v2.operations.from_json(
+        "[[1, 2, 3], [4, 5, 6]]" * 2,
+        schema={
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": {"type": "integer"},
+                "minItems": 3,
+                "maxItems": 3,
+            },
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == [[1, 2, 3], [4, 5, 6]] * 2
+    assert str(result.type) == "4 * 3 * int64"
 
     result = ak._v2.operations.from_json(
         "[]",
@@ -230,6 +362,37 @@ def test_option_regulararray_integer():
     assert result.tolist() == [[1, 2, 3], None, [4, 5, 6]]
     assert str(result.type) == "3 * option[3 * int64]"
 
+    result = ak._v2.operations.from_json(
+        "[[1, 2, 3], null, [4, 5, 6]]" * 2,
+        schema={
+            "type": "array",
+            "items": {
+                "type": ["array", "null"],
+                "items": {"type": "integer"},
+                "minItems": 3,
+                "maxItems": 3,
+            },
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == [[1, 2, 3], None, [4, 5, 6]] * 2
+    assert str(result.type) == "6 * option[3 * int64]"
+
+    result = ak._v2.operations.from_json(
+        "[]",
+        schema={
+            "type": "array",
+            "items": {
+                "type": ["array", "null"],
+                "items": {"type": "integer"},
+                "minItems": 3,
+                "maxItems": 3,
+            },
+        },
+    )
+    assert result.tolist() == []
+    assert str(result.type) == "0 * option[3 * int64]"
+
 
 def test_option_array_integer():
     result = ak._v2.operations.from_json(
@@ -241,6 +404,17 @@ def test_option_array_integer():
     )
     assert result.tolist() == [[1, 2, 3], None, [], [4, 5]]
     assert str(result.type) == "4 * option[var * int64]"
+
+    result = ak._v2.operations.from_json(
+        " [ [ 1 ,2,3 ],null,[ ], [4, 5]]" * 2,
+        schema={
+            "type": "array",
+            "items": {"type": ["null", "array"], "items": {"type": "integer"}},
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == [[1, 2, 3], None, [], [4, 5]] * 2
+    assert str(result.type) == "8 * option[var * int64]"
 
     result = ak._v2.operations.from_json(
         "[]",
@@ -266,6 +440,20 @@ def test_option_array_option_integer():
     )
     assert result.tolist() == [[1, 2, 3], None, [], [None, 5]]
     assert str(result.type) == "4 * option[var * ?int64]"
+
+    result = ak._v2.operations.from_json(
+        " [ [ 1 ,2,3 ],null,[ ] ,[null, 5]]" * 2,
+        schema={
+            "type": "array",
+            "items": {
+                "type": ["null", "array"],
+                "items": {"type": ["integer", "null"]},
+            },
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == [[1, 2, 3], None, [], [None, 5]] * 2
+    assert str(result.type) == "8 * option[var * ?int64]"
 
     result = ak._v2.operations.from_json(
         "[]",
@@ -296,6 +484,20 @@ def test_array_array_integer():
     assert str(result.type) == "3 * var * var * int64"
 
     result = ak._v2.operations.from_json(
+        " [ [ [ 1 ,2,3 ] ] ,[ [], [4, 5]], []]" * 2,
+        schema={
+            "type": "array",
+            "items": {
+                "type": "array",
+                "items": {"type": "array", "items": {"type": "integer"}},
+            },
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == [[[1, 2, 3]], [[], [4, 5]], []] * 2
+    assert str(result.type) == "6 * var * var * int64"
+
+    result = ak._v2.operations.from_json(
         " [ [  ] ,[ ], []]",
         schema={
             "type": "array",
@@ -305,7 +507,7 @@ def test_array_array_integer():
             },
         },
     )
-    assert result.tolist() == [[], [ ], []]
+    assert result.tolist() == [[], [], []]
     assert str(result.type) == "3 * var * var * int64"
 
     result = ak._v2.operations.from_json(
@@ -320,20 +522,6 @@ def test_array_array_integer():
     )
     assert result.tolist() == []
     assert str(result.type) == "0 * var * var * int64"
-
-    result = ak._v2.operations.from_json(
-        " [ [ 1 ,2,3 ] ][ [], [4, 5]] []",
-        schema={
-            "type": "array",
-            "items": {
-                "type": "array",
-                "items": {"type": "array", "items": {"type": "integer"}},
-            },
-        },
-        line_delimited=True,
-    )
-    assert result.tolist() == [[[1, 2, 3]], [[], [4, 5]], []]
-    assert str(result.type) == "3 * var * var * int64"
 
 
 def test_record():
@@ -353,6 +541,30 @@ def test_record():
         {"x": 2, "y": 2.2},
         {"x": 3, "y": 3.3},
     ]
+    assert str(result.type) == "3 * {x: int64, y: float64}"
+
+    result = ak._v2.operations.from_json(
+        ' [ { "x" :1 ,"y":1.1},{"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]' * 2,
+        schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"x": {"type": "integer"}, "y": {"type": "number"}},
+                "required": ["x", "y"],
+            },
+        },
+        line_delimited=True,
+    )
+    assert (
+        result.tolist()
+        == [
+            {"x": 1, "y": 1.1},
+            {"x": 2, "y": 2.2},
+            {"x": 3, "y": 3.3},
+        ]
+        * 2
+    )
+    assert str(result.type) == "6 * {x: int64, y: float64}"
 
     result = ak._v2.operations.from_json(
         "[]",
@@ -366,6 +578,7 @@ def test_record():
         },
     )
     assert result.tolist() == []
+    assert str(result.type) == "0 * {x: int64, y: float64}"
 
 
 def test_option_record():
@@ -386,6 +599,31 @@ def test_option_record():
         {"x": 2, "y": 2.2},
         {"x": 3, "y": 3.3},
     ]
+    assert str(result.type) == "4 * ?{x: int64, y: float64}"
+
+    result = ak._v2.operations.from_json(
+        ' [ { "x" : 1 ,"y":1.1},null ,{"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]' * 2,
+        schema={
+            "type": "array",
+            "items": {
+                "type": ["object", "null"],
+                "properties": {"x": {"type": "integer"}, "y": {"type": "number"}},
+                "required": ["x", "y"],
+            },
+        },
+        line_delimited=True,
+    )
+    assert (
+        result.tolist()
+        == [
+            {"x": 1, "y": 1.1},
+            None,
+            {"x": 2, "y": 2.2},
+            {"x": 3, "y": 3.3},
+        ]
+        * 2
+    )
+    assert str(result.type) == "8 * ?{x: int64, y: float64}"
 
     result = ak._v2.operations.from_json(
         "[]",
@@ -399,25 +637,7 @@ def test_option_record():
         },
     )
     assert result.tolist() == []
-
-    result = ak._v2.operations.from_json(
-        '  { "x" : 1 ,"y":1.1}null{"x": 2, "y": 2.2} {"x": 3, "y": 3.3}',
-        schema={
-            "type": "array",
-            "items": {
-                "type": ["object", "null"],
-                "properties": {"x": {"type": "integer"}, "y": {"type": "number"}},
-                "required": ["x", "y"],
-            },
-        },
-        line_delimited=True,
-    )
-    assert result.tolist() == [
-        {"x": 1, "y": 1.1},
-        None,
-        {"x": 2, "y": 2.2},
-        {"x": 3, "y": 3.3},
-    ]
+    assert str(result.type) == "0 * ?{x: int64, y: float64}"
 
 
 def test_top_record():
@@ -430,3 +650,25 @@ def test_top_record():
         },
     )
     assert result.tolist() == {"x": 1, "y": 1.1}
+
+    result = ak._v2.operations.from_json(
+        ' { "x" :1 ,"y":1.1}  ' * 2,
+        schema={
+            "type": "object",
+            "properties": {"y": {"type": "number"}, "x": {"type": "integer"}},
+            "required": ["x", "y"],
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == [{"x": 1, "y": 1.1}] * 2
+
+    result = ak._v2.operations.from_json(
+        "",
+        schema={
+            "type": "object",
+            "properties": {"y": {"type": "number"}, "x": {"type": "integer"}},
+            "required": ["x", "y"],
+        },
+        line_delimited=True,
+    )
+    assert result.tolist() == []

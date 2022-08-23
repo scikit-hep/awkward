@@ -312,9 +312,11 @@ def _yes_schema(
 
         instructions.append(["TopLevelArray"])
         form = build_assembly(schema["items"], container, instructions)
+        is_record = False
 
     elif schema.get("type") == "object":
         form = build_assembly(schema, container, instructions)
+        is_record = True
 
     else:
         raise ak._v2._util.error(
@@ -344,6 +346,9 @@ def _yes_schema(
 
     layout = ak._v2.operations.from_buffers(form, length, container, highlevel=False)
     layout = _record_to_complex(layout, complex_record_fields)
+
+    if is_record and read_one:
+        layout = layout[0]
 
     if highlevel and isinstance(
         layout, (ak._v2.contents.Content, ak._v2.record.Record)

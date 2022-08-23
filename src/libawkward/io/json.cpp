@@ -1381,7 +1381,7 @@ namespace awkward {
 
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
-          specializedjson_->set_length(numfields);
+          specializedjson_->add_to_length(numfields);
           return true;
         case FillByteMaskedArray:
         case FillIndexedOptionArray:
@@ -1522,6 +1522,7 @@ namespace awkward {
 
     int64_t instruction_stack_max_depth = 0;
     std::vector<std::string> strings;
+    bool is_record = true;
 
     for (auto& item : doc.GetArray()) {
       if (!item.IsArray()  ||  item.Size() == 0  ||  !item[0].IsString()) {
@@ -1542,6 +1543,8 @@ namespace awkward {
         instructions_.push_back(-1);
         instructions_.push_back(-1);
         instructions_.push_back(-1);
+
+        is_record = false;
       }
 
       else if (std::string("FillByteMaskedArray") == item[0].GetString()) {
@@ -1837,11 +1840,12 @@ namespace awkward {
           + stream.error_context()
           + FILENAME(__LINE__));
       }
+      if (is_record) {
+        length_ = 1;
+      }
     }
 
     else {
-      int64_t length = 0;
-      handler.StartArray();
       while (stream.Peek() != 0) {
         handler.reset_moved();
         bool fully_parsed = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
@@ -1864,7 +1868,9 @@ namespace awkward {
                 + FILENAME(__LINE__));
             }
           }
-          length++;
+          if (is_record) {
+            length_++;
+          }
         }
         else if (stream.Peek() != 0) {
           std::string reason(handler.schema_failure() ? "JSON schema mismatch before char " : "JSON syntax error at char ");
@@ -1876,7 +1882,6 @@ namespace awkward {
             + FILENAME(__LINE__));
         }
       }
-      handler.EndArray(length);
     }
 
   }
