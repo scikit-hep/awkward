@@ -139,11 +139,14 @@ def metadata(
     if columns is not None:
         subform = subform.select_columns(columns)
 
-    # Handle empty field at root
-    if parquetfile_for_metadata.schema_arrow.names == [""]:
-        column_prefix = ("",)
+        form = ak._v2._connect.pyarrow.form_handle_arrow(
+            parquetfile_for_metadata.schema_arrow, pass_empty_field=True
+        )
+        subform = form.select_columns(columns)
     else:
-        column_prefix = ()
+        subform = ak._v2._connect.pyarrow.form_handle_arrow(
+            parquetfile_for_metadata.schema_arrow, pass_empty_field=True
+        )
 
     metadata = parquetfile_for_metadata.metadata
     if scan_files and not path_for_schema.endswith("/_metadata"):
@@ -198,9 +201,7 @@ def metadata(
         else:
             col_counts = None
 
-    parquet_columns = subform.columns(
-        list_indicator=list_indicator, column_prefix=column_prefix
-    )
+    parquet_columns = subform.columns(list_indicator=list_indicator)
 
     return parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata
 
