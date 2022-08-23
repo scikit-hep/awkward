@@ -672,3 +672,76 @@ def test_top_record():
         line_delimited=True,
     )
     assert result.tolist() == []
+
+
+def test_number_substitutions():
+    result = ak._v2.operations.from_json(
+        '[1, 2, 3.14, "nan", "-inf", "inf", 999]',
+        schema={"type": "array", "items": {"type": "number"}},
+        nan_string="nan",
+        posinf_string="inf",
+        neginf_string="-inf",
+    )
+    assert result.tolist()[:3] == [1, 2, 3.14]
+    assert np.isnan(result[3])
+    assert result.tolist()[4:] == [-np.inf, np.inf, 999]
+    assert str(result.type) == "7 * float64"
+
+    result = ak._v2.operations.from_json(
+        '["nan", "-inf", "inf"]',
+        schema={"type": "array", "items": {"type": "number"}},
+        nan_string="nan",
+        posinf_string="inf",
+        neginf_string="-inf",
+    )
+    assert np.isnan(result[0])
+    assert result.tolist()[1:] == [-np.inf, np.inf]
+    assert str(result.type) == "3 * float64"
+
+    result = ak._v2.operations.from_json(
+        '["nan", "-inf", "inf"]',
+        schema={"type": "array", "items": {"type": "string"}},
+        nan_string="nan",
+        posinf_string="inf",
+        neginf_string="-inf",
+    )
+    assert result.tolist() == ["nan", "-inf", "inf"]
+    assert str(result.type) == "3 * string"
+
+
+def test_complex_substitutions():
+    result = ak._v2.operations.from_json(
+        '[{"r": 1, "i": 1.1}, {"r": 2, "i": 2.2}, {"r": "inf", "i": 3.3}]',
+        schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"r": {"type": "number"}, "i": {"type": "number"}},
+                "required": ["r", "i"],
+            },
+        },
+        posinf_string="inf",
+        complex_record_fields=("r", "i"),
+    )
+    assert result.tolist() == [1 + 1.1j, 2 + 2.2j, np.inf + 3.3j]
+    assert str(result.type) == "3 * complex128"
+
+    result = ak._v2.operations.from_json(
+        '[{"r": 1, "i": 1.1, "other": 1}, {"r": 2, "i": 2.2, "other": 1}, {"r": "inf", "i": 3.3, "other": 1}]',
+        schema={
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "r": {"type": "number"},
+                    "i": {"type": "number"},
+                    "other": {"type": "integer"},
+                },
+                "required": ["r", "i", "other"],
+            },
+        },
+        posinf_string="inf",
+        complex_record_fields=("r", "i"),
+    )
+    assert result.tolist() == [1 + 1.1j, 2 + 2.2j, np.inf + 3.3j]
+    assert str(result.type) == "3 * complex128"
