@@ -1251,6 +1251,9 @@ class NumpyArray(Content):
         else:
             return out
 
+    def _to_raggedtensor(self, tensorflow):
+        return tensorflow.ragged.constant(self._to_numpy(allow_missing=False))
+
     def _completely_flatten(self, nplike, options):
         return [self.raw(nplike).reshape(-1)]
 

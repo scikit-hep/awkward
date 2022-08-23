@@ -321,6 +321,11 @@ class EmptyArray(Content):
     def _to_numpy(self, allow_missing):
         return self._nplike.empty(0, dtype=np.float64)
 
+    def _to_raggedtensor(self, tensorflow):
+        raise ak._v2._util.error(
+            TypeError("EmptyArray cannot be converted into RaggedTensor")
+        )
+
     def _completely_flatten(self, nplike, options):
         return []
 

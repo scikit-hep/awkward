@@ -1327,6 +1327,11 @@ class UnionArray(Content):
             out[mask] = content
         return out
 
+    def _to_raggedtensor(self, tensorflow):
+        raise ak._v2._util.error(
+            TypeError("UnionArray cannot be converted into RaggedTensor")
+        )
+
     def _completely_flatten(self, nplike, options):
         out = []
         for i in range(len(self._contents)):

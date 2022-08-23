@@ -1188,6 +1188,9 @@ class IndexedArray(Content):
     def _to_numpy(self, allow_missing):
         return self.project()._to_numpy(allow_missing)
 
+    def _to_raggedtensor(self, tensorflow):
+        return self.project()._to_raggedtensor(tensorflow)
+
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
 

@@ -2040,6 +2040,12 @@ class ListOffsetArray(Content):
 
         return ak._v2.operations.to_numpy(self.toRegularArray(), allow_missing)
 
+    def _to_raggedtensor(self, tensorflow):
+        layout = self.toListOffsetArray64(True)
+        return tensorflow.RaggedTensor.from_row_starts(
+            layout._content._to_raggedtensor(tensorflow), layout.starts
+        )
+
     def _completely_flatten(self, nplike, options):
         if (
             self.parameter("__array__") == "string"

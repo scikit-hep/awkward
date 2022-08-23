@@ -952,6 +952,11 @@ class RecordArray(Content):
 
         return out
 
+    def _to_raggedtensor(self, tensorflow):
+        raise ak._v2._util.error(
+            TypeError("RecordArray cannot be converted into RaggedTensor")
+        )
+
     def _completely_flatten(self, nplike, options):
         if options["flatten_records"]:
             out = []

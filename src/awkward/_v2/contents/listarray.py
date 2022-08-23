@@ -1409,6 +1409,9 @@ class ListArray(Content):
     def _to_numpy(self, allow_missing):
         return ak._v2.operations.to_numpy(self.toRegularArray(), allow_missing)
 
+    def _to_raggedtensor(self, tensorflow):
+        return self.toListOffsetArray64(True)._to_raggedtensor(tensorflow)
+
     def _completely_flatten(self, nplike, options):
         if (
             self.parameter("__array__") == "string"

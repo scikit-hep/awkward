@@ -18,6 +18,7 @@ import awkward._v2._lookup
 # third-party connectors
 import awkward._v2._connect.numpy
 import awkward._v2._connect.numexpr
+import awkward._v2._connect.tensorflow
 import awkward._v2.numba
 
 # high-level interface

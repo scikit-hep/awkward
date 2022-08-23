@@ -607,6 +607,11 @@ class BitMaskedArray(Content):
     def _to_numpy(self, allow_missing):
         return self.toByteMaskedArray()._to_numpy(allow_missing)
 
+    def _to_raggedtensor(self, tensorflow):
+        raise ak._v2._util.error(
+            TypeError("BitMaskedArray cannot be converted into RaggedTensor")
+        )
+
     def _completely_flatten(self, nplike, options):
         return self.project()._completely_flatten(nplike, options)
 

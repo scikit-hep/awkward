@@ -31,6 +31,7 @@ from awkward._v2.operations.ak_from_jax import from_jax
 from awkward._v2.operations.ak_from_json import from_json
 from awkward._v2.operations.ak_from_numpy import from_numpy
 from awkward._v2.operations.ak_from_parquet import from_parquet
+from awkward._v2.operations.ak_from_raggedtensor import from_raggedtensor
 from awkward._v2.operations.ak_from_rdataframe import from_rdataframe
 from awkward._v2.operations.ak_from_regular import from_regular
 from awkward._v2.operations.ak_full_like import full_like
@@ -73,6 +74,7 @@ from awkward._v2.operations.ak_to_json import to_json
 from awkward._v2.operations.ak_to_layout import to_layout
 from awkward._v2.operations.ak_to_list import to_list
 from awkward._v2.operations.ak_to_numpy import to_numpy
+from awkward._v2.operations.ak_to_raggedtensor import to_raggedtensor
 from awkward._v2.operations.ak_to_dataframe import to_dataframe
 from awkward._v2.operations.ak_to_parquet import to_parquet
 from awkward._v2.operations.ak_to_rdataframe import to_rdataframe
