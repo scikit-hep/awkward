@@ -14,139 +14,102 @@ namespace awkward {
   public:
     CppBuffers(ROOT::RDF::RResultPtr<std::vector<T>>& result)
         : result_(result) {
-      offsets_.reserve(3);
-      data_.reserve(1024);
     }
 
     ~CppBuffers() {}
 
-    int64_t
-    offsets_length(int64_t level) {
-      return static_cast<int64_t>(offsets_[level].size());
-    }
-
-    int64_t
-    data_length() {
-      return data_.size();
+    template<class BUILDER>
+    const std::map<std::string, size_t>&
+    names_nbytes(BUILDER& builder) {
+      builder.buffer_nbytes(map_names_nbytes_);
+      return map_names_nbytes_;
     }
 
     void
-    copy_offsets(void* to_buffer, int64_t length, int64_t level) {
-      auto ptr = reinterpret_cast<int64_t*>(to_buffer);
-      int64_t i = 0;
-      for (auto const& it : offsets_[level]) {
-        ptr[i++] = it;
-      }
+    append(const std::string& key, uint8_t* ptr) {
+      buffers_uint8_ptr_[key] = ptr;
     }
 
     void
-    copy_data(void* to_buffer, int64_t length) {
-      auto ptr = reinterpret_cast<DATA*>(to_buffer);
-      int64_t i = 0;
-      for (auto const& it : data_) {
-        ptr[i++] = it;
+    check_buffers() {
+      std::cout << "CPPBuffers check buffers: " << buffers_uint8_ptr_.size() << "!!! ";
+      for (auto it : buffers_uint8_ptr_) {
+        uint8_t* data = it.second;
+        for (int i = 0; i < map_names_nbytes_[it.first]; i++) {
+          std::cout << (int64_t)data[i] << ",";
+        }
+      }
+      std::cout << std::endl;
+    }
+
+    template<class BUILDER>
+    void
+    fill_from(BUILDER& builder) {
+      for (auto it : result_) {
+        builder.append(it);
       }
     }
 
-    std::pair<int64_t, int64_t>
-    offsets_and_flatten_2() {
-      int64_t i = 0;
-      std::vector<int64_t> offsets;
-      offsets.reserve(1024);
+    template<class BUILDER, class PRIMITIVE>
+    void
+    to_char_buffers(BUILDER& builder) {
+      builder.to_char_buffers(buffers_uint8_ptr_);
+    }
+
+    template<class BUILDER>
+    void
+    fill_offsets_and_flatten_2(BUILDER& builder) {
       for (auto const& vec : result_) {
-        offsets.emplace_back(i);
-        i += vec.size();
-        data_.insert(data_.end(), vec.begin(), vec.end());
-      }
-      offsets.emplace_back(i);
-
-      offsets_.emplace_back(offsets);
-
-      return {static_cast<int64_t>(offsets_.size()),
-              static_cast<int64_t>(offsets_[0].size())};
-    }
-
-    std::pair<int64_t, int64_t>
-    offsets_and_flatten_3() {
-      int64_t i = 0;
-      int64_t j = 0;
-      std::vector<int64_t> offsets;
-      offsets.reserve(1024);
-      std::vector<int64_t> inner_offsets;
-      inner_offsets.reserve(1024);
-      for (auto const& vec_of_vecs : result_) {
-        offsets.emplace_back(i);
-        i += vec_of_vecs.size();
-
-        for (auto const& vec : vec_of_vecs) {
-          inner_offsets.emplace_back(j);
-          j += vec.size();
-          data_.insert(data_.end(), vec.begin(), vec.end());
+        auto& subbuilder = builder.begin_list();
+        for (auto it : vec) {
+          subbuilder.append(it);
         }
-        inner_offsets.emplace_back(j);
+        builder.end_list();
       }
-      offsets.emplace_back(i);
-
-      offsets_.emplace_back(offsets);
-      offsets_.emplace_back(inner_offsets);
-
-      return {static_cast<int64_t>(offsets_.size()),
-              static_cast<int64_t>(offsets_[0].size())};
     }
 
-    std::pair<int64_t, int64_t>
-    offsets_and_flatten_4() {
-      int64_t i = 0;
-      int64_t j = 0;
-      int64_t k = 0;
-      std::vector<int64_t> offsets;
-      std::vector<int64_t> inner_offsets;
-      std::vector<int64_t> inner_inner_offsets;
-      for (auto const& vec_of_vecs_of_vecs : result_) {
-        offsets.emplace_back(i);
-        i += vec_of_vecs_of_vecs.size();
-
-        for (auto const& vec_of_vecs : vec_of_vecs_of_vecs) {
-          inner_offsets.emplace_back(j);
-          j += vec_of_vecs.size();
-
-          for (auto const& vec : vec_of_vecs) {
-            inner_inner_offsets.emplace_back(k);
-            k += vec.size();
-            data_.insert(data_.end(), vec.begin(), vec.end());
-          }
-          inner_inner_offsets.emplace_back(k);
-        }
-        inner_offsets.emplace_back(j);
-      }
-      offsets.emplace_back(i);
-
-      offsets_.emplace_back(offsets);
-      offsets_.emplace_back(inner_offsets);
-      offsets_.emplace_back(inner_inner_offsets);
-
-      return {static_cast<int64_t>(offsets_.size()),
-              static_cast<int64_t>(offsets_[0].size())};
-    }
-
-    int64_t
-    result_distance() {
-      return std::distance(result_.begin(), result_.end());
-    }
-
+    template<class BUILDER>
     void
-    fill_data_array(void* to_buffer) {
-      int64_t i = 0;
-      DATA* ptr = reinterpret_cast<DATA*>(to_buffer);
-      for (auto const& it : result_) {
-        ptr[i++] = it;
+    fill_offsets_and_flatten_3(BUILDER& builder) {
+      for (auto const& vec_of_vecs : result_) {
+        auto& builder1 = builder.begin_list();
+        for (auto const& vec : vec_of_vecs) {
+          auto& builder2 = builder1.begin_list();
+          for (auto it : vec) {
+            builder2.append(it);
+          }
+          builder1.end_list();
+        }
+        builder.end_list();
+      }
+    }
+
+    template<class BUILDER>
+    void
+    fill_offsets_and_flatten_4(BUILDER& builder) {
+      for (auto const& vec_of_vecs_of_vecs : result_) {
+        auto& builder1 = builder.begin_list();
+        for (auto const& vec_of_vecs : vec_of_vecs_of_vecs) {
+          auto& builder2 = builder1.begin_list();
+          for (auto vec : vec_of_vecs) {
+            auto& builder3 = builder2.begin_list();
+            for (auto it : vec) {
+              builder3.append(it);
+            }
+            builder2.end_list();
+          }
+          builder1.end_list();
+        }
+        builder.end_list();
       }
     }
 
   private:
     ROOT::RDF::RResultPtr<std::vector<T>>& result_;
-    std::vector<std::vector<int64_t>> offsets_;
-    std::vector<DATA> data_;
+    std::map<std::string, size_t> map_names_nbytes_;
+    std::map<std::string, void*> buffers_void_ptr_;
+    std::map<std::string, uint8_t*> buffers_uint8_ptr_;
+
   };
 
 }  // namespace awkward

@@ -35,7 +35,7 @@ namespace awkward {
       /// @brief Converts index as field string.
       std::string
       index_as_field() const {
-        return std::to_string(static_cast<size_t>(index));
+        return std::to_string(reinterpret_cast<size_t>(index));
       }
 
       /// @brief The index of a Record field.
@@ -138,8 +138,18 @@ namespace awkward {
       /// using the same name and size (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        data_.concatenate(static_cast<PRIMITIVE*>(
+        data_.concatenate(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-data"]));
+        }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        data_.concatenate(reinterpret_cast<PRIMITIVE*>(
+          buffers["node" + std::to_string(id_) + "-data"]));
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -306,9 +316,20 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        offsets_.concatenate(static_cast<PRIMITIVE*>(
+        offsets_.concatenate(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-offsets"]));
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        offsets_.concatenate(reinterpret_cast<PRIMITIVE*>(
+            buffers["node" + std::to_string(id_) + "-offsets"]));
+        content_.to_char_buffers(buffers);
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -480,11 +501,24 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        starts_.concatenate(static_cast<PRIMITIVE*>(
+        starts_.concatenate(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-starts"]));
-        stops_.concatenate(static_cast<PRIMITIVE*>(
+        stops_.concatenate(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-stops"]));
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        starts_.concatenate(reinterpret_cast<PRIMITIVE*>(
+            buffers["node" + std::to_string(id_) + "-starts"]));
+        stops_.concatenate(reinterpret_cast<PRIMITIVE*>(
+            buffers["node" + std::to_string(id_) + "-stops"]));
+        content_.to_char_buffers(buffers);
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -574,6 +608,13 @@ namespace awkward {
 
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {}
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {}
 
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
@@ -669,6 +710,13 @@ namespace awkward {
 
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {}
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {}
 
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
@@ -871,6 +919,18 @@ namespace awkward {
           });
       }
 
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        for (size_t i = 0; i < fields_count_; i++)
+          visit_at(contents, i, [&buffers](auto& content) {
+            content.builder.to_char_buffers(buffers);
+          });
+      }
+
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
@@ -1069,6 +1129,18 @@ namespace awkward {
           });
       }
 
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        for (size_t i = 0; i < fields_count_; i++)
+          visit_at(contents, i, [&buffers](auto& content) {
+            content.to_char_buffers(buffers);
+          });
+      }
+
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
@@ -1235,6 +1307,15 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        content_.to_char_buffers(buffers);
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -1410,9 +1491,20 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        index_.concatenate(static_cast<PRIMITIVE*>(
+        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-index"]));
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
+            buffers["node" + std::to_string(id_) + "-index"]));
+        content_.to_char_buffers(buffers);
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -1599,9 +1691,20 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        index_.concatenate(static_cast<PRIMITIVE*>(
+        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
             buffers["node" + std::to_string(id_) + "-index"]));
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        index_.concatenate(reinterpret_cast<PRIMITIVE*>(
+            buffers["node" + std::to_string(id_) + "-index"]));
+        content_.to_char_buffers(buffers);
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -1737,6 +1840,15 @@ namespace awkward {
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        content_.to_char_buffers(buffers);
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -1926,9 +2038,20 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        mask_.concatenate(static_cast<int8_t*>(
+        mask_.concatenate(reinterpret_cast<int8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        mask_.concatenate(reinterpret_cast<int8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]));
+        content_.to_char_buffers(buffers);
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -2164,11 +2287,24 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        mask_.concatenate_from(static_cast<uint8_t*>(
+        mask_.concatenate_from(reinterpret_cast<uint8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]), 0, 1);
-        mask_.append(static_cast<uint8_t*>(
+        mask_.append(reinterpret_cast<uint8_t*>(
             buffers["node" + std::to_string(id_) + "-mask"]), mask_.length() - 1, 0, 1);
         content_.to_buffers(buffers);
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        mask_.concatenate_from(reinterpret_cast<uint8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]), 0, 1);
+        mask_.append(reinterpret_cast<uint8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]), mask_.length() - 1, 0, 1);
+        content_.to_char_buffers(buffers);
       }
 
       /// @brief Generates a unique description of the builder and its
@@ -2419,14 +2555,33 @@ namespace awkward {
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        tags_.concatenate(static_cast<TAGS*>(
+        tags_.concatenate(reinterpret_cast<TAGS*>(
             buffers["node" + std::to_string(id_) + "-tags"]));
-        index_.concatenate(static_cast<INDEX*>(
+        index_.concatenate(reinterpret_cast<INDEX*>(
             buffers["node" + std::to_string(id_) + "-index"]));
 
         for (size_t i = 0; i < contents_count_; i++)
           visit_at(contents_, i, [&buffers](auto& content) {
             content.to_buffers(buffers);
+          });
+      }
+
+      /// @brief Copies and concatenates all the accumulated data in the builder
+      /// to a map of user-allocated buffers.
+      ///
+      /// The map keys and the buffer sizes are obtained from #buffer_nbytes
+      void
+      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
+        auto index_sequence((std::index_sequence_for<BUILDERS...>()));
+
+        tags_.concatenate(reinterpret_cast<TAGS*>(
+            buffers["node" + std::to_string(id_) + "-tags"]));
+        index_.concatenate(reinterpret_cast<INDEX*>(
+            buffers["node" + std::to_string(id_) + "-index"]));
+
+        for (size_t i = 0; i < contents_count_; i++)
+          visit_at(contents_, i, [&buffers](auto& content) {
+            content.to_char_buffers(buffers);
           });
       }
 

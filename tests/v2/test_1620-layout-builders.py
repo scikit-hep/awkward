@@ -4,14 +4,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward._v2 as ak  # noqa: F401
 
-import awkward._v2._lookup  # noqa: E402
-import awkward._v2._connect.cling  # noqa: E402
-
 
 ROOT = pytest.importorskip("ROOT")
 
 
 compiler = ROOT.gInterpreter.Declare
+
 
 def test_data_frame_integers():
     ak_array_in = ak.Array([1, 2, 3, 4, 5])
@@ -42,7 +40,7 @@ def test_data_frame_double():
 
 
 def test_data_frame_char():
-    ak_array_in = ak.Array(['a', 'b', 'c', 'd', 'e'])
+    ak_array_in = ak.Array(["a", "b", "c", "d", "e"])
 
     data_frame = ak.to_rdataframe({"x": ak_array_in})
 
@@ -68,6 +66,7 @@ def test_data_frame_complex():
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
+
 def test_data_frame_listoffset_integers():
     ak_array_in = ak.Array([[1], [2, 3, 4], [5]])
 
@@ -83,11 +82,13 @@ def test_data_frame_listoffset_integers():
 
 
 def test_data_frame_listoffset_listoffset_double():
-    ak_array_in = ak.Array([
-        [[1.1, 2.2, 3.3]],
-        [[4.4, 5.5]],
-        [[6.6], [7.7, 8.8, 9.9]],
-    ])
+    ak_array_in = ak.Array(
+        [
+            [[1.1, 2.2, 3.3]],
+            [[4.4, 5.5]],
+            [[6.6], [7.7, 8.8, 9.9]],
+        ]
+    )
 
     data_frame = ak.to_rdataframe({"x": ak_array_in})
 
@@ -102,16 +103,24 @@ def test_data_frame_listoffset_listoffset_double():
 
 
 def test_data_frame_vec_of_vec():
-    array = ak.Array([
-    [{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
-    [],
-    [{"x": None, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}]
-])
-#] * 10000)
+    array = ak.Array(
+        [
+            [
+                {"x": 1.1, "y": [1]},
+                {"x": None, "y": [1, 2]},
+                {"x": 3.3, "y": [1, 2, 3]},
+            ],
+            [],
+            [{"x": None, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}],
+        ]
+    )
+    # ] * 10000)
 
     rdf2 = ak.to_rdataframe({"array": array})
     # Note when dimensions R and C are large, the following code suffers from potential performance penalties caused by frequent reallocation of memory by the push_back() function. This should be used only when vector dimensions are not known in advance.
-    rdf3 = rdf2.Define("output", """
+    rdf3 = rdf2.Define(
+        "output",
+        """
     std::vector<std::vector<double>> tmp1;
 
     for (auto record : array) {
@@ -122,15 +131,18 @@ def test_data_frame_vec_of_vec():
         tmp1.push_back(tmp2);
     }
     return tmp1;
-    """)
+    """,
+    )
 
     assert rdf3.GetColumnType("output") == "vector<vector<double> >"
-    out = ak.from_rdataframe(
+    out = ak.from_rdataframe(  # noqa: F841
         rdf3,
         column="output",
     )
 
-    rdf3 = rdf2.Define("output2", """
+    rdf3 = rdf2.Define(
+        "output2",
+        """
     std::vector<std::vector<std::vector<double>>> tmp1;
 
     for (auto record : array) {
@@ -147,9 +159,10 @@ def test_data_frame_vec_of_vec():
         tmp1.push_back(tmp2);
     }
     return tmp1;
-    """)
+    """,
+    )
     assert rdf3.GetColumnType("output2") == "vector<vector<vector<double> > >"
-    out = ak.from_rdataframe(
+    out = ak.from_rdataframe(  # noqa: F841
         rdf3,
         column="output2",
     )
