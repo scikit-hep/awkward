@@ -108,7 +108,7 @@ def from_rdataframe(data_frame, column):
         buffers = {}
 
         # pull in the CppBuffers (after which we can import from it)
-        CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type, cpp_type_of[dtype.name]]
+        CppBuffers = cppyy.gbl.awkward.CppBuffers[column_type]
         cpp_buffers_self = CppBuffers(result_ptrs)
 
         if isinstance(form, ak._v2.forms.NumpyForm):

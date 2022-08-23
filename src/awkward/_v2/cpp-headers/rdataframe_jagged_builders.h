@@ -11,7 +11,7 @@
 
 namespace awkward {
 
-  template <typename T, typename DATA>
+  template <typename T>
   class CppBuffers {
   public:
     CppBuffers(ROOT::RDF::RResultPtr<std::vector<T>>& result)
@@ -109,7 +109,6 @@ namespace awkward {
   private:
     ROOT::RDF::RResultPtr<std::vector<T>>& result_;
     std::map<std::string, size_t> map_names_nbytes_;
-    std::map<std::string, void*> buffers_void_ptr_;
     std::map<std::string, uint8_t*> buffers_uint8_ptr_;
 
   };
