@@ -8,6 +8,7 @@ from numbers import Number
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 def to_json(
@@ -17,8 +18,8 @@ def to_json(
     num_indent_spaces=None,
     num_readability_spaces=0,
     nan_string=None,
-    infinity_string=None,
-    minus_infinity_string=None,
+    posinf_string=None,
+    neginf_string=None,
     complex_record_fields=None,
     convert_bytes=None,
     convert_other=None,
@@ -46,11 +47,10 @@ def to_json(
             commas (`,`) and colons (`:`), for pretty-printed JSON.
         nan_string (None or str): If not None, floating-point NaN values will be
             replaced with this string instead of a JSON number.
-        infinity_string (None or str): If not None, floating-point positive infinity
+        posinf_string (None or str): If not None, floating-point positive infinity
             values will be replaced with this string instead of a JSON number.
-        minus_infinity_string (None or str): If not None, floating-point negative
-            infinity values will be replaced with this string instead of a JSON
-            number.
+        neginf_string (None or str): If not None, floating-point negative infinity
+            values will be replaced with this string instead of a JSON number.
         complex_record_fields (None or (str, str)): If not None, defines a pair of
             field names to interpret records as complex numbers, such as
             `("real", "imag")`.
@@ -66,10 +66,10 @@ def to_json(
     otherwise, this function returns nothing and writes to a file.
 
     This function converts the array into Python objects with #ak.to_list, performs
-    some conversions to make the data JSON serializable (`nan_string`, `infinity_string`,
-    `minus_infinity_string`, `complex_record_fields`, `convert_bytes`, `convert_other`),
-    then uses `json.dumps` to return a string or `json.dump` to write to a file
-    (depending on the value of `file`).
+    some conversions to make the data JSON serializable (`nan_string`,
+    `posinf_string`, `neginf_string`, `complex_record_fields`, `convert_bytes`,
+    `convert_other`), then uses `json.dumps` to return a string or `json.dump`
+    to write to a file (depending on the value of `file`).
 
     If `line_delimited` is True or a line-delimiter string like `"\r\n"`/`os.linesep`,
     the output is line-delimited JSON, variously referred to as "ldjson", "ndjson", and
@@ -93,7 +93,8 @@ def to_json(
        * #ak.types.UnionArray: JSON data are naturally heterogeneous.
 
     If the array contains any NaN (not a number), infinite values, or
-    imaginary/complex types, `nan_string` or `infinity_string` _must_ be supplied.
+    imaginary/complex types, `nan_string`, `posinf_string`, and/or `neginf_string`
+    _must_ be supplied.
 
     If the array contains any raw bytestrings (`"__array__"` equal to `"bytestring"`),
     `convert_bytes` _must_ be supplied. To interpret as strings, use `bytes.decode`.
@@ -114,8 +115,8 @@ def to_json(
             num_indent_spaces=num_indent_spaces,
             num_readability_spaces=num_readability_spaces,
             nan_string=nan_string,
-            infinity_string=infinity_string,
-            minus_infinity_string=minus_infinity_string,
+            posinf_string=posinf_string,
+            neginf_string=neginf_string,
             complex_record_fields=complex_record_fields,
             convert_bytes=convert_bytes,
             convert_other=convert_other,
@@ -128,8 +129,8 @@ def to_json(
             num_indent_spaces,
             num_readability_spaces,
             nan_string,
-            infinity_string,
-            minus_infinity_string,
+            posinf_string,
+            neginf_string,
             complex_record_fields,
             convert_bytes,
             convert_other,
@@ -143,20 +144,14 @@ def _impl(
     num_indent_spaces,
     num_readability_spaces,
     nan_string,
-    infinity_string,
-    minus_infinity_string,
+    posinf_string,
+    neginf_string,
     complex_record_fields,
     convert_bytes,
     convert_other,
 ):
     if array is None or isinstance(array, (bool, str, bytes, Number)):
-        return json.dumps(array)
-
-    elif isinstance(array, bytes):
-        return json.dumps(array.decode("utf-8", "surrogateescape"))
-
-    elif isinstance(array, np.ndarray):
-        out = ak._v2.contents.NumpyArray(array)
+        out = ak._v2.operations.from_iter([array], highlevel=False)
 
     elif isinstance(array, ak._v2.highlevel.Array):
         out = array.layout
@@ -179,13 +174,16 @@ def _impl(
     elif isinstance(array, ak._v2.contents.Content):
         out = array
 
+    elif hasattr(array, "shape") and hasattr(array, "dtype"):
+        out = ak._v2.contents.NumpyArray(array)
+
     else:
         raise ak._v2._util.error(TypeError(f"unrecognized array type: {repr(array)}"))
 
     jsondata = out.to_json(
         nan_string=nan_string,
-        infinity_string=infinity_string,
-        minus_infinity_string=minus_infinity_string,
+        posinf_string=posinf_string,
+        neginf_string=neginf_string,
         complex_record_fields=complex_record_fields,
         convert_bytes=convert_bytes,
         behavior=ak._v2._util.behavior_of(array),

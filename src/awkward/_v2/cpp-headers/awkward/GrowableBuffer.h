@@ -395,7 +395,7 @@ namespace awkward {
     /// first, the empty slots are filled and then a new panel will be allocated
     /// for the rest of the array elements.
     void
-    extend(PRIMITIVE* ptr, size_t size) {
+    extend(const PRIMITIVE* ptr, size_t size) {
       size_t unfilled_items = ptr_->reserved() - ptr_->current_length();
       if (size > unfilled_items) {
         for (size_t i = 0; i < unfilled_items; i++) {

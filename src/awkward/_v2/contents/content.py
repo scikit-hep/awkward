@@ -1362,8 +1362,8 @@ class Content:
     def to_json(
         self,
         nan_string=None,
-        infinity_string=None,
-        minus_infinity_string=None,
+        posinf_string=None,
+        neginf_string=None,
         complex_record_fields=None,
         convert_bytes=None,
         behavior=None,
@@ -1383,8 +1383,8 @@ class Content:
             behavior,
             {
                 "nan_string": nan_string,
-                "infinity_string": infinity_string,
-                "minus_infinity_string": minus_infinity_string,
+                "posinf_string": posinf_string,
+                "neginf_string": neginf_string,
                 "complex_real_string": complex_real_string,
                 "complex_imag_string": complex_imag_string,
                 "convert_bytes": convert_bytes,
@@ -1437,15 +1437,15 @@ class Content:
                     isnan = math.isnan
                     filters.append(lambda x: nan_string if isnan(x) else x)
 
-                infinity_string = json_conversions["infinity_string"]
-                if infinity_string is not None:
+                posinf_string = json_conversions["posinf_string"]
+                if posinf_string is not None:
                     inf = float("inf")
-                    filters.append(lambda x: infinity_string if x == inf else x)
+                    filters.append(lambda x: posinf_string if x == inf else x)
 
-                minus_infinity_string = json_conversions["minus_infinity_string"]
-                if minus_infinity_string is not None:
+                neginf_string = json_conversions["neginf_string"]
+                if neginf_string is not None:
                     minf = float("-inf")
-                    filters.append(lambda x: minus_infinity_string if x == minf else x)
+                    filters.append(lambda x: neginf_string if x == minf else x)
 
                 if len(filters) == 1:
                     f0 = filters[0]
