@@ -132,7 +132,12 @@ def metadata(
         ):
             list_indicator = "list.element"
             break
+
+    subform = ak._v2._connect.pyarrow.form_handle_arrow(
+        parquetfile_for_metadata.schema_arrow, pass_empty_field=True
+    )
     if columns is not None:
+        subform = subform.select_columns(columns)
 
         form = ak._v2._connect.pyarrow.form_handle_arrow(
             parquetfile_for_metadata.schema_arrow, pass_empty_field=True
