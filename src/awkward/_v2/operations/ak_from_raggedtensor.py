@@ -10,7 +10,8 @@ numpy = ak.nplike.Numpy.instance()
 def from_raggedtensor(tensor, highlevel=True, behavior=None):
     """
     Args:
-        tensor: (`tensorflow.RaggedTensor`)
+        tensor: (`tensorflow.RaggedTensor` or `tensorflow.Tensor`) RaggedTensor to convert to an {class}`ak.Array`.
+            Must be either a `RaggedTensor
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -35,6 +36,11 @@ def _impl(
     behavior,
 ):
     tensorflow = awkward._v2._connect.tensorflow.import_tensorflow()  # noqa: F401
+    if not isinstance(tensor, tensorflow.RaggedTensor):
+        raise ak._v2._util.error(
+            TypeError(f"expected `tensorflow.RaggedTensor` object, not {type(tensor)}")
+        )
+
     layout = _tensor_to_layout(tensor, tensorflow)
     if highlevel:
         return ak._v2._util.wrap(layout, behavior, highlevel)
@@ -43,18 +49,13 @@ def _impl(
 
 
 def _tensor_to_layout(tensor, tensorflow):
-    if isinstance(tensor, tensorflow.RaggedTensor):
+    if tensor.ragged_rank > 0:
         stops = tensor.row_limits().numpy()
         offsets = numpy.zeros(len(stops) + 1, dtype=np.int64)
         offsets[1:] = stops
         return ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index64(offsets), _tensor_to_layout(tensor.values, tensorflow)
+            ak._v2.index.Index64(offsets),
+            _tensor_to_layout(tensor.values, tensorflow),
         )
-    elif isinstance(tensor, tensorflow.Tensor):
-        return ak._v2.contents.NumpyArray(tensor.numpy())
     else:
-        raise ak._v2._util.error(
-            TypeError(
-                f"expected `tensorflow.RaggedTensor` or `tensorflow.Tensor` object, not {type(tensor)}"
-            )
-        )
+        return ak._v2.contents.NumpyArray(tensor.numpy())
