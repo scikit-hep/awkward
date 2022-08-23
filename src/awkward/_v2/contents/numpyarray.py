@@ -645,19 +645,30 @@ class NumpyArray(Content):
         return out2, nextoffsets[: outlength[0]]
 
     def numbers_to_type(self, name):
+        dtype = primitive_to_dtype(name)
         if (
             self.parameter("__array__") == "string"
             or self.parameter("__array__") == "bytestring"
-            or self.parameter("__array__") == "char"
-            or self.parameter("__array__") == "byte"
+            or dtype == self._data.dtype
         ):
             return self
         else:
-            dtype = primitive_to_dtype(name)
+            # Char/byte arrays are no longer char/byte arrays
+            # if the dtype changes
+            if (
+                self.parameter("__array__") == "char"
+                or self.parameter("__array__") == "byte"
+            ):
+                # Remove `__array__`
+                parameters = copy.copy(self._parameters)
+                del parameters["__array__"]
+            else:
+                parameters = self._parameters
+
             return NumpyArray(
                 self._nplike.asarray(self._data, dtype=dtype),
                 self._identifier,
-                self._parameters,
+                parameters,
                 self._nplike,
             )
 
