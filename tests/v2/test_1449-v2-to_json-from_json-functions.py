@@ -27,8 +27,8 @@ def test_to_json_options(tmp_path):
 
     kwargs = {
         "nan_string": "nan",
-        "infinity_string": "inf",
-        "minus_infinity_string": "-inf",
+        "posinf_string": "inf",
+        "neginf_string": "-inf",
         "complex_record_fields": ("real", "imag"),
         "convert_bytes": lambda x: base64.b64encode(x).decode(),
     }

@@ -136,6 +136,7 @@ PYBIND11_MODULE(_ext, m) {
   make_fromjson(m, "fromjson");
   make_fromjsonfile(m, "fromjsonfile");
   make_fromjsonobj(m, "fromjsonobj");
+  make_fromjsonobj_schema(m, "fromjsonobj_schema");
 
   make_uproot_issue_90(m);
 
@@ -143,6 +144,5 @@ PYBIND11_MODULE(_ext, m) {
 
   make_ForthMachineOf<int32_t, int32_t>(m, "ForthMachine32");
   make_ForthMachineOf<int64_t, int32_t>(m, "ForthMachine64");
-  make_SpecializedJSON(m, "SpecializedJSON");
 
 }

@@ -99,9 +99,9 @@ def test_behavior_forwarding_structure():
 
 def test_behavior_forwarding_convert():
     assert (
-        ak._v2.operations.from_json_schema(
+        ak._v2.operations.from_json(
             " [ 1 ,2 ,3.0, 4, 5]  \n  ",
-            {"type": "array", "items": {"type": "integer"}},
+            schema={"type": "array", "items": {"type": "number"}},
             behavior={},
         ).behavior
         == {}

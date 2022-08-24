@@ -2,6 +2,7 @@
 
 import os
 import json
+import pathlib
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
@@ -32,17 +33,17 @@ def test_fromfile(tmp_path):
     with open(os.path.join(str(tmp_path), "tmp1.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], [], [4, 5.5]]")
 
-    array = ak._v2.operations.from_json_file(os.path.join(str(tmp_path), "tmp1.json"))
+    array = ak._v2.operations.from_json(tmp_path / "tmp1.json")
     assert array.tolist() == [[1.1, 2.2, 3.0], [], [4.0, 5.5]]
 
     with pytest.raises(IOError):
-        ak._v2.operations.from_json_file("nonexistent.json")
+        ak._v2.operations.from_json(pathlib.Path("nonexistent.json"))
 
     with open(os.path.join(str(tmp_path), "tmp2.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], []], [4, 5.5]]")
 
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json_file(os.path.join(str(tmp_path), "tmp2.json"))
+        ak._v2.operations.from_json(tmp_path / "tmp2.json")
 
 
 def test_tostring():
@@ -138,8 +139,8 @@ def test_complex_with_nan_and_inf():
             content,
             complex_record_fields=("r", "i"),
             nan_string="Not a number",
-            infinity_string="Inf",
-            minus_infinity_string="-Inf",
+            posinf_string="Inf",
+            neginf_string="-Inf",
         )
         == """[{"r":1.1,"i":0.1},{"r":2.2,"i":0.0},{"r":3.3,"i":0.0},{"r":"Not a number","i":"Not a number"},{"r":5.5,"i":0.0},{"r":"-Inf","i":0.0},{"r":7.7,"i":0.0},{"r":"Not a number","i":"Inf"},{"r":9.9,"i":0.0}]"""
     )
@@ -235,8 +236,8 @@ def test_numpy():
         ak._v2.operations.to_json(
             b2,
             nan_string="Not a number",
-            infinity_string="Inf",
-            minus_infinity_string="-Inf",
+            posinf_string="Inf",
+            neginf_string="-Inf",
         )
         == """[[[1.1,2.2,3.3],[4.4,"Inf",6.6]],[[10.1,20.2,"Not a number"],[40.4,50.5,"-Inf"]]]"""
     )
@@ -249,7 +250,7 @@ def test_numpy():
         )
     )
     assert (
-        ak._v2.operations.to_json(b3, infinity_string="Infinity")
+        ak._v2.operations.to_json(b3, posinf_string="Infinity")
         == '[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,"Infinity"],[40.4,50.5,60.6]]]'
     )
     b4 = ak._v2.contents.NumpyArray(
@@ -261,7 +262,7 @@ def test_numpy():
         )
     )
     assert (
-        ak._v2.operations.to_json(b4, minus_infinity_string="-Infinity")
+        ak._v2.operations.to_json(b4, neginf_string="-Infinity")
         == '[[[1.1,2.2,3.3],[4.4,5.5,6.6]],[[10.1,20.2,"-Infinity"],[40.4,50.5,60.6]]]'
     )
     c = ak._v2.contents.NumpyArray(
