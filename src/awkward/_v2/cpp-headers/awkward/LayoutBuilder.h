@@ -155,9 +155,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const {
+      form(size_t offset = 0) const {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
 
         std::string params("");
         if (parameters_ == "") {
@@ -335,9 +335,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -345,7 +345,7 @@ namespace awkward {
         }
         return "{ \"class\": \"ListOffsetArray\", \"offsets\": \"" +
                type_to_numpy_like<PRIMITIVE>() +
-               "\", \"content\": " + content_.form() + params +
+               "\", \"content\": " + content_.form(offset) + params +
                ", \"form_key\": \"" + form_key.str() + "\" }";
       }
 
@@ -524,9 +524,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -535,7 +535,7 @@ namespace awkward {
         return "{ \"class\": \"ListArray\", \"starts\": \"" +
                type_to_numpy_like<PRIMITIVE>() + "\", \"stops\": \"" +
                type_to_numpy_like<PRIMITIVE>() +
-               "\", \"content\": " + content_.form() + params +
+               "\", \"content\": " + content_.form(offset) + params +
                ", \"form_key\": \"" + form_key.str() + "\" }";
       }
 
@@ -619,7 +619,7 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -721,9 +721,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -934,9 +934,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -953,7 +953,7 @@ namespace awkward {
                 << (!content_names_.empty() ? content_names_.at(content.index)
                                             : content.index_as_field())
                 << +"\": ";
-            out << content.builder.form();
+            out << content.builder.form(offset);
           };
           visit_at(contents, i, contents_form);
         }
@@ -1144,9 +1144,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -1159,7 +1159,7 @@ namespace awkward {
             out << ", ";
           }
           auto contents_form = [&out](auto& content) {
-            out << content.form();
+            out << content.form(offset);
           };
           visit_at(contents, i, contents_form);
         }
@@ -1321,16 +1321,16 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
           params = std::string(", \"parameters\": { " + parameters_ + " }");
         }
         return "{ \"class\": \"RegularArray\", \"content\": " +
-               content_.form() + ", \"size\": " + std::to_string(size_) +
+               content_.form(offset) + ", \"size\": " + std::to_string(size_) +
                params + ", \"form_key\": \"" + form_key.str() + "\" }";
       }
 
@@ -1510,9 +1510,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -1520,7 +1520,7 @@ namespace awkward {
         }
         return "{ \"class\": \"IndexedArray\", \"index\": \"" +
                type_to_numpy_like<PRIMITIVE>() +
-               "\", \"content\": " + content_.form() + params +
+               "\", \"content\": " + content_.form(offset) + params +
                ", \"form_key\": \"" + form_key.str() + "\" }";
       }
 
@@ -1710,9 +1710,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -1720,7 +1720,7 @@ namespace awkward {
         }
         return "{ \"class\": \"IndexedOptionArray\", \"index\": \"" +
                type_to_numpy_like<PRIMITIVE>() +
-               "\", \"content\": " + content_.form() + params +
+               "\", \"content\": " + content_.form(offset) + params +
                ", \"form_key\": \"" + form_key.str() + "\" }";
       }
 
@@ -1854,16 +1854,16 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
           params = std::string(", \"parameters\": { " + parameters_ + " }");
         }
         return "{ \"class\": \"UnmaskedArray\", \"content\": " +
-               content_.form() + params + ", \"form_key\": \"" +
+               content_.form(offset) + params + ", \"form_key\": \"" +
                form_key.str() + "\" }";
       }
 
@@ -2057,9 +2057,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key, form_valid_when;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         form_valid_when << std::boolalpha << valid_when_;
         std::string params("");
         if (parameters_ == "") {
@@ -2068,7 +2068,7 @@ namespace awkward {
         }
         return "{ \"class\": \"ByteMaskedArray\", \"mask\": \"i8\", "
                "\"content\": " +
-               content_.form() + ", \"valid_when\": " + form_valid_when.str() +
+               content_.form(offset) + ", \"valid_when\": " + form_valid_when.str() +
                params + ", \"form_key\": \"" + form_key.str() + "\" }";
       }
 
@@ -2310,9 +2310,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key, form_valid_when, form_lsb_order;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         form_valid_when << std::boolalpha << valid_when_;
         form_lsb_order << std::boolalpha << lsb_order_;
         std::string params("");
@@ -2322,7 +2322,7 @@ namespace awkward {
         }
         return "{ \"class\": \"BitMaskedArray\", \"mask\": \"u8\", "
                "\"content\": " +
-               content_.form() + ", \"valid_when\": " + form_valid_when.str() +
+               content_.form(offset) + ", \"valid_when\": " + form_valid_when.str() +
                ", \"lsb_order\": " + form_lsb_order.str() + params +
                ", \"form_key\": \"" + form_key.str() + "\" }";
       }
@@ -2588,9 +2588,9 @@ namespace awkward {
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
       std::string
-      form() const noexcept {
+      form(size_t offset = 0) const noexcept {
         std::stringstream form_key;
-        form_key << "node" << id_;
+        form_key << "node" << id_ + offset;
         std::string params("");
         if (parameters_ == "") {
         } else {
@@ -2605,7 +2605,7 @@ namespace awkward {
             out << ", ";
           }
           auto contents_form = [&](auto& content) {
-            out << content.form();
+            out << content.form(offset);
           };
           visit_at(contents_, i, contents_form);
         }
