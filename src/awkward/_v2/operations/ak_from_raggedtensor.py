@@ -44,7 +44,7 @@ def _impl(
             TypeError(f"expected `tensorflow.RaggedTensor` object, not {type(tensor)}")
         )
 
-    layout = _tensor_to_layout(tensor, tensorflow)
+    layout = tensor_to_layout(tensor, tensorflow)
     if highlevel:
         return ak._v2._util.wrap(layout, behavior, highlevel)
     else:
@@ -57,16 +57,16 @@ def stops_to_offsets(stops):
     return offsets
 
 
-def _tensor_to_layout(tensor, tensorflow, parameters=None, child_parameters=None):
+def tensor_to_layout(tensor, tensorflow, parameters=None):
     if isinstance(tensor, tensorflow.RaggedTensor):
         offsets = stops_to_offsets(tensor.row_limits().numpy())
         return ak._v2.contents.ListOffsetArray(
             ak._v2.index.Index64(offsets),
-            _tensor_to_layout(tensor.values, tensorflow),
+            tensor_to_layout(tensor.values, tensorflow),
             parameters=parameters,
         )
-    # Strings are not treated as a ragged dimension, but instead a regular dimension with
-    # a tensorflow.string dtype
+    # Strings are not treated by TensorFlow as a ragged dimension, but instead a regular
+    # dimension with a tensorflow.string dtype
     elif tensor.dtype == tensorflow.string:
         tensor = tensorflow.cast(
             tensorflow.strings.unicode_decode(tensor, "UTF-8"), tensorflow.uint8
