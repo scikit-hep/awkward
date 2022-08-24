@@ -37,7 +37,7 @@ compiler = ROOT.gInterpreter.Declare
 
 done = compiler(
     """
-#include "rdataframe_jagged_builders.h"
+#include "rdataframe/jagged_builders.h"
 """
 )
 assert done is True

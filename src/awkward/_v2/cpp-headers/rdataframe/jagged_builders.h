@@ -106,6 +106,23 @@ namespace awkward {
       }
     }
 
+    template<class BUILDER, typename ITERABLE>
+    void
+    recurse_fill_from(int64_t level, BUILDER& builder, ITERABLE& result) const {
+      if (level == 0) {
+        for (auto it : result) {
+          builder.append(it);
+        }
+      }
+      else {
+        auto& next_builder = builder.begin_list();
+        for (auto& it : result) {
+          recurse_fill_from(level - 1, next_builder, it);
+        }
+        next_builder.end_list();
+      }
+    }
+
   private:
     ROOT::RDF::RResultPtr<std::vector<T>>& result_;
     std::map<std::string, size_t> map_names_nbytes_;

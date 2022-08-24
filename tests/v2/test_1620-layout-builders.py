@@ -117,7 +117,11 @@ def test_data_frame_vec_of_vec():
     # ] * 10000)
 
     rdf2 = ak.to_rdataframe({"array": array})
-    # Note when dimensions R and C are large, the following code suffers from potential performance penalties caused by frequent reallocation of memory by the push_back() function. This should be used only when vector dimensions are not known in advance.
+    # We create a matrix RxC here
+    # Note when dimensions R and C are large, the following code suffers
+    # from potential performance penalties caused by frequent reallocation
+    # of memory by the push_back() function. This should be used only when
+    # vector dimensions are not known in advance.
     rdf3 = rdf2.Define(
         "output",
         """
@@ -135,10 +139,11 @@ def test_data_frame_vec_of_vec():
     )
 
     assert rdf3.GetColumnType("output") == "vector<vector<double> >"
-    out = ak.from_rdataframe(  # noqa: F841
+    out = ak.from_rdataframe(
         rdf3,
         column="output",
     )
+    assert out["output"].to_list() == (array["y"] * array["y"] * 1.0).to_list()
 
     rdf3 = rdf2.Define(
         "output2",
@@ -147,10 +152,13 @@ def test_data_frame_vec_of_vec():
 
     for (auto record : array) {
         std::vector<std::vector<double>> tmp2;
-        double x_number = record.x().value_or(0.0);
+        // we can check if it's None:
+        // if (record.x().has_value())
+        // or set it to 1 so that we do not scale:
+        double x_number = record.x().value_or(1);
         for (auto number : record.y()) {
             std::vector<double> tmp3;
-            for (int i = 0; i <= x_number; i++) {
+            for (int64_t i = 0; i < std::rint(x_number); i++) {
                 double value = x_number * number;
                 tmp3.push_back(value);
             }
@@ -166,3 +174,36 @@ def test_data_frame_vec_of_vec():
         rdf3,
         column="output2",
     )
+    result = ak.Array(
+        [
+            [
+                [[1.1]],  # "x" is 1 - "y" values are unchanged, and each is nesed
+                [
+                    [1.0],
+                    [2.0],
+                ],  # "x" is None - "y" values are unchanged, and each is nesed
+                [
+                    [3.3, 3.3, 3.3],
+                    [6.6, 6.6, 6.6],
+                    [9.899999999999999, 9.899999999999999, 9.899999999999999],
+                ],  # "x" is 3.3 - "y" values are scaled by 3.3 and each is nesed 3 times
+            ],
+            [],
+            [
+                [
+                    [1.0],
+                    [2.0],
+                    [3.0],
+                    [4.0],
+                ],  # "x" is None - "y" values are unchanged, and each is nesed
+                [
+                    [5.5, 5.5, 5.5, 5.5, 5.5, 5.5],
+                    [11.0, 11.0, 11.0, 11.0, 11.0, 11.0],
+                    [16.5, 16.5, 16.5, 16.5, 16.5, 16.5],
+                    [22.0, 22.0, 22.0, 22.0, 22.0, 22.0],
+                    [27.5, 27.5, 27.5, 27.5, 27.5, 27.5],
+                ],  # "x" is 5.5 - "y" values are scaled by 5.5 and each is nesed 5 times
+            ],
+        ]
+    )
+    assert out["output2"].to_list() == result.to_list()
