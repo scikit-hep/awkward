@@ -210,3 +210,16 @@ def test_ragged_tensor_strings_to_array():
     tensor = tf.ragged.constant(paragraphs)
     array = ak._v2.from_raggedtensor(tensor)
     assert array.to_list() == paragraphs
+
+
+def test_ragged_tensor_bytestrings_to_array():
+    paragraphs = [
+        [[b"I", b"have", b"a", b"cat"], [b"His", b"name", b"is", b"Mat"]],
+        [
+            [b"Do", b"you", b"want", b"to", b"come", b"visit"],
+            [b"I'm", b"free", b"tomorrow"],
+        ],
+    ]
+    tensor = tf.ragged.constant(paragraphs)
+    array = ak._v2.from_raggedtensor(tensor, string_encoding=None)
+    assert array.to_list() == paragraphs
