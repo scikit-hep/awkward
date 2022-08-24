@@ -1320,6 +1320,10 @@ class Content:
     def to_numpy(self, allow_missing):
         return self._to_numpy(allow_missing)
 
+    def to_raggedtensor(self):
+        tensorflow = awkward._v2._connect.tensorflow.import_tensorflow()
+        return self._to_raggedtensor(tensorflow)
+
     def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
         if nplike is None:
             nplike = self._nplike

@@ -21,5 +21,4 @@ def to_raggedtensor(array):
 
 def _impl(array):
     layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
-    tensorflow = ak._v2._connect.tensorflow.import_tensorflow()
-    return layout._to_raggedtensor(tensorflow)
+    return layout.to_raggedtensor()

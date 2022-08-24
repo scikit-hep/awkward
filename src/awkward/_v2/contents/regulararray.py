@@ -1129,8 +1129,8 @@ class RegularArray(Content):
     def _to_raggedtensor(self, tensorflow):
         # FIXME: handle string/bytestrings
         return tensorflow.RaggedTensor.from_row_lengths(
-            np.full(self._length, self._size, dtype=np.int64),
             self._content._to_raggedtensor(tensorflow),
+            numpy.full(self._length, self._size, dtype=np.int64),
         )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
