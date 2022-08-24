@@ -19,6 +19,7 @@ repos:
   rev: v2.0.0
   hooks:
   - id: setup-cfg-fmt
+    args: [--include-version-classifiers, --max-py-version=3.11]
 
 - repo: https://github.com/asottile/pyupgrade
   rev: "v2.37.3"
