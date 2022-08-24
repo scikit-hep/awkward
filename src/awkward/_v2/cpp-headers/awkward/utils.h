@@ -249,6 +249,13 @@ namespace awkward {
     return "unsupported type";
   }
 
+  /// @brief Check if an RDataFrame column is an Awkward Array.
+  template <typename T>
+  bool
+  is_awkward_type() {
+    return (std::string(typeid(T).name()).find("awkward") != std::string::npos);
+  }
+
   /// @class visit_impl
   ///
   /// @brief Class to index tuple at runtime.
