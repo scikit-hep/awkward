@@ -244,7 +244,7 @@ namespace awkward {
                                            FormKey(nullptr),
                                            std::vector<int64_t>(),
                                            8,
-                                           "M8" + primitive.substr(10, -1),
+                                           "M8" + primitive.substr(10, std::string::npos),
                                            util::dtype::datetime64);
       }
       else if (primitive.find("timedelta64") == 0) {
@@ -253,7 +253,7 @@ namespace awkward {
                                            FormKey(nullptr),
                                            std::vector<int64_t>(),
                                            8,
-                                           "m8" + primitive.substr(11, -1),
+                                           "m8" + primitive.substr(11, std::string::npos),
                                            util::dtype::timedelta64);
       }
       else {
