@@ -2042,9 +2042,15 @@ class ListOffsetArray(Content):
 
     def _to_raggedtensor(self, tensorflow):
         layout = self.toListOffsetArray64(True)
-        return tensorflow.RaggedTensor.from_row_starts(
-            layout._content._to_raggedtensor(tensorflow), layout.starts
-        )
+
+        # Handle strings specially
+        if layout.parameter("__array__") in {"string", "bytestring"}:
+            as_numpy = layout.to_numpy(allow_missing=False)
+            return tensorflow.constant(as_numpy)
+        else:
+            return tensorflow.RaggedTensor.from_row_starts(
+                layout._content._to_raggedtensor(tensorflow), layout.starts
+            )
 
     def _completely_flatten(self, nplike, options):
         if (
