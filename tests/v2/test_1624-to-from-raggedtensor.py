@@ -46,7 +46,7 @@ def test_from_list_array_numpy_array():
     assert tensor.to_list() == array.tolist()
 
 
-def test_nested_list_offset_array_numpy_array():
+def test_from_nested_list_offset_array_numpy_array():
     array = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 2, 5], dtype=np.int64)),
         ak._v2.contents.ListOffsetArray(
@@ -59,7 +59,7 @@ def test_nested_list_offset_array_numpy_array():
     assert tensor.to_list() == array.tolist()
 
 
-def test_record_array():
+def test_from_record_array():
     array = ak._v2.contents.RecordArray(
         [
             ak._v2.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
@@ -72,7 +72,7 @@ def test_record_array():
         ak._v2.to_raggedtensor(array)
 
 
-def test_record():
+def test_from_record():
     array = ak._v2.contents.RecordArray(
         [
             ak._v2.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
@@ -87,7 +87,7 @@ def test_record():
         ak._v2.to_raggedtensor(record)
 
 
-def test_indexed_array_numpy_array():
+def test_from_indexed_array_numpy_array():
     array = ak._v2.contents.IndexedArray(
         ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
         ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
@@ -97,7 +97,7 @@ def test_indexed_array_numpy_array():
     assert tensor.numpy().tolist() == array.tolist()
 
 
-def test_indexed_option_array_numpy_array():
+def test_from_indexed_option_array_numpy_array():
     array = ak._v2.contents.IndexedOptionArray(
         ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
@@ -107,7 +107,7 @@ def test_indexed_option_array_numpy_array():
         ak._v2.to_raggedtensor(array)
 
 
-def test_byte_masked_array_numpy_array():
+def test_from_byte_masked_array_numpy_array():
     array = ak._v2.contents.ByteMaskedArray(
         ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
         ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
@@ -118,7 +118,7 @@ def test_byte_masked_array_numpy_array():
         ak._v2.to_raggedtensor(array)
 
 
-def test_bit_masked_array_numpy_array():
+def test_from_bit_masked_array_numpy_array():
     array = ak._v2.contents.BitMaskedArray(
         ak._v2.index.Index(
             np.packbits(
@@ -156,7 +156,7 @@ def test_bit_masked_array_numpy_array():
         ak._v2.to_raggedtensor(array)
 
 
-def test_nested_unmasked_array_numpy_array():
+def test_from_nested_unmasked_array_numpy_array():
     array = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
         ak._v2.contents.UnmaskedArray(
@@ -168,7 +168,7 @@ def test_nested_unmasked_array_numpy_array():
         ak._v2.to_raggedtensor(array)
 
 
-def test_union_array_numpy_array():
+def test_from_union_array_numpy_array():
     array = ak._v2.contents.UnionArray(
         ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
         ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
