@@ -67,7 +67,11 @@ def from_rdataframe(data_frame, column):
         form = ak._v2.forms.from_json(form_str)
         list_depth = form.purelist_depth
         if list_depth > 4:
-            raise ak._v2._util.error(NotImplementedError)
+            raise ak._v2._util.error(
+                NotImplementedError(
+                    "Retrieving arbitrary depth nested containers is not implemented yet."
+                )
+            )
 
         def supported(form):
             if form.purelist_depth == 1:
