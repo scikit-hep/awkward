@@ -601,7 +601,7 @@ def reducer_recordclass(reducer, layout, behavior):
     behavior = Behavior(ak._v2.behavior, behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
-        return behavior[reducer.function, rec]
+        return behavior[reducer.highlevel_function(), rec]
 
 
 def typestrs(behavior):
