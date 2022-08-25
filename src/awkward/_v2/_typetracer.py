@@ -265,6 +265,9 @@ class TypeTracerArray:
     def ndim(self):
         return len(self._shape)
 
+    def astype(self, dtype):
+        return self.__class__(np.dtype(dtype), self._shape)
+
     def view(self, dtype):
         if (
             self.itemsize != np.dtype(dtype).itemsize
