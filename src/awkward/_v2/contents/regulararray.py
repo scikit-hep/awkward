@@ -1118,13 +1118,9 @@ class RegularArray(Content):
         if array_param in {"bytestring", "string"}:
             return self._nplike.array(self.to_list())
 
-        out = ak._v2.operations.to_numpy(self.content, allow_missing=allow_missing)
-        head, tail = out.shape[0], out.shape[1:]
-        if self.size == 0:
-            shape = (0, 0) + tail
-        else:
-            shape = (head // self.size, self.size) + tail
-        return out[: shape[0] * self.size].reshape(shape)
+        out = self._content.to_numpy(allow_missing)
+        shape = (self._length, self._size) + out.shape[1:]
+        return out[: self._length * self._size].reshape(shape)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":
