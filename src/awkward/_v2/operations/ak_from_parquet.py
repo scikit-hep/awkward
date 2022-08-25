@@ -198,6 +198,9 @@ def metadata(
 
     parquet_columns = subform.columns(list_indicator=list_indicator)
 
+    if parquetfile_for_metadata.schema.column(0).path.startswith("."):
+        parquet_columns = [f".{c}" for c in parquet_columns]
+
     return parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata
 
 
