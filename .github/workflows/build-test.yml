@@ -237,10 +237,10 @@ jobs:
 
     timeout-minutes: 30
 
-     # Required for miniconda to activate conda
-     defaults:
+    # Required for miniconda to activate conda
+    defaults:
       run:
-        shell: "bash -l {0}"
+      shell: "bash -l {0}"
 
     steps:
       - uses: "actions/checkout@v3"
@@ -249,11 +249,11 @@ jobs:
 
       - name: "Get conda"
         uses: "conda-incubator/setup-miniconda@v2"
-         with:
-           auto-update-conda: true
-           python-version: ${{ matrix.python-version }}
-           miniforge-variant: Mambaforge
-           use-mamba: true
+        with:
+          auto-update-conda: true
+          python-version: "${{ matrix.python-version }}"
+          miniforge-variant: Mambaforge
+          use-mamba: true
 
       - name: "Install ROOT"
         if: "matrix.python-version == 3.8  &&  runner.os != 'macOS'  &&  runner.os != 'Windows'"
