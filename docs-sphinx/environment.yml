@@ -1,9 +1,10 @@
 name: awkward-docs
-
+channels:
+  - conda-forge
 dependencies:
   - pip
-  - xeus-cling==0.13.0
-  - gxx_linux-64==9.4.0
+  - xeus-cling=0.13.0
+  - gxx_linux-64=9.4.0
   - pip:
     - -r requirements.txt
 
