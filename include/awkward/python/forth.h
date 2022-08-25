@@ -6,7 +6,6 @@
 #include <pybind11/pybind11.h>
 
 #include "awkward/forth/ForthMachine.h"
-#include "awkward/forth/SpecializedJSON.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -14,8 +13,5 @@ namespace ak = awkward;
 template <typename T, typename I>
 py::class_<ak::ForthMachineOf<T, I>, std::shared_ptr<ak::ForthMachineOf<T, I>>>
 make_ForthMachineOf(const py::handle& m, const std::string& name);
-
-py::class_<ak::SpecializedJSON, std::shared_ptr<ak::SpecializedJSON>>
-make_SpecializedJSON(const py::handle& m, const std::string& name);
 
 #endif // AWKWARDPY_FORTH_H_

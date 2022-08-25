@@ -155,9 +155,18 @@ class ErrorContext:
             except Exception as err:
                 valuestr = f"repr-raised-{type(err).__name__}"
 
-        elif value is None or isinstance(value, (bool, int, str, bytes)):
+        elif value is None or isinstance(value, (bool, int, float)):
             try:
                 valuestr = repr(value)
+            except Exception as err:
+                valuestr = f"repr-raised-{type(err).__name__}"
+
+        elif isinstance(value, (str, bytes)):
+            try:
+                if len(value) < 60:
+                    valuestr = repr(value)
+                else:
+                    valuestr = repr(value[:57]) + "..."
             except Exception as err:
                 valuestr = f"repr-raised-{type(err).__name__}"
 
