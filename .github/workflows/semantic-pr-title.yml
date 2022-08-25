@@ -8,6 +8,10 @@ on:
       - synchronize
   workflow_dispatch:
 
+concurrency:
+  group: semantic-pr-title-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   main:
     name: Validate PR title
