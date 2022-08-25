@@ -14,6 +14,13 @@ kernelspec:
 How to use the header-only LayoutBuilder in C++
 ===============================================
 
+```{code-cell}
+:tags: [hide-cell]
+
+// Make Awkward headers available in this notebook
+#pragma cling add_include_path("../../src/awkward/_v2/cpp-headers")
+```
+
 What is header-only Layout Builder?
 -----------------------------------
 
@@ -65,16 +72,15 @@ Three phases of using Layout Builder
 
 Example
 -------
+First, include the LayoutBuilder header file:
+
+```{code-cell}
+#include "awkward/LayoutBuilder.h"
+```
 
 Below is an example for creating RecordArray with NumpyArray and ListOffsetArray as fields.
 
 Type alias can be used for each builder class.
-
-```{code-cell}
-#pragma cling add_include_path("../../src/awkward/_v2/cpp-headers")
-
-#include "awkward/LayoutBuilder.h"
-```
 
 ```{code-cell}
 template<class PRIMITIVE>
@@ -82,15 +88,7 @@ using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
 template<class PRIMITIVE, class BUILDER>
 using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
-
-template<class... BUILDERS>
-using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>; 
-
-template<std::size_t field_name, class BUILDER>
-using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
 ```
-
-Note, it is not possible to template on `std::string` because this feature comes only from `C++20`. That is why, a user-defined map with enumerated type field ID as keys and field names as value has to provided for passing the field names as template parameters to the Record Builder.
 
 If multiple Record Builders are used in a Builder, then a user-defined `field_map` has to be provided for each Record Builder.
 
@@ -100,8 +98,19 @@ enum Field : std::size_t {one, two};
 using UserDefinedMap = std::map<std::size_t, std::string>;
 
 UserDefinedMap fields_map({
-{Field::one, "one"},
-{Field::two, "two"}});
+    {Field::one, "one"},
+    {Field::two, "two"}
+});
+```
+
+Note, it is not possible to template on `std::string` because this feature comes only from `C++20`. That is why, a user-defined map with enumerated type field ID as keys and field names as value has to provided for passing the field names as template parameters to the Record Builder.
+
+```{code-cell}
+template<class... BUILDERS>
+using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>; 
+
+template<std::size_t field_name, class BUILDER>
+using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
 ```
 
 The Record Builder content is a heterogeneous type container (std::tuple) which can take other Builders as template parameters. The field names are non-type template parameters defined by a user. In this example, a Record Builder with the fields as Numpy and ListOffset is taken.
