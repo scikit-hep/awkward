@@ -59,13 +59,18 @@ Three phases of using Layout Builder
 
 Example
 -------
-First, include the LayoutBuilder header file:
+
+Below is an example for creating RecordArray with NumpyArray and ListOffsetArray as fields.
+
+First, include the LayoutBuilder header file. Note that only `LayoutBuilder.h` needs to be included in the example since the other header-only files required are already included in its implementation.
 
 ```{code-cell}
 #include "awkward/LayoutBuilder.h"
 ```
 
-Below is an example for creating RecordArray with NumpyArray and ListOffsetArray as fields.
+The Record Builder content is a heterogeneous type container (std::tuple) which can take other Builders as template parameters. The field names are non-type template parameters defined by a user.
+
+In the ListOffset Builder, there is an option to use 64-bit signed integers `int64`, 32-bit signed integers `int32` or 32-bit unsigned integers `uint32` as the type for list offsets.
 
 Type alias can be used for each builder class.
 
@@ -75,9 +80,17 @@ using NumpyBuilder = awkward::LayoutBuilder::Numpy<PRIMITIVE>;
 
 template<class PRIMITIVE, class BUILDER>
 using ListOffsetBuilder = awkward::LayoutBuilder::ListOffset<PRIMITIVE, BUILDER>;
+
+template<class... BUILDERS>
+using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>; 
+
+template<std::size_t field_name, class BUILDER>
+using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
 ```
 
-If multiple Record Builders are used in a Builder, then a user-defined `field_map` has to be provided for each Record Builder.
+Note, it is not possible to template on `std::string` because this feature comes only from `C++20`. That is why, a user-defined `field_map` with enumerated type field ID as keys and field names as value has to provided for passing the field names as template parameters to the `Record` Builder.
+
+If multiple `Record` Builders are used in a Builder, then a user-defined map has to be provided for each of the `Record` Builders used.
 
 ```{code-cell}
 enum Field : std::size_t {one, two};
@@ -90,21 +103,9 @@ UserDefinedMap fields_map({
 });
 ```
 
-Note, it is not possible to template on `std::string` because this feature comes only from `C++20`. That is why, a user-defined map with enumerated type field ID as keys and field names as value has to provided for passing the field names as template parameters to the Record Builder.
+The builder is defined as demonstrated below. To set the field names, there are two methods:
 
-```{code-cell}
-template<class... BUILDERS>
-using RecordBuilder = awkward::LayoutBuilder::Record<UserDefinedMap, BUILDERS...>; 
-
-template<std::size_t field_name, class BUILDER>
-using RecordField = awkward::LayoutBuilder::Field<field_name, BUILDER>;
-```
-
-The Record Builder content is a heterogeneous type container (std::tuple) which can take other Builders as template parameters. The field names are non-type template parameters defined by a user. In this example, a Record Builder with the fields as Numpy and ListOffset is taken.
-
-In the ListOffset Builder, there is an option to use 64-bit signed integers `int64`, 32-bit signed integers `int32` or 32-bit unsigned integers `uint32` as the type for list offsets.
-
-To set the field names, either the user-defined `fields_map` can be passed as a parameter in Builder object of `set_field_names()` method can be used.
+First Method: The user-defined `fields_map` can be passed as a parameter in the object of the builder.
 
 ```{code-cell}
 RecordBuilder<
@@ -112,7 +113,11 @@ RecordBuilder<
   RecordField<Field::two, ListOffsetBuilder<int64_t,
       NumpyBuilder<int32_t>>>
 > builder(fields_map);
+```
 
+Second Method: The user-defined `fields_map` can be passed a parameter in `set_field_names()`.
+
+```{code-cell}
 //  builder.set_field_names(fields_map);
 ```
 
