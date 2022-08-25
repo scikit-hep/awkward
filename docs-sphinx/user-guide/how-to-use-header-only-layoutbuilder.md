@@ -118,7 +118,7 @@ RecordBuilder<
 Second Method: The user-defined `fields_map` can be passed a parameter in `set_field_names()`.
 
 ```{code-cell}
-  builder.set_field_names(fields_map);
+builder.set_field_names(fields_map);
 ```
 
 The `field_names()` method can be used to check if field names are set correctly in the Record Builder or not.
