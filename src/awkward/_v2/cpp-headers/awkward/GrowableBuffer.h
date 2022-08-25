@@ -339,9 +339,9 @@ namespace awkward {
     /// Although the #length increments every time #append is called,
     /// it is always less than or equal to #reserved because of
     /// allocations of new panels.
-    int64_t
+    size_t
     length() const {
-      return length_ + (int64_t)ptr_->current_length();
+      return length_ + ptr_->current_length();
     }
 
     /// @brief Return options of this GrowableBuffer.
@@ -465,7 +465,7 @@ namespace awkward {
     const BuilderOptions options_;
 
     /// @brief Filled panels data length.
-    int64_t length_;
+    size_t length_;
 
     /// @brief The first panel.
     std::unique_ptr<Panel<PRIMITIVE>> panel_;
