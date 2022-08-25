@@ -20,7 +20,7 @@ def test_to_from_data_frame_large():
     rows = 3 ** (n // 2)
     cols = n
 
-    arr = np.zeros((rows, cols), dtype=int)
+    arr = np.zeros((rows, cols), dtype=np.int64)
     shape = (rows,)
 
     source = np.array([-1, 0, 1], dtype=np.int64)[:, None]
