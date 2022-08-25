@@ -511,6 +511,7 @@ class Content:
             items = [ak._v2._slicing.prepare_tuple_item(x, self._nplike) for x in where]
 
             nextwhere = ak._v2._slicing.getitem_broadcast(items)
+            ak._v2._slicing.ensure_supported_tuple(nextwhere)
 
             next = ak._v2.contents.RegularArray(
                 self,

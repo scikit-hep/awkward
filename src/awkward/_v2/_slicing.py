@@ -490,3 +490,36 @@ def getitem_next_array_wrap(outcontent, shape, outer_length=0):
             size = 1
         outcontent = ak._v2.contents.RegularArray(outcontent, size, length, None, None)
     return outcontent
+
+
+def index_is_advanced_separator(item):
+    return (item is np.newaxis) or (item is Ellipsis) or isinstance(item, slice)
+
+
+def ensure_supported_tuple(where):
+    """
+    Args:
+        where: tuple index
+
+    Raise ValueError if the given tuple index is not supported by Awkward Array
+    """
+    if len(where) == 0:
+        return
+
+    has_seen_array = False
+    for item, next_item in zip(where, where[1:]):
+        # Take note if we find an advanced (array) index
+        if isinstance(item, ak._v2.index.Index):
+            has_seen_array = True
+
+        elif (
+            has_seen_array
+            and index_is_advanced_separator(item)
+            and (isinstance(next_item, ak._v2.index.Index))
+        ):
+            raise ak._v2._util.error(
+                ValueError(
+                    "NumPy advanced indexing with array indices separated by None "
+                    "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
+                )
+            )
