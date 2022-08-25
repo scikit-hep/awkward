@@ -260,7 +260,6 @@ jobs:
         run: |
           conda env list
           mamba install root
-          pip install dask-awkward
           conda list
 
       - name: Setup ccache
@@ -277,11 +276,13 @@ jobs:
 
       - name: Install NumPy
         run: |
+          conda env list
           if [[ -z "${NUMPY_VERSION}" ]]; then
-            python -m pip install numpy;
+            mamba install numpy
           else
-            python -m pip install "numpy==${NUMPY_VERSION}";
+            mamba install "numpy==${NUMPY_VERSION}";
           fi
+          conda list
 
       - name: Build
         run: 'python -m pip install -v .[test,dev]'
