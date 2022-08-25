@@ -226,9 +226,6 @@ jobs:
         python-version:
           - '3.8'
 
-        include:
-          - numpy-version: 1.13.1
-
     runs-on: ubuntu-20.04
 
     env:
@@ -264,8 +261,7 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: >-
-            ${{ github.job
-            }}-${{matrix.python-version}}-${{matrix.numpy-version}}
+            ${{ github.job}}-${{matrix.python-version}}
 
       - name: Use ccache
         run: |
