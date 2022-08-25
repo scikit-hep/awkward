@@ -67,7 +67,7 @@ def test_numpyarray_getitem_next():
     c = np.array([False, False, False, True, True, True, False, True, False, True])
     assert to_list(b[c]) == to_list(a[c])
     assert b.typetracer[c].form == b[c].form
-    c = np.array([], dtype=int)
+    c = np.array([], dtype=np.int64)
     assert to_list(b[c]) == to_list(a[c])
     assert b.typetracer[c].form == b[c].form
 
@@ -80,7 +80,7 @@ def test_numpyarray_getitem_next():
     c = np.array([False, False, False, True, True, True, False, True, False, True])
     assert to_list(b[c]) == to_list(a[c])
     assert b.typetracer[c].form == b[c].form
-    c = np.array([], dtype=int)
+    c = np.array([], dtype=np.int64)
     assert to_list(b[c]) == to_list(a[c])
     assert b.typetracer[c].form == b[c].form
 
@@ -105,10 +105,10 @@ def test_numpyarray_getitem_next():
     assert to_list(b[c]) == to_list(a[c])
     assert b.typetracer[c].form == b[c].form
 
-    c = np.array([], dtype=int)
+    c = np.array([], dtype=np.int64)
     assert to_list(b[c]) == to_list(a[c])
-    c1 = np.array([], dtype=int)
-    c2 = np.array([], dtype=int)
+    c1 = np.array([], dtype=np.int64)
+    c2 = np.array([], dtype=np.int64)
     assert to_list(b[c1, c2]) == to_list(a[c1, c2])
     assert b.typetracer[c1, c2].form == b[c1, c2].form
 
