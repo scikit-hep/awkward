@@ -224,7 +224,6 @@ First, we'll write a small bit of code to display the form in a more pleasing ma
 :tags: [hide-cell]
 
 #include <string>
-#include <fstream>
 
 #include "nlohmann/json.hpp"
 
