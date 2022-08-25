@@ -39,14 +39,12 @@ The Layout Builder namespace consists of the following 14 types of Layout Builde
 All Builders except `Numpy` and `Empty` can take any other Builder as template parameters.
 These Builders are sufficient to build every type of Awkward Array.
 
-
 Why header-only Layout Builder?
 -------------------------------
 
 The users can directly include `LayoutBuilder.h` in their compilation, rather than linking against platform-specific libraries or worrying about native dependencies. This makes the integration of Awkward Arrays into other projects easier and more portable.
 
 The code is minimal, it does not include all of the code needed to use Awkward Arrays in Python, nor does it include references to Python or pybind11. The C++ users can use it to make arrays and then copy them to Python without any specialised data types - only raw buffers, strings, and integers.
-
 
 How to use Layout Builders?
 -----------------------------
@@ -57,7 +55,6 @@ The following cpp-headers which reside in this [directory](https://github.com/sc
 2. GrowableBuffer.h
 3. LayoutBuilder.h
 4. utils.h
-
 
 Three phases of using Layout Builder
 ------------------------------------
@@ -239,7 +236,6 @@ A Layout Builder Form is a unique description of an Awkward Array and returns a 
 }
 ```
 
-
 More Examples
 -------------
-The examples for other Layout Builders can be found in [tests-cpp](https://github.com/scikit-hep/awkward/blob/main/tests-cpp/test_1494-layout-builder.cpp).
+The examples for other Layout Builders can be found [here](https://github.com/scikit-hep/awkward/blob/main/tests-cpp/test_1494-layout-builder.cpp).
