@@ -123,6 +123,7 @@ def nanmax(
 
 
 def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
+    ak._v2._reducers.Max.function = max
     layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:

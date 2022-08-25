@@ -826,18 +826,12 @@ class RecordArray(Content):
         keepdims,
         behavior,
     ):
-        reducer_name = reducer.__name__.split(".")[0].lower()
-
-        if behavior is None or not (
-            any(
-                x[0].__module__.split(".")[-1].split("_")[-1] == reducer_name
-                for x in behavior.keys()
-            )
-        ):
+        reducer_recordclass = ak._v2._util.reducer_recordclass(reducer, self, behavior)
+        if reducer_recordclass is None:
             raise ak._v2._util.error(
                 TypeError(
                     "no ak.{} overloads for custom types: {}".format(
-                        reducer_name, ", ".join(self._fields)
+                        str(reducer).split(".")[-1], ", ".join(self._fields)
                     )
                 )
             )

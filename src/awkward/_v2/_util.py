@@ -588,6 +588,13 @@ def recordclass(layout, behavior):
     return ak._v2.highlevel.Record
 
 
+def reducer_recordclass(reducer, layout, behavior):
+    behavior = Behavior(ak._v2.behavior, behavior)
+    rec = layout.parameter("__record__")
+    if isstr(rec):
+        return behavior[reducer.function, rec]
+
+
 def typestrs(behavior):
     behavior = Behavior(ak._v2.behavior, behavior)
     out = {}

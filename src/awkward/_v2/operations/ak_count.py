@@ -93,6 +93,7 @@ def count(array, axis=None, keepdims=False, mask_identity=False, flatten_records
 
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
+    ak._v2._reducers.Count.function = count
     layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:

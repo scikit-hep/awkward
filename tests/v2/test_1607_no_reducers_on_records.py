@@ -9,23 +9,8 @@ def test_reducers():
     array = ak._v2.Array([[{"rho": -1.1, "phi": -0.1}, {"rho": 1.1, "phi": 0.1}]])
 
     with pytest.raises(TypeError):
-        assert ak._v2.to_list(ak._v2.operations.sum(array, axis=1)) == [
-            {"phi": 0.0, "rho": 0.0}
-        ]
-
-    with pytest.raises(TypeError):
-        assert ak._v2.to_list(ak._v2.operations.prod(array, axis=1)) == [
-            {"phi": -0.010000000000000002, "rho": -1.2100000000000002}
-        ]
-
-    with pytest.raises(TypeError):
-        assert ak._v2.to_list(ak._v2.operations.count(array, axis=1)) == [
-            {"phi": 2, "rho": 2}
-        ]
-
-    with pytest.raises(TypeError):
-        assert ak._v2.to_list(ak._v2.operations.count_nonzero(array, axis=1)) == [
-            {"phi": 2, "rho": 2}
+        assert ak._v2.to_list(ak._v2.operations.all(array, axis=1)) == [
+            {"phi": True, "rho": True}
         ]
 
     with pytest.raises(TypeError):
@@ -34,8 +19,43 @@ def test_reducers():
         ]
 
     with pytest.raises(TypeError):
-        assert ak._v2.to_list(ak._v2.operations.all(array, axis=1)) == [
+        assert ak._v2.to_list(ak._v2.operations.argmax(array, axis=1)) == [
             {"phi": True, "rho": True}
+        ]
+
+    with pytest.raises(TypeError):
+        assert ak._v2.to_list(ak._v2.operations.argmin(array, axis=1)) == [
+            {"phi": 0, "rho": 0}
+        ]
+
+    with pytest.raises(TypeError):
+        assert ak._v2.to_list(ak._v2.operations.count_nonzero(array, axis=1)) == [
+            {"phi": 2, "rho": 2}
+        ]
+
+    with pytest.raises(TypeError):
+        assert ak._v2.to_list(ak._v2.operations.count(array, axis=1)) == [
+            {"phi": 2, "rho": 2}
+        ]
+
+    with pytest.raises(TypeError):
+        assert ak._v2.to_list(ak._v2.operations.max(array, axis=1)) == [
+            {"phi": 0.1, "rho": 1.1}
+        ]
+
+    with pytest.raises(TypeError):
+        assert ak._v2.to_list(ak._v2.operations.min(array, axis=1)) == [
+            {"phi": -0.1, "rho": -1.1}
+        ]
+
+    with pytest.raises(TypeError):
+        assert ak._v2.to_list(ak._v2.operations.prod(array, axis=1)) == [
+            {"phi": -0.010000000000000002, "rho": -1.2100000000000002}
+        ]
+
+    with pytest.raises(TypeError):
+        assert ak._v2.to_list(ak._v2.operations.sum(array, axis=1)) == [
+            {"phi": 0.0, "rho": 0.0}
         ]
 
 
