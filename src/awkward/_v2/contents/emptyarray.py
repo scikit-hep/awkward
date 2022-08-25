@@ -261,6 +261,7 @@ class EmptyArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         as_numpy = self.toNumpyArray(reducer.preferred_dtype)
         return as_numpy._reduce_next(
@@ -272,6 +273,7 @@ class EmptyArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):

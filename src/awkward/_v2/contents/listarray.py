@@ -1234,6 +1234,7 @@ class ListArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         return self.toListOffsetArray64(True)._reduce_next(
             reducer,
@@ -1244,6 +1245,7 @@ class ListArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):

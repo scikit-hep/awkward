@@ -559,6 +559,7 @@ class BitMaskedArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         return self.toByteMaskedArray()._reduce_next(
             reducer,
@@ -569,6 +570,7 @@ class BitMaskedArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):
