@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: C++14
   language: C++14
@@ -21,20 +21,20 @@ The header-only Layout Builder consists of a set of compile-time, templated, sta
 
 The Layout Builder namespace consists of the following 14 types of Layout Builders:
 
-* Numpy
-* ListOffset
-* List
-* Empty
-* EmptyRecord
-* Record
-* Tuple
-* Regular
-* Indexed
-* IndexedOption
-* Unmasked
-* ByteMasked
-* BitMasked
-* Union
+* `Numpy`
+* `ListOffset`
+* `List`
+* `Empty`
+* `EmptyRecord`
+* `Record`
+* `Tuple`
+* `Regular`
+* `Indexed`
+* `IndexedOption`
+* `Unmasked`
+* `ByteMasked`
+* `BitMasked`
+* `Union`
 
 All Builders except `Numpy` and `Empty` can take any other Builder as template parameters.
 These Builders are sufficient to build every type of Awkward Array.
@@ -249,7 +249,7 @@ namespace display
 }
 ```
 
-The is the Awkward Form generated for this example. 
+The is the Awkward Form generated for this example.
 
 ```{code-cell}
 display::JSON(builder.form())
