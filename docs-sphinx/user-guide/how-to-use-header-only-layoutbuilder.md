@@ -74,15 +74,6 @@ Type alias can be used for each builder class.
 #pragma cling add_include_path("../../src/awkward/_v2/cpp-headers")
 
 #include "awkward/LayoutBuilder.h"
-
-#include <string>
-#include <fstream>
-
-#include "nlohmann/json.hpp"
-```
-
-```{code-cell}
-using UserDefinedMap = std::map<std::size_t, std::string>;
 ```
 
 ```{code-cell}
@@ -105,6 +96,8 @@ If multiple Record Builders are used in a Builder, then a user-defined `field_ma
 
 ```{code-cell}
 enum Field : std::size_t {one, two};
+
+using UserDefinedMap = std::map<std::size_t, std::string>;
 
 UserDefinedMap fields_map({
 {Field::one, "one"},
@@ -219,7 +212,12 @@ Now, let's look at the _form_ of the builder. A Form is a unique description of 
 First, we'll write a small bit of code to display the form in a more pleasing manner for this guide:
 
 ```{code-cell}
-:tags: []
+:tags: [hide-cell]
+
+#include <string>
+#include <fstream>
+
+#include "nlohmann/json.hpp"
 
 namespace nl = nlohmann;
 
