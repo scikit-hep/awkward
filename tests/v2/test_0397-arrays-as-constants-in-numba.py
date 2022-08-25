@@ -100,7 +100,7 @@ def test_Array():
 
 
 def test_Record():
-    record = ak.Record({"x": 1, "y": [1, 2, 3]})
+    record = ak._v2.Record({"x": 1, "y": [1, 2, 3]})
 
     @numba.njit
     def f1():
