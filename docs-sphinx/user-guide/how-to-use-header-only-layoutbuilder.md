@@ -71,7 +71,7 @@ Below is an example for creating RecordArray with NumpyArray and ListOffsetArray
 Type alias can be used for each builder class.
 
 ```{code-cell}
-#pragma cling add_include_path("../includes")
+#pragma cling add_include_path("../../src/awkward/_v2/cpp-headers")
 
 #include "awkward/LayoutBuilder.h"
 
