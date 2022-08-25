@@ -233,7 +233,6 @@ jobs:
 
     env:
       PIP_ONLY_BINARY: cmake
-      NUMPY_VERSION: '${{ matrix.numpy-version }}'
 
     timeout-minutes: 30
 
@@ -276,11 +275,7 @@ jobs:
       - name: Install NumPy
         run: |
           conda env list
-          if [[ -z "${NUMPY_VERSION}" ]]; then
-            mamba install numpy
-          else
-            mamba install "numpy==${NUMPY_VERSION}";
-          fi
+          mamba install numpy
           conda list
 
       - name: Build
