@@ -17,6 +17,9 @@ void
 make_fromjsonobj(py::module& m, const std::string& name);
 
 void
+make_fromjsonobj_schema(py::module& m, const std::string& name);
+
+void
 make_uproot_issue_90(py::module& m);
 
 #endif // AWKWARDPY_IO_H_
