@@ -240,7 +240,7 @@ jobs:
     # Required for miniconda to activate conda
     defaults:
       run:
-      shell: "bash -l {0}"
+        shell: "bash -l {0}"
 
     steps:
       - uses: "actions/checkout@v3"
