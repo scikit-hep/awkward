@@ -20,7 +20,7 @@ def test_empty_array_slice():
         a.typetracer[2, 1, np.array([], dtype=int)].form
         == a[2, 1, np.array([], dtype=int)].form
     )
-    assert to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == [[]]
+    assert to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == []
     assert (
         a.typetracer[2, np.array([1], dtype=int), np.array([], dtype=int)].form
         == a[2, np.array([1], dtype=int), np.array([], dtype=int)].form
