@@ -26,22 +26,7 @@ What is header-only Layout Builder?
 
 The header-only Layout Builder consists of a set of compile-time, templated, static C++ classes, implemented entirely in header file which can be dropped into any external project, and easily separable from the rest of the Awkward C++ codebase.
 
-The Layout Builder namespace consists of the following 14 types of Layout Builders:
-
-* `Numpy`
-* `ListOffset`
-* `List`
-* `Empty`
-* `EmptyRecord`
-* `Record`
-* `Tuple`
-* `Regular`
-* `Indexed`
-* `IndexedOption`
-* `Unmasked`
-* `ByteMasked`
-* `BitMasked`
-* `Union`
+The Layout Builder namespace consists of [14 types](https://awkward-array.readthedocs.io/en/docs/_static/doxygen/src_2awkward_2__v2_2cpp-headers_2awkward_2LayoutBuilder_8h.html) of Layout Builders.
 
 All Builders except `Numpy` and `Empty` can take any other Builder as template parameters.
 These Builders are sufficient to build every type of Awkward Array.
@@ -56,12 +41,14 @@ The code is minimal, it does not include all of the code needed to use Awkward A
 How to use Layout Builders?
 -----------------------------
 
-The following cpp-headers which reside in this [directory](https://github.com/scikit-hep/awkward/tree/main/src/awkward/_v2/cpp-headers/awkward) are needed to use Layout Builders.
+The following cpp-headers which reside in this [directory](https://github.com/scikit-hep/awkward/tree/main/src/awkward/_v2/cpp-headers/awkward) are needed to use Layout Builders in an external project.
 
 1. BuilderOptions.h
 2. GrowableBuffer.h
 3. LayoutBuilder.h
 4. utils.h
+
+It is recommended to use an awkward installation (e.g. a versioned set of files with pip install) and the config options described above.
 
 Three phases of using Layout Builder
 ------------------------------------
