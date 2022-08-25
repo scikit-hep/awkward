@@ -81,6 +81,10 @@ jobs:
   build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-wasm, awkward-x86-64]
+    defaults:
+      run:
+        # Ensure conda env is activated
+        shell: "bash -l {0}"
     steps:
     - uses: actions/checkout@v3
     - name: Setup Python
@@ -88,9 +92,8 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
         mamba-version: "*"
-        channels: conda-forge,defaults
-        channel-priority: true
         environment-file: docs-sphinx/environment.yml
+        activate-environment: awkward-docs
     - name: Download WASM wheel
       uses: actions/download-artifact@v3
       with:
