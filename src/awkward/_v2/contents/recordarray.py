@@ -831,7 +831,7 @@ class RecordArray(Content):
             raise ak._v2._util.error(
                 TypeError(
                     "no ak.{} overloads for custom types: {}".format(
-                        str(reducer).split(".")[-1], ", ".join(self._fields)
+                        reducer.name, ", ".join(self._fields)
                     )
                 )
             )
