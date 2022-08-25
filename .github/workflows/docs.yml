@@ -35,13 +35,9 @@ jobs:
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
     - name: Setup Python
-      uses: conda-incubator/setup-miniconda@v2
+      uses: actions/setup-python@v4
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
-        mamba-version: "*"
-        channels: conda-forge,defaults
-        channel-priority: true
-        environment-file: docs-sphinx/environment.yml
     - name: Install requirements
       run: |
         python -m pip install --upgrade pip
