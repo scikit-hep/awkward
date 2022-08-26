@@ -795,6 +795,7 @@ class ByteMaskedArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         mask_length = self._mask.length
 
@@ -899,6 +900,7 @@ class ByteMaskedArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
         if not branch and negaxis == depth:

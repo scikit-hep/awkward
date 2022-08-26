@@ -1132,6 +1132,7 @@ class UnionArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, UnionArray):
@@ -1150,6 +1151,7 @@ class UnionArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):
