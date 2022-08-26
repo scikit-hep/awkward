@@ -118,7 +118,7 @@ def prepare_advanced_indexing(items):
         # Now error if we find another array
         for item in it:
             if isinstance(item, ak._v2.index.Index):
-                ak._v2._util.error(
+                raise ak._v2._util.error(
                     ValueError(
                         "NumPy advanced indexing with array indices separated by None "
                         "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"

@@ -55,6 +55,9 @@ def test_lengths_empty_regular_slices():
         == [[], [], []]
     )
     with pytest.raises(ValueError):
+        _ = e[:, [], :, 0, []]
+
+    with pytest.raises(ValueError):
         _ = e[:, [], :, []]
 
     with pytest.raises(ValueError):
