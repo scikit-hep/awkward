@@ -3,7 +3,6 @@
 import numbers
 import math
 import copy
-from collections.abc import Iterable
 
 import awkward as ak
 import awkward._v2._reducers
@@ -509,9 +508,10 @@ class Content:
             if len(where) == 0:
                 return self
 
-            items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
-
-            nextwhere = ak._v2._slicing.getitem_broadcast(items)
+            # Normalise valid indices onto well-defined basis
+            items = ak._v2._slicing.normalise_items(where, self._nplike)
+            # Prepare items for advanced indexing (e.g. via broadcasting)
+            nextwhere = ak._v2._slicing.prepare_advanced_indexing(items)
 
             next = ak._v2.contents.RegularArray(
                 self,
@@ -521,13 +521,6 @@ class Content:
                 None,
                 self._nplike,
             )
-
-            if any(isinstance(x, list) and len(x) == 0 for x in items) and any(
-                isinstance(x, slice) for x in items
-            ):
-                attempt = next.maybe_toNumpyArray()
-                if attempt is not None:
-                    next = attempt
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
@@ -592,15 +585,17 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif isinstance(where, Iterable) and len(where) == 0:
+        elif ak._util.is_sized_iterable(where) and len(where) == 0:
             return self._carry(
                 ak._v2.index.Index64.empty(0, self._nplike), allow_lazy=True
             )
 
-        elif isinstance(where, Iterable) and all(ak._v2._util.isstr(x) for x in where):
+        elif ak._util.is_sized_iterable(where) and all(
+            ak._v2._util.isstr(x) for x in where
+        ):
             return self._getitem_fields(where)
 
-        elif isinstance(where, Iterable):
+        elif ak._util.is_sized_iterable(where):
             layout = ak._v2.operations.to_layout(where)
             as_array = layout.maybe_to_array(layout.nplike)
             if as_array is None:

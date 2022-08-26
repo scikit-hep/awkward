@@ -563,7 +563,7 @@ class ListOffsetArray(Content):
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
                     return ak._v2._slicing.getitem_next_array_wrap(
-                        out, head.metadata.get("shape", (head.length,))
+                        out, head.metadata.get("shape", (head.length,), self.length)
                     )
                 else:
                     return out

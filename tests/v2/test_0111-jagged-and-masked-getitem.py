@@ -1365,7 +1365,7 @@ def test_array_boolean_to_int():
         [[True, True, True], [], [True, True], [True], [True, True, True, True]],
         highlevel=False,
     )
-    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    b = ak._v2._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
 
     a = ak._v2.operations.from_iter(
@@ -1378,7 +1378,7 @@ def test_array_boolean_to_int():
         ],
         highlevel=False,
     )
-    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    b = ak._v2._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[0, 1], [], [0], [], [0, 1, 2]]
 
     a = ak._v2.operations.from_iter(
@@ -1391,14 +1391,14 @@ def test_array_boolean_to_int():
         ],
         highlevel=False,
     )
-    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    b = ak._v2._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[1, 2], [], [1], [], [1, 2, 3]]
 
     a = ak._v2.operations.from_iter(
         [[True, True, None], [], [True, None], [None], [True, True, True, None]],
         highlevel=False,
     )
-    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    b = ak._v2._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[0, 1, None], [], [0, None], [None], [0, 1, 2, None]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
@@ -1409,7 +1409,7 @@ def test_array_boolean_to_int():
         [[None, True, True], [], [None, True], [None], [None, True, True, True]],
         highlevel=False,
     )
-    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    b = ak._v2._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[None, 1, 2], [], [None, 1], [None], [None, 1, 2, 3]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
@@ -1420,7 +1420,7 @@ def test_array_boolean_to_int():
         [[False, True, None], [], [False, None], [None], [False, True, True, None]],
         highlevel=False,
     )
-    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    b = ak._v2._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[1, None], [], [None], [None], [1, 2, None]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
@@ -1431,7 +1431,7 @@ def test_array_boolean_to_int():
         [[None, True, False], [], [None, False], [None], [None, True, True, False]],
         highlevel=False,
     )
-    b = ak._v2._slicing.prepare_tuple_bool_to_int(a)
+    b = ak._v2._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[None, 1], [], [None], [None], [None, 1, 2]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
