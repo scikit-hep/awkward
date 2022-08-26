@@ -9,6 +9,10 @@ class Reducer:
     needs_position = False
 
     @classmethod
+    def highlevel_function(cls):
+        return getattr(ak._v2.operations, cls.name)
+
+    @classmethod
     def return_dtype(cls, given_dtype):
         if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
             return np.int32 if ak._util.win or ak._util.bits32 else np.int64
