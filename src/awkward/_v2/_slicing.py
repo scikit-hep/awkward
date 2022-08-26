@@ -104,26 +104,25 @@ def prepare_advanced_indexing(items):
     # Awkward-NumPy case, we don't want to treat integer indices as "advanced"
     # indices, i.e. `0, :, 0` should not trigger this case, but `0, :, [0]` should
     # (it is broadcast to `[0], :, [0]`)
-    if len(prepared):
-        # We'll perform this validation using a simple finite-state machine
-        it = iter(prepared)
-        # Find an array
-        for item in it:
-            if isinstance(item, ak._v2.index.Index):
-                break
-        # Then find a separator
-        for item in it:
-            if (item is np.newaxis) or (item is Ellipsis) or isinstance(item, slice):
-                break
-        # Now error if we find another array
-        for item in it:
-            if isinstance(item, ak._v2.index.Index):
-                raise ak._v2._util.error(
-                    ValueError(
-                        "NumPy advanced indexing with array indices separated by None "
-                        "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
-                    )
+    # We'll perform this validation using a simple finite-state machine
+    it = iter(prepared)
+    # Find an array
+    for item in it:
+        if isinstance(item, ak._v2.index.Index):
+            break
+    # Then find a separator
+    for item in it:
+        if (item is np.newaxis) or (item is Ellipsis) or isinstance(item, slice):
+            break
+    # Now error if we find another array
+    for item in it:
+        if isinstance(item, ak._v2.index.Index):
+            raise ak._v2._util.error(
+                ValueError(
+                    "NumPy advanced indexing with array indices separated by None "
+                    "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
                 )
+            )
     return tuple(prepared)
 
 
