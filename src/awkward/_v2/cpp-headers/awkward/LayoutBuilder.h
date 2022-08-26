@@ -1158,7 +1158,7 @@ namespace awkward {
           if (i != 0) {
             out << ", ";
           }
-          auto contents_form = [&out](auto& content) {
+          auto contents_form = [&out, &offset](auto& content) {
             out << content.form(offset);
           };
           visit_at(contents, i, contents_form);

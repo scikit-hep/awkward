@@ -44,15 +44,29 @@ namespace awkward {
       std::cout << std::endl;
     }
 
-    template<class BUILDER>
+    template<class BUILDER, typename PRIMITIVE>
     void
-    fill_from(BUILDER& builder) const {
-      for (auto it : result_) {
+    fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) const {
+      std::cout << "fill_from " << std::endl;
+      for (auto it : result) {
         builder.append(it);
       }
     }
 
-    template<class BUILDER, class PRIMITIVE>
+    template<class BUILDER1, typename PRIMITIVE1, class BUILDER2, typename PRIMITIVE2>
+    void
+    fill_from_2(BUILDER1& builder1, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE1>>& result1,
+      BUILDER2& builder2, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE2>>& result2) const {
+      std::cout << "fill_from 2 " << std::endl;
+      for (auto it : result1) {
+        builder1.append(it);
+      }
+      for (auto it : result2) {
+        builder2.append(it);
+      }
+    }
+
+    template<class BUILDER>
     void
     to_char_buffers(BUILDER& builder) {
       builder.to_char_buffers(buffers_uint8_ptr_);

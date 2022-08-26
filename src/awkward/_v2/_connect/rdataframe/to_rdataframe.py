@@ -256,6 +256,7 @@ namespace awkward {{
         }}
 
         void Initialise() {{
+            std::cout << "Initialise()" << std::endl;
             // initialize fEntryRanges
             const auto chunkSize = fSize / fNSlots;
             auto start = 0UL;
@@ -292,6 +293,7 @@ namespace awkward {{
         }}
 
         bool SetEntry(unsigned int slot, ULong64_t entry) {{
+            std::cout << "SetEntry " << slot << ": " << entry << std::endl;
             {cpp_code_entries}
             return true;
         }}

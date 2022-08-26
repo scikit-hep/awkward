@@ -11,6 +11,37 @@ ROOT = pytest.importorskip("ROOT")
 compiler = ROOT.gInterpreter.Declare
 
 
+def test_data_frame_integers():
+    ak_array_x = ak.Array([1, 2, 3, 4, 5])
+    ak_array_y = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+
+    data_frame = ak.to_rdataframe({"x": ak_array_x, "y": ak_array_y})
+
+    assert data_frame.GetColumnType("x") == "int64_t"
+    assert data_frame.GetColumnType("y") == "double"
+
+    ak_array_out = ak.from_rdataframe(
+        data_frame,
+        columns=("x", "y"),
+    )
+    assert ak_array_x.to_list() == ak_array_out["x"].to_list()
+    assert ak_array_y.to_list() == ak_array_out["y"].to_list()
+
+
+def test_data_frame_double():
+    ak_array_in = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+
+    data_frame = ak.to_rdataframe({"x": ak_array_in})
+
+    assert data_frame.GetColumnType("x") == "double"
+
+    ak_array_out = ak.from_rdataframe(
+        data_frame,
+        columns="x",
+    )
+    assert ak_array_in.to_list() == ak_array_out["x"].to_list()
+
+
 def test_data_frame_vec_of_vec():
     array = ak.Array(
         [
@@ -49,7 +80,7 @@ def test_data_frame_vec_of_vec():
 
     assert rdf3.GetColumnType("output") == "vector<vector<double> >"
 
-    rdf3 = rdf2.Define(
+    rdf4 = rdf3.Define(
         "output2",
         """
     std::vector<std::vector<std::vector<double>>> tmp1;
@@ -73,11 +104,16 @@ def test_data_frame_vec_of_vec():
     return tmp1;
     """,
     )
-    assert rdf3.GetColumnType("output2") == "vector<vector<vector<double> > >"
+    assert rdf4.GetColumnType("output2") == "vector<vector<vector<double> > >"
+
     out = ak.from_rdataframe(  # noqa: F841
-        rdf3,
-        column=("output2", "output"),
+        rdf4,
+        columns=(
+            "output",
+            "output2",
+        ),
     )
+
     assert out["output"].to_list() == (array["y"] * array["y"] * 1.0).to_list()
     result = ak.Array(
         [
