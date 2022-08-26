@@ -13,20 +13,24 @@ def headtail(oldtail):
         return oldtail[0], oldtail[1:]
 
 
-def getitem_broadcast(items):
+def prepare_advanced_indexing(items):
     """Broadcast index objects to satisfy NumPy indexing rules
 
     Args:
         items: iterable of index items.
 
     Returns a tuple of broadcasted index items.
+
+    Raises a ValueError if an invalid-style index is used, and a TypeError if an invalid
+    index item type is given.
     """
-    lookup = []
+    # First identify which items need to be broadcast
+    broadcastable_index = []
     broadcastable = []
-    awkward_items = 0
+    n_awkward_contents = 0
     for item in items:
         if isinstance(item, ak._v2.contents.Content):
-            awkward_items += 1
+            n_awkward_contents += 1
         if (
             isinstance(
                 item,
@@ -41,13 +45,14 @@ def getitem_broadcast(items):
             or item is np.newaxis
             or item is Ellipsis
         ):
-            lookup.append(None)
+            broadcastable_index.append(None)
         else:
             # this includes integers (which broadcast to arrays)
-            lookup.append(len(broadcastable))
+            broadcastable_index.append(len(broadcastable))
             broadcastable.append(item)
 
-    if awkward_items > 1 or (awkward_items == 1 and len(broadcastable) != 0):
+    # Now ensure that we don't have mixed Awkward-NumPy style indexing
+    if n_awkward_contents > 1 or (n_awkward_contents == 1 and len(broadcastable) != 0):
         raise ak._v2._util.error(
             ValueError(
                 "cannot mix Awkward slicing (using an array with missing or variable-length lists in the slice) with "
@@ -56,46 +61,73 @@ def getitem_broadcast(items):
             )
         )
 
+    # Then broadcast the index items
     nplike = ak.nplike.of(*broadcastable)
-
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
-    out = []
-    for i, item in zip(lookup, items):
-        if i is None:
-            out.append(item)
-        else:
-            x = broadcasted[i]
-            if len(x.shape) == 0:
-                out.append(int(x))
+    # And re-assemble the index with the broadcasted items
+    prepared = []
+    for i_broadcast, item in zip(broadcastable_index, items):
+        # Non-broadcasted item
+        if i_broadcast is None:
+            prepared.append(item)
+            continue
+
+        x = broadcasted[i_broadcast]
+        if len(x.shape) == 0:
+            prepared.append(int(x))
+        elif issubclass(x.dtype.type, np.int64):
+            prepared.append(ak._v2.index.Index64(x.reshape(-1)))
+            prepared[-1].metadata["shape"] = x.shape
+        elif issubclass(x.dtype.type, np.integer):
+            prepared.append(ak._v2.index.Index64(x.astype(np.int64).reshape(-1)))
+            prepared[-1].metadata["shape"] = x.shape
+        elif issubclass(x.dtype.type, (np.bool_, bool)):
+            if len(x.shape) == 1:
+                current = ak._v2.index.Index64(nplike.nonzero(x)[0])
+                prepared.append(current)
+                prepared[-1].metadata["shape"] = current.data.shape
             else:
-                if issubclass(x.dtype.type, np.int64):
-                    out.append(ak._v2.index.Index64(x.reshape(-1)))
-                    out[-1].metadata["shape"] = x.shape
-                elif issubclass(x.dtype.type, np.integer):
-                    out.append(ak._v2.index.Index64(x.astype(np.int64).reshape(-1)))
-                    out[-1].metadata["shape"] = x.shape
-                elif issubclass(x.dtype.type, (np.bool_, bool)):
-                    if len(x.shape) == 1:
-                        current = ak._v2.index.Index64(nplike.nonzero(x)[0])
-                        out.append(current)
-                        out[-1].metadata["shape"] = current.data.shape
-                    else:
-                        for w in nplike.nonzero(x):
-                            out.append(ak._v2.index.Index64(w))
-                else:
-                    raise ak._v2._util.error(
-                        TypeError(
-                            "array slice must be an array of integers or booleans, not\n\n    {}".format(
-                                repr(x).replace("\n", "\n    ")
-                            )
-                        )
+                for w in nplike.nonzero(x):
+                    prepared.append(ak._v2.index.Index64(w))
+        else:
+            raise ak._v2._util.error(
+                TypeError(
+                    "array slice must be an array of integers or booleans, not\n\n    {}".format(
+                        repr(x).replace("\n", "\n    ")
                     )
+                )
+            )
 
-    return tuple(out)
+    # Finally, ensure that we don't have an unsupported mode of NumPy indexing
+    # We do this here, rather than above the broadcast, because unlike the
+    # Awkward-NumPy case, we don't want to treat integer indices as "advanced"
+    # indices, i.e. `0, :, 0` should not trigger this case, but `0, :, [0]` should
+    # (it is broadcast to `[0], :, [0]`)
+    if len(prepared):
+        # We'll perform this validation using a simple finite-state machine
+        it = iter(prepared)
+        # Find an array
+        for item in it:
+            if isinstance(item, ak._v2.index.Index):
+                break
+        # Then find a separator
+        for item in it:
+            if (item is np.newaxis) or (item is Ellipsis) or isinstance(item, slice):
+                break
+        # Now error if we find another array
+        for item in it:
+            if isinstance(item, ak._v2.index.Index):
+                ak._v2._util.error(
+                    ValueError(
+                        "NumPy advanced indexing with array indices separated by None "
+                        "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
+                    )
+                )
+    return tuple(prepared)
 
 
-def prepare_tuple_item(item, nplike):
+def normalise_item(item, nplike):
     if ak._util.isint(item):
         return int(item)
 
@@ -112,22 +144,22 @@ def prepare_tuple_item(item, nplike):
         return item
 
     elif isinstance(item, ak.highlevel.Array):
-        return prepare_tuple_item(item.layout, nplike)
+        return normalise_item(item.layout, nplike)
 
     elif isinstance(item, ak.layout.Content):
-        return prepare_tuple_item(v1_to_v2(item), nplike)
+        return normalise_item(v1_to_v2(item), nplike)
 
     elif isinstance(item, ak._v2.highlevel.Array):
-        return prepare_tuple_item(item.layout, nplike)
+        return normalise_item(item.layout, nplike)
 
     elif isinstance(item, ak._v2.contents.EmptyArray):
-        return prepare_tuple_item(item.toNumpyArray(np.int64), nplike)
+        return normalise_item(item.toNumpyArray(np.int64), nplike)
 
     elif isinstance(item, ak._v2.contents.NumpyArray):
         return item.data
 
     elif isinstance(item, ak._v2.contents.Content):
-        out = prepare_tuple_bool_to_int(prepare_tuple_nested(item))
+        out = normalise_item_bool_to_int(normalise_item_nested(item))
         if isinstance(out, ak._v2.contents.NumpyArray):
             return out.data
         else:
@@ -143,7 +175,7 @@ def prepare_tuple_item(item, nplike):
         layout = ak._v2.operations.to_layout(item)
         as_array = layout.maybe_to_array(layout.nplike)
         if as_array is None:
-            return prepare_tuple_item(layout, nplike)
+            return normalise_item(layout, nplike)
         else:
             return as_array
 
@@ -159,13 +191,18 @@ def prepare_tuple_item(item, nplike):
         )
 
 
-def prepare_tuple_RegularArray_toListOffsetArray64(item):
+def normalise_items(where, nplike):
+    # First prepare items for broadcasting into like-types
+    return [normalise_item(x, nplike) for x in where]
+
+
+def normalise_item_RegularArray_toListOffsetArray64(item):
     if isinstance(item, ak._v2.contents.RegularArray):
 
         next = item.toListOffsetArray64()
         return ak._v2.contents.ListOffsetArray(
             next.offsets,
-            prepare_tuple_RegularArray_toListOffsetArray64(next.content),
+            normalise_item_RegularArray_toListOffsetArray64(next.content),
             identifier=item.identifier,
             parameters=item.parameters,
         )
@@ -177,10 +214,10 @@ def prepare_tuple_RegularArray_toListOffsetArray64(item):
         raise ak._v2._util.error(AssertionError(type(item)))
 
 
-def prepare_tuple_nested(item):
+def normalise_item_nested(item):
     if isinstance(item, ak._v2.contents.EmptyArray):
         # policy: unknown -> int
-        return prepare_tuple_nested(item.toNumpyArray(np.int64))
+        return normalise_item_nested(item.toNumpyArray(np.int64))
 
     elif isinstance(item, ak._v2.contents.NumpyArray) and issubclass(
         item.dtype.type, (bool, np.bool_, np.integer)
@@ -195,7 +232,7 @@ def prepare_tuple_nested(item):
                 nplike=item.nplike,
             )
         next = next.toRegularArray()
-        next = prepare_tuple_RegularArray_toListOffsetArray64(next)
+        next = normalise_item_RegularArray_toListOffsetArray64(next)
         return next
 
     elif isinstance(
@@ -204,7 +241,7 @@ def prepare_tuple_nested(item):
     ) and issubclass(item.offsets.dtype.type, np.int64):
         return ak._v2.contents.ListOffsetArray(
             item.offsets,
-            prepare_tuple_nested(item.content),
+            normalise_item_nested(item.content),
             identifier=item.identifier,
             parameters=item.parameters,
         )
@@ -218,7 +255,7 @@ def prepare_tuple_nested(item):
         ),
     ):
         next = item.toListOffsetArray64(False)
-        return prepare_tuple_nested(next)
+        return normalise_item_nested(next)
 
     elif isinstance(
         item,
@@ -240,14 +277,14 @@ def prepare_tuple_nested(item):
         ),
     ):
         next = item.simplify_optiontype()
-        return prepare_tuple_nested(next)
+        return normalise_item_nested(next)
 
     elif isinstance(
         item,
         ak._v2.contents.IndexedArray,
     ):
         next = item.project()
-        return prepare_tuple_nested(next)
+        return normalise_item_nested(next)
 
     elif isinstance(
         item,
@@ -263,7 +300,7 @@ def prepare_tuple_nested(item):
 
         return ak._v2.contents.IndexedOptionArray(
             ak._v2.index.Index64(nextindex, nplike=item.nplike),
-            prepare_tuple_nested(projected),
+            normalise_item_nested(projected),
             identifier=item.identifier,
             parameters=item.parameters,
         )
@@ -279,7 +316,7 @@ def prepare_tuple_nested(item):
         is_valid = item.mask_as_bool(valid_when=True)
         positions_where_valid = item.nplike.index_nplike.nonzero(is_valid)[0]
 
-        nextcontent = prepare_tuple_nested(
+        nextcontent = normalise_item_nested(
             item.content._carry(ak._v2.index.Index64(positions_where_valid), False)
         )
 
@@ -304,7 +341,7 @@ def prepare_tuple_nested(item):
                 )
             )
 
-        return prepare_tuple_nested(attempt)
+        return normalise_item_nested(attempt)
 
     elif isinstance(item, ak._v2.contents.RecordArray):
         raise ak._v2._util.error(TypeError("record arrays can't be used as slices"))
@@ -321,7 +358,7 @@ def prepare_tuple_nested(item):
         )
 
 
-def prepare_tuple_bool_to_int(item):
+def normalise_item_bool_to_int(item):
     # actually convert leaf-node booleans to integers
     if (
         isinstance(item, ak._v2.contents.ListOffsetArray)
@@ -415,13 +452,13 @@ def prepare_tuple_bool_to_int(item):
 
     elif isinstance(item, ak._v2.contents.ListOffsetArray):
         return ak._v2.contents.ListOffsetArray(
-            item.offsets, prepare_tuple_bool_to_int(item.content)
+            item.offsets, normalise_item_bool_to_int(item.content)
         )
 
     elif isinstance(item, ak._v2.contents.IndexedOptionArray):
         if isinstance(item.content, ak._v2.contents.ListOffsetArray):
             return ak._v2.contents.IndexedOptionArray(
-                item.index, prepare_tuple_bool_to_int(item.content)
+                item.index, normalise_item_bool_to_int(item.content)
             )
 
         if isinstance(item.content, ak._v2.contents.NumpyArray) and issubclass(
@@ -473,7 +510,7 @@ def prepare_tuple_bool_to_int(item):
 
         else:
             return ak._v2.contents.IndexedOptionArray(
-                item.index, prepare_tuple_bool_to_int(item.content)
+                item.index, normalise_item_bool_to_int(item.content)
             )
 
     elif isinstance(item, ak._v2.contents.NumpyArray):
@@ -492,36 +529,3 @@ def getitem_next_array_wrap(outcontent, shape, outer_length=0):
             size = 1
         outcontent = ak._v2.contents.RegularArray(outcontent, size, length, None, None)
     return outcontent
-
-
-def index_is_advanced_separator(item):
-    return (item is np.newaxis) or (item is Ellipsis) or isinstance(item, slice)
-
-
-def ensure_supported_tuple(where):
-    """
-    Args:
-        where: tuple index
-
-    Raise ValueError if the given tuple index is not supported by Awkward Array
-    """
-    if len(where) == 0:
-        return
-
-    has_seen_array = False
-    for item, next_item in zip(where, where[1:]):
-        # Take note if we find an advanced (array) index
-        if isinstance(item, ak._v2.index.Index):
-            has_seen_array = True
-
-        elif (
-            has_seen_array
-            and index_is_advanced_separator(item)
-            and (isinstance(next_item, ak._v2.index.Index))
-        ):
-            raise ak._v2._util.error(
-                ValueError(
-                    "NumPy advanced indexing with array indices separated by None "
-                    "(np.newaxis), Ellipsis, or slice are not permitted with Awkward Arrays"
-                )
-            )

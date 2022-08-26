@@ -508,10 +508,10 @@ class Content:
             if len(where) == 0:
                 return self
 
-            items = [ak._v2._slicing.prepare_tuple_item(x, self._nplike) for x in where]
-
-            nextwhere = ak._v2._slicing.getitem_broadcast(items)
-            ak._v2._slicing.ensure_supported_tuple(nextwhere)
+            # Normalise valid indices onto well-defined basis
+            items = ak._v2._slicing.normalise_items(where, self._nplike)
+            # Prepare items for advanced indexing (e.g. via broadcasting)
+            nextwhere = ak._v2._slicing.prepare_advanced_indexing(items)
 
             next = ak._v2.contents.RegularArray(
                 self,
