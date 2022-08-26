@@ -334,6 +334,6 @@ def test_data_frame_from_json():
     data_frame = ak._v2.to_rdataframe({"variants": array})
     out = ak._v2.from_rdataframe(
         data_frame,
-        column="variants",
+        columns=("variants",),
     )
     assert array.to_list() == out["variants"].to_list()

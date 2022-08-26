@@ -20,7 +20,7 @@ def test_data_frame_integers():
 
     ak_array_out = ak.from_rdataframe(
         data_frame,
-        column="x",
+        columns=("x",),
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
@@ -34,7 +34,7 @@ def test_data_frame_double():
 
     ak_array_out = ak.from_rdataframe(
         data_frame,
-        column="x",
+        columns=("x",),
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
@@ -48,7 +48,7 @@ def test_data_frame_char():
 
     ak_array_out = ak.from_rdataframe(
         data_frame,
-        column="x",
+        columns=("x",),
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
@@ -62,7 +62,7 @@ def test_data_frame_complex():
 
     ak_array_out = ak.from_rdataframe(
         data_frame,
-        column="x",
+        columns=("x",),
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
@@ -76,7 +76,7 @@ def test_data_frame_listoffset_integers():
 
     ak_array_out = ak.from_rdataframe(
         data_frame,
-        column="x",
+        columns=("x",),
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
@@ -97,7 +97,7 @@ def test_data_frame_listoffset_listoffset_double():
 
     ak_array_out = ak.from_rdataframe(
         data_frame,
-        column="x",
+        columns=("x",),
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
@@ -141,7 +141,7 @@ def test_data_frame_vec_of_vec():
     assert rdf3.GetColumnType("output") == "vector<vector<double> >"
     out = ak.from_rdataframe(
         rdf3,
-        column="output",
+        columns=("output",),
     )
     assert out["output"].to_list() == (array["y"] * array["y"] * 1.0).to_list()
 
@@ -172,7 +172,7 @@ def test_data_frame_vec_of_vec():
     assert rdf3.GetColumnType("output2") == "vector<vector<vector<double> > >"
     out = ak.from_rdataframe(  # noqa: F841
         rdf3,
-        column="output2",
+        columns=("output2",),
     )
     result = ak.Array(
         [

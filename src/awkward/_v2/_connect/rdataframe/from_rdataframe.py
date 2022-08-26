@@ -107,7 +107,8 @@ def from_rdataframe(data_frame, columns):
             # the associated RLoopManager.
             lookup = result_ptrs[col].begin().lookup()
             generator = lookup[col].generator
-            contents[col] = generator.tolayout(lookup, 0, ())
+            layout = generator.tolayout(lookup[col], 0, ())
+            contents[col] = layout
 
         else:  # Convert the C++ vectors to Awkward arrays
             form = ak._v2.forms.from_json(ROOT.awkward.type_to_form[col_type](0))
