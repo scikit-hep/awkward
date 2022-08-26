@@ -49,8 +49,10 @@ def getitem_broadcast(items):
 
     if awkward_items > 1 or (awkward_items == 1 and len(broadcastable) != 0):
         raise ak._v2._util.error(
-            TypeError(
-                "cannot mix Awkward slicing (using an array with missing or variable-length lists in the slice) with NumPy advanced slicing (using more than one broadcastable array or integer in the slice), though you can perform multiple slices"
+            ValueError(
+                "cannot mix Awkward slicing (using an array with missing or variable-length lists in the slice) with "
+                "NumPy advanced slicing (using more than one broadcastable array or integer in the slice), "
+                "though you can perform multiple slices "
             )
         )
 

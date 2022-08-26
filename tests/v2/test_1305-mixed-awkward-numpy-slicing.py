@@ -9,5 +9,5 @@ def test():
     array = ak._v2.Array([[3.14]])
     first_slice = ak._v2.Array([True, None])[:1]  # type is 1 * ?bool
     second_slice = 0
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         array[first_slice, second_slice]
