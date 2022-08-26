@@ -76,6 +76,17 @@ def from_rdataframe(data_frame, columns):
             )
         return buffers
 
+    # `depth` is always greater or equal 2
+    def cpp_builder_type(depth, data_type):
+        if depth == 2:
+            return f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{data_type}>>"
+        else:
+            return (
+                "awkward::LayoutBuilder::ListOffset<int64_t, "
+                + cpp_builder_type(depth - 1, data_type)
+                + ">"
+            )
+
     # Register Take action for each column
     # 'Take' is a lazy action:
     result_ptrs = {}
@@ -135,7 +146,7 @@ def from_rdataframe(data_frame, columns):
                 # NOTE: list_depth == 2 or 1 if its the list of strings
                 ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
                     "int64_t",
-                    f"awkward::LayoutBuilder::Numpy<{data_type}",
+                    f"awkward::LayoutBuilder::Numpy<{data_type}>",
                 ]
                 builder = ListOffsetBuilder()
                 builder_type = type(builder).__cpp_name__
@@ -143,9 +154,10 @@ def from_rdataframe(data_frame, columns):
                 cpp_buffers_self.fill_offsets_and_flatten_2[builder_type](builder)
 
             elif list_depth == 3:
+
                 ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
                     "int64_t",
-                    f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{data_type}>",
+                    cpp_builder_type(list_depth - 1, data_type),
                 ]
                 builder = ListOffsetBuilder()
                 builder_type = type(builder).__cpp_name__
@@ -155,7 +167,7 @@ def from_rdataframe(data_frame, columns):
             else:
                 ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
                     "int64_t",
-                    f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{data_type}>>",
+                    cpp_builder_type(list_depth - 1, data_type),
                 ]
                 builder = ListOffsetBuilder()
                 builder_type = type(builder).__cpp_name__
