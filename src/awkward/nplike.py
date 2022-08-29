@@ -884,6 +884,15 @@ def is_jax_tracer(tracer):
 
 
 def of(*arrays, default_cls=Numpy):
+    """
+    Args:
+        *arrays: iterable of possible array objects
+        default_cls: default NumpyLike class if no array objects found
+
+    Return the #ak.nplike.NumpyLike that is best-suited to operating upon the given
+    iterable of arrays. Return an instance of the `default_cls` if no known array types
+    are found.
+    """
     nplikes = set()
     for array in arrays:
         nplike = getattr(array, "nplike", None)
