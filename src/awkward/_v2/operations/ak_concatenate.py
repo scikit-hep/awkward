@@ -50,6 +50,18 @@ def concatenate(
 
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
+    # Simple single-array fast-path
+    single_nplike = ak.nplike.of(arrays)
+    if (
+        # Is an Awkward Content
+        isinstance(arrays, ak._v2.contents.Content)
+        # Is a NumPy Array
+        or ak.nplike.is_numpy_buffer(arrays)
+        # Is an array with a known NumpyLike
+        or single_nplike is not ak.nplike.Numpy.instance()
+    ):
+        return ak._v2.operations.ak_flatten._impl(arrays, axis, highlevel, behavior)
+
     content_or_others = [
         ak._v2.operations.to_layout(
             x, allow_record=False if axis == 0 else True, allow_other=True
@@ -58,7 +70,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     ]
 
     contents = [x for x in content_or_others if isinstance(x, ak._v2.contents.Content)]
-    if not any(contents):
+    if len(contents) == 0:
         raise ak._v2._util.error(ValueError("need at least one array to concatenate"))
 
     posaxis = contents[0].axis_wrap_if_negative(axis)
