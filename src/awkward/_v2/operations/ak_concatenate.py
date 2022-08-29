@@ -50,27 +50,22 @@ def concatenate(
 
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
-    contents = [
+    content_or_others = [
         ak._v2.operations.to_layout(
             x, allow_record=False if axis == 0 else True, allow_other=True
         )
         for x in arrays
     ]
-    if not any(isinstance(x, (ak._v2.contents.Content,)) for x in contents):
+
+    contents = [x for x in content_or_others if isinstance(x, ak._v2.contents.Content)]
+    if not any(contents):
         raise ak._v2._util.error(ValueError("need at least one array to concatenate"))
 
-    first_content = [x for x in contents if isinstance(x, (ak._v2.contents.Content,))][
-        0
-    ]
-
-    posaxis = first_content.axis_wrap_if_negative(axis)
+    posaxis = contents[0].axis_wrap_if_negative(axis)
     maxdepth = max(
         x.minmax_depth[1]
-        for x in contents
-        if isinstance(
-            x,
-            (ak._v2.contents.Content,),
-        )
+        for x in content_or_others
+        if isinstance(x, ak._v2.contents.Content)
     )
     if not 0 <= posaxis < maxdepth:
         raise ak._v2._util.error(
@@ -79,7 +74,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 "is ambiguous".format(axis)
             )
         )
-    for x in contents:
+    for x in content_or_others:
         if isinstance(x, ak._v2.contents.Content):
             if x.axis_wrap_if_negative(axis) != posaxis:
                 raise ak._v2._util.error(
@@ -90,14 +85,14 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 )
 
     if posaxis == 0:
-        contents = [
+        content_or_others = [
             x
             if isinstance(x, ak._v2.contents.Content)
             else ak._v2.operations.to_layout([x])
-            for x in contents
+            for x in content_or_others
         ]
-        batch = [contents[0]]
-        for x in contents[1:]:
+        batch = [content_or_others[0]]
+        for x in content_or_others[1:]:
             if batch[-1].mergeable(x, mergebool=mergebool):
                 batch.append(x)
             else:
@@ -264,7 +259,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 return None
 
         out = ak._v2._broadcasting.broadcast_and_apply(
-            contents,
+            content_or_others,
             action,
             behavior=ak._v2._util.behavior_of(*arrays, behavior=behavior),
             allow_records=True,
