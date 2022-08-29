@@ -866,9 +866,7 @@ class Jax(NumpyLike):
 
 
 def is_numpy_buffer(array):
-    import numpy as np
-
-    return isinstance(array, np.ndarray)
+    return isinstance(array, numpy.ndarray)
 
 
 def is_cupy_buffer(array):
