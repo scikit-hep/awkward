@@ -60,7 +60,22 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         # Is an array with a known NumpyLike
         or single_nplike is not ak.nplike.Numpy.instance()
     ):
-        return ak._v2.operations.ak_flatten._impl(arrays, axis, highlevel, behavior)
+        # Convert the array to a layout object
+        content = ak._v2.operations.to_layout(
+            arrays, allow_record=False, allow_other=False
+        )
+        # Determine the absolute concatenation axis
+        posaxis = content.axis_wrap_if_negative(axis)
+        if not 0 <= posaxis < content.minmax_depth[1]:
+            raise ak._v2._util.error(
+                ValueError(
+                    "axis={} is beyond the depth of this array or the depth of this array "
+                    "is ambiguous".format(axis)
+                )
+            )
+        return ak._v2.operations.ak_flatten._impl(
+            content, posaxis + 1, highlevel, behavior
+        )
 
     content_or_others = [
         ak._v2.operations.to_layout(
