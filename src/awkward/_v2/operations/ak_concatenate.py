@@ -50,7 +50,7 @@ def concatenate(
 
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
-    # Simple single-array fast-path
+    # Simple single-array, axis=0 fast-path
     single_nplike = ak.nplike.of(arrays)
     if (
         # Is an Awkward Content
@@ -64,18 +64,10 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         content = ak._v2.operations.to_layout(
             arrays, allow_record=False, allow_other=False
         )
-        # Determine the absolute concatenation axis
-        posaxis = content.axis_wrap_if_negative(axis)
-        if not 0 <= posaxis < content.minmax_depth[1]:
-            raise ak._v2._util.error(
-                ValueError(
-                    "axis={} is beyond the depth of this array or the depth of this array "
-                    "is ambiguous".format(axis)
-                )
-            )
-        return ak._v2.operations.ak_flatten._impl(
-            content, posaxis + 1, highlevel, behavior
-        )
+        # Only handle concatenation along `axis=0`
+        # Let ambiguous depth arrays fall through
+        if content.axis_wrap_if_negative(axis) == 0:
+            return ak._v2.operations.ak_flatten._impl(content, 1, highlevel, behavior)
 
     content_or_others = [
         ak._v2.operations.to_layout(
