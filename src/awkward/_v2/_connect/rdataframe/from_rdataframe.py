@@ -195,12 +195,16 @@ def from_rdataframe(data_frame, columns):
                 builder = ListOffsetBuilder()
                 builder_type = type(builder).__cpp_name__
 
-                if not hasattr(cppyy.gbl, f"fill_offsets_and_flatten{list_depth}"):
-                    done = cppyy.cppdef(cpp_fill_function(list_depth))
+                if not hasattr(
+                    cppyy.gbl.awkward, f"fill_offsets_and_flatten{list_depth}"
+                ):
+                    done = cppyy.cppdef(
+                        "namespace awkward {" + cpp_fill_function(list_depth) + "}"
+                    )
                     assert done is True
 
                 fill_from_func = getattr(
-                    cppyy.gbl, f"fill_offsets_and_flatten{list_depth}"
+                    cppyy.gbl.awkward, f"fill_offsets_and_flatten{list_depth}"
                 )
                 fill_from_func[builder_type, col_type](builder, result_ptrs[col])
             else:

@@ -148,3 +148,55 @@ def test_data_frame_vec_of_vec():
         ]
     )
     assert out["output2"].to_list() == result.to_list()
+
+
+def test_rdata_frame_rvecs_as_records():
+    data_frame = ROOT.RDataFrame(1024)
+    coordDefineCode = """ROOT::VecOps::RVec<double> {0}(len);
+                     std::transform({0}.begin(), {0}.end(), {0}.begin(), [](double){{return gRandom->Uniform(-1.0, 1.0);}});
+                     return {0};"""
+
+    data_frame_x_y = (
+        data_frame.Define("len", "gRandom->Uniform(0, 16)")
+        .Define("x", coordDefineCode.format("x"))
+        .Define("y", coordDefineCode.format("y"))
+    )
+
+    # Now we have in hands d, a RDataFrame with two columns, x and y, which
+    # hold collections of coordinates. The size of these collections vary.
+    # Let's now define radii out of x and y. We'll do it treating the collections
+    # stored in the columns without looping on the individual elements.
+    data_frame_x_y_r = data_frame_x_y.Define("r", "sqrt(x*x + y*y)")
+    assert data_frame_x_y_r.GetColumnType("r") == "ROOT::VecOps::RVec<double>"
+
+    array = ak.from_rdataframe(
+        data_frame_x_y_r,
+        columns=(
+            "x",
+            "y",
+            "r",
+        ),
+    )
+
+    assert array["x"].layout.form == ak._v2.forms.ListOffsetForm(
+        "i64", ak._v2.forms.NumpyForm("float64")
+    )
+    assert array["y"].layout.form == ak._v2.forms.ListOffsetForm(
+        "i64", ak._v2.forms.NumpyForm("float64")
+    )
+    assert array["r"].layout.form == ak._v2.forms.ListOffsetForm(
+        "i64", ak._v2.forms.NumpyForm("float64")
+    )
+
+    assert array.layout.form == ak._v2.forms.RecordForm(
+        [
+            ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64")),
+            ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64")),
+            ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64")),
+        ],
+        [
+            "x",
+            "y",
+            "r",
+        ],
+    )
