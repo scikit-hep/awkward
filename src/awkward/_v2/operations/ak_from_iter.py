@@ -82,6 +82,9 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 )
             )
 
+    if isinstance(iterable, tuple):
+        iterable = list(iterable)
+
     builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
     builder.fromiter(iterable)
 
