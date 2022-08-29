@@ -178,21 +178,21 @@ def test_rdata_frame_rvecs_as_records():
         ),
     )
 
-    assert array["x"].layout.form == ak._v2.forms.ListOffsetForm(
-        "i64", ak._v2.forms.NumpyForm("float64")
+    assert array["x"].layout.form == ak.forms.ListOffsetForm(
+        "i64", ak.forms.NumpyForm("float64")
     )
-    assert array["y"].layout.form == ak._v2.forms.ListOffsetForm(
-        "i64", ak._v2.forms.NumpyForm("float64")
+    assert array["y"].layout.form == ak.forms.ListOffsetForm(
+        "i64", ak.forms.NumpyForm("float64")
     )
-    assert array["r"].layout.form == ak._v2.forms.ListOffsetForm(
-        "i64", ak._v2.forms.NumpyForm("float64")
+    assert array["r"].layout.form == ak.forms.ListOffsetForm(
+        "i64", ak.forms.NumpyForm("float64")
     )
 
-    assert array.layout.form == ak._v2.forms.RecordForm(
+    assert array.layout.form == ak.forms.RecordForm(
         [
-            ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64")),
-            ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64")),
-            ak._v2.forms.ListOffsetForm("i64", ak._v2.forms.NumpyForm("float64")),
+            ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64")),
+            ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64")),
+            ak.forms.ListOffsetForm("i64", ak.forms.NumpyForm("float64")),
         ],
         [
             "x",
