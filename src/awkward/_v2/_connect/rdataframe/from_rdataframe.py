@@ -76,15 +76,57 @@ def from_rdataframe(data_frame, columns):
             )
         return buffers
 
-    # `depth` is always greater or equal 2
     def cpp_builder_type(depth, data_type):
-        if depth == 2:
-            return f"awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<{data_type}>>"
+        if depth == 1:
+            return f"awkward::LayoutBuilder::Numpy<{data_type}>>"
         else:
             return (
                 "awkward::LayoutBuilder::ListOffset<int64_t, "
                 + cpp_builder_type(depth - 1, data_type)
                 + ">"
+            )
+
+    def cpp_fill_offsets_and_flatten(depth):
+        if depth == 1:
+            return "\nfor (auto it : vec1) {\n" + "  builder1.append(it);\n" + "}\n"
+        else:
+            return (
+                f"for (auto const& vec{depth - 1} : vec{depth}) "
+                + "{\n"
+                + f"  auto& builder{depth - 1} = builder{depth}.begin_list();\n"
+                + "  "
+                + cpp_fill_offsets_and_flatten(depth - 1)
+                + "\n"
+                + f"  builder{depth}.end_list();\n"
+                + "}\n"
+            )
+
+    def cpp_fill_function(depth):
+        if depth == 1:
+            return (
+                "template<class BUILDER, typename PRIMITIVE>\n"
+                + "void\n"
+                + "fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) {"
+                + "  for (auto it : result) {\n"
+                + "    builder.append(it);\n"
+                + "  }\n"
+                + "}\n"
+            )
+        else:
+            return (
+                "template<class BUILDER, typename PRIMITIVE>\n"
+                + "void\n"
+                + f"fill_offsets_and_flatten{depth}(BUILDER& builder{depth}, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) "
+                + "{\n"
+                + f"  for (auto const& vec{depth - 1} : result) "
+                + "{\n"
+                + f"  auto& builder{depth - 1} = builder{depth}.begin_list();\n"
+                + "  "
+                + cpp_fill_offsets_and_flatten(depth - 1)
+                + "\n"
+                + f"  builder{depth}.end_list();\n"
+                + "}\n"
+                + "}\n"
             )
 
     # Register Take action for each column
@@ -141,20 +183,10 @@ def from_rdataframe(data_frame, columns):
                 buffers = empty_buffers(cpp_buffers_self, names_nbytes)
                 cpp_buffers_self.to_char_buffers[builder_type](builder)
 
-            elif isinstance(form, ak._v2.forms.ListOffsetForm) and isinstance(
-                form.content, ak._v2.forms.NumpyForm
-            ):
-                # NOTE: list_depth == 2 or 1 if its the list of strings
-                ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
-                    "int64_t",
-                    f"awkward::LayoutBuilder::Numpy<{data_type}>",
-                ]
-                builder = ListOffsetBuilder()
-                builder_type = type(builder).__cpp_name__
-
-                cpp_buffers_self.fill_offsets_and_flatten_2[builder_type](builder)
-
-            elif list_depth == 3:
+            elif isinstance(form, ak._v2.forms.ListOffsetForm):
+                if isinstance(form.content, ak._v2.forms.NumpyForm):
+                    # NOTE: list_depth == 2 or 1 if its the list of strings
+                    list_depth = 2
 
                 ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
                     "int64_t",
@@ -163,17 +195,18 @@ def from_rdataframe(data_frame, columns):
                 builder = ListOffsetBuilder()
                 builder_type = type(builder).__cpp_name__
 
-                cpp_buffers_self.fill_offsets_and_flatten_3[builder_type](builder)
+                if not hasattr(cppyy.gbl, f"fill_offsets_and_flatten{list_depth}"):
+                    done = cppyy.cppdef(cpp_fill_function(list_depth))
+                    assert done is True
 
+                fill_from_func = getattr(
+                    cppyy.gbl, f"fill_offsets_and_flatten{list_depth}"
+                )
+                fill_from_func[builder_type, col_type](builder, result_ptrs[col])
             else:
-                ListOffsetBuilder = cppyy.gbl.awkward.LayoutBuilder.ListOffset[
-                    "int64_t",
-                    cpp_builder_type(list_depth - 1, data_type),
-                ]
-                builder = ListOffsetBuilder()
-                builder_type = type(builder).__cpp_name__
-
-                cpp_buffers_self.fill_offsets_and_flatten_4[builder_type](builder)
+                raise ak._v2._util.error(
+                    AssertionError(f"unrecognized Form: {type(form)}")
+                )
 
             names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
             buffers = empty_buffers(cpp_buffers_self, names_nbytes)
