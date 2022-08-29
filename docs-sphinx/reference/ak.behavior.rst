@@ -671,5 +671,5 @@ Complete example
 ================
 
 The
-`Vector design prototype <https://vector.readthedocs.io/en/latest/notebooks/VectorDesignPrototype.html>`__
+`Vector design prototype <https://vector.readthedocs.io/en/latest/usage/vector_design_prototype.html>`__
 has a complete example, including Numba.
