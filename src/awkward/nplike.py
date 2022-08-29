@@ -17,14 +17,12 @@ def of(*arrays):
         nplike = getattr(array, "nplike", None)
         if nplike is not None:
             nplikes.add(nplike)
-        else:
-
-            if is_numpy_buffer(array):
-                nplikes.add(ak.nplike.Numpy.instance())
-            elif is_cupy_buffer(array):
-                nplikes.add(ak.nplike.Cupy.instance())
-            elif is_jax_buffer(array):
-                nplikes.add(ak.nplike.Jax.instance())
+        elif is_numpy_buffer(array):
+            nplikes.add(ak.nplike.Numpy.instance())
+        elif is_cupy_buffer(array):
+            nplikes.add(ak.nplike.Cupy.instance())
+        elif is_jax_buffer(array):
+            nplikes.add(ak.nplike.Jax.instance())
 
     if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in nplikes):
         return ak._v2._typetracer.TypeTracer.instance()
