@@ -12,8 +12,12 @@ import os
 from awkward._v2.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {
+    "float32": "float",
     "float64": "double",
+    "int32": "int32_t",
+    "uint32": "uint32_t",
     "int64": "int64_t",
+    "uint64": "uint64_t",
     "complex128": "std::complex<double>",
     "uint8": "uint8_t",
 }
