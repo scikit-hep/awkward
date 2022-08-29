@@ -41,8 +41,6 @@ def from_iter(
          `"__array__"` equal to `"bytestring"` (unencoded bytes).
        * str: converted into #ak.layout.ListOffsetArray with parameter
          `"__array__"` equal to `"string"` (UTF-8 encoded string).
-       * tuple: converted into #ak.layout.RecordArray without field names
-         (i.e. homogeneously typed, uniform sized tuples).
        * dict: converted into #ak.layout.RecordArray with field names
          (i.e. homogeneously typed records with the same sets of fields).
        * iterable, including np.ndarray: converted into
