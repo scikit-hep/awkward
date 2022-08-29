@@ -18,7 +18,6 @@ def of(*arrays):
         if nplike is not None:
             nplikes.add(nplike)
         else:
-            from awkward._v2._util import is_numpy_buffer, is_cupy_buffer, is_jax_buffer
 
             if is_numpy_buffer(array):
                 nplikes.add(ak.nplike.Numpy.instance())
@@ -411,7 +410,6 @@ class NumpyKernel:
     @staticmethod
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
-            from awkward._v2._util import is_numpy_buffer, is_cupy_buffer, is_jax_buffer
 
             if is_numpy_buffer(x):
                 return ctypes.cast(x.ctypes.data, t)
@@ -432,8 +430,6 @@ class NumpyKernel:
 
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
-
-        from awkward._v2._util import is_jax_tracer
 
         if not any(is_jax_tracer(arg) for arg in args):
             return self._kernel(
@@ -902,3 +898,21 @@ class Jax(NumpyLike):
     def argmax(self, *args, **kwargs):
         out = self._module.argmax(*args, **kwargs)
         return out
+
+
+def is_numpy_buffer(array):
+    import numpy as np
+
+    return isinstance(array, np.ndarray)
+
+
+def is_cupy_buffer(array):
+    return type(array).__module__.startswith("cupy.")
+
+
+def is_jax_buffer(array):
+    return type(array).__module__.startswith("jaxlib.")
+
+
+def is_jax_tracer(tracer):
+    return type(tracer).__module__.startswith("jax.")
