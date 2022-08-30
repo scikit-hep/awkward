@@ -12,14 +12,15 @@ import os
 from awkward._v2.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {
-    "float32": "float",
-    "float64": "double",
+    "int8": "int8_t",
+    "uint8": "uint8_t",
     "int32": "int32_t",
     "uint32": "uint32_t",
     "int64": "int64_t",
     "uint64": "uint64_t",
+    "float32": "float",
+    "float64": "double",
     "complex128": "std::complex<double>",
-    "uint8": "uint8_t",
 }
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -133,15 +134,25 @@ def from_rdataframe(data_frame, columns):
                 + "}\n"
             )
 
+    is_indexed = True if "awkward_index_" in data_frame.GetColumnNames() else False
+
     # Register Take action for each column
     # 'Take' is a lazy action:
     result_ptrs = {}
     column_types = {}
+    contents_index = None
+    columns = (
+        columns + ("awkward_index_",)
+        if (is_indexed and "awkward_index_" not in columns)
+        else columns
+    )
     for col in columns:
         column_types[col] = data_frame.GetColumnType(col)
         result_ptrs[col] = data_frame.Take[column_types[col]](col)
 
     contents = {}
+    awkward_contents = {}
+    contents_index = {}
     for col in columns:
         col_type = column_types[col]
         if ROOT.awkward.is_awkward_type[col_type]():  # Retrieve Awkward arrays
@@ -154,7 +165,7 @@ def from_rdataframe(data_frame, columns):
             lookup = result_ptrs[col].begin().lookup()
             generator = lookup[col].generator
             layout = generator.tolayout(lookup[col], 0, ())
-            contents[col] = layout
+            awkward_contents[col] = layout
 
         else:  # Convert the C++ vectors to Awkward arrays
             form = ak._v2.forms.from_json(ROOT.awkward.type_to_form[col_type](0))
@@ -225,7 +236,24 @@ def from_rdataframe(data_frame, columns):
                 builder.length(),
                 buffers,
             )
+
+            if col == "awkward_index_":
+                contents_index = ak._v2.index.Index64(
+                    array.layout.to_numpy(allow_missing=True)
+                )
+            else:
+                contents[col] = array.layout
+
+    for col, content in awkward_contents.items():
+        # wrap Awkward array in IndexedArray only if needed
+        if contents_index is not None and len(contents_index) < len(content):
+            array = ak._v2._util.wrap(
+                ak._v2.contents.IndexedArray(contents_index, content),
+                highlevel=True,
+            )
             contents[col] = array.layout
+        else:
+            contents[col] = content
 
     return ak._v2._util.wrap(
         ak._v2.contents.RecordArray(list(contents.values()), list(contents.keys())),
