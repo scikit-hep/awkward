@@ -483,11 +483,6 @@ def arrayclass(layout, behavior):
         cls = behavior[arr]
         if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
             return cls
-    rec = layout.parameter("__record__")
-    if isstr(rec):
-        cls = behavior[".", rec]
-        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
-            return cls
     deeprec = layout.purelist_parameter("__record__")
     if isstr(deeprec):
         cls = behavior["*", deeprec]
@@ -554,11 +549,6 @@ def numba_array_typer(layouttype, behavior):
         typer = behavior["__numba_typer__", arr]
         if callable(typer):
             return typer
-    rec = layouttype.parameters.get("__record__")
-    if isstr(rec):
-        typer = behavior["__numba_typer__", ".", rec]
-        if callable(typer):
-            return typer
     deeprec = layouttype.parameters.get("__record__")
     if isstr(deeprec):
         typer = behavior["__numba_typer__", "*", deeprec]
@@ -572,11 +562,6 @@ def numba_array_lower(layouttype, behavior):
     arr = layouttype.parameters.get("__array__")
     if isstr(arr):
         lower = behavior["__numba_lower__", arr]
-        if callable(lower):
-            return lower
-    rec = layouttype.parameters.get("__record__")
-    if isstr(rec):
-        lower = behavior["__numba_lower__", ".", rec]
         if callable(lower):
             return lower
     deeprec = layouttype.parameters.get("__record__")
