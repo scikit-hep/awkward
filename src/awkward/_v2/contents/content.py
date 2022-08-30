@@ -1404,12 +1404,28 @@ class Content:
         return self.packed()._to_list(behavior, None)
 
     def _to_list_custom(self, behavior, json_conversions):
-        cls = ak._v2._util.arrayclass(self, behavior)
-        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
-            array = cls(self)
+        if self.is_RecordType:
+            overloaded = (
+                ak._v2._util.recordclass(self, behavior).__getitem__
+                is not ak._v2.highlevel.Record.__getitem__
+            )
+        else:
+            overloaded = (
+                ak._v2._util.arrayclass(self, behavior).__getitem__
+                is not ak._v2.highlevel.Array.__getitem__
+            )
+
+        if overloaded:
+            array = ak._v2._util.wrap(self, behavior=behavior)
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]
+                if isinstance(
+                    out[i], (ak._v2.highlevel.Array, ak._v2.highlevel.Record)
+                ):
+                    out[i] = out[i]._layout._to_list(behavior, json_conversions)
+                elif hasattr(out[i], "tolist"):
+                    out[i] = out[i].tolist()
 
             if json_conversions is not None:
                 convert_bytes = json_conversions["convert_bytes"]

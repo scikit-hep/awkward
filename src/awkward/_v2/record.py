@@ -191,11 +191,38 @@ class Record:
             return Record(self._array[self._at : self._at + 1].packed(), 0)
 
     def to_list(self, behavior=None):
-        cls = ak._v2._util.recordclass(self._array, behavior)
-        if cls is not ak._v2.highlevel.Record:
-            return cls(self)
+        return self._to_list(behavior, None)
 
-        return self._array[self._at : self._at + 1]._to_list(behavior, None)[0]
+    def _to_list(self, behavior, json_conversions):
+        overloaded = (
+            ak._v2._util.recordclass(self._array, behavior).__getitem__
+            is not ak._v2.highlevel.Record.__getitem__
+        )
+
+        if overloaded:
+            record = ak._v2._util.wrap(self, behavior=behavior)
+            contents = []
+            for field in self._array.fields:
+                contents.append(record[field])
+                if isinstance(
+                    contents[-1], (ak._v2.highlevel.Array, ak._v2.highlevel.Record)
+                ):
+                    contents[-1] = contents[-1]._layout._to_list(
+                        behavior, json_conversions
+                    )
+                elif hasattr(contents[-1], "tolist"):
+                    contents[-1] = contents[-1].tolist()
+
+        else:
+            contents = [
+                content[self._at : self._at + 1]._to_list(behavior, json_conversions)[0]
+                for content in self._array.contents
+            ]
+
+        if self.is_tuple and json_conversions is None:
+            return tuple(contents)
+        else:
+            return dict(zip(self._array.fields, contents))
 
     def __deepcopy__(self, memo=None):
         return Record(self._array.__deepcopy__(memo), self._at)
