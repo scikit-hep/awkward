@@ -707,7 +707,7 @@ class RegularArray(Content):
         elif all(x.is_RegularType and x.size == self.size for x in others):
             parameters = self._parameters
             tail_contents = []
-            zeros_length = 0
+            zeros_length = self._length
             for x in others:
                 parameters = ak._v2._util.merge_parameters(
                     parameters, x._parameters, True
