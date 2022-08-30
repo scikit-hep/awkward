@@ -8,6 +8,58 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
+def test_without_control():
+    array = ak._v2.Array(
+        [
+            {"ok": 1, "x": 1.1, "y": 1 + 1j, "z": b"one"},
+            {"ok": 2, "x": 2.2, "y": 2 + 2j, "z": b"two"},
+            {"ok": 3, "x": 3.3, "y": 3 + 3j, "z": b"three"},
+            {"ok": 4, "x": float("nan"), "y": float("nan"), "z": b"four"},
+            {"ok": 5, "x": float("inf"), "y": float("inf") + 5j, "z": b"five"},
+            {"ok": 6, "x": float("-inf"), "y": 6 + float("-inf") * 1j, "z": b"six"},
+            {"ok": 7, "x": 7.7, "y": 7 + 7j, "z": b"seven"},
+            {"ok": 8, "x": None, "y": 8 + 8j, "z": b"eight"},
+            {"ok": 9, "x": 9.9, "y": 9 + 9j, "z": b"nine"},
+        ]
+    )
+
+    assert ak._v2.to_json(array.ok) == "[1,2,3,4,5,6,7,8,9]"
+
+    with pytest.raises(ValueError):
+        ak._v2.to_json(array.x)
+
+    assert ak._v2.to_json(array.x[:3]) == "[1.1,2.2,3.3]"
+
+    with pytest.raises(ValueError):
+        ak._v2.to_json(array.x, nan_string="NAN")
+
+    with pytest.raises(ValueError):
+        ak._v2.to_json(array.x, nan_string="NAN", posinf_string="INF")
+
+    assert (
+        ak._v2.to_json(
+            array.x, nan_string="NAN", posinf_string="INF", neginf_string="-INF"
+        )
+        == '[1.1,2.2,3.3,"NAN","INF","-INF",7.7,null,9.9]'
+    )
+
+    with pytest.raises(TypeError):
+        ak._v2.to_json(array.y[:3])
+
+    assert (
+        ak._v2.to_json(array.y[:3], complex_record_fields=["R", "I"])
+        == '[{"R":1.0,"I":1.0},{"R":2.0,"I":2.0},{"R":3.0,"I":3.0}]'
+    )
+
+    with pytest.raises(TypeError):
+        ak._v2.to_json(array.z)
+
+    assert (
+        ak._v2.to_json(array.z, convert_bytes=lambda x: x.decode())
+        == '["one","two","three","four","five","six","seven","eight","nine"]'
+    )
+
+
 def test_to_json_options(tmp_path):
     filename = os.path.join(tmp_path, "whatever.json")
 
