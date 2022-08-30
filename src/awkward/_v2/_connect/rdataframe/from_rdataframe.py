@@ -11,7 +11,7 @@ import ctypes
 import os
 from awkward._v2.types.numpytype import primitive_to_dtype
 
-_primitive_to_cpp_type_dict = {
+cpp_type_of = {
     "bool": "bool",
     "int8": "int8_t",
     "uint8": "uint8_t",
@@ -56,25 +56,17 @@ assert done is True
 
 def from_rdataframe(data_frame, columns):
     def supported(form):
-        if form.purelist_depth == 1:
-            # special case for a list of strings form
-            return isinstance(
-                form, (ak._v2.forms.ListOffsetForm, ak._v2.forms.NumpyForm)
-            )
+        if isinstance(form, ak._v2.forms.NumpyForm) and form.inner_shape == ():
+            return True
         else:
             return isinstance(form, ak._v2.forms.ListOffsetForm) and supported(
                 form.content
             )
 
     def form_dtype(form):
-        if form.purelist_depth == 1:
-            # special case for a list of strings form
-            return (
-                primitive_to_dtype(form.content.primitive)
-                if isinstance(form, ak._v2.forms.ListOffsetForm)
-                else primitive_to_dtype(form.primitive)
-            )
-        else:
+        if isinstance(form, ak._v2.forms.NumpyForm) and form.inner_shape == ():
+            return primitive_to_dtype(form.primitive)
+        elif isinstance(form, ak._v2.forms.ListOffsetForm):
             return form_dtype(form.content)
 
     def empty_buffers(cpp_buffers_self, names_nbytes):
@@ -184,7 +176,7 @@ def from_rdataframe(data_frame, columns):
 
             list_depth = form.purelist_depth
 
-            data_type = _primitive_to_cpp_type_dict[form_dtype(form).name]
+            data_type = cpp_type_of[form_dtype(form).name]
 
             # pull in the CppBuffers (after which we can import from it)
             CppBuffers = cppyy.gbl.awkward.CppBuffers[col_type]
