@@ -11,16 +11,22 @@ import ctypes
 import os
 from awkward._v2.types.numpytype import primitive_to_dtype
 
-cpp_type_of = {
+_primitive_to_cpp_type_dict = {
+    "bool": "bool",
     "int8": "int8_t",
     "uint8": "uint8_t",
+    "int16": "int16_t",
+    "uint16": "uint16_t",
     "int32": "int32_t",
     "uint32": "uint32_t",
     "int64": "int64_t",
     "uint64": "uint64_t",
     "float32": "float",
     "float64": "double",
+    "complex64": "std::complex<float>",
     "complex128": "std::complex<double>",
+    "datetime64": "std::time_t",
+    "timedelta64": "std::difftime",
 }
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -178,7 +184,7 @@ def from_rdataframe(data_frame, columns):
 
             list_depth = form.purelist_depth
 
-            data_type = cpp_type_of[form_dtype(form).name]
+            data_type = _primitive_to_cpp_type_dict[form_dtype(form).name]
 
             # pull in the CppBuffers (after which we can import from it)
             CppBuffers = cppyy.gbl.awkward.CppBuffers[col_type]
