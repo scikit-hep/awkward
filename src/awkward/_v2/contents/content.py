@@ -1378,12 +1378,14 @@ class Content:
             complex_real_string = None
             complex_imag_string = None
         elif (
-            isinstance(complex_record_fields, tuple)
+            isinstance(complex_record_fields, (tuple, list))
             and len(complex_record_fields) == 2
             and isinstance(complex_record_fields[0], str)
             and isinstance(complex_record_fields[1], str)
         ):
             complex_real_string, complex_imag_string = complex_record_fields
+        else:
+            complex_real_string, complex_imag_string = None, None
 
         return self.packed()._to_list(
             behavior,
@@ -1411,6 +1413,11 @@ class Content:
             for i in range(self.length):
                 out[i] = array[i]
 
+            # These json_conversions are applied in NumpyArray (for numbers)
+            # and ListArray/ListOffsetArray/RegularArray (for bytestrings),
+            # but they're also applied here because __getitem__ might return
+            # something convertible (the overloaded __getitem__ might be
+            # trivial, as it is in Vector).
             if json_conversions is not None:
                 convert_bytes = json_conversions["convert_bytes"]
                 if convert_bytes is not None:
