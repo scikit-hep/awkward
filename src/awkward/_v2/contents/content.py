@@ -1409,14 +1409,16 @@ class Content:
 
     def _to_list_custom(self, behavior, json_conversions):
         if self.is_RecordType:
+            getitem = ak._v2._util.recordclass(self, behavior).__getitem__
             overloaded = (
-                ak._v2._util.recordclass(self, behavior).__getitem__
-                is not ak._v2.highlevel.Record.__getitem__
+                getitem is not ak._v2.highlevel.Record.__getitem__
+                and not getattr(getitem, "ignore_in_to_list", False)
             )
         else:
+            getitem = ak._v2._util.arrayclass(self, behavior).__getitem__
             overloaded = (
-                ak._v2._util.arrayclass(self, behavior).__getitem__
-                is not ak._v2.highlevel.Array.__getitem__
+                getitem is not ak._v2.highlevel.Array.__getitem__
+                and not getattr(getitem, "ignore_in_to_list", False)
             )
 
         if overloaded:
