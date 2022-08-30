@@ -4,7 +4,7 @@
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
 [![Python 3.6‒3.10](https://img.shields.io/badge/python-3.6%E2%80%923.10-blue)](https://www.python.org)
 [![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Continuous integration tests](https://img.shields.io/azure-devops/build/jpivarski/Scikit-HEP/6/main?label=tests)](https://dev.azure.com/jpivarski/Scikit-HEP/_build/latest?definitionId=6&branchName=main)
+[![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml)
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
@@ -178,11 +178,11 @@ The [roadmap, future version planning, issue prioritization, deprecation schedul
 
 # Papers and talks about Awkward Array
 
-   * [Original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now out-of-date.
-   * [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) on September 14, 2019.
+   * [Original motivations for Awkward 1.0](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now out-of-date.
+   * [StrangeLoop talk](https://youtu.be/2NxWpU7NArk) (video) on September 14, 2019.
    * [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
    * [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
-   * [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (to be published in _EPJ Web of Conferences_).
+   * [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (published in _EPJ Web of Conferences_).
    * [Demo for Coffea developers](https://github.com/scikit-hep/awkward/blob/main/docs-jupyter/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
    * [Demo for Numba developers](https://github.com/scikit-hep/awkward/blob/main/docs-jupyter/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
    * [Summary poster](https://github.com/jpivarski/2020-02-27-irishep-poster/blob/master/pivarski-irishep-poster.pdf) on February 27, 2020.
@@ -190,8 +190,12 @@ The [roadmap, future version planning, issue prioritization, deprecation schedul
    * [Presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) (video) on July 5, 2020.
    * [Tutorial at PyHEP 2020](https://youtu.be/ea-zYLQBS4U) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski/2020-07-13-pyhep2020-tutorial.git/1.1?urlpath=lab/tree/tutorial.ipynb)) on July 13, 2020.
    * [Tutorial at PyHEP 2021](https://youtu.be/5aWAxvdrszw?t=9189) (video with [interactive notebook on Binder](https://mybinder.org/v2/gh/jpivarski-talks/2021-07-06-pyhep-uproot-awkward-tutorial/v1.2?urlpath=lab/tree/uproot-awkward-tutorial.ipynb) on July 6, 2021.
-   * [Tutorial for STAR collaboration meeting](https://youtu.be/NnU_zp5s1MY) on September 13, 2021 (video with [interactive notebook on Binder](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme)). This is the first tutorial with extensive exercises to test your understanding.
+   * [Tutorial for STAR collaboration meeting](https://youtu.be/NnU_zp5s1MY) on September 13, 2021 (video with [notebooks on GitHub](https://github.com/jpivarski-talks/2021-09-13-star-uproot-awkward-tutorial#readme)). This is the first tutorial with extensive exercises to test your understanding.
    * [Lessons learned in Python-C++ integration](https://indico.cern.ch/event/855454/contributions/4605044/) ([video](https://videos.cern.ch/record/2295164) and [slides](https://indico.cern.ch/event/855454/contributions/4605044/attachments/2349193/4006676/main.pdf)) on December 1, 2021. This talk describes the motivation for Awkward version 2.0.
+   * [Awkward Array updates](https://indico.cern.ch/event/1140031/) on April 6, 2022. A demonstration and overview of Awkward version 2.0.
+   * [Summary poster](https://github.com/jpivarski-talks/2022-07-25-cssi-meeting-poster/blob/main/pivarski-awkward-cssi-poster.pdf) on July 5, 2022.
+   * [Tutorial at SciPy 2022](https://youtu.be/Dovyd72eD70) (video with [notebooks on GitHub](https://github.com/jpivarski-talks/2022-07-11-scipy-loopy-tutorial#readme)) on July 11, 2022. This is aimed at a general scientific audience, not particle physicists in particular. Features three long exercises.
+   * [Tutorial at CoDaS-HEP 2022](https://github.com/jpivarski-talks/2022-08-03-codas-hep-columnar-tutorial#readme) on August 3, 2022. Aimed at particle physicists; features a long exercise on Higgs decay combinatorics.
 
 ### Citing Awkward Array in a publication
 

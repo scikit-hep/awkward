@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
 from awkward._v2.forms.form import _parameters_equal
@@ -14,6 +14,24 @@ np = ak.nplike.NumpyMetadata.instance()
 
 class ListArray(Content):
     is_ListType = True
+
+    def copy(
+        self,
+        starts=unset,
+        stops=unset,
+        content=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return ListArray(
+            self._starts if starts is unset else starts,
+            self._stops if stops is unset else stops,
+            self._content if content is unset else content,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self, starts, stops, content, identifier=None, parameters=None, nplike=None
@@ -156,7 +174,20 @@ class ListArray(Content):
     def toListOffsetArray64(self, start_at_zero=False):
         starts = self._starts.data
         stops = self._stops.data
-        if self._nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
+
+        if not self._nplike.known_data:
+            offsets = self._nplike.index_nplike.empty(
+                starts.shape[0] + 1, dtype=starts.dtype
+            )
+            return ListOffsetArray(
+                ak._v2.index.Index(offsets, nplike=self._nplike),
+                self._content,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
+
+        elif self._nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
             offsets = self._nplike.index_nplike.empty(
                 starts.shape[0] + 1, dtype=starts.dtype
             )
@@ -166,7 +197,7 @@ class ListArray(Content):
                 offsets[:-1] = starts
                 offsets[-1] = stops[-1]
             return ListOffsetArray(
-                ak._v2.index.Index(offsets, nplike=self.nplike),
+                ak._v2.index.Index(offsets, nplike=self._nplike),
                 self._content,
                 self._identifier,
                 self._parameters,
@@ -772,7 +803,7 @@ class ListArray(Content):
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
                     return ak._v2._slicing.getitem_next_array_wrap(
-                        out, head.metadata.get("shape", (head.length,))
+                        out, head.metadata.get("shape", (head.length,)), self.length
                     )
                 else:
                     return out
@@ -961,9 +992,10 @@ class ListArray(Content):
 
         contents = []
 
+        parameters = self._parameters
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters, True
+                parameters, array._parameters, True
             )
 
             if isinstance(
@@ -1215,6 +1247,7 @@ class ListArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         return self.toListOffsetArray64(True)._reduce_next(
             reducer,
@@ -1225,6 +1258,7 @@ class ListArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):
@@ -1457,6 +1491,8 @@ class ListArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

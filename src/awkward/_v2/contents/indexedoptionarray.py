@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.indexedoptionform import IndexedOptionForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -15,6 +15,22 @@ numpy = ak.nplike.Numpy.instance()
 class IndexedOptionArray(Content):
     is_OptionType = True
     is_IndexedType = True
+
+    def copy(
+        self,
+        index=unset,
+        content=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return IndexedOptionArray(
+            self._index if index is unset else index,
+            self._content if content is unset else content,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(self, index, content, identifier=None, parameters=None, nplike=None):
         if not (
@@ -133,6 +149,35 @@ class IndexedOptionArray(Content):
                 self._parameters,
                 self._nplike,
             )
+
+    def toByteMaskedArray(self, valid_when):
+        mask = ak._v2.index.Index8(self.mask_as_bool(valid_when, self._nplike))
+
+        carry = self._index.data
+        too_negative = carry < -1
+        if self._nplike.any(too_negative, prefer=False):
+            carry = carry.copy()
+            carry[too_negative] = -1
+        carry = ak._v2.index.Index(carry)
+
+        if self._content.length == 0:
+            content = self._content.dummy()._carry(carry, False)
+        else:
+            content = self._content._carry(carry, False)
+
+        return ak._v2.contents.ByteMaskedArray(
+            mask,
+            content,
+            valid_when,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
+
+    def toBitMaskedArray(self, valid_when, lsb_order):
+        return self.toByteMaskedArray(valid_when).toBitMaskedArray(
+            valid_when, lsb_order
+        )
 
     def mask_as_bool(self, valid_when=True, nplike=None):
         if nplike is None:
@@ -667,9 +712,10 @@ class IndexedOptionArray(Content):
         nextindex = ak._v2.index.Index64.empty(total_length, self._nplike)
         parameters = self._parameters
 
+        parameters = self._parameters
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters, True
+                parameters, array._parameters, True
             )
 
             if isinstance(
@@ -1322,6 +1368,7 @@ class IndexedOptionArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         branch, depth = self.branch_depth
 
@@ -1344,6 +1391,7 @@ class IndexedOptionArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
         # If we are reducing the contents of this layout,
@@ -1635,6 +1683,8 @@ class IndexedOptionArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

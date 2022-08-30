@@ -12,6 +12,8 @@ import numbers
 
 from collections.abc import Mapping
 from collections.abc import MutableMapping
+from collections.abc import Iterable
+from collections.abc import Sized
 
 import awkward as ak
 
@@ -35,6 +37,10 @@ def is_file_path(x):
         return os.path.isfile(x)
     except ValueError:
         return False
+
+
+def is_sized_iterable(obj):
+    return isinstance(obj, Iterable) and isinstance(obj, Sized)
 
 
 def isint(x):

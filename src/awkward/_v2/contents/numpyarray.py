@@ -2,7 +2,7 @@
 
 import copy
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.numpyform import NumpyForm
 from awkward._v2.forms.form import _parameters_equal
 from awkward._v2.types.numpytype import primitive_to_dtype
@@ -13,6 +13,20 @@ numpy = ak.nplike.Numpy.instance()
 
 class NumpyArray(Content):
     is_NumpyType = True
+
+    def copy(
+        self,
+        data=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return NumpyArray(
+            self._data if data is unset else data,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(self, data, identifier=None, parameters=None, nplike=None):
         if nplike is None:
@@ -168,51 +182,6 @@ class NumpyArray(Content):
             )
         out._identifier = self._identifier
         out._parameters = self._parameters
-        return out
-
-    def _nonfinite_to_union(self, nan_string, infinity_string, minus_infinity_string):
-        shape = self._data.shape
-        zeroslen = [1]
-        for x in shape:
-            zeroslen.append(zeroslen[-1] * x)
-
-        out = NumpyArray(self._data.reshape(-1), None, None, self._nplike)
-
-        is_nonfinite = ~self._nplike.isfinite(self._data)  # true for inf, -inf, nan
-        is_posinf = is_nonfinite & (self._data > 0)  # true for inf only
-        is_neginf = is_nonfinite & (self._data < 0)  # true for -inf only
-        is_nan = self._nplike.isnan(self._data)  # true for nan only
-        tags = self._nplike.index_nplike.zeros(out.length, np.int8)
-        tags[is_nonfinite] = 1
-        index = self._nplike.index_nplike.arange(out.length, dtype=np.int64)
-        index[is_posinf] = 0
-        index[is_neginf] = 1
-        index[is_nan] = 2
-
-        out = ak._v2.contents.unionarray.UnionArray(
-            tags=ak._v2.index.Index8(tags, nplike=self.nplike),
-            index=ak._v2.index.Index64(index, nplike=self.nplike),
-            contents=[
-                out,
-                ak._v2.operations.from_iter(
-                    [
-                        infinity_string if infinity_string is not None else "Infinity",
-                        minus_infinity_string
-                        if minus_infinity_string is not None
-                        else "-Infinity",
-                        nan_string if nan_string is not None else "NaN",
-                    ],
-                    highlevel=False,
-                ),
-            ],
-        )
-        for i in range(len(shape) - 1, 0, -1):
-            out = ak._v2.contents.RegularArray(
-                out, shape[i], zeroslen[i], None, None, self._nplike
-            )
-        out._identifier = self._identifier
-        out._parameters = self._parameters
-
         return out
 
     def maybe_to_array(self, nplike):
@@ -482,9 +451,10 @@ class NumpyArray(Content):
 
         contiguous_arrays = []
 
+        parameters = self._parameters
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters, True
+                parameters, array._parameters, True
             )
             if isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
                 pass
@@ -1107,6 +1077,7 @@ class NumpyArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         if len(self._data.shape) != 1 or not self.is_contiguous:
             return self.toRegularArray()._reduce_next(
@@ -1118,6 +1089,7 @@ class NumpyArray(Content):
                 outlength,
                 mask,
                 keepdims,
+                behavior,
             )
 
         if isinstance(self.nplike, ak.nplike.Jax):
@@ -1311,6 +1283,8 @@ class NumpyArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 
@@ -1370,15 +1344,15 @@ class NumpyArray(Content):
                     for i in self._nplike.nonzero(self._nplike.isnan(self._data))[0]:
                         out[i] = nan_string
 
-                infinity_string = json_conversions["infinity_string"]
-                if infinity_string is not None:
+                posinf_string = json_conversions["posinf_string"]
+                if posinf_string is not None:
                     for i in self._nplike.nonzero(self._data == np.inf)[0]:
-                        out[i] = infinity_string
+                        out[i] = posinf_string
 
-                minus_infinity_string = json_conversions["minus_infinity_string"]
-                if minus_infinity_string is not None:
+                neginf_string = json_conversions["neginf_string"]
+                if neginf_string is not None:
                     for i in self._nplike.nonzero(self._data == -np.inf)[0]:
-                        out[i] = minus_infinity_string
+                        out[i] = neginf_string
 
             return out
 

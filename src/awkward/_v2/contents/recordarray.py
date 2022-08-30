@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward._v2.record import Record
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.recordform import RecordForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -17,6 +17,24 @@ numpy = ak.nplike.Numpy.instance()
 
 class RecordArray(Content):
     is_RecordType = True
+
+    def copy(
+        self,
+        contents=unset,
+        fields=unset,
+        length=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return RecordArray(
+            self._contents if contents is unset else contents,
+            self._fields if fields is unset else fields,
+            self._length if length is unset else length,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self,
@@ -570,9 +588,10 @@ class RecordArray(Content):
             for_each_field.append([field])
 
         if self.is_tuple:
+            parameters = self._parameters
             for array in headless:
                 parameters = ak._v2._util.merge_parameters(
-                    self._parameters, array._parameters, True
+                    parameters, array._parameters, True
                 )
 
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
@@ -607,7 +626,12 @@ class RecordArray(Content):
             these_fields = self._fields.copy()
             these_fields.sort()
 
+            parameters = self._parameters
             for array in headless:
+                parameters = ak._v2._util.merge_parameters(
+                    parameters, array._parameters, True
+                )
+
                 if isinstance(array, ak._v2.contents.recordarray.RecordArray):
                     if not array.is_tuple:
                         those_fields = array._fields.copy()
@@ -800,30 +824,23 @@ class RecordArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
-        contents = []
-        for content in self._contents:
-            contents.append(
-                content[: self._length]._reduce_next(
-                    reducer,
-                    negaxis,
-                    starts,
-                    shifts,
-                    parents,
-                    outlength,
-                    mask,
-                    keepdims,
+        reducer_recordclass = ak._v2._util.reducer_recordclass(reducer, self, behavior)
+        if reducer_recordclass is None:
+            raise ak._v2._util.error(
+                TypeError(
+                    "no ak.{} overloads for custom types: {}".format(
+                        reducer.name, ", ".join(self._fields)
+                    )
                 )
             )
-
-        return ak._v2.contents.RecordArray(
-            contents,
-            self._fields,
-            outlength,
-            None,
-            None,
-            self._nplike,
-        )
+        else:
+            raise ak._v2._util.error(
+                NotImplementedError(
+                    "overloading reducers for RecordArrays has not been implemented yet"
+                )
+            )
 
     def _validity_error(self, path):
         for i, cont in enumerate(self.contents):
@@ -1001,6 +1018,8 @@ class RecordArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

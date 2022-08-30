@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.emptyform import EmptyForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -12,6 +12,18 @@ numpy = ak.nplike.Numpy.instance()
 class EmptyArray(Content):
     is_NumpyType = True
     is_UnknownType = True
+
+    def copy(
+        self,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return EmptyArray(
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(self, identifier=None, parameters=None, nplike=None):
         if nplike is None:
@@ -135,7 +147,10 @@ class EmptyArray(Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, ak._v2.index.Index64):
-            raise ak._v2._util.indexerror(self, head, "array is empty")
+            if not head.nplike.known_shape or head.length == 0:
+                return self
+            else:
+                raise ak._v2._util.indexerror(self, head.data, "array is empty")
 
         elif isinstance(head, ak._v2.contents.ListOffsetArray):
             raise ak._v2._util.indexerror(self, head, "array is empty")
@@ -249,6 +264,7 @@ class EmptyArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         as_numpy = self.toNumpyArray(reducer.preferred_dtype)
         return as_numpy._reduce_next(
@@ -260,6 +276,7 @@ class EmptyArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):
@@ -334,6 +351,8 @@ class EmptyArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

@@ -82,13 +82,15 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 )
             )
 
+    if isinstance(iterable, tuple):
+        iterable = list(iterable)
+
     builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
-    for x in iterable:
-        builder.fromiter(x)
+    builder.fromiter(iterable)
 
     formstr, length, buffers = builder.to_buffers()
     form = ak._v2.forms.from_json(formstr)
 
     return ak._v2.operations.from_buffers(
         form, length, buffers, highlevel=highlevel, behavior=behavior
-    )
+    )[0]

@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.indexedform import IndexedForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -14,6 +14,22 @@ numpy = ak.nplike.Numpy.instance()
 
 class IndexedArray(Content):
     is_IndexedType = True
+
+    def copy(
+        self,
+        index=unset,
+        content=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return IndexedArray(
+            self._index if index is unset else index,
+            self._content if content is unset else content,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(self, index, content, identifier=None, parameters=None, nplike=None):
         if not (
@@ -563,9 +579,10 @@ class IndexedArray(Content):
         nextindex = ak._v2.index.Index64.empty(total_length, self._nplike)
         parameters = self._parameters
 
+        parameters = self._parameters
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters, True
+                parameters, array._parameters, True
             )
 
             if isinstance(
@@ -953,6 +970,7 @@ class IndexedArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         branch, depth = self.branch_depth
 
@@ -996,6 +1014,7 @@ class IndexedArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
         # If we are reducing the contents of this layout,
@@ -1225,6 +1244,8 @@ class IndexedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

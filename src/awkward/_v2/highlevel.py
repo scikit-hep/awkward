@@ -134,7 +134,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     Otherwise, multiple DataFrames are needed, though they can be merged (with a
     loss of information).
 
-    The #ak.to_pandas function performs this conversion; if `how=None`, it
+    The #ak.to_dataframe function performs this conversion; if `how=None`, it
     returns a list of DataFrames; otherwise, `how` is passed to `pd.merge` when
     merging the resultant DataFrames.
 

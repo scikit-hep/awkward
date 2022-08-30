@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.listoffsetform import ListOffsetForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -14,6 +14,22 @@ numpy = ak.nplike.Numpy.instance()
 
 class ListOffsetArray(Content):
     is_ListType = True
+
+    def copy(
+        self,
+        offsets=unset,
+        content=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return ListOffsetArray(
+            self._offsets if offsets is unset else offsets,
+            self._content if content is unset else content,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(self, offsets, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
@@ -547,7 +563,7 @@ class ListOffsetArray(Content):
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
                     return ak._v2._slicing.getitem_next_array_wrap(
-                        out, head.metadata.get("shape", (head.length,))
+                        out, head.metadata.get("shape", (head.length,), self.length)
                     )
                 else:
                     return out
@@ -751,7 +767,15 @@ class ListOffsetArray(Content):
         listarray = ak._v2.contents.listarray.ListArray(
             self.starts, self.stops, self._content, None, self._parameters, self._nplike
         )
-        return listarray.mergemany(others)
+        out = listarray.mergemany(others)
+
+        if all(
+            isinstance(x, ListOffsetArray) and x._offsets.dtype == self._offsets.dtype
+            for x in others
+        ):
+            return out.toListOffsetArray64(False)
+        else:
+            return out
 
     def fill_none(self, value):
         return ListOffsetArray(
@@ -1443,6 +1467,7 @@ class ListOffsetArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         if self._offsets.dtype != np.dtype(np.int64) or (
             self._offsets.nplike.known_data and self._offsets[0] != 0
@@ -1457,6 +1482,7 @@ class ListOffsetArray(Content):
                 outlength,
                 mask,
                 keepdims,
+                behavior,
             )
 
         branch, depth = self.branch_depth
@@ -1562,6 +1588,7 @@ class ListOffsetArray(Content):
                 maxnextparents[0] + 1,
                 mask,
                 False,
+                behavior,
             )
 
             out = ak._v2.contents.ListArray(
@@ -1617,6 +1644,7 @@ class ListOffsetArray(Content):
                 globalstarts_length,
                 mask,
                 keepdims,
+                behavior,
             )
 
             outoffsets = ak._v2.index.Index64.empty(outlength + 1, self._nplike)
@@ -2074,6 +2102,8 @@ class ListOffsetArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

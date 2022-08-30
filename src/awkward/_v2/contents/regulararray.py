@@ -3,7 +3,7 @@
 import copy
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.regularform import RegularForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -14,6 +14,24 @@ numpy = ak.nplike.Numpy.instance()
 class RegularArray(Content):
     is_ListType = True
     is_RegularType = True
+
+    def copy(
+        self,
+        content=unset,
+        size=unset,
+        zeros_length=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return RegularArray(
+            self._content if content is unset else content,
+            self._size if size is unset else size,
+            self._zeros_length if zeros_length is unset else zeros_length,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self,
@@ -512,7 +530,7 @@ class RegularArray(Content):
                 out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
                 if advanced is None:
                     return ak._v2._slicing.getitem_next_array_wrap(
-                        out, head.metadata.get("shape", (head.length,))
+                        out, head.metadata.get("shape", (head.length,)), self._length
                     )
                 else:
                     return out
@@ -682,7 +700,31 @@ class RegularArray(Content):
     def mergemany(self, others):
         if len(others) == 0:
             return self
-        return self.toListOffsetArray64(True).mergemany(others)
+
+        if any(x.is_OptionType for x in others):
+            return ak._v2.contents.UnmaskedArray(self).mergemany(others)
+
+        elif all(x.is_RegularType and x.size == self.size for x in others):
+            parameters = self._parameters
+            tail_contents = []
+            zeros_length = 0
+            for x in others:
+                parameters = ak._v2._util.merge_parameters(
+                    parameters, x._parameters, True
+                )
+                tail_contents.append(x._content[: x._length * x._size])
+                zeros_length += x._length
+
+            return RegularArray(
+                self._content[: self._length * self._size].mergemany(tail_contents),
+                self._size,
+                zeros_length,
+                None,
+                parameters,
+            )
+
+        else:
+            return self.toListOffsetArray64(True).mergemany(others)
 
     def fill_none(self, value):
         return RegularArray(
@@ -943,6 +985,7 @@ class RegularArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         out = self.toListOffsetArray64(True)._reduce_next(
             reducer,
@@ -953,6 +996,7 @@ class RegularArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
         if not self._content.dimension_optiontype:
@@ -1076,13 +1120,9 @@ class RegularArray(Content):
         if array_param in {"bytestring", "string"}:
             return self._nplike.array(self.to_list())
 
-        out = ak._v2.operations.to_numpy(self.content, allow_missing=allow_missing)
-        head, tail = out.shape[0], out.shape[1:]
-        if self.size == 0:
-            shape = (0, 0) + tail
-        else:
-            shape = (head // self.size, self.size) + tail
-        return out[: shape[0] * self.size].reshape(shape)
+        out = self._content.to_numpy(allow_missing)
+        shape = (self._length, self._size) + out.shape[1:]
+        return out[: self._length * self._size].reshape(shape)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":
@@ -1194,6 +1234,8 @@ class RegularArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

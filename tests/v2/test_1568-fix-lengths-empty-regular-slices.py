@@ -54,18 +54,20 @@ def test_lengths_empty_regular_slices():
         == ak._v2.to_list(f[1:4, [], [], []])
         == [[], [], []]
     )
-    assert (
-        ak._v2.to_list(d[:, [], :, []])
-        == ak._v2.to_list(e[:, [], :, []])
-        == ak._v2.to_list(f[:, [], :, []])
-        == []
-    )
-    assert (
-        ak._v2.to_list(d[1:4, [], -3:, []])
-        == ak._v2.to_list(e[1:4, [], -3:, []])
-        == ak._v2.to_list(f[1:4, [], -3:, []])
-        == []
-    )
+    with pytest.raises(ValueError):
+        _ = e[:, [], :, 0, []]
+
+    with pytest.raises(ValueError):
+        _ = e[:, [], :, []]
+
+    with pytest.raises(ValueError):
+        _ = f[:, [], :, []]
+
+    with pytest.raises(ValueError):
+        _ = e[1:4, [], -3:, []]
+
+    with pytest.raises(ValueError):
+        _ = f[1:4, [], -3:, []]
 
     assert (
         d[:, :, []].shape
@@ -91,16 +93,6 @@ def test_lengths_empty_regular_slices():
         d[1:4, [], [], []].shape
         == ak._v2.to_numpy(e[1:4, [], [], []]).shape
         == ak._v2.to_numpy(f[1:4, [], [], []]).shape
-    )
-    assert (
-        d[:, [], :, []].shape
-        == ak._v2.to_numpy(e[:, [], :, []]).shape
-        == ak._v2.to_numpy(f[:, [], :, []]).shape
-    )
-    assert (
-        d[1:4, [], -3:, []].shape
-        == ak._v2.to_numpy(e[1:4, [], -3:, []]).shape
-        == ak._v2.to_numpy(f[1:4, [], -3:, []]).shape
     )
 
     np1 = np.ones((5, 7))

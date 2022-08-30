@@ -265,6 +265,9 @@ class TypeTracerArray:
     def ndim(self):
         return len(self._shape)
 
+    def astype(self, dtype):
+        return self.__class__(np.dtype(dtype), self._shape)
+
     def view(self, dtype):
         if (
             self.itemsize != np.dtype(dtype).itemsize
@@ -273,9 +276,11 @@ class TypeTracerArray:
             last = int(
                 round(self._shape[-1] * self.itemsize / np.dtype(dtype).itemsize)
             )
-            self._shape = self.shape[:-1] + (last,)
-        self._dtype = np.dtype(dtype)
-        return self
+            shape = self._shape[:-1] + (last,)
+        else:
+            shape = self._shape
+        dtype = np.dtype(dtype)
+        return self.__class__(dtype, shape)
 
     def forget_length(self):
         return type(self)(self._dtype, (UnknownLength,) + self._shape[1:])
@@ -748,6 +753,10 @@ class TypeTracer(ak.nplike.NumpyLike):
     def repeat(self, *args, **kwargs):
         # array, int
         # array1, array2
+        raise ak._v2._util.error(NotImplementedError)
+
+    def tile(self, *args, **kwargs):
+        # array, int
         raise ak._v2._util.error(NotImplementedError)
 
     def stack(self, *args, **kwargs):

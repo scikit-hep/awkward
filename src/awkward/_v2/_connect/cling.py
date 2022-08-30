@@ -177,6 +177,11 @@ namespace awkward {
     RecordView(ssize_t at, ssize_t which, ssize_t* ptrs, PyObject* lookup)
       : at_(at), which_(which), ptrs_(ptrs), lookup_(lookup) { }
 
+    PyObject* lookup() {
+        Py_INCREF(lookup_);
+        return lookup_;
+    }
+
   protected:
     ssize_t at_;
     ssize_t which_;
@@ -476,6 +481,22 @@ class Generator:
         else:
             raise ak._v2._util.error(NotImplementedError("TODO: identifiers in C++"))
 
+    def IndexOf(self, arraytype):
+        if arraytype == "int8_t":
+            return ak._v2.index.Index8
+        elif arraytype == "uint8_t":
+            return ak._v2.index.IndexU8
+        elif arraytype == "int32_t":
+            return ak._v2.index.Index32
+        elif arraytype == "uint32_t":
+            return ak._v2.index.IndexU32
+        elif arraytype == "int64_t":
+            return ak._v2.index.Index64
+        elif arraytype == "uint64_t":
+            return ak._v2.index.IndexU64
+        else:
+            raise ak._v2._util.error(AssertionError(arraytype))
+
     def class_type_suffix(self, key):
         return ak._v2._util.identifier_hash(key)
 
@@ -626,18 +647,18 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
         )
 
     def __init__(self, content, size, identifier, parameters, flatlist_as_rvec):
-        self.content = content
+        self.contenttype = content
         self.size = size
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.content,
+                self.contenttype,
                 self.size,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -647,7 +668,7 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.size == other.size
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -660,22 +681,22 @@ class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
         ) in ("string", "bytestring")
 
     def is_flatlist(self):
-        return isinstance(self.content, NumpyArrayGenerator)
+        return isinstance(self.contenttype, NumpyArrayGenerator)
 
     def class_type(self):
         return f"RegularArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
         if self.flatlist_as_rvec and self.is_flatlist:
-            nested_type = self.content.value_type()
+            nested_type = self.contenttype.value_type()
             return f"ROOT::VecOps::RVec<{nested_type}>"
         else:
-            return self.content.class_type()
+            return self.contenttype.class_type()
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
         if not self.is_string and not (self.flatlist_as_rvec and self.is_flatlist):
-            self.content.generate(compiler, use_cached)
+            self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -703,7 +724,7 @@ namespace awkward {{
 }}
 """.strip()
             elif self.flatlist_as_rvec and self.is_flatlist:
-                nested_type = self.content.value_type()
+                nested_type = self.contenttype.value_type()
                 value_type = f"ROOT::VecOps::RVec<{nested_type}>"
                 out = f"""
 namespace awkward {{
@@ -830,17 +851,6 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         else:
             return self.content.class_type()
 
-    # FIXME: override the IndexOf method in the ContentLookup super-class
-    def IndexOf(self, arraytype):
-        if self.index_type == "int32_t":
-            return ak._v2.index.Index32
-        elif self.index_type == "uint32_t":
-            return ak._v2.index.Index32
-        elif self.index_type == "int64_t":
-            return ak._v2.index.Index64
-        else:
-            raise ak._v2._util.error(AssertionError(self.index_type))
-
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
         if not self.is_string and not (self.flatlist_as_rvec and self.is_flatlist):
@@ -934,25 +944,25 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
 
     def __init__(self, index_type, content, identifier, parameters, flatlist_as_rvec):
         if index_type == "i32":
-            self.index_type = "int32_t"
+            self.indextype = "int32_t"
         elif index_type == "u32":
-            self.index_type = "uint32_t"
+            self.indextype = "uint32_t"
         elif index_type == "i64":
-            self.index_type = "int64_t"
+            self.indextype = "int64_t"
         else:
             raise ak._v2._util.error(AssertionError(index_type))
-        self.content = content
+        self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.index_type,
-                self.content,
+                self.indextype,
+                self.contenttype,
                 self.identifier,
                 json.dumps(self.parameters),
             )
@@ -961,8 +971,8 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.index_type == other.index_type
-            and self.content == other.content
+            and self.indextype == other.indextype
+            and self.contenttype == other.contenttype
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -971,11 +981,11 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
         return f"IndexedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return self.content.value_type()
+        return self.contenttype.value_type()
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -992,8 +1002,8 @@ namespace awkward {{
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
-      ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
-      return {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0];
+      ssize_t index = reinterpret_cast<{self.indextype}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
+      return {self.contenttype.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0];
     }}
   }};
 }}
@@ -1020,18 +1030,19 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
             self.index_type = "int64_t"
         else:
             raise ak._v2._util.error(AssertionError(index_type))
-        self.content = content
+        self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        self.indextype = self.index_type
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
             (
                 type(self),
                 self.index_type,
-                self.content,
+                self.contenttype,
                 self.identifier,
                 json.dumps(self.parameters),
             )
@@ -1041,7 +1052,7 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         return (
             isinstance(other, type(self))
             and self.index_type == other.index_type
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -1050,11 +1061,11 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         return f"IndexedOptionArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return f"std::optional<{self.content.value_type()}>"
+        return f"std::optional<{self.contenttype.value_type()}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1073,7 +1084,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       ssize_t index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
       if (index >= 0) {{
-        return value_type{{ {self.content.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0] }};
+        return value_type{{ {self.contenttype.class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[0] }};
       }}
       else {{
         return std::nullopt;
@@ -1098,18 +1109,19 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
         )
 
     def __init__(self, content, valid_when, identifier, parameters, flatlist_as_rvec):
-        self.content = content
+        self.contenttype = content
         self.valid_when = valid_when
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
+        self.masktype = "int8_t"
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.content,
+                self.contenttype,
                 self.valid_when,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -1119,7 +1131,7 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.valid_when == other.valid_when
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -1131,11 +1143,11 @@ class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
         )
 
     def value_type(self):
-        return f"std::optional<{self.content.value_type()}>"
+        return f"std::optional<{self.contenttype.value_type()}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1154,7 +1166,7 @@ namespace awkward {{
     value_type operator[](size_t at) const noexcept {{
       int8_t mask = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.MASK}])[start_ + at];
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
+        return value_type{{ {self.contenttype.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -1188,18 +1200,19 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
         parameters,
         flatlist_as_rvec,
     ):
-        self.content = content
+        self.contenttype = content
         self.valid_when = valid_when
         self.lsb_order = lsb_order
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
+        self.masktype = "uint8_t"
 
     def __hash__(self):
         return hash(
             (
-                self.content,
+                self.contenttype,
                 self.valid_when,
                 self.lsb_order,
                 self.identifier,
@@ -1210,7 +1223,7 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.valid_when == other.valid_when
             and self.lsb_order == other.lsb_order
             and self.identifier == other.identifier
@@ -1221,11 +1234,11 @@ class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
         return f"BitMaskedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return f"std::optional<{self.content.value_type()}>"
+        return f"std::optional<{self.contenttype.value_type()}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1249,7 +1262,7 @@ namespace awkward {{
       uint8_t mask = {"(byte >> shift) & 1" if self.lsb_order else "(byte << shift) & 128"};
 
       if ({"mask != 0" if self.valid_when else "mask == 0"}) {{
-        return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
+        return value_type{{ {self.contenttype.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
       }}
       else {{
         return std::nullopt;
@@ -1273,21 +1286,21 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
         )
 
     def __init__(self, content, identifier, parameters, flatlist_as_rvec):
-        self.content = content
+        self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
+        assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
-            (type(self), self.content, self.identifier, json.dumps(self.parameters))
+            (type(self), self.contenttype, self.identifier, json.dumps(self.parameters))
         )
 
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.content == other.content
+            and self.contenttype == other.contenttype
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -1296,11 +1309,11 @@ class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
         return f"UnmaskedArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return f"std::optional<{self.content.value_type()}>"
+        return f"std::optional<{self.contenttype.value_type()}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        self.content.generate(compiler, use_cached)
+        self.contenttype.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
@@ -1317,7 +1330,7 @@ namespace awkward {{
     {self._generate_common(key)}
 
     value_type operator[](size_t at) const noexcept {{
-      return value_type{{ {self.content.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
+      return value_type{{ {self.contenttype.class_type()}(start_, stop_, ptrs_[which_ + {self.CONTENT}], ptrs_, lookup_)[at] }};
     }}
   }};
 }}
@@ -1423,12 +1436,12 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
         )
 
     def __init__(self, contents, fields, identifier, parameters, flatlist_as_rvec):
-        self.contents = tuple(contents)
+        self.contenttypes = tuple(contents)
         self.fields = None if fields is None else tuple(fields)
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        for content in self.contents:
+        for content in self.contenttypes:
             assert self.flatlist_as_rvec == content.flatlist_as_rvec
 
         self.record = RecordGenerator(contents, fields, parameters, flatlist_as_rvec)
@@ -1437,7 +1450,7 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
         return hash(
             (
                 type(self),
-                self.contents,
+                self.contenttypes,
                 self.fields,
                 self.identifier,
                 json.dumps(self.parameters),
@@ -1447,7 +1460,7 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.contents == other.contents
+            and self.contenttypes == other.contenttypes
             and self.fields == other.fields
             and self.identifier == other.identifier
             and self.parameters == other.parameters
@@ -1465,6 +1478,22 @@ class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
 
     def value_type(self):
         return self.record.class_type()
+
+    def fieldindex(self, key):
+        out = -1
+        if self.fields is not None:
+            for i, x in enumerate(self.fields):
+                if x == key:
+                    out = i
+                    break
+        if out == -1:
+            try:
+                out = int(key)
+            except ValueError:
+                return None
+            if not 0 <= out < len(self.contenttypes):
+                return None
+        return out
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
@@ -1506,27 +1535,28 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         )
 
     def __init__(self, index_type, contents, identifier, parameters, flatlist_as_rvec):
+        self.tagstype = "int8_t"
         if index_type == "i32":
-            self.index_type = "int32_t"
+            self.indextype = "int32_t"
         elif index_type == "u32":
-            self.index_type = "uint32_t"
+            self.indextype = "uint32_t"
         elif index_type == "i64":
-            self.index_type = "int64_t"
+            self.indextype = "int64_t"
         else:
             raise ak._v2._util.error(AssertionError(index_type))
-        self.contents = tuple(contents)
+        self.contenttypes = tuple(contents)
         self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
-        for content in self.contents:
+        for content in self.contenttypes:
             assert self.flatlist_as_rvec == content.flatlist_as_rvec
 
     def __hash__(self):
         return hash(
             (
                 type(self),
-                self.index_type,
-                self.contents,
+                self.indextype,
+                self.contenttypes,
                 self.identifier,
                 json.dumps(self.parameters),
             )
@@ -1535,8 +1565,8 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
-            and self.index_type == other.index_type
-            and self.contents == other.contents
+            and self.indextype == other.indextype
+            and self.contenttypes == other.contenttypes
             and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
@@ -1545,17 +1575,17 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         return f"UnionArray_{self.class_type_suffix((self, self.flatlist_as_rvec))}"
 
     def value_type(self):
-        return f"std::variant<{','.join(x.value_type() for x in self.contents)}>"
+        return f"std::variant<{','.join(x.value_type() for x in self.contenttypes)}>"
 
     def generate(self, compiler, use_cached=True):
         generate_ArrayView(compiler, use_cached=use_cached)
-        for content in self.contents:
+        for content in self.contenttypes:
             content.generate(compiler, use_cached)
 
         key = (self, self.flatlist_as_rvec)
         if not use_cached or key not in cache:
             cases = []
-            for i, content in enumerate(self.contents):
+            for i, content in enumerate(self.contenttypes):
                 cases.append(
                     f"""
         case {i}:
@@ -1578,11 +1608,11 @@ namespace awkward {{
 
     value_type operator[](size_t at) const noexcept {{
       int8_t tag = reinterpret_cast<int8_t*>(ptrs_[which_ + {self.TAGS}])[start_ + at];
-      {self.index_type} index = reinterpret_cast<{self.index_type}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
+      {self.indextype} index = reinterpret_cast<{self.indextype}*>(ptrs_[which_ + {self.INDEX}])[start_ + at];
       switch (tag) {{
         {eoln.join(cases)}
         default:
-          return value_type{{ {self.contents[0].class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_, lookup_)[0] }};
+          return value_type{{ {self.contenttypes[0].class_type()}(index, index + 1, ptrs_[which_ + {self.CONTENTS + 0}], ptrs_, lookup_)[0] }};
       }}
     }}
   }};

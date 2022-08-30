@@ -1,0 +1,285 @@
+name: Build Test
+
+on:
+  pull_request:
+    paths-ignore:
+      - README.md
+      - VERSION_INFO
+      - .ci/*
+      - .readthedocs.yml
+      - docs-src/*
+      - docs-img/*
+      - docs-jupyter/*
+      - docs-doxygen/*
+      - docs-sphinx/*
+      - docs/*
+      - studies/*
+      - src/cuda-kernels
+      - cuda-kernels
+
+  schedule:
+    - cron: 0 12 1 * *
+
+  workflow_dispatch:
+
+concurrency:
+  group: 'build-test-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
+jobs:
+  Windows:
+    strategy:
+      matrix:
+        python-version:
+          - '3.11-dev'
+          - '3.10'
+          - '3.9'
+          - '3.8'
+          - '3.7'
+          - '3.6'
+
+        python-architecture:
+          - x64
+
+        include:
+          - python-version: '3.9'
+            python-architecture: x86
+
+    runs-on: windows-2019
+
+    env:
+      PIP_ONLY_BINARY: cmake
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: 'Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '${{ matrix.python-version }}'
+          architecture: '${{ matrix.python-architecture }}'
+
+      - name: Build
+        run: 'python -m pip install -v .[test,dev]'
+
+      - name: Check if kernel specification is sorted
+        run: python dev/kernel-diagnostics.py --check-spec-sorted
+
+      - name: Generate Kernel tests
+        run: python dev/generate-tests.py
+
+      - name: Test specification
+        run: python -m pytest -vv -rs tests-spec
+
+      - name: Test specification with explicitly defined values
+        run: python -m pytest -vv -rs tests-spec-explicit
+
+      - name: Test CPU kernels
+        run: python -m pytest -vv -rs tests-cpu-kernels
+
+      - name: Test
+        run: python -m pytest -vv -rs tests
+
+  MacOS:
+    strategy:
+      matrix:
+        python-version:
+          - '3.11-dev'
+          - '3.10'
+          - '3.9'
+          - '3.8'
+          - '3.7'
+          - '3.6'
+
+    runs-on: macOS-11
+
+    env:
+      PIP_ONLY_BINARY: cmake
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: '${{ github.job }}-${{matrix.python-version}}'
+
+      - name: Use ccache
+        run: |
+          echo "/usr/lib/ccache" >> $GITHUB_PATH
+          echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
+      - name: 'Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '${{ matrix.python-version }}'
+
+      - name: Build
+        run: 'python -m pip install -v .[test,dev]'
+
+      - name: Check if kernel specification is sorted
+        run: python dev/kernel-diagnostics.py --check-spec-sorted
+
+      - name: Generate Kernel tests
+        run: python dev/generate-tests.py
+
+      - name: Test specification
+        run: python -m pytest -vv -rs tests-spec
+
+      - name: Test specification with explicitly defined values
+        run: python -m pytest -vv -rs tests-spec-explicit
+
+      - name: Test CPU kernels
+        run: python -m pytest -vv -rs tests-cpu-kernels
+
+      - name: Test
+        run: python -m pytest -vv -rs tests
+
+  Linux:
+    strategy:
+      matrix:
+        python-version:
+          - '3.11-dev'
+          - '3.10'
+          - '3.9'
+          - '3.8'
+          - '3.7'
+          - '3.6'
+
+        include:
+          - python-version: '3.6'
+            numpy-version: 1.13.1
+
+    runs-on: ubuntu-20.04
+
+    env:
+      PIP_ONLY_BINARY: cmake
+      NUMPY_VERSION: '${{ matrix.numpy-version }}'
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: >-
+            ${{ github.job
+            }}-${{matrix.python-version}}-${{matrix.numpy-version}}
+
+      - name: Use ccache
+        run: |
+          echo "/usr/lib/ccache" >> $GITHUB_PATH
+          echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
+      - name: 'Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '${{ matrix.python-version }}'
+
+      - name: Install NumPy
+        run: |
+          if [[ -z "${NUMPY_VERSION}" ]]; then
+            python -m pip install numpy;
+          else
+            python -m pip install "numpy==${NUMPY_VERSION}";
+          fi
+
+      - name: Build
+        run: 'python -m pip install -v .[test,dev]'
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Check if kernel specification is sorted
+        run: python dev/kernel-diagnostics.py --check-spec-sorted
+
+      - name: Generate Kernel tests
+        run: python dev/generate-tests.py
+
+      - name: Test specification
+        run: python -m pytest -vv -rs tests-spec
+
+      - name: Test specification with explicitly defined values
+        run: python -m pytest -vv -rs tests-spec-explicit
+
+      - name: Test CPU kernels
+        run: python -m pytest -vv -rs tests-cpu-kernels
+
+      - name: Test
+        run: >-
+          python -m pytest -vv -rs tests --cov=awkward._v2 --cov-report=term
+          --cov-report=xml
+
+      - name: Codecov
+        run: 'bash <(curl -s https://codecov.io/bash)'
+        if: matrix.python-version == '3.9'
+
+  Linux-ROOT:
+    strategy:
+      matrix:
+        python-version:
+          - '3.8'
+
+    runs-on: ubuntu-20.04
+
+    env:
+      PIP_ONLY_BINARY: cmake
+
+    timeout-minutes: 30
+
+    # Required for miniconda to activate conda
+    defaults:
+      run:
+        shell: "bash -l {0}"
+
+    steps:
+      - uses: "actions/checkout@v3"
+        with:
+          submodules: true
+
+      - name: "Get conda"
+        uses: "conda-incubator/setup-miniconda@v2"
+        with:
+          auto-update-conda: true
+          python-version: "${{ matrix.python-version }}"
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: "Install ROOT"
+        run: |
+          mamba env list
+          mamba install root
+          mamba list
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: >-
+            ${{ github.job}}-${{matrix.python-version}}
+
+      - name: Use ccache
+        run: |
+          echo "/usr/lib/ccache" >> $GITHUB_PATH
+          echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
+      - name: Install NumPy
+        run: |
+          conda env list
+          mamba install numpy
+          conda list
+
+      - name: Build
+        run: 'python -m pip install -v .[test,dev]'
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Test
+        run: >-
+          python -m pytest -vv -rs tests

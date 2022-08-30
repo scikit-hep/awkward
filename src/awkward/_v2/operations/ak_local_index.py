@@ -55,9 +55,9 @@ def local_index(array, axis=-1, highlevel=True, behavior=None):
          (3, 2, 2),
          (3, 2, 3)]
 
-    But if you're interested in Pandas, you may want to use #ak.to_pandas directly.
+    But if you're interested in Pandas, you may want to use #ak.to_dataframe directly.
 
-        >>> ak.to_pandas(array)
+        >>> ak.to_dataframe(array)
                                     values
         entry subentry subsubentry
         0     0        0               0.0

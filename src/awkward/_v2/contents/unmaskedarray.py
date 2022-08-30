@@ -3,15 +3,30 @@
 import copy
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.unmaskedform import UnmaskedForm
 from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 
 class UnmaskedArray(Content):
     is_OptionType = True
+
+    def copy(
+        self,
+        content=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return UnmaskedArray(
+            self._content if content is unset else content,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(self, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(content, Content):
@@ -91,23 +106,41 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def toByteMaskedArray(self):
-        return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-            ak._v2.index.Index8(
-                self.mask_as_bool(valid_when=True).view(np.int8), nplike=self.nplike
-            ),
-            self._content,
-            True,
-            self._identifier,
-            self._parameters,
-            self._nplike,
-        )
-
     def toIndexedOptionArray64(self):
         arange = self._nplike.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             ak._v2.index.Index64(arange, nplike=self.nplike),
             self._content,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
+
+    def toByteMaskedArray(self, valid_when):
+        return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
+            ak._v2.index.Index8(
+                self.mask_as_bool(valid_when).view(np.int8), nplike=self.nplike
+            ),
+            self._content,
+            valid_when,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
+
+    def toBitMaskedArray(self, valid_when, lsb_order):
+        bitlength = int(numpy.ceil(self._content.length / 8.0))
+        if valid_when:
+            bitmask = self._nplike.full(bitlength, np.uint8(255), dtype=np.uint8)
+        else:
+            bitmask = self._nplike.zeros(bitlength, dtype=np.uint8)
+
+        return ak._v2.contents.BitMaskedArray(
+            ak._v2.index.IndexU8(bitmask),
+            self._content,
+            valid_when,
+            self.length,
+            lsb_order,
             self._identifier,
             self._parameters,
             self._nplike,
@@ -300,7 +333,25 @@ class UnmaskedArray(Content):
     def mergemany(self, others):
         if len(others) == 0:
             return self
-        return self.toIndexedOptionArray64().mergemany(others)
+
+        if all(isinstance(x, UnmaskedArray) for x in others):
+            parameters = self._parameters
+            tail_contents = []
+            for x in others:
+                parameters = ak._v2._util.merge_parameters(
+                    parameters, x._parameters, True
+                )
+                tail_contents.append(x._content)
+
+            return UnmaskedArray(
+                self._content.mergemany(tail_contents),
+                None,
+                parameters,
+                self._nplike,
+            )
+
+        else:
+            return self.toIndexedOptionArray64().mergemany(others)
 
     def fill_none(self, value):
         return self._content.fill_none(value)
@@ -437,6 +488,7 @@ class UnmaskedArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         next = self._content
         if isinstance(next, ak._v2.contents.RegularArray):
@@ -451,6 +503,7 @@ class UnmaskedArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):
@@ -539,6 +592,8 @@ class UnmaskedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

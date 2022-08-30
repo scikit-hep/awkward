@@ -6,7 +6,7 @@ import math
 
 import awkward as ak
 from awkward._v2.index import Index
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
 from awkward._v2.forms.bitmaskedform import BitMaskedForm
 from awkward._v2.forms.form import _parameters_equal
@@ -17,6 +17,28 @@ numpy = ak.nplike.Numpy.instance()
 
 class BitMaskedArray(Content):
     is_OptionType = True
+
+    def copy(
+        self,
+        mask=unset,
+        content=unset,
+        valid_when=unset,
+        length=unset,
+        lsb_order=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return BitMaskedArray(
+            self._mask if mask is unset else mask,
+            self._content if content is unset else content,
+            self._valid_when if valid_when is unset else valid_when,
+            self._length if length is unset else length,
+            self._lsb_order if lsb_order is unset else lsb_order,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self,
@@ -195,6 +217,30 @@ class BitMaskedArray(Content):
             self._nplike,
         )
 
+    def toIndexedOptionArray64(self):
+        index = ak._v2.index.Index64.empty(self._mask.length * 8, self._nplike)
+        assert index.nplike is self._nplike and self._mask.nplike is self._nplike
+        self._handle_error(
+            self._nplike[
+                "awkward_BitMaskedArray_to_IndexedOptionArray",
+                index.dtype.type,
+                self._mask.dtype.type,
+            ](
+                index.raw(self._nplike),
+                self._mask.data,
+                self._mask.length,
+                self._valid_when,
+                self._lsb_order,
+            ),
+        )
+        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
+            index[0 : self._length],
+            self._content,
+            self._identifier,
+            self._parameters,
+            self._nplike,
+        )
+
     def toByteMaskedArray(self):
         bytemask = ak._v2.index.Index8.empty(self._mask.length * 8, self._nplike)
         assert bytemask.nplike is self._nplike and self._mask.nplike is self._nplike
@@ -220,29 +266,43 @@ class BitMaskedArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
-        index = ak._v2.index.Index64.empty(self._mask.length * 8, self._nplike)
-        assert index.nplike is self._nplike and self._mask.nplike is self._nplike
-        self._handle_error(
-            self._nplike[
-                "awkward_BitMaskedArray_to_IndexedOptionArray",
-                index.dtype.type,
-                self._mask.dtype.type,
-            ](
-                index.raw(self._nplike),
-                self._mask.data,
-                self._mask.length,
-                self._valid_when,
-                self._lsb_order,
-            ),
-        )
-        return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-            index[0 : self._length],
-            self._content,
-            self._identifier,
-            self._parameters,
-            self._nplike,
-        )
+    def toBitMaskedArray(self, valid_when, lsb_order):
+        if lsb_order == self._lsb_order:
+            if valid_when == self._valid_when:
+                return self
+            else:
+                return BitMaskedArray(
+                    ak._v2.index.IndexU8(~self._mask.data),
+                    self._content,
+                    valid_when,
+                    self._length,
+                    lsb_order,
+                    self._identifier,
+                    self._parameters,
+                    self._nplike,
+                )
+
+        else:
+            import awkward._v2._connect.pyarrow
+
+            bytemask = awkward._v2._connect.pyarrow.unpackbits(
+                self._mask.data, self._lsb_order
+            )
+            bitmask = awkward._v2._connect.pyarrow.packbits(bytemask, lsb_order)
+
+            if valid_when != self._valid_when:
+                bitmask = ~bitmask
+
+            return BitMaskedArray(
+                ak._v2.index.IndexU8(bitmask),
+                self._content,
+                valid_when,
+                self._length,
+                lsb_order,
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
 
     def mask_as_bool(self, valid_when=None, nplike=None):
         if valid_when is None:
@@ -408,7 +468,18 @@ class BitMaskedArray(Content):
     def mergemany(self, others):
         if len(others) == 0:
             return self
-        return self.toIndexedOptionArray64().mergemany(others)
+
+        out = self.toIndexedOptionArray64().mergemany(others)
+
+        if all(
+            isinstance(x, BitMaskedArray)
+            and x._valid_when == self._valid_when
+            and x._lsb_order == self._lsb_order
+            for x in others
+        ):
+            return out.toBitMaskedArray(self._valid_when, self._lsb_order)
+        else:
+            return out
 
     def fill_none(self, value):
         return self.toIndexedOptionArray64().fill_none(value)
@@ -488,6 +559,7 @@ class BitMaskedArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         return self.toByteMaskedArray()._reduce_next(
             reducer,
@@ -498,6 +570,7 @@ class BitMaskedArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):
@@ -586,6 +659,8 @@ class BitMaskedArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

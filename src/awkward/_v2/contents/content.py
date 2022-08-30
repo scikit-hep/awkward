@@ -3,7 +3,6 @@
 import numbers
 import math
 import copy
-from collections.abc import Iterable
 
 import awkward as ak
 import awkward._v2._reducers
@@ -11,6 +10,8 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
+
+unset = object()
 
 
 class Content:
@@ -507,9 +508,10 @@ class Content:
             if len(where) == 0:
                 return self
 
-            items = [ak._v2._slicing.prepare_tuple_item(x) for x in where]
-
-            nextwhere = ak._v2._slicing.getitem_broadcast(items)
+            # Normalise valid indices onto well-defined basis
+            items = ak._v2._slicing.normalise_items(where, self._nplike)
+            # Prepare items for advanced indexing (e.g. via broadcasting)
+            nextwhere = ak._v2._slicing.prepare_advanced_indexing(items)
 
             next = ak._v2.contents.RegularArray(
                 self,
@@ -519,13 +521,6 @@ class Content:
                 None,
                 self._nplike,
             )
-
-            if any(isinstance(x, list) and len(x) == 0 for x in items) and any(
-                isinstance(x, slice) for x in items
-            ):
-                attempt = next.maybe_toNumpyArray()
-                if attempt is not None:
-                    next = attempt
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
 
@@ -590,15 +585,17 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif isinstance(where, Iterable) and len(where) == 0:
+        elif ak._util.is_sized_iterable(where) and len(where) == 0:
             return self._carry(
                 ak._v2.index.Index64.empty(0, self._nplike), allow_lazy=True
             )
 
-        elif isinstance(where, Iterable) and all(ak._v2._util.isstr(x) for x in where):
+        elif ak._util.is_sized_iterable(where) and all(
+            ak._v2._util.isstr(x) for x in where
+        ):
             return self._getitem_fields(where)
 
-        elif isinstance(where, Iterable):
+        elif ak._util.is_sized_iterable(where):
             layout = ak._v2.operations.to_layout(where)
             as_array = layout.maybe_to_array(layout.nplike)
             if as_array is None:
@@ -802,10 +799,17 @@ class Content:
 
         return (head, tail)
 
+    def dummy(self):
+        raise ak._v2._util.error(
+            NotImplementedError(
+                "FIXME: need to implement 'dummy', which makes an array of length 1 and an arbitrary value (0?) for this array type"
+            )
+        )
+
     def local_index(self, axis):
         return self._local_index(axis, 0)
 
-    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False):
+    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
         if axis is None:
             raise ak._v2._util.error(NotImplementedError)
 
@@ -852,39 +856,50 @@ class Content:
             1,
             mask,
             keepdims,
+            behavior,
         )
 
         return next[0]
 
-    def argmin(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce(awkward._v2._reducers.ArgMin, axis, mask, keepdims)
+    def argmin(self, axis=-1, mask=True, keepdims=False, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.ArgMin, axis, mask, keepdims, behavior
+        )
 
-    def argmax(self, axis=-1, mask=True, keepdims=False):
-        return self._reduce(awkward._v2._reducers.ArgMax, axis, mask, keepdims)
+    def argmax(self, axis=-1, mask=True, keepdims=False, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.ArgMax, axis, mask, keepdims, behavior
+        )
 
-    def count(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Count, axis, mask, keepdims)
+    def count(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.Count, axis, mask, keepdims, behavior)
 
-    def count_nonzero(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.CountNonzero, axis, mask, keepdims)
+    def count_nonzero(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.CountNonzero, axis, mask, keepdims, behavior
+        )
 
-    def sum(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Sum, axis, mask, keepdims)
+    def sum(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.Sum, axis, mask, keepdims, behavior)
 
-    def prod(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims)
+    def prod(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims, behavior)
 
-    def any(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.Any, axis, mask, keepdims)
+    def any(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.Any, axis, mask, keepdims, behavior)
 
-    def all(self, axis=-1, mask=False, keepdims=False):
-        return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims)
+    def all(self, axis=-1, mask=False, keepdims=False, behavior=None):
+        return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims, behavior)
 
-    def min(self, axis=-1, mask=True, keepdims=False, initial=None):
-        return self._reduce(awkward._v2._reducers.Min(initial), axis, mask, keepdims)
+    def min(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.Min(initial), axis, mask, keepdims, behavior
+        )
 
-    def max(self, axis=-1, mask=True, keepdims=False, initial=None):
-        return self._reduce(awkward._v2._reducers.Max(initial), axis, mask, keepdims)
+    def max(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
+        return self._reduce(
+            awkward._v2._reducers.Max(initial), axis, mask, keepdims, behavior
+        )
 
     def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
@@ -1339,7 +1354,7 @@ class Content:
             action,
             behavior,
             1,
-            depth_context,
+            copy.copy(depth_context),
             lateral_context,
             {
                 "allow_records": allow_records,
@@ -1353,8 +1368,8 @@ class Content:
     def to_json(
         self,
         nan_string=None,
-        infinity_string=None,
-        minus_infinity_string=None,
+        posinf_string=None,
+        neginf_string=None,
         complex_record_fields=None,
         convert_bytes=None,
         behavior=None,
@@ -1374,8 +1389,8 @@ class Content:
             behavior,
             {
                 "nan_string": nan_string,
-                "infinity_string": infinity_string,
-                "minus_infinity_string": minus_infinity_string,
+                "posinf_string": posinf_string,
+                "neginf_string": neginf_string,
                 "complex_real_string": complex_real_string,
                 "complex_imag_string": complex_imag_string,
                 "convert_bytes": convert_bytes,
@@ -1428,15 +1443,15 @@ class Content:
                     isnan = math.isnan
                     filters.append(lambda x: nan_string if isnan(x) else x)
 
-                infinity_string = json_conversions["infinity_string"]
-                if infinity_string is not None:
+                posinf_string = json_conversions["posinf_string"]
+                if posinf_string is not None:
                     inf = float("inf")
-                    filters.append(lambda x: infinity_string if x == inf else x)
+                    filters.append(lambda x: posinf_string if x == inf else x)
 
-                minus_infinity_string = json_conversions["minus_infinity_string"]
-                if minus_infinity_string is not None:
+                neginf_string = json_conversions["neginf_string"]
+                if neginf_string is not None:
                     minf = float("-inf")
-                    filters.append(lambda x: minus_infinity_string if x == minf else x)
+                    filters.append(lambda x: neginf_string if x == minf else x)
 
                 if len(filters) == 1:
                     f0 = filters[0]

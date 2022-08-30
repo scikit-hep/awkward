@@ -11,7 +11,7 @@ import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.index import Index8
 from awkward._v2.index import Index64
-from awkward._v2.contents.content import Content
+from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.unionform import UnionForm
 from awkward._v2.forms.form import _parameters_equal
 
@@ -21,6 +21,24 @@ numpy = ak.nplike.Numpy.instance()
 
 class UnionArray(Content):
     is_UnionType = True
+
+    def copy(
+        self,
+        tags=unset,
+        index=unset,
+        contents=unset,
+        identifier=unset,
+        parameters=unset,
+        nplike=unset,
+    ):
+        return UnionArray(
+            self._tags if tags is unset else tags,
+            self._index if index is unset else index,
+            self._contents if contents is unset else contents,
+            self._identifier if identifier is unset else identifier,
+            self._parameters if parameters is unset else parameters,
+            self._nplike if nplike is unset else nplike,
+        )
 
     def __init__(
         self, tags, index, contents, identifier=None, parameters=None, nplike=None
@@ -291,7 +309,9 @@ class UnionArray(Content):
                 index,
             )
         )
-        nextcarry = ak._v2.index.Index64(tmpcarry.data[: lenout[0]], self._nplike)
+        nextcarry = ak._v2.index.Index64(
+            tmpcarry.data[: lenout[0]], nplike=self._nplike
+        )
         return self._contents[index]._carry(nextcarry, False)
 
     @staticmethod
@@ -881,9 +901,10 @@ class UnionArray(Content):
         length_so_far = 0
         parameters = self._parameters
 
+        parameters = self._parameters
         for array in head:
             parameters = ak._v2._util.merge_parameters(
-                self._parameters, array._parameters, True
+                parameters, array._parameters, True
             )
             if isinstance(array, ak._v2.contents.unionarray.UnionArray):
                 union_tags = ak._v2.index.Index(array.tags)
@@ -1111,6 +1132,7 @@ class UnionArray(Content):
         outlength,
         mask,
         keepdims,
+        behavior,
     ):
         simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, UnionArray):
@@ -1129,6 +1151,7 @@ class UnionArray(Content):
             outlength,
             mask,
             keepdims,
+            behavior,
         )
 
     def _validity_error(self, path):
@@ -1361,6 +1384,8 @@ class UnionArray(Content):
             depth_context=depth_context,
             lateral_context=lateral_context,
             continuation=continuation,
+            behavior=behavior,
+            nplike=self._nplike,
             options=options,
         )
 

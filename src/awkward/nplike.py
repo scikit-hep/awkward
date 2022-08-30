@@ -236,6 +236,10 @@ class NumpyLike(Singleton):
         # array1, array2
         return self._module.repeat(*args, **kwargs)
 
+    def tile(self, *args, **kwargs):
+        # array, int
+        return self._module.tile(*args, **kwargs)
+
     def stack(self, *args, **kwargs):
         # arrays
         return self._module.stack(*args, **kwargs)
@@ -348,6 +352,7 @@ class NumpyLike(Singleton):
 
     def all(self, *args, **kwargs):
         # array
+        kwargs.pop("prefer", None)
         return self._module.all(*args, **kwargs)
 
     def any(self, *args, **kwargs):

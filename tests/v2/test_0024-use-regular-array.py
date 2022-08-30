@@ -10,20 +10,22 @@ to_list = ak._v2.operations.to_list
 def test_empty_array_slice():
     # inspired by PR021::test_getitem
     a = ak._v2.operations.from_json("[[], [[], []], [[], [], []]]")
-    assert to_list(a[2, 1, np.array([], dtype=int)]) == []
+    assert to_list(a[2, 1, np.array([], dtype=np.int64)]) == []
     # FIXME: assert [[]] == []
-    # assert to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == []
+    # assert to_list(a[2, np.array([1], dtype=np.int64), np.array([], dtype=np.int64)]) == []
 
     a = ak._v2.operations.from_iter([[], [[], []], [[], [], []]], highlevel=False)
-    assert to_list(a[2, 1, np.array([], dtype=int)]) == []
+    assert to_list(a[2, 1, np.array([], dtype=np.int64)]) == []
     assert (
-        a.typetracer[2, 1, np.array([], dtype=int)].form
-        == a[2, 1, np.array([], dtype=int)].form
+        a.typetracer[2, 1, np.array([], dtype=np.int64)].form
+        == a[2, 1, np.array([], dtype=np.int64)].form
     )
-    assert to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == [[]]
+    assert to_list(a[2, np.array([1], dtype=int), np.array([], dtype=int)]) == []
     assert (
-        a.typetracer[2, np.array([1], dtype=int), np.array([], dtype=int)].form
-        == a[2, np.array([1], dtype=int), np.array([], dtype=int)].form
+        a.typetracer[
+            2, np.array([1], dtype=np.int64), np.array([], dtype=np.int64)
+        ].form
+        == a[2, np.array([1], dtype=np.int64), np.array([], dtype=np.int64)].form
     )
 
     # inspired by PR015::test_deep_numpy
@@ -45,10 +47,10 @@ def test_empty_array_slice():
         listarray.typetracer[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]].form
         == listarray[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]].form
     )
-    assert to_list(listarray[2, 1, np.array([], dtype=int)]) == []
+    assert to_list(listarray[2, 1, np.array([], dtype=np.int64)]) == []
     assert (
-        listarray.typetracer[2, 1, np.array([], dtype=int)].form
-        == listarray[2, 1, np.array([], dtype=int)].form
+        listarray.typetracer[2, 1, np.array([], dtype=np.int64)].form
+        == listarray[2, 1, np.array([], dtype=np.int64)].form
     )
     assert to_list(listarray[2, 1, []]) == []
     assert listarray.typetracer[2, 1, []].form == listarray[2, 1, []].form

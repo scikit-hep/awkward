@@ -21,7 +21,7 @@ def concatenate(
         merge (bool): If True, combine data into the same buffers wherever
             possible, eliminating unnecessary #ak.layout.UnionArray8_64 types
             at the expense of materializing #ak.layout.VirtualArray nodes.
-        mergebool (bool): If True, boolean and nummeric data can be combined
+        mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
             distinct types (using an #ak.layout.UnionArray8_64).
@@ -111,7 +111,6 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     else:
 
         def action(inputs, depth, **kwargs):
-
             if depth == posaxis and any(
                 isinstance(x, ak._v2.contents.Content) and x.is_OptionType
                 for x in inputs
@@ -124,19 +123,72 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         nextinputs.append(x)
                 inputs = nextinputs
 
+            if depth == posaxis:
+                nplike = ak.nplike.of(*inputs)
+
+                length = ak._v2._typetracer.UnknownLength
+                for x in inputs:
+                    if isinstance(x, ak._v2.contents.Content):
+                        if not ak._v2._util.isint(length):
+                            length = x.length
+                        elif length != x.length and ak._v2._util.isint(x.length):
+                            raise ak._v2._util.error(
+                                ValueError(
+                                    "all arrays must have the same length for "
+                                    "axis={}".format(axis)
+                                )
+                            )
+
             if depth == posaxis and all(
+                isinstance(x, ak._v2.contents.Content)
+                and x.is_RegularType
+                or (isinstance(x, ak._v2.contents.NumpyArray) and x.data.ndim > 1)
+                or not isinstance(x, ak._v2.contents.Content)
+                for x in inputs
+            ):
+                regulararrays = []
+                sizes = []
+                for x in inputs:
+                    if isinstance(x, ak._v2.contents.RegularArray):
+                        regulararrays.append(x)
+                    elif isinstance(x, ak._v2.contents.NumpyArray):
+                        regulararrays.append(x.toRegularArray())
+                    else:
+                        regulararrays.append(
+                            ak._v2.contents.RegularArray(
+                                ak._v2.contents.NumpyArray(
+                                    nplike.broadcast_to(nplike.array([x]), (length,))
+                                ),
+                                1,
+                            )
+                        )
+                    sizes.append(regulararrays[-1].size)
+
+                prototype = nplike.empty(sum(sizes), np.int8)
+                start = 0
+                for tag, size in enumerate(sizes):
+                    prototype[start : start + size] = tag
+                    start += size
+
+                tags = ak._v2.index.Index8(nplike.tile(prototype, length))
+                index = ak._v2.contents.UnionArray.regular_index(tags)
+                inner = ak._v2.contents.UnionArray(
+                    tags, index, [x._content for x in regulararrays]
+                )
+
+                out = ak._v2.contents.RegularArray(
+                    inner.simplify_uniontype(merge=merge, mergebool=mergebool),
+                    len(prototype),
+                )
+                return (out,)
+
+            elif depth == posaxis and all(
                 isinstance(x, ak._v2.contents.Content)
                 and x.is_ListType
                 or (isinstance(x, ak._v2.contents.NumpyArray) and x.data.ndim > 1)
                 or not isinstance(x, ak._v2.contents.Content)
                 for x in inputs
             ):
-
-                nplike = ak.nplike.of(*inputs)
-
-                length = max(
-                    len(x) for x in inputs if isinstance(x, ak._v2.contents.Content)
-                )
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, ak._v2.contents.Content):
@@ -190,7 +242,8 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 inner = ak._v2.contents.UnionArray(tags, index, all_flatten)
 
                 out = ak._v2.contents.ListOffsetArray(
-                    offsets, inner.simplify_uniontype(merge=merge, mergebool=mergebool)
+                    offsets,
+                    inner.simplify_uniontype(merge=merge, mergebool=mergebool),
                 )
 
                 return (out,)
