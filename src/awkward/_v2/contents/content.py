@@ -3,6 +3,7 @@
 import numbers
 import math
 import copy
+from collections.abc import Sized, Iterable
 
 import awkward as ak
 import awkward._v2._reducers
@@ -1378,10 +1379,11 @@ class Content:
             complex_real_string = None
             complex_imag_string = None
         elif (
-            isinstance(complex_record_fields, (tuple, list))
+            isinstance(complex_record_fields, Sized)
+            and isinstance(complex_record_fields, Iterable)
             and len(complex_record_fields) == 2
-            and isinstance(complex_record_fields[0], str)
-            and isinstance(complex_record_fields[1], str)
+            and ak._v2._util.isstr(complex_record_fields[0])
+            and ak._v2._util.isstr(complex_record_fields[1])
         ):
             complex_real_string, complex_imag_string = complex_record_fields
         else:

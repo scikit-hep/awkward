@@ -3,6 +3,7 @@
 import pathlib
 import json
 from urllib.parse import urlparse
+from collections.abc import Sized, Iterable
 
 import awkward as ak
 
@@ -415,10 +416,11 @@ def _record_to_complex(layout, complex_record_fields):
         return layout
 
     elif (
-        isinstance(complex_record_fields, tuple)
+        isinstance(complex_record_fields, Sized)
+        and isinstance(complex_record_fields, Iterable)
         and len(complex_record_fields) == 2
-        and isinstance(complex_record_fields[0], str)
-        and isinstance(complex_record_fields[1], str)
+        and ak._v2._util.isstr(complex_record_fields[0])
+        and ak._v2._util.isstr(complex_record_fields[1])
     ):
 
         def action(node, **kwargs):
