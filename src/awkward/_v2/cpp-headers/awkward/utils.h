@@ -17,15 +17,7 @@ namespace awkward {
   template <typename T>
   const std::string
   type_to_name() {
-    std::cout << "Type " << typeid(T).name() << " is not recognized." << std::endl;
-    return typeid(T).name();
-  }
-
-  /// @brief Returns `bool` string when the primitive type
-  /// is boolean.
-  template <>
-  const std::string
-  type_to_name<unsigned long>() {
+    std::cout << "Type " << typeid(T).name() << " is not recognized. Try uint64." << std::endl;
     return "uint64";
   }
 
