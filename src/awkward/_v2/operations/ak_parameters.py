@@ -48,7 +48,7 @@ def _impl(array):
         return {}
 
 def _copy(what):
-    if all(isinstance(x, (str, numbers.Real) for x in what.values())):
+    if all(isinstance(x, (str, numbers.Real)) for x in what.values()):
         return what.copy()
     else:
         return copy.deepcopy(what)
