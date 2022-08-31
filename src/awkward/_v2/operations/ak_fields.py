@@ -27,4 +27,4 @@ def fields(array):
 
 def _impl(array):
     layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
-    return layout.fields
+    return layout.fields.copy()

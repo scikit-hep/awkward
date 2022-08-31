@@ -256,6 +256,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <td align="center"><a href="https://github.com/Ahmad-AlSubaie"><img src="https://avatars.githubusercontent.com/u/32343365?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ahmad-AlSubaie</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Ahmad-AlSubaie" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ManasviGoyal"><img src="https://avatars.githubusercontent.com/u/55101825?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Manasvi Goyal</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=ManasviGoyal" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/aryan26roy"><img src="https://avatars.githubusercontent.com/u/50577809?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aryan Roy</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=aryan26roy" title="Code">💻</a></td>
+    <td align="center"><a href="https://saransh-cpp.github.io/"><img src="https://avatars.githubusercontent.com/u/74055102?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Saransh</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Saransh-cpp" title="Code">💻</a></td>
   </tr>
 </table>
 
