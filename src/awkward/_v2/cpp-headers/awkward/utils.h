@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#ifndef AWKWARD_UTILS_H_
-#define AWKWARD_UTILS_H_
+#ifndef AWKWARD_CPP_HEADERS_UTILS_H_
+#define AWKWARD_CPP_HEADERS_UTILS_H_
 
 #include <iterator>
 #include <complex>
@@ -17,6 +17,7 @@ namespace awkward {
   template <typename T>
   const std::string
   type_to_name() {
+    std::cout << "Type " << typeid(T).name() << " is not recognized." << std::endl;
     return typeid(T).name();
   }
 
@@ -306,4 +307,4 @@ namespace awkward {
 
 }  // namespace awkward
 
-#endif  // AWKWARD_UTILS_H_
+#endif  // AWKWARD_CPP_HEADERS_UTILS_H_

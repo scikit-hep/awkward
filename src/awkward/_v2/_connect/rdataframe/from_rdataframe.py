@@ -55,14 +55,6 @@ assert done is True
 
 
 def from_rdataframe(data_frame, columns):
-    def supported(form):
-        if isinstance(form, ak._v2.forms.NumpyForm) and form.inner_shape == ():
-            return True
-        else:
-            return isinstance(form, ak._v2.forms.ListOffsetForm) and supported(
-                form.content
-            )
-
     def form_dtype(form):
         if isinstance(form, ak._v2.forms.NumpyForm) and form.inner_shape == ():
             return primitive_to_dtype(form.primitive)
@@ -168,15 +160,9 @@ def from_rdataframe(data_frame, columns):
         else:  # Convert the C++ vectors to Awkward arrays
             form = ak._v2.forms.from_json(ROOT.awkward.type_to_form[col_type](0))
 
-            if not supported(form):
-                raise ak._v2._util.error(
-                    NotImplementedError,
-                    f"`from_rdataframe` doesn't support the {form} form yet.",
-                )
-
             list_depth = form.purelist_depth
-
-            data_type = cpp_type_of[form_dtype(form).name]
+            form_dtype_name = form_dtype(form).name
+            data_type = cpp_type_of[form_dtype_name]
 
             # pull in the CppBuffers (after which we can import from it)
             CppBuffers = cppyy.gbl.awkward.CppBuffers[col_type]
