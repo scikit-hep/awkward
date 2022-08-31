@@ -37,7 +37,7 @@ def test_refcount():
 
     array_out = ak._v2.from_rdataframe(
         data_frame,
-        column="x",
+        columns=("x",),
     )
     assert array.to_list() == array_out["x"].to_list()
 
@@ -122,7 +122,7 @@ def test_data_frame_vec_of_vec_of_integers():
 
     ak_array_out = ak._v2.from_rdataframe(
         data_frame,
-        column="x",
+        columns=("x",),
     )
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
