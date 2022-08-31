@@ -44,83 +44,18 @@ namespace awkward {
       std::cout << std::endl;
     }
 
-    template<class BUILDER>
+    template<class BUILDER, typename PRIMITIVE>
     void
-    fill_from(BUILDER& builder) const {
-      for (auto it : result_) {
+    fill_from(BUILDER& builder, ROOT::RDF::RResultPtr<std::vector<PRIMITIVE>>& result) const {
+      for (auto it : result) {
         builder.append(it);
       }
     }
 
-    template<class BUILDER, class PRIMITIVE>
+    template<class BUILDER>
     void
     to_char_buffers(BUILDER& builder) {
       builder.to_char_buffers(buffers_uint8_ptr_);
-    }
-
-    template<class BUILDER>
-    void
-    fill_offsets_and_flatten_2(BUILDER& builder) const {
-      for (auto const& vec : result_) {
-        auto& subbuilder = builder.begin_list();
-        for (auto it : vec) {
-          subbuilder.append(it);
-        }
-        builder.end_list();
-      }
-    }
-
-    template<class BUILDER>
-    void
-    fill_offsets_and_flatten_3(BUILDER& builder) const {
-      for (auto const& vec_of_vecs : result_) {
-        auto& builder1 = builder.begin_list();
-        for (auto const& vec : vec_of_vecs) {
-          auto& builder2 = builder1.begin_list();
-          for (auto it : vec) {
-            builder2.append(it);
-          }
-          builder1.end_list();
-        }
-        builder.end_list();
-      }
-    }
-
-    template<class BUILDER>
-    void
-    fill_offsets_and_flatten_4(BUILDER& builder) const {
-      for (auto const& vec_of_vecs_of_vecs : result_) {
-        auto& builder1 = builder.begin_list();
-        for (auto const& vec_of_vecs : vec_of_vecs_of_vecs) {
-          auto& builder2 = builder1.begin_list();
-          for (auto const& vec : vec_of_vecs) {
-            auto& builder3 = builder2.begin_list();
-            for (auto it : vec) {
-              builder3.append(it);
-            }
-            builder2.end_list();
-          }
-          builder1.end_list();
-        }
-        builder.end_list();
-      }
-    }
-
-    template<class BUILDER, typename ITERABLE>
-    void
-    recurse_fill_from(int64_t level, BUILDER& builder, ITERABLE& result) const {
-      if (level == 0) {
-        for (auto it : result) {
-          builder.append(it);
-        }
-      }
-      else {
-        auto& next_builder = builder.begin_list();
-        for (auto& it : result) {
-          recurse_fill_from(level - 1, next_builder, it);
-        }
-        next_builder.end_list();
-      }
     }
 
   private:
