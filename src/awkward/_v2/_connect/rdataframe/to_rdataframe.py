@@ -314,6 +314,6 @@ namespace awkward {{
             (self.data_ptrs_list),
         )
 
-        rdf = rdf.Define("awkward_index_", "rdfentry_")
+        rdf = rdf.Define("awkward_index_", "(int64_t)rdfentry_")
 
         return rdf
