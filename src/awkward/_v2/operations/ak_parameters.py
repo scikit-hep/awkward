@@ -47,6 +47,7 @@ def _impl(array):
     else:
         return {}
 
+
 def _copy(what):
     if all(isinstance(x, (str, numbers.Real)) for x in what.values()):
         return what.copy()
