@@ -17,8 +17,8 @@ namespace awkward {
   template <typename T>
   const std::string
   type_to_name() {
-    std::cout << "Type " << typeid(T).name() << " is not recognized. Try uint64." << std::endl;
-    return "uint64";
+    std::cout << "Type " << typeid(T).name() << " is not recognized." << std::endl;
+    return "int64";
   }
 
   /// @brief Returns `bool` string when the primitive type
