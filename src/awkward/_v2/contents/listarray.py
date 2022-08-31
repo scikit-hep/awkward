@@ -349,8 +349,10 @@ class ListArray(Content):
                 slicer=ListArray(slicestarts, slicestops, slicecontent),
             )
 
-            asListOffsetArray64 = self.toListOffsetArray64(True)
-            next_content = asListOffsetArray64._content
+            asListOffsetArray64 = self.toListOffsetArray64(False)
+            next_content = asListOffsetArray64._content[
+                asListOffsetArray64.offsets[0] : asListOffsetArray64.offsets[-1]
+            ]
 
             sliceoffsets = ak._v2.index.Index64(slicecontent._offsets)
 
