@@ -25,6 +25,14 @@ namespace awkward {
   /// is boolean.
   template <>
   const std::string
+  type_to_name<unsigned long>() {
+    return "uint64";
+  }
+
+  /// @brief Returns `bool` string when the primitive type
+  /// is boolean.
+  template <>
+  const std::string
   type_to_name<bool>() {
     return "bool";
   }
