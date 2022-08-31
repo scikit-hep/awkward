@@ -158,7 +158,8 @@ def from_rdataframe(data_frame, columns):
             awkward_contents[col] = layout
 
         else:  # Convert the C++ vectors to Awkward arrays
-            form = ak._v2.forms.from_json(ROOT.awkward.type_to_form[col_type](0))
+            form_str = ROOT.awkward.type_to_form[col_type](0)
+            form = ak._v2.forms.from_json(form_str)
 
             list_depth = form.purelist_depth
             form_dtype_name = form_dtype(form).name
