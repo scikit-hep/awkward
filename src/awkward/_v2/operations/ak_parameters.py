@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import copy
+
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -27,13 +29,13 @@ def parameters(array):
 
 def _impl(array):
     if isinstance(array, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
-        return array.layout.parameters
+        return copy.copy(array.layout.parameters)
 
     elif isinstance(
         array,
         (ak._v2.contents.Content, ak._v2.record.Record),
     ):
-        return array.parameters
+        return copy.copy(array.parameters)
 
     elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
         return array.snapshot().layout.parameters
