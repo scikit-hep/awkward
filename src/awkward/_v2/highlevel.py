@@ -3127,3 +3127,8 @@ class LayoutBuilder(Sized):
         can't be used in Numba.
         """
         return self.Record(self, name)
+
+
+def ignore_in_to_list(getitem_function):
+    getitem_function.ignore_in_to_list = True
+    return getitem_function
