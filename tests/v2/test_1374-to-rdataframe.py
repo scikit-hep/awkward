@@ -26,7 +26,7 @@ def test_two_columns():
     data_frame = ak._v2.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=True
     )
-    assert set(data_frame.GetColumnNames()) == {"x", "y"}
+    assert set(data_frame.GetColumnNames()) == {"x", "y", "awkward_index_"}
     assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<int64_t>"
     assert data_frame.GetColumnType("y").startswith("awkward::ListArray_")
 
@@ -38,7 +38,7 @@ def test_two_columns_as_rvecs():
     )
 
     data_frame = ak._v2.to_rdataframe({"x": ak_array_1, "y": ak_array_2})
-    assert set(data_frame.GetColumnNames()) == {"x", "y"}
+    assert set(data_frame.GetColumnNames()) == {"x", "y", "awkward_index_"}
     assert data_frame.GetColumnType("x") == "double"
     assert data_frame.GetColumnType("y").startswith("awkward::Record_")
 
@@ -120,7 +120,7 @@ def test_two_columns_as_vecs():
     data_frame = ak._v2.operations.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=False
     )
-    assert set(data_frame.GetColumnNames()) == {"x", "y"}
+    assert set(data_frame.GetColumnNames()) == {"x", "y", "awkward_index_"}
     assert data_frame.GetColumnType("x") == "double"
     assert data_frame.GetColumnType("y").startswith("awkward::Record_")
 
@@ -166,7 +166,7 @@ def test_two_columns_transform_filter():
     )
 
     data_frame = ak._v2.to_rdataframe({"one": example1, "two": example2})
-    assert set(data_frame.GetColumnNames()) == {"one", "two"}
+    assert set(data_frame.GetColumnNames()) == {"one", "two", "awkward_index_"}
 
     compiler(
         """
@@ -181,7 +181,12 @@ ROOT::RDF::RNode MyTransformation(ROOT::RDF::RNode df) {
     data_frame_transformed = ROOT.MyTransformation[data_frame.GetColumnType("one")](
         ROOT.RDF.AsRNode(data_frame)
     )
-    assert set(data_frame_transformed.GetColumnNames()) == {"neg_one", "one", "two"}
+    assert set(data_frame_transformed.GetColumnNames()) == {
+        "neg_one",
+        "one",
+        "two",
+        "awkward_index_",
+    }
     assert data_frame_transformed.Count().GetValue() == 5
 
     data_frame2 = data_frame.Filter("one > 2.5")
@@ -194,9 +199,9 @@ ROOT::RDF::RNode MyTransformation(ROOT::RDF::RNode df) {
 def test_jims_example1():
     array = ak._v2.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}])
     data_frame = ak._v2.to_rdataframe({"some_array": array})
-    assert set(data_frame.GetColumnNames()) == {"some_array"}
+    assert set(data_frame.GetColumnNames()) == {"some_array", "awkward_index_"}
     data_frame_y = data_frame.Define("y", "some_array.x()")
-    assert set(data_frame_y.GetColumnNames()) == {"some_array", "y"}
+    assert set(data_frame_y.GetColumnNames()) == {"some_array", "y", "awkward_index_"}
 
     cpp_list = ", ".join(str(e) for e in array.x.to_list())
 
