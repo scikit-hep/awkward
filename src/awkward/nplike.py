@@ -11,42 +11,6 @@ import numpy
 import awkward as ak
 
 
-def of(*arrays):
-    nplikes = set()
-    for array in arrays:
-        nplike = getattr(array, "nplike", None)
-        if nplike is not None:
-            nplikes.add(nplike)
-        else:
-            from awkward._v2._util import is_numpy_buffer, is_cupy_buffer, is_jax_buffer
-
-            if is_numpy_buffer(array):
-                nplikes.add(ak.nplike.Numpy.instance())
-            elif is_cupy_buffer(array):
-                nplikes.add(ak.nplike.Cupy.instance())
-            elif is_jax_buffer(array):
-                nplikes.add(ak.nplike.Jax.instance())
-
-    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in nplikes):
-        return ak._v2._typetracer.TypeTracer.instance()
-
-    if nplikes == set():
-        return Numpy.instance()
-    elif len(nplikes) == 1:
-        return next(iter(nplikes))
-    else:
-        raise ValueError(
-            """attempting to use both a 'cpu' array and a 'cuda' array in the """
-            """same operation; use one of
-
-    ak.to_backend(array, 'cpu')
-    ak.to_backend(array, 'cuda')
-
-to move one or the other to main memory or the GPU(s)."""
-            + ak._util.exception_suffix(__file__)
-        )
-
-
 class Singleton:
     _instance = None
 
@@ -411,7 +375,6 @@ class NumpyKernel:
     @staticmethod
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
-            from awkward._v2._util import is_numpy_buffer, is_cupy_buffer, is_jax_buffer
 
             if is_numpy_buffer(x):
                 return ctypes.cast(x.ctypes.data, t)
@@ -432,8 +395,6 @@ class NumpyKernel:
 
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
-
-        from awkward._v2._util import is_jax_tracer
 
         if not any(is_jax_tracer(arg) for arg in args):
             return self._kernel(
@@ -902,3 +863,61 @@ class Jax(NumpyLike):
     def argmax(self, *args, **kwargs):
         out = self._module.argmax(*args, **kwargs)
         return out
+
+
+def is_numpy_buffer(array):
+    return isinstance(array, numpy.ndarray)
+
+
+def is_cupy_buffer(array):
+    return type(array).__module__.startswith("cupy.")
+
+
+def is_jax_buffer(array):
+    return type(array).__module__.startswith("jaxlib.")
+
+
+def is_jax_tracer(tracer):
+    return type(tracer).__module__.startswith("jax.")
+
+
+def of(*arrays, default_cls=Numpy):
+    """
+    Args:
+        *arrays: iterable of possible array objects
+        default_cls: default NumpyLike class if no array objects found
+
+    Return the #ak.nplike.NumpyLike that is best-suited to operating upon the given
+    iterable of arrays. Return an instance of the `default_cls` if no known array types
+    are found.
+    """
+    nplikes = set()
+    for array in arrays:
+        nplike = getattr(array, "nplike", None)
+        if nplike is not None:
+            nplikes.add(nplike)
+        elif is_numpy_buffer(array):
+            nplikes.add(Numpy.instance())
+        elif is_cupy_buffer(array):
+            nplikes.add(Cupy.instance())
+        elif is_jax_buffer(array):
+            nplikes.add(Jax.instance())
+
+    if any(isinstance(x, ak._v2._typetracer.TypeTracer) for x in nplikes):
+        return ak._v2._typetracer.TypeTracer.instance()
+
+    if nplikes == set():
+        return default_cls.instance()
+    elif len(nplikes) == 1:
+        return next(iter(nplikes))
+    else:
+        raise ValueError(
+            """attempting to use both a 'cpu' array and a 'cuda' array in the """
+            """same operation; use one of
+
+    ak.to_backend(array, 'cpu')
+    ak.to_backend(array, 'cuda')
+
+to move one or the other to main memory or the GPU(s)."""
+            + ak._util.exception_suffix(__file__)
+        )

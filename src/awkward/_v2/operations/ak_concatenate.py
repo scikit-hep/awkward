@@ -50,27 +50,41 @@ def concatenate(
 
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
-    contents = [
+    # Simple single-array, axis=0 fast-path
+    single_nplike = ak.nplike.of(arrays)
+    if (
+        # Is an Awkward Content
+        isinstance(arrays, ak._v2.contents.Content)
+        # Is a NumPy Array
+        or ak.nplike.is_numpy_buffer(arrays)
+        # Is an array with a known NumpyLike
+        or single_nplike is not ak.nplike.Numpy.instance()
+    ):
+        # Convert the array to a layout object
+        content = ak._v2.operations.to_layout(
+            arrays, allow_record=False, allow_other=False
+        )
+        # Only handle concatenation along `axis=0`
+        # Let ambiguous depth arrays fall through
+        if content.axis_wrap_if_negative(axis) == 0:
+            return ak._v2.operations.ak_flatten._impl(content, 1, highlevel, behavior)
+
+    content_or_others = [
         ak._v2.operations.to_layout(
             x, allow_record=False if axis == 0 else True, allow_other=True
         )
         for x in arrays
     ]
-    if not any(isinstance(x, (ak._v2.contents.Content,)) for x in contents):
+
+    contents = [x for x in content_or_others if isinstance(x, ak._v2.contents.Content)]
+    if len(contents) == 0:
         raise ak._v2._util.error(ValueError("need at least one array to concatenate"))
 
-    first_content = [x for x in contents if isinstance(x, (ak._v2.contents.Content,))][
-        0
-    ]
-
-    posaxis = first_content.axis_wrap_if_negative(axis)
+    posaxis = contents[0].axis_wrap_if_negative(axis)
     maxdepth = max(
         x.minmax_depth[1]
-        for x in contents
-        if isinstance(
-            x,
-            (ak._v2.contents.Content,),
-        )
+        for x in content_or_others
+        if isinstance(x, ak._v2.contents.Content)
     )
     if not 0 <= posaxis < maxdepth:
         raise ak._v2._util.error(
@@ -79,7 +93,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 "is ambiguous".format(axis)
             )
         )
-    for x in contents:
+    for x in content_or_others:
         if isinstance(x, ak._v2.contents.Content):
             if x.axis_wrap_if_negative(axis) != posaxis:
                 raise ak._v2._util.error(
@@ -90,14 +104,14 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 )
 
     if posaxis == 0:
-        contents = [
+        content_or_others = [
             x
             if isinstance(x, ak._v2.contents.Content)
             else ak._v2.operations.to_layout([x])
-            for x in contents
+            for x in content_or_others
         ]
-        batch = [contents[0]]
-        for x in contents[1:]:
+        batch = [content_or_others[0]]
+        for x in content_or_others[1:]:
             if batch[-1].mergeable(x, mergebool=mergebool):
                 batch.append(x)
             else:
@@ -264,7 +278,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 return None
 
         out = ak._v2._broadcasting.broadcast_and_apply(
-            contents,
+            content_or_others,
             action,
             behavior=ak._v2._util.behavior_of(*arrays, behavior=behavior),
             allow_records=True,

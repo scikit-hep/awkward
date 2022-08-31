@@ -160,11 +160,12 @@ class Index:
 
     def __getitem__(self, where):
         out = self._data[where]
-        from awkward._v2._util import is_cupy_buffer, is_jax_buffer
 
         if hasattr(out, "shape") and len(out.shape) != 0:
             return Index(out, metadata=self.metadata, nplike=self.nplike)
-        elif (is_jax_buffer(out) or is_cupy_buffer(out)) and len(out.shape) == 0:
+        elif (ak.nplike.is_jax_buffer(out) or ak.nplike.is_cupy_buffer(out)) and len(
+            out.shape
+        ) == 0:
             return out.item()
         else:
             return out

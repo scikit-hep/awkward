@@ -1185,21 +1185,3 @@ def to_arraylib(module, array, allow_missing):
         raise ak._v2._util.error(
             ValueError(f"{module.__name__} is not supported by to_arraylib")
         )
-
-
-def is_numpy_buffer(array):
-    import numpy as np
-
-    return isinstance(array, np.ndarray)
-
-
-def is_cupy_buffer(array):
-    return type(array).__module__.startswith("cupy.")
-
-
-def is_jax_buffer(array):
-    return type(array).__module__.startswith("jaxlib.")
-
-
-def is_jax_tracer(tracer):
-    return type(tracer).__module__.startswith("jax.")
