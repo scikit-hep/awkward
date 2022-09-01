@@ -22,6 +22,10 @@ class _Unset:
 unset = _Unset()
 
 
+ActionType = t.Callable[["Content", ...], t.Union["Content", None]]
+BehaviorType = t.Dict[str, t.Union["ak._v2.highlevel.Array", "ak._v2.record.Record"]]
+
+
 class Content:
     is_NumpyType = False
     is_UnknownType = False
@@ -89,6 +93,14 @@ class Content:
     def form(self):
         return self.form_with_key(None)
 
+    @property
+    def typetracer(self) -> Content:
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def length(self) -> int:
+        raise ak._v2._util.error(NotImplementedError)
+
     def form_with_key(self, form_key="node{id}", id_start=0):
         hold_id = [id_start]
 
@@ -122,11 +134,29 @@ class Content:
 
         return self._form_with_key(getkey)
 
+    def _form_with_key(
+        self,
+        key_func: t.Callable[
+            [
+                Content,
+            ],
+            ak._v2.forms.Form,
+        ],
+    ) -> ak._v2.forms.Form:
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def Form(self) -> t.Type[ak._v2.forms.Form]:
+        raise ak._v2._util.error(NotImplementedError)
+
     def forget_length(self):
         if not isinstance(self._nplike, ak._v2._typetracer.TypeTracer):
             return self.typetracer._forget_length()
         else:
             return self._forget_length()
+
+    def _forget_length(self) -> Content:
+        raise ak._v2._util.error(NotImplementedError)
 
     def to_buffers(
         self,
@@ -181,6 +211,15 @@ class Content:
         self._to_buffers(form, getkey, container, nplike)
 
         return form, len(self), container
+
+    def _to_buffers(
+        self,
+        form: ak._v2.forms.Form,
+        getkey: t.Callable[[Content, ak._v2.forms.Form, str], str],
+        container: t.MutableMapping[str, t.Any],
+        nplike: ak.nplike.NumpyLike,
+    ):
+        raise ak._v2._util.error(NotImplementedError)
 
     def __len__(self):
         return self.length
@@ -633,13 +672,13 @@ class Content:
     def _getitem_field(self, where: str):
         raise ak._v2._util.error(NotImplementedError)
 
-    def _getitem_fields(self, where: t.List[str]):
+    def _getitem_fields(self, where: t.List[str], only_fields: t.Tuple[str, ...] = ()):
         raise ak._v2._util.error(NotImplementedError)
 
-    def _getitem_next(self, head, tail, advanced):
+    def _getitem_next(self, head, tail, advanced: t.Optional[ak._v2.index.Index]):
         raise ak._v2._util.error(NotImplementedError)
 
-    def _carry(self, carry: ak._v2.index.Index, lazy=True):
+    def _carry(self, carry: ak._v2.index.Index, allow_lazy: bool = True):
         raise ak._v2._util.error(NotImplementedError)
 
     def _carry_asrange(self, carry: ak._v2.index.Index):
@@ -740,6 +779,9 @@ class Content:
         others = [other]
         return self.mergemany(others)
 
+    def mergemany(self, others: t.List[Content]) -> Content:
+        raise ak._v2._util.error(NotImplementedError)
+
     def merge_as_union(self, other):
         mylength = self.length
         theirlength = other.length
@@ -835,6 +877,9 @@ class Content:
     def local_index(self, axis):
         return self._local_index(axis, 0)
 
+    def _local_index(self, axis: int, depth: int):
+        raise ak._v2._util.error(NotImplementedError)
+
     def _reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
         if axis is None:
             raise ak._v2._util.error(NotImplementedError)
@@ -886,6 +931,20 @@ class Content:
         )
 
         return next[0]
+
+    def _reduce_next(
+        self,
+        reducer: ak._v2._reducers.Reducer,
+        negaxis: int,
+        starts: ak._v2.index.Index,
+        shifts: t.Optional[ak._v2.index.Index],
+        parents: ak._v2.index.Index,
+        outlength: int,
+        mask: bool,
+        keepdims: bool,
+        behavior: t.Optional[BehaviorType],
+    ):
+        raise ak._v2._util.error(NotImplementedError)
 
     def argmin(self, axis=-1, mask=True, keepdims=False, behavior=None):
         return self._reduce(
@@ -973,6 +1032,20 @@ class Content:
             order,
         )
 
+    def _argsort_next(
+        self,
+        negaxis: int,
+        starts: ak._v2.index.Index,
+        shifts: t.Optional[ak._v2.index.Index],
+        parents: ak._v2.index.Index,
+        outlength: int,
+        ascending: bool,
+        stable: bool,
+        kind: t.Any,
+        order: t.Any,
+    ):
+        raise ak._v2._util.error(NotImplementedError)
+
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
         branch, depth = self.branch_depth
@@ -1017,6 +1090,19 @@ class Content:
             kind,
             order,
         )
+
+    def _sort_next(
+        self,
+        negaxis: int,
+        starts: ak._v2.index.Index,
+        parents: ak._v2.index.Index,
+        outlength: int,
+        ascending: bool,
+        stable: bool,
+        kind: t.Any,
+        order: t.Any,
+    ):
+        raise ak._v2._util.error(NotImplementedError)
 
     def _combinations_axis0(self, n, replacement, recordlookup, parameters):
         size = self.length
@@ -1092,6 +1178,17 @@ class Content:
                     ValueError("if provided, the length of 'fields' must be 'n'")
                 )
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
+
+    def _combinations(
+        self,
+        n: int,
+        replacement: bool,
+        recordlookup: t.Optional[t.List[str]],
+        parameters: t.Dict[str, t.Any],
+        axis: int,
+        depth: int,
+    ):
+        raise ak._v2._util.error(NotImplementedError)
 
     def validity_error_parameters(self, path):
         if self.parameter("__array__") == "string":
@@ -1199,9 +1296,15 @@ class Content:
             return paramcheck
         return self._validity_error(path)
 
+    def _validity_error(self, path: str) -> str:
+        raise ak._v2._util.error(NotImplementedError)
+
     @property
     def nbytes(self):
         return self._nbytes_part()
+
+    def _nbytes_part(self) -> int:
+        raise ak._v2._util.error(NotImplementedError)
 
     def purelist_parameter(self, key):
         return self.Form.purelist_parameter(self, key)
@@ -1211,6 +1314,15 @@ class Content:
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
         parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
         return self._is_unique(negaxis, starts, parents, 1)
+
+    def _is_unique(
+        self,
+        negaxis: t.Optional[int],
+        starts: ak._v2.index.Index,
+        parents: ak._v2.index.Index,
+        outlength: int,
+    ) -> bool:
+        raise ak._v2._util.error(NotImplementedError)
 
     def unique(self, axis=None):
         if axis == -1 or axis is None:
@@ -1259,6 +1371,15 @@ class Content:
                 )
             )
         )
+
+    def _unique(
+        self,
+        negaxis: t.Optional[int],
+        starts: ak._v2.index.Index,
+        parents: ak._v2.index.Index,
+        outlength: int,
+    ):
+        raise ak._v2._util.error(NotImplementedError)
 
     @property
     def purelist_isregular(self):
@@ -1318,6 +1439,9 @@ class Content:
     def pad_none(self, length, axis, clip=False):
         return self._pad_none(length, axis, 0, clip)
 
+    def _pad_none(self, target: int, axis: int, depth: int, clip: bool) -> Content:
+        raise ak._v2._util.error(NotImplementedError)
+
     def to_arrow(
         self,
         list_to32=False,
@@ -1349,8 +1473,21 @@ class Content:
             },
         )
 
+    def _to_arrow(
+        self,
+        pyarrow: t.Any,
+        mask_node: t.Any,
+        validbytes: t.Any,
+        length: int,
+        options: t.Dict[str, t.Any],
+    ):
+        raise ak._v2._util.error(NotImplementedError)
+
     def to_numpy(self, allow_missing):
         return self._to_numpy(allow_missing)
+
+    def _to_numpy(self, allow_missing: bool):
+        raise ak._v2._util.error(NotImplementedError)
 
     def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
         if nplike is None:
@@ -1363,6 +1500,11 @@ class Content:
             },
         )
         return tuple(arrays)
+
+    def _completely_flatten(
+        self, nplike: t.Optional[ak.nplike.NumpyLike], options: t.Dict[str, t.Any]
+    ) -> list:
+        raise ak._v2._util.error(NotImplementedError)
 
     def recursively_apply(
         self,
@@ -1390,6 +1532,17 @@ class Content:
                 "function_name": function_name,
             },
         )
+
+    def _recursively_apply(
+        self,
+        action: ActionType,
+        behavior: t.Optional[BehaviorType],
+        depth: int,
+        depth_context: t.Optional[dict],
+        lateral_context: t.Optional[dict],
+        options: t.Dict[str, t.Any],
+    ) -> t.Union[Content, None]:
+        raise ak._v2._util.error(NotImplementedError)
 
     def to_json(
         self,
@@ -1425,11 +1578,19 @@ class Content:
             },
         )
 
+    def packed(self) -> Content:
+        raise ak._v2._util.error(NotImplementedError)
+
     def tolist(self, behavior=None):
         return self.to_list(behavior)
 
     def to_list(self, behavior=None):
         return self.packed()._to_list(behavior, None)
+
+    def _to_list(
+        self, behavior: t.Optional[BehaviorType], json_conversions: t.Dict[str, t.Any]
+    ) -> list:
+        raise ak._v2._util.error(NotImplementedError)
 
     def _to_list_custom(self, behavior, json_conversions):
         cls = ak._v2._util.arrayclass(self, behavior)
@@ -1521,11 +1682,19 @@ class Content:
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
 
+    def _offsets_and_flattened(
+        self, axis: int, depth: int
+    ) -> t.Tuple[ak._v2.index.Index, Content]:
+        raise ak._v2._util.error(NotImplementedError)
+
     def to_backend(self, backend):
         if self.nplike is ak._v2._util.regularize_backend(backend):
             return self
         else:
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
+
+    def _to_nplike(self, nplike: ak.nplike.NumpyLike) -> Content:
+        raise ak._v2._util.error(NotImplementedError)
 
     def with_parameter(self, key, value):
         out = copy.copy(self)
@@ -1579,3 +1748,8 @@ class Content:
             )
             and self._layout_equal(other, index_dtype, numpyarray)
         )
+
+    def _layout_equal(
+        self, other: Content, index_dtype: bool = True, numpyarray: bool = True
+    ) -> bool:
+        raise ak._v2._util.error(NotImplementedError)
