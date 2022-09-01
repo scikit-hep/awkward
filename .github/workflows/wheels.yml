@@ -34,12 +34,6 @@ jobs:
         build: ["cp*", "pp*"]
 
         include:
-        - os: ubuntu-latest
-          type: ManyLinux1
-          arch: auto64
-          build: "cp{36,37,38}-*"
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-
         - os: macos-latest
           type: "Universal"
           arch: universal2
@@ -51,7 +45,7 @@ jobs:
 
         - os: windows-latest
           arch: auto32
-          build: "cp{36,37,38,39}-*"
+          build: "cp{37,38,39}-*"
 
 
     steps:
@@ -76,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [36, 37, 38, 39, 310, 311]
+        python: [37, 38, 39, 310, 311]
         arch: [aarch64]
     steps:
 
