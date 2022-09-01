@@ -21,9 +21,20 @@ class _Unset:
 
 unset = _Unset()
 
-
-ActionType = t.Callable[["Content", ...], t.Union["Content", None]]
 BehaviorType = t.Dict[str, t.Union["ak._v2.highlevel.Array", "ak._v2.record.Record"]]
+ActionType = t.Callable[
+    [
+        "Content",
+        int,
+        t.Optional[dict],
+        t.Optional[dict],
+        t.Callable[[], None],
+        t.Optional[BehaviorType],
+        t.Optional[ak.nplike.NumpyLike],
+        t.Dict[str, t.Any],
+    ],
+    t.Union["Content", None],
+]
 
 
 class Content:
