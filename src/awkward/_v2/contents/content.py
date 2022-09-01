@@ -11,7 +11,13 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
-unset = object()
+
+class _Unset:
+    def __repr__(self):
+        return f"{__name__}.unset"
+
+
+unset = _Unset()
 
 
 class Content:
