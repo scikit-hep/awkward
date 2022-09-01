@@ -146,9 +146,10 @@ jobs:
           - '3.9'
           - '3.8'
           - '3.7'
+        numpy-package: "numpy"
         include:
           - python-version: '3.7'
-            numpy-version: 1.13.1
+            numpy-package: "oldest-supported-numpy"
 
     runs-on: ubuntu-20.04
 
@@ -166,7 +167,7 @@ jobs:
         with:
           key: >-
             ${{ github.job
-            }}-${{matrix.python-version}}-${{matrix.numpy-version}}
+            }}-${{matrix.python-version}}-${{matrix.numpy-package}}
 
       - name: Use ccache
         run: |
@@ -179,12 +180,7 @@ jobs:
           python-version: '${{ matrix.python-version }}'
 
       - name: Install NumPy
-        run: |
-          if [[ -z "${NUMPY_VERSION}" ]]; then
-            python -m pip install numpy;
-          else
-            python -m pip install "numpy==${NUMPY_VERSION}";
-          fi
+        run: python -m pip install "${{ matrix.numpy-package }}"
 
       - name: Build
         run: 'python -m pip install -v .[test,dev]'
