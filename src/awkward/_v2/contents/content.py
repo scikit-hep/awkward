@@ -1,8 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import numbers
 import math
 import copy
+import typing as t
 
 import awkward as ak
 import awkward._v2._reducers
@@ -622,7 +624,25 @@ class Content:
                 )
             )
 
-    def _carry_asrange(self, carry):
+    def _getitem_at(self, where: int):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_range(self, where: slice):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_field(self, where: str):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_fields(self, where: t.List[str]):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_next(self, head, tail, advanced):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _carry(self, carry: ak._v2.index.Index, lazy=True):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _carry_asrange(self, carry: ak._v2.index.Index):
         assert isinstance(carry, ak._v2.index.Index)
 
         result = self._nplike.index_nplike.empty(1, dtype=np.bool_)
