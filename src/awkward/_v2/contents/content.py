@@ -21,20 +21,24 @@ class _Unset:
 
 unset = _Unset()
 
-BehaviorType = t.Dict[str, t.Union["ak._v2.highlevel.Array", "ak._v2.record.Record"]]
-ActionType = t.Callable[
-    [
-        "Content",
-        int,
-        t.Optional[dict],
-        t.Optional[dict],
-        t.Callable[[], None],
-        t.Optional[BehaviorType],
-        t.Optional[ak.nplike.NumpyLike],
-        t.Dict[str, t.Any],
-    ],
-    t.Union["Content", None],
-]
+if t.TYPE_CHECKING:
+    from typing import Any, Self
+    from collections.abc import Callable, MutableMapping
+
+    BehaviorType = dict[str, ak._v2.highlevel.Array | ak._v2.record.Record]
+    ActionType = Callable[
+        [
+            "Content",
+            int,
+            dict | None,
+            dict | None,
+            Callable[[], None],
+            BehaviorType | None,
+            ak.nplike.NumpyLike | None,
+            dict[str, Any],
+        ],
+        "Content" | None,
+    ]
 
 
 class Content:
@@ -105,7 +109,7 @@ class Content:
         return self.form_with_key(None)
 
     @property
-    def typetracer(self) -> Content:
+    def typetracer(self) -> Self:
         raise ak._v2._util.error(NotImplementedError)
 
     @property
@@ -147,7 +151,7 @@ class Content:
 
     def _form_with_key(
         self,
-        key_func: t.Callable[[Content], ak._v2.forms.Form],
+        key_func: Callable[[Content], ak._v2.forms.Form],
     ) -> ak._v2.forms.Form:
         raise ak._v2._util.error(NotImplementedError)
 
@@ -161,7 +165,7 @@ class Content:
         else:
             return self._forget_length()
 
-    def _forget_length(self) -> Content:
+    def _forget_length(self) -> Self:
         raise ak._v2._util.error(NotImplementedError)
 
     def to_buffers(
@@ -221,8 +225,8 @@ class Content:
     def _to_buffers(
         self,
         form: ak._v2.forms.Form,
-        getkey: t.Callable[[Content, ak._v2.forms.Form, str], str],
-        container: t.MutableMapping[str, t.Any],
+        getkey: Callable[[Content, ak._v2.forms.Form, str], str],
+        container: MutableMapping[str, t.Any],
         nplike: ak.nplike.NumpyLike,
     ):
         raise ak._v2._util.error(NotImplementedError)
@@ -678,10 +682,10 @@ class Content:
     def _getitem_field(self, where: str):
         raise ak._v2._util.error(NotImplementedError)
 
-    def _getitem_fields(self, where: t.List[str], only_fields: t.Tuple[str, ...] = ()):
+    def _getitem_fields(self, where: list[str], only_fields: tuple[str, ...] = ()):
         raise ak._v2._util.error(NotImplementedError)
 
-    def _getitem_next(self, head, tail, advanced: t.Optional[ak._v2.index.Index]):
+    def _getitem_next(self, head, tail, advanced: ak._v2.index.Index | None):
         raise ak._v2._util.error(NotImplementedError)
 
     def _carry(self, carry: ak._v2.index.Index, allow_lazy: bool = True):
@@ -785,7 +789,7 @@ class Content:
         others = [other]
         return self.mergemany(others)
 
-    def mergemany(self, others: t.List[Content]) -> Content:
+    def mergemany(self, others: list[Content]) -> Content:
         raise ak._v2._util.error(NotImplementedError)
 
     def merge_as_union(self, other):
@@ -943,12 +947,12 @@ class Content:
         reducer: ak._v2._reducers.Reducer,
         negaxis: int,
         starts: ak._v2.index.Index,
-        shifts: t.Optional[ak._v2.index.Index],
+        shifts: ak._v2.index.Index | None,
         parents: ak._v2.index.Index,
         outlength: int,
         mask: bool,
         keepdims: bool,
-        behavior: t.Optional[BehaviorType],
+        behavior: BehaviorType | None,
     ):
         raise ak._v2._util.error(NotImplementedError)
 
@@ -1042,13 +1046,13 @@ class Content:
         self,
         negaxis: int,
         starts: ak._v2.index.Index,
-        shifts: t.Optional[ak._v2.index.Index],
+        shifts: ak._v2.index.Index | None,
         parents: ak._v2.index.Index,
         outlength: int,
         ascending: bool,
         stable: bool,
-        kind: t.Any,
-        order: t.Any,
+        kind: Any,
+        order: Any,
     ):
         raise ak._v2._util.error(NotImplementedError)
 
@@ -1105,8 +1109,8 @@ class Content:
         outlength: int,
         ascending: bool,
         stable: bool,
-        kind: t.Any,
-        order: t.Any,
+        kind: Any,
+        order: Any,
     ):
         raise ak._v2._util.error(NotImplementedError)
 
@@ -1189,8 +1193,8 @@ class Content:
         self,
         n: int,
         replacement: bool,
-        recordlookup: t.Optional[t.List[str]],
-        parameters: t.Dict[str, t.Any],
+        recordlookup: list[str | None],
+        parameters: dict[str, t.Any],
         axis: int,
         depth: int,
     ):
@@ -1323,7 +1327,7 @@ class Content:
 
     def _is_unique(
         self,
-        negaxis: t.Optional[int],
+        negaxis: int | None,
         starts: ak._v2.index.Index,
         parents: ak._v2.index.Index,
         outlength: int,
@@ -1380,7 +1384,7 @@ class Content:
 
     def _unique(
         self,
-        negaxis: t.Optional[int],
+        negaxis: int | None,
         starts: ak._v2.index.Index,
         parents: ak._v2.index.Index,
         outlength: int,
@@ -1481,11 +1485,11 @@ class Content:
 
     def _to_arrow(
         self,
-        pyarrow: t.Any,
-        mask_node: t.Any,
-        validbytes: t.Any,
+        pyarrow: Any,
+        mask_node: Any,
+        validbytes: Any,
         length: int,
-        options: t.Dict[str, t.Any],
+        options: dict[str, Any],
     ):
         raise ak._v2._util.error(NotImplementedError)
 
@@ -1508,7 +1512,7 @@ class Content:
         return tuple(arrays)
 
     def _completely_flatten(
-        self, nplike: t.Optional[ak.nplike.NumpyLike], options: t.Dict[str, t.Any]
+        self, nplike: ak.nplike.NumpyLike | None, options: dict[str, Any]
     ) -> list:
         raise ak._v2._util.error(NotImplementedError)
 
@@ -1542,12 +1546,12 @@ class Content:
     def _recursively_apply(
         self,
         action: ActionType,
-        behavior: t.Optional[BehaviorType],
+        behavior: BehaviorType | None,
         depth: int,
-        depth_context: t.Optional[dict],
-        lateral_context: t.Optional[dict],
-        options: t.Dict[str, t.Any],
-    ) -> t.Union[Content, None]:
+        depth_context: dict | None,
+        lateral_context: dict | None,
+        options: dict[str, Any],
+    ) -> Content | None:
         raise ak._v2._util.error(NotImplementedError)
 
     def to_json(
@@ -1594,7 +1598,7 @@ class Content:
         return self.packed()._to_list(behavior, None)
 
     def _to_list(
-        self, behavior: t.Optional[BehaviorType], json_conversions: t.Dict[str, t.Any]
+        self, behavior: BehaviorType | None, json_conversions: dict[str, t.Any]
     ) -> list:
         raise ak._v2._util.error(NotImplementedError)
 
@@ -1699,7 +1703,7 @@ class Content:
         else:
             return self._to_nplike(ak._v2._util.regularize_backend(backend))
 
-    def _to_nplike(self, nplike: ak.nplike.NumpyLike) -> Content:
+    def _to_nplike(self, nplike: ak.nplike.NumpyLike) -> Self:
         raise ak._v2._util.error(NotImplementedError)
 
     def with_parameter(self, key, value):
@@ -1756,7 +1760,7 @@ class Content:
         )
 
     def _layout_equal(
-        self, other: Content, index_dtype: bool = True, numpyarray: bool = True
+        self, other: Self, index_dtype: bool = True, numpyarray: bool = True
     ) -> bool:
         raise ak._v2._util.error(NotImplementedError)
 
