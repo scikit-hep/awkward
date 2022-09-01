@@ -136,10 +136,7 @@ class Content:
 
     def _form_with_key(
         self,
-        key_func: t.Callable[
-            [Content],
-            ak._v2.forms.Form,
-        ],
+        key_func: t.Callable[[Content], ak._v2.forms.Form],
     ) -> ak._v2.forms.Form:
         raise ak._v2._util.error(NotImplementedError)
 
