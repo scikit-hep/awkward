@@ -137,9 +137,7 @@ class Content:
     def _form_with_key(
         self,
         key_func: t.Callable[
-            [
-                Content,
-            ],
+            [Content],
             ak._v2.forms.Form,
         ],
     ) -> ak._v2.forms.Form:
