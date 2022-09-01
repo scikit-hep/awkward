@@ -1759,3 +1759,6 @@ class Content:
         self, other: Content, index_dtype: bool = True, numpyarray: bool = True
     ) -> bool:
         raise ak._v2._util.error(NotImplementedError)
+
+    def _repr(self, indent: str, pre: str, post: str) -> str:
+        raise ak._v2._util.error(NotImplementedError)
