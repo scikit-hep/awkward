@@ -117,4 +117,4 @@ def test_success_nonempty_list():
         check_valid=True,
     )
 
-    assert to_list(array[index]) == [[[0], [1]]]
+    assert to_list(array[index]) == [[[1], [2]]]

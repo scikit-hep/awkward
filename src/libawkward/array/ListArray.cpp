@@ -1935,11 +1935,16 @@ namespace awkward {
 
     ContentPtr out;
     if (dynamic_cast<SliceJagged64*>(slicecontent.content().get())) {
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
+        ContentPtr asListOffsetArray64 = toListOffsetArray64(true);
+        ContentPtr next_content;
+        if (ListOffsetArrayOf<int64_t>* raw =
+              dynamic_cast<ListOffsetArrayOf<int64_t>*>(asListOffsetArray64.get())) {
+          next_content = raw->content()->carry(nextcarry, true);
+        }
       ContentPtr next = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                             util::Parameters(),
                                                             smalloffsets,
-                                                            nextcontent);
+                                                            next_content);
       out = next.get()->getitem_next_jagged(util::make_starts(smalloffsets),
                                             util::make_stops(smalloffsets),
                                             slicecontent.content(),

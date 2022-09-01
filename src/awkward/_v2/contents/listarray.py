@@ -349,8 +349,10 @@ class ListArray(Content):
                 slicer=ListArray(slicestarts, slicestops, slicecontent),
             )
 
-            asListOffsetArray64 = self.toListOffsetArray64(True)
-            next_content = asListOffsetArray64._content
+            as_list_offset_array = self.toListOffsetArray64(False)
+            next_content = as_list_offset_array._content[
+                as_list_offset_array.offsets[0] : as_list_offset_array.offsets[-1]
+            ]
 
             sliceoffsets = ak._v2.index.Index64(slicecontent._offsets)
 
@@ -422,7 +424,6 @@ class ListArray(Content):
                 ),
                 slicer=ak._v2.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
-
             nextcontent = self._content._carry(nextcarry, True)
             nexthead, nexttail = ak._v2._slicing.headtail(tail)
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
@@ -511,7 +512,10 @@ class ListArray(Content):
                 slicecontent._content,
                 ak._v2.contents.listoffsetarray.ListOffsetArray,
             ):
-                nextcontent = self._content._carry(nextcarry, True)
+
+                # Generate ranges between starts and stops
+                as_list_offset_array = self.toListOffsetArray64(True)
+                nextcontent = as_list_offset_array._content._carry(nextcarry, True)
                 next = ak._v2.contents.listoffsetarray.ListOffsetArray(
                     smalloffsets, nextcontent, None, self._parameters, self._nplike
                 )
