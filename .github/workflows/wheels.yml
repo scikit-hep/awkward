@@ -57,6 +57,7 @@ jobs:
       env:
         CIBW_BUILD: ${{ matrix.build }}
         CIBW_ARCHS: ${{ matrix.arch }}
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
 
     - name: Upload wheels
       uses: actions/upload-artifact@v3
