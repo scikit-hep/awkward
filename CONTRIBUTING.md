@@ -267,11 +267,11 @@ Templating is only used for integer specialization.
 
 ### Python standard
 
-We target Python 3.6 and above. Import statements can assume Python 3 names, string-checking can assume Python 3 meanings of `str` and `bytes`, Unicode literals don't need to be prefixed by `u`, and dict order can be assumed to be stable. Python's f-strings can now be used, but not with equals signs (e.g. `f"{something = }"` rather than `f"something = {something}"`) because that's a Python 3.8 feature (its main use is in debugging, anyway).
+We target Python 3.7 and above. Import statements can assume Python 3 names, string-checking can assume Python 3 meanings of `str` and `bytes`, Unicode literals don't need to be prefixed by `u`, and dict order can be assumed to be stable. Python's f-strings can now be used, but not with equals signs (e.g. `f"{something = }"` rather than `f"something = {something}"`) because that's a Python 3.8 feature (its main use is in debugging, anyway).
 
-If you see any outdated (pre-Python 3.6) code, you can safely clean them up. Some strings are not easier to read as f-strings or require some work to make them more readable; it should be a case-by-case basis.
+If you see any outdated (pre-Python 3.7) code, you can safely clean them up. Some strings are not easier to read as f-strings or require some work to make them more readable; it should be a case-by-case basis.
 
-Python 3.6 will be the standard until it becomes "painful" to keep it (like, when CI and build tools no longer support it, or if we adopt type annotations).
+Python 3.7 will be the standard until it becomes "painful" to keep it (like, when CI and build tools no longer support it, or if we adopt type annotations).
 
 ### Third party dependencies
 
