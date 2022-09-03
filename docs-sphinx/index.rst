@@ -20,8 +20,8 @@
    :alt: Conda-Forge
    :target: https://github.com/conda-forge/awkward-feedstock
 
-.. image:: https://img.shields.io/badge/python-3.6%E2%80%923.10-blue
-   :alt: Python 3.6‒3.10
+.. image:: https://img.shields.io/badge/python-3.7%E2%80%923.10-blue
+   :alt: Python 3.7‒3.10
    :target: https://www.python.org
 
 .. image:: https://img.shields.io/badge/license-BSD%203--Clause-blue.svg

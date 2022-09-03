@@ -61,7 +61,7 @@ PIP_ONLY_BINARY = "cmake,numpy"
 
 [[tool.cibuildwheel.overrides]]
 select = "cp3?-*"
-manylinux-x86_64-image = "manylinux2010"
+manylinux-x86_64-image = "manylinux2014"
 
 
 [tool.pytest.ini_options]
@@ -79,7 +79,7 @@ filterwarnings = [
 log_cli_level = "info"
 
 [tool.pylint]
-master.py-version = "3.6"
+master.py-version = "3.7"
 master.jobs = "0"
 master.ignore-paths = [
   "src/awkward/_typeparser/generated_parser.py"
