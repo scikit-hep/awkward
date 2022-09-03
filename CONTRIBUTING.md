@@ -32,6 +32,20 @@ That said, most of the commits on a pull request/git branch should be from a sin
 
 As such, you should name your branch starting with your GitHub userid and a slash, such as `jpivarski/write-contributing-md`. If you start a pull request with a branch that doesn't follow convention, though, you don't need to fix it.
 
+The titles of pull requests (and therefore the merge commit messages) should follow [these conventions](https://www.conventionalcommits.org/en/v1.0.0/#summary). Mostly, this means prefixing the title with one of these words and a colon:
+
+  * feat: new feature
+  * fix: bug-fix
+  * perf: code change that improves performance
+  * refactor: code change that neither fixes a bug nor adds a feature
+  * style: changes that do not affect the meaning of the code
+  * test: adding missing tests or correcting existing tests
+  * build: changes that affect the build system or external dependencies
+  * docs: documentation only changes
+  * ci: changes to our CI configuration files and scripts
+  * chore: other changes that don't modify src or test files
+  * revert: reverts a previous commit
+
 Most pull requests are merged with the "squash and merge" feature, so details about commit history within a pull request are lost. Feel free, therefore, to commit with any frequency you're comfortable with. I like to make frequent commits to avoid losing work to a dead laptop, and to have more save-points to recover from.
 
 It is unnecessary to manually edit (rebase) your commit history. If, however, you do want to save a pull request as multiple commits on `main`, ask me and we'll discuss. (The default branch is named `main`, not `master`.)
@@ -55,15 +69,7 @@ python -m pytest -vv -rs tests-spec
 python -m pytest -vv -rs tests-cpu-kernels
 ```
 
-Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
-
-```bash
-pip uninstall -y awkward-cuda-kernels
-python dev/generate-cuda.py
-./cuda-build.sh --install
-```
-
-The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
+Furthermore, if you have an Nvidia GPU and CuPy installed, you can run the CUDA tests with
 
 ```bash
 python dev/generate-tests.py
@@ -114,44 +120,11 @@ Before re-building documentation, you might want to delete the files that were g
 rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
 ```
 
-### Continuous integration
+### Continuous testing
 
 Pull requests must pass all [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) tests before they are merged. I will sometimes cancel non-essential builds to give priority to pull requests that are almost ready to be merged. If you needed the result of the build as a diagnostic, you can ask me to restart your job or make a trivial change to trigger a new build.
 
 Currently, we only run merge builds (the state of your branch if merged with `main`), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge main`.
-
-### Semi-automated testing of CUDA kernels
-
-For development on the cuda-kernels, an AWS VM with a GPU has been set up to run tests in the `tests-cuda` directory. You can email jpivarski at GMail for more information on how to get permissions to launch the AWS instance.
-
-To see if the AWS instance is running, use the launcher:
-
-```bash
-% ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ ./list-instances.py
-i-0295dd31185ce78f7     WW.XX.YY.ZZ    running ['launcher']
-i-0a1ec83c261607797     AA.BB.CC.DD    running ['awkward1-cuda-test']
-i-0a9dd553fe19610fb          (none)    stopped ['awkward1-cuda-test-2gpus']
-```
-
-If it is `stopped`, launch it with:
-
-```bash
-ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ aws ec2 start-instances --instance-ids i-0a1ec83c261607797
-```
-
-Once it's `running`, use its IP address (`AA.BB.CC.DD`) to run the tests for your branch (`my-branch-name`):
-
-```bash
-ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@AA.BB.CC.DD ./cuda-run-tests.sh my-branch-name
-```
-
-When you are done, be sure to put it back into the `stopped` state:
-
-```bash
-ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ aws ec2 stop-instances --instance-ids i-0a1ec83c261607797
-```
-
-and verify with `list-instances`. While the GPU instance is running, you can ssh into it interactively for debugging.
 
 ### The main branch
 
@@ -166,6 +139,10 @@ Committing directly to `main` is not allowed except for
    * unprecedented emergencies
 
 and only by me.
+
+### The main-v1 branch
+
+The `main-v1` branch was split from `main` just before Awkward 1.x code was removed, so it exists to make 1.10.x bug-fix releases. These commits must be be drawn from `main-v1`, not `main`, and pull requests must target `main-v1` (not the GitHub default). A single commit cannot be applied to both `main` and `main-v1` because they have diverged too much. If a bug-fix needs to be applied to both (unlikely), it will have to be reimplemented on both.
 
 ### Releases
 
@@ -189,16 +166,6 @@ Contributing to each part of the codebase has a different flavor:
    * The CPU kernels and GPU kernels are two implementations of the same functions, optimized for CPUs and GPUs, respectively. The pure C interface to these functions, and most of their implementations, involve only numbers and arrays. This *is* the place for performance optimizations.
 
 A Contribution might only touch one layer of the code or it might involve more than one.
-
-### Deployment products
-
-Awkward Array consists of two (or three) shared libraries,
-
-   * `libawkward-cpu-kernels.so` (or `.dylib`, etc.)
-   * `libawkward-cuda-kernels.so` (if compiled with CUDA support)
-   * `libawkward.so`
-
-and a Python library shipped as binary wheels or (in rare cases) a source tarball to be compiled. The pip and conda deployments include all shared libraries with the Python package and put C++ headers in the system-dependent location for `includes`, in a directory named `awkward`.
 
 ### Performance considerations
 
@@ -231,7 +198,7 @@ As we change the code, we should keep in mind the following priorities, in this 
 
 Above all, the purpose of any programming language is to be read by humans; if we were only concerned with operating the machine, we would be flipping individual bits. It should be organized in stanzas that highlight similarities and differences by grouping them on the screen.
 
-We adhere to an 80-character line width, which is a [stand<65;53;42Mard in the industry](https://github.com/scikit-hep/awkward-1.0/pull/183), despite the fact that we don't write punch-cards anymore. The standardized width allows several window columns to be examined side-by-side. Exceptions to the 80-character limit follow [PEP 8](https://www.python.org/dev/peps/pep-0008/): we don't split URLs or similar tokens that must be read as a unit.
+We adhere to an 80-character line width, which is a [standard in the industry](https://github.com/scikit-hep/awkward-1.0/pull/183), despite the fact that we don't write punch-cards anymore. The standardized width allows several window columns to be examined side-by-side. Exceptions to the 80-character limit follow [PEP 8](https://www.python.org/dev/peps/pep-0008/): we don't split URLs or similar tokens that must be read as a unit.
 
 Unit tests do not need to adhere to the 80-character limit.
 
@@ -259,11 +226,9 @@ As stated above, most of the C++ features we use are "old," such as virtual inhe
 
 A quick scan of the code would reveal that we make extensive use of `std::shared_ptr`. Raw pointers are used in extremely limited circumstances, and never passed out of the scope that holds a shared pointer to the same resource (guaranteeing its lifetime). The main use of raw pointers is for down-casting with `dynamic_cast`.
 
-Class instances are passed between functions as generic types for flexibility. For example, `toListOffsetArray64` returns a list array converted to the `ListOffsetArray64` class, but it is passed as a smart pointer to the common superclass, `Content`. This is because passing as a `ListOffsetArray64` exposes typeinfo symbols that violate visibility rules.
-
 Class hierarchies are intentionally simple. If any inheritance is involved, the one superclass is abstract and all subclasses are direct children of that abstract superclass.
 
-Templating is only used for integer specialization.
+Templating is mostly just used for integer specialization.
 
 ### Python standard
 
@@ -281,11 +246,11 @@ The Python codebase only strictly depends on NumPy 1.13.1, the first version wit
 
 Other third party libraries are used if they exist (can be imported), and we only accept certain versions of these libraries. Both the test-import and any version-testing must be within runtime code, not startup code, so that they're only invoked when users explicitly call for the feature that requires them.
 
-Versions can be explicitly tested with `distutils.version.LooseVersion`, though it's better to test for features (existence of classes, methods, and attributes) than to test for explicit version numbers.
+Versions can be explicitly tested with `packaging.version.parse`, though it's better to test for features (existence of classes, methods, and attributes) than to test for explicit version numbers.
 
 ### Array object details
 
-Arrays are (or soon will be: [#176](https://github.com/scikit-hep/awkward-1.0/issues/176) and [#177](https://github.com/scikit-hep/awkward-1.0/issues/177)) immutable objects. Only the high-level `ak.Array` changes its state in-place in response to user choices (such as `__setitem__`, which replaces its `layout` using the pure function `ak.with_field`). This is not a performance liability but usually a benefit because it means that we can freely share data among array objects without worrying about long-distance modifications.
+Arrays are immutable objects. Only the high-level `ak.Array` changes its state in-place in response to user choices (such as `__setitem__`, which replaces its `layout` using the pure function `ak.with_field`). This is not a performance liability but usually a benefit because it means that we can freely share data among array objects without worrying about long-distance modifications.
 
 Users can break this model by wrapping NumPy arrays as Awkward Arrays and changing the original NumPy arrays in-place, but they are encouraged not to.
 
