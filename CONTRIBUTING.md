@@ -231,7 +231,7 @@ As we change the code, we should keep in mind the following priorities, in this 
 
 Above all, the purpose of any programming language is to be read by humans; if we were only concerned with operating the machine, we would be flipping individual bits. It should be organized in stanzas that highlight similarities and differences by grouping them on the screen.
 
-We adhere to an 80-character line width, which is a [standard in the industry](https://github.com/scikit-hep/awkward-1.0/pull/183), despite the fact that we don't write punch-cards anymore. The standardized width allows several window columns to be examined side-by-side. Exceptions to the 80-character limit follow [PEP 8](https://www.python.org/dev/peps/pep-0008/): we don't split URLs or similar tokens that must be read as a unit.
+We adhere to an 80-character line width, which is a [stand<65;53;42Mard in the industry](https://github.com/scikit-hep/awkward-1.0/pull/183), despite the fact that we don't write punch-cards anymore. The standardized width allows several window columns to be examined side-by-side. Exceptions to the 80-character limit follow [PEP 8](https://www.python.org/dev/peps/pep-0008/): we don't split URLs or similar tokens that must be read as a unit.
 
 Unit tests do not need to adhere to the 80-character limit.
 
@@ -271,7 +271,7 @@ We target Python 3.7 and above. Import statements can assume Python 3 names, str
 
 If you see any outdated (pre-Python 3.7) code, you can safely clean them up. Some strings are not easier to read as f-strings or require some work to make them more readable; it should be a case-by-case basis.
 
-Python 3.7 will be the standard until it becomes "painful" to keep it (like, when CI and build tools no longer support it, or if we adopt type annotations).
+Awkward Array follows [CPython's EoL schedule](https://endoflife.date/python), and will drop support for out-of-date versions of Python accordingly.
 
 ### Third party dependencies
 
