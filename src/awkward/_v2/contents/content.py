@@ -5,6 +5,7 @@ import numbers
 import math
 import copy
 import typing as t
+from collections.abc import Sized, Iterable
 
 import awkward as ak
 import awkward._v2._reducers
@@ -1567,10 +1568,11 @@ class Content:
             complex_real_string = None
             complex_imag_string = None
         elif (
-            isinstance(complex_record_fields, (tuple, list))
+            isinstance(complex_record_fields, Sized)
+            and isinstance(complex_record_fields, Iterable)
             and len(complex_record_fields) == 2
-            and isinstance(complex_record_fields[0], str)
-            and isinstance(complex_record_fields[1], str)
+            and ak._v2._util.isstr(complex_record_fields[0])
+            and ak._v2._util.isstr(complex_record_fields[1])
         ):
             complex_real_string, complex_imag_string = complex_record_fields
         else:
@@ -1603,12 +1605,30 @@ class Content:
         raise ak._v2._util.error(NotImplementedError)
 
     def _to_list_custom(self, behavior, json_conversions):
-        cls = ak._v2._util.arrayclass(self, behavior)
-        if cls.__getitem__ is not ak._v2.highlevel.Array.__getitem__:
-            array = cls(self)
+        if self.is_RecordType:
+            getitem = ak._v2._util.recordclass(self, behavior).__getitem__
+            overloaded = (
+                getitem is not ak._v2.highlevel.Record.__getitem__
+                and not getattr(getitem, "ignore_in_to_list", False)
+            )
+        else:
+            getitem = ak._v2._util.arrayclass(self, behavior).__getitem__
+            overloaded = (
+                getitem is not ak._v2.highlevel.Array.__getitem__
+                and not getattr(getitem, "ignore_in_to_list", False)
+            )
+
+        if overloaded:
+            array = ak._v2._util.wrap(self, behavior=behavior)
             out = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]
+                if isinstance(
+                    out[i], (ak._v2.highlevel.Array, ak._v2.highlevel.Record)
+                ):
+                    out[i] = out[i]._layout._to_list(behavior, json_conversions)
+                elif hasattr(out[i], "tolist"):
+                    out[i] = out[i].tolist()
 
             # These json_conversions are applied in NumpyArray (for numbers)
             # and ListArray/ListOffsetArray/RegularArray (for bytestrings),
