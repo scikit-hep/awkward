@@ -103,7 +103,7 @@ def test_getitem():
         "tw",
         [1.1, 2.2],
         [],
-        "thre",
+        "three",
         [4.4],
         "fiv",
         "fou",

@@ -108,11 +108,11 @@ def test_string_equal():
             ["one", "Two", "", "threE", "four", "", "five", "siX"],
         ),
         (
-            ["one", "two", "", "thre", "four", "", "five", "six", ""],
+            ["one", "two", "", "three", "four", "", "five", "six", ""],
             ["one", "two", "", "three", "four", "", "five", "six", ""],
         ),
         (
-            ["one", "two", "", "thre", "four", "", "five", "six"],
+            ["one", "two", "", "three", "four", "", "five", "six"],
             ["one", "two", "", "three", "four", "", "five", "six"],
         ),
         (

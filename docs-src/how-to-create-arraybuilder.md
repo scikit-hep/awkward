@@ -162,7 +162,7 @@ arbitrary_nesting(builder, 5)
 builder
 ```
 
-Often, you'll know the exact depth of nesting you want. The Python `with` statement can be used to restrict the generality (nd free you from having to remember to `end` what you `begin`).
+Often, you'll know the exact depth of nesting you want. The Python `with` statement can be used to restrict the generality (and free you from having to remember to `end` what you `begin`).
 
 ```{code-cell}
 builder = ak.ArrayBuilder()

@@ -94,7 +94,7 @@ class DifferentiableArray(ak.Array):
                 elif isinstance(layout, ak._util.indexedtypes):
                     return fetch_indices_and_fieldloc_layout(layout.project())
                 elif isinstance(layout, ak._util.uniontypes):
-                    raise ValueError("Can't differntiate an UnionArray type {0}".format(layout))
+                    raise ValueError("Can't differentiate an UnionArray type {0}".format(layout))
                 elif isinstance(layout, ak._util.recordtypes):
                     indices = []
                     for content in layout.contents:
@@ -139,7 +139,7 @@ class DifferentiableArray(ak.Array):
                 elif isinstance(layout, ak._util.listtypes):
                     return fetch_children_tracer(layout.content, preslice_identities)
                 elif isinstance(layout, ak._util.uniontypes):
-                    raise ValueError("Can't differntiate an UnionArray type {0}".format(layout))
+                    raise ValueError("Can't differentiate an UnionArray type {0}".format(layout))
                 elif isinstance(layout, ak._util.recordtypes):
                     children = []
                     for content in layout.contents:

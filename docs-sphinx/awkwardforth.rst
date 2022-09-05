@@ -209,7 +209,7 @@ Here is an example of a ForthMachine with an output (``<-`` writes data from the
     >>> np.asarray(vm["x"])
     array([999], dtype=int32)
 
-(Note: always view outputs as NumPy arrays. In Awkward 1.x, outputs were returned as NumpyArray objects, but now they are returned as NumPy arrays. Wraping the output in ``np.asarray`` makes your code version-independent.)
+(Note: always view outputs as NumPy arrays. In Awkward 1.x, outputs were returned as NumpyArray objects, but now they are returned as NumPy arrays. Wrapping the output in ``np.asarray`` makes your code version-independent.)
 
 A ForthMachine can have an arbitrary number of variables, inputs, and outputs, and an arbitrary number of user-defined words, with index orders defined by the order of declaration (relevant for fast C++ access).
 
@@ -406,7 +406,7 @@ In both styles, you have to make sure that the "``(``", "``)``", and "``\``" cha
 Literal integers
 ****************
 
-Literal integers in the source code put an integer on the stack. AwkwardForth has no floating point types, so only ``-?[0-9]+`` are allowed, no ``.`` or ``e``. If the number is prefixed by ``0x``, then the number is parsed as hexidecimal, with ``-?[0-9a-f]`` allowed.
+Literal integers in the source code put an integer on the stack. AwkwardForth has no floating point types, so only ``-?[0-9]+`` are allowed, no ``.`` or ``e``. If the number is prefixed by ``0x``, then the number is parsed as hexadecimal, with ``-?[0-9a-f]`` allowed.
 
 .. code-block:: python
 

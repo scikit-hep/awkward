@@ -58,4 +58,4 @@ ak.layout.Index.__repr__
 
 .. py:method:: ak.layout.Index.__repr__()
 
-A string representation of the Index (single-line XML, trucated middle).
+A string representation of the Index (single-line XML, truncated middle).

@@ -503,7 +503,7 @@ Custom type names
 =================
 
 To make the string type appear as ``string`` in type representations, a
-``"__typestr__"`` behavior is overriden (in ``ak.behaviors.string``):
+``"__typestr__"`` behavior is overridden (in ``ak.behaviors.string``):
 
 .. code-block:: python
 

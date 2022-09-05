@@ -4,7 +4,7 @@ ak.layout.ArrayBuilder
 The low-level ArrayBuilder that builds :doc:`ak.layout.Content` arrays. This
 object is wrapped by :doc:`_auto/ak.ArrayBuilder`.
 
-(Method names in the high-level interface have been chnaged to include
+(Method names in the high-level interface have been changed to include
 underscores after "begin" and "end," but that hasn't happened in the
 low-level interface, yet or possibly at all.)
 

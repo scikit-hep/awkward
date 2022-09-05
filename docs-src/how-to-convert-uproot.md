@@ -238,7 +238,7 @@ From Awkward to ROOT with Uproot 3
 
 Since ROOT file-writing is only implemented in Uproot 3, you'll need to take into consideration whether an array is flat, and therefore NumPy, or jagged, and therefore Awkward 0 (i.e. "old library").
 
-To open a flie for writing, use `uproot.recreate`, rather than `uproot.open`.
+To open a file for writing, use `uproot.recreate`, rather than `uproot.open`.
 
 ```{code-cell}
 file = uproot3.recreate("/tmp/example.root")

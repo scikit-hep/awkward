@@ -14,7 +14,7 @@ kernelspec:
 Differentiation using JAX
 =========================
 
-Currently, all the functions which contain slicing or numpy ufuncs are supported by Awkward Arrays and can be differentiated by JAX. We do not support any specialized funtions like `ak.sum()` or `ak.prod()`. These are planned to be implemented in the near future. Since, the GPU support for Awkward Arrays is only partially complete, we have to configure JAX to use CPU only. We can do this by:
+Currently, all the functions which contain slicing or numpy ufuncs are supported by Awkward Arrays and can be differentiated by JAX. We do not support any specialized functions like `ak.sum()` or `ak.prod()`. These are planned to be implemented in the near future. Since, the GPU support for Awkward Arrays is only partially complete, we have to configure JAX to use CPU only. We can do this by:
 
 ```{code-cell}
 import jax

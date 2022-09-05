@@ -348,7 +348,7 @@ The reasons for this speedup are all related to Awkward Array's data structure, 
 
    * only a single block of memory needs to be fetched from memory into the CPU cache (no "pointer chasing"),
    * data for fields other than the one being operated upon are not in the same buffer, so they don't even need to be loaded ("columnar," rather than "record-oriented"),
-   * the data type can be evaluated once before applying a precompiled opeation to a whole array buffer, rather than once before each element of a Python list.
+   * the data type can be evaluated once before applying a precompiled operation to a whole array buffer, rather than once before each element of a Python list.
 
 This memory layout is especially good for applying one operation on all values in the array, thinking about the result, and then applying another. This is the "interactive" style of data analysis that you're probably familiar with from NumPy and Pandas, especially if you use Jupyter notebooks. It does have a performance cost, however: array buffers need to be allocated and filled after each step of the process, and some of those might never be used again.
 

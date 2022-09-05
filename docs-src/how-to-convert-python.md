@@ -344,7 +344,7 @@ ak.behavior["bytestring"]
 ak.behavior[np.equal, "string", "string"]
 ```
 
-The fact that strings are really just variable-length lists is worth keeping in mind, since they might behave in unexpectedly list-like ways. If you notice any behavior that ought to be overloded for strings, recommend it as a [feature request](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=feature&template=feature-request.md&title=).
+The fact that strings are really just variable-length lists is worth keeping in mind, since they might behave in unexpectedly list-like ways. If you notice any behavior that ought to be overloaded for strings, recommend it as a [feature request](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=feature&template=feature-request.md&title=).
 
 +++
 

@@ -214,7 +214,7 @@ Returns a copy of the array node and its children.
    * If ``copyidentities``, then :doc:`ak.layout.Identities` buffers are also
      copied.
 
-If all three flags are False, then only (small) C++ and Pyhton objects are
+If all three flags are False, then only (small) C++ and Python objects are
 copied, not (large) array buffers.
 
 ak.layout.Content.fieldindex
