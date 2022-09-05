@@ -54,7 +54,9 @@ class ArrayType:
             return (
                 self._length == other._length
                 and _parameters_equal(
-                    self._content._parameters, other._content._parameters
+                    self._content._parameters,
+                    other._content._parameters,
+                    only_array_record=True,
                 )
                 and self._content._typestr == other._content._typestr
             )
