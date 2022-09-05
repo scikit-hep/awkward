@@ -238,7 +238,7 @@ def test_arraytype_bytestring():
 
 def test_arraytype_categorical_1():
     text = str(
-        ak._v2.behaviors.categorical.to_categorical(
+        ak._v2.operations.ak_to_categorical.to_categorical(
             ak._v2.Array(["one", "one", "two", "three", "one", "three"])
         ).type
     )
@@ -249,7 +249,7 @@ def test_arraytype_categorical_1():
 
 def test_arraytype_categorical_2():
     text = str(
-        ak._v2.behaviors.categorical.to_categorical(
+        ak._v2.operations.ak_to_categorical.to_categorical(
             ak._v2.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])
         ).type
     )

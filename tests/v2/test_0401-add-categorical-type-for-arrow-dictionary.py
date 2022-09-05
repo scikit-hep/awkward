@@ -207,14 +207,16 @@ def test_option_two_extra():
 
 def test_to_categorical_numbers():
     array = ak._v2.Array([1.1, 2.2, 3.3, 1.1, 2.2, 3.3, 1.1, 2.2, 3.3])
-    assert not ak._v2.behaviors.categorical.is_categorical(array)
-    categorical = ak._v2.behaviors.categorical.to_categorical(array)
-    assert ak._v2.behaviors.categorical.is_categorical(categorical)
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(array)
+    categorical = ak._v2.operations.ak_to_categorical.to_categorical(array)
+    assert ak._v2.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.tolist()
     assert to_list(categorical.layout.content) == [1.1, 2.2, 3.3]
-    not_categorical = ak._v2.behaviors.categorical.from_categorical(categorical)
-    assert not ak._v2.behaviors.categorical.is_categorical(not_categorical)
-    assert ak._v2.behaviors.categorical.categories(categorical).tolist() == [
+    not_categorical = ak._v2.operations.ak_from_categorical.from_categorical(
+        categorical
+    )
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(not_categorical)
+    assert ak._v2.operations.ak_categories.categories(categorical).tolist() == [
         1.1,
         2.2,
         3.3,
@@ -223,13 +225,15 @@ def test_to_categorical_numbers():
 
 def test_to_categorical_nested():
     array = ak._v2.Array([["one", "two", "three"], [], ["one", "two"], ["three"]])
-    assert not ak._v2.behaviors.categorical.is_categorical(array)
-    categorical = ak._v2.behaviors.categorical.to_categorical(array)
-    assert ak._v2.behaviors.categorical.is_categorical(categorical)
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(array)
+    categorical = ak._v2.operations.ak_to_categorical.to_categorical(array)
+    assert ak._v2.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.tolist()
-    not_categorical = ak._v2.behaviors.categorical.from_categorical(categorical)
-    assert not ak._v2.behaviors.categorical.is_categorical(not_categorical)
-    assert ak._v2.behaviors.categorical.categories(categorical).tolist() == [
+    not_categorical = ak._v2.operations.ak_from_categorical.from_categorical(
+        categorical
+    )
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(not_categorical)
+    assert ak._v2.operations.ak_categories.categories(categorical).tolist() == [
         "one",
         "two",
         "three",
@@ -240,14 +244,16 @@ def test_to_categorical():
     array = ak._v2.Array(
         ["one", "two", "three", "one", "two", "three", "one", "two", "three"]
     )
-    assert not ak._v2.behaviors.categorical.is_categorical(array)
-    categorical = ak._v2.behaviors.categorical.to_categorical(array)
-    assert ak._v2.behaviors.categorical.is_categorical(categorical)
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(array)
+    categorical = ak._v2.operations.ak_to_categorical.to_categorical(array)
+    assert ak._v2.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.tolist()
     assert to_list(categorical.layout.content) == ["one", "two", "three"]
-    not_categorical = ak._v2.behaviors.categorical.from_categorical(categorical)
-    assert not ak._v2.behaviors.categorical.is_categorical(not_categorical)
-    assert ak._v2.behaviors.categorical.categories(categorical).tolist() == [
+    not_categorical = ak._v2.operations.ak_from_categorical.from_categorical(
+        categorical
+    )
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(not_categorical)
+    assert ak._v2.operations.ak_categories.categories(categorical).tolist() == [
         "one",
         "two",
         "three",
@@ -271,14 +277,16 @@ def test_to_categorical_none():
             None,
         ]
     )
-    assert not ak._v2.behaviors.categorical.is_categorical(array)
-    categorical = ak._v2.behaviors.categorical.to_categorical(array)
-    assert ak._v2.behaviors.categorical.is_categorical(categorical)
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(array)
+    categorical = ak._v2.operations.ak_to_categorical.to_categorical(array)
+    assert ak._v2.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.tolist()
     assert to_list(categorical.layout.content) == ["one", "two", "three"]
-    not_categorical = ak._v2.behaviors.categorical.from_categorical(categorical)
-    assert not ak._v2.behaviors.categorical.is_categorical(not_categorical)
-    assert ak._v2.behaviors.categorical.categories(categorical).tolist() == [
+    not_categorical = ak._v2.operations.ak_from_categorical.from_categorical(
+        categorical
+    )
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(not_categorical)
+    assert ak._v2.operations.ak_categories.categories(categorical).tolist() == [
         "one",
         "two",
         "three",
@@ -323,14 +331,16 @@ def test_to_categorical_masked():
     array = ak._v2.Array(
         ak._v2.contents.ByteMaskedArray(mask, content, valid_when=False)
     )
-    assert not ak._v2.behaviors.categorical.is_categorical(array)
-    categorical = ak._v2.behaviors.categorical.to_categorical(array)
-    assert ak._v2.behaviors.categorical.is_categorical(categorical)
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(array)
+    categorical = ak._v2.operations.ak_to_categorical.to_categorical(array)
+    assert ak._v2.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.tolist()
     assert to_list(categorical.layout.content) == ["one", "two", "three"]
-    not_categorical = ak._v2.behaviors.categorical.from_categorical(categorical)
-    assert not ak._v2.behaviors.categorical.is_categorical(not_categorical)
-    assert ak._v2.behaviors.categorical.categories(categorical).tolist() == [
+    not_categorical = ak._v2.operations.ak_from_categorical.from_categorical(
+        categorical
+    )
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(not_categorical)
+    assert ak._v2.operations.ak_categories.categories(categorical).tolist() == [
         "one",
         "two",
         "three",
@@ -366,14 +376,16 @@ def test_to_categorical_masked_again():
     array = ak._v2.Array(
         ak._v2.contents.ByteMaskedArray(mask, indexedarray, valid_when=False)
     )
-    assert not ak._v2.behaviors.categorical.is_categorical(array)
-    categorical = ak._v2.behaviors.categorical.to_categorical(array)
-    assert ak._v2.behaviors.categorical.is_categorical(categorical)
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(array)
+    categorical = ak._v2.operations.ak_to_categorical.to_categorical(array)
+    assert ak._v2.operations.ak_is_categorical.is_categorical(categorical)
     assert to_list(array) == categorical.tolist()
     assert to_list(categorical.layout.content) == ["one", "two", "three"]
-    not_categorical = ak._v2.behaviors.categorical.from_categorical(categorical)
-    assert not ak._v2.behaviors.categorical.is_categorical(not_categorical)
-    assert ak._v2.behaviors.categorical.categories(categorical).tolist() == [
+    not_categorical = ak._v2.operations.ak_from_categorical.from_categorical(
+        categorical
+    )
+    assert not ak._v2.operations.ak_is_categorical.is_categorical(not_categorical)
+    assert ak._v2.operations.ak_categories.categories(categorical).tolist() == [
         "one",
         "two",
         "three",
@@ -385,7 +397,7 @@ def test_typestr():
     assert (
         str(
             ak._v2.operations.type(
-                ak._v2.behaviors.categorical.to_categorical(
+                ak._v2.operations.ak_to_categorical.to_categorical(
                     ak._v2.Array([1.1, 2.2, 2.2, 3.3])
                 )
             )
@@ -395,7 +407,7 @@ def test_typestr():
     assert (
         str(
             ak._v2.operations.type(
-                ak._v2.behaviors.categorical.to_categorical(
+                ak._v2.operations.ak_to_categorical.to_categorical(
                     ak._v2.Array([1.1, 2.2, None, 2.2, 3.3])
                 )
             )
@@ -405,7 +417,7 @@ def test_typestr():
     assert (
         str(
             ak._v2.operations.type(
-                ak._v2.behaviors.categorical.to_categorical(
+                ak._v2.operations.ak_to_categorical.to_categorical(
                     ak._v2.Array(["one", "two", "two", "three"])
                 )
             )
@@ -415,7 +427,7 @@ def test_typestr():
     assert (
         str(
             ak._v2.operations.type(
-                ak._v2.behaviors.categorical.to_categorical(
+                ak._v2.operations.ak_to_categorical.to_categorical(
                     ak._v2.Array(["one", "two", None, "two", "three"])
                 )
             )
@@ -432,7 +444,7 @@ def test_zip():
         {"x": 2.2, "y": "two"},
         {"x": 3.3, "y": "three"},
     ]
-    y = ak._v2.behaviors.categorical.to_categorical(y)
+    y = ak._v2.operations.ak_to_categorical.to_categorical(y)
     assert ak.zip({"x": x, "y": y}).tolist() == [
         {"x": 1.1, "y": "one"},
         {"x": 2.2, "y": "two"},
