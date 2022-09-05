@@ -109,7 +109,9 @@ class BitMaskedForm(Form):
                 and self._mask == other._mask
                 and self._valid_when == other._valid_when
                 and self._lsb_order == other._lsb_order
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:
@@ -124,7 +126,9 @@ class BitMaskedForm(Form):
                 self._mask == other._mask
                 and self._valid_when == other._valid_when
                 and self._lsb_order == other._lsb_order
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content.generated_compatibility(other._content)
             )
 

@@ -934,7 +934,9 @@ class ListArray(Content):
         return self.toListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
     def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
+        if not _parameters_equal(
+            self._parameters, other._parameters, only_array_record=True
+        ):
             return False
 
         if isinstance(

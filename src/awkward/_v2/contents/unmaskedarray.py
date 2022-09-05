@@ -300,7 +300,9 @@ class UnmaskedArray(Content):
                 return (offsets, flattened)
 
     def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
+        if not _parameters_equal(
+            self._parameters, other._parameters, only_array_record=True
+        ):
             return False
 
         if isinstance(

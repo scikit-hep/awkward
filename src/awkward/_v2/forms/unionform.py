@@ -109,7 +109,9 @@ class UnionForm(Form):
             and self._tags == other._tags
             and self._index == other._index
             and len(self._contents) == len(other._contents)
-            and _parameters_equal(self._parameters, other._parameters)
+            and _parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
         ):
             return self._contents == other._contents
 
@@ -121,7 +123,9 @@ class UnionForm(Form):
 
         elif isinstance(other, UnionForm):
             if len(self._contents) == len(other._contents):
-                return _parameters_equal(self._parameters, other._parameters) and all(
+                return _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                ) and all(
                     x.generated_compatibility(y)
                     for x, y in zip(self._contents, other._contents)
                 )

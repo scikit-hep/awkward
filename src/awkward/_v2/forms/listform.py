@@ -91,7 +91,9 @@ class ListForm(Form):
                 and self._form_key == other._form_key
                 and self._starts == other._starts
                 and self._stops == other._stops
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:
@@ -105,7 +107,9 @@ class ListForm(Form):
             return (
                 self._starts == other._starts
                 and self._stops == other._stops
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content.generated_compatibility(other._content)
             )
 

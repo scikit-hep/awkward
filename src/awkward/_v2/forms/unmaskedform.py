@@ -55,7 +55,9 @@ class UnmaskedForm(Form):
             return (
                 self._has_identifier == other._has_identifier
                 and self._form_key == other._form_key
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:
