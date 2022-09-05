@@ -4,7 +4,6 @@ import sys
 
 import awkward as ak
 import awkward._v2.types.type
-from awkward._v2.forms.form import _parameters_equal
 
 
 class ArrayType:
@@ -51,14 +50,6 @@ class ArrayType:
 
     def __eq__(self, other):
         if isinstance(other, ArrayType):
-            return (
-                self._length == other._length
-                and _parameters_equal(
-                    self._content._parameters,
-                    other._content._parameters,
-                    only_array_record=True,
-                )
-                and self._content._typestr == other._content._typestr
-            )
+            return self._length == other._length and self._content == other._content
         else:
             return False
