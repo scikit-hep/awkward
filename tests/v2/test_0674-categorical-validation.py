@@ -11,7 +11,7 @@ pyarrow = pytest.importorskip("pyarrow")
 def test_categorical_is_valid():
     # validate a categorical array by its content
     arr = ak._v2.Array([2019, 2020, 2021, 2020, 2019])
-    categorical = ak._v2.behaviors.categorical.to_categorical(arr)
+    categorical = ak._v2.operations.ak_to_categorical.to_categorical(arr)
     assert ak._v2.operations.is_valid(categorical)
 
 

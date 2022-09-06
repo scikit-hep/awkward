@@ -200,7 +200,7 @@ def test_subranges_equal():
 
 def test_categorical():
     array = ak._v2.highlevel.Array(["1chchc", "1chchc", "2sss", "3", "4", "5"])
-    categorical = ak._v2.behaviors.categorical.to_categorical(array)
+    categorical = ak._v2.operations.ak_to_categorical.to_categorical(array)
 
     assert ak._v2.operations.is_valid(categorical) is True
     assert categorical.layout.is_unique() is False
