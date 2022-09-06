@@ -4,12 +4,29 @@ from __future__ import annotations
 import numbers
 import math
 import copy
-import typing as t
-from collections.abc import Sized, Iterable
+from typing import Any
+from collections.abc import Callable, MutableMapping, Sized, Iterable
 
 import awkward as ak
 import awkward._v2._reducers
 from awkward._v2.tmp_for_testing import v1_to_v2
+
+from awkward._v2.typing import Self, TypeAlias
+
+BehaviorType: TypeAlias = "dict[str,ak._v2.highlevel.Array | ak._v2.record.Record]"
+ActionType: TypeAlias = """Callable[
+    [
+        Content,
+        int,
+        dict | None,
+        dict | None,
+        Callable[[], None],
+        BehaviorType | None,
+        ak.nplike.NumpyLike | None,
+        dict[str, Any],
+    ],
+    Content | None,
+]"""
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -21,25 +38,6 @@ class _Unset:
 
 
 unset = _Unset()
-
-if t.TYPE_CHECKING:
-    from typing import Any, Self
-    from collections.abc import Callable, MutableMapping
-
-    BehaviorType = dict[str, ak._v2.highlevel.Array | ak._v2.record.Record]
-    ActionType = Callable[
-        [
-            "Content",
-            int,
-            dict | None,
-            dict | None,
-            Callable[[], None],
-            BehaviorType | None,
-            ak.nplike.NumpyLike | None,
-            dict[str, Any],
-        ],
-        "Content" | None,
-    ]
 
 
 class Content:
@@ -157,7 +155,7 @@ class Content:
         raise ak._v2._util.error(NotImplementedError)
 
     @property
-    def Form(self) -> t.Type[ak._v2.forms.Form]:
+    def Form(self) -> type[ak._v2.forms.Form]:
         raise ak._v2._util.error(NotImplementedError)
 
     def forget_length(self):
@@ -227,7 +225,7 @@ class Content:
         self,
         form: ak._v2.forms.Form,
         getkey: Callable[[Content, ak._v2.forms.Form, str], str],
-        container: MutableMapping[str, t.Any],
+        container: MutableMapping[str, Any],
         nplike: ak.nplike.NumpyLike,
     ):
         raise ak._v2._util.error(NotImplementedError)
@@ -1195,7 +1193,7 @@ class Content:
         n: int,
         replacement: bool,
         recordlookup: list[str | None],
-        parameters: dict[str, t.Any],
+        parameters: dict[str, Any],
         axis: int,
         depth: int,
     ):
@@ -1600,7 +1598,7 @@ class Content:
         return self.packed()._to_list(behavior, None)
 
     def _to_list(
-        self, behavior: BehaviorType | None, json_conversions: dict[str, t.Any]
+        self, behavior: BehaviorType | None, json_conversions: dict[str, Any]
     ) -> list:
         raise ak._v2._util.error(NotImplementedError)
 
@@ -1714,7 +1712,7 @@ class Content:
 
     def _offsets_and_flattened(
         self, axis: int, depth: int
-    ) -> t.Tuple[ak._v2.index.Index, Content]:
+    ) -> tuple[ak._v2.index.Index, Content]:
         raise ak._v2._util.error(NotImplementedError)
 
     def to_backend(self, backend):
