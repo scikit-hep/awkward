@@ -144,7 +144,7 @@ def _array_ufunc_deregulate(inputs):
     nextinputs = []
     for x in inputs:
         if isinstance(x, ak._v2.contents.RegularArray):
-            y = x.maybe_toNumpyArray()
+            y = x.maybe_to_numpy_array()
             if y is not None:
                 nextinputs.append(y)
             else:
