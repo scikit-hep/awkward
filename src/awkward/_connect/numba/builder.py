@@ -8,6 +8,7 @@ import awkward as ak
 
 numpy = ak.nplike.Numpy.instance()
 
+#
 dynamic_addrs = {}
 
 
@@ -188,6 +189,19 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
             return numba.types.none(args[0])
         else:
             raise TypeError("wrong number or types of arguments for ArrayBuilder.real")
+
+    @numba.core.typing.templates.bound_function("complex")
+    def resolve_complex(self, arraybuildertype, args, kwargs):
+        if (
+            len(args) == 1
+            and len(kwargs) == 0
+            and isinstance(args[0], (numba.types.Complex))
+        ):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError(
+                "wrong number or types of arguments for ArrayBuilder.complex"
+            )
 
     @numba.core.typing.templates.bound_function("begin_list")
     def resolve_begin_list(self, arraybuildertype, args, kwargs):
@@ -396,6 +410,23 @@ def lower_real(context, builder, sig, args):
     return context.get_dummy_value()
 
 
+@numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Complex)
+def lower_complex(context, builder, sig, args):
+    arraybuildertype, xtype = sig.args
+    arraybuilderval, xval = args
+    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
+    z_imag = xval.operands.pop()
+    z_real = xval.operands.pop().value
+
+    call(
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_complex,
+        (proxyin.rawptr, z_real, z_imag),
+    )
+    return context.get_dummy_value()
+
+
 @numba.extending.lower_builtin("begin_list", ArrayBuilderType)
 def lower_beginlist(context, builder, sig, args):
     (arraybuildertype,) = sig.args
@@ -578,6 +609,11 @@ def lower_append_float(context, builder, sig, args):
     return lower_real(context, builder, sig, args)
 
 
+@numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.Complex)
+def lower_append_complex(context, builder, sig, args):
+    return lower_complex(context, builder, sig, args)
+
+
 @numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.Optional)
 def lower_append_optional(context, builder, sig, args):
     arraybuildertype, opttype = sig.args
@@ -604,6 +640,13 @@ def lower_append_optional(context, builder, sig, args):
                 )
             elif isinstance(opttype.type, numba.types.Float):
                 lower_real(
+                    context,
+                    builder,
+                    numba.types.none(arraybuildertype, opttype.type),
+                    (arraybuilderval, optproxy.data),
+                )
+            elif isinstance(opttype.type, numba.types.Complex):
+                lower_complex(
                     context,
                     builder,
                     numba.types.none(arraybuildertype, opttype.type),
