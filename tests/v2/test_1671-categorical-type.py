@@ -10,11 +10,8 @@ def test():
     assert array1.type != array2.type
     assert array2.type == ak._v2.types.ArrayType(
         ak._v2.types.ListType(
-            ak._v2.types.NumpyType(
-                "uint8", parameters={"__array__": "char"}, typestr="char"
-            ),
-            parameters={"__categorical__": True},
-            typestr="string",
+            ak._v2.types.NumpyType("uint8", parameters={"__array__": "char"}),
+            parameters={"__array__": "string", "__categorical__": True},
         ),
         4,
     )
