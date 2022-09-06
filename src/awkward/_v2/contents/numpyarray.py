@@ -169,7 +169,7 @@ class NumpyArray(Content):
             self._nplike,
         )
 
-    def toRegularArray(self):
+    def to_regular_array(self):
         shape = self._data.shape
         zeroslen = [1]
         for x in shape:
@@ -1382,3 +1382,6 @@ class NumpyArray(Content):
             )
         else:
             return True
+
+    def toRegularArray(self):
+        return self.to_regular_array()
