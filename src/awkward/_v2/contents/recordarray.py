@@ -524,12 +524,6 @@ class RecordArray(Content):
     def _mergeable(self, other, mergebool):
         if isinstance(
             other,
-            (ak._v2.contents.unionarray.UnionArray,),
-        ):
-            return True
-
-        elif isinstance(
-            other,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
                 ak._v2.contents.indexedoptionarray.IndexedOptionArray,
