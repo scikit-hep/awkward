@@ -5,7 +5,6 @@ import copy
 import awkward as ak
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.regularform import RegularForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -659,22 +658,8 @@ class RegularArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         return self.toListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(
-            self._parameters, other._parameters, only_array_record=True
-        ):
-            return False
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
-        elif isinstance(
             other,
             (
                 ak._v2.contents.indexedarray.IndexedArray,

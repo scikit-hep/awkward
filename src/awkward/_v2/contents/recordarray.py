@@ -9,7 +9,6 @@ import awkward as ak
 from awkward._v2.record import Record
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.recordform import RecordForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -522,18 +521,10 @@ class RecordArray(Content):
                 ),
             )
 
-    def mergeable(self, other, mergebool=True):
-        if not _parameters_equal(
-            self._parameters, other._parameters, only_array_record=True
-        ):
-            return False
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
             other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
+            (ak._v2.contents.unionarray.UnionArray,),
         ):
             return True
 
