@@ -4,8 +4,8 @@ from __future__ import annotations
 import numbers
 import math
 import copy
-from typing import Any
-from collections.abc import Callable, MutableMapping, Sized, Iterable
+from typing import Any, TypeVar
+from collections.abc import Callable, Mapping, MutableMapping, Sized, Iterable
 
 import awkward as ak
 import awkward._v2._reducers
@@ -27,6 +27,7 @@ ActionType: TypeAlias = """Callable[
     ],
     Content | None,
 ]"""
+AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -50,7 +51,12 @@ class Content:
     is_RecordType = False
     is_UnionType = False
 
-    def _init(self, identifier, parameters, nplike):
+    def _init(
+        self,
+        identifier: ak._v2.identifier.Identifier | None,
+        parameters: dict[str, Any] | None,
+        nplike: ak.nplike.NumpyLike | None,
+    ):
         if identifier is not None and not isinstance(
             identifier, ak._v2.identifier.Identifier
         ):
@@ -84,27 +90,27 @@ class Content:
         self._nplike = nplike
 
     @property
-    def identifier(self):
+    def identifier(self) -> ak._v2.identifier.Identifier | None:
         return self._identifier
 
     @property
-    def parameters(self):
+    def parameters(self) -> dict[str, Any]:
         if self._parameters is None:
             self._parameters = {}
         return self._parameters
 
-    def parameter(self, key):
+    def parameter(self, key: str):
         if self._parameters is None:
             return None
         else:
             return self._parameters.get(key)
 
     @property
-    def nplike(self):
+    def nplike(self) -> ak.nplike.NumpyLike | None:
         return self._nplike
 
     @property
-    def form(self):
+    def form(self) -> ak._v2.forms.Form:
         return self.form_with_key(None)
 
     @property
@@ -115,7 +121,9 @@ class Content:
     def length(self) -> int:
         raise ak._v2._util.error(NotImplementedError)
 
-    def form_with_key(self, form_key="node{id}", id_start=0):
+    def form_with_key(
+        self, form_key: str | None = "node{id}", id_start: int = 0
+    ) -> ak._v2.forms.Form:
         hold_id = [id_start]
 
         if form_key is None:
@@ -158,7 +166,7 @@ class Content:
     def Form(self) -> type[ak._v2.forms.Form]:
         raise ak._v2._util.error(NotImplementedError)
 
-    def forget_length(self):
+    def forget_length(self) -> Self:
         if not isinstance(self._nplike, ak._v2._typetracer.TypeTracer):
             return self.typetracer._forget_length()
         else:
@@ -169,12 +177,12 @@ class Content:
 
     def to_buffers(
         self,
-        container=None,
+        container: MutableMapping[str, Any] | None = None,
         buffer_key="{form_key}-{attribute}",
-        form_key="node{id}",
-        id_start=0,
-        nplike=None,
-    ):
+        form_key: str | None = "node{id}",
+        id_start: int = 0,
+        nplike: ak.nplike.NumpyLike | None = None,
+    ) -> tuple[ak._v2.forms.Form, int, Mapping[str, Any]]:
         if container is None:
             container = {}
         if nplike is None:
@@ -225,15 +233,15 @@ class Content:
         self,
         form: ak._v2.forms.Form,
         getkey: Callable[[Content, ak._v2.forms.Form, str], str],
-        container: MutableMapping[str, Any],
-        nplike: ak.nplike.NumpyLike,
-    ):
+        container: MutableMapping[str, Any] | None,
+        nplike: ak.nplike.NumpyLike | None,
+    ) -> tuple[ak._v2.forms.Form, int, Mapping[str, Any]]:
         raise ak._v2._util.error(NotImplementedError)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.length
 
-    def _repr_extra(self, indent):
+    def _repr_extra(self, indent: str) -> list[str]:
         out = []
         if self._parameters is not None:
             for k, v in self._parameters.items():
@@ -331,11 +339,11 @@ class Content:
         for i in range(len(self)):
             yield self._getitem_at(i)
 
-    def _getitem_next_field(self, head, tail, advanced):
+    def _getitem_next_field(self, head, tail, advanced: ak._v2.index.Index | None):
         nexthead, nexttail = ak._v2._slicing.headtail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
-    def _getitem_next_fields(self, head, tail, advanced):
+    def _getitem_next_fields(self, head, tail, advanced: ak._v2.index.Index | None):
         only_fields, not_fields = [], []
         for x in tail:
             if ak._util.isstr(x) or isinstance(x, list):
@@ -347,7 +355,7 @@ class Content:
             nexthead, nexttail, advanced
         )
 
-    def _getitem_next_newaxis(self, tail, advanced):
+    def _getitem_next_newaxis(self, tail, advanced: ak._v2.index.Index | None):
         nexthead, nexttail = ak._v2._slicing.headtail(tail)
         return ak._v2.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced),
@@ -358,7 +366,7 @@ class Content:
             self._nplike,
         )
 
-    def _getitem_next_ellipsis(self, tail, advanced):
+    def _getitem_next_ellipsis(self, tail, advanced: ak._v2.index.Index | None):
         mindepth, maxdepth = self.minmax_depth
 
         dimlength = sum(
@@ -379,7 +387,9 @@ class Content:
         else:
             return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
 
-    def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
+    def _getitem_next_regular_missing(
+        self, head, tail, advanced: ak._v2.index.Index | None, raw, length: int
+    ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
         index = ak._v2.index.Index64(head.index, nplike=self.nplike)
@@ -414,7 +424,9 @@ class Content:
             self._nplike,
         )
 
-    def _getitem_next_missing_jagged(self, head, tail, advanced, that):
+    def _getitem_next_missing_jagged(
+        self, head, tail, advanced: ak._v2.index.Index | None, that
+    ):
         head = head._to_nplike(self._nplike)
         jagged = head.content.toListOffsetArray64()
 
@@ -472,7 +484,12 @@ class Content:
             self._nplike,
         )
 
-    def _getitem_next_missing(self, head, tail, advanced):
+    def _getitem_next_missing(
+        self,
+        head: ak._v2.contents.IndexedOptionArray,
+        tail,
+        advanced: ak._v2.index.Index | None,
+    ) -> Content:
         assert isinstance(head, ak._v2.contents.IndexedOptionArray)
 
         if advanced is not None:
@@ -729,25 +746,25 @@ class Content:
         else:
             raise ak._v2._util.error(NotImplementedError)
 
-    def _field_identifier(self, field):
+    def _field_identifier(self, field: str):
         if self._identifier is None:
             return None
         else:
             raise ak._v2._util.error(NotImplementedError)
 
-    def _fields_identifier(self, fields):
+    def _fields_identifier(self, fields: list[str]):
         if self._identifier is None:
             return None
         else:
             raise ak._v2._util.error(NotImplementedError)
 
-    def _carry_identifier(self, carry):
+    def _carry_identifier(self, carry: ak._v2.index.Index):
         if self._identifier is None:
             return None
         else:
             raise ak._v2._util.error(NotImplementedError)
 
-    def axis_wrap_if_negative(self, axis):
+    def axis_wrap_if_negative(self, axis: AxisMaybeNone) -> AxisMaybeNone:
         if axis is None or axis >= 0:
             return axis
 
@@ -774,7 +791,7 @@ class Content:
 
         return axis
 
-    def _local_index_axis0(self):
+    def _local_index_axis0(self) -> ak._v2.contents.NumpyArray:
         localindex = ak._v2.index.Index64.empty(self.length, self._nplike)
         self._handle_error(
             self._nplike["awkward_localindex", np.int64](
@@ -784,14 +801,14 @@ class Content:
         )
         return ak._v2.contents.NumpyArray(localindex, None, None, self._nplike)
 
-    def merge(self, other):
+    def merge(self, other: Content) -> Content:
         others = [other]
         return self.mergemany(others)
 
     def mergemany(self, others: list[Content]) -> Content:
         raise ak._v2._util.error(NotImplementedError)
 
-    def merge_as_union(self, other):
+    def merge_as_union(self, other: Content):
         mylength = self.length
         theirlength = other.length
         tags = ak._v2.index.Index8.empty((mylength + theirlength), self._nplike)
@@ -824,7 +841,9 @@ class Content:
             tags, index, contents, None, None, self._nplike
         )
 
-    def _merging_strategy(self, others):
+    def _merging_strategy(
+        self, others: list[Content]
+    ) -> tuple[list[Content], list[Content]]:
         if len(others) == 0:
             raise ak._v2._util.error(
                 ValueError(
@@ -883,13 +902,20 @@ class Content:
             )
         )
 
-    def local_index(self, axis):
+    def local_index(self, axis: int):
         return self._local_index(axis, 0)
 
     def _local_index(self, axis: int, depth: int):
         raise ak._v2._util.error(NotImplementedError)
 
-    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
+    def _reduce(
+        self,
+        reducer: type[ak._v2._reducers.Reducer],
+        axis: int = -1,
+        mask: bool = True,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         if axis is None:
             raise ak._v2._util.error(NotImplementedError)
 
@@ -943,7 +969,7 @@ class Content:
 
     def _reduce_next(
         self,
-        reducer: ak._v2._reducers.Reducer,
+        reducer: type[ak._v2._reducers.Reducer],
         negaxis: int,
         starts: ak._v2.index.Index,
         shifts: ak._v2.index.Index | None,
@@ -955,47 +981,116 @@ class Content:
     ):
         raise ak._v2._util.error(NotImplementedError)
 
-    def argmin(self, axis=-1, mask=True, keepdims=False, behavior=None):
+    def argmin(
+        self,
+        axis: int = -1,
+        mask: bool = True,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         return self._reduce(
             awkward._v2._reducers.ArgMin, axis, mask, keepdims, behavior
         )
 
-    def argmax(self, axis=-1, mask=True, keepdims=False, behavior=None):
+    def argmax(
+        self,
+        axis: int = -1,
+        mask: bool = True,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         return self._reduce(
             awkward._v2._reducers.ArgMax, axis, mask, keepdims, behavior
         )
 
-    def count(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def count(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         return self._reduce(awkward._v2._reducers.Count, axis, mask, keepdims, behavior)
 
-    def count_nonzero(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def count_nonzero(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         return self._reduce(
             awkward._v2._reducers.CountNonzero, axis, mask, keepdims, behavior
         )
 
-    def sum(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def sum(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         return self._reduce(awkward._v2._reducers.Sum, axis, mask, keepdims, behavior)
 
-    def prod(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def prod(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         return self._reduce(awkward._v2._reducers.Prod, axis, mask, keepdims, behavior)
 
-    def any(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def any(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         return self._reduce(awkward._v2._reducers.Any, axis, mask, keepdims, behavior)
 
-    def all(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def all(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: BehaviorType | None = None,
+    ):
         return self._reduce(awkward._v2._reducers.All, axis, mask, keepdims, behavior)
 
-    def min(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
+    def min(
+        self,
+        axis: int = -1,
+        mask: bool = True,
+        keepdims: bool = False,
+        initial: BehaviorType | None = None,
+        behavior=None,
+    ):
         return self._reduce(
             awkward._v2._reducers.Min(initial), axis, mask, keepdims, behavior
         )
 
-    def max(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
+    def max(
+        self,
+        axis: int = -1,
+        mask: bool = True,
+        keepdims: bool = False,
+        initial: BehaviorType | None = None,
+        behavior=None,
+    ):
         return self._reduce(
             awkward._v2._reducers.Max(initial), axis, mask, keepdims, behavior
         )
 
-    def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+    def argsort(
+        self,
+        axis: int = -1,
+        ascending: bool = True,
+        stable: bool = False,
+        kind: Any = None,
+        order: Any = None,
+    ):
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:
@@ -1055,7 +1150,14 @@ class Content:
     ):
         raise ak._v2._util.error(NotImplementedError)
 
-    def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+    def sort(
+        self,
+        axis: int = -1,
+        ascending: bool = True,
+        stable: bool = False,
+        kind: Any = None,
+        order: Any = None,
+    ):
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:
@@ -1113,7 +1215,7 @@ class Content:
     ):
         raise ak._v2._util.error(NotImplementedError)
 
-    def _combinations_axis0(self, n, replacement, recordlookup, parameters):
+    def _combinations_axis0(self, n: int, replacement: bool, recordlookup, parameters):
         size = self.length
         if replacement:
             size = size + (n - 1)
@@ -1173,7 +1275,14 @@ class Content:
             contents, recordlookup, length, None, parameters, self._nplike
         )
 
-    def combinations(self, n, replacement=False, axis=1, fields=None, parameters=None):
+    def combinations(
+        self,
+        n: int,
+        replacement: bool = False,
+        axis: int = 1,
+        fields=None,
+        parameters=None,
+    ):
         if n < 1:
             raise ak._v2._util.error(
                 ValueError("in combinations, 'n' must be at least 1")
@@ -1199,7 +1308,7 @@ class Content:
     ):
         raise ak._v2._util.error(NotImplementedError)
 
-    def validity_error_parameters(self, path):
+    def validity_error_parameters(self, path: str) -> str:
         if self.parameter("__array__") == "string":
             content = None
             if isinstance(
@@ -1299,7 +1408,7 @@ class Content:
 
         return ""
 
-    def validity_error(self, path="layout"):
+    def validity_error(self, path: str = "layout") -> str:
         paramcheck = self.validity_error_parameters(path)
         if paramcheck != "":
             return paramcheck
@@ -1309,16 +1418,16 @@ class Content:
         raise ak._v2._util.error(NotImplementedError)
 
     @property
-    def nbytes(self):
+    def nbytes(self) -> int:
         return self._nbytes_part()
 
     def _nbytes_part(self) -> int:
         raise ak._v2._util.error(NotImplementedError)
 
-    def purelist_parameter(self, key):
+    def purelist_parameter(self, key: str) -> Any:
         return self.Form.purelist_parameter(self, key)
 
-    def is_unique(self, axis=None):
+    def is_unique(self, axis: int | None = None) -> bool:
         negaxis = axis if axis is None else -axis
         starts = ak._v2.index.Index64.zeros(1, self._nplike)
         parents = ak._v2.index.Index64.zeros(self.length, self._nplike)
@@ -1333,7 +1442,7 @@ class Content:
     ) -> bool:
         raise ak._v2._util.error(NotImplementedError)
 
-    def unique(self, axis=None):
+    def unique(self, axis: int | None = None):
         if axis == -1 or axis is None:
             negaxis = axis if axis is None else -axis
             if negaxis is not None:
@@ -1391,34 +1500,34 @@ class Content:
         raise ak._v2._util.error(NotImplementedError)
 
     @property
-    def purelist_isregular(self):
+    def purelist_isregular(self) -> bool:
         return self.Form.purelist_isregular.__get__(self)
 
     @property
-    def purelist_depth(self):
+    def purelist_depth(self) -> int:
         return self.Form.purelist_depth.__get__(self)
 
     @property
-    def minmax_depth(self):
+    def minmax_depth(self) -> tuple[int, int]:
         return self.Form.minmax_depth.__get__(self)
 
     @property
-    def branch_depth(self):
+    def branch_depth(self) -> tuple[bool, int]:
         return self.Form.branch_depth.__get__(self)
 
     @property
-    def fields(self):
+    def fields(self) -> list[str]:
         return self.Form.fields.__get__(self)
 
     @property
-    def is_tuple(self):
+    def is_tuple(self) -> bool:
         return self.Form.is_tuple.__get__(self)
 
     @property
-    def dimension_optiontype(self):
+    def dimension_optiontype(self) -> bool:
         return self.Form.dimension_optiontype.__get__(self)
 
-    def pad_none_axis0(self, target, clip):
+    def pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and target < self.length:
             index = ak._v2.index.Index64(
                 self._nplike.index_nplike.arange(self.length, dtype=np.int64),
@@ -1445,7 +1554,7 @@ class Content:
         )
         return next.simplify_optiontype()
 
-    def pad_none(self, length, axis, clip=False):
+    def pad_none(self, length: int, axis: int, clip: bool = False) -> Content:
         return self._pad_none(length, axis, 0, clip)
 
     def _pad_none(self, target: int, axis: int, depth: int, clip: bool) -> Content:
@@ -1453,14 +1562,14 @@ class Content:
 
     def to_arrow(
         self,
-        list_to32=False,
-        string_to32=False,
-        bytestring_to32=False,
+        list_to32: bool = False,
+        string_to32: bool = False,
+        bytestring_to32: bool = False,
         emptyarray_to=None,
-        categorical_as_dictionary=False,
-        extensionarray=True,
-        count_nulls=True,
-        record_is_scalar=False,
+        categorical_as_dictionary: bool = False,
+        extensionarray: bool = True,
+        count_nulls: bool = True,
+        record_is_scalar: bool = False,
     ):
         import awkward._v2._connect.pyarrow
 
@@ -1492,13 +1601,18 @@ class Content:
     ):
         raise ak._v2._util.error(NotImplementedError)
 
-    def to_numpy(self, allow_missing):
+    def to_numpy(self, allow_missing: bool):
         return self._to_numpy(allow_missing)
 
     def _to_numpy(self, allow_missing: bool):
         raise ak._v2._util.error(NotImplementedError)
 
-    def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
+    def completely_flatten(
+        self,
+        nplike: ak.nplike.NumpyLike | None = None,
+        flatten_records: bool = True,
+        function_name: str | None = None,
+    ):
         if nplike is None:
             nplike = self._nplike
         arrays = self._completely_flatten(
@@ -1517,16 +1631,16 @@ class Content:
 
     def recursively_apply(
         self,
-        action,
-        behavior=None,
-        depth_context=None,
-        lateral_context=None,
-        allow_records=True,
-        keep_parameters=True,
-        numpy_to_regular=True,
-        return_array=True,
-        function_name=None,
-    ):
+        action: ActionType,
+        behavior: BehaviorType | None = None,
+        depth_context: dict[str, Any] | None = None,
+        lateral_context: dict[str, Any] | None = None,
+        allow_records: bool = True,
+        keep_parameters: bool = True,
+        numpy_to_regular: bool = True,
+        return_array: bool = True,
+        function_name: str | None = None,
+    ) -> Content | None:
         return self._recursively_apply(
             action,
             behavior,
@@ -1555,13 +1669,13 @@ class Content:
 
     def to_json(
         self,
-        nan_string=None,
-        posinf_string=None,
-        neginf_string=None,
-        complex_record_fields=None,
-        convert_bytes=None,
-        behavior=None,
-    ):
+        nan_string: str | None = None,
+        posinf_string: str | None = None,
+        neginf_string: str | None = None,
+        complex_record_fields: tuple[str, str] | None = None,
+        convert_bytes: bool | None = None,
+        behavior: BehaviorType | None = None,
+    ) -> list:
         if complex_record_fields is None:
             complex_real_string = None
             complex_imag_string = None
@@ -1591,10 +1705,10 @@ class Content:
     def packed(self) -> Content:
         raise ak._v2._util.error(NotImplementedError)
 
-    def tolist(self, behavior=None):
+    def tolist(self, behavior: BehaviorType | None = None) -> list:
         return self.to_list(behavior)
 
-    def to_list(self, behavior=None):
+    def to_list(self, behavior: BehaviorType | None = None) -> list:
         return self.packed()._to_list(behavior, None)
 
     def _to_list(
@@ -1602,7 +1716,9 @@ class Content:
     ) -> list:
         raise ak._v2._util.error(NotImplementedError)
 
-    def _to_list_custom(self, behavior, json_conversions):
+    def _to_list_custom(
+        self, behavior: BehaviorType | None, json_conversions: dict[str, Any]
+    ):
         if self.is_RecordType:
             getitem = ak._v2._util.recordclass(self, behavior).__getitem__
             overloaded = (
@@ -1706,7 +1822,7 @@ class Content:
 
             return out
 
-    def flatten(self, axis=1, depth=0):
+    def flatten(self, axis: int = 1, depth: int = 0) -> Content:
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
 
@@ -1715,7 +1831,7 @@ class Content:
     ) -> tuple[ak._v2.index.Index, Content]:
         raise ak._v2._util.error(NotImplementedError)
 
-    def to_backend(self, backend):
+    def to_backend(self, backend: str) -> Self:
         if self.nplike is ak._v2._util.regularize_backend(backend):
             return self
         else:
@@ -1724,7 +1840,7 @@ class Content:
     def _to_nplike(self, nplike: ak.nplike.NumpyLike) -> Self:
         raise ak._v2._util.error(NotImplementedError)
 
-    def with_parameter(self, key, value):
+    def with_parameter(self, key: str, value: Any) -> Self:
         out = copy.copy(self)
 
         if self._parameters is None:
@@ -1766,7 +1882,9 @@ class Content:
 
         return _replace_numpyarray_nodes(aux_data.layout, list(children))
 
-    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def layout_equal(
+        self, other: Content, index_dtype: bool = True, numpyarray: bool = True
+    ) -> bool:
         return (
             self.__class__ is other.__class__
             and len(self) == len(other)
