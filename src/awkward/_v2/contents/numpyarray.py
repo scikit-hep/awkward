@@ -392,7 +392,7 @@ class NumpyArray(Content):
         ):
             return self.mergeable(other._content, mergebool)
 
-        elif isinstance(other, ak._v2.contents.numpyarray.NumpyArray):
+        elif isinstance(other, ak._v2.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
                 return False
 
@@ -428,12 +428,25 @@ class NumpyArray(Content):
 
             return True
 
+        # If we have >1 dimension, promote ourselves to `RegularArray` and attempt to merge.
+        elif (
+            isinstance(other, ak._v2.contents.RegularArray) and self.purelist_depth > 1
+        ):
+            as_regular_array = self.toRegularArray()
+            assert isinstance(as_regular_array, ak._v2.contents.RegularArray)
+            return as_regular_array.mergeable(other, mergebool)
+
         else:
             return False
 
     def mergemany(self, others):
         if len(others) == 0:
             return self
+
+        # Resolve merging against regular types by
+        if any(isinstance(o, ak._v2.contents.RegularArray) for o in others):
+            return self.toRegularArray().mergemany(others)
+
         head, tail = self._merging_strategy(others)
 
         contiguous_arrays = []
