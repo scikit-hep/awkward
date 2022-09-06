@@ -715,6 +715,12 @@ class Content:
         others = [other]
         return self.mergemany(others)
 
+    def mergeable(self, other, mergebool):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def mergemany(self, others):
+        raise ak._v2._util.error(NotImplementedError)
+
     def merge_as_union(self, other):
         mylength = self.length
         theirlength = other.length
