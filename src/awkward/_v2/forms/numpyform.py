@@ -191,6 +191,10 @@ class NumpyForm(Form):
         return len(self.inner_shape) + 1
 
     @property
+    def is_identity_like(self):
+        return False
+
+    @property
     def minmax_depth(self):
         depth = len(self.inner_shape) + 1
         return (depth, depth)

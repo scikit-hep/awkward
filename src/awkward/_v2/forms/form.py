@@ -262,6 +262,11 @@ class Form:
             self._parameters = {}
         return self._parameters
 
+    @property
+    def is_identity_like(self):
+        """Return True if the content or its non-list descendents are an identity"""
+        raise ak._v2._util.error(NotImplementedError)
+
     def parameter(self, key):
         if self._parameters is None:
             return None

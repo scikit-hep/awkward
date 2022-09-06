@@ -277,6 +277,10 @@ class RecordForm(Form):
         return 1
 
     @property
+    def is_identity_like(self):
+        return False
+
+    @property
     def minmax_depth(self):
         if len(self._contents) == 0:
             return (1, 1)

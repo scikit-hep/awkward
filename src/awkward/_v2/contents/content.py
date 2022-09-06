@@ -1236,6 +1236,10 @@ class Content:
         )
 
     @property
+    def is_identity_like(self):
+        return self.Form.is_identity_like.__get__(self)
+
+    @property
     def purelist_isregular(self):
         return self.Form.purelist_isregular.__get__(self)
 

@@ -174,6 +174,10 @@ class ListForm(Form):
             return self._content.purelist_depth + 1
 
     @property
+    def is_identity_like(self):
+        return False
+
+    @property
     def minmax_depth(self):
         if self.parameter("__array__") in ("string", "bytestring"):
             return (1, 1)

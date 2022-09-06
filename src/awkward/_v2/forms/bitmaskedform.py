@@ -73,6 +73,10 @@ class BitMaskedForm(Form):
     def lsb_order(self):
         return self._lsb_order
 
+    @property
+    def is_identity_like(self):
+        return False
+
     def __repr__(self):
         args = [
             repr(self._mask),

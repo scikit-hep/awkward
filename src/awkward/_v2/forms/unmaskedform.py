@@ -137,6 +137,10 @@ class UnmaskedForm(Form):
         return self._content.purelist_depth
 
     @property
+    def is_identity_like(self):
+        return self._content.is_identity_like
+
+    @property
     def minmax_depth(self):
         return self._content.minmax_depth
 

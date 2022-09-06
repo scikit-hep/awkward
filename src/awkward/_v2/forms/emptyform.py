@@ -81,6 +81,10 @@ class EmptyForm(Form):
         return 1
 
     @property
+    def is_identity_like(self):
+        return True
+
+    @property
     def minmax_depth(self):
         return (1, 1)
 
