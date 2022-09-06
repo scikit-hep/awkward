@@ -10,6 +10,7 @@ from awkward._v2.operations.ak_argsort import argsort
 from awkward._v2.operations.ak_backend import backend
 from awkward._v2.operations.ak_broadcast_arrays import broadcast_arrays
 from awkward._v2.operations.ak_cartesian import cartesian
+from awkward._v2.operations.ak_categories import categories
 from awkward._v2.operations.ak_combinations import combinations
 from awkward._v2.operations.ak_concatenate import concatenate
 from awkward._v2.operations.ak_copy import copy
@@ -25,6 +26,7 @@ from awkward._v2.operations.ak_from_arrow import from_arrow
 from awkward._v2.operations.ak_from_arrow_schema import from_arrow_schema
 from awkward._v2.operations.ak_from_avro_file import from_avro_file
 from awkward._v2.operations.ak_from_buffers import from_buffers
+from awkward._v2.operations.ak_from_categorical import from_categorical
 from awkward._v2.operations.ak_from_cupy import from_cupy
 from awkward._v2.operations.ak_from_iter import from_iter
 from awkward._v2.operations.ak_from_jax import from_jax
@@ -35,6 +37,7 @@ from awkward._v2.operations.ak_from_rdataframe import from_rdataframe
 from awkward._v2.operations.ak_from_regular import from_regular
 from awkward._v2.operations.ak_full_like import full_like
 from awkward._v2.operations.ak_isclose import isclose
+from awkward._v2.operations.ak_is_categorical import is_categorical
 from awkward._v2.operations.ak_is_none import is_none
 from awkward._v2.operations.ak_is_tuple import is_tuple
 from awkward._v2.operations.ak_is_valid import is_valid
@@ -68,6 +71,7 @@ from awkward._v2.operations.ak_to_arrow_table import to_arrow_table
 from awkward._v2.operations.ak_to_backend import to_backend
 from awkward._v2.operations.ak_to_buffers import to_buffers
 from awkward._v2.operations.ak_to_cupy import to_cupy
+from awkward._v2.operations.ak_to_categorical import to_categorical
 from awkward._v2.operations.ak_to_jax import to_jax
 from awkward._v2.operations.ak_to_json import to_json
 from awkward._v2.operations.ak_to_layout import to_layout
