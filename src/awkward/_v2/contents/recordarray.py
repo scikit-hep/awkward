@@ -572,10 +572,9 @@ class RecordArray(Content):
         for_each_field = []
         for field in self.contents:
             trimmed = field[0 : self.length]
-            for_each_field.append([field])
+            for_each_field.append([trimmed])
 
         if self.is_tuple:
-            parameters = self._parameters
             for array in headless:
                 parameters = ak._v2._util.merge_parameters(
                     parameters, array._parameters, True
@@ -613,7 +612,6 @@ class RecordArray(Content):
             these_fields = self._fields.copy()
             these_fields.sort()
 
-            parameters = self._parameters
             for array in headless:
                 parameters = ak._v2._util.merge_parameters(
                     parameters, array._parameters, True
