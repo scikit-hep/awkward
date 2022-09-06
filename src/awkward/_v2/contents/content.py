@@ -687,7 +687,7 @@ class Content:
     def _getitem_next(self, head, tail, advanced: ak._v2.index.Index | None):
         raise ak._v2._util.error(NotImplementedError)
 
-    def _carry(self, carry: ak._v2.index.Index, allow_lazy: bool = True):
+    def _carry(self, carry: ak._v2.index.Index, allow_lazy: bool):
         raise ak._v2._util.error(NotImplementedError)
 
     def _carry_asrange(self, carry: ak._v2.index.Index):
