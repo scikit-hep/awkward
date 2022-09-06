@@ -2,8 +2,6 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-
 
 def is_categorical(array):
     """
