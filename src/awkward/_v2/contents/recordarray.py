@@ -654,8 +654,7 @@ class RecordArray(Content):
         nextcontents = []
         minlength = None
         for forfield in for_each_field:
-            tail_forfield = forfield[1:]
-            merged = forfield[0].mergemany(tail_forfield)
+            merged = forfield[0].mergemany(forfield[1:])
 
             nextcontents.append(merged)
 
