@@ -63,6 +63,7 @@ class IndexedOptionForm(Form):
         if self.parameter("__array__") == "categorical":
             parameters = dict(self._parameters)
             del parameters["__array__"]
+            parameters["__categorical__"] = True
         else:
             parameters = self._parameters
 
