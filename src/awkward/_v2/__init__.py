@@ -1,5 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from __future__ import annotations
+
+
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward._v2.index
 import awkward._v2.identifier
@@ -34,6 +37,6 @@ import awkward._v2.behaviors.string
 from awkward._v2.operations import *
 
 
-behavior = {}
-behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
-behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
+behavior: dict[str, Array | Record] = {}
+awkward._v2.behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
+awkward._v2.behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
