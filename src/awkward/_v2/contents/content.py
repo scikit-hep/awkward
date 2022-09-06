@@ -721,6 +721,25 @@ class Content:
     def mergemany(self, others):
         raise ak._v2._util.error(NotImplementedError)
 
+    def _maybe_mergeable(self, other: "Content") -> bool:
+        """
+        Args:
+            other: other `Content` object to merge with
+
+        Return True if the other content is potentially mergeable with
+        this content. Otherwise, return False. In this context, "maybe"
+        mergeable simply means "has the same parameters, or is identity-like".
+        """
+        if (
+            ak._v2.forms.form._parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
+            or other.is_identity_like
+        ):
+            return True
+        else:
+            return False
+
     def merge_as_union(self, other):
         mylength = self.length
         theirlength = other.length
