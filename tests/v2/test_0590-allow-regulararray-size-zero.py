@@ -29,7 +29,7 @@ def test_ListOffsetArray_rpad_and_clip():
     ]
 
 
-def test_toListOffsetArray64():
+def test_to_list_offset_array():
     assert ak._v2.operations.from_regular(empty).tolist() == []
 
 

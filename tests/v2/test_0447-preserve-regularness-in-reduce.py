@@ -26,11 +26,11 @@ def test_nokeepdims():
     nparray = np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     regular_regular = ak._v2.contents.RegularArray(regular, 3, zeros_length=0)
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(listoffset, 3, zeros_length=0)
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
 
     assert to_list(regular_regular) == [
         [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
@@ -101,11 +101,11 @@ def test_keepdims():
     nparray = np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     regular_regular = ak._v2.contents.RegularArray(regular, 3, zeros_length=0)
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(listoffset, 3, zeros_length=0)
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
 
     assert (
         str(ak._v2.highlevel.Array(listoffset_listoffset).type)
@@ -191,11 +191,11 @@ def test_nokeepdims_none1():
         ]
     ).layout
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     regular_regular = ak._v2.contents.RegularArray(regular, 3, zeros_length=0)
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(listoffset, 3, zeros_length=0)
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
 
     assert (
         str(ak._v2.highlevel.Array(listoffset_listoffset).type)
@@ -273,11 +273,11 @@ def test_keepdims_none1():
         ]
     ).layout
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     regular_regular = ak._v2.contents.RegularArray(regular, 3, zeros_length=0)
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(listoffset, 3, zeros_length=0)
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
 
     assert (
         str(ak._v2.highlevel.Array(listoffset_listoffset).type)
@@ -362,11 +362,11 @@ def test_nokeepdims_mask1():
         valid_when=False,
     )
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     regular_regular = ak._v2.contents.RegularArray(regular, 3, zeros_length=0)
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(listoffset, 3, zeros_length=0)
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
 
     assert (
         str(ak._v2.highlevel.Array(listoffset_listoffset).type)
@@ -451,11 +451,11 @@ def test_keepdims_mask1():
         valid_when=False,
     )
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     regular_regular = ak._v2.contents.RegularArray(regular, 3, zeros_length=0)
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(listoffset, 3, zeros_length=0)
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
 
     assert (
         str(ak._v2.highlevel.Array(listoffset_listoffset).type)
@@ -500,20 +500,20 @@ def test_keepdims_mask1():
 def test_nokeepdims_mask2():
     content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     mask = ak._v2.index.Index8(np.array([False, False, True, True, False, True]))
     regular_regular = ak._v2.contents.RegularArray(
         ak._v2.contents.ByteMaskedArray(mask, regular, valid_when=False),
         3,
         zeros_length=0,
     )
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(
         ak._v2.contents.ByteMaskedArray(mask, listoffset, valid_when=False),
         3,
         zeros_length=0,
     )
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
 
     assert (
         str(ak._v2.highlevel.Array(listoffset_listoffset).type)
@@ -562,20 +562,20 @@ def test_nokeepdims_mask2():
 def test_keepdims_mask2():
     content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     mask = ak._v2.index.Index8(np.array([False, False, True, True, False, True]))
     regular_regular = ak._v2.contents.RegularArray(
         ak._v2.contents.ByteMaskedArray(mask, regular, valid_when=False),
         3,
         zeros_length=0,
     )
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(
         ak._v2.contents.ByteMaskedArray(mask, listoffset, valid_when=False),
         3,
         zeros_length=0,
     )
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
 
     assert (
         str(ak._v2.highlevel.Array(listoffset_listoffset).type)
@@ -624,11 +624,11 @@ def test_keepdims_mask2():
 def test_nokeepdims_mask3():
     content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     regular_regular = ak._v2.contents.RegularArray(regular, 3, zeros_length=0)
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(listoffset, 3, zeros_length=0)
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
     mask = ak._v2.index.Index8(np.array([True, False]))
     regular_regular = ak._v2.contents.ByteMaskedArray(
         mask, regular_regular, valid_when=False
@@ -690,11 +690,11 @@ def test_nokeepdims_mask3():
 def test_keepdims_mask3():
     content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    listoffset = regular.toListOffsetArray64(False)
+    listoffset = regular.to_list_offset_array(False)
     regular_regular = ak._v2.contents.RegularArray(regular, 3, zeros_length=0)
-    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    listoffset_regular = regular_regular.to_list_offset_array(False)
     regular_listoffset = ak._v2.contents.RegularArray(listoffset, 3, zeros_length=0)
-    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+    listoffset_listoffset = regular_listoffset.to_list_offset_array(False)
     mask = ak._v2.index.Index8(np.array([True, False]))
     regular_regular = ak._v2.contents.ByteMaskedArray(
         mask, regular_regular, valid_when=False

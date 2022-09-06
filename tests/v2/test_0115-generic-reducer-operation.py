@@ -15,7 +15,7 @@ def test_ListOffsetArray_to_RegularArray():
         np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64)
     )
     listoffsetarray = ak._v2.contents.ListOffsetArray(offsets1, content)
-    regulararray = listoffsetarray.toRegularArray()
+    regulararray = listoffsetarray.to_regular_array()
     assert to_list(listoffsetarray) == to_list(regulararray)
 
 

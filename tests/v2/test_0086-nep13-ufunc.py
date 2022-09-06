@@ -69,8 +69,8 @@ def test_indexedoptionarray():
 
 def test_regularize_shape():
     array = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5).reshape(2, 3, 5))
-    assert isinstance(array.toRegularArray(), ak._v2.contents.RegularArray)
-    assert to_list(array.toRegularArray()) == to_list(array)
+    assert isinstance(array.to_regular_array(), ak._v2.contents.RegularArray)
+    assert to_list(array.to_regular_array()) == to_list(array)
 
 
 def test_regulararray():

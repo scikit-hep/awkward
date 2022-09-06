@@ -244,7 +244,7 @@ def test_maybe_toNumpy():
     regulararray = ak._v2.contents.RegularArray(content, 4, zeros_length=0)
 
     array3 = ak._v2.highlevel.Array([2, 1, 1, None, -1], check_valid=True).layout
-    numpyarray = regulararray.maybe_toNumpyArray()
+    numpyarray = regulararray.maybe_to_numpy_array()
     assert to_list(numpyarray[array3]) == [
         [8.8, 9.9, 10.0, 11.1],
         [4.4, 5.5, 6.6, 7.7],
@@ -266,7 +266,7 @@ def test_maybe_toNumpy():
         3,
     )
     assert len(a) == 2
-    a = a.maybe_toNumpyArray()
+    a = a.maybe_to_numpy_array()
     assert isinstance(
         a[
             1,
