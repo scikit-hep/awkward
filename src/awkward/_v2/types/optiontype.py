@@ -75,8 +75,7 @@ class OptionType(Type):
     def __eq__(self, other):
         if isinstance(other, OptionType):
             return (
-                self._typestr == other._typestr
-                and _parameters_equal(
+                _parameters_equal(
                     self._parameters, other._parameters, only_array_record=True
                 )
                 and self._content == other._content
