@@ -43,10 +43,13 @@ class OptionType(Type):
         return self._content
 
     def _str(self, indent, compact):
+        head = []
+        tail = []
         if self._typestr is not None:
-            out = [self._typestr]
+            content_out = [self._typestr]
 
         else:
+            content_out = self._content._str(indent, compact)
             params = self._str_parameters()
             if params is None:
                 if isinstance(
@@ -57,16 +60,22 @@ class OptionType(Type):
                     "char",
                     "byte",
                 ):
-                    out = ["option["] + self._content._str(indent, compact) + ["]"]
+                    head = ["option["]
+                    tail = ["]"]
                 else:
-                    out = ["?"] + self._content._str(indent, compact)
+                    head = ["?"]
 
             else:
-                out = (
-                    ["option["] + self._content._str(indent, compact) + [f", {params}]"]
-                )
+                head = ["option["]
+                tail = [f", {params}]"]
 
-        return [self._str_categorical_begin()] + out + [self._str_categorical_end()]
+        return (
+            head
+            + [self._str_categorical_begin()]
+            + content_out
+            + [self._str_categorical_end()]
+            + tail
+        )
 
     def __repr__(self):
         args = [repr(self._content)] + self._repr_args()
