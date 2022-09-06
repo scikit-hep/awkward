@@ -157,7 +157,7 @@ def apply_step(
         isinstance(x, NumpyArray) and x.data.ndim != 1 for x in inputs
     ):
         inputs = [
-            x.toRegularArray() if isinstance(x, NumpyArray) else x for x in inputs
+            x.to_regular_array() if isinstance(x, NumpyArray) else x for x in inputs
         ]
 
     # Rare that any function would want this, but some do.
@@ -165,7 +165,7 @@ def apply_step(
         isinstance(x, RegularArray) for x in inputs
     ):
         inputs = [
-            x.toListOffsetArray64(False) if isinstance(x, RegularArray) else x
+            x.to_list_offset_array(False) if isinstance(x, RegularArray) else x
             for x in inputs
         ]
 
@@ -220,7 +220,7 @@ def apply_step(
         # Any NumpyArrays with ndim != 1?
         elif any(isinstance(x, NumpyArray) and x.data.ndim != 1 for x in inputs):
             nextinputs = [
-                x.toRegularArray() if isinstance(x, NumpyArray) else x for x in inputs
+                x.to_regular_array() if isinstance(x, NumpyArray) else x for x in inputs
             ]
             return apply_step(
                 nplike,
@@ -591,12 +591,12 @@ def apply_step(
 
                 if isinstance(offsets, Index):
                     return tuple(
-                        ListOffsetArray(offsets, x).toListOffsetArray64(False)
+                        ListOffsetArray(offsets, x).to_list_offset_array(False)
                         for x in outcontent
                     )
                 elif isinstance(starts, Index) and isinstance(stops, Index):
                     return tuple(
-                        ListArray(starts, stops, x).toListOffsetArray64(False)
+                        ListArray(starts, stops, x).to_list_offset_array(False)
                         for x in outcontent
                     )
                 else:

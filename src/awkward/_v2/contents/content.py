@@ -361,7 +361,7 @@ class Content:
 
     def _getitem_next_missing_jagged(self, head, tail, advanced, that):
         head = head._to_nplike(self._nplike)
-        jagged = head.content.toListOffsetArray64()
+        jagged = head.content.to_list_offset_array()
 
         index = ak._v2.index.Index64(head._index, nplike=self.nplike)
         content = that._getitem_at(0)

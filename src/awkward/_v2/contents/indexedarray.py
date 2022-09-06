@@ -840,7 +840,7 @@ class IndexedArray(Content):
             return unique
         else:
             if isinstance(unique, ak._v2.contents.RegularArray):
-                unique = unique.toListOffsetArray64(True)
+                unique = unique.to_list_offset_array(True)
 
             if isinstance(unique, ak._v2.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
@@ -1023,7 +1023,7 @@ class IndexedArray(Content):
             return out
         else:
             if isinstance(out, ak._v2.contents.RegularArray):
-                out = out.toListOffsetArray64(True)
+                out = out.to_list_offset_array(True)
 
             # If the result of `_reduce_next` is a list, and we're not applying at this
             # depth, then it will have offsets given by the boundaries in parents.

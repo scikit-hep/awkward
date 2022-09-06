@@ -48,7 +48,7 @@ def _impl(array, axis, highlevel, behavior):
 
         def action(layout, continuation, **kwargs):
             if layout.is_RegularType:
-                return continuation().toListOffsetArray64(False)
+                return continuation().to_list_offset_array(False)
 
         out = layout.recursively_apply(action, behavior, numpy_to_regular=True)
 
@@ -60,7 +60,7 @@ def _impl(array, axis, highlevel, behavior):
         def action(layout, depth, depth_context, **kwargs):
             posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
             if posaxis == depth and layout.is_RegularType:
-                return layout.toListOffsetArray64(False)
+                return layout.to_list_offset_array(False)
             elif posaxis == depth and layout.is_ListType:
                 return layout
             elif posaxis == 0:

@@ -889,7 +889,7 @@ class ByteMaskedArray(Content):
 
         next = self._content._carry(nextcarry, False)
         if isinstance(next, ak._v2.contents.RegularArray):
-            next = next.toListOffsetArray64(True)
+            next = next.to_list_offset_array(True)
 
         out = next._reduce_next(
             reducer,
@@ -907,7 +907,7 @@ class ByteMaskedArray(Content):
             return out
         else:
             if isinstance(out, ak._v2.contents.RegularArray):
-                out = out.toListOffsetArray64(True)
+                out = out.to_list_offset_array(True)
 
             if isinstance(out, ak._v2.contents.ListOffsetArray):
                 outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)

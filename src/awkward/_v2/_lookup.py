@@ -32,7 +32,7 @@ def tolookup(layout, positions):
         if len(layout.shape) == 1:
             return NumpyLookup.tolookup(layout, positions)
         else:
-            return tolookup(layout.toRegularArray(), positions)
+            return tolookup(layout.to_regular_array(), positions)
 
     elif isinstance(layout, ak._v2.contents.RegularArray):
         return RegularLookup.tolookup(layout, positions)

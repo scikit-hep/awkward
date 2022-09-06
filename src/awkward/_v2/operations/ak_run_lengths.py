@@ -157,7 +157,7 @@ def _impl(array, highlevel, behavior):
                 layout.content.parameter("__array__") == "string"
                 or layout.content.parameter("__array__") == "bytestring"
             ):
-                listoffsetarray = layout.toListOffsetArray64(False)
+                listoffsetarray = layout.to_list_offset_array(False)
                 offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
                 content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
@@ -172,7 +172,7 @@ def _impl(array, highlevel, behavior):
                     ak._v2.contents.NumpyArray(nextcontent),
                 )
 
-            listoffsetarray = layout.toListOffsetArray64(False)
+            listoffsetarray = layout.to_list_offset_array(False)
             offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
             content = listoffsetarray.content[offsets[0] : offsets[-1]]
 

@@ -198,7 +198,7 @@ def normalise_items(where, nplike):
 def normalise_item_RegularArray_toListOffsetArray64(item):
     if isinstance(item, ak._v2.contents.RegularArray):
 
-        next = item.toListOffsetArray64()
+        next = item.to_list_offset_array()
         return ak._v2.contents.ListOffsetArray(
             next.offsets,
             normalise_item_RegularArray_toListOffsetArray64(next.content),
@@ -230,7 +230,7 @@ def normalise_item_nested(item):
                 parameters=item.parameters,
                 nplike=item.nplike,
             )
-        next = next.toRegularArray()
+        next = next.to_regular_array()
         next = normalise_item_RegularArray_toListOffsetArray64(next)
         return next
 
@@ -253,7 +253,7 @@ def normalise_item_nested(item):
             ak._v2.contents.RegularArray,
         ),
     ):
-        next = item.toListOffsetArray64(False)
+        next = item.to_list_offset_array(False)
         return normalise_item_nested(next)
 
     elif isinstance(

@@ -266,7 +266,7 @@ class NumpyArray(Content):
                 "too many jagged slice dimensions for array",
             )
         else:
-            next = self.toRegularArray()
+            next = self.to_regular_array()
             return next._getitem_next_jagged(
                 slicestarts, slicestops, slicecontent, tail
             )
@@ -329,7 +329,7 @@ class NumpyArray(Content):
             return out2
 
         elif isinstance(head, ak._v2.contents.IndexedOptionArray):
-            next = self.toRegularArray()
+            next = self.to_regular_array()
             return next._getitem_next_missing(head, tail, advanced)
 
         else:
@@ -375,7 +375,7 @@ class NumpyArray(Content):
             raise ak._v2._util.error(np.AxisError("axis=0 not allowed for flatten"))
 
         elif len(self.shape) != 1:
-            return self.toRegularArray()._offsets_and_flattened(posaxis, depth)
+            return self.to_regular_array()._offsets_and_flattened(posaxis, depth)
 
         else:
             raise ak._v2._util.error(np.AxisError("axis out of range for flatten"))
@@ -495,7 +495,7 @@ class NumpyArray(Content):
                 np.AxisError("'axis' out of range for local_index")
             )
         else:
-            return self.toRegularArray()._local_index(posaxis, depth)
+            return self.to_regular_array()._local_index(posaxis, depth)
 
     def contiguous(self):
         if self.is_contiguous:
@@ -667,7 +667,7 @@ class NumpyArray(Content):
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
-            return contiguous_self.toRegularArray()._is_unique(
+            return contiguous_self.to_regular_array()._is_unique(
                 negaxis,
                 starts,
                 parents,
@@ -745,7 +745,7 @@ class NumpyArray(Content):
         # axis is not None
         if len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
-            return contiguous_self.toRegularArray()._unique(
+            return contiguous_self.to_regular_array()._unique(
                 negaxis,
                 starts,
                 parents,
@@ -870,7 +870,7 @@ class NumpyArray(Content):
             )
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
-            return contiguous_self.toRegularArray()._argsort_next(
+            return contiguous_self.to_regular_array()._argsort_next(
                 negaxis,
                 starts,
                 shifts,
@@ -981,7 +981,7 @@ class NumpyArray(Content):
 
         elif len(self.shape) != 1 or not self.is_contiguous:
             contiguous_self = self if self.is_contiguous else self.contiguous()
-            return contiguous_self.toRegularArray()._sort_next(
+            return contiguous_self.to_regular_array()._sort_next(
                 negaxis,
                 starts,
                 parents,
@@ -1063,7 +1063,7 @@ class NumpyArray(Content):
                 np.AxisError("'axis' out of range for combinations")
             )
         else:
-            return self.toRegularArray()._combinations(
+            return self.to_regular_array()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
 
@@ -1080,7 +1080,7 @@ class NumpyArray(Content):
         behavior,
     ):
         if len(self._data.shape) != 1 or not self.is_contiguous:
-            return self.toRegularArray()._reduce_next(
+            return self.to_regular_array()._reduce_next(
                 reducer,
                 negaxis,
                 starts,
@@ -1196,7 +1196,7 @@ class NumpyArray(Content):
         if len(self.shape) == 0:
             raise ak._v2._util.error(ValueError("cannot apply ak.pad_none to a scalar"))
         elif len(self.shape) > 1 or not self.is_contiguous:
-            return self.toRegularArray()._pad_none(target, axis, depth, clip)
+            return self.to_regular_array()._pad_none(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
             raise ak._v2._util.error(
@@ -1218,7 +1218,7 @@ class NumpyArray(Content):
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self._data.ndim != 1:
-            return self.toRegularArray()._to_arrow(
+            return self.to_regular_array()._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
 
@@ -1260,7 +1260,7 @@ class NumpyArray(Content):
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
         if self._data.ndim != 1 and options["numpy_to_regular"]:
-            return self.toRegularArray()._recursively_apply(
+            return self.to_regular_array()._recursively_apply(
                 action, behavior, depth, depth_context, lateral_context, options
             )
 
@@ -1296,7 +1296,7 @@ class NumpyArray(Content):
             raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
-        return self.contiguous().toRegularArray()
+        return self.contiguous().to_regular_array()
 
     def _to_list(self, behavior, json_conversions):
         if self.parameter("__array__") == "byte":

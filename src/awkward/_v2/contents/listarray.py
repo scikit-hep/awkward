@@ -171,7 +171,7 @@ class ListArray(Content):
             self._nplike,
         )
 
-    def toListOffsetArray64(self, start_at_zero=False):
+    def to_list_offset_array(self, start_at_zero=False):
         starts = self._starts.data
         stops = self._stops.data
 
@@ -202,15 +202,15 @@ class ListArray(Content):
                 self._identifier,
                 self._parameters,
                 self._nplike,
-            ).toListOffsetArray64(start_at_zero=start_at_zero)
+            ).to_list_offset_array(start_at_zero=start_at_zero)
 
         else:
             offsets = self._compact_offsets64(start_at_zero)
             return self._broadcast_tooffsets64(offsets)
 
-    def toRegularArray(self):
+    def to_regular_array(self):
         offsets = self._compact_offsets64(True)
-        return self._broadcast_tooffsets64(offsets).toRegularArray()
+        return self._broadcast_tooffsets64(offsets).to_regular_array()
 
     def _getitem_nothing(self):
         return self._content._getitem_range(slice(0, 0))
@@ -349,7 +349,7 @@ class ListArray(Content):
                 slicer=ListArray(slicestarts, slicestops, slicecontent),
             )
 
-            as_list_offset_array = self.toListOffsetArray64(False)
+            as_list_offset_array = self.to_list_offset_array(False)
             next_content = as_list_offset_array._content[
                 as_list_offset_array.offsets[0] : as_list_offset_array.offsets[-1]
             ]
@@ -514,7 +514,7 @@ class ListArray(Content):
             ):
 
                 # Generate ranges between starts and stops
-                as_list_offset_array = self.toListOffsetArray64(True)
+                as_list_offset_array = self.to_list_offset_array(True)
                 nextcontent = as_list_offset_array._content._carry(nextcarry, True)
                 next = ak._v2.contents.listoffsetarray.ListOffsetArray(
                     smalloffsets, nextcontent, None, self._parameters, self._nplike
@@ -928,10 +928,10 @@ class ListArray(Content):
                 tonum, None, None, self._nplike
             )
         else:
-            return self.toListOffsetArray64(True).num(posaxis, depth)
+            return self.to_list_offset_array(True).num(posaxis, depth)
 
     def _offsets_and_flattened(self, axis, depth):
-        return self.toListOffsetArray64(True)._offsets_and_flattened(axis, depth)
+        return self.to_list_offset_array(True)._offsets_and_flattened(axis, depth)
 
     def mergeable(self, other, mergebool):
         if not _parameters_equal(self._parameters, other._parameters):
@@ -1060,7 +1060,7 @@ class ListArray(Content):
                 length_so_far += array.length
 
             elif isinstance(array, ak._v2.contents.regulararray.RegularArray):
-                listoffsetarray = array.toListOffsetArray64(True)
+                listoffsetarray = array.to_list_offset_array(True)
 
                 array_starts = ak._v2.index.Index64(listoffsetarray.starts)
                 array_stops = ak._v2.index.Index64(listoffsetarray.stops)
@@ -1172,14 +1172,14 @@ class ListArray(Content):
         if self._starts.length == 0:
             return True
 
-        return self.toListOffsetArray64(True)._is_unique(
+        return self.to_list_offset_array(True)._is_unique(
             negaxis, starts, parents, outlength
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self._starts.length == 0:
             return self
-        return self.toListOffsetArray64(True)._unique(
+        return self.to_list_offset_array(True)._unique(
             negaxis, starts, parents, outlength
         )
 
@@ -1195,7 +1195,7 @@ class ListArray(Content):
         kind,
         order,
     ):
-        next = self.toListOffsetArray64(True)
+        next = self.to_list_offset_array(True)
         out = next._argsort_next(
             negaxis,
             starts,
@@ -1212,7 +1212,7 @@ class ListArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        return self.toListOffsetArray64(True)._sort_next(
+        return self.to_list_offset_array(True)._sort_next(
             negaxis,
             starts,
             parents,
@@ -1240,7 +1240,7 @@ class ListArray(Content):
         keepdims,
         behavior,
     ):
-        return self.toListOffsetArray64(True)._reduce_next(
+        return self.to_list_offset_array(True)._reduce_next(
             reducer,
             negaxis,
             starts,
@@ -1403,17 +1403,17 @@ class ListArray(Content):
                     self._nplike,
                 )
         else:
-            return self.toListOffsetArray64(True)._pad_none(
+            return self.to_list_offset_array(True)._pad_none(
                 target, axis, depth, clip=True
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        return self.toListOffsetArray64(False)._to_arrow(
+        return self.to_list_offset_array(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
 
     def _to_numpy(self, allow_missing):
-        return ak._v2.operations.to_numpy(self.toRegularArray(), allow_missing)
+        return ak._v2.operations.to_numpy(self.to_regular_array(), allow_missing)
 
     def _completely_flatten(self, nplike, options):
         if (
@@ -1422,7 +1422,7 @@ class ListArray(Content):
         ):
             return [ak._v2.operations.to_numpy(self)]
         else:
-            next = self.toListOffsetArray64(False)
+            next = self.to_list_offset_array(False)
             flat = next.content[next.offsets[0] : next.offsets[-1]]
             return flat._completely_flatten(nplike, options)
 
@@ -1495,7 +1495,7 @@ class ListArray(Content):
             raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
-        return self.toListOffsetArray64(True).packed()
+        return self.to_list_offset_array(True).packed()
 
     def _to_list(self, behavior, json_conversions):
         return ListOffsetArray._to_list(self, behavior, json_conversions)
@@ -1519,3 +1519,9 @@ class ListArray(Content):
             and self.stops.layout_equal(other.stops, index_dtype, numpyarray)
             and self.content.layout_equal(other.content, index_dtype, numpyarray)
         )
+
+    def toListOffsetArray64(self):
+        return self.to_list_offset_array()
+
+    def toRegularArray(self):
+        return self.to_regular_array()

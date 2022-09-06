@@ -492,7 +492,7 @@ class UnmaskedArray(Content):
     ):
         next = self._content
         if isinstance(next, ak._v2.contents.RegularArray):
-            next = next.toListOffsetArray64(True)
+            next = next.to_list_offset_array(True)
 
         return next._reduce_next(
             reducer,
