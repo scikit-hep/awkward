@@ -268,6 +268,33 @@ class Form:
         else:
             return self._parameters.get(key)
 
+    def purelist_parameter(self, key):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def purelist_isregular(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def purelist_depth(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def minmax_depth(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def branch_depth(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def fields(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def is_tuple(self):
+        raise ak._v2._util.error(NotImplementedError)
+
     @property
     def form_key(self):
         return self._form_key
@@ -345,3 +372,30 @@ class Form:
 
     def column_types(self):
         return self._column_types()
+
+    def _columns(self, path, output, list_indicator):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _select_columns(self, index, specifier, matches, output):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _column_types(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def generated_compatibility(self, other):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_range(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_field(self, where, only_fields=()):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_fields(self, where, only_fields=()):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _tolist_part(self, verbose, toplevel):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _type(self, typestrs):
+        raise ak._v2._util.error(NotImplementedError)
