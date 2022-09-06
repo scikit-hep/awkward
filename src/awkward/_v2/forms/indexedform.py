@@ -76,7 +76,8 @@ class IndexedForm(Form):
                 out_array = self._content.parameter("__array__")
                 if out_array is not None:
                     out._parameters["__array__"] = out_array
-
+                else:
+                    del out._parameters["__array__"]
                 out._parameters["__categorical__"] = True
 
         return out
