@@ -434,7 +434,7 @@ class NumpyArray(Content):
         ):
             as_regular_array = self.toRegularArray()
             assert isinstance(as_regular_array, ak._v2.contents.RegularArray)
-            return as_regular_array.mergeable(other, mergebool)
+            return as_regular_array._content.mergeable(other._content, mergebool)
 
         else:
             return False
