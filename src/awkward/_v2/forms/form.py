@@ -173,7 +173,9 @@ def _parameters_equal(one, two, only_array_record=False):
         return True
     elif one is None:
         if only_array_record:
-            for key in ("__array__", "__record__"):
+            # NB: __categorical__ is currently a type-only parameter, but
+            # we check it here as types check this too.
+            for key in ("__array__", "__record__", "__categorical__"):
                 if two.get(key) is not None:
                     return False
             return True
@@ -185,7 +187,7 @@ def _parameters_equal(one, two, only_array_record=False):
 
     elif two is None:
         if only_array_record:
-            for key in ("__array__", "__record__"):
+            for key in ("__array__", "__record__", "__categorical__"):
                 if one.get(key) is not None:
                     return False
             return True
@@ -197,7 +199,7 @@ def _parameters_equal(one, two, only_array_record=False):
 
     else:
         if only_array_record:
-            keys = ("__array__", "__record__")
+            keys = ("__array__", "__record__", "__categorical__")
         else:
             keys = set(one.keys()).union(two.keys())
         for key in keys:
