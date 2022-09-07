@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import json
+from typing import Any
 
 import awkward as ak
 
@@ -212,6 +214,17 @@ def _parameters_update(one, two):
     for k, v in two.items():
         if v is not None:
             one[k] = v
+
+
+def _parameters_is_empty(parameters: dict[str, Any] | None) -> bool:
+    if parameters is None:
+        return True
+
+    for item in parameters.values():
+        if item is not None:
+            return False
+
+    return True
 
 
 class Form:

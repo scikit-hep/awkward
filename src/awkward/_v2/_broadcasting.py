@@ -265,7 +265,7 @@ def _intersection_parameters_factory(
     # If we encounter None-parameters, then we stop early
     # as there can be no intersection.
     for parameters in input_parameters:
-        if parameters is None:
+        if ak._v2.forms.form._parameters_is_empty(parameters):
             break
         else:
             parameters_to_intersect.append(parameters.items())
