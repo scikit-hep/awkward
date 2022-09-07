@@ -306,7 +306,8 @@ def _one_to_one_parameters_factory(
         if n_outputs != len(inputs):
             raise ak._v2._util.error(
                 ValueError(
-                    'Cannot apply `"ONE_TO_ONE"` for actions which change the number of outputs.'
+                    "cannot follow one-to-one parameter broadcasting rule for actions "
+                    "which change the number of outputs."
                 )
             )
         return input_parameters
