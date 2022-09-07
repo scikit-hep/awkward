@@ -726,7 +726,11 @@ def apply_step(
                     options,
                 )
                 assert isinstance(outcontent, tuple)
-                return tuple(RegularArray(x, maxsize, length) for x in outcontent)
+                parameters = parameters_factory(len(outcontent))
+                return tuple(
+                    RegularArray(x, maxsize, length, parameters=p)
+                    for x, p in zip(outcontent, parameters)
+                )
 
             elif not nplike.known_data or not nplike.known_shape:
                 offsets = None
