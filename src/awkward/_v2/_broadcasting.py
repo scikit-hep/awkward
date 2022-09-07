@@ -7,7 +7,7 @@ import enum
 import functools
 import itertools
 import operator
-from typing import Any, Callable
+from typing import Any, Callable, Dict, List, Union
 from collections.abc import Sequence
 
 import awkward as ak
@@ -180,7 +180,7 @@ class Sentinel:
             return f"{self._name}"
 
 
-BroadcastParameterFactory = Callable[[int], list[dict[str, Any] | None]]
+BroadcastParameterFactory = Callable[[int], List[Union[Dict[str, Any], None]]]
 
 NO_PARAMETERS = Sentinel("NO_PARAMETERS", __name__)
 
