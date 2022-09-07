@@ -165,15 +165,47 @@ class BroadcastParameterRule(str, enum.Enum):
     NONE = "NONE"
 
 
+# TODO: move to _util or another module
+class Sentinel:
+    """A class for implementing sentinel types"""
+
+    def __init__(self, name, module=None):
+        self._name = name
+        self._module = module
+
+    def __repr__(self):
+        if self._module is not None:
+            return f"{self._module}.{self._name}"
+        else:
+            return f"{self._name}"
+
+
 BroadcastParameterFactory = Callable[[int], list[dict[str, Any] | None]]
+
+NO_PARAMETERS = Sentinel("NO_PARAMETERS", __name__)
+
+
+def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
+    """
+    Args:
+        obj: #ak._v2.contents.Content that holds parameters, or object
+        default: value to return if obj is not an #ak._v2.contents.Content
+
+    Return the parameters of an object if it is a #ak._v2.contents.Content;
+    otherwise, return a default value.
+    """
+    if isinstance(obj, ak._v2.contents.Content):
+        return obj._parameters
+    else:
+        return default
 
 
 def _all_or_nothing_parameters_factory(
-    contents: Sequence[Content],
+    inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
     Args:
-        contents: sequence of #ak._v2.contents.Content objects
+        inputs: sequence of #ak._v2.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -182,17 +214,22 @@ def _all_or_nothing_parameters_factory(
     parameters are repeated, i.e. `[parameters, parameters, ...]`. Otherwise, a list
     of Nones is returned, i.e. `[None, None, ...]`.
     """
+    input_parameters = [
+        p for p in (_parameters_of(c) for c in inputs) if p is not NO_PARAMETERS
+    ]
+
     parameters = None
-    if len(contents) > 0:
-        maybe_parameters = contents[0]._parameters
+    if len(input_parameters) > 0:
+        # All parameters must match this first layout's parameters
+        first_parameters = input_parameters[0]
         # Ensure all parameters match, or set parameters to None
-        for content in contents[1:]:
+        for other_parameters in input_parameters[1:]:
             if not ak._v2.forms.form._parameters_equal(
-                maybe_parameters, content._parameters
+                first_parameters, other_parameters
             ):
                 break
         else:
-            parameters = maybe_parameters
+            parameters = first_parameters
 
     def apply(n_outputs: int) -> list[dict[str, Any] | None]:
         # NB: we don't make unique copies here, so let's hope everyone
@@ -203,11 +240,11 @@ def _all_or_nothing_parameters_factory(
 
 
 def _intersection_parameters_factory(
-    contents: Sequence[Content],
+    inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
     Args:
-        contents: sequence of #ak._v2.contents.Content objects
+        inputs: sequence of #ak._v2.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -217,30 +254,41 @@ def _intersection_parameters_factory(
     `[None, None, ...]`; otherwise, the computed parameter dictionary is repeated,
     i.e. `[parameters, parameters, ...]`.
     """
-    parameters = None
-    parameter_items = []
-    for content in contents:
-        if content._parameters is None:
+    intersected_parameters = None
+    parameters_to_intersect = []
+
+    input_parameters = [
+        p for p in (_parameters_of(c) for c in inputs) if p is not NO_PARAMETERS
+    ]
+
+    # Build a list of set-like dict.items() views.
+    # If we encounter None-parameters, then we stop early
+    # as there can be no intersection.
+    for parameters in input_parameters:
+        if parameters is None:
             break
         else:
-            parameter_items.append(content._parameters.items())
+            parameters_to_intersect.append(parameters.items())
+    # Otherwise, build the intersected parameter dict
     else:
-        parameters = dict(functools.reduce(operator.and_, parameter_items))
+        intersected_parameters = dict(
+            functools.reduce(operator.and_, parameters_to_intersect)
+        )
 
     def apply(n_outputs: int) -> list[dict[str, Any] | None]:
         # NB: we don't make unique copies here, so let's hope everyone
         # is well-behaved downstream!
-        return [parameters] * n_outputs
+        return [intersected_parameters] * n_outputs
 
     return apply
 
 
 def _one_to_one_parameters_factory(
-    contents: Sequence[Content],
+    inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
     Args:
-        contents: sequence of #ak._v2.contents.Content objects
+        inputs: sequence of #ak._v2.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -251,22 +299,27 @@ def _one_to_one_parameters_factory(
     content at the same position in the `contents` sequence. If the length of the
     given contents does not match the requested list length, a ValueError is raised.
     """
-    parameters = [c._parameters for c in contents]
+    # Find the parameters of the inputs, with None values for non-Contents
+    input_parameters = [_parameters_of(c, default=None) for c in inputs]
 
     def apply(n_outputs) -> list[dict[str, Any] | None]:
-        if n_outputs != len(contents):
-            raise ak._v2._util.error(ValueError)
-        return parameters
+        if n_outputs != len(inputs):
+            raise ak._v2._util.error(
+                ValueError(
+                    'Cannot apply `"ONE_TO_ONE"` for actions which change the number of outputs.'
+                )
+            )
+        return input_parameters
 
     return apply
 
 
 def _no_parameters_factory(
-    contents: Sequence[Content],
+    inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
     Args:
-        contents: sequence of #ak._v2.contents.Content objects
+        inputs: sequence of #ak._v2.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -281,7 +334,8 @@ def _no_parameters_factory(
     return apply
 
 
-BROADCAST_RULE_TO_IMPL = {
+# Mapping from rule enum values to factory implementations
+BROADCAST_RULE_TO_FACTORY_IMPL = {
     BroadcastParameterRule.INTERSECT: _intersection_parameters_factory,
     BroadcastParameterRule.ALL_OR_NOTHING: _all_or_nothing_parameters_factory,
     BroadcastParameterRule.ONE_TO_ONE: _one_to_one_parameters_factory,
@@ -341,16 +395,15 @@ def apply_step(
     # Load the parameter broadcasting rule implementation
     rule = options["broadcast_parameters_rule"]
     try:
-        rule_impl = BROADCAST_RULE_TO_IMPL[rule]
+        parameters_factory_impl = BROADCAST_RULE_TO_FACTORY_IMPL[rule]
     except KeyError:
         raise ak._v2._util.error(
             ValueError(
                 f"`broadcast_parameters_rule` should be one of {[str(x) for x in BroadcastParameterRule]}, "
-                f"but this routine received `{rule}`."
+                f"but this routine received `{rule}`"
             )
         ) from None
-
-    parameters_factory = rule_impl(inputs)
+    parameters_factory = parameters_factory_impl(inputs)
 
     # This whole function is one big switch statement.
     def continuation():
