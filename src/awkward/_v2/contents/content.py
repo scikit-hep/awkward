@@ -12,6 +12,7 @@ from awkward._v2.tmp_for_testing import v1_to_v2
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
+# FIXME: use common Sentinel class for this
 unset = object()
 
 
