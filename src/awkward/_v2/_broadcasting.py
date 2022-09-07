@@ -248,7 +248,7 @@ def _intersection_parameters_factory(
         inputs: sequence of #ak._v2.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
-    The parameter objects within this list are built using an "all or nothing rule":
+    The parameter objects within this list are built using an "intersection rule":
 
     The intersection of `content._parameters.items()` for each content is computed.
     If any parameter dictionaries are None, then a list of Nones is returned, i.e.
@@ -291,10 +291,10 @@ def _one_to_one_parameters_factory(
         inputs: sequence of #ak._v2.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
-    The parameter objects within this list are built using an "all or nothing rule":
+    The parameter objects within this list are built using a "one-to-one rule":
 
-    The request number of outputs is compared against the length of the given
-    `contents`. If the two values match, then a list of parameter objects is returned,
+    The requested number of outputs is compared against the length of the given
+    `inputs`. If the two values match, then a list of parameter objects is returned,
     where each element of the returned list corresponds to the parameters of the
     content at the same position in the `contents` sequence. If the length of the
     given contents does not match the requested list length, a ValueError is raised.
