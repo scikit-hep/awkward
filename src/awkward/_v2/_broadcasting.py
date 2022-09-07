@@ -156,15 +156,6 @@ def all_same_offsets(nplike, inputs):
     return True
 
 
-class BroadcastParameterRule(str, enum.Enum):
-    """Behaviour for parameter coalescence during broadcasting."""
-
-    INTERSECT = "INTERSECT"
-    ONE_TO_ONE = "ONE_TO_ONE"
-    ALL_OR_NOTHING = "ALL_OR_NOTHING"
-    NONE = "NONE"
-
-
 # TODO: move to _util or another module
 class Sentinel:
     """A class for implementing sentinel types"""
@@ -181,6 +172,16 @@ class Sentinel:
 
 
 NO_PARAMETERS = Sentinel("NO_PARAMETERS", __name__)
+
+
+class BroadcastParameterRule(str, enum.Enum):
+    """Behaviour for parameter coalescence during broadcasting."""
+
+    INTERSECT = "intersect"
+    ONE_TO_ONE = "one_to_one"
+    ALL_OR_NOTHING = "all_or_nothing"
+    NONE = "none"
+
 
 BroadcastParameterFactory = Callable[[int], List[Union[Dict[str, Any], None]]]
 
@@ -831,7 +832,11 @@ def apply_step(
                     for x in inputs
                 ]
 
-                first, secondround = None, False
+                # Find first list without custom broadcasting which will define the broadcast offsets
+                # Don't consider RegularArray (handle case of 1-sized regular broadcasting)
+                # Do this to prioritise non-custom broadcasting
+                first = None
+
                 for x, fcn in zip(inputs, fcns):
                     if (
                         isinstance(x, listtypes)
@@ -841,6 +846,10 @@ def apply_step(
                         first = x
                         break
 
+                # Did we fail to find a list without custom broadcasting?
+                secondround = False
+                # If we failed to find an irregular, non-custom broadcasting list,
+                # continue search for *any* list.
                 if first is None:
                     secondround = True
                     for x in inputs:
@@ -848,6 +857,7 @@ def apply_step(
                             first = x
                             break
 
+                # Find intended
                 offsets = first._compact_offsets64(True)
 
                 nextinputs = []
