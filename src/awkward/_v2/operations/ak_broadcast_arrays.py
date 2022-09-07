@@ -156,7 +156,10 @@ def _impl(arrays, kwargs):
             ("depth_limit", None),
             ("left_broadcast", True),
             ("right_broadcast", True),
-            ("broadcast_parameters_rule", "ONE_TO_ONE"),
+            (
+                "broadcast_parameters_rule",
+                ak._v2._broadcasting.BroadcastParameterRule.ONE_TO_ONE,
+            ),
         ],
     )
 
