@@ -864,7 +864,6 @@ def apply_step(
                             first = x
                             break
 
-                # Find intended
                 offsets = first._compact_offsets64(True)
 
                 nextinputs = []
