@@ -573,11 +573,15 @@ def apply_step(
 
                 assert numoutputs is not None
 
+            parameters = parameters_factory(numoutputs)
             return tuple(
                 UnionArray(
-                    Index8(tags), Index64(index), [x[i] for x in outcontents]
+                    Index8(tags),
+                    Index64(index),
+                    [x[i] for x in outcontents],
+                    parameters=p,
                 ).simplify_uniontype()
-                for i in range(numoutputs)
+                for i, p in enumerate(parameters)
             )
 
         # Any option-types?
@@ -641,8 +645,10 @@ def apply_step(
                 options,
             )
             assert isinstance(outcontent, tuple)
+            parameters = parameters_factory(len(outcontent))
             return tuple(
-                IndexedOptionArray(index, x).simplify_optiontype() for x in outcontent
+                IndexedOptionArray(index, x, parameters=p).simplify_optiontype()
+                for x, p in zip(outcontent, parameters)
             )
 
         # Any list-types?
