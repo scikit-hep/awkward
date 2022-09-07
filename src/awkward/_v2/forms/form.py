@@ -217,6 +217,14 @@ def _parameters_update(one, two):
 
 
 def _parameters_is_empty(parameters: dict[str, Any] | None) -> bool:
+    """
+    Args:
+        parameters (dict or None): parameters dictionary, or None
+
+    Return True if the parameters dictionary is considered empty, either because it is
+    None, or because it does not have any meaningful (non-None) values; otherwise,
+    return False.
+    """
     if parameters is None:
         return True
 
