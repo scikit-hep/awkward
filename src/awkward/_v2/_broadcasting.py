@@ -296,7 +296,7 @@ def _one_to_one_parameters_factory(
     The requested number of outputs is compared against the length of the given
     `inputs`. If the two values match, then a list of parameter objects is returned,
     where each element of the returned list corresponds to the parameters of the
-    content at the same position in the `contents` sequence. If the length of the
+    content at the same position in the `inputs` sequence. If the length of the
     given contents does not match the requested list length, a ValueError is raised.
     """
     # Find the parameters of the inputs, with None values for non-Contents
@@ -314,7 +314,7 @@ def _one_to_one_parameters_factory(
     return apply
 
 
-def _no_parameters_factory(
+def _none_parameters_factory(
     inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
@@ -339,7 +339,7 @@ BROADCAST_RULE_TO_FACTORY_IMPL = {
     BroadcastParameterRule.INTERSECT: _intersection_parameters_factory,
     BroadcastParameterRule.ALL_OR_NOTHING: _all_or_nothing_parameters_factory,
     BroadcastParameterRule.ONE_TO_ONE: _one_to_one_parameters_factory,
-    BroadcastParameterRule.NONE: _no_parameters_factory,
+    BroadcastParameterRule.NONE: _none_parameters_factory,
 }
 
 
