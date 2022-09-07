@@ -39,7 +39,9 @@ class EmptyForm(Form):
             return True
 
         elif isinstance(other, EmptyForm):
-            return _parameters_equal(self._parameters, other._parameters)
+            return _parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
 
         else:
             return False
@@ -77,6 +79,10 @@ class EmptyForm(Form):
     @property
     def purelist_depth(self):
         return 1
+
+    @property
+    def is_identity_like(self):
+        return True
 
     @property
     def minmax_depth(self):

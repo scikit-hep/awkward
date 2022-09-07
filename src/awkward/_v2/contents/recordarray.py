@@ -9,7 +9,6 @@ import awkward as ak
 from awkward._v2.record import Record
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.recordform import RecordForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -522,20 +521,8 @@ class RecordArray(Content):
                 ),
             )
 
-    def mergeable(self, other, mergebool=True):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
-        elif isinstance(
             other,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
@@ -585,10 +572,9 @@ class RecordArray(Content):
         for_each_field = []
         for field in self.contents:
             trimmed = field[0 : self.length]
-            for_each_field.append([field])
+            for_each_field.append([trimmed])
 
         if self.is_tuple:
-            parameters = self._parameters
             for array in headless:
                 parameters = ak._v2._util.merge_parameters(
                     parameters, array._parameters, True
@@ -626,7 +612,6 @@ class RecordArray(Content):
             these_fields = self._fields.copy()
             these_fields.sort()
 
-            parameters = self._parameters
             for array in headless:
                 parameters = ak._v2._util.merge_parameters(
                     parameters, array._parameters, True
@@ -669,8 +654,7 @@ class RecordArray(Content):
         nextcontents = []
         minlength = None
         for forfield in for_each_field:
-            tail_forfield = forfield[1:]
-            merged = forfield[0].mergemany(tail_forfield)
+            merged = forfield[0].mergemany(forfield[1:])
 
             nextcontents.append(merged)
 

@@ -55,7 +55,9 @@ class UnmaskedForm(Form):
             return (
                 self._has_identifier == other._has_identifier
                 and self._form_key == other._form_key
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:
@@ -133,6 +135,10 @@ class UnmaskedForm(Form):
     @property
     def purelist_depth(self):
         return self._content.purelist_depth
+
+    @property
+    def is_identity_like(self):
+        return self._content.is_identity_like
 
     @property
     def minmax_depth(self):

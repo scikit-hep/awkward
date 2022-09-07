@@ -62,7 +62,9 @@ class ListOffsetForm(Form):
                 self._has_identifier == other._has_identifier
                 and self._form_key == other._form_key
                 and self._offsets == other._offsets
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:
@@ -75,7 +77,9 @@ class ListOffsetForm(Form):
         elif isinstance(other, ListOffsetForm):
             return (
                 self._offsets == other._offsets
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content.generated_compatibility(other._content)
             )
 
@@ -135,6 +139,10 @@ class ListOffsetForm(Form):
             return 1
         else:
             return self._content.purelist_depth + 1
+
+    @property
+    def is_identity_like(self):
+        return False
 
     @property
     def minmax_depth(self):

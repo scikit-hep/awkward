@@ -715,6 +715,27 @@ class Content:
         others = [other]
         return self.mergemany(others)
 
+    def mergeable(self, other, mergebool=True):
+        # Is the other content is an identity, or a union?
+        if other.is_identity_like or other.is_UnionType:
+            return True
+        # Otherwise, do the parameters match? If not, we can't merge.
+        elif not (
+            ak._v2.forms.form._parameters_equal(
+                self._parameters, other._parameters, only_array_record=True
+            )
+        ):
+            return False
+        # Finally, fall back upon the per-content implementation
+        else:
+            return self._mergeable(other, mergebool)
+
+    def _mergeable(self, other: "Content", mergebool: bool) -> bool:
+        raise ak._v2._util.error(NotImplementedError)
+
+    def mergemany(self, others):
+        raise ak._v2._util.error(NotImplementedError)
+
     def merge_as_union(self, other):
         mylength = self.length
         theirlength = other.length
@@ -1234,6 +1255,10 @@ class Content:
                 )
             )
         )
+
+    @property
+    def is_identity_like(self):
+        return self.Form.is_identity_like.__get__(self)
 
     @property
     def purelist_isregular(self):

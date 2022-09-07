@@ -7,7 +7,6 @@ from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.contents.listoffsetarray import ListOffsetArray
 from awkward._v2.forms.listform import ListForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -933,19 +932,7 @@ class ListArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         return self.toListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
-
-        if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
             other,
             (

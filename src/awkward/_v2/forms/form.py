@@ -173,7 +173,9 @@ def _parameters_equal(one, two, only_array_record=False):
         return True
     elif one is None:
         if only_array_record:
-            for key in ("__array__", "__record__"):
+            # NB: __categorical__ is currently a type-only parameter, but
+            # we check it here as types check this too.
+            for key in ("__array__", "__record__", "__categorical__"):
                 if two.get(key) is not None:
                     return False
             return True
@@ -185,7 +187,7 @@ def _parameters_equal(one, two, only_array_record=False):
 
     elif two is None:
         if only_array_record:
-            for key in ("__array__", "__record__"):
+            for key in ("__array__", "__record__", "__categorical__"):
                 if one.get(key) is not None:
                     return False
             return True
@@ -197,9 +199,9 @@ def _parameters_equal(one, two, only_array_record=False):
 
     else:
         if only_array_record:
-            keys = set(one.keys()).union(two.keys())
+            keys = ("__array__", "__record__", "__categorical__")
         else:
-            keys = ("__array__", "__record__")
+            keys = set(one.keys()).union(two.keys())
         for key in keys:
             if one.get(key) != two.get(key):
                 return False
@@ -262,11 +264,43 @@ class Form:
             self._parameters = {}
         return self._parameters
 
+    @property
+    def is_identity_like(self):
+        """Return True if the content or its non-list descendents are an identity"""
+        raise ak._v2._util.error(NotImplementedError)
+
     def parameter(self, key):
         if self._parameters is None:
             return None
         else:
             return self._parameters.get(key)
+
+    def purelist_parameter(self, key):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def purelist_isregular(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def purelist_depth(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def minmax_depth(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def branch_depth(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def fields(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def is_tuple(self):
+        raise ak._v2._util.error(NotImplementedError)
 
     @property
     def form_key(self):
@@ -345,3 +379,30 @@ class Form:
 
     def column_types(self):
         return self._column_types()
+
+    def _columns(self, path, output, list_indicator):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _select_columns(self, index, specifier, matches, output):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _column_types(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def generated_compatibility(self, other):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_range(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_field(self, where, only_fields=()):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _getitem_fields(self, where, only_fields=()):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _tolist_part(self, verbose, toplevel):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def _type(self, typestrs):
+        raise ak._v2._util.error(NotImplementedError)

@@ -57,10 +57,10 @@ class RegularType(Type):
             out = [self._typestr]
 
         elif self.parameter("__array__") == "string":
-            return [f"string[{self._size}]"]
+            out = [f"string[{self._size}]"]
 
         elif self.parameter("__array__") == "bytestring":
-            return [f"bytes[{self._size}]"]
+            out = [f"bytes[{self._size}]"]
 
         else:
             params = self._str_parameters()
@@ -82,8 +82,7 @@ class RegularType(Type):
     def __eq__(self, other):
         if isinstance(other, RegularType):
             return (
-                self._typestr == other._typestr
-                and self._size == other._size
+                self._size == other._size
                 and _parameters_equal(
                     self._parameters, other._parameters, only_array_record=True
                 )

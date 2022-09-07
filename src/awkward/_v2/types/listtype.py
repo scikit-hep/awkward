@@ -44,10 +44,10 @@ class ListType(Type):
             out = [self._typestr]
 
         elif self.parameter("__array__") == "string":
-            return ["string"]
+            out = ["string"]
 
         elif self.parameter("__array__") == "bytestring":
-            return ["bytes"]
+            out = ["bytes"]
 
         else:
             params = self._str_parameters()
@@ -67,8 +67,7 @@ class ListType(Type):
     def __eq__(self, other):
         if isinstance(other, ListType):
             return (
-                self._typestr == other._typestr
-                and _parameters_equal(
+                _parameters_equal(
                     self._parameters, other._parameters, only_array_record=True
                 )
                 and self._content == other._content

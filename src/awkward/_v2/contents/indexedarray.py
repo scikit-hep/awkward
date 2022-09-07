@@ -6,7 +6,6 @@ import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.indexedform import IndexedForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -451,19 +450,7 @@ class IndexedArray(Content):
         else:
             return self.project()._offsets_and_flattened(posaxis, depth)
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
-
-        if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
             other,
             (

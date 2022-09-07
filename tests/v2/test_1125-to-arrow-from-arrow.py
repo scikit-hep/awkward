@@ -11,26 +11,32 @@ pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 to_list = ak._v2.operations.to_list
 
 
-def arrow_round_trip(akarray, paarray, extensionarray):
+def arrow_round_trip(akarray, paarray, extensionarray, categorical_as_dictionary=False):
     assert to_list(akarray) == paarray.to_pylist()
     akarray2 = ak._v2.from_arrow(paarray, highlevel=False)
     assert to_list(akarray2) == to_list(akarray)
-    if extensionarray:
+    if extensionarray and categorical_as_dictionary:
         assert akarray2.form.type == akarray.form.type
     akarray3 = ak._v2.from_arrow(
-        akarray2.to_arrow(extensionarray=extensionarray), highlevel=False
+        akarray2.to_arrow(
+            extensionarray=extensionarray,
+            categorical_as_dictionary=categorical_as_dictionary,
+        ),
+        highlevel=False,
     )
-    if extensionarray:
+    if extensionarray and categorical_as_dictionary:
         assert akarray3.form.type == akarray.form.type
 
 
-def parquet_round_trip(akarray, paarray, extensionarray, tmp_path):
+def parquet_round_trip(
+    akarray, paarray, extensionarray, tmp_path, categorical_as_dictionary=False
+):
     filename = os.path.join(tmp_path, "whatever.parquet")
     pyarrow_parquet.write_table(pyarrow.table({"": paarray}), filename)
     table = pyarrow_parquet.read_table(filename)
     akarray4 = ak._v2.from_arrow(table[0].chunks[0], highlevel=False)
     assert to_list(akarray4) == to_list(akarray)
-    if extensionarray:
+    if extensionarray and categorical_as_dictionary:
         assert akarray4.form.type == akarray.form.type
 
 
@@ -254,11 +260,22 @@ def test_dictionary_encoding(tmp_path, categorical_as_dictionary, extensionarray
         categorical_as_dictionary=categorical_as_dictionary,
         extensionarray=extensionarray,
     )
-    arrow_round_trip(akarray, paarray, extensionarray)
+    arrow_round_trip(
+        akarray,
+        paarray,
+        extensionarray,
+        categorical_as_dictionary=categorical_as_dictionary,
+    )
 
     # https://issues.apache.org/jira/browse/ARROW-14525
     if not (extensionarray and categorical_as_dictionary):
-        parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
+        parquet_round_trip(
+            akarray,
+            paarray,
+            extensionarray,
+            tmp_path,
+            categorical_as_dictionary=categorical_as_dictionary,
+        )
 
 
 @pytest.mark.parametrize("string_to32", [False, True])
