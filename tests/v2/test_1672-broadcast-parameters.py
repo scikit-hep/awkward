@@ -56,8 +56,8 @@ def test_broadcast_strings_2d():
 @pytest.mark.skip("string broadcasting is broken")
 def test_broadcast_string_int():
     this = ak._v2.Array(["one", "two", "one", "nine"])
-    that = ak._v2.operations.ak_with_parameter.with_parameter(
-        ak._v2.Array([1, 2, 1, 9]), "kind", "integer"
+    that = ak._v2.contents.NumpyArray(
+        numpy.array([1, 2, 1, 9], dtype="int32"), parameters={"kind": "integer"}
     )
     this_next, that_next = ak._v2.operations.ak_broadcast_arrays.broadcast_arrays(
         this, that
@@ -68,18 +68,18 @@ def test_broadcast_string_int():
 
 
 def test_broadcast_float_int():
-    this = ak._v2.operations.ak_with_parameter.with_parameter(
-        ak._v2.Array([1.0, 2.0, 3.0, 4.0]), "name", "this"
+    this = ak._v2.contents.NumpyArray(
+        numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64"), parameters={"name": "this"}
     )
-    that = ak._v2.operations.ak_with_parameter.with_parameter(
-        ak._v2.Array([1, 2, 1, 9]), "name", "that"
+    that = ak._v2.contents.NumpyArray(
+        numpy.array([1, 2, 1, 9], dtype="int32"), parameters={"name": "that"}
     )
     this_next, that_next = ak._v2.operations.ak_broadcast_arrays.broadcast_arrays(
-        this, that
+        this, that, highlevel=False
     )
 
-    assert this.layout.parameters == this_next.layout.parameters
-    assert that.layout.parameters == that_next.layout.parameters
+    assert this.parameters == this_next.parameters
+    assert that.parameters == that_next.parameters
 
 
 def test_broadcast_float_int_option():
@@ -132,33 +132,53 @@ def test_broadcast_float_int_union():
 
 
 def test_broadcast_float_int_2d():
-    this = ak._v2.operations.ak_with_parameter.with_parameter(
-        ak._v2.Array([[1.0, 2.0, 3.0], [4.0]]), "name", "this"
+    this = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        parameters={"name": "this"},
     )
-    that = ak._v2.operations.ak_with_parameter.with_parameter(
-        ak._v2.Array([[1, 2, 1], [9]]), "name", "that"
+    that = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        parameters={"name": "that"},
     )
     this_next, that_next = ak._v2.operations.ak_broadcast_arrays.broadcast_arrays(
-        this, that
+        this, that, highlevel=False
     )
 
-    assert this.layout.parameters == this_next.layout.parameters
-    assert that.layout.parameters == that_next.layout.parameters
+    assert this.parameters == this_next.parameters
+    assert that.parameters == that_next.parameters
 
-    assert this.layout.content.parameters == this_next.layout.content.parameters
-    assert that.layout.content.parameters == that_next.layout.content.parameters
+    assert this.content.parameters == this_next.content.parameters
+    assert that.content.parameters == that_next.content.parameters
 
 
 def test_broadcast_float_int_2d_right_broadcast():
-    this = ak._v2.operations.ak_with_parameter.with_parameter(
-        ak._v2.Array([[1.0, 2.0, 3.0], [4.0]]), "name", "this"
+    this = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        parameters={"name": "this"},
     )
-    that = ak._v2.operations.ak_to_regular.to_regular(
-        ak._v2.operations.ak_with_parameter.with_parameter(
-            ak._v2.Array([[1], [9]]), "name", "that"
-        ),
-        axis=1,
+    that = ak._v2.contents.RegularArray(
+        ak._v2.contents.NumpyArray(numpy.array([1, 9], dtype="int64")),
+        size=1,
+        parameters={"name": "that"},
     )
+    this_next, that_next = ak._v2.operations.ak_broadcast_arrays.broadcast_arrays(
+        this, that, highlevel=False
+    )
+
+    assert this.parameters == this_next.parameters
+    assert that.parameters == that_next.parameters
+
+    assert this.content.parameters == this_next.content.parameters
+    assert that.content.parameters == that_next.content.parameters
+
+
+def test_broadcast_string_self():
+    this = ak._v2.Array(["one", "two", "one", "nine"])
+    that = this
+
     this_next, that_next = ak._v2.operations.ak_broadcast_arrays.broadcast_arrays(
         this, that
     )
@@ -166,5 +186,125 @@ def test_broadcast_float_int_2d_right_broadcast():
     assert this.layout.parameters == this_next.layout.parameters
     assert that.layout.parameters == that_next.layout.parameters
 
-    assert this.layout.content.parameters == this_next.layout.content.parameters
-    assert that.layout.content.parameters == that_next.layout.content.parameters
+
+def test_transform_float_int_2d_same():
+    this = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        parameters={"name": "this"},
+    )
+    that = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        parameters={"name": "this"},
+    )
+    this_next, that_next = ak._v2.operations.ak_transform.transform(
+        lambda *a, **k: None, this, that, highlevel=False
+    )
+
+    assert this_next.parameters == that_next.parameters
+    assert this_next.parameters != {}
+
+
+def test_transform_float_int_2d_different_one_to_one():
+    this = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        parameters={"name": "this"},
+    )
+    that = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        parameters={"name": "that"},
+    )
+    this_next, that_next = ak._v2.operations.ak_transform.transform(
+        lambda *a, **k: None,
+        this,
+        that,
+        highlevel=False,
+        broadcast_parameters_rule="one_to_one",
+    )
+
+    assert this_next.parameters == this.parameters
+    assert that_next.parameters == that.parameters
+
+
+def test_transform_float_int_2d_different_intersect():
+    this = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        parameters={"name": "this"},
+    )
+    that = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        parameters={"name": "that"},
+    )
+    this_next, that_next = ak._v2.operations.ak_transform.transform(
+        lambda *a, **k: None,
+        this,
+        that,
+        highlevel=False,
+        broadcast_parameters_rule="intersect",
+    )
+
+    assert this_next.parameters == {}
+    assert that_next.parameters == {}
+
+
+def test_transform_float_int_2d_one_to_one_error():
+    this = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        parameters={"name": "this"},
+    )
+    that = ak._v2.contents.ListOffsetArray(
+        ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
+        ak._v2.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
+        parameters={"name": "that"},
+    )
+
+    def apply(arrays, **kwargs):
+        layout = ak._v2.operations.ak_to_layout.to_layout(arrays[0])
+        if isinstance(layout, ak._v2.contents.NumpyArray):
+            return layout
+
+    with pytest.raises(ValueError):
+        ak._v2.operations.ak_transform.transform(
+            apply, this, that, highlevel=False, broadcast_parameters_rule="one_to_one"
+        )
+
+
+def test_transform_string_self_one_to_one():
+    this = ak._v2.Array(["one", "two", "one", "nine"])
+    that = this
+
+    def apply(arrays, **kwargs):
+        layout = ak._v2.operations.ak_to_layout.to_layout(arrays[0])
+        if layout.parameter("__array__") is not None:
+            return arrays
+
+    this_next, that_next = ak._v2.operations.ak_transform.transform(
+        apply, this, that, broadcast_parameters_rule="one_to_one"
+    )
+
+    assert this.layout.parameters == this_next.layout.parameters
+    assert that.layout.parameters == that_next.layout.parameters
+
+
+@pytest.mark.parametrize("rule", ["all_or_nothing", "intersect", "one_to_one"])
+def test_transform_string_self_intersect(rule):
+    this = ak._v2.Array(["one", "two", "one", "nine"])
+    that = this
+
+    def apply(arrays, **kwargs):
+        layout = ak._v2.operations.ak_to_layout.to_layout(arrays[0])
+        if layout.parameter("__array__") is not None:
+            return arrays
+
+    this_next, that_next = ak._v2.operations.ak_transform.transform(
+        apply, this, that, broadcast_parameters_rule=rule
+    )
+
+    assert this.layout.parameters == this_next.layout.parameters
+    assert that.layout.parameters == that_next.layout.parameters
