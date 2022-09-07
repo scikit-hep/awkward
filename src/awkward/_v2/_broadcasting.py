@@ -180,9 +180,9 @@ class Sentinel:
             return f"{self._name}"
 
 
-BroadcastParameterFactory = Callable[[int], List[Union[Dict[str, Any], None]]]
-
 NO_PARAMETERS = Sentinel("NO_PARAMETERS", __name__)
+
+BroadcastParameterFactory = Callable[[int], List[Union[Dict[str, Any], None]]]
 
 
 def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
@@ -254,13 +254,12 @@ def _intersection_parameters_factory(
     `[None, None, ...]`; otherwise, the computed parameter dictionary is repeated,
     i.e. `[parameters, parameters, ...]`.
     """
-    intersected_parameters = None
-    parameters_to_intersect = []
-
     input_parameters = [
         p for p in (_parameters_of(c) for c in inputs) if p is not NO_PARAMETERS
     ]
 
+    intersected_parameters = None
+    parameters_to_intersect = []
     # Build a list of set-like dict.items() views.
     # If we encounter None-parameters, then we stop early
     # as there can be no intersection.
