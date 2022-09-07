@@ -1,7 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from __future__ import annotations
+
 import copy
+import enum
+import functools
 import itertools
+import operator
+from typing import Any, Callable
+from collections.abc import Sequence
 
 import awkward as ak
 from awkward._v2.contents.content import Content  # noqa: F401
@@ -149,6 +156,139 @@ def all_same_offsets(nplike, inputs):
     return True
 
 
+class BroadcastParameterRule(str, enum.Enum):
+    """Behaviour for parameter coalescence during broadcasting."""
+
+    INTERSECT = "INTERSECT"
+    ONE_TO_ONE = "ONE_TO_ONE"
+    ALL_OR_NOTHING = "ALL_OR_NOTHING"
+    NONE = "NONE"
+
+
+BroadcastParameterFactory = Callable[[int], list[dict[str, Any] | None]]
+
+
+def _all_or_nothing_parameters_factory(
+    contents: Sequence[Content],
+) -> BroadcastParameterFactory:
+    """
+    Args:
+        contents: sequence of #ak._v2.contents.Content objects
+
+    Return a callable that creates an appropriately sized list of parameter objects.
+    The parameter objects within this list are built using an "all or nothing rule":
+
+    If the parameters of all the given contents are equal, then the first content's
+    parameters are repeated, i.e. `[parameters, parameters, ...]`. Otherwise, a list
+    of Nones is returned, i.e. `[None, None, ...]`.
+    """
+    parameters = None
+    if len(contents) > 0:
+        maybe_parameters = contents[0]._parameters
+        # Ensure all parameters match, or set parameters to None
+        for content in contents[1:]:
+            if not ak._v2.forms.form._parameters_equal(
+                maybe_parameters, content._parameters
+            ):
+                break
+        else:
+            parameters = maybe_parameters
+
+    def apply(n_outputs: int) -> list[dict[str, Any] | None]:
+        # NB: we don't make unique copies here, so let's hope everyone
+        # is well-behaved downstream!
+        return [parameters] * n_outputs
+
+    return apply
+
+
+def _intersection_parameters_factory(
+    contents: Sequence[Content],
+) -> BroadcastParameterFactory:
+    """
+    Args:
+        contents: sequence of #ak._v2.contents.Content objects
+
+    Return a callable that creates an appropriately sized list of parameter objects.
+    The parameter objects within this list are built using an "all or nothing rule":
+
+    The intersection of `content._parameters.items()` for each content is computed.
+    If any parameter dictionaries are None, then a list of Nones is returned, i.e.
+    `[None, None, ...]`; otherwise, the computed parameter dictionary is repeated,
+    i.e. `[parameters, parameters, ...]`.
+    """
+    parameters = None
+    parameter_items = []
+    for content in contents:
+        if content._parameters is None:
+            break
+        else:
+            parameter_items.append(content._parameters.items())
+    else:
+        parameters = dict(functools.reduce(operator.and_, parameter_items))
+
+    def apply(n_outputs: int) -> list[dict[str, Any] | None]:
+        # NB: we don't make unique copies here, so let's hope everyone
+        # is well-behaved downstream!
+        return [parameters] * n_outputs
+
+    return apply
+
+
+def _one_to_one_parameters_factory(
+    contents: Sequence[Content],
+) -> BroadcastParameterFactory:
+    """
+    Args:
+        contents: sequence of #ak._v2.contents.Content objects
+
+    Return a callable that creates an appropriately sized list of parameter objects.
+    The parameter objects within this list are built using an "all or nothing rule":
+
+    The request number of outputs is compared against the length of the given
+    `contents`. If the two values match, then a list of parameter objects is returned,
+    where each element of the returned list corresponds to the parameters of the
+    content at the same position in the `contents` sequence. If the length of the
+    given contents does not match the requested list length, a ValueError is raised.
+    """
+    parameters = [c._parameters for c in contents]
+
+    def apply(n_outputs) -> list[dict[str, Any] | None]:
+        if n_outputs != len(contents):
+            raise ak._v2._util.error(ValueError)
+        return parameters
+
+    return apply
+
+
+def _no_parameters_factory(
+    contents: Sequence[Content],
+) -> BroadcastParameterFactory:
+    """
+    Args:
+        contents: sequence of #ak._v2.contents.Content objects
+
+    Return a callable that creates an appropriately sized list of parameter objects.
+    The parameter objects within this list are built using an "all or nothing rule":
+
+    A list of Nones is returned, with a length corresponding to the requested number of
+    outputs, i.e. `[None, None, ...]`.
+    """
+
+    def apply(n_outputs: int) -> list[dict[str, Any] | None]:
+        return [None] * n_outputs
+
+    return apply
+
+
+BROADCAST_RULE_TO_IMPL = {
+    BroadcastParameterRule.INTERSECT: _intersection_parameters_factory,
+    BroadcastParameterRule.ALL_OR_NOTHING: _all_or_nothing_parameters_factory,
+    BroadcastParameterRule.ONE_TO_ONE: _one_to_one_parameters_factory,
+    BroadcastParameterRule.NONE: _no_parameters_factory,
+}
+
+
 def apply_step(
     nplike, inputs, action, depth, depth_context, lateral_context, behavior, options
 ):
@@ -197,6 +337,20 @@ def apply_step(
     # Now all lengths must agree.
     if nplike.known_shape:
         checklength([x for x in inputs if isinstance(x, Content)], options)
+
+    # Load the parameter broadcasting rule implementation
+    rule = options["broadcast_parameters_rule"]
+    try:
+        rule_impl = BROADCAST_RULE_TO_IMPL[rule]
+    except KeyError:
+        raise ak._v2._util.error(
+            ValueError(
+                f"`broadcast_parameters_rule` should be one of {[str(x) for x in BroadcastParameterRule]}, "
+                f"but this routine received `{rule}`."
+            )
+        ) from None
+
+    parameters_factory = rule_impl(inputs)
 
     # This whole function is one big switch statement.
     def continuation():
@@ -551,8 +705,11 @@ def apply_step(
                     options,
                 )
                 assert isinstance(outcontent, tuple)
-
-                return tuple(ListOffsetArray(offsets, x) for x in outcontent)
+                parameters = parameters_factory(len(outcontent))
+                return tuple(
+                    ListOffsetArray(offsets, x, parameters=p)
+                    for x, p in zip(outcontent, parameters)
+                )
 
             # Not all regular, but all same offsets?
             # Optimization: https://github.com/scikit-hep/awkward-1.0/issues/442
@@ -588,16 +745,21 @@ def apply_step(
                     options,
                 )
                 assert isinstance(outcontent, tuple)
+                parameters = parameters_factory(len(outcontent))
 
                 if isinstance(offsets, Index):
                     return tuple(
-                        ListOffsetArray(offsets, x).toListOffsetArray64(False)
-                        for x in outcontent
+                        ListOffsetArray(offsets, x, parameters=p).toListOffsetArray64(
+                            False
+                        )
+                        for x, p in zip(outcontent, parameters)
                     )
                 elif isinstance(starts, Index) and isinstance(stops, Index):
                     return tuple(
-                        ListArray(starts, stops, x).toListOffsetArray64(False)
-                        for x in outcontent
+                        ListArray(starts, stops, x, parameters=p).toListOffsetArray64(
+                            False
+                        )
+                        for x, p in zip(outcontent, parameters)
                     )
                 else:
                     raise ak._v2._util.error(
@@ -664,8 +826,12 @@ def apply_step(
                     options,
                 )
                 assert isinstance(outcontent, tuple)
+                parameters = parameters_factory(len(outcontent))
 
-                return tuple(ListOffsetArray(offsets, x) for x in outcontent)
+                return tuple(
+                    ListOffsetArray(offsets, x, parameters=p)
+                    for x, p in zip(outcontent, parameters)
+                )
 
         # Any RecordArrays?
         elif any(isinstance(x, RecordArray) for x in inputs):
@@ -724,9 +890,12 @@ def apply_step(
 
             return tuple(
                 RecordArray(
-                    [x[i] for x in outcontents], None if istuple else fields, length
+                    [x[i] for x in outcontents],
+                    None if istuple else fields,
+                    length,
+                    parameters=p,
                 )
-                for i in range(numoutputs)
+                for i, p in enumerate(parameters_factory(numoutputs))
             )
 
         else:
@@ -769,6 +938,7 @@ def broadcast_and_apply(
     numpy_to_regular=False,
     regular_to_jagged=False,
     function_name=None,
+    broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
     nplike = ak.nplike.of(*inputs)
     isscalar = []
@@ -787,6 +957,7 @@ def broadcast_and_apply(
             "numpy_to_regular": numpy_to_regular,
             "regular_to_jagged": regular_to_jagged,
             "function_name": function_name,
+            "broadcast_parameters_rule": broadcast_parameters_rule,
         },
     )
     assert isinstance(out, tuple)
