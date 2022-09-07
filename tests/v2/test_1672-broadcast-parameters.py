@@ -175,6 +175,28 @@ def test_broadcast_float_int_2d_right_broadcast():
     assert that.content.parameters == that_next.content.parameters
 
 
+def test_broadcast_float_int_2d_regular():
+    this = ak._v2.contents.RegularArray(
+        ak._v2.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
+        size=2,
+        parameters={"name": "this"},
+    )
+    that = ak._v2.contents.RegularArray(
+        ak._v2.contents.NumpyArray(numpy.array([1, 9], dtype="int64")),
+        size=1,
+        parameters={"name": "that"},
+    )
+    this_next, that_next = ak._v2.operations.ak_broadcast_arrays.broadcast_arrays(
+        this, that, highlevel=False
+    )
+
+    assert this.parameters == this_next.parameters
+    assert that.parameters == that_next.parameters
+
+    assert this.content.parameters == this_next.content.parameters
+    assert that.content.parameters == that_next.content.parameters
+
+
 def test_broadcast_string_self():
     this = ak._v2.Array(["one", "two", "one", "nine"])
     that = this
