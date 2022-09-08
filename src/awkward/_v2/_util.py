@@ -7,9 +7,9 @@ import itertools
 import numbers
 import os
 import re
-import setuptools
 import threading
 import traceback
+import packaging.version
 
 from collections.abc import Sequence, Mapping, Iterable
 
@@ -46,7 +46,7 @@ def regularize_backend(backend):
 
 
 def parse_version(version):
-    return setuptools.extern.packaging.version.parse(version)
+    return packaging.version.parse(version)
 
 
 def numpy_at_least(version):

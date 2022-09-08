@@ -4,7 +4,12 @@
 
 import ctypes
 import platform
-import pkg_resources
+import sys
+
+if sys.version_info < (3, 9):
+    import importlib_resources
+else:
+    import importlib.resources as importlib_resources
 
 import awkward._kernel_signatures
 
@@ -14,7 +19,9 @@ elif platform.system() == "Darwin":
     name = "libawkward-cpu-kernels.dylib"
 else:
     name = "libawkward-cpu-kernels.so"
-libpath = pkg_resources.resource_filename("awkward", name)
 
-lib = ctypes.cdll.LoadLibrary(libpath)
+libpath_ref = importlib_resources.files("awkward") / name
+with importlib_resources.as_file(libpath_ref) as libpath:
+    lib = ctypes.cdll.LoadLibrary(str(libpath))
+
 kernel = awkward._kernel_signatures.by_signature(lib)

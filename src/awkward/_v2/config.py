@@ -1,9 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import sys
-import os
 import argparse
-import pkg_resources
+
+if sys.version_info < (3, 9):
+    import importlib_resources
+else:
+    import importlib.resources as importlib_resources
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser(
@@ -25,19 +28,17 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     output = []
-    incdir = pkg_resources.resource_filename(
-        "awkward", os.path.join("src", "_v2", "cpp-headers")
-    )
+    incdir_ref = importlib_resources.files("awkward") / "src" / "_v2" / "cpp-headers"
+    with importlib_resources.as_file(incdir_ref) as incdir:
+        # loop over original sys.argv to get optional arguments in order
+        for arg in sys.argv:
+            if arg == "--cflags":
+                output.append(f"-std=c++17 -I{incdir}")
 
-    # loop over original sys.argv to get optional arguments in order
-    for arg in sys.argv:
-        if arg == "--cflags":
-            output.append(f"-std=c++17 -I{incdir}")
+            if arg == "--cflags-only-I":
+                output.append(f"-I{incdir}")
 
-        if arg == "--cflags-only-I":
-            output.append(f"-I{incdir}")
-
-        if arg == "--incdir":
-            output.append(incdir)
+            if arg == "--incdir":
+                output.append(str(incdir))
 
     print(" ".join(output))  # noqa: T201
