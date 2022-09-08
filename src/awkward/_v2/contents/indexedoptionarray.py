@@ -1684,10 +1684,20 @@ class IndexedOptionArray(Content):
 
     def packed(self):
         original_index = self._index.raw(self._nplike)
-
         is_none = original_index < 0
         num_none = self._nplike.index_nplike.count_nonzero(is_none)
-        if self._content.length > len(original_index) - num_none:
+        if self.parameter("__array__") == "categorical" or self._content.length <= (
+            len(original_index) - num_none
+        ):
+            return ak._v2.contents.IndexedOptionArray(
+                self._index,
+                self._content.packed(),
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
+
+        else:
             new_index = self._nplike.index_nplike.empty(
                 len(original_index), dtype=original_index.dtype
             )
@@ -1699,15 +1709,6 @@ class IndexedOptionArray(Content):
             return ak._v2.contents.IndexedOptionArray(
                 ak._v2.index.Index(new_index, nplike=self.nplike),
                 self.project().packed(),
-                self._identifier,
-                self._parameters,
-                self._nplike,
-            )
-
-        else:
-            return ak._v2.contents.IndexedOptionArray(
-                self._index,
-                self._content.packed(),
                 self._identifier,
                 self._parameters,
                 self._nplike,
