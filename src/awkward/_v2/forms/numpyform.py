@@ -120,7 +120,9 @@ class NumpyForm(Form):
                 and self._form_key == other._form_key
                 and self._primitive == other._primitive
                 and self._inner_shape == other._inner_shape
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
             )
         else:
             return False
@@ -142,7 +144,9 @@ class NumpyForm(Form):
                 ak._v2.types.numpytype.primitive_to_dtype(self._primitive)
                 == ak._v2.types.numpytype.primitive_to_dtype(other._primitive)
                 and self._inner_shape == other._inner_shape
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
             )
 
         else:
@@ -185,6 +189,10 @@ class NumpyForm(Form):
     @property
     def purelist_depth(self):
         return len(self.inner_shape) + 1
+
+    @property
+    def is_identity_like(self):
+        return False
 
     @property
     def minmax_depth(self):

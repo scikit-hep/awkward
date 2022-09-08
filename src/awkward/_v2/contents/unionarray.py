@@ -13,7 +13,6 @@ from awkward._v2.index import Index8
 from awkward._v2.index import Index64
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.unionform import UnionForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -779,9 +778,7 @@ class UnionArray(Content):
                     ),
                 )
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
+    def _mergeable(self, other, mergebool):
         return True
 
     def merging_strategy(self, others):

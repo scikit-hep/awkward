@@ -58,6 +58,10 @@ class ByteMaskedForm(Form):
     def valid_when(self):
         return self._valid_when
 
+    @property
+    def is_identity_like(self):
+        return False
+
     def __repr__(self):
         args = [
             repr(self._mask),
@@ -91,7 +95,9 @@ class ByteMaskedForm(Form):
                 and self._form_key == other._form_key
                 and self._mask == other._mask
                 and self._valid_when == other._valid_when
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:
@@ -105,7 +111,9 @@ class ByteMaskedForm(Form):
             return (
                 self._mask == other._mask
                 and self._valid_when == other._valid_when
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content.generated_compatibility(other._content)
             )
 

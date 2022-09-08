@@ -161,7 +161,9 @@ class RecordForm(Form):
                 and self._form_key == other._form_key
                 and self.is_tuple == other.is_tuple
                 and len(self._contents) == len(other._contents)
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
             ):
                 if self.is_tuple:
                     return self._contents == other._contents
@@ -273,6 +275,10 @@ class RecordForm(Form):
     @property
     def purelist_depth(self):
         return 1
+
+    @property
+    def is_identity_like(self):
+        return False
 
     @property
     def minmax_depth(self):

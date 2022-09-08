@@ -12,9 +12,16 @@ pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 to_list = ak._v2.operations.to_list
 
 
-def parquet_round_trip(akarray, extensionarray, tmp_path):
+def parquet_round_trip(
+    akarray, extensionarray, tmp_path, categorical_as_dictionary=False
+):
     filename = os.path.join(tmp_path, "whatever.parquet")
-    ak._v2.to_parquet(akarray, filename, extensionarray=extensionarray)
+    ak._v2.to_parquet(
+        akarray,
+        filename,
+        extensionarray=extensionarray,
+        categorical_as_dictionary=categorical_as_dictionary,
+    )
     akarray2 = ak._v2.from_parquet(filename)
 
     assert to_list(akarray2) == to_list(akarray)
@@ -210,6 +217,9 @@ def test_indexedoptionarray_emptyarray(tmp_path, extensionarray):
     parquet_round_trip(ak._v2.Array(akarray), extensionarray, tmp_path)
 
 
+@pytest.mark.skip(
+    "Categorical arrays can't roundtrip through Parquet due to ARROW-14525"
+)
 @pytest.mark.parametrize("categorical_as_dictionary", [False, True])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_dictionary_encoding(tmp_path, categorical_as_dictionary, extensionarray):
@@ -220,8 +230,9 @@ def test_dictionary_encoding(tmp_path, categorical_as_dictionary, extensionarray
     )
 
     # https://issues.apache.org/jira/browse/ARROW-14525
-    if not (extensionarray and categorical_as_dictionary):
-        parquet_round_trip(ak._v2.Array(akarray), extensionarray, tmp_path)
+    parquet_round_trip(
+        ak._v2.Array(akarray), extensionarray, tmp_path, categorical_as_dictionary
+    )
 
 
 @pytest.mark.parametrize("string_to32", [False, True])

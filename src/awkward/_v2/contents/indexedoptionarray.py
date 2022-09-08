@@ -6,7 +6,6 @@ import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.indexedoptionform import IndexedOptionForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -584,19 +583,7 @@ class IndexedOptionArray(Content):
                 )
                 return (outoffsets, flattened)
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
-
-        if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -1697,10 +1684,20 @@ class IndexedOptionArray(Content):
 
     def packed(self):
         original_index = self._index.raw(self._nplike)
-
         is_none = original_index < 0
         num_none = self._nplike.index_nplike.count_nonzero(is_none)
-        if self._content.length > len(original_index) - num_none:
+        if self.parameter("__array__") == "categorical" or self._content.length <= (
+            len(original_index) - num_none
+        ):
+            return ak._v2.contents.IndexedOptionArray(
+                self._index,
+                self._content.packed(),
+                self._identifier,
+                self._parameters,
+                self._nplike,
+            )
+
+        else:
             new_index = self._nplike.index_nplike.empty(
                 len(original_index), dtype=original_index.dtype
             )
@@ -1712,15 +1709,6 @@ class IndexedOptionArray(Content):
             return ak._v2.contents.IndexedOptionArray(
                 ak._v2.index.Index(new_index, nplike=self.nplike),
                 self.project().packed(),
-                self._identifier,
-                self._parameters,
-                self._nplike,
-            )
-
-        else:
-            return ak._v2.contents.IndexedOptionArray(
-                self._index,
-                self._content.packed(),
                 self._identifier,
                 self._parameters,
                 self._nplike,

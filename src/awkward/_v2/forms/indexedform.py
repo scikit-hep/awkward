@@ -71,7 +71,14 @@ class IndexedForm(Form):
             if self._parameters.get("__array__") == "categorical":
                 if out._parameters is self._parameters:
                     out._parameters = dict(out._parameters)
-                del out._parameters["__array__"]
+
+                # Restore content __array__
+                out_array = self._content.parameter("__array__")
+                if out_array is not None:
+                    out._parameters["__array__"] = out_array
+                else:
+                    del out._parameters["__array__"]
+                out._parameters["__categorical__"] = True
 
         return out
 
@@ -81,7 +88,9 @@ class IndexedForm(Form):
                 self._has_identifier == other._has_identifier
                 and self._form_key == other._form_key
                 and self._index == other._index
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content == other._content
             )
         else:
@@ -94,7 +103,9 @@ class IndexedForm(Form):
         elif isinstance(other, IndexedForm):
             return (
                 self._index == other._index
-                and _parameters_equal(self._parameters, other._parameters)
+                and _parameters_equal(
+                    self._parameters, other._parameters, only_array_record=True
+                )
                 and self._content.generated_compatibility(other._content)
             )
 
@@ -150,6 +161,10 @@ class IndexedForm(Form):
     @property
     def purelist_depth(self):
         return self._content.purelist_depth
+
+    @property
+    def is_identity_like(self):
+        return False
 
     @property
     def minmax_depth(self):

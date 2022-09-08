@@ -146,6 +146,7 @@ def _impl(arrays, kwargs):
         depth_limit,
         left_broadcast,
         right_broadcast,
+        broadcast_parameters_rule,
     ) = ak._v2._util.extra(
         (),
         kwargs,
@@ -155,6 +156,10 @@ def _impl(arrays, kwargs):
             ("depth_limit", None),
             ("left_broadcast", True),
             ("right_broadcast", True),
+            (
+                "broadcast_parameters_rule",
+                ak._v2._broadcasting.BroadcastParameterRule.ONE_TO_ONE,
+            ),
         ],
     )
 
@@ -181,6 +186,7 @@ def _impl(arrays, kwargs):
         behavior,
         left_broadcast=left_broadcast,
         right_broadcast=right_broadcast,
+        broadcast_parameters_rule=broadcast_parameters_rule,
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)

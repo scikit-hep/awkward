@@ -6,7 +6,6 @@ import awkward as ak
 from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.indexedform import IndexedForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -451,19 +450,7 @@ class IndexedArray(Content):
         else:
             return self.project()._offsets_and_flattened(posaxis, depth)
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
-
-        if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
             other,
             (
@@ -1257,7 +1244,16 @@ class IndexedArray(Content):
             raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
-        return self.project().packed()
+        if self.parameter("__array__") == "categorical":
+            return IndexedArray(
+                self._index,
+                self._content.packed(),
+                identifier=self._identifier,
+                parameters=self._parameters,
+                nplike=self._nplike,
+            )
+        else:
+            return self.project().packed()
 
     def _to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)
@@ -1274,8 +1270,8 @@ class IndexedArray(Content):
         return IndexedArray(
             index,
             content,
-            identifier=self.identifier,
-            parameters=self.parameters,
+            identifier=self._identifier,
+            parameters=self._parameters,
             nplike=nplike,
         )
 
