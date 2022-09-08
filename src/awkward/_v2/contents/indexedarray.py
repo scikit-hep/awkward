@@ -1244,7 +1244,16 @@ class IndexedArray(Content):
             raise ak._v2._util.error(AssertionError(result))
 
     def packed(self):
-        return self.project().packed()
+        if self.parameter("__array__") == "categorical":
+            return IndexedArray(
+                self._index,
+                self._content.packed(),
+                identifier=self._identifier,
+                parameters=self._parameters,
+                nplike=self._nplike,
+            )
+        else:
+            return self.project().packed()
 
     def _to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)
@@ -1261,8 +1270,8 @@ class IndexedArray(Content):
         return IndexedArray(
             index,
             content,
-            identifier=self.identifier,
-            parameters=self.parameters,
+            identifier=self._identifier,
+            parameters=self._parameters,
             nplike=nplike,
         )
 
