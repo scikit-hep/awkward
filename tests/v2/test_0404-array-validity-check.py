@@ -28,7 +28,7 @@ def test_BitMaskedArray():
         False,
         False,
     ]
-    assert np.asarray(array.toByteMaskedArray().mask).tolist() == [
+    assert np.asarray(array.to_byte_masked_array().mask).tolist() == [
         0,
         0,
         1,
@@ -43,7 +43,7 @@ def test_BitMaskedArray():
         1,
         1,
     ]
-    assert np.asarray(array.toIndexedOptionArray64().index).tolist() == [
+    assert np.asarray(array.to_indexed_option_array_64().index).tolist() == [
         0,
         1,
         -1,

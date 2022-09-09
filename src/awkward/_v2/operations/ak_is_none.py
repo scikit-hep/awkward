@@ -39,7 +39,7 @@ def _impl(array, axis, highlevel, behavior):
         nplike = ak.nplike.of(layout)
 
         if layout.is_OptionType:
-            layout = layout.toIndexedOptionArray64()
+            layout = layout.to_indexed_option_array_64()
 
             # Convert the option type into a union, using the mask
             # as a tag.

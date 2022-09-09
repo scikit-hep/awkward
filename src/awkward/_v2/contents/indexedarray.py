@@ -138,10 +138,13 @@ class IndexedArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
+    def to_indexed_option_array_64(self):
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             self._index, self._content, self._identifier, self._parameters, self._nplike
         )
+
+    def toIndexedOptionArray64(self):
+        return self.to_indexed_option_array_64()
 
     def mask_as_bool(self, valid_when=True):
         if valid_when:
@@ -380,7 +383,7 @@ class IndexedArray(Content):
                     ak._v2.contents.unmaskedarray.UnmaskedArray,
                 ),
             ):
-                rawcontent = self._content.toIndexedOptionArray64()
+                rawcontent = self._content.to_indexed_option_array_64()
                 inner = rawcontent.index
                 result = ak._v2.index.Index64.empty(self.index.length, self._nplike)
 
@@ -593,7 +596,7 @@ class IndexedArray(Content):
                     ak._v2.contents.unmaskedarray.UnmaskedArray,
                 ),
             ):
-                array = array.toIndexedOptionArray64()
+                array = array.to_indexed_option_array_64()
 
             if isinstance(array, ak._v2.contents.indexedarray.IndexedArray):
                 contents.append(array.content)

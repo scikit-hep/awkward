@@ -138,7 +138,7 @@ class IndexedOptionArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
+    def to_indexed_option_array_64(self):
         if self._index.dtype == np.dtype(np.int64):
             return self
         else:
@@ -150,7 +150,10 @@ class IndexedOptionArray(Content):
                 self._nplike,
             )
 
-    def toByteMaskedArray(self, valid_when):
+    def toIndexedOptionArray64(self):
+        return self.to_indexed_option_array_64()
+
+    def to_byte_masked_array(self, valid_when):
         mask = ak._v2.index.Index8(self.mask_as_bool(valid_when, self._nplike))
 
         carry = self._index.data
@@ -174,10 +177,16 @@ class IndexedOptionArray(Content):
             self._nplike,
         )
 
-    def toBitMaskedArray(self, valid_when, lsb_order):
-        return self.toByteMaskedArray(valid_when).toBitMaskedArray(
+    def toByteMaskedArray(self, valid_when):
+        return self.to_byte_masked_array(valid_when)
+
+    def to_bit_masked_array(self, valid_when, lsb_order):
+        return self.to_byte_masked_array(valid_when).to_bit_masked_array(
             valid_when, lsb_order
         )
+
+    def toBitMaskedArray(self, valid_when, lsb_order):
+        return self.to_bit_masked_array(valid_when, lsb_order)
 
     def mask_as_bool(self, valid_when=True, nplike=None):
         if nplike is None:
@@ -491,7 +500,7 @@ class IndexedOptionArray(Content):
                     ak._v2.contents.unmaskedarray.UnmaskedArray,
                 ),
             ):
-                rawcontent = self._content.toIndexedOptionArray64()
+                rawcontent = self._content.to_indexed_option_array_64()
                 inner = rawcontent.index
                 result = ak._v2.index.Index64.empty(self.index.length, self._nplike)
             assert (
@@ -726,7 +735,7 @@ class IndexedOptionArray(Content):
                     ak._v2.contents.unmaskedarray.UnmaskedArray,
                 ),
             ):
-                array = array.toIndexedOptionArray64()
+                array = array.to_indexed_option_array_64()
 
             if isinstance(array, ak._v2.contents.indexedoptionarray.IndexedOptionArray):
                 contents.append(array.content)

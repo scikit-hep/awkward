@@ -48,14 +48,16 @@ def test_OptionType_transformations():
     assert isinstance(indexedoptionarray, ak._v2.contents.IndexedOptionArray)
 
     for valid_when in [False, True]:
-        bytemaskedarray = indexedoptionarray.toByteMaskedArray(valid_when)
+        bytemaskedarray = indexedoptionarray.to_byte_masked_array(valid_when)
         assert isinstance(bytemaskedarray, ak._v2.contents.ByteMaskedArray)
         assert bytemaskedarray.valid_when is valid_when
         assert ak._v2.Array(bytemaskedarray).tolist() == expected
 
     for valid_when in [False, True]:
         for lsb_order in [False, True]:
-            bitmaskedarray = indexedoptionarray.toBitMaskedArray(valid_when, lsb_order)
+            bitmaskedarray = indexedoptionarray.to_bit_masked_array(
+                valid_when, lsb_order
+            )
             assert isinstance(bitmaskedarray, ak._v2.contents.BitMaskedArray)
             assert bitmaskedarray.valid_when is valid_when
             assert bitmaskedarray.lsb_order is lsb_order
@@ -66,14 +68,14 @@ def test_OptionType_transformations():
     )
 
     for valid_when in [False, True]:
-        bytemaskedarray = unmaskedarray.toByteMaskedArray(valid_when)
+        bytemaskedarray = unmaskedarray.to_byte_masked_array(valid_when)
         assert isinstance(bytemaskedarray, ak._v2.contents.ByteMaskedArray)
         assert bytemaskedarray.valid_when is valid_when
         assert ak._v2.Array(bytemaskedarray).tolist() == list(range(13))
 
     for valid_when in [False, True]:
         for lsb_order in [False, True]:
-            bitmaskedarray = unmaskedarray.toBitMaskedArray(valid_when, lsb_order)
+            bitmaskedarray = unmaskedarray.to_bit_masked_array(valid_when, lsb_order)
             assert isinstance(bitmaskedarray, ak._v2.contents.BitMaskedArray)
             assert bitmaskedarray.valid_when is valid_when
             assert bitmaskedarray.lsb_order is lsb_order

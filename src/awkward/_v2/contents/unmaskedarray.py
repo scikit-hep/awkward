@@ -106,7 +106,7 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
+    def to_indexed_option_array_64(self):
         arange = self._nplike.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak._v2.contents.indexedoptionarray.IndexedOptionArray(
             ak._v2.index.Index64(arange, nplike=self.nplike),
@@ -116,7 +116,10 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def toByteMaskedArray(self, valid_when):
+    def toIndexedOptionArray64(self):
+        return self.to_indexed_option_array_64()
+
+    def to_byte_masked_array(self, valid_when):
         return ak._v2.contents.bytemaskedarray.ByteMaskedArray(
             ak._v2.index.Index8(
                 self.mask_as_bool(valid_when).view(np.int8), nplike=self.nplike
@@ -128,7 +131,10 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def toBitMaskedArray(self, valid_when, lsb_order):
+    def toByteMaskedArray(self, valid_when):
+        return self.to_byte_masked_array(valid_when)
+
+    def to_bit_masked_array(self, valid_when, lsb_order):
         bitlength = int(numpy.ceil(self._content.length / 8.0))
         if valid_when:
             bitmask = self._nplike.full(bitlength, np.uint8(255), dtype=np.uint8)
@@ -145,6 +151,9 @@ class UnmaskedArray(Content):
             self._parameters,
             self._nplike,
         )
+
+    def toBitMaskedArray(self, valid_when, lsb_order):
+        return self.to_bit_masked_array(valid_when, lsb_order)
 
     def mask_as_bool(self, valid_when=True, nplike=None):
         if nplike is None:
@@ -328,7 +337,7 @@ class UnmaskedArray(Content):
             return self._content.mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
-        return self.toIndexedOptionArray64()._reverse_merge(other)
+        return self.to_indexed_option_array_64()._reverse_merge(other)
 
     def mergemany(self, others):
         if len(others) == 0:
@@ -351,7 +360,7 @@ class UnmaskedArray(Content):
             )
 
         else:
-            return self.toIndexedOptionArray64().mergemany(others)
+            return self.to_indexed_option_array_64().mergemany(others)
 
     def fill_none(self, value):
         return self._content.fill_none(value)
