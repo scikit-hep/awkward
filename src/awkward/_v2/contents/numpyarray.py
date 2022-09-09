@@ -4,7 +4,6 @@ import copy
 import awkward as ak
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.numpyform import NumpyForm
-from awkward._v2.forms.form import _parameters_equal
 from awkward._v2.types.numpytype import primitive_to_dtype
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -380,20 +379,8 @@ class NumpyArray(Content):
         else:
             raise ak._v2._util.error(np.AxisError("axis out of range for flatten"))
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
-        elif isinstance(
             other,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
@@ -405,7 +392,7 @@ class NumpyArray(Content):
         ):
             return self.mergeable(other._content, mergebool)
 
-        if isinstance(other, ak._v2.contents.numpyarray.NumpyArray):
+        elif isinstance(other, ak._v2.contents.NumpyArray):
             if self._data.ndim != other._data.ndim:
                 return False
 
@@ -441,12 +428,25 @@ class NumpyArray(Content):
 
             return True
 
+        # If we have >1 dimension, promote ourselves to `RegularArray` and attempt to merge.
+        elif (
+            isinstance(other, ak._v2.contents.RegularArray) and self.purelist_depth > 1
+        ):
+            as_regular_array = self.toRegularArray()
+            assert isinstance(as_regular_array, ak._v2.contents.RegularArray)
+            return as_regular_array._content.mergeable(other._content, mergebool)
+
         else:
             return False
 
     def mergemany(self, others):
         if len(others) == 0:
             return self
+
+        # Resolve merging against regular types by
+        if any(isinstance(o, ak._v2.contents.RegularArray) for o in others):
+            return self.toRegularArray().mergemany(others)
+
         head, tail = self._merging_strategy(others)
 
         contiguous_arrays = []

@@ -13,6 +13,7 @@ def transform(
     depth_context=None,
     lateral_context=None,
     allow_records=True,
+    broadcast_parameters_rule="intersect",
     left_broadcast=True,
     right_broadcast=True,
     numpy_to_regular=False,
@@ -42,6 +43,11 @@ def transform(
             `lateral_context` after the transformation.
         allow_records (bool): If False and the recursive walk encounters any
             #ak._v2.contents.RecordArray nodes, an error is raised.
+        broadcast_parameters_rule (str): Rule for broadcasting parameters, one of:
+            - `"intersect"`
+            - `"all_or_nothing"`
+            - `"one_to_one"`
+            - `"none"`
         left_broadcast (bool): If `more_arrays` are provided, the parameter
             determines whether the arrays are left-broadcasted, which is
             Awkward-like broadcasting.
@@ -346,6 +352,33 @@ def transform(
     #ak._v2.broadcast_arrays would return. See #ak._v2.broadcast_arrays for an
     explanation of `left_broadcast` and `right_broadcast`.
 
+    Broadcasting Parameters
+    =======================
+    When broadcasting multiple arrays with parameters, there are different ways of
+    assigning parameters to the outputs. The assignment of array parameters happens
+    at every level above the transformation action.
+
+    The method of parameter assignment used by the broadcasting routine is controlled
+    by the `broadcast_parameters_rule` option, which can take one of the following
+    values:
+
+    `"intersect"`
+        The parameters of each output array will correspond to the intersection
+        of the parameters from each of the input arrays.
+
+    `"all_or_nothing"`
+        If the parameters of the input arrays are all equal, then they will be used
+        for each output array. Otherwise, the output arrays will not be given
+        parameters.
+
+    `"one_to_one"`
+        If the number of output arrays matches the number of input arrays, then the
+        output arrays are given the parameters of the input arrays. Otherwise, a
+        ValueError is raised.
+
+    `"none"`
+        The output arrays will not be given parameters.
+
     See also: #ak.is_valid and #ak.valid_when to check the validity of transformed
     outputs.
     """
@@ -358,6 +391,7 @@ def transform(
             depth_context=depth_context,
             lateral_context=lateral_context,
             allow_records=allow_records,
+            broadcast_parameters_rule=broadcast_parameters_rule,
             left_broadcast=left_broadcast,
             right_broadcast=right_broadcast,
             numpy_to_regular=numpy_to_regular,
@@ -374,6 +408,7 @@ def transform(
             depth_context,
             lateral_context,
             allow_records,
+            broadcast_parameters_rule,
             left_broadcast,
             right_broadcast,
             numpy_to_regular,
@@ -391,6 +426,7 @@ def _impl(
     depth_context,
     lateral_context,
     allow_records,
+    broadcast_parameters_rule,
     left_broadcast,
     right_broadcast,
     numpy_to_regular,
@@ -416,6 +452,7 @@ def _impl(
         "keep_parameters": True,
         "return_array": return_array,
         "function_name": "ak._v2.transform",
+        "broadcast_parameters_rule": broadcast_parameters_rule,
     }
 
     if len(more_layouts) == 0:

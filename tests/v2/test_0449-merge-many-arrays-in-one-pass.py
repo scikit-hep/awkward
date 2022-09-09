@@ -3,108 +3,84 @@
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
+import itertools
 
 to_list = ak._v2.operations.to_list
 
 
 def test_numpyarray():
-    for dtype1 in ("i1", "i2", "i4", "i8", "u1", "u2", "u4", "u8", "f4", "f8", "?"):
-        for dtype2 in ("i1", "i2", "i4", "i8", "u1", "u2", "u4", "u8", "f4", "f8", "?"):
-            for dtype3 in (
-                "i1",
-                "i2",
-                "i4",
-                "i8",
-                "u1",
-                "u2",
-                "u4",
-                "u8",
-                "f4",
-                "f8",
-                "?",
-            ):
-                for dtype4 in (
-                    "i1",
-                    "i2",
-                    "i4",
-                    "i8",
-                    "u1",
-                    "u2",
-                    "u4",
-                    "u8",
-                    "f4",
-                    "f8",
-                    "?",
-                ):
-                    one = np.array([0, 1, 2], dtype=dtype1)
-                    two = np.array([3, 0], dtype=dtype2)
-                    three = np.array([], dtype=dtype3)
-                    four = np.array([4, 5, 0, 6, 7], dtype=dtype4)
-                    combined = np.concatenate([one, two, three, four])
+    for dtype1, dtype2, dtype3, dtype4 in itertools.product(
+        ("i1", "i2", "i4", "i8", "u1", "u2", "u4", "u8", "f4", "f8", "?"), repeat=4
+    ):
+        one = np.array([0, 1, 2], dtype=dtype1)
+        two = np.array([3, 0], dtype=dtype2)
+        three = np.array([], dtype=dtype3)
+        four = np.array([4, 5, 0, 6, 7], dtype=dtype4)
+        combined = np.concatenate([one, two, three, four])
 
-                    ak_combined = ak._v2.contents.NumpyArray(one).mergemany(
-                        [
-                            ak._v2.contents.NumpyArray(two),
-                            ak._v2.contents.NumpyArray(three),
-                            ak._v2.contents.NumpyArray(four),
-                        ]
-                    )
+        ak_combined = ak._v2.contents.NumpyArray(one).mergemany(
+            [
+                ak._v2.contents.NumpyArray(two),
+                ak._v2.contents.NumpyArray(three),
+                ak._v2.contents.NumpyArray(four),
+            ]
+        )
 
-                    assert to_list(ak_combined) == combined.tolist()
-                    assert ak_combined.dtype == combined.dtype
+        assert to_list(ak_combined) == combined.tolist()
+        assert ak_combined.dtype == combined.dtype
 
-                    assert (
-                        ak._v2.contents.NumpyArray(one)
-                        .typetracer.mergemany(
-                            [
-                                ak._v2.contents.NumpyArray(two),
-                                ak._v2.contents.NumpyArray(three),
-                                ak._v2.contents.NumpyArray(four),
-                            ]
-                        )
-                        .form
-                        == ak._v2.contents.NumpyArray(one)
-                        .mergemany(
-                            [
-                                ak._v2.contents.NumpyArray(two),
-                                ak._v2.contents.NumpyArray(three),
-                                ak._v2.contents.NumpyArray(four),
-                            ]
-                        )
-                        .form
-                    )
+        assert (
+            ak._v2.contents.NumpyArray(one)
+            .typetracer.mergemany(
+                [
+                    ak._v2.contents.NumpyArray(two),
+                    ak._v2.contents.NumpyArray(three),
+                    ak._v2.contents.NumpyArray(four),
+                ]
+            )
+            .form
+            == ak._v2.contents.NumpyArray(one)
+            .mergemany(
+                [
+                    ak._v2.contents.NumpyArray(two),
+                    ak._v2.contents.NumpyArray(three),
+                    ak._v2.contents.NumpyArray(four),
+                ]
+            )
+            .form
+        )
 
-                    ak_combined = ak._v2.contents.NumpyArray(one).mergemany(
-                        [
-                            ak._v2.contents.NumpyArray(two),
-                            ak._v2.contents.EmptyArray(),
-                            ak._v2.contents.NumpyArray(four),
-                        ]
-                    )
+        ak_combined = ak._v2.contents.NumpyArray(one).mergemany(
+            [
+                ak._v2.contents.NumpyArray(two),
+                ak._v2.contents.EmptyArray(),
+                ak._v2.contents.NumpyArray(four),
+            ]
+        )
 
-                    assert to_list(ak_combined) == combined.tolist()
-                    assert ak_combined.dtype == np.concatenate([one, two, four]).dtype
+        assert to_list(ak_combined) == combined.tolist()
+        assert ak_combined.dtype == np.concatenate([one, two, four]).dtype
 
-                    assert (
-                        ak._v2.contents.NumpyArray(one)
-                        .typetracer.mergemany(
-                            [
-                                ak._v2.contents.NumpyArray(two),
-                                ak._v2.contents.EmptyArray(),
-                                ak._v2.contents.NumpyArray(four),
-                            ]
-                        )
-                        .form
-                        == ak._v2.contents.NumpyArray(one)
-                        .mergemany(
-                            [
-                                ak._v2.contents.NumpyArray(two),
-                                ak._v2.contents.EmptyArray(),
-                                ak._v2.contents.NumpyArray(four),
-                            ]
-                        )
-                        .form
-                    )
+        assert (
+            ak._v2.contents.NumpyArray(one)
+            .typetracer.mergemany(
+                [
+                    ak._v2.contents.NumpyArray(two),
+                    ak._v2.contents.EmptyArray(),
+                    ak._v2.contents.NumpyArray(four),
+                ]
+            )
+            .form
+            == ak._v2.contents.NumpyArray(one)
+            .mergemany(
+                [
+                    ak._v2.contents.NumpyArray(two),
+                    ak._v2.contents.EmptyArray(),
+                    ak._v2.contents.NumpyArray(four),
+                ]
+            )
+            .form
+        )
 
 
 def test_lists():

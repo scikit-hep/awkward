@@ -5,7 +5,6 @@ import copy
 import awkward as ak
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.regularform import RegularForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -659,20 +658,8 @@ class RegularArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         return self.to_list_offset_array(True)._offsets_and_flattened(axis, depth)
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
-        elif isinstance(
             other,
             (
                 ak._v2.contents.indexedarray.IndexedArray,
@@ -694,6 +681,14 @@ class RegularArray(Content):
         ):
             return self._content.mergeable(other.content, mergebool)
 
+        # For n-dimensional NumpyArrays, let's now convert them to RegularArray
+        # We could add a special case that tries to first convert self to NumpyArray
+        # and merge conventionally, but it's not worth it at this stage.
+        elif (
+            isinstance(other, ak._v2.contents.numpyarray.NumpyArray)
+            and other.purelist_depth > 1
+        ):
+            return self._content.mergeable(other.toRegularArray().content, mergebool)
         else:
             return False
 
@@ -704,7 +699,15 @@ class RegularArray(Content):
         if any(x.is_OptionType for x in others):
             return ak._v2.contents.UnmaskedArray(self).mergemany(others)
 
-        elif all(x.is_RegularType and x.size == self.size for x in others):
+        # Regularize NumpyArray into RegularArray (or NumpyArray if 1D)
+        others = [
+            o.toRegularArray()
+            if isinstance(o, ak._v2.contents.numpyarray.NumpyArray)
+            else o
+            for o in others
+        ]
+
+        if all(x.is_RegularType and x.size == self.size for x in others):
             parameters = self._parameters
             tail_contents = []
             zeros_length = self._length

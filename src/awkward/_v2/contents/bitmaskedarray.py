@@ -9,7 +9,6 @@ from awkward._v2.index import Index
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.contents.bytemaskedarray import ByteMaskedArray
 from awkward._v2.forms.bitmaskedform import BitMaskedForm
-from awkward._v2.forms.form import _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -443,19 +442,7 @@ class BitMaskedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         return self.to_byte_masked_array._offsets_and_flattened(axis, depth)
 
-    def mergeable(self, other, mergebool):
-        if not _parameters_equal(self._parameters, other._parameters):
-            return False
-
-        if isinstance(
-            other,
-            (
-                ak._v2.contents.emptyarray.EmptyArray,
-                ak._v2.contents.unionarray.UnionArray,
-            ),
-        ):
-            return True
-
+    def _mergeable(self, other, mergebool):
         if isinstance(
             other,
             (
