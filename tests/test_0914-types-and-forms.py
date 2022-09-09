@@ -39,6 +39,10 @@ def test_UnknownType():
     )
 
 
+@pytest.mark.skipif(
+    ak._v2._util.win,
+    reason="NumPy does not have float16, float128, and complex256 -- on Windows",
+)
 def test_NumpyType():
     assert str(ak._v2.types.numpytype.NumpyType("bool")) == "bool"
     assert str(ak._v2.types.numpytype.NumpyType("int8")) == "int8"
@@ -1523,6 +1527,10 @@ def test_EmptyForm():
     }
 
 
+@pytest.mark.skipif(
+    ak._v2._util.win,
+    reason="NumPy does not have float16, float128, and complex256 -- on Windows",
+)
 def test_NumpyForm():
     assert (
         str(ak._v2.forms.numpyform.NumpyForm("bool"))

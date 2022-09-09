@@ -210,11 +210,11 @@ class Content:
                 raise ak._v2._util.error(ValueError(message + filename))
 
             else:
-                if error.id != ak._util.kSliceNone and self._identifier is not None:
+                if error.id != ak._v2._util.kSliceNone and self._identifier is not None:
                     # FIXME https://github.com/scikit-hep/awkward-1.0/blob/45d59ef4ae45eebb02995b8e1acaac0d46fb9573/src/libawkward/util.cpp#L443-L450
                     pass
 
-                if error.attempt != ak._util.kSliceNone:
+                if error.attempt != ak._v2._util.kSliceNone:
                     message += f" while attempting to get index {error.attempt}"
 
                 message += filename
@@ -240,7 +240,7 @@ class Content:
                 raise ak._v2._util.error(ValueError(message + filename))
 
             else:
-                if error.attempt != ak._util.kSliceNone:
+                if error.attempt != ak._v2._util.kSliceNone:
                     message += f" while attempting to get index {error.attempt}"
 
                 message += filename
@@ -284,7 +284,7 @@ class Content:
     def _getitem_next_fields(self, head, tail, advanced):
         only_fields, not_fields = [], []
         for x in tail:
-            if ak._util.isstr(x) or isinstance(x, list):
+            if ak._v2._util.isstr(x) or isinstance(x, list):
                 only_fields.append(x)
             else:
                 not_fields.append(x)
@@ -488,7 +488,7 @@ class Content:
         return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.isint(where):
+        if ak._v2._util.isint(where):
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
@@ -497,7 +497,7 @@ class Content:
         elif isinstance(where, slice):
             return self._getitem((where,))
 
-        elif ak._util.isstr(where):
+        elif ak._v2._util.isstr(where):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
@@ -587,17 +587,17 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif ak._util.is_sized_iterable(where) and len(where) == 0:
+        elif ak._v2._util.is_sized_iterable(where) and len(where) == 0:
             return self._carry(
                 ak._v2.index.Index64.empty(0, self._nplike), allow_lazy=True
             )
 
-        elif ak._util.is_sized_iterable(where) and all(
+        elif ak._v2._util.is_sized_iterable(where) and all(
             ak._v2._util.isstr(x) for x in where
         ):
             return self._getitem_fields(where)
 
-        elif ak._util.is_sized_iterable(where):
+        elif ak._v2._util.is_sized_iterable(where):
             layout = ak._v2.operations.to_layout(where)
             as_array = layout.maybe_to_array(layout.nplike)
             if as_array is None:

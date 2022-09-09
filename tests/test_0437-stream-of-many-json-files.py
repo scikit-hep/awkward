@@ -4,11 +4,9 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-import os
 from pathlib import Path
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-path = Path(DIR).parents[0]
+samples_path = Path(__file__).parent / "samples"
 
 to_list = ak._v2.operations.to_list
 
@@ -127,7 +125,7 @@ def test_two_arrays():
     assert array.tolist() == ["one", "two"]
 
     array = ak._v2.operations.from_json(
-        path / "samples/test-two-arrays.json", line_delimited=True
+        samples_path / "test-two-arrays.json", line_delimited=True
     )
     assert array.tolist() == [
         {"one": 1, "two": 2.2},
@@ -281,7 +279,7 @@ def test_array_tojson():
 def test_fromfile():
     # read multiple json fragments from a json file
     array = ak._v2.operations.from_json(
-        path / "samples/test-record-array.json", line_delimited=True
+        samples_path / "test-record-array.json", line_delimited=True
     )
     assert array.tolist() == [
         {"x": 1.1, "y": []},
@@ -295,7 +293,7 @@ def test_fromfile():
     # read json file containing 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with floats
     array = ak._v2.operations.from_json(
-        path / "samples/test.json",
+        samples_path / "test.json",
         posinf_string="inf",
         neginf_string="-inf",
     )
@@ -357,7 +355,7 @@ def test_fromfile():
     ]
 
     # read json file containing 'nan' and 'inf' user-defined strings
-    array = ak._v2.operations.from_json(path / "samples/test.json")
+    array = ak._v2.operations.from_json(samples_path / "test.json")
 
     assert array.tolist() == [
         1.1,
@@ -418,7 +416,7 @@ def test_fromfile():
     # read json file containing 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with a predefined 'None' string
     array = ak._v2.operations.from_json(
-        path / "samples/test.json",
+        samples_path / "test.json",
         posinf_string="inf",
         neginf_string="-inf",
         nan_string="NaN",
@@ -494,7 +492,7 @@ def test_fromfile():
     # user-defined strings
     # replace can only work for one string definition
     array = ak._v2.operations.from_json(
-        path / "samples/test-nan-inf.json",
+        samples_path / "test-nan-inf.json",
         posinf_string="Infinity",
         nan_string="None at all",
     )

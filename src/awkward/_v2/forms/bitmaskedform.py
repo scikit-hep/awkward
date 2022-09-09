@@ -18,7 +18,7 @@ class BitMaskedForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._util.isstr(mask):
+        if not ak._v2._util.isstr(mask):
             raise ak._v2._util.error(
                 TypeError(
                     "{} 'mask' must be of type str, not {}".format(

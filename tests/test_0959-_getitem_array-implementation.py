@@ -74,7 +74,7 @@ def test_ListOffsetArray_NumpyArray():
 
 
 @pytest.mark.skipif(
-    ak._util.win,
+    ak._v2._util.win,
     reason="unstable dict order. -- on Windows",
 )
 def test_RecordArray_NumpyArray():

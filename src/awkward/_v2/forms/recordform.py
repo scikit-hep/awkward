@@ -119,9 +119,9 @@ class RecordForm(Form):
             return field in self._fields
 
     def content(self, index_or_field):
-        if ak._util.isint(index_or_field):
+        if ak._v2._util.isint(index_or_field):
             index = index_or_field
-        elif ak._util.isstr(index_or_field):
+        elif ak._v2._util.isstr(index_or_field):
             index = self.field_to_index(index_or_field)
         else:
             raise ak._v2._util.error(
@@ -214,7 +214,7 @@ class RecordForm(Form):
 
         else:
             nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
-            if ak._util.isstr(nexthead):
+            if ak._v2._util.isstr(nexthead):
                 return self.content(where)._getitem_field(nexthead, nexttail)
             else:
                 return self.content(where)._getitem_fields(nexthead, nexttail)
@@ -230,7 +230,7 @@ class RecordForm(Form):
             contents = [self.content(i) for i in indexes]
         else:
             nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
-            if ak._util.isstr(nexthead):
+            if ak._v2._util.isstr(nexthead):
                 contents = [
                     self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
                 ]
