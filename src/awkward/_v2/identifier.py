@@ -27,7 +27,7 @@ class Identifier:
         self._ref = ref
         self._fieldloc = fieldloc
         if not isinstance(fieldloc, dict) or not all(
-            ak._util.isint(k) and ak._util.isstr(v) for k, v in fieldloc.items()
+            ak._v2._util.isint(k) and ak._v2._util.isstr(v) for k, v in fieldloc.items()
         ):
             raise ak._v2._util.error(
                 TypeError("Identifier fieldloc must be a dict of int -> str")

@@ -315,18 +315,16 @@ def test_UnionArray_NumpyArray(flatlist_as_rvec):
 
 @pytest.mark.skip(reason="the test needs an external data file: see the comments")
 def test_data_frame_from_json():
-    import os
     import json
     from pathlib import Path
 
-    DIR = os.path.dirname(os.path.abspath(__file__))
-    path = Path(DIR).parents[0]
+    path = Path(__file__).parent / "samples" / "covid.json"
 
     # The JSON data file for this test can be accessed from
     # European Centre for Disease Prevention and Control
     # An agency of the European Union
     # https://www.ecdc.europa.eu/en/publications-data/data-virus-variants-covid-19-eueea
-    with open(os.path.join(path, "samples/covid.json")) as f:
+    with path.open() as f:
         data = json.load(f)
 
     array = ak._v2.operations.from_iter(data)

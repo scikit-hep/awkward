@@ -307,7 +307,7 @@ class NumpyArray(Content):
             out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 
-        elif ak._util.isstr(head):
+        elif ak._v2._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
@@ -558,8 +558,12 @@ class NumpyArray(Content):
         )
 
         if not sorted:
-            tmp_beg_ptr = ak._v2.index.Index64.empty(ak._util.kMaxLevels, self._nplike)
-            tmp_end_ptr = ak._v2.index.Index64.empty(ak._util.kMaxLevels, self._nplike)
+            tmp_beg_ptr = ak._v2.index.Index64.empty(
+                ak._v2._util.kMaxLevels, self._nplike
+            )
+            tmp_end_ptr = ak._v2.index.Index64.empty(
+                ak._v2._util.kMaxLevels, self._nplike
+            )
 
             assert (
                 tmp_beg_ptr.nplike is self._nplike
@@ -583,7 +587,7 @@ class NumpyArray(Content):
                     stops.data,
                     True,
                     starts.length,
-                    ak._util.kMaxLevels,
+                    ak._v2._util.kMaxLevels,
                 )
             )
         assert starts.nplike is self._nplike and stops.nplike is self._nplike

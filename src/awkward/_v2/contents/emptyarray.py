@@ -144,7 +144,7 @@ class EmptyArray(Content):
         elif isinstance(head, slice):
             raise ak._v2._util.indexerror(self, head, "array is empty")
 
-        elif ak._util.isstr(head):
+        elif ak._v2._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):

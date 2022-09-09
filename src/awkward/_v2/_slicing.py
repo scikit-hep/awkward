@@ -41,7 +41,7 @@ def prepare_advanced_indexing(items):
                     ak._v2.contents.IndexedOptionArray,
                 ),
             )
-            or ak._util.isstr(item)
+            or ak._v2._util.isstr(item)
             or item is np.newaxis
             or item is Ellipsis
         ):
@@ -127,13 +127,13 @@ def prepare_advanced_indexing(items):
 
 
 def normalise_item(item, nplike):
-    if ak._util.isint(item):
+    if ak._v2._util.isint(item):
         return int(item)
 
     elif isinstance(item, slice):
         return item
 
-    elif ak._util.isstr(item):
+    elif ak._v2._util.isstr(item):
         return item
 
     elif item is np.newaxis:
@@ -164,13 +164,15 @@ def normalise_item(item, nplike):
         else:
             return out
 
-    elif ak._util.is_sized_iterable(item) and len(item) == 0:
+    elif ak._v2._util.is_sized_iterable(item) and len(item) == 0:
         return nplike.empty(0, dtype=np.int64)
 
-    elif ak._util.is_sized_iterable(item) and all(ak._util.isstr(x) for x in item):
+    elif ak._v2._util.is_sized_iterable(item) and all(
+        ak._v2._util.isstr(x) for x in item
+    ):
         return list(item)
 
-    elif ak._util.is_sized_iterable(item):
+    elif ak._v2._util.is_sized_iterable(item):
         layout = ak._v2.operations.to_layout(item)
         as_array = layout.maybe_to_array(layout.nplike)
         if as_array is None:

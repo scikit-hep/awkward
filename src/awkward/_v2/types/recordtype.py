@@ -46,7 +46,7 @@ class RecordType(Type):
                     )
                 )
             )
-        if typestr is not None and not ak._util.isstr(typestr):
+        if typestr is not None and not ak._v2._util.isstr(typestr):
             raise ak._v2._util.error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(

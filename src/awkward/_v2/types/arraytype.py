@@ -16,7 +16,7 @@ class ArrayType:
                     )
                 )
             )
-        if not ak._util.isint(length) or length < 0:
+        if not ak._v2._util.isint(length) or length < 0:
             raise ak._v2._util.error(
                 ValueError(
                     "{} 'length' must be of a positive integer, not {}".format(

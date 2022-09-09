@@ -379,10 +379,10 @@ class IndexedOptionArray(Content):
             )
             return out2.simplify_optiontype()
 
-        elif ak._util.isstr(head):
+        elif ak._v2._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 
-        elif isinstance(head, list) and ak._util.isstr(head[0]):
+        elif isinstance(head, list) and ak._v2._util.isstr(head[0]):
             return self._getitem_next_fields(head, tail, advanced)
 
         elif head is np.newaxis:

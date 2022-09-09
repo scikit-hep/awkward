@@ -18,7 +18,7 @@ class UnionForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._util.isstr(tags):
+        if not ak._v2._util.isstr(tags):
             raise ak._v2._util.error(
                 TypeError(
                     "{} 'tags' must be of type str, not {}".format(
@@ -26,7 +26,7 @@ class UnionForm(Form):
                     )
                 )
             )
-        if not ak._util.isstr(index):
+        if not ak._v2._util.isstr(index):
             raise ak._v2._util.error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(
