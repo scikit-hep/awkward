@@ -5,18 +5,23 @@ import numbers
 import numpy
 
 import awkward.nplike
-import awkward._util
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
+
+
+# FIXME: deduplicate this
+# matches include/awkward/common.h
+kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
+kSliceNone = kMaxInt64 + 1  # for Slice::none()
 
 
 class NoError:
     str = None
     filename = None
     pass_through = False
-    attempt = ak._util.kSliceNone
-    id = ak._util.kSliceNone
+    attempt = kSliceNone
+    id = kSliceNone
 
 
 class NoKernel:
