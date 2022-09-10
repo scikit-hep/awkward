@@ -6,7 +6,7 @@ import awkward as ak  # noqa: F401
 
 
 def test_EmptyArray():
-    a = ak._v2.contents.emptyarray.EmptyArray()
+    a = ak.contents.emptyarray.EmptyArray()
     assert len(a) == 0
     with pytest.raises(IndexError):
         a[
@@ -16,7 +16,7 @@ def test_EmptyArray():
         a[
             10:20,
         ],
-        ak._v2.contents.emptyarray.EmptyArray,
+        ak.contents.emptyarray.EmptyArray,
     )
     assert (
         len(
@@ -37,33 +37,33 @@ def test_EmptyArray():
 
 
 def test_NumpyArray_toRegularArray():
-    a = ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(2, 3, 5)).layout
+    a = ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(2, 3, 5)).layout
     b = a.toRegularArray()
-    assert isinstance(b, ak._v2.contents.RegularArray)
+    assert isinstance(b, ak.contents.RegularArray)
     assert len(b) == len(a) == 2
     assert b.size == 3
-    assert isinstance(b.content, ak._v2.contents.RegularArray)
+    assert isinstance(b.content, ak.contents.RegularArray)
     assert len(b.content) == 6
     assert b.content.size == 5
-    assert isinstance(b.content.content, ak._v2.contents.NumpyArray)
+    assert isinstance(b.content.content, ak.contents.NumpyArray)
     assert len(b.content.content) == 30
     assert a.typetracer.toRegularArray().form == b.form
 
-    a = ak._v2.operations.from_numpy(np.arange(2 * 0 * 5).reshape(2, 0, 5)).layout
+    a = ak.operations.from_numpy(np.arange(2 * 0 * 5).reshape(2, 0, 5)).layout
     b = a.toRegularArray()
-    assert isinstance(b, ak._v2.contents.RegularArray)
+    assert isinstance(b, ak.contents.RegularArray)
     assert len(b) == len(a) == 2
     assert b.size == 0
-    assert isinstance(b.content, ak._v2.contents.RegularArray)
+    assert isinstance(b.content, ak.contents.RegularArray)
     assert len(b.content) == 0
     assert b.content.size == 5
-    assert isinstance(b.content.content, ak._v2.contents.NumpyArray)
+    assert isinstance(b.content.content, ak.contents.NumpyArray)
     assert len(b.content.content) == 0
     assert a.typetracer.toRegularArray().form == b.form
 
 
 def test_NumpyArray():
-    a = ak._v2.contents.numpyarray.NumpyArray(
+    a = ak.contents.numpyarray.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
     )
     assert len(a) == 4
@@ -99,7 +99,7 @@ def test_NumpyArray():
         a[
             2:,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         a[2:,][  # noqa: E231
@@ -124,7 +124,7 @@ def test_NumpyArray():
             ["bad", "good", "ok"],
         ]
 
-    b = ak._v2.contents.numpyarray.NumpyArray(
+    b = ak.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     )
     assert len(b) == 2
@@ -132,7 +132,7 @@ def test_NumpyArray():
         b[
             1,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         len(
@@ -178,8 +178,8 @@ def test_NumpyArray():
 
 def test_RegularArray_NumpyArray():
     # 6.6 is inaccessible
-    a = ak._v2.contents.regulararray.RegularArray(
-        ak._v2.contents.numpyarray.NumpyArray(
+    a = ak.contents.regulararray.RegularArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
         ),
         3,
@@ -189,7 +189,7 @@ def test_RegularArray_NumpyArray():
         a[
             1,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         a.typetracer[
@@ -223,7 +223,7 @@ def test_RegularArray_NumpyArray():
         a[
             1:2,
         ],
-        ak._v2.contents.regulararray.RegularArray,
+        ak.contents.regulararray.RegularArray,
     )
     assert (
         a.typetracer[
@@ -270,15 +270,15 @@ def test_RegularArray_NumpyArray():
             ["bad", "good", "ok"],
         ]
 
-    b = ak._v2.contents.regulararray.RegularArray(
-        ak._v2.contents.emptyarray.EmptyArray(), 0, zeros_length=10
+    b = ak.contents.regulararray.RegularArray(
+        ak.contents.emptyarray.EmptyArray(), 0, zeros_length=10
     )
     assert len(b) == 10
     assert isinstance(
         b[
             5,
         ],
-        ak._v2.contents.emptyarray.EmptyArray,
+        ak.contents.emptyarray.EmptyArray,
     )
     assert (
         b.typetracer[
@@ -300,7 +300,7 @@ def test_RegularArray_NumpyArray():
         b[
             7:,
         ],
-        ak._v2.contents.regulararray.RegularArray,
+        ak.contents.regulararray.RegularArray,
     )
     assert (
         b.typetracer[
@@ -339,10 +339,10 @@ def test_RegularArray_NumpyArray():
 def test_ListArray_NumpyArray():
     # 200 is inaccessible in stops
     # 6.6, 7.7, and 8.8 are inaccessible in content
-    a = ak._v2.contents.listarray.ListArray(
-        ak._v2.index.Index(np.array([4, 100, 1], dtype=np.int64)),
-        ak._v2.index.Index(np.array([7, 100, 3, 200], dtype=np.int64)),
-        ak._v2.contents.numpyarray.NumpyArray(
+    a = ak.contents.listarray.ListArray(
+        ak.index.Index(np.array([4, 100, 1], dtype=np.int64)),
+        ak.index.Index(np.array([7, 100, 3, 200], dtype=np.int64)),
+        ak.contents.numpyarray.NumpyArray(
             np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
         ),
     )
@@ -359,7 +359,7 @@ def test_ListArray_NumpyArray():
         a[
             2,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         a.typetracer[
@@ -433,7 +433,7 @@ def test_ListArray_NumpyArray():
         a[
             1:,
         ],
-        ak._v2.contents.listarray.ListArray,
+        ak.contents.listarray.ListArray,
     )
     assert (
         a.typetracer[
@@ -487,9 +487,9 @@ def test_ListArray_NumpyArray():
 
 def test_ListOffsetArray_NumpyArray():
     # 6.6 and 7.7 are inaccessible
-    a = ak._v2.contents.listoffsetarray.ListOffsetArray(
-        ak._v2.index.Index(np.array([1, 4, 4, 6])),
-        ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+    a = ak.contents.listoffsetarray.ListOffsetArray(
+        ak.index.Index(np.array([1, 4, 4, 6])),
+        ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
     )
     assert len(a) == 3
     with pytest.raises(IndexError):
@@ -504,7 +504,7 @@ def test_ListOffsetArray_NumpyArray():
         a[
             2,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         a.typetracer[
@@ -578,7 +578,7 @@ def test_ListOffsetArray_NumpyArray():
         a[
             1:,
         ],
-        ak._v2.contents.listarray.ListArray,
+        ak.contents.listarray.ListArray,
     )
     assert (
         a.typetracer[
@@ -632,12 +632,10 @@ def test_ListOffsetArray_NumpyArray():
 
 def test_RecordArray_NumpyArray():
     # 5.5 is inaccessible
-    a = ak._v2.contents.recordarray.RecordArray(
+    a = ak.contents.recordarray.RecordArray(
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4])),
-            ak._v2.contents.numpyarray.NumpyArray(
-                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-            ),
+            ak.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4])),
+            ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
         ["x", "y"],
     )
@@ -654,7 +652,7 @@ def test_RecordArray_NumpyArray():
         a[
             2,
         ],
-        ak._v2.record.Record,
+        ak.record.Record,
     )
     assert (
         a.typetracer[
@@ -680,7 +678,7 @@ def test_RecordArray_NumpyArray():
         a[
             2:,
         ],
-        ak._v2.contents.indexedarray.IndexedArray,
+        ak.contents.indexedarray.IndexedArray,
     )
     assert (
         a.typetracer[
@@ -726,7 +724,7 @@ def test_RecordArray_NumpyArray():
         a[
             "y",
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         a.typetracer[
@@ -766,12 +764,10 @@ def test_RecordArray_NumpyArray():
     )
 
     # 5.5 is inaccessible
-    b = ak._v2.contents.recordarray.RecordArray(
+    b = ak.contents.recordarray.RecordArray(
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4])),
-            ak._v2.contents.numpyarray.NumpyArray(
-                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-            ),
+            ak.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4])),
+            ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
         None,
     )
@@ -788,7 +784,7 @@ def test_RecordArray_NumpyArray():
         b[
             2,
         ],
-        ak._v2.record.Record,
+        ak.record.Record,
     )
     assert (
         b.typetracer[
@@ -814,7 +810,7 @@ def test_RecordArray_NumpyArray():
         b[
             2:,
         ],
-        ak._v2.contents.indexedarray.IndexedArray,
+        ak.contents.indexedarray.IndexedArray,
     )
     assert (
         b.typetracer[
@@ -860,7 +856,7 @@ def test_RecordArray_NumpyArray():
         b[
             "1",
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         b.typetracer[
@@ -895,13 +891,13 @@ def test_RecordArray_NumpyArray():
         == 5
     )
 
-    c = ak._v2.contents.recordarray.RecordArray([], [], 10)
+    c = ak.contents.recordarray.RecordArray([], [], 10)
     assert len(c) == 10
     assert isinstance(
         c[
             5,
         ],
-        ak._v2.record.Record,
+        ak.record.Record,
     )
     assert (
         c.typetracer[
@@ -915,7 +911,7 @@ def test_RecordArray_NumpyArray():
         c[
             7:,
         ],
-        ak._v2.contents.indexedarray.IndexedArray,
+        ak.contents.indexedarray.IndexedArray,
     )
     assert (
         c.typetracer[
@@ -946,13 +942,13 @@ def test_RecordArray_NumpyArray():
             "x",
         ]
 
-    d = ak._v2.contents.recordarray.RecordArray([], None, 10)
+    d = ak.contents.recordarray.RecordArray([], None, 10)
     assert len(d) == 10
     assert isinstance(
         d[
             5,
         ],
-        ak._v2.record.Record,
+        ak.record.Record,
     )
     assert (
         d.typetracer[
@@ -966,7 +962,7 @@ def test_RecordArray_NumpyArray():
         d[
             7:,
         ],
-        ak._v2.contents.indexedarray.IndexedArray,
+        ak.contents.indexedarray.IndexedArray,
     )
     assert (
         d.typetracer[
@@ -1000,9 +996,9 @@ def test_RecordArray_NumpyArray():
 
 def test_IndexedArray_NumpyArray():
     # 4.4 is inaccessible; 3.3 and 5.5 appear twice
-    a = ak._v2.contents.indexedarray.IndexedArray(
-        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    a = ak.contents.indexedarray.IndexedArray(
+        ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
     assert len(a) == 7
     assert (
@@ -1101,7 +1097,7 @@ def test_IndexedArray_NumpyArray():
         a[
             3:,
         ],
-        ak._v2.contents.indexedarray.IndexedArray,
+        ak.contents.indexedarray.IndexedArray,
     )
     assert (
         a.typetracer[
@@ -1167,9 +1163,9 @@ def test_IndexedArray_NumpyArray():
 
 def test_IndexedOptionArray_NumpyArray():
     # 1.1 and 4.4 are inaccessible; 3.3 appears twice
-    a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    a = ak.contents.indexedoptionarray.IndexedOptionArray(
+        ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
     assert len(a) == 7
     assert (
@@ -1268,7 +1264,7 @@ def test_IndexedOptionArray_NumpyArray():
         a[
             3:,
         ],
-        ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+        ak.contents.indexedoptionarray.IndexedOptionArray,
     )
     assert (
         a.typetracer[
@@ -1346,9 +1342,9 @@ def test_IndexedOptionArray_NumpyArray():
 
 def test_ByteMaskedArray_NumpyArray():
     # 2.2, 4.4, and 6.6 are inaccessible
-    a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    a = ak.contents.bytemaskedarray.ByteMaskedArray(
+        ak.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
     assert len(a) == 5
@@ -1424,7 +1420,7 @@ def test_ByteMaskedArray_NumpyArray():
         a[
             2:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         a.typetracer[
@@ -1500,9 +1496,9 @@ def test_ByteMaskedArray_NumpyArray():
         ]
 
     # 2.2, 4.4, and 6.6 are inaccessible
-    b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    b = ak.contents.bytemaskedarray.ByteMaskedArray(
+        ak.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
     assert len(b) == 5
@@ -1578,7 +1574,7 @@ def test_ByteMaskedArray_NumpyArray():
         b[
             2:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         b.typetracer[
@@ -1656,8 +1652,8 @@ def test_ByteMaskedArray_NumpyArray():
 
 def test_BitMaskedArray_NumpyArray():
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    a = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -1679,7 +1675,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -1858,7 +1854,7 @@ def test_BitMaskedArray_NumpyArray():
         a[
             5:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         a.typetracer[
@@ -1930,8 +1926,8 @@ def test_BitMaskedArray_NumpyArray():
         ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    b = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -1953,7 +1949,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -2131,7 +2127,7 @@ def test_BitMaskedArray_NumpyArray():
         b[
             5:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         b.typetracer[
@@ -2203,8 +2199,8 @@ def test_BitMaskedArray_NumpyArray():
         ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    c = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -2229,7 +2225,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -2407,7 +2403,7 @@ def test_BitMaskedArray_NumpyArray():
         c[
             5:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         c.typetracer[
@@ -2479,8 +2475,8 @@ def test_BitMaskedArray_NumpyArray():
         ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    d = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -2505,7 +2501,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -2683,7 +2679,7 @@ def test_BitMaskedArray_NumpyArray():
         d[
             5:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         d.typetracer[
@@ -2756,8 +2752,8 @@ def test_BitMaskedArray_NumpyArray():
 
 
 def test_UnmaskedArray_NumpyArray():
-    a = ak._v2.contents.unmaskedarray.UnmaskedArray(
-        ak._v2.contents.numpyarray.NumpyArray(
+    a = ak.contents.unmaskedarray.UnmaskedArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
         )
     )
@@ -2794,7 +2790,7 @@ def test_UnmaskedArray_NumpyArray():
         a[
             2:,
         ],
-        ak._v2.contents.unmaskedarray.UnmaskedArray,
+        ak.contents.unmaskedarray.UnmaskedArray,
     )
     assert (
         a.typetracer[
@@ -2827,12 +2823,12 @@ def test_UnmaskedArray_NumpyArray():
 def test_UnionArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
-    a = ak._v2.contents.unionarray.UnionArray(
-        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
-        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+    a = ak.contents.unionarray.UnionArray(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3])),
-            ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+            ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3])),
+            ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
     assert len(a) == 7
@@ -2932,7 +2928,7 @@ def test_UnionArray_NumpyArray():
         a[
             3:,
         ],
-        ak._v2.contents.unionarray.UnionArray,
+        ak.contents.unionarray.UnionArray,
     )
     assert (
         a.typetracer[
@@ -3010,10 +3006,10 @@ def test_UnionArray_NumpyArray():
 
 def test_RegularArray_RecordArray_NumpyArray():
     # 6.6 is inaccessible
-    a = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
-        ak._v2.contents.recordarray.RecordArray(
+    a = ak.contents.regulararray.RegularArray(  # noqa: F841
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -3033,7 +3029,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             1,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -3067,7 +3063,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             1:2,
         ],
-        ak._v2.contents.regulararray.RegularArray,
+        ak.contents.regulararray.RegularArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -3110,9 +3106,9 @@ def test_RegularArray_RecordArray_NumpyArray():
             "bad",
         ]
 
-    b = ak._v2.contents.regulararray.RegularArray(  # noqa: F841
-        ak._v2.contents.recordarray.RecordArray(
-            [ak._v2.contents.emptyarray.EmptyArray()], ["nest"]
+    b = ak.contents.regulararray.RegularArray(  # noqa: F841
+        ak.contents.recordarray.RecordArray(
+            [ak.contents.emptyarray.EmptyArray()], ["nest"]
         ),
         0,
         zeros_length=10,
@@ -3129,7 +3125,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         b["nest",][  # noqa: E231
             5,
         ],
-        ak._v2.contents.emptyarray.EmptyArray,
+        ak.contents.emptyarray.EmptyArray,
     )
     assert (
         b.typetracer["nest",][  # noqa: E231
@@ -3151,7 +3147,7 @@ def test_RegularArray_RecordArray_NumpyArray():
         b["nest",][  # noqa: E231
             7:,
         ],
-        ak._v2.contents.regulararray.RegularArray,
+        ak.contents.regulararray.RegularArray,
     )
     assert (
         b.typetracer["nest",][  # noqa: E231
@@ -3186,12 +3182,12 @@ def test_RegularArray_RecordArray_NumpyArray():
 def test_ListArray_RecordArray_NumpyArray():
     # 200 is inaccessible in stops
     # 6.6, 7.7, and 8.8 are inaccessible in content
-    a = ak._v2.contents.listarray.ListArray(  # noqa: F841
-        ak._v2.index.Index(np.array([4, 100, 1])),
-        ak._v2.index.Index(np.array([7, 100, 3, 200])),
-        ak._v2.contents.recordarray.RecordArray(
+    a = ak.contents.listarray.ListArray(  # noqa: F841
+        ak.index.Index(np.array([4, 100, 1])),
+        ak.index.Index(np.array([7, 100, 3, 200])),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
                 )
             ],
@@ -3218,7 +3214,7 @@ def test_ListArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             2,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -3292,7 +3288,7 @@ def test_ListArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             1:,
         ],
-        ak._v2.contents.listarray.ListArray,
+        ak.contents.listarray.ListArray,
     )
     assert (
         len(
@@ -3334,14 +3330,10 @@ def test_ListArray_RecordArray_NumpyArray():
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
     # 6.6 and 7.7 are inaccessible
-    a = ak._v2.contents.listoffsetarray.ListOffsetArray(  # noqa: F841
-        ak._v2.index.Index(np.array([1, 4, 4, 6])),
-        ak._v2.contents.recordarray.RecordArray(
-            [
-                ak._v2.contents.numpyarray.NumpyArray(
-                    [6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]
-                )
-            ],
+    a = ak.contents.listoffsetarray.ListOffsetArray(  # noqa: F841
+        ak.index.Index(np.array([1, 4, 4, 6])),
+        ak.contents.recordarray.RecordArray(
+            [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
             ["nest"],
         ),
     )
@@ -3365,7 +3357,7 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             2,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -3439,7 +3431,7 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             1:,
         ],
-        ak._v2.contents.listarray.ListArray,
+        ak.contents.listarray.ListArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -3489,11 +3481,11 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
 
 def test_IndexedArray_RecordArray_NumpyArray():
     # 4.4 is inaccessible; 3.3 and 5.5 appear twice
-    a = ak._v2.contents.indexedarray.IndexedArray(  # noqa: F841
-        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
-        ak._v2.contents.recordarray.RecordArray(
+    a = ak.contents.indexedarray.IndexedArray(  # noqa: F841
+        ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -3604,7 +3596,7 @@ def test_IndexedArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             3:,
         ],
-        ak._v2.contents.indexedarray.IndexedArray,
+        ak.contents.indexedarray.IndexedArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -3666,11 +3658,11 @@ def test_IndexedArray_RecordArray_NumpyArray():
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
     # 1.1 and 4.4 are inaccessible; 3.3 appears twice
-    a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
-        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
-        ak._v2.contents.recordarray.RecordArray(
+    a = ak.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
+        ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -3781,7 +3773,7 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             3:,
         ],
-        ak._v2.contents.indexedoptionarray.IndexedOptionArray,
+        ak.contents.indexedoptionarray.IndexedOptionArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -3855,11 +3847,11 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
     # 2.2, 4.4, and 6.6 are inaccessible
-    a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
-        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
-        ak._v2.contents.recordarray.RecordArray(
+    a = ak.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
+        ak.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -3947,7 +3939,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             2:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -4019,11 +4011,11 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         ]
 
     # 2.2, 4.4, and 6.6 are inaccessible
-    b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
-        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
-        ak._v2.contents.recordarray.RecordArray(
+    b = ak.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
+        ak.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -4111,7 +4103,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
         b["nest",][  # noqa: E231
             2:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         b.typetracer["nest",][  # noqa: E231
@@ -4185,8 +4177,8 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    a = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -4207,9 +4199,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.recordarray.RecordArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array(
                         [
                             0.0,
@@ -4405,7 +4397,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             5:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -4477,8 +4469,8 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    b = ak._v2.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
-        ak._v2.index.Index(
+    b = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -4500,9 +4492,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.recordarray.RecordArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array(
                         [
                             0.0,
@@ -4705,7 +4697,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         b["nest",][  # noqa: E231
             5:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         b.typetracer["nest",][  # noqa: E231
@@ -4777,8 +4769,8 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    c = ak._v2.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
-        ak._v2.index.Index(
+    c = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -4803,9 +4795,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.recordarray.RecordArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array(
                         [
                             0.0,
@@ -5008,7 +5000,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         c["nest",][  # noqa: E231
             5:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         c.typetracer["nest",][  # noqa: E231
@@ -5080,8 +5072,8 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         ]
 
     # 4.0, 5.0, 6.0, 7.0, 2.2, 4.4, and 6.6 are inaccessible
-    d = ak._v2.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
-        ak._v2.index.Index(
+    d = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -5106,9 +5098,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.recordarray.RecordArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array(
                         [
                             0.0,
@@ -5311,7 +5303,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
         d["nest",][  # noqa: E231
             5:,
         ],
-        ak._v2.contents.bytemaskedarray.ByteMaskedArray,
+        ak.contents.bytemaskedarray.ByteMaskedArray,
     )
     assert (
         d.typetracer["nest",][  # noqa: E231
@@ -5384,10 +5376,10 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
-    a = ak._v2.contents.unmaskedarray.UnmaskedArray(  # noqa: F841
-        ak._v2.contents.recordarray.RecordArray(
+    a = ak.contents.unmaskedarray.UnmaskedArray(  # noqa: F841
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([0.0, 1.1, 2.2, 3.3], dtype=np.float64)
                 )
             ],
@@ -5434,7 +5426,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             2:,
         ],
-        ak._v2.contents.unmaskedarray.UnmaskedArray,
+        ak.contents.unmaskedarray.UnmaskedArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231
@@ -5467,16 +5459,16 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
 def test_UnionArray_RecordArray_NumpyArray():
     # 100 is inaccessible in index
     # 1.1 is inaccessible in contents[1]
-    a = ak._v2.contents.unionarray.UnionArray(  # noqa: F841
-        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
-        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
+    a = ak.contents.unionarray.UnionArray(  # noqa: F841
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [
-            ak._v2.contents.recordarray.RecordArray(
-                [ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3]))], ["nest"]
+            ak.contents.recordarray.RecordArray(
+                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3]))], ["nest"]
             ),
-            ak._v2.contents.recordarray.RecordArray(
+            ak.contents.recordarray.RecordArray(
                 [
-                    ak._v2.contents.numpyarray.NumpyArray(
+                    ak.contents.numpyarray.NumpyArray(
                         np.array([1.1, 2.2, 3.3, 4.4, 5.5])
                     )
                 ],
@@ -5588,7 +5580,7 @@ def test_UnionArray_RecordArray_NumpyArray():
         a["nest",][  # noqa: E231
             3:,
         ],
-        ak._v2.contents.NumpyArray,
+        ak.contents.NumpyArray,
     )
     assert (
         a.typetracer["nest",][  # noqa: E231

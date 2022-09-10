@@ -31,14 +31,14 @@ def mixin_class(registry, name=None):
 
         record = type(
             cls_name + "Record",
-            (cls, ak._v2.highlevel.Record),
+            (cls, ak.highlevel.Record),
             {"__module__": cls.__module__},
         )
         setattr(sys.modules[cls.__module__], cls_name + "Record", record)
         registry[behavior_name] = record
         array = type(
             cls_name + "Array",
-            (cls, ak._v2.highlevel.Array),
+            (cls, ak.highlevel.Array),
             {"__module__": cls.__module__},
         )
         setattr(sys.modules[cls.__module__], cls_name + "Array", array)
@@ -82,7 +82,7 @@ def mixin_class_method(ufunc, rhs=None, transpose=True):
 
     def register(method):
         if not isinstance(rhs, (set, type(None))):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError("expected a set of right-hand-side argument types")
             )
         if transpose and rhs is not None:

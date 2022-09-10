@@ -3,7 +3,7 @@
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _parameters_equal
 
 
 class UnionForm(Form):
@@ -18,16 +18,16 @@ class UnionForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._v2._util.isstr(tags):
-            raise ak._v2._util.error(
+        if not ak._util.isstr(tags):
+            raise ak._util.error(
                 TypeError(
                     "{} 'tags' must be of type str, not {}".format(
                         type(self).__name__, repr(tags)
                     )
                 )
             )
-        if not ak._v2._util.isstr(index):
-            raise ak._v2._util.error(
+        if not ak._util.isstr(index):
+            raise ak._util.error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(
                         type(self).__name__, repr(index)
@@ -35,7 +35,7 @@ class UnionForm(Form):
                 )
             )
         if not isinstance(contents, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -44,7 +44,7 @@ class UnionForm(Form):
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     TypeError(
                         "{} all 'contents' must be Form subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -95,10 +95,10 @@ class UnionForm(Form):
         )
 
     def _type(self, typestrs):
-        return ak._v2.types.uniontype.UnionType(
+        return ak.types.uniontype.UnionType(
             [x._type(typestrs) for x in self._contents],
             self._parameters,
-            ak._v2._util.gettypestr(self._parameters, typestrs),
+            ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -176,7 +176,7 @@ class UnionForm(Form):
         )
 
     def simplify_uniontype(self, merge=True, mergebool=False):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:
@@ -266,7 +266,7 @@ class UnionForm(Form):
                 contents.append(next_content)
 
         if len(contents) == 0:
-            return ak._v2.forms.EmptyForm(
+            return ak.forms.EmptyForm(
                 self._has_identifier, self._parameters, self._form_key
             )
         elif len(contents) == 1:

@@ -30,12 +30,12 @@ def cartesian(
             items for a chosen set of keys from the `array` dict or integer
             slots of the `array` iterable.
         parameters (None or dict): Parameters for the new
-            #ak.layout.RecordArray node that is created by this operation.
+            #ak.contents.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
-            #ak.layout.RecordArray node that is created by this operation
+            #ak.contents.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -87,7 +87,7 @@ def cartesian(
          [[(4, 'd')], [(5, 'd')]],
          [[(6, 'e'), (6, 'f')]]]
 
-    These tuples are #ak.layout.RecordArray nodes with unnamed fields. To
+    These tuples are #ak.contents.RecordArray nodes with unnamed fields. To
     name the fields, we can pass `one` and `two` in a dict, rather than a list.
 
         >>> ak.to_list(ak.cartesian({"x": one, "y": two}))
@@ -214,8 +214,8 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.cartesian",
+    with ak._util.OperationErrorContext(
+        "ak.cartesian",
         dict(
             arrays=arrays,
             axis=axis,
@@ -231,22 +231,22 @@ def cartesian(
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
-        behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)
+        behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
         nplike = ak.nplike.of(*arrays.values())
         new_arrays = {}
         for n, x in arrays.items():
-            new_arrays[n] = ak._v2.operations.to_layout(
+            new_arrays[n] = ak.operations.to_layout(
                 x, allow_record=False, allow_other=False
             )
 
     else:
         arrays = list(arrays)
-        behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
+        behavior = ak._util.behavior_of(*arrays, behavior=behavior)
         nplike = ak.nplike.of(*arrays)
         new_arrays = []
         for x in arrays:
             new_arrays.append(
-                ak._v2.operations.to_layout(x, allow_record=False, allow_other=False)
+                ak.operations.to_layout(x, allow_record=False, allow_other=False)
             )
 
     if with_name is not None:
@@ -263,10 +263,10 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
     posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
     if posaxis < 0:
-        raise ak._v2._util.error(ValueError("negative axis depth is ambiguous"))
+        raise ak._util.error(ValueError("negative axis depth is ambiguous"))
     for x in new_arrays_values[1:]:
         if x.axis_wrap_if_negative(axis) != posaxis:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     "arrays to cartesian-product do not have the same depth for negative axis"
                 )
@@ -280,7 +280,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             if nested is True:
                 nested = list(new_arrays.keys())  # last key is ignored below
             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(
                         "the 'nested' parameter of cartesian must be dict keys "
                         "for a dict of arrays"
@@ -303,7 +303,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                 for x in nested
             ):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(
                         "the 'nested' prarmeter of cartesian must be integers in "
                         "[0, len(arrays) - 1) for an iterable of arrays"
@@ -317,21 +317,21 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         layouts = [x for x in layouts]
 
         indexes = [
-            ak._v2.index.Index64(x.reshape(-1), nplike=nplike)
+            ak.index.Index64(x.reshape(-1), nplike=nplike)
             for x in nplike.index_nplike.meshgrid(
                 *[nplike.index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
                 indexing="ij"
             )
         ]
         outs = [
-            ak._v2.contents.IndexedArray(x, y)
+            ak.contents.IndexedArray(x, y)
             for x, y in __builtins__["zip"](indexes, layouts)
         ]
 
-        result = ak._v2.contents.RecordArray(outs, fields, parameters=parameters)
+        result = ak.contents.RecordArray(outs, fields, parameters=parameters)
         for i in range(len(new_arrays) - 1, -1, -1):
             if i in nested:
-                result = ak._v2.contents.RegularArray(result, len(layouts[i + 1]), 0)
+                result = ak.contents.RegularArray(result, len(layouts[i + 1]), 0)
 
     else:
 
@@ -339,7 +339,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             if i == 0:
                 return layout
             else:
-                return ak._v2.contents.RegularArray(newaxis(layout, i - 1), 1, 0)
+                return ak.contents.RegularArray(newaxis(layout, i - 1), 1, 0)
 
         def getgetfunction1(i, **kwargs):
             def getfunction1(layout, depth, **kwargs):
@@ -359,7 +359,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                         layout.parameter("__array__") == "string"
                         or layout.parameter("__array__") == "bytestring"
                     ):
-                        raise ak._v2._util.error(
+                        raise ak._util.error(
                             ValueError(
                                 "ak.cartesian does not compute combinations of the "
                                 "characters of a string; please split it into lists"
@@ -375,9 +375,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             return getfunction2
 
         def apply(x, i):
-            layout = ak._v2.operations.to_layout(
-                x, allow_record=False, allow_other=False
-            )
+            layout = ak.operations.to_layout(x, allow_record=False, allow_other=False)
             return layout.recursively_apply(getgetfunction2(i), behavior)
 
         toflatten = []
@@ -388,7 +386,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             if nested is True:
                 nested = list(new_arrays.keys())  # last key is ignored below
             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(
                         "the 'nested' parameter of cartesian must be dict keys "
                         "for a dict of arrays"
@@ -409,7 +407,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                 for x in nested
             ):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(
                         "the 'nested' parameter of cartesian must be integers in "
                         "[0, len(arrays) - 1) for an iterable of arrays"
@@ -427,18 +425,16 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 if all(len(x) == 0 for x in inputs):
                     inputs = [
                         x.content
-                        if isinstance(x, ak._v2.contents.RegularArray) and x.size == 1
+                        if isinstance(x, ak.contents.RegularArray) and x.size == 1
                         else x
                         for x in inputs
                     ]
-                return (
-                    ak._v2.contents.RecordArray(inputs, fields, parameters=parameters),
-                )
+                return (ak.contents.RecordArray(inputs, fields, parameters=parameters),)
 
             else:
                 return None
 
-        out = ak._v2._broadcasting.broadcast_and_apply(
+        out = ak._broadcasting.broadcast_and_apply(
             layouts, getfunction3, behavior, right_broadcast=False
         )
         assert isinstance(out, tuple) and len(out) == 1
@@ -446,8 +442,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
         while len(toflatten) != 0:
             flatten_axis = toflatten.pop()
-            result = ak._v2.operations.flatten(
+            result = ak.operations.flatten(
                 result, axis=flatten_axis, highlevel=False, behavior=behavior
             )
 
-    return ak._v2._util.wrap(result, behavior, highlevel)
+    return ak._util.wrap(result, behavior, highlevel)

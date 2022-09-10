@@ -6,11 +6,11 @@ import awkward as ak  # noqa: F401
 
 
 def test_record_nochange():
-    class Point(ak._v2.Record):
+    class Point(ak.Record):
         def __getitem__(self, where):
             return super().__getitem__(where)
 
-    array = ak._v2.Array(
+    array = ak.Array(
         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
         with_name="point",
         behavior={"point": Point},
@@ -22,11 +22,11 @@ def test_record_nochange():
 
 
 def test_array_nochange():
-    class PointArray(ak._v2.Array):
+    class PointArray(ak.Array):
         def __getitem__(self, where):
             return super().__getitem__(where)
 
-    array = ak._v2.Array(
+    array = ak.Array(
         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
         with_name="point",
         behavior={("*", "point"): PointArray},
@@ -38,11 +38,11 @@ def test_array_nochange():
 
 
 def test_record_changed():
-    class Point(ak._v2.Record):
+    class Point(ak.Record):
         def __getitem__(self, where):
             return str(super().__getitem__(where))
 
-    array = ak._v2.Array(
+    array = ak.Array(
         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
         with_name="point",
         behavior={"point": Point},
@@ -58,11 +58,11 @@ def test_record_changed():
 
 
 def test_array_changed():
-    class PointArray(ak._v2.Array):
+    class PointArray(ak.Array):
         def __getitem__(self, where):
             return str(super().__getitem__(where))
 
-    array = ak._v2.Array(
+    array = ak.Array(
         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
         with_name="point",
         behavior={("*", "point"): PointArray},
@@ -74,11 +74,11 @@ def test_array_changed():
 
 
 def test_record_to_Array():
-    class Point(ak._v2.Record):
+    class Point(ak.Record):
         def __getitem__(self, where):
-            return ak._v2.Array([1, 2, 3])
+            return ak.Array([1, 2, 3])
 
-    array = ak._v2.Array(
+    array = ak.Array(
         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
         with_name="point",
         behavior={"point": Point},
@@ -94,11 +94,11 @@ def test_record_to_Array():
 
 
 def test_array_to_Array():
-    class PointArray(ak._v2.Array):
+    class PointArray(ak.Array):
         def __getitem__(self, where):
-            return ak._v2.Array([1, 2, 3])
+            return ak.Array([1, 2, 3])
 
-    array = ak._v2.Array(
+    array = ak.Array(
         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
         with_name="point",
         behavior={("*", "point"): PointArray},
@@ -110,11 +110,11 @@ def test_array_to_Array():
 
 
 def test_record_to_ndarray():
-    class Point(ak._v2.Record):
+    class Point(ak.Record):
         def __getitem__(self, where):
             return np.array([1, 2, 3])
 
-    array = ak._v2.Array(
+    array = ak.Array(
         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
         with_name="point",
         behavior={"point": Point},
@@ -130,11 +130,11 @@ def test_record_to_ndarray():
 
 
 def test_array_to_ndarray():
-    class PointArray(ak._v2.Array):
+    class PointArray(ak.Array):
         def __getitem__(self, where):
             return np.array([1, 2, 3])
 
-    array = ak._v2.Array(
+    array = ak.Array(
         [[{"rho": 1, "phi": 1.0}], [], [{"rho": 2, "phi": 2.0}]],
         with_name="point",
         behavior={("*", "point"): PointArray},

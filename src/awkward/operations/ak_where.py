@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("where")
+@ak._connect.numpy.implements("where")
 def where(condition, *args, **kwargs):
     """
     Args:
@@ -18,9 +18,9 @@ def where(condition, *args, **kwargs):
         mergebool (bool, default is True): If True, boolean and numeric data
             can be combined into the same buffer, losing information about
             False vs `0` and True vs `1`; otherwise, they are kept in separate
-            buffers with distinct types (using an #ak.layout.UnionArray8_64).
+            buffers with distinct types (using an #ak.contents.UnionArray).
         highlevel (bool, default is True): If True, return an #ak.Array;
-            otherwise, return a low-level #ak.layout.Content subclass.
+            otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -38,26 +38,26 @@ def where(condition, *args, **kwargs):
     for all `i`. The structure of `x` and `y` do not need to be the same; if
     they are incompatible types, the output will have #ak.type.UnionType.
     """
-    mergebool, highlevel, behavior = ak._v2._util.extra(
+    mergebool, highlevel, behavior = ak._util.extra(
         (), kwargs, [("mergebool", True), ("highlevel", True), ("behavior", None)]
     )
 
     if len(args) == 0:
-        with ak._v2._util.OperationErrorContext(
-            "ak._v2.where",
+        with ak._util.OperationErrorContext(
+            "ak.where",
             dict(condition=condition, mergebool=mergebool, highlevel=highlevel),
         ):
             return _impl1(condition, mergebool, highlevel, behavior)
 
     elif len(args) == 1:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError("either both or neither of x and y should be given")
         )
 
     elif len(args) == 2:
         x, y = args
-        with ak._v2._util.OperationErrorContext(
-            "ak._v2.where",
+        with ak._util.OperationErrorContext(
+            "ak.where",
             dict(
                 condition=condition, x=x, y=y, mergebool=mergebool, highlevel=highlevel
             ),
@@ -65,7 +65,7 @@ def where(condition, *args, **kwargs):
             return _impl3(condition, x, y, mergebool, highlevel, behavior)
 
     else:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError(
                 "where() takes from 1 to 3 positional arguments but {} were "
                 "given".format(len(args) + 1)
@@ -74,63 +74,63 @@ def where(condition, *args, **kwargs):
 
 
 def _impl1(condition, mergebool, highlevel, behavior):
-    akcondition = ak._v2.operations.to_layout(
+    akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
     nplike = ak.nplike.of(akcondition)
 
-    akcondition = ak._v2.contents.NumpyArray(ak._v2.operations.to_numpy(akcondition))
-    out = nplike.nonzero(ak._v2.operations.to_numpy(akcondition))
+    akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
+    out = nplike.nonzero(ak.operations.to_numpy(akcondition))
     if highlevel:
         return tuple(
-            ak._v2._util.wrap(
-                ak._v2.contents.NumpyArray(x),
-                ak._v2._util.behavior_of(condition, behavior=behavior),
+            ak._util.wrap(
+                ak.contents.NumpyArray(x),
+                ak._util.behavior_of(condition, behavior=behavior),
             )
             for x in out
         )
     else:
-        return tuple(ak._v2.contents.NumpyArray(x) for x in out)
+        return tuple(ak.contents.NumpyArray(x) for x in out)
 
 
 def _impl3(condition, x, y, mergebool, highlevel, behavior):
-    akcondition = ak._v2.operations.to_layout(
+    akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
 
-    left = ak._v2.operations.to_layout(x, allow_record=False, allow_other=True)
-    right = ak._v2.operations.to_layout(y, allow_record=False, allow_other=True)
+    left = ak.operations.to_layout(x, allow_record=False, allow_other=True)
+    right = ak.operations.to_layout(y, allow_record=False, allow_other=True)
 
     good_arrays = [akcondition]
-    if isinstance(left, ak._v2.contents.Content):
+    if isinstance(left, ak.contents.Content):
         good_arrays.append(left)
-    if isinstance(right, ak._v2.contents.Content):
+    if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
     nplike = ak.nplike.of(*good_arrays)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
-        if isinstance(akcondition, ak._v2.contents.NumpyArray):
+        if isinstance(akcondition, ak.contents.NumpyArray):
             npcondition = nplike.index_nplike.asarray(akcondition)
-            tags = ak._v2.index.Index8((npcondition == 0).view(np.int8))
-            index = ak._v2.index.Index64(
+            tags = ak.index.Index8((npcondition == 0).view(np.int8))
+            index = ak.index.Index64(
                 nplike.index_nplike.arange(len(tags), dtype=np.int64), nplike=nplike
             )
-            if not isinstance(left, ak._v2.contents.Content):
-                left = ak._v2.contents.NumpyArray(nplike.repeat(left, len(tags)))
-            if not isinstance(right, ak._v2.contents.Content):
-                right = ak._v2.contents.NumpyArray(nplike.repeat(right, len(tags)))
-            tmp = ak._v2.contents.UnionArray(tags, index, [left, right])
+            if not isinstance(left, ak.contents.Content):
+                left = ak.contents.NumpyArray(nplike.repeat(left, len(tags)))
+            if not isinstance(right, ak.contents.Content):
+                right = ak.contents.NumpyArray(nplike.repeat(right, len(tags)))
+            tmp = ak.contents.UnionArray(tags, index, [left, right])
             return (tmp.simplify_uniontype(mergebool=mergebool),)
         else:
             return None
 
-    behavior = ak._v2._util.behavior_of(condition, x, y, behavior=behavior)
-    out = ak._v2._broadcasting.broadcast_and_apply(
+    behavior = ak._util.behavior_of(condition, x, y, behavior=behavior)
+    out = ak._broadcasting.broadcast_and_apply(
         [akcondition, left, right],
         action,
         behavior,
         numpy_to_regular=True,
     )
 
-    return ak._v2._util.wrap(out[0], behavior, highlevel)
+    return ak._util.wrap(out[0], behavior, highlevel)

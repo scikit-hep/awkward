@@ -32,8 +32,8 @@ def backend(*arrays):
 
     See #ak.to_backend.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.backend",
+    with ak._util.OperationErrorContext(
+        "ak.backend",
         {"*arrays": arrays},
     ):
         return _impl(arrays)
@@ -42,12 +42,12 @@ def backend(*arrays):
 def _impl(arrays):
     backends = set()
     for array in arrays:
-        layout = ak._v2.operations.to_layout(
+        layout = ak.operations.to_layout(
             array,
             allow_record=True,
             allow_other=True,
         )
-        if isinstance(layout, (ak._v2.contents.Content, ak._v2.index.Index)):
+        if isinstance(layout, (ak.contents.Content, ak.index.Index)):
             if isinstance(layout.nplike, ak.nplike.Numpy):
                 backends.add("cpu")
             elif isinstance(layout.nplike, ak.nplike.Cupy):

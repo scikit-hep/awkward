@@ -21,7 +21,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
             innermost: `-1` is the innermost  dimension, `-2` is the next
             level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -50,8 +50,8 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
     The values could be floating-point numbers or strings.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.fill_none",
+    with ak._util.OperationErrorContext(
+        "ak.fill_none",
         dict(
             array=array, value=value, axis=axis, highlevel=highlevel, behavior=behavior
         ),
@@ -60,9 +60,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
 
 def _impl(array, value, axis, highlevel, behavior):
-    arraylayout = ak._v2.operations.to_layout(
-        array, allow_record=True, allow_other=False
-    )
+    arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     nplike = ak.nplike.of(arraylayout)
 
     # Convert value type to appropriate layout
@@ -71,35 +69,35 @@ def _impl(array, value, axis, highlevel, behavior):
         and issubclass(value.dtype.type, (np.bool_, np.number))
         and len(value.shape) != 0
     ):
-        valuelayout = ak._v2.operations.to_layout(
+        valuelayout = ak.operations.to_layout(
             nplike.asarray(value)[np.newaxis], allow_record=False, allow_other=False
         )
     elif isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
         isinstance(value, np.ndarray)
         and issubclass(value.dtype.type, (np.bool_, np.number))
     ):
-        valuelayout = ak._v2.operations.to_layout(
+        valuelayout = ak.operations.to_layout(
             nplike.asarray(value), allow_record=False, allow_other=False
         )
     elif (
         isinstance(value, Iterable)
         and not (isinstance(value, (str, bytes)))
-        or isinstance(value, (ak._v2.highlevel.Record, ak._v2.record.Record))
+        or isinstance(value, (ak.highlevel.Record, ak.record.Record))
     ):
-        valuelayout = ak._v2.operations.to_layout(
+        valuelayout = ak.operations.to_layout(
             value, allow_record=True, allow_other=False
         )
-        if isinstance(valuelayout, ak._v2.record.Record):
+        if isinstance(valuelayout, ak.record.Record):
             valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
         elif len(valuelayout) == 0:
-            offsets = ak._v2.index.Index64(
+            offsets = ak.index.Index64(
                 nplike.array([0, 0], dtype=np.int64), nplike=nplike
             )
-            valuelayout = ak._v2.contents.ListOffsetArray(offsets, valuelayout)
+            valuelayout = ak.contents.ListOffsetArray(offsets, valuelayout)
         else:
-            valuelayout = ak._v2.contents.RegularArray(valuelayout, len(valuelayout), 1)
+            valuelayout = ak.contents.RegularArray(valuelayout, len(valuelayout), 1)
     else:
-        valuelayout = ak._v2.operations.to_layout(
+        valuelayout = ak.operations.to_layout(
             [value], allow_record=False, allow_other=False
         )
 
@@ -127,6 +125,4 @@ def _impl(array, value, axis, highlevel, behavior):
     depth_context = {"posaxis": axis}
     out = arraylayout.recursively_apply(action, behavior, depth_context=depth_context)
 
-    return ak._v2._util.wrap(
-        out, ak._v2._util.behavior_of(array, behavior=behavior), highlevel
-    )
+    return ak._util.wrap(out, ak._util.behavior_of(array, behavior=behavior), highlevel)

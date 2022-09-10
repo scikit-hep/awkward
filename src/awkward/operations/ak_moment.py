@@ -57,8 +57,8 @@ def moment(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.moment",
+    with ak._util.OperationErrorContext(
+        "ak.moment",
         dict(
             x=x,
             n=n,
@@ -73,31 +73,31 @@ def moment(
 
 
 def _impl(x, n, weight, axis, keepdims, mask_identity, flatten_records):
-    x = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(x, allow_record=False, allow_other=False)
+    x = ak.highlevel.Array(
+        ak.operations.to_layout(x, allow_record=False, allow_other=False)
     )
     if weight is not None:
-        weight = ak._v2.highlevel.Array(
-            ak._v2.operations.to_layout(weight, allow_record=False, allow_other=False)
+        weight = ak.highlevel.Array(
+            ak.operations.to_layout(weight, allow_record=False, allow_other=False)
         )
 
     with np.errstate(invalid="ignore"):
         if weight is None:
-            sumw = ak._v2.operations.ak_count._impl(
+            sumw = ak.operations.ak_count._impl(
                 x, axis, keepdims, mask_identity, flatten_records
             )
-            sumwxn = ak._v2.operations.ak_sum._impl(
+            sumwxn = ak.operations.ak_sum._impl(
                 x**n, axis, keepdims, mask_identity, flatten_records
             )
         else:
-            sumw = ak._v2.operations.ak_sum._impl(
+            sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,
                 keepdims,
                 mask_identity,
                 flatten_records,
             )
-            sumwxn = ak._v2.operations.ak_sum._impl(
+            sumwxn = ak.operations.ak_sum._impl(
                 (x * weight) ** n,
                 axis,
                 keepdims,

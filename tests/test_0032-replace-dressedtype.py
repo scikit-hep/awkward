@@ -4,81 +4,81 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_types_with_parameters():
-    t = ak._v2.types.UnknownType()
+    t = ak.types.UnknownType()
     assert t.parameters == {}
 
-    t = ak._v2.types.UnknownType(parameters={"__array__": ["val", "ue"]})
+    t = ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
     assert t.parameters == {"__array__": ["val", "ue"]}
 
-    t = ak._v2.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]})
+    t = ak.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]})
     assert t.parameters == {"__array__": ["val", "ue"]}
-    t = ak._v2.types.NumpyType("float64", parameters={"__array__": ["val", "ue"]})
+    t = ak.types.NumpyType("float64", parameters={"__array__": ["val", "ue"]})
     assert t.parameters == {"__array__": ["val", "ue"]}
-    t = ak._v2.types.ArrayType(
-        ak._v2.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]}), 100
+    t = ak.types.ArrayType(
+        ak.types.NumpyType("int32", parameters={"__array__": ["val", "ue"]}), 100
     )
     assert t.content.parameters == {"__array__": ["val", "ue"]}
-    t = ak._v2.types.ListType(
-        ak._v2.types.NumpyType("int32"), parameters={"__array__": ["val", "ue"]}
+    t = ak.types.ListType(
+        ak.types.NumpyType("int32"), parameters={"__array__": ["val", "ue"]}
     )
     assert t.parameters == {"__array__": ["val", "ue"]}
-    t = ak._v2.types.RegularType(
-        ak._v2.types.NumpyType("int32"), 5, parameters={"__array__": ["val", "ue"]}
+    t = ak.types.RegularType(
+        ak.types.NumpyType("int32"), 5, parameters={"__array__": ["val", "ue"]}
     )
     assert t.parameters == {"__array__": ["val", "ue"]}
-    t = ak._v2.types.OptionType(
-        ak._v2.types.NumpyType("int32"), parameters={"__array__": ["val", "ue"]}
+    t = ak.types.OptionType(
+        ak.types.NumpyType("int32"), parameters={"__array__": ["val", "ue"]}
     )
     assert t.parameters == {"__array__": ["val", "ue"]}
-    t = ak._v2.types.UnionType(
-        (ak._v2.types.NumpyType("int32"), ak._v2.types.NumpyType("float64")),
+    t = ak.types.UnionType(
+        (ak.types.NumpyType("int32"), ak.types.NumpyType("float64")),
         parameters={"__array__": ["val", "ue"]},
     )
     assert t.parameters == {"__array__": ["val", "ue"]}
-    t = ak._v2.types.RecordType(
+    t = ak.types.RecordType(
         [
-            ak._v2.types.NumpyType("int32"),
-            ak._v2.types.NumpyType("float64"),
+            ak.types.NumpyType("int32"),
+            ak.types.NumpyType("float64"),
         ],
         fields=["one", "two"],
         parameters={"__array__": ["val", "ue"]},
     )
     assert t.parameters == {"__array__": ["val", "ue"]}
 
-    t = ak._v2.types.UnknownType(
+    t = ak.types.UnknownType(
         parameters={"key1": ["val", "ue"], "__record__": "one \u2192 two"}
     )
     assert t.parameters == {"__record__": "one \u2192 two", "key1": ["val", "ue"]}
 
-    assert t == ak._v2.types.UnknownType(
+    assert t == ak.types.UnknownType(
         parameters={"__record__": "one \u2192 two", "key1": ["val", "ue"]}
     )
-    assert t != ak._v2.types.UnknownType(parameters={"__array__": ["val", "ue"]})
+    assert t != ak.types.UnknownType(parameters={"__array__": ["val", "ue"]})
 
 
 def test_dress():
-    class Dummy(ak._v2.highlevel.Array):
+    class Dummy(ak.highlevel.Array):
         def __repr__(self):
             return f"<Dummy {str(self)}>"
 
     ns = {"Dummy": Dummy}
 
-    x = ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    x = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     x.parameters["__array__"] = "Dummy"
-    a = ak._v2.highlevel.Array(x, behavior=ns, check_valid=True)
+    a = ak.highlevel.Array(x, behavior=ns, check_valid=True)
     assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
-    x2 = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64)),
-        ak._v2.contents.NumpyArray(
+    x2 = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64)),
+        ak.contents.NumpyArray(
             np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"__array__": "Dummy"}
         ),
     )
-    a2 = ak._v2.highlevel.Array(x2, behavior=ns, check_valid=True)
+    a2 = ak.highlevel.Array(x2, behavior=ns, check_valid=True)
     # columns limit changed from 40 to 80 in v2
     assert (
         repr(a2)
@@ -91,7 +91,7 @@ def test_dress():
 
 def test_record_name():
     typestrs = {}
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
 
     builder.begin_record("Dummy")
     builder.field("one")
@@ -122,7 +122,7 @@ def test_builder_string():
     a1 = builder.snapshot()
     assert str(a1) == "[b'one', b'two', b'three']"
 
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     builder.bytestring(b"one")
     builder.bytestring(b"two")
     builder.bytestring(b"three")
@@ -132,13 +132,12 @@ def test_builder_string():
     assert str(a) == "[b'one', b'two', b'three']"
     assert to_list(a) == [b"one", b"two", b"three"]
     assert (
-        ak._v2.operations.to_json(a, convert_bytes=bytes.decode)
-        == '["one","two","three"]'
+        ak.operations.to_json(a, convert_bytes=bytes.decode) == '["one","two","three"]'
     )
     assert repr(a) == "<Array [b'one', b'two', b'three'] type='3 * bytes'>"
-    assert str(ak._v2.operations.type(a)) == "3 * bytes"
+    assert str(ak.operations.type(a)) == "3 * bytes"
 
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
 
     builder.string("one")
     builder.string("two")
@@ -147,11 +146,11 @@ def test_builder_string():
     a = builder.snapshot()
     assert str(a) == "['one', 'two', 'three']"
     assert to_list(a) == ["one", "two", "three"]
-    assert ak._v2.operations.to_json(a) == '["one","two","three"]'
+    assert ak.operations.to_json(a) == '["one","two","three"]'
     assert repr(a) == "<Array ['one', 'two', 'three'] type='3 * string'>"
-    assert str(ak._v2.operations.type(a)) == "3 * string"
+    assert str(ak.operations.type(a)) == "3 * string"
 
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
 
     builder.begin_list()
     builder.string("one")
@@ -170,23 +169,25 @@ def test_builder_string():
     a = builder.snapshot()
     assert str(a) == "[['one', 'two', 'three'], [], ['four', 'five']]"
     assert to_list(a) == [["one", "two", "three"], [], ["four", "five"]]
-    assert ak._v2.operations.to_json(a) == '[["one","two","three"],[],["four","five"]]'
-    assert str(ak._v2.operations.type(a)) == "3 * var * string"
+    assert ak.operations.to_json(a) == '[["one","two","three"],[],["four","five"]]'
+    assert str(ak.operations.type(a)) == "3 * var * string"
 
 
 def test_fromiter_fromjson():
-    assert to_list(ak._v2.from_iter(["one", "two", "three"])) == ["one", "two", "three"]
-    assert to_list(
-        ak._v2.from_iter([["one", "two", "three"], [], ["four", "five"]])
-    ) == [["one", "two", "three"], [], ["four", "five"]]
+    assert to_list(ak.from_iter(["one", "two", "three"])) == ["one", "two", "three"]
+    assert to_list(ak.from_iter([["one", "two", "three"], [], ["four", "five"]])) == [
+        ["one", "two", "three"],
+        [],
+        ["four", "five"],
+    ]
 
 
 def test_fromjson():
-    assert to_list(ak._v2.operations.from_json('["one", "two", "three"]')) == [
+    assert to_list(ak.operations.from_json('["one", "two", "three"]')) == [
         "one",
         "two",
         "three",
     ]
     assert to_list(
-        ak._v2.operations.from_json('[["one", "two", "three"], [], ["four", "five"]]')
+        ak.operations.from_json('[["one", "two", "three"], [], ["four", "five"]]')
     ) == [["one", "two", "three"], [], ["four", "five"]]

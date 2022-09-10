@@ -6,208 +6,208 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], [], [7, 11, 13]],
             [[17, 19], [], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [],
         [7 * 29, 11 * 31, 13 * 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [-1], [], [7, 11, 13]],
             [[17, 19], [], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [-1],
         [],
         [7 * 29, 11 * 31, 13 * 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], [], [7, 11, 13]],
             [[17, 19], [-1], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [-1],
         [],
         [7 * 29, 11 * 31, 13 * 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], [-1], [7, 11, 13]],
             [[17, 19], [], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [-1],
         [7 * 29, 11 * 31, 13 * 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], [], [7, 11, 13]],
             [[17, 19], [], [-1], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [-1],
         [7 * 29, 11 * 31, 13 * 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [-1], [], [7, 11, 13]],
             [[17, 19], [39], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [-39],
         [],
         [7 * 29, 11 * 31, 13 * 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], [-1], [7, 11, 13]],
             [[17, 19], [], [39], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [-39],
         [7 * 29, 11 * 31, 13 * 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], []],
             [[17, 19], [], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [],
         [29, 31, 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], []],
             [[17, 19], [], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [],
         [29, 31, 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3]],
             [[17, 19], [], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [],
         [29, 31, 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [-1], []],
             [[17, 19], [], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [-1],
         [],
         [29, 31, 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], []],
             [[17, 19], [-1], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [-1],
         [],
         [29, 31, 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], [-1]],
             [[17, 19], [], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [-1],
         [29, 31, 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], []],
             [[17, 19], [], [-1], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [-1],
         [29, 31, 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [-1], []],
             [[17, 19], [39], [], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [-39],
         [],
         [29, 31, 37],
     ]
 
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3], [], [-1]],
             [[17, 19], [], [39], [29, 31, 37]],
         ]
     )
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19],
         [],
         [-39],
@@ -216,24 +216,24 @@ def test():
 
 
 def test_other_axis_values():
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [
             [[2, 3, 5], [], [], [7, 11, 13]],
             [[17, 19, 23], [], [], [29, 31, 37]],
         ]
     )
 
-    assert ak._v2.operations.prod(ak_array, axis=-1).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-1).tolist() == [
         [2 * 3 * 5, 1, 1, 7 * 11 * 13],
         [17 * 19 * 23, 1, 1, 29 * 31 * 37],
     ]
 
-    assert ak._v2.operations.prod(ak_array, axis=-2).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-2).tolist() == [
         [2 * 7, 3 * 11, 5 * 13],
         [17 * 29, 19 * 31, 23 * 37],
     ]
 
-    assert ak._v2.operations.prod(ak_array, axis=-3).tolist() == [
+    assert ak.operations.prod(ak_array, axis=-3).tolist() == [
         [2 * 17, 3 * 19, 5 * 23],
         [],
         [],
@@ -242,10 +242,10 @@ def test_other_axis_values():
 
 
 def test_actual_issue():
-    ak_array = ak._v2.highlevel.Array(
+    ak_array = ak.highlevel.Array(
         [[[1, 2, 3], [], [4, 3, 2]], [[4, 5, 6], [], [2, 3, 4]]]
     )
-    assert ak._v2.operations.min(ak_array, axis=0).tolist() == [
+    assert ak.operations.min(ak_array, axis=0).tolist() == [
         [1, 2, 3],
         [],
         [2, 3, 2],

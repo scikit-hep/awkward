@@ -28,8 +28,8 @@ def to_arrow(
         bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
         emptyarray_to (None or dtype): If None, #ak.types.UnknownType maps to Arrow's
             null type; otherwise, it is converted a given numeric dtype.
-        categorical_as_dictionary (bool): If True, #ak.layout.IndexedArray and
-            #ak.layout.IndexedOptionArray labeled with `__array__ = "categorical"`
+        categorical_as_dictionary (bool): If True, #ak.contents.IndexedArray and
+            #ak.contents.IndexedOptionArray labeled with `__array__ = "categorical"`
             are mapped to Arrow `DictionaryArray`; otherwise, the projection is
             evaluated before conversion (always the case without
             `__array__ = "categorical"`).
@@ -61,8 +61,8 @@ def to_arrow(
 
     See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet, #ak.from_arrow_schema.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_arrow",
+    with ak._util.OperationErrorContext(
+        "ak.to_arrow",
         dict(
             array=array,
             list_to32=list_to32,
@@ -96,8 +96,8 @@ def _impl(
     extensionarray,
     count_nulls,
 ):
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
-    if isinstance(layout, ak._v2.record.Record):
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.record.Record):
         layout = layout.array[layout.at : layout.at + 1]
         record_is_scalar = True
     else:

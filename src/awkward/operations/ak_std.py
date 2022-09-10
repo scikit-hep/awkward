@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("std")
+@ak._connect.numpy.implements("std")
 def std(
     x,
     weight=None,
@@ -60,8 +60,8 @@ def std(
 
     See also #ak.nanstd.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.std",
+    with ak._util.OperationErrorContext(
+        "ak.std",
         dict(
             x=x,
             weight=weight,
@@ -75,7 +75,7 @@ def std(
         return _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._v2._connect.numpy.implements("nanstd")
+@ak._connect.numpy.implements("nanstd")
 def nanstd(
     x,
     weight=None,
@@ -121,8 +121,8 @@ def nanstd(
 
     See also #ak.std.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.nanstd",
+    with ak._util.OperationErrorContext(
+        "ak.nanstd",
         dict(
             x=x,
             weight=weight,
@@ -133,25 +133,25 @@ def nanstd(
             flatten_records=flatten_records,
         ),
     ):
-        x = ak._v2.operations.ak_nan_to_none._impl(x, False, None)
+        x = ak.operations.ak_nan_to_none._impl(x, False, None)
         if weight is not None:
-            weight = ak._v2.operations.ak_nan_to_none._impl(weight, False, None)
+            weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
 
         return _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records)
 
 
 def _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records):
-    x = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(x, allow_record=False, allow_other=False)
+    x = ak.highlevel.Array(
+        ak.operations.to_layout(x, allow_record=False, allow_other=False)
     )
     if weight is not None:
-        weight = ak._v2.highlevel.Array(
-            ak._v2.operations.to_layout(weight, allow_record=False, allow_other=False)
+        weight = ak.highlevel.Array(
+            ak.operations.to_layout(weight, allow_record=False, allow_other=False)
         )
 
     with np.errstate(invalid="ignore"):
         return ak.nplike.of(x, weight).sqrt(
-            ak._v2.operations.ak_var._impl(
+            ak.operations.ak_var._impl(
                 x,
                 weight,
                 ddof,

@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _parameters_equal
 
 
 class IndexedOptionForm(Form):
@@ -16,8 +16,8 @@ class IndexedOptionForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._v2._util.isstr(index):
-            raise ak._v2._util.error(
+        if not ak._util.isstr(index):
+            raise ak._util.error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(
                         type(self).__name__, repr(index)
@@ -25,7 +25,7 @@ class IndexedOptionForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -67,10 +67,10 @@ class IndexedOptionForm(Form):
         else:
             parameters = self._parameters
 
-        return ak._v2.types.optiontype.OptionType(
+        return ak.types.optiontype.OptionType(
             self._content._type(typestrs),
             parameters,
-            ak._v2._util.gettypestr(self._parameters, typestrs),
+            ak._util.gettypestr(self._parameters, typestrs),
         ).simplify_option_union()
 
     def __eq__(self, other):
@@ -143,14 +143,14 @@ class IndexedOptionForm(Form):
         if isinstance(
             self._content,
             (
-                ak._v2.forms.indexedform.IndexedForm,
-                ak._v2.forms.indexedoptionform.IndexedOptionForm,
-                ak._v2.forms.bytemaskedform.ByteMaskedForm,
-                ak._v2.forms.bitmaskedform.BitMaskedForm,
-                ak._v2.forms.unmaskedform.UnmaskedForm,
+                ak.forms.indexedform.IndexedForm,
+                ak.forms.indexedoptionform.IndexedOptionForm,
+                ak.forms.bytemaskedform.ByteMaskedForm,
+                ak.forms.bitmaskedform.BitMaskedForm,
+                ak.forms.unmaskedform.UnmaskedForm,
             ),
         ):
-            return ak._v2.forms.indexedoptionform.IndexedOptionForm(
+            return ak.forms.indexedoptionform.IndexedOptionForm(
                 "i64",
                 self._content.content,
                 has_identifier=self._has_identifier,

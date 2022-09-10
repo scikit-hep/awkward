@@ -6,45 +6,41 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
-content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
+content = ak.contents.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
 
 offsetsA = np.arange(0, 2 * 3 * 5 + 5, 5)
 offsetsB = np.arange(0, 2 * 3 + 3, 3)
 startsA, stopsA = offsetsA[:-1], offsetsA[1:]
 startsB, stopsB = offsetsB[:-1], offsetsB[1:]
 
-listoffsetarrayA64 = ak._v2.contents.ListOffsetArray(
-    ak._v2.index.Index64(offsetsA), content
-)
+listoffsetarrayA64 = ak.contents.ListOffsetArray(ak.index.Index64(offsetsA), content)
 
-listarrayA64 = ak._v2.contents.ListArray(
-    ak._v2.index.Index64(startsA), ak._v2.index.Index64(stopsA), content
+listarrayA64 = ak.contents.ListArray(
+    ak.index.Index64(startsA), ak.index.Index64(stopsA), content
 )
-content = ak._v2.contents.NumpyArray(
+content = ak.contents.NumpyArray(
     np.arange(2 * 3 * 5 * 7, dtype=np.int32).reshape(-1, 7)
 )
-listoffsetarrayA32 = ak._v2.contents.ListOffsetArray(
-    ak._v2.index.Index32(offsetsA), content
-)
-listarrayA32 = ak._v2.contents.ListArray(
-    ak._v2.index.Index32(startsA), ak._v2.index.Index32(stopsA), content
+listoffsetarrayA32 = ak.contents.ListOffsetArray(ak.index.Index32(offsetsA), content)
+listarrayA32 = ak.contents.ListArray(
+    ak.index.Index32(startsA), ak.index.Index32(stopsA), content
 )
 
 modelA = np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7)
 
-listoffsetarrayB64 = ak._v2.contents.ListOffsetArray(
-    ak._v2.index.Index64(offsetsB), listoffsetarrayA64
+listoffsetarrayB64 = ak.contents.ListOffsetArray(
+    ak.index.Index64(offsetsB), listoffsetarrayA64
 )
-listoffsetarrayB32 = ak._v2.contents.ListOffsetArray(
-    ak._v2.index.Index32(offsetsB), listoffsetarrayA32
+listoffsetarrayB32 = ak.contents.ListOffsetArray(
+    ak.index.Index32(offsetsB), listoffsetarrayA32
 )
-listarrayB64 = ak._v2.contents.ListArray(
-    ak._v2.index.Index64(startsB), ak._v2.index.Index64(stopsB), listarrayA64
+listarrayB64 = ak.contents.ListArray(
+    ak.index.Index64(startsB), ak.index.Index64(stopsB), listarrayA64
 )
-listarrayB32 = ak._v2.contents.ListArray(
-    ak._v2.index.Index32(startsB), ak._v2.index.Index32(stopsB), listarrayA32
+listarrayB32 = ak.contents.ListArray(
+    ak.index.Index32(startsB), ak.index.Index32(stopsB), listarrayA32
 )
 
 modelB = np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)

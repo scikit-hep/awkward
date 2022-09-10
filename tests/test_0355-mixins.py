@@ -4,40 +4,40 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_make_mixins():
-    @ak._v2.behaviors.mixins.mixin_class(ak._v2.behavior)
+    @ak.behaviors.mixins.mixin_class(ak.behavior)
     class Point:
         def distance(self, other):
             return np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
-        @ak._v2.behaviors.mixins.mixin_class_method(np.equal, {"Point"})
+        @ak.behaviors.mixins.mixin_class_method(np.equal, {"Point"})
         def point_equal(self, other):
             return np.logical_and(self.x == other.x, self.y == other.y)
 
-        @ak._v2.behaviors.mixins.mixin_class_method(np.abs)
+        @ak.behaviors.mixins.mixin_class_method(np.abs)
         def point_abs(self):
             return np.sqrt(self.x**2 + self.y**2)
 
-        @ak._v2.behaviors.mixins.mixin_class_method(np.add, {"Point"})
+        @ak.behaviors.mixins.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
-            return ak._v2.operations.zip(
+            return ak.operations.zip(
                 {"x": self.x + other.x, "y": self.y + other.y},
                 with_name="Point",
             )
 
-    @ak._v2.behaviors.mixins.mixin_class(ak._v2.behavior)
+    @ak.behaviors.mixins.mixin_class(ak.behavior)
     class WeightedPoint(Point):
-        @ak._v2.behaviors.mixins.mixin_class_method(np.equal, {"WeightedPoint"})
+        @ak.behaviors.mixins.mixin_class_method(np.equal, {"WeightedPoint"})
         def weighted_equal(self, other):
             return np.logical_and(self.point_equal(other), self.weight == other.weight)
 
-        @ak._v2.behaviors.mixins.mixin_class_method(np.add, {"WeightedPoint"})
+        @ak.behaviors.mixins.mixin_class_method(np.add, {"WeightedPoint"})
         def weighted_add(self, other):
             sumw = self.weight + other.weight
-            return ak._v2.operations.zip(
+            return ak.operations.zip(
                 {
                     "x": (self.x * self.weight + other.x * other.weight) / sumw,
                     "y": (self.y * self.weight + other.y * other.weight) / sumw,
@@ -46,7 +46,7 @@ def test_make_mixins():
                 with_name="WeightedPoint",
             )
 
-    one = ak._v2.Array(
+    one = ak.Array(
         [
             [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
             [],
@@ -54,7 +54,7 @@ def test_make_mixins():
         ],
         with_name="Point",
     )
-    two = ak._v2.Array(
+    two = ak.Array(
         [
             [{"x": 0.9, "y": 1}, {"x": 2, "y": 2.2}, {"x": 2.9, "y": 3}],
             [],
@@ -62,12 +62,12 @@ def test_make_mixins():
         ],
         with_name="Point",
     )
-    wone = ak._v2.Array(
-        ak._v2.operations.with_field(one, abs(one), "weight"),
+    wone = ak.Array(
+        ak.operations.with_field(one, abs(one), "weight"),
         with_name="WeightedPoint",
     )
-    wtwo = ak._v2.Array(
-        ak._v2.operations.with_field(two, abs(two), "weight"),
+    wtwo = ak.Array(
+        ak.operations.with_field(two, abs(two), "weight"),
         with_name="WeightedPoint",
     )
 

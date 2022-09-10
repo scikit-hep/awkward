@@ -28,7 +28,7 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     output = []
-    incdir_ref = importlib_resources.files("awkward") / "src" / "_v2" / "cpp-headers"
+    incdir_ref = importlib_resources.files("awkward") / "src" / "cpp-headers"
     with importlib_resources.as_file(incdir_ref) as incdir:
         # loop over original sys.argv to get optional arguments in order
         for arg in sys.argv:

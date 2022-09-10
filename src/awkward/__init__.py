@@ -1,39 +1,56 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# NumPy-like alternatives
+import awkward.nplike
+
+# shims for C++ (now everything is compiled into one 'awkward._ext' module)
+import awkward._ext
+
+# Compiled dynamic modules
+import awkward._cpu_kernels
+import awkward._libawkward
+
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
-import awkward._v2.index
-import awkward._v2.identifier
-import awkward._v2.contents
-import awkward._v2.record
-import awkward._v2.types
-import awkward._v2.forms
-import awkward._v2._slicing
-import awkward._v2._broadcasting
-import awkward._v2._typetracer
+import awkward.index
+import awkward.identifier
+import awkward.contents
+import awkward.record
+import awkward.types
+import awkward.forms
+import awkward._slicing
+import awkward._broadcasting
+import awkward._typetracer
 
 # internal
-import awkward._v2._util
-import awkward._v2._lookup
+import awkward._util
+import awkward._lookup
 
 # third-party connectors
-import awkward._v2._connect.numpy
-import awkward._v2._connect.numexpr
-import awkward._v2.numba
+import awkward._connect.numpy
+import awkward._connect.numexpr
+import awkward.numba
 
 # high-level interface
-from awkward._v2.highlevel import Array
-from awkward._v2.highlevel import Record
-from awkward._v2.highlevel import ArrayBuilder
+from awkward.highlevel import Array
+from awkward.highlevel import Record
+from awkward.highlevel import ArrayBuilder
 
 # behaviors
-import awkward._v2.behaviors.categorical
-import awkward._v2.behaviors.mixins
-import awkward._v2.behaviors.string
-
-# operations
-from awkward._v2.operations import *
-
+import awkward.behaviors.categorical
+import awkward.behaviors.mixins
+import awkward.behaviors.string
 
 behavior = {}
-behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
-behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
+awkward.behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
+awkward.behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
+
+# operations
+from awkward.operations import *
+
+# version
+__version__ = awkward._ext.__version__
+__all__ = [x for x in globals() if not x.startswith("_") and x not in ("numpy",)]
+
+
+def __dir__():
+    return __all__

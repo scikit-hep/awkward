@@ -8,13 +8,13 @@ import awkward as ak  # noqa: F401
 
 pyarrow = pytest.importorskip("pyarrow")
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_from_arrow():
-    import awkward._v2._connect.pyarrow
+    import awkward._connect.pyarrow
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
             type=pyarrow.date64(),
@@ -25,7 +25,7 @@ def test_from_arrow():
         np.datetime64("2019-02-20T00:00:00.000"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
             type=pyarrow.date32(),
@@ -36,7 +36,7 @@ def test_from_arrow():
         np.datetime64("2019-02-20"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.time(1, 0, 0), datetime.time(2, 30, 0)],
             type=pyarrow.time64("us"),
@@ -47,7 +47,7 @@ def test_from_arrow():
         np.datetime64("1970-01-01T02:30:00.000"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.time(1, 0, 0), datetime.time(2, 30, 0)],
             type=pyarrow.time64("ns"),
@@ -55,7 +55,7 @@ def test_from_arrow():
     )
     assert to_list(array) == [3600000000000, 9000000000000]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.time(1, 0, 0), datetime.time(2, 30, 0)],
             type=pyarrow.time32("s"),
@@ -66,7 +66,7 @@ def test_from_arrow():
         np.datetime64("1970-01-01T02:30:00.000"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.time(1, 0, 0), datetime.time(2, 30, 0)],
             type=pyarrow.time32("ms"),
@@ -77,7 +77,7 @@ def test_from_arrow():
         np.datetime64("1970-01-01T02:30:00.000"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
             type=pyarrow.timestamp("s"),
@@ -88,7 +88,7 @@ def test_from_arrow():
         np.datetime64("2019-02-20T00:00:00.000"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
             type=pyarrow.timestamp("ms"),
@@ -99,7 +99,7 @@ def test_from_arrow():
         np.datetime64("2019-02-20T00:00:00.000"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
             type=pyarrow.timestamp("us"),
@@ -110,7 +110,7 @@ def test_from_arrow():
         np.datetime64("2019-02-20T00:00:00.000"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.datetime(2002, 1, 23), datetime.datetime(2019, 2, 20)],
             type=pyarrow.timestamp("ns"),
@@ -118,7 +118,7 @@ def test_from_arrow():
     )
     assert to_list(array) == [1011744000000000000, 1550620800000000000]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.timedelta(5), datetime.timedelta(10)],
             type=pyarrow.duration("s"),
@@ -129,7 +129,7 @@ def test_from_arrow():
         np.timedelta64(10, "D"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.timedelta(5), datetime.timedelta(10)],
             type=pyarrow.duration("ms"),
@@ -140,7 +140,7 @@ def test_from_arrow():
         np.timedelta64(10, "D"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.timedelta(5), datetime.timedelta(10)],
             type=pyarrow.duration("us"),
@@ -151,7 +151,7 @@ def test_from_arrow():
         np.timedelta64(10, "D"),
     ]
 
-    array = awkward._v2._connect.pyarrow.handle_arrow(
+    array = awkward._connect.pyarrow.handle_arrow(
         pyarrow.array(
             [datetime.timedelta(5), datetime.timedelta(10)],
             type=pyarrow.duration("ns"),

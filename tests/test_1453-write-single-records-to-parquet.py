@@ -14,13 +14,11 @@ pytest.importorskip("fsspec")
 def test(tmp_path):
     filename = os.path.join(tmp_path, "whatever.parquet")
 
-    original = ak._v2.Record({"x": 1, "y": [1, 2, 3], "z": "THREE"})
+    original = ak.Record({"x": 1, "y": [1, 2, 3], "z": "THREE"})
 
-    assert ak._v2.from_arrow(ak._v2.to_arrow(original)).tolist() == original.tolist()
+    assert ak.from_arrow(ak.to_arrow(original)).tolist() == original.tolist()
 
-    assert (
-        ak._v2.from_arrow(ak._v2.to_arrow_table(original)).tolist() == original.tolist()
-    )
+    assert ak.from_arrow(ak.to_arrow_table(original)).tolist() == original.tolist()
 
-    ak._v2.to_parquet(original, filename)
-    assert ak._v2.from_parquet(filename).tolist() == original.tolist()
+    ak.to_parquet(original, filename)
+    assert ak.from_parquet(filename).tolist() == original.tolist()

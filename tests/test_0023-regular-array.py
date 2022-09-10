@@ -6,25 +6,25 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
-content = ak._v2.contents.NumpyArray(
+content = ak.contents.NumpyArray(
     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
 )
-offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
-regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
-starts = ak._v2.index.Index64(np.array([0, 1]))
-stops = ak._v2.index.Index64(np.array([2, 3]))
-listarray = ak._v2.contents.ListArray(starts, stops, regulararray)
+offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
+regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+starts = ak.index.Index64(np.array([0, 1]))
+stops = ak.index.Index64(np.array([2, 3]))
+listarray = ak.contents.ListArray(starts, stops, regulararray)
 
 
 def test_simple_type():
-    assert str(ak._v2.operations.type(content)) == "float64"
+    assert str(ak.operations.type(content)) == "float64"
 
 
 def test_type():
-    assert str(ak._v2.operations.type(regulararray)) == "2 * var * float64"
+    assert str(ak.operations.type(regulararray)) == "2 * var * float64"
 
 
 def test_iteration():
@@ -137,9 +137,9 @@ def test_getitem_deeper():
     )
 
 
-content2 = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
-regulararrayA = ak._v2.contents.RegularArray(content2, 5, zeros_length=0)
-regulararrayB = ak._v2.contents.RegularArray(regulararrayA, 3, zeros_length=0)
+content2 = ak.contents.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
+regulararrayA = ak.contents.RegularArray(content2, 5, zeros_length=0)
+regulararrayB = ak.contents.RegularArray(regulararrayA, 3, zeros_length=0)
 modelA = np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7)
 modelB = np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
 
@@ -224,10 +224,10 @@ def test_numpy():
 
 
 def test_maybe_toNumpy():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
     ).layout
-    array2 = ak._v2.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
+    array2 = ak.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
     assert to_list(array[array2]) == [
         3.3,
         6.6,
@@ -238,12 +238,12 @@ def test_maybe_toNumpy():
     ]
     assert array.typetracer[array2].form == array[array2].form
 
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
     )
-    regulararray = ak._v2.contents.RegularArray(content, 4, zeros_length=0)
+    regulararray = ak.contents.RegularArray(content, 4, zeros_length=0)
 
-    array3 = ak._v2.highlevel.Array([2, 1, 1, None, -1], check_valid=True).layout
+    array3 = ak.highlevel.Array([2, 1, 1, None, -1], check_valid=True).layout
     numpyarray = regulararray.maybe_toNumpyArray()
     assert to_list(numpyarray[array3]) == [
         [8.8, 9.9, 10.0, 11.1],
@@ -259,8 +259,8 @@ def test_maybe_toNumpy():
         [10.0, 9.9, 9.9, None, 11.1],
     ]
 
-    a = ak._v2.contents.regulararray.RegularArray(
-        ak._v2.contents.numpyarray.NumpyArray(
+    a = ak.contents.regulararray.RegularArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
         ),
         3,
@@ -271,5 +271,5 @@ def test_maybe_toNumpy():
         a[
             1,
         ],
-        ak._v2.contents.numpyarray.NumpyArray,
+        ak.contents.numpyarray.NumpyArray,
     )

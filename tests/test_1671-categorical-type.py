@@ -5,12 +5,12 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    array1 = ak._v2.Array(["one", "two", "one", "one"])
-    array2 = ak._v2.operations.ak_to_categorical.to_categorical(array1)
+    array1 = ak.Array(["one", "two", "one", "one"])
+    array2 = ak.operations.ak_to_categorical.to_categorical(array1)
     assert array1.type != array2.type
-    assert array2.type == ak._v2.types.ArrayType(
-        ak._v2.types.ListType(
-            ak._v2.types.NumpyType("uint8", parameters={"__array__": "char"}),
+    assert array2.type == ak.types.ArrayType(
+        ak.types.ListType(
+            ak.types.NumpyType("uint8", parameters={"__array__": "char"}),
             parameters={"__array__": "string", "__categorical__": True},
         ),
         4,

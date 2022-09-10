@@ -433,44 +433,44 @@ namespace awkward {{
 
 
 def togenerator(form, flatlist_as_rvec):
-    if isinstance(form, ak._v2.forms.EmptyForm):
+    if isinstance(form, ak.forms.EmptyForm):
         return togenerator(form.toNumpyForm(np.dtype(np.float64)), flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.NumpyForm):
+    elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:
             return NumpyArrayGenerator.from_form(form, flatlist_as_rvec)
         else:
             return togenerator(form.toRegularForm(), flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.RegularForm):
+    elif isinstance(form, ak.forms.RegularForm):
         return RegularArrayGenerator.from_form(form, flatlist_as_rvec)
 
-    elif isinstance(form, (ak._v2.forms.ListForm, ak._v2.forms.ListOffsetForm)):
+    elif isinstance(form, (ak.forms.ListForm, ak.forms.ListOffsetForm)):
         return ListArrayGenerator.from_form(form, flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.IndexedForm):
+    elif isinstance(form, ak.forms.IndexedForm):
         return IndexedArrayGenerator.from_form(form, flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.IndexedOptionForm):
+    elif isinstance(form, ak.forms.IndexedOptionForm):
         return IndexedOptionArrayGenerator.from_form(form, flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.ByteMaskedForm):
+    elif isinstance(form, ak.forms.ByteMaskedForm):
         return ByteMaskedArrayGenerator.from_form(form, flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.BitMaskedForm):
+    elif isinstance(form, ak.forms.BitMaskedForm):
         return BitMaskedArrayGenerator.from_form(form, flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.UnmaskedForm):
+    elif isinstance(form, ak.forms.UnmaskedForm):
         return UnmaskedArrayGenerator.from_form(form, flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.RecordForm):
+    elif isinstance(form, ak.forms.RecordForm):
         return RecordArrayGenerator.from_form(form, flatlist_as_rvec)
 
-    elif isinstance(form, ak._v2.forms.UnionForm):
+    elif isinstance(form, ak.forms.UnionForm):
         return UnionArrayGenerator.from_form(form, flatlist_as_rvec)
 
     else:
-        raise ak._v2._util.error(AssertionError(f"unrecognized Form: {type(form)}"))
+        raise ak._util.error(AssertionError(f"unrecognized Form: {type(form)}"))
 
 
 class Generator:
@@ -479,26 +479,26 @@ class Generator:
         if not form.has_identifier:
             return None
         else:
-            raise ak._v2._util.error(NotImplementedError("TODO: identifiers in C++"))
+            raise ak._util.error(NotImplementedError("TODO: identifiers in C++"))
 
     def IndexOf(self, arraytype):
         if arraytype == "int8_t":
-            return ak._v2.index.Index8
+            return ak.index.Index8
         elif arraytype == "uint8_t":
-            return ak._v2.index.IndexU8
+            return ak.index.IndexU8
         elif arraytype == "int32_t":
-            return ak._v2.index.Index32
+            return ak.index.Index32
         elif arraytype == "uint32_t":
-            return ak._v2.index.IndexU32
+            return ak.index.IndexU32
         elif arraytype == "int64_t":
-            return ak._v2.index.Index64
+            return ak.index.Index64
         elif arraytype == "uint64_t":
-            return ak._v2.index.IndexU64
+            return ak.index.IndexU64
         else:
-            raise ak._v2._util.error(AssertionError(arraytype))
+            raise ak._util.error(AssertionError(arraytype))
 
     def class_type_suffix(self, key):
-        return ak._v2._util.identifier_hash(key)
+        return ak._util.identifier_hash(key)
 
     def _generate_common(self, key):
         params = [
@@ -552,7 +552,7 @@ class Generator:
         return f"{self.dataset(length=length, ptrs=ptrs)}[{entry}]"
 
 
-class NumpyArrayGenerator(Generator, ak._v2._lookup.NumpyLookup):
+class NumpyArrayGenerator(Generator, ak._lookup.NumpyLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return NumpyArrayGenerator(
@@ -635,7 +635,7 @@ namespace awkward {{
             compiler(out)
 
 
-class RegularArrayGenerator(Generator, ak._v2._lookup.RegularLookup):
+class RegularArrayGenerator(Generator, ak._lookup.RegularLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return RegularArrayGenerator(
@@ -773,10 +773,10 @@ namespace awkward {{
             compiler(out)
 
 
-class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
+class ListArrayGenerator(Generator, ak._lookup.ListLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
-        if isinstance(form, ak._v2.forms.ListForm):
+        if isinstance(form, ak.forms.ListForm):
             index_string = form.starts
         else:
             index_string = form.offsets
@@ -797,7 +797,7 @@ class ListArrayGenerator(Generator, ak._v2._lookup.ListLookup):
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise ak._v2._util.error(AssertionError(index_type))
+            raise ak._util.error(AssertionError(index_type))
         self.content = content
 
         # FIXME: satisfy the ContentLookup super-class
@@ -931,7 +931,7 @@ namespace awkward {{
             compiler(out)
 
 
-class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
+class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return IndexedArrayGenerator(
@@ -950,7 +950,7 @@ class IndexedArrayGenerator(Generator, ak._v2._lookup.IndexedLookup):
         elif index_type == "i64":
             self.indextype = "int64_t"
         else:
-            raise ak._v2._util.error(AssertionError(index_type))
+            raise ak._util.error(AssertionError(index_type))
         self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
@@ -1012,7 +1012,7 @@ namespace awkward {{
             compiler(out)
 
 
-class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup):
+class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return IndexedOptionArrayGenerator(
@@ -1029,7 +1029,7 @@ class IndexedOptionArrayGenerator(Generator, ak._v2._lookup.IndexedOptionLookup)
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise ak._v2._util.error(AssertionError(index_type))
+            raise ak._util.error(AssertionError(index_type))
         self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
@@ -1097,7 +1097,7 @@ namespace awkward {{
             compiler(out)
 
 
-class ByteMaskedArrayGenerator(Generator, ak._v2._lookup.ByteMaskedLookup):
+class ByteMaskedArrayGenerator(Generator, ak._lookup.ByteMaskedLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return ByteMaskedArrayGenerator(
@@ -1179,7 +1179,7 @@ namespace awkward {{
             compiler(out)
 
 
-class BitMaskedArrayGenerator(Generator, ak._v2._lookup.BitMaskedLookup):
+class BitMaskedArrayGenerator(Generator, ak._lookup.BitMaskedLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return BitMaskedArrayGenerator(
@@ -1275,7 +1275,7 @@ namespace awkward {{
             compiler(out)
 
 
-class UnmaskedArrayGenerator(Generator, ak._v2._lookup.UnmaskedLookup):
+class UnmaskedArrayGenerator(Generator, ak._lookup.UnmaskedLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return UnmaskedArrayGenerator(
@@ -1339,7 +1339,7 @@ namespace awkward {{
             compiler(out)
 
 
-class RecordGenerator(Generator, ak._v2._lookup.RecordLookup):
+class RecordGenerator(Generator, ak._lookup.RecordLookup):
     def __init__(self, contents, fields, parameters, flatlist_as_rvec):
         self.contents = tuple(contents)
         self.fields = None if fields is None else tuple(fields)
@@ -1424,7 +1424,7 @@ namespace awkward {{
             compiler(out)
 
 
-class RecordArrayGenerator(Generator, ak._v2._lookup.RecordLookup):
+class RecordArrayGenerator(Generator, ak._lookup.RecordLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return RecordArrayGenerator(
@@ -1523,7 +1523,7 @@ namespace awkward {{
             compiler(out)
 
 
-class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
+class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
     @classmethod
     def from_form(cls, form, flatlist_as_rvec):
         return UnionArrayGenerator(
@@ -1543,7 +1543,7 @@ class UnionArrayGenerator(Generator, ak._v2._lookup.UnionLookup):
         elif index_type == "i64":
             self.indextype = "int64_t"
         else:
-            raise ak._v2._util.error(AssertionError(index_type))
+            raise ak._util.error(AssertionError(index_type))
         self.contenttypes = tuple(contents)
         self.identifier = identifier
         self.parameters = parameters

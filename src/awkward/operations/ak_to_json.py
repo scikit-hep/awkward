@@ -106,8 +106,8 @@ def to_json(
 
     See also #ak.from_json.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_json",
+    with ak._util.OperationErrorContext(
+        "ak.to_json",
         dict(
             array=array,
             file=file,
@@ -151,34 +151,34 @@ def _impl(
     convert_other,
 ):
     if array is None or isinstance(array, (bool, str, bytes, Number)):
-        out = ak._v2.operations.from_iter([array], highlevel=False)
+        out = ak.operations.from_iter([array], highlevel=False)
 
-    elif isinstance(array, ak._v2.highlevel.Array):
+    elif isinstance(array, ak.highlevel.Array):
         out = array.layout
 
-    elif isinstance(array, ak._v2.highlevel.Record):
+    elif isinstance(array, ak.highlevel.Record):
         out = array.layout.array[array.layout.at : array.layout.at + 1]
 
-    elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
         out = array.snapshot().layout
 
-    elif isinstance(array, ak._v2.record.Record):
+    elif isinstance(array, ak.record.Record):
         out = array.array[array.at : array.at + 1]
 
-    elif isinstance(array, ak.layout.ArrayBuilder):
+    elif isinstance(array, ak._ext.ArrayBuilder):
         formstr, length, buffers = array.to_buffers()
-        form = ak._v2.forms.from_json(formstr)
+        form = ak.forms.from_json(formstr)
 
-        out = ak._v2.operations.from_buffers(form, length, buffers, highlevel=False)
+        out = ak.operations.from_buffers(form, length, buffers, highlevel=False)
 
-    elif isinstance(array, ak._v2.contents.Content):
+    elif isinstance(array, ak.contents.Content):
         out = array
 
     elif hasattr(array, "shape") and hasattr(array, "dtype"):
-        out = ak._v2.contents.NumpyArray(array)
+        out = ak.contents.NumpyArray(array)
 
     else:
-        raise ak._v2._util.error(TypeError(f"unrecognized array type: {repr(array)}"))
+        raise ak._util.error(TypeError(f"unrecognized array type: {repr(array)}"))
 
     jsondata = out.to_json(
         nan_string=nan_string,
@@ -186,10 +186,10 @@ def _impl(
         neginf_string=neginf_string,
         complex_record_fields=complex_record_fields,
         convert_bytes=convert_bytes,
-        behavior=ak._v2._util.behavior_of(array),
+        behavior=ak._util.behavior_of(array),
     )
 
-    if line_delimited and not ak._v2._util.isstr(line_delimited):
+    if line_delimited and not ak._util.isstr(line_delimited):
         line_delimited = "\n"
 
     separators = (
@@ -198,7 +198,7 @@ def _impl(
     )
 
     if file is not None:
-        if ak._v2._util.isstr(file) or isinstance(file, pathlib.Path):
+        if ak._util.isstr(file) or isinstance(file, pathlib.Path):
             parsed_url = urlparse(file)
             if parsed_url.scheme == "" or parsed_url.netloc == "":
 
@@ -255,7 +255,7 @@ def _impl(
                         openfile.write(line_delimited)
 
         else:
-            if isinstance(array, (ak._v2.highlevel.Record, ak._v2.record.Record)):
+            if isinstance(array, (ak.highlevel.Record, ak.record.Record)):
                 jsondata = jsondata[0]
 
             if file is None:
@@ -286,7 +286,7 @@ def _impl(
                     )
 
     except Exception as err:
-        raise ak._v2._util.error(err) from err
+        raise ak._util.error(err) from err
 
 
 class _NoContextManager:

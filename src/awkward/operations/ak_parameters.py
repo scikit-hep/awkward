@@ -14,35 +14,37 @@ def parameters(array):
     supported, including all Awkward Arrays and Records).
 
     Parameters are a dict from str to JSON-like objects, usually strings.
-    Every #ak.layout.Content node has a different set of parameters. Some
+    Every #ak.contents.Content node has a different set of parameters. Some
     key names are special, such as `"__record__"` and `"__array__"` that name
     particular records and arrays as capable of supporting special behaviors.
 
     See #ak.Array and #ak.behavior for a more complete description of
     behaviors.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.parameters",
+    with ak._util.OperationErrorContext(
+        "ak.parameters",
         dict(array=array),
     ):
         return _impl(array)
 
 
 def _impl(array):
-    if isinstance(array, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
+    if isinstance(array, (ak.highlevel.Array, ak.highlevel.Record)):
         return _copy(array.layout.parameters)
 
     elif isinstance(
         array,
-        (ak._v2.contents.Content, ak._v2.record.Record),
+        (ak.contents.Content, ak.record.Record),
     ):
         return _copy(array.parameters)
 
-    elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
-        return array.snapshot().layout.parameters
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
+        form = ak.forms.from_json(array._layout.form())
+        return form.parameters
 
-    elif isinstance(array, ak.layout.ArrayBuilder):
-        return array.snapshot().parameters
+    elif isinstance(array, ak._ext.ArrayBuilder):
+        form = ak.forms.from_json(array.form())
+        return form.parameters
 
     else:
         return {}

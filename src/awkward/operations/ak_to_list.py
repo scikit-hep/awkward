@@ -32,8 +32,8 @@ def to_list(array):
 
     See also #ak.from_iter and #ak.Array.tolist.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_list",
+    with ak._util.OperationErrorContext(
+        "ak.to_list",
         dict(array=array),
     ):
         return _impl(array)
@@ -43,38 +43,21 @@ def _impl(array):
     if isinstance(
         array,
         (
-            ak._v2.highlevel.Array,
-            ak._v2.highlevel.Record,
-            ak._v2.highlevel.ArrayBuilder,
+            ak.highlevel.Array,
+            ak.highlevel.Record,
+            ak.highlevel.ArrayBuilder,
         ),
     ):
         return array.to_list()
 
-    elif isinstance(array, (ak._v2.contents.Content, ak._v2.record.Record)):
+    elif isinstance(array, (ak.contents.Content, ak.record.Record)):
         return array.to_list(None)
 
-    elif isinstance(
-        array,
-        (ak.layout.ArrayBuilder, ak.layout.LayoutBuilder32, ak.layout.LayoutBuilder64),
-    ):
+    elif isinstance(array, ak._ext.ArrayBuilder):
         formstr, length, container = array.to_buffers()
-        form = ak._v2.forms.from_json(formstr)
-        layout = ak._v2.operations.from_buffers(form, length, container)
+        form = ak.forms.from_json(formstr)
+        layout = ak.operations.from_buffers(form, length, container)
         return layout.to_list(None)
-
-    elif isinstance(
-        array,
-        (
-            ak.highlevel.Array,
-            ak.highlevel.Record,
-            ak.highlevel.ArrayBuilder,
-            ak.layout.Content,
-            ak.layout.Record,
-        ),
-    ):
-        raise ak._v2._util.error(
-            TypeError("do not use ak._v2.operations.to_list on v1 arrays")
-        )
 
     elif hasattr(array, "tolist"):
         return array.tolist()

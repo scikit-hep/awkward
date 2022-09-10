@@ -17,11 +17,11 @@ def to_cupy(array):
 
     See also #ak.from_cupy and #ak.to_numpy.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_cupy",
+    with ak._util.OperationErrorContext(
+        "ak.to_cupy",
         dict(array=array),
     ):
-        from awkward._v2._connect.cuda import import_cupy
+        from awkward._connect.cuda import import_cupy
 
         cupy = import_cupy()
-        return ak._v2._util.to_arraylib(cupy, array, True)
+        return ak._util.to_arraylib(cupy, array, True)

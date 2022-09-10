@@ -9,10 +9,10 @@ jax = pytest.importorskip("jax")
 jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
 
-# #### ak.layout.NumpyArray ####
+# #### ak.contents.NumpyArray ####
 
-test_numpyarray = ak._v2.Array(np.arange(10, dtype=np.float64), backend="jax")
-test_numpyarray_tangent = ak._v2.Array(np.arange(10, dtype=np.float64), backend="jax")
+test_numpyarray = ak.Array(np.arange(10, dtype=np.float64), backend="jax")
+test_numpyarray_tangent = ak.Array(np.arange(10, dtype=np.float64), backend="jax")
 
 test_numpyarray_jax = jax.numpy.arange(10, dtype=np.float64)
 test_numpyarray_tangent_jax = jax.numpy.arange(10, dtype=np.float64)
@@ -36,8 +36,7 @@ def test_numpyarray_grad_1():
     assert value_vjp == value_vjp_jax
     assert jvp_grad == jvp_grad_jax
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
@@ -55,12 +54,11 @@ def test_numpyarray_grad_2():
     value_vjp, vjp_func = jax.vjp(func_numpyarray_2, test_numpyarray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_numpyarray_2, test_numpyarray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
@@ -78,12 +76,11 @@ def test_numpyarray_grad_3():
     value_vjp, vjp_func = jax.vjp(func_numpyarray_3, test_numpyarray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_numpyarray_3, test_numpyarray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
@@ -101,19 +98,18 @@ def test_numpyarray_grad_4():
     value_vjp, vjp_func = jax.vjp(func_numpyarray_4, test_numpyarray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_numpyarray_4, test_numpyarray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
-test_regulararray = ak._v2.Array(
+test_regulararray = ak.Array(
     [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
 )
-test_regulararray_tangent = ak._v2.Array(
+test_regulararray_tangent = ak.Array(
     [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
 )
 
@@ -139,12 +135,11 @@ def test_regular_array_1():
     value_vjp, vjp_func = jax.vjp(func_regulararray_1, test_regulararray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_regulararray_1, test_regulararray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
@@ -162,12 +157,11 @@ def test_regular_array_2():
     value_vjp, vjp_func = jax.vjp(func_regulararray_2, test_regulararray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_regulararray_2, test_regulararray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
@@ -185,12 +179,11 @@ def test_regular_array_3():
     value_vjp, vjp_func = jax.vjp(func_regular_array_3, test_regulararray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_regular_array_3, test_regulararray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
@@ -208,12 +201,11 @@ def test_regular_array_4():
     value_vjp, vjp_func = jax.vjp(func_regular_array_4, test_regulararray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_regular_array_4, test_regulararray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
@@ -231,12 +223,11 @@ def test_regular_array_5():
     value_vjp, vjp_func = jax.vjp(func_regular_array_5, test_regulararray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_regular_array_5, test_regulararray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
@@ -254,16 +245,15 @@ def test_regular_array_6():
     value_vjp, vjp_func = jax.vjp(func_regular_array_6, test_regulararray)
     value_vjp_jax, vjp_func_jax = jax.vjp(func_regular_array_6, test_regulararray_jax)
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
-test_recordarray = ak._v2.Array(
+test_recordarray = ak.Array(
     [
         [{"x": 1.1, "y": [1.0]}, {"x": 2.2, "y": [1.0, 2.2]}],
         [],
@@ -271,7 +261,7 @@ test_recordarray = ak._v2.Array(
     ],
     backend="jax",
 )
-test_recordarray_tangent = ak._v2.Array(
+test_recordarray_tangent = ak.Array(
     [
         [{"x": 0.0, "y": [1.0]}, {"x": 2.0, "y": [1.5, 0.0]}],
         [],
@@ -289,10 +279,10 @@ def test_recordarray_1():
         func_recordarray_1, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(func_recordarray_1, test_recordarray)
-    assert ak._v2.to_list(value_jvp) == 14.0
-    assert ak._v2.to_list(value_vjp) == 14.0
-    assert ak._v2.to_list(jvp_grad) == 1.0
-    assert ak._v2.to_list(vjp_func(value_vjp)[0]) == [
+    assert ak.to_list(value_jvp) == 14.0
+    assert ak.to_list(value_vjp) == 14.0
+    assert ak.to_list(jvp_grad) == 1.0
+    assert ak.to_list(vjp_func(value_vjp)[0]) == [
         [{"x": 0.0, "y": [0.0]}, {"x": 0.0, "y": [0.0, 0.0]}],
         [],
         [{"x": 0.0, "y": [0.0, 28.0, 0.0]}],
@@ -307,10 +297,10 @@ def test_recordarray_2():
         func_recordarray_2, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(func_recordarray_2, test_recordarray)
-    assert ak._v2.to_list(value_jvp) == [12.0, 14.0, 16.0]
-    assert ak._v2.to_list(value_vjp) == [12.0, 14.0, 16.0]
-    assert ak._v2.to_list(jvp_grad) == [4.0, 1.0, 2.0]
-    assert ak._v2.to_list(vjp_func(value_vjp)[0]) == [
+    assert ak.to_list(value_jvp) == [12.0, 14.0, 16.0]
+    assert ak.to_list(value_vjp) == [12.0, 14.0, 16.0]
+    assert ak.to_list(jvp_grad) == [4.0, 1.0, 2.0]
+    assert ak.to_list(vjp_func(value_vjp)[0]) == [
         [{"x": 0.0, "y": [0.0]}, {"x": 0.0, "y": [0.0, 0.0]}],
         [],
         [{"x": 0.0, "y": [24.0, 28.0, 32.0]}],
@@ -325,10 +315,10 @@ def test_recordarray_3():
         test_recordarray_3, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_3, test_recordarray)
-    assert ak._v2.to_list(value_jvp) == [2.0]
-    assert ak._v2.to_list(value_vjp) == [2.0]
-    assert ak._v2.to_list(jvp_grad) == [4.0]
-    assert ak._v2.to_list(vjp_func(value_vjp)[0]) == [
+    assert ak.to_list(value_jvp) == [2.0]
+    assert ak.to_list(value_vjp) == [2.0]
+    assert ak.to_list(jvp_grad) == [4.0]
+    assert ak.to_list(vjp_func(value_vjp)[0]) == [
         [{"x": 0.0, "y": [8.0]}, {"x": 0.0, "y": [0.0, 0.0]}],
         [],
         [{"x": 0.0, "y": [0.0, 0.0, 0.0]}],
@@ -343,10 +333,10 @@ def test_recordarray_4():
         test_recordarray_4, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_4, test_recordarray)
-    assert ak._v2.to_list(value_jvp) == [[12.0, 14.0, 16.0]]
-    assert ak._v2.to_list(value_vjp) == [[12.0, 14.0, 16.0]]
-    assert ak._v2.to_list(jvp_grad) == [[4.0, 1.0, 2.0]]
-    assert ak._v2.to_list(vjp_func(value_vjp)[0]) == [
+    assert ak.to_list(value_jvp) == [[12.0, 14.0, 16.0]]
+    assert ak.to_list(value_vjp) == [[12.0, 14.0, 16.0]]
+    assert ak.to_list(jvp_grad) == [[4.0, 1.0, 2.0]]
+    assert ak.to_list(vjp_func(value_vjp)[0]) == [
         [{"x": 0.0, "y": [0.0]}, {"x": 0.0, "y": [0.0, 0.0]}],
         [],
         [{"x": 0.0, "y": [24.0, 28.0, 32.0]}],
@@ -361,10 +351,10 @@ def test_recordarray_5():
         test_recordarray_5, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_5, test_recordarray)
-    assert ak._v2.to_list(value_jvp) == [[[2.0], [2.0, 4.4]], [], [[2.0, 4.0, 6.0]]]
-    assert ak._v2.to_list(value_vjp) == [[[2.0], [2.0, 4.4]], [], [[2.0, 4.0, 6.0]]]
-    assert ak._v2.to_list(jvp_grad) == [[[2.0], [3.0, 0.0]], [], [[4.0, 1.0, 2.0]]]
-    assert ak._v2.to_list(vjp_func(value_vjp)[0]) == [
+    assert ak.to_list(value_jvp) == [[[2.0], [2.0, 4.4]], [], [[2.0, 4.0, 6.0]]]
+    assert ak.to_list(value_vjp) == [[[2.0], [2.0, 4.4]], [], [[2.0, 4.0, 6.0]]]
+    assert ak.to_list(jvp_grad) == [[[2.0], [3.0, 0.0]], [], [[4.0, 1.0, 2.0]]]
+    assert ak.to_list(vjp_func(value_vjp)[0]) == [
         [{"x": 0.0, "y": [4.0]}, {"x": 0.0, "y": [4.0, 8.8]}],
         [],
         [{"x": 0.0, "y": [4.0, 8.0, 12.0]}],
@@ -379,18 +369,18 @@ def test_recordarray_6():
         test_recordarray_6, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_6, test_recordarray)
-    assert ak._v2.to_list(value_jvp) == [
+    assert ak.to_list(value_jvp) == [
         [[2.0], [2.0, 9.680000000000001]],
         [],
         [[2.0, 8.0, 18.0]],
     ]
-    assert ak._v2.to_list(value_vjp) == [
+    assert ak.to_list(value_vjp) == [
         [[2.0], [2.0, 9.680000000000001]],
         [],
         [[2.0, 8.0, 18.0]],
     ]
-    assert ak._v2.to_list(jvp_grad) == [[[4.0], [6.0, 0.0]], [], [[8.0, 4.0, 12.0]]]
-    assert ak._v2.to_list(vjp_func(value_vjp)[0]) == [
+    assert ak.to_list(jvp_grad) == [[[4.0], [6.0, 0.0]], [], [[8.0, 4.0, 12.0]]]
+    assert ak.to_list(vjp_func(value_vjp)[0]) == [
         [{"x": 0.0, "y": [8.0]}, {"x": 0.0, "y": [8.0, 85.18400000000003]}],
         [],
         [{"x": 0.0, "y": [8.0, 64.0, 216.0]}],
@@ -405,10 +395,10 @@ def test_recordarray_7():
         test_recordarray_7, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(test_recordarray_7, test_recordarray)
-    assert ak._v2.to_list(value_jvp) == 14.0
-    assert ak._v2.to_list(value_vjp) == 14.0
-    assert ak._v2.to_list(jvp_grad) == 1.0
-    assert ak._v2.to_list(vjp_func(value_vjp)[0]) == [
+    assert ak.to_list(value_jvp) == 14.0
+    assert ak.to_list(value_vjp) == 14.0
+    assert ak.to_list(jvp_grad) == 1.0
+    assert ak.to_list(vjp_func(value_vjp)[0]) == [
         [{"x": 0.0, "y": [0.0]}, {"x": 0.0, "y": [0.0, 0.0]}],
         [],
         [{"x": 0.0, "y": [0.0, 28.0, 0.0]}],
@@ -423,10 +413,10 @@ def test_recordarray_8():
         func_recordarray_8, (test_recordarray,), (test_recordarray_tangent,)
     )
     value_vjp, vjp_func = jax.vjp(func_recordarray_8, test_recordarray)
-    assert ak._v2.to_list(value_jvp) == [12.0, 14.0, 16.0]
-    assert ak._v2.to_list(value_vjp) == [12.0, 14.0, 16.0]
-    assert ak._v2.to_list(jvp_grad) == [4.0, 1.0, 2.0]
-    assert ak._v2.to_list(vjp_func(value_vjp)[0]) == [
+    assert ak.to_list(value_jvp) == [12.0, 14.0, 16.0]
+    assert ak.to_list(value_vjp) == [12.0, 14.0, 16.0]
+    assert ak.to_list(jvp_grad) == [4.0, 1.0, 2.0]
+    assert ak.to_list(vjp_func(value_vjp)[0]) == [
         [{"x": 0.0, "y": [0.0]}, {"x": 0.0, "y": [0.0, 0.0]}],
         [],
         [{"x": 0.0, "y": [24.0, 28.0, 32.0]}],

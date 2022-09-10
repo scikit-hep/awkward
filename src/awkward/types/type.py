@@ -4,7 +4,7 @@ import json
 import sys
 
 import awkward as ak
-from awkward._v2.types._awkward_datashape_parser import Lark_StandAlone, Transformer
+from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -86,64 +86,64 @@ class _DataShapeTransformer(Transformer):
         return args[0]
 
     def numpytype(self, args):
-        return ak._v2.types.NumpyType(args[0], parameters=self._parameters(args, 1))
+        return ak.types.NumpyType(args[0], parameters=self._parameters(args, 1))
 
     def numpytype_name(self, args):
         return str(args[0])
 
     def unknowntype(self, args):
-        return ak._v2.types.UnknownType(parameters=self._parameters(args, 0))
+        return ak.types.UnknownType(parameters=self._parameters(args, 0))
 
     def regulartype(self, args):
-        return ak._v2.types.RegularType(args[1], int(args[0]))
+        return ak.types.RegularType(args[1], int(args[0]))
 
     def listtype(self, args):
-        return ak._v2.types.ListType(args[0])
+        return ak.types.ListType(args[0])
 
     def varlen_string(self, args):
-        return ak._v2.types.ListType(
-            ak._v2.types.NumpyType("uint8", {"__array__": "char"}),
+        return ak.types.ListType(
+            ak.types.NumpyType("uint8", {"__array__": "char"}),
             {"__array__": "string"},
         )
 
     def varlen_bytestring(self, args):
-        return ak._v2.types.ListType(
-            ak._v2.types.NumpyType("uint8", {"__array__": "byte"}),
+        return ak.types.ListType(
+            ak.types.NumpyType("uint8", {"__array__": "byte"}),
             {"__array__": "bytestring"},
         )
 
     def fixedlen_string(self, args):
-        return ak._v2.types.RegularType(
-            ak._v2.types.NumpyType("uint8", {"__array__": "char"}),
+        return ak.types.RegularType(
+            ak.types.NumpyType("uint8", {"__array__": "char"}),
             int(args[0]),
             {"__array__": "string"},
         )
 
     def fixedlen_bytestring(self, args):
-        return ak._v2.types.RegularType(
-            ak._v2.types.NumpyType("uint8", {"__array__": "byte"}),
+        return ak.types.RegularType(
+            ak.types.NumpyType("uint8", {"__array__": "byte"}),
             int(args[0]),
             {"__array__": "bytestring"},
         )
 
     def char(self, args):
-        return ak._v2.types.NumpyType("uint8", {"__array__": "char"})
+        return ak.types.NumpyType("uint8", {"__array__": "char"})
 
     def byte(self, args):
-        return ak._v2.types.NumpyType("uint8", {"__array__": "byte"})
+        return ak.types.NumpyType("uint8", {"__array__": "byte"})
 
     def option1(self, args):
-        return ak._v2.types.OptionType(args[0])
+        return ak.types.OptionType(args[0])
 
     def option2(self, args):
-        return ak._v2.types.OptionType(args[0], parameters=self._parameters(args, 1))
+        return ak.types.OptionType(args[0], parameters=self._parameters(args, 1))
 
     def tuple(self, args):
         if len(args) == 0:
             types = []
         else:
             types = args[0]
-        return ak._v2.types.RecordType(types, None)
+        return ak.types.RecordType(types, None)
 
     def types(self, args):
         return args
@@ -159,7 +159,7 @@ class _DataShapeTransformer(Transformer):
         else:
             parameters = {}
 
-        return ak._v2.types.RecordType(types, None, parameters)
+        return ak.types.RecordType(types, None, parameters)
 
     def record(self, args):
         if len(args) == 0:
@@ -168,7 +168,7 @@ class _DataShapeTransformer(Transformer):
         else:
             fields = [x[0] for x in args[0]]
             types = [x[1] for x in args[0]]
-        return ak._v2.types.RecordType(types, fields)
+        return ak.types.RecordType(types, fields)
 
     def pairs(self, args):
         return args
@@ -189,13 +189,13 @@ class _DataShapeTransformer(Transformer):
         else:
             parameters = {}
 
-        return ak._v2.types.RecordType(types, fields, parameters)
+        return ak.types.RecordType(types, fields, parameters)
 
     def named0(self, args):
         parameters = {"__record__": str(args[0])}
         if 1 < len(args):
             parameters.update(args[1])
-        return ak._v2.types.RecordType([], None, parameters)
+        return ak.types.RecordType([], None, parameters)
 
     def named(self, args):
         parameters = {"__record__": str(args[0])}
@@ -213,7 +213,7 @@ class _DataShapeTransformer(Transformer):
             fields = None
             contents = arguments
 
-        return ak._v2.types.RecordType(contents, fields, parameters)
+        return ak.types.RecordType(contents, fields, parameters)
 
     def named_types(self, args):
         if len(args) == 2 and isinstance(args[1], list):
@@ -244,7 +244,7 @@ class _DataShapeTransformer(Transformer):
             arguments = args[0]
             parameters = None
 
-        return ak._v2.types.UnionType(arguments, parameters)
+        return ak.types.UnionType(arguments, parameters)
 
     def list_parameters(self, args):
         # modify recently created type object
@@ -289,25 +289,25 @@ class _DataShapeTransformer(Transformer):
 
 def from_datashape(datashape, highlevel=True):
     """
-    Parses `datashape` (str) and returns a #ak._v2.types.Type object, the inverse of
-    calling `str` on a #ak._v2.types.Type.
+    Parses `datashape` (str) and returns a #ak.types.Type object, the inverse of
+    calling `str` on a #ak.types.Type.
 
     If `highlevel=True`, and the type string starts with a number (e.g. '1000 * ...'),
-    the return type is #ak._v2.types.ArrayType, representing an #ak._v2.highlevel.Array.
+    the return type is #ak.types.ArrayType, representing an #ak.highlevel.Array.
 
     If `highlevel=True` and the type string starts with a record indicator (e.g. `{`),
-    the return type is #ak._v2.types.RecordType, representing an #ak._v2.highlevel.Record,
+    the return type is #ak.types.RecordType, representing an #ak.highlevel.Record,
     rather than an array of them.
 
     Other strings (e.g. starting with `var *`, `?`, `option`, etc.) are not compatible
     with `highlevel=True`; an exception would be raised.
 
     If `highlevel=False`, the type is assumed to represent a layout (e.g. a number
-    indicates a #ak._v2.types.RegularType, rather than a #ak._v2.types.ArrayType).
+    indicates a #ak.types.RegularType, rather than a #ak.types.ArrayType).
     """
-    from awkward._v2.types.regulartype import RegularType
-    from awkward._v2.types.recordtype import RecordType
-    from awkward._v2.types.arraytype import ArrayType
+    from awkward.types.regulartype import RegularType
+    from awkward.types.recordtype import RecordType
+    from awkward.types.arraytype import ArrayType
 
     parser = Lark_StandAlone(transformer=_DataShapeTransformer())
     out = parser.parse(datashape)
@@ -318,7 +318,7 @@ def from_datashape(datashape, highlevel=True):
         elif isinstance(out, RecordType):
             return out
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     f"type '{type(out).__name__}' is not compatible with highlevel=True"
                 )

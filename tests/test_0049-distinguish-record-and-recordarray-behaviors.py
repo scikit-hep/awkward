@@ -5,7 +5,7 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-class Pointy(ak._v2.highlevel.Record):
+class Pointy(ak.highlevel.Record):
     def __repr__(self):
         return "<{} {}>".format(self["x"], self["y"])
 
@@ -14,7 +14,7 @@ def test():
     behavior = {}
     behavior["__typestr__", "Point"] = "P"
     behavior["Point"] = Pointy
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.0, 0.2]}],
             [],

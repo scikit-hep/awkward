@@ -120,8 +120,8 @@ def to_dataframe(
               2         3.0  NaN
               3         4.0  NaN
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_layout",
+    with ak._util.OperationErrorContext(
+        "ak.to_layout",
         dict(
             array=array,
             how=how,
@@ -136,7 +136,7 @@ def _impl(array, how, levelname, anonymous):
     try:
         import pandas
     except ImportError as err:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ImportError(
                 """install the 'pandas' package with:
 
@@ -164,14 +164,14 @@ or
             return recurse(layout.project(), row_arrays, col_names)
 
         elif layout.parameter("__array__") in ("string", "bytestring"):
-            return [(ak._v2.operations.to_numpy(layout), row_arrays, col_names)]
+            return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
 
         elif layout.purelist_depth > 1:
             offsets, flattened = layout._offsets_and_flattened(axis=1, depth=0)
             offsets = numpy.asarray(offsets)
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts
-            if ak._v2._util.win or ak._v2._util.bits32:
+            if ak._util.win or ak._util.bits32:
                 counts = counts.astype(np.int32)
             if len(row_arrays) == 0:
                 newrows = [
@@ -186,9 +186,9 @@ or
             return recurse(flattened, newrows, col_names)
 
         elif layout.is_UnionType:
-            layout = ak._v2._util.union_to_record(layout, anonymous)
+            layout = ak._util.union_to_record(layout, anonymous)
             if layout.is_UnionType:
-                return [(ak._v2.operations.to_numpy(layout), row_arrays, col_names)]
+                return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
             else:
                 return sum(
                     (
@@ -198,7 +198,7 @@ or
                     [],
                 )
 
-        elif isinstance(layout, ak._v2.contents.RecordArray):
+        elif isinstance(layout, ak.contents.RecordArray):
             return sum(
                 (
                     recurse(layout._getitem_field(n), row_arrays, col_names + (n,))
@@ -208,10 +208,10 @@ or
             )
 
         else:
-            return [(ak._v2.operations.to_numpy(layout), row_arrays, col_names)]
+            return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
 
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
-    if isinstance(layout, ak._v2.record.Record):
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.record.Record):
         layout2 = layout.array[layout.at : layout.at + 1]
     else:
         layout2 = layout
@@ -219,7 +219,7 @@ or
     tables = []
     last_row_arrays = None
     for column, row_arrays, col_names in recurse(layout2, [], ()):
-        if isinstance(layout, ak._v2.record.Record):
+        if isinstance(layout, ak.record.Record):
             row_arrays = row_arrays[1:]  # Record --> one-element RecordArray
         if len(col_names) == 0:
             columns = [anonymous]

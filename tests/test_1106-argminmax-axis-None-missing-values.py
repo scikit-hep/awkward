@@ -6,5 +6,5 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    x = ak._v2.highlevel.Array([1, 2, 3, None, 4])
-    assert ak._v2.operations.argmax(x) == 4
+    x = ak.highlevel.Array([1, 2, 3, None, 4])
+    assert ak.operations.argmax(x) == 4

@@ -15,191 +15,177 @@ import awkward as ak  # noqa: F401
 
 def test_0459_types():
 
-    plain_plain = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
-    array_plain = ak._v2.operations.with_parameter(plain_plain, "__array__", "zoinks")
-    plain_isdoc = ak._v2.operations.with_parameter(
+    plain_plain = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
+    array_plain = ak.operations.with_parameter(plain_plain, "__array__", "zoinks")
+    plain_isdoc = ak.operations.with_parameter(
         plain_plain, "__doc__", "This is a zoink."
     )
-    array_isdoc = ak._v2.operations.with_parameter(
+    array_isdoc = ak.operations.with_parameter(
         array_plain, "__doc__", "This is a zoink."
     )
 
-    assert ak._v2.operations.parameters(plain_plain) == {}
-    assert ak._v2.operations.parameters(array_plain) == {"__array__": "zoinks"}
-    assert ak._v2.operations.parameters(plain_isdoc) == {"__doc__": "This is a zoink."}
-    assert ak._v2.operations.parameters(array_isdoc) == {
+    assert ak.operations.parameters(plain_plain) == {}
+    assert ak.operations.parameters(array_plain) == {"__array__": "zoinks"}
+    assert ak.operations.parameters(plain_isdoc) == {"__doc__": "This is a zoink."}
+    assert ak.operations.parameters(array_isdoc) == {
         "__array__": "zoinks",
         "__doc__": "This is a zoink.",
     }
 
-    assert ak._v2.operations.type(plain_plain) == ak._v2.operations.type(plain_plain)
-    assert ak._v2.operations.type(array_plain) == ak._v2.operations.type(array_plain)
-    assert ak._v2.operations.type(plain_isdoc) == ak._v2.operations.type(plain_isdoc)
-    assert ak._v2.operations.type(array_isdoc) == ak._v2.operations.type(array_isdoc)
+    assert ak.operations.type(plain_plain) == ak.operations.type(plain_plain)
+    assert ak.operations.type(array_plain) == ak.operations.type(array_plain)
+    assert ak.operations.type(plain_isdoc) == ak.operations.type(plain_isdoc)
+    assert ak.operations.type(array_isdoc) == ak.operations.type(array_isdoc)
 
-    assert ak._v2.operations.type(plain_plain) != ak._v2.operations.type(array_plain)
-    assert ak._v2.operations.type(array_plain) != ak._v2.operations.type(plain_plain)
+    assert ak.operations.type(plain_plain) != ak.operations.type(array_plain)
+    assert ak.operations.type(array_plain) != ak.operations.type(plain_plain)
 
-    assert ak._v2.operations.type(plain_plain) == ak._v2.operations.type(plain_isdoc)
-    assert ak._v2.operations.type(plain_isdoc) == ak._v2.operations.type(plain_plain)
+    assert ak.operations.type(plain_plain) == ak.operations.type(plain_isdoc)
+    assert ak.operations.type(plain_isdoc) == ak.operations.type(plain_plain)
 
-    assert ak._v2.operations.type(array_plain) == ak._v2.operations.type(array_isdoc)
-    assert ak._v2.operations.type(array_isdoc) == ak._v2.operations.type(array_plain)
+    assert ak.operations.type(array_plain) == ak.operations.type(array_isdoc)
+    assert ak.operations.type(array_isdoc) == ak.operations.type(array_plain)
 
-    assert ak._v2.operations.type(plain_isdoc) != ak._v2.operations.type(array_isdoc)
-    assert ak._v2.operations.type(array_isdoc) != ak._v2.operations.type(plain_isdoc)
+    assert ak.operations.type(plain_isdoc) != ak.operations.type(array_isdoc)
+    assert ak.operations.type(array_isdoc) != ak.operations.type(plain_isdoc)
 
     assert array_plain.layout.parameters == {"__array__": "zoinks"}
-    assert ak._v2.operations.without_parameters(array_plain).layout.parameters == {}
+    assert ak.operations.without_parameters(array_plain).layout.parameters == {}
     assert plain_isdoc.layout.parameters == {"__doc__": "This is a zoink."}
-    assert ak._v2.operations.without_parameters(plain_isdoc).layout.parameters == {}
+    assert ak.operations.without_parameters(plain_isdoc).layout.parameters == {}
     assert array_isdoc.layout.parameters == {
         "__array__": "zoinks",
         "__doc__": "This is a zoink.",
     }
-    assert ak._v2.operations.without_parameters(array_isdoc).layout.parameters == {}
+    assert ak.operations.without_parameters(array_isdoc).layout.parameters == {}
 
 
 def test_0459():
-    plain_plain = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
-    array_plain = ak._v2.operations.with_parameter(plain_plain, "__array__", "zoinks")
-    plain_isdoc = ak._v2.operations.with_parameter(
+    plain_plain = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4])
+    array_plain = ak.operations.with_parameter(plain_plain, "__array__", "zoinks")
+    plain_isdoc = ak.operations.with_parameter(
         plain_plain, "__doc__", "This is a zoink."
     )
-    array_isdoc = ak._v2.operations.with_parameter(
+    array_isdoc = ak.operations.with_parameter(
         array_plain, "__doc__", "This is a zoink."
     )
 
-    assert ak._v2.operations.parameters(plain_plain) == {}
-    assert ak._v2.operations.parameters(array_plain) == {"__array__": "zoinks"}
-    assert ak._v2.operations.parameters(plain_isdoc) == {"__doc__": "This is a zoink."}
-    assert ak._v2.operations.parameters(array_isdoc) == {
+    assert ak.operations.parameters(plain_plain) == {}
+    assert ak.operations.parameters(array_plain) == {"__array__": "zoinks"}
+    assert ak.operations.parameters(plain_isdoc) == {"__doc__": "This is a zoink."}
+    assert ak.operations.parameters(array_isdoc) == {
         "__array__": "zoinks",
         "__doc__": "This is a zoink.",
     }
 
     assert (
-        ak._v2.operations.parameters(
-            ak._v2.operations.concatenate([plain_plain, plain_plain])
-        )
+        ak.operations.parameters(ak.operations.concatenate([plain_plain, plain_plain]))
         == {}
     )
-    assert ak._v2.operations.parameters(
-        ak._v2.operations.concatenate([array_plain, array_plain])
+    assert ak.operations.parameters(
+        ak.operations.concatenate([array_plain, array_plain])
     ) == {"__array__": "zoinks"}
-    assert ak._v2.operations.parameters(
-        ak._v2.operations.concatenate([plain_isdoc, plain_isdoc])
+    assert ak.operations.parameters(
+        ak.operations.concatenate([plain_isdoc, plain_isdoc])
     ) == {"__doc__": "This is a zoink."}
-    assert ak._v2.operations.parameters(
-        ak._v2.operations.concatenate([array_isdoc, array_isdoc])
+    assert ak.operations.parameters(
+        ak.operations.concatenate([array_isdoc, array_isdoc])
     ) == {
         "__array__": "zoinks",
         "__doc__": "This is a zoink.",
     }
 
     assert isinstance(
-        ak._v2.operations.concatenate([plain_plain, plain_plain]).layout,
-        ak._v2.contents.NumpyArray,
+        ak.operations.concatenate([plain_plain, plain_plain]).layout,
+        ak.contents.NumpyArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([array_plain, array_plain]).layout,
-        ak._v2.contents.NumpyArray,
+        ak.operations.concatenate([array_plain, array_plain]).layout,
+        ak.contents.NumpyArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([plain_isdoc, plain_isdoc]).layout,
-        ak._v2.contents.NumpyArray,
+        ak.operations.concatenate([plain_isdoc, plain_isdoc]).layout,
+        ak.contents.NumpyArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([array_isdoc, array_isdoc]).layout,
-        ak._v2.contents.NumpyArray,
+        ak.operations.concatenate([array_isdoc, array_isdoc]).layout,
+        ak.contents.NumpyArray,
     )
 
     assert (
-        ak._v2.operations.parameters(
-            ak._v2.operations.concatenate([plain_plain, array_plain])
-        )
+        ak.operations.parameters(ak.operations.concatenate([plain_plain, array_plain]))
         == {}
     )
     assert (
-        ak._v2.operations.parameters(
-            ak._v2.operations.concatenate([plain_isdoc, array_isdoc])
-        )
+        ak.operations.parameters(ak.operations.concatenate([plain_isdoc, array_isdoc]))
         == {}
     )
     assert (
-        ak._v2.operations.parameters(
-            ak._v2.operations.concatenate([array_plain, plain_plain])
-        )
+        ak.operations.parameters(ak.operations.concatenate([array_plain, plain_plain]))
         == {}
     )
     assert (
-        ak._v2.operations.parameters(
-            ak._v2.operations.concatenate([array_isdoc, plain_isdoc])
-        )
+        ak.operations.parameters(ak.operations.concatenate([array_isdoc, plain_isdoc]))
         == {}
     )
 
     assert isinstance(
-        ak._v2.operations.concatenate([plain_plain, array_plain]).layout,
-        ak._v2.contents.UnionArray,
+        ak.operations.concatenate([plain_plain, array_plain]).layout,
+        ak.contents.UnionArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([plain_isdoc, array_isdoc]).layout,
-        ak._v2.contents.UnionArray,
+        ak.operations.concatenate([plain_isdoc, array_isdoc]).layout,
+        ak.contents.UnionArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([array_plain, plain_plain]).layout,
-        ak._v2.contents.UnionArray,
+        ak.operations.concatenate([array_plain, plain_plain]).layout,
+        ak.contents.UnionArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([array_isdoc, plain_isdoc]).layout,
-        ak._v2.contents.UnionArray,
+        ak.operations.concatenate([array_isdoc, plain_isdoc]).layout,
+        ak.contents.UnionArray,
     )
 
     assert (
-        ak._v2.operations.parameters(
-            ak._v2.operations.concatenate([plain_plain, plain_isdoc])
-        )
+        ak.operations.parameters(ak.operations.concatenate([plain_plain, plain_isdoc]))
         == {}
     )
-    assert ak._v2.operations.parameters(
-        ak._v2.operations.concatenate([array_plain, array_isdoc])
+    assert ak.operations.parameters(
+        ak.operations.concatenate([array_plain, array_isdoc])
     ) == {"__array__": "zoinks"}
     assert (
-        ak._v2.operations.parameters(
-            ak._v2.operations.concatenate([plain_isdoc, plain_plain])
-        )
+        ak.operations.parameters(ak.operations.concatenate([plain_isdoc, plain_plain]))
         == {}
     )
-    assert ak._v2.operations.parameters(
-        ak._v2.operations.concatenate([array_isdoc, array_plain])
+    assert ak.operations.parameters(
+        ak.operations.concatenate([array_isdoc, array_plain])
     ) == {"__array__": "zoinks"}
 
     assert isinstance(
-        ak._v2.operations.concatenate([plain_plain, plain_isdoc]).layout,
-        ak._v2.contents.NumpyArray,
+        ak.operations.concatenate([plain_plain, plain_isdoc]).layout,
+        ak.contents.NumpyArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([array_plain, array_isdoc]).layout,
-        ak._v2.contents.NumpyArray,
+        ak.operations.concatenate([array_plain, array_isdoc]).layout,
+        ak.contents.NumpyArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([plain_isdoc, plain_plain]).layout,
-        ak._v2.contents.NumpyArray,
+        ak.operations.concatenate([plain_isdoc, plain_plain]).layout,
+        ak.contents.NumpyArray,
     )
     assert isinstance(
-        ak._v2.operations.concatenate([array_isdoc, array_plain]).layout,
-        ak._v2.contents.NumpyArray,
+        ak.operations.concatenate([array_isdoc, array_plain]).layout,
+        ak.contents.NumpyArray,
     )
 
 
 def test_0522():
-    content1 = ak._v2.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
-    content2 = ak._v2.highlevel.Array([0, 100, 200, 300, 400]).layout
-    tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 0, 0, 1, 1, 1], np.int8))
-    index = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 3, 4, 2, 3, 4], np.int64))
-    unionarray = ak._v2.highlevel.Array(
-        ak._v2.contents.UnionArray(tags, index, [content1, content2])
+    content1 = ak.highlevel.Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
+    content2 = ak.highlevel.Array([0, 100, 200, 300, 400]).layout
+    tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 0, 0, 1, 1, 1], np.int8))
+    index = ak.index.Index64(np.array([0, 1, 2, 0, 1, 3, 4, 2, 3, 4], np.int64))
+    unionarray = ak.highlevel.Array(
+        ak.contents.UnionArray(tags, index, [content1, content2])
     )
     assert unionarray.tolist() == [0.0, 1.1, 2.2, 0, 100, 3.3, 4.4, 200, 300, 400]
 
@@ -278,7 +264,7 @@ def test_0522():
         490,
     ]
 
-    assert (unionarray + ak._v2.highlevel.Array(np.arange(0, 100, 10))).tolist() == [
+    assert (unionarray + ak.highlevel.Array(np.arange(0, 100, 10))).tolist() == [
         0.0,
         11.1,
         22.2,
@@ -290,7 +276,7 @@ def test_0522():
         380,
         490,
     ]
-    assert (ak._v2.highlevel.Array(np.arange(0, 100, 10)) + unionarray).tolist() == [
+    assert (ak.highlevel.Array(np.arange(0, 100, 10)) + unionarray).tolist() == [
         0.0,
         11.1,
         22.2,

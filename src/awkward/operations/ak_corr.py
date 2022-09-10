@@ -55,8 +55,8 @@ def corr(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.corr",
+    with ak._util.OperationErrorContext(
+        "ak.corr",
         dict(
             x=x,
             y=y,
@@ -71,52 +71,52 @@ def corr(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
-    x = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(x, allow_record=False, allow_other=False)
+    x = ak.highlevel.Array(
+        ak.operations.to_layout(x, allow_record=False, allow_other=False)
     )
-    y = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(y, allow_record=False, allow_other=False)
+    y = ak.highlevel.Array(
+        ak.operations.to_layout(y, allow_record=False, allow_other=False)
     )
     if weight is not None:
-        weight = ak._v2.highlevel.Array(
-            ak._v2.operations.to_layout(weight, allow_record=False, allow_other=False)
+        weight = ak.highlevel.Array(
+            ak.operations.to_layout(weight, allow_record=False, allow_other=False)
         )
 
     with np.errstate(invalid="ignore"):
-        xmean = ak._v2.operations.ak_mean._impl(
+        xmean = ak.operations.ak_mean._impl(
             x, weight, axis, False, mask_identity, flatten_records
         )
-        ymean = ak._v2.operations.ak_mean._impl(
+        ymean = ak.operations.ak_mean._impl(
             y, weight, axis, False, mask_identity, flatten_records
         )
         xdiff = x - xmean
         ydiff = y - ymean
         if weight is None:
-            sumwxx = ak._v2.operations.ak_sum._impl(
+            sumwxx = ak.operations.ak_sum._impl(
                 xdiff**2, axis, keepdims, mask_identity, flatten_records
             )
-            sumwyy = ak._v2.operations.ak_sum._impl(
+            sumwyy = ak.operations.ak_sum._impl(
                 ydiff**2, axis, keepdims, mask_identity, flatten_records
             )
-            sumwxy = ak._v2.operations.ak_sum._impl(
+            sumwxy = ak.operations.ak_sum._impl(
                 xdiff * ydiff, axis, keepdims, mask_identity, flatten_records
             )
         else:
-            sumwxx = ak._v2.operations.ak_sum._impl(
+            sumwxx = ak.operations.ak_sum._impl(
                 (xdiff**2) * weight,
                 axis,
                 keepdims,
                 mask_identity,
                 flatten_records,
             )
-            sumwyy = ak._v2.operations.ak_sum._impl(
+            sumwyy = ak.operations.ak_sum._impl(
                 (ydiff**2) * weight,
                 axis,
                 keepdims,
                 mask_identity,
                 flatten_records,
             )
-            sumwxy = ak._v2.operations.ak_sum._impl(
+            sumwxy = ak.operations.ak_sum._impl(
                 (xdiff * ydiff) * weight,
                 axis,
                 keepdims,

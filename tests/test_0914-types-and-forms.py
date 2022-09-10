@@ -6,32 +6,30 @@ import awkward as ak  # noqa: F401
 
 
 def test_UnknownType():
-    assert str(ak._v2.types.unknowntype.UnknownType()) == "unknown"
+    assert str(ak.types.unknowntype.UnknownType()) == "unknown"
     assert (
-        str(ak._v2.types.unknowntype.UnknownType({"x": 123}))
+        str(ak.types.unknowntype.UnknownType({"x": 123}))
         == 'unknown[parameters={"x": 123}]'
     )
-    assert str(ak._v2.types.unknowntype.UnknownType(None, "override")) == "override"
+    assert str(ak.types.unknowntype.UnknownType(None, "override")) == "override"
+    assert str(ak.types.unknowntype.UnknownType({"x": 123}, "override")) == "override"
     assert (
-        str(ak._v2.types.unknowntype.UnknownType({"x": 123}, "override")) == "override"
-    )
-    assert (
-        str(ak._v2.types.unknowntype.UnknownType({"__categorical__": True}))
+        str(ak.types.unknowntype.UnknownType({"__categorical__": True}))
         == "categorical[type=unknown]"
     )
     assert (
-        str(ak._v2.types.unknowntype.UnknownType({"__categorical__": True, "x": 123}))
+        str(ak.types.unknowntype.UnknownType({"__categorical__": True, "x": 123}))
         == 'categorical[type=unknown[parameters={"x": 123}]]'
     )
     assert (
-        str(ak._v2.types.unknowntype.UnknownType({"__categorical__": True}, "override"))
+        str(ak.types.unknowntype.UnknownType({"__categorical__": True}, "override"))
         == "categorical[type=override]"
     )
 
-    assert repr(ak._v2.types.unknowntype.UnknownType()) == "UnknownType()"
+    assert repr(ak.types.unknowntype.UnknownType()) == "UnknownType()"
     assert (
         repr(
-            ak._v2.types.unknowntype.UnknownType(
+            ak.types.unknowntype.UnknownType(
                 parameters={"__categorical__": True}, typestr="override"
             )
         )
@@ -40,210 +38,193 @@ def test_UnknownType():
 
 
 @pytest.mark.skipif(
-    ak._v2._util.win,
+    ak._util.win,
     reason="NumPy does not have float16, float128, and complex256 -- on Windows",
 )
 def test_NumpyType():
-    assert str(ak._v2.types.numpytype.NumpyType("bool")) == "bool"
-    assert str(ak._v2.types.numpytype.NumpyType("int8")) == "int8"
-    assert str(ak._v2.types.numpytype.NumpyType("uint8")) == "uint8"
-    assert str(ak._v2.types.numpytype.NumpyType("int16")) == "int16"
-    assert str(ak._v2.types.numpytype.NumpyType("uint16")) == "uint16"
-    assert str(ak._v2.types.numpytype.NumpyType("int32")) == "int32"
-    assert str(ak._v2.types.numpytype.NumpyType("uint32")) == "uint32"
-    assert str(ak._v2.types.numpytype.NumpyType("int64")) == "int64"
-    assert str(ak._v2.types.numpytype.NumpyType("uint64")) == "uint64"
+    assert str(ak.types.numpytype.NumpyType("bool")) == "bool"
+    assert str(ak.types.numpytype.NumpyType("int8")) == "int8"
+    assert str(ak.types.numpytype.NumpyType("uint8")) == "uint8"
+    assert str(ak.types.numpytype.NumpyType("int16")) == "int16"
+    assert str(ak.types.numpytype.NumpyType("uint16")) == "uint16"
+    assert str(ak.types.numpytype.NumpyType("int32")) == "int32"
+    assert str(ak.types.numpytype.NumpyType("uint32")) == "uint32"
+    assert str(ak.types.numpytype.NumpyType("int64")) == "int64"
+    assert str(ak.types.numpytype.NumpyType("uint64")) == "uint64"
     if hasattr(np, "float16"):
-        assert str(ak._v2.types.numpytype.NumpyType("float16")) == "float16"
-    assert str(ak._v2.types.numpytype.NumpyType("float32")) == "float32"
-    assert str(ak._v2.types.numpytype.NumpyType("float64")) == "float64"
+        assert str(ak.types.numpytype.NumpyType("float16")) == "float16"
+    assert str(ak.types.numpytype.NumpyType("float32")) == "float32"
+    assert str(ak.types.numpytype.NumpyType("float64")) == "float64"
     if hasattr(np, "float128"):
-        assert str(ak._v2.types.numpytype.NumpyType("float128")) == "float128"
-    assert str(ak._v2.types.numpytype.NumpyType("complex64")) == "complex64"
-    assert str(ak._v2.types.numpytype.NumpyType("complex128")) == "complex128"
+        assert str(ak.types.numpytype.NumpyType("float128")) == "float128"
+    assert str(ak.types.numpytype.NumpyType("complex64")) == "complex64"
+    assert str(ak.types.numpytype.NumpyType("complex128")) == "complex128"
     if hasattr(np, "complex256"):
-        assert str(ak._v2.types.numpytype.NumpyType("complex256")) == "complex256"
+        assert str(ak.types.numpytype.NumpyType("complex256")) == "complex256"
     assert (
-        str(ak._v2.types.numpytype.NumpyType("bool", {"x": 123}))
+        str(ak.types.numpytype.NumpyType("bool", {"x": 123}))
         == 'bool[parameters={"x": 123}]'
     )
-    assert str(ak._v2.types.numpytype.NumpyType("bool", None, "override")) == "override"
+    assert str(ak.types.numpytype.NumpyType("bool", None, "override")) == "override"
     assert (
-        str(ak._v2.types.numpytype.NumpyType("bool", {"x": 123}, "override"))
-        == "override"
+        str(ak.types.numpytype.NumpyType("bool", {"x": 123}, "override")) == "override"
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("bool", {"__categorical__": True}))
+        str(ak.types.numpytype.NumpyType("bool", {"__categorical__": True}))
         == "categorical[type=bool]"
     )
     assert (
-        str(
-            ak._v2.types.numpytype.NumpyType(
-                "bool", {"__categorical__": True, "x": 123}
-            )
-        )
+        str(ak.types.numpytype.NumpyType("bool", {"__categorical__": True, "x": 123}))
         == 'categorical[type=bool[parameters={"x": 123}]]'
     )
     assert (
-        str(
-            ak._v2.types.numpytype.NumpyType(
-                "bool", {"__categorical__": True}, "override"
-            )
-        )
+        str(ak.types.numpytype.NumpyType("bool", {"__categorical__": True}, "override"))
         == "categorical[type=override]"
     )
-    assert str(ak._v2.types.numpytype.NumpyType("datetime64")) == "datetime64"
+    assert str(ak.types.numpytype.NumpyType("datetime64")) == "datetime64"
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "Y"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "Y"}))
         == 'datetime64[unit="Y"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "M"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "M"}))
         == 'datetime64[unit="M"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "W"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "W"}))
         == 'datetime64[unit="W"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "D"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "D"}))
         == 'datetime64[unit="D"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "h"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "h"}))
         == 'datetime64[unit="h"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "m"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "m"}))
         == 'datetime64[unit="m"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "s"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "s"}))
         == 'datetime64[unit="s"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "ms"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "ms"}))
         == 'datetime64[unit="ms"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "us"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "us"}))
         == 'datetime64[unit="us"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "ns"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "ns"}))
         == 'datetime64[unit="ns"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "ps"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "ps"}))
         == 'datetime64[unit="ps"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "fs"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "fs"}))
         == 'datetime64[unit="fs"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "as"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "as"}))
         == 'datetime64[unit="as"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "10s"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "10s"}))
         == 'datetime64[unit="10s"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "1s"}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "1s"}))
         == 'datetime64[unit="s"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"__unit__": "s", "x": 123}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"__unit__": "s", "x": 123}))
         == 'datetime64[unit="s", parameters={"x": 123}]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("datetime64", {"x": 123}))
+        str(ak.types.numpytype.NumpyType("datetime64", {"x": 123}))
         == 'datetime64[parameters={"x": 123}]'
     )
-    assert str(ak._v2.types.numpytype.NumpyType("timedelta64")) == "timedelta64"
+    assert str(ak.types.numpytype.NumpyType("timedelta64")) == "timedelta64"
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "Y"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "Y"}))
         == 'timedelta64[unit="Y"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "M"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "M"}))
         == 'timedelta64[unit="M"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "W"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "W"}))
         == 'timedelta64[unit="W"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "D"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "D"}))
         == 'timedelta64[unit="D"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "h"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "h"}))
         == 'timedelta64[unit="h"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "m"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "m"}))
         == 'timedelta64[unit="m"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "s"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "s"}))
         == 'timedelta64[unit="s"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "ms"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "ms"}))
         == 'timedelta64[unit="ms"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "us"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "us"}))
         == 'timedelta64[unit="us"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "ns"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "ns"}))
         == 'timedelta64[unit="ns"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "ps"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "ps"}))
         == 'timedelta64[unit="ps"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "fs"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "fs"}))
         == 'timedelta64[unit="fs"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "as"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "as"}))
         == 'timedelta64[unit="as"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "10s"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "10s"}))
         == 'timedelta64[unit="10s"]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "1s"}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "1s"}))
         == 'timedelta64[unit="s"]'
     )
     assert (
-        str(
-            ak._v2.types.numpytype.NumpyType("timedelta64", {"__unit__": "s", "x": 123})
-        )
+        str(ak.types.numpytype.NumpyType("timedelta64", {"__unit__": "s", "x": 123}))
         == 'timedelta64[unit="s", parameters={"x": 123}]'
     )
     assert (
-        str(ak._v2.types.numpytype.NumpyType("timedelta64", {"x": 123}))
+        str(ak.types.numpytype.NumpyType("timedelta64", {"x": 123}))
         == 'timedelta64[parameters={"x": 123}]'
     )
-    assert (
-        str(ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "char"})) == "char"
-    )
-    assert (
-        str(ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "byte"})) == "byte"
-    )
-    assert (
-        repr(ak._v2.types.numpytype.NumpyType(primitive="bool")) == "NumpyType('bool')"
-    )
+    assert str(ak.types.numpytype.NumpyType("uint8", {"__array__": "char"})) == "char"
+    assert str(ak.types.numpytype.NumpyType("uint8", {"__array__": "byte"})) == "byte"
+    assert repr(ak.types.numpytype.NumpyType(primitive="bool")) == "NumpyType('bool')"
     assert (
         repr(
-            ak._v2.types.numpytype.NumpyType(
+            ak.types.numpytype.NumpyType(
                 primitive="bool",
                 parameters={"__categorical__": True},
                 typestr="override",
@@ -253,7 +234,7 @@ def test_NumpyType():
     )
     assert (
         repr(
-            ak._v2.types.numpytype.NumpyType(
+            ak.types.numpytype.NumpyType(
                 primitive="datetime64", parameters={"__unit__": "s"}
             )
         )
@@ -261,7 +242,7 @@ def test_NumpyType():
     )
     assert (
         repr(
-            ak._v2.types.numpytype.NumpyType(
+            ak.types.numpytype.NumpyType(
                 primitive="uint8", parameters={"__array__": "char"}
             )
         )
@@ -269,7 +250,7 @@ def test_NumpyType():
     )
     assert (
         repr(
-            ak._v2.types.numpytype.NumpyType(
+            ak.types.numpytype.NumpyType(
                 primitive="uint8", parameters={"__array__": "byte"}
             )
         )
@@ -279,59 +260,51 @@ def test_NumpyType():
 
 def test_RegularType():
     assert (
-        str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.unknowntype.UnknownType(), 10
-            )
-        )
+        str(ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), 10))
         == "10 * unknown"
     )
     assert (
-        str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.unknowntype.UnknownType(), 0
-            )
-        )
+        str(ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), 0))
         == "0 * unknown"
     )
     with pytest.raises(ValueError):
-        ak._v2.types.regulartype.RegularType(ak._v2.types.unknowntype.UnknownType(), -1)
+        ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), -1)
     assert (
         str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.unknowntype.UnknownType(), 10, {"x": 123}
+            ak.types.regulartype.RegularType(
+                ak.types.unknowntype.UnknownType(), 10, {"x": 123}
             )
         )
         == '[10 * unknown, parameters={"x": 123}]'
     )
     assert (
         str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.unknowntype.UnknownType(), 10, None, "override"
+            ak.types.regulartype.RegularType(
+                ak.types.unknowntype.UnknownType(), 10, None, "override"
             )
         )
         == "override"
     )
     assert (
         str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.unknowntype.UnknownType(), 10, {"x": 123}, "override"
+            ak.types.regulartype.RegularType(
+                ak.types.unknowntype.UnknownType(), 10, {"x": 123}, "override"
             )
         )
         == "override"
     )
     assert (
         str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.unknowntype.UnknownType(), 10, {"__categorical__": True}
+            ak.types.regulartype.RegularType(
+                ak.types.unknowntype.UnknownType(), 10, {"__categorical__": True}
             )
         )
         == "categorical[type=10 * unknown]"
     )
     assert (
         str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.unknowntype.UnknownType(),
+            ak.types.regulartype.RegularType(
+                ak.types.unknowntype.UnknownType(),
                 10,
                 {"__categorical__": True, "x": 123},
             )
@@ -340,8 +313,8 @@ def test_RegularType():
     )
     assert (
         str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.unknowntype.UnknownType(),
+            ak.types.regulartype.RegularType(
+                ak.types.unknowntype.UnknownType(),
                 10,
                 {"__categorical__": True},
                 "override",
@@ -351,8 +324,8 @@ def test_RegularType():
     )
     assert (
         str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "char"}),
+            ak.types.regulartype.RegularType(
+                ak.types.numpytype.NumpyType("uint8", {"__array__": "char"}),
                 10,
                 {"__array__": "string"},
             )
@@ -361,8 +334,8 @@ def test_RegularType():
     )
     assert (
         str(
-            ak._v2.types.regulartype.RegularType(
-                ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "byte"}),
+            ak.types.regulartype.RegularType(
+                ak.types.numpytype.NumpyType("uint8", {"__array__": "byte"}),
                 10,
                 {"__array__": "bytestring"},
             )
@@ -372,16 +345,16 @@ def test_RegularType():
 
     assert (
         repr(
-            ak._v2.types.regulartype.RegularType(
-                content=ak._v2.types.unknowntype.UnknownType(), size=10
+            ak.types.regulartype.RegularType(
+                content=ak.types.unknowntype.UnknownType(), size=10
             )
         )
         == "RegularType(UnknownType(), 10)"
     )
     assert (
         repr(
-            ak._v2.types.regulartype.RegularType(
-                content=ak._v2.types.unknowntype.UnknownType(),
+            ak.types.regulartype.RegularType(
+                content=ak.types.unknowntype.UnknownType(),
                 size=10,
                 parameters={"__categorical__": True},
                 typestr="override",
@@ -391,8 +364,8 @@ def test_RegularType():
     )
     assert (
         repr(
-            ak._v2.types.regulartype.RegularType(
-                content=ak._v2.types.numpytype.NumpyType(
+            ak.types.regulartype.RegularType(
+                content=ak.types.numpytype.NumpyType(
                     primitive="uint8", parameters={"__array__": "char"}
                 ),
                 parameters={"__array__": "string"},
@@ -403,8 +376,8 @@ def test_RegularType():
     )
     assert (
         repr(
-            ak._v2.types.regulartype.RegularType(
-                content=ak._v2.types.numpytype.NumpyType(
+            ak.types.regulartype.RegularType(
+                content=ak.types.numpytype.NumpyType(
                     primitive="uint8", parameters={"__array__": "byte"}
                 ),
                 parameters={"__array__": "bytestring"},
@@ -417,45 +390,41 @@ def test_RegularType():
 
 def test_ListType():
     assert (
-        str(ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()))
+        str(ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()))
         == "var * unknown"
     )
     assert (
-        str(
-            ak._v2.types.listtype.ListType(
-                ak._v2.types.unknowntype.UnknownType(), {"x": 123}
-            )
-        )
+        str(ak.types.listtype.ListType(ak.types.unknowntype.UnknownType(), {"x": 123}))
         == '[var * unknown, parameters={"x": 123}]'
     )
     assert (
         str(
-            ak._v2.types.listtype.ListType(
-                ak._v2.types.unknowntype.UnknownType(), None, "override"
+            ak.types.listtype.ListType(
+                ak.types.unknowntype.UnknownType(), None, "override"
             )
         )
         == "override"
     )
     assert (
         str(
-            ak._v2.types.listtype.ListType(
-                ak._v2.types.unknowntype.UnknownType(), {"x": 123}, "override"
+            ak.types.listtype.ListType(
+                ak.types.unknowntype.UnknownType(), {"x": 123}, "override"
             )
         )
         == "override"
     )
     assert (
         str(
-            ak._v2.types.listtype.ListType(
-                ak._v2.types.unknowntype.UnknownType(), {"__categorical__": True}
+            ak.types.listtype.ListType(
+                ak.types.unknowntype.UnknownType(), {"__categorical__": True}
             )
         )
         == "categorical[type=var * unknown]"
     )
     assert (
         str(
-            ak._v2.types.listtype.ListType(
-                ak._v2.types.unknowntype.UnknownType(),
+            ak.types.listtype.ListType(
+                ak.types.unknowntype.UnknownType(),
                 {"__categorical__": True, "x": 123},
             )
         )
@@ -463,8 +432,8 @@ def test_ListType():
     )
     assert (
         str(
-            ak._v2.types.listtype.ListType(
-                ak._v2.types.unknowntype.UnknownType(),
+            ak.types.listtype.ListType(
+                ak.types.unknowntype.UnknownType(),
                 {"__categorical__": True},
                 "override",
             )
@@ -473,8 +442,8 @@ def test_ListType():
     )
     assert (
         str(
-            ak._v2.types.listtype.ListType(
-                ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "char"}),
+            ak.types.listtype.ListType(
+                ak.types.numpytype.NumpyType("uint8", {"__array__": "char"}),
                 {"__array__": "string"},
             )
         )
@@ -482,8 +451,8 @@ def test_ListType():
     )
     assert (
         str(
-            ak._v2.types.listtype.ListType(
-                ak._v2.types.numpytype.NumpyType("uint8", {"__array__": "byte"}),
+            ak.types.listtype.ListType(
+                ak.types.numpytype.NumpyType("uint8", {"__array__": "byte"}),
                 {"__array__": "bytestring"},
             )
         )
@@ -491,17 +460,13 @@ def test_ListType():
     )
 
     assert (
-        repr(
-            ak._v2.types.listtype.ListType(
-                content=ak._v2.types.unknowntype.UnknownType()
-            )
-        )
+        repr(ak.types.listtype.ListType(content=ak.types.unknowntype.UnknownType()))
         == "ListType(UnknownType())"
     )
     assert (
         repr(
-            ak._v2.types.listtype.ListType(
-                content=ak._v2.types.unknowntype.UnknownType(),
+            ak.types.listtype.ListType(
+                content=ak.types.unknowntype.UnknownType(),
                 parameters={"__categorical__": True},
                 typestr="override",
             )
@@ -510,8 +475,8 @@ def test_ListType():
     )
     assert (
         repr(
-            ak._v2.types.listtype.ListType(
-                content=ak._v2.types.numpytype.NumpyType(
+            ak.types.listtype.ListType(
+                content=ak.types.numpytype.NumpyType(
                     primitive="uint8", parameters={"__array__": "char"}
                 ),
                 parameters={"__array__": "string"},
@@ -521,8 +486,8 @@ def test_ListType():
     )
     assert (
         repr(
-            ak._v2.types.listtype.ListType(
-                content=ak._v2.types.numpytype.NumpyType(
+            ak.types.listtype.ListType(
+                content=ak.types.numpytype.NumpyType(
                     primitive="uint8", parameters={"__array__": "byte"}
                 ),
                 parameters={"__array__": "bytestring"},
@@ -535,10 +500,10 @@ def test_ListType():
 def test_RecordType():
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
             )
@@ -547,10 +512,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
             )
@@ -559,10 +524,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__record__": "Name"},
@@ -572,10 +537,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__record__": "Name"},
@@ -585,10 +550,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 None,
@@ -599,10 +564,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 None,
@@ -613,10 +578,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__record__": "Name"},
@@ -627,10 +592,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__record__": "Name"},
@@ -641,10 +606,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"x": 123},
@@ -654,10 +619,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"x": 123},
@@ -667,10 +632,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__record__": "Name", "x": 123},
@@ -680,10 +645,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "x": 123},
@@ -693,10 +658,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"x": 123},
@@ -707,10 +672,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"x": 123},
@@ -721,10 +686,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__record__": "Name", "x": 123},
@@ -735,10 +700,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "x": 123},
@@ -749,10 +714,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__categorical__": True},
@@ -762,10 +727,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__categorical__": True},
@@ -775,10 +740,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__record__": "Name", "__categorical__": True},
@@ -788,10 +753,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "__categorical__": True},
@@ -801,10 +766,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__categorical__": True},
@@ -815,10 +780,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__categorical__": True},
@@ -829,10 +794,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__record__": "Name", "__categorical__": True},
@@ -843,10 +808,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "__categorical__": True},
@@ -857,10 +822,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"x": 123, "__categorical__": True},
@@ -870,10 +835,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"x": 123, "__categorical__": True},
@@ -883,10 +848,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__record__": "Name", "x": 123, "__categorical__": True},
@@ -896,10 +861,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "x": 123, "__categorical__": True},
@@ -909,10 +874,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"x": 123, "__categorical__": True},
@@ -923,10 +888,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"x": 123, "__categorical__": True},
@@ -937,10 +902,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 {"__record__": "Name", "x": 123, "__categorical__": True},
@@ -951,10 +916,10 @@ def test_RecordType():
     )
     assert (
         str(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "x": 123, "__categorical__": True},
@@ -966,10 +931,10 @@ def test_RecordType():
 
     assert (
         repr(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 contents=[
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 fields=None,
             )
@@ -978,10 +943,10 @@ def test_RecordType():
     )
     assert (
         repr(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 contents=[
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 fields=["x", "y"],
             )
@@ -990,10 +955,10 @@ def test_RecordType():
     )
     assert (
         repr(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 contents=[
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 fields=None,
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
@@ -1004,10 +969,10 @@ def test_RecordType():
     )
     assert (
         repr(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 contents=[
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 fields=None,
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
@@ -1017,10 +982,10 @@ def test_RecordType():
     )
     assert (
         repr(
-            ak._v2.types.recordtype.RecordType(
+            ak.types.recordtype.RecordType(
                 contents=[
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 fields=["x", "y"],
                 parameters={"__record__": "Name", "x": 123, "__categorical__": True},
@@ -1033,39 +998,37 @@ def test_RecordType():
 
 def test_OptionType():
     assert (
-        str(ak._v2.types.optiontype.OptionType(ak._v2.types.unknowntype.UnknownType()))
+        str(ak.types.optiontype.OptionType(ak.types.unknowntype.UnknownType()))
         == "?unknown"
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType())
+            ak.types.optiontype.OptionType(
+                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType())
             )
         )
         == "option[var * unknown]"
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
-                )
+            ak.types.optiontype.OptionType(
+                ak.types.regulartype.RegularType(ak.types.unknowntype.UnknownType(), 10)
             )
         )
         == "option[10 * unknown]"
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.unknowntype.UnknownType(), {"x": 123}
+            ak.types.optiontype.OptionType(
+                ak.types.unknowntype.UnknownType(), {"x": 123}
             )
         )
         == 'option[unknown, parameters={"x": 123}]'
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()),
+            ak.types.optiontype.OptionType(
+                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"x": 123},
             )
         )
@@ -1073,9 +1036,9 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
+            ak.types.optiontype.OptionType(
+                ak.types.regulartype.RegularType(
+                    ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"x": 123},
             )
@@ -1084,16 +1047,16 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.unknowntype.UnknownType(), None, "override"
+            ak.types.optiontype.OptionType(
+                ak.types.unknowntype.UnknownType(), None, "override"
             )
         )
         == "override"
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()),
+            ak.types.optiontype.OptionType(
+                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 None,
                 "override",
             )
@@ -1102,9 +1065,9 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
+            ak.types.optiontype.OptionType(
+                ak.types.regulartype.RegularType(
+                    ak.types.unknowntype.UnknownType(), 10
                 ),
                 None,
                 "override",
@@ -1114,16 +1077,16 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.unknowntype.UnknownType(), {"x": 123}, "override"
+            ak.types.optiontype.OptionType(
+                ak.types.unknowntype.UnknownType(), {"x": 123}, "override"
             )
         )
         == "override"
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()),
+            ak.types.optiontype.OptionType(
+                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"x": 123},
                 "override",
             )
@@ -1132,9 +1095,9 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
+            ak.types.optiontype.OptionType(
+                ak.types.regulartype.RegularType(
+                    ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"x": 123},
                 "override",
@@ -1144,16 +1107,16 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.unknowntype.UnknownType(), {"__categorical__": True}
+            ak.types.optiontype.OptionType(
+                ak.types.unknowntype.UnknownType(), {"__categorical__": True}
             )
         )
         == "?categorical[type=unknown]"
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()),
+            ak.types.optiontype.OptionType(
+                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"__categorical__": True},
             )
         )
@@ -1161,9 +1124,9 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
+            ak.types.optiontype.OptionType(
+                ak.types.regulartype.RegularType(
+                    ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"__categorical__": True},
             )
@@ -1172,8 +1135,8 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.unknowntype.UnknownType(),
+            ak.types.optiontype.OptionType(
+                ak.types.unknowntype.UnknownType(),
                 {"x": 123, "__categorical__": True},
             )
         )
@@ -1181,8 +1144,8 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()),
+            ak.types.optiontype.OptionType(
+                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"x": 123, "__categorical__": True},
             )
         )
@@ -1190,9 +1153,9 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
+            ak.types.optiontype.OptionType(
+                ak.types.regulartype.RegularType(
+                    ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"x": 123, "__categorical__": True},
             )
@@ -1201,8 +1164,8 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.unknowntype.UnknownType(),
+            ak.types.optiontype.OptionType(
+                ak.types.unknowntype.UnknownType(),
                 {"__categorical__": True},
                 "override",
             )
@@ -1211,8 +1174,8 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()),
+            ak.types.optiontype.OptionType(
+                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"__categorical__": True},
                 "override",
             )
@@ -1221,9 +1184,9 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
+            ak.types.optiontype.OptionType(
+                ak.types.regulartype.RegularType(
+                    ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"__categorical__": True},
                 "override",
@@ -1233,8 +1196,8 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.unknowntype.UnknownType(),
+            ak.types.optiontype.OptionType(
+                ak.types.unknowntype.UnknownType(),
                 {"x": 123, "__categorical__": True},
                 "override",
             )
@@ -1243,8 +1206,8 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.listtype.ListType(ak._v2.types.unknowntype.UnknownType()),
+            ak.types.optiontype.OptionType(
+                ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"x": 123, "__categorical__": True},
                 "override",
             )
@@ -1253,9 +1216,9 @@ def test_OptionType():
     )
     assert (
         str(
-            ak._v2.types.optiontype.OptionType(
-                ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
+            ak.types.optiontype.OptionType(
+                ak.types.regulartype.RegularType(
+                    ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"x": 123, "__categorical__": True},
                 "override",
@@ -1265,28 +1228,22 @@ def test_OptionType():
     )
 
     assert (
-        repr(
-            ak._v2.types.optiontype.OptionType(
-                content=ak._v2.types.unknowntype.UnknownType()
-            )
-        )
+        repr(ak.types.optiontype.OptionType(content=ak.types.unknowntype.UnknownType()))
         == "OptionType(UnknownType())"
     )
     assert (
         repr(
-            ak._v2.types.optiontype.OptionType(
-                content=ak._v2.types.listtype.ListType(
-                    ak._v2.types.unknowntype.UnknownType()
-                )
+            ak.types.optiontype.OptionType(
+                content=ak.types.listtype.ListType(ak.types.unknowntype.UnknownType())
             )
         )
         == "OptionType(ListType(UnknownType()))"
     )
     assert (
         repr(
-            ak._v2.types.optiontype.OptionType(
-                content=ak._v2.types.regulartype.RegularType(
-                    ak._v2.types.unknowntype.UnknownType(), 10
+            ak.types.optiontype.OptionType(
+                content=ak.types.regulartype.RegularType(
+                    ak.types.unknowntype.UnknownType(), 10
                 ),
                 parameters={"x": 123, "__categorical__": True},
                 typestr="override",
@@ -1299,10 +1256,10 @@ def test_OptionType():
 def test_UnionType():
     assert (
         str(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ]
             )
         )
@@ -1310,10 +1267,10 @@ def test_UnionType():
     )
     assert (
         str(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"x": 123},
             )
@@ -1322,10 +1279,10 @@ def test_UnionType():
     )
     assert (
         str(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
                 "override",
@@ -1335,10 +1292,10 @@ def test_UnionType():
     )
     assert (
         str(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"x": 123},
                 "override",
@@ -1348,10 +1305,10 @@ def test_UnionType():
     )
     assert (
         str(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"__categorical__": True},
             )
@@ -1360,10 +1317,10 @@ def test_UnionType():
     )
     assert (
         str(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"x": 123, "__categorical__": True},
             )
@@ -1372,10 +1329,10 @@ def test_UnionType():
     )
     assert (
         str(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"__categorical__": True},
                 "override",
@@ -1385,10 +1342,10 @@ def test_UnionType():
     )
     assert (
         str(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 [
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"x": 123, "__categorical__": True},
                 "override",
@@ -1399,10 +1356,10 @@ def test_UnionType():
 
     assert (
         repr(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 contents=[
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ]
             )
         )
@@ -1410,10 +1367,10 @@ def test_UnionType():
     )
     assert (
         repr(
-            ak._v2.types.uniontype.UnionType(
+            ak.types.uniontype.UnionType(
                 contents=[
-                    ak._v2.types.unknowntype.UnknownType(),
-                    ak._v2.types.numpytype.NumpyType("bool"),
+                    ak.types.unknowntype.UnknownType(),
+                    ak.types.numpytype.NumpyType("bool"),
                 ],
                 parameters={"x": 123, "__categorical__": True},
                 typestr="override",
@@ -1425,32 +1382,28 @@ def test_UnionType():
 
 def test_ArrayType():
     assert (
-        str(
-            ak._v2.types.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), 10)
-        )
+        str(ak.types.arraytype.ArrayType(ak.types.unknowntype.UnknownType(), 10))
         == "10 * unknown"
     )
     assert (
-        str(ak._v2.types.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), 0))
+        str(ak.types.arraytype.ArrayType(ak.types.unknowntype.UnknownType(), 0))
         == "0 * unknown"
     )
     with pytest.raises(ValueError):
-        ak._v2.types.arraytype.ArrayType(ak._v2.types.unknowntype.UnknownType(), -1)
+        ak.types.arraytype.ArrayType(ak.types.unknowntype.UnknownType(), -1)
 
     # ArrayType should not have these arguments (should not be a Type subclass)
     with pytest.raises(TypeError):
-        ak._v2.types.arraytype.ArrayType(
-            ak._v2.types.unknowntype.UnknownType(), 10, {"x": 123}
-        )
+        ak.types.arraytype.ArrayType(ak.types.unknowntype.UnknownType(), 10, {"x": 123})
     with pytest.raises(TypeError):
-        ak._v2.types.arraytype.ArrayType(
-            ak._v2.types.unknowntype.UnknownType(), 10, None, "override"
+        ak.types.arraytype.ArrayType(
+            ak.types.unknowntype.UnknownType(), 10, None, "override"
         )
 
     assert (
         repr(
-            ak._v2.types.arraytype.ArrayType(
-                content=ak._v2.types.unknowntype.UnknownType(), length=10
+            ak.types.arraytype.ArrayType(
+                content=ak.types.unknowntype.UnknownType(), length=10
             )
         )
         == "ArrayType(UnknownType(), 10)"
@@ -1459,14 +1412,14 @@ def test_ArrayType():
 
 def test_EmptyForm():
     assert (
-        str(ak._v2.forms.emptyform.EmptyForm())
+        str(ak.forms.emptyform.EmptyForm())
         == """{
     "class": "EmptyArray"
 }"""
     )
     assert (
         str(
-            ak._v2.forms.emptyform.EmptyForm(
+            ak.forms.emptyform.EmptyForm(
                 has_identifier=True, parameters={"x": 123}, form_key="hello"
             )
         )
@@ -1479,26 +1432,26 @@ def test_EmptyForm():
     "form_key": "hello"
 }"""
     )
-    assert repr(ak._v2.forms.emptyform.EmptyForm()) == "EmptyForm()"
+    assert repr(ak.forms.emptyform.EmptyForm()) == "EmptyForm()"
     assert (
         repr(
-            ak._v2.forms.emptyform.EmptyForm(
+            ak.forms.emptyform.EmptyForm(
                 has_identifier=True, parameters={"x": 123}, form_key="hello"
             )
         )
         == "EmptyForm(has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.emptyform.EmptyForm().tolist(verbose=False) == {
+    assert ak.forms.emptyform.EmptyForm().tolist(verbose=False) == {
         "class": "EmptyArray"
     }
-    assert ak._v2.forms.emptyform.EmptyForm().tolist() == {
+    assert ak.forms.emptyform.EmptyForm().tolist() == {
         "class": "EmptyArray",
         "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.emptyform.EmptyForm(
+    assert ak.forms.emptyform.EmptyForm(
         has_identifier=True, parameters={"x": 123}, form_key="hello"
     ).tolist(verbose=False) == {
         "class": "EmptyArray",
@@ -1506,13 +1459,13 @@ def test_EmptyForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter({"class": "EmptyArray"}).tolist() == {
+    assert ak.forms.from_iter({"class": "EmptyArray"}).tolist() == {
         "class": "EmptyArray",
         "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "EmptyArray",
             "has_identifier": True,
@@ -1528,23 +1481,21 @@ def test_EmptyForm():
 
 
 @pytest.mark.skipif(
-    ak._v2._util.win,
+    ak._util.win,
     reason="NumPy does not have float16, float128, and complex256 -- on Windows",
 )
 def test_NumpyForm():
     assert (
-        str(ak._v2.forms.numpyform.NumpyForm("bool"))
+        str(ak.forms.numpyform.NumpyForm("bool"))
         == """{
     "class": "NumpyArray",
     "primitive": "bool"
 }"""
     )
-    assert (
-        repr(ak._v2.forms.numpyform.NumpyForm(primitive="bool")) == "NumpyForm('bool')"
-    )
+    assert repr(ak.forms.numpyform.NumpyForm(primitive="bool")) == "NumpyForm('bool')"
     assert (
         repr(
-            ak._v2.forms.numpyform.NumpyForm(
+            ak.forms.numpyform.NumpyForm(
                 primitive="bool",
                 inner_shape=[1, 2, 3],
                 has_identifier=True,
@@ -1555,11 +1506,11 @@ def test_NumpyForm():
         == "NumpyForm('bool', inner_shape=(1, 2, 3), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.numpyform.NumpyForm("bool").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("bool").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("bool").tolist() == {
+    assert ak.forms.numpyform.NumpyForm("bool").tolist() == {
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [],
@@ -1567,7 +1518,7 @@ def test_NumpyForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.numpyform.NumpyForm(
+    assert ak.forms.numpyform.NumpyForm(
         "bool",
         inner_shape=[1, 2, 3],
         has_identifier=True,
@@ -1582,103 +1533,103 @@ def test_NumpyForm():
         "form_key": "hello",
     }
 
-    assert ak._v2.forms.numpyform.NumpyForm("bool").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("bool").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("int8").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("int8").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("uint8").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("uint8").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("int16").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("int16").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("uint16").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("uint16").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("int32").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("int32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("uint32").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("uint32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("int64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("int64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("uint64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("uint64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
     if hasattr(np, "float16"):
-        assert ak._v2.forms.numpyform.NumpyForm("float16").tolist(verbose=False) == {
+        assert ak.forms.numpyform.NumpyForm("float16").tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float16",
         }
-    assert ak._v2.forms.numpyform.NumpyForm("float32").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("float32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("float64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("float64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
     if hasattr(np, "float128"):
-        assert ak._v2.forms.numpyform.NumpyForm("float128").tolist(verbose=False) == {
+        assert ak.forms.numpyform.NumpyForm("float128").tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float128",
         }
-    assert ak._v2.forms.numpyform.NumpyForm("complex64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("complex64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("complex128").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("complex128").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
     if hasattr(np, "complex256"):
-        assert ak._v2.forms.numpyform.NumpyForm("complex256").tolist(verbose=False) == {
+        assert ak.forms.numpyform.NumpyForm("complex256").tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "complex256",
         }
-    assert ak._v2.forms.numpyform.NumpyForm("datetime64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("datetime64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak._v2.forms.numpyform.NumpyForm(
+    assert ak.forms.numpyform.NumpyForm(
         "datetime64", parameters={"__unit__": "s"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak._v2.forms.numpyform.NumpyForm(
+    assert ak.forms.numpyform.NumpyForm(
         "datetime64", parameters={"__unit__": "s", "x": 123}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak._v2.forms.numpyform.NumpyForm("timedelta64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("timedelta64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
-    assert ak._v2.forms.numpyform.NumpyForm(
+    assert ak.forms.numpyform.NumpyForm(
         "timedelta64", parameters={"__unit__": "s"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak._v2.forms.numpyform.NumpyForm(
+    assert ak.forms.numpyform.NumpyForm(
         "timedelta64", parameters={"__unit__": "s", "x": 123}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
@@ -1686,142 +1637,116 @@ def test_NumpyForm():
         "parameters": {"__unit__": "s", "x": 123},
     }
 
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("bool")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("bool")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("int8")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("int8")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("uint8")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint8")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("int16")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("int16")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("uint16")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint16")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("int32")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("int32")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("uint32")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint32")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("int64")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("int64")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("uint64")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint64")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
     if hasattr(np, "float16"):
-        assert ak._v2.forms.numpyform.from_dtype(np.dtype("float16")).tolist(
+        assert ak.forms.numpyform.from_dtype(np.dtype("float16")).tolist(
             verbose=False
         ) == {
             "class": "NumpyArray",
             "primitive": "float16",
         }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("float32")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("float32")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("float64")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("float64")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
     if hasattr(np, "float128"):
-        assert ak._v2.forms.numpyform.from_dtype(np.dtype("float128")).tolist(
+        assert ak.forms.numpyform.from_dtype(np.dtype("float128")).tolist(
             verbose=False
         ) == {
             "class": "NumpyArray",
             "primitive": "float128",
         }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("complex64")).tolist(
+    assert ak.forms.numpyform.from_dtype(np.dtype("complex64")).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("complex128")).tolist(
+    assert ak.forms.numpyform.from_dtype(np.dtype("complex128")).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
     if hasattr(np, "complex256"):
-        assert ak._v2.forms.numpyform.from_dtype(np.dtype("complex256")).tolist(
+        assert ak.forms.numpyform.from_dtype(np.dtype("complex256")).tolist(
             verbose=False
         ) == {
             "class": "NumpyArray",
             "primitive": "complex256",
         }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("M8")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("M8")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("M8[s]")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("M8[s]")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak._v2.forms.numpyform.from_dtype(
+    assert ak.forms.numpyform.from_dtype(
         np.dtype("M8[s]"), parameters={"x": 123}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("m8")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("m8")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("m8[s]")).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("m8[s]")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak._v2.forms.numpyform.from_dtype(
+    assert ak.forms.numpyform.from_dtype(
         np.dtype("m8[s]"), parameters={"x": 123}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype(("bool", (1, 2, 3)))).tolist(
+    assert ak.forms.numpyform.from_dtype(np.dtype(("bool", (1, 2, 3)))).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
@@ -1829,83 +1754,83 @@ def test_NumpyForm():
         "inner_shape": [1, 2, 3],
     }
     with pytest.raises(TypeError):
-        ak._v2.forms.from_dtype(np.dtype("O")).tolist(verbose=False)
+        ak.forms.from_dtype(np.dtype("O")).tolist(verbose=False)
     with pytest.raises(TypeError):
-        ak._v2.forms.from_dtype(
-            np.dtype([("one", np.int64), ("two", np.float64)])
-        ).tolist(verbose=False)
-    assert ak._v2.forms.from_iter("bool").tolist(verbose=False) == {
+        ak.forms.from_dtype(np.dtype([("one", np.int64), ("two", np.float64)])).tolist(
+            verbose=False
+        )
+    assert ak.forms.from_iter("bool").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak._v2.forms.from_iter("int8").tolist(verbose=False) == {
+    assert ak.forms.from_iter("int8").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak._v2.forms.from_iter("uint8").tolist(verbose=False) == {
+    assert ak.forms.from_iter("uint8").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak._v2.forms.from_iter("int16").tolist(verbose=False) == {
+    assert ak.forms.from_iter("int16").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak._v2.forms.from_iter("uint16").tolist(verbose=False) == {
+    assert ak.forms.from_iter("uint16").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak._v2.forms.from_iter("int32").tolist(verbose=False) == {
+    assert ak.forms.from_iter("int32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak._v2.forms.from_iter("uint32").tolist(verbose=False) == {
+    assert ak.forms.from_iter("uint32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak._v2.forms.from_iter("int64").tolist(verbose=False) == {
+    assert ak.forms.from_iter("int64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak._v2.forms.from_iter("uint64").tolist(verbose=False) == {
+    assert ak.forms.from_iter("uint64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
     if hasattr(np, "float16"):
-        assert ak._v2.forms.from_iter("float16").tolist(verbose=False) == {
+        assert ak.forms.from_iter("float16").tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float16",
         }
-    assert ak._v2.forms.from_iter("float32").tolist(verbose=False) == {
+    assert ak.forms.from_iter("float32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak._v2.forms.from_iter("float64").tolist(verbose=False) == {
+    assert ak.forms.from_iter("float64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
     if hasattr(np, "float128"):
-        assert ak._v2.forms.from_iter("float128").tolist(verbose=False) == {
+        assert ak.forms.from_iter("float128").tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float128",
         }
-    assert ak._v2.forms.from_iter("complex64").tolist(verbose=False) == {
+    assert ak.forms.from_iter("complex64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak._v2.forms.from_iter("complex128").tolist(verbose=False) == {
+    assert ak.forms.from_iter("complex128").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
     if hasattr(np, "complex256"):
-        assert ak._v2.forms.from_iter("complex256").tolist(verbose=False) == {
+        assert ak.forms.from_iter("complex256").tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "complex256",
         }
-    assert ak._v2.forms.from_iter("datetime64").tolist(verbose=False) == {
+    assert ak.forms.from_iter("datetime64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "datetime64",
@@ -1916,7 +1841,7 @@ def test_NumpyForm():
         "primitive": "datetime64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "datetime64",
@@ -1927,11 +1852,11 @@ def test_NumpyForm():
         "primitive": "datetime64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak._v2.forms.from_iter("timedelta64").tolist(verbose=False) == {
+    assert ak.forms.from_iter("timedelta64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "timedelta64",
@@ -1942,7 +1867,7 @@ def test_NumpyForm():
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "timedelta64",
@@ -1954,119 +1879,119 @@ def test_NumpyForm():
         "parameters": {"__unit__": "s", "x": 123},
     }
 
-    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "bool"}).tolist(
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "bool"}).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "int8"}).tolist(
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "int8"}).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "uint8"}).tolist(
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "uint8"}).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "int16"}).tolist(
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "int16"}).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "uint16"}
-    ).tolist(verbose=False) == {
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "uint16"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "int32"}).tolist(
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "int32"}).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "uint32"}
-    ).tolist(verbose=False) == {
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "uint32"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak._v2.forms.from_iter({"class": "NumpyArray", "primitive": "int64"}).tolist(
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "int64"}).tolist(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "uint64"}
-    ).tolist(verbose=False) == {
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "uint64"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
     if hasattr(np, "float16"):
-        assert ak._v2.forms.from_iter(
+        assert ak.forms.from_iter(
             {"class": "NumpyArray", "primitive": "float16"}
         ).tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float16",
         }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "float32"}
-    ).tolist(verbose=False) == {
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "float32"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "float64"}
-    ).tolist(verbose=False) == {
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "float64"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
     if hasattr(np, "float128"):
-        assert ak._v2.forms.from_iter(
+        assert ak.forms.from_iter(
             {"class": "NumpyArray", "primitive": "float128"}
         ).tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float128",
         }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "complex64"}
-    ).tolist(verbose=False) == {
+    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "complex64"}).tolist(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {"class": "NumpyArray", "primitive": "complex128"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
     if hasattr(np, "complex256"):
-        assert ak._v2.forms.from_iter(
+        assert ak.forms.from_iter(
             {"class": "NumpyArray", "primitive": "complex256"}
         ).tolist(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "complex256",
         }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {"class": "NumpyArray", "primitive": "datetime64"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {"class": "NumpyArray", "primitive": "timedelta64"}
     ).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
 
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "NumpyArray",
             "primitive": "bool",
@@ -2087,9 +2012,7 @@ def test_NumpyForm():
 
 def test_RegularForm():
     assert (
-        str(
-            ak._v2.forms.regularform.RegularForm(ak._v2.forms.emptyform.EmptyForm(), 10)
-        )
+        str(ak.forms.regularform.RegularForm(ak.forms.emptyform.EmptyForm(), 10))
         == """{
     "class": "RegularArray",
     "size": 10,
@@ -2100,8 +2023,8 @@ def test_RegularForm():
     )
     assert (
         str(
-            ak._v2.forms.regularform.RegularForm(
-                ak._v2.forms.emptyform.EmptyForm(),
+            ak.forms.regularform.RegularForm(
+                ak.forms.emptyform.EmptyForm(),
                 10,
                 has_identifier=True,
                 parameters={"x": 123},
@@ -2123,16 +2046,16 @@ def test_RegularForm():
     )
     assert (
         repr(
-            ak._v2.forms.regularform.RegularForm(
-                content=ak._v2.forms.emptyform.EmptyForm(), size=10
+            ak.forms.regularform.RegularForm(
+                content=ak.forms.emptyform.EmptyForm(), size=10
             )
         )
         == "RegularForm(EmptyForm(), 10)"
     )
     assert (
         repr(
-            ak._v2.forms.regularform.RegularForm(
-                content=ak._v2.forms.emptyform.EmptyForm(),
+            ak.forms.regularform.RegularForm(
+                content=ak.forms.emptyform.EmptyForm(),
                 size=10,
                 has_identifier=True,
                 parameters={"x": 123},
@@ -2142,15 +2065,15 @@ def test_RegularForm():
         == "RegularForm(EmptyForm(), 10, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.regularform.RegularForm(
-        ak._v2.forms.emptyform.EmptyForm(), 10
-    ).tolist(verbose=False) == {
+    assert ak.forms.regularform.RegularForm(ak.forms.emptyform.EmptyForm(), 10).tolist(
+        verbose=False
+    ) == {
         "class": "RegularArray",
         "size": 10,
         "content": {"class": "EmptyArray"},
     }
-    assert ak._v2.forms.regularform.RegularForm(
-        ak._v2.forms.emptyform.EmptyForm(), 10
+    assert ak.forms.regularform.RegularForm(
+        ak.forms.emptyform.EmptyForm(), 10
     ).tolist() == {
         "class": "RegularArray",
         "size": 10,
@@ -2164,8 +2087,8 @@ def test_RegularForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.regularform.RegularForm(
-        content=ak._v2.forms.emptyform.EmptyForm(),
+    assert ak.forms.regularform.RegularForm(
+        content=ak.forms.emptyform.EmptyForm(),
         size=10,
         has_identifier=True,
         parameters={"x": 123},
@@ -2178,7 +2101,7 @@ def test_RegularForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {"class": "RegularArray", "size": 10, "content": {"class": "EmptyArray"}}
     ).tolist() == {
         "class": "RegularArray",
@@ -2193,7 +2116,7 @@ def test_RegularForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "RegularArray",
             "size": 10,
@@ -2210,8 +2133,8 @@ def test_RegularForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.regularform.RegularForm(
-        ak._v2.forms.numpyform.NumpyForm("bool"), 10
+    assert ak.forms.regularform.RegularForm(
+        ak.forms.numpyform.NumpyForm("bool"), 10
     ).tolist() == {
         "class": "RegularArray",
         "content": {
@@ -2227,8 +2150,8 @@ def test_RegularForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.regularform.RegularForm(
-        ak._v2.forms.numpyform.NumpyForm("bool"), 10
+    assert ak.forms.regularform.RegularForm(
+        ak.forms.numpyform.NumpyForm("bool"), 10
     ).tolist(verbose=False) == {
         "class": "RegularArray",
         "content": "bool",
@@ -2238,11 +2161,7 @@ def test_RegularForm():
 
 def test_ListForm():
     assert (
-        str(
-            ak._v2.forms.listform.ListForm(
-                "i32", "i32", ak._v2.forms.emptyform.EmptyForm()
-            )
-        )
+        str(ak.forms.listform.ListForm("i32", "i32", ak.forms.emptyform.EmptyForm()))
         == """{
     "class": "ListArray",
     "starts": "i32",
@@ -2253,11 +2172,7 @@ def test_ListForm():
 }"""
     )
     assert (
-        str(
-            ak._v2.forms.listform.ListForm(
-                "u32", "u32", ak._v2.forms.emptyform.EmptyForm()
-            )
-        )
+        str(ak.forms.listform.ListForm("u32", "u32", ak.forms.emptyform.EmptyForm()))
         == """{
     "class": "ListArray",
     "starts": "u32",
@@ -2268,11 +2183,7 @@ def test_ListForm():
 }"""
     )
     assert (
-        str(
-            ak._v2.forms.listform.ListForm(
-                "i64", "i64", ak._v2.forms.emptyform.EmptyForm()
-            )
-        )
+        str(ak.forms.listform.ListForm("i64", "i64", ak.forms.emptyform.EmptyForm()))
         == """{
     "class": "ListArray",
     "starts": "i64",
@@ -2284,10 +2195,10 @@ def test_ListForm():
     )
     assert (
         str(
-            ak._v2.forms.listform.ListForm(
+            ak.forms.listform.ListForm(
                 "i32",
                 "i32",
-                ak._v2.forms.emptyform.EmptyForm(),
+                ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -2309,18 +2220,18 @@ def test_ListForm():
     )
     assert (
         repr(
-            ak._v2.forms.listform.ListForm(
-                starts="i32", stops="i32", content=ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.listform.ListForm(
+                starts="i32", stops="i32", content=ak.forms.emptyform.EmptyForm()
             )
         )
         == "ListForm('i32', 'i32', EmptyForm())"
     )
     assert (
         repr(
-            ak._v2.forms.listform.ListForm(
+            ak.forms.listform.ListForm(
                 starts="i32",
                 stops="i32",
-                content=ak._v2.forms.emptyform.EmptyForm(),
+                content=ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -2329,16 +2240,16 @@ def test_ListForm():
         == "ListForm('i32', 'i32', EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.listform.ListForm(
-        "i32", "i32", ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.listform.ListForm(
+        "i32", "i32", ak.forms.emptyform.EmptyForm()
     ).tolist(verbose=False) == {
         "class": "ListArray",
         "starts": "i32",
         "stops": "i32",
         "content": {"class": "EmptyArray"},
     }
-    assert ak._v2.forms.listform.ListForm(
-        "i32", "i32", ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.listform.ListForm(
+        "i32", "i32", ak.forms.emptyform.EmptyForm()
     ).tolist() == {
         "class": "ListArray",
         "starts": "i32",
@@ -2353,10 +2264,10 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.listform.ListForm(
+    assert ak.forms.listform.ListForm(
         starts="i32",
         stops="i32",
-        content=ak._v2.forms.emptyform.EmptyForm(),
+        content=ak.forms.emptyform.EmptyForm(),
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
@@ -2369,7 +2280,7 @@ def test_ListForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ListArray",
             "starts": "i32",
@@ -2390,7 +2301,7 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ListArray",
             "starts": "u32",
@@ -2411,7 +2322,7 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ListArray",
             "starts": "i64",
@@ -2432,7 +2343,7 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ListArray",
             "starts": "i32",
@@ -2456,8 +2367,8 @@ def test_ListForm():
 def test_ListOffsetForm():
     assert (
         str(
-            ak._v2.forms.listoffsetform.ListOffsetForm(
-                "i32", ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.listoffsetform.ListOffsetForm(
+                "i32", ak.forms.emptyform.EmptyForm()
             )
         )
         == """{
@@ -2470,8 +2381,8 @@ def test_ListOffsetForm():
     )
     assert (
         str(
-            ak._v2.forms.listoffsetform.ListOffsetForm(
-                "u32", ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.listoffsetform.ListOffsetForm(
+                "u32", ak.forms.emptyform.EmptyForm()
             )
         )
         == """{
@@ -2484,8 +2395,8 @@ def test_ListOffsetForm():
     )
     assert (
         str(
-            ak._v2.forms.listoffsetform.ListOffsetForm(
-                "i64", ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.listoffsetform.ListOffsetForm(
+                "i64", ak.forms.emptyform.EmptyForm()
             )
         )
         == """{
@@ -2498,9 +2409,9 @@ def test_ListOffsetForm():
     )
     assert (
         str(
-            ak._v2.forms.listoffsetform.ListOffsetForm(
+            ak.forms.listoffsetform.ListOffsetForm(
                 "i32",
-                ak._v2.forms.emptyform.EmptyForm(),
+                ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -2521,17 +2432,17 @@ def test_ListOffsetForm():
     )
     assert (
         repr(
-            ak._v2.forms.listoffsetform.ListOffsetForm(
-                offsets="i32", content=ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.listoffsetform.ListOffsetForm(
+                offsets="i32", content=ak.forms.emptyform.EmptyForm()
             )
         )
         == "ListOffsetForm('i32', EmptyForm())"
     )
     assert (
         repr(
-            ak._v2.forms.listoffsetform.ListOffsetForm(
+            ak.forms.listoffsetform.ListOffsetForm(
                 offsets="i32",
-                content=ak._v2.forms.emptyform.EmptyForm(),
+                content=ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -2540,15 +2451,15 @@ def test_ListOffsetForm():
         == "ListOffsetForm('i32', EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.listoffsetform.ListOffsetForm(
-        "i32", ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.listoffsetform.ListOffsetForm(
+        "i32", ak.forms.emptyform.EmptyForm()
     ).tolist(verbose=False) == {
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {"class": "EmptyArray"},
     }
-    assert ak._v2.forms.listoffsetform.ListOffsetForm(
-        "i32", ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.listoffsetform.ListOffsetForm(
+        "i32", ak.forms.emptyform.EmptyForm()
     ).tolist() == {
         "class": "ListOffsetArray",
         "offsets": "i32",
@@ -2562,9 +2473,9 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.listoffsetform.ListOffsetForm(
+    assert ak.forms.listoffsetform.ListOffsetForm(
         offsets="i32",
-        content=ak._v2.forms.emptyform.EmptyForm(),
+        content=ak.forms.emptyform.EmptyForm(),
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
@@ -2576,7 +2487,7 @@ def test_ListOffsetForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ListOffsetArray",
             "offsets": "i32",
@@ -2595,7 +2506,7 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ListOffsetArray",
             "offsets": "u32",
@@ -2614,7 +2525,7 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ListOffsetArray",
             "offsets": "i64",
@@ -2633,7 +2544,7 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ListOffsetArray",
             "offsets": "i32",
@@ -2655,10 +2566,10 @@ def test_ListOffsetForm():
 def test_RecordForm():
     assert (
         str(
-            ak._v2.forms.recordform.RecordForm(
+            ak.forms.recordform.RecordForm(
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 None,
             )
@@ -2675,10 +2586,10 @@ def test_RecordForm():
     )
     assert (
         str(
-            ak._v2.forms.recordform.RecordForm(
+            ak.forms.recordform.RecordForm(
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 ["x", "y"],
             )
@@ -2695,10 +2606,10 @@ def test_RecordForm():
     )
     assert (
         str(
-            ak._v2.forms.recordform.RecordForm(
+            ak.forms.recordform.RecordForm(
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 None,
                 has_identifier=True,
@@ -2723,10 +2634,10 @@ def test_RecordForm():
     )
     assert (
         str(
-            ak._v2.forms.recordform.RecordForm(
+            ak.forms.recordform.RecordForm(
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 ["x", "y"],
                 has_identifier=True,
@@ -2752,10 +2663,10 @@ def test_RecordForm():
 
     assert (
         repr(
-            ak._v2.forms.recordform.RecordForm(
+            ak.forms.recordform.RecordForm(
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 None,
             )
@@ -2764,10 +2675,10 @@ def test_RecordForm():
     )
     assert (
         repr(
-            ak._v2.forms.recordform.RecordForm(
+            ak.forms.recordform.RecordForm(
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 ["x", "y"],
             )
@@ -2776,10 +2687,10 @@ def test_RecordForm():
     )
     assert (
         repr(
-            ak._v2.forms.recordform.RecordForm(
+            ak.forms.recordform.RecordForm(
                 contents=[
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 fields=None,
                 has_identifier=True,
@@ -2791,10 +2702,10 @@ def test_RecordForm():
     )
     assert (
         repr(
-            ak._v2.forms.recordform.RecordForm(
+            ak.forms.recordform.RecordForm(
                 contents=[
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 fields=["x", "y"],
                 has_identifier=True,
@@ -2805,8 +2716,8 @@ def test_RecordForm():
         == "RecordForm([EmptyForm(), NumpyForm('bool')], ['x', 'y'], has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.recordform.RecordForm(
-        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+    assert ak.forms.recordform.RecordForm(
+        [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         None,
     ).tolist(verbose=False) == {
         "class": "RecordArray",
@@ -2815,8 +2726,8 @@ def test_RecordForm():
             "bool",
         ],
     }
-    assert ak._v2.forms.recordform.RecordForm(
-        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+    assert ak.forms.recordform.RecordForm(
+        [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         ["x", "y"],
     ).tolist(verbose=False) == {
         "class": "RecordArray",
@@ -2825,8 +2736,8 @@ def test_RecordForm():
             "y": "bool",
         },
     }
-    assert ak._v2.forms.recordform.RecordForm(
-        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+    assert ak.forms.recordform.RecordForm(
+        [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         None,
     ).tolist() == {
         "class": "RecordArray",
@@ -2850,8 +2761,8 @@ def test_RecordForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.recordform.RecordForm(
-        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+    assert ak.forms.recordform.RecordForm(
+        [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         ["x", "y"],
     ).tolist() == {
         "class": "RecordArray",
@@ -2875,10 +2786,10 @@ def test_RecordForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.recordform.RecordForm(
+    assert ak.forms.recordform.RecordForm(
         contents=[
-            ak._v2.forms.emptyform.EmptyForm(),
-            ak._v2.forms.numpyform.NumpyForm("bool"),
+            ak.forms.emptyform.EmptyForm(),
+            ak.forms.numpyform.NumpyForm("bool"),
         ],
         fields=None,
         has_identifier=True,
@@ -2894,10 +2805,10 @@ def test_RecordForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.recordform.RecordForm(
+    assert ak.forms.recordform.RecordForm(
         contents=[
-            ak._v2.forms.emptyform.EmptyForm(),
-            ak._v2.forms.numpyform.NumpyForm("bool"),
+            ak.forms.emptyform.EmptyForm(),
+            ak.forms.numpyform.NumpyForm("bool"),
         ],
         fields=["x", "y"],
         has_identifier=True,
@@ -2913,7 +2824,7 @@ def test_RecordForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "RecordArray",
             "contents": [
@@ -2943,7 +2854,7 @@ def test_RecordForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "RecordArray",
             "contents": {
@@ -2973,7 +2884,7 @@ def test_RecordForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "RecordArray",
             "contents": [
@@ -2994,7 +2905,7 @@ def test_RecordForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "RecordArray",
             "contents": {
@@ -3019,11 +2930,7 @@ def test_RecordForm():
 
 def test_IndexedForm():
     assert (
-        str(
-            ak._v2.forms.indexedform.IndexedForm(
-                "i32", ak._v2.forms.emptyform.EmptyForm()
-            )
-        )
+        str(ak.forms.indexedform.IndexedForm("i32", ak.forms.emptyform.EmptyForm()))
         == """{
     "class": "IndexedArray",
     "index": "i32",
@@ -3033,11 +2940,7 @@ def test_IndexedForm():
 }"""
     )
     assert (
-        str(
-            ak._v2.forms.indexedform.IndexedForm(
-                "u32", ak._v2.forms.emptyform.EmptyForm()
-            )
-        )
+        str(ak.forms.indexedform.IndexedForm("u32", ak.forms.emptyform.EmptyForm()))
         == """{
     "class": "IndexedArray",
     "index": "u32",
@@ -3047,11 +2950,7 @@ def test_IndexedForm():
 }"""
     )
     assert (
-        str(
-            ak._v2.forms.indexedform.IndexedForm(
-                "i64", ak._v2.forms.emptyform.EmptyForm()
-            )
-        )
+        str(ak.forms.indexedform.IndexedForm("i64", ak.forms.emptyform.EmptyForm()))
         == """{
     "class": "IndexedArray",
     "index": "i64",
@@ -3062,9 +2961,9 @@ def test_IndexedForm():
     )
     assert (
         str(
-            ak._v2.forms.indexedform.IndexedForm(
+            ak.forms.indexedform.IndexedForm(
                 "i32",
-                ak._v2.forms.emptyform.EmptyForm(),
+                ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -3085,17 +2984,17 @@ def test_IndexedForm():
     )
     assert (
         repr(
-            ak._v2.forms.indexedform.IndexedForm(
-                index="i32", content=ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.indexedform.IndexedForm(
+                index="i32", content=ak.forms.emptyform.EmptyForm()
             )
         )
         == "IndexedForm('i32', EmptyForm())"
     )
     assert (
         repr(
-            ak._v2.forms.indexedform.IndexedForm(
+            ak.forms.indexedform.IndexedForm(
                 index="i32",
-                content=ak._v2.forms.emptyform.EmptyForm(),
+                content=ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -3104,15 +3003,15 @@ def test_IndexedForm():
         == "IndexedForm('i32', EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.indexedform.IndexedForm(
-        "i32", ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.indexedform.IndexedForm(
+        "i32", ak.forms.emptyform.EmptyForm()
     ).tolist(verbose=False) == {
         "class": "IndexedArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
     }
-    assert ak._v2.forms.indexedform.IndexedForm(
-        "i32", ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.indexedform.IndexedForm(
+        "i32", ak.forms.emptyform.EmptyForm()
     ).tolist() == {
         "class": "IndexedArray",
         "index": "i32",
@@ -3126,9 +3025,9 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.indexedform.IndexedForm(
+    assert ak.forms.indexedform.IndexedForm(
         index="i32",
-        content=ak._v2.forms.emptyform.EmptyForm(),
+        content=ak.forms.emptyform.EmptyForm(),
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
@@ -3140,7 +3039,7 @@ def test_IndexedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "IndexedArray",
             "index": "i32",
@@ -3159,7 +3058,7 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "IndexedArray",
             "index": "u32",
@@ -3178,7 +3077,7 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "IndexedArray",
             "index": "i64",
@@ -3197,7 +3096,7 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "IndexedArray",
             "index": "i32",
@@ -3219,8 +3118,8 @@ def test_IndexedForm():
 def test_IndexedOptionForm():
     assert (
         str(
-            ak._v2.forms.indexedoptionform.IndexedOptionForm(
-                "i32", ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.indexedoptionform.IndexedOptionForm(
+                "i32", ak.forms.emptyform.EmptyForm()
             )
         )
         == """{
@@ -3233,8 +3132,8 @@ def test_IndexedOptionForm():
     )
     assert (
         str(
-            ak._v2.forms.indexedoptionform.IndexedOptionForm(
-                "i64", ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.indexedoptionform.IndexedOptionForm(
+                "i64", ak.forms.emptyform.EmptyForm()
             )
         )
         == """{
@@ -3247,9 +3146,9 @@ def test_IndexedOptionForm():
     )
     assert (
         str(
-            ak._v2.forms.indexedoptionform.IndexedOptionForm(
+            ak.forms.indexedoptionform.IndexedOptionForm(
                 "i32",
-                ak._v2.forms.emptyform.EmptyForm(),
+                ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -3270,17 +3169,17 @@ def test_IndexedOptionForm():
     )
     assert (
         repr(
-            ak._v2.forms.indexedoptionform.IndexedOptionForm(
-                index="i32", content=ak._v2.forms.emptyform.EmptyForm()
+            ak.forms.indexedoptionform.IndexedOptionForm(
+                index="i32", content=ak.forms.emptyform.EmptyForm()
             )
         )
         == "IndexedOptionForm('i32', EmptyForm())"
     )
     assert (
         repr(
-            ak._v2.forms.indexedoptionform.IndexedOptionForm(
+            ak.forms.indexedoptionform.IndexedOptionForm(
                 index="i32",
-                content=ak._v2.forms.emptyform.EmptyForm(),
+                content=ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -3289,15 +3188,15 @@ def test_IndexedOptionForm():
         == "IndexedOptionForm('i32', EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.indexedoptionform.IndexedOptionForm(
-        "i32", ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.indexedoptionform.IndexedOptionForm(
+        "i32", ak.forms.emptyform.EmptyForm()
     ).tolist(verbose=False) == {
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
     }
-    assert ak._v2.forms.indexedoptionform.IndexedOptionForm(
-        "i32", ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.indexedoptionform.IndexedOptionForm(
+        "i32", ak.forms.emptyform.EmptyForm()
     ).tolist() == {
         "class": "IndexedOptionArray",
         "index": "i32",
@@ -3311,9 +3210,9 @@ def test_IndexedOptionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.indexedoptionform.IndexedOptionForm(
+    assert ak.forms.indexedoptionform.IndexedOptionForm(
         index="i32",
-        content=ak._v2.forms.emptyform.EmptyForm(),
+        content=ak.forms.emptyform.EmptyForm(),
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
@@ -3325,7 +3224,7 @@ def test_IndexedOptionForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "IndexedOptionArray",
             "index": "i32",
@@ -3344,7 +3243,7 @@ def test_IndexedOptionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "IndexedOptionArray",
             "index": "i64",
@@ -3363,7 +3262,7 @@ def test_IndexedOptionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "IndexedOptionArray",
             "index": "i32",
@@ -3385,8 +3284,8 @@ def test_IndexedOptionForm():
 def test_ByteMaskedForm():
     assert (
         str(
-            ak._v2.forms.bytemaskedform.ByteMaskedForm(
-                "i8", ak._v2.forms.emptyform.EmptyForm(), True
+            ak.forms.bytemaskedform.ByteMaskedForm(
+                "i8", ak.forms.emptyform.EmptyForm(), True
             )
         )
         == """{
@@ -3400,8 +3299,8 @@ def test_ByteMaskedForm():
     )
     assert (
         str(
-            ak._v2.forms.bytemaskedform.ByteMaskedForm(
-                "i8", ak._v2.forms.emptyform.EmptyForm(), False
+            ak.forms.bytemaskedform.ByteMaskedForm(
+                "i8", ak.forms.emptyform.EmptyForm(), False
             )
         )
         == """{
@@ -3415,9 +3314,9 @@ def test_ByteMaskedForm():
     )
     assert (
         str(
-            ak._v2.forms.bytemaskedform.ByteMaskedForm(
+            ak.forms.bytemaskedform.ByteMaskedForm(
                 "i8",
-                ak._v2.forms.emptyform.EmptyForm(),
+                ak.forms.emptyform.EmptyForm(),
                 True,
                 has_identifier=True,
                 parameters={"x": 123},
@@ -3440,17 +3339,17 @@ def test_ByteMaskedForm():
     )
     assert (
         repr(
-            ak._v2.forms.bytemaskedform.ByteMaskedForm(
-                mask="i8", content=ak._v2.forms.emptyform.EmptyForm(), valid_when=True
+            ak.forms.bytemaskedform.ByteMaskedForm(
+                mask="i8", content=ak.forms.emptyform.EmptyForm(), valid_when=True
             )
         )
         == "ByteMaskedForm('i8', EmptyForm(), True)"
     )
     assert (
         repr(
-            ak._v2.forms.bytemaskedform.ByteMaskedForm(
+            ak.forms.bytemaskedform.ByteMaskedForm(
                 mask="i8",
-                content=ak._v2.forms.emptyform.EmptyForm(),
+                content=ak.forms.emptyform.EmptyForm(),
                 valid_when=True,
                 has_identifier=True,
                 parameters={"x": 123},
@@ -3460,16 +3359,16 @@ def test_ByteMaskedForm():
         == "ByteMaskedForm('i8', EmptyForm(), True, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.bytemaskedform.ByteMaskedForm(
-        "i8", ak._v2.forms.emptyform.EmptyForm(), True
+    assert ak.forms.bytemaskedform.ByteMaskedForm(
+        "i8", ak.forms.emptyform.EmptyForm(), True
     ).tolist(verbose=False) == {
         "class": "ByteMaskedArray",
         "mask": "i8",
         "valid_when": True,
         "content": {"class": "EmptyArray"},
     }
-    assert ak._v2.forms.bytemaskedform.ByteMaskedForm(
-        "i8", ak._v2.forms.emptyform.EmptyForm(), True
+    assert ak.forms.bytemaskedform.ByteMaskedForm(
+        "i8", ak.forms.emptyform.EmptyForm(), True
     ).tolist() == {
         "class": "ByteMaskedArray",
         "mask": "i8",
@@ -3484,9 +3383,9 @@ def test_ByteMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.bytemaskedform.ByteMaskedForm(
+    assert ak.forms.bytemaskedform.ByteMaskedForm(
         mask="i8",
-        content=ak._v2.forms.emptyform.EmptyForm(),
+        content=ak.forms.emptyform.EmptyForm(),
         valid_when=True,
         has_identifier=True,
         parameters={"x": 123},
@@ -3500,7 +3399,7 @@ def test_ByteMaskedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ByteMaskedArray",
             "mask": "i8",
@@ -3521,7 +3420,7 @@ def test_ByteMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ByteMaskedArray",
             "mask": "i64",
@@ -3542,7 +3441,7 @@ def test_ByteMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "ByteMaskedArray",
             "mask": "i8",
@@ -3566,8 +3465,8 @@ def test_ByteMaskedForm():
 def test_BitMaskedForm():
     assert (
         str(
-            ak._v2.forms.bitmaskedform.BitMaskedForm(
-                "u8", ak._v2.forms.emptyform.EmptyForm(), True, True
+            ak.forms.bitmaskedform.BitMaskedForm(
+                "u8", ak.forms.emptyform.EmptyForm(), True, True
             )
         )
         == """{
@@ -3582,8 +3481,8 @@ def test_BitMaskedForm():
     )
     assert (
         str(
-            ak._v2.forms.bitmaskedform.BitMaskedForm(
-                "u8", ak._v2.forms.emptyform.EmptyForm(), False, True
+            ak.forms.bitmaskedform.BitMaskedForm(
+                "u8", ak.forms.emptyform.EmptyForm(), False, True
             )
         )
         == """{
@@ -3598,8 +3497,8 @@ def test_BitMaskedForm():
     )
     assert (
         str(
-            ak._v2.forms.bitmaskedform.BitMaskedForm(
-                "u8", ak._v2.forms.emptyform.EmptyForm(), True, False
+            ak.forms.bitmaskedform.BitMaskedForm(
+                "u8", ak.forms.emptyform.EmptyForm(), True, False
             )
         )
         == """{
@@ -3614,8 +3513,8 @@ def test_BitMaskedForm():
     )
     assert (
         str(
-            ak._v2.forms.bitmaskedform.BitMaskedForm(
-                "u8", ak._v2.forms.emptyform.EmptyForm(), False, False
+            ak.forms.bitmaskedform.BitMaskedForm(
+                "u8", ak.forms.emptyform.EmptyForm(), False, False
             )
         )
         == """{
@@ -3630,9 +3529,9 @@ def test_BitMaskedForm():
     )
     assert (
         str(
-            ak._v2.forms.bitmaskedform.BitMaskedForm(
+            ak.forms.bitmaskedform.BitMaskedForm(
                 "u8",
-                ak._v2.forms.emptyform.EmptyForm(),
+                ak.forms.emptyform.EmptyForm(),
                 True,
                 False,
                 has_identifier=True,
@@ -3657,9 +3556,9 @@ def test_BitMaskedForm():
     )
     assert (
         repr(
-            ak._v2.forms.bitmaskedform.BitMaskedForm(
+            ak.forms.bitmaskedform.BitMaskedForm(
                 mask="u8",
-                content=ak._v2.forms.emptyform.EmptyForm(),
+                content=ak.forms.emptyform.EmptyForm(),
                 valid_when=True,
                 lsb_order=False,
             )
@@ -3668,9 +3567,9 @@ def test_BitMaskedForm():
     )
     assert (
         repr(
-            ak._v2.forms.bitmaskedform.BitMaskedForm(
+            ak.forms.bitmaskedform.BitMaskedForm(
                 mask="u8",
-                content=ak._v2.forms.emptyform.EmptyForm(),
+                content=ak.forms.emptyform.EmptyForm(),
                 valid_when=True,
                 lsb_order=False,
                 has_identifier=True,
@@ -3681,8 +3580,8 @@ def test_BitMaskedForm():
         == "BitMaskedForm('u8', EmptyForm(), True, False, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.bitmaskedform.BitMaskedForm(
-        "u8", ak._v2.forms.emptyform.EmptyForm(), True, False
+    assert ak.forms.bitmaskedform.BitMaskedForm(
+        "u8", ak.forms.emptyform.EmptyForm(), True, False
     ).tolist(verbose=False) == {
         "class": "BitMaskedArray",
         "mask": "u8",
@@ -3690,8 +3589,8 @@ def test_BitMaskedForm():
         "lsb_order": False,
         "content": {"class": "EmptyArray"},
     }
-    assert ak._v2.forms.bitmaskedform.BitMaskedForm(
-        "u8", ak._v2.forms.emptyform.EmptyForm(), True, False
+    assert ak.forms.bitmaskedform.BitMaskedForm(
+        "u8", ak.forms.emptyform.EmptyForm(), True, False
     ).tolist() == {
         "class": "BitMaskedArray",
         "mask": "u8",
@@ -3707,9 +3606,9 @@ def test_BitMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.bitmaskedform.BitMaskedForm(
+    assert ak.forms.bitmaskedform.BitMaskedForm(
         mask="u8",
-        content=ak._v2.forms.emptyform.EmptyForm(),
+        content=ak.forms.emptyform.EmptyForm(),
         valid_when=True,
         lsb_order=False,
         has_identifier=True,
@@ -3725,7 +3624,7 @@ def test_BitMaskedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "BitMaskedArray",
             "mask": "u8",
@@ -3748,7 +3647,7 @@ def test_BitMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "BitMaskedArray",
             "mask": "i64",
@@ -3771,7 +3670,7 @@ def test_BitMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "BitMaskedArray",
             "mask": "u8",
@@ -3796,7 +3695,7 @@ def test_BitMaskedForm():
 
 def test_UnmaskedForm():
     assert (
-        str(ak._v2.forms.unmaskedform.UnmaskedForm(ak._v2.forms.emptyform.EmptyForm()))
+        str(ak.forms.unmaskedform.UnmaskedForm(ak.forms.emptyform.EmptyForm()))
         == """{
     "class": "UnmaskedArray",
     "content": {
@@ -3806,8 +3705,8 @@ def test_UnmaskedForm():
     )
     assert (
         str(
-            ak._v2.forms.unmaskedform.UnmaskedForm(
-                ak._v2.forms.emptyform.EmptyForm(),
+            ak.forms.unmaskedform.UnmaskedForm(
+                ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -3826,17 +3725,13 @@ def test_UnmaskedForm():
 }"""
     )
     assert (
-        repr(
-            ak._v2.forms.unmaskedform.UnmaskedForm(
-                content=ak._v2.forms.emptyform.EmptyForm()
-            )
-        )
+        repr(ak.forms.unmaskedform.UnmaskedForm(content=ak.forms.emptyform.EmptyForm()))
         == "UnmaskedForm(EmptyForm())"
     )
     assert (
         repr(
-            ak._v2.forms.unmaskedform.UnmaskedForm(
-                content=ak._v2.forms.emptyform.EmptyForm(),
+            ak.forms.unmaskedform.UnmaskedForm(
+                content=ak.forms.emptyform.EmptyForm(),
                 has_identifier=True,
                 parameters={"x": 123},
                 form_key="hello",
@@ -3845,14 +3740,14 @@ def test_UnmaskedForm():
         == "UnmaskedForm(EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.unmaskedform.UnmaskedForm(
-        ak._v2.forms.emptyform.EmptyForm()
-    ).tolist(verbose=False) == {
+    assert ak.forms.unmaskedform.UnmaskedForm(ak.forms.emptyform.EmptyForm()).tolist(
+        verbose=False
+    ) == {
         "class": "UnmaskedArray",
         "content": {"class": "EmptyArray"},
     }
-    assert ak._v2.forms.unmaskedform.UnmaskedForm(
-        ak._v2.forms.emptyform.EmptyForm()
+    assert ak.forms.unmaskedform.UnmaskedForm(
+        ak.forms.emptyform.EmptyForm()
     ).tolist() == {
         "class": "UnmaskedArray",
         "content": {
@@ -3865,8 +3760,8 @@ def test_UnmaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.unmaskedform.UnmaskedForm(
-        content=ak._v2.forms.emptyform.EmptyForm(),
+    assert ak.forms.unmaskedform.UnmaskedForm(
+        content=ak.forms.emptyform.EmptyForm(),
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
@@ -3877,7 +3772,7 @@ def test_UnmaskedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {"class": "UnmaskedArray", "content": {"class": "EmptyArray"}}
     ).tolist() == {
         "class": "UnmaskedArray",
@@ -3891,7 +3786,7 @@ def test_UnmaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "UnmaskedArray",
             "content": {"class": "EmptyArray"},
@@ -3911,12 +3806,12 @@ def test_UnmaskedForm():
 def test_UnionForm():
     assert (
         str(
-            ak._v2.forms.unionform.UnionForm(
+            ak.forms.unionform.UnionForm(
                 "i8",
                 "i32",
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
             )
         )
@@ -3934,12 +3829,12 @@ def test_UnionForm():
     )
     assert (
         str(
-            ak._v2.forms.unionform.UnionForm(
+            ak.forms.unionform.UnionForm(
                 "i8",
                 "u32",
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
             )
         )
@@ -3957,12 +3852,12 @@ def test_UnionForm():
     )
     assert (
         str(
-            ak._v2.forms.unionform.UnionForm(
+            ak.forms.unionform.UnionForm(
                 "i8",
                 "i64",
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
             )
         )
@@ -3980,12 +3875,12 @@ def test_UnionForm():
     )
     assert (
         str(
-            ak._v2.forms.unionform.UnionForm(
+            ak.forms.unionform.UnionForm(
                 "i8",
                 "i32",
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 has_identifier=True,
                 parameters={"x": 123},
@@ -4012,12 +3907,12 @@ def test_UnionForm():
 
     assert (
         repr(
-            ak._v2.forms.unionform.UnionForm(
+            ak.forms.unionform.UnionForm(
                 "i8",
                 "i32",
                 [
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
             )
         )
@@ -4025,12 +3920,12 @@ def test_UnionForm():
     )
     assert (
         repr(
-            ak._v2.forms.unionform.UnionForm(
+            ak.forms.unionform.UnionForm(
                 tags="i8",
                 index="i32",
                 contents=[
-                    ak._v2.forms.emptyform.EmptyForm(),
-                    ak._v2.forms.numpyform.NumpyForm("bool"),
+                    ak.forms.emptyform.EmptyForm(),
+                    ak.forms.numpyform.NumpyForm("bool"),
                 ],
                 has_identifier=True,
                 parameters={"x": 123},
@@ -4040,10 +3935,10 @@ def test_UnionForm():
         == "UnionForm('i8', 'i32', [EmptyForm(), NumpyForm('bool')], has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak._v2.forms.unionform.UnionForm(
+    assert ak.forms.unionform.UnionForm(
         "i8",
         "i32",
-        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
     ).tolist(verbose=False) == {
         "class": "UnionArray",
         "tags": "i8",
@@ -4053,10 +3948,10 @@ def test_UnionForm():
             "bool",
         ],
     }
-    assert ak._v2.forms.unionform.UnionForm(
+    assert ak.forms.unionform.UnionForm(
         "i8",
         "i32",
-        [ak._v2.forms.emptyform.EmptyForm(), ak._v2.forms.numpyform.NumpyForm("bool")],
+        [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
     ).tolist() == {
         "class": "UnionArray",
         "tags": "i8",
@@ -4081,12 +3976,12 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.unionform.UnionForm(
+    assert ak.forms.unionform.UnionForm(
         tags="i8",
         index="i32",
         contents=[
-            ak._v2.forms.emptyform.EmptyForm(),
-            ak._v2.forms.numpyform.NumpyForm("bool"),
+            ak.forms.emptyform.EmptyForm(),
+            ak.forms.numpyform.NumpyForm("bool"),
         ],
         has_identifier=True,
         parameters={"x": 123},
@@ -4103,7 +3998,7 @@ def test_UnionForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4137,7 +4032,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4171,7 +4066,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4205,7 +4100,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak._v2.forms.from_iter(
+    assert ak.forms.from_iter(
         {
             "class": "UnionArray",
             "tags": "i8",

@@ -4,21 +4,21 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_getitem():
-    content0 = ak._v2.operations.from_iter(
+    content0 = ak.operations.from_iter(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
     )
-    content1 = ak._v2.operations.from_iter(
+    content1 = ak.operations.from_iter(
         ["one", "two", "three", "four", "five"], highlevel=False
     )
-    tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
 
-    array32 = ak._v2.contents.UnionArray.regular_index(tags, ak._v2.index.Index32)
-    arrayU32 = ak._v2.contents.UnionArray.regular_index(tags, ak._v2.index.IndexU32)
-    array64 = ak._v2.contents.UnionArray.regular_index(tags, ak._v2.index.Index64)
+    array32 = ak.contents.UnionArray.regular_index(tags, ak.index.Index32)
+    arrayU32 = ak.contents.UnionArray.regular_index(tags, ak.index.IndexU32)
+    array64 = ak.contents.UnionArray.regular_index(tags, ak.index.Index64)
 
     assert np.asarray(array32).tolist() == [
         0,
@@ -54,8 +54,8 @@ def test_getitem():
     ]
     assert np.asarray(array64).dtype == np.dtype(np.int64)
 
-    index = ak._v2.index.Index(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    array = ak._v2.contents.UnionArray(tags, index, [content0, content1])
+    index = ak.index.Index(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak.contents.UnionArray(tags, index, [content0, content1])
 
     assert np.asarray(array.tags).tolist() == [1, 1, 0, 0, 1, 0, 1, 1]
     assert np.asarray(array.tags).dtype == np.dtype(np.int8)
@@ -123,11 +123,11 @@ def test_getitem():
     ]
     assert array.typetracer[:, :-1].form == array[:, :-1].form
 
-    content2 = ak._v2.operations.from_iter(
+    content2 = ak.operations.from_iter(
         [{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}],
         highlevel=False,
     )
-    content3 = ak._v2.operations.from_iter(
+    content3 = ak.operations.from_iter(
         [
             {"x": 0.0, "y": "zero", "z": False},
             {"x": 1.1, "y": "one", "z": True},
@@ -137,7 +137,7 @@ def test_getitem():
         ],
         highlevel=False,
     )
-    array2 = ak._v2.contents.UnionArray(tags, index, [content2, content3])
+    array2 = ak.contents.UnionArray(tags, index, [content2, content3])
 
     assert to_list(array2) == [
         {"x": 0.0, "y": "zero", "z": False},
@@ -191,8 +191,8 @@ def test_getitem():
         array2["z"]
     assert "no field 'z'" in str(err.value)
 
-    array3 = ak._v2.contents.UnionArray(tags, index, [content3, content2])
-    array4 = ak._v2.contents.UnionArray(
+    array3 = ak.contents.UnionArray(tags, index, [content3, content2])
+    array4 = ak.contents.UnionArray(
         tags, index, [content0, content1, content2, content3]
     )
 

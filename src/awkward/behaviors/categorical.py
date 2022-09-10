@@ -2,7 +2,7 @@
 
 
 import awkward as ak
-from awkward._v2.highlevel import Array
+from awkward.highlevel import Array
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -52,7 +52,7 @@ def as_hashable(obj):
 
 
 def _categorical_equal(one, two):
-    behavior = ak._v2._util.behavior_of(one, two)
+    behavior = ak._util.behavior_of(one, two)
 
     one, two = one.layout, two.layout
 
@@ -63,17 +63,17 @@ def _categorical_equal(one, two):
 
     one_index = ak.nplike.numpy.asarray(one.index)
     two_index = ak.nplike.numpy.asarray(two.index)
-    one_content = ak._v2._util.wrap(one.content, behavior)
-    two_content = ak._v2._util.wrap(two.content, behavior)
+    one_content = ak._util.wrap(one.content, behavior)
+    two_content = ak._util.wrap(two.content, behavior)
 
-    if len(one_content) == len(two_content) and ak._v2.operations.all(
+    if len(one_content) == len(two_content) and ak.operations.all(
         one_content == two_content, axis=None
     ):
         one_mapped = one_index
 
     else:
-        one_list = ak._v2.operations.to_list(one_content)
-        two_list = ak._v2.operations.to_list(two_content)
+        one_list = ak.operations.to_list(one_content)
+        two_list = ak.operations.to_list(two_content)
         one_hashable = [as_hashable(x) for x in one_list]
         two_hashable = [as_hashable(x) for x in two_list]
         two_lookup = {x: i for i, x in enumerate(two_hashable)}
@@ -86,20 +86,16 @@ def _categorical_equal(one, two):
         one_mapped = one_to_two[one_index]
 
     out = one_mapped == two_index
-    out = ak._v2._util.wrap(
-        ak._v2.contents.NumpyArray(out), ak._v2._util.behavior_of(one, two)
-    )
+    out = ak._util.wrap(ak.contents.NumpyArray(out), ak._util.behavior_of(one, two))
     return out
 
 
 def _apply_ufunc(ufunc, method, inputs, kwargs):
     nextinputs = []
     for x in inputs:
-        if isinstance(x, ak._v2.highlevel.Array) and x.layout.is_IndexedType:
+        if isinstance(x, ak.highlevel.Array) and x.layout.is_IndexedType:
             nextinputs.append(
-                ak._v2.highlevel.Array(
-                    x.layout.project(), behavior=ak._v2._util.behavior_of(x)
-                )
+                ak.highlevel.Array(x.layout.project(), behavior=ak._util.behavior_of(x))
             )
         else:
             nextinputs.append(x)

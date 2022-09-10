@@ -10,7 +10,7 @@ def unzip(array, highlevel=True, behavior=None):
     Args:
         array: Array to unzip into individual fields.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -31,26 +31,26 @@ def unzip(array, highlevel=True, behavior=None):
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.unzip",
+    with ak._util.OperationErrorContext(
+        "ak.unzip",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, highlevel, behavior)
 
 
 def _impl(array, highlevel, behavior):
-    behavior = ak._v2._util.behavior_of(array, behavior=behavior)
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
-    fields = ak._v2.operations.fields(layout)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    fields = ak.operations.fields(layout)
 
     def check_for_union(layout, **kwargs):
-        if isinstance(layout, (ak._v2.contents.RecordArray, ak._v2.Record)):
+        if isinstance(layout, (ak.contents.RecordArray, ak.Record)):
             pass  # don't descend into nested records
 
-        elif isinstance(layout, ak._v2.contents.UnionArray):
+        elif isinstance(layout, ak.contents.UnionArray):
             for content in layout.contents:
-                if set(ak._v2.operations.fields(content)) != set(fields):
-                    raise ak._v2._util.error(
+                if set(ak.operations.fields(content)) != set(fields):
+                    raise ak._util.error(
                         ValueError("union of different sets of fields, cannot ak.unzip")
                     )
 
@@ -60,6 +60,6 @@ def _impl(array, highlevel, behavior):
     layout.recursively_apply(check_for_union, behavior, return_array=False)
 
     if len(fields) == 0:
-        return (ak._v2._util.wrap(layout, behavior, highlevel),)
+        return (ak._util.wrap(layout, behavior, highlevel),)
     else:
-        return tuple(ak._v2._util.wrap(layout[n], behavior, highlevel) for n in fields)
+        return tuple(ak._util.wrap(layout[n], behavior, highlevel) for n in fields)

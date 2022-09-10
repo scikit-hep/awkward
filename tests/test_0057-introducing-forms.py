@@ -10,10 +10,10 @@ import awkward as ak  # noqa: F401
 
 
 def test_forms():
-    form = ak._v2.forms.NumpyForm("float64")
+    form = ak.forms.NumpyForm("float64")
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert form.inner_shape == ()
     assert form.itemsize == 8
     assert form.primitive == "float64"
@@ -33,7 +33,7 @@ def test_forms():
         "primitive": "float64",
     }
 
-    form = ak._v2.forms.NumpyForm(
+    form = ak.forms.NumpyForm(
         "float64",
         [1, 2, 3],
         has_identifier=True,
@@ -42,7 +42,7 @@ def test_forms():
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert form.inner_shape == (1, 2, 3)
     assert form.itemsize == 8
     assert form.primitive == "float64"
@@ -66,9 +66,9 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.BitMaskedForm(
+    form = ak.forms.BitMaskedForm(
         "i8",
-        ak._v2.forms.NumpyForm("float64"),
+        ak.forms.NumpyForm("float64"),
         True,
         False,
         parameters={"hey": ["you"]},
@@ -76,7 +76,7 @@ def test_forms():
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "BitMaskedArray",
         "mask": "i8",
@@ -104,13 +104,13 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.EmptyForm(
+    form = ak.forms.EmptyForm(
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "EmptyArray",
         "has_identifier": False,
@@ -123,15 +123,15 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.IndexedForm(
+    form = ak.forms.IndexedForm(
         "i64",
-        ak._v2.forms.NumpyForm("float64"),
+        ak.forms.NumpyForm("float64"),
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "IndexedArray",
         "index": "i64",
@@ -155,15 +155,15 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.IndexedOptionForm(
+    form = ak.forms.IndexedOptionForm(
         "i64",
-        ak._v2.forms.NumpyForm("float64"),
+        ak.forms.NumpyForm("float64"),
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "IndexedOptionArray",
         "index": "i64",
@@ -187,16 +187,16 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.ListForm(
+    form = ak.forms.ListForm(
         "i64",
         "i64",
-        ak._v2.forms.NumpyForm("float64"),
+        ak.forms.NumpyForm("float64"),
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "ListArray",
         "starts": "i64",
@@ -222,15 +222,15 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.ListOffsetForm(
+    form = ak.forms.ListOffsetForm(
         "i64",
-        ak._v2.forms.NumpyForm("float64"),
+        ak.forms.NumpyForm("float64"),
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "ListOffsetArray",
         "offsets": "i64",
@@ -254,15 +254,15 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.RecordForm(
-        [ak._v2.forms.NumpyForm("float64"), ak._v2.forms.NumpyForm("bool")],
+    form = ak.forms.RecordForm(
+        [ak.forms.NumpyForm("float64"), ak.forms.NumpyForm("bool")],
         ["one", "two"],
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "RecordArray",
         "contents": {
@@ -297,15 +297,15 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.RecordForm(
-        [ak._v2.forms.NumpyForm("float64"), ak._v2.forms.NumpyForm("bool")],
+    form = ak.forms.RecordForm(
+        [ak.forms.NumpyForm("float64"), ak.forms.NumpyForm("bool")],
         None,
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "RecordArray",
         "contents": [
@@ -337,15 +337,15 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.RegularForm(
-        ak._v2.forms.NumpyForm("float64"),
+    form = ak.forms.RegularForm(
+        ak.forms.NumpyForm("float64"),
         10,
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "RegularArray",
         "content": {
@@ -369,16 +369,16 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.UnionForm(
+    form = ak.forms.UnionForm(
         "i8",
         "i64",
-        [ak._v2.forms.NumpyForm("float64"), ak._v2.forms.NumpyForm("bool")],
+        [ak.forms.NumpyForm("float64"), ak.forms.NumpyForm("bool")],
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "UnionArray",
         "tags": "i8",
@@ -414,14 +414,14 @@ def test_forms():
         "form_key": "yowzers",
     }
 
-    form = ak._v2.forms.UnmaskedForm(
-        ak._v2.forms.NumpyForm("float64"),
+    form = ak.forms.UnmaskedForm(
+        ak.forms.NumpyForm("float64"),
         parameters={"hey": ["you"]},
         form_key="yowzers",
     )
     assert form == form
     assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak._v2.forms.from_json(form.to_json()) == form
+    assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "UnmaskedArray",
         "content": {

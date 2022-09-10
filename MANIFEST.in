@@ -3,7 +3,7 @@ include dev/generate-kernel-signatures.py
 include kernel-specification.yml
 recursive-include include *.h
 recursive-include src *.cpp *.py *.cu
-recursive-include src/awkward/_v2/cpp-headers *.h
+recursive-include src/awkward/cpp-headers *.h
 recursive-include tests *.cpp *.py samples/*
 recursive-include tests-cpu-kernels *.py
 recursive-include tests-cuda-kernels *.py

@@ -32,12 +32,12 @@ def argcombinations(
             tuples with unnamed fields; otherwise, these `fields` name the
             fields. The number of `fields` must be equal to `n`.
         parameters (None or dict): Parameters for the new
-            #ak.layout.RecordArray node that is created by this operation.
+            #ak.contents.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
-            #ak.layout.RecordArray node that is created by this operation
+            #ak.contents.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
 
     Computes a Cartesian product (i.e. cross product) of `array` with itself
     that is restricted to combinations sampled without replacement,
@@ -48,8 +48,8 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.argcombinations",
+    with ak._util.OperationErrorContext(
+        "ak.argcombinations",
         dict(
             array=array,
             n=n,
@@ -86,14 +86,14 @@ def _impl(
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError("the 'axis' for argcombinations must be non-negative")
         )
     else:
-        layout = ak._v2.operations.to_layout(
+        layout = ak.operations.to_layout(
             array, allow_record=False, allow_other=False
         ).local_index(axis)
         out = layout.combinations(
             n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
         )
-        return ak._v2._util.wrap(out, behavior, highlevel)
+        return ak._util.wrap(out, behavior, highlevel)

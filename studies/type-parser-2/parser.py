@@ -4,14 +4,14 @@ import lark
 
 import awkward as ak
 
-from awkward._v2.types.numpytype import NumpyType
-from awkward._v2.types.unknowntype import UnknownType
-from awkward._v2.types.regulartype import RegularType
-from awkward._v2.types.listtype import ListType
-from awkward._v2.types.optiontype import OptionType
-from awkward._v2.types.recordtype import RecordType
-from awkward._v2.types.uniontype import UnionType
-from awkward._v2.types.arraytype import ArrayType
+from awkward.types.numpytype import NumpyType
+from awkward.types.unknowntype import UnknownType
+from awkward.types.regulartype import RegularType
+from awkward.types.listtype import ListType
+from awkward.types.optiontype import OptionType
+from awkward.types.recordtype import RecordType
+from awkward.types.uniontype import UnionType
+from awkward.types.arraytype import ArrayType
 
 
 grammar = r"""
@@ -144,64 +144,64 @@ class Transformer:
         return args[0]
 
     def numpytype(self, args):
-        return ak._v2.types.NumpyType(args[0], parameters=self._parameters(args, 1))
+        return ak.types.NumpyType(args[0], parameters=self._parameters(args, 1))
 
     def numpytype_name(self, args):
         return str(args[0])
 
     def unknowntype(self, args):
-        return ak._v2.types.UnknownType(parameters=self._parameters(args, 0))
+        return ak.types.UnknownType(parameters=self._parameters(args, 0))
 
     def regulartype(self, args):
-        return ak._v2.types.RegularType(args[1], int(args[0]))
+        return ak.types.RegularType(args[1], int(args[0]))
 
     def listtype(self, args):
-        return ak._v2.types.ListType(args[0])
+        return ak.types.ListType(args[0])
 
     def varlen_string(self, args):
-        return ak._v2.types.ListType(
-            ak._v2.types.NumpyType("uint8", {"__array__": "char"}),
+        return ak.types.ListType(
+            ak.types.NumpyType("uint8", {"__array__": "char"}),
             {"__array__": "string"},
         )
 
     def varlen_bytestring(self, args):
-        return ak._v2.types.ListType(
-            ak._v2.types.NumpyType("uint8", {"__array__": "byte"}),
+        return ak.types.ListType(
+            ak.types.NumpyType("uint8", {"__array__": "byte"}),
             {"__array__": "bytestring"},
         )
 
     def fixedlen_string(self, args):
-        return ak._v2.types.RegularType(
-            ak._v2.types.NumpyType("uint8", {"__array__": "char"}),
+        return ak.types.RegularType(
+            ak.types.NumpyType("uint8", {"__array__": "char"}),
             int(args[0]),
             {"__array__": "string"},
         )
 
     def fixedlen_bytestring(self, args):
-        return ak._v2.types.RegularType(
-            ak._v2.types.NumpyType("uint8", {"__array__": "byte"}),
+        return ak.types.RegularType(
+            ak.types.NumpyType("uint8", {"__array__": "byte"}),
             int(args[0]),
             {"__array__": "bytestring"},
         )
 
     def char(self, args):
-        return ak._v2.types.NumpyType("uint8", {"__array__": "char"})
+        return ak.types.NumpyType("uint8", {"__array__": "char"})
 
     def byte(self, args):
-        return ak._v2.types.NumpyType("uint8", {"__array__": "byte"})
+        return ak.types.NumpyType("uint8", {"__array__": "byte"})
 
     def option1(self, args):
-        return ak._v2.types.OptionType(args[0])
+        return ak.types.OptionType(args[0])
 
     def option2(self, args):
-        return ak._v2.types.OptionType(args[0], parameters=self._parameters(args, 1))
+        return ak.types.OptionType(args[0], parameters=self._parameters(args, 1))
 
     def tuple(self, args):
         if len(args) == 0:
             types = []
         else:
             types = args[0]
-        return ak._v2.types.RecordType(types, None)
+        return ak.types.RecordType(types, None)
 
     def types(self, args):
         return args
@@ -217,7 +217,7 @@ class Transformer:
         else:
             parameters = {}
 
-        return ak._v2.types.RecordType(types, None, parameters)
+        return ak.types.RecordType(types, None, parameters)
 
     def record(self, args):
         if len(args) == 0:
@@ -226,7 +226,7 @@ class Transformer:
         else:
             fields = [x[0] for x in args[0]]
             types = [x[1] for x in args[0]]
-        return ak._v2.types.RecordType(types, fields)
+        return ak.types.RecordType(types, fields)
 
     def pairs(self, args):
         return args
@@ -247,13 +247,13 @@ class Transformer:
         else:
             parameters = {}
 
-        return ak._v2.types.RecordType(types, fields, parameters)
+        return ak.types.RecordType(types, fields, parameters)
 
     def named0(self, args):
         parameters = {"__record__": str(args[0])}
         if 1 < len(args):
             parameters.update(args[1])
-        return ak._v2.types.RecordType([], None, parameters)
+        return ak.types.RecordType([], None, parameters)
 
     def named(self, args):
         parameters = {"__record__": str(args[0])}
@@ -271,7 +271,7 @@ class Transformer:
             fields = None
             contents = arguments
 
-        return ak._v2.types.RecordType(contents, fields, parameters)
+        return ak.types.RecordType(contents, fields, parameters)
 
     def named_types(self, args):
         if len(args) == 2 and isinstance(args[1], list):
@@ -302,7 +302,7 @@ class Transformer:
             arguments = args[0]
             parameters = None
 
-        return ak._v2.types.UnionType(arguments, parameters)
+        return ak.types.UnionType(arguments, parameters)
 
     def list_parameters(self, args):
         # modify recently created type object

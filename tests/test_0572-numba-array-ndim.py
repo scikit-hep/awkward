@@ -6,7 +6,7 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-ak._v2.numba.register_and_check()
+ak.numba.register_and_check()
 
 
 def test():
@@ -14,8 +14,8 @@ def test():
     def f1(array):
         return array.ndim
 
-    assert f1(ak._v2.highlevel.Array([[1, 2, 3], [], [4, 5]])) == 2
-    assert f1(ak._v2.highlevel.Array([[[1], [2, 3]], [], [[4, 5], []]])) == 3
+    assert f1(ak.highlevel.Array([[1, 2, 3], [], [4, 5]])) == 2
+    assert f1(ak.highlevel.Array([[[1], [2, 3]], [], [[4, 5], []]])) == 3
 
     with pytest.raises(numba.core.errors.TypingError):
-        f1(ak._v2.highlevel.Record({"x": [1, 2, 3], "y": [4]}))
+        f1(ak.highlevel.Record({"x": [1, 2, 3], "y": [4]}))

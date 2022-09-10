@@ -35,7 +35,7 @@ def from_parquet(
             types that don't have bitmasks in the Arrow/Parquet data, so that the
             Form (BitMaskedForm vs UnmaskedForm) is predictable.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -48,8 +48,8 @@ def from_parquet(
 
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.from_parquet",
+    with ak._util.OperationErrorContext(
+        "ak.from_parquet",
         dict(
             path=path,
             columns=columns,
@@ -63,7 +63,7 @@ def from_parquet(
             behavior=behavior,
         ),
     ):
-        import awkward._v2._connect.pyarrow  # noqa: F401
+        import awkward._connect.pyarrow  # noqa: F401
 
         parquet_columns, subform, actual_paths, fs, subrg, row_counts, meta = metadata(
             path,
@@ -94,21 +94,19 @@ def metadata(
     ignore_metadata=False,
     scan_files=True,
 ):
-    import awkward._v2._connect.pyarrow
+    import awkward._connect.pyarrow
 
     # early exit if missing deps
-    pyarrow_parquet = awkward._v2._connect.pyarrow.import_pyarrow_parquet(
-        "ak._v2.from_parquet"
-    )
+    pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.from_parquet")
     import fsspec.parquet
 
     if row_groups is not None:
-        if not all(ak._v2._util.isint(x) and x >= 0 for x in row_groups):
-            raise ak._v2._util.error(
+        if not all(ak._util.isint(x) and x >= 0 for x in row_groups):
+            raise ak._util.error(
                 ValueError("row_groups must be a set of non-negative integers")
             )
         if len(set(row_groups)) < len(row_groups):
-            raise ak._v2._util.error(ValueError("row group indices must not repeat"))
+            raise ak._util.error(ValueError("row group indices must not repeat"))
 
     fs, _, paths = fsspec.get_fs_token_paths(
         path, mode="rb", storage_options=storage_options
@@ -133,7 +131,7 @@ def metadata(
             list_indicator = "list.element"
             break
 
-    subform = ak._v2._connect.pyarrow.form_handle_arrow(
+    subform = ak._connect.pyarrow.form_handle_arrow(
         parquetfile_for_metadata.schema_arrow, pass_empty_field=True
     )
     if columns is not None:
@@ -159,13 +157,13 @@ def metadata(
                 metadata.append_row_groups(md)
     if row_groups is not None:
         if any(_ >= metadata.num_row_groups for _ in row_groups):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}"
                 )
             )
         if not can_sub:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "Requested selection of row-groups, but not scanning metadata"
                 )
@@ -237,17 +235,17 @@ def _load(
 
     if len(arrays) == 0:
         numpy = ak.nplike.Numpy.instance()
-        return ak._v2.operations.ak_from_buffers._impl(
+        return ak.operations.ak_from_buffers._impl(
             subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
         )
     elif len(arrays) == 1:
         # make high-level
-        if isinstance(arrays[0], ak._v2.record.Record):
-            return ak._v2.Record(arrays[0])
-        return ak._v2.Array(arrays[0])
+        if isinstance(arrays[0], ak.record.Record):
+            return ak.Record(arrays[0])
+        return ak.Array(arrays[0])
     else:
         # TODO: if each array is a record?
-        return ak._v2.operations.ak_concatenate._impl(
+        return ak.operations.ak_concatenate._impl(
             arrays, 0, True, True, highlevel, behavior
         )
 
@@ -305,7 +303,7 @@ def _read_parquet_file(
         else:
             arrow_table = parquetfile.read_row_groups(row_groups, parquet_columns)
 
-    return ak._v2.operations.ak_from_arrow._impl(
+    return ak.operations.ak_from_arrow._impl(
         arrow_table,
         generate_bitmasks,
         # why is high-level False here?
@@ -359,7 +357,7 @@ def _all_and_metadata_paths(path, fs, paths, ignore_metadata=False, scan_files=T
     all_paths = [x for x, is_meta, is_comm in all_paths if not is_meta and not is_comm]
 
     if len(all_paths) == 0:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError(f"no *.parquet or *.parq matches for path {path!r}")
         )
 

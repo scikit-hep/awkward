@@ -7,11 +7,11 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-ak._v2.numba.register_and_check()
+ak.numba.register_and_check()
 
 
 def test_refcount():
-    array = ak._v2.highlevel.Array([1, 2, 3])
+    array = ak.highlevel.Array([1, 2, 3])
 
     @numba.njit
     def f1():
@@ -34,7 +34,7 @@ def test_refcount():
 
 
 def test_Array():
-    array = ak._v2.highlevel.Array([1, 2, 3])
+    array = ak.highlevel.Array([1, 2, 3])
 
     @numba.njit
     def f1():
@@ -100,7 +100,7 @@ def test_Array():
 
 
 def test_Record():
-    record = ak._v2.Record({"x": 1, "y": [1, 2, 3]})
+    record = ak.Record({"x": 1, "y": [1, 2, 3]})
 
     @numba.njit
     def f1():
@@ -110,7 +110,7 @@ def test_Record():
 
 
 def test_ArrayBuilder():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     assert sys.getrefcount(builder._layout) == 3
 
     @numba.njit

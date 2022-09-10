@@ -6,18 +6,18 @@ import awkward as ak  # noqa: F401
 
 
 def test_example():
-    x = ak._v2.operations.from_iter([[1, 2, 3, None], [], [4, 5]])
-    y = ak._v2.operations.from_iter([100, 200, 300])
+    x = ak.operations.from_iter([[1, 2, 3, None], [], [4, 5]])
+    y = ak.operations.from_iter([100, 200, 300])
 
-    ttx = ak._v2.highlevel.Array(x.layout.typetracer)
-    tty = ak._v2.highlevel.Array(y.layout.typetracer)
+    ttx = ak.highlevel.Array(x.layout.typetracer)
+    tty = ak.highlevel.Array(y.layout.typetracer)
 
     assert (x + y).layout.form == (ttx + tty).layout.form
     assert (x + np.sin(y)).layout.form == (ttx + np.sin(tty)).layout.form
 
-    x = ak._v2.highlevel.Array(
-        ak._v2.contents.ListArray(x.layout.starts, x.layout.stops, x.layout.content)
+    x = ak.highlevel.Array(
+        ak.contents.ListArray(x.layout.starts, x.layout.stops, x.layout.content)
     )
-    ttx = ak._v2.highlevel.Array(x.layout.typetracer)
+    ttx = ak.highlevel.Array(x.layout.typetracer)
 
     assert (x + x).layout.form == (ttx + ttx).layout.form

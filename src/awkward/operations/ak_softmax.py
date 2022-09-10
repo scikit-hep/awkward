@@ -40,8 +40,8 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.softmax",
+    with ak._util.OperationErrorContext(
+        "ak.softmax",
         dict(
             x=x,
             axis=axis,
@@ -54,14 +54,14 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False, flatten_records=F
 
 
 def _impl(x, axis, keepdims, mask_identity, flatten_records):
-    x = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(x, allow_record=False, allow_other=False)
+    x = ak.highlevel.Array(
+        ak.operations.to_layout(x, allow_record=False, allow_other=False)
     )
 
     with np.errstate(invalid="ignore"):
         nplike = ak.nplike.of(x)
         expx = nplike.exp(x)
-        denom = ak._v2.operations.ak_sum._impl(
+        denom = ak.operations.ak_sum._impl(
             expx, axis, keepdims, mask_identity, flatten_records
         )
         return nplike.true_divide(expx, denom)

@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal
-from awkward._v2.forms.bytemaskedform import ByteMaskedForm
+from awkward.forms.form import Form, _parameters_equal
+from awkward.forms.bytemaskedform import ByteMaskedForm
 
 
 class BitMaskedForm(Form):
@@ -18,8 +18,8 @@ class BitMaskedForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._v2._util.isstr(mask):
-            raise ak._v2._util.error(
+        if not ak._util.isstr(mask):
+            raise ak._util.error(
                 TypeError(
                     "{} 'mask' must be of type str, not {}".format(
                         type(self).__name__, repr(mask)
@@ -27,7 +27,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -35,7 +35,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'valid_when' must be bool, not {}".format(
                         type(self).__name__, repr(valid_when)
@@ -43,7 +43,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(lsb_order, bool):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'lsb_order' must be bool, not {}".format(
                         type(self).__name__, repr(lsb_order)
@@ -99,10 +99,10 @@ class BitMaskedForm(Form):
         )
 
     def _type(self, typestrs):
-        return ak._v2.types.optiontype.OptionType(
+        return ak.types.optiontype.OptionType(
             self._content._type(typestrs),
             self._parameters,
-            ak._v2._util.gettypestr(self._parameters, typestrs),
+            ak._util.gettypestr(self._parameters, typestrs),
         ).simplify_option_union()
 
     def __eq__(self, other):
@@ -185,14 +185,14 @@ class BitMaskedForm(Form):
         if isinstance(
             self._content,
             (
-                ak._v2.forms.indexedform.IndexedForm,
-                ak._v2.forms.indexedoptionform.IndexedOptionForm,
-                ak._v2.forms.bytemaskedform.ByteMaskedForm,
-                ak._v2.forms.bitmaskedform.BitMaskedForm,
-                ak._v2.forms.unmaskedform.UnmaskedForm,
+                ak.forms.indexedform.IndexedForm,
+                ak.forms.indexedoptionform.IndexedOptionForm,
+                ak.forms.bytemaskedform.ByteMaskedForm,
+                ak.forms.bitmaskedform.BitMaskedForm,
+                ak.forms.unmaskedform.UnmaskedForm,
             ),
         ):
-            return ak._v2.forms.indexedoptionform.IndexedOptionForm(
+            return ak.forms.indexedoptionform.IndexedOptionForm(
                 "i64",
                 self._content,
                 has_identifier=self._has_identifier,

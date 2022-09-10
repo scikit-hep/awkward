@@ -1,22 +1,22 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.types.type import Type
-from awkward._v2.forms.form import _parameters_equal
+from awkward.types.type import Type
+from awkward.forms.form import _parameters_equal
 
 
 class RegularType(Type):
     def __init__(self, content, size, parameters=None, typestr=None):
         if not isinstance(content, Type):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'content' must be a Type subtype, not {}".format(
                         type(self).__name__, repr(content)
                     )
                 )
             )
-        if not ak._v2._util.isint(size) or size < 0:
-            raise ak._v2._util.error(
+        if not ak._util.isint(size) or size < 0:
+            raise ak._util.error(
                 ValueError(
                     "{} 'size' must be of a positive integer, not {}".format(
                         type(self).__name__, repr(size)
@@ -24,15 +24,15 @@ class RegularType(Type):
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
                     )
                 )
             )
-        if typestr is not None and not ak._v2._util.isstr(typestr):
-            raise ak._v2._util.error(
+        if typestr is not None and not ak._util.isstr(typestr):
+            raise ak._util.error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)

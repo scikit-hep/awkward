@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.highlevel import Array
+from awkward.highlevel import Array
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -38,13 +38,13 @@ class ByteBehavior(Array):
         if isinstance(other, (bytes, ByteBehavior)):
             return bytes(self) + bytes(other)
         else:
-            raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
+            raise ak._util.error(TypeError("can only concatenate bytes to bytes"))
 
     def __radd__(self, other):
         if isinstance(other, (bytes, ByteBehavior)):
             return bytes(other) + bytes(self)
         else:
-            raise ak._v2._util.error(TypeError("can only concatenate bytes to bytes"))
+            raise ak._util.error(TypeError("can only concatenate bytes to bytes"))
 
 
 class CharBehavior(Array):
@@ -79,13 +79,13 @@ class CharBehavior(Array):
         if isinstance(other, (str, CharBehavior)):
             return str(self) + str(other)
         else:
-            raise ak._v2._util.error(TypeError("can only concatenate str to str"))
+            raise ak._util.error(TypeError("can only concatenate str to str"))
 
     def __radd__(self, other):
         if isinstance(other, (str, CharBehavior)):
             return str(other) + str(self)
         else:
-            raise ak._v2._util.error(TypeError("can only concatenate str to str"))
+            raise ak._util.error(TypeError("can only concatenate str to str"))
 
 
 class ByteStringBehavior(Array):
@@ -106,11 +106,11 @@ class StringBehavior(Array):
 
 def _string_equal(one, two):
     nplike = ak.nplike.of(one, two)
-    behavior = ak._v2._util.behavior_of(one, two)
+    behavior = ak._util.behavior_of(one, two)
 
     one, two = (
-        ak._v2.operations.without_parameters(one).layout,
-        ak._v2.operations.without_parameters(two).layout,
+        ak.operations.without_parameters(one).layout,
+        ak.operations.without_parameters(two).layout,
     )
 
     # first condition: string lengths must be the same
@@ -127,13 +127,13 @@ def _string_equal(one, two):
         onepossible = one[possible]
         twopossible = two[possible]
 
-        reduced = ak._v2.operations.all(
-            ak._v2.Array(onepossible) == ak._v2.Array(twopossible), axis=-1
+        reduced = ak.operations.all(
+            ak.Array(onepossible) == ak.Array(twopossible), axis=-1
         ).layout
         # update same-length strings with a verdict about their characters
         out[possible] = reduced.data
 
-    return ak._v2._util.wrap(ak._v2.contents.NumpyArray(out), behavior)
+    return ak._util.wrap(ak.contents.NumpyArray(out), behavior)
 
 
 def _string_notequal(one, two):
@@ -144,11 +144,11 @@ def _string_broadcast(layout, offsets):
     nplike = ak.nplike.of(offsets)
     offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
-    if ak._v2._util.win or ak._v2._util.bits32:
+    if ak._util.win or ak._util.bits32:
         counts = counts.astype(np.int32)
     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
-    return ak._v2.contents.IndexedArray(
-        ak._v2.index.Index64(parents, nplike=nplike), layout
+    return ak.contents.IndexedArray(
+        ak.index.Index64(parents, nplike=nplike), layout
     ).project()
 
 
@@ -167,45 +167,45 @@ def _string_numba_lower(
     import numba
     import llvmlite.ir
 
-    whichpos = ak._v2._connect.numba.layout.posat(
+    whichpos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.CONTENT
     )
-    nextpos = ak._v2._connect.numba.layout.getat(
+    nextpos = ak._connect.numba.layout.getat(
         context, builder, viewproxy.arrayptrs, whichpos
     )
 
-    whichnextpos = ak._v2._connect.numba.layout.posat(
+    whichnextpos = ak._connect.numba.layout.posat(
         context, builder, nextpos, viewtype.type.contenttype.ARRAY
     )
 
-    startspos = ak._v2._connect.numba.layout.posat(
+    startspos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.STARTS
     )
-    startsptr = ak._v2._connect.numba.layout.getat(
+    startsptr = ak._connect.numba.layout.getat(
         context, builder, viewproxy.arrayptrs, startspos
     )
     startsarraypos = builder.add(viewproxy.start, atval)
-    start = ak._v2._connect.numba.layout.getat(
+    start = ak._connect.numba.layout.getat(
         context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype
     )
 
-    stopspos = ak._v2._connect.numba.layout.posat(
+    stopspos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.STOPS
     )
-    stopsptr = ak._v2._connect.numba.layout.getat(
+    stopsptr = ak._connect.numba.layout.getat(
         context, builder, viewproxy.arrayptrs, stopspos
     )
     stopsarraypos = builder.add(viewproxy.start, atval)
-    stop = ak._v2._connect.numba.layout.getat(
+    stop = ak._connect.numba.layout.getat(
         context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype
     )
 
-    baseptr = ak._v2._connect.numba.layout.getat(
+    baseptr = ak._connect.numba.layout.getat(
         context, builder, viewproxy.arrayptrs, whichnextpos
     )
     rawptr = builder.add(
         baseptr,
-        ak._v2._connect.numba.layout.castint(
+        ak._connect.numba.layout.castint(
             context, builder, viewtype.type.indextype.dtype, numba.intp, start
         ),
     )
@@ -214,7 +214,7 @@ def _string_numba_lower(
         llvmlite.ir.PointerType(llvmlite.ir.IntType(numba.intp.bitwidth // 8)),
     )
     strsize = builder.sub(stop, start)
-    strsize_cast = ak._v2._connect.numba.layout.castint(
+    strsize_cast = ak._connect.numba.layout.castint(
         context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
     )
 

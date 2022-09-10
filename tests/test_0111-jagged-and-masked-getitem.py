@@ -4,21 +4,21 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_array_slice_with_union():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
     ).layout
 
-    content0 = ak._v2.contents.NumpyArray(np.array([5, 2, 2]))
-    content1 = ak._v2.contents.NumpyArray(np.array([3, 9, 0, 1]))
-    tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
-    index2 = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak._v2.contents.UnionArray(tags, index2, [content0, content1])
+    content0 = ak.contents.NumpyArray(np.array([5, 2, 2]))
+    content1 = ak.contents.NumpyArray(np.array([3, 9, 0, 1]))
+    tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
+    index2 = ak.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
+    unionarray = ak.contents.UnionArray(tags, index2, [content0, content1])
 
-    assert to_list(array[ak._v2.highlevel.Array(unionarray, check_valid=True)]) == [
+    assert to_list(array[ak.highlevel.Array(unionarray, check_valid=True)]) == [
         5.5,
         2.2,
         2.2,
@@ -28,13 +28,13 @@ def test_array_slice_with_union():
         1.1,
     ]
     assert (
-        array.typetracer[ak._v2.highlevel.Array(unionarray)].form
-        == array[ak._v2.highlevel.Array(unionarray)].form
+        array.typetracer[ak.highlevel.Array(unionarray)].form
+        == array[ak.highlevel.Array(unionarray)].form
     )
 
 
 def test_array_slice():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
     ).layout
     assert to_list(array[[5, 2, 2, 3, 9, 0, 1]]) == [
@@ -64,31 +64,31 @@ def test_array_slice():
         == array[np.array([5, 2, 2, 3, 9, 0, 1])].form
     )
 
-    array2 = ak._v2.contents.NumpyArray(np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32))
+    array2 = ak.contents.NumpyArray(np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32))
 
     assert to_list(array[array2]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert array.typetracer[array2].form == array[array2].form
     assert to_list(
         array[
-            ak._v2.highlevel.Array(
+            ak.highlevel.Array(
                 np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True
             )
         ]
     ) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert (
         array.typetracer[
-            ak._v2.highlevel.Array(
+            ak.highlevel.Array(
                 np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True
             )
         ].form
         == array[
-            ak._v2.highlevel.Array(
+            ak.highlevel.Array(
                 np.array([5, 2, 2, 3, 9, 0, 1], dtype=np.int32), check_valid=True
             )
         ].form
     )
     assert to_list(
-        array[ak._v2.highlevel.Array([5, 2, 2, 3, 9, 0, 1], check_valid=True)]
+        array[ak.highlevel.Array([5, 2, 2, 3, 9, 0, 1], check_valid=True)]
     ) == [
         5.5,
         2.2,
@@ -99,25 +99,23 @@ def test_array_slice():
         1.1,
     ]
     assert (
-        array.typetracer[ak._v2.highlevel.Array([5, 2, 2, 3, 9, 0, 1])].form
-        == array[ak._v2.highlevel.Array([5, 2, 2, 3, 9, 0, 1])].form
+        array.typetracer[ak.highlevel.Array([5, 2, 2, 3, 9, 0, 1])].form
+        == array[ak.highlevel.Array([5, 2, 2, 3, 9, 0, 1])].form
     )
 
-    array3 = ak._v2.contents.NumpyArray(
+    array3 = ak.contents.NumpyArray(
         np.array([False, False, False, False, False, True, False, True, False, True])
     )
     assert to_list(array[array3]) == [5.5, 7.7, 9.9]
     assert array.typetracer[array3].form == array[array3].form
 
-    content = ak._v2.contents.NumpyArray(
-        np.array([1, 0, 9, 3, 2, 2, 5], dtype=np.int64)
-    )
-    index = ak._v2.index.Index64(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedArray(index, content)
+    content = ak.contents.NumpyArray(np.array([1, 0, 9, 3, 2, 2, 5], dtype=np.int64))
+    index = ak.index.Index64(np.array([6, 5, 4, 3, 2, 1, 0], dtype=np.int64))
+    indexedarray = ak.contents.IndexedArray(index, content)
 
     assert to_list(array[indexedarray]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert array.typetracer[indexedarray].form == array[indexedarray].form
-    assert to_list(array[ak._v2.highlevel.Array(indexedarray, check_valid=True)]) == [
+    assert to_list(array[ak.highlevel.Array(indexedarray, check_valid=True)]) == [
         5.5,
         2.2,
         2.2,
@@ -127,22 +125,22 @@ def test_array_slice():
         1.1,
     ]
     assert (
-        array.typetracer[ak._v2.highlevel.Array(indexedarray)].form
-        == array[ak._v2.highlevel.Array(indexedarray)].form
+        array.typetracer[ak.highlevel.Array(indexedarray)].form
+        == array[ak.highlevel.Array(indexedarray)].form
     )
 
-    emptyarray = ak._v2.contents.EmptyArray()
+    emptyarray = ak.contents.EmptyArray()
 
     assert to_list(array[emptyarray]) == []
     assert array.typetracer[emptyarray].form == array[emptyarray].form
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         np.array([[0.0, 1.1, 2.2, 3.3, 4.4], [5.5, 6.6, 7.7, 8.8, 9.9]]),
         check_valid=True,
     ).layout
 
-    numpyarray1 = ak._v2.contents.NumpyArray(np.array([[0, 1], [1, 0]]))
-    numpyarray2 = ak._v2.contents.NumpyArray(np.array([[2, 4], [3, 3]]))
+    numpyarray1 = ak.contents.NumpyArray(np.array([[0, 1], [1, 0]]))
+    numpyarray2 = ak.contents.NumpyArray(np.array([[2, 4], [3, 3]]))
 
     assert to_list(
         array[
@@ -168,7 +166,7 @@ def test_array_slice():
 
 
 def test_array_slice_1():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             {"x": 1, "y": 1.1, "z": [1]},
             {"x": 2, "y": 2.2, "z": [2, 2]},
@@ -178,7 +176,7 @@ def test_array_slice_1():
         ],
         check_valid=True,
     ).layout
-    assert to_list(array[ak._v2.operations.from_iter(["y", "x"], highlevel=False)]) == [
+    assert to_list(array[ak.operations.from_iter(["y", "x"], highlevel=False)]) == [
         {"y": 1.1, "x": 1},
         {"y": 2.2, "x": 2},
         {"y": 3.3, "x": 3},
@@ -188,71 +186,49 @@ def test_array_slice_1():
 
 
 def test_array_slice_2():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
     ).layout
 
-    content0 = ak._v2.contents.NumpyArray(np.array([5, 2, 2]))
-    content1 = ak._v2.contents.NumpyArray(np.array([3, 9, 0, 1]))
-    tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
-    index2 = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak._v2.contents.UnionArray(tags, index2, [content0, content1])
+    content0 = ak.contents.NumpyArray(np.array([5, 2, 2]))
+    content1 = ak.contents.NumpyArray(np.array([3, 9, 0, 1]))
+    tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
+    index2 = ak.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
+    unionarray = ak.contents.UnionArray(tags, index2, [content0, content1])
 
     assert to_list(array[unionarray]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert array.typetracer[unionarray].form == array[unionarray].form
 
 
 def test_new_slices():
-    content = ak._v2.contents.NumpyArray(
-        np.array([1, 0, 9, 3, 2, 2, 5], dtype=np.int64)
-    )
-    index = ak._v2.index.Index64(np.array([6, 5, -1, 3, 2, -1, 0], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedOptionArray(index, content)
+    content = ak.contents.NumpyArray(np.array([1, 0, 9, 3, 2, 2, 5], dtype=np.int64))
+    index = ak.index.Index64(np.array([6, 5, -1, 3, 2, -1, 0], dtype=np.int64))
+    indexedarray = ak.contents.IndexedOptionArray(index, content)
 
     assert to_list(indexedarray) == [5, 2, None, 3, 9, None, 1]
 
-    assert (
-        ak._ext._slice_tostring(indexedarray)
-        == "[missing([0, 1, -1, 2, 3, -1, 4], array([5, 2, 3, 9, 1]))]"
-    )
-
-    offsets = ak._v2.index.Index64(np.array([0, 4, 4, 7], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 4, 4, 7], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
     assert to_list(listoffsetarray) == [[1, 0, 9, 3], [], [2, 2, 5]]
 
-    assert (
-        ak._ext._slice_tostring(listoffsetarray)
-        == "[jagged([0, 4, 4, 7], array([1, 0, 9, 3, 2, 2, 5]))]"
-    )
-
-    offsets = ak._v2.index.Index64(np.array([1, 4, 4, 6], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([1, 4, 4, 6], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
     assert to_list(listoffsetarray) == [[0, 9, 3], [], [2, 2]]
 
-    assert (
-        ak._ext._slice_tostring(listoffsetarray)
-        == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
-    )
-
-    starts = ak._v2.index.Index64(np.array([1, 99, 5], dtype=np.int64))
-    stops = ak._v2.index.Index64(np.array([4, 99, 7], dtype=np.int64))
-    listarray = ak._v2.contents.ListArray(starts, stops, content)
+    starts = ak.index.Index64(np.array([1, 99, 5], dtype=np.int64))
+    stops = ak.index.Index64(np.array([4, 99, 7], dtype=np.int64))
+    listarray = ak.contents.ListArray(starts, stops, content)
 
     assert to_list(listarray) == [[0, 9, 3], [], [2, 5]]
 
-    assert (
-        ak._ext._slice_tostring(listarray)
-        == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 5]))]"
-    )
-
 
 def test_missing():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
     ).layout
-    array2 = ak._v2.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
+    array2 = ak.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
     assert to_list(array[array2]) == [
         3.3,
         6.6,
@@ -263,17 +239,17 @@ def test_missing():
     ]
     assert array.typetracer[array2].form == array[array2].form
 
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
     )
-    regulararray = ak._v2.contents.RegularArray(content, 4, zeros_length=0)
+    regulararray = ak.contents.RegularArray(content, 4, zeros_length=0)
 
     assert to_list(regulararray) == [
         [0.0, 1.1, 2.2, 3.3],
         [4.4, 5.5, 6.6, 7.7],
         [8.8, 9.9, 10.0, 11.1],
     ]
-    array3 = ak._v2.highlevel.Array([2, 1, 1, None, -1], check_valid=True).layout
+    array3 = ak.highlevel.Array([2, 1, 1, None, -1], check_valid=True).layout
     assert to_list(regulararray[array3]) == [
         [8.8, 9.9, 10.0, 11.1],
         [4.4, 5.5, 6.6, 7.7],
@@ -351,7 +327,7 @@ def test_missing():
         ].form
     )
 
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]])
     )
     assert to_list(content[array3]) == [
@@ -430,11 +406,11 @@ def test_missing():
         ].form
     )
 
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
     assert to_list(listoffsetarray) == [
         [0.0, 1.1, 2.2, 3.3],
@@ -495,12 +471,12 @@ def test_missing():
 
 def test_bool_missing():
     data = [1.1, 2.2, 3.3, 4.4, 5.5]
-    array = ak._v2.contents.NumpyArray(np.array(data))
+    array = ak.contents.NumpyArray(np.array(data))
 
     x1, x2, x3, x4, x5 = True, True, True, False, None
     mask = [x1, x2, x3, x4, x5]
     expected = [m if m is None else x for x, m in zip(data, mask) if m is not False]
-    array2 = ak._v2.highlevel.Array(mask, check_valid=True).layout
+    array2 = ak.highlevel.Array(mask, check_valid=True).layout
 
     for x1 in [True, False, None]:
         for x2 in [True, False, None]:
@@ -513,16 +489,16 @@ def test_bool_missing():
                             for x, m in zip(data, mask)
                             if m is not False
                         ]
-                        array2 = ak._v2.highlevel.Array(mask, check_valid=True).layout
+                        array2 = ak.highlevel.Array(mask, check_valid=True).layout
                         assert to_list(array[array2]) == expected
                         assert array.typetracer[array2].form == array[array2].form
 
 
 def test_bool_missing2():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True
     ).layout
-    array2 = ak._v2.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
+    array2 = ak.highlevel.Array([3, 6, None, None, -2, 6], check_valid=True).layout
 
     assert to_list(array[array2]) == [
         3.3,
@@ -534,14 +510,14 @@ def test_bool_missing2():
     ]
     assert array.typetracer[array2].form == array[array2].form
 
-    array = ak._v2.operations.from_iter(
+    array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
 
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
     )
-    regulararray = ak._v2.contents.RegularArray(content, 4, zeros_length=0)
+    regulararray = ak.contents.RegularArray(content, 4, zeros_length=0)
 
     assert to_list(regulararray) == [
         [0.0, 1.1, 2.2, 3.3],
@@ -549,7 +525,7 @@ def test_bool_missing2():
         [8.8, 9.9, 10.0, 11.1],
     ]
 
-    array1 = ak._v2.operations.from_iter([True, None, False, True], highlevel=False)
+    array1 = ak.operations.from_iter([True, None, False, True], highlevel=False)
 
     assert to_list(regulararray[:, array1]) == [
         [0.0, None, 3.3],
@@ -564,7 +540,7 @@ def test_bool_missing2():
     ]
     assert regulararray.typetracer[1:, array1].form == regulararray[1:, array1].form
 
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]])
     )
 
@@ -578,11 +554,11 @@ def test_bool_missing2():
     assert to_list(content[1:, array1]) == [[4.4, None, 7.7], [8.8, None, 11.1]]
     assert content.typetracer[1:, array1].form == content[1:, array1].form
 
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
     assert to_list(listoffsetarray[:, array1]) == [
         [0.0, None, 3.3],
@@ -601,7 +577,7 @@ def test_bool_missing2():
 
 
 def test_records_missing():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             {"x": 0, "y": 0.0},
             {"x": 1, "y": 1.1},
@@ -616,7 +592,7 @@ def test_records_missing():
         ],
         check_valid=True,
     ).layout
-    array2 = ak._v2.highlevel.Array([3, 1, None, 1, 7], check_valid=True).layout
+    array2 = ak.highlevel.Array([3, 1, None, 1, 7], check_valid=True).layout
 
     assert to_list(array[array2]) == [
         {"x": 3, "y": 3.3},
@@ -627,7 +603,7 @@ def test_records_missing():
     ]
     assert array.typetracer[array2].form == array[array2].form
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 {"x": 0, "y": 0.0},
@@ -646,7 +622,7 @@ def test_records_missing():
         ],
         check_valid=True,
     ).layout
-    array2 = ak._v2.highlevel.Array([1, None, 2, -1], check_valid=True).layout
+    array2 = ak.highlevel.Array([1, None, 2, -1], check_valid=True).layout
 
     assert to_list(array[:, array2]) == [
         [{"x": 1, "y": 1.1}, None, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
@@ -654,7 +630,7 @@ def test_records_missing():
     ]
     assert array.typetracer[:, array2].form == array[:, array2].form
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             {"x": [0, 1, 2, 3], "y": [0.0, 1.1, 2.2, 3.3]},
             {"x": [4, 5, 6, 7], "y": [4.4, 5.5, 6.6, 7.7]},
@@ -677,10 +653,10 @@ def test_records_missing():
 
 
 def test_jagged():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True
     ).layout
-    array2 = ak._v2.highlevel.Array(
+    array2 = ak.highlevel.Array(
         [[0, -1], [], [-1, 0], [-1], [1, 1, -2, 0]], check_valid=True
     ).layout
 
@@ -695,10 +671,10 @@ def test_jagged():
 
 
 def test_double_jagged():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[[0, 1, 2, 3], [4, 5]], [[6, 7, 8], [9, 10, 11, 12, 13]]], check_valid=True
     ).layout
-    array2 = ak._v2.highlevel.Array(
+    array2 = ak.highlevel.Array(
         [[[2, 1, 0], [-1]], [[-1, -2, -3], [2, 1, 1, 3]]], check_valid=True
     ).layout
 
@@ -708,20 +684,20 @@ def test_double_jagged():
     ]
     assert array.typetracer[array2].form == array[array2].form
 
-    content = ak._v2.operations.from_iter(
+    content = ak.operations.from_iter(
         [[0, 1, 2, 3], [4, 5], [6, 7, 8], [9, 10, 11, 12, 13]], highlevel=False
     )
-    regulararray = ak._v2.contents.RegularArray(content, 2, zeros_length=0)
+    regulararray = ak.contents.RegularArray(content, 2, zeros_length=0)
 
-    array1 = ak._v2.highlevel.Array([[2, 1, 0], [-1]], check_valid=True).layout
+    array1 = ak.highlevel.Array([[2, 1, 0], [-1]], check_valid=True).layout
 
     assert to_list(regulararray[:, array1]) == [[[2, 1, 0], [5]], [[8, 7, 6], [13]]]
     assert regulararray.typetracer[:, array1].form == regulararray[:, array1].form
     assert to_list(regulararray[1:, array1]) == [[[8, 7, 6], [13]]]
     assert regulararray.typetracer[1:, array1].form == regulararray[1:, array1].form
 
-    offsets = ak._v2.index.Index64(np.array([0, 2, 4], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 2, 4], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
     assert to_list(listoffsetarray[:, array1]) == [
         [[2, 1, 0], [5]],
         [[8, 7, 6], [13]],
@@ -734,10 +710,10 @@ def test_double_jagged():
 
 
 def test_masked_jagged():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True
     ).layout
-    array1 = ak._v2.highlevel.Array(
+    array1 = ak.highlevel.Array(
         [[-1, -2], None, [], None, [-2, 0]], check_valid=True
     ).layout
 
@@ -746,10 +722,10 @@ def test_masked_jagged():
 
 
 def test_jagged_masked():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True
     ).layout
-    array1 = ak._v2.highlevel.Array(
+    array1 = ak.highlevel.Array(
         [[-1, None], [], [None, 0], [None], [1]], check_valid=True
     ).layout
 
@@ -758,15 +734,15 @@ def test_jagged_masked():
 
 
 def test_regular_regular():
-    content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5))
-    regulararray1 = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    regulararray2 = ak._v2.contents.RegularArray(regulararray1, 3, zeros_length=0)
+    content = ak.contents.NumpyArray(np.arange(2 * 3 * 5))
+    regulararray1 = ak.contents.RegularArray(content, 5, zeros_length=0)
+    regulararray2 = ak.contents.RegularArray(regulararray1, 3, zeros_length=0)
 
-    array1 = ak._v2.highlevel.Array(
+    array1 = ak.highlevel.Array(
         [[[2], [1, -2], [-1, 2, 0]], [[-3], [-4, 3], [-5, -3, 4]]],
         check_valid=True,
     ).layout
-    array2 = ak._v2.highlevel.Array(
+    array2 = ak.highlevel.Array(
         [[[2], [1, -2], [-1, None, 0]], [[-3], [-4, 3], [-5, None, 4]]],
         check_valid=True,
     ).layout
@@ -785,14 +761,14 @@ def test_regular_regular():
 
 
 def test_masked_of_jagged_of_whatever():
-    content = ak._v2.contents.NumpyArray(np.arange(2 * 3 * 5))
-    regulararray1 = ak._v2.contents.RegularArray(content, 5, zeros_length=0)
-    regulararray2 = ak._v2.contents.RegularArray(regulararray1, 3, zeros_length=0)
+    content = ak.contents.NumpyArray(np.arange(2 * 3 * 5))
+    regulararray1 = ak.contents.RegularArray(content, 5, zeros_length=0)
+    regulararray2 = ak.contents.RegularArray(regulararray1, 3, zeros_length=0)
 
-    array1 = ak._v2.highlevel.Array(
+    array1 = ak.highlevel.Array(
         [[[2], None, [-1, 2, 0]], [[-3], None, [-5, -3, 4]]], check_valid=True
     ).layout
-    array2 = ak._v2.highlevel.Array(
+    array2 = ak.highlevel.Array(
         [[[2], None, [-1, None, 0]], [[-3], None, [-5, None, 4]]],
         check_valid=True,
     ).layout
@@ -811,15 +787,15 @@ def test_masked_of_jagged_of_whatever():
 
 
 def test_emptyarray():
-    content = ak._v2.contents.EmptyArray()
-    offsets = ak._v2.index.Index64(np.array([0, 0, 0, 0, 0], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    content = ak.contents.EmptyArray()
+    offsets = ak.index.Index64(np.array([0, 0, 0, 0, 0], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    array1 = ak._v2.highlevel.Array([[], [], [], []], check_valid=True).layout
-    array2 = ak._v2.highlevel.Array([[], [None], [], []], check_valid=True).layout
-    array3 = ak._v2.highlevel.Array([[], [], None, []], check_valid=True).layout
-    array4 = ak._v2.highlevel.Array([[], [None], None, []], check_valid=True).layout
-    array5 = ak._v2.highlevel.Array([[], [0], [], []], check_valid=True).layout
+    array1 = ak.highlevel.Array([[], [], [], []], check_valid=True).layout
+    array2 = ak.highlevel.Array([[], [None], [], []], check_valid=True).layout
+    array3 = ak.highlevel.Array([[], [], None, []], check_valid=True).layout
+    array4 = ak.highlevel.Array([[], [None], None, []], check_valid=True).layout
+    array5 = ak.highlevel.Array([[], [0], [], []], check_valid=True).layout
 
     assert to_list(listoffsetarray) == [[], [], [], []]
 
@@ -838,19 +814,17 @@ def test_emptyarray():
 
 
 def test_numpyarray():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True
     ).layout
-    array2 = ak._v2.highlevel.Array(
-        [[[], [], []], [], [[], []]], check_valid=True
-    ).layout
+    array2 = ak.highlevel.Array([[[], [], []], [], [[], []]], check_valid=True).layout
 
     with pytest.raises(IndexError):
         array[array2]
 
 
 def test_record():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             {"x": [0, 1, 2], "y": [0.0, 1.1, 2.2, 3.3]},
             {"x": [3, 4, 5, 6], "y": [4.4, 5.5]},
@@ -858,13 +832,11 @@ def test_record():
         ],
         check_valid=True,
     ).layout
-    array2 = ak._v2.highlevel.Array(
-        [[-1, 1], [0, 0, 1], [-1, -2]], check_valid=True
-    ).layout
-    array3 = ak._v2.highlevel.Array(
+    array2 = ak.highlevel.Array([[-1, 1], [0, 0, 1], [-1, -2]], check_valid=True).layout
+    array3 = ak.highlevel.Array(
         [[-1, 1], [0, 0, None, 1], [-1, -2]], check_valid=True
     ).layout
-    array4 = ak._v2.highlevel.Array([[-1, 1], None, [-1, -2]], check_valid=True).layout
+    array4 = ak.highlevel.Array([[-1, 1], None, [-1, -2]], check_valid=True).layout
 
     assert to_list(array[array2]) == [
         {"x": [2, 1], "y": [3.3, 1.1]},
@@ -887,11 +859,11 @@ def test_record():
 
 
 def test_indexedarray():
-    array = ak._v2.operations.from_iter(
+    array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    index = ak._v2.index.Index64(np.array([3, 2, 1, 0], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedArray(index, array)
+    index = ak.index.Index64(np.array([3, 2, 1, 0], dtype=np.int64))
+    indexedarray = ak.contents.IndexedArray(index, array)
 
     assert to_list(indexedarray) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -900,11 +872,11 @@ def test_indexedarray():
         [0.0, 1.1, 2.2],
     ]
 
-    array1 = ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]], check_valid=True).layout
+    array1 = ak.highlevel.Array([[0, -1], [0], [], [1, 1]], check_valid=True).layout
     assert to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
     assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
-    array1 = ak._v2.highlevel.Array(
+    array1 = ak.highlevel.Array(
         [[0, -1], [0], [None], [1, None, 1]], check_valid=True
     ).layout
 
@@ -916,22 +888,18 @@ def test_indexedarray():
     ]
     assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
-    array1 = ak._v2.highlevel.Array(
-        [[0, -1], [0], None, [1, 1]], check_valid=True
-    ).layout
+    array1 = ak.highlevel.Array([[0, -1], [0], None, [1, 1]], check_valid=True).layout
 
     assert to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, [1.1, 1.1]]
     assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
-    array1 = ak._v2.highlevel.Array(
-        [[0, -1], [0], None, [None]], check_valid=True
-    ).layout
+    array1 = ak.highlevel.Array([[0, -1], [0], None, [None]], check_valid=True).layout
 
     assert to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, [None]]
     assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
-    index = ak._v2.index.Index64(np.array([3, 2, 1, 0], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedOptionArray(index, array)
+    index = ak.index.Index64(np.array([3, 2, 1, 0], dtype=np.int64))
+    indexedarray = ak.contents.IndexedOptionArray(index, array)
 
     assert to_list(indexedarray) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -941,16 +909,14 @@ def test_indexedarray():
     ]
 
     assert to_list(
-        indexedarray[
-            ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]], check_valid=True)
-        ]
+        indexedarray[ak.highlevel.Array([[0, -1], [0], [], [1, 1]], check_valid=True)]
     ) == [[6.6, 9.9], [5.5], [], [1.1, 1.1]]
     assert (
-        indexedarray.typetracer[ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]])].form
-        == indexedarray[ak._v2.highlevel.Array([[0, -1], [0], [], [1, 1]])].form
+        indexedarray.typetracer[ak.highlevel.Array([[0, -1], [0], [], [1, 1]])].form
+        == indexedarray[ak.highlevel.Array([[0, -1], [0], [], [1, 1]])].form
     )
 
-    array1 = ak._v2.highlevel.Array(
+    array1 = ak.highlevel.Array(
         [[0, -1], [0], [None], [1, None, 1]], check_valid=True
     ).layout
 
@@ -962,12 +928,12 @@ def test_indexedarray():
     ]
     assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
-    array1 = ak._v2.highlevel.Array([[0, -1], [0], None, []], check_valid=True).layout
+    array1 = ak.highlevel.Array([[0, -1], [0], None, []], check_valid=True).layout
 
     assert to_list(indexedarray[array1]) == [[6.6, 9.9], [5.5], None, []]
     assert indexedarray.typetracer[array1].form == indexedarray[array1].form
 
-    array1 = ak._v2.highlevel.Array(
+    array1 = ak.highlevel.Array(
         [[0, -1], [0], None, [1, None, 1]], check_valid=True
     ).layout
 
@@ -981,12 +947,12 @@ def test_indexedarray():
 
 
 def test_indexedarray2():
-    array = ak._v2.operations.from_iter(
+    array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    index = ak._v2.index.Index64(np.array([3, 2, -1, 0], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedOptionArray(index, array)
-    array = ak._v2.highlevel.Array([[0, -1], [0], None, [1, 1]]).layout
+    index = ak.index.Index64(np.array([3, 2, -1, 0], dtype=np.int64))
+    indexedarray = ak.contents.IndexedOptionArray(index, array)
+    array = ak.highlevel.Array([[0, -1], [0], None, [1, 1]]).layout
 
     assert to_list(indexedarray) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -1004,12 +970,12 @@ def test_indexedarray2():
 
 
 def test_indexedarray2b():
-    array = ak._v2.operations.from_iter(
+    array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    index = ak._v2.index.Index64(np.array([0, -1, 2, 3], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedOptionArray(index, array)
-    array = ak._v2.highlevel.Array([[1, 1], None, [0], [0, -1]]).layout
+    index = ak.index.Index64(np.array([0, -1, 2, 3], dtype=np.int64))
+    indexedarray = ak.contents.IndexedOptionArray(index, array)
+    array = ak.highlevel.Array([[1, 1], None, [0], [0, -1]]).layout
 
     assert to_list(indexedarray) == [
         [0.0, 1.1, 2.2],
@@ -1027,12 +993,12 @@ def test_indexedarray2b():
 
 
 def test_bytemaskedarray2b():
-    array = ak._v2.operations.from_iter(
+    array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    mask = ak._v2.index.Index8(np.array([0, 1, 0, 0], dtype=np.int8))
-    maskedarray = ak._v2.contents.ByteMaskedArray(mask, array, valid_when=False)
-    array = ak._v2.highlevel.Array([[1, 1], None, [0], [0, -1]]).layout
+    mask = ak.index.Index8(np.array([0, 1, 0, 0], dtype=np.int8))
+    maskedarray = ak.contents.ByteMaskedArray(mask, array, valid_when=False)
+    array = ak.highlevel.Array([[1, 1], None, [0], [0, -1]]).layout
 
     assert to_list(maskedarray) == [
         [0.0, 1.1, 2.2],
@@ -1050,14 +1016,14 @@ def test_bytemaskedarray2b():
 
 
 def test_bitmaskedarray2b():
-    array = ak._v2.operations.from_iter(
+    array = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    mask = ak._v2.index.IndexU8(np.array([66], dtype=np.uint8))
-    maskedarray = ak._v2.contents.BitMaskedArray(
+    mask = ak.index.IndexU8(np.array([66], dtype=np.uint8))
+    maskedarray = ak.contents.BitMaskedArray(
         mask, array, valid_when=False, length=4, lsb_order=True
     )  # lsb_order is irrelevant in this example
-    array = ak._v2.highlevel.Array([[1, 1], None, [0], [0, -1]]).layout
+    array = ak.highlevel.Array([[1, 1], None, [0], [0, -1]]).layout
 
     assert to_list(maskedarray) == [
         [0.0, 1.1, 2.2],
@@ -1075,9 +1041,9 @@ def test_bitmaskedarray2b():
 
 
 def test_indexedarray3():
-    array = ak._v2.highlevel.Array([0.0, 1.1, 2.2, None, 4.4, None, None, 7.7]).layout
-    assert to_list(array[ak._v2.highlevel.Array([4, 3, 2])]) == [4.4, None, 2.2]
-    assert to_list(array[ak._v2.highlevel.Array([4, 3, 2, None, 1])]) == [
+    array = ak.highlevel.Array([0.0, 1.1, 2.2, None, 4.4, None, None, 7.7]).layout
+    assert to_list(array[ak.highlevel.Array([4, 3, 2])]) == [4.4, None, 2.2]
+    assert to_list(array[ak.highlevel.Array([4, 3, 2, None, 1])]) == [
         4.4,
         None,
         2.2,
@@ -1085,10 +1051,8 @@ def test_indexedarray3():
         1.1,
     ]
 
-    array = ak._v2.highlevel.Array(
-        [[0.0, 1.1, None, 2.2], [3.3, None, 4.4], [5.5]]
-    ).layout
-    array2 = ak._v2.highlevel.Array([[3, 2, 2, 1], [1, 2], []]).layout
+    array = ak.highlevel.Array([[0.0, 1.1, None, 2.2], [3.3, None, 4.4], [5.5]]).layout
+    array2 = ak.highlevel.Array([[3, 2, 2, 1], [1, 2], []]).layout
 
     assert to_list(array[array2]) == [
         [2.2, None, None, 1.1],
@@ -1097,12 +1061,12 @@ def test_indexedarray3():
     ]
     assert array.typetracer[array2].form == array[array2].form
 
-    array = ak._v2.highlevel.Array([[0.0, 1.1, 2.2], [3.3, 4.4], None, [5.5]]).layout
-    array2 = ak._v2.highlevel.Array([3, 2, 1]).layout
-    array3 = ak._v2.highlevel.Array([3, 2, 1, None, 0]).layout
-    array4 = ak._v2.highlevel.Array([[2, 1, 1, 0], [1], None, [0]]).layout
-    array5 = ak._v2.highlevel.Array([[2, 1, 1, 0], None, [1], [0]]).layout
-    array6 = ak._v2.highlevel.Array([[2, 1, 1, 0], None, [1], [0], None]).layout
+    array = ak.highlevel.Array([[0.0, 1.1, 2.2], [3.3, 4.4], None, [5.5]]).layout
+    array2 = ak.highlevel.Array([3, 2, 1]).layout
+    array3 = ak.highlevel.Array([3, 2, 1, None, 0]).layout
+    array4 = ak.highlevel.Array([[2, 1, 1, 0], [1], None, [0]]).layout
+    array5 = ak.highlevel.Array([[2, 1, 1, 0], None, [1], [0]]).layout
+    array6 = ak.highlevel.Array([[2, 1, 1, 0], None, [1], [0], None]).layout
 
     assert to_list(array[array2]) == [[5.5], None, [3.3, 4.4]]
     assert array.typetracer[array2].form == array[array2].form
@@ -1135,10 +1099,10 @@ def test_indexedarray3():
 
 
 def test_sequential():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         np.arange(2 * 3 * 5).reshape(2, 3, 5).tolist(), check_valid=True
     ).layout
-    array2 = ak._v2.highlevel.Array([[2, 1, 0], [2, 1, 0]], check_valid=True).layout
+    array2 = ak.highlevel.Array([[2, 1, 0], [2, 1, 0]], check_valid=True).layout
 
     assert to_list(array[array2]) == [
         [[10, 11, 12, 13, 14], [5, 6, 7, 8, 9], [0, 1, 2, 3, 4]],
@@ -1153,15 +1117,13 @@ def test_sequential():
 
 
 def test_union():
-    one = ak._v2.operations.from_iter(
-        [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
-    )
-    two = ak._v2.operations.from_iter(
+    one = ak.operations.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
+    two = ak.operations.from_iter(
         [[6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]], highlevel=False
     )
-    tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
-    index = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak._v2.contents.UnionArray(tags, index, [one, two])
+    tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
+    index = ak.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
+    unionarray = ak.contents.UnionArray(tags, index, [one, two])
 
     assert to_list(unionarray) == [
         [1.1, 2.2, 3.3],
@@ -1175,16 +1137,14 @@ def test_union():
 
 
 def test_union_2():
-    one = ak._v2.operations.from_iter(
-        [[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False
-    )
-    two = ak._v2.operations.from_iter(
+    one = ak.operations.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
+    two = ak.operations.from_iter(
         [[6.6], [7.7, 8.8], [], [9.9, 10.0, 11.1, 12.2]], highlevel=False
     )
-    tags = ak._v2.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
-    index = ak._v2.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak._v2.contents.UnionArray(tags, index, [one, two])
-    array = ak._v2.highlevel.Array(
+    tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
+    index = ak.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
+    unionarray = ak.contents.UnionArray(tags, index, [one, two])
+    array = ak.highlevel.Array(
         [[0, -1], [], [1, 1], [], [-1], [], [1, -2, -1]], check_valid=True
     ).layout
 
@@ -1201,7 +1161,7 @@ def test_union_2():
 
 
 def test_jagged_mask():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], check_valid=True
     ).layout
     assert to_list(
@@ -1262,7 +1222,7 @@ def test_jagged_mask():
 
 
 def test_jagged_missing_mask():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True
     ).layout
 
@@ -1361,14 +1321,14 @@ def test_jagged_missing_mask():
 
 
 def test_array_boolean_to_int():
-    a = ak._v2.operations.from_iter(
+    a = ak.operations.from_iter(
         [[True, True, True], [], [True, True], [True], [True, True, True, True]],
         highlevel=False,
     )
-    b = ak._v2._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[0, 1, 2], [], [0, 1], [0], [0, 1, 2, 3]]
 
-    a = ak._v2.operations.from_iter(
+    a = ak.operations.from_iter(
         [
             [True, True, False],
             [],
@@ -1378,10 +1338,10 @@ def test_array_boolean_to_int():
         ],
         highlevel=False,
     )
-    b = ak._v2._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[0, 1], [], [0], [], [0, 1, 2]]
 
-    a = ak._v2.operations.from_iter(
+    a = ak.operations.from_iter(
         [
             [False, True, True],
             [],
@@ -1391,47 +1351,47 @@ def test_array_boolean_to_int():
         ],
         highlevel=False,
     )
-    b = ak._v2._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[1, 2], [], [1], [], [1, 2, 3]]
 
-    a = ak._v2.operations.from_iter(
+    a = ak.operations.from_iter(
         [[True, True, None], [], [True, None], [None], [True, True, True, None]],
         highlevel=False,
     )
-    b = ak._v2._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[0, 1, None], [], [0, None], [None], [0, 1, 2, None]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
         == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
     )
 
-    a = ak._v2.operations.from_iter(
+    a = ak.operations.from_iter(
         [[None, True, True], [], [None, True], [None], [None, True, True, True]],
         highlevel=False,
     )
-    b = ak._v2._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[None, 1, 2], [], [None, 1], [None], [None, 1, 2, 3]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
         == np.arange(6).tolist()  # kernels expect nonnegative entries to be arange
     )
 
-    a = ak._v2.operations.from_iter(
+    a = ak.operations.from_iter(
         [[False, True, None], [], [False, None], [None], [False, True, True, None]],
         highlevel=False,
     )
-    b = ak._v2._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[1, None], [], [None], [None], [1, 2, None]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()
         == np.arange(3).tolist()  # kernels expect nonnegative entries to be arange
     )
 
-    a = ak._v2.operations.from_iter(
+    a = ak.operations.from_iter(
         [[None, True, False], [], [None, False], [None], [None, True, True, False]],
         highlevel=False,
     )
-    b = ak._v2._slicing.normalise_item_bool_to_int(a)
+    b = ak._slicing.normalise_item_bool_to_int(a)
     assert to_list(b) == [[None, 1], [], [None], [None], [None, 1, 2]]
     assert (
         b.content.index.data[b.content.index.data >= 0].tolist()

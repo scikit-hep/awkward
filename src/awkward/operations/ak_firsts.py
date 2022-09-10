@@ -14,7 +14,7 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -29,15 +29,15 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
 
     See #ak.singletons to invert this function.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.firsts",
+    with ak._util.OperationErrorContext(
+        "ak.firsts",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     posaxis = layout.axis_wrap_if_negative(axis)
 
     if posaxis == 0:
@@ -47,14 +47,14 @@ def _impl(array, axis, highlevel, behavior):
             out = layout[0]
     else:
         if posaxis < 0:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 NotImplementedError("ak.firsts with ambiguous negative axis")
             )
         toslice = (slice(None, None, None),) * posaxis + (0,)
-        out = ak._v2.operations.mask(
+        out = ak.operations.mask(
             layout,
-            ak._v2.operations.num(layout, axis=posaxis) > 0,
+            ak.operations.num(layout, axis=posaxis) > 0,
             highlevel=False,
         )[toslice]
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

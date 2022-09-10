@@ -7,14 +7,14 @@ import awkward as ak  # noqa: F401
 
 def test_numpy_array():
     x = np.arange(12)
-    y = ak._v2.operations.is_none(x)
+    y = ak.operations.is_none(x)
 
     assert y.tolist() == [False] * 12
 
 
 def test_awkward_from_numpy_array():
     x = np.arange(12)
-    y = ak._v2.operations.from_numpy(x)
-    z = ak._v2.operations.is_none(y)
+    y = ak.operations.from_numpy(x)
+    z = ak.operations.is_none(y)
 
     assert z.tolist() == [False] * 12

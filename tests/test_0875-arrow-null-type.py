@@ -10,7 +10,7 @@ pyarrow = pytest.importorskip("pyarrow")
 
 
 def test_issue1():
-    null_array = ak._v2.highlevel.Array({"null_col": [None]}).layout
+    null_array = ak.highlevel.Array({"null_col": [None]}).layout
     tpe = null_array.to_arrow().storage.field("null_col").type
     assert tpe.storage_type == pyarrow.null()
 
@@ -19,7 +19,7 @@ pyarrow_parquet = pytest.importorskip("pyarrow.parquet")
 
 
 def test_issue2(tmp_path):
-    import awkward._v2._connect.pyarrow
+    import awkward._connect.pyarrow
 
     filename = os.path.join(tmp_path, "whatever.parquet")
 
@@ -28,7 +28,7 @@ def test_issue2(tmp_path):
 
     assert (
         str(
-            awkward._v2._connect.pyarrow.handle_arrow(
+            awkward._connect.pyarrow.handle_arrow(
                 pyarrow_parquet.read_table(filename)
             ).form.type
         )
