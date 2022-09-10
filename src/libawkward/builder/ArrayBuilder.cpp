@@ -6,10 +6,8 @@
 #include <stdexcept>
 
 #include "awkward/common.h"
-#include "awkward/Content.h"
 #include "awkward/builder/Builder.h"
 #include "awkward/builder/UnknownBuilder.h"
-
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/BuilderOptions.h"
 

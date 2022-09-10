@@ -13,6 +13,9 @@ import awkward._v2
 import awkward._cpu_kernels
 import awkward._libawkward
 
+from awkward._v2.highlevel import Array
+from awkward._v2.record import Record
+
 # version
 __version__ = awkward._ext.__version__
 
