@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("argsort")
+# @ak._connect.numpy.implements("argsort")
 def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:
@@ -42,8 +42,8 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavio
         >>> data[index]
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.argsort",
+    with ak._util.OperationErrorContext(
+        "ak.argsort",
         dict(
             array=array,
             axis=axis,
@@ -57,6 +57,6 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavio
 
 
 def _impl(array, axis, ascending, stable, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.argsort(axis, ascending, stable)
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

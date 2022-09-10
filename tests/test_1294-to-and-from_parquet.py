@@ -17,7 +17,7 @@ def through_arrow(
     bytestring_to32=False,
     categorical_as_dictionary=False,
 ):
-    arrow_table = ak._v2.to_arrow_table(
+    arrow_table = ak.to_arrow_table(
         akarray,
         extensionarray=extensionarray,
         list_to32=list_to32,
@@ -25,7 +25,7 @@ def through_arrow(
         bytestring_to32=bytestring_to32,
         categorical_as_dictionary=categorical_as_dictionary,
     )
-    array_form = ak._v2.from_arrow(arrow_table, generate_bitmasks=True).layout.form
+    array_form = ak.from_arrow(arrow_table, generate_bitmasks=True).layout.form
     return arrow_table.schema, array_form
 
 
@@ -40,7 +40,7 @@ def through_parquet(
 ):
     filename = os.path.join(tmp_path, "whatever.parquet")
     pyarrow_parquet.write_table(
-        ak._v2.to_arrow_table(
+        ak.to_arrow_table(
             akarray,
             extensionarray=extensionarray,
             list_to32=list_to32,
@@ -51,7 +51,7 @@ def through_parquet(
         filename,
     )
     parquet_file = pyarrow_parquet.ParquetFile(filename)
-    array_form = ak._v2.from_arrow(
+    array_form = ak.from_arrow(
         parquet_file.read_row_groups([0]), generate_bitmasks=True
     ).layout.form
     return parquet_file.schema_arrow, array_form
@@ -60,12 +60,12 @@ def through_parquet(
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_schema_numpyarray(tmp_path, through, extensionarray):
-    akarray = ak._v2.contents.NumpyArray(
+    akarray = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -78,9 +78,9 @@ def test_schema_numpyarray(tmp_path, through, extensionarray):
 def test_schema_listoffsetarray_numpyarray(
     tmp_path, dtype, list_to32, through, extensionarray
 ):
-    akarray = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-        ak._v2.contents.NumpyArray(
+    akarray = ak.contents.ListOffsetArray(
+        ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak.contents.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
             parameters={"which": "inner"},
         ),
@@ -90,21 +90,21 @@ def test_schema_listoffsetarray_numpyarray(
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, list_to32=list_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-        ak._v2.contents.ByteMaskedArray(
-            ak._v2.index.Index8(
+    akarray = ak.contents.ListOffsetArray(
+        ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak.contents.ByteMaskedArray(
+            ak.index.Index8(
                 np.array(
                     [False, True, False, True, True, False, True, True, False, False],
                     dtype=np.int8,
                 )
             ),
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
                 parameters={"which": "inner"},
             ),
@@ -117,16 +117,16 @@ def test_schema_listoffsetarray_numpyarray(
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, list_to32=list_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-            ak._v2.contents.NumpyArray(
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+            ak.contents.NumpyArray(
                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
                 parameters={"which": "inner"},
             ),
@@ -139,17 +139,17 @@ def test_schema_listoffsetarray_numpyarray(
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, list_to32=list_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-            ak._v2.contents.ByteMaskedArray(
-                ak._v2.index.Index8(
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False, True, True, True], dtype=np.int8)),
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+            ak.contents.ByteMaskedArray(
+                ak.index.Index8(
                     np.array(
                         [
                             False,
@@ -166,7 +166,7 @@ def test_schema_listoffsetarray_numpyarray(
                         dtype=np.int8,
                     )
                 ),
-                ak._v2.contents.NumpyArray(
+                ak.contents.NumpyArray(
                     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
                     parameters={"which": "inner"},
                 ),
@@ -182,7 +182,7 @@ def test_schema_listoffsetarray_numpyarray(
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, list_to32=list_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -195,11 +195,11 @@ def test_schema_listoffsetarray_numpyarray(
 def test_schema_listoffsetarray_numpyarray_2(
     tmp_path, dtype, list_to32, through, extensionarray
 ):
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, False, True, False, True], dtype=np.int8)),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-            ak._v2.contents.NumpyArray(
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False, True, False, True], dtype=np.int8)),
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+            ak.contents.NumpyArray(
                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
                 parameters={"which": "inner"},
             ),
@@ -212,7 +212,7 @@ def test_schema_listoffsetarray_numpyarray_2(
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, list_to32=list_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -221,20 +221,20 @@ def test_schema_listoffsetarray_numpyarray_2(
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_numpyarray_bool(tmp_path, through, extensionarray):
-    akarray = ak._v2.contents.NumpyArray(
+    akarray = ak.contents.NumpyArray(
         np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_),
         parameters={"which": "inner"},
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_)),
-        ak._v2.contents.NumpyArray(
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_)),
+        ak.contents.NumpyArray(
             np.random.randint(0, 2, 14).astype(np.int8).view(np.bool_),
             parameters={"which": "inner"},
         ),
@@ -243,7 +243,7 @@ def test_numpyarray_bool(tmp_path, through, extensionarray):
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -252,9 +252,9 @@ def test_numpyarray_bool(tmp_path, through, extensionarray):
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_indexedoptionarray_numpyarray(tmp_path, through, extensionarray):
-    akarray = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index64(np.array([2, 0, 0, -1, 3, 1, 5, -1, 2], dtype=np.int64)),
-        ak._v2.contents.NumpyArray(
+    akarray = ak.contents.IndexedOptionArray(
+        ak.index.Index64(np.array([2, 0, 0, -1, 3, 1, 5, -1, 2], dtype=np.int64)),
+        ak.contents.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]),
             parameters={"which": "inner"},
         ),
@@ -262,14 +262,14 @@ def test_indexedoptionarray_numpyarray(tmp_path, through, extensionarray):
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.IndexedArray(
-        ak._v2.index.Index64(np.array([2, 0, 0, 3, 1, 5, 2], dtype=np.int64)),
-        ak._v2.contents.NumpyArray(
+    akarray = ak.contents.IndexedArray(
+        ak.index.Index64(np.array([2, 0, 0, 3, 1, 5, 2], dtype=np.int64)),
+        ak.contents.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]),
             parameters={"which": "inner"},
         ),
@@ -277,7 +277,7 @@ def test_indexedoptionarray_numpyarray(tmp_path, through, extensionarray):
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -286,14 +286,14 @@ def test_indexedoptionarray_numpyarray(tmp_path, through, extensionarray):
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_indexedoptionarray_emptyarray(tmp_path, through, extensionarray):
-    akarray = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
-        ak._v2.contents.EmptyArray(parameters={"which": "inner"}),
+    akarray = ak.contents.IndexedOptionArray(
+        ak.index.Index64(np.array([-1, -1, -1, -1, -1], dtype=np.int64)),
+        ak.contents.EmptyArray(parameters={"which": "inner"}),
         parameters={"which": "outer"},
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -305,9 +305,9 @@ def test_indexedoptionarray_emptyarray(tmp_path, through, extensionarray):
 def test_dictionary_encoding(
     tmp_path, categorical_as_dictionary, through, extensionarray
 ):
-    akarray = ak._v2.contents.IndexedArray(
-        ak._v2.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
-        ak._v2.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
+    akarray = ak.contents.IndexedArray(
+        ak.index.Index64(np.array([3, 2, 2, 2, 0, 1, 3], dtype=np.uint64)),
+        ak.contents.NumpyArray([0.0, 1.1, 2.2, 3.3], parameters={"which": "inner"}),
         parameters={"__array__": "categorical", "which": "outer"},
     )
 
@@ -321,7 +321,7 @@ def test_dictionary_encoding(
             tmp_path,
             categorical_as_dictionary=categorical_as_dictionary,
         )
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
@@ -332,9 +332,9 @@ def test_dictionary_encoding(
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_listoffsetraray_string(tmp_path, string_to32, dtype, through, extensionarray):
-    akarray = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-        ak._v2.contents.NumpyArray(
+    akarray = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak.contents.NumpyArray(
             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "char"}
         ),
         parameters={"__array__": "string", "something": "else"},
@@ -343,7 +343,7 @@ def test_listoffsetraray_string(tmp_path, string_to32, dtype, through, extension
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, string_to32=string_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -356,9 +356,9 @@ def test_listoffsetraray_string(tmp_path, string_to32, dtype, through, extension
 def test_listoffsetraray_bytestring(
     tmp_path, bytestring_to32, dtype, through, extensionarray
 ):
-    akarray = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
-        ak._v2.contents.NumpyArray(
+    akarray = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=dtype)),
+        ak.contents.NumpyArray(
             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
         ),
         parameters={"__array__": "bytestring", "something": "else"},
@@ -367,7 +367,7 @@ def test_listoffsetraray_bytestring(
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, bytestring_to32=bytestring_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -378,8 +378,8 @@ def test_listoffsetraray_bytestring(
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionarray):
-    akarray = ak._v2.contents.RegularArray(
-        ak._v2.contents.NumpyArray(
+    akarray = ak.contents.RegularArray(
+        ak.contents.NumpyArray(
             np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
             parameters={"which": "inner"},
         ),
@@ -390,20 +390,20 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionar
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, list_to32=list_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.RegularArray(
-        ak._v2.contents.ByteMaskedArray(
-            ak._v2.index.Index8(
+    akarray = ak.contents.RegularArray(
+        ak.contents.ByteMaskedArray(
+            ak.index.Index8(
                 np.array(
                     [False, True, False, True, True, False, True, True, False, False],
                     dtype=np.int8,
                 )
             ),
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
                 parameters={"which": "inner"},
             ),
@@ -417,15 +417,15 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionar
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, list_to32=list_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
-        ak._v2.contents.RegularArray(
-            ak._v2.contents.NumpyArray(
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False], dtype=np.int8)),
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(
                 np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
                 parameters={"which": "inner"},
             ),
@@ -441,16 +441,16 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionar
         schema_arrow, array_form = through(
             akarray, extensionarray, tmp_path, list_to32=list_to32
         )
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
 
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, False], dtype=np.int8)),
-        ak._v2.contents.RegularArray(
-            ak._v2.contents.ByteMaskedArray(
-                ak._v2.index.Index8(
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False], dtype=np.int8)),
+        ak.contents.RegularArray(
+            ak.contents.ByteMaskedArray(
+                ak.index.Index8(
                     np.array(
                         [
                             False,
@@ -467,7 +467,7 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionar
                         dtype=np.int8,
                     )
                 ),
-                ak._v2.contents.NumpyArray(
+                ak.contents.NumpyArray(
                     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]),
                     parameters={"which": "inner"},
                 ),
@@ -486,7 +486,7 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionar
         schema_arrow, array_form = through(
             akarray, extensionarray, tmp_path, list_to32=list_to32
         )
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
@@ -499,8 +499,8 @@ def test_regulararray_numpyarray(tmp_path, size, list_to32, through, extensionar
 def test_regularaarray_bytestring(
     tmp_path, size, bytestring_to32, through, extensionarray
 ):
-    akarray = ak._v2.contents.RegularArray(
-        ak._v2.contents.NumpyArray(
+    akarray = ak.contents.RegularArray(
+        ak.contents.NumpyArray(
             np.arange(97, 107, dtype=np.uint8), parameters={"__array__": "byte"}
         ),
         size,
@@ -510,7 +510,7 @@ def test_regularaarray_bytestring(
     schema_arrow, array_form = through(
         akarray, extensionarray, tmp_path, bytestring_to32=bytestring_to32
     )
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -519,14 +519,12 @@ def test_regularaarray_bytestring(
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_unmaskedarray_numpyarray(tmp_path, through, extensionarray):
-    akarray = ak._v2.contents.UnmaskedArray(
-        ak._v2.contents.NumpyArray(
-            np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"}
-        )
+    akarray = ak.contents.UnmaskedArray(
+        ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3]), parameters={"which": "inner"})
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
@@ -536,14 +534,14 @@ def test_unmaskedarray_numpyarray(tmp_path, through, extensionarray):
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_recordarray(tmp_path, is_tuple, through, extensionarray):
-    akarray = ak._v2.contents.RecordArray(
+    akarray = ak.contents.RecordArray(
         [
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
             ),
-            ak._v2.contents.ListOffsetArray(
-                ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-                ak._v2.contents.NumpyArray(
+            ak.contents.ListOffsetArray(
+                ak.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                ak.contents.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"which": "inner2"}
                 ),
             ),
@@ -553,23 +551,23 @@ def test_recordarray(tmp_path, is_tuple, through, extensionarray):
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.RecordArray(
+    akarray = ak.contents.RecordArray(
         [
-            ak._v2.contents.ByteMaskedArray(
-                ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
-                ak._v2.contents.NumpyArray(
+            ak.contents.ByteMaskedArray(
+                ak.index.Index8(np.array([False, True, False]).view(np.int8)),
+                ak.contents.NumpyArray(
                     np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
                 ),
                 valid_when=False,
             ),
-            ak._v2.contents.ListOffsetArray(
-                ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-                ak._v2.contents.NumpyArray(
+            ak.contents.ListOffsetArray(
+                ak.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                ak.contents.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5]), parameters={"which": "inner2"}
                 ),
             ),
@@ -579,24 +577,24 @@ def test_recordarray(tmp_path, is_tuple, through, extensionarray):
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.RecordArray(
+    akarray = ak.contents.RecordArray(
         [
-            ak._v2.contents.ByteMaskedArray(
-                ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
-                ak._v2.contents.NumpyArray(
+            ak.contents.ByteMaskedArray(
+                ak.index.Index8(np.array([False, True, False]).view(np.int8)),
+                ak.contents.NumpyArray(
                     np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
                 ),
                 valid_when=False,
             ),
-            ak._v2.contents.UnmaskedArray(
-                ak._v2.contents.ListOffsetArray(
-                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-                    ak._v2.contents.NumpyArray(
+            ak.contents.UnmaskedArray(
+                ak.contents.ListOffsetArray(
+                    ak.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak.contents.NumpyArray(
                         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
                         parameters={"which": "inner2"},
                     ),
@@ -608,21 +606,21 @@ def test_recordarray(tmp_path, is_tuple, through, extensionarray):
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
-        ak._v2.contents.RecordArray(
+    akarray = ak.contents.IndexedOptionArray(
+        ak.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
+        ak.contents.RecordArray(
             [
-                ak._v2.contents.NumpyArray(
+                ak.contents.NumpyArray(
                     np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
                 ),
-                ak._v2.contents.ListOffsetArray(
-                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-                    ak._v2.contents.NumpyArray(
+                ak.contents.ListOffsetArray(
+                    ak.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak.contents.NumpyArray(
                         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
                         parameters={"which": "inner2"},
                     ),
@@ -634,25 +632,25 @@ def test_recordarray(tmp_path, is_tuple, through, extensionarray):
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
-    akarray = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
-        ak._v2.contents.RecordArray(
+    akarray = ak.contents.IndexedOptionArray(
+        ak.index.Index64(np.array([2, 0, -1, 0, 1], dtype=np.int64)),
+        ak.contents.RecordArray(
             [
-                ak._v2.contents.ByteMaskedArray(
-                    ak._v2.index.Index8(np.array([False, True, False]).view(np.int8)),
-                    ak._v2.contents.NumpyArray(
+                ak.contents.ByteMaskedArray(
+                    ak.index.Index8(np.array([False, True, False]).view(np.int8)),
+                    ak.contents.NumpyArray(
                         np.array([1.1, 2.2, 3.3]), parameters={"which": "inner1"}
                     ),
                     valid_when=False,
                 ),
-                ak._v2.contents.ListOffsetArray(
-                    ak._v2.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
-                    ak._v2.contents.NumpyArray(
+                ak.contents.ListOffsetArray(
+                    ak.index.Index32(np.array([0, 3, 3, 5], dtype=np.int32)),
+                    ak.contents.NumpyArray(
                         np.array([1.1, 2.2, 3.3, 4.4, 5.5]),
                         parameters={"which": "inner2"},
                     ),
@@ -664,14 +662,14 @@ def test_recordarray(tmp_path, is_tuple, through, extensionarray):
     )
 
     schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-    predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+    predicted_form = ak._connect.pyarrow.form_handle_arrow(
         schema_arrow, pass_empty_field=True
     )
     assert predicted_form == array_form
 
 
 @pytest.mark.skipif(
-    not ak._v2._util.numpy_at_least("1.20"), reason="NumPy >= 1.20 required for dates"
+    not ak._util.numpy_at_least("1.20"), reason="NumPy >= 1.20 required for dates"
 )
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
@@ -679,7 +677,7 @@ def test_numpyarray_datetime(tmp_path, through, extensionarray):
     # pyarrow doesn't yet support datetime/duration conversions to Parquet.
     # (FIXME: find or create a JIRA ticket.)
 
-    akarray = ak._v2.contents.NumpyArray(
+    akarray = ak.contents.NumpyArray(
         np.array(
             ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], dtype="datetime64[s]"
         )
@@ -687,18 +685,18 @@ def test_numpyarray_datetime(tmp_path, through, extensionarray):
 
     if through is through_arrow:
         schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
 
-    akarray = ak._v2.contents.NumpyArray(
+    akarray = ak.contents.NumpyArray(
         np.array(["41", "1", "20"], dtype="timedelta64[s]")
     )
 
     if through is through_arrow:
         schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
@@ -710,15 +708,15 @@ def test_unionarray(tmp_path, through, extensionarray):
     # pyarrow doesn't yet support union array conversions to Parquet.
     # (FIXME: find or create a JIRA ticket.)
 
-    akarray = ak._v2.contents.UnionArray(
-        ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
-        ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
+    akarray = ak.contents.UnionArray(
+        ak.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
+        ak.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
         [
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 np.array([0.0, 1.1, 2.2]),
                 parameters={"which": "inner1"},
             ),
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 np.array([0, 10, 20, 30], dtype=np.int32),
                 parameters={"which": "inner2"},
             ),
@@ -728,24 +726,22 @@ def test_unionarray(tmp_path, through, extensionarray):
 
     if through is through_arrow:
         schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
 
-    akarray = ak._v2.contents.UnionArray(
-        ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
-        ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
+    akarray = ak.contents.UnionArray(
+        ak.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
+        ak.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
         [
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 np.array([0.0, 1.1, 2.2]),
                 parameters={"which": "inner1"},
             ),
-            ak._v2.contents.ByteMaskedArray(
-                ak._v2.index.Index8(
-                    np.array([False, False, True, False]).view(np.int8)
-                ),
-                ak._v2.contents.NumpyArray(
+            ak.contents.ByteMaskedArray(
+                ak.index.Index8(np.array([False, False, True, False]).view(np.int8)),
+                ak.contents.NumpyArray(
                     np.array([0, 10, 20, 30], dtype=np.int32),
                     parameters={"which": "inner2"},
                 ),
@@ -758,23 +754,23 @@ def test_unionarray(tmp_path, through, extensionarray):
 
     if through is through_arrow:
         schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
 
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(
             np.array([False, True, False, True, False, True, True]).view(np.int8)
         ),
-        ak._v2.contents.UnionArray(
-            ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
-            ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
+        ak.contents.UnionArray(
+            ak.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
+            ak.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
             [
-                ak._v2.contents.NumpyArray(
+                ak.contents.NumpyArray(
                     np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
                 ),
-                ak._v2.contents.NumpyArray(
+                ak.contents.NumpyArray(
                     np.array([0, 10, 20, 30], dtype=np.int32),
                     parameters={"which": "inner2"},
                 ),
@@ -787,27 +783,27 @@ def test_unionarray(tmp_path, through, extensionarray):
 
     if through is through_arrow:
         schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
 
-    akarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(
+    akarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(
             np.array([False, True, False, True, False, True, True]).view(np.int8)
         ),
-        ak._v2.contents.UnionArray(
-            ak._v2.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
-            ak._v2.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
+        ak.contents.UnionArray(
+            ak.index.Index8(np.array([0, 0, 1, 1, 1, 0, 1], dtype=np.int8)),
+            ak.index.Index64(np.array([0, 1, 3, 2, 1, 2, 0], dtype=np.int64)),
             [
-                ak._v2.contents.NumpyArray(
+                ak.contents.NumpyArray(
                     np.array([0.0, 1.1, 2.2]), parameters={"which": "inner1"}
                 ),
-                ak._v2.contents.ByteMaskedArray(
-                    ak._v2.index.Index8(
+                ak.contents.ByteMaskedArray(
+                    ak.index.Index8(
                         np.array([False, False, True, False]).view(np.int8)
                     ),
-                    ak._v2.contents.NumpyArray(
+                    ak.contents.NumpyArray(
                         np.array([0, 10, 20, 30], dtype=np.int32),
                         parameters={"which": "inner2"},
                     ),
@@ -823,7 +819,7 @@ def test_unionarray(tmp_path, through, extensionarray):
 
     if through is through_arrow:
         schema_arrow, array_form = through(akarray, extensionarray, tmp_path)
-        predicted_form = ak._v2._connect.pyarrow.form_handle_arrow(
+        predicted_form = ak._connect.pyarrow.form_handle_arrow(
             schema_arrow, pass_empty_field=True
         )
         assert predicted_form == array_form
@@ -848,52 +844,48 @@ def generate_datafiles(tmp_path):
     fs = fsspec.filesystem("file")
     data1 = ak.from_iter([[1, 2, 3], [4, 5]])
     data2 = data1 + 1
-    md1 = ak._v2.to_parquet(data1, os.path.join(tmp_path, "data1.parq"))
-    md2 = ak._v2.to_parquet(data2, os.path.join(tmp_path, "data2.parq"))
+    md1 = ak.to_parquet(data1, os.path.join(tmp_path, "data1.parq"))
+    md2 = ak.to_parquet(data2, os.path.join(tmp_path, "data2.parq"))
     return str(tmp_path), [md1, md2], fs
 
 
 @pytest.fixture()
 def with_common_metadata(generate_datafiles):
     path, mdlist, fs = generate_datafiles
-    ak._v2.operations.ak_to_parquet.write_metadata(
-        path, fs, *mdlist, global_metadata=False
-    )
+    ak.operations.ak_to_parquet.write_metadata(path, fs, *mdlist, global_metadata=False)
     return path
 
 
 @pytest.fixture()
 def with_global_metadata(generate_datafiles):
     path, mdlist, fs = generate_datafiles
-    ak._v2.operations.ak_to_parquet.write_metadata(
-        path, fs, *mdlist, global_metadata=True
-    )
+    ak.operations.ak_to_parquet.write_metadata(path, fs, *mdlist, global_metadata=True)
     return path
 
 
 @pytest.fixture()
 def with_corrupted_global_metadata(generate_datafiles):
     path, mdlist, fs = generate_datafiles
-    ak._v2.operations.ak_to_parquet.write_metadata(path, fs, *mdlist)
+    ak.operations.ak_to_parquet.write_metadata(path, fs, *mdlist)
     with open(os.path.join("path", "_metadata"), "wb") as f:
         f.write(b"not parquet")
     return path
 
 
 def test_defaults_global(with_global_metadata):
-    arr = ak._v2.metadata_from_parquet(with_global_metadata)
+    arr = ak.metadata_from_parquet(with_global_metadata)
     assert arr["num_rows"] == 4
     assert arr["col_counts"] == [2, 2]
 
 
 def test_defaults_common(with_common_metadata):
-    arr = ak._v2.metadata_from_parquet(with_common_metadata)
+    arr = ak.metadata_from_parquet(with_common_metadata)
     assert arr["num_rows"] == 4
     assert arr["col_counts"] == [2, 2]
 
 
 def test_dont_scan(with_global_metadata):
-    arr = ak._v2.metadata_from_parquet(
+    arr = ak.metadata_from_parquet(
         with_global_metadata, ignore_metadata=True, scan_files=False
     )
     assert arr["col_counts"] is None
@@ -903,20 +895,18 @@ def test_cant_select(with_common_metadata):
     # strictly, tow_groups=[0] could be allowed, since that file is first and may be scanned
     # anyway
     with pytest.raises(ValueError):
-        ak._v2.metadata_from_parquet(
-            with_common_metadata, scan_files=False, row_groups=[1]
-        )
+        ak.metadata_from_parquet(with_common_metadata, scan_files=False, row_groups=[1])
 
 
 def test_select(with_global_metadata):
-    arr = ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[1])
+    arr = ak.metadata_from_parquet(with_global_metadata, row_groups=[1])
     assert arr["col_counts"] == [2]
 
     with pytest.raises(ValueError):
-        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[1, 1])
+        ak.metadata_from_parquet(with_global_metadata, row_groups=[1, 1])
 
     with pytest.raises(ValueError):
-        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[-1])
+        ak.metadata_from_parquet(with_global_metadata, row_groups=[-1])
 
     with pytest.raises(ValueError):
-        ak._v2.metadata_from_parquet(with_global_metadata, row_groups=[4])
+        ak.metadata_from_parquet(with_global_metadata, row_groups=[4])

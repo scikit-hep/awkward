@@ -18,13 +18,13 @@ def is_valid(array, exception=False):
 
     See also #ak.validity_error.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.is_valid",
+    with ak._util.OperationErrorContext(
+        "ak.is_valid",
         dict(array=array, exception=exception),
     ):
         return _impl(array, exception)
 
 
 def _impl(array, exception):
-    out = ak._v2.operations.validity_error(array, exception=exception)
+    out = ak.operations.validity_error(array, exception=exception)
     return out in (None, "")

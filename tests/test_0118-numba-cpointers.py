@@ -9,39 +9,39 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-ak_numba_arrayview = pytest.importorskip("awkward._v2._connect.numba.arrayview")
+ak_numba_arrayview = pytest.importorskip("awkward._connect.numba.arrayview")
 
-ak._v2.numba.register_and_check()
+ak.numba.register_and_check()
 
 
 def test_views():
-    assert ak._v2.operations.to_list(
+    assert ak.operations.to_list(
         ak_numba_arrayview.ArrayView.fromarray(
-            ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+            ak.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5])
         ).toarray()
     ) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
-    assert ak._v2.operations.to_list(
+    assert ak.operations.to_list(
         ak_numba_arrayview.ArrayView.fromarray(
-            ak._v2.highlevel.Array(np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+            ak.highlevel.Array(np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
         ).toarray()
     ) == [[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]
 
-    assert ak._v2.operations.to_list(
+    assert ak.operations.to_list(
         ak_numba_arrayview.ArrayView.fromarray(
-            ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+            ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
         ).toarray()
     ) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
-    assert ak._v2.operations.to_list(
+    assert ak.operations.to_list(
         ak_numba_arrayview.ArrayView.fromarray(
-            ak._v2.highlevel.Array([1.1, 2.2, None, 3.3, None, 4.4, 5.5])
+            ak.highlevel.Array([1.1, 2.2, None, 3.3, None, 4.4, 5.5])
         ).toarray()
     ) == [1.1, 2.2, None, 3.3, None, 4.4, 5.5]
 
-    assert ak._v2.operations.to_list(
+    assert ak.operations.to_list(
         ak_numba_arrayview.ArrayView.fromarray(
-            ak._v2.highlevel.Array(
+            ak.highlevel.Array(
                 [
                     {"x": 0.0, "y": []},
                     {"x": 1.1, "y": [1, 1]},
@@ -52,21 +52,21 @@ def test_views():
         ).toarray()
     ) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}]
 
-    assert ak._v2.operations.to_list(
+    assert ak.operations.to_list(
         ak_numba_arrayview.ArrayView.fromarray(
-            ak._v2.highlevel.Array([(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])])
+            ak.highlevel.Array([(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])])
         ).toarray()
     ) == [(0.0, []), (1.1, [1, 1]), (2.2, [2, 2, 2])]
 
-    assert ak._v2.operations.to_list(
+    assert ak.operations.to_list(
         ak_numba_arrayview.ArrayView.fromarray(
-            ak._v2.highlevel.Array([1.1, 2.2, 3.3, [], [1], [2, 2]])
+            ak.highlevel.Array([1.1, 2.2, 3.3, [], [1], [2, 2]])
         ).toarray()
     ) == [1.1, 2.2, 3.3, [], [1], [2, 2]]
 
 
 def test_unbox():
-    array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
     @numba.njit
     def f1(x):
@@ -76,13 +76,13 @@ def test_unbox():
 
 
 def test_box():
-    array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
     @numba.njit
     def f1(x):
         return x
 
-    assert ak._v2.operations.to_list(f1(array)) == [
+    assert ak.operations.to_list(f1(array)) == [
         [1.1, 2.2, 3.3],
         [],
         [4.4, 5.5],
@@ -90,7 +90,7 @@ def test_box():
 
 
 def test_refcount():
-    array = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     array.numba_type
     assert [
         sys.getrefcount(x) == 2
@@ -158,7 +158,7 @@ def test_refcount():
 
 
 def test_len():
-    array = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    array = ak.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5])
 
     @numba.njit
     def f1(x):
@@ -168,7 +168,7 @@ def test_len():
 
 
 def test_NumpyArray_getitem():
-    array = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    array = ak.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5])
 
     @numba.njit
     def f1(x, i):
@@ -197,31 +197,31 @@ def test_NumpyArray_getitem():
     def f2(x, i1, i2):
         return x[i1:i2]
 
-    assert ak._v2.operations.to_list(f2(array, 0, 5)) == [
+    assert ak.operations.to_list(f2(array, 0, 5)) == [
         1.1,
         2.2,
         3.3,
         4.4,
         5.5,
     ]
-    assert ak._v2.operations.to_list(f2(array, 1, 5)) == [2.2, 3.3, 4.4, 5.5]
-    assert ak._v2.operations.to_list(f2(array, 2, 5)) == [3.3, 4.4, 5.5]
-    assert ak._v2.operations.to_list(f2(array, 3, 5)) == [4.4, 5.5]
-    assert ak._v2.operations.to_list(f2(array, 4, 5)) == [5.5]
-    assert ak._v2.operations.to_list(f2(array, 5, 5)) == []
-    assert ak._v2.operations.to_list(f2(array, 6, 5)) == []
-    assert ak._v2.operations.to_list(f2(array, -1, 5)) == [5.5]
-    assert ak._v2.operations.to_list(f2(array, -2, 5)) == [4.4, 5.5]
-    assert ak._v2.operations.to_list(f2(array, -3, 5)) == [3.3, 4.4, 5.5]
-    assert ak._v2.operations.to_list(f2(array, -4, 5)) == [2.2, 3.3, 4.4, 5.5]
-    assert ak._v2.operations.to_list(f2(array, -5, 5)) == [
+    assert ak.operations.to_list(f2(array, 1, 5)) == [2.2, 3.3, 4.4, 5.5]
+    assert ak.operations.to_list(f2(array, 2, 5)) == [3.3, 4.4, 5.5]
+    assert ak.operations.to_list(f2(array, 3, 5)) == [4.4, 5.5]
+    assert ak.operations.to_list(f2(array, 4, 5)) == [5.5]
+    assert ak.operations.to_list(f2(array, 5, 5)) == []
+    assert ak.operations.to_list(f2(array, 6, 5)) == []
+    assert ak.operations.to_list(f2(array, -1, 5)) == [5.5]
+    assert ak.operations.to_list(f2(array, -2, 5)) == [4.4, 5.5]
+    assert ak.operations.to_list(f2(array, -3, 5)) == [3.3, 4.4, 5.5]
+    assert ak.operations.to_list(f2(array, -4, 5)) == [2.2, 3.3, 4.4, 5.5]
+    assert ak.operations.to_list(f2(array, -5, 5)) == [
         1.1,
         2.2,
         3.3,
         4.4,
         5.5,
     ]
-    assert ak._v2.operations.to_list(f2(array, -6, 5)) == [
+    assert ak.operations.to_list(f2(array, -6, 5)) == [
         1.1,
         2.2,
         3.3,
@@ -229,61 +229,61 @@ def test_NumpyArray_getitem():
         5.5,
     ]
 
-    assert ak._v2.operations.to_list(f2(array, 0, -6)) == []
-    assert ak._v2.operations.to_list(f2(array, 0, -5)) == []
-    assert ak._v2.operations.to_list(f2(array, 0, -4)) == [1.1]
-    assert ak._v2.operations.to_list(f2(array, 0, -3)) == [1.1, 2.2]
-    assert ak._v2.operations.to_list(f2(array, 0, -2)) == [1.1, 2.2, 3.3]
-    assert ak._v2.operations.to_list(f2(array, 0, -1)) == [1.1, 2.2, 3.3, 4.4]
-    assert ak._v2.operations.to_list(f2(array, 0, 6)) == [
+    assert ak.operations.to_list(f2(array, 0, -6)) == []
+    assert ak.operations.to_list(f2(array, 0, -5)) == []
+    assert ak.operations.to_list(f2(array, 0, -4)) == [1.1]
+    assert ak.operations.to_list(f2(array, 0, -3)) == [1.1, 2.2]
+    assert ak.operations.to_list(f2(array, 0, -2)) == [1.1, 2.2, 3.3]
+    assert ak.operations.to_list(f2(array, 0, -1)) == [1.1, 2.2, 3.3, 4.4]
+    assert ak.operations.to_list(f2(array, 0, 6)) == [
         1.1,
         2.2,
         3.3,
         4.4,
         5.5,
     ]
-    assert ak._v2.operations.to_list(f2(array, 0, 5)) == [
+    assert ak.operations.to_list(f2(array, 0, 5)) == [
         1.1,
         2.2,
         3.3,
         4.4,
         5.5,
     ]
-    assert ak._v2.operations.to_list(f2(array, 0, 4)) == [1.1, 2.2, 3.3, 4.4]
-    assert ak._v2.operations.to_list(f2(array, 0, 3)) == [1.1, 2.2, 3.3]
-    assert ak._v2.operations.to_list(f2(array, 0, 2)) == [1.1, 2.2]
-    assert ak._v2.operations.to_list(f2(array, 0, 1)) == [1.1]
-    assert ak._v2.operations.to_list(f2(array, 0, 0)) == []
+    assert ak.operations.to_list(f2(array, 0, 4)) == [1.1, 2.2, 3.3, 4.4]
+    assert ak.operations.to_list(f2(array, 0, 3)) == [1.1, 2.2, 3.3]
+    assert ak.operations.to_list(f2(array, 0, 2)) == [1.1, 2.2]
+    assert ak.operations.to_list(f2(array, 0, 1)) == [1.1]
+    assert ak.operations.to_list(f2(array, 0, 0)) == []
 
     aslist = [1.1, 2.2, 3.3, 4.4, 5.5]
     for i1 in range(-6, 7):
         for i2 in range(-6, 7):
-            assert ak._v2.operations.to_list(f2(array, i1, i2)) == aslist[i1:i2]
+            assert ak.operations.to_list(f2(array, i1, i2)) == aslist[i1:i2]
 
     @numba.njit
     def f3(x, i1, i2):
         return x[1:4][i1:i2]
 
-    assert ak._v2.operations.to_list(f3(array, -1, 3)) == [4.4]
-    assert ak._v2.operations.to_list(f3(array, -2, 3)) == [3.3, 4.4]
-    assert ak._v2.operations.to_list(f3(array, -3, 3)) == [2.2, 3.3, 4.4]
-    assert ak._v2.operations.to_list(f3(array, 0, 3)) == [2.2, 3.3, 4.4]
-    assert ak._v2.operations.to_list(f3(array, 1, 3)) == [3.3, 4.4]
-    assert ak._v2.operations.to_list(f3(array, 2, 3)) == [4.4]
-    assert ak._v2.operations.to_list(f3(array, 3, 3)) == []
+    assert ak.operations.to_list(f3(array, -1, 3)) == [4.4]
+    assert ak.operations.to_list(f3(array, -2, 3)) == [3.3, 4.4]
+    assert ak.operations.to_list(f3(array, -3, 3)) == [2.2, 3.3, 4.4]
+    assert ak.operations.to_list(f3(array, 0, 3)) == [2.2, 3.3, 4.4]
+    assert ak.operations.to_list(f3(array, 1, 3)) == [3.3, 4.4]
+    assert ak.operations.to_list(f3(array, 2, 3)) == [4.4]
+    assert ak.operations.to_list(f3(array, 3, 3)) == []
 
-    assert ak._v2.operations.to_list(f3(array, 0, -4)) == []
-    assert ak._v2.operations.to_list(f3(array, 0, -3)) == []
-    assert ak._v2.operations.to_list(f3(array, 0, -2)) == [2.2]
-    assert ak._v2.operations.to_list(f3(array, 0, -1)) == [2.2, 3.3]
-    assert ak._v2.operations.to_list(f3(array, 0, 3)) == [2.2, 3.3, 4.4]
-    assert ak._v2.operations.to_list(f3(array, 0, 2)) == [2.2, 3.3]
-    assert ak._v2.operations.to_list(f3(array, 0, 1)) == [2.2]
-    assert ak._v2.operations.to_list(f3(array, 0, 0)) == []
+    assert ak.operations.to_list(f3(array, 0, -4)) == []
+    assert ak.operations.to_list(f3(array, 0, -3)) == []
+    assert ak.operations.to_list(f3(array, 0, -2)) == [2.2]
+    assert ak.operations.to_list(f3(array, 0, -1)) == [2.2, 3.3]
+    assert ak.operations.to_list(f3(array, 0, 3)) == [2.2, 3.3, 4.4]
+    assert ak.operations.to_list(f3(array, 0, 2)) == [2.2, 3.3]
+    assert ak.operations.to_list(f3(array, 0, 1)) == [2.2]
+    assert ak.operations.to_list(f3(array, 0, 0)) == []
 
 
 def test_RegularArray_getitem():
-    array = ak._v2.highlevel.Array(np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+    array = ak.highlevel.Array(np.array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
 
     @numba.njit
     def f1(x, i):
@@ -310,55 +310,55 @@ def test_RegularArray_getitem():
     assert f2(array, 1, -2) == 5.5
     assert f2(array, 1, -1) == 6.6
 
-    array = ak._v2.highlevel.Array(np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    array = ak.highlevel.Array(np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
 
     @numba.njit
     def f3(x, i1, i2):
         return x[i1:i2]
 
-    assert ak._v2.operations.to_list(f3(array, -1, 3)) == [[5.5, 6.6]]
-    assert ak._v2.operations.to_list(f3(array, -2, 3)) == [
+    assert ak.operations.to_list(f3(array, -1, 3)) == [[5.5, 6.6]]
+    assert ak.operations.to_list(f3(array, -2, 3)) == [
         [3.3, 4.4],
         [5.5, 6.6],
     ]
-    assert ak._v2.operations.to_list(f3(array, -3, 3)) == [
+    assert ak.operations.to_list(f3(array, -3, 3)) == [
         [1.1, 2.2],
         [3.3, 4.4],
         [5.5, 6.6],
     ]
-    assert ak._v2.operations.to_list(f3(array, 0, 3)) == [
+    assert ak.operations.to_list(f3(array, 0, 3)) == [
         [1.1, 2.2],
         [3.3, 4.4],
         [5.5, 6.6],
     ]
-    assert ak._v2.operations.to_list(f3(array, 1, 3)) == [
+    assert ak.operations.to_list(f3(array, 1, 3)) == [
         [3.3, 4.4],
         [5.5, 6.6],
     ]
-    assert ak._v2.operations.to_list(f3(array, 2, 3)) == [[5.5, 6.6]]
-    assert ak._v2.operations.to_list(f3(array, 3, 3)) == []
+    assert ak.operations.to_list(f3(array, 2, 3)) == [[5.5, 6.6]]
+    assert ak.operations.to_list(f3(array, 3, 3)) == []
 
-    assert ak._v2.operations.to_list(f3(array, 0, 0)) == []
-    assert ak._v2.operations.to_list(f3(array, 0, 1)) == [[1.1, 2.2]]
-    assert ak._v2.operations.to_list(f3(array, 0, 2)) == [
+    assert ak.operations.to_list(f3(array, 0, 0)) == []
+    assert ak.operations.to_list(f3(array, 0, 1)) == [[1.1, 2.2]]
+    assert ak.operations.to_list(f3(array, 0, 2)) == [
         [1.1, 2.2],
         [3.3, 4.4],
     ]
-    assert ak._v2.operations.to_list(f3(array, 0, 3)) == [
+    assert ak.operations.to_list(f3(array, 0, 3)) == [
         [1.1, 2.2],
         [3.3, 4.4],
         [5.5, 6.6],
     ]
-    assert ak._v2.operations.to_list(f3(array, 0, -1)) == [
+    assert ak.operations.to_list(f3(array, 0, -1)) == [
         [1.1, 2.2],
         [3.3, 4.4],
     ]
-    assert ak._v2.operations.to_list(f3(array, 0, -2)) == [[1.1, 2.2]]
-    assert ak._v2.operations.to_list(f3(array, 0, -3)) == []
+    assert ak.operations.to_list(f3(array, 0, -2)) == [[1.1, 2.2]]
+    assert ak.operations.to_list(f3(array, 0, -3)) == []
 
 
 def test_ListArray_getitem():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
     )
 
@@ -366,17 +366,17 @@ def test_ListArray_getitem():
     def f1(x, i):
         return x[i]
 
-    assert ak._v2.operations.to_list(f1(array, 0)) == [0.0, 1.1, 2.2]
-    assert ak._v2.operations.to_list(f1(array, 1)) == []
-    assert ak._v2.operations.to_list(f1(array, 2)) == [3.3, 4.4]
-    assert ak._v2.operations.to_list(f1(array, 3)) == [5.5]
-    assert ak._v2.operations.to_list(f1(array, 4)) == [6.6, 7.7, 8.8, 9.9]
+    assert ak.operations.to_list(f1(array, 0)) == [0.0, 1.1, 2.2]
+    assert ak.operations.to_list(f1(array, 1)) == []
+    assert ak.operations.to_list(f1(array, 2)) == [3.3, 4.4]
+    assert ak.operations.to_list(f1(array, 3)) == [5.5]
+    assert ak.operations.to_list(f1(array, 4)) == [6.6, 7.7, 8.8, 9.9]
 
     @numba.njit
     def f2(x, i1, i2):
         return x[i1:i2]
 
-    assert ak._v2.operations.to_list(f2(array, 1, 4)) == [[], [3.3, 4.4], [5.5]]
+    assert ak.operations.to_list(f2(array, 1, 4)) == [[], [3.3, 4.4], [5.5]]
 
 
 def test_IndexedArray_getitem():
@@ -384,7 +384,7 @@ def test_IndexedArray_getitem():
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], highlevel=False
     )
     index = ak.layout.Index64(np.array([3, 2, 2, 5, 0, 7], dtype=np.int64))
-    array = ak._v2.highlevel.Array(ak.layout.IndexedArray64(index, content))
+    array = ak.highlevel.Array(ak.layout.IndexedArray64(index, content))
 
     @numba.njit
     def f1(x, i):
@@ -401,11 +401,11 @@ def test_IndexedArray_getitem():
     def f2(x, i1, i2):
         return x[i1:i2]
 
-    assert ak._v2.operations.to_list(f2(array, 1, 5)) == [2.2, 2.2, 5.5, 0]
+    assert ak.operations.to_list(f2(array, 1, 5)) == [2.2, 2.2, 5.5, 0]
 
 
 def test_IndexedOptionArray_getitem():
-    array = ak._v2.highlevel.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+    array = ak.highlevel.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
 
     @numba.njit
     def f1(x, i):
@@ -422,11 +422,11 @@ def test_IndexedOptionArray_getitem():
     def f2(x, i1, i2):
         return x[i1:i2]
 
-    assert ak._v2.operations.to_list(f2(array, 1, 5)) == [2.2, None, 3.3, None]
+    assert ak.operations.to_list(f2(array, 1, 5)) == [2.2, None, 3.3, None]
 
 
 def test_RecordView_unbox_box():
-    record = ak._v2.highlevel.Array(
+    record = ak.highlevel.Array(
         [
             {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
@@ -437,7 +437,7 @@ def test_RecordView_unbox_box():
         check_valid=True,
     )[3]
 
-    assert ak._v2.operations.to_list(
+    assert ak.operations.to_list(
         ak_numba_arrayview.RecordView.fromrecord(record).torecord()
     ) == {
         "x": 3.3,
@@ -454,11 +454,11 @@ def test_RecordView_unbox_box():
     def f2(x):
         return x
 
-    assert ak._v2.operations.to_list(f2(record)) == {"x": 3.3, "y": [3, 3, 3]}
+    assert ak.operations.to_list(f2(record)) == {"x": 3.3, "y": [3, 3, 3]}
 
 
 def test_RecordView_refcount():
-    record = ak._v2.highlevel.Array(
+    record = ak.highlevel.Array(
         [
             {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
@@ -539,7 +539,7 @@ def test_RecordView_refcount():
 
 
 def test_Record_getitem():
-    record = ak._v2.highlevel.Array(
+    record = ak.highlevel.Array(
         [
             {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
@@ -560,7 +560,7 @@ def test_Record_getitem():
     def f2(x):
         return x["y"]
 
-    assert ak._v2.operations.to_list(f2(record)) == [3, 3, 3]
+    assert ak.operations.to_list(f2(record)) == [3, 3, 3]
 
     @numba.njit
     def f3(x):
@@ -572,11 +572,11 @@ def test_Record_getitem():
     def f4(x):
         return x.y
 
-    assert ak._v2.operations.to_list(f4(record)) == [3, 3, 3]
+    assert ak.operations.to_list(f4(record)) == [3, 3, 3]
 
 
 def test_RecordArray_getitem():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
@@ -591,21 +591,21 @@ def test_RecordArray_getitem():
     def f1(x, i):
         return x[i]
 
-    assert ak._v2.operations.to_list(f1(array, 3)) == {"x": 3.3, "y": [3, 3, 3]}
-    assert ak._v2.operations.to_list(f1(array, 2)) == {"x": 2.2, "y": [2, 2]}
-    assert ak._v2.operations.to_list(f1(array, 1)) == {"x": 1.1, "y": [1]}
+    assert ak.operations.to_list(f1(array, 3)) == {"x": 3.3, "y": [3, 3, 3]}
+    assert ak.operations.to_list(f1(array, 2)) == {"x": 2.2, "y": [2, 2]}
+    assert ak.operations.to_list(f1(array, 1)) == {"x": 1.1, "y": [1]}
 
     @numba.njit
     def f2(x, i1, i2):
         return x[i1:i2]
 
-    assert ak._v2.operations.to_list(f2(array, 1, 4)) == [
+    assert ak.operations.to_list(f2(array, 1, 4)) == [
         {"x": 1.1, "y": [1]},
         {"x": 2.2, "y": [2, 2]},
         {"x": 3.3, "y": [3, 3, 3]},
     ]
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
             [],
@@ -618,14 +618,14 @@ def test_RecordArray_getitem():
     def f3(x, i, j):
         return x[i][j]
 
-    assert ak._v2.operations.to_list(f3(array, 2, -2)) == {
+    assert ak.operations.to_list(f3(array, 2, -2)) == {
         "x": 3.3,
         "y": [3, 3, 3],
     }
 
 
 def test_RecordArray_getitem_field():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             {"x": 0.0, "y": []},
             {"x": 1.1, "y": [1]},
@@ -640,29 +640,29 @@ def test_RecordArray_getitem_field():
     def f1(x):
         return x[1:4]["x"]
 
-    assert ak._v2.operations.to_list(f1(array)) == [1.1, 2.2, 3.3]
+    assert ak.operations.to_list(f1(array)) == [1.1, 2.2, 3.3]
 
     @numba.njit
     def f2(x):
         return x[1:4]["y"]
 
-    assert ak._v2.operations.to_list(f2(array)) == [[1], [2, 2], [3, 3, 3]]
+    assert ak.operations.to_list(f2(array)) == [[1], [2, 2], [3, 3, 3]]
 
     @numba.njit
     def f3(x):
         return x[1:4].x
 
-    assert ak._v2.operations.to_list(f3(array)) == [1.1, 2.2, 3.3]
+    assert ak.operations.to_list(f3(array)) == [1.1, 2.2, 3.3]
 
     @numba.njit
     def f4(x):
         return x[1:4].y
 
-    assert ak._v2.operations.to_list(f4(array)) == [[1], [2, 2], [3, 3, 3]]
+    assert ak.operations.to_list(f4(array)) == [[1], [2, 2], [3, 3, 3]]
 
 
 def test_ListArray_getitem_field():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
             [],
@@ -682,7 +682,7 @@ def test_ListArray_getitem_field():
     def f1(x):
         return x["x"]
 
-    assert ak._v2.operations.to_list(f1(array)) == [
+    assert ak.operations.to_list(f1(array)) == [
         [0.0, 1.1, 2.2],
         [],
         [3.3, 4.4],
@@ -694,7 +694,7 @@ def test_ListArray_getitem_field():
     def f2(x):
         return x.y
 
-    assert ak._v2.operations.to_list(f2(array)) == [
+    assert ak.operations.to_list(f2(array)) == [
         [[], [1], [2, 2]],
         [],
         [[3, 3, 3], [4, 4, 4, 4]],
@@ -711,13 +711,13 @@ def test_ListArray_getitem_field():
     def f3(x):
         return x[1:4].x
 
-    assert ak._v2.operations.to_list(f3(array)) == [[], [3.3, 4.4], [5.5]]
+    assert ak.operations.to_list(f3(array)) == [[], [3.3, 4.4], [5.5]]
 
     @numba.njit
     def f4(x):
         return x[1:4]["y"]
 
-    assert ak._v2.operations.to_list(f4(array)) == [
+    assert ak.operations.to_list(f4(array)) == [
         [],
         [[3, 3, 3], [4, 4, 4, 4]],
         [[5, 5, 5, 5, 5]],
@@ -727,13 +727,13 @@ def test_ListArray_getitem_field():
     def f5(x):
         return x["x"][1:4]
 
-    assert ak._v2.operations.to_list(f5(array)) == [[], [3.3, 4.4], [5.5]]
+    assert ak.operations.to_list(f5(array)) == [[], [3.3, 4.4], [5.5]]
 
     @numba.njit
     def f6(x):
         return x.y[1:4]
 
-    assert ak._v2.operations.to_list(f6(array)) == [
+    assert ak.operations.to_list(f6(array)) == [
         [],
         [[3, 3, 3], [4, 4, 4, 4]],
         [[5, 5, 5, 5, 5]],
@@ -743,7 +743,7 @@ def test_ListArray_getitem_field():
     def f7(x):
         return x[4]["x"]
 
-    assert ak._v2.operations.to_list(ak._v2.operations.to_list(f7(array))) == [
+    assert ak.operations.to_list(ak.operations.to_list(f7(array))) == [
         6.6,
         7.7,
         8.8,
@@ -754,7 +754,7 @@ def test_ListArray_getitem_field():
     def f8(x):
         return x[4].y
 
-    assert ak._v2.operations.to_list(ak._v2.operations.to_list(f8(array))) == [
+    assert ak.operations.to_list(ak.operations.to_list(f8(array))) == [
         [6, 6, 6, 6, 6, 6],
         [7, 7, 7, 7, 7, 7, 7],
         [8, 8, 8, 8, 8, 8, 8, 8],
@@ -765,7 +765,7 @@ def test_ListArray_getitem_field():
     def f9(x):
         return x.x[4]
 
-    assert ak._v2.operations.to_list(ak._v2.operations.to_list(f9(array))) == [
+    assert ak.operations.to_list(ak.operations.to_list(f9(array))) == [
         6.6,
         7.7,
         8.8,
@@ -776,7 +776,7 @@ def test_ListArray_getitem_field():
     def f10(x):
         return x["y"][4]
 
-    assert ak._v2.operations.to_list(ak._v2.operations.to_list(f10(array))) == [
+    assert ak.operations.to_list(ak.operations.to_list(f10(array))) == [
         [6, 6, 6, 6, 6, 6],
         [7, 7, 7, 7, 7, 7, 7],
         [8, 8, 8, 8, 8, 8, 8, 8],
@@ -793,7 +793,7 @@ def test_ListArray_getitem_field():
     def f12(x):
         return x[4].y[1]
 
-    assert ak._v2.operations.to_list(ak._v2.operations.to_list(f12(array))) == [
+    assert ak.operations.to_list(ak.operations.to_list(f12(array))) == [
         7,
         7,
         7,
@@ -807,7 +807,7 @@ def test_ListArray_getitem_field():
     def f12b(x):
         return x[4].y[1][6]
 
-    assert ak._v2.operations.to_list(ak._v2.operations.to_list(f12b(array))) == 7
+    assert ak.operations.to_list(ak.operations.to_list(f12b(array))) == 7
 
     @numba.njit
     def f13(x):
@@ -819,7 +819,7 @@ def test_ListArray_getitem_field():
     def f14(x):
         return x["y"][4][1]
 
-    assert ak._v2.operations.to_list(ak._v2.operations.to_list(f14(array))) == [
+    assert ak.operations.to_list(ak.operations.to_list(f14(array))) == [
         7,
         7,
         7,
@@ -833,11 +833,11 @@ def test_ListArray_getitem_field():
     def f14b(x):
         return x["y"][4][1][6]
 
-    assert ak._v2.operations.to_list(f14b(array)) == 7
+    assert ak.operations.to_list(f14b(array)) == 7
 
 
 def test_RecordArray_deep_field():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [{"x": {"y": {"z": 1.1}}}, {"x": {"y": {"z": 2.2}}}, {"x": {"y": {"z": 3.3}}}],
         check_valid=True,
     )
@@ -870,19 +870,19 @@ def test_RecordArray_deep_field():
     def f5(x):
         return x["x"].y["z"]
 
-    assert ak._v2.operations.to_list(f5(array)) == [1.1, 2.2, 3.3]
+    assert ak.operations.to_list(f5(array)) == [1.1, 2.2, 3.3]
 
     @numba.njit
     def f6(x):
         return x.x["y"].z
 
-    assert ak._v2.operations.to_list(f6(array)) == [1.1, 2.2, 3.3]
+    assert ak.operations.to_list(f6(array)) == [1.1, 2.2, 3.3]
 
     @numba.njit
     def f7(x):
         return x.x["y"]
 
-    assert ak._v2.operations.to_list(f7(array)) == [
+    assert ak.operations.to_list(f7(array)) == [
         {"z": 1.1},
         {"z": 2.2},
         {"z": 3.3},
@@ -892,7 +892,7 @@ def test_RecordArray_deep_field():
     def f8(x):
         return x.x
 
-    assert ak._v2.operations.to_list(f8(array)) == [
+    assert ak.operations.to_list(f8(array)) == [
         {"y": {"z": 1.1}},
         {"y": {"z": 2.2}},
         {"y": {"z": 3.3}},
@@ -933,7 +933,7 @@ def test_ListArray_deep_at():
     listarray2 = ak.layout.ListOffsetArray64(offsets2, listarray1)
     offsets3 = ak.layout.Index32(np.array([0, 2, 4], dtype=np.int32))
     listarray3 = ak.layout.ListOffsetArray32(offsets3, listarray2)
-    array = ak._v2.highlevel.Array(listarray3)
+    array = ak.highlevel.Array(listarray3)
 
     @numba.njit
     def f1(x):
@@ -945,19 +945,19 @@ def test_ListArray_deep_at():
     def f2(x):
         return x[1][1][1]
 
-    assert ak._v2.operations.to_list(f2(array)) == [15.5, 16.6]
+    assert ak.operations.to_list(f2(array)) == [15.5, 16.6]
 
     @numba.njit
     def f3(x):
         return x[1][1]
 
-    assert ak._v2.operations.to_list(f3(array)) == [[13.3, 14.4], [15.5, 16.6]]
+    assert ak.operations.to_list(f3(array)) == [[13.3, 14.4], [15.5, 16.6]]
 
     @numba.njit
     def f4(x):
         return x[1]
 
-    assert ak._v2.operations.to_list(f4(array)) == [
+    assert ak.operations.to_list(f4(array)) == [
         [[9.9, 10.0], [11.1, 12.2]],
         [[13.3, 14.4], [15.5, 16.6]],
     ]
@@ -972,7 +972,7 @@ def test_IndexedArray_deep_at():
     index3 = ak.layout.Index32(np.array([1, 2], dtype=np.int32))
     indexedarray3 = ak.layout.IndexedArray32(index3, indexedarray2)
     # This is not a valid array (IndexedArray inside IndexedArray), but instructive!  :)
-    array = ak._v2.highlevel.Array(indexedarray3, check_valid=False)
+    array = ak.highlevel.Array(indexedarray3, check_valid=False)
 
     @numba.njit
     def f1(x):
@@ -982,7 +982,7 @@ def test_IndexedArray_deep_at():
 
 
 def test_iterator():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
     )
 
@@ -998,7 +998,7 @@ def test_iterator():
 
 
 def test_ArrayBuilder_refcount():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     assert (sys.getrefcount(builder), sys.getrefcount(builder._layout)) == (2, 2)
 
     @numba.njit
@@ -1028,7 +1028,7 @@ def test_ArrayBuilder_refcount():
 
 
 def test_ArrayBuilder_len():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     builder.real(1.1)
     builder.real(2.2)
     builder.real(3.3)
@@ -1048,7 +1048,7 @@ def test_ArrayBuilder_simple():
         x.clear()
         return 3.14
 
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     f1(a)
 
 
@@ -1060,10 +1060,10 @@ def test_ArrayBuilder_boolean():
         x.boolean(False)
         return x
 
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     b = f1(a)
-    assert ak._v2.operations.to_list(a.snapshot()) == [True, False, False]
-    assert ak._v2.operations.to_list(b.snapshot()) == [True, False, False]
+    assert ak.operations.to_list(a.snapshot()) == [True, False, False]
+    assert ak.operations.to_list(b.snapshot()) == [True, False, False]
 
 
 def test_ArrayBuilder_integer():
@@ -1074,10 +1074,10 @@ def test_ArrayBuilder_integer():
         x.integer(3)
         return x
 
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     b = f1(a)
-    assert ak._v2.operations.to_list(a.snapshot()) == [1, 2, 3]
-    assert ak._v2.operations.to_list(b.snapshot()) == [1, 2, 3]
+    assert ak.operations.to_list(a.snapshot()) == [1, 2, 3]
+    assert ak.operations.to_list(b.snapshot()) == [1, 2, 3]
 
 
 def test_ArrayBuilder_real():
@@ -1088,10 +1088,10 @@ def test_ArrayBuilder_real():
         x.real(z)
         return x
 
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     b = f1(a, np.array([3.5], dtype=np.float32)[0])
-    assert ak._v2.operations.to_list(a.snapshot()) == [1, 2.2, 3.5]
-    assert ak._v2.operations.to_list(b.snapshot()) == [1, 2.2, 3.5]
+    assert ak.operations.to_list(a.snapshot()) == [1, 2.2, 3.5]
+    assert ak.operations.to_list(b.snapshot()) == [1, 2.2, 3.5]
 
 
 def test_ArrayBuilder_list():
@@ -1110,14 +1110,14 @@ def test_ArrayBuilder_list():
         x.end_list()
         return x
 
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     b = f1(a)
-    assert ak._v2.operations.to_list(a.snapshot()) == [
+    assert ak.operations.to_list(a.snapshot()) == [
         [1.1, 2.2, 3.3],
         [],
         [4.4, 5.5],
     ]
-    assert ak._v2.operations.to_list(b.snapshot()) == [
+    assert ak.operations.to_list(b.snapshot()) == [
         [1.1, 2.2, 3.3],
         [],
         [4.4, 5.5],
@@ -1136,9 +1136,9 @@ def test_ArrayBuilder_list():
         return x
 
     c = f3(b)
-    assert ak._v2.operations.to_list(a.snapshot()) == []
-    assert ak._v2.operations.to_list(b.snapshot()) == []
-    assert ak._v2.operations.to_list(c.snapshot()) == []
+    assert ak.operations.to_list(a.snapshot()) == []
+    assert ak.operations.to_list(b.snapshot()) == []
+    assert ak.operations.to_list(c.snapshot()) == []
 
 
 def test_ArrayBuilder_tuple():
@@ -1154,18 +1154,18 @@ def test_ArrayBuilder_tuple():
         x.end_tuple()
         return x
 
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     b = f1(a)
-    assert ak._v2.operations.to_list(a.snapshot()) == [(1, 1.1), (2, 2.2)]
-    assert ak._v2.operations.to_list(b.snapshot()) == [(1, 1.1), (2, 2.2)]
+    assert ak.operations.to_list(a.snapshot()) == [(1, 1.1), (2, 2.2)]
+    assert ak.operations.to_list(b.snapshot()) == [(1, 1.1), (2, 2.2)]
     c = f1.py_func(a)
-    assert ak._v2.operations.to_list(a.snapshot()) == [
+    assert ak.operations.to_list(a.snapshot()) == [
         (1, 1.1),
         (2, 2.2),
         (1, 1.1),
         (2, 2.2),
     ]
-    assert ak._v2.operations.to_list(c.snapshot()) == [
+    assert ak.operations.to_list(c.snapshot()) == [
         (1, 1.1),
         (2, 2.2),
         (1, 1.1),
@@ -1186,24 +1186,24 @@ def test_ArrayBuilder_record():
         x.end_record()
         return x
 
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     b = f1(a)
-    assert ak._v2.operations.to_list(a.snapshot()) == [
+    assert ak.operations.to_list(a.snapshot()) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
     ]
-    assert ak._v2.operations.to_list(b.snapshot()) == [
+    assert ak.operations.to_list(b.snapshot()) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
     ]
     c = f1.py_func(a)
-    assert ak._v2.operations.to_list(a.snapshot()) == [
+    assert ak.operations.to_list(a.snapshot()) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
     ]
-    assert ak._v2.operations.to_list(c.snapshot()) == [
+    assert ak.operations.to_list(c.snapshot()) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
         {"x": 1, "y": 1.1},
@@ -1227,7 +1227,7 @@ def test_custom_record():
     behavior["__numba_typer__", "Dummy"] = dummy_typer
     behavior["__numba_lower__", "Dummy"] = dummy_lower
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}],
         behavior=behavior,
         check_valid=True,
@@ -1258,7 +1258,7 @@ def test_custom_record2():
     behavior["__numba_typer__", "Dummy", "stuff"] = dummy_typer2
     behavior["__numba_lower__", "Dummy", "stuff"] = dummy_lower2
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}],
         behavior=behavior,
         check_valid=True,
@@ -1289,7 +1289,7 @@ def test_custom_record3():
     behavior["__numba_typer__", "Dummy", "stuff", ()] = dummy_typer3
     behavior["__numba_lower__", "Dummy", "stuff", ()] = dummy_lower3
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}],
         behavior=behavior,
         check_valid=True,
@@ -1322,7 +1322,7 @@ def test_custom_record4():
     behavior["__numba_typer__", "Dummy", operator.eq, "Dummy"] = dummy_typer4
     behavior["__numba_lower__", "Dummy", operator.eq, "Dummy"] = dummy_lower4
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [{"x": 1.1, "y": 100}, {"x": 2.2, "y": 200}, {"x": 3.3, "y": 300}],
         behavior=behavior,
         check_valid=True,
@@ -1360,7 +1360,7 @@ def test_custom_record5():
     behavior["__numba_typer__", operator.neg, "Dummy"] = dummy_typer5
     behavior["__numba_lower__", operator.neg, "Dummy"] = dummy_lower5
 
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [{"x": 1.1, "y": 100}, {"x": -2.2, "y": 200}, {"x": 3.3, "y": 300}],
         behavior=behavior,
         check_valid=True,
@@ -1398,7 +1398,7 @@ def test_ArrayBuilder_append_numba5():
     def f3(builder, i):
         builder.append(f2(builder, i))
 
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
 
     f1(builder, True)
     f1(builder, 1)
@@ -1407,7 +1407,7 @@ def test_ArrayBuilder_append_numba5():
     f3(builder, 1)
     f1(builder, None)
 
-    assert ak._v2.operations.to_list(builder.snapshot()) == [
+    assert ak.operations.to_list(builder.snapshot()) == [
         True,
         1,
         2.2,

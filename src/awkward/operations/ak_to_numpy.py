@@ -32,8 +32,8 @@ def to_numpy(array, allow_missing=True):
 
     See also #ak.from_numpy and #ak.to_cupy.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_numpy",
+    with ak._util.OperationErrorContext(
+        "ak.to_numpy",
         dict(array=array, allow_missing=allow_missing),
     ):
-        return ak._v2._util.to_arraylib(numpy, array, allow_missing)
+        return ak._util.to_arraylib(numpy, array, allow_missing)

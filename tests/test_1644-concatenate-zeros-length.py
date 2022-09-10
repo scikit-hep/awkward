@@ -6,7 +6,7 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    x = ak._v2.from_numpy(np.empty((5, 0), dtype=np.float64), regulararray=True)
-    y = ak._v2.from_numpy(np.empty((8, 0), dtype=np.float64), regulararray=True)
-    z = ak._v2.concatenate([x, y], axis=0)
+    x = ak.from_numpy(np.empty((5, 0), dtype=np.float64), regulararray=True)
+    y = ak.from_numpy(np.empty((8, 0), dtype=np.float64), regulararray=True)
+    z = ak.concatenate([x, y], axis=0)
     assert len(z) == 13

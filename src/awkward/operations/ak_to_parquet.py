@@ -66,17 +66,15 @@ def to_parquet(
 
     ``pyarrow._parquet.FileMetaData`` instance
     """
-    import awkward._v2._connect.pyarrow
+    import awkward._connect.pyarrow
 
-    pyarrow_parquet = awkward._v2._connect.pyarrow.import_pyarrow_parquet(
-        "ak.to_parquet"
-    )
-    fsspec = awkward._v2._connect.pyarrow.import_fsspec("ak.to_parquet")
+    pyarrow_parquet = awkward._connect.pyarrow.import_pyarrow_parquet("ak.to_parquet")
+    fsspec = awkward._connect.pyarrow.import_fsspec("ak.to_parquet")
 
-    layout = ak._v2.operations.ak_to_layout.to_layout(
+    layout = ak.operations.ak_to_layout.to_layout(
         data, allow_record=True, allow_other=False
     )
-    table = ak._v2.operations.ak_to_arrow_table._impl(
+    table = ak.operations.ak_to_arrow_table._impl(
         layout,
         list_to32,
         string_to32,
@@ -97,7 +95,7 @@ def to_parquet(
     else:
         column_prefix = ()
 
-    if isinstance(data, ak._v2.Record):
+    if isinstance(data, ak.Record):
         form = layout.array.form
     else:
         form = layout.form

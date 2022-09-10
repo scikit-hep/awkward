@@ -13,13 +13,11 @@ def test_empty_form():
     "class": "EmptyArray"
 }
     """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
     array = builder.snapshot()
-    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
-        ak._v2.types.UnknownType(), 0
-    )
+    assert ak.operations.type(array) == ak.types.ArrayType(ak.types.UnknownType(), 0)
 
-    assert ak._v2.to_list(array) == []
+    assert ak.to_list(array) == []
 
 
 def test_numpy_bool_form():
@@ -28,7 +26,7 @@ def test_numpy_bool_form():
     "class": "NumpyArray",
     "primitive": "bool"
 }    """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.boolean(True)
     builder.boolean(True)
@@ -36,11 +34,11 @@ def test_numpy_bool_form():
     builder.boolean(True)
 
     array = builder.snapshot()
-    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
-        ak._v2.types.NumpyType("bool"), 4
-    )  # FIXME: ak._v2.types.NumpyType("bool")
+    assert ak.operations.type(array) == ak.types.ArrayType(
+        ak.types.NumpyType("bool"), 4
+    )  # FIXME: ak.types.NumpyType("bool")
 
-    assert ak._v2.to_list(array) == [True, True, False, True]
+    assert ak.to_list(array) == [True, True, False, True]
 
 
 def test_numpy_int_form():
@@ -49,7 +47,7 @@ def test_numpy_int_form():
     "class": "NumpyArray",
     "primitive": "int64"
 }    """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.int64(1)
     builder.int64(2)
@@ -57,11 +55,11 @@ def test_numpy_int_form():
     builder.int64(4)
 
     array = builder.snapshot()
-    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
-        ak._v2.types.NumpyType("int64"), 4
-    )  # FIXME: ak._v2.types.NumpyType("int64")
+    assert ak.operations.type(array) == ak.types.ArrayType(
+        ak.types.NumpyType("int64"), 4
+    )  # FIXME: ak.types.NumpyType("int64")
 
-    assert ak._v2.to_list(array) == [1, 2, 3, 4]
+    assert ak.to_list(array) == [1, 2, 3, 4]
 
 
 def test_numpy_float_form():
@@ -70,7 +68,7 @@ def test_numpy_float_form():
     "class": "NumpyArray",
     "primitive": "float64"
 }    """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
@@ -78,15 +76,15 @@ def test_numpy_float_form():
     builder.float64(4.4)
 
     array = builder.snapshot()
-    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
-        ak._v2.types.NumpyType("float64"), 4
-    )  # FIXME: ak._v2.types.NumpyType("float64")
+    assert ak.operations.type(array) == ak.types.ArrayType(
+        ak.types.NumpyType("float64"), 4
+    )  # FIXME: ak.types.NumpyType("float64")
 
-    assert ak._v2.to_list(array) == [1.1, 2.2, 3.3, 4.4]
+    assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4]
 
 
 @pytest.mark.skipif(
-    ak._v2._util.win,
+    ak._util.win,
     reason="FIXME: the test fails on Windows",
 )
 def test_numpy_complex_form():
@@ -95,7 +93,7 @@ def test_numpy_complex_form():
     "class": "NumpyArray",
     "primitive": "complex128"
 }    """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.complex(1.0 + 0.1j)
     builder.complex(2.0 + 0.2j)
@@ -103,11 +101,11 @@ def test_numpy_complex_form():
     builder.complex(4.0 + 0.4j)
 
     array = builder.snapshot()
-    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
-        ak._v2.types.NumpyType("complex128"), 4
-    )  # FIXME: ak._v2.types.NumpyType("complex128")
+    assert ak.operations.type(array) == ak.types.ArrayType(
+        ak.types.NumpyType("complex128"), 4
+    )  # FIXME: ak.types.NumpyType("complex128")
 
-    assert ak._v2.to_list(array) == [1.0 + 0.1j, 2.0 + 0.2j, 3.0 + 0.3j, 4.0 + 0.4j]
+    assert ak.to_list(array) == [1.0 + 0.1j, 2.0 + 0.2j, 3.0 + 0.3j, 4.0 + 0.4j]
 
 
 def test_record_form2():
@@ -121,7 +119,7 @@ def test_record_form2():
     "form_key": "node0"
 }
     """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     # the fields alternate
     builder.float64(1.1)  # "one"
@@ -131,15 +129,15 @@ def test_record_form2():
 
     # etc.
     array = builder.snapshot()
-    assert ak._v2.operations.type(array) == ak._v2.types.ArrayType(
-        ak._v2.types.RecordType(
-            [ak._v2.types.NumpyType("float64"), ak._v2.types.NumpyType("int64")],
+    assert ak.operations.type(array) == ak.types.ArrayType(
+        ak.types.RecordType(
+            [ak.types.NumpyType("float64"), ak.types.NumpyType("int64")],
             ["one", "two"],
         ),
         2,
     )
 
-    assert ak._v2.to_list(array) == [
+    assert ak.to_list(array) == [
         {"one": 1.1, "two": 2},
         {"one": 3.3, "two": 4},
     ]
@@ -156,13 +154,13 @@ def test_bit_masked_form():
     "form_key": "node0"
 }
     """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
     builder.float64(3.3)
 
-    assert ak._v2.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
 
 def test_byte_masked_form():
@@ -176,13 +174,13 @@ def test_byte_masked_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
     builder.float64(3.3)
 
-    assert ak._v2.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
 
 def test_unmasked_form():
@@ -193,13 +191,13 @@ def test_unmasked_form():
     "form_key": "node0"
 }
 """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
     builder.float64(3.3)
 
-    assert ak._v2.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
 
 def test_unsupported_form():
@@ -212,7 +210,7 @@ def test_unsupported_form():
            """
 
     with pytest.raises(ValueError):
-        ak._v2.highlevel.LayoutBuilder(form)
+        ak.highlevel.LayoutBuilder(form)
 
 
 def test_list_offset_form():
@@ -245,7 +243,7 @@ def test_list_offset_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.begin_list()
     builder.float64(1.1)
@@ -271,7 +269,7 @@ def test_list_offset_form():
     builder.end_list()
     builder.end_list()
 
-    assert ak._v2.to_list(builder.snapshot()) == [
+    assert ak.to_list(builder.snapshot()) == [
         [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
         [],
         [{"x": 3.3, "y": [1, 2, 3]}],
@@ -292,7 +290,7 @@ def test_indexed_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.int64(11)
     builder.int64(22)
@@ -302,7 +300,7 @@ def test_indexed_form():
     builder.int64(66)
     builder.int64(77)
 
-    assert ak._v2.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]
+    assert ak.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]
 
 
 def test_indexed_option_form():
@@ -319,7 +317,7 @@ def test_indexed_option_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.null()
     builder.int64(11)
@@ -333,7 +331,7 @@ def test_indexed_option_form():
     builder.int64(77)
 
     # FIXME: the first index element is duplicated
-    assert ak._v2.to_list(builder.snapshot()[1:]) == [
+    assert ak.to_list(builder.snapshot()[1:]) == [
         None,
         11,
         22,
@@ -356,7 +354,7 @@ def test_regular_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.int64(11)
     builder.int64(22)
@@ -366,12 +364,12 @@ def test_regular_form():
     builder.int64(66)
     builder.int64(77)
 
-    assert ak._v2.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66]]
+    assert ak.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66]]
 
     builder.int64(88)
     builder.int64(99)
 
-    assert ak._v2.to_list(builder.snapshot()) == [
+    assert ak.to_list(builder.snapshot()) == [
         [11, 22, 33],
         [44, 55, 66],
         [77, 88, 99],
@@ -392,7 +390,7 @@ def test_union_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.tag(0)
     builder.float64(1.1)
@@ -413,7 +411,7 @@ def test_union_form():
     builder.tag(0)
     builder.float64(-2.2)
 
-    assert ak._v2.to_list(builder.snapshot()) == [
+    assert ak.to_list(builder.snapshot()) == [
         1.1,
         False,
         2.2,
@@ -440,7 +438,7 @@ def test_union2_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.tag(0)
     builder.float64(1.1)
@@ -451,7 +449,7 @@ def test_union2_form():
     builder.tag(1)
     builder.float64(3.3)
 
-    assert ak._v2.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
 
 def test_union3_form():
@@ -469,7 +467,7 @@ def test_union3_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.tag(0)
     builder.float64(1.1)
@@ -496,7 +494,7 @@ def test_union3_form():
     builder.tag(0)
     builder.float64(-2.2)
 
-    assert ak._v2.to_list(builder.snapshot()) == [
+    assert ak.to_list(builder.snapshot()) == [
         1.1,
         False,
         11,
@@ -523,7 +521,7 @@ def test_record_form():
     "form_key": "node0"
 }
     """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     # if record contents have the same type,
     # the fields alternate
@@ -534,7 +532,7 @@ def test_record_form():
 
     # etc.
 
-    assert ak._v2.to_list(builder.snapshot()) == [
+    assert ak.to_list(builder.snapshot()) == [
         {"one": 1.1, "two": 2.2},
         {"one": 3.3, "two": 4.4},
     ]
@@ -552,7 +550,7 @@ def test_error_in_record_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     # if record contents have the same type,
     # the fields alternate
@@ -573,7 +571,7 @@ def test_error_in_numpy_form():
 }
     """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.float64(1.1)
     builder.float64(2.2)
@@ -595,7 +593,7 @@ def test_categorical_form():
 }
 """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.int64(2019)
     builder.int64(2020)
@@ -608,7 +606,7 @@ def test_categorical_form():
     builder.int64(2020)
     builder.int64(2020)
 
-    assert ak._v2.to_list(builder.snapshot()) == [
+    assert ak.to_list(builder.snapshot()) == [
         2019,
         2020,
         2021,
@@ -635,13 +633,13 @@ def test_char_form():
     }
 }"""
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.string("one")
     builder.string("two")
     builder.string("three")
 
-    assert ak._v2.to_list(builder.snapshot()) == "onetwothree"
+    assert ak.to_list(builder.snapshot()) == "onetwothree"
 
 
 def test_string_form():
@@ -663,13 +661,13 @@ def test_string_form():
     }
 }"""
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.string("one")
     builder.string("two")
     builder.string("three")
 
-    assert ak._v2.to_list(builder.snapshot()) == ["one", "two", "three"]
+    assert ak.to_list(builder.snapshot()) == ["one", "two", "three"]
 
 
 def test_list_offset_empty_form():
@@ -683,7 +681,7 @@ def test_list_offset_empty_form():
 }
 """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.begin_list()
     builder.end_list()
@@ -692,7 +690,7 @@ def test_list_offset_empty_form():
     builder.begin_list()
     builder.end_list()
 
-    assert ak._v2.to_list(builder.snapshot()) == [[], [], []]
+    assert ak.to_list(builder.snapshot()) == [[], [], []]
 
 
 def test_list_offset_list_offset_empty_form():
@@ -710,7 +708,7 @@ def test_list_offset_list_offset_empty_form():
 }
 """
 
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
 
     builder.begin_list()
     builder.end_list()
@@ -737,4 +735,4 @@ def test_list_offset_list_offset_empty_form():
     builder.end_list()
     builder.end_list()
 
-    assert ak._v2.to_list(builder.snapshot()) == [[], [[], [], []], [[], []], [], [[]]]
+    assert ak.to_list(builder.snapshot()) == [[], [[], [], []], [[], []], [], [[]]]

@@ -10,21 +10,21 @@ from typing import Any, Callable, Dict, List, Union
 from collections.abc import Sequence
 
 import awkward as ak
-from awkward._v2.contents.content import Content  # noqa: F401
-from awkward._v2.contents.emptyarray import EmptyArray  # noqa: F401
-from awkward._v2.contents.numpyarray import NumpyArray  # noqa: F401
-from awkward._v2.contents.regulararray import RegularArray  # noqa: F401
-from awkward._v2.contents.listarray import ListArray  # noqa: F401
-from awkward._v2.contents.listoffsetarray import ListOffsetArray  # noqa: F401
-from awkward._v2.contents.recordarray import RecordArray  # noqa: F401
-from awkward._v2.contents.indexedarray import IndexedArray  # noqa: F401
-from awkward._v2.contents.indexedoptionarray import IndexedOptionArray  # noqa: F401
-from awkward._v2.contents.bytemaskedarray import ByteMaskedArray  # noqa: F401
-from awkward._v2.contents.bitmaskedarray import BitMaskedArray  # noqa: F401
-from awkward._v2.contents.unmaskedarray import UnmaskedArray  # noqa: F401
-from awkward._v2.contents.unionarray import UnionArray  # noqa: F401
-from awkward._v2.record import Record  # noqa: F401
-from awkward._v2.index import (
+from awkward.contents.content import Content  # noqa: F401
+from awkward.contents.emptyarray import EmptyArray  # noqa: F401
+from awkward.contents.numpyarray import NumpyArray  # noqa: F401
+from awkward.contents.regulararray import RegularArray  # noqa: F401
+from awkward.contents.listarray import ListArray  # noqa: F401
+from awkward.contents.listoffsetarray import ListOffsetArray  # noqa: F401
+from awkward.contents.recordarray import RecordArray  # noqa: F401
+from awkward.contents.indexedarray import IndexedArray  # noqa: F401
+from awkward.contents.indexedoptionarray import IndexedOptionArray  # noqa: F401
+from awkward.contents.bytemaskedarray import ByteMaskedArray  # noqa: F401
+from awkward.contents.bitmaskedarray import BitMaskedArray  # noqa: F401
+from awkward.contents.unmaskedarray import UnmaskedArray  # noqa: F401
+from awkward.contents.unionarray import UnionArray  # noqa: F401
+from awkward.record import Record  # noqa: F401
+from awkward.index import (
     Index,  # noqa: F401
     Index8,  # noqa: F401
     #    IndexU8,  # noqa: F401
@@ -92,7 +92,7 @@ def checklength(inputs, options):
     length = inputs[0].length
     for x in inputs[1:]:
         if x.length != length:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     "cannot broadcast {} of length {} with {} of length {}{}".format(
                         type(inputs[0]).__name__,
@@ -188,13 +188,13 @@ BroadcastParameterFactory = Callable[[int], List[Union[Dict[str, Any], None]]]
 def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
     """
     Args:
-        obj: #ak._v2.contents.Content that holds parameters, or object
-        default: value to return if obj is not an #ak._v2.contents.Content
+        obj: #ak.contents.Content that holds parameters, or object
+        default: value to return if obj is not an #ak.contents.Content
 
-    Return the parameters of an object if it is a #ak._v2.contents.Content;
+    Return the parameters of an object if it is a #ak.contents.Content;
     otherwise, return a default value.
     """
-    if isinstance(obj, ak._v2.contents.Content):
+    if isinstance(obj, ak.contents.Content):
         return obj._parameters
     else:
         return default
@@ -205,7 +205,7 @@ def all_or_nothing_parameters_factory(
 ) -> BroadcastParameterFactory:
     """
     Args:
-        inputs: sequence of #ak._v2.contents.Content or other objects
+        inputs: sequence of #ak.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -224,9 +224,7 @@ def all_or_nothing_parameters_factory(
         first_parameters = input_parameters[0]
         # Ensure all parameters match, or set parameters to None
         for other_parameters in input_parameters[1:]:
-            if not ak._v2.forms.form._parameters_equal(
-                first_parameters, other_parameters
-            ):
+            if not ak.forms.form._parameters_equal(first_parameters, other_parameters):
                 break
         else:
             parameters = first_parameters
@@ -244,7 +242,7 @@ def intersection_parameters_factory(
 ) -> BroadcastParameterFactory:
     """
     Args:
-        inputs: sequence of #ak._v2.contents.Content or other objects
+        inputs: sequence of #ak.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "intersection rule":
@@ -264,14 +262,14 @@ def intersection_parameters_factory(
     # If we encounter None-parameters, then we stop early
     # as there can be no intersection.
     for parameters in input_parameters:
-        if ak._v2.forms.form._parameters_is_empty(parameters):
+        if ak.forms.form._parameters_is_empty(parameters):
             break
         else:
             parameters_to_intersect.append(parameters)
     # Otherwise, build the intersected parameter dict
     else:
         intersected_parameters = functools.reduce(
-            ak._v2.forms.form._parameters_intersect, parameters_to_intersect
+            ak.forms.form._parameters_intersect, parameters_to_intersect
         )
 
     def apply(n_outputs: int) -> list[dict[str, Any] | None]:
@@ -287,7 +285,7 @@ def one_to_one_parameters_factory(
 ) -> BroadcastParameterFactory:
     """
     Args:
-        inputs: sequence of #ak._v2.contents.Content or other objects
+        inputs: sequence of #ak.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using a "one-to-one rule":
@@ -303,7 +301,7 @@ def one_to_one_parameters_factory(
 
     def apply(n_outputs) -> list[dict[str, Any] | None]:
         if n_outputs != len(inputs):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     "cannot follow one-to-one parameter broadcasting rule for actions "
                     "which change the number of outputs."
@@ -319,7 +317,7 @@ def none_parameters_factory(
 ) -> BroadcastParameterFactory:
     """
     Args:
-        inputs: sequence of #ak._v2.contents.Content or other objects
+        inputs: sequence of #ak.contents.Content or other objects
 
     Return a callable that creates an appropriately sized list of parameter objects.
     The parameter objects within this list are built using an "all or nothing rule":
@@ -397,7 +395,7 @@ def apply_step(
     try:
         parameters_factory_impl = BROADCAST_RULE_TO_FACTORY_IMPL[rule]
     except KeyError:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError(
                 f"`broadcast_parameters_rule` should be one of {[str(x) for x in BroadcastParameterRule]}, "
                 f"but this routine received `{rule}`"
@@ -511,7 +509,7 @@ def apply_step(
                         if length is None:
                             length = tagslist[-1].shape[0]
                         elif length != tagslist[-1].shape[0]:
-                            raise ak._v2._util.error(
+                            raise ak._util.error(
                                 ValueError(
                                     "cannot broadcast UnionArray of length {} "
                                     "with UnionArray of length {}{}".format(
@@ -686,7 +684,7 @@ def apply_step(
                             elif x.size == maxsize:
                                 nextinputs.append(x.content[: x.length * x.size])
                             else:
-                                raise ak._v2._util.error(
+                                raise ak._util.error(
                                     ValueError(
                                         "cannot broadcast RegularArray of size "
                                         "{} with RegularArray of size {} {}".format(
@@ -825,7 +823,7 @@ def apply_step(
                         for x, p in zip(outcontent, parameters)
                     )
                 else:
-                    raise ak._v2._util.error(
+                    raise ak._util.error(
                         AssertionError(
                             "unexpected offsets, starts: {}, {}".format(
                                 type(offsets), type(starts)
@@ -836,7 +834,7 @@ def apply_step(
             # General list-handling case: the offsets of each list may be different.
             else:
                 fcns = [
-                    ak._v2._util.custom_broadcast(x, behavior)
+                    ak._util.custom_broadcast(x, behavior)
                     if isinstance(x, Content)
                     else None
                     for x in inputs
@@ -907,7 +905,7 @@ def apply_step(
         # Any RecordArrays?
         elif any(isinstance(x, RecordArray) for x in inputs):
             if not options["allow_records"]:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(f"cannot broadcast records {in_function(options)}")
                 )
 
@@ -917,7 +915,7 @@ def apply_step(
                     if fields is None:
                         fields = x.fields
                     elif set(fields) != set(x.fields):
-                        raise ak._v2._util.error(
+                        raise ak._util.error(
                             ValueError(
                                 "cannot broadcast records because fields don't "
                                 "match{}:\n    {}\n    {}".format(
@@ -930,7 +928,7 @@ def apply_step(
                     if length is None:
                         length = x.length
                     elif length != x.length:
-                        raise ak._v2._util.error(
+                        raise ak._util.error(
                             ValueError(
                                 "cannot broadcast RecordArray of length {} "
                                 "with RecordArray of length {}{}".format(
@@ -970,7 +968,7 @@ def apply_step(
             )
 
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     "cannot broadcast: {}{}".format(
                         ", ".join(repr(type(x)) for x in inputs), in_function(options)
@@ -994,7 +992,7 @@ def apply_step(
     elif result is None:
         return continuation()
     else:
-        raise ak._v2._util.error(AssertionError(result))
+        raise ak._util.error(AssertionError(result))
 
 
 def broadcast_and_apply(

@@ -11,8 +11,8 @@ jax.config.update("jax_enable_x64", True)
 
 # #### ak.layout.NumpyArray ####
 
-test_numpyarray = ak._v2.Array(np.arange(10, dtype=np.float64), backend="jax")
-test_numpyarray_tangent = ak._v2.Array(np.arange(10, dtype=np.float64), backend="jax")
+test_numpyarray = ak.Array(np.arange(10, dtype=np.float64), backend="jax")
+test_numpyarray_tangent = ak.Array(np.arange(10, dtype=np.float64), backend="jax")
 
 test_numpyarray_jax = jax.numpy.arange(10, dtype=np.float64)
 test_numpyarray_tangent_jax = jax.numpy.arange(10, dtype=np.float64)
@@ -20,7 +20,7 @@ test_numpyarray_tangent_jax = jax.numpy.arange(10, dtype=np.float64)
 
 def test_numpyarray_grad_sum_1():
     def func_numpyarray_1(x):
-        return ak._v2.sum(x)
+        return ak.sum(x)
 
     def func_nummpyarray_1_jax(x):
         return jax.numpy.sum(x)
@@ -39,14 +39,13 @@ def test_numpyarray_grad_sum_1():
     assert value_vjp == value_vjp_jax
     assert jvp_grad == jvp_grad_jax
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_numpyarray_grad_prod_1():
     def func_numpyarray_1(x):
-        return ak._v2.prod(x)
+        return ak.prod(x)
 
     def func_nummpyarray_1_jax(x):
         return jax.numpy.prod(x)
@@ -65,14 +64,13 @@ def test_numpyarray_grad_prod_1():
     assert value_vjp == value_vjp_jax
     assert jvp_grad == jvp_grad_jax
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_numpyarray_grad_max_1():
     def func_numpyarray_1(x):
-        return ak._v2.max(x)
+        return ak.max(x)
 
     def func_nummpyarray_1_jax(x):
         return jax.numpy.max(x)
@@ -91,14 +89,13 @@ def test_numpyarray_grad_max_1():
     assert value_vjp == value_vjp_jax
     assert jvp_grad == jvp_grad_jax
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_numpyarray_grad_min_1():
     def func_numpyarray_1(x):
-        return ak._v2.min(x)
+        return ak.min(x)
 
     def func_nummpyarray_1_jax(x):
         return jax.numpy.min(x)
@@ -117,14 +114,13 @@ def test_numpyarray_grad_min_1():
     assert value_vjp == value_vjp_jax
     assert jvp_grad == jvp_grad_jax
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_numpyarray_grad_all_1():
     def func_numpyarray_1(x):
-        return ak._v2.all(x)
+        return ak.all(x)
 
     def func_nummpyarray_1_jax(x):
         return jax.numpy.all(x)
@@ -143,14 +139,13 @@ def test_numpyarray_grad_all_1():
     assert value_vjp == value_vjp_jax
     assert jvp_grad == jvp_grad_jax
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_numpyarray_grad_any_1():
     def func_numpyarray_1(x):
-        return ak._v2.any(x)
+        return ak.any(x)
 
     def func_nummpyarray_1_jax(x):
         return jax.numpy.any(x)
@@ -169,15 +164,14 @@ def test_numpyarray_grad_any_1():
     assert value_vjp == value_vjp_jax
     assert jvp_grad == jvp_grad_jax
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
-test_regulararray = ak._v2.Array(
+test_regulararray = ak.Array(
     [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
 )
-test_regulararray_tangent = ak._v2.Array(
+test_regulararray_tangent = ak.Array(
     [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]], backend="jax"
 )
 
@@ -191,7 +185,7 @@ test_regulararray_tangent_jax = jax.numpy.array(
 
 def test_regular_array_sum_0():
     def func_regulararray_sum_0(x):
-        return ak._v2.sum(x, 0)
+        return ak.sum(x, 0)
 
     def func_regulararray_sum_0_jax(x):
         return jax.numpy.sum(x, 0)
@@ -210,18 +204,17 @@ def test_regular_array_sum_0():
         func_regulararray_sum_0_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_sum_1():
     def func_regulararray_sum_1(x):
-        return ak._v2.sum(x, 1)
+        return ak.sum(x, 1)
 
     def func_regulararray_sum_1_jax(x):
         return jax.numpy.sum(x, 1)
@@ -240,18 +233,17 @@ def test_regular_array_sum_1():
         func_regulararray_sum_1_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_sum_none():
     def func_regulararray_sum_none(x):
-        return ak._v2.sum(x, 1)
+        return ak.sum(x, 1)
 
     def func_regulararray_sum_none_jax(x):
         return jax.numpy.sum(x, 1)
@@ -270,18 +262,17 @@ def test_regular_array_sum_none():
         func_regulararray_sum_none_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_prod_0():
     def func_regulararray_prod_0(x):
-        return ak._v2.prod(x, 0)
+        return ak.prod(x, 0)
 
     def func_regulararray_prod_0_jax(x):
         return jax.numpy.prod(x, 0)
@@ -300,17 +291,17 @@ def test_regular_array_prod_0():
         func_regulararray_prod_0_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == pytest.approx(value_jvp_jax.tolist())
-    assert ak._v2.to_list(value_vjp) == pytest.approx(value_vjp_jax.tolist())
-    assert ak._v2.to_list(jvp_grad) == pytest.approx(jvp_grad_jax.tolist())
+    assert ak.to_list(value_jvp) == pytest.approx(value_jvp_jax.tolist())
+    assert ak.to_list(value_vjp) == pytest.approx(value_vjp_jax.tolist())
+    assert ak.to_list(jvp_grad) == pytest.approx(jvp_grad_jax.tolist())
     np.testing.assert_array_almost_equal(
-        ak._v2.to_list(vjp_func(value_vjp)[0]), vjp_func_jax(value_vjp_jax)[0].tolist()
+        ak.to_list(vjp_func(value_vjp)[0]), vjp_func_jax(value_vjp_jax)[0].tolist()
     )
 
 
 def test_regular_array_prod_1():
     def func_regulararray_prod_1(x):
-        return ak._v2.prod(x, 1)
+        return ak.prod(x, 1)
 
     def func_regulararray_prod_1_jax(x):
         return jax.numpy.prod(x, 1)
@@ -329,17 +320,17 @@ def test_regular_array_prod_1():
         func_regulararray_prod_1_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == pytest.approx(value_jvp_jax.tolist())
-    assert ak._v2.to_list(value_vjp) == pytest.approx(value_vjp_jax.tolist())
-    assert ak._v2.to_list(jvp_grad) == pytest.approx(jvp_grad_jax.tolist())
+    assert ak.to_list(value_jvp) == pytest.approx(value_jvp_jax.tolist())
+    assert ak.to_list(value_vjp) == pytest.approx(value_vjp_jax.tolist())
+    assert ak.to_list(jvp_grad) == pytest.approx(jvp_grad_jax.tolist())
     np.testing.assert_array_almost_equal(
-        ak._v2.to_list(vjp_func(value_vjp)[0]), vjp_func_jax(value_vjp_jax)[0].tolist()
+        ak.to_list(vjp_func(value_vjp)[0]), vjp_func_jax(value_vjp_jax)[0].tolist()
     )
 
 
 def test_regular_array_prod_none():
     def func_regulararray_prod_none(x):
-        return ak._v2.prod(x)
+        return ak.prod(x)
 
     def func_regulararray_prod_none_jax(x):
         return jax.numpy.prod(x)
@@ -358,17 +349,17 @@ def test_regular_array_prod_none():
         func_regulararray_prod_none_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == pytest.approx(value_jvp_jax.tolist())
-    assert ak._v2.to_list(value_vjp) == pytest.approx(value_vjp_jax.tolist())
-    assert ak._v2.to_list(jvp_grad) == pytest.approx(jvp_grad_jax.tolist())
+    assert ak.to_list(value_jvp) == pytest.approx(value_jvp_jax.tolist())
+    assert ak.to_list(value_vjp) == pytest.approx(value_vjp_jax.tolist())
+    assert ak.to_list(jvp_grad) == pytest.approx(jvp_grad_jax.tolist())
     np.testing.assert_array_almost_equal(
-        ak._v2.to_list(vjp_func(value_vjp)[0]), vjp_func_jax(value_vjp_jax)[0].tolist()
+        ak.to_list(vjp_func(value_vjp)[0]), vjp_func_jax(value_vjp_jax)[0].tolist()
     )
 
 
 def test_regular_array_max_0():
     def func_regulararray_max_0(x):
-        return ak._v2.max(x, 0)
+        return ak.max(x, 0)
 
     def func_regulararray_max_0_jax(x):
         return jax.numpy.max(x, 0)
@@ -387,18 +378,17 @@ def test_regular_array_max_0():
         func_regulararray_max_0_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_max_1():
     def func_regulararray_max_1(x):
-        return ak._v2.max(x, 1)
+        return ak.max(x, 1)
 
     def func_regulararray_max_1_jax(x):
         return jax.numpy.max(x, 1)
@@ -417,18 +407,17 @@ def test_regular_array_max_1():
         func_regulararray_max_1_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_max_none():
     def func_regulararray_max_none(x):
-        return ak._v2.max(x)
+        return ak.max(x)
 
     def func_regulararray_max_none_jax(x):
         return jax.numpy.max(x)
@@ -447,18 +436,17 @@ def test_regular_array_max_none():
         func_regulararray_max_none_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_min_0():
     def func_regulararray_min_0(x):
-        return ak._v2.min(x, 0)
+        return ak.min(x, 0)
 
     def func_regulararray_min_0_jax(x):
         return jax.numpy.min(x, 0)
@@ -477,18 +465,17 @@ def test_regular_array_min_0():
         func_regulararray_min_0_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_min_1():
     def func_regulararray_min_1(x):
-        return ak._v2.min(x, 1)
+        return ak.min(x, 1)
 
     def func_regulararray_min_1_jax(x):
         return jax.numpy.min(x, 1)
@@ -507,18 +494,17 @@ def test_regular_array_min_1():
         func_regulararray_min_1_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_min_none():
     def func_regulararray_min_none(x):
-        return ak._v2.min(x)
+        return ak.min(x)
 
     def func_regulararray_min_none_jax(x):
         return jax.numpy.min(x)
@@ -537,18 +523,17 @@ def test_regular_array_min_none():
         func_regulararray_min_none_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_all_0():
     def func_regulararray_all_0(x):
-        return ak._v2.all(x, 0)
+        return ak.all(x, 0)
 
     def func_regulararray_all_0_jax(x):
         return jax.numpy.all(x, 0)
@@ -567,18 +552,17 @@ def test_regular_array_all_0():
         func_regulararray_all_0_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_all_1():
     def func_regulararray_all_1(x):
-        return ak._v2.all(x, 1)
+        return ak.all(x, 1)
 
     def func_regulararray_all_1_jax(x):
         return jax.numpy.all(x, 1)
@@ -597,18 +581,17 @@ def test_regular_array_all_1():
         func_regulararray_all_1_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_all_none():
     def func_regulararray_all_none(x):
-        return ak._v2.all(x)
+        return ak.all(x)
 
     def func_regulararray_all_none_jax(x):
         return jax.numpy.all(x)
@@ -627,18 +610,17 @@ def test_regular_array_all_none():
         func_regulararray_all_none_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_any_0():
     def func_regulararray_any_0(x):
-        return ak._v2.any(x, 0)
+        return ak.any(x, 0)
 
     def func_regulararray_any_0_jax(x):
         return jax.numpy.any(x, 0)
@@ -657,18 +639,17 @@ def test_regular_array_any_0():
         func_regulararray_any_0_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_any_1():
     def func_regulararray_any_1(x):
-        return ak._v2.any(x, 1)
+        return ak.any(x, 1)
 
     def func_regulararray_any_1_jax(x):
         return jax.numpy.any(x, 1)
@@ -687,18 +668,17 @@ def test_regular_array_any_1():
         func_regulararray_any_1_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )
 
 
 def test_regular_array_any_none():
     def func_regulararray_any_none(x):
-        return ak._v2.any(x)
+        return ak.any(x)
 
     def func_regulararray_any_none_jax(x):
         return jax.numpy.any(x)
@@ -717,10 +697,9 @@ def test_regular_array_any_none():
         func_regulararray_any_none_jax, test_regulararray_jax
     )
 
-    assert ak._v2.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak._v2.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak._v2.to_list(jvp_grad) == jvp_grad_jax.tolist()
+    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
+    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
+    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
     assert (
-        ak._v2.to_list(vjp_func(value_vjp)[0])
-        == (vjp_func_jax(value_vjp_jax)[0]).tolist()
+        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
     )

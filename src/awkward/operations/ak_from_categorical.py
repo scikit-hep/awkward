@@ -20,8 +20,8 @@ def from_categorical(array, highlevel=True):
     See also #ak.is_categorical, #ak.categories, #ak.to_categorical,
     #ak.from_categorical.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.from_categorical",
+    with ak._util.OperationErrorContext(
+        "ak.from_categorical",
         dict(array=array, highlevel=highlevel),
     ):
         return _impl(array, highlevel)
@@ -30,7 +30,7 @@ def from_categorical(array, highlevel=True):
 def _impl(array, highlevel):
     def action(layout, **kwargs):
         if layout.parameter("__array__") == "categorical":
-            out = ak._v2.operations.with_parameter(
+            out = ak.operations.with_parameter(
                 layout, "__array__", None, highlevel=False
             )
             return out
@@ -38,9 +38,9 @@ def _impl(array, highlevel):
         else:
             return None
 
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.recursively_apply(action)
     if highlevel:
-        return ak._v2._util.wrap(out, ak._v2._util.behavior_of(array))
+        return ak._util.wrap(out, ak._util.behavior_of(array))
     else:
         return out

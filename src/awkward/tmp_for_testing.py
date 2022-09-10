@@ -8,11 +8,11 @@ def v1v2_id_equal(v1, v2):
     if v1 is None and v2 is None:
         return True
     else:
-        raise ak._v2._util.error(NotImplementedError("Identities/Identifier equality"))
+        raise ak._util.error(NotImplementedError("Identities/Identifier equality"))
 
 
 def v1v2_equal(v1, v2):
-    assert isinstance(v1, ak.layout.Content) and isinstance(v2, ak._v2.contents.Content)
+    assert isinstance(v1, ak.layout.Content) and isinstance(v2, ak.contents.Content)
 
     if len(v1) != len(v2):
         return False
@@ -23,25 +23,23 @@ def v1v2_equal(v1, v2):
     if v1.parameters != v2.parameters:
         return False
 
-    if isinstance(v1, ak.layout.EmptyArray) and isinstance(
-        v2, ak._v2.contents.EmptyArray
-    ):
+    if isinstance(v1, ak.layout.EmptyArray) and isinstance(v2, ak.contents.EmptyArray):
         return True
 
     elif isinstance(v1, ak.layout.NumpyArray) and isinstance(
-        v2, ak._v2.contents.NumpyArray
+        v2, ak.contents.NumpyArray
     ):
         v1_data = np.asarray(v1)
         return v1_data.dtype == v2.dtype and np.array_equal(v1_data, v2.data)
 
     elif isinstance(v1, ak.layout.RegularArray) and isinstance(
-        v2, ak._v2.contents.RegularArray
+        v2, ak.contents.RegularArray
     ):
         return v1v2_equal(v1.content, v2.content) and v1.size == v2.size
 
     elif isinstance(
         v1, (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64)
-    ) and isinstance(v2, ak._v2.contents.ListArray):
+    ) and isinstance(v2, ak.contents.ListArray):
         v1_starts = np.asarray(v1.starts)
         v1_stops = np.asarray(v1.stops)
         v2_starts = v2.starts.data
@@ -61,7 +59,7 @@ def v1v2_equal(v1, v2):
             ak.layout.ListOffsetArrayU32,
             ak.layout.ListOffsetArray64,
         ),
-    ) and isinstance(v2, ak._v2.contents.ListOffsetArray):
+    ) and isinstance(v2, ak.contents.ListOffsetArray):
         v1_offsets = np.asarray(v1.offsets)
         v2_offsets = v2.offsets.data
         return (
@@ -71,7 +69,7 @@ def v1v2_equal(v1, v2):
         )
 
     elif isinstance(v1, ak.layout.RecordArray) and isinstance(
-        v2, ak._v2.contents.RecordArray
+        v2, ak.contents.RecordArray
     ):
         return v1.istuple == v2.is_tuple and all(
             v1v2_equal(v1.field(i)[: len(v1)], v2.content(i))
@@ -85,7 +83,7 @@ def v1v2_equal(v1, v2):
             ak.layout.IndexedArrayU32,
             ak.layout.IndexedArray64,
         ),
-    ) and isinstance(v2, ak._v2.contents.IndexedArray):
+    ) and isinstance(v2, ak.contents.IndexedArray):
         v1_index = np.asarray(v1.index)
         v2_index = v2.index.data
         return (
@@ -96,7 +94,7 @@ def v1v2_equal(v1, v2):
 
     elif isinstance(
         v1, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64)
-    ) and isinstance(v2, ak._v2.contents.IndexedOptionArray):
+    ) and isinstance(v2, ak.contents.IndexedOptionArray):
         v1_index = np.asarray(v1.index)
         v2_index = v2.index.data
         return (
@@ -106,7 +104,7 @@ def v1v2_equal(v1, v2):
         )
 
     elif isinstance(v1, ak.layout.ByteMaskedArray) and isinstance(
-        v2, ak._v2.contents.ByteMaskedArray
+        v2, ak.contents.ByteMaskedArray
     ):
         v1_mask = np.asarray(v1.mask)
         v2_mask = v2.mask.data
@@ -118,7 +116,7 @@ def v1v2_equal(v1, v2):
         )
 
     elif isinstance(v1, ak.layout.BitMaskedArray) and isinstance(
-        v2, ak._v2.contents.BitMaskedArray
+        v2, ak.contents.BitMaskedArray
     ):
         v1_mask = np.asarray(v1.mask)
         v2_mask = v2.mask.data
@@ -131,7 +129,7 @@ def v1v2_equal(v1, v2):
         )
 
     elif isinstance(v1, ak.layout.UnmaskedArray) and isinstance(
-        v2, ak._v2.contents.UnmaskedArray
+        v2, ak.contents.UnmaskedArray
     ):
         return v1v2_equal(v1.content, v2.content)
 
@@ -142,7 +140,7 @@ def v1v2_equal(v1, v2):
             ak.layout.UnionArray8_U32,
             ak.layout.UnionArray8_64,
         ),
-    ) and isinstance(v2, ak._v2.contents.UnionArray):
+    ) and isinstance(v2, ak.contents.UnionArray):
         v1_tags = np.asarray(v1.tags)
         v2_tags = v2.tags.data
         v1_index = np.asarray(v1.index)
@@ -158,19 +156,19 @@ def v1v2_equal(v1, v2):
         )
 
     elif isinstance(v1, ak.layout.VirtualArray) and isinstance(
-        v2, ak._v2.contents.VirtualArray
+        v2, ak.contents.VirtualArray
     ):
-        raise ak._v2._util.error(AssertionError("VirtualArray is v1 only"))
+        raise ak._util.error(AssertionError("VirtualArray is v1 only"))
 
     else:
-        raise ak._v2._util.error(AssertionError(f"{type(v1)} vs {type(v2)}"))
+        raise ak._util.error(AssertionError(f"{type(v1)} vs {type(v2)}"))
 
 
 def v1_to_v2_id(v1):
     if v1 is None:
         return None
     else:
-        raise ak._v2._util.error(NotImplementedError("Identities to Identifier"))
+        raise ak._util.error(NotImplementedError("Identities to Identifier"))
 
 
 def fix(array):
@@ -200,27 +198,27 @@ def v1_to_v2(v1):
     assert isinstance(v1, ak.layout.Content)
 
     if isinstance(v1, ak.layout.EmptyArray):
-        return ak._v2.contents.EmptyArray(
+        return ak.contents.EmptyArray(
             identifier=v1_to_v2_id(v1.identities), parameters=v1.parameters
         )
 
     elif isinstance(v1, ak.layout.NumpyArray):
         primitive = v1.form.primitive
         if primitive in {"datetime64", "timedelta64"}:
-            return ak._v2.contents.NumpyArray(
+            return ak.contents.NumpyArray(
                 fix(np.asarray(v1.view_int64)).view(np.dtype(v1.format)),
                 identifier=v1_to_v2_id(v1.identities),
                 parameters=v1.parameters,
             )
         else:
-            return ak._v2.contents.NumpyArray(
+            return ak.contents.NumpyArray(
                 fix(np.asarray(v1)),
                 identifier=v1_to_v2_id(v1.identities),
                 parameters=v1.parameters,
             )
 
     elif isinstance(v1, ak.layout.RegularArray):
-        return ak._v2.contents.RegularArray(
+        return ak.contents.RegularArray(
             v1_to_v2(v1.content),
             v1.size,
             len(v1),
@@ -231,9 +229,9 @@ def v1_to_v2(v1):
     elif isinstance(
         v1, (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64)
     ):
-        return ak._v2.contents.ListArray(
-            ak._v2.index.Index(fix(np.asarray(v1.starts))),
-            ak._v2.index.Index(fix(np.asarray(v1.stops))),
+        return ak.contents.ListArray(
+            ak.index.Index(fix(np.asarray(v1.starts))),
+            ak.index.Index(fix(np.asarray(v1.stops))),
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
@@ -247,15 +245,15 @@ def v1_to_v2(v1):
             ak.layout.ListOffsetArray64,
         ),
     ):
-        return ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index(fix(np.asarray(v1.offsets))),
+        return ak.contents.ListOffsetArray(
+            ak.index.Index(fix(np.asarray(v1.offsets))),
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
         )
 
     elif isinstance(v1, ak.layout.RecordArray):
-        return ak._v2.contents.RecordArray(
+        return ak.contents.RecordArray(
             [v1_to_v2(x) for x in v1.contents],
             v1.recordlookup,
             len(v1),
@@ -271,8 +269,8 @@ def v1_to_v2(v1):
             ak.layout.IndexedArray64,
         ),
     ):
-        return ak._v2.contents.IndexedArray(
-            ak._v2.index.Index(fix(np.asarray(v1.index))),
+        return ak.contents.IndexedArray(
+            ak.index.Index(fix(np.asarray(v1.index))),
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
@@ -281,16 +279,16 @@ def v1_to_v2(v1):
     elif isinstance(
         v1, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64)
     ):
-        return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index(fix(np.asarray(v1.index))),
+        return ak.contents.IndexedOptionArray(
+            ak.index.Index(fix(np.asarray(v1.index))),
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
         )
 
     elif isinstance(v1, ak.layout.ByteMaskedArray):
-        return ak._v2.contents.ByteMaskedArray(
-            ak._v2.index.Index(fix(np.asarray(v1.mask))),
+        return ak.contents.ByteMaskedArray(
+            ak.index.Index(fix(np.asarray(v1.mask))),
             v1_to_v2(v1.content),
             v1.valid_when,
             identifier=v1_to_v2_id(v1.identities),
@@ -298,8 +296,8 @@ def v1_to_v2(v1):
         )
 
     elif isinstance(v1, ak.layout.BitMaskedArray):
-        return ak._v2.contents.BitMaskedArray(
-            ak._v2.index.Index(fix(np.asarray(v1.mask))),
+        return ak.contents.BitMaskedArray(
+            ak.index.Index(fix(np.asarray(v1.mask))),
             v1_to_v2(v1.content),
             v1.valid_when,
             len(v1),
@@ -309,7 +307,7 @@ def v1_to_v2(v1):
         )
 
     elif isinstance(v1, ak.layout.UnmaskedArray):
-        return ak._v2.contents.UnmaskedArray(
+        return ak.contents.UnmaskedArray(
             v1_to_v2(v1.content),
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
@@ -323,42 +321,42 @@ def v1_to_v2(v1):
             ak.layout.UnionArray8_64,
         ),
     ):
-        return ak._v2.contents.UnionArray(
-            ak._v2.index.Index(fix(np.asarray(v1.tags))),
-            ak._v2.index.Index(fix(np.asarray(v1.index))),
+        return ak.contents.UnionArray(
+            ak.index.Index(fix(np.asarray(v1.tags))),
+            ak.index.Index(fix(np.asarray(v1.index))),
             [v1_to_v2(x) for x in v1.contents],
             identifier=v1_to_v2_id(v1.identities),
             parameters=v1.parameters,
         )
 
     elif isinstance(v1, ak.layout.VirtualArray):
-        raise ak._v2._util.error(AssertionError("VirtualArray is v1 only"))
+        raise ak._util.error(AssertionError("VirtualArray is v1 only"))
 
     else:
-        raise ak._v2._util.error(AssertionError(type(v1)))
+        raise ak._util.error(AssertionError(type(v1)))
 
 
 def v2_to_v1_id(v1):
     if v1 is None:
         return None
     else:
-        raise ak._v2._util.error(NotImplementedError("Identifier to Identities"))
+        raise ak._util.error(NotImplementedError("Identifier to Identities"))
 
 
 def v2_to_v1(v2):
-    assert isinstance(v2, ak._v2.contents.Content)
+    assert isinstance(v2, ak.contents.Content)
 
-    if isinstance(v2, ak._v2.contents.EmptyArray):
+    if isinstance(v2, ak.contents.EmptyArray):
         return ak.layout.EmptyArray(
             identities=v2_to_v1_id(v2.identifier), parameters=v2.parameters
         )
 
-    elif isinstance(v2, ak._v2.contents.NumpyArray):
+    elif isinstance(v2, ak.contents.NumpyArray):
         return ak.layout.NumpyArray(
             v2.data, identities=v2_to_v1_id(v2.identifier), parameters=v2.parameters
         )
 
-    elif isinstance(v2, ak._v2.contents.RegularArray):
+    elif isinstance(v2, ak.contents.RegularArray):
         return ak.layout.RegularArray(
             v2_to_v1(v2.content),
             v2.size,
@@ -367,7 +365,7 @@ def v2_to_v1(v2):
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.ListArray):
+    elif isinstance(v2, ak.contents.ListArray):
         assert v2.starts.dtype == v2.stops.dtype
         if v2.starts.dtype == np.dtype(np.int32):
             ind = ak.layout.Index32
@@ -386,7 +384,7 @@ def v2_to_v1(v2):
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.ListOffsetArray):
+    elif isinstance(v2, ak.contents.ListOffsetArray):
         if v2.offsets.dtype == np.dtype(np.int32):
             ind = ak.layout.Index32
             cls = ak.layout.ListOffsetArray32
@@ -403,7 +401,7 @@ def v2_to_v1(v2):
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.RecordArray):
+    elif isinstance(v2, ak.contents.RecordArray):
         return ak.layout.RecordArray(
             [v2_to_v1(x) for x in v2.contents],
             None if v2.is_tuple else v2.fields,
@@ -412,7 +410,7 @@ def v2_to_v1(v2):
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.IndexedArray):
+    elif isinstance(v2, ak.contents.IndexedArray):
         if v2.index.dtype == np.dtype(np.int32):
             ind = ak.layout.Index32
             cls = ak.layout.IndexedArray32
@@ -429,7 +427,7 @@ def v2_to_v1(v2):
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.IndexedOptionArray):
+    elif isinstance(v2, ak.contents.IndexedOptionArray):
         if v2.index.dtype == np.dtype(np.int32):
             ind = ak.layout.Index32
             cls = ak.layout.IndexedOptionArray32
@@ -446,7 +444,7 @@ def v2_to_v1(v2):
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.ByteMaskedArray):
+    elif isinstance(v2, ak.contents.ByteMaskedArray):
         return ak.layout.ByteMaskedArray(
             ak.layout.Index8(v2.mask.data),
             v2_to_v1(v2.content),
@@ -455,7 +453,7 @@ def v2_to_v1(v2):
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.BitMaskedArray):
+    elif isinstance(v2, ak.contents.BitMaskedArray):
         return ak.layout.BitMaskedArray(
             ak.layout.IndexU8(v2.mask.data),
             v2_to_v1(v2.content),
@@ -466,14 +464,14 @@ def v2_to_v1(v2):
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.UnmaskedArray):
+    elif isinstance(v2, ak.contents.UnmaskedArray):
         return ak.layout.UnmaskedArray(
             v2_to_v1(v2.content),
             identities=v2_to_v1_id(v2.identifier),
             parameters=v2.parameters,
         )
 
-    elif isinstance(v2, ak._v2.contents.UnionArray):
+    elif isinstance(v2, ak.contents.UnionArray):
         if v2.index.dtype == np.dtype(np.int32):
             ind = ak.layout.Index32
             cls = ak.layout.UnionArray8_32
@@ -492,7 +490,7 @@ def v2_to_v1(v2):
         )
 
     else:
-        raise ak._v2._util.error(AssertionError(type(v2)))
+        raise ak._util.error(AssertionError(type(v2)))
 
 
 def v1_to_v2_index(v1):
@@ -508,19 +506,19 @@ def v1_to_v2_index(v1):
     )
 
     if isinstance(v1, ak.layout.IndexU8):
-        return ak._v2.index.IndexU8(np.asarray(v1))
+        return ak.index.IndexU8(np.asarray(v1))
 
     elif isinstance(v1, ak.layout.IndexU32):
-        return ak._v2.index.IndexU32(np.asarray(v1))
+        return ak.index.IndexU32(np.asarray(v1))
 
     elif isinstance(v1, ak.layout.Index8):
-        return ak._v2.index.Index8(np.asarray(v1))
+        return ak.index.Index8(np.asarray(v1))
 
     elif isinstance(v1, ak.layout.Index32):
-        return ak._v2.index.Index32(np.asarray(v1))
+        return ak.index.Index32(np.asarray(v1))
 
     elif isinstance(v1, ak.layout.Index64):
-        return ak._v2.index.Index64(np.asarray(v1))
+        return ak.index.Index64(np.asarray(v1))
 
     else:
-        raise ak._v2._util.error(AssertionError(type(v1)))
+        raise ak._util.error(AssertionError(type(v1)))

@@ -7,8 +7,8 @@ import awkward as ak  # noqa: F401
 
 def test_numbers_to_type():
     one, two = (
-        ak._v2.highlevel.Array([1, 2, 3]).layout,
-        ak._v2.highlevel.Array([4, 5]).layout,
+        ak.highlevel.Array([1, 2, 3]).layout,
+        ak.highlevel.Array([4, 5]).layout,
     )
 
     assert np.asarray(one.numbers_to_type("bool")).dtype == np.dtype(np.bool_)

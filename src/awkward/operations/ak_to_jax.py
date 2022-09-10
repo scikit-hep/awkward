@@ -17,11 +17,11 @@ def to_jax(array):
 
     See also #ak.from_jax and #ak.to_numpy.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_jax",
+    with ak._util.OperationErrorContext(
+        "ak.to_jax",
         dict(array=array),
     ):
-        from awkward._v2._connect.jax import import_jax
+        from awkward._connect.jax import import_jax
 
         jax = import_jax().numpy
-        return ak._v2._util.to_arraylib(jax, array, True)
+        return ak._util.to_arraylib(jax, array, True)

@@ -6,11 +6,11 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-ak._v2.numba.register_and_check()
+ak.numba.register_and_check()
 
 
 def test_deep():
-    array = ak._v2.highlevel.Array([[], [0], [1, 2, 3]])
+    array = ak.highlevel.Array([[], [0], [1, 2, 3]])
     assert 0 in array
     assert 3 in array
     assert 4 not in array
@@ -21,9 +21,9 @@ def test_bug():
     def f2(array):
         return array[2][1]
 
-    assert f2(ak._v2.highlevel.Array([[], [], [1, 2, None, 3]])) == 2
-    assert f2(ak._v2.highlevel.Array([[], [0], [1, 2, None, 3]])) == 2
-    assert f2(ak._v2.highlevel.Array([[], [0, 123], [1, 2, None, 3]])) == 2
+    assert f2(ak.highlevel.Array([[], [], [1, 2, None, 3]])) == 2
+    assert f2(ak.highlevel.Array([[], [0], [1, 2, None, 3]])) == 2
+    assert f2(ak.highlevel.Array([[], [0, 123], [1, 2, None, 3]])) == 2
 
 
 def test_numba():
@@ -31,14 +31,14 @@ def test_numba():
     def f1(array):
         return 0 in array, 3 in array, 4 in array
 
-    assert f1(ak._v2.highlevel.Array([0, 1, 2, 3])) == (True, True, False)
+    assert f1(ak.highlevel.Array([0, 1, 2, 3])) == (True, True, False)
 
     @numba.njit
     def f2(array):
         return 0 in array[0], 0 in array[2], 3 in array[2], 3 in array
 
-    assert f1(ak._v2.highlevel.Array([[], [0], [1, 2, 3]])) == (True, True, False)
-    assert f2(ak._v2.highlevel.Array([[], [0], [1, 2, 3]])) == (
+    assert f1(ak.highlevel.Array([[], [0], [1, 2, 3]])) == (True, True, False)
+    assert f2(ak.highlevel.Array([[], [0], [1, 2, 3]])) == (
         False,
         False,
         True,
@@ -49,47 +49,43 @@ def test_numba():
     def f3(array):
         return None in array
 
-    assert f1(ak._v2.highlevel.Array([0, 1, 2, None, 3])) == (True, True, False)
-    assert f3(ak._v2.highlevel.Array([0, 1, 2, None, 3])) is True
+    assert f1(ak.highlevel.Array([0, 1, 2, None, 3])) == (True, True, False)
+    assert f3(ak.highlevel.Array([0, 1, 2, None, 3])) is True
 
-    assert f1(ak._v2.highlevel.Array([[], [0], None, [1, 2, 3]])) == (True, True, False)
-    assert f2(ak._v2.highlevel.Array([[], None, [1, 2, 3]])) == (
+    assert f1(ak.highlevel.Array([[], [0], None, [1, 2, 3]])) == (True, True, False)
+    assert f2(ak.highlevel.Array([[], None, [1, 2, 3]])) == (
         False,
         False,
         True,
         True,
     )
 
-    assert f1(ak._v2.highlevel.Array([[], [0], [1, 2, None, 3]])) == (True, True, False)
-    assert f2(ak._v2.highlevel.Array([[], [0], [1, 2, None, 3]])) == (
+    assert f1(ak.highlevel.Array([[], [0], [1, 2, None, 3]])) == (True, True, False)
+    assert f2(ak.highlevel.Array([[], [0], [1, 2, None, 3]])) == (
         False,
         False,
         True,
         True,
     )
 
-    assert f1(ak._v2.highlevel.Array([{"x": 0}, {"x": 1}, {"x": 2}, {"x": 3}])) == (
+    assert f1(ak.highlevel.Array([{"x": 0}, {"x": 1}, {"x": 2}, {"x": 3}])) == (
+        True,
+        True,
+        False,
+    )
+    assert f1(ak.highlevel.Array([{"x": [0]}, {"x": []}, {"x": [2]}, {"x": [3]}])) == (
+        True,
+        True,
+        False,
+    )
+
+    assert f1(ak.highlevel.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])) == (
         True,
         True,
         False,
     )
     assert f1(
-        ak._v2.highlevel.Array([{"x": [0]}, {"x": []}, {"x": [2]}, {"x": [3]}])
-    ) == (
-        True,
-        True,
-        False,
-    )
-
-    assert f1(
-        ak._v2.highlevel.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])
-    ) == (
-        True,
-        True,
-        False,
-    )
-    assert f1(
-        ak._v2.highlevel.Array(
+        ak.highlevel.Array(
             [
                 [],
                 [{"x": 0, "y": 999}],
@@ -97,16 +93,14 @@ def test_numba():
             ]
         )
     ) == (True, True, False)
-    assert f2(
-        ak._v2.highlevel.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])
-    ) == (
+    assert f2(ak.highlevel.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])) == (
         False,
         False,
         True,
         True,
     )
     assert f2(
-        ak._v2.highlevel.Array(
+        ak.highlevel.Array(
             [
                 [],
                 [{"x": 0, "y": 999}],
@@ -116,38 +110,36 @@ def test_numba():
     ) == (False, False, True, True)
 
     assert f1(
-        ak._v2.highlevel.Array([[], [{"x": [0]}], [{"x": []}, {"x": [2]}, {"x": [3]}]])
+        ak.highlevel.Array([[], [{"x": [0]}], [{"x": []}, {"x": [2]}, {"x": [3]}]])
     ) == (
         True,
         True,
         False,
     )
 
-    assert f1(ak._v2.highlevel.Array([{"x": 0}, {"x": 1}, {"x": None}, {"x": 3}])) == (
+    assert f1(ak.highlevel.Array([{"x": 0}, {"x": 1}, {"x": None}, {"x": 3}])) == (
         True,
         True,
         False,
     )
-    assert (
-        f3(ak._v2.highlevel.Array([{"x": 0}, {"x": 1}, {"x": None}, {"x": 3}])) is True
-    )
-    assert f1(ak._v2.highlevel.Array([{"x": 0}, {"x": 1}, None, {"x": 3}])) == (
+    assert f3(ak.highlevel.Array([{"x": 0}, {"x": 1}, {"x": None}, {"x": 3}])) is True
+    assert f1(ak.highlevel.Array([{"x": 0}, {"x": 1}, None, {"x": 3}])) == (
         True,
         True,
         False,
     )
-    assert f3(ak._v2.highlevel.Array([{"x": 0}, {"x": 1}, None, {"x": 3}])) is True
+    assert f3(ak.highlevel.Array([{"x": 0}, {"x": 1}, None, {"x": 3}])) is True
 
-    array = ak._v2.highlevel.Array([{"x": 0}, {"x": 1}, {"x": 2}, {"x": 3}])
+    array = ak.highlevel.Array([{"x": 0}, {"x": 1}, {"x": 2}, {"x": 3}])
     assert f1(array[0]) == (True, False, False)
 
-    array = ak._v2.highlevel.Array([{"x": [0]}, {"x": [1]}, {"x": []}, {"x": [3]}])
+    array = ak.highlevel.Array([{"x": [0]}, {"x": [1]}, {"x": []}, {"x": [3]}])
     assert f1(array[0]) == (True, False, False)
 
-    array = ak._v2.highlevel.Array([{"x": 0}, None, {"x": 2}, {"x": 3}])
+    array = ak.highlevel.Array([{"x": 0}, None, {"x": 2}, {"x": 3}])
     assert f1(array[0]) == (True, False, False)
     assert f3(array[0]) is False
 
-    array = ak._v2.highlevel.Array([{"x": [0]}, None, {"x": []}, {"x": [3]}])
+    array = ak.highlevel.Array([{"x": [0]}, None, {"x": []}, {"x": [3]}])
     assert f1(array[0]) == (True, False, False)
     assert f3(array[0]) is False

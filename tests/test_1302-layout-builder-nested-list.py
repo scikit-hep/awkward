@@ -30,7 +30,7 @@ def test_nested_layout_builder():
     }
 }
 """
-    builder = ak._v2.highlevel.LayoutBuilder(form)
+    builder = ak.highlevel.LayoutBuilder(form)
     #
     #     """
     # {
@@ -109,14 +109,14 @@ def test_nested_layout_builder():
     builder.int64(3)  # w
     builder.int64(4)  # x
 
-    assert ak._v2.to_list(builder.snapshot()) == [
+    assert ak.to_list(builder.snapshot()) == [
         {"u": [{"i": 1, "j": [9, 8, 7]}], "v": 2, "w": 3, "x": 4},
         {"u": [{"i": 1, "j": [9, 8, 7]}], "v": 2, "w": 3, "x": 4},
     ]
 
 
 def test_nested_array_builder():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
 
     builder.begin_record()
     builder.field("u")
@@ -170,7 +170,7 @@ def test_nested_array_builder():
 
     array = builder.snapshot()
 
-    assert ak._v2.to_list(array) == [
+    assert ak.to_list(array) == [
         {"u": [{"i": 1, "j": [9, 8, 7]}], "v": 2, "w": 3, "x": 4},
         {"u": [{"i": 1, "j": [9, 8, 7]}], "v": 2, "w": 3, "x": 4},
     ]

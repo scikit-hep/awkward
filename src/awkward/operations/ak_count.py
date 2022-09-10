@@ -79,8 +79,8 @@ def count(array, axis=None, keepdims=False, mask_identity=False, flatten_records
     If it is desirable to exclude NaN ("not a number") values from #ak.count,
     use #ak.nan_to_none to turn them into None, which are not counted.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.count",
+    with ak._util.OperationErrorContext(
+        "ak.count",
         dict(
             array=array,
             axis=axis,
@@ -93,14 +93,14 @@ def count(array, axis=None, keepdims=False, mask_identity=False, flatten_records
 
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:
         if not layout.nplike.known_data or not layout.nplike.known_shape:
-            reducer_cls = ak._v2._reducers.Count
+            reducer_cls = ak._reducers.Count
 
             def map(x):
-                return ak._v2._typetracer.UnknownScalar(
+                return ak._typetracer.UnknownScalar(
                     np.dtype(reducer_cls.return_dtype(x.dtype))
                 )
 
@@ -125,11 +125,11 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         )
 
     else:
-        behavior = ak._v2._util.behavior_of(array)
+        behavior = ak._util.behavior_of(array)
         out = layout.count(
             axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
         )
-        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
-            return ak._v2._util.wrap(out, behavior)
+        if isinstance(out, (ak.contents.Content, ak.record.Record)):
+            return ak._util.wrap(out, behavior)
         else:
             return out

@@ -31,8 +31,8 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
     #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.with_field",
+    with ak._util.OperationErrorContext(
+        "ak.with_field",
         dict(base=base, what=what, where=where, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(base, what, where, highlevel, behavior)
@@ -41,23 +41,23 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 def _impl(base, what, where, highlevel, behavior):
     if not (
         where is None
-        or ak._v2._util.isstr(where)
-        or (isinstance(where, Iterable) and all(ak._v2._util.isstr(x) for x in where))
+        or ak._util.isstr(where)
+        or (isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where))
     ):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError(
                 "New fields may only be assigned by field name(s) "
                 "or as a new integer slot by passing None for 'where'"
             )
         )
 
-    if not ak._v2._util.isstr(where) and isinstance(where, Iterable):
+    if not ak._util.isstr(where) and isinstance(where, Iterable):
         where = list(where)
 
     if (
-        not ak._v2._util.isstr(where)
+        not ak._util.isstr(where)
         and isinstance(where, Iterable)
-        and all(ak._v2._util.isstr(x) for x in where)
+        and all(ak._util.isstr(x) for x in where)
         and len(where) > 1
     ):
         return _impl(
@@ -75,18 +75,18 @@ def _impl(base, what, where, highlevel, behavior):
         )
     else:
 
-        if not (ak._v2._util.isstr(where) or where is None):
+        if not (ak._util.isstr(where) or where is None):
             where = where[0]
 
-        behavior = ak._v2._util.behavior_of(base, what, behavior=behavior)
-        base = ak._v2.operations.to_layout(base, allow_record=True, allow_other=False)
+        behavior = ak._util.behavior_of(base, what, behavior=behavior)
+        base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
 
         if len(base.fields) == 0:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError("no tuples or records in array; cannot add a new field")
             )
 
-        what = ak._v2.operations.to_layout(what, allow_record=True, allow_other=True)
+        what = ak.operations.to_layout(what, allow_record=True, allow_other=True)
 
         keys = copy.copy(base.fields)
         if where in base.fields:
@@ -95,9 +95,7 @@ def _impl(base, what, where, highlevel, behavior):
         if len(keys) == 0:
             # the only key was removed, so just create new Record
             out = (
-                ak._v2.contents.RecordArray(
-                    [what], [where], parameters=base.parameters
-                ),
+                ak.contents.RecordArray([what], [where], parameters=base.parameters),
             )
 
         else:
@@ -105,19 +103,17 @@ def _impl(base, what, where, highlevel, behavior):
             def action(inputs, **kwargs):
                 nplike = ak.nplike.of(*inputs)
                 base, what = inputs
-                if isinstance(base, ak._v2.contents.RecordArray):
+                if isinstance(base, ak.contents.RecordArray):
                     if what is None:
-                        what = ak._v2.contents.IndexedOptionArray(
-                            ak._v2.index.Index64(
+                        what = ak.contents.IndexedOptionArray(
+                            ak.index.Index64(
                                 nplike.index_nplike.full(len(base), -1, np.int64),
                                 nplike=nplike,
                             ),
-                            ak._v2.contents.EmptyArray(),
+                            ak.contents.EmptyArray(),
                         )
-                    elif not isinstance(what, ak._v2.contents.Content):
-                        what = ak._v2.contents.NumpyArray(
-                            nplike.repeat(what, len(base))
-                        )
+                    elif not isinstance(what, ak.contents.Content):
+                        what = ak.contents.NumpyArray(nplike.repeat(what, len(base)))
                     if base.is_tuple and where is None:
                         fields = None
                     elif base.is_tuple:
@@ -126,7 +122,7 @@ def _impl(base, what, where, highlevel, behavior):
                         fields = keys + [str(len(keys))]
                     else:
                         fields = keys + [where]
-                    out = ak._v2.contents.RecordArray(
+                    out = ak.contents.RecordArray(
                         [base[k] for k in keys] + [what],
                         fields,
                         parameters=base.parameters,
@@ -135,7 +131,7 @@ def _impl(base, what, where, highlevel, behavior):
                 else:
                     return None
 
-            out = ak._v2._broadcasting.broadcast_and_apply(
+            out = ak._broadcasting.broadcast_and_apply(
                 [base, what],
                 action,
                 behavior,
@@ -144,4 +140,4 @@ def _impl(base, what, where, highlevel, behavior):
 
         assert isinstance(out, tuple) and len(out) == 1
 
-        return ak._v2._util.wrap(out[0], behavior, highlevel)
+        return ak._util.wrap(out[0], behavior, highlevel)

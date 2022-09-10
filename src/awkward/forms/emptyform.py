@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _parameters_equal
 
 
 class EmptyForm(Form):
@@ -19,9 +19,9 @@ class EmptyForm(Form):
         return self._tolist_extra({"class": "EmptyArray"}, verbose)
 
     def _type(self, typestrs):
-        return ak._v2.types.unknowntype.UnknownType(
+        return ak.types.unknowntype.UnknownType(
             self._parameters,
-            ak._v2._util.gettypestr(self._parameters, typestrs),
+            ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -32,7 +32,7 @@ class EmptyForm(Form):
         )
 
     def toNumpyForm(self, dtype):
-        return ak._v2.forms.numpyform.from_dtype(dtype, self._parameters)
+        return ak.forms.numpyform.from_dtype(dtype, self._parameters)
 
     def generated_compatibility(self, other):
         if other is None:
@@ -54,10 +54,10 @@ class EmptyForm(Form):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        raise ak._v2._util.indexerror(self, where, "not an array of records")
+        raise ak._util.indexerror(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
-        raise ak._v2._util.indexerror(self, where, "not an array of records")
+        raise ak._util.indexerror(self, where, "not an array of records")
 
     def _carry(self, allow_lazy):
         return EmptyForm(

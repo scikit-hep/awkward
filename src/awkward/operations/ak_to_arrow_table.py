@@ -62,8 +62,8 @@ def to_arrow_table(
 
     See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_arrow_table",
+    with ak._util.OperationErrorContext(
+        "ak.to_arrow_table",
         dict(
             array=array,
             list_to32=list_to32,
@@ -97,10 +97,10 @@ def _impl(
     extensionarray,
     count_nulls,
 ):
-    from awkward._v2._connect.pyarrow import pyarrow
+    from awkward._connect.pyarrow import pyarrow
 
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
-    if isinstance(layout, ak._v2.record.Record):
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    if isinstance(layout, ak.record.Record):
         layout = layout.array[layout.at : layout.at + 1]
         record_is_scalar = True
     else:
@@ -141,7 +141,7 @@ def _impl(
         ]
         for x in check:
             parameters.append(
-                {ak._v2._util.direct_Content_subclass(x).__name__: x._parameters}
+                {ak._util.direct_Content_subclass(x).__name__: x._parameters}
             )
 
     else:

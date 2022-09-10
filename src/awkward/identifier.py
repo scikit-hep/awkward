@@ -27,18 +27,18 @@ class Identifier:
         self._ref = ref
         self._fieldloc = fieldloc
         if not isinstance(fieldloc, dict) or not all(
-            ak._v2._util.isint(k) and ak._v2._util.isstr(v) for k, v in fieldloc.items()
+            ak._util.isint(k) and ak._util.isstr(v) for k, v in fieldloc.items()
         ):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError("Identifier fieldloc must be a dict of int -> str")
             )
         self._nplike = ak.nplike.of(data)
 
         self._data = self._nplike.asarray(data, order="C")
         if len(self._data.shape) != 2:
-            raise ak._v2._util.error(TypeError("Identifier data must be 2-dimensional"))
+            raise ak._util.error(TypeError("Identifier data must be 2-dimensional"))
         if self._data.dtype not in (np.dtype(np.int32), np.dtype(np.int64)):
-            raise ak._v2._util.error(TypeError("Identifier data must be int32, int64"))
+            raise ak._util.error(TypeError("Identifier data must be int32, int64"))
 
     @classmethod
     def zeros(cls, ref, fieldloc, length, width, nplike, dtype):

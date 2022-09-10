@@ -55,14 +55,14 @@ def packed(array, highlevel=True, behavior=None):
 
     See also #ak.to_buffers.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.packed",
+    with ak._util.OperationErrorContext(
+        "ak.packed",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, highlevel, behavior)
 
 
 def _impl(array, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     out = layout.packed()
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

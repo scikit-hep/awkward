@@ -11,7 +11,7 @@ class Flake8ASTErrorInfo(NamedTuple):
 
 
 class Visitor(ast.NodeVisitor):
-    msg = "AK101 exception must be wrapped in ak._v2._util.*error"
+    msg = "AK101 exception must be wrapped in ak._util.*error"
 
     def __init__(self):
         self.errors: list[Flake8ASTErrorInfo] = []

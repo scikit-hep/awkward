@@ -121,8 +121,8 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
         >>> ak.type(ak.pad_none(array, 2, axis=2, clip=True))
         3 * var *   2 * ?float64
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.pad_none",
+    with ak._util.OperationErrorContext(
+        "ak.pad_none",
         dict(
             array=array,
             target=target,
@@ -136,7 +136,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
 
 
 def _impl(array, target, axis, clip, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.pad_none(target, axis, clip=clip)
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

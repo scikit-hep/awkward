@@ -6,7 +6,7 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-ak._v2.numba.register_and_check()
+ak.numba.register_and_check()
 
 
 def test_unmasked():
@@ -19,10 +19,10 @@ def test_unmasked():
                 return item
         return None
 
-    content = ak._v2.highlevel.Array([{"x": 1}, {"x": 2}, {"x": 3}]).layout
-    unmasked = ak._v2.contents.UnmaskedArray(content)
-    array = ak._v2.highlevel.Array(unmasked)
-    assert ak._v2.operations.to_list(find_it(array)) == {"x": 3}
+    content = ak.highlevel.Array([{"x": 1}, {"x": 2}, {"x": 3}]).layout
+    unmasked = ak.contents.UnmaskedArray(content)
+    array = ak.highlevel.Array(unmasked)
+    assert ak.operations.to_list(find_it(array)) == {"x": 3}
 
 
 def test_indexedoption():
@@ -35,8 +35,8 @@ def test_indexedoption():
                 return item
         return None
 
-    array = ak._v2.highlevel.Array([{"x": 1}, {"x": 2}, None, {"x": 3}])
-    assert ak._v2.operations.to_list(find_it(array)) == {"x": 3}
+    array = ak.highlevel.Array([{"x": 1}, {"x": 2}, None, {"x": 3}])
+    assert ak.operations.to_list(find_it(array)) == {"x": 3}
 
 
 def test_indexed_1():
@@ -48,10 +48,10 @@ def test_indexed_1():
                 return i
         return 999
 
-    content = ak._v2.highlevel.Array([{"x": 100}, {"x": 101}, {"x": 102}]).layout
-    index = ak._v2.index.Index64(np.array([2, 0, 1], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedArray(index, content)
-    array = ak._v2.highlevel.Array(indexedarray)
+    content = ak.highlevel.Array([{"x": 100}, {"x": 101}, {"x": 102}]).layout
+    index = ak.index.Index64(np.array([2, 0, 1], dtype=np.int64))
+    indexedarray = ak.contents.IndexedArray(index, content)
+    array = ak.highlevel.Array(indexedarray)
 
     assert f1(array, 100) == 1
     assert f1(array, 101) == 2
@@ -67,10 +67,10 @@ def test_indexed_2():
                 return item
         return None
 
-    content = ak._v2.highlevel.Array([{"x": 100}, {"x": 101}, {"x": 102}]).layout
-    index = ak._v2.index.Index64(np.array([2, 0, 1], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedArray(index, content)
-    array = ak._v2.highlevel.Array(indexedarray)
+    content = ak.highlevel.Array([{"x": 100}, {"x": 101}, {"x": 102}]).layout
+    index = ak.index.Index64(np.array([2, 0, 1], dtype=np.int64))
+    indexedarray = ak.contents.IndexedArray(index, content)
+    array = ak.highlevel.Array(indexedarray)
 
     assert f1(array, 100).tolist() == {"x": 100}
     assert f1(array, 101).tolist() == {"x": 101}

@@ -31,8 +31,8 @@ def from_arrow(array, generate_bitmasks=False, highlevel=True, behavior=None):
 
     See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.from_arrow",
+    with ak._util.OperationErrorContext(
+        "ak.from_arrow",
         dict(
             array=array,
             generate_bitmasks=generate_bitmasks,
@@ -44,11 +44,11 @@ def from_arrow(array, generate_bitmasks=False, highlevel=True, behavior=None):
 
 
 def _impl(array, generate_bitmasks, highlevel, behavior):
-    import awkward._v2._connect.pyarrow
+    import awkward._connect.pyarrow
 
-    pyarrow = awkward._v2._connect.pyarrow.pyarrow
+    pyarrow = awkward._connect.pyarrow.pyarrow
 
-    out = awkward._v2._connect.pyarrow.handle_arrow(
+    out = awkward._connect.pyarrow.handle_arrow(
         array, generate_bitmasks=generate_bitmasks, pass_empty_field=True
     )
 
@@ -56,16 +56,16 @@ def _impl(array, generate_bitmasks, highlevel, behavior):
         (
             awkwardarrow_type,
             storage_type,
-        ) = awkward._v2._connect.pyarrow.to_awkwardarrow_storage_types(array.type)
+        ) = awkward._connect.pyarrow.to_awkwardarrow_storage_types(array.type)
 
         if awkwardarrow_type is None:
-            if isinstance(out, ak._v2.contents.UnmaskedArray):
-                out = awkward._v2._connect.pyarrow.remove_optiontype(out)
+            if isinstance(out, ak.contents.UnmaskedArray):
+                out = awkward._connect.pyarrow.remove_optiontype(out)
         else:
             if awkwardarrow_type.mask_type in (None, "IndexedArray"):
-                out = awkward._v2._connect.pyarrow.remove_optiontype(out)
+                out = awkward._connect.pyarrow.remove_optiontype(out)
 
             if awkwardarrow_type.record_is_scalar:
                 out = out._getitem_at(0)
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

@@ -21,24 +21,24 @@ def parameters(array):
     See #ak.Array and #ak.behavior for a more complete description of
     behaviors.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.parameters",
+    with ak._util.OperationErrorContext(
+        "ak.parameters",
         dict(array=array),
     ):
         return _impl(array)
 
 
 def _impl(array):
-    if isinstance(array, (ak._v2.highlevel.Array, ak._v2.highlevel.Record)):
+    if isinstance(array, (ak.highlevel.Array, ak.highlevel.Record)):
         return _copy(array.layout.parameters)
 
     elif isinstance(
         array,
-        (ak._v2.contents.Content, ak._v2.record.Record),
+        (ak.contents.Content, ak.record.Record),
     ):
         return _copy(array.parameters)
 
-    elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
         return array.snapshot().layout.parameters
 
     elif isinstance(array, ak.layout.ArrayBuilder):

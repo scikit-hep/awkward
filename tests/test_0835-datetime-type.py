@@ -6,7 +6,7 @@ import awkward as ak  # noqa: F401
 
 import datetime
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_date_time():
@@ -14,7 +14,7 @@ def test_date_time():
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
     )
 
-    array = ak._v2.contents.NumpyArray(numpy_array)
+    array = ak.contents.NumpyArray(numpy_array)
     assert str(array.form.type) == "datetime64[s]"
     assert to_list(array) == [
         np.datetime64("2020-07-27T10:41:11"),
@@ -25,12 +25,12 @@ def test_date_time():
         assert array[i] == numpy_array[i]
 
     date_time = np.datetime64("2020-07-27T10:41:11.200000011", "us")
-    array1 = ak._v2.contents.NumpyArray(
+    array1 = ak.contents.NumpyArray(
         np.array(["2020-07-27T10:41:11.200000011"], "datetime64[us]")
     )
     assert np.datetime64(array1[0], "us") == date_time
 
-    assert to_list(ak._v2.operations.from_iter(array1)) == [
+    assert to_list(ak.operations.from_iter(array1)) == [
         np.datetime64("2020-07-27T10:41:11.200000")
     ]
 
@@ -39,7 +39,7 @@ def test_date_time_minmax():
     numpy_array = np.array(
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]"
     )
-    array = ak._v2.contents.NumpyArray(numpy_array)
+    array = ak.contents.NumpyArray(numpy_array)
     assert array.max() == numpy_array[0]
     assert array.min() == numpy_array[1]
 
@@ -48,7 +48,7 @@ def test_time_delta():
 
     numpy_array = np.array(["41", "1", "20"], "timedelta64[D]")
 
-    array = ak._v2.highlevel.Array(numpy_array).layout
+    array = ak.highlevel.Array(numpy_array).layout
     assert str(array.form.type) == "timedelta64[D]"
     assert to_list(array) == [
         np.timedelta64("41", "D"),
@@ -60,7 +60,7 @@ def test_time_delta():
 
 
 def test_datetime64_ArrayBuilder():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     dt = np.datetime64("2020-03-27T10:41:12", "25us")
     dt1 = np.datetime64("2020-03-27T10:41", "15s")
     dt2 = np.datetime64("2020-05")
@@ -86,7 +86,7 @@ def test_datetime64_ArrayBuilder():
 
 
 def test_highlevel_datetime64_ArrayBuilder():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     dt = np.datetime64("2020-03-27T10:41:12", "25us")
     dt1 = np.datetime64("2020-03-27T10:41", "15s")
     dt2 = np.datetime64("2020-05")
@@ -118,7 +118,7 @@ def test_highlevel_datetime64_ArrayBuilder():
 
 
 def test_timedelta64_ArrayBuilder():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     builder.timedelta(np.timedelta64(5, "W"))
     builder.timedelta(np.timedelta64(5, "D"))
     builder.timedelta(np.timedelta64(5, "s"))
@@ -131,7 +131,7 @@ def test_timedelta64_ArrayBuilder():
 
 
 def test_timedelta64_ArrayBuilder_py3():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     builder.timedelta(np.timedelta64(5, "W"))
     builder.timedelta(np.timedelta64(5, "D"))
     builder.timedelta(np.timedelta64(5, "s"))
@@ -144,7 +144,7 @@ def test_timedelta64_ArrayBuilder_py3():
 
 
 def test_highlevel_timedelta64_ArrayBuilder():
-    builder = ak._v2.highlevel.ArrayBuilder()
+    builder = ak.highlevel.ArrayBuilder()
     builder.timedelta(np.timedelta64(5, "W"))
     builder.timedelta(np.timedelta64(5, "D"))
     builder.timedelta(np.timedelta64(5, "s"))
@@ -161,7 +161,7 @@ def test_highlevel_timedelta64_ArrayBuilder():
 
 
 def test_count_axis_None():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -174,11 +174,11 @@ def test_count_axis_None():
         ],
         check_valid=True,
     )
-    assert ak._v2.operations.count(array) == 9
+    assert ak.operations.count(array) == 9
 
 
 def test_count():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -191,32 +191,32 @@ def test_count():
         ],
         check_valid=True,
     )
-    assert to_list(ak._v2.operations.count(array, axis=-1)) == [
+    assert to_list(ak.operations.count(array, axis=-1)) == [
         [3, 0, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.count(array, axis=2)) == [
+    assert to_list(ak.operations.count(array, axis=2)) == [
         [3, 0, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.count(array, axis=-1, keepdims=True)) == [
+    assert to_list(ak.operations.count(array, axis=-1, keepdims=True)) == [
         [[3], [0], [2], [1]],
         [],
         [[2], [1]],
     ]
-    assert to_list(ak._v2.operations.count(array, axis=-2)) == [
+    assert to_list(ak.operations.count(array, axis=-2)) == [
         [3, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.count(array, axis=1)) == [
+    assert to_list(ak.operations.count(array, axis=1)) == [
         [3, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.count(array, axis=-2, keepdims=True)) == [
+    assert to_list(ak.operations.count(array, axis=-2, keepdims=True)) == [
         [[3, 2, 1]],
         [[]],
         [[2, 1]],
@@ -224,7 +224,7 @@ def test_count():
 
 
 def test_count_nonzeroaxis_None():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -237,11 +237,11 @@ def test_count_nonzeroaxis_None():
         ],
         check_valid=True,
     )
-    assert ak._v2.operations.count_nonzero(array) == 9
+    assert ak.operations.count_nonzero(array) == 9
 
 
 def test_count_nonzero():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -254,12 +254,12 @@ def test_count_nonzero():
         ],
         check_valid=True,
     )
-    assert to_list(ak._v2.operations.count_nonzero(array, axis=-1)) == [
+    assert to_list(ak.operations.count_nonzero(array, axis=-1)) == [
         [3, 0, 2, 1],
         [],
         [2, 1],
     ]
-    assert to_list(ak._v2.operations.count_nonzero(array, axis=-2)) == [
+    assert to_list(ak.operations.count_nonzero(array, axis=-2)) == [
         [3, 2, 1],
         [],
         [2, 1],
@@ -267,7 +267,7 @@ def test_count_nonzero():
 
 
 def test_all_nonzero():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -281,12 +281,12 @@ def test_all_nonzero():
         check_valid=True,
     )
 
-    assert to_list(ak._v2.operations.all(array, axis=-1)) == [
+    assert to_list(ak.operations.all(array, axis=-1)) == [
         [True, True, True, True],
         [],
         [True, True],
     ]
-    assert to_list(ak._v2.operations.all(array, axis=-2)) == [
+    assert to_list(ak.operations.all(array, axis=-2)) == [
         [True, True, True],
         [],
         [True, True],
@@ -294,7 +294,7 @@ def test_all_nonzero():
 
 
 def test_argmin_argmax_axis_None():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -307,12 +307,12 @@ def test_argmin_argmax_axis_None():
         ],
         check_valid=True,
     )
-    assert ak._v2.operations.argmin(array) == 4
-    assert ak._v2.operations.argmax(array) == 3
+    assert ak.operations.argmin(array) == 4
+    assert ak.operations.argmax(array) == 3
 
 
 def test_argmin_argmax():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -325,30 +325,30 @@ def test_argmin_argmax():
         ],
         check_valid=True,
     )
-    assert to_list(ak._v2.operations.argmin(array, axis=0)) == [
+    assert to_list(ak.operations.argmin(array, axis=0)) == [
         [1, 1, 0],
         [1],
         [0, 0],
         [0],
     ]
-    assert to_list(ak._v2.operations.argmax(array, axis=0)) == [
+    assert to_list(ak.operations.argmax(array, axis=0)) == [
         [0, 0, 0],
         [1],
         [0, 0],
         [0],
     ]
-    assert to_list(ak._v2.operations.argmin(array, axis=1)) == [
+    assert to_list(ak.operations.argmin(array, axis=1)) == [
         [3, 2, 0],
         [],
         [0, 0],
     ]
-    assert to_list(ak._v2.operations.argmax(array, axis=1)) == [
+    assert to_list(ak.operations.argmax(array, axis=1)) == [
         [2, 0, 0],
         [],
         [1, 0],
     ]
 
-    array = ak._v2.operations.from_iter(
+    array = ak.operations.from_iter(
         [
             [
                 [
@@ -378,7 +378,7 @@ def test_argmin_argmax():
 
 
 def test_any_all():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 [np.datetime64("2022"), np.datetime64("2023"), np.datetime64("2025")],
@@ -392,12 +392,12 @@ def test_any_all():
         check_valid=True,
     )
 
-    assert to_list(ak._v2.operations.any(array, axis=-1)) == [
+    assert to_list(ak.operations.any(array, axis=-1)) == [
         [True, False, True, True],
         [],
         [True, True],
     ]
-    assert to_list(ak._v2.operations.any(array, axis=-2)) == [
+    assert to_list(ak.operations.any(array, axis=-2)) == [
         [True, True, True],
         [],
         [True, True],
@@ -405,15 +405,15 @@ def test_any_all():
 
 
 def test_prod():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         np.array(["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[s]")
     )
     with pytest.raises(ValueError):
-        ak._v2.operations.prod(array, axis=-1)
+        ak.operations.prod(array, axis=-1)
 
 
 def test_min_max():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 np.datetime64("2020-03-27T10:41:11"),
@@ -469,7 +469,7 @@ def test_min_max():
 
 
 def test_highlevel_min_max_axis_None():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 np.datetime64("2020-03-27T10:41:11"),
@@ -511,12 +511,12 @@ def test_highlevel_min_max_axis_None():
             np.datetime64("2020-01-27T10:41:11"),
         ],
     ]
-    assert ak._v2.operations.min(array) == np.datetime64("2020-01-27T10:41:11")
-    assert ak._v2.operations.max(array) == np.datetime64("2020-06-27T10:41:11")
+    assert ak.operations.min(array) == np.datetime64("2020-01-27T10:41:11")
+    assert ak.operations.max(array) == np.datetime64("2020-06-27T10:41:11")
 
 
 def test_highlevel_min_max():
-    array = ak._v2.highlevel.Array(
+    array = ak.highlevel.Array(
         [
             [
                 np.datetime64("2020-03-27T10:41:11"),
@@ -558,26 +558,26 @@ def test_highlevel_min_max():
             np.datetime64("2020-01-27T10:41:11"),
         ],
     ]
-    assert to_list(ak._v2.operations.min(array, axis=0)) == [
+    assert to_list(ak.operations.min(array, axis=0)) == [
         np.datetime64("2020-02-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-04-27T10:41:11"),
     ]
-    assert to_list(ak._v2.operations.max(array, axis=0)) == [
+    assert to_list(ak.operations.max(array, axis=0)) == [
         datetime.datetime(2020, 4, 27, 0, 0),
         datetime.datetime(2020, 3, 27, 10, 41, 11),
         datetime.datetime(2020, 5, 1, 0, 0),
         datetime.datetime(2020, 6, 27, 10, 41, 11),
         datetime.datetime(2020, 4, 27, 10, 41, 11),
     ]
-    assert to_list(ak._v2.operations.min(array, axis=1)) == [
+    assert to_list(ak.operations.min(array, axis=1)) == [
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
         np.datetime64("2020-01-27T10:41:11"),
     ]
-    assert to_list(ak._v2.operations.max(array, axis=1)) == [
+    assert to_list(ak.operations.max(array, axis=1)) == [
         datetime.datetime(2020, 5, 1, 0, 0),
         datetime.datetime(2020, 6, 27, 10, 41, 11),
         datetime.datetime(2020, 3, 27, 10, 41, 11),
@@ -591,12 +591,12 @@ def test_date_time_units():
     array2 = np.array(
         ["2020-07-27T10:41:11", "2019-01-01", "2020-01-01"], "datetime64[25s]"
     )
-    ak_a1 = ak._v2.highlevel.Array(array1).layout
+    ak_a1 = ak.highlevel.Array(array1).layout
 
-    ak_a2 = ak._v2.highlevel.Array(array2).layout
+    ak_a2 = ak.highlevel.Array(array2).layout
 
-    np_ar1 = ak._v2.operations.to_numpy(ak_a1)
-    np_ar2 = ak._v2.operations.to_numpy(ak_a2)
+    np_ar1 = ak.operations.to_numpy(ak_a1)
+    np_ar2 = ak.operations.to_numpy(ak_a2)
 
     if np_ar1[0] > np_ar2[0]:
         assert (np_ar1[0] - np.timedelta64(25, "s")) < np_ar2[0]
@@ -610,9 +610,9 @@ def test_sum():
 
     arrays = (np.arange(0, 12, dtype=dtype) for dtype in dtypes)
     for array in arrays:
-        content = ak._v2.contents.NumpyArray(array)
-        offsets = ak._v2.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
-        depth = ak._v2.contents.ListOffsetArray(offsets, content)
+        content = ak.contents.NumpyArray(array)
+        offsets = ak.index.Index64(np.array([0, 4, 8, 12], dtype=np.int64))
+        depth = ak.contents.ListOffsetArray(offsets, content)
 
         if np.issubdtype(array.dtype, np.timedelta64):
             assert to_list(depth.sum(-1)) == [
@@ -649,11 +649,11 @@ def test_more():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
     )
-    akarray = ak._v2.highlevel.Array(nparray)
+    akarray = ak.highlevel.Array(nparray)
 
     assert (akarray[1:] - akarray[:-1]).tolist() == [np.timedelta64(60, "m")]
-    assert ak._v2.operations.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(60, "m")
-    assert ak._v2.operations.sum(akarray[1:] - akarray[:-1], axis=0) == [
+    assert ak.operations.sum(akarray[1:] - akarray[:-1]) == np.timedelta64(60, "m")
+    assert ak.operations.sum(akarray[1:] - akarray[:-1], axis=0) == [
         np.timedelta64(60, "m")
     ]
 
@@ -662,7 +662,7 @@ def test_ufunc_sum():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
     )
-    akarray = ak._v2.highlevel.Array(nparray)
+    akarray = ak.highlevel.Array(nparray)
 
     with pytest.raises(TypeError):
         akarray[1:] + akarray[:-1]
@@ -672,23 +672,23 @@ def test_ufunc_mul():
     nparray = np.array(
         [np.datetime64("2021-06-03T10:00"), np.datetime64("2021-06-03T11:00")]
     )
-    akarray = ak._v2.highlevel.Array(nparray)
+    akarray = ak.highlevel.Array(nparray)
 
     with pytest.raises(TypeError):
         akarray * 2
 
-    assert ak._v2.highlevel.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
+    assert ak.highlevel.Array([np.timedelta64(3, "D")])[0] == np.timedelta64(3, "D")
 
 
 def test_NumpyArray_layout_as_objects():
     with pytest.raises(TypeError):
-        ak._v2.highlevel.Array(
-            ak._v2.contents.NumpyArray(
+        ak.highlevel.Array(
+            ak.contents.NumpyArray(
                 ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"]
             )
         )
 
-    array0 = ak._v2.contents.NumpyArray(
+    array0 = ak.contents.NumpyArray(
         np.array(
             ["2019-09-02T09:30:00", "2019-09-13T09:30:00", "2019-09-21T20:00:00"],
             dtype=np.datetime64,
@@ -703,7 +703,7 @@ def test_NumpyArray_layout_as_objects():
 
 
 def test_NumpyArray_layout():
-    array = ak._v2.contents.NumpyArray(
+    array = ak.contents.NumpyArray(
         [
             np.datetime64("2019-09-02T09:30:00"),
             np.datetime64("2019-09-13T09:30:00"),

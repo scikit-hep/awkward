@@ -4,46 +4,46 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-ak_to_buffers = ak._v2.operations.to_buffers
-ak_from_buffers = ak._v2.operations.from_buffers
-ak_from_iter = ak._v2.operations.from_iter
+ak_to_buffers = ak.operations.to_buffers
+ak_from_buffers = ak.operations.from_buffers
+ak_from_iter = ak.operations.from_iter
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_EmptyArray():
-    v2a = ak._v2.contents.emptyarray.EmptyArray()
+    v2a = ak.contents.emptyarray.EmptyArray()
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
 
 def test_NumpyArray():
-    v2a = ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
+    v2a = ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
-    v2b = ak._v2.contents.numpyarray.NumpyArray(
+    v2b = ak.contents.numpyarray.NumpyArray(
         np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2b))) == to_list(v2b)
 
 
 def test_RegularArray_NumpyArray():
-    v2a = ak._v2.contents.regulararray.RegularArray(
-        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+    v2a = ak.contents.regulararray.RegularArray(
+        ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         3,
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
-    v2b = ak._v2.contents.regulararray.RegularArray(
-        ak._v2.contents.emptyarray.EmptyArray(), 0, zeros_length=10
+    v2b = ak.contents.regulararray.RegularArray(
+        ak.contents.emptyarray.EmptyArray(), 0, zeros_length=10
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2b))) == to_list(v2b)
 
 
 def test_ListArray_NumpyArray():
-    v2a = ak._v2.contents.listarray.ListArray(
-        ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
-        ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
-        ak._v2.contents.numpyarray.NumpyArray(
+    v2a = ak.contents.listarray.ListArray(
+        ak.index.Index(np.array([4, 100, 1], np.int64)),
+        ak.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak.contents.numpyarray.NumpyArray(
             np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
         ),
     )
@@ -51,78 +51,74 @@ def test_ListArray_NumpyArray():
 
 
 def test_ListOffsetArray_NumpyArray():
-    v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
-        ak._v2.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
-        ak._v2.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+    v2a = ak.contents.listoffsetarray.ListOffsetArray(
+        ak.index.Index(np.array([1, 4, 4, 6, 7], np.int64)),
+        ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
 
 def test_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.recordarray.RecordArray(
+    v2a = ak.contents.recordarray.RecordArray(
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-            ak._v2.contents.numpyarray.NumpyArray(
-                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-            ),
+            ak.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
         ["x", "y"],
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
-    v2b = ak._v2.contents.recordarray.RecordArray(
+    v2b = ak.contents.recordarray.RecordArray(
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-            ak._v2.contents.numpyarray.NumpyArray(
-                np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])
-            ),
+            ak.contents.numpyarray.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
         None,
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2b))) == to_list(v2b)
 
-    v2c = ak._v2.contents.recordarray.RecordArray([], [], 10)
+    v2c = ak.contents.recordarray.RecordArray([], [], 10)
     assert to_list(ak_from_buffers(*ak_to_buffers(v2c))) == to_list(v2c)
 
-    v2d = ak._v2.contents.recordarray.RecordArray([], None, 10)
+    v2d = ak.contents.recordarray.RecordArray([], None, 10)
     assert to_list(ak_from_buffers(*ak_to_buffers(v2d))) == to_list(v2d)
 
 
 def test_IndexedArray_NumpyArray():
-    v2a = ak._v2.contents.indexedarray.IndexedArray(
-        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    v2a = ak.contents.indexedarray.IndexedArray(
+        ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
 
 def test_IndexedOptionArray_NumpyArray():
-    v2a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    v2a = ak.contents.indexedoptionarray.IndexedOptionArray(
+        ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
 
 def test_ByteMaskedArray_NumpyArray():
-    v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    v2a = ak.contents.bytemaskedarray.ByteMaskedArray(
+        ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
-    v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    v2b = ak.contents.bytemaskedarray.ByteMaskedArray(
+        ak.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=False,
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2b))) == to_list(v2b)
 
 
 def test_BitMaskedArray_NumpyArray():
-    v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    v2a = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -144,7 +140,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -155,8 +151,8 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
-    v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    v2b = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -178,7 +174,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -189,8 +185,8 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2b))) == to_list(v2b)
 
-    v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    v2c = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -215,7 +211,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -226,8 +222,8 @@ def test_BitMaskedArray_NumpyArray():
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2c))) == to_list(v2c)
 
-    v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    v2d = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -252,7 +248,7 @@ def test_BitMaskedArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.numpyarray.NumpyArray(
+        ak.contents.numpyarray.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -265,29 +261,29 @@ def test_BitMaskedArray_NumpyArray():
 
 
 def test_UnmaskedArray_NumpyArray():
-    v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
-        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
+    v2a = ak.contents.unmaskedarray.UnmaskedArray(
+        ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
 
 def test_UnionArray_NumpyArray():
-    v2a = ak._v2.contents.unionarray.UnionArray(
-        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
-        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
+    v2a = ak.contents.unionarray.UnionArray(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
         [
-            ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64)),
-            ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+            ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64)),
+            ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
 
 def test_RegularArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.regulararray.RegularArray(
-        ak._v2.contents.recordarray.RecordArray(
+    v2a = ak.contents.regulararray.RegularArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -297,9 +293,9 @@ def test_RegularArray_RecordArray_NumpyArray():
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
-    v2b = ak._v2.contents.regulararray.RegularArray(
-        ak._v2.contents.recordarray.RecordArray(
-            [ak._v2.contents.emptyarray.EmptyArray()], ["nest"]
+    v2b = ak.contents.regulararray.RegularArray(
+        ak.contents.recordarray.RecordArray(
+            [ak.contents.emptyarray.EmptyArray()], ["nest"]
         ),
         0,
         zeros_length=10,
@@ -308,12 +304,12 @@ def test_RegularArray_RecordArray_NumpyArray():
 
 
 def test_ListArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.listarray.ListArray(
-        ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
-        ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
-        ak._v2.contents.recordarray.RecordArray(
+    v2a = ak.contents.listarray.ListArray(
+        ak.index.Index(np.array([4, 100, 1], np.int64)),
+        ak.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])
                 )
             ],
@@ -324,14 +320,10 @@ def test_ListArray_RecordArray_NumpyArray():
 
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.listoffsetarray.ListOffsetArray(
-        ak._v2.index.Index(np.array([1, 4, 4, 6], np.int64)),
-        ak._v2.contents.recordarray.RecordArray(
-            [
-                ak._v2.contents.numpyarray.NumpyArray(
-                    [6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]
-                )
-            ],
+    v2a = ak.contents.listoffsetarray.ListOffsetArray(
+        ak.index.Index(np.array([1, 4, 4, 6], np.int64)),
+        ak.contents.recordarray.RecordArray(
+            [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
             ["nest"],
         ),
     )
@@ -339,11 +331,11 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
 
 
 def test_IndexedArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.indexedarray.IndexedArray(
-        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
-        ak._v2.contents.recordarray.RecordArray(
+    v2a = ak.contents.indexedarray.IndexedArray(
+        ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -354,11 +346,11 @@ def test_IndexedArray_RecordArray_NumpyArray():
 
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.indexedoptionarray.IndexedOptionArray(
-        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
-        ak._v2.contents.recordarray.RecordArray(
+    v2a = ak.contents.indexedoptionarray.IndexedOptionArray(
+        ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -369,11 +361,11 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
 
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-        ak._v2.contents.recordarray.RecordArray(
+    v2a = ak.contents.bytemaskedarray.ByteMaskedArray(
+        ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -383,11 +375,11 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
-    v2b = ak._v2.contents.bytemaskedarray.ByteMaskedArray(
-        ak._v2.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
-        ak._v2.contents.recordarray.RecordArray(
+    v2b = ak.contents.bytemaskedarray.ByteMaskedArray(
+        ak.index.Index(np.array([0, 1, 0, 1, 0], np.int8)),
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
                 )
             ],
@@ -399,8 +391,8 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
 
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    v2a = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -421,9 +413,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.recordarray.RecordArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array(
                         [
                             0.0,
@@ -452,8 +444,8 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2a))) == to_list(v2a)
 
-    v2b = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    v2b = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -475,9 +467,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.recordarray.RecordArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array(
                         [
                             0.0,
@@ -506,8 +498,8 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2b))) == to_list(v2b)
 
-    v2c = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    v2c = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -532,9 +524,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.recordarray.RecordArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array(
                         [
                             0.0,
@@ -563,8 +555,8 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
     )
     assert to_list(ak_from_buffers(*ak_to_buffers(v2c))) == to_list(v2c)
 
-    v2d = ak._v2.contents.bitmaskedarray.BitMaskedArray(
-        ak._v2.index.Index(
+    v2d = ak.contents.bitmaskedarray.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -589,9 +581,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                 )
             )
         ),
-        ak._v2.contents.recordarray.RecordArray(
+        ak.contents.recordarray.RecordArray(
             [
-                ak._v2.contents.numpyarray.NumpyArray(
+                ak.contents.numpyarray.NumpyArray(
                     np.array(
                         [
                             0.0,
@@ -622,9 +614,9 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
 
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.unmaskedarray.UnmaskedArray(
-        ak._v2.contents.recordarray.RecordArray(
-            [ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))],
+    v2a = ak.contents.unmaskedarray.UnmaskedArray(
+        ak.contents.recordarray.RecordArray(
+            [ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3]))],
             ["nest"],
         )
     )
@@ -632,17 +624,17 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
 
 
 def test_UnionArray_RecordArray_NumpyArray():
-    v2a = ak._v2.contents.unionarray.UnionArray(
-        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
-        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
+    v2a = ak.contents.unionarray.UnionArray(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
         [
-            ak._v2.contents.recordarray.RecordArray(
-                [ak._v2.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64))],
+            ak.contents.recordarray.RecordArray(
+                [ak.contents.numpyarray.NumpyArray(np.array([1, 2, 3], np.int64))],
                 ["nest"],
             ),
-            ak._v2.contents.recordarray.RecordArray(
+            ak.contents.recordarray.RecordArray(
                 [
-                    ak._v2.contents.numpyarray.NumpyArray(
+                    ak.contents.numpyarray.NumpyArray(
                         np.array([1.1, 2.2, 3.3, 4.4, 5.5])
                     )
                 ],

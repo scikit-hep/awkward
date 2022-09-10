@@ -25,8 +25,8 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
     You can also remove a single parameter with this function, since setting
     a parameter to None is equivalent to removing it.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.with_parameter",
+    with ak._util.OperationErrorContext(
+        "ak.with_parameter",
         dict(
             array=array,
             parameter=parameter,
@@ -39,11 +39,9 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
 
 
 def _impl(array, parameter, value, highlevel, behavior):
-    behavior = ak._v2._util.behavior_of(array, behavior=behavior)
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
 
     out = layout.with_parameter(parameter, value)
 
-    return ak._v2._util.wrap(
-        out, ak._v2._util.behavior_of(array, behavior=behavior), highlevel
-    )
+    return ak._util.wrap(out, ak._util.behavior_of(array, behavior=behavior), highlevel)

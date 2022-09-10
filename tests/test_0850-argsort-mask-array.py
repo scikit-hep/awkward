@@ -6,21 +6,19 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    array = ak._v2.Array([[0, 1, 2, 3], [3, 3, 3, 2, 1]])
+    array = ak.Array([[0, 1, 2, 3], [3, 3, 3, 2, 1]])
     is_valid = array != 3
 
-    assert ak._v2.operations.mask(array, is_valid).tolist() == [
+    assert ak.operations.mask(array, is_valid).tolist() == [
         [0, 1, 2, None],
         [None, None, None, 2, 1],
     ]
 
-    assert ak._v2.operations.sort(ak._v2.operations.mask(array, is_valid)).tolist() == [
+    assert ak.operations.sort(ak.operations.mask(array, is_valid)).tolist() == [
         [0, 1, 2, None],
         [1, 2, None, None, None],
     ]
-    assert ak._v2.operations.argsort(
-        ak._v2.operations.mask(array, is_valid)
-    ).tolist() == [
+    assert ak.operations.argsort(ak.operations.mask(array, is_valid)).tolist() == [
         [0, 1, 2, 3],
         [4, 3, 0, 1, 2],
     ]

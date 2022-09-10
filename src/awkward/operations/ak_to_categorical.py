@@ -71,8 +71,8 @@ def to_categorical(array, highlevel=True):
 
     See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_categorical",
+    with ak._util.OperationErrorContext(
+        "ak.to_categorical",
         dict(array=array, highlevel=highlevel),
     ):
         return _impl(array, highlevel)
@@ -85,21 +85,19 @@ def _impl(array, highlevel):
                 layout = layout.simplify_optiontype()
             if layout.is_IndexedType and layout.is_OptionType:
                 content = layout.content
-                cls = ak._v2.contents.IndexedOptionArray
+                cls = ak.contents.IndexedOptionArray
             elif layout.is_IndexedType:
                 content = layout.content
-                cls = ak._v2.contents.IndexedArray
+                cls = ak.contents.IndexedArray
             elif layout.is_OptionType:
                 content = layout.content
-                cls = ak._v2.contents.IndexedOptionArray
+                cls = ak.contents.IndexedOptionArray
             else:
                 content = layout
-                cls = ak._v2.contents.IndexedArray
+                cls = ak.contents.IndexedArray
 
-            content_list = ak._v2.operations.to_list(content)
-            hashable = [
-                ak._v2.behaviors.categorical.as_hashable(x) for x in content_list
-            ]
+            content_list = ak.operations.to_list(content)
+            hashable = [ak.behaviors.categorical.as_hashable(x) for x in content_list]
 
             lookup = {}
             is_first = ak.nplike.numpy.empty(len(hashable), dtype=np.bool_)
@@ -117,19 +115,19 @@ def _impl(array, highlevel):
                 original_index = ak.nplike.numpy.asarray(layout.index)
                 index = mapping[original_index]
                 index[original_index < 0] = -1
-                index = ak._v2.index.Index64(index)
+                index = ak.index.Index64(index)
 
             elif layout.is_IndexedType:
                 original_index = ak.nplike.numpy.asarray(layout.index)
-                index = ak._v2.index.Index64(mapping[original_index])
+                index = ak.index.Index64(mapping[original_index])
 
             elif layout.is_OptionType:
                 mask = ak.nplike.numpy.asarray(layout.mask_as_bool(valid_when=False))
                 mapping[mask.view(np.bool_)] = -1
-                index = ak._v2.index.Index64(mapping)
+                index = ak.index.Index64(mapping)
 
             else:
-                index = ak._v2.index.Index64(mapping)
+                index = ak.index.Index64(mapping)
 
             out = cls(index, content[is_first], parameters={"__array__": "categorical"})
             return out
@@ -137,10 +135,10 @@ def _impl(array, highlevel):
         else:
             return None
 
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.recursively_apply(action)
     if highlevel:
-        out = ak._v2._util.wrap(out, ak._v2._util.behavior_of(array))
+        out = ak._util.wrap(out, ak._util.behavior_of(array))
         return out
     else:
         return out

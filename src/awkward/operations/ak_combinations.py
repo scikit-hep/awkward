@@ -154,8 +154,8 @@ def combinations(
     The #ak.argcombinations form can be particularly useful as nested indexing
     in #ak.Array.__getitem__.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.combinations",
+    with ak._util.OperationErrorContext(
+        "ak.combinations",
         dict(
             array=array,
             n=n,
@@ -191,8 +191,8 @@ def _impl(
     if with_name is not None:
         parameters["__record__"] = with_name
 
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.combinations(
         n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
     )
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

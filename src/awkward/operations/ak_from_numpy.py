@@ -37,8 +37,8 @@ def from_numpy(
 
     See also #ak.to_numpy and #ak.from_cupy.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.from_numpy",
+    with ak._util.OperationErrorContext(
+        "ak.from_numpy",
         dict(
             array=array,
             regulararray=regulararray,
@@ -47,6 +47,6 @@ def from_numpy(
             behavior=behavior,
         ),
     ):
-        return ak._v2._util.from_arraylib(
+        return ak._util.from_arraylib(
             array, regulararray, recordarray, highlevel, behavior
         )

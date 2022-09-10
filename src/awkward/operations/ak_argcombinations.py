@@ -48,8 +48,8 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.argcombinations",
+    with ak._util.OperationErrorContext(
+        "ak.argcombinations",
         dict(
             array=array,
             n=n,
@@ -86,14 +86,14 @@ def _impl(
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError("the 'axis' for argcombinations must be non-negative")
         )
     else:
-        layout = ak._v2.operations.to_layout(
+        layout = ak.operations.to_layout(
             array, allow_record=False, allow_other=False
         ).local_index(axis)
         out = layout.combinations(
             n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
         )
-        return ak._v2._util.wrap(out, behavior, highlevel)
+        return ak._util.wrap(out, behavior, highlevel)

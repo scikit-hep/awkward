@@ -346,8 +346,8 @@ from numpy import (
     float64,
 )
 
-from awkward._v2._connect.cuda import fetch_specialization
-from awkward._v2._connect.cuda import import_cupy
+from awkward._connect.cuda import fetch_specialization
+from awkward._connect.cuda import import_cupy
 
 cupy = import_cupy("Awkward Arrays with CUDA")
 """

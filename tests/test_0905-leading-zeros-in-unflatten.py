@@ -7,12 +7,10 @@ import awkward as ak  # noqa: F401
 
 def test():
     array = ak.Array([[1, 2, 3]])
-    assert ak._v2.operations.unflatten(array, [2, 1], axis=1).tolist() == [
-        [[1, 2], [3]]
-    ]
-    assert ak._v2.operations.unflatten(array, [0, 2, 1], axis=1).tolist() == [
+    assert ak.operations.unflatten(array, [2, 1], axis=1).tolist() == [[[1, 2], [3]]]
+    assert ak.operations.unflatten(array, [0, 2, 1], axis=1).tolist() == [
         [[], [1, 2], [3]]
     ]
-    assert ak._v2.operations.unflatten(array, [0, 0, 2, 1], axis=1).tolist() == [
+    assert ak.operations.unflatten(array, [0, 0, 2, 1], axis=1).tolist() == [
         [[], [], [1, 2], [3]]
     ]

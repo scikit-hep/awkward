@@ -2,14 +2,14 @@
 
 import awkward as ak
 
-import awkward._v2._lookup  # noqa: E402
-import awkward._v2._connect.cling  # noqa: E402
+import awkward._lookup  # noqa: E402
+import awkward._connect.cling  # noqa: E402
 
 import ROOT
 import cppyy
 import ctypes
 import os
-from awkward._v2.types.numpytype import primitive_to_dtype
+from awkward.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {
     "bool": "bool",
@@ -56,9 +56,9 @@ assert done is True
 
 def from_rdataframe(data_frame, columns):
     def form_dtype(form):
-        if isinstance(form, ak._v2.forms.NumpyForm) and form.inner_shape == ():
+        if isinstance(form, ak.forms.NumpyForm) and form.inner_shape == ():
             return primitive_to_dtype(form.primitive)
-        elif isinstance(form, ak._v2.forms.ListOffsetForm):
+        elif isinstance(form, ak.forms.ListOffsetForm):
             return form_dtype(form.content)
 
     def empty_buffers(cpp_buffers_self, names_nbytes):
@@ -159,7 +159,7 @@ def from_rdataframe(data_frame, columns):
 
         else:  # Convert the C++ vectors to Awkward arrays
             form_str = ROOT.awkward.type_to_form[col_type](0)
-            form = ak._v2.forms.from_json(form_str)
+            form = ak.forms.from_json(form_str)
 
             list_depth = form.purelist_depth
             form_dtype_name = form_dtype(form).name
@@ -169,7 +169,7 @@ def from_rdataframe(data_frame, columns):
             CppBuffers = cppyy.gbl.awkward.CppBuffers[col_type]
             cpp_buffers_self = CppBuffers(result_ptrs[col])
 
-            if isinstance(form, ak._v2.forms.NumpyForm):
+            if isinstance(form, ak.forms.NumpyForm):
 
                 NumpyBuilder = cppyy.gbl.awkward.LayoutBuilder.Numpy[data_type]
                 builder = NumpyBuilder()
@@ -183,8 +183,8 @@ def from_rdataframe(data_frame, columns):
                 buffers = empty_buffers(cpp_buffers_self, names_nbytes)
                 cpp_buffers_self.to_char_buffers[builder_type](builder)
 
-            elif isinstance(form, ak._v2.forms.ListOffsetForm):
-                if isinstance(form.content, ak._v2.forms.NumpyForm):
+            elif isinstance(form, ak.forms.ListOffsetForm):
+                if isinstance(form.content, ak.forms.NumpyForm):
                     # NOTE: list_depth == 2 or 1 if its the list of strings
                     list_depth = 2
 
@@ -208,22 +208,20 @@ def from_rdataframe(data_frame, columns):
                 )
                 fill_from_func[builder_type, col_type](builder, result_ptrs[col])
             else:
-                raise ak._v2._util.error(
-                    AssertionError(f"unrecognized Form: {type(form)}")
-                )
+                raise ak._util.error(AssertionError(f"unrecognized Form: {type(form)}"))
 
             names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
             buffers = empty_buffers(cpp_buffers_self, names_nbytes)
             cpp_buffers_self.to_char_buffers[builder_type](builder)
 
-            array = ak._v2.from_buffers(
+            array = ak.from_buffers(
                 form,
                 builder.length(),
                 buffers,
             )
 
             if col == "awkward_index_":
-                contents_index = ak._v2.index.Index64(
+                contents_index = ak.index.Index64(
                     array.layout.to_numpy(allow_missing=True)
                 )
             else:
@@ -232,15 +230,15 @@ def from_rdataframe(data_frame, columns):
     for col, content in awkward_contents.items():
         # wrap Awkward array in IndexedArray only if needed
         if contents_index is not None and len(contents_index) < len(content):
-            array = ak._v2._util.wrap(
-                ak._v2.contents.IndexedArray(contents_index, content),
+            array = ak._util.wrap(
+                ak.contents.IndexedArray(contents_index, content),
                 highlevel=True,
             )
             contents[col] = array.layout
         else:
             contents[col] = content
 
-    return ak._v2._util.wrap(
-        ak._v2.contents.RecordArray(list(contents.values()), list(contents.keys())),
+    return ak._util.wrap(
+        ak.contents.RecordArray(list(contents.values()), list(contents.keys())),
         highlevel=True,
     )

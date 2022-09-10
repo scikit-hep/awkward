@@ -60,8 +60,8 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
     See also #ak.num and #ak.flatten.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.unflatten",
+    with ak._util.OperationErrorContext(
+        "ak.unflatten",
         dict(
             array=array,
             counts=counts,
@@ -76,14 +76,12 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 def _impl(array, counts, axis, highlevel, behavior):
     nplike = ak.nplike.of(array)
 
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if isinstance(counts, (numbers.Integral, np.integer)):
         current_offsets = None
     else:
-        counts = ak._v2.operations.to_layout(
-            counts, allow_record=False, allow_other=False
-        )
+        counts = ak.operations.to_layout(counts, allow_record=False, allow_other=False)
 
         if counts.is_OptionType:
             mask = counts.mask_as_bool(valid_when=False)
@@ -94,9 +92,9 @@ def _impl(array, counts, axis, highlevel, behavior):
             mask = False
 
         if counts.ndim != 1:
-            raise ak._v2._util.error(ValueError("counts must be one-dimensional"))
+            raise ak._util.error(ValueError("counts must be one-dimensional"))
         if not issubclass(counts.dtype.type, np.integer):
-            raise ak._v2._util.error(ValueError("counts must be integers"))
+            raise ak._util.error(ValueError("counts must be integers"))
 
         current_offsets = [nplike.index_nplike.empty(len(counts) + 1, np.int64)]
         current_offsets[0][0] = 0
@@ -105,10 +103,10 @@ def _impl(array, counts, axis, highlevel, behavior):
     def doit(layout):
         if isinstance(counts, (numbers.Integral, np.integer)):
             if counts < 0 or counts > len(layout):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError("too large counts for array or negative counts")
                 )
-            out = ak._v2.contents.RegularArray(layout, counts)
+            out = ak.contents.RegularArray(layout, counts)
 
         else:
             position = (
@@ -122,7 +120,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             if position >= len(current_offsets[0]) or current_offsets[0][
                 position
             ] != len(layout):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(
                         "structure imposed by 'counts' does not fit in the array or partition "
                         "at axis={}".format(axis)
@@ -132,12 +130,12 @@ def _impl(array, counts, axis, highlevel, behavior):
             offsets = current_offsets[0][: position + 1]
             current_offsets[0] = current_offsets[0][position:] - len(layout)
 
-            out = ak._v2.contents.ListOffsetArray(ak._v2.index.Index64(offsets), layout)
+            out = ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout)
             if not isinstance(mask, (bool, np.bool_)):
-                index = ak._v2.index.Index8(
+                index = ak.index.Index8(
                     nplike.asarray(mask).astype(np.int8), nplike=nplike
                 )
-                out = ak._v2.contents.ByteMaskedArray(index, out, valid_when=False)
+                out = ak.contents.ByteMaskedArray(index, out, valid_when=False)
 
         return out
 
@@ -159,9 +157,9 @@ def _impl(array, counts, axis, highlevel, behavior):
                 outeroffsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
 
                 content = doit(listoffsetarray.content[: outeroffsets[-1]])
-                if isinstance(content, ak._v2.contents.ByteMaskedArray):
+                if isinstance(content, ak.contents.ByteMaskedArray):
                     inneroffsets = nplike.index_nplike.asarray(content.content.offsets)
-                elif isinstance(content, ak._v2.contents.RegularArray):
+                elif isinstance(content, ak.contents.RegularArray):
                     inneroffsets = nplike.index_nplike.asarray(
                         content.toListOffsetArray64(True).offsets
                     )
@@ -177,7 +175,7 @@ def _impl(array, counts, axis, highlevel, behavior):
                 if not nplike.index_nplike.array_equal(
                     inneroffsets[positions], outeroffsets
                 ):
-                    raise ak._v2._util.error(
+                    raise ak._util.error(
                         ValueError(
                             "structure imposed by 'counts' does not fit in the array or partition "
                             "at axis={}".format(axis)
@@ -185,9 +183,7 @@ def _impl(array, counts, axis, highlevel, behavior):
                     )
                 positions[0] = 0
 
-                return ak._v2.contents.ListOffsetArray(
-                    ak._v2.index.Index64(positions), content
-                )
+                return ak.contents.ListOffsetArray(ak.index.Index64(positions), content)
 
             else:
                 return layout
@@ -197,11 +193,11 @@ def _impl(array, counts, axis, highlevel, behavior):
     if current_offsets is not None and not (
         len(current_offsets[0]) == 1 and current_offsets[0][0] == 0
     ):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError(
                 "structure imposed by 'counts' does not fit in the array or partition "
                 "at axis={}".format(axis)
             )
         )
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

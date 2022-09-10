@@ -90,15 +90,15 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
     However, it is important to keep in mind that this is a special case:
     #ak.flatten and `content` are not interchangeable!
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.flatten",
+    with ak._util.OperationErrorContext(
+        "ak.flatten",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     nplike = ak.nplike.of(layout)
 
     if axis is None:
@@ -106,20 +106,20 @@ def _impl(array, axis, highlevel, behavior):
         assert isinstance(out, tuple) and all(
             isinstance(x, nplike.ndarray) for x in out
         )
-        out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
+        out = ak.contents.NumpyArray(nplike.concatenate(out))
 
     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
         def apply(layout):
             if layout.is_UnknownType:
-                return apply(ak._v2.contents.NumpyArray(nplike.array([])))
+                return apply(ak.contents.NumpyArray(nplike.array([])))
 
             elif layout.is_IndexedType:
                 return apply(layout.project())
 
             elif layout.is_UnionType:
                 if not any(
-                    x.is_OptionType and not isinstance(x, ak._v2.contents.UnmaskedArray)
+                    x.is_OptionType and not isinstance(x, ak.contents.UnmaskedArray)
                     for x in layout.contents
                 ):
                     return layout
@@ -131,7 +131,7 @@ def _impl(array, axis, highlevel, behavior):
                 bigmask = nplike.index_nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):
                     if content.is_OptionType and not isinstance(
-                        content, ak._v2.contents.UnmaskedArray
+                        content, ak.contents.UnmaskedArray
                     ):
                         bigmask[:] = False
                         bigmask[tags == tag] = nplike.index_nplike.asarray(
@@ -140,9 +140,9 @@ def _impl(array, axis, highlevel, behavior):
                         index[bigmask] = -1
 
                 good = index >= 0
-                return ak._v2.contents.UnionArray(
-                    ak._v2.index.Index8(tags[good]),
-                    ak._v2.index.Index64(index[good]),
+                return ak.contents.UnionArray(
+                    ak.index.Index8(tags[good]),
+                    ak.index.Index64(index[good]),
                     layout.contents,
                 )
 
@@ -154,8 +154,8 @@ def _impl(array, axis, highlevel, behavior):
 
         out = apply(layout)
 
-        return ak._v2._util.wrap(out, behavior, highlevel)
+        return ak._util.wrap(out, behavior, highlevel)
 
     else:
         out = layout.flatten(axis)
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

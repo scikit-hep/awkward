@@ -21,41 +21,41 @@ def code_to_function(code, function_name, externals=None, debug=False):
 
 
 def tonumbatype(form):
-    if isinstance(form, ak._v2.forms.EmptyForm):
+    if isinstance(form, ak.forms.EmptyForm):
         return tonumbatype(form.toNumpyForm(np.dtype(np.float64)))
 
-    elif isinstance(form, ak._v2.forms.NumpyForm):
+    elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:
-            return ak._v2._connect.numba.layout.NumpyArrayType.from_form(form)
+            return ak._connect.numba.layout.NumpyArrayType.from_form(form)
         else:
             return tonumbatype(form.toRegularForm())
 
-    elif isinstance(form, ak._v2.forms.RegularForm):
-        return ak._v2._connect.numba.layout.RegularArrayType.from_form(form)
+    elif isinstance(form, ak.forms.RegularForm):
+        return ak._connect.numba.layout.RegularArrayType.from_form(form)
 
-    elif isinstance(form, (ak._v2.forms.ListForm, ak._v2.forms.ListOffsetForm)):
-        return ak._v2._connect.numba.layout.ListArrayType.from_form(form)
+    elif isinstance(form, (ak.forms.ListForm, ak.forms.ListOffsetForm)):
+        return ak._connect.numba.layout.ListArrayType.from_form(form)
 
-    elif isinstance(form, ak._v2.forms.IndexedForm):
-        return ak._v2._connect.numba.layout.IndexedArrayType.from_form(form)
+    elif isinstance(form, ak.forms.IndexedForm):
+        return ak._connect.numba.layout.IndexedArrayType.from_form(form)
 
-    elif isinstance(form, ak._v2.forms.IndexedOptionForm):
-        return ak._v2._connect.numba.layout.IndexedOptionArrayType.from_form(form)
+    elif isinstance(form, ak.forms.IndexedOptionForm):
+        return ak._connect.numba.layout.IndexedOptionArrayType.from_form(form)
 
-    elif isinstance(form, ak._v2.forms.ByteMaskedForm):
-        return ak._v2._connect.numba.layout.ByteMaskedArrayType.from_form(form)
+    elif isinstance(form, ak.forms.ByteMaskedForm):
+        return ak._connect.numba.layout.ByteMaskedArrayType.from_form(form)
 
-    elif isinstance(form, ak._v2.forms.BitMaskedForm):
-        return ak._v2._connect.numba.layout.BitMaskedArrayType.from_form(form)
+    elif isinstance(form, ak.forms.BitMaskedForm):
+        return ak._connect.numba.layout.BitMaskedArrayType.from_form(form)
 
-    elif isinstance(form, ak._v2.forms.UnmaskedForm):
-        return ak._v2._connect.numba.layout.UnmaskedArrayType.from_form(form)
+    elif isinstance(form, ak.forms.UnmaskedForm):
+        return ak._connect.numba.layout.UnmaskedArrayType.from_form(form)
 
-    elif isinstance(form, ak._v2.forms.RecordForm):
-        return ak._v2._connect.numba.layout.RecordArrayType.from_form(form)
+    elif isinstance(form, ak.forms.RecordForm):
+        return ak._connect.numba.layout.RecordArrayType.from_form(form)
 
-    elif isinstance(form, ak._v2.forms.UnionForm):
-        return ak._v2._connect.numba.layout.UnionArrayType.from_form(form)
+    elif isinstance(form, ak.forms.UnionForm):
+        return ak._connect.numba.layout.UnionArrayType.from_form(form)
 
     else:
         raise AssertionError(f"unrecognized Form: {type(form)}")
@@ -64,7 +64,7 @@ def tonumbatype(form):
 ########## Lookup
 
 
-@numba.extending.typeof_impl.register(ak._v2._lookup.Lookup)
+@numba.extending.typeof_impl.register(ak._lookup.Lookup)
 def typeof_Lookup(obj, c):
     return LookupType()
 
@@ -104,8 +104,8 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 class ArrayView:
     @classmethod
     def fromarray(cls, array):
-        behavior = ak._v2._util.behavior_of(array)
-        layout = ak._v2.operations.to_layout(
+        behavior = ak._util.behavior_of(array)
+        layout = ak.operations.to_layout(
             array,
             allow_record=False,
             allow_other=False,
@@ -114,7 +114,7 @@ class ArrayView:
         return ArrayView(
             tonumbatype(layout.form),
             behavior,
-            ak._v2._lookup.Lookup(layout),
+            ak._lookup.Lookup(layout),
             0,
             0,
             len(layout),
@@ -133,7 +133,7 @@ class ArrayView:
     def toarray(self):
         layout = self.type.tolayout(self.lookup, self.pos, self.fields)
         sliced = layout._getitem_range(slice(self.start, self.stop))
-        return ak._v2._util.wrap(sliced, self.behavior)
+        return ak._util.wrap(sliced, self.behavior)
 
 
 @numba.extending.typeof_impl.register(ArrayView)
@@ -495,20 +495,20 @@ def lower_iternext(context, builder, sig, args, result):
 class RecordView:
     @classmethod
     def fromrecord(cls, record):
-        behavior = ak._v2._util.behavior_of(record)
-        layout = ak._v2.operations.to_layout(
+        behavior = ak._util.behavior_of(record)
+        layout = ak.operations.to_layout(
             record,
             allow_record=True,
             allow_other=False,
             numpytype=(np.number, np.bool_, np.datetime64, np.timedelta64),
         )
-        assert isinstance(layout, ak._v2.record.Record)
+        assert isinstance(layout, ak.record.Record)
         arraylayout = layout.array
         return RecordView(
             ArrayView(
                 tonumbatype(arraylayout.form),
                 behavior,
-                ak._v2._lookup.Lookup(arraylayout),
+                ak._lookup.Lookup(arraylayout),
                 0,
                 0,
                 len(arraylayout),
@@ -523,8 +523,8 @@ class RecordView:
 
     def torecord(self):
         arraylayout = self.arrayview.toarray().layout
-        return ak._v2._util.wrap(
-            ak._v2.record.Record(arraylayout, self.at), self.arrayview.behavior
+        return ak._util.wrap(
+            ak.record.Record(arraylayout, self.at), self.arrayview.behavior
         )
 
 
@@ -653,7 +653,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
     key = RecordViewType
 
     def generic_resolve(self, recordviewtype, attr):
-        for methodname, typer, lower in ak._v2._util.numba_methods(
+        for methodname, typer, lower in ak._util.numba_methods(
             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
         ):
             if attr == methodname:
@@ -683,7 +683,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
                 return numba.types.BoundFunction(type_method, recordviewtype)
 
-        for attrname, typer, _ in ak._v2._util.numba_attrs(
+        for attrname, typer, _ in ak._util.numba_attrs(
             recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
         ):
             if attr == attrname:
@@ -694,7 +694,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
 
 @numba.extending.lower_getattr_generic(RecordViewType)
 def lower_getattr_generic_record(context, builder, recordviewtype, recordviewval, attr):
-    for attrname, typer, lower in ak._v2._util.numba_attrs(
+    for attrname, typer, lower in ak._util.numba_attrs(
         recordviewtype.arrayviewtype.type, recordviewtype.arrayviewtype.behavior
     ):
         if attr == attrname:
@@ -719,7 +719,7 @@ def register_unary_operator(unaryop):
                     left = args[0].arrayviewtype.type
                     behavior = args[0].arrayviewtype.behavior
 
-                    for typer, lower in ak._v2._util.numba_unaryops(
+                    for typer, lower in ak._util.numba_unaryops(
                         unaryop, left, behavior
                     ):
                         numba.extending.lower_builtin(unaryop, *args)(lower)
@@ -755,7 +755,7 @@ def register_binary_operator(binop):
                         behavior = args[1].arrayviewtype.behavior
 
                 if left is not None or right is not None:
-                    for typer, lower in ak._v2._util.numba_binops(
+                    for typer, lower in ak._util.numba_binops(
                         binop, left, right, behavior
                     ):
                         numba.extending.lower_builtin(binop, *args)(lower)
@@ -808,7 +808,7 @@ def overload_contains(obj, element):
                 name = "x"
                 indent = indent + "    "
 
-            if isinstance(arraytype, ak._v2._connect.numba.layout.RecordArrayType):
+            if isinstance(arraytype, ak._connect.numba.layout.RecordArrayType):
                 if arraytype.is_tuple:
                     for fi, ft in enumerate(arraytype.contenttypes):
                         add_statement(indent, name + "[" + repr(fi) + "]", ft, False)
@@ -945,7 +945,7 @@ def type_asarray(context):
     def typer(arrayview):
         if (
             isinstance(arrayview, ArrayViewType)
-            and isinstance(arrayview.type, ak._v2._connect.numba.layout.NumpyArrayType)
+            and isinstance(arrayview.type, ak._connect.numba.layout.NumpyArrayType)
             and arrayview.type.ndim == 1
             and array_supported(arrayview.type.inner_dtype)
         ):
@@ -959,16 +959,16 @@ def lower_asarray(context, builder, sig, args):
     rettype, (viewtype,) = sig.return_type, sig.args
     (viewval,) = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    assert isinstance(viewtype.type, ak._v2._connect.numba.layout.NumpyArrayType)
+    assert isinstance(viewtype.type, ak._connect.numba.layout.NumpyArrayType)
 
-    whichpos = ak._v2._connect.numba.layout.posat(
+    whichpos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.ARRAY
     )
-    arrayptr = ak._v2._connect.numba.layout.getat(
+    arrayptr = ak._connect.numba.layout.getat(
         context, builder, viewproxy.arrayptrs, whichpos
     )
 
-    bitwidth = ak._v2._connect.numba.layout.type_bitwidth(rettype.dtype)
+    bitwidth = ak._connect.numba.layout.type_bitwidth(rettype.dtype)
     itemsize = context.get_constant(numba.intp, bitwidth // 8)
 
     data = numba.core.cgutils.pointer_add(

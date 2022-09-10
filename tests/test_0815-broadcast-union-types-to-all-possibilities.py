@@ -6,21 +6,21 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    @ak._v2.behaviors.mixins.mixin_class(ak._v2.behavior)
+    @ak.behaviors.mixins.mixin_class(ak.behavior)
     class Point:
-        @ak._v2.behaviors.mixins.mixin_class_method(np.add, {"Point"})
+        @ak.behaviors.mixins.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
-            return ak._v2.operations.zip(
+            return ak.operations.zip(
                 {"x": self.x + other.x, "y": self.y + other.y},
                 with_name="Point",
             )
 
-    @ak._v2.behaviors.mixins.mixin_class(ak._v2.behavior)
+    @ak.behaviors.mixins.mixin_class(ak.behavior)
     class Point2(Point):
         pass
 
     def make(name):
-        return ak._v2.operations.zip(
+        return ak.operations.zip(
             {
                 "x": ak.Array([[1, 2], [3]]),
                 "y": ak.Array([[1, 2], [3]]),
@@ -28,7 +28,7 @@ def test():
             with_name=name,
         )
 
-    a = ak._v2.operations.zip(
+    a = ak.operations.zip(
         {
             "x": ak.Array([1, 1]),
             "y": ak.Array([1, 1]),
@@ -49,12 +49,12 @@ def test():
         [{"x": 2, "y": 2}, {"x": 3, "y": 3}],
         [{"x": 4, "y": 4}],
     ]
-    d = ak._v2.operations.concatenate([b, c], axis=1)
+    d = ak.operations.concatenate([b, c], axis=1)
     assert (a + d).tolist() == [
         [{"x": 2, "y": 2}, {"x": 3, "y": 3}, {"x": 2, "y": 2}, {"x": 3, "y": 3}],
         [{"x": 4, "y": 4}, {"x": 4, "y": 4}],
     ]
 
-    e = ak._v2.operations.concatenate([b[b.x < 0], c[c.x < 0]], axis=1)
+    e = ak.operations.concatenate([b[b.x < 0], c[c.x < 0]], axis=1)
 
     assert (a + e).tolist() == [[], []]

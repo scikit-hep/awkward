@@ -9,12 +9,12 @@ import awkward.nplike
 import awkward.layout
 
 # internal
-import awkward._v2
+import awkward
 import awkward._cpu_kernels
 import awkward._libawkward
 
-from awkward._v2.highlevel import Array
-from awkward._v2.record import Record
+from awkward.highlevel import Array
+from awkward.record import Record
 
 # version
 __version__ = awkward._ext.__version__

@@ -6,8 +6,8 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    array = ak._v2.Array([[3.14]])
-    first_slice = ak._v2.Array([True, None])[:1]  # type is 1 * ?bool
+    array = ak.Array([[3.14]])
+    first_slice = ak.Array([True, None])[:1]  # type is 1 * ?bool
     second_slice = 0
     with pytest.raises(ValueError):
         array[first_slice, second_slice]

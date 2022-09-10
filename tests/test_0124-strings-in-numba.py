@@ -6,11 +6,11 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-ak._v2.numba.register_and_check()
+ak.numba.register_and_check()
 
 
 def test_string():
-    array = ak._v2.highlevel.Array(["one", "two", "three", "four", "five"])
+    array = ak.highlevel.Array(["one", "two", "three", "four", "five"])
 
     def f1(x, i):
         return x[i]
@@ -33,7 +33,7 @@ def test_string():
 
 
 def test_bytestring():
-    array = ak._v2.highlevel.Array([b"one", b"two", b"three", b"four", b"five"])
+    array = ak.highlevel.Array([b"one", b"two", b"three", b"four", b"five"])
 
     def f1(x, i):
         return x[i]

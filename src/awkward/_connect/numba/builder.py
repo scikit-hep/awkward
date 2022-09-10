@@ -25,7 +25,7 @@ class ArrayBuilderType(numba.types.Type):
     def __init__(self, behavior):
         super().__init__(
             name="ak2.ArrayBuilderType({})".format(
-                ak._v2._connect.numba.arrayview.repr_behavior(behavior)
+                ak._connect.numba.arrayview.repr_behavior(behavior)
             )
         )
         self.behavior = behavior
@@ -71,7 +71,7 @@ def unbox_ArrayBuilder(arraybuildertype, arraybuilderobj, c):
 @numba.extending.box(ArrayBuilderType)
 def box_ArrayBuilder(arraybuildertype, arraybuilderval, c):
     ArrayBuilder_obj = c.pyapi.unserialize(
-        c.pyapi.serialize_object(ak._v2.highlevel.ArrayBuilder)
+        c.pyapi.serialize_object(ak.highlevel.ArrayBuilder)
     )
     behavior_obj = c.pyapi.unserialize(
         c.pyapi.serialize_object(arraybuildertype.behavior)
@@ -129,7 +129,7 @@ def lower_len(context, builder, sig, args):
         ak._libawkward.ArrayBuilder_length,
         (proxyin.rawptr, result),
     )
-    return ak._v2._connect.numba.layout.castint(
+    return ak._connect.numba.layout.castint(
         context, builder, numba.int64, numba.intp, builder.load(result)
     )
 
@@ -275,8 +275,8 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
             and isinstance(
                 args[0],
                 (
-                    ak._v2._connect.numba.arrayview.ArrayViewType,
-                    ak._v2._connect.numba.arrayview.RecordViewType,
+                    ak._connect.numba.arrayview.ArrayViewType,
+                    ak._connect.numba.arrayview.RecordViewType,
                     numba.types.Boolean,
                     numba.types.Integer,
                     numba.types.Float,
@@ -307,7 +307,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                         isinstance(key, tuple)
                         and len(key) == 3
                         and key[0] == "__numba_lower__"
-                        and key[1] == ak._v2.highlevel.ArrayBuilder.append
+                        and key[1] == ak.highlevel.ArrayBuilder.append
                         and (
                             args[0] == key[2]
                             or (
@@ -329,7 +329,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if (
             len(args) == 1
             and len(kwargs) == 0
-            and isinstance(args[0], ak._v2._connect.numba.arrayview.ArrayViewType)
+            and isinstance(args[0], ak._connect.numba.arrayview.ArrayViewType)
         ):
             return numba.types.none(args[0])
         else:
@@ -371,7 +371,7 @@ def lower_integer(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    x = ak._v2._connect.numba.layout.castint(context, builder, xtype, numba.int64, xval)
+    x = ak._connect.numba.layout.castint(context, builder, xtype, numba.int64, xval)
     call(context, builder, ak._libawkward.ArrayBuilder_integer, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
@@ -419,7 +419,7 @@ def lower_begintuple(context, builder, sig, args):
     arraybuildertype, numfieldstype = sig.args
     arraybuilderval, numfieldsval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    numfields = ak._v2._connect.numba.layout.castint(
+    numfields = ak._connect.numba.layout.castint(
         context, builder, numfieldstype, numba.int64, numfieldsval
     )
     call(
@@ -436,7 +436,7 @@ def lower_index(context, builder, sig, args):
     arraybuildertype, indextype = sig.args
     arraybuilderval, indexval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    index = ak._v2._connect.numba.layout.castint(
+    index = ak._connect.numba.layout.castint(
         context, builder, indextype, numba.int64, indexval
     )
     call(
@@ -513,7 +513,7 @@ def lower_endrecord(context, builder, sig, args):
 
 
 @numba.extending.lower_builtin(
-    "append", ArrayBuilderType, ak._v2._connect.numba.arrayview.ArrayViewType
+    "append", ArrayBuilderType, ak._connect.numba.arrayview.ArrayViewType
 )
 def lower_append_array(context, builder, sig, args):
     arraybuildertype, viewtype = sig.args
@@ -530,7 +530,7 @@ def lower_append_array(context, builder, sig, args):
 
 
 @numba.extending.lower_builtin(
-    "append", ArrayBuilderType, ak._v2._connect.numba.arrayview.RecordViewType
+    "append", ArrayBuilderType, ak._connect.numba.arrayview.RecordViewType
 )
 def lower_append_record(context, builder, sig, args):
     arraybuildertype, recordviewtype = sig.args
@@ -541,11 +541,11 @@ def lower_append_record(context, builder, sig, args):
     arrayviewproxy = context.make_helper(
         builder, recordviewtype.arrayviewtype, recordviewproxy.arrayview
     )
-    atval = ak._v2._connect.numba.layout.castint(
+    atval = ak._connect.numba.layout.castint(
         context, builder, numba.intp, numba.int64, recordviewproxy.at
     )
 
-    sharedptr = ak._v2._connect.numba.layout.getat(
+    sharedptr = ak._connect.numba.layout.getat(
         context, builder, arrayviewproxy.sharedptrs, arrayviewproxy.pos
     )
 
@@ -631,7 +631,7 @@ def lower_append_none(context, builder, sig, args):
 
 
 @numba.extending.lower_builtin(
-    "extend", ArrayBuilderType, ak._v2._connect.numba.arrayview.ArrayViewType
+    "extend", ArrayBuilderType, ak._connect.numba.arrayview.ArrayViewType
 )
 def lower_extend_array(context, builder, sig, args):
     arraybuildertype, viewtype = sig.args
@@ -639,13 +639,13 @@ def lower_extend_array(context, builder, sig, args):
 
     viewproxy = context.make_helper(builder, viewtype, viewval)
 
-    sharedptr = ak._v2._connect.numba.layout.getat(
+    sharedptr = ak._connect.numba.layout.getat(
         context, builder, viewproxy.sharedptrs, viewproxy.pos
     )
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     with numba.core.cgutils.for_range(builder, viewproxy.stop, viewproxy.start) as loop:
-        atval = ak._v2._connect.numba.layout.castint(
+        atval = ak._connect.numba.layout.castint(
             context, builder, numba.intp, numba.int64, loop.index
         )
         call(

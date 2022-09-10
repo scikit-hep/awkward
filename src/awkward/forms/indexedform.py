@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal, _parameters_update
+from awkward.forms.form import Form, _parameters_equal, _parameters_update
 
 
 class IndexedForm(Form):
@@ -15,8 +15,8 @@ class IndexedForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._v2._util.isstr(index):
-            raise ak._v2._util.error(
+        if not ak._util.isstr(index):
+            raise ak._util.error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(
                         type(self).__name__, repr(index)
@@ -24,7 +24,7 @@ class IndexedForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)

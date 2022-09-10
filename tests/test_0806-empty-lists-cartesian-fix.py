@@ -4,33 +4,33 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_empty_arrays_cartesian():
-    one = ak._v2.Array([])
-    two = one = ak._v2.Array([])
+    one = ak.Array([])
+    two = one = ak.Array([])
 
     with pytest.raises(ValueError) as err:
-        to_list(ak._v2.operations.cartesian([one, two]))
+        to_list(ak.operations.cartesian([one, two]))
 
     assert isinstance(err.value, ValueError)
 
-    to_list(ak._v2.operations.concatenate([one, two], axis=0))
+    to_list(ak.operations.concatenate([one, two], axis=0))
 
 
 def test_cartesian():
-    muon = ak._v2.Array([[{"pt": 1.0}], []], with_name="muon")
-    electron = ak._v2.Array([[], [{"pt": 1.0}]], with_name="electron")
+    muon = ak.Array([[{"pt": 1.0}], []], with_name="muon")
+    electron = ak.Array([[], [{"pt": 1.0}]], with_name="electron")
 
     muon = muon[muon.pt > 5]
     electron = electron[electron.pt > 5]
 
-    leptons = ak._v2.operations.concatenate([muon, electron], axis=1)
-    candidate = ak._v2.operations.firsts(leptons)
-    assert to_list(ak._v2.Array(candidate)) == [None, None]
+    leptons = ak.operations.concatenate([muon, electron], axis=1)
+    candidate = ak.operations.firsts(leptons)
+    assert to_list(ak.Array(candidate)) == [None, None]
 
-    result = ak._v2.operations.cartesian([candidate, candidate], axis=0)
+    result = ak.operations.cartesian([candidate, candidate], axis=0)
     assert to_list(result) == [
         (None, None),
         (None, None),
@@ -38,14 +38,10 @@ def test_cartesian():
         (None, None),
     ]
 
-    result = ak._v2.operations.cartesian(
-        [candidate, ak._v2.Array([[1, 2, 3], []])], axis=1
-    )
+    result = ak.operations.cartesian([candidate, ak.Array([[1, 2, 3], []])], axis=1)
 
     assert to_list(result) == [None, None]
 
-    one, two = ak._v2.operations.broadcast_arrays(
-        candidate, ak._v2.Array([[1, 2, 3], []])
-    )
+    one, two = ak.operations.broadcast_arrays(candidate, ak.Array([[1, 2, 3], []]))
     assert to_list(one) == [None, None]
     assert to_list(two) == [None, None]

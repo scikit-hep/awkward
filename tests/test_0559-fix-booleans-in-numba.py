@@ -6,7 +6,7 @@ import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-ak._v2.numba.register_and_check()
+ak.numba.register_and_check()
 
 
 def test():
@@ -18,5 +18,5 @@ def test():
                 out[i] = x
         return out
 
-    array = ak._v2.highlevel.Array([True, False, False])
+    array = ak.highlevel.Array([True, False, False])
     assert do_something(array).tolist() == [True, False, False]

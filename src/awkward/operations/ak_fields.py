@@ -18,13 +18,13 @@ def fields(array):
     If the array contains neither tuples nor records, this returns an empty
     list.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.fields",
+    with ak._util.OperationErrorContext(
+        "ak.fields",
         dict(array=array),
     ):
         return _impl(array)
 
 
 def _impl(array):
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     return layout.fields.copy()

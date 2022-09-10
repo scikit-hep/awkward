@@ -12,14 +12,14 @@ def is_tuple(array):
     If `array` is a record, this returns True if the record is a tuple.
     If `array` is an array, this returns True if the outermost record is a tuple.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.is_tuple",
+    with ak._util.OperationErrorContext(
+        "ak.is_tuple",
         dict(array=array),
     ):
         return _impl(array)
 
 
 def _impl(array):
-    layout = ak._v2.to_layout(array, allow_record=True)
+    layout = ak.to_layout(array, allow_record=True)
 
     return layout.is_tuple

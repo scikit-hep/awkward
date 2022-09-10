@@ -1,17 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.types.type import Type
-from awkward._v2.types.regulartype import RegularType
-from awkward._v2.types.listtype import ListType
-from awkward._v2.types.uniontype import UnionType
-from awkward._v2.forms.form import _parameters_equal
+from awkward.types.type import Type
+from awkward.types.regulartype import RegularType
+from awkward.types.listtype import ListType
+from awkward.types.uniontype import UnionType
+from awkward.forms.form import _parameters_equal
 
 
 class OptionType(Type):
     def __init__(self, content, parameters=None, typestr=None):
         if not isinstance(content, Type):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'content' must be a Type subclass, not {}".format(
                         type(self).__name__, repr(content)
@@ -19,15 +19,15 @@ class OptionType(Type):
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
                     )
                 )
             )
-        if typestr is not None and not ak._v2._util.isstr(typestr):
-            raise ak._v2._util.error(
+        if typestr is not None and not ak._util.isstr(typestr):
+            raise ak._util.error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)
@@ -100,7 +100,7 @@ class OptionType(Type):
                     contents.append(
                         OptionType(
                             content.content,
-                            ak._v2._util.merge_parameters(
+                            ak._util.merge_parameters(
                                 self._parameters, content._parameters
                             ),
                             content._typestr

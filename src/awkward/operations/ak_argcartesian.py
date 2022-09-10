@@ -70,8 +70,8 @@ def argcartesian(
     All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
     so see the #ak.cartesian documentation for a more complete description.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.argcartesian",
+    with ak._util.OperationErrorContext(
+        "ak.argcartesian",
         dict(
             arrays=arrays,
             axis=axis,
@@ -87,18 +87,18 @@ def argcartesian(
 
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
-        behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)
+        behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
         layouts = {
-            n: ak._v2.operations.to_layout(
+            n: ak.operations.to_layout(
                 x, allow_record=False, allow_other=False
             ).local_index(axis)
             for n, x in arrays.items()
         }
     else:
         arrays = list(arrays)
-        behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
+        behavior = ak._util.behavior_of(*arrays, behavior=behavior)
         layouts = [
-            ak._v2.operations.to_layout(
+            ak.operations.to_layout(
                 x, allow_record=False, allow_other=False
             ).local_index(axis)
             for x in arrays
@@ -111,7 +111,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    result = ak._v2.operations.cartesian(
+    result = ak.operations.cartesian(
         layouts,
         axis=axis,
         nested=nested,
@@ -120,4 +120,4 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         behavior=behavior,
     )
 
-    return ak._v2._util.wrap(result, behavior, highlevel)
+    return ak._util.wrap(result, behavior, highlevel)

@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("ravel")
+# @ak._connect.numpy.implements("ravel")
 def ravel(array, highlevel=True, behavior=None):
     """
     Args:
@@ -41,23 +41,23 @@ def ravel(array, highlevel=True, behavior=None):
     Missing values are eliminated by flattening: there is no distinction
     between an empty list and a value of None at the level of flattening.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.ravel",
+    with ak._util.OperationErrorContext(
+        "ak.ravel",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, highlevel, behavior)
 
 
 def _impl(array, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     nplike = ak.nplike.of(layout)
 
     out = layout.completely_flatten(function_name="ak.ravel")
     assert isinstance(out, tuple) and all(isinstance(x, nplike.ndarray) for x in out)
 
     if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
-        out = ak._v2.contents.NumpyArray(nplike.ma.concatenate(out))
+        out = ak.contents.NumpyArray(nplike.ma.concatenate(out))
     else:
-        out = ak._v2.contents.NumpyArray(nplike.concatenate(out))
+        out = ak.contents.NumpyArray(nplike.concatenate(out))
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

@@ -2,7 +2,7 @@
 
 from collections.abc import Iterable
 
-from awkward._v2.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _parameters_equal
 
 import awkward as ak
 
@@ -28,7 +28,7 @@ def from_dtype(dtype, parameters=None):
             dtype = np.dtype(dtype.type)
 
     return NumpyForm(
-        primitive=ak._v2.types.numpytype.dtype_to_primitive(dtype),
+        primitive=ak.types.numpytype.dtype_to_primitive(dtype),
         parameters=parameters,
         inner_shape=inner_shape,
     )
@@ -45,11 +45,11 @@ class NumpyForm(Form):
         parameters=None,
         form_key=None,
     ):
-        primitive = ak._v2.types.numpytype.dtype_to_primitive(
-            ak._v2.types.numpytype.primitive_to_dtype(primitive)
+        primitive = ak.types.numpytype.dtype_to_primitive(
+            ak.types.numpytype.primitive_to_dtype(primitive)
         )
         if not isinstance(inner_shape, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'inner_shape' must be iterable, not {}".format(
                         type(self).__name__, repr(inner_shape)
@@ -71,7 +71,7 @@ class NumpyForm(Form):
 
     @property
     def itemsize(self):
-        return ak._v2.types.numpytype.primitive_to_dtype(self._primitive).itemsize
+        return ak.types.numpytype.primitive_to_dtype(self._primitive).itemsize
 
     def __repr__(self):
         args = [repr(self._primitive)]
@@ -101,13 +101,13 @@ class NumpyForm(Form):
             return self._tolist_extra(out, verbose)
 
     def _type(self, typestrs):
-        out = ak._v2.types.numpytype.NumpyType(
+        out = ak.types.numpytype.NumpyType(
             self._primitive,
             None,
-            ak._v2._util.gettypestr(self._parameters, typestrs),
+            ak._util.gettypestr(self._parameters, typestrs),
         )
         for x in self._inner_shape[::-1]:
-            out = ak._v2.types.regulartype.RegularType(out, x)
+            out = ak.types.regulartype.RegularType(out, x)
 
         out._parameters = self._parameters
 
@@ -130,7 +130,7 @@ class NumpyForm(Form):
     def toRegularForm(self):
         out = NumpyForm(self._primitive, (), False, None, None)
         for x in self._inner_shape[::-1]:
-            out = ak._v2.forms.RegularForm(out, x, False, None, None)
+            out = ak.forms.RegularForm(out, x, False, None, None)
         out._has_identifier = self._has_identifier
         out._parameters = self._parameters
         return out
@@ -141,8 +141,8 @@ class NumpyForm(Form):
 
         elif isinstance(other, NumpyForm):
             return (
-                ak._v2.types.numpytype.primitive_to_dtype(self._primitive)
-                == ak._v2.types.numpytype.primitive_to_dtype(other._primitive)
+                ak.types.numpytype.primitive_to_dtype(self._primitive)
+                == ak.types.numpytype.primitive_to_dtype(other._primitive)
                 and self._inner_shape == other._inner_shape
                 and _parameters_equal(
                     self._parameters, other._parameters, only_array_record=True
@@ -162,10 +162,10 @@ class NumpyForm(Form):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        raise ak._v2._util.indexerror(self, where, "not an array of records")
+        raise ak._util.indexerror(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
-        raise ak._v2._util.indexerror(self, where, "not an array of records")
+        raise ak._util.indexerror(self, where, "not an array of records")
 
     def _carry(self, allow_lazy):
         return NumpyForm(
@@ -224,4 +224,4 @@ class NumpyForm(Form):
         return self
 
     def _column_types(self):
-        return (ak._v2.types.numpytype.primitive_to_dtype(self._primitive),)
+        return (ak.types.numpytype.primitive_to_dtype(self._primitive),)

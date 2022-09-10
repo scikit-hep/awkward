@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("max")
+# @ak._connect.numpy.implements("max")
 def max(
     array,
     axis=None,
@@ -51,8 +51,8 @@ def max(
 
     See also #ak.nanmax.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.max",
+    with ak._util.OperationErrorContext(
+        "ak.max",
         dict(
             array=array,
             axis=axis,
@@ -65,7 +65,7 @@ def max(
         return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
 
 
-# @ak._v2._connect.numpy.implements("nanmax")
+# @ak._connect.numpy.implements("nanmax")
 def nanmax(
     array,
     axis=None,
@@ -106,8 +106,8 @@ def nanmax(
 
     See also #ak.max.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.nanmax",
+    with ak._util.OperationErrorContext(
+        "ak.nanmax",
         dict(
             array=array,
             axis=axis,
@@ -117,21 +117,21 @@ def nanmax(
             flatten_records=flatten_records,
         ),
     ):
-        array = ak._v2.operations.ak_nan_to_none._impl(array, False, None)
+        array = ak.operations.ak_nan_to_none._impl(array, False, None)
 
         return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
 
 
 def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:
         if not layout.nplike.known_data or not layout.nplike.known_shape:
-            reducer_cls = ak._v2._reducers.Max
+            reducer_cls = ak._reducers.Max
 
             def map(x):
-                return ak._v2._typetracer.MaybeNone(
-                    ak._v2._typetracer.UnknownScalar(
+                return ak._typetracer.MaybeNone(
+                    ak._typetracer.UnknownScalar(
                         np.dtype(reducer_cls.return_dtype(x.dtype))
                     )
                 )
@@ -155,7 +155,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
         return reduce([map(x) for x in tmp if not x.shape[0] <= 0])
 
     else:
-        behavior = ak._v2._util.behavior_of(array)
+        behavior = ak._util.behavior_of(array)
         out = layout.max(
             axis=axis,
             mask=mask_identity,
@@ -163,7 +163,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
             initial=initial,
             behavior=behavior,
         )
-        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
-            return ak._v2._util.wrap(out, behavior)
+        if isinstance(out, (ak.contents.Content, ak.record.Record)):
+            return ak._util.wrap(out, behavior)
         else:
             return out

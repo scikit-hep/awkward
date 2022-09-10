@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 _ZEROS = object()
 
 
-# @ak._v2._connect.numpy.implements("zeros_like")
+# @ak._connect.numpy.implements("zeros_like")
 def zeros_like(array, highlevel=True, behavior=None, dtype=None):
     """
     Args:
@@ -26,8 +26,8 @@ def zeros_like(array, highlevel=True, behavior=None, dtype=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.zeros_like",
+    with ak._util.OperationErrorContext(
+        "ak.zeros_like",
         dict(array=array, highlevel=highlevel, behavior=behavior, dtype=dtype),
     ):
         return _impl(array, highlevel, behavior, dtype)
@@ -35,9 +35,5 @@ def zeros_like(array, highlevel=True, behavior=None, dtype=None):
 
 def _impl(array, highlevel, behavior, dtype):
     if dtype is not None:
-        return ak._v2.operations.ak_full_like._impl(
-            array, 0, highlevel, behavior, dtype
-        )
-    return ak._v2.operations.ak_full_like._impl(
-        array, _ZEROS, highlevel, behavior, dtype
-    )
+        return ak.operations.ak_full_like._impl(array, 0, highlevel, behavior, dtype)
+    return ak.operations.ak_full_like._impl(array, _ZEROS, highlevel, behavior, dtype)

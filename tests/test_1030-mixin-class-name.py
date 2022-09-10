@@ -8,7 +8,7 @@ import awkward as ak  # noqa: F401
 behavior = {}
 
 
-@ak._v2.behaviors.mixins.mixin_class(behavior, "1030_point")
+@ak.behaviors.mixins.mixin_class(behavior, "1030_point")
 class AVeryVeryVeryLargeClassName:
     @property
     def mag2(self):
@@ -19,13 +19,13 @@ def test():
     x = np.random.randint(0, 64, 128)
     y = np.random.randint(0, 64, 128)
 
-    point_1030 = ak._v2.operations.zip(
+    point_1030 = ak.operations.zip(
         {"x": x, "y": y}, behavior=behavior, with_name="1030_point"
     )
-    assert isinstance(point_1030.mag2, ak._v2.Array)
+    assert isinstance(point_1030.mag2, ak.Array)
 
-    point = ak._v2.operations.zip(
+    point = ak.operations.zip(
         {"x": x, "y": y}, behavior=behavior, with_name="AVeryVeryVeryLargeClassName"
     )
     with pytest.raises(AttributeError):
-        assert isinstance(point.mag2, ak._v2.Array)
+        assert isinstance(point.mag2, ak.Array)

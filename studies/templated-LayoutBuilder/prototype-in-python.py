@@ -3,7 +3,7 @@ import json
 import pytest
 
 import numpy as np
-import awkward._v2 as ak
+import awkward as ak
 
 
 ############################### GrowableBuffer

@@ -68,8 +68,8 @@ def linear_fit(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.linear_fit",
+    with ak._util.OperationErrorContext(
+        "ak.linear_fit",
         dict(
             x=x,
             y=y,
@@ -84,57 +84,57 @@ def linear_fit(
 
 
 def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
-    x = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(x, allow_record=False, allow_other=False)
+    x = ak.highlevel.Array(
+        ak.operations.to_layout(x, allow_record=False, allow_other=False)
     )
-    y = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(y, allow_record=False, allow_other=False)
+    y = ak.highlevel.Array(
+        ak.operations.to_layout(y, allow_record=False, allow_other=False)
     )
     if weight is not None:
-        weight = ak._v2.highlevel.Array(
-            ak._v2.operations.to_layout(weight, allow_record=False, allow_other=False)
+        weight = ak.highlevel.Array(
+            ak.operations.to_layout(weight, allow_record=False, allow_other=False)
         )
 
     with np.errstate(invalid="ignore"):
         nplike = ak.nplike.of(x, y, weight)
         if weight is None:
-            sumw = ak._v2.operations.ak_count._impl(
+            sumw = ak.operations.ak_count._impl(
                 x, axis, keepdims, mask_identity, flatten_records
             )
-            sumwx = ak._v2.operations.ak_sum._impl(
+            sumwx = ak.operations.ak_sum._impl(
                 x, axis, keepdims, mask_identity, flatten_records
             )
-            sumwy = ak._v2.operations.ak_sum._impl(
+            sumwy = ak.operations.ak_sum._impl(
                 y, axis, keepdims, mask_identity, flatten_records
             )
-            sumwxx = ak._v2.operations.ak_sum._impl(
+            sumwxx = ak.operations.ak_sum._impl(
                 x**2, axis, keepdims, mask_identity, flatten_records
             )
-            sumwxy = ak._v2.operations.ak_sum._impl(
+            sumwxy = ak.operations.ak_sum._impl(
                 x * y, axis, keepdims, mask_identity, flatten_records
             )
         else:
-            sumw = ak._v2.operations.ak_sum._impl(
+            sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,
                 keepdims,
                 mask_identity,
                 flatten_records,
             )
-            sumwx = ak._v2.operations.ak_sum._impl(
+            sumwx = ak.operations.ak_sum._impl(
                 x * weight, axis, keepdims, mask_identity, flatten_records
             )
-            sumwy = ak._v2.operations.ak_sum._impl(
+            sumwy = ak.operations.ak_sum._impl(
                 y * weight, axis, keepdims, mask_identity, flatten_records
             )
-            sumwxx = ak._v2.operations.ak_sum._impl(
+            sumwxx = ak.operations.ak_sum._impl(
                 (x**2) * weight,
                 axis,
                 keepdims,
                 mask_identity,
                 flatten_records,
             )
-            sumwxy = ak._v2.operations.ak_sum._impl(
+            sumwxy = ak.operations.ak_sum._impl(
                 x * y * weight,
                 axis,
                 keepdims,
@@ -147,14 +147,14 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
         intercept_error = nplike.sqrt(nplike.true_divide(sumwxx, delta))
         slope_error = nplike.sqrt(nplike.true_divide(sumw, delta))
 
-        intercept = ak._v2.operations.to_layout(
+        intercept = ak.operations.to_layout(
             intercept, allow_record=True, allow_other=True
         )
-        slope = ak._v2.operations.to_layout(slope, allow_record=True, allow_other=True)
-        intercept_error = ak._v2.operations.to_layout(
+        slope = ak.operations.to_layout(slope, allow_record=True, allow_other=True)
+        intercept_error = ak.operations.to_layout(
             intercept_error, allow_record=True, allow_other=True
         )
-        slope_error = ak._v2.operations.to_layout(
+        slope_error = ak.operations.to_layout(
             slope_error, allow_record=True, allow_other=True
         )
 
@@ -162,43 +162,41 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
         if not isinstance(
             intercept,
             (
-                ak._v2.contents.Content,
-                ak._v2.record.Record,
+                ak.contents.Content,
+                ak.record.Record,
             ),
         ):
-            intercept = ak._v2.contents.NumpyArray(nplike.array([intercept]))
+            intercept = ak.contents.NumpyArray(nplike.array([intercept]))
             scalar = True
         if not isinstance(
             slope,
             (
-                ak._v2.contents.Content,
-                ak._v2.record.Record,
+                ak.contents.Content,
+                ak.record.Record,
             ),
         ):
-            slope = ak._v2.contents.NumpyArray(nplike.array([slope]))
+            slope = ak.contents.NumpyArray(nplike.array([slope]))
             scalar = True
         if not isinstance(
             intercept_error,
             (
-                ak._v2.contents.Content,
-                ak._v2.record.Record,
+                ak.contents.Content,
+                ak.record.Record,
             ),
         ):
-            intercept_error = ak._v2.contents.NumpyArray(
-                nplike.array([intercept_error])
-            )
+            intercept_error = ak.contents.NumpyArray(nplike.array([intercept_error]))
             scalar = True
         if not isinstance(
             slope_error,
             (
-                ak._v2.contents.Content,
-                ak._v2.record.Record,
+                ak.contents.Content,
+                ak.record.Record,
             ),
         ):
-            slope_error = ak._v2.contents.NumpyArray(nplike.array([slope_error]))
+            slope_error = ak.contents.NumpyArray(nplike.array([slope_error]))
             scalar = True
 
-        out = ak._v2.contents.RecordArray(
+        out = ak.contents.RecordArray(
             [intercept, slope, intercept_error, slope_error],
             ["intercept", "slope", "intercept_error", "slope_error"],
             parameters={"__record__": "LinearFit"},
@@ -206,7 +204,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
         if scalar:
             out = out[0]
 
-        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
-            return ak._v2._util.wrap(out, ak._v2._util.behavior_of(x, y))
+        if isinstance(out, (ak.contents.Content, ak.record.Record)):
+            return ak._util.wrap(out, ak._util.behavior_of(x, y))
         else:
             return out

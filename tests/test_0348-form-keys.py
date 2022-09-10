@@ -7,10 +7,10 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-ak_Array = ak._v2.highlevel.Array
-ak_Record = ak._v2.highlevel.Record
-ak_to_buffers = ak._v2.operations.to_buffers
-ak_from_buffers = ak._v2.operations.from_buffers
+ak_Array = ak.highlevel.Array
+ak_Record = ak.highlevel.Record
+ak_to_buffers = ak.operations.to_buffers
+ak_from_buffers = ak.operations.from_buffers
 
 
 def test_numpyarray():
@@ -49,7 +49,7 @@ def test_listoffsetarray():
 
 def test_listarray():
     listoffsetarray = ak_Array([[1, 2, 3], [], [4, 5]]).layout
-    listarray = ak._v2.contents.ListArray(
+    listarray = ak.contents.ListArray(
         listoffsetarray.starts, listoffsetarray.stops, listoffsetarray.content
     )
     assert ak_from_buffers(*ak_to_buffers(listarray)).tolist() == [
@@ -80,8 +80,8 @@ def test_indexedoptionarray():
 
 def test_indexedarray():
     content = ak_Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
-    index = ak._v2.index.Index64(np.array([3, 1, 1, 4, 2], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedArray(index, content)
+    index = ak.index.Index64(np.array([3, 1, 1, 4, 2], dtype=np.int64))
+    indexedarray = ak.contents.IndexedArray(index, content)
     assert ak_from_buffers(*ak_to_buffers(indexedarray)).tolist() == [
         3.3,
         1.1,
@@ -112,10 +112,8 @@ def test_emptyarray():
 
 def test_bytemaskedarray():
     content = ak_Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
-    mask = ak._v2.index.Index8(
-        np.array([False, True, True, False, False], dtype=np.int8)
-    )
-    bytemaskedarray = ak._v2.contents.ByteMaskedArray(mask, content, True)
+    mask = ak.index.Index8(np.array([False, True, True, False, False], dtype=np.int8))
+    bytemaskedarray = ak.contents.ByteMaskedArray(mask, content, True)
     assert ak_from_buffers(*ak_to_buffers(bytemaskedarray)).tolist() == [
         None,
         1.1,
@@ -134,10 +132,10 @@ def test_bytemaskedarray():
 
 def test_bitmaskedarray():
     content = ak_Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
-    mask = ak._v2.index.IndexU8(
+    mask = ak.index.IndexU8(
         np.packbits(np.array([False, True, True, False, False], dtype=np.int8))
     )
-    bitmaskedarray = ak._v2.contents.BitMaskedArray(mask, content, True, 5, False)
+    bitmaskedarray = ak.contents.BitMaskedArray(mask, content, True, 5, False)
     assert ak_from_buffers(*ak_to_buffers(bitmaskedarray)).tolist() == [
         None,
         1.1,
@@ -209,7 +207,7 @@ def test_record():
 
 def test_regulararray():
     content = ak_Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).layout
-    regulararray = ak._v2.contents.RegularArray(content, 3, zeros_length=0)
+    regulararray = ak.contents.RegularArray(content, 3, zeros_length=0)
     assert ak_from_buffers(*ak_to_buffers(regulararray)).tolist() == [
         [1, 2, 3],
         [4, 5, 6],
@@ -241,7 +239,7 @@ def test_unionarray():
 
 def test_unmaskedarray():
     content = ak_Array([1, 2, 3, 4, 5]).layout
-    unmaskedarray = ak._v2.contents.UnmaskedArray(content)
+    unmaskedarray = ak.contents.UnmaskedArray(content)
     assert ak_from_buffers(*ak_to_buffers(unmaskedarray)).tolist() == [1, 2, 3, 4, 5]
     assert pickle.loads(pickle.dumps(ak_Array(unmaskedarray), -1)).tolist() == [
         1,

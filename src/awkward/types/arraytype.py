@@ -3,21 +3,21 @@
 import sys
 
 import awkward as ak
-import awkward._v2.types.type
+import awkward.types.type
 
 
 class ArrayType:
     def __init__(self, content, length):
-        if not isinstance(content, awkward._v2.types.type.Type):
-            raise ak._v2._util.error(
+        if not isinstance(content, awkward.types.type.Type):
+            raise ak._util.error(
                 TypeError(
                     "{} all 'contents' must be Type subclasses, not {}".format(
                         type(self).__name__, repr(content)
                     )
                 )
             )
-        if not ak._v2._util.isint(length) or length < 0:
-            raise ak._v2._util.error(
+        if not ak._util.isint(length) or length < 0:
+            raise ak._util.error(
                 ValueError(
                     "{} 'length' must be of a positive integer, not {}".format(
                         type(self).__name__, repr(length)

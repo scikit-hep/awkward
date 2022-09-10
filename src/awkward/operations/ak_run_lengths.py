@@ -83,8 +83,8 @@ def run_lengths(array, highlevel=True, behavior=None):
 
     See also #ak.num, #ak.argsort, #ak.unflatten.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.run_lengths",
+    with ak._util.OperationErrorContext(
+        "ak.run_lengths",
         dict(
             array=array,
             highlevel=highlevel,
@@ -103,7 +103,7 @@ def _impl(array, highlevel, behavior):
         else:
             diffs = data[1:] != data[:-1]
 
-            if isinstance(diffs, ak._v2.highlevel.Array):
+            if isinstance(diffs, ak.highlevel.Array):
                 diffs = nplike.asarray(diffs)
             if offsets is not None:
                 diffs[offsets[1:-1] - 1] = True
@@ -131,25 +131,23 @@ def _impl(array, highlevel, behavior):
                 layout.parameter("__array__") == "string"
                 or layout.parameter("__array__") == "bytestring"
             ):
-                nextcontent, _ = lengths_of(ak._v2.highlevel.Array(layout), None)
-                return ak._v2.contents.NumpyArray(nextcontent)
+                nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
+                return ak.contents.NumpyArray(nextcontent)
 
-            if not isinstance(
-                layout, (ak._v2.contents.NumpyArray, ak._v2.contents.EmptyArray)
-            ):
-                raise ak._v2._util.error(
+            if not isinstance(layout, (ak.contents.NumpyArray, ak.contents.EmptyArray)):
+                raise ak._util.error(
                     NotImplementedError("run_lengths on " + type(layout).__name__)
                 )
 
             nextcontent, _ = lengths_of(nplike.asarray(layout), None)
-            return ak._v2.contents.NumpyArray(nextcontent)
+            return ak.contents.NumpyArray(nextcontent)
 
         elif layout.branch_depth == (False, 2):
             if layout.is_IndexedType:
                 layout = layout.project()
 
             if not layout.is_ListType:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     NotImplementedError("run_lengths on " + type(layout).__name__)
                 )
 
@@ -165,11 +163,11 @@ def _impl(array, highlevel, behavior):
                     content = content.project()
 
                 nextcontent, nextoffsets = lengths_of(
-                    ak._v2.highlevel.Array(content), offsets - offsets[0]
+                    ak.highlevel.Array(content), offsets - offsets[0]
                 )
-                return ak._v2.contents.ListOffsetArray(
-                    ak._v2.index.Index64(nextoffsets),
-                    ak._v2.contents.NumpyArray(nextcontent),
+                return ak.contents.ListOffsetArray(
+                    ak.index.Index64(nextoffsets),
+                    ak.contents.NumpyArray(nextcontent),
                 )
 
             listoffsetarray = layout.toListOffsetArray64(False)
@@ -180,9 +178,9 @@ def _impl(array, highlevel, behavior):
                 content = content.project()
 
             if not isinstance(
-                content, (ak._v2.contents.NumpyArray, ak._v2.contents.EmptyArray)
+                content, (ak.contents.NumpyArray, ak.contents.EmptyArray)
             ):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     NotImplementedError(
                         "run_lengths on "
                         + type(layout).__name__
@@ -194,15 +192,15 @@ def _impl(array, highlevel, behavior):
             nextcontent, nextoffsets = lengths_of(
                 nplike.asarray(content), offsets - offsets[0]
             )
-            return ak._v2.contents.ListOffsetArray(
-                ak._v2.index.Index64(nextoffsets),
-                ak._v2.contents.NumpyArray(nextcontent),
+            return ak.contents.ListOffsetArray(
+                ak.index.Index64(nextoffsets),
+                ak.contents.NumpyArray(nextcontent),
             )
         else:
             return None
 
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     out = layout.recursively_apply(action, behavior)
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

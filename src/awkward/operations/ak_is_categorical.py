@@ -15,13 +15,13 @@ def is_categorical(array):
 
     See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.is_categorical",
+    with ak._util.OperationErrorContext(
+        "ak.is_categorical",
         dict(array=array),
     ):
         return _impl(array)
 
 
 def _impl(array):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     return layout.purelist_parameter("__array__") == "categorical"

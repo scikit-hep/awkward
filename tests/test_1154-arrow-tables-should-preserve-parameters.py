@@ -8,16 +8,16 @@ pytest.importorskip("pyarrow")
 
 
 def test():
-    a = ak._v2.highlevel.Array(
-        ak._v2.contents.RecordArray(
+    a = ak.highlevel.Array(
+        ak.contents.RecordArray(
             [
-                ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3])),
-                ak._v2.contents.NumpyArray(np.array([1, 2, 3])),
+                ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3])),
+                ak.contents.NumpyArray(np.array([1, 2, 3])),
             ],
             ["x", "y"],
             parameters={"__record__": "Hello"},
         )
     )
-    assert ak._v2.operations.from_arrow(
-        ak._v2.operations.to_arrow_table(a)
+    assert ak.operations.from_arrow(
+        ak.operations.to_arrow_table(a)
     ).type.content.parameters == {"__record__": "Hello"}

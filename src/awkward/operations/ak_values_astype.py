@@ -47,8 +47,8 @@ def values_astype(array, to, highlevel=True, behavior=None):
 
     See also #ak.strings_astype.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.values_astype",
+    with ak._util.OperationErrorContext(
+        "ak.values_astype",
         dict(array=array, to=to, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, to, highlevel, behavior)
@@ -56,18 +56,18 @@ def values_astype(array, to, highlevel=True, behavior=None):
 
 def _impl(array, to, highlevel, behavior):
     to_dtype = np.dtype(to)
-    to_str = ak._v2.types.numpytype._dtype_to_primitive_dict.get(to_dtype)
+    to_str = ak.types.numpytype._dtype_to_primitive_dict.get(to_dtype)
 
     if to_str is None:
         if to_dtype.name.startswith("datetime64"):
             to_str = to_dtype.name
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     f"cannot use {to_dtype} to cast the numeric type of an array"
                 )
             )
 
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.numbers_to_type(to_str)
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

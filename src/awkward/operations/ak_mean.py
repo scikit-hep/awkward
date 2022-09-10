@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("mean")
+# @ak._connect.numpy.implements("mean")
 def mean(
     x, weight=None, axis=None, keepdims=False, mask_identity=True, flatten_records=False
 ):
@@ -73,8 +73,8 @@ def mean(
 
     See also #ak.nanmean.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.mean",
+    with ak._util.OperationErrorContext(
+        "ak.mean",
         dict(
             x=x,
             weight=weight,
@@ -87,7 +87,7 @@ def mean(
         return _impl(x, weight, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._v2._connect.numpy.implements("nanmean")
+# @ak._connect.numpy.implements("nanmean")
 def nanmean(
     x, weight=None, axis=None, keepdims=False, mask_identity=True, flatten_records=False
 ):
@@ -124,8 +124,8 @@ def nanmean(
 
     See also #ak.mean.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.nanmean",
+    with ak._util.OperationErrorContext(
+        "ak.nanmean",
         dict(
             x=x,
             weight=weight,
@@ -135,39 +135,39 @@ def nanmean(
             flatten_records=flatten_records,
         ),
     ):
-        x = ak._v2.operations.ak_nan_to_none._impl(x, False, None)
+        x = ak.operations.ak_nan_to_none._impl(x, False, None)
         if weight is not None:
-            weight = ak._v2.operations.ak_nan_to_none._impl(weight, False, None)
+            weight = ak.operations.ak_nan_to_none._impl(weight, False, None)
 
         return _impl(x, weight, axis, keepdims, mask_identity, flatten_records)
 
 
 def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
-    x = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(x, allow_record=False, allow_other=False)
+    x = ak.highlevel.Array(
+        ak.operations.to_layout(x, allow_record=False, allow_other=False)
     )
     if weight is not None:
-        weight = ak._v2.highlevel.Array(
-            ak._v2.operations.to_layout(weight, allow_record=False, allow_other=False)
+        weight = ak.highlevel.Array(
+            ak.operations.to_layout(weight, allow_record=False, allow_other=False)
         )
 
     with np.errstate(invalid="ignore"):
         if weight is None:
-            sumw = ak._v2.operations.ak_count._impl(
+            sumw = ak.operations.ak_count._impl(
                 x, axis, keepdims, mask_identity, flatten_records
             )
-            sumwx = ak._v2.operations.ak_sum._impl(
+            sumwx = ak.operations.ak_sum._impl(
                 x, axis, keepdims, mask_identity, flatten_records
             )
         else:
-            sumw = ak._v2.operations.ak_sum._impl(
+            sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,
                 keepdims,
                 mask_identity,
                 flatten_records,
             )
-            sumwx = ak._v2.operations.ak_sum._impl(
+            sumwx = ak.operations.ak_sum._impl(
                 x * weight, axis, keepdims, mask_identity, flatten_records
             )
         return ak.nplike.of(sumwx, sumw).true_divide(sumwx, sumw)

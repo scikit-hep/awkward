@@ -71,14 +71,14 @@ def local_index(array, axis=-1, highlevel=True, behavior=None):
                        2               8.8
                        3               9.9
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.local_index",
+    with ak._util.OperationErrorContext(
+        "ak.local_index",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     out = layout.local_index(axis)
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

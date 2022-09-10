@@ -85,8 +85,8 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 
     (which is 5 characters away from simply filtering the `array`).
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.mask",
+    with ak._util.OperationErrorContext(
+        "ak.mask",
         dict(
             array=array,
             mask=mask,
@@ -101,32 +101,28 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 def _impl(array, mask, valid_when, highlevel, behavior):
     def action(inputs, **kwargs):
         layoutarray, layoutmask = inputs
-        if isinstance(layoutmask, ak._v2.contents.NumpyArray):
+        if isinstance(layoutmask, ak.contents.NumpyArray):
             m = ak.nplike.of(layoutmask).asarray(layoutmask)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(
                         "mask must have boolean type, not " "{}".format(repr(m.dtype))
                     )
                 )
-            bytemask = ak._v2.index.Index8(m.view(np.int8))
+            bytemask = ak.index.Index8(m.view(np.int8))
             return (
-                ak._v2.contents.ByteMaskedArray(
+                ak.contents.ByteMaskedArray(
                     bytemask, layoutarray, valid_when=valid_when
                 ).simplify_optiontype(),
             )
         else:
             return None
 
-    layoutarray = ak._v2.operations.to_layout(
-        array, allow_record=False, allow_other=False
-    )
-    layoutmask = ak._v2.operations.to_layout(
-        mask, allow_record=False, allow_other=False
-    )
+    layoutarray = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    layoutmask = ak.operations.to_layout(mask, allow_record=False, allow_other=False)
 
-    behavior = ak._v2._util.behavior_of(array, mask, behavior=behavior)
-    out = ak._v2._broadcasting.broadcast_and_apply(
+    behavior = ak._util.behavior_of(array, mask, behavior=behavior)
+    out = ak._broadcasting.broadcast_and_apply(
         [layoutarray, layoutmask],
         action,
         behavior,
@@ -134,4 +130,4 @@ def _impl(array, mask, valid_when, highlevel, behavior):
         right_broadcast=False,
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return ak._v2._util.wrap(out[0], behavior, highlevel)
+    return ak._util.wrap(out[0], behavior, highlevel)

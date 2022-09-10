@@ -50,8 +50,8 @@ def from_iter(
 
     See also #ak.to_list.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.from_iter",
+    with ak._util.OperationErrorContext(
+        "ak.from_iter",
         dict(
             iterable=iterable,
             highlevel=highlevel,
@@ -76,7 +76,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 resize,
             )[0]
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     "cannot produce an array from a single dict (that would be a record)"
                 )
@@ -89,8 +89,8 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     builder.fromiter(iterable)
 
     formstr, length, buffers = builder.to_buffers()
-    form = ak._v2.forms.from_json(formstr)
+    form = ak.forms.from_json(formstr)
 
-    return ak._v2.operations.from_buffers(
+    return ak.operations.from_buffers(
         form, length, buffers, highlevel=highlevel, behavior=behavior
     )[0]

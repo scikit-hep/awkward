@@ -25,51 +25,47 @@ class Lookup:
 
 
 def tolookup(layout, positions):
-    if isinstance(layout, ak._v2.contents.EmptyArray):
+    if isinstance(layout, ak.contents.EmptyArray):
         return tolookup(layout.toNumpyArray(np.dtype(np.float64)), positions)
 
-    elif isinstance(layout, ak._v2.contents.NumpyArray):
+    elif isinstance(layout, ak.contents.NumpyArray):
         if len(layout.shape) == 1:
             return NumpyLookup.tolookup(layout, positions)
         else:
             return tolookup(layout.toRegularArray(), positions)
 
-    elif isinstance(layout, ak._v2.contents.RegularArray):
+    elif isinstance(layout, ak.contents.RegularArray):
         return RegularLookup.tolookup(layout, positions)
 
-    elif isinstance(
-        layout, (ak._v2.contents.ListArray, ak._v2.contents.ListOffsetArray)
-    ):
+    elif isinstance(layout, (ak.contents.ListArray, ak.contents.ListOffsetArray)):
         return ListLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak._v2.contents.IndexedArray):
+    elif isinstance(layout, ak.contents.IndexedArray):
         return IndexedLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak._v2.contents.IndexedOptionArray):
+    elif isinstance(layout, ak.contents.IndexedOptionArray):
         return IndexedOptionLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak._v2.contents.ByteMaskedArray):
+    elif isinstance(layout, ak.contents.ByteMaskedArray):
         return ByteMaskedLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak._v2.contents.BitMaskedArray):
+    elif isinstance(layout, ak.contents.BitMaskedArray):
         return BitMaskedLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak._v2.contents.UnmaskedArray):
+    elif isinstance(layout, ak.contents.UnmaskedArray):
         return UnmaskedLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak._v2.contents.RecordArray):
+    elif isinstance(layout, ak.contents.RecordArray):
         return RecordLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak._v2.record.Record):
+    elif isinstance(layout, ak.record.Record):
         return RecordLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak._v2.contents.UnionArray):
+    elif isinstance(layout, ak.contents.UnionArray):
         return UnionLookup.tolookup(layout, positions)
 
     else:
-        raise ak._v2._util.error(
-            AssertionError(f"unrecognized Content: {type(layout)}")
-        )
+        raise ak._util.error(AssertionError(f"unrecognized Content: {type(layout)}"))
 
 
 class ContentLookup:
@@ -95,7 +91,7 @@ class NumpyLookup(ContentLookup):
     def tolayout(self, lookup, pos, fields):
         assert lookup.positions[pos + self.IDENTIFIER] == -1
         assert fields == ()
-        return ak._v2.contents.NumpyArray(
+        return ak.contents.NumpyArray(
             lookup.positions[pos + self.ARRAY], parameters=self.parameters
         )
 
@@ -119,7 +115,7 @@ class RegularLookup(ContentLookup):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak._v2.contents.RegularArray(
+        return ak.contents.RegularArray(
             content,
             self.size,
             lookup.positions[pos + self.ZEROS_LENGTH],
@@ -150,9 +146,7 @@ class ListLookup(ContentLookup):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak._v2.contents.ListArray(
-            starts, stops, content, parameters=self.parameters
-        )
+        return ak.contents.ListArray(starts, stops, content, parameters=self.parameters)
 
 
 class IndexedLookup(ContentLookup):
@@ -175,7 +169,7 @@ class IndexedLookup(ContentLookup):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak._v2.contents.IndexedArray(index, content, parameters=self.parameters)
+        return ak.contents.IndexedArray(index, content, parameters=self.parameters)
 
 
 class IndexedOptionLookup(ContentLookup):
@@ -198,7 +192,7 @@ class IndexedOptionLookup(ContentLookup):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak._v2.contents.IndexedOptionArray(
+        return ak.contents.IndexedOptionArray(
             index, content, parameters=self.parameters
         )
 
@@ -223,7 +217,7 @@ class ByteMaskedLookup(ContentLookup):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak._v2.contents.ByteMaskedArray(
+        return ak.contents.ByteMaskedArray(
             mask, content, self.valid_when, parameters=self.parameters
         )
 
@@ -250,7 +244,7 @@ class BitMaskedLookup(ContentLookup):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak._v2.contents.BitMaskedArray(
+        return ak.contents.BitMaskedArray(
             mask,
             content,
             self.valid_when,
@@ -277,7 +271,7 @@ class UnmaskedLookup(ContentLookup):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak._v2.contents.UnmaskedArray(content, parameters=self.parameters)
+        return ak.contents.UnmaskedArray(content, parameters=self.parameters)
 
 
 class RecordLookup(ContentLookup):
@@ -311,7 +305,7 @@ class RecordLookup(ContentLookup):
                 )
                 contents.append(layout)
 
-            return ak._v2.contents.RecordArray(
+            return ak.contents.RecordArray(
                 contents,
                 self.fields,
                 lookup.positions[pos + self.LENGTH],
@@ -346,6 +340,4 @@ class UnionLookup(ContentLookup):
                 lookup, lookup.positions[pos + self.CONTENTS + i], fields
             )
             contents.append(layout)
-        return ak._v2.contents.UnionArray(
-            tags, index, contents, parameters=self.parameters
-        )
+        return ak.contents.UnionArray(tags, index, contents, parameters=self.parameters)

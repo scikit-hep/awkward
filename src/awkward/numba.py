@@ -23,9 +23,7 @@ or
             ) from err
 
         checked_version = True
-        if ak._v2._util.parse_version(numba.__version__) < ak._v2._util.parse_version(
-            "0.50"
-        ):
+        if ak._util.parse_version(numba.__version__) < ak._util.parse_version("0.50"):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
                 "(you have version {})".format(numba.__version__)
@@ -35,41 +33,41 @@ or
 
 
 def register():
-    if hasattr(ak._v2.numba, "ArrayViewType"):
+    if hasattr(ak.numba, "ArrayViewType"):
         return
 
     import numba
-    import awkward._v2._connect.numba.arrayview
-    import awkward._v2._connect.numba.layout
-    import awkward._v2._connect.numba.builder
+    import awkward._connect.numba.arrayview
+    import awkward._connect.numba.layout
+    import awkward._connect.numba.builder
 
-    n = ak._v2.numba
-    n.ArrayViewType = awkward._v2._connect.numba.arrayview.ArrayViewType
-    n.ArrayViewModel = awkward._v2._connect.numba.arrayview.ArrayViewModel
-    n.RecordViewType = awkward._v2._connect.numba.arrayview.RecordViewType
-    n.RecordViewModel = awkward._v2._connect.numba.arrayview.RecordViewModel
-    n.ContentType = awkward._v2._connect.numba.layout.ContentType
-    n.NumpyArrayType = awkward._v2._connect.numba.layout.NumpyArrayType
-    n.RegularArrayType = awkward._v2._connect.numba.layout.RegularArrayType
-    n.ListArrayType = awkward._v2._connect.numba.layout.ListArrayType
-    n.IndexedArrayType = awkward._v2._connect.numba.layout.IndexedArrayType
-    n.IndexedOptionArrayType = awkward._v2._connect.numba.layout.IndexedOptionArrayType
-    n.ByteMaskedArrayType = awkward._v2._connect.numba.layout.ByteMaskedArrayType
-    n.BitMaskedArrayType = awkward._v2._connect.numba.layout.BitMaskedArrayType
-    n.UnmaskedArrayType = awkward._v2._connect.numba.layout.UnmaskedArrayType
-    n.RecordArrayType = awkward._v2._connect.numba.layout.RecordArrayType
-    n.UnionArrayType = awkward._v2._connect.numba.layout.UnionArrayType
-    n.ArrayBuilderType = awkward._v2._connect.numba.builder.ArrayBuilderType
-    n.ArrayBuilderModel = awkward._v2._connect.numba.builder.ArrayBuilderModel
+    n = ak.numba
+    n.ArrayViewType = awkward._connect.numba.arrayview.ArrayViewType
+    n.ArrayViewModel = awkward._connect.numba.arrayview.ArrayViewModel
+    n.RecordViewType = awkward._connect.numba.arrayview.RecordViewType
+    n.RecordViewModel = awkward._connect.numba.arrayview.RecordViewModel
+    n.ContentType = awkward._connect.numba.layout.ContentType
+    n.NumpyArrayType = awkward._connect.numba.layout.NumpyArrayType
+    n.RegularArrayType = awkward._connect.numba.layout.RegularArrayType
+    n.ListArrayType = awkward._connect.numba.layout.ListArrayType
+    n.IndexedArrayType = awkward._connect.numba.layout.IndexedArrayType
+    n.IndexedOptionArrayType = awkward._connect.numba.layout.IndexedOptionArrayType
+    n.ByteMaskedArrayType = awkward._connect.numba.layout.ByteMaskedArrayType
+    n.BitMaskedArrayType = awkward._connect.numba.layout.BitMaskedArrayType
+    n.UnmaskedArrayType = awkward._connect.numba.layout.UnmaskedArrayType
+    n.RecordArrayType = awkward._connect.numba.layout.RecordArrayType
+    n.UnionArrayType = awkward._connect.numba.layout.UnionArrayType
+    n.ArrayBuilderType = awkward._connect.numba.builder.ArrayBuilderType
+    n.ArrayBuilderModel = awkward._connect.numba.builder.ArrayBuilderModel
 
-    @numba.extending.typeof_impl.register(ak._v2.highlevel.Array)
+    @numba.extending.typeof_impl.register(ak.highlevel.Array)
     def typeof_Array(obj, c):
         return obj.numba_type
 
-    @numba.extending.typeof_impl.register(ak._v2.highlevel.Record)
+    @numba.extending.typeof_impl.register(ak.highlevel.Record)
     def typeof_Record(obj, c):
         return obj.numba_type
 
-    @numba.extending.typeof_impl.register(ak._v2.highlevel.ArrayBuilder)
+    @numba.extending.typeof_impl.register(ak.highlevel.ArrayBuilder)
     def typeof_ArrayBuilder(obj, c):
         return obj.numba_type

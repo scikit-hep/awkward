@@ -6,11 +6,9 @@ import awkward as ak  # noqa: F401
 
 
 def test_unknown_type():
-    array = ak._v2.Array({"x": np.arange(10)})
-    array = ak._v2.operations.with_field(base=array, what=None, where="unknown field1")
-    array = ak._v2.operations.with_field(
-        base=array, what=[None], where="unknown field2"
-    )
+    array = ak.Array({"x": np.arange(10)})
+    array = ak.operations.with_field(base=array, what=None, where="unknown field1")
+    array = ak.operations.with_field(base=array, what=[None], where="unknown field2")
 
     # Try to access the type of a single element
     # This raises a ValueError in #879
@@ -21,8 +19,8 @@ def test_unknown_type():
 
 
 def test_in_place_wrapper_broadcasting():
-    array = ak._v2.Array({"x": np.arange(3)})
+    array = ak.Array({"x": np.arange(3)})
     array["unknown field"] = None
 
     assert array["unknown field"].tolist() == [None, None, None]
-    assert ak._v2.operations.fields(array) == ["x", "unknown field"]
+    assert ak.operations.fields(array) == ["x", "unknown field"]

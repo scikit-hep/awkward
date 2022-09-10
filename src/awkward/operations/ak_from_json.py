@@ -88,7 +88,7 @@ def from_json(
 
     In-memory strings or bytes are simply passed as the first argument:
 
-        >>> ak._v2.from_json("[[1.1, 2.2, 3.3], [], [4.4, 5.5]]")
+        >>> ak.from_json("[[1.1, 2.2, 3.3], [], [4.4, 5.5]]")
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
     File names/paths need to be wrapped in `pathlib.Path`, and remote files are
@@ -99,7 +99,7 @@ def from_json(
         ...     file.write("[[1.1, 2.2, 3.3], [], [4.4, 5.5]]")
         ...
         33
-        >>> ak._v2.from_json(pathlib.Path("tmp.json"))
+        >>> ak.from_json(pathlib.Path("tmp.json"))
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
     And any object with a `read(num_bytes)` method can be used as the `source`.
@@ -114,7 +114,7 @@ def from_json(
         ...         return self.bytes[start:self.pos]
         ...
         >>> filelike_obj = HasReadMethod("[[1.1, 2.2, 3.3], [], [4.4, 5.5]]")
-        >>> ak._v2.from_json(filelike_obj)
+        >>> ak.from_json(filelike_obj)
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
     If this function opens a file or network connection (because it is passed as
@@ -150,7 +150,7 @@ def from_json(
     As shown above, reading JSON may result in #ak.Array or #ak.Record, but line-delimited
     (`line_delimited=True`) only results in #ak.Array:
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '{"x": 1.1, "y": [1]}\n{"x": 2.2, "y": [1, 2]}\n{"x": 3.3, "y": [1, 2, 3]}',
         ...     line_delimited=True,
         ... )
@@ -158,7 +158,7 @@ def from_json(
 
     Even arrays of length zero:
 
-        >>> ak._v2.from_json("", line_delimited=True)
+        >>> ak.from_json("", line_delimited=True)
         <Array [] type='0 * unknown'>
 
     Note that JSON interpreted with `line_delimited` doesn't actually need delimiters
@@ -181,13 +181,13 @@ def from_json(
         ...     "required": ["x", "y"],
         ... }
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '{"x": 1.1, "y": [1, 2, 3]}',
         ...     schema=schema,
         ... )
         <Record {x: 1.1, y: [1, ..., 3]} type='{x: float64, y: var * int64}'>
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '{"x": 1.1, "y": [1]}\n{"x": 2.2, "y": [1, 2]}\n{"x": 3.3, "y": [1, 2, 3]}',
         ...     schema=schema,
         ...     line_delimited=True,
@@ -239,7 +239,7 @@ def from_json(
     The `nan_string`, `posinf_string`, and `neginf_string` convert quoted strings
     into floating-point numbers. You can specify what these strings are.
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '[1, 2, "nan", "inf", "-inf"]',
         ...     nan_string="nan",
         ...     posinf_string="inf",
@@ -250,7 +250,7 @@ def from_json(
     Without these rules, the array would be interpreted as a union of numbers and
     strings:
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '[1, 2, "nan", "inf", "-inf"]',
         ... )
         <Array [1, 2, 'nan', 'inf', '-inf'] type='5 * union[int64, string]'>
@@ -260,7 +260,7 @@ def from_json(
     *before* schema-validation). Note that they can't be `"integer"`, since
     not-a-number and infinite values are only possible for floating-point numbers.
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '[1, 2, "nan", "inf", "-inf"]',
         ...     nan_string="nan",
         ...     posinf_string="inf",
@@ -275,7 +275,7 @@ def from_json(
     imaginary parts and possibly other fields. Any other fields will be excluded
     from the output array.
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '[{"r": 1, "i": 1.1, "other": ""}, {"r": 2, "i": 2.2, "other": ""}]',
         ...     complex_record_fields=("r", "i"),
         ... )
@@ -283,7 +283,7 @@ def from_json(
 
     Without this rule, the array would be interpreted as an array of records:
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '[{"r": 1, "i": 1.1, "other": ""}, {"r": 2, "i": 2.2, "other": ""}]',
         ... )
         <Array [{r: 1, i: 1.1, other: ''}, {...}] type='2 * {r: int64, i: float64, ...'>
@@ -292,7 +292,7 @@ def from_json(
     conversion is performed *after* schema-validation). Note that even the fields
     that will be ignored by `complex_record_fields` need to be specified.
 
-        >>> ak._v2.from_json(
+        >>> ak.from_json(
         ...     '[{"r": 1, "i": 1.1, "other": ""}, {"r": 2, "i": 2.2, "other": ""}]',
         ...     complex_record_fields=("r", "i"),
         ...     schema={
@@ -312,8 +312,8 @@ def from_json(
 
     See also #ak.to_json.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.from_json",
+    with ak._util.OperationErrorContext(
+        "ak.from_json",
         dict(
             source=source,
             line_delimited=line_delimited,
@@ -419,30 +419,30 @@ def _record_to_complex(layout, complex_record_fields):
         isinstance(complex_record_fields, Sized)
         and isinstance(complex_record_fields, Iterable)
         and len(complex_record_fields) == 2
-        and ak._v2._util.isstr(complex_record_fields[0])
-        and ak._v2._util.isstr(complex_record_fields[1])
+        and ak._util.isstr(complex_record_fields[0])
+        and ak._util.isstr(complex_record_fields[1])
     ):
 
         def action(node, **kwargs):
-            if isinstance(node, ak._v2.contents.RecordArray):
+            if isinstance(node, ak.contents.RecordArray):
                 if set(complex_record_fields).issubset(node.fields):
                     real = node._getitem_field(complex_record_fields[0])
                     imag = node._getitem_field(complex_record_fields[1])
                     if (
-                        isinstance(real, ak._v2.contents.NumpyArray)
+                        isinstance(real, ak.contents.NumpyArray)
                         and len(real.shape) == 1
                         and issubclass(real.dtype.type, (np.integer, np.floating))
-                        and isinstance(imag, ak._v2.contents.NumpyArray)
+                        and isinstance(imag, ak.contents.NumpyArray)
                         and len(imag.shape) == 1
                         and issubclass(imag.dtype.type, (np.integer, np.floating))
                     ):
                         with numpy._module.errstate(invalid="ignore"):
-                            return ak._v2.contents.NumpyArray(
+                            return ak.contents.NumpyArray(
                                 node._nplike.asarray(real)
                                 + node._nplike.asarray(imag) * 1j
                             )
                     else:
-                        raise ak._v2._util.error(
+                        raise ak._util.error(
                             ValueError(
                                 f"expected record with fields {complex_record_fields[0]!r} and {complex_record_fields[1]!r} to have integer or floating point types, not {str(real.form.type)!r} and {str(imag.form.type)!r}"
                             )
@@ -451,7 +451,7 @@ def _record_to_complex(layout, complex_record_fields):
         return layout.recursively_apply(action)
 
     else:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError("complex_record_fields must be None or a pair of strings")
         )
 
@@ -485,21 +485,19 @@ def _no_schema(
                 neginf_string,
             )
         except Exception as err:
-            raise ak._v2._util.error(ValueError(str(err))) from None
+            raise ak._util.error(ValueError(str(err))) from None
 
     formstr, length, buffers = builder.to_buffers()
-    form = ak._v2.forms.from_json(formstr)
-    layout = ak._v2.operations.from_buffers(form, length, buffers, highlevel=False)
+    form = ak.forms.from_json(formstr)
+    layout = ak.operations.from_buffers(form, length, buffers, highlevel=False)
 
     layout = _record_to_complex(layout, complex_record_fields)
 
     if read_one:
         layout = layout[0]
 
-    if highlevel and isinstance(
-        layout, (ak._v2.contents.Content, ak._v2.record.Record)
-    ):
-        return ak._v2._util.wrap(layout, behavior, highlevel)
+    if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(layout, behavior, highlevel)
     else:
         return layout
 
@@ -518,11 +516,11 @@ def _yes_schema(
     highlevel,
     behavior,
 ):
-    if isinstance(schema, bytes) or ak._v2._util.isstr(schema):
+    if isinstance(schema, bytes) or ak._util.isstr(schema):
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
         )
 
@@ -531,7 +529,7 @@ def _yes_schema(
 
     if schema.get("type") == "array":
         if "items" not in schema:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError("JSONSchema type is not concrete: array without items")
             )
 
@@ -544,7 +542,7 @@ def _yes_schema(
         is_record = True
 
     else:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError(
                 "only 'array' and 'object' types supported at the JSONSchema root"
             )
@@ -567,30 +565,28 @@ def _yes_schema(
                 resize,
             )
         except Exception as err:
-            raise ak._v2._util.error(ValueError(str(err))) from None
+            raise ak._util.error(ValueError(str(err))) from None
 
-    layout = ak._v2.operations.from_buffers(form, length, container, highlevel=False)
+    layout = ak.operations.from_buffers(form, length, container, highlevel=False)
     layout = _record_to_complex(layout, complex_record_fields)
 
     if is_record and read_one:
         layout = layout[0]
 
-    if highlevel and isinstance(
-        layout, (ak._v2.contents.Content, ak._v2.record.Record)
-    ):
-        return ak._v2._util.wrap(layout, behavior, highlevel)
+    if highlevel and isinstance(layout, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(layout, behavior, highlevel)
     else:
         return layout
 
 
 def build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
         )
 
     if "type" not in schema is None:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
         )
 
@@ -626,9 +622,9 @@ def build_assembly(schema, container, instructions):
             container[node + "-data"] = None
             instructions.append(["FillByteMaskedArray", mask + "-mask", "int8"])
             instructions.append([instruction, node + "-data", dtype])
-            return ak._v2.forms.ByteMaskedForm(
+            return ak.forms.ByteMaskedForm(
                 "i8",
-                ak._v2.forms.NumpyForm(primitive, form_key=node),
+                ak.forms.NumpyForm(primitive, form_key=node),
                 valid_when=True,
                 form_key=mask,
             )
@@ -637,7 +633,7 @@ def build_assembly(schema, container, instructions):
             node = f"node{len(container)}"
             container[node + "-data"] = None
             instructions.append([instruction, node + "-data", dtype])
-            return ak._v2.forms.NumpyForm(primitive, form_key=node)
+            return ak.forms.NumpyForm(primitive, form_key=node)
 
     elif tpe == "string":
         # https://json-schema.org/understanding-json-schema/reference/string.html#string
@@ -645,7 +641,7 @@ def build_assembly(schema, container, instructions):
             strings = schema["enum"]
             assert isinstance(strings, list)
             assert len(strings) >= 1
-            assert all(ak._v2._util.isstr(x) for x in strings)
+            assert all(ak._util.isstr(x) for x in strings)
             bytestrings = [x.encode("utf-8", errors="surrogateescape") for x in strings]
 
             index = f"node{len(container)}"
@@ -661,18 +657,18 @@ def build_assembly(schema, container, instructions):
 
             if is_optional:
                 instruction = "FillNullEnumString"
-                formtype = ak._v2.forms.IndexedOptionForm
+                formtype = ak.forms.IndexedOptionForm
             else:
                 instruction = "FillEnumString"
-                formtype = ak._v2.forms.IndexedForm
+                formtype = ak.forms.IndexedForm
 
             instructions.append([instruction, index + "-index", "int64", strings])
 
             return formtype(
                 "i64",
-                ak._v2.forms.ListOffsetForm(
+                ak.forms.ListOffsetForm(
                     "i64",
-                    ak._v2.forms.NumpyForm(
+                    ak.forms.NumpyForm(
                         "uint8", parameters={"__array__": "char"}, form_key=node
                     ),
                     parameters={"__array__": "string"},
@@ -696,9 +692,9 @@ def build_assembly(schema, container, instructions):
                 ["FillString", offsets + "-offsets", "int64", node + "-data", "uint8"]
             )
 
-            out = ak._v2.forms.ListOffsetForm(
+            out = ak.forms.ListOffsetForm(
                 "i64",
-                ak._v2.forms.NumpyForm(
+                ak.forms.NumpyForm(
                     "uint8",
                     parameters={"__array__": "char"},
                     form_key=node,
@@ -707,7 +703,7 @@ def build_assembly(schema, container, instructions):
                 form_key=offsets,
             )
             if is_optional:
-                return ak._v2.forms.ByteMaskedForm(
+                return ak.forms.ByteMaskedForm(
                     "i8", out, valid_when=True, form_key=mask
                 )
             else:
@@ -717,12 +713,12 @@ def build_assembly(schema, container, instructions):
         # https://json-schema.org/understanding-json-schema/reference/array.html
 
         if "items" not in schema:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError("JSONSchema type is not concrete: array without 'items'")
             )
 
         if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
-            assert ak._v2._util.isint(schema.get("minItems"))
+            assert ak._util.isint(schema.get("minItems"))
 
             if is_optional:
                 mask = f"node{len(container)}"
@@ -735,9 +731,9 @@ def build_assembly(schema, container, instructions):
 
             content = build_assembly(schema["items"], container, instructions)
 
-            out = ak._v2.forms.RegularForm(content, size=schema.get("minItems"))
+            out = ak.forms.RegularForm(content, size=schema.get("minItems"))
             if is_optional:
-                return ak._v2.forms.IndexedOptionForm("i64", out, form_key=mask)
+                return ak.forms.IndexedOptionForm("i64", out, form_key=mask)
             else:
                 return out
 
@@ -753,9 +749,9 @@ def build_assembly(schema, container, instructions):
 
             content = build_assembly(schema["items"], container, instructions)
 
-            out = ak._v2.forms.ListOffsetForm("i64", content, form_key=offsets)
+            out = ak.forms.ListOffsetForm("i64", content, form_key=offsets)
             if is_optional:
-                return ak._v2.forms.ByteMaskedForm(
+                return ak.forms.ByteMaskedForm(
                     "i8", out, valid_when=True, form_key=mask
                 )
             else:
@@ -765,7 +761,7 @@ def build_assembly(schema, container, instructions):
         # https://json-schema.org/understanding-json-schema/reference/object.html
 
         if "properties" not in schema:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "JSONSchema type is not concrete: object without 'properties'"
                 )
@@ -794,16 +790,16 @@ def build_assembly(schema, container, instructions):
             instructions[startkeys + keyindex][2] = len(instructions)
             contents.append(build_assembly(subschema, container, instructions))
 
-        out = ak._v2.forms.RecordForm(contents, names)
+        out = ak.forms.RecordForm(contents, names)
         if is_optional:
-            return ak._v2.forms.IndexedOptionForm("i64", out, form_key=mask)
+            return ak.forms.IndexedOptionForm("i64", out, form_key=mask)
         else:
             return out
 
     elif isinstance(tpe, list):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             NotImplementedError("arbitrary unions of types are not yet supported")
         )
 
     else:
-        raise ak._v2._util.error(TypeError(f"unrecognized JSONSchema: {tpe!r}"))
+        raise ak._util.error(TypeError(f"unrecognized JSONSchema: {tpe!r}"))
