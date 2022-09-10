@@ -1860,13 +1860,13 @@ class Record(NDArrayOperatorsMixin):
         if name.startswith("_") or hasattr(type(self), name):
             super().__setattr__(name, value)
         elif name in self._layout.fields:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 AttributeError(
                     "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
                 )
             )
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 AttributeError(
                     "only private attributes (started with an underscore) can be set on records"
                 )

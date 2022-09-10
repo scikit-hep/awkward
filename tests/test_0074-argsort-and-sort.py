@@ -39,7 +39,7 @@ def test_keep_None_in_place_test():
 
 
 def test_slicing_FIXME():
-    # awkward/_v2/_slicing.py:218:
+    # awkward/_slicing.py:218:
     array = ak._v2.highlevel.Array([[3, 2, 1], [], None, [4, 5]]).layout
 
     assert to_list(array[ak._v2.operations.argsort(array, axis=1)]) == to_list(

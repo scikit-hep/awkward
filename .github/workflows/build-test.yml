@@ -206,7 +206,7 @@ jobs:
 
       - name: Test
         run: >-
-          python -m pytest -vv -rs tests --cov=awkward._v2 --cov-report=term
+          python -m pytest -vv -rs tests --cov=awkward --cov-report=term
           --cov-report=xml
 
       - name: Codecov

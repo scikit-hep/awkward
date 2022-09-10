@@ -1560,10 +1560,10 @@ class Content:
         return out
 
     def __copy__(self):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def __deepcopy__(self, memo):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def _jax_flatten(self):
         from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData

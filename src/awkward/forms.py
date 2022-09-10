@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# v2: replace with src/awkward/_v2/forms.
+# v2: replace with src/awkward/forms.
 
 from awkward._ext import Form
 from awkward._ext import BitMaskedForm

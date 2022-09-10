@@ -297,7 +297,6 @@ def getcudakernelslist():
             os.path.dirname(CURRENT_DIR),
             "src",
             "awkward",
-            "_v2",
             "_connect",
             "cuda",
             "cuda_kernels",
