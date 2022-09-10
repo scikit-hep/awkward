@@ -1,5 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# NumPy-like alternatives
+import awkward.nplike
+
+# shims for C++ (now everything is compiled into one 'awkward._ext' module)
+import awkward.layout
+
+# Compiled dynamic modules
+import awkward._cpu_kernels
+import awkward._libawkward
+
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward.index
 import awkward.identifier
@@ -30,10 +40,21 @@ import awkward.behaviors.categorical
 import awkward.behaviors.mixins
 import awkward.behaviors.string
 
+behavior = {}
+awkward.behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
+awkward.behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
+
 # operations
 from awkward.operations import *
 
+# version
+__version__ = awkward._ext.__version__
 
-behavior = {}
-behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
-behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
+# call C++ startup function
+awkward._ext.startup()
+
+__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy",)]
+
+
+def __dir__():
+    return __all__
