@@ -15,7 +15,7 @@ class IndexedForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._util.isstr(index):
+        if not ak._v2._util.isstr(index):
             raise ak._v2._util.error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(

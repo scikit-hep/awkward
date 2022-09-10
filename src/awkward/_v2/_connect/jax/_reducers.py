@@ -13,10 +13,10 @@ class Reducer:
     @classmethod
     def return_dtype(cls, given_dtype):
         if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
-            return np.int32 if ak._util.win or ak._util.bits32 else np.int64
+            return np.int32 if ak._v2._util.win or ak._v2._util.bits32 else np.int64
 
         if given_dtype in (np.uint8, np.uint16, np.uint32):
-            return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
+            return np.uint32 if ak._v2._util.win or ak._v2._util.bits32 else np.uint64
 
         return given_dtype
 

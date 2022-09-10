@@ -19,7 +19,7 @@ class RegularForm(Form):
                     )
                 )
             )
-        if not ak._util.isint(size):
+        if not ak._v2._util.isint(size):
             raise ak._v2._util.error(
                 TypeError(
                     "{} 'size' must be of type int, not {}".format(

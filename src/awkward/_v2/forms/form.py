@@ -13,7 +13,7 @@ def from_iter(input):
     if input is None:
         return None
 
-    if ak._util.isstr(input):
+    if ak._v2._util.isstr(input):
         return ak._v2.forms.numpyform.NumpyForm(primitive=input)
 
     assert isinstance(input, dict)
@@ -280,7 +280,7 @@ class Form:
                     )
                 )
             )
-        if form_key is not None and not ak._util.isstr(form_key):
+        if form_key is not None and not ak._v2._util.isstr(form_key):
             raise ak._v2._util.error(
                 TypeError(
                     "{} 'form_key' must be of type string or None, not {}".format(

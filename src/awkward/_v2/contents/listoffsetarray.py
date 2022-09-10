@@ -402,8 +402,8 @@ class ListOffsetArray(Content):
             start, stop, step = head.start, head.stop, head.step
 
             step = 1 if step is None else step
-            start = ak._util.kSliceNone if start is None else start
-            stop = ak._util.kSliceNone if stop is None else stop
+            start = ak._v2._util.kSliceNone if start is None else start
+            stop = ak._v2._util.kSliceNone if stop is None else stop
 
             carrylength = ak._v2.index.Index64.empty(1, self._nplike)
             assert (
@@ -521,7 +521,7 @@ class ListOffsetArray(Content):
                     self._nplike,
                 )
 
-        elif ak._util.isstr(head):
+        elif ak._v2._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):

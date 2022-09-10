@@ -115,7 +115,7 @@ class Record:
             return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.isint(where):
+        if ak._v2._util.isint(where):
             raise ak._v2._util.error(
                 IndexError("scalar Record cannot be sliced by an integer")
             )
@@ -125,7 +125,7 @@ class Record:
                 IndexError("scalar Record cannot be sliced by a range slice (`:`)")
             )
 
-        elif ak._util.isstr(where):
+        elif ak._v2._util.isstr(where):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
@@ -144,7 +144,7 @@ class Record:
         elif isinstance(where, tuple) and len(where) == 1:
             return self._getitem(where[0])
 
-        elif isinstance(where, tuple) and ak._util.isstr(where[0]):
+        elif isinstance(where, tuple) and ak._v2._util.isstr(where[0]):
             return self._getitem_field(where[0])._getitem(where[1:])
 
         elif isinstance(where, ak.highlevel.Array):
@@ -162,7 +162,7 @@ class Record:
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
-        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
+        elif isinstance(where, Iterable) and all(ak._v2._util.isstr(x) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):

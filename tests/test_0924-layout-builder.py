@@ -86,7 +86,7 @@ def test_numpy_float_form():
 
 
 @pytest.mark.skipif(
-    ak._util.win,
+    ak._v2._util.win,
     reason="FIXME: the test fails on Windows",
 )
 def test_numpy_complex_form():

@@ -83,7 +83,7 @@ class RecordArray(Content):
             else:
                 length = min(lengths)
         if not isinstance(length, ak._v2._typetracer.UnknownLengthType) and not (
-            ak._util.isint(length) and length >= 0
+            ak._v2._util.isint(length) and length >= 0
         ):
             raise ak._v2._util.error(
                 TypeError(
@@ -113,7 +113,7 @@ class RecordArray(Content):
         if isinstance(fields, Iterable):
             if not isinstance(fields, list):
                 fields = list(fields)
-            if not all(ak._util.isstr(x) for x in fields):
+            if not all(ak._v2._util.isstr(x) for x in fields):
                 raise ak._v2._util.error(
                     TypeError(
                         "{} 'fields' must all be strings, not {}".format(
@@ -337,7 +337,7 @@ class RecordArray(Content):
 
         else:
             nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
-            if ak._util.isstr(nexthead):
+            if ak._v2._util.isstr(nexthead):
                 return self.content(where)._getitem_field(nexthead, nexttail)
             else:
                 return self.content(where)._getitem_fields(nexthead, nexttail)
@@ -353,7 +353,7 @@ class RecordArray(Content):
             contents = [self.content(i) for i in indexes]
         else:
             nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
-            if ak._util.isstr(nexthead):
+            if ak._v2._util.isstr(nexthead):
                 contents = [
                     self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
                 ]
@@ -434,7 +434,7 @@ class RecordArray(Content):
         if head == ():
             return self
 
-        elif ak._util.isstr(head):
+        elif ak._v2._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):

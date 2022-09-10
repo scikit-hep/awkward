@@ -44,7 +44,7 @@ def test_highlevel():
     assert str(c) == "[{one: 3.14, two: [1.1, 2.2]}, {one: 99.9, two: [-3.14]}]"
 
 
-class Dummy(ak.highlevel.Array):
+class Dummy(ak._v2.highlevel.Array):
     pass
 
 
@@ -92,7 +92,6 @@ def test_string2():
         content,
         parameters={"__array__": "string"},
     )
-    a = ak._v2.highlevel.Array(listoffsetarray, check_valid=True)
 
     a = ak._v2.highlevel.Array(listoffsetarray, check_valid=True)
     assert isinstance(a, ak._v2.highlevel.Array)
