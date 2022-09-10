@@ -23,13 +23,13 @@ class Index:
             nplike = ak.nplike.of(data)
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
-            raise ak._v2._util.error(TypeError("Index metadata must be None or a dict"))
+            raise ak._util.error(TypeError("Index metadata must be None or a dict"))
         self._metadata = metadata
         self._data = self._nplike.index_nplike.asarray(
             data, dtype=self._expected_dtype, order="C"
         )
         if len(self._data.shape) != 1:
-            raise ak._v2._util.error(TypeError("Index data must be one-dimensional"))
+            raise ak._util.error(TypeError("Index data must be one-dimensional"))
 
         if issubclass(self._data.dtype.type, np.longlong):
             assert (
@@ -50,7 +50,7 @@ class Index:
             elif self._data.dtype == np.dtype(np.int64):
                 self.__class__ = Index64
             else:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     TypeError(
                         "Index data must be int8, uint8, int32, uint32, int64, not "
                         + repr(self._data.dtype)
@@ -59,7 +59,7 @@ class Index:
         else:
             if self._data.dtype != self._expected_dtype:
                 # self._data = self._data.astype(self._expected_dtype)   # copy/convert
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     NotImplementedError(
                         "while developing, we want to catch these errors"
                     )
@@ -104,7 +104,7 @@ class Index:
         return self._data.shape[0]
 
     def forget_length(self):
-        tt = ak._v2._typetracer.TypeTracer.instance()
+        tt = ak._typetracer.TypeTracer.instance()
         if isinstance(self._nplike, type(tt)):
             data = self._data
         else:
@@ -192,10 +192,10 @@ class Index:
         return self.data.nbytes
 
     def to_backend(self, backend):
-        if self.nplike is ak._v2._util.regularize_backend(backend):
+        if self.nplike is ak._util.regularize_backend(backend):
             return self
         else:
-            return self._to_nplike(ak._v2._util.regularize_backend(backend))
+            return self._to_nplike(ak._util.regularize_backend(backend))
 
     def _to_nplike(self, nplike):
         # if isinstance(nplike, ak.nplike.Jax):

@@ -4,15 +4,15 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_ListOffsetArray():
-    array = ak._v2.Array(
+    array = ak.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
     )
 
-    assert to_list(ak._v2.operations.combinations(array, 2, replacement=False)) == [
+    assert to_list(ak.operations.combinations(array, 2, replacement=False)) == [
         [(0.0, 1.1), (0.0, 2.2), (0.0, 3.3), (1.1, 2.2), (1.1, 3.3), (2.2, 3.3)],
         [],
         [(4.4, 5.5), (4.4, 6.6), (5.5, 6.6)],
@@ -31,7 +31,7 @@ def test_ListOffsetArray():
         ],
     ]
     assert to_list(
-        ak._v2.operations.combinations(array, 2, replacement=False, fields=["x", "y"])
+        ak.operations.combinations(array, 2, replacement=False, fields=["x", "y"])
     ) == [
         [
             {"x": 0.0, "y": 1.1},
@@ -57,13 +57,13 @@ def test_ListOffsetArray():
             {"x": 11.1, "y": 12.2},
         ],
     ]
-    tmp = ak._v2.operations.combinations(
+    tmp = ak.operations.combinations(
         array, 2, replacement=False, parameters={"some": "param"}
     ).layout
 
     assert tmp.content.parameters["some"] == "param"
 
-    assert to_list(ak._v2.operations.combinations(array, 2, replacement=True)) == [
+    assert to_list(ak.operations.combinations(array, 2, replacement=True)) == [
         [
             (0.0, 0.0),
             (0.0, 1.1),
@@ -98,7 +98,7 @@ def test_ListOffsetArray():
         ],
     ]
 
-    assert to_list(ak._v2.operations.combinations(array, 3, replacement=False)) == [
+    assert to_list(ak.operations.combinations(array, 3, replacement=False)) == [
         [(0.0, 1.1, 2.2), (0.0, 1.1, 3.3), (0.0, 2.2, 3.3), (1.1, 2.2, 3.3)],
         [],
         [(4.4, 5.5, 6.6)],
@@ -117,7 +117,7 @@ def test_ListOffsetArray():
         ],
     ]
 
-    assert to_list(ak._v2.operations.combinations(array, 3, replacement=True)) == [
+    assert to_list(ak.operations.combinations(array, 3, replacement=True)) == [
         [
             (0.0, 0.0, 0.0),
             (0.0, 0.0, 1.1),
@@ -195,14 +195,14 @@ def test_ListOffsetArray():
 
 
 def test_RegularArray():
-    array = ak._v2.Array(np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]]))
+    array = ak.Array(np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7]]))
 
-    assert to_list(ak._v2.operations.combinations(array, 2, replacement=False)) == [
+    assert to_list(ak.operations.combinations(array, 2, replacement=False)) == [
         [(0.0, 1.1), (0.0, 2.2), (0.0, 3.3), (1.1, 2.2), (1.1, 3.3), (2.2, 3.3)],
         [(4.4, 5.5), (4.4, 6.6), (4.4, 7.7), (5.5, 6.6), (5.5, 7.7), (6.6, 7.7)],
     ]
     assert to_list(
-        ak._v2.operations.combinations(array, 2, replacement=False, fields=["x", "y"])
+        ak.operations.combinations(array, 2, replacement=False, fields=["x", "y"])
     ) == [
         [
             {"x": 0.0, "y": 1.1},
@@ -222,12 +222,12 @@ def test_RegularArray():
         ],
     ]
 
-    tmp = ak._v2.operations.combinations(
+    tmp = ak.operations.combinations(
         array, 2, replacement=False, parameters={"some": "param"}
     ).layout
     assert tmp.content.parameters["some"] == "param"
 
-    assert to_list(ak._v2.operations.combinations(array, 2, replacement=True)) == [
+    assert to_list(ak.operations.combinations(array, 2, replacement=True)) == [
         [
             (0.0, 0.0),
             (0.0, 1.1),
@@ -254,12 +254,12 @@ def test_RegularArray():
         ],
     ]
 
-    assert to_list(ak._v2.operations.combinations(array, 3, replacement=False)) == [
+    assert to_list(ak.operations.combinations(array, 3, replacement=False)) == [
         [(0.0, 1.1, 2.2), (0.0, 1.1, 3.3), (0.0, 2.2, 3.3), (1.1, 2.2, 3.3)],
         [(4.4, 5.5, 6.6), (4.4, 5.5, 7.7), (4.4, 6.6, 7.7), (5.5, 6.6, 7.7)],
     ]
 
-    assert to_list(ak._v2.operations.combinations(array, 3, replacement=True)) == [
+    assert to_list(ak.operations.combinations(array, 3, replacement=True)) == [
         [
             (0.0, 0.0, 0.0),
             (0.0, 0.0, 1.1),
@@ -308,11 +308,9 @@ def test_RegularArray():
 
 
 def test_axis0():
-    array = ak._v2.Array([0.0, 1.1, 2.2, 3.3])
+    array = ak.Array([0.0, 1.1, 2.2, 3.3])
 
-    assert to_list(
-        ak._v2.operations.combinations(array, 2, replacement=False, axis=0)
-    ) == [
+    assert to_list(ak.operations.combinations(array, 2, replacement=False, axis=0)) == [
         (0.0, 1.1),
         (0.0, 2.2),
         (0.0, 3.3),
@@ -322,7 +320,7 @@ def test_axis0():
     ]
 
     assert to_list(
-        ak._v2.operations.combinations(
+        ak.operations.combinations(
             array, 2, replacement=False, axis=0, fields=["x", "y"]
         )
     ) == [
@@ -335,15 +333,13 @@ def test_axis0():
     ]
 
     assert (
-        ak._v2.operations.combinations(
+        ak.operations.combinations(
             array, 2, replacement=False, axis=0, parameters={"some": "param"}
         ).layout.parameters["some"]
         == "param"
     )
 
-    assert to_list(
-        ak._v2.operations.combinations(array, 3, replacement=False, axis=0)
-    ) == [
+    assert to_list(ak.operations.combinations(array, 3, replacement=False, axis=0)) == [
         (0.0, 1.1, 2.2),
         (0.0, 1.1, 3.3),
         (0.0, 2.2, 3.3),
@@ -352,7 +348,7 @@ def test_axis0():
 
 
 def test_IndexedArray():
-    array = ak._v2.Array(
+    array = ak.Array(
         [
             [0.0, 1.1, 2.2, 3.3],
             [],
@@ -364,7 +360,7 @@ def test_IndexedArray():
         ]
     )
 
-    assert to_list(ak._v2.operations.combinations(array, 2, replacement=False)) == [
+    assert to_list(ak.operations.combinations(array, 2, replacement=False)) == [
         [(0.0, 1.1), (0.0, 2.2), (0.0, 3.3), (1.1, 2.2), (1.1, 3.3), (2.2, 3.3)],
         [],
         [(4.4, 5.5), (4.4, 6.6), (5.5, 6.6)],
@@ -387,7 +383,7 @@ def test_IndexedArray():
 
 
 def test_axis2():
-    array = ak._v2.Array(
+    array = ak.Array(
         [
             [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6]],
             [],
@@ -395,9 +391,7 @@ def test_axis2():
         ]
     )
 
-    assert to_list(
-        ak._v2.operations.combinations(array, 2, axis=1, replacement=False)
-    ) == [
+    assert to_list(ak.operations.combinations(array, 2, axis=1, replacement=False)) == [
         [
             ([0.0, 1.1, 2.2, 3.3], []),
             ([0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6]),
@@ -407,9 +401,7 @@ def test_axis2():
         [([7.7], [8.8, 9.9, 10.0, 11.1, 12.2])],
     ]
 
-    assert to_list(
-        ak._v2.operations.combinations(array, 2, axis=2, replacement=False)
-    ) == [
+    assert to_list(ak.operations.combinations(array, 2, axis=2, replacement=False)) == [
         [
             [(0.0, 1.1), (0.0, 2.2), (0.0, 3.3), (1.1, 2.2), (1.1, 3.3), (2.2, 3.3)],
             [],
@@ -435,11 +427,11 @@ def test_axis2():
 
 
 def test_argcombinations():
-    array = ak._v2.Array(
+    array = ak.Array(
         [[0.0, 1.1, 2.2, 3.3], [], [4.4, 5.5, 6.6], [7.7], [8.8, 9.9, 10.0, 11.1, 12.2]]
     )
 
-    assert to_list(ak._v2.operations.argcombinations(array, 2, replacement=False)) == [
+    assert to_list(ak.operations.argcombinations(array, 2, replacement=False)) == [
         [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)],
         [],
         [(0, 1), (0, 2), (1, 2)],

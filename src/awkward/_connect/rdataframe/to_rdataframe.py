@@ -2,8 +2,8 @@
 
 import awkward as ak
 
-import awkward._v2._lookup  # noqa: E402
-import awkward._v2._connect.cling  # noqa: E402
+import awkward._lookup  # noqa: E402
+import awkward._connect.cling  # noqa: E402
 
 import ROOT
 import threading
@@ -47,7 +47,7 @@ class DataSourceGenerator:
         for key, value in self.generators.items():
             class_type_suffix = class_type_suffix + "_" + key + "_" + value.class_type()
 
-        key = ak._v2._util.identifier_hash(class_type_suffix)
+        key = ak._util.identifier_hash(class_type_suffix)
 
         return f"AwkwardArrayDataSource_{key}"
 
@@ -64,24 +64,20 @@ class DataSourceGenerator:
         k = 0
 
         for key in layouts:
-            self.generators[key] = ak._v2._connect.cling.togenerator(
+            self.generators[key] = ak._connect.cling.togenerator(
                 layouts[key].form, flatlist_as_rvec=self.flatlist_as_rvec
             )
-            self.lookups[key] = ak._v2._lookup.Lookup(
-                layouts[key], self.generators[key]
-            )
+            self.lookups[key] = ak._lookup.Lookup(layouts[key], self.generators[key])
             self.generators[key].generate(ROOT.gInterpreter.Declare)
 
             self.entry_types[key] = self.generators[key].entry_type()
             if self.entry_types[key] == "bool":
-                raise ak._v2._util.error(NotImplementedError)
+                raise ak._util.error(NotImplementedError)
 
-            if isinstance(
-                self.generators[key], ak._v2._connect.cling.NumpyArrayGenerator
-            ):
+            if isinstance(self.generators[key], ak._connect.cling.NumpyArrayGenerator):
                 pass
             elif isinstance(
-                self.generators[key], ak._v2._connect.cling.ListArrayGenerator
+                self.generators[key], ak._connect.cling.ListArrayGenerator
             ) and (
                 self.generators[key].is_string
                 or (
@@ -91,30 +87,30 @@ class DataSourceGenerator:
             ):
                 pass
             elif isinstance(
-                self.generators[key], ak._v2._connect.cling.RegularArrayGenerator
+                self.generators[key], ak._connect.cling.RegularArrayGenerator
             ) and (
                 self.generators[key].flatlist_as_rvec
                 and self.generators[key].is_flatlist
             ):
                 pass
             elif isinstance(
-                self.generators[key], ak._v2._connect.cling.IndexedOptionArrayGenerator
+                self.generators[key], ak._connect.cling.IndexedOptionArrayGenerator
             ):
                 pass
             elif isinstance(
-                self.generators[key], ak._v2._connect.cling.IndexedArrayGenerator
+                self.generators[key], ak._connect.cling.IndexedArrayGenerator
             ):
                 pass
             elif isinstance(
-                self.generators[key], ak._v2._connect.cling.ByteMaskedArrayGenerator
+                self.generators[key], ak._connect.cling.ByteMaskedArrayGenerator
             ):
                 pass
             elif isinstance(
-                self.generators[key], ak._v2._connect.cling.BitMaskedArrayGenerator
+                self.generators[key], ak._connect.cling.BitMaskedArrayGenerator
             ):
                 pass
             elif isinstance(
-                self.generators[key], ak._v2._connect.cling.UnmaskedArrayGenerator
+                self.generators[key], ak._connect.cling.UnmaskedArrayGenerator
             ):
                 pass
             else:

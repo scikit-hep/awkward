@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form, _parameters_equal
 
 
 class ListForm(Form):
@@ -16,16 +16,16 @@ class ListForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._v2._util.isstr(starts):
-            raise ak._v2._util.error(
+        if not ak._util.isstr(starts):
+            raise ak._util.error(
                 TypeError(
                     "{} 'starts' must be of type str, not {}".format(
                         type(self).__name__, repr(starts)
                     )
                 )
             )
-        if not ak._v2._util.isstr(stops):
-            raise ak._v2._util.error(
+        if not ak._util.isstr(stops):
+            raise ak._util.error(
                 TypeError(
                     "{} 'starts' must be of type str, not {}".format(
                         type(self).__name__, repr(starts)
@@ -33,7 +33,7 @@ class ListForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -78,10 +78,10 @@ class ListForm(Form):
         )
 
     def _type(self, typestrs):
-        return ak._v2.types.listtype.ListType(
+        return ak.types.listtype.ListType(
             self._content._type(typestrs),
             self._parameters,
-            ak._v2._util.gettypestr(self._parameters, typestrs),
+            ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

@@ -16,7 +16,7 @@ def to_regular(array, axis=1, highlevel=True, behavior=None):
             variable dimensions into regular ones or raise a ValueError if that
             is not possible.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -40,15 +40,15 @@ def to_regular(array, axis=1, highlevel=True, behavior=None):
 
     See also #ak.from_regular.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_regular",
+    with ak._util.OperationErrorContext(
+        "ak.to_regular",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, axis, highlevel, behavior)
 
 
 def _impl(array, axis, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array)
+    layout = ak.operations.to_layout(array)
     posaxis = layout.axis_wrap_if_negative(axis)
 
     if axis is None:
@@ -69,7 +69,7 @@ def _impl(array, axis, highlevel, behavior):
             if posaxis == depth and layout.is_ListType:
                 return layout.toRegularArray()
             elif posaxis == 0:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     np.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )
@@ -80,4 +80,4 @@ def _impl(array, axis, highlevel, behavior):
         depth_context = {"posaxis": posaxis}
         out = layout.recursively_apply(action, behavior, depth_context)
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

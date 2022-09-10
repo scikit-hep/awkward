@@ -9,7 +9,7 @@ docs/demos/test-program.cpp
 include/awkward/kernels.h
 src/awkward/_kernel_signatures.py
 src/awkward/_kernel_signatures_cuda.py
-src/awkward/_v2/_connect/cuda/_kernel_signatures.py
+src/awkward/_connect/cuda/_kernel_signatures.py
 
 # Kernel tests
 tests-cpu-kernels

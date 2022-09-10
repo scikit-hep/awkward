@@ -10,23 +10,23 @@ def packed(array, highlevel=True, behavior=None):
     Args:
         array: Array whose internal structure will be packed.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Returns an array with the same type and values as the input, but with packed inner structures:
 
-    - #ak.layout.NumpyArray becomes C-contiguous (if it isn't already)
-    - #ak.layout.RegularArray trims unreachable content
-    - #ak.layout.ListArray becomes #ak.layout.ListOffsetArray, making all list data contiguous
-    - #ak.layout.ListOffsetArray starts at `offsets[0] == 0`, trimming unreachable content
-    - #ak.layout.RecordArray trims unreachable contents
-    - #ak.layout.IndexedArray gets projected
-    - #ak.layout.IndexedOptionArray remains an #ak.layout.IndexedOptionArray (with simplified `index`) if it contains records, becomes #ak.layout.ByteMaskedArray otherwise
-    - #ak.layout.ByteMaskedArray becomes an #ak.layout.IndexedOptionArray if it contains records, stays a #ak.layout.ByteMaskedArray otherwise
-    - #ak.layout.BitMaskedArray becomes an #ak.layout.IndexedOptionArray if it contains records, stays a #ak.layout.BitMaskedArray otherwise
-    - #ak.layout.UnionArray gets projected contents
-    - #ak.layout.Record becomes a record over a single-item #ak.layout.RecordArray
+    - #ak.contents.NumpyArray becomes C-contiguous (if it isn't already)
+    - #ak.contents.RegularArray trims unreachable content
+    - #ak.contents.ListArray becomes #ak.contents.ListOffsetArray, making all list data contiguous
+    - #ak.contents.ListOffsetArray starts at `offsets[0] == 0`, trimming unreachable content
+    - #ak.contents.RecordArray trims unreachable contents
+    - #ak.contents.IndexedArray gets projected
+    - #ak.contents.IndexedOptionArray remains an #ak.contents.IndexedOptionArray (with simplified `index`) if it contains records, becomes #ak.contents.ByteMaskedArray otherwise
+    - #ak.contents.ByteMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records, stays a #ak.contents.ByteMaskedArray otherwise
+    - #ak.contents.BitMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records, stays a #ak.contents.BitMaskedArray otherwise
+    - #ak.contents.UnionArray gets projected contents
+    - #ak.contents.Record becomes a record over a single-item #ak.contents.RecordArray
 
     Example:
 
@@ -55,14 +55,14 @@ def packed(array, highlevel=True, behavior=None):
 
     See also #ak.to_buffers.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.packed",
+    with ak._util.OperationErrorContext(
+        "ak.packed",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, highlevel, behavior)
 
 
 def _impl(array, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     out = layout.packed()
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

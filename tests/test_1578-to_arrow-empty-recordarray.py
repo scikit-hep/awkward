@@ -8,7 +8,7 @@ pytest.importorskip("pyarrow")
 
 
 def test():
-    layout = ak._v2.contents.RecordArray([], fields=[], length=3)
-    struct = ak._v2.to_arrow(layout)
+    layout = ak.contents.RecordArray([], fields=[], length=3)
+    struct = ak.to_arrow(layout)
     assert len(struct) == len(layout) == 3
     assert struct.tolist() == [{}, {}, {}]

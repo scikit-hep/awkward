@@ -12,7 +12,7 @@ def with_name(array, name, highlevel=True, behavior=None):
         name (str): Name to give to the records or tuples; this assigns
             the `"__record__"` parameter.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -27,22 +27,22 @@ def with_name(array, name, highlevel=True, behavior=None):
     to the data; see #ak.Array and #ak.behavior for a more complete
     description.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.with_name",
+    with ak._util.OperationErrorContext(
+        "ak.with_name",
         dict(array=array, name=name, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, name, highlevel, behavior)
 
 
 def _impl(array, name, highlevel, behavior):
-    behavior = ak._v2._util.behavior_of(array, behavior=behavior)
-    layout = ak._v2.operations.to_layout(array)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
+    layout = ak.operations.to_layout(array)
 
     def action(layout, **ignore):
-        if isinstance(layout, ak._v2.contents.RecordArray):
+        if isinstance(layout, ak.contents.RecordArray):
             parameters = dict(layout.parameters)
             parameters["__record__"] = name
-            return ak._v2.contents.RecordArray(
+            return ak.contents.RecordArray(
                 layout.contents,
                 layout.fields,
                 len(layout),
@@ -62,4 +62,4 @@ def _impl(array, name, highlevel, behavior):
 
     out2 = out.recursively_apply(action2, behavior)
 
-    return ak._v2._util.wrap(out2, behavior, highlevel)
+    return ak._util.wrap(out2, behavior, highlevel)

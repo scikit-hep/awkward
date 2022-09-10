@@ -15,7 +15,7 @@ def to_backend(array, backend, highlevel=True, behavior=None):
             structure is copied to the GPU(s) for use with
             `libawkward-cuda-kernels.so`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -46,20 +46,20 @@ def to_backend(array, backend, highlevel=True, behavior=None):
 
     See #ak.kernels.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_backend",
+    with ak._util.OperationErrorContext(
+        "ak.to_backend",
         dict(array=array, backend=backend, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, backend, highlevel, behavior)
 
 
 def _impl(array, backend, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(
+    layout = ak.operations.to_layout(
         array,
         allow_record=True,
         allow_other=True,
     )
     backend_layout = layout.to_backend(backend)
     if highlevel:
-        return ak._v2.Array(backend_layout, behavior=behavior)
+        return ak.Array(backend_layout, behavior=behavior)
     return backend_layout

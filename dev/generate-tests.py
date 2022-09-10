@@ -297,7 +297,6 @@ def getcudakernelslist():
             os.path.dirname(CURRENT_DIR),
             "src",
             "awkward",
-            "_v2",
             "_connect",
             "cuda",
             "cuda_kernels",
@@ -675,7 +674,7 @@ def gencudakerneltests(specdict):
                 )
 
                 f.write(
-                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._v2._connect.cuda as ak_cu\n\ncupy_nplike = ak.nplike.Cupy.instance()\n\n"
+                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._connect.cuda as ak_cu\n\ncupy_nplike = ak.nplike.Cupy.instance()\n\n"
                 )
                 num = 1
                 if spec.tests == []:

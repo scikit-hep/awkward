@@ -4,8 +4,8 @@ import glob
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._v2.forms.form import Form, _parameters_equal
-from awkward._v2.forms.indexedform import IndexedForm
+from awkward.forms.form import Form, _parameters_equal
+from awkward.forms.indexedform import IndexedForm
 
 
 class RecordForm(Form):
@@ -20,7 +20,7 @@ class RecordForm(Form):
         form_key=None,
     ):
         if not isinstance(contents, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -29,7 +29,7 @@ class RecordForm(Form):
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     TypeError(
                         "{} all 'contents' must be Form subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -37,7 +37,7 @@ class RecordForm(Form):
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'fields' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -75,7 +75,7 @@ class RecordForm(Form):
             else:
                 return self._fields[index]
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 IndexError(
                     "no index {} in record with {} fields".format(
                         index, len(self._contents)
@@ -99,7 +99,7 @@ class RecordForm(Form):
                 pass
             else:
                 return i
-        raise ak._v2._util.error(
+        raise ak._util.error(
             IndexError(
                 "no field {} in record with {} fields".format(
                     repr(field), len(self._contents)
@@ -119,12 +119,12 @@ class RecordForm(Form):
             return field in self._fields
 
     def content(self, index_or_field):
-        if ak._v2._util.isint(index_or_field):
+        if ak._util.isint(index_or_field):
             index = index_or_field
-        elif ak._v2._util.isstr(index_or_field):
+        elif ak._util.isstr(index_or_field):
             index = self.field_to_index(index_or_field)
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "index_or_field must be an integer (index) or string (field), not {}".format(
                         repr(index_or_field)
@@ -147,11 +147,11 @@ class RecordForm(Form):
         return self._tolist_extra(out, verbose)
 
     def _type(self, typestrs):
-        return ak._v2.types.recordtype.RecordType(
+        return ak.types.recordtype.RecordType(
             [x._type(typestrs) for x in self._contents],
             self._fields,
             self._parameters,
-            ak._v2._util.gettypestr(self._parameters, typestrs),
+            ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):
@@ -213,8 +213,8 @@ class RecordForm(Form):
             return self.content(where)
 
         else:
-            nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
-            if ak._v2._util.isstr(nexthead):
+            nexthead, nexttail = ak._slicing.headtail(only_fields)
+            if ak._util.isstr(nexthead):
                 return self.content(where)._getitem_field(nexthead, nexttail)
             else:
                 return self.content(where)._getitem_fields(nexthead, nexttail)
@@ -229,8 +229,8 @@ class RecordForm(Form):
         if len(only_fields) == 0:
             contents = [self.content(i) for i in indexes]
         else:
-            nexthead, nexttail = ak._v2._slicing.headtail(only_fields)
-            if ak._v2._util.isstr(nexthead):
+            nexthead, nexttail = ak._slicing.headtail(only_fields)
+            if ak._util.isstr(nexthead):
                 contents = [
                     self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
                 ]

@@ -26,9 +26,7 @@ or
 """
 
 else:
-    if ak._v2._util.parse_version(pyarrow.__version__) < ak._v2._util.parse_version(
-        "7.0.0"
-    ):
+    if ak._util.parse_version(pyarrow.__version__) < ak._util.parse_version("7.0.0"):
         pyarrow = None
         error_message = "pyarrow 7.0.0 or later required for {0}"
 
@@ -198,7 +196,7 @@ if pyarrow is not None:
         pyarrow.duration("ns"): (False, np.dtype("m8[ns]")),
     }
 
-if not ak._v2._util.numpy_at_least("1.17.0"):
+if not ak._util.numpy_at_least("1.17.0"):
 
     def packbits(bytearray, lsb_order=True):
         if lsb_order:
@@ -299,18 +297,16 @@ def popbuffers_finalize(
             assert validbits is None or numpy.all(
                 numpy.frombuffer(validbits, np.uint8)[: len(out) // 8] == 0xFF
             )
-            return ak._v2.contents.UnmaskedArray(
+            return ak.contents.UnmaskedArray(
                 out, parameters=awkwardarrow_type.mask_parameters
             )
 
         else:
             if validbits is None:
                 if generate_bitmasks:
-                    return ak._v2.contents.BitMaskedArray(
+                    return ak.contents.BitMaskedArray(
                         # ceildiv(len(out), 8) = -(len(out) // -8)
-                        ak._v2.index.IndexU8(
-                            numpy.full(-(len(out) // -8), np.uint8(0xFF))
-                        ),
+                        ak.index.IndexU8(numpy.full(-(len(out) // -8), np.uint8(0xFF))),
                         out,
                         valid_when=True,
                         length=len(out),
@@ -318,12 +314,12 @@ def popbuffers_finalize(
                         parameters=awkwardarrow_type.mask_parameters,
                     )
                 else:
-                    return ak._v2.contents.UnmaskedArray(
+                    return ak.contents.UnmaskedArray(
                         out, parameters=awkwardarrow_type.mask_parameters
                     )
             else:
-                return ak._v2.contents.BitMaskedArray(
-                    ak._v2.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
+                return ak.contents.BitMaskedArray(
+                    ak.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
                     out,
                     valid_when=True,
                     length=len(out),
@@ -337,10 +333,10 @@ def popbuffers_finalize(
             validbits = numpy.full(-(len(out) // -8), np.uint8(0xFF))
 
         if validbits is None:
-            return ak._v2.contents.UnmaskedArray(out)
+            return ak.contents.UnmaskedArray(out)
         else:
-            return ak._v2.contents.BitMaskedArray(
-                ak._v2.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
+            return ak.contents.BitMaskedArray(
+                ak.index.IndexU8(numpy.frombuffer(validbits, dtype=np.uint8)),
                 out,
                 valid_when=True,
                 length=len(out),
@@ -353,12 +349,10 @@ def form_popbuffers_finalize(out, awkwardarrow_type):
         isinstance(awkwardarrow_type, AwkwardArrowType)
         and awkwardarrow_type.mask_type == "UnmaskedArray"
     ):
-        return ak._v2.forms.UnmaskedForm(
-            out, parameters=awkwardarrow_type.mask_parameters
-        )
+        return ak.forms.UnmaskedForm(out, parameters=awkwardarrow_type.mask_parameters)
 
     else:
-        return ak._v2.forms.BitMaskedForm(
+        return ak.forms.BitMaskedForm(
             "u8",
             out,
             valid_when=True,
@@ -375,7 +369,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
     ### Beginning of the big if-elif-elif chain!
 
     if isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError(
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
@@ -403,7 +397,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         )
         index = masked_index.content.data
 
-        if not isinstance(masked_index, ak._v2.contents.UnmaskedArray):
+        if not isinstance(masked_index, ak.contents.UnmaskedArray):
             mask = masked_index.mask_as_bool(valid_when=False)
             if mask.any():
                 index = numpy.array(index, copy=True)
@@ -411,14 +405,14 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         content = handle_arrow(paarray.dictionary, generate_bitmasks)
 
-        parameters = ak._v2._util.merge_parameters(
+        parameters = ak._util.merge_parameters(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
             parameters = {"__array__": "categorical"}
 
-        return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index(index),
+        return ak.contents.IndexedOptionArray(
+            ak.index.Index(index),
             content,
             parameters=parameters,
         ).simplify_optiontype()
@@ -434,7 +428,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             # strip the dummy option-type node
             akcontent = remove_optiontype(akcontent)
 
-        out = ak._v2.contents.RegularArray(
+        out = ak.contents.RegularArray(
             akcontent,
             storage_type.list_size,
             parameters=node_parameters(awkwardarrow_type),
@@ -449,13 +443,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         paoffsets = buffers.pop(0)
 
         if isinstance(storage_type, pyarrow.lib.LargeListType):
-            akoffsets = ak._v2.index.Index64(
-                numpy.frombuffer(paoffsets, dtype=np.int64)
-            )
+            akoffsets = ak.index.Index64(numpy.frombuffer(paoffsets, dtype=np.int64))
         else:
-            akoffsets = ak._v2.index.Index32(
-                numpy.frombuffer(paoffsets, dtype=np.int32)
-            )
+            akoffsets = ak.index.Index32(numpy.frombuffer(paoffsets, dtype=np.int32))
 
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         akcontent = popbuffers(paarray.values, a, b, buffers, generate_bitmasks)
@@ -464,7 +454,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             # strip the dummy option-type node
             akcontent = remove_optiontype(akcontent)
 
-        out = ak._v2.contents.ListOffsetArray(
+        out = ak.contents.ListOffsetArray(
             akoffsets, akcontent, parameters=node_parameters(awkwardarrow_type)
         )
         return popbuffers_finalize(
@@ -474,14 +464,14 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
     elif isinstance(storage_type, pyarrow.lib.MapType):
         # FIXME: make a ListOffsetArray of 2-tuples with __array__ == "sorted_map".
         # (Make sure the keys are sorted).
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     elif isinstance(
         storage_type, (pyarrow.lib.Decimal128Type, pyarrow.lib.Decimal256Type)
     ):
         # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType.
         # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError(
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
@@ -497,8 +487,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             parameters = {"__array__": "bytestring"}
         sub_parameters = {"__array__": "byte"}
 
-        out = ak._v2.contents.RegularArray(
-            ak._v2.contents.NumpyArray(
+        out = ak.contents.RegularArray(
+            ak.contents.NumpyArray(
                 numpy.frombuffer(pacontent, dtype=np.uint8),
                 parameters=sub_parameters,
                 nplike=ak.nplike.Numpy.instance(),
@@ -517,13 +507,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         pacontent = buffers.pop(0)
 
         if storage_type in _string_like[::2]:
-            akoffsets = ak._v2.index.Index32(
-                numpy.frombuffer(paoffsets, dtype=np.int32)
-            )
+            akoffsets = ak.index.Index32(numpy.frombuffer(paoffsets, dtype=np.int32))
         else:
-            akoffsets = ak._v2.index.Index64(
-                numpy.frombuffer(paoffsets, dtype=np.int64)
-            )
+            akoffsets = ak.index.Index64(numpy.frombuffer(paoffsets, dtype=np.int64))
 
         parameters = node_parameters(awkwardarrow_type)
 
@@ -536,9 +522,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
                 parameters = {"__array__": "bytestring"}
             sub_parameters = {"__array__": "byte"}
 
-        out = ak._v2.contents.ListOffsetArray(
+        out = ak.contents.ListOffsetArray(
             akoffsets,
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 numpy.frombuffer(pacontent, dtype=np.uint8),
                 parameters=sub_parameters,
                 nplike=ak.nplike.Numpy.instance(),
@@ -572,7 +558,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if awkwardarrow_type is not None and awkwardarrow_type.record_is_tuple:
             keys = None
 
-        out = ak._v2.contents.RecordArray(
+        out = ak.contents.RecordArray(
             contents,
             keys,
             length=len(paarray),
@@ -610,9 +596,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
                 akcontent = remove_optiontype(akcontent)
             akcontents.append(akcontent)
 
-        out = ak._v2.contents.UnionArray(
-            ak._v2.index.Index8(nptags),
-            ak._v2.index.Index32(npindex),
+        out = ak.contents.UnionArray(
+            ak.index.Index8(nptags),
+            ak.index.Index32(npindex),
             akcontents,
             parameters=node_parameters(awkwardarrow_type),
         )
@@ -625,9 +611,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         assert storage_type.num_fields == 0
 
         # This is already an option-type and offsets-corrected, so no popbuffers_finalize.
-        return ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
-            ak._v2.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
+        return ak.contents.IndexedOptionArray(
+            ak.index.Index64(numpy.full(len(paarray), -1, dtype=np.int64)),
+            ak.contents.EmptyArray(parameters=node_parameters(awkwardarrow_type)),
             parameters=mask_parameters(awkwardarrow_type),
         )
 
@@ -638,7 +624,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
 
         bytedata = unpackbits(numpy.frombuffer(bitdata, dtype=np.uint8))
 
-        out = ak._v2.contents.NumpyArray(
+        out = ak.contents.NumpyArray(
             bytedata.view(np.bool_),
             parameters=node_parameters(awkwardarrow_type),
             nplike=ak.nplike.Numpy.instance(),
@@ -658,7 +644,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if dt is None:
             dt = storage_type.to_pandas_dtype()
 
-        out = ak._v2.contents.NumpyArray(
+        out = ak.contents.NumpyArray(
             numpy.frombuffer(data, dtype=dt),
             parameters=node_parameters(awkwardarrow_type),
             nplike=ak.nplike.Numpy.instance(),
@@ -668,7 +654,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         )
 
     else:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError(f"unrecognized Arrow array type: {storage_type!r}")
         )
 
@@ -677,7 +663,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
     ### Beginning of the big if-elif-elif chain!
 
     if isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError(
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
@@ -698,20 +684,20 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         elif index_type is np.int32:
             index = "i32"
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(f"unrecognized Arrow DictionaryType index type: {index_type}")
             )
 
         a, b = to_awkwardarrow_storage_types(storage_type.value_type)
         content = form_popbuffers(a, b)
 
-        parameters = ak._v2._util.merge_parameters(
+        parameters = ak._util.merge_parameters(
             mask_parameters(awkwardarrow_type), node_parameters(awkwardarrow_type)
         )
         if parameters is None:
             parameters = {"__array__": "categorical"}
 
-        return ak._v2.forms.IndexedOptionForm(
+        return ak.forms.IndexedOptionForm(
             index,
             content,
             parameters=parameters,
@@ -725,7 +711,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
             # strip the dummy option-type node
             akcontent = form_remove_optiontype(akcontent)
 
-        out = ak._v2.forms.RegularForm(
+        out = ak.forms.RegularForm(
             akcontent,
             storage_type.list_size,
             parameters=node_parameters(awkwardarrow_type),
@@ -745,20 +731,20 @@ def form_popbuffers(awkwardarrow_type, storage_type):
             # strip the dummy option-type node
             akcontent = form_remove_optiontype(akcontent)
 
-        out = ak._v2.forms.ListOffsetForm(
+        out = ak.forms.ListOffsetForm(
             akoffsets, akcontent, parameters=node_parameters(awkwardarrow_type)
         )
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.MapType):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     elif isinstance(
         storage_type, (pyarrow.lib.Decimal128Type, pyarrow.lib.Decimal256Type)
     ):
         # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType.
         # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError(
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
@@ -770,8 +756,8 @@ def form_popbuffers(awkwardarrow_type, storage_type):
             parameters = {"__array__": "bytestring"}
         sub_parameters = {"__array__": "byte"}
 
-        out = ak._v2.forms.RegularForm(
-            ak._v2.forms.NumpyForm("uint8", parameters=sub_parameters),
+        out = ak.forms.RegularForm(
+            ak.forms.NumpyForm("uint8", parameters=sub_parameters),
             storage_type.byte_width,
             parameters=parameters,
         )
@@ -794,9 +780,9 @@ def form_popbuffers(awkwardarrow_type, storage_type):
                 parameters = {"__array__": "bytestring"}
             sub_parameters = {"__array__": "byte"}
 
-        out = ak._v2.forms.ListOffsetForm(
+        out = ak.forms.ListOffsetForm(
             akoffsets,
-            ak._v2.forms.NumpyForm("uint8", parameters=sub_parameters),
+            ak.forms.NumpyForm("uint8", parameters=sub_parameters),
             parameters=parameters,
         )
         return form_popbuffers_finalize(out, awkwardarrow_type)
@@ -819,7 +805,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         if awkwardarrow_type is not None and awkwardarrow_type.record_is_tuple:
             keys = None
 
-        out = ak._v2.forms.RecordForm(
+        out = ak.forms.RecordForm(
             contents,
             keys,
             parameters=node_parameters(awkwardarrow_type),
@@ -838,16 +824,16 @@ def form_popbuffers(awkwardarrow_type, storage_type):
                 akcontent = form_remove_optiontype(akcontent)
             akcontents.append(akcontent)
 
-        out = ak._v2.forms.UnionForm(
+        out = ak.forms.UnionForm(
             "i8", "i32", akcontents, parameters=node_parameters(awkwardarrow_type)
         )
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif storage_type == pyarrow.null():
         # This is already an option-type, so no form_popbuffers_finalize.
-        return ak._v2.forms.IndexedOptionForm(
+        return ak.forms.IndexedOptionForm(
             "i64",
-            ak._v2.forms.EmptyForm(parameters=node_parameters(awkwardarrow_type)),
+            ak.forms.EmptyForm(parameters=node_parameters(awkwardarrow_type)),
             parameters=mask_parameters(awkwardarrow_type),
         )
 
@@ -856,15 +842,15 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         if dt is None:
             dt = np.dtype(storage_type.to_pandas_dtype())
 
-        out = ak._v2.forms.NumpyForm(
-            ak._v2.types.numpytype.dtype_to_primitive(dt),
+        out = ak.forms.NumpyForm(
+            ak.types.numpytype.dtype_to_primitive(dt),
             parameters=node_parameters(awkwardarrow_type),
         )
 
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     else:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             TypeError(f"unrecognized Arrow array type: {storage_type!r}")
         )
 
@@ -875,11 +861,11 @@ def to_awkwardarrow_type(
     if use_extensionarray:
         return AwkwardArrowType(
             storage_type,
-            ak._v2._util.direct_Content_subclass_name(mask),
-            ak._v2._util.direct_Content_subclass_name(node),
+            ak._util.direct_Content_subclass_name(mask),
+            ak._util.direct_Content_subclass_name(node),
             None if mask is None else mask.parameters,
             None if node is None else node.parameters,
-            node.is_tuple if isinstance(node, ak._v2.contents.RecordArray) else None,
+            node.is_tuple if isinstance(node, ak.contents.RecordArray) else None,
             record_is_scalar,
         )
     else:
@@ -888,8 +874,8 @@ def to_awkwardarrow_type(
 
 def remove_optiontype(akarray):
     assert type(akarray).is_OptionType
-    if isinstance(akarray, ak._v2.contents.IndexedOptionArray):
-        return ak._v2.contents.IndexedArray(
+    if isinstance(akarray, ak.contents.IndexedOptionArray):
+        return ak.contents.IndexedArray(
             akarray.index, akarray.content, akarray.identifier, akarray.parameters
         )
     else:
@@ -898,8 +884,8 @@ def remove_optiontype(akarray):
 
 def form_remove_optiontype(akform):
     assert type(akform).is_OptionType
-    if isinstance(akform, ak._v2.forms.IndexedOptionForm):
-        return ak._v2.forms.IndexedForm(
+    if isinstance(akform, ak.forms.IndexedOptionForm):
+        return ak.forms.IndexedForm(
             akform.index,
             akform.content,
             akform.has_identifier,
@@ -928,7 +914,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         if len(layouts) == 1:
             return layouts[0]
         else:
-            return ak._v2.operations.concatenate(layouts, highlevel=False)
+            return ak.operations.concatenate(layouts, highlevel=False)
 
     elif isinstance(obj, pyarrow.lib.RecordBatch):
         if pass_empty_field and list(obj.schema.names) == [""]:
@@ -982,7 +968,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 else:
                     contents.append(layout)
 
-            out = ak._v2.contents.RecordArray(
+            out = ak.contents.RecordArray(
                 contents,
                 obj.schema.names,
                 length=len(obj),
@@ -996,13 +982,11 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 record_mask = numpy.zeros(len(out), dtype=np.bool_)
 
             if record_is_optiontype and record_mask is None:
-                return ak._v2.contents.UnmaskedArray(
-                    out, parameters=optiontype_parameters
-                )
+                return ak.contents.UnmaskedArray(out, parameters=optiontype_parameters)
 
             elif record_is_optiontype:
-                return ak._v2.contents.ByteMaskedArray(
-                    ak._v2.index.Index8(record_mask),
+                return ak.contents.ByteMaskedArray(
+                    ak.index.Index8(record_mask),
                     out,
                     valid_when=False,
                     parameters=optiontype_parameters,
@@ -1015,7 +999,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         batches = obj.combine_chunks().to_batches()
         if len(batches) == 0:
             # FIXME: create a zero-length array with the right type
-            raise ak._v2._util.error(NotImplementedError)
+            raise ak._util.error(NotImplementedError)
         elif len(batches) == 1:
             return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:
@@ -1024,7 +1008,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 for batch in batches
                 if len(batch) > 0
             ]
-            return ak._v2.operations.concatenate(arrays, highlevel=False)
+            return ak.operations.concatenate(arrays, highlevel=False)
 
     elif (
         isinstance(obj, Iterable)
@@ -1041,13 +1025,13 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         if len(chunks) == 1:
             return chunks[0]
         else:
-            return ak._v2.operations.concatenate(chunks, highlevel=False)
+            return ak.operations.concatenate(chunks, highlevel=False)
 
     elif isinstance(obj, Iterable) and len(obj) == 0:
-        return ak._v2.contents.RecordArray([], [], length=0)
+        return ak.contents.RecordArray([], [], length=0)
 
     else:
-        raise ak._v2._util.error(TypeError(f"unrecognized Arrow type: {type(obj)}"))
+        raise ak._util.error(TypeError(f"unrecognized Arrow type: {type(obj)}"))
 
 
 def form_handle_arrow(schema, pass_empty_field=False):
@@ -1094,12 +1078,12 @@ def form_handle_arrow(schema, pass_empty_field=False):
             else:
                 forms.append(akform)
 
-        out = ak._v2.forms.RecordForm(
+        out = ak.forms.RecordForm(
             forms, list(schema.names), parameters=recordtype_parameters
         )
 
         if record_is_optiontype:
-            return ak._v2.forms.ByteMaskedForm(
+            return ak.forms.ByteMaskedForm(
                 "i8", out, valid_when=False, parameters=optiontype_parameters
             )
 

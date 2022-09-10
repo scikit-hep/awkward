@@ -34,34 +34,34 @@ def alternate(length):
 is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 
 
-# avoid recursion in which ak._v2.Array.__getitem__ calls prettyprint
-# to form an error string: private reimplementation of ak._v2.Array.__getitem__
+# avoid recursion in which ak.Array.__getitem__ calls prettyprint
+# to form an error string: private reimplementation of ak.Array.__getitem__
 
 
 def get_at(data, index):
     out = data._layout._getitem_at(index)
-    if isinstance(out, ak._v2.contents.NumpyArray):
+    if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
         if array_param == "byte":
-            return ak._v2._util.tobytes(out.raw(numpy))
+            return ak._util.tobytes(out.raw(numpy))
         elif array_param == "char":
-            return ak._v2._util.tobytes(out.raw(numpy)).decode(errors="surrogateescape")
-    if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
-        return ak._v2._util.wrap(out, data._behavior)
+            return ak._util.tobytes(out.raw(numpy)).decode(errors="surrogateescape")
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, data._behavior)
     else:
         return out
 
 
 def get_field(data, field):
     out = data._layout._getitem_field(field)
-    if isinstance(out, ak._v2.contents.NumpyArray):
+    if isinstance(out, ak.contents.NumpyArray):
         array_param = out.parameter("__array__")
         if array_param == "byte":
-            return ak._v2._util.tobytes(out.raw(numpy))
+            return ak._util.tobytes(out.raw(numpy))
         elif array_param == "char":
-            return ak._v2._util.tobytes(out.raw(numpy)).decode(errors="surrogateescape")
-    if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
-        return ak._v2._util.wrap(out, data._behavior)
+            return ak._util.tobytes(out.raw(numpy)).decode(errors="surrogateescape")
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, data._behavior)
     else:
         return out
 
@@ -69,7 +69,7 @@ def get_field(data, field):
 def valuestr_horiz(data, limit_cols):
     original_limit_cols = limit_cols
 
-    if isinstance(data, ak._v2.highlevel.Array):
+    if isinstance(data, ak.highlevel.Array):
         front, back = ["["], ["]"]
         limit_cols -= 2
 
@@ -90,10 +90,9 @@ def valuestr_horiz(data, limit_cols):
                     cols_taken, strs = valuestr_horiz(current, limit_cols - for_comma)
 
                     if (
-                        ak._v2.highlevel.Record in current.__class__.__bases__
-                        or ak._v2.highlevel.Array in current.__class__.__bases__
-                        and not type(current).__repr__
-                        is ak._v2.highlevel.Array.__repr__
+                        ak.highlevel.Record in current.__class__.__bases__
+                        or ak.highlevel.Array in current.__class__.__bases__
+                        and not type(current).__repr__ is ak.highlevel.Array.__repr__
                     ):
                         strs = type(current).__repr__(current)
 
@@ -109,10 +108,9 @@ def valuestr_horiz(data, limit_cols):
                     cols_taken, strs = valuestr_horiz(current, limit_cols - 2)
 
                     if (
-                        ak._v2.highlevel.Record in current.__class__.__bases__
-                        or ak._v2.highlevel.Array in current.__class__.__bases__
-                        and not type(current).__repr__
-                        is ak._v2.highlevel.Array.__repr__
+                        ak.highlevel.Record in current.__class__.__bases__
+                        or ak.highlevel.Array in current.__class__.__bases__
+                        and not type(current).__repr__ is ak.highlevel.Array.__repr__
                     ):
                         strs = type(current).__repr__(current)
 
@@ -135,7 +133,7 @@ def valuestr_horiz(data, limit_cols):
             limit_cols += 5  # credit the ", ..."
             return original_limit_cols - limit_cols, front + back
 
-    elif isinstance(data, ak._v2.highlevel.Record):
+    elif isinstance(data, ak.highlevel.Record):
         is_tuple = data.layout.is_tuple
 
         front = ["("] if is_tuple else ["{"]
@@ -211,7 +209,7 @@ def valuestr(data, limit_rows, limit_cols):
         _, strs = valuestr_horiz(data, limit_cols)
         return "".join(strs)
 
-    elif isinstance(data, ak._v2.highlevel.Array):
+    elif isinstance(data, ak.highlevel.Array):
         front, back = [], []
         which = 0
         for forward, index in alternate(len(data)):
@@ -241,7 +239,7 @@ def valuestr(data, limit_rows, limit_cols):
 
         return "\n".join(out)
 
-    elif isinstance(data, ak._v2.highlevel.Record):
+    elif isinstance(data, ak.highlevel.Record):
         is_tuple = data.layout.is_tuple
 
         front = []
@@ -287,4 +285,4 @@ def valuestr(data, limit_rows, limit_cols):
         return "\n".join(out)
 
     else:
-        raise ak._v2._util.error(AssertionError(type(data)))
+        raise ak._util.error(AssertionError(type(data)))

@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("sort")
+@ak._connect.numpy.implements("sort")
 def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:
@@ -22,7 +22,7 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=N
             use a sorting algorithm that is not guaranteed to be stable
             (heapsort).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -31,8 +31,8 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=N
         >>> ak.sort(ak.Array([[7, 5, 7], [], [2], [8, 2]]))
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.sort",
+    with ak._util.OperationErrorContext(
+        "ak.sort",
         dict(
             array=array,
             axis=axis,
@@ -46,6 +46,6 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=N
 
 
 def _impl(array, axis, ascending, stable, highlevel, behavior):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.sort(axis, ascending, stable)
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

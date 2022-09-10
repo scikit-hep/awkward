@@ -13,7 +13,6 @@
 
 #include "awkward/util.h"
 #include "awkward/datetime_util.h"
-#include "awkward/Identities.h"
 
 namespace rj = rapidjson;
 
@@ -429,8 +428,7 @@ namespace awkward {
 
     void
     handle_error(const struct Error& err,
-                 const std::string& classname,
-                 const Identities* identities) {
+                 const std::string& classname) {
       std::string filename = (err.filename == nullptr ? "" : err.filename);
 
       if (err.pass_through == true) {
@@ -440,14 +438,6 @@ namespace awkward {
         if (err.str != nullptr) {
           std::stringstream out;
           out << "in " << classname;
-          if (err.identity != kSliceNone && identities != nullptr) {
-            if (0 <= err.identity && err.identity < identities->length()) {
-              out << " with identity ["
-                  << identities->identity_at(err.identity) << "]";
-            } else {
-              out << " with invalid identity";
-            }
-          }
           if (err.attempt != kSliceNone) {
             out << " attempting to get " << err.attempt;
           }
@@ -456,34 +446,6 @@ namespace awkward {
         }
       }
     }
-
-    template<typename T>
-    IndexOf<T> make_starts(const IndexOf<T> &offsets) {
-      return IndexOf<T>(offsets.ptr(),
-                        offsets.offset(),
-                        offsets.length() - 1,
-                        offsets.ptr_lib());
-    }
-
-    template<typename T>
-    IndexOf<T> make_stops(const IndexOf<T> &offsets) {
-      return IndexOf<T>(offsets.ptr(),
-                        offsets.offset() + 1,
-                        offsets.length() - 1,
-                        offsets.ptr_lib());
-    }
-
-    template IndexOf<int32_t> make_starts(const IndexOf<int32_t> &offsets);
-
-    template IndexOf<uint32_t> make_starts(const IndexOf<uint32_t> &offsets);
-
-    template IndexOf<int64_t> make_starts(const IndexOf<int64_t> &offsets);
-
-    template IndexOf<int32_t> make_stops(const IndexOf<int32_t> &offsets);
-
-    template IndexOf<uint32_t> make_stops(const IndexOf<uint32_t> &offsets);
-
-    template IndexOf<int64_t> make_stops(const IndexOf<int64_t> &offsets);
 
     std::string
     quote(const std::string &x) {
@@ -581,15 +543,6 @@ namespace awkward {
     }
 
     bool
-    json_equals(const std::string &myvalue, const std::string &value) {
-      rj::Document mine;
-      rj::Document yours;
-      mine.Parse<rj::kParseNanAndInfFlag>(myvalue.c_str());
-      yours.Parse<rj::kParseNanAndInfFlag>(value.c_str());
-      return mine == yours;
-    }
-
-    bool
     parameter_equals(const Parameters &parameters,
                      const std::string &key,
                      const std::string &value) {
@@ -605,173 +558,6 @@ namespace awkward {
       mine.Parse<rj::kParseNanAndInfFlag>(myvalue.c_str());
       yours.Parse<rj::kParseNanAndInfFlag>(value.c_str());
       return mine == yours;
-    }
-
-    bool
-    parameters_equal(const Parameters &self, const Parameters &other, bool check_all) {
-      if (check_all) {
-        std::set<std::string> checked;
-        for (auto pair : self) {
-          if (!parameter_equals(other, pair.first, pair.second)) {
-            return false;
-          }
-          checked.insert(pair.first);
-        }
-        for (auto pair : other) {
-          if (checked.find(pair.first) == checked.end()) {
-            if (!parameter_equals(self, pair.first, pair.second)) {
-              return false;
-            }
-          }
-        }
-        return true;
-      }
-      else {
-        auto self_array = self.find("__array__");
-        auto other_array = other.find("__array__");
-        auto self_record = self.find("__record__");
-        auto other_record = other.find("__record__");
-        std::string my_array;
-        std::string your_array;
-        std::string my_record;
-        std::string your_record;
-        if (self_array == self.end()) {
-          my_array = "null";
-        }
-        else {
-          my_array = self_array->second;
-        }
-        if (other_array == other.end()) {
-          your_array = "null";
-        }
-        else {
-          your_array = other_array->second;
-        }
-        if (self_record == self.end()) {
-          my_record = "null";
-        }
-        else {
-          my_record = self_record->second;
-        }
-        if (other_record == other.end()) {
-          your_record = "null";
-        }
-        else {
-          your_record = other_record->second;
-        }
-        rj::Document mine_array;
-        rj::Document yours_array;
-        rj::Document mine_record;
-        rj::Document yours_record;
-        mine_array.Parse<rj::kParseNanAndInfFlag>(my_array.c_str());
-        yours_array.Parse<rj::kParseNanAndInfFlag>(your_array.c_str());
-        mine_record.Parse<rj::kParseNanAndInfFlag>(my_record.c_str());
-        yours_record.Parse<rj::kParseNanAndInfFlag>(your_record.c_str());
-        return mine_array == yours_array  &&  mine_record == yours_record;
-      }
-    }
-
-    void
-    merge_parameters(Parameters& output, const Parameters& input) {
-      for (auto it = output.cbegin();  it != output.cend();  ) {
-        if (parameter_equals(input, it->first, it->second)) {
-          ++it;
-        }
-        else {
-          it = output.erase(it);
-        }
-      }
-    }
-
-    bool
-    parameter_isstring(const Parameters &parameters, const std::string &key) {
-      auto item = parameters.find(key);
-      if (item == parameters.end()) {
-        return false;
-      }
-      rj::Document mine;
-      mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
-      return mine.IsString();
-    }
-
-    bool
-    parameter_isname(const Parameters &parameters, const std::string &key) {
-      auto item = parameters.find(key);
-      if (item == parameters.end()) {
-        return false;
-      }
-      rj::Document mine;
-      mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
-      if (!mine.IsString()) {
-        return false;
-      }
-      std::string value = mine.GetString();
-      if (value.empty()) {
-        return false;
-      }
-      if (!((value[0] >= 'a' && value[0] <= 'z') ||
-            (value[0] >= 'A' && value[0] <= 'Z') ||
-            (value[0] == '_'))) {
-        return false;
-      }
-      for (size_t i = 1; i < value.length(); i++) {
-        if (!((value[i] >= 'a' && value[i] <= 'z') ||
-              (value[i] >= 'A' && value[i] <= 'Z') ||
-              (value[i] >= '0' && value[i] <= '9') ||
-              (value[i] == '_'))) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    const std::string
-    parameter_asstring(const Parameters &parameters, const std::string &key) {
-      auto item = parameters.find(key);
-      if (item == parameters.end()) {
-        throw std::runtime_error(
-          std::string("parameter is null") + FILENAME(__LINE__));
-      }
-      rj::Document mine;
-      mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
-      if (!mine.IsString()) {
-        throw std::runtime_error(
-          std::string("parameter is not a string") + FILENAME(__LINE__));
-      }
-      return mine.GetString();
-    }
-
-    std::string
-    gettypestr(const Parameters &parameters, const TypeStrs &typestrs) {
-      auto item = parameters.find("__record__");
-      if (item != parameters.end()) {
-        std::string source = item->second;
-        rj::Document recname;
-        recname.Parse<rj::kParseNanAndInfFlag>(source.c_str());
-        if (recname.IsString()) {
-          std::string name = recname.GetString();
-          for (auto pair : typestrs) {
-            if (pair.first == name) {
-              return pair.second;
-            }
-          }
-        }
-      }
-      item = parameters.find("__array__");
-      if (item != parameters.end()) {
-        std::string source = item->second;
-        rj::Document recname;
-        recname.Parse<rj::kParseNanAndInfFlag>(source.c_str());
-        if (recname.IsString()) {
-          std::string name = recname.GetString();
-          for (auto pair : typestrs) {
-            if (pair.first == name) {
-              return pair.second;
-            }
-          }
-        }
-      }
-      return std::string();
     }
 
     std::string
@@ -806,22 +592,5 @@ namespace awkward {
 
       return std::make_tuple(datetime_units(next_units), next_interval);
     }
-
-    double
-    scale_from_units(const std::string& format, uint64_t index) {
-      int64_t scale_up = util::units_map.at(index).scale_up;
-      int64_t scale_down = util::units_map.at(index).scale_down;
-
-      std::string other_format;
-      int64_t other_unit_step;
-      std::tie(other_format, other_unit_step) = util::datetime_data(format);
-
-      uint64_t other_index = (uint64_t)util::value(util::units_map, other_format);
-      int64_t next_scale_up = util::units_map.at(other_index).scale_up;
-      int64_t next_scale_down = util::units_map.at(other_index).scale_down;
-
-      return (double)other_unit_step * (scale_down * next_scale_up) / (scale_up * next_scale_down);
-    }
-
   }
 }

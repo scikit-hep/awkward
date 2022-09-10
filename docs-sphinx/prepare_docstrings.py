@@ -22,7 +22,7 @@ latest_commit = (
               .strip()
 )
 
-toctree = ["_auto/changelog.rst"]
+toctree = ["_auto/changelog.rst", "ak.behavior.rst"]
 
 def tostr(node):
     if isinstance(node, ast.NameConstant):
@@ -253,10 +253,6 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
                        key=lambda x: x.replace("/__init__.py",    "!")
                                       .replace("/highlevel",      "#")
                                       .replace("/operations",     "$")
-
-                                      .replace("/describe.py",    "#")
-                                      .replace("/convert.py",     "$")
-                                      .replace("/structure.py",   "%")
                                       .replace("/reducers.py",    "&")
                                       .replace("/categorical.py", "'")
 
@@ -269,71 +265,22 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
 
     shortname = (modulename.replace("awkward.", "ak.")
                            .replace(".highlevel", "")
-                           .replace(".operations.convert", "")
-                           .replace(".operations.describe", "")
-                           .replace(".operations.structure", "")
-                           .replace(".operations.reducers", "")
                            .replace(".behaviors.mixins", "")
                            .replace(".behaviors.categorical", "")
                            .replace(".behaviors.string", ""))
+    shortname = re.sub(r"\.operations\.ak_\w+", "", shortname)
+    shortname = re.sub(r"\.(contents|types|forms)\.\w+", r".\1", shortname)
 
-    if modulename == "awkward.operations.describe":
-        toctree.append("ak.behavior.rst")
-    elif not done_extra and modulename.startswith("awkward._"):
+    if not done_extra and modulename.startswith("awkward._"):
         done_extra = True
         toctree.extend(["ak.numba.register.rst",
                         "ak.numexpr.evaluate.rst",
                         "ak.numexpr.re_evaluate.rst",
                         "ak.autograd.elementwise_grad.rst",
-                        "ak.layout.Content.rst",
-                        "ak.layout.EmptyArray.rst",
-                        "ak.layout.NumpyArray.rst",
-                        "ak.layout.RegularArray.rst",
-                        "ak.layout.ListArray.rst",
-                        "ak.layout.ListOffsetArray.rst",
-                        "ak.layout.RecordArray.rst",
-                        "ak.layout.Record.rst",
-                        "ak.layout.IndexedArray.rst",
-                        "ak.layout.IndexedOptionArray.rst",
-                        "ak.layout.ByteMaskedArray.rst",
-                        "ak.layout.BitMaskedArray.rst",
-                        "ak.layout.UnmaskedArray.rst",
-                        "ak.layout.UnionArray.rst",
-                        "ak.layout.VirtualArray.rst",
-                        "ak.layout.ArrayGenerator.rst",
-                        "ak.layout.SliceGenerator.rst",
-                        "ak.layout.ArrayCache.rst",
-                        "ak.layout.Iterator.rst",
-                        "ak.layout.ArrayBuilder.rst",
-                        "ak.layout.Index.rst",
-                        "ak.layout.Identities.rst",
-                        "ak.types.Type.rst",
-                        "ak.types.ArrayType.rst",
-                        "ak.types.UnknownType.rst",
-                        "ak.types.PrimitiveType.rst",
-                        "ak.types.RegularType.rst",
-                        "ak.types.ListType.rst",
-                        "ak.types.RecordType.rst",
-                        "ak.types.OptionType.rst",
-                        "ak.types.UnionType.rst",
-                        "ak.forms.Form.rst",
-                        "ak.forms.EmptyForm.rst",
-                        "ak.forms.NumpyForm.rst",
-                        "ak.forms.RegularForm.rst",
-                        "ak.forms.ListForm.rst",
-                        "ak.forms.ListOffsetForm.rst",
-                        "ak.forms.RecordForm.rst",
-                        "ak.forms.IndexedForm.rst",
-                        "ak.forms.IndexedOptionForm.rst",
-                        "ak.forms.ByteMaskedForm.rst",
-                        "ak.forms.BitMaskedForm.rst",
-                        "ak.forms.UnmaskedForm.rst",
-                        "ak.forms.UnionForm.rst",
-                        "ak.forms.VirtualForm.rst",
                         "awkwardforth.rst",
                         ])
 
-    if modulename.startswith("awkward._") or modulename == "awkward.nplike":
+    if modulename.startswith("awkward._") or modulename == "awkward.nplike" or modulename == "awkward.types._awkward_datashape_parser":
         continue  # don't show awkward._*, including _v2
 
     link = ("`{0} <https://github.com/scikit-hep/awkward-1.0/blob/"

@@ -4,8 +4,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-import awkward._v2._lookup  # noqa: E402
-import awkward._v2._connect.cling  # noqa: E402
+import awkward._lookup  # noqa: E402
+import awkward._connect.cling  # noqa: E402
 
 ROOT = pytest.importorskip("ROOT")
 
@@ -14,7 +14,7 @@ compiler = ROOT.gInterpreter.Declare
 
 
 def test_two_columns():
-    array = ak._v2.Array(
+    array = ak.Array(
         [
             [{"x": 1, "y": [1.1]}, {"x": 2, "y": [2.2, 0.2]}],
             [],
@@ -23,7 +23,7 @@ def test_two_columns():
     )
     ak_array_1 = array["x"]
     ak_array_2 = array["y"]
-    data_frame = ak._v2.to_rdataframe(
+    data_frame = ak.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=True
     )
     assert set(data_frame.GetColumnNames()) == {"x", "y", "awkward_index_"}
@@ -32,12 +32,10 @@ def test_two_columns():
 
 
 def test_two_columns_as_rvecs():
-    ak_array_1 = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
-    ak_array_2 = ak._v2.Array(
-        [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
-    )
+    ak_array_1 = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    ak_array_2 = ak.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}])
 
-    data_frame = ak._v2.to_rdataframe({"x": ak_array_1, "y": ak_array_2})
+    data_frame = ak.to_rdataframe({"x": ak_array_1, "y": ak_array_2})
     assert set(data_frame.GetColumnNames()) == {"x", "y", "awkward_index_"}
     assert data_frame.GetColumnType("x") == "double"
     assert data_frame.GetColumnType("y").startswith("awkward::Record_")
@@ -78,9 +76,9 @@ def test_two_columns_as_rvecs():
 
 
 def test_list_array():
-    ak_array = ak._v2.Array([[1.1], [2.2, 3.3, 4.4], [5.5, 6.6]])
+    ak_array = ak.Array([[1.1], [2.2, 3.3, 4.4], [5.5, 6.6]])
 
-    data_frame = ak._v2.to_rdataframe({"x": ak_array})
+    data_frame = ak.to_rdataframe({"x": ak_array})
 
     assert data_frame.GetColumnType("x") == "ROOT::VecOps::RVec<double>"
 
@@ -112,12 +110,10 @@ def test_list_array():
 
 
 def test_two_columns_as_vecs():
-    ak_array_1 = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
-    ak_array_2 = ak._v2.Array(
-        [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
-    )
+    ak_array_1 = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    ak_array_2 = ak.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}])
 
-    data_frame = ak._v2.operations.to_rdataframe(
+    data_frame = ak.operations.to_rdataframe(
         {"x": ak_array_1, "y": ak_array_2}, flatlist_as_rvec=False
     )
     assert set(data_frame.GetColumnNames()) == {"x", "y", "awkward_index_"}
@@ -160,12 +156,10 @@ def test_two_columns_as_vecs():
 
 
 def test_two_columns_transform_filter():
-    example1 = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
-    example2 = ak._v2.Array(
-        [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}]
-    )
+    example1 = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    example2 = ak.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}])
 
-    data_frame = ak._v2.to_rdataframe({"one": example1, "two": example2})
+    data_frame = ak.to_rdataframe({"one": example1, "two": example2})
     assert set(data_frame.GetColumnNames()) == {"one", "two", "awkward_index_"}
 
     compiler(
@@ -197,8 +191,8 @@ ROOT::RDF::RNode MyTransformation(ROOT::RDF::RNode df) {
 
 
 def test_jims_example1():
-    array = ak._v2.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}])
-    data_frame = ak._v2.to_rdataframe({"some_array": array})
+    array = ak.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}, {"x": 4.4}, {"x": 5.5}])
+    data_frame = ak.to_rdataframe({"some_array": array})
     assert set(data_frame.GetColumnNames()) == {"some_array", "awkward_index_"}
     data_frame_y = data_frame.Define("y", "some_array.x()")
     assert set(data_frame_y.GetColumnNames()) == {"some_array", "y", "awkward_index_"}
@@ -226,8 +220,8 @@ def test_jims_example1():
 
 
 def test_jims_example2():
-    example1 = ak._v2.Array([1.1, 2.2, 3.3, 4.4, 5.5])
-    example2 = ak._v2.Array(
+    example1 = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    example2 = ak.Array(
         [
             {"x": [1.1, 1.2, 1.3]},
             {"x": [2.2, 2.21]},
@@ -237,7 +231,7 @@ def test_jims_example2():
         ]
     )
 
-    data_frame = ak._v2.operations.to_rdataframe({"one": example1, "two": example2})
+    data_frame = ak.operations.to_rdataframe({"one": example1, "two": example2})
 
     assert data_frame.GetColumnType("one") == "double"
     assert data_frame.GetColumnType("two").startswith("awkward::Record_")
@@ -284,14 +278,14 @@ def test_jims_example2():
 
 
 def test_empty_array():
-    array = ak._v2.Array([])
-    data_frame = ak._v2.to_rdataframe({"empty_array": array})
+    array = ak.Array([])
+    data_frame = ak.to_rdataframe({"empty_array": array})
     assert data_frame.GetColumnType("empty_array") == "double"
     assert data_frame.Count().GetValue() == 0
 
 
 def test_empty_list_array():
-    array = ak._v2.Array([[], [], []])
-    data_frame = ak._v2.to_rdataframe({"empty_list_array": array})
+    array = ak.Array([[], [], []])
+    data_frame = ak.to_rdataframe({"empty_list_array": array})
     assert data_frame.GetColumnType("empty_list_array") == "ROOT::VecOps::RVec<double>"
     assert data_frame.Count().GetValue() == 3

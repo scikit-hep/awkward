@@ -14,15 +14,15 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Returns an array whose value is True where an element of `array` is None;
     False otherwise (at a given `axis` depth).
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.is_none",
+    with ak._util.OperationErrorContext(
+        "ak.is_none",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, axis, highlevel, behavior)
@@ -33,7 +33,7 @@ def _impl(array, axis, highlevel, behavior):
     # Determine the (potentially nested) bytemask
     def getfunction_inner(layout, depth, **kwargs):
 
-        if not isinstance(layout, ak._v2.contents.Content):
+        if not isinstance(layout, ak.contents.Content):
             return
 
         nplike = ak.nplike.of(layout)
@@ -46,12 +46,12 @@ def _impl(array, axis, highlevel, behavior):
             tag = nplike.index_nplike.asarray(layout.mask_as_bool(valid_when=False))
             index = nplike.index_nplike.where(tag, 0, nplike.asarray(layout.index))
 
-            return ak._v2.contents.UnionArray(
-                ak._v2.index.Index8(tag),
-                ak._v2.index.Index64(index),
+            return ak.contents.UnionArray(
+                ak.index.Index8(tag),
+                ak.index.Index64(index),
                 [
                     layout.content.recursively_apply(getfunction_inner, behavior),
-                    ak._v2.contents.NumpyArray(nplike.array([True], dtype=np.bool_)),
+                    ak.contents.NumpyArray(nplike.array([True], dtype=np.bool_)),
                 ],
             ).simplify_uniontype()
 
@@ -61,7 +61,7 @@ def _impl(array, axis, highlevel, behavior):
             or layout.is_RecordType
             or layout.is_NumpyType
         ):
-            return ak._v2.contents.NumpyArray(nplike.zeros(len(layout), dtype=np.bool_))
+            return ak.contents.NumpyArray(nplike.zeros(len(layout), dtype=np.bool_))
 
     # Locate the axis
     def getfunction_outer(layout, depth, depth_context, **kwargs):
@@ -71,15 +71,15 @@ def _impl(array, axis, highlevel, behavior):
         if depth_context["posaxis"] == depth - 1:
             return layout.recursively_apply(getfunction_inner, behavior)
 
-    layout = ak._v2.operations.to_layout(array)
+    layout = ak.operations.to_layout(array)
     max_axis = layout.branch_depth[1] - 1
     if axis > max_axis:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             np.AxisError(f"axis={axis} exceeds the depth ({max_axis}) of this array")
         )
-    behavior = ak._v2._util.behavior_of(array, behavior=behavior)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
     depth_context = {"posaxis": axis}
     out = layout.recursively_apply(
         getfunction_outer, behavior, depth_context=depth_context
     )
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

@@ -107,10 +107,6 @@ Navigation
 
 **Combinatorics:** :doc:`_auto/ak.cartesian` produces tuples of *n* items from *n* arrays, usually per-sublist, and :doc:`_auto/ak.combinations` produces unique tuples of *n* items from the same array. To get integer arrays for selecting these tuples, use :doc:`_auto/ak.argcartesian` and :doc:`_auto/ak.argcombinations`.
 
-**Partitioned arrays:** :doc:`_auto/ak.partitions` reveals how an array is internally partitioned (if at all) and :doc:`_auto/ak.partitioned`, :doc:`_auto/ak.repartition` create or change the partitioning.
-
-**Virtual arrays:** :doc:`_auto/ak.virtual` creates an array that will be generated on demand and :doc:`_auto/ak.with_cache` assigns a new cache to all virtual arrays in a structure.
-
 **NumPy compatibility:** :doc:`_auto/ak.size`, :doc:`_auto/ak.atleast_1d`.
 
 **Reducers:** eliminate a dimension by replacing it with a count, sum, logical and/or, etc. over its members. These functions summarize the innermost lists with ``axis=-1`` and cross lists with other values of ``axis``. They never apply to data structures, only numbers at the innermost fields of a structure.
@@ -139,8 +135,6 @@ Navigation
 
 **String behaviors:** defined in the ``ak.behaviors.string`` submodule; rarely needed for analysis (strings are a built-in behavior).
 
-**Partition functions:** defined in the ``ak.partition`` submodule; rarely needed for analysis: use :doc:`_auto/ak.partitions`, :doc:`_auto/ak.partitioned`, :doc:`_auto/ak.repartition`.
-
 **Numba compatibility:** :doc:`ak.numba.register` informs Numba about Awkward Array types; rarely needed because this should happen automatically.
 
 **Pandas compatibility:** :doc:`ak.to_pandas` turns an Awkward Array into a list of DataFrames or joins them with `pd.merge <https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html>`__ if necessary.
@@ -151,68 +145,60 @@ Navigation
 
 **Layout nodes:** the high-level :doc:`_auto/ak.Array` and :doc:`_auto/ak.Record` types hide the tree-structure that build the array, but they can be accessed with `ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_. This layout structure is the core of the library, but usually doesn't have to be accessed by data analysts.
 
-   * :doc:`ak.layout.Content`: the abstract base class.
-   * :doc:`ak.layout.EmptyArray`: an array of unknown type with no elements (usually produced by :doc:`_auto/ak.ArrayBuilder`, which can't determine type at a given level without samples).
-   * :doc:`ak.layout.NumpyArray`: any NumPy array (e.g. multidimensional shape, arbitrary dtype), though usually only one-dimensional arrays of numbers.
-   * :doc:`ak.layout.RegularArray`: splits its nested content into equal-length lists.
-   * :doc:`ak.layout.ListArray`: splits its nested content into variable-length lists with full generality (may use its content non-contiguously, overlapping, or out-of-order).
-   * :doc:`ak.layout.ListOffsetArray`: splits its nested content into variable-length lists, assuming contiguous, non-overlapping, in-order content.
-   * :doc:`ak.layout.RecordArray`: represents a logical array of records with a "struct of arrays" layout in memory.
-   * :doc:`ak.layout.Record`: represents a single record (not a subclass of :doc:`ak.layout.Content` in Python).
-   * :doc:`ak.layout.IndexedArray`: rearranges and/or duplicates its content by lazily applying an integer index.
-   * :doc:`ak.layout.IndexedOptionArray`: same as :doc:`ak.layout.IndexedArray` with missing values as negative indexes.
-   * :doc:`ak.layout.ByteMaskedArray`: represents its content with missing values with an 8-bit boolean mask.
-   * :doc:`ak.layout.BitMaskedArray`: represents its content with missing values with a 1-bit boolean mask.
-   * :doc:`ak.layout.UnmaskedArray`: specifies that its content can contain missing values in principle, but no mask is supplied because all elements are non-missing.
-   * :doc:`ak.layout.UnionArray`: interleaves a set of arrays as a tagged union, can represent heterogeneous data.
-   * :doc:`ak.layout.VirtualArray`: generates an array on demand from an :doc:`ak.layout.ArrayGenerator` or a :doc:`ak.layout.SliceGenerator` and optionally caches the generated array in an :doc:`ak.layout.ArrayCache`.
+   * :class:`ak.contents.Content`: the abstract base class.
+   * :class:`ak.contents.EmptyArray`: an array of unknown type with no elements (usually produced by :doc:`_auto/ak.ArrayBuilder`, which can't determine type at a given level without samples).
+   * :class:`ak.contents.NumpyArray`: any NumPy array (e.g. multidimensional shape, arbitrary dtype), though usually only one-dimensional arrays of numbers.
+   * :class:`ak.contents.RegularArray`: splits its nested content into equal-length lists.
+   * :class:`ak.contents.ListArray`: splits its nested content into variable-length lists with full generality (may use its content non-contiguously, overlapping, or out-of-order).
+   * :class:`ak.contents.ListOffsetArray`: splits its nested content into variable-length lists, assuming contiguous, non-overlapping, in-order content.
+   * :class:`ak.contents.RecordArray`: represents a logical array of records with a "struct of arrays" layout in memory.
+   * :class:`ak.contents.Record`: represents a single record (not a subclass of :class:`ak.contents.Content` in Python).
+   * :class:`ak.contents.IndexedArray`: rearranges and/or duplicates its content by lazily applying an integer index.
+   * :class:`ak.contents.IndexedOptionArray`: same as :class:`ak.contents.IndexedArray` with missing values as negative indexes.
+   * :class:`ak.contents.ByteMaskedArray`: represents its content with missing values with an 8-bit boolean mask.
+   * :class:`ak.contents.BitMaskedArray`: represents its content with missing values with a 1-bit boolean mask.
+   * :class:`ak.contents.UnmaskedArray`: specifies that its content can contain missing values in principle, but no mask is supplied because all elements are non-missing.
+   * :class:`ak.contents.UnionArray`: interleaves a set of arrays as a tagged union, can represent heterogeneous data.
 
-Most layout nodes contain another content node (:doc:`ak.layout.RecordArray` and :doc:`ak.layout.UnionArray` can contain more than one), thus forming a tree. Only :doc:`ak.layout.EmptyArray` and :doc:`ak.layout.NumpyArray` cannot contain a content, and hence these are leaves of the tree.
+Most layout nodes contain another content node (:class:`ak.contents.RecordArray` and :class:`ak.contents.UnionArray` can contain more than one), thus forming a tree. Only :class:`ak.contents.EmptyArray` and :class:`ak.contents.NumpyArray` cannot contain a content, and hence these are leaves of the tree.
 
-Note that :doc:`_auto/ak.partition.PartitionedArray` and its concrete class,  :doc:`_auto/ak.partition.IrregularlyPartitionedArray`, are not :doc:`ak.layout.Content` because they cannot be nested within a tree. Partitioning is only allowed at the root of the tree.
+**Index for layout nodes:** integer and boolean arrays that define the shape of the data structure, such as boolean masks in :class:`ak.contents.ByteMaskedArray`, are not :class:`ak.contents.NumpyArray` but a more constrained type called :class:`ak.index.Index`.
 
-**Iterator for layout nodes:** :doc:`ak.layout.Iterator` (used internally).
-
-**Layout-level ArrayBuilder:** :doc:`ak.layout.ArrayBuilder` (used internally).
-
-**Index for layout nodes:** integer and boolean arrays that define the shape of the data structure, such as boolean masks in :doc:`ak.layout.ByteMaskedArray`, are not :doc:`ak.layout.NumpyArray` but a more constrained type called :doc:`ak.layout.Index`.
-
-**Identities for layout nodes:** :doc:`ak.layout.Identities` are an optional surrogate key for certain join operations. (Not yet used.)
+**Identifiers for layout nodes:** :class:`ak.identifier.Identifier` is an optional surrogate key for certain join operations. (Not yet used.)
 
 **High-level data types:**
 
-This is the type of data in a high-level :doc:`_auto/ak.Array` or :doc:`_auto/ak.Record` as reported by :doc:`_auto/ak.type`. It represents as much information as a data analyst needs to know (e.g. the distinction between variable and fixed-length lists, but not the distinction between :doc:`ak.layout.ListArray` and :doc:`ak.layout.ListOffsetArray`).
+This is the type of data in a high-level :doc:`_auto/ak.Array` or :doc:`_auto/ak.Record` as reported by :doc:`_auto/ak.type`. It represents as much information as a data analyst needs to know (e.g. the distinction between variable and fixed-length lists, but not the distinction between :class:`ak.contents.ListArray` and :class:`ak.contents.ListOffsetArray`).
 
-   * :doc:`ak.types.Type`: the abstract base class.
-   * :doc:`ak.types.ArrayType`: type of a non-composable, high-level :doc:`_auto/ak.Array`, which includes the length of the array.
-   * :doc:`ak.types.UnknownType`: a type that is not known because it is represented by an :doc:`ak.layout.EmptyArray`.
-   * :doc:`ak.types.PrimitiveType`: a numeric or boolean type.
-   * :doc:`ak.types.RegularType`: lists of a fixed length; this ``size`` is part of the type description.
-   * :doc:`ak.types.ListType`: lists of unspecified or variable length.
-   * :doc:`ak.types.RecordType`: records with named fields or tuples with a fixed number of unnamed slots. The fields/slots and their types are part of the type description.
-   * :doc:`ak.types.OptionType`: data that may be missing.
-   * :doc:`ak.types.UnionType`: heterogeneous data selected from a short list of possibilities.
+   * :class:`ak.types.Type`: the abstract base class.
+   * :class:`ak.types.ArrayType`: type of a non-composable, high-level :doc:`_auto/ak.Array`, which includes the length of the array.
+   * :class:`ak.types.UnknownType`: a type that is not known because it is represented by an :class:`ak.contents.EmptyArray`.
+   * :class:`ak.types.PrimitiveType`: a numeric or boolean type.
+   * :class:`ak.types.RegularType`: lists of a fixed length; this ``size`` is part of the type description.
+   * :class:`ak.types.ListType`: lists of unspecified or variable length.
+   * :class:`ak.types.RecordType`: records with named fields or tuples with a fixed number of unnamed slots. The fields/slots and their types are part of the type description.
+   * :class:`ak.types.OptionType`: data that may be missing.
+   * :class:`ak.types.UnionType`: heterogeneous data selected from a short list of possibilities.
 
-All concrete :doc:`ak.types.Type` subclasses are composable except :doc:`ak.types.ArrayType`.
+All concrete :class:`ak.types.Type` subclasses are composable except :class:`ak.types.ArrayType`.
 
 **Low-level array forms:**
 
-This is the type of a :doc:`ak.layout.Content` array expressed with low-level granularity (e.g. including the distinction between :doc:`ak.layout.ListArray` and :doc:`ak.layout.ListOffsetArray`). There is a one-to-one relationship between :doc:`ak.layout.Content` subclasses and :doc:`ak.forms.Form` subclasses, and each :doc:`ak.forms.Form` maps to only one :doc:`ak.types.Type`.
+This is the type of a :class:`ak.contents.Content` array expressed with low-level granularity (e.g. including the distinction between :class:`ak.contents.ListArray` and :class:`ak.contents.ListOffsetArray`). There is a one-to-one relationship between :class:`ak.contents.Content` subclasses and :class:`ak.forms.Form` subclasses, and each :class:`ak.forms.Form` maps to only one :class:`ak.types.Type`.
 
-   * :doc:`ak.forms.Form`: the abstract base class.
-   * :doc:`ak.forms.EmptyForm` for :doc:`ak.layout.EmptyArray`.
-   * :doc:`ak.forms.NumpyForm` for :doc:`ak.layout.NumpyArray`.
-   * :doc:`ak.forms.RegularForm` for :doc:`ak.layout.RegularArray`.
-   * :doc:`ak.forms.ListForm` for :doc:`ak.layout.ListArray`.
-   * :doc:`ak.forms.ListOffsetForm` for :doc:`ak.layout.ListOffsetArray`.
-   * :doc:`ak.forms.RecordForm` for :doc:`ak.layout.RecordArray`.
-   * :doc:`ak.forms.IndexedForm` for :doc:`ak.layout.IndexedArray`.
-   * :doc:`ak.forms.IndexedOptionForm` for :doc:`ak.layout.IndexedOptionArray`.
-   * :doc:`ak.forms.ByteMaskedForm` for :doc:`ak.layout.ByteMaskedArray`.
-   * :doc:`ak.forms.BitMaskedForm` for :doc:`ak.layout.BitMaskedArray`.
-   * :doc:`ak.forms.UnmaskedForm` for :doc:`ak.layout.UnmaskedArray`.
-   * :doc:`ak.forms.UnionForm` for :doc:`ak.layout.UnionArray`.
-   * :doc:`ak.forms.VirtualForm` for :doc:`ak.layout.VirtualArray`.
+   * :class:`ak.forms.Form`: the abstract base class.
+   * :class:`ak.forms.EmptyForm` for :class:`ak.contents.EmptyArray`.
+   * :class:`ak.forms.NumpyForm` for :class:`ak.contents.NumpyArray`.
+   * :class:`ak.forms.RegularForm` for :class:`ak.contents.RegularArray`.
+   * :class:`ak.forms.ListForm` for :class:`ak.contents.ListArray`.
+   * :class:`ak.forms.ListOffsetForm` for :class:`ak.contents.ListOffsetArray`.
+   * :class:`ak.forms.RecordForm` for :class:`ak.contents.RecordArray`.
+   * :class:`ak.forms.IndexedForm` for :class:`ak.contents.IndexedArray`.
+   * :class:`ak.forms.IndexedOptionForm` for :class:`ak.contents.IndexedOptionArray`.
+   * :class:`ak.forms.ByteMaskedForm` for :class:`ak.contents.ByteMaskedArray`.
+   * :class:`ak.forms.BitMaskedForm` for :class:`ak.contents.BitMaskedArray`.
+   * :class:`ak.forms.UnmaskedForm` for :class:`ak.contents.UnmaskedArray`.
+   * :class:`ak.forms.UnionForm` for :class:`ak.contents.UnionArray`.
 
 Internal implementation
 """""""""""""""""""""""

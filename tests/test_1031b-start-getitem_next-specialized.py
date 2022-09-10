@@ -4,12 +4,12 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_NumpyArray():
-    a = ak._v2.contents.RegularArray(
-        ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
+    a = ak.contents.RegularArray(
+        ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
         3,
     )
     assert to_list(a[1]) == [
@@ -46,8 +46,8 @@ def test_NumpyArray():
 
 
 def test_RegularArray():
-    new = ak._v2.contents.RegularArray(
-        ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
+    new = ak.contents.RegularArray(
+        ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
         3,
     )
 
@@ -93,7 +93,7 @@ def test_RegularArray():
 
     assert to_list(new[1, [2, 0]]) == [[25, 26, 27, 28, 29], [15, 16, 17, 18, 19]]
 
-    array = ak._v2.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     assert (
         repr(array[[True, False, True]])
         == "<Array [[1.1, 2.2, 3.3], [4.4, 5.5]] type='2 * var * float64'>"
@@ -104,12 +104,12 @@ def test_RegularArray():
 
 
 def test_RecordArray():
-    new = ak._v2.contents.RecordArray(
+    new = ak.contents.RecordArray(
         [
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 np.array([[0, 1, 2, 3, 4], [0, 1, 2, 3, 4]], np.int64)
             ),
-            ak._v2.contents.NumpyArray(
+            ak.contents.NumpyArray(
                 np.array(
                     [[0.0, 1.1, 2.2, 3.3, 4.4, 5.5], [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]]
                 )
@@ -166,14 +166,12 @@ def test_RecordArray():
 
 
 def test_UnmaskedArray():
-    new = ak._v2.contents.UnmaskedArray(
-        ak._v2.contents.NumpyArray(
-            np.array([[0.0, 1.1, 2.2, 3.3], [0.0, 1.1, 2.2, 3.3]])
-        )
+    new = ak.contents.UnmaskedArray(
+        ak.contents.NumpyArray(np.array([[0.0, 1.1, 2.2, 3.3], [0.0, 1.1, 2.2, 3.3]]))
     )
 
     assert to_list(new[0, 1:]) == [1.1, 2.2, 3.3]
-    assert isinstance(new.typetracer[0, 1:], ak._v2._typetracer.MaybeNone)
+    assert isinstance(new.typetracer[0, 1:], ak._typetracer.MaybeNone)
     assert new.typetracer[0, 1:].content.form == new[0, 1:].form
 
     with pytest.raises(IndexError):
@@ -212,20 +210,16 @@ def test_UnmaskedArray():
 
 
 def test_UnionArray():
-    new = ak._v2.contents.UnionArray(
-        ak._v2.index.Index8(np.array([1, 1], np.int8)),
-        ak._v2.index.Index64(np.array([1, 0], np.int64)),
+    new = ak.contents.UnionArray(
+        ak.index.Index8(np.array([1, 1], np.int8)),
+        ak.index.Index64(np.array([1, 0], np.int64)),
         [
-            ak._v2.contents.RegularArray(
-                ak._v2.operations.from_numpy(
-                    np.arange(2 * 3 * 5).reshape(-1, 5)
-                ).layout,
+            ak.contents.RegularArray(
+                ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
                 3,
             ),
-            ak._v2.contents.RegularArray(
-                ak._v2.operations.from_numpy(
-                    np.arange(2 * 3 * 5).reshape(-1, 5)
-                ).layout,
+            ak.contents.RegularArray(
+                ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
                 3,
             ),
         ],
@@ -281,10 +275,10 @@ def test_UnionArray():
 
 
 def test_IndexedArray():
-    new = ak._v2.contents.IndexedArray(
-        ak._v2.index.Index64(np.array([1, 0], np.int64)),
-        ak._v2.contents.RegularArray(
-            ak._v2.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
+    new = ak.contents.IndexedArray(
+        ak.index.Index64(np.array([1, 0], np.int64)),
+        ak.contents.RegularArray(
+            ak.operations.from_numpy(np.arange(2 * 3 * 5).reshape(-1, 5)).layout,
             3,
         ),
     )
@@ -339,8 +333,8 @@ def test_IndexedArray():
 
 
 def test_BitMaskedArray():
-    new = ak._v2.contents.BitMaskedArray(
-        ak._v2.index.IndexU8(
+    new = ak.contents.BitMaskedArray(
+        ak.index.IndexU8(
             np.packbits(
                 np.array(
                     [
@@ -379,7 +373,7 @@ def test_BitMaskedArray():
                 )
             )
         ),
-        ak._v2.contents.NumpyArray(
+        ak.contents.NumpyArray(
             np.array(
                 [
                     [
@@ -470,9 +464,9 @@ def test_BitMaskedArray():
 
 
 def test_ByteMaskedArray():
-    new = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([1, 1, 1], np.int8)),
-        ak._v2.contents.NumpyArray(
+    new = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([1, 1, 1], np.int8)),
+        ak.contents.NumpyArray(
             np.array(
                 [
                     [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
@@ -523,9 +517,9 @@ def test_ByteMaskedArray():
 
 
 def test_IndexedOptionArray():
-    new = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index64(np.array([1, 1], np.int64)),
-        ak._v2.contents.NumpyArray(
+    new = ak.contents.IndexedOptionArray(
+        ak.index.Index64(np.array([1, 1], np.int64)),
+        ak.contents.NumpyArray(
             np.array([[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [1.1, 2.2, 3.3, 4.4, 5.5, 6.6]])
         ),
     )
@@ -570,10 +564,10 @@ def test_IndexedOptionArray():
 
 
 def test_ListArray():
-    new = ak._v2.contents.ListArray(
-        ak._v2.index.Index64(np.array([0, 100, 1], np.int64)),
-        ak._v2.index.Index64(np.array([3, 100, 3, 200], np.int64)),
-        ak._v2.contents.NumpyArray(
+    new = ak.contents.ListArray(
+        ak.index.Index64(np.array([0, 100, 1], np.int64)),
+        ak.index.Index64(np.array([3, 100, 3, 200], np.int64)),
+        ak.contents.NumpyArray(
             np.array(
                 [
                     [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],
@@ -650,9 +644,9 @@ def test_ListArray():
 
 
 def test_ListOffsetArray_NumpyArray():
-    new = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 1, 2, 3], np.int64)),
-        ak._v2.contents.NumpyArray(
+    new = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 1, 2, 3], np.int64)),
+        ak.contents.NumpyArray(
             np.array(
                 [
                     [1.1, 2.2, 3.3, 4.4, 5.5, 6.6],

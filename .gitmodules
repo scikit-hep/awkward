@@ -4,6 +4,3 @@
 [submodule "rapidjson"]
 	path = rapidjson
 	url = https://github.com/Tencent/rapidjson.git
-[submodule "dlpack"]
-	path = dlpack
-	url = https://github.com/dmlc/dlpack.git

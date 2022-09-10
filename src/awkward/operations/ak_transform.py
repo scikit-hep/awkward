@@ -42,7 +42,7 @@ def transform(
             example, data added during the transformation will be in the original
             `lateral_context` after the transformation.
         allow_records (bool): If False and the recursive walk encounters any
-            #ak._v2.contents.RecordArray nodes, an error is raised.
+            #ak.contents.RecordArray nodes, an error is raised.
         broadcast_parameters_rule (str): Rule for broadcasting parameters, one of:
             - `"intersect"`
             - `"all_or_nothing"`
@@ -54,13 +54,13 @@ def transform(
         right_broadcast (bool): If `more_arrays` are provided, the parameter
             determines whether the arrays are right-broadcasted, which is
             NumPy-like broadcasting.
-        numpy_to_regular (bool): If True, multidimensional #ak._v2.contents.NumpyArray
-            nodes are converted into #ak._v2.contents.RegularArray nodes before
+        numpy_to_regular (bool): If True, multidimensional #ak.contents.NumpyArray
+            nodes are converted into #ak.contents.RegularArray nodes before
             calling `transformation`.
         regular_to_jagged (bool): If True, regular-type lists are converted into
             variable-length lists before calling `transformation`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -76,9 +76,9 @@ def transform(
         >>> def say_hello(layout, depth, **kwargs):
         ...     print("Hello", type(layout).__name__, "at", depth)
         ...
-        >>> array = ak._v2.Array([[1.1, 2.2, "three"], [], None, [4.4, 5.5]])
+        >>> array = ak.Array([[1.1, 2.2, "three"], [], None, [4.4, 5.5]])
         >>>
-        >>> ak._v2.transform(say_hello, array, return_array=False)
+        >>> ak.transform(say_hello, array, return_array=False)
         Hello IndexedOptionArray at 1
         Hello ListOffsetArray at 1
         Hello UnionArray at 2
@@ -89,7 +89,7 @@ def transform(
     In the above, `say_hello` is called on every node of the `array`, which has
     a lot of nodes because it has nested lists, missing data, and a union of
     different types. The data types are low-level "layouts," subclasses of
-    #ak._v2.contents.Content, rather than high-level #ak.Array.
+    #ak.contents.Content, rather than high-level #ak.Array.
 
     The primary purpose of this function is to allow you to edit one level of
     structure without having to worry about what it's embedded in. Suppose, for
@@ -100,12 +100,12 @@ def transform(
         ...     if layout.is_NumpyType:
         ...         return np.round(layout.data).astype(np.int32)
         ...
-        >>> array = ak._v2.Array(
+        >>> array = ak.Array(
         ... [[[[[1.1, 2.2, 3.3], []], None], []],
         ...  [[[[4.4, 5.5]]]]]
         ... )
         >>>
-        >>> ak._v2.transform(rounder, array).show(type=True)
+        >>> ak.transform(rounder, array).show(type=True)
         type: 2 * var * var * option[var * var * int32]
         [[[[[1, 2, 3], []], None], []],
          [[[[4, 6]]]]]
@@ -121,24 +121,24 @@ def transform(
         ...     if layouts[0].is_NumpyType and layouts[1].is_NumpyType:
         ...         return layouts[0].data + 10 * layouts[1].data
         ...
-        >>> array1 = ak._v2.Array([[1, 2, 3], [], None, [4, 5]])
-        >>> array2 = ak._v2.Array([1, 2, 3, 4])
+        >>> array1 = ak.Array([[1, 2, 3], [], None, [4, 5]])
+        >>> array2 = ak.Array([1, 2, 3, 4])
         >>>
-        >>> ak._v2.transform(combine, array1, array2)
+        >>> ak.transform(combine, array1, array2)
         <Array [[11, 12, 13], [], None, [44, 45]] type='4 * option[var * int64]'>
 
     The `1` and `4` from `array2` are broadcasted to the `[1, 2, 3]` and the
     `[4, 5]` of `array1`, and the other elements disappear because they are
     broadcasted with an empty list and a missing value. Note that the first argument
     of this `transformation` function is a *list* of layouts, not a single layout.
-    There are always 2 layouts because 2 arrays were passed to #ak._v2.transform.
+    There are always 2 layouts because 2 arrays were passed to #ak.transform.
 
     Signature of the transformation function
     ========================================
 
     If there is only one array, the first argument of `transformation` is a
-    #ak._v2.contents.Content instance. If there are multiple arrays (`more_arrays`),
-    the first argument is a list of #ak._v2.contents.Content instances.
+    #ak.contents.Content instance. If there are multiple arrays (`more_arrays`),
+    the first argument is a list of #ak.contents.Content instances.
 
     All other arguments can be absorbed into a `**kwargs` because they will always
     be passed to your function by keyword. They are
@@ -163,24 +163,24 @@ def transform(
            array(s) if `highlevel`.
        * nplike (array library shim): Handle to the NumPy library, CuPy, etc.,
            depending on the type of arrays.
-       * options (dict): Options provided to #ak._v2.transform.
+       * options (dict): Options provided to #ak.transform.
 
     If there is only one array, the `transformation` function must either return
-    None or return an array: #ak._v2.contents.Content, #ak._v2.Array, or a NumPy,
-    CuPy, etc. array. (The preferred type is #ak._v2.contents.Content; all others
+    None or return an array: #ak.contents.Content, #ak.Array, or a NumPy,
+    CuPy, etc. array. (The preferred type is #ak.contents.Content; all others
     are converted to a layout.)
 
     If there are multiple arrays (`more_arrays`), then the transformation function
     may return one array or a tuple of arrays. (The preferred type is a tuple, even
     if it has length 1.)
 
-    The final return value of #ak._v2.transform is a new array or tuple of arrays
+    The final return value of #ak.transform is a new array or tuple of arrays
     constructed by replacing nodes when `transformation` returns a
-    #ak._v2.contents.Content or tuple of #ak._v2.contents.Content, and leaving
+    #ak.contents.Content or tuple of #ak.contents.Content, and leaving
     nodes unchanged when `transformation` returns None. If `transformation` returns
     length-1 tuples, the final output is an array, not a length-1 tuple.
 
-    If `return_array` is False, #ak._v2.transform returns None. This is useful for
+    If `return_array` is False, #ak.transform returns None. This is useful for
     functions that return non-array data through `lateral_context`.
 
     Contexts
@@ -195,7 +195,7 @@ def transform(
 
     For example, consider this array:
 
-        >>> array = ak._v2.Array([
+        >>> array = ak.Array([
         ...     [{"x": [1], "y": 1.1}, {"x": [1, 2], "y": 2.2}, {"x": [1, 2, 3], "y": 3.3}],
         ...     [],
         ...     [{"x": [1, 2, 3, 4], "y": 4.4}, {"x": [1, 2, 3, 4, 5], "y": 5.5}],
@@ -208,7 +208,7 @@ def transform(
         ...     print(depth_context["types"])
         ...
         >>> context = {"types": ()}
-        >>> ak._v2.transform(crawl, array, depth_context=context, return_array=False)
+        >>> ak.transform(crawl, array, depth_context=context, return_array=False)
         ('ListOffsetArray',)
         ('ListOffsetArray', 'RecordArray')
         ('ListOffsetArray', 'RecordArray', 'ListOffsetArray')
@@ -219,13 +219,13 @@ def transform(
 
     The data in `depth_context["types"]` represents a path from the root of the
     tree to the current node. There is never, for instance, more than one leaf-type
-    (#ak._v2.contents.NumpyArray) in the tuple. Also, the `context` is unchanged
+    (#ak.contents.NumpyArray) in the tuple. Also, the `context` is unchanged
     outside of the function.
 
     On the other hand, if we do the same with a `lateral_context`,
 
         >>> context = {"types": ()}
-        >>> ak._v2.transform(crawl, array, lateral_context=context, return_array=False)
+        >>> ak.transform(crawl, array, lateral_context=context, return_array=False)
         ('ListOffsetArray',)
         ('ListOffsetArray', 'RecordArray')
         ('ListOffsetArray', 'RecordArray', 'ListOffsetArray')
@@ -235,7 +235,7 @@ def transform(
         {'types': ('ListOffsetArray', 'RecordArray', 'ListOffsetArray', 'NumpyArray', 'NumpyArray')}
 
     The data accumulate through the walk over the tree. There are two leaf-types
-    (#ak._v2.contents.NumpyArray) in the tuple because this tree has two leaves.
+    (#ak.contents.NumpyArray) in the tuple because this tree has two leaves.
     The data are even available outside of the function, so `lateral_context` can
     be paired with `return_array=False` to extract non-array data, rather than
     transforming the array.
@@ -254,30 +254,30 @@ def transform(
     For example, this function inserts an option-type at every level of an array:
 
         >>> def insert_optiontype(layout, continuation, **kwargs):
-        ...     return ak._v2.contents.UnmaskedArray(continuation())
+        ...     return ak.contents.UnmaskedArray(continuation())
         ...
-        >>> array = ak._v2.Array([[[[[1.1, 2.2, 3.3], []]], []], [[[[4.4, 5.5]]]]])
+        >>> array = ak.Array([[[[[1.1, 2.2, 3.3], []]], []], [[[[4.4, 5.5]]]]])
         >>> array.type.show()
         2 * var * var * var * var * float64
         >>>
-        >>> array2 = ak._v2.transform(insert_optiontype, array)
+        >>> array2 = ak.transform(insert_optiontype, array)
         >>> array2.type.show()
         2 * option[var * option[var * option[var * option[var * ?float64]]]]
 
-    In the original array, every node is a #ak._v2.contents.ListOffsetArray except
-    the leaf, which is a #ak._v2.contents.NumpyArray. The call to `continuation()`
-    returns a #ak._v2.contents.ListOffsetArray with its contents transformed, which
-    is the argument of a new #ak._v2.contents.UnmaskedArray.
+    In the original array, every node is a #ak.contents.ListOffsetArray except
+    the leaf, which is a #ak.contents.NumpyArray. The call to `continuation()`
+    returns a #ak.contents.ListOffsetArray with its contents transformed, which
+    is the argument of a new #ak.contents.UnmaskedArray.
 
     To see this process as it happens, we can add `print` statements to the function.
 
         >>> def insert_optiontype(input, continuation, **kwargs):
         ...     print("before", input.form.type)
-        ...     output = ak._v2.contents.UnmaskedArray(continuation())
+        ...     output = ak.contents.UnmaskedArray(continuation())
         ...     print("after ", output.form.type)
         ...     return output
         ...
-        >>> ak._v2.transform(insert_optiontype, array)
+        >>> ak.transform(insert_optiontype, array)
         before var * var * var * var * float64
         before var * var * var * float64
         before var * var * float64
@@ -300,8 +300,8 @@ def transform(
 
     For instance, given these two arrays:
 
-        >>> array1 = ak._v2.Array([[1, 2, 3], [], None, [4, 5]])
-        >>> array2 = ak._v2.Array([10, 20, 30, 40])
+        >>> array1 = ak.Array([[1, 2, 3], [], None, [4, 5]])
+        >>> array2 = ak.Array([10, 20, 30, 40])
 
     The following single-array function shows the nodes encountered when walking
     down either one of them.
@@ -309,11 +309,11 @@ def transform(
         >>> def one_array(layout, **kwargs):
         ...     print(type(layout).__name__)
         ...
-        >>> ak._v2.transform(one_array, array1, return_array=False)
+        >>> ak.transform(one_array, array1, return_array=False)
         IndexedOptionArray
         ListOffsetArray
         NumpyArray
-        >>> ak._v2.transform(one_array, array2, return_array=False)
+        >>> ak.transform(one_array, array2, return_array=False)
         NumpyArray
 
     The first array has three nested nodes; the second has only one node.
@@ -322,11 +322,11 @@ def transform(
 
         >>> def two_arrays(layouts, **kwargs):
         ...     assert len(layouts) == 2
-        ...     print(type(layouts[0]).__name__, ak._v2.to_list(layouts[0]))
-        ...     print(type(layouts[1]).__name__, ak._v2.to_list(layouts[1]))
+        ...     print(type(layouts[0]).__name__, ak.to_list(layouts[0]))
+        ...     print(type(layouts[1]).__name__, ak.to_list(layouts[1]))
         ...     print()
         ...
-        >>> ak._v2.transform(two_arrays, array1, array2)
+        >>> ak.transform(two_arrays, array1, array2)
         RegularArray [[[1, 2, 3], [], None, [4, 5]]]
         RegularArray [[10, 20, 30, 40]]
 
@@ -344,12 +344,12 @@ def transform(
 
     The incompatible types of the two arrays eventually becomes the same type by
     duplicating and removing values wherever necessary. If you cannot perform an
-    operation on a #ak._v2.contents.ListArray and a #ak._v2.contents.NumpyArray,
-    wait for a later iteration, in which both will be #ak._v2.contents.NumpyArray
+    operation on a #ak.contents.ListArray and a #ak.contents.NumpyArray,
+    wait for a later iteration, in which both will be #ak.contents.NumpyArray
     (if the original arrays are broadcastable).
 
     The return value, without transformation, is the same as what
-    #ak._v2.broadcast_arrays would return. See #ak._v2.broadcast_arrays for an
+    #ak.broadcast_arrays would return. See #ak.broadcast_arrays for an
     explanation of `left_broadcast` and `right_broadcast`.
 
     Broadcasting Parameters
@@ -382,8 +382,8 @@ def transform(
     See also: #ak.is_valid and #ak.valid_when to check the validity of transformed
     outputs.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.transform",
+    with ak._util.OperationErrorContext(
+        "ak.transform",
         dict(
             transformation=transformation,
             array=array,
@@ -435,11 +435,11 @@ def _impl(
     behavior,
     highlevel,
 ):
-    behavior = ak._v2._util.behavior_of(*((array,) + more_arrays), behavior=behavior)
+    behavior = ak._util.behavior_of(*((array,) + more_arrays), behavior=behavior)
 
-    layout = ak._v2.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.to_layout(array, allow_record=False, allow_other=False)
     more_layouts = [
-        ak._v2.to_layout(x, allow_record=False, allow_other=False) for x in more_arrays
+        ak.to_layout(x, allow_record=False, allow_other=False) for x in more_arrays
     ]
     nplike = ak.nplike.of(layout, *more_layouts)
 
@@ -451,7 +451,7 @@ def _impl(
         "regular_to_jagged": regular_to_jagged,
         "keep_parameters": True,
         "return_array": return_array,
-        "function_name": "ak._v2.transform",
+        "function_name": "ak.transform",
         "broadcast_parameters_rule": broadcast_parameters_rule,
     }
 
@@ -463,17 +463,17 @@ def _impl(
             if out is None:
                 return out
 
-            if isinstance(out, ak._v2.highlevel.Array):
+            if isinstance(out, ak.highlevel.Array):
                 return out.layout
 
-            if isinstance(out, ak._v2.contents.Content):
+            if isinstance(out, ak.contents.Content):
                 return out
 
             if hasattr(out, "dtype") and hasattr(out, "shape"):
-                return ak._v2.contents.NumpyArray(out)
+                return ak.contents.NumpyArray(out)
 
             else:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     TypeError(
                         f"transformation must return an Awkward array, not {type(out)}\n\n{out!r}"
                     )
@@ -489,7 +489,7 @@ def _impl(
         )
 
         if return_array:
-            return ak._v2._util.wrap(out, behavior, highlevel)
+            return ak._util.wrap(out, behavior, highlevel)
 
     else:
 
@@ -497,27 +497,26 @@ def _impl(
             out = transformation(inputs, **kwargs)
 
             if out is None:
-                if all(isinstance(x, ak._v2.contents.NumpyArray) for x in inputs):
+                if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
                     return tuple(inputs)
                 else:
                     return None
 
-            if isinstance(out, ak._v2.highlevel.Array):
+            if isinstance(out, ak.highlevel.Array):
                 return (out.layout,)
 
-            if isinstance(out, ak._v2.contents.Content):
+            if isinstance(out, ak.contents.Content):
                 return (out,)
 
             if hasattr(out, "dtype") and hasattr(out, "shape"):
-                return (ak._v2.contents.NumpyArray(out),)
+                return (ak.contents.NumpyArray(out),)
 
             if isinstance(out, Iterable) and not isinstance(out, tuple):
                 out = tuple(out)
 
-            if any(isinstance(x, ak._v2.highlevel.Array) for x in out):
+            if any(isinstance(x, ak.highlevel.Array) for x in out):
                 out = tuple(
-                    x.layout if isinstance(x, ak._v2.highlevel.Array) else x
-                    for x in out
+                    x.layout if isinstance(x, ak.highlevel.Array) else x for x in out
                 )
 
             if any(hasattr(x, "dtype") and hasattr(x, "shape") for x in out):
@@ -527,8 +526,8 @@ def _impl(
                 )
 
             for x in out:
-                if not isinstance(x, ak._v2.contents.Content):
-                    raise ak._v2._util.error(
+                if not isinstance(x, ak.contents.Content):
+                    raise ak._util.error(
                         TypeError(
                             f"transformation must return an Awkward array or tuple of arrays, not {type(x)}\n\n{x!r}"
                         )
@@ -538,9 +537,9 @@ def _impl(
 
         inputs = [layout] + more_layouts
         isscalar = []
-        out = ak._v2._broadcasting.apply_step(
+        out = ak._broadcasting.apply_step(
             nplike,
-            ak._v2._broadcasting.broadcast_pack(inputs, isscalar),
+            ak._broadcasting.broadcast_pack(inputs, isscalar),
             action,
             0,
             copy.copy(depth_context),
@@ -549,10 +548,10 @@ def _impl(
             options,
         )
         assert isinstance(out, tuple)
-        out = [ak._v2._broadcasting.broadcast_unpack(x, isscalar, nplike) for x in out]
+        out = [ak._broadcasting.broadcast_unpack(x, isscalar, nplike) for x in out]
 
         if return_array:
             if len(out) == 1:
-                return ak._v2._util.wrap(out[0], behavior, highlevel)
+                return ak._util.wrap(out[0], behavior, highlevel)
             else:
-                return tuple(ak._v2._util.wrap(x, behavior, highlevel) for x in out)
+                return tuple(ak._util.wrap(x, behavior, highlevel) for x in out)

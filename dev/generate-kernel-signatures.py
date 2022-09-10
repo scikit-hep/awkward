@@ -312,7 +312,6 @@ def kernel_signatures_cuda_py(specification):
             os.path.dirname(CURRENT_DIR),
             "src",
             "awkward",
-            "_v2",
             "_connect",
             "cuda",
             "_kernel_signatures.py",
@@ -347,8 +346,8 @@ from numpy import (
     float64,
 )
 
-from awkward._v2._connect.cuda import fetch_specialization
-from awkward._v2._connect.cuda import import_cupy
+from awkward._connect.cuda import fetch_specialization
+from awkward._connect.cuda import import_cupy
 
 cupy = import_cupy("Awkward Arrays with CUDA")
 """
@@ -365,7 +364,6 @@ def by_signature(cuda_kernel_templates):
                 os.path.dirname(CURRENT_DIR),
                 "src",
                 "awkward",
-                "_v2",
                 "_connect",
                 "cuda",
                 "cuda_kernels",
@@ -391,7 +389,6 @@ def by_signature(cuda_kernel_templates):
                             os.path.dirname(CURRENT_DIR),
                             "src",
                             "awkward",
-                            "_v2",
                             "_connect",
                             "cuda",
                             "cuda_kernels",

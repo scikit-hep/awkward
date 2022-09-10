@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("broadcast_arrays")
+@ak._connect.numpy.implements("broadcast_arrays")
 def broadcast_arrays(*arrays, **kwargs):
     """
     Args:
@@ -15,7 +15,7 @@ def broadcast_arrays(*arrays, **kwargs):
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described below.
         highlevel (bool, default is True): If True, return an #ak.Array;
-            otherwise, return a low-level #ak.layout.Content subclass.
+            otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         depth_limit (None or int, default is None): If None, attempt to fully
@@ -132,8 +132,8 @@ def broadcast_arrays(*arrays, **kwargs):
         >>> ak.to_list(that)
         [[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]]
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.broadcast_arrays",
+    with ak._util.OperationErrorContext(
+        "ak.broadcast_arrays",
         dict(arrays=arrays, kwargs=kwargs),
     ):
         return _impl(arrays, kwargs)
@@ -147,7 +147,7 @@ def _impl(arrays, kwargs):
         left_broadcast,
         right_broadcast,
         broadcast_parameters_rule,
-    ) = ak._v2._util.extra(
+    ) = ak._util.extra(
         (),
         kwargs,
         [
@@ -158,29 +158,29 @@ def _impl(arrays, kwargs):
             ("right_broadcast", True),
             (
                 "broadcast_parameters_rule",
-                ak._v2._broadcasting.BroadcastParameterRule.ONE_TO_ONE,
+                ak._broadcasting.BroadcastParameterRule.ONE_TO_ONE,
             ),
         ],
     )
 
     inputs = []
     for x in arrays:
-        y = ak._v2.operations.to_layout(x, allow_record=True, allow_other=True)
-        if not isinstance(y, (ak._v2.contents.Content, ak._v2.Record)):
-            y = ak._v2.contents.NumpyArray(ak.nplike.of(*arrays).array([y]))
+        y = ak.operations.to_layout(x, allow_record=True, allow_other=True)
+        if not isinstance(y, (ak.contents.Content, ak.Record)):
+            y = ak.contents.NumpyArray(ak.nplike.of(*arrays).array([y]))
         inputs.append(y)
 
     def action(inputs, depth, **kwargs):
         if depth == depth_limit or (
             depth_limit is None
-            and all(isinstance(x, ak._v2.contents.NumpyArray) for x in inputs)
+            and all(isinstance(x, ak.contents.NumpyArray) for x in inputs)
         ):
             return tuple(inputs)
         else:
             return None
 
-    behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
-    out = ak._v2._broadcasting.broadcast_and_apply(
+    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
+    out = ak._broadcasting.broadcast_and_apply(
         inputs,
         action,
         behavior,
@@ -191,6 +191,6 @@ def _impl(arrays, kwargs):
     )
     assert isinstance(out, tuple)
     if highlevel:
-        return [ak._v2._util.wrap(x, behavior) for x in out]
+        return [ak._util.wrap(x, behavior) for x in out]
     else:
         return list(out)

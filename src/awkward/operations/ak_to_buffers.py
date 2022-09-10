@@ -111,8 +111,8 @@ def to_buffers(
 
     See also #ak.from_buffers and #ak.packed.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.to_buffers",
+    with ak._util.OperationErrorContext(
+        "ak.to_buffers",
         dict(
             array=array,
             container=container,
@@ -126,7 +126,7 @@ def to_buffers(
 
 
 def _impl(array, container, buffer_key, form_key, id_start, nplike):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     return layout.to_buffers(
         container=container,
         buffer_key=buffer_key,

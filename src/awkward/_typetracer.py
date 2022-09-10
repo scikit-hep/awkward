@@ -10,18 +10,13 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# FIXME: deduplicate this
-# matches include/awkward/common.h
-kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
-kSliceNone = kMaxInt64 + 1  # for Slice::none()
-
-
 class NoError:
-    str = None
-    filename = None
-    pass_through = False
-    attempt = kSliceNone
-    id = kSliceNone
+    def __init__(self):
+        self.str = None
+        self.filename = None
+        self.pass_through = False
+        self.attempt = ak._util.kSliceNone
+        self.id = ak._util.kSliceNone
 
 
 class NoKernel:
@@ -206,7 +201,7 @@ def _length_after_slice(slice, original_length):
 class TypeTracerArray:
     @classmethod
     def from_array(cls, array, dtype=None):
-        if isinstance(array, ak._v2.index.Index):
+        if isinstance(array, ak.index.Index):
             array = array.data
 
         # not array-like
@@ -214,7 +209,7 @@ class TypeTracerArray:
             sequence = list(array)
             array = numpy.array(sequence)
             if array.dtype == np.dtype("O"):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(
                         f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
                         f"from a sequence of non-primitive types: {sequence}"
@@ -247,7 +242,7 @@ class TypeTracerArray:
 
     @shape.setter
     def shape(self, value):
-        if ak._v2._util.isint(value):
+        if ak._util.isint(value):
             value = (value,)
         elif value is None or isinstance(value, (UnknownLengthType, UnknownScalar)):
             value = (UnknownLength,)
@@ -291,14 +286,14 @@ class TypeTracerArray:
         return type(self)(self._dtype, (UnknownLength,) + self._shape[1:])
 
     def __iter__(self):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             AssertionError(
                 "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
             )
         )
 
     def __array__(self, *args, **kwargs):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             AssertionError(
                 "bug in Awkward Array: attempt to convert TypeTracerArray into a concrete array"
             )
@@ -316,14 +311,14 @@ class TypeTracerArray:
         return self._CTypes
 
     def __len__(self):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             AssertionError(
                 "bug in Awkward Array: attempt to get length of a TypeTracerArray"
             )
         )
 
     def __setitem__(self, where, what):
-        raise ak._v2._util.error(
+        raise ak._util.error(
             AssertionError(
                 "bug in Awkward Array: attempt to set values of a TypeTracerArray"
             )
@@ -340,7 +335,7 @@ class TypeTracerArray:
                 missing = max(0, len(self._shape) - (len(before) + len(after)))
                 where = before + (slice(None, None, None),) * missing + after
 
-        if ak._v2._util.isint(where):
+        if ak._util.isint(where):
             if len(self._shape) == 1:
                 if where == 0:
                     return UnknownScalar(self._dtype)
@@ -384,7 +379,7 @@ class TypeTracerArray:
             shapes = []
             for j in range(num_basic, len(where)):
                 wh = where[j]
-                if ak._v2._util.isint(wh):
+                if ak._util.isint(wh):
                     shapes.append(numpy.array(0))
                 elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
                     sh = [
@@ -397,7 +392,7 @@ class TypeTracerArray:
                         )
                     )
                 else:
-                    raise ak._v2._util.error(NotImplementedError(repr(wh)))
+                    raise ak._util.error(NotImplementedError(repr(wh)))
 
             slicer_shape = numpy.broadcast_arrays(*shapes)[0].shape
 
@@ -409,7 +404,7 @@ class TypeTracerArray:
         elif (
             isinstance(where, tuple)
             and len(where) > 0
-            and (ak._v2._util.isint(where[0]) or isinstance(where[0], slice))
+            and (ak._util.isint(where[0]) or isinstance(where[0], slice))
         ):
             head, tail = where[0], where[1:]
             next = self.__getitem__(head)
@@ -422,13 +417,13 @@ class TypeTracerArray:
                 elif isinstance(wh, slice):
                     after_shape.append(_length_after_slice(wh, inner_shape[i]))
                 else:
-                    raise ak._v2._util.error(NotImplementedError(repr(wh)))
+                    raise ak._util.error(NotImplementedError(repr(wh)))
 
             shape = (next._shape[0],) + tuple(after_shape)
             return TypeTracerArray(self._dtype, shape)
 
         else:
-            raise ak._v2._util.error(NotImplementedError(repr(where)))
+            raise ak._util.error(NotImplementedError(repr(where)))
 
     def __lt__(self, other):
         if isinstance(other, numbers.Real):
@@ -459,8 +454,8 @@ class TypeTracerArray:
             args = args[0]
 
         assert len(args) != 0
-        assert ak._v2._util.isint(args[0]) or isinstance(args[0], UnknownLengthType)
-        assert all(ak._v2._util.isint(x) for x in args[1:])
+        assert ak._util.isint(args[0]) or isinstance(args[0], UnknownLengthType)
+        assert all(ak._util.isint(x) for x in args[1:])
         assert all(x >= 0 for x in args[1:])
 
         return TypeTracerArray(self._dtype, (UnknownLength,) + args[1:])
@@ -478,18 +473,18 @@ class TypeTracer(ak.nplike.NumpyLike):
         return self
 
     def to_rectilinear(self, array, *args, **kwargs):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def __getitem__(self, name_and_types):
         return NoKernel()
 
     @property
     def ma(self):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     @property
     def char(self):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     @property
     def ndarray(self):
@@ -503,13 +498,13 @@ class TypeTracer(ak.nplike.NumpyLike):
         elif isinstance(array, TypeTracerArray):
             return self
         elif hasattr(nplike, "known_data") and nplike.known_data:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "Converting a TypeTracer nplike to a nplike with `known_data=True` is not possible"
                 )
             )
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
                 )
@@ -536,11 +531,11 @@ class TypeTracer(ak.nplike.NumpyLike):
         return TypeTracerArray.from_array(array, dtype=dtype)
 
     def isscalar(self, *args, **kwargs):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def frombuffer(self, *args, **kwargs):
         # array[, dtype=]
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def zeros(self, shape, dtype=np.float64, **kwargs):
         # shape/len[, dtype=]
@@ -591,24 +586,20 @@ class TypeTracer(ak.nplike.NumpyLike):
         elif len(args) == 3:
             start, stop, step = args[0], args[1], args[2]
 
-        if (
-            ak._v2._util.isint(start)
-            and ak._v2._util.isint(stop)
-            and ak._v2._util.isint(step)
-        ):
+        if ak._util.isint(start) and ak._util.isint(stop) and ak._util.isint(step):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
 
         return TypeTracerArray(kwargs["dtype"], (length,))
 
     def meshgrid(self, *args, **kwargs):
         # *arrays, indexing="ij"
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     ############################ testing
 
     def shape(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def array_equal(self, *args, **kwargs):
         # array1, array2
@@ -616,11 +607,11 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def size(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def searchsorted(self, *args, **kwargs):
         # haystack, needle, side="right"
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def argsort(self, array, *args, **kwargs):
         # array
@@ -658,7 +649,7 @@ class TypeTracer(ak.nplike.NumpyLike):
                 if shape[i] == 1 and thisshape[i] != 1:
                     shape[i] = thisshape[i]
                 elif shape[i] != 1 and thisshape[i] != 1 and shape[i] != thisshape[i]:
-                    raise ak._v2._util.error(
+                    raise ak._util.error(
                         ValueError(
                             "shape mismatch: objects cannot be broadcast to a single shape"
                         )
@@ -716,11 +707,11 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def cumsum(self, *args, **kwargs):
         # arrays[, out=]
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def cumprod(self, *args, **kwargs):
         # arrays[, out=]
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def nonzero(self, array):
         # array
@@ -728,7 +719,7 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def unique(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def concatenate(self, arrays):
         inner_shape = None
@@ -737,7 +728,7 @@ class TypeTracer(ak.nplike.NumpyLike):
             if inner_shape is None:
                 inner_shape = x.shape[1:]
             elif inner_shape != x.shape[1:]:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(
                         "inner dimensions don't match in concatenate: {} vs {}".format(
                             inner_shape, x.shape[1:]
@@ -747,9 +738,7 @@ class TypeTracer(ak.nplike.NumpyLike):
             emptyarrays.append(_emptyarray(x))
 
         if inner_shape is None:
-            raise ak._v2._util.error(
-                ValueError("need at least one array to concatenate")
-            )
+            raise ak._util.error(ValueError("need at least one array to concatenate"))
 
         return TypeTracerArray(
             numpy.concatenate(emptyarrays).dtype, (UnknownLength,) + inner_shape
@@ -758,61 +747,61 @@ class TypeTracer(ak.nplike.NumpyLike):
     def repeat(self, *args, **kwargs):
         # array, int
         # array1, array2
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def tile(self, *args, **kwargs):
         # array, int
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def stack(self, *args, **kwargs):
         # arrays
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def vstack(self, *args, **kwargs):
         # arrays
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def packbits(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def unpackbits(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def atleast_1d(self, *args, **kwargs):
         # *arrays
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def broadcast_to(self, *args, **kwargs):
         # array, shape
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def append(self, *args, **kwargs):
         # array, element
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def where(self, *args, **kwargs):
         # array, element
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     ############################ ufuncs
 
     def sqrt(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def exp(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def true_divide(self, *args, **kwargs):
         # array1, array2
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def bitwise_or(self, *args, **kwargs):
         # array1, array2[, out=output]
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def logical_and(self, x, y):
         # array1, array2
@@ -840,21 +829,21 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def equal(self, *args, **kwargs):
         # array1, array2
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def ceil(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     ############################ almost-ufuncs
 
     def nan_to_num(self, *args, **kwargs):
         # array, copy=True, nan=0.0, posinf=None, neginf=None
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def isclose(self, *args, **kwargs):
         # a, b, rtol=1e-05, atol=1e-08, equal_nan=False
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     ############################ reducers
 
@@ -868,31 +857,31 @@ class TypeTracer(ak.nplike.NumpyLike):
 
     def count_nonzero(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def sum(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def prod(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def min(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def max(self, *args, **kwargs):
         # array
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def argmin(self, *args, **kwargs):
         # array[, axis=]
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def argmax(self, *args, **kwargs):
         # array[, axis=]
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     def array_str(
         self, array, max_line_width=None, precision=None, suppress_small=None
@@ -901,4 +890,4 @@ class TypeTracer(ak.nplike.NumpyLike):
         return "[?? ... ??]"
 
     def datetime_as_string(self, *args, **kwargs):
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)

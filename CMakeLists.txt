@@ -42,11 +42,11 @@ target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${VERSION_INFO
 target_include_directories(awkward-parent INTERFACE include)
 target_compile_features(awkward-parent INTERFACE cxx_std_11)
 
-# C++ dependencies (header-only): RapidJSON and dlpack
-target_include_directories(awkward-parent INTERFACE rapidjson/include dlpack/include)
+# C++ dependencies (header-only): RapidJSON
+target_include_directories(awkward-parent INTERFACE rapidjson/include)
 
 # C++ dependencies (header-only): GrowableBuffer
-target_include_directories(awkward-parent INTERFACE src/awkward/_v2/cpp-headers/)
+target_include_directories(awkward-parent INTERFACE src/awkward/cpp-headers/)
 
 # First tier: cpu-kernels (object files, static library, and dynamic library).
 add_library(awkward-cpu-kernels-objects OBJECT ${CPU_KERNEL_SOURCES})

@@ -149,7 +149,7 @@ class Invocation:
 
 def import_cupy(name="Awkward Arrays with CUDA"):
     if cupy is None:
-        raise awkward._v2._util.error(ModuleNotFoundError(error_message.format(name)))
+        raise awkward._util.error(ModuleNotFoundError(error_message.format(name)))
     return cupy
 
 
@@ -158,7 +158,7 @@ def initialize_cuda_kernels(cupy):
         global kernel
 
         if kernel is None:
-            import awkward._v2._connect.cuda._kernel_signatures
+            import awkward._connect.cuda._kernel_signatures
 
             cuda_src = f"#define ERROR_BITS {ERROR_BITS}\n#define NO_ERROR {NO_ERROR}"
 
@@ -182,20 +182,20 @@ def initialize_cuda_kernels(cupy):
 
             # Pass an empty Raw Module to fetch all template specializations
             template_specializations = fetch_template_specializations(
-                awkward._v2._connect.cuda._kernel_signatures.by_signature(None)
+                awkward._connect.cuda._kernel_signatures.by_signature(None)
             )
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
                 options=("--std=c++11",),
                 name_expressions=template_specializations,
             )
-            kernel = awkward._v2._connect.cuda._kernel_signatures.by_signature(
+            kernel = awkward._connect.cuda._kernel_signatures.by_signature(
                 cuda_kernel_templates
             )
 
         return kernel
     else:
-        raise awkward._v2._util.error(
+        raise awkward._util.error(
             ModuleNotFoundError(error_message.format("Awkward Arrays with CUDA"))
         )
 
@@ -217,7 +217,7 @@ def synchronize_cuda(stream=None):
             cupy.array(NO_ERROR),
             [],
         )
-        raise awkward._v2._util.error(
+        raise awkward._util.error(
             ValueError(
                 f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
             ),

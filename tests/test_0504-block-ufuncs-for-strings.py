@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test():
@@ -12,13 +12,13 @@ def test():
         nextinputs = []
         for x in inputs:
             if (
-                isinstance(x, ak._v2.highlevel.Array)
+                isinstance(x, ak.highlevel.Array)
                 and x.layout.is_IndexedType
                 and not x.layout.is_OptionType
             ):
                 nextinputs.append(
-                    ak._v2.highlevel.Array(
-                        x.layout.project(), behavior=ak._v2._util.behavior_of(x)
+                    ak.highlevel.Array(
+                        x.layout.project(), behavior=ak._util.behavior_of(x)
                     )
                 )
             else:
@@ -26,17 +26,17 @@ def test():
 
         return getattr(ufunc, method)(*nextinputs, **kwargs)
 
-    ak._v2.behavior[np.ufunc, "categorical"] = _apply_ufunc
+    ak.behavior[np.ufunc, "categorical"] = _apply_ufunc
 
-    array = ak._v2.highlevel.Array(
-        ak._v2.contents.IndexedArray(
-            ak._v2.index.Index64(np.array([0, 1, 2, 1, 3, 1, 4])),
-            ak._v2.contents.NumpyArray(np.array([321, 1.1, 123, 999, 2])),
+    array = ak.highlevel.Array(
+        ak.contents.IndexedArray(
+            ak.index.Index64(np.array([0, 1, 2, 1, 3, 1, 4])),
+            ak.contents.NumpyArray(np.array([321, 1.1, 123, 999, 2])),
             parameters={"__array__": "categorical"},
         )
     )
     assert to_list(array * 10) == [3210, 11, 1230, 11, 9990, 11, 20]
 
-    array = ak._v2.highlevel.Array(["HAL"])
+    array = ak.highlevel.Array(["HAL"])
     with pytest.raises(TypeError):
         array + 1

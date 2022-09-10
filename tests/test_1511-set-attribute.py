@@ -6,10 +6,8 @@ import numpy as np
 
 
 def test_array():
-    record = ak._v2.contents.RecordArray(
-        [ak._v2.contents.NumpyArray(np.arange(10))], ["x"]
-    )
-    array = ak._v2.Array(record)
+    record = ak.contents.RecordArray([ak.contents.NumpyArray(np.arange(10))], ["x"])
+    array = ak.Array(record)
 
     with pytest.raises(AttributeError):
         array.x = 10
@@ -22,10 +20,8 @@ def test_array():
 
 
 def test_record():
-    record = ak._v2.contents.RecordArray(
-        [ak._v2.contents.NumpyArray(np.arange(10))], ["x"]
-    )
-    array = ak._v2.Array(record)
+    record = ak.contents.RecordArray([ak.contents.NumpyArray(np.arange(10))], ["x"])
+    array = ak.Array(record)
     record = array[0]
 
     with pytest.raises(AttributeError):
@@ -50,11 +46,11 @@ class BadBehaviorBase:
         self.__class__.FIELD_STRING = value
 
 
-class BadBehaviorArray(BadBehaviorBase, ak._v2.Array):
+class BadBehaviorArray(BadBehaviorBase, ak.Array):
     pass
 
 
-class BadBehaviorRecord(BadBehaviorBase, ak._v2.Record):
+class BadBehaviorRecord(BadBehaviorBase, ak.Record):
     pass
 
 
@@ -62,10 +58,8 @@ behavior = {("*", "bad"): BadBehaviorArray, "bad": BadBehaviorRecord}
 
 
 def test_bad_behavior_array():
-    record = ak._v2.contents.RecordArray(
-        [ak._v2.contents.NumpyArray(np.arange(10))], ["x"]
-    )
-    array = ak._v2.Array(record, with_name="bad", behavior=behavior)
+    record = ak.contents.RecordArray([ak.contents.NumpyArray(np.arange(10))], ["x"])
+    array = ak.Array(record, with_name="bad", behavior=behavior)
     assert isinstance(array, BadBehaviorArray)
 
     assert array.fields == BadBehaviorArray.FIELD_STRING
@@ -74,10 +68,8 @@ def test_bad_behavior_array():
 
 
 def test_bad_behavior_record():
-    record = ak._v2.contents.RecordArray(
-        [ak._v2.contents.NumpyArray(np.arange(10))], ["x"]
-    )
-    array = ak._v2.Array(record, with_name="bad", behavior=behavior)
+    record = ak.contents.RecordArray([ak.contents.NumpyArray(np.arange(10))], ["x"])
+    array = ak.Array(record, with_name="bad", behavior=behavior)
     record = array[0]
     assert isinstance(record, BadBehaviorRecord)
 

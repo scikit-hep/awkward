@@ -10,9 +10,9 @@ np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
 
-@numba.extending.typeof_impl.register(ak._v2.contents.Content)
-@numba.extending.typeof_impl.register(ak._v2.index.Index)
-@numba.extending.typeof_impl.register(ak._v2.record.Record)
+@numba.extending.typeof_impl.register(ak.contents.Content)
+@numba.extending.typeof_impl.register(ak.index.Index)
+@numba.extending.typeof_impl.register(ak.record.Record)
 def fake_typeof(obj, c):
     raise TypeError(
         "{} objects cannot be passed directly into Numba-compiled functions; "
@@ -47,33 +47,33 @@ class ContentType(numba.types.Type):
 
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
-            return ak._v2.index.Index8
+            return ak.index.Index8
         elif arraytype.dtype.bitwidth == 8:
-            return ak._v2.index.IndexU8
+            return ak.index.IndexU8
         elif arraytype.dtype.bitwidth == 32 and arraytype.dtype.signed:
-            return ak._v2.index.Index32
+            return ak.index.Index32
         elif arraytype.dtype.bitwidth == 32:
-            return ak._v2.index.IndexU32
+            return ak.index.IndexU32
         elif arraytype.dtype.bitwidth == 64:
-            return ak._v2.index.Index64
+            return ak.index.Index64
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 AssertionError(f"no Index* type for array: {arraytype}")
             )
 
     def getitem_at_check(self, viewtype):
-        typer = ak._v2._util.numba_array_typer(viewtype.type, viewtype.behavior)
+        typer = ak._util.numba_array_typer(viewtype.type, viewtype.behavior)
         if typer is None:
             return self.getitem_at(viewtype)
         else:
             return typer(viewtype)
 
     def getitem_range(self, viewtype):
-        return ak._v2._connect.numba.arrayview.wrap(self, viewtype, None)
+        return ak._connect.numba.arrayview.wrap(self, viewtype, None)
 
     def getitem_field(self, viewtype, key):
         if self.has_field(key):
-            return ak._v2._connect.numba.arrayview.wrap(
+            return ak._connect.numba.arrayview.wrap(
                 self, viewtype, viewtype.fields + (key,)
             )
         else:
@@ -92,7 +92,7 @@ class ContentType(numba.types.Type):
         wrapneg,
         checkbounds,
     ):
-        lower = ak._v2._util.numba_array_lower(viewtype.type, viewtype.behavior)
+        lower = ak._util.numba_array_lower(viewtype.type, viewtype.behavior)
         if lower is not None:
             atval = regularize_atval(
                 context, builder, viewproxy, attype, atval, wrapneg, checkbounds
@@ -268,10 +268,10 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
     return castint(context, builder, atval.type, numba.intp, atval)
 
 
-class NumpyArrayType(ContentType, ak._v2._lookup.NumpyLookup):
+class NumpyArrayType(ContentType, ak._lookup.NumpyLookup):
     @classmethod
     def from_form(cls, form):
-        t = numba.from_dtype(ak._v2.types.numpytype.primitive_to_dtype(form.primitive))
+        t = numba.from_dtype(ak.types.numpytype.primitive_to_dtype(form.primitive))
         arraytype = numba.types.Array(t, 1, "C")
         return NumpyArrayType(
             arraytype, cls.from_form_identifier(form), form.parameters
@@ -331,11 +331,11 @@ class NumpyArrayType(ContentType, ak._v2._lookup.NumpyLookup):
         return False
 
 
-class RegularArrayType(ContentType, ak._v2._lookup.RegularLookup):
+class RegularArrayType(ContentType, ak._lookup.RegularLookup):
     @classmethod
     def from_form(cls, form):
         return RegularArrayType(
-            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.tonumbatype(form.content),
             form.size,
             cls.from_form_identifier(form),
             form.parameters,
@@ -356,7 +356,7 @@ class RegularArrayType(ContentType, ak._v2._lookup.RegularLookup):
         return self.contenttype.has_field(key)
 
     def getitem_at(self, viewtype):
-        return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
+        return ak._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 
     def lower_getitem_at(
         self,
@@ -409,17 +409,17 @@ class RegularArrayType(ContentType, ak._v2._lookup.RegularLookup):
         return False
 
 
-class ListArrayType(ContentType, ak._v2._lookup.ListLookup):
+class ListArrayType(ContentType, ak._lookup.ListLookup):
     @classmethod
     def from_form(cls, form):
-        if isinstance(form, ak._v2.forms.ListForm):
+        if isinstance(form, ak.forms.ListForm):
             index_string = form.starts
         else:
             index_string = form.offsets
 
         return ListArrayType(
             cls.from_form_index(index_string),
-            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.tonumbatype(form.content),
             cls.from_form_identifier(form),
             form.parameters,
         )
@@ -442,7 +442,7 @@ class ListArrayType(ContentType, ak._v2._lookup.ListLookup):
         return self.contenttype.has_field(key)
 
     def getitem_at(self, viewtype):
-        return ak._v2._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
+        return ak._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
 
     def lower_getitem_at(
         self,
@@ -507,12 +507,12 @@ class ListArrayType(ContentType, ak._v2._lookup.ListLookup):
         return False
 
 
-class IndexedArrayType(ContentType, ak._v2._lookup.IndexedLookup):
+class IndexedArrayType(ContentType, ak._lookup.IndexedLookup):
     @classmethod
     def from_form(cls, form):
         return IndexedArrayType(
             cls.from_form_index(form.index),
-            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.tonumbatype(form.content),
             cls.from_form_identifier(form),
             form.parameters,
         )
@@ -535,9 +535,7 @@ class IndexedArrayType(ContentType, ak._v2._lookup.IndexedLookup):
         return self.contenttype.has_field(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._v2._connect.numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
         return self.contenttype.getitem_at_check(viewtype)
 
     def lower_getitem_at(
@@ -567,7 +565,7 @@ class IndexedArrayType(ContentType, ak._v2._lookup.IndexedLookup):
             context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
         )
 
-        nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+        nextviewtype = ak._connect.numba.arrayview.wrap(
             self.contenttype, viewtype, None
         )
         proxynext = context.make_helper(builder, nextviewtype)
@@ -610,12 +608,12 @@ class IndexedArrayType(ContentType, ak._v2._lookup.IndexedLookup):
         return self.contenttype.is_recordtype
 
 
-class IndexedOptionArrayType(ContentType, ak._v2._lookup.IndexedOptionLookup):
+class IndexedOptionArrayType(ContentType, ak._lookup.IndexedOptionLookup):
     @classmethod
     def from_form(cls, form):
         return IndexedOptionArrayType(
             cls.from_form_index(form.index),
-            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.tonumbatype(form.content),
             cls.from_form_identifier(form),
             form.parameters,
         )
@@ -638,9 +636,7 @@ class IndexedOptionArrayType(ContentType, ak._v2._lookup.IndexedOptionLookup):
         return self.contenttype.has_field(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._v2._connect.numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -682,7 +678,7 @@ class IndexedOptionArrayType(ContentType, ak._v2._lookup.IndexedOptionLookup):
                 output.data = numba.core.cgutils.get_null_value(output.data.type)
 
             with isvalid:
-                nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+                nextviewtype = ak._connect.numba.arrayview.wrap(
                     self.contenttype, viewtype, None
                 )
                 proxynext = context.make_helper(builder, nextviewtype)
@@ -730,12 +726,12 @@ class IndexedOptionArrayType(ContentType, ak._v2._lookup.IndexedOptionLookup):
         return self.contenttype.is_recordtype
 
 
-class ByteMaskedArrayType(ContentType, ak._v2._lookup.ByteMaskedLookup):
+class ByteMaskedArrayType(ContentType, ak._lookup.ByteMaskedLookup):
     @classmethod
     def from_form(cls, form):
         return ByteMaskedArrayType(
             cls.from_form_index(form.mask),
-            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.tonumbatype(form.content),
             form.valid_when,
             cls.from_form_identifier(form),
             form.parameters,
@@ -761,9 +757,7 @@ class ByteMaskedArrayType(ContentType, ak._v2._lookup.ByteMaskedLookup):
         return self.contenttype.has_field(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._v2._connect.numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -803,7 +797,7 @@ class ByteMaskedArrayType(ContentType, ak._v2._lookup.ByteMaskedLookup):
             )
         ) as (isvalid, isnone):
             with isvalid:
-                nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+                nextviewtype = ak._connect.numba.arrayview.wrap(
                     self.contenttype, viewtype, None
                 )
                 proxynext = context.make_helper(builder, nextviewtype)
@@ -852,12 +846,12 @@ class ByteMaskedArrayType(ContentType, ak._v2._lookup.ByteMaskedLookup):
         return self.contenttype.is_recordtype
 
 
-class BitMaskedArrayType(ContentType, ak._v2._lookup.BitMaskedLookup):
+class BitMaskedArrayType(ContentType, ak._lookup.BitMaskedLookup):
     @classmethod
     def from_form(cls, form):
         return BitMaskedArrayType(
             cls.from_form_index(form.mask),
-            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.tonumbatype(form.content),
             form.valid_when,
             form.lsb_order,
             cls.from_form_identifier(form),
@@ -888,9 +882,7 @@ class BitMaskedArrayType(ContentType, ak._v2._lookup.BitMaskedLookup):
         return self.contenttype.has_field(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._v2._connect.numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -949,7 +941,7 @@ class BitMaskedArrayType(ContentType, ak._v2._lookup.BitMaskedLookup):
             )
         ) as (isvalid, isnone):
             with isvalid:
-                nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+                nextviewtype = ak._connect.numba.arrayview.wrap(
                     self.contenttype, viewtype, None
                 )
                 proxynext = context.make_helper(builder, nextviewtype)
@@ -998,11 +990,11 @@ class BitMaskedArrayType(ContentType, ak._v2._lookup.BitMaskedLookup):
         return self.contenttype.is_recordtype
 
 
-class UnmaskedArrayType(ContentType, ak._v2._lookup.UnmaskedLookup):
+class UnmaskedArrayType(ContentType, ak._lookup.UnmaskedLookup):
     @classmethod
     def from_form(cls, form):
         return UnmaskedArrayType(
-            ak._v2._connect.numba.arrayview.tonumbatype(form.content),
+            ak._connect.numba.arrayview.tonumbatype(form.content),
             cls.from_form_identifier(form),
             form.parameters,
         )
@@ -1021,9 +1013,7 @@ class UnmaskedArrayType(ContentType, ak._v2._lookup.UnmaskedLookup):
         return self.contenttype.has_field(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._v2._connect.numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect.numba.arrayview.wrap(self.contenttype, viewtype, None)
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -1048,7 +1038,7 @@ class UnmaskedArrayType(ContentType, ak._v2._lookup.UnmaskedLookup):
 
         output = context.make_helper(builder, rettype)
 
-        nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+        nextviewtype = ak._connect.numba.arrayview.wrap(
             self.contenttype, viewtype, None
         )
         proxynext = context.make_helper(builder, nextviewtype)
@@ -1093,11 +1083,11 @@ class UnmaskedArrayType(ContentType, ak._v2._lookup.UnmaskedLookup):
         return self.contenttype.is_recordtype
 
 
-class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
+class RecordArrayType(ContentType, ak._lookup.RecordLookup):
     @classmethod
     def from_form(cls, form):
         return RecordArrayType(
-            [ak._v2._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
+            [ak._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
             None if form.is_tuple else form.fields,
             cls.from_form_identifier(form),
             form.parameters,
@@ -1139,8 +1129,8 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
 
     def getitem_at_check(self, viewtype):
         out = self.getitem_at(viewtype)
-        if isinstance(out, ak._v2._connect.numba.arrayview.RecordViewType):
-            typer = ak._v2._util.numba_record_typer(
+        if isinstance(out, ak._connect.numba.arrayview.RecordViewType):
+            typer = ak._util.numba_record_typer(
                 out.arrayviewtype.type, out.arrayviewtype.behavior
             )
             if typer is not None:
@@ -1149,7 +1139,7 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
 
     def getitem_at(self, viewtype):
         if len(viewtype.fields) == 0:
-            return ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
+            return ak._connect.numba.arrayview.RecordViewType(viewtype)
         else:
             key = viewtype.fields[0]
             index = self.fieldindex(key)
@@ -1167,7 +1157,7 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
                         )
                     )
             contenttype = self.contenttypes[index]
-            subviewtype = ak._v2._connect.numba.arrayview.wrap(
+            subviewtype = ak._connect.numba.arrayview.wrap(
                 contenttype, viewtype, viewtype.fields[1:]
             )
             return contenttype.getitem_at_check(subviewtype)
@@ -1188,7 +1178,7 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
                     )
                 )
         contenttype = self.contenttypes[index]
-        subviewtype = ak._v2._connect.numba.arrayview.wrap(contenttype, viewtype, None)
+        subviewtype = ak._connect.numba.arrayview.wrap(contenttype, viewtype, None)
         return contenttype.getitem_range(subviewtype)
 
     def getitem_field_record(self, recordviewtype, key):
@@ -1207,7 +1197,7 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
                     )
                 )
         contenttype = self.contenttypes[index]
-        subviewtype = ak._v2._connect.numba.arrayview.wrap(
+        subviewtype = ak._connect.numba.arrayview.wrap(
             contenttype, recordviewtype, None
         )
         return contenttype.getitem_at_check(subviewtype)
@@ -1238,8 +1228,8 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
             checkbounds,
         )
         baretype = self.getitem_at(viewtype)
-        if isinstance(baretype, ak._v2._connect.numba.arrayview.RecordViewType):
-            lower = ak._v2._util.numba_record_lower(
+        if isinstance(baretype, ak._connect.numba.arrayview.RecordViewType):
+            lower = ak._util.numba_record_lower(
                 baretype.arrayviewtype.type, baretype.arrayviewtype.behavior
             )
             if lower is not None:
@@ -1265,7 +1255,7 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
 
         if len(viewtype.fields) == 0:
             proxyout = context.make_helper(
-                builder, ak._v2._connect.numba.arrayview.RecordViewType(viewtype)
+                builder, ak._connect.numba.arrayview.RecordViewType(viewtype)
             )
             proxyout.arrayview = viewval
             proxyout.at = atval
@@ -1278,7 +1268,7 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
             whichpos = posat(context, builder, viewproxy.pos, self.CONTENTS + index)
             nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-            nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+            nextviewtype = ak._connect.numba.arrayview.wrap(
                 contenttype, viewtype, viewtype.fields[1:]
             )
             proxynext = context.make_helper(builder, nextviewtype)
@@ -1347,7 +1337,7 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
         proxynext.arrayptrs = arrayviewproxy.arrayptrs
         proxynext.pylookup = arrayviewproxy.pylookup
 
-        nextviewtype = ak._v2._connect.numba.arrayview.wrap(
+        nextviewtype = ak._connect.numba.arrayview.wrap(
             contenttype, arrayviewtype, None
         )
 
@@ -1387,13 +1377,13 @@ class RecordArrayType(ContentType, ak._v2._lookup.RecordLookup):
         return True
 
 
-class UnionArrayType(ContentType, ak._v2._lookup.UnionLookup):
+class UnionArrayType(ContentType, ak._lookup.UnionLookup):
     @classmethod
     def from_form(cls, form):
         return UnionArrayType(
             cls.from_form_index(form.tags),
             cls.from_form_index(form.index),
-            [ak._v2._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
+            [ak._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
             cls.from_form_identifier(form),
             form.parameters,
         )
@@ -1501,21 +1491,19 @@ def inner_dtype_of_form(form):
     if form is None:
         return None
 
-    elif isinstance(form, ak._v2.forms.NumpyForm):
-        return numba.from_dtype(
-            ak._v2.types.numpytype.primitive_to_dtype(form.primitive)
-        )
+    elif isinstance(form, ak.forms.NumpyForm):
+        return numba.from_dtype(ak.types.numpytype.primitive_to_dtype(form.primitive))
 
-    elif isinstance(form, ak._v2.forms.EmptyForm):
+    elif isinstance(form, ak.forms.EmptyForm):
         return numba.types.float64
 
     elif isinstance(
         form,
         (
-            ak._v2.forms.RegularForm,
-            ak._v2.forms.ListForm,
-            ak._v2.forms.ListOffsetForm,
-            ak._v2.forms.IndexedForm,
+            ak.forms.RegularForm,
+            ak.forms.ListForm,
+            ak.forms.ListOffsetForm,
+            ak.forms.IndexedForm,
         ),
     ):
         return inner_dtype_of_form(form.content)
@@ -1523,16 +1511,16 @@ def inner_dtype_of_form(form):
     elif isinstance(
         form,
         (
-            ak._v2.forms.RecordForm,
-            ak._v2.forms.IndexedOptionForm,
-            ak._v2.forms.ByteMaskedForm,
-            ak._v2.forms.BitMaskedForm,
-            ak._v2.forms.UnmaskedForm,
+            ak.forms.RecordForm,
+            ak.forms.IndexedOptionForm,
+            ak.forms.ByteMaskedForm,
+            ak.forms.BitMaskedForm,
+            ak.forms.UnmaskedForm,
         ),
     ):
         return None
 
-    elif isinstance(form, ak._v2.forms.UnionForm):
+    elif isinstance(form, ak.forms.UnionForm):
         context = numba.core.typing.Context()
         return context.unify_types(*[inner_dtype_of_form(x) for x in form.contents])
 
@@ -1547,13 +1535,13 @@ def optiontype_of_form(form):
     elif isinstance(
         form,
         (
-            ak._v2.forms.NumpyForm,
-            ak._v2.forms.EmptyForm,
-            ak._v2.forms.RegularForm,
-            ak._v2.forms.ListForm,
-            ak._v2.forms.ListOffsetForm,
-            ak._v2.forms.IndexedForm,
-            ak._v2.forms.RecordForm,
+            ak.forms.NumpyForm,
+            ak.forms.EmptyForm,
+            ak.forms.RegularForm,
+            ak.forms.ListForm,
+            ak.forms.ListOffsetForm,
+            ak.forms.IndexedForm,
+            ak.forms.RecordForm,
         ),
     ):
         return False
@@ -1561,15 +1549,15 @@ def optiontype_of_form(form):
     elif isinstance(
         form,
         (
-            ak._v2.forms.IndexedOptionForm,
-            ak._v2.forms.ByteMaskedForm,
-            ak._v2.forms.BitMaskedForm,
-            ak._v2.forms.UnmaskedForm,
+            ak.forms.IndexedOptionForm,
+            ak.forms.ByteMaskedForm,
+            ak.forms.BitMaskedForm,
+            ak.forms.UnmaskedForm,
         ),
     ):
         return False
 
-    elif isinstance(form, ak._v2.forms.UnionForm):
+    elif isinstance(form, ak.forms.UnionForm):
         return any(optiontype_of_form(x) for x in form.contents)
 
     else:
@@ -1583,11 +1571,11 @@ def recordtype_of_form(form):
     elif isinstance(
         form,
         (
-            ak._v2.forms.NumpyForm,
-            ak._v2.forms.EmptyForm,
-            ak._v2.forms.RegularForm,
-            ak._v2.forms.ListForm,
-            ak._v2.forms.ListOffsetForm,
+            ak.forms.NumpyForm,
+            ak.forms.EmptyForm,
+            ak.forms.RegularForm,
+            ak.forms.ListForm,
+            ak.forms.ListOffsetForm,
         ),
     ):
         return False
@@ -1595,19 +1583,19 @@ def recordtype_of_form(form):
     elif isinstance(
         form,
         (
-            ak._v2.forms.IndexedForm,
-            ak._v2.forms.IndexedOptionForm,
-            ak._v2.forms.ByteMaskedForm,
-            ak._v2.forms.BitMaskedForm,
-            ak._v2.forms.UnmaskedForm,
+            ak.forms.IndexedForm,
+            ak.forms.IndexedOptionForm,
+            ak.forms.ByteMaskedForm,
+            ak.forms.BitMaskedForm,
+            ak.forms.UnmaskedForm,
         ),
     ):
         return recordtype_of_form(form.content)
 
-    elif isinstance(form, (ak._v2.forms.RecordForm,)):
+    elif isinstance(form, (ak.forms.RecordForm,)):
         return True
 
-    elif isinstance(form, ak._v2.forms.UnionForm):
+    elif isinstance(form, ak.forms.UnionForm):
         return any(recordtype_of_form(x) for x in form.contents)
 
     else:

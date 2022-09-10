@@ -26,7 +26,7 @@ class ReadAvroFT:
             try:
                 self.temp_header += self.data.read(numbytes)
                 if not self.check_valid():
-                    raise ak._v2._util.error(
+                    raise ak._util.error(
                         TypeError("invalid Avro file: first 4 bytes are not b'Obj\x01'")
                     )
                 pos = 4
@@ -115,10 +115,7 @@ class ReadAvroFT:
                 break
 
         for elem in form_keys:
-            if "offsets" in elem:
-                container[elem] = machine.output_Index64(elem)
-            else:
-                container[elem] = machine.output_NumpyArray(elem)
+            container[elem] = machine.output(elem)
 
         self.outcontents = (self.form, self.blocks, container)
 
@@ -223,9 +220,9 @@ class ReadAvroFT:
             file = {"type": file}
 
         if file["type"] == "null":
-            aform = ak._v2.forms.IndexedOptionForm(
+            aform = ak.forms.IndexedOptionForm(
                 "i64",
-                ak._v2.forms.EmptyForm(form_key=f"node{form_next_id+1}"),
+                ak.forms.EmptyForm(form_key=f"node{form_next_id+1}"),
                 form_key=f"node{form_next_id}",
             )
             declarations.append(f"output node{form_next_id+1}-data uint8 \n")
@@ -275,9 +272,7 @@ class ReadAvroFT:
                 )
                 aformcont.append(aform)
 
-            aform = ak._v2.forms.RecordForm(
-                aformcont, aformfields, form_key=f"node{temp}"
-            )
+            aform = ak.forms.RecordForm(aformcont, aformfields, form_key=f"node{temp}")
 
             return (
                 aform,
@@ -290,9 +285,9 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "string":
-            aform = ak._v2.forms.ListOffsetForm(
+            aform = ak.forms.ListOffsetForm(
                 "i64",
-                ak._v2.forms.NumpyForm(
+                ak.forms.NumpyForm(
                     "uint8",
                     parameters={"__array__": "char"},
                     form_key=f"node{form_next_id+1}",
@@ -329,7 +324,7 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "int":
-            aform = ak._v2.forms.NumpyForm(
+            aform = ak.forms.NumpyForm(
                 primitive="int32", form_key=f"node{form_next_id}"
             )
             declarations.append(f"output node{form_next_id}-data int32 \n")
@@ -355,7 +350,7 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "long":
-            aform = ak._v2.forms.NumpyForm("int64", form_key=f"node{form_next_id}")
+            aform = ak.forms.NumpyForm("int64", form_key=f"node{form_next_id}")
             form_keys.append(f"node{form_next_id}-data")
             declarations.append(f"output node{form_next_id}-data int64 \n")
 
@@ -379,7 +374,7 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "float":
-            aform = ak._v2.forms.NumpyForm("float32", form_key=f"node{form_next_id}")
+            aform = ak.forms.NumpyForm("float32", form_key=f"node{form_next_id}")
             declarations.append(f"output node{form_next_id}-data float32 \n")
             form_keys.append(f"node{form_next_id}-data")
 
@@ -403,7 +398,7 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "double":
-            aform = ak._v2.forms.NumpyForm("float64", form_key=f"node{form_next_id}")
+            aform = ak.forms.NumpyForm("float64", form_key=f"node{form_next_id}")
             declarations.append(f"output node{form_next_id}-data float64 \n")
             form_keys.append(f"node{form_next_id}-data")
 
@@ -427,7 +422,7 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "boolean":
-            aform = ak._v2.forms.NumpyForm("bool", form_key=f"node{form_next_id}")
+            aform = ak.forms.NumpyForm("bool", form_key=f"node{form_next_id}")
             declarations.append(f"output node{form_next_id}-data bool\n")
             form_keys.append(f"node{form_next_id}-data")
 
@@ -455,9 +450,9 @@ class ReadAvroFT:
             declarations.append(f"output node{form_next_id}-offsets int64\n")
             form_keys.append(f"node{form_next_id+1}-data")
             form_keys.append(f"node{form_next_id}-offsets")
-            aform = ak._v2.forms.ListOffsetForm(
+            aform = ak.forms.ListOffsetForm(
                 "i64",
-                ak._v2.forms.NumpyForm(
+                ak.forms.NumpyForm(
                     "uint8",
                     form_key=f"node{form_next_id+1}",
                     parameters={"__array__": "byte"},
@@ -584,7 +579,7 @@ class ReadAvroFT:
                         )
                         exec_code.append(" endof")
 
-                aform = ak._v2.forms.ByteMaskedForm(
+                aform = ak.forms.ByteMaskedForm(
                     "i8", aform1, True, form_key=f"node{temp}"
                 )
 
@@ -634,7 +629,7 @@ class ReadAvroFT:
                         )
                         exec_code.append("\nendof")
 
-                aform = ak._v2.forms.IndexedOptionForm(
+                aform = ak.forms.IndexedOptionForm(
                     "i64", aform1, form_key=f"node{temp}"
                 )
 
@@ -704,16 +699,16 @@ class ReadAvroFT:
                         exec_code.append("\n endof")
 
                 if null_present:
-                    aform = ak._v2.forms.ByteMaskedForm(
+                    aform = ak.forms.ByteMaskedForm(
                         "i8",
-                        ak._v2.forms.UnionForm(
+                        ak.forms.UnionForm(
                             "i8", "i64", temp_forms, form_key=f"node{union_idx}"
                         ),
                         True,
                         form_key=f"node{mask_idx}",
                     )
                 else:
-                    aform = ak._v2.forms.UnionForm(
+                    aform = ak.forms.UnionForm(
                         "i8", "i64", aform1, form_key=f"node{mask_idx}"
                     )
 
@@ -762,8 +757,8 @@ class ReadAvroFT:
         elif file["type"] == "fixed":
             form_keys.append(f"node{form_next_id+1}-data")
             declarations.append(f"output node{form_next_id+1}-data uint8 \n")
-            aform = ak._v2.forms.RegularForm(
-                ak._v2.forms.NumpyForm(
+            aform = ak.forms.RegularForm(
+                ak.forms.NumpyForm(
                     "uint8",
                     form_key=f"node{form_next_id+1}",
                     parameters={"__array__": "byte"},
@@ -789,11 +784,11 @@ class ReadAvroFT:
             )
 
         elif file["type"] == "enum":
-            aform = ak._v2.forms.IndexedForm(
+            aform = ak.forms.IndexedForm(
                 "i64",
-                ak._v2.forms.ListOffsetForm(
+                ak.forms.ListOffsetForm(
                     "i64",
-                    ak._v2.forms.NumpyForm(
+                    ak.forms.NumpyForm(
                         "uint8",
                         parameters={"__array__": "char"},
                         form_key=f"node{form_next_id+2}",
@@ -878,9 +873,7 @@ class ReadAvroFT:
                 exec_code.append("\n" + "    " * ind + "loop")
 
             exec_code.append("\n" + "    " * ind + "1 stream skip")
-            aform = ak._v2.forms.ListOffsetForm(
-                "i64", aformtemp, form_key=f"node{temp}"
-            )
+            aform = ak.forms.ListOffsetForm("i64", aformtemp, form_key=f"node{temp}")
 
             return (
                 aform,
@@ -918,4 +911,4 @@ class ReadAvroFT:
             #         exec_code = exec_code+hh
             #         exec_code = exec_code+jj
             #         exec_code = exec_code+kk
-            raise ak._v2._util.error(NotImplementedError)
+            raise ak._util.error(NotImplementedError)

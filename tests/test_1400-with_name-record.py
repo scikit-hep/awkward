@@ -6,5 +6,5 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    record = ak._v2.with_name(ak._v2.Record({"x": 10.0}), "X")
-    assert ak._v2.parameters(record) == {"__record__": "X"}
+    record = ak.with_name(ak.Record({"x": 10.0}), "X")
+    assert ak.parameters(record) == {"__record__": "X"}

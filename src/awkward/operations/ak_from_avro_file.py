@@ -16,7 +16,7 @@ def from_avro_file(
         debug_forth (bool): If True, prints the generated Forth code for debugging.
         limit_entries (int): The number of rows of the Avro file to be read into the Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
     Reads Avro files as Awkward Arrays.
@@ -24,10 +24,10 @@ def from_avro_file(
     Internally this function uses AwkwardForth DSL. The function recursively parses the Avro schema, generates
     Awkward form and Forth code for that specific Avro file and then reads it.
     """
-    import awkward._v2._connect.avro
+    import awkward._connect.avro
 
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.from_avro_file",
+    with ak._util.OperationErrorContext(
+        "ak.from_avro_file",
         dict(
             file=file,
             highlevel=highlevel,
@@ -43,22 +43,22 @@ def from_avro_file(
         if isinstance(file, str):
             try:
                 with open(file, "rb") as opened_file:
-                    form, length, container = awkward._v2._connect.avro.ReadAvroFT(
+                    form, length, container = awkward._connect.avro.ReadAvroFT(
                         opened_file, limit_entries, debug_forth
                     ).outcontents
                     return _impl(form, length, container, highlevel, behavior)
             except ImportError as err:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     "the filename is incorrect or the file does not exist"
                 ) from err
 
         else:
             if not hasattr(file, "read"):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     TypeError("the fileobject provided is not of the correct type.")
                 )
             else:
-                form, length, container = awkward._v2._connect.avro.ReadAvroFT(
+                form, length, container = awkward._connect.avro.ReadAvroFT(
                     file, limit_entries, debug_forth
                 ).outarr
                 return _impl(form, length, container, highlevel, behavior)
@@ -66,7 +66,7 @@ def from_avro_file(
 
 def _impl(form, length, container, highlevel, behavior):
 
-    return ak._v2.from_buffers(
+    return ak.from_buffers(
         form=form,
         length=length,
         container=container,

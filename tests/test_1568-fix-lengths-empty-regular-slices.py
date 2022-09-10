@@ -4,54 +4,54 @@ import pytest  # noqa: F401
 import awkward as ak  # noqa: F401
 import numpy as np  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_lengths_empty_regular_slices():
     d = np.arange(2 * 3).reshape(2, 3)
-    e = ak._v2.contents.NumpyArray(d)
+    e = ak.contents.NumpyArray(d)
 
-    assert ak._v2.to_list(d[:, []]) == ak._v2.to_list(e[:, []]) == [[], []]
-    assert ak._v2.to_list(d[1:, []]) == ak._v2.to_list(e[1:, []]) == [[]]
+    assert ak.to_list(d[:, []]) == ak.to_list(e[:, []]) == [[], []]
+    assert ak.to_list(d[1:, []]) == ak.to_list(e[1:, []]) == [[]]
 
-    assert d[:, []].shape == ak._v2.to_numpy(e[:, []]).shape
-    assert d[1:, []].shape == ak._v2.to_numpy(e[1:, []]).shape
+    assert d[:, []].shape == ak.to_numpy(e[:, []]).shape
+    assert d[1:, []].shape == ak.to_numpy(e[1:, []]).shape
 
-    f = ak._v2.operations.to_regular(e, axis=1)
+    f = ak.operations.to_regular(e, axis=1)
     assert to_list(f[:, []]) == [[], []]
 
     d = np.arange(5 * 7 * 11 * 13 * 17).reshape(5, 7, 11, 13, 17)
-    e = ak._v2.contents.NumpyArray(d)
-    f = ak._v2.operations.to_regular(e, axis=1)
+    e = ak.contents.NumpyArray(d)
+    f = ak.operations.to_regular(e, axis=1)
 
     assert (
-        ak._v2.to_list(d[-4:, -4:, []])
-        == ak._v2.to_list(e[-4:, -4:, []])
-        == ak._v2.to_list(f[-4:, -4:, []])
+        ak.to_list(d[-4:, -4:, []])
+        == ak.to_list(e[-4:, -4:, []])
+        == ak.to_list(f[-4:, -4:, []])
         == [[[], [], [], []], [[], [], [], []], [[], [], [], []], [[], [], [], []]]
     )
     assert (
-        ak._v2.to_list(d[:, [], []])
-        == ak._v2.to_list(e[:, [], []])
-        == ak._v2.to_list(f[:, [], []])
+        ak.to_list(d[:, [], []])
+        == ak.to_list(e[:, [], []])
+        == ak.to_list(f[:, [], []])
         == [[], [], [], [], []]
     )
     assert (
-        ak._v2.to_list(d[1:4, [], []])
-        == ak._v2.to_list(e[1:4, [], []])
-        == ak._v2.to_list(f[1:4, [], []])
+        ak.to_list(d[1:4, [], []])
+        == ak.to_list(e[1:4, [], []])
+        == ak.to_list(f[1:4, [], []])
         == [[], [], []]
     )
     assert (
-        ak._v2.to_list(d[:, [], [], []])
-        == ak._v2.to_list(e[:, [], [], []])
-        == ak._v2.to_list(f[:, [], [], []])
+        ak.to_list(d[:, [], [], []])
+        == ak.to_list(e[:, [], [], []])
+        == ak.to_list(f[:, [], [], []])
         == [[], [], [], [], []]
     )
     assert (
-        ak._v2.to_list(d[1:4, [], [], []])
-        == ak._v2.to_list(e[1:4, [], [], []])
-        == ak._v2.to_list(f[1:4, [], [], []])
+        ak.to_list(d[1:4, [], [], []])
+        == ak.to_list(e[1:4, [], [], []])
+        == ak.to_list(f[1:4, [], [], []])
         == [[], [], []]
     )
     with pytest.raises(ValueError):
@@ -71,36 +71,34 @@ def test_lengths_empty_regular_slices():
 
     assert (
         d[:, :, []].shape
-        == ak._v2.to_numpy(e[:, :, []]).shape
-        == ak._v2.to_numpy(f[:, :, []]).shape
+        == ak.to_numpy(e[:, :, []]).shape
+        == ak.to_numpy(f[:, :, []]).shape
     )
     assert (
         d[:, [], []].shape
-        == ak._v2.to_numpy(e[:, [], []]).shape
-        == ak._v2.to_numpy(f[:, [], []]).shape
+        == ak.to_numpy(e[:, [], []]).shape
+        == ak.to_numpy(f[:, [], []]).shape
     )
     assert (
         d[1:4, :, [], []].shape
-        == ak._v2.to_numpy(e[1:4, :, [], []]).shape
-        == ak._v2.to_numpy(f[1:4, :, [], []]).shape
+        == ak.to_numpy(e[1:4, :, [], []]).shape
+        == ak.to_numpy(f[1:4, :, [], []]).shape
     )
     assert (
         d[:, [], [], []].shape
-        == ak._v2.to_numpy(e[:, [], [], []]).shape
-        == ak._v2.to_numpy(f[:, [], [], []]).shape
+        == ak.to_numpy(e[:, [], [], []]).shape
+        == ak.to_numpy(f[:, [], [], []]).shape
     )
     assert (
         d[1:4, [], [], []].shape
-        == ak._v2.to_numpy(e[1:4, [], [], []]).shape
-        == ak._v2.to_numpy(f[1:4, [], [], []]).shape
+        == ak.to_numpy(e[1:4, [], [], []]).shape
+        == ak.to_numpy(f[1:4, [], [], []]).shape
     )
 
     np1 = np.ones((5, 7))
-    a = ak._v2.Array(np.ones((5, 7)))
-    assert (
-        ak._v2.to_list(np1[:, []]) == ak._v2.to_list(a[:, []]) == [[], [], [], [], []]
-    )
-    assert ak._v2.to_list(np1[[], :]) == ak._v2.to_list(a[[], :]) == []
+    a = ak.Array(np.ones((5, 7)))
+    assert ak.to_list(np1[:, []]) == ak.to_list(a[:, []]) == [[], [], [], [], []]
+    assert ak.to_list(np1[[], :]) == ak.to_list(a[[], :]) == []
 
-    assert np1[:, []].shape == ak._v2.to_numpy(a[:, []]).shape == (5, 0)
-    assert np1[[], :].shape == ak._v2.to_numpy(a[[], :]).shape == (0, 7)
+    assert np1[:, []].shape == ak.to_numpy(a[:, []]).shape == (5, 0)
+    assert np1[[], :].shape == ak.to_numpy(a[[], :]).shape == (0, 7)

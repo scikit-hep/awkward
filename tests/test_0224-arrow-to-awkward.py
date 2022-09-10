@@ -5,53 +5,53 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 pyarrow = pytest.importorskip("pyarrow")
-pytest.importorskip("awkward._v2._connect.pyarrow")
+pytest.importorskip("awkward._connect.pyarrow")
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_toarrow_BitMaskedArray():
-    content = ak._v2.highlevel.Array(
+    content = ak.highlevel.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    bitmask = ak._v2.index.IndexU8(np.array([40, 34], dtype=np.uint8))
-    array = ak._v2.contents.BitMaskedArray(bitmask, content, False, 9, False)
+    bitmask = ak.index.IndexU8(np.array([40, 34], dtype=np.uint8))
+    array = ak.contents.BitMaskedArray(bitmask, content, False, 9, False)
     assert array.to_arrow().to_pylist() == to_list(array)
 
 
 def test_toarrow_ByteMaskedArray_1():
-    content = ak._v2.highlevel.Array(
+    content = ak.highlevel.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    bytemask = ak._v2.index.Index8(np.array([False, True, False], dtype=np.bool_))
-    array = ak._v2.contents.ByteMaskedArray(bytemask, content, True)
+    bytemask = ak.index.Index8(np.array([False, True, False], dtype=np.bool_))
+    array = ak.contents.ByteMaskedArray(bytemask, content, True)
     assert array.to_arrow().to_pylist() == to_list(array)
 
 
 def test_toarrow_NumpyArray_1():
-    array = ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]))
+    array = ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]))
     assert isinstance(array.to_arrow(), pyarrow.lib.Array)
     assert array.to_arrow().to_pylist() == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5]
 
 
 def test_toarrow_NumpyArray_2():
-    array = ak._v2.contents.NumpyArray(np.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5]]))
+    array = ak.contents.NumpyArray(np.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5]]))
     assert isinstance(array.to_arrow(), pyarrow.lib.Array)
     assert array.to_arrow().to_pylist() == [[0.0, 1.1], [2.2, 3.3], [4.4, 5.5]]
 
 
 def test_toarrow_EmptyArray():
-    array = ak._v2.contents.EmptyArray()
+    array = ak.contents.EmptyArray()
     assert isinstance(array.to_arrow(), pyarrow.lib.Array)
     assert array.to_arrow().to_pylist() == []
 
 
 def test_toarrow_ListOffsetArray64():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 9]))
-    array = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 9]))
+    array = ak.contents.ListOffsetArray(offsets, content)
     assert isinstance(array.to_arrow().storage, pyarrow.LargeListArray)
     assert array.to_arrow().to_pylist() == [
         [1.1, 2.2, 3.3],
@@ -74,11 +74,11 @@ def test_toarrow_ListOffsetArray64():
 
 
 def test_toarrow_ListOffsetArrayU32():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.IndexU32(np.array([0, 3, 3, 5, 6, 9]))
-    array = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.IndexU32(np.array([0, 3, 3, 5, 6, 9]))
+    array = ak.contents.ListOffsetArray(offsets, content)
     assert isinstance(array.to_arrow().storage, pyarrow.ListArray)
     assert array.to_arrow().to_pylist() == [
         [1.1, 2.2, 3.3],
@@ -101,11 +101,11 @@ def test_toarrow_ListOffsetArrayU32():
 
 
 def test_toarrow_ListArray_RegularArray():
-    content = ak._v2.highlevel.Array(
+    content = ak.highlevel.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    offsets = ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
-    array = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    array = ak.contents.ListOffsetArray(offsets, content)
     assert array.to_arrow().to_pylist() == [
         ["one", "two", "three"],
         [],
@@ -114,15 +114,15 @@ def test_toarrow_ListArray_RegularArray():
         ["seven", "eight", "nine"],
     ]
 
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
-    regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
-    starts = ak._v2.index.Index64(np.array([0, 1], dtype=np.int64))
-    stops = ak._v2.index.Index64(np.array([2, 3], dtype=np.int64))
-    listarray = ak._v2.contents.ListArray(starts, stops, regulararray)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
+    regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+    starts = ak.index.Index64(np.array([0, 1], dtype=np.int64))
+    stops = ak.index.Index64(np.array([2, 3], dtype=np.int64))
+    listarray = ak.contents.ListArray(starts, stops, regulararray)
 
     assert isinstance(listarray.to_arrow().storage, pyarrow.LargeListArray)
     assert listarray.to_arrow().to_pylist() == [
@@ -146,18 +146,18 @@ def test_toarrow_ListArray_RegularArray():
 
 
 def test_toarrow_RecordArray():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    content2 = ak._v2.contents.NumpyArray(
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    offsets = ak.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
 
-    recordarray = ak._v2.contents.RecordArray(
+    recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
         fields=["one", "two", "2", "wonky"],
     )
@@ -173,11 +173,11 @@ def test_toarrow_RecordArray():
 
 
 def test_toarrow_UnionArray():
-    content0 = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
-    index = ak._v2.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    unionarray = ak._v2.contents.UnionArray(tags, index, [content0, content1])
+    content0 = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    unionarray = ak.contents.UnionArray(tags, index, [content0, content1])
 
     assert isinstance(unionarray.to_arrow().storage, pyarrow.UnionArray)
     assert unionarray.to_arrow().to_pylist() == [
@@ -193,11 +193,11 @@ def test_toarrow_UnionArray():
 
 
 def test_toarrow_IndexedArray():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    index = ak._v2.index.Index32(np.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedArray(index, content)
+    index = ak.index.Index32(np.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=np.int64))
+    indexedarray = ak.contents.IndexedArray(index, content)
 
     assert isinstance(indexedarray.to_arrow().storage, pyarrow.lib.DoubleArray)
     assert indexedarray.to_arrow().to_pylist() == [
@@ -213,27 +213,27 @@ def test_toarrow_IndexedArray():
 
 
 def test_toarrow_IndexedOptionArray_2():
-    array = ak._v2.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5, None]).layout
+    array = ak.highlevel.Array([1.1, 2.2, 3.3, 4.4, 5.5, None]).layout
 
     assert array.to_arrow().to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5, None]
     assert array[:-1].to_arrow().to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert array[:1].to_arrow().to_pylist() == [1.1]
     assert array[:0].to_arrow().to_pylist() == []
 
-    content = ak._v2.contents.NumpyArray(np.array([], dtype=np.float64))
-    index = ak._v2.index.Index32(np.array([-1, -1, -1, -1], dtype=np.int32))
-    indexedoptionarray = ak._v2.contents.IndexedOptionArray(index, content)
+    content = ak.contents.NumpyArray(np.array([], dtype=np.float64))
+    index = ak.index.Index32(np.array([-1, -1, -1, -1], dtype=np.int32))
+    indexedoptionarray = ak.contents.IndexedOptionArray(index, content)
     assert indexedoptionarray.to_arrow().to_pylist() == [None, None, None, None]
 
 
 def test_toarrow_ByteMaskedArray_2():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
-    bytemaskedarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, True, False, False, False], dtype=np.int8)),
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
+    bytemaskedarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, True, False, False, False], dtype=np.int8)),
         listoffsetarray,
         True,
     )
@@ -248,52 +248,52 @@ def test_toarrow_ByteMaskedArray_2():
 
 
 def test_toarrow_ByteMaskedArray_3():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
-    regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
-    starts = ak._v2.index.Index64(np.array([0, 1]))
-    stops = ak._v2.index.Index64(np.array([2, 3]))
-    listarray = ak._v2.contents.ListArray(starts, stops, regulararray)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
+    regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+    starts = ak.index.Index64(np.array([0, 1]))
+    stops = ak.index.Index64(np.array([2, 3]))
+    listarray = ak.contents.ListArray(starts, stops, regulararray)
 
-    bytemaskedarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, False], dtype=np.int8)), listarray, True
+    bytemaskedarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False], dtype=np.int8)), listarray, True
     )
     assert bytemaskedarray.to_arrow().to_pylist() == to_list(bytemaskedarray)
 
 
 def test_toarrow_ByteMaskedArray_4():
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    content2 = ak._v2.contents.NumpyArray(
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
-    recordarray = ak._v2.contents.RecordArray(
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
+    recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
         fields=["one", "two", "2", "wonky"],
     )
 
-    bytemaskedarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, False], dtype=np.int8)), recordarray, True
+    bytemaskedarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False], dtype=np.int8)), recordarray, True
     )
     assert bytemaskedarray.to_arrow().to_pylist() == to_list(bytemaskedarray)
 
 
 def test_toarrow_ByteMaskedArray_5():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    index = ak._v2.index.Index32(np.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=np.int64))
-    indexedarray = ak._v2.contents.IndexedArray(index, content)
+    index = ak.index.Index32(np.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=np.int64))
+    indexedarray = ak.contents.IndexedArray(index, content)
 
-    bytemaskedarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, False, False], dtype=np.int8)),
+    bytemaskedarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, False, False], dtype=np.int8)),
         indexedarray,
         True,
     )
@@ -301,18 +301,16 @@ def test_toarrow_ByteMaskedArray_5():
 
 
 def test_toarrow_ByteMaskedArray_broken_unions_1():
-    content0 = ak._v2.highlevel.Array(
+    content0 = ak.highlevel.Array(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
     ).layout
-    content1 = ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
-    tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1, 0, 0], dtype=np.int8))
-    index = ak._v2.index.Index32(
-        np.array([0, 1, 1, 0, 2, 2, 4, 3, 3, 4], dtype=np.int32)
-    )
-    unionarray = ak._v2.contents.UnionArray(tags, index, [content0, content1])
+    content1 = ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
+    tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1, 0, 0], dtype=np.int8))
+    index = ak.index.Index32(np.array([0, 1, 1, 0, 2, 2, 4, 3, 3, 4], dtype=np.int32))
+    unionarray = ak.contents.UnionArray(tags, index, [content0, content1])
 
-    bytemaskedarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(
+    bytemaskedarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(
             # tags          1,     1,     0,    0,     1,    0,    1,     1,    0,     0
             # index         0,     1,     1,    0,     2,    2,    4,     3,    3,     4
             np.array(
@@ -327,20 +325,18 @@ def test_toarrow_ByteMaskedArray_broken_unions_1():
 
 
 def test_toarrow_ByteMaskedArray_broken_unions_2():
-    content0 = ak._v2.highlevel.Array(
+    content0 = ak.highlevel.Array(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
     ).layout
-    content1 = ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
-    tags = ak._v2.index.Index8(
-        np.array([1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0], dtype=np.int8)
-    )
-    index = ak._v2.index.Index32(
+    content1 = ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
+    tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0], dtype=np.int8))
+    index = ak.index.Index32(
         np.array([0, 1, 1, 0, 2, 2, 4, 3, 3, 4, 3], dtype=np.int32)
     )
-    unionarray = ak._v2.contents.UnionArray(tags, index, [content0, content1])
+    unionarray = ak.contents.UnionArray(tags, index, [content0, content1])
 
-    bytemaskedarray = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(
+    bytemaskedarray = ak.contents.ByteMaskedArray(
+        ak.index.Index8(
             # tags          1,     1,     0,    0,     1,    0,    1,     1,    0,     0,    0
             # index         0,     1,     1,    0,     2,    2,    4,     3,    3,     4,    3
             np.array(
@@ -355,9 +351,9 @@ def test_toarrow_ByteMaskedArray_broken_unions_2():
 
 
 def test_toarrow_IndexedOptionArray():
-    ioa = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]),
-        ak._v2.contents.NumpyArray(
+    ioa = ak.contents.IndexedOptionArray(
+        ak.index.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]),
+        ak.contents.NumpyArray(
             np.array(
                 [
                     5.2,
@@ -394,79 +390,77 @@ def test_toarrow_IndexedOptionArray():
 
 
 def test_fromarrow_NumpyArray_1():
-    boolarray = ak._v2.contents.NumpyArray(
+    boolarray = ak.contents.NumpyArray(
         np.array([True, True, True, False, False, True, False, True, False, True])
     )
-    assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(boolarray.to_arrow())
-    ) == to_list(boolarray)
+    assert to_list(ak._connect.pyarrow.handle_arrow(boolarray.to_arrow())) == to_list(
+        boolarray
+    )
 
 
 def test_fromarrow_NumpyArray_2():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(content.to_arrow())) == to_list(
+    assert to_list(ak._connect.pyarrow.handle_arrow(content.to_arrow())) == to_list(
         content
     )
 
 
 def test_fromarrow_ListOffsetArray():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow())
+        ak._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow())
     ) == to_list(listoffsetarray)
 
 
 def test_fromarrow_RegularArray():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+    regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(regulararray.to_arrow())
+        ak._connect.pyarrow.handle_arrow(regulararray.to_arrow())
     ) == to_list(regulararray)
 
 
 def test_fromarrow_RecordArray():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10], dtype=np.int64))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    content2 = ak._v2.contents.NumpyArray(
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
-    recordarray = ak._v2.contents.RecordArray(
+    offsets = ak.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
         fields=["one", "chonks", "2", "wonky"],
     )
-    assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(recordarray.to_arrow())
-    ) == to_list(recordarray)
+    assert to_list(ak._connect.pyarrow.handle_arrow(recordarray.to_arrow())) == to_list(
+        recordarray
+    )
 
 
 def test_fromarrow_UnionArray():
-    content0 = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content = ak._v2.highlevel.Array(
+    content0 = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content = ak.highlevel.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
-    index = ak._v2.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    array = ak._v2.contents.UnionArray(tags, index, [content0, content])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(array.to_arrow())) == to_list(
-        array
-    )
+    tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak.contents.UnionArray(tags, index, [content0, content])
+    assert to_list(ak._connect.pyarrow.handle_arrow(array.to_arrow())) == to_list(array)
 
 
 def test_chunkedarray():
@@ -482,7 +476,7 @@ def test_chunkedarray():
         ]
     )
     assert a.to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         1.1,
         2.2,
         3.3,
@@ -503,7 +497,7 @@ def test_recordbatch():
         ],
         ["a", "b"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"a": 1.1, "b": [1, 2, 3]},
         {"a": 2.2, "b": []},
         {"a": 3.3, "b": []},
@@ -518,7 +512,7 @@ def test_recordbatch():
         ],
         ["a", "b"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"a": 1.1, "b": [1, None, 3]},
         {"a": 2.2, "b": []},
         {"a": 3.3, "b": []},
@@ -560,7 +554,7 @@ def test_recordbatch():
         ],
         ["a", "b", "c", "d", "e"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {
             "a": 1.1,
             "b": [1, 2, 3],
@@ -597,38 +591,36 @@ def test_recordbatch():
 
 
 def test_arrow_toarrow_string():
-    a = ak._v2.operations.from_iter(["one", "two", "three"]).layout
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == to_list(a)
-    a = ak._v2.operations.from_iter(
-        [["one", "two", "three"], [], ["four", "five"]]
-    ).layout
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == to_list(a)
+    a = ak.operations.from_iter(["one", "two", "three"]).layout
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == to_list(a)
+    a = ak.operations.from_iter([["one", "two", "three"], [], ["four", "five"]]).layout
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == to_list(a)
     if hasattr(pyarrow.BinaryArray, "from_buffers"):
-        a = ak._v2.operations.from_iter([b"one", b"two", b"three"]).layout
-        assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+        a = ak.operations.from_iter([b"one", b"two", b"three"]).layout
+        assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
             b"one",
             b"two",
             b"three",
         ]
-        a = ak._v2.operations.from_iter(
+        a = ak.operations.from_iter(
             [[b"one", b"two", b"three"], [], [b"four", b"five"]]
         ).layout
-        assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+        assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
             [b"one", b"two", b"three"],
             [],
             [b"four", b"five"],
         ]
     else:
-        a = ak._v2.operations.from_iter([b"one", b"two", b"three"]).layout
-        assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+        a = ak.operations.from_iter([b"one", b"two", b"three"]).layout
+        assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
             "one",
             "two",
             "three",
         ]
-        a = ak._v2.operations.from_iter(
+        a = ak.operations.from_iter(
             [[b"one", b"two", b"three"], [], [b"four", b"five"]]
         ).layout
-        assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+        assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
             ["one", "two", "three"],
             [],
             ["four", "five"],
@@ -637,7 +629,7 @@ def test_arrow_toarrow_string():
 
 def test_arrow_array():
     a = pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         1.1,
         2.2,
         3.3,
@@ -648,7 +640,7 @@ def test_arrow_array():
 
 def test_arrow_boolean():
     a = pyarrow.array([True, True, False, False, True])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         True,
         True,
         False,
@@ -659,7 +651,7 @@ def test_arrow_boolean():
 
 def test_arrow_array_null():
     a = pyarrow.array([1.1, 2.2, 3.3, None, 4.4, 5.5])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         1.1,
         2.2,
         3.3,
@@ -671,7 +663,7 @@ def test_arrow_array_null():
 
 def test_arrow_nested_array():
     a = pyarrow.array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [1.1, 2.2, 3.3],
         [],
         [4.4, 5.5],
@@ -680,7 +672,7 @@ def test_arrow_nested_array():
 
 def test_arrow_nested_nested_array():
     a = pyarrow.array([[[1.1, 2.2], [3.3], []], [], [[4.4, 5.5]]])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [[1.1, 2.2], [3.3], []],
         [],
         [[4.4, 5.5]],
@@ -689,7 +681,7 @@ def test_arrow_nested_nested_array():
 
 def test_arrow_nested_array_null():
     a = pyarrow.array([[1.1, 2.2, None], [], [4.4, 5.5]])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [1.1, 2.2, None],
         [],
         [4.4, 5.5],
@@ -698,7 +690,7 @@ def test_arrow_nested_array_null():
 
 def test_arrow_null_nested_array_null():
     a = pyarrow.array([[1.1, 2.2, None], [], None, [4.4, 5.5]])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [1.1, 2.2, None],
         [],
         None,
@@ -714,7 +706,7 @@ def test_arrow_chunked_array():
             pyarrow.array([6.6, 7.7, 8.8]),
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         1.1,
         2.2,
         3.3,
@@ -728,7 +720,7 @@ def test_arrow_chunked_array():
 
 def test_arrow_struct():
     a = pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
         {"x": 3, "y": 3.3},
@@ -737,7 +729,7 @@ def test_arrow_struct():
 
 def test_arrow_struct_null():
     a = pyarrow.array([{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": None},
         {"x": 3, "y": 3.3},
@@ -748,7 +740,7 @@ def test_arrow_null_struct():
     a = pyarrow.array(
         [{"x": 1, "y": 1.1}, None, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"x": 1, "y": 1.1},
         None,
         {"x": 2, "y": 2.2},
@@ -760,7 +752,7 @@ def test_arrow_null_struct_null():
     a = pyarrow.array(
         [{"x": 1, "y": 1.1}, None, {"x": 2, "y": None}, {"x": 3, "y": 3.3}]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"x": 1, "y": 1.1},
         None,
         {"x": 2, "y": None},
@@ -779,7 +771,7 @@ def test_arrow_chunked_struct():
             pyarrow.array([{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}], t),
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
         {"x": 3, "y": 3.3},
@@ -796,7 +788,7 @@ def test_arrow_nested_struct():
             [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
         [],
         [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
@@ -811,7 +803,7 @@ def test_arrow_nested_struct_null():
             [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}],
         [],
         [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
@@ -827,7 +819,7 @@ def test_arrow_null_nested_struct():
             [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
         None,
         [],
@@ -844,7 +836,7 @@ def test_arrow_null_nested_struct_null():
             [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [{"x": 1, "y": 1.1}, {"x": 2, "y": None}, {"x": 3, "y": 3.3}],
         None,
         [],
@@ -856,7 +848,7 @@ def test_arrow_struct_nested():
     a = pyarrow.array(
         [{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [3, 3], "y": 3.3}]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"x": [], "y": 1.1},
         {"x": [2], "y": 2.2},
         {"x": [3, 3], "y": 3.3},
@@ -867,7 +859,7 @@ def test_arrow_struct_nested_null():
     a = pyarrow.array(
         [{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [None, 3], "y": 3.3}]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {"x": [], "y": 1.1},
         {"x": [2], "y": 2.2},
         {"x": [None, 3], "y": 3.3},
@@ -882,7 +874,7 @@ def test_arrow_nested_struct_nested():
             [{"x": [4, 4, 4], "y": 4.4}, {"x": [5, 5, 5, 5], "y": 5.5}],
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [3, 3], "y": 3.3}],
         [],
         [{"x": [4, 4, 4], "y": 4.4}, {"x": [5, 5, 5, 5], "y": 5.5}],
@@ -898,7 +890,7 @@ def test_arrow_null_nested_struct_nested_null():
             [{"x": [4, 4, 4], "y": 4.4}, {"x": [5, 5, 5, 5], "y": 5.5}],
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [{"x": [], "y": 1.1}, {"x": [2], "y": 2.2}, {"x": [None, 3], "y": 3.3}],
         None,
         [],
@@ -908,7 +900,7 @@ def test_arrow_null_nested_struct_nested_null():
 
 def test_arrow_strings():
     a = pyarrow.array(["one", "two", "three", "fo\u2014ur", "five"])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "two",
         "three",
@@ -919,7 +911,7 @@ def test_arrow_strings():
 
 def test_arrow_strings_null():
     a = pyarrow.array(["one", "two", None, "fo\u2014ur", "five"])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "two",
         None,
@@ -930,7 +922,7 @@ def test_arrow_strings_null():
 
 def test_arrow_binary():
     a = pyarrow.array([b"one", b"two", b"three", b"four", b"five"])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         b"one",
         b"two",
         b"three",
@@ -941,7 +933,7 @@ def test_arrow_binary():
 
 def test_arrow_binary_null():
     a = pyarrow.array([b"one", b"two", None, b"four", b"five"])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         b"one",
         b"two",
         None,
@@ -957,7 +949,7 @@ def test_arrow_chunked_strings():
             pyarrow.array(["six", "seven", "eight"]),
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "two",
         "three",
@@ -971,7 +963,7 @@ def test_arrow_chunked_strings():
 
 def test_arrow_nested_strings():
     a = pyarrow.array([["one", "two", "three"], [], ["four", "five"]])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         ["one", "two", "three"],
         [],
         ["four", "five"],
@@ -980,7 +972,7 @@ def test_arrow_nested_strings():
 
 def test_arrow_nested_strings_null():
     a = pyarrow.array([["one", "two", None], [], ["four", "five"]])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         ["one", "two", None],
         [],
         ["four", "five"],
@@ -989,7 +981,7 @@ def test_arrow_nested_strings_null():
 
 def test_arrow_null_nested_strings_null():
     a = pyarrow.array([["one", "two", None], [], None, ["four", "five"]])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         ["one", "two", None],
         [],
         None,
@@ -1005,7 +997,7 @@ def test_arrow_union_sparse():
             pyarrow.array([True, True, False, True, False]),
         ],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         0.0,
         True,
         2.2,
@@ -1022,7 +1014,7 @@ def test_arrow_union_sparse_null():
             pyarrow.array([True, True, False, True, False]),
         ],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         0.0,
         True,
         None,
@@ -1039,7 +1031,7 @@ def test_arrow_union_sparse_null_null():
             pyarrow.array([True, None, False, True, False]),
         ],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         0.0,
         None,
         None,
@@ -1054,7 +1046,7 @@ def test_arrow_union_dense():
         pyarrow.array([0, 0, 1, 2, 3, 1, 2], type=pyarrow.int32()),
         [pyarrow.array([0.0, 1.1, 2.2, 3.3]), pyarrow.array([True, True, False])],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         0.0,
         True,
         1.1,
@@ -1071,7 +1063,7 @@ def test_arrow_union_dense_null():
         pyarrow.array([0, 0, 1, 2, 3, 1, 2], type=pyarrow.int32()),
         [pyarrow.array([0.0, 1.1, None, 3.3]), pyarrow.array([True, True, False])],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         0.0,
         True,
         1.1,
@@ -1088,7 +1080,7 @@ def test_arrow_union_dense_null_null():
         pyarrow.array([0, 0, 1, 2, 3, 1, 2], type=pyarrow.int32()),
         [pyarrow.array([0.0, 1.1, None, 3.3]), pyarrow.array([True, None, False])],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         0.0,
         True,
         1.1,
@@ -1104,7 +1096,7 @@ def test_arrow_dictarray():
         pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
         pyarrow.array(["one", "two", "three"]),
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "one",
         "three",
@@ -1122,7 +1114,7 @@ def test_arrow_dictarray_null():
         pyarrow.array([0, 0, 2, None, 1, None, 2, 1, 1]),
         pyarrow.array(["one", "two", "three"]),
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "one",
         "three",
@@ -1140,7 +1132,7 @@ def test_arrow_null_dictarray():
         pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
         pyarrow.array(["one", None, "three"]),
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         "one",
         "one",
         "three",
@@ -1188,7 +1180,7 @@ def test_arrow_batch():
         ],
         ["a", "b", "c", "d", "e"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {
             "a": 1.1,
             "b": [1, 2, 3],
@@ -1302,7 +1294,7 @@ def test_arrow_table():
             ),
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         {
             "a": 1.1,
             "b": [1, 2, 3],
@@ -1377,7 +1369,7 @@ def test_arrow_nonnullable_table():
         )
     else:
         table2 = table.add_column(1, "y", y)
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(table2)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(table2)) == [
         {"x": 1, "y": 1.1},
         {"x": 2, "y": 2.2},
         {"x": 3, "y": 3.3},
@@ -1385,25 +1377,25 @@ def test_arrow_nonnullable_table():
 
 
 def test_arrow_coverage100():
-    a = ak._v2.operations.from_iter(
+    a = ak.operations.from_iter(
         [True, True, False, False, True, False, True, False]
     ).layout
     assert a.to_arrow().to_pylist() == to_list(a)
 
-    a = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-        ak._v2.contents.NumpyArray(
+    a = ak.contents.ListOffsetArray(
+        ak.index.Index32(np.array([0, 5, 10], "i4")),
+        ak.contents.NumpyArray(
             np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
         ),
         parameters={"__array__": "bytestring"},
     )
     assert a.to_arrow().to_pylist() == [b"hello", b"there"]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True, False, False, True, True])),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, True, False, False, True, True])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
                 parameters={"__array__": "bytes"},
             ),
@@ -1420,11 +1412,11 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True])),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, True])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10], "i4")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
             ),
             parameters={"__array__": "bytestring"},
@@ -1433,11 +1425,11 @@ def test_arrow_coverage100():
     )
     assert a.to_arrow().to_pylist() == [b"hello", None]
 
-    a = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.IndexedOptionArray(
+        ak.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10], "i4")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "bytes"}
             ),
             parameters={"__array__": "bytestring"},
@@ -1452,20 +1444,20 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-        ak._v2.contents.NumpyArray(
+    a = ak.contents.ListOffsetArray(
+        ak.index.Index32(np.array([0, 5, 10], "i4")),
+        ak.contents.NumpyArray(
             np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
         ),
         parameters={"__array__": "string"},
     )
     assert a.to_arrow().to_pylist() == ["hello", "there"]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True, False, False, True, True])),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, True, False, False, True, True])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
                 parameters={"__array__": "chars"},
             ),
@@ -1474,7 +1466,7 @@ def test_arrow_coverage100():
         valid_when=False,
     )
     assert a.to_arrow().to_pylist() == ["hello", None, "hello", "there", None, None]
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
         "hello",
         None,
         "hello",
@@ -1483,11 +1475,11 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True, False, False, True, True])),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], "i8")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, True, False, False, True, True])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], "i8")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
                 parameters={"__array__": "chars"},
             ),
@@ -1496,7 +1488,7 @@ def test_arrow_coverage100():
         valid_when=False,
     )
     assert a.to_arrow().to_pylist() == ["hello", None, "hello", "there", None, None]
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
         "hello",
         None,
         "hello",
@@ -1505,11 +1497,11 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True, False, False, True, True])),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], "i8")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, True, False, False, True, True])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], "i8")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1"),
                 parameters={"__array__": "bytes"},
             ),
@@ -1525,7 +1517,7 @@ def test_arrow_coverage100():
         None,
         None,
     ]
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
         b"hello",
         None,
         b"hello",
@@ -1534,11 +1526,11 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True])),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, True])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10], "i4")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
             ),
             parameters={"__array__": "string"},
@@ -1547,11 +1539,11 @@ def test_arrow_coverage100():
     )
     assert a.to_arrow().to_pylist() == ["hello", None]
 
-    a = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.IndexedOptionArray(
+        ak.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10], "i4")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellothere", "u1"), parameters={"__array__": "chars"}
             ),
             parameters={"__array__": "string"},
@@ -1559,20 +1551,20 @@ def test_arrow_coverage100():
     )
     assert a.to_arrow().to_pylist() == [None, "there", None, "hello", "hello", None]
 
-    a = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-        ak._v2.contents.NumpyArray(np.frombuffer(b"hellothere", "u1")),
+    a = ak.contents.ListOffsetArray(
+        ak.index.Index32(np.array([0, 5, 10], "i4")),
+        ak.contents.NumpyArray(np.frombuffer(b"hellothere", "u1")),
     )
     assert a.to_arrow().to_pylist() == [
         [104, 101, 108, 108, 111],
         [116, 104, 101, 114, 101],
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True, False, False, True, True])),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
-            ak._v2.contents.NumpyArray(
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, True, False, False, True, True])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10, 15, 20, 25, 30], "i4")),
+            ak.contents.NumpyArray(
                 np.frombuffer(b"hellotherehellotherehellothere", "u1")
             ),
         ),
@@ -1587,21 +1579,21 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, True])),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-            ak._v2.contents.NumpyArray(np.frombuffer(b"hellothere", "u1")),
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, True])),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10], "i4")),
+            ak.contents.NumpyArray(np.frombuffer(b"hellothere", "u1")),
         ),
         valid_when=False,
     )
     assert a.to_arrow().to_pylist() == [[104, 101, 108, 108, 111], None]
 
-    a = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-            ak._v2.contents.NumpyArray(np.frombuffer(b"hellothere", "u1")),
+    a = ak.contents.IndexedOptionArray(
+        ak.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10], "i4")),
+            ak.contents.NumpyArray(np.frombuffer(b"hellothere", "u1")),
         ),
     )
     assert a.to_arrow().to_pylist() == [
@@ -1613,10 +1605,10 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
-        ak._v2.contents.RegularArray(
-            ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    a = ak.contents.IndexedOptionArray(
+        ak.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
             3,
             zeros_length=0,
         ),
@@ -1630,29 +1622,10 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index32(np.array([-1, 1, -1, 0, 0, -1, 1, -1], "i4")),
-        ak._v2.contents.RegularArray(
-            ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
-            3,
-            zeros_length=0,
-        ),
-    )
-    assert a.to_arrow().to_pylist() == [
-        None,
-        [4.4, 5.5, 6.6],
-        None,
-        [1.1, 2.2, 3.3],
-        [1.1, 2.2, 3.3],
-        None,
-        [4.4, 5.5, 6.6],
-        None,
-    ]
-
-    a = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index64(np.array([-1, 1, -1, 0, 0, -1, 1, -1], "i8")),
-        ak._v2.contents.RegularArray(
-            ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    a = ak.contents.IndexedOptionArray(
+        ak.index.Index32(np.array([-1, 1, -1, 0, 0, -1, 1, -1], "i4")),
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
             3,
             zeros_length=0,
         ),
@@ -1668,12 +1641,31 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, True, True, True, False, False])),
-        ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
-            ak._v2.contents.RegularArray(
-                ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    a = ak.contents.IndexedOptionArray(
+        ak.index.Index64(np.array([-1, 1, -1, 0, 0, -1, 1, -1], "i8")),
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+            3,
+            zeros_length=0,
+        ),
+    )
+    assert a.to_arrow().to_pylist() == [
+        None,
+        [4.4, 5.5, 6.6],
+        None,
+        [1.1, 2.2, 3.3],
+        [1.1, 2.2, 3.3],
+        None,
+        [4.4, 5.5, 6.6],
+        None,
+    ]
+
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, True, True, True, False, False])),
+        ak.contents.IndexedOptionArray(
+            ak.index.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
+            ak.contents.RegularArray(
+                ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
                 3,
                 zeros_length=0,
             ),
@@ -1689,10 +1681,10 @@ def test_arrow_coverage100():
         None,
     ]
 
-    a = ak._v2.contents.UnmaskedArray(
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index32(np.array([0, 5, 10], "i4")),
-            ak._v2.contents.NumpyArray(np.frombuffer(b"hellothere", "u1")),
+    a = ak.contents.UnmaskedArray(
+        ak.contents.ListOffsetArray(
+            ak.index.Index32(np.array([0, 5, 10], "i4")),
+            ak.contents.NumpyArray(np.frombuffer(b"hellothere", "u1")),
         )
     )
     assert a.to_arrow().to_pylist() == [
@@ -1703,28 +1695,28 @@ def test_arrow_coverage100():
     a = pyarrow.array(
         ["one", "two", "three", "two", "two", "one", "three", "one"]
     ).dictionary_encode()
-    b = ak._v2._connect.pyarrow.handle_arrow(a)
-    assert isinstance(b, ak._v2.contents.IndexedOptionArray)
+    b = ak._connect.pyarrow.handle_arrow(a)
+    assert isinstance(b, ak.contents.IndexedOptionArray)
     assert to_list(b) == ["one", "two", "three", "two", "two", "one", "three", "one"]
 
-    a = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]).layout
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+    a = ak.highlevel.Array([[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]).layout
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
         [1.1, 2.2, 3.3],
         [],
         None,
         [4.4, 5.5],
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, False, False, True, True, False, False])),
-        ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 999, 314, 4.4, 5.5])),
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, False, False, True, True, False, False])),
+        ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 999, 314, 4.4, 5.5])),
         valid_when=False,
     )
     assert a.to_arrow().to_pylist() == [1.1, 2.2, 3.3, None, None, 4.4, 5.5]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([False, False, False, True, True, False, False])),
-        ak._v2.operations.from_iter(
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([False, False, False, True, True, False, False])),
+        ak.operations.from_iter(
             [b"hello", b"", b"there", b"yuk", b"", b"o", b"hellothere"]
         ).layout,
         valid_when=False,
@@ -1739,21 +1731,21 @@ def test_arrow_coverage100():
         b"hellothere",
     ]
 
-    a = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8([True, True, False, True]),
-        ak._v2.operations.from_iter([[1.1, 2.2, 3.3], [], [999], [4.4, 5.5]]).layout,
+    a = ak.contents.ByteMaskedArray(
+        ak.index.Index8([True, True, False, True]),
+        ak.operations.from_iter([[1.1, 2.2, 3.3], [], [999], [4.4, 5.5]]).layout,
         valid_when=True,
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
         [1.1, 2.2, 3.3],
         [],
         None,
         [4.4, 5.5],
     ]
 
-    a = ak._v2.operations.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
+    a = ak.operations.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
     assert a.to_arrow().to_pylist() == [[1, 2, 3], [], [4, 5], 999, 123]
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
         [1, 2, 3],
         [],
         [4, 5],
@@ -1763,14 +1755,14 @@ def test_arrow_coverage100():
 
 
 def test_arrow_coverage100_broken_unions():
-    a = ak._v2.operations.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
-    b = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index8(np.array([True, True, False, False, True])),
+    a = ak.operations.from_iter([[1, 2, 3], [], [4, 5], 999, 123]).layout
+    b = ak.contents.ByteMaskedArray(
+        ak.index.Index8(np.array([True, True, False, False, True])),
         a,
         valid_when=True,
     )
     assert b.to_arrow().to_pylist() == [[1, 2, 3], [], None, None, 123]
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(b.to_arrow())) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(b.to_arrow())) == [
         [1, 2, 3],
         [],
         None,
@@ -1778,16 +1770,16 @@ def test_arrow_coverage100_broken_unions():
         123,
     ]
 
-    content1 = ak._v2.operations.from_iter([1.1, 2.2, 3.3, 4.4, 5.5]).layout
-    content2 = ak._v2.contents.NumpyArray(np.array([], dtype=np.int32))
-    a = ak._v2.contents.UnionArray(
-        ak._v2.index.Index8(np.array([0, 0, 0, 0, 0], "i1")),
-        ak._v2.index.Index32(np.array([0, 1, 2, 3, 4], "i4")),
+    content1 = ak.operations.from_iter([1.1, 2.2, 3.3, 4.4, 5.5]).layout
+    content2 = ak.contents.NumpyArray(np.array([], dtype=np.int32))
+    a = ak.contents.UnionArray(
+        ak.index.Index8(np.array([0, 0, 0, 0, 0], "i1")),
+        ak.index.Index32(np.array([0, 1, 2, 3, 4], "i4")),
         [content1, content2],
     )
     assert to_list(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert a.to_arrow().to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a.to_arrow())) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a.to_arrow())) == [
         1.1,
         2.2,
         3.3,
@@ -1802,7 +1794,7 @@ def test_arrow_coverage100_broken_unions():
             pyarrow.array([True, None, False, True, False]),
         ],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         0.0,
         1.1,
         None,
@@ -1820,7 +1812,7 @@ def test_arrow_coverage100_broken_unions():
         [0, 1],
     )
     assert a.to_pylist() == [[0.0, 1.1, 2.2], 1.1, None, None, None]
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         [0.0, 1.1, 2.2],
         1.1,
         None,
@@ -1829,7 +1821,7 @@ def test_arrow_coverage100_broken_unions():
     ]
 
     a = pyarrow.chunked_array([pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5])])
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a)) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a)) == [
         1.1,
         2.2,
         3.3,
@@ -1840,299 +1832,299 @@ def test_arrow_coverage100_broken_unions():
 
 # NumpyArray in Awkward Arrays translate to their corresponding DataType Arrays in Arrow
 def test_nonzero_offset_fromarrow_NumpyArray_1():
-    boolarray = ak._v2.contents.NumpyArray(
+    boolarray = ak.contents.NumpyArray(
         np.array([True, True, True, False, False, True, False, True, False, True])
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(boolarray.to_arrow()[5:])
+        ak._connect.pyarrow.handle_arrow(boolarray.to_arrow()[5:])
     ) == pyarrow.Array.to_pylist(boolarray.to_arrow()[5:])
 
 
 def test_nonzero_offset_fromarrow_NumpyArray_2():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(content.to_arrow()[2:])
+        ak._connect.pyarrow.handle_arrow(content.to_arrow()[2:])
     ) == pyarrow.Array.to_pylist(content.to_arrow()[2:])
 
 
 def test_nonzero_offset_fromarrow_NumpyArray_3():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(content.to_arrow()[2:5])
+        ak._connect.pyarrow.handle_arrow(content.to_arrow()[2:5])
     ) == pyarrow.Array.to_pylist(content.to_arrow()[2:5])
 
 
 def test_nonzero_offset_fromarrow_NumpyArray_4():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(content.to_arrow()[0:9:2])
+        ak._connect.pyarrow.handle_arrow(content.to_arrow()[0:9:2])
     ) == pyarrow.Array.to_pylist(content.to_arrow()[0:9:2])
 
 
 def test_nonzero_offset_fromarrow_NumpyArray_5():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(content.to_arrow()[-2:10])
+        ak._connect.pyarrow.handle_arrow(content.to_arrow()[-2:10])
     ) == pyarrow.Array.to_pylist(content.to_arrow()[-2:10])
 
 
 def test_nonzero_offset_fromarrow_NumpyArray_6():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(content.to_arrow()[-3:3:-1])
+        ak._connect.pyarrow.handle_arrow(content.to_arrow()[-3:3:-1])
     ) == pyarrow.Array.to_pylist(content.to_arrow()[-3:3:-1])
 
 
 # ListOffsetArrays in Awkward Arrays translate to ListArrays in Arrow
 def test_nonzero_offset_fromarrow_ListOffsetArray_1():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow()[2:])
+        ak._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow()[2:])
     ) == pyarrow.Array.to_pylist(listoffsetarray.to_arrow()[2:])
 
 
 def test_nonzero_offset_fromarrow_ListOffsetArray_2():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow()[2:5])
+        ak._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow()[2:5])
     ) == pyarrow.Array.to_pylist(listoffsetarray.to_arrow()[2:5])
 
 
 def test_nonzero_offset_fromarrow_ListOffsetArray_3():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow()[0:5:2])
+        ak._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow()[0:5:2])
     ) == pyarrow.Array.to_pylist(listoffsetarray.to_arrow()[0:5:2])
 
 
 def test_nonzero_offset_fromarrow_ListOffsetArray_4():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow()[-3:3:-1])
+        ak._connect.pyarrow.handle_arrow(listoffsetarray.to_arrow()[-3:3:-1])
     ) == pyarrow.Array.to_pylist(listoffsetarray.to_arrow()[-3:3:-1])
 
 
 # RegularArrays in Awkward Arrays translate to ListArrays in Arrow
 def test_nonzero_offset_fromarrow_RegularArray_1():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+    regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(regulararray.to_arrow()[2:])
+        ak._connect.pyarrow.handle_arrow(regulararray.to_arrow()[2:])
     ) == pyarrow.Array.to_pylist(regulararray.to_arrow()[2:])
 
 
 def test_nonzero_offset_fromarrow_RegularArray_2():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+    regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(regulararray.to_arrow()[2:5])
+        ak._connect.pyarrow.handle_arrow(regulararray.to_arrow()[2:5])
     ) == pyarrow.Array.to_pylist(regulararray.to_arrow()[2:5])
 
 
 def test_nonzero_offset_fromarrow_RegularArray_3():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+    regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(regulararray.to_arrow()[0:5:2])
+        ak._connect.pyarrow.handle_arrow(regulararray.to_arrow()[0:5:2])
     ) == pyarrow.Array.to_pylist(regulararray.to_arrow()[0:5:2])
 
 
 def test_nonzero_offset_fromarrow_RegularArray_4():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    regulararray = ak._v2.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
+    regulararray = ak.contents.RegularArray(listoffsetarray, 2, zeros_length=0)
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(regulararray.to_arrow()[-3:3:-1])
+        ak._connect.pyarrow.handle_arrow(regulararray.to_arrow()[-3:3:-1])
     ) == pyarrow.Array.to_pylist(regulararray.to_arrow()[-3:3:-1])
 
 
 # RecordArrays in Awkward Arrays translate to Struct Arrays in Arrow
 def test_nonzero_offset_fromarrow_RecordArray_1():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    content2 = ak._v2.contents.NumpyArray(
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
-    recordarray = ak._v2.contents.RecordArray(
+    offsets = ak.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
         fields=["one", "chonks", "2", "wonky"],
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(recordarray.to_arrow()[2:])
+        ak._connect.pyarrow.handle_arrow(recordarray.to_arrow()[2:])
     ) == pyarrow.Array.to_pylist(recordarray.to_arrow()[2:])
 
 
 def test_nonzero_offset_fromarrow_RecordArray_2():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    content2 = ak._v2.contents.NumpyArray(
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
-    recordarray = ak._v2.contents.RecordArray(
+    offsets = ak.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
         fields=["one", "chonks", "2", "wonky"],
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(recordarray.to_arrow()[2:5])
+        ak._connect.pyarrow.handle_arrow(recordarray.to_arrow()[2:5])
     ) == pyarrow.Array.to_pylist(recordarray.to_arrow()[2:5])
 
 
 def test_nonzero_offset_fromarrow_RecordArray_3():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    content2 = ak._v2.contents.NumpyArray(
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
-    recordarray = ak._v2.contents.RecordArray(
+    offsets = ak.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
         fields=["one", "chonks", "2", "wonky"],
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(recordarray.to_arrow()[0:5:2])
+        ak._connect.pyarrow.handle_arrow(recordarray.to_arrow()[0:5:2])
     ) == pyarrow.Array.to_pylist(recordarray.to_arrow()[0:5:2])
 
 
 def test_nonzero_offset_fromarrow_RecordArray_4():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    content2 = ak._v2.contents.NumpyArray(
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
-    recordarray = ak._v2.contents.RecordArray(
+    offsets = ak.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
         fields=["one", "chonks", "2", "wonky"],
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(recordarray.to_arrow()[-3:3:-1])
+        ak._connect.pyarrow.handle_arrow(recordarray.to_arrow()[-3:3:-1])
     ) == pyarrow.Array.to_pylist(recordarray.to_arrow()[-3:3:-1])
 
 
 def test_nonzero_offset_fromarrow_RecordArray_4_again():
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
-    offsets = ak._v2.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(offsets, content)
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
-    content1 = ak._v2.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
-    content2 = ak._v2.contents.NumpyArray(
+    content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    offsets = ak._v2.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
-    recordarray = ak._v2.contents.RecordArray(
+    offsets = ak.index.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.contents.RecordArray(
         [content1, listoffsetarray, content2, content1],
         fields=["one", "chonks", "2", "wonky"],
     )
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(recordarray.to_arrow()[-3:3:-1])
+        ak._connect.pyarrow.handle_arrow(recordarray.to_arrow()[-3:3:-1])
     ) == pyarrow.Array.to_pylist(recordarray.to_arrow()[-3:3:-1])
 
 
 def test_nonzero_offset_fromarrow_UnionArray_1():
-    content0 = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content = ak._v2.highlevel.Array(
+    content0 = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content = ak.highlevel.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
-    index = ak._v2.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    array = ak._v2.contents.UnionArray(tags, index, [content0, content])
+    tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak.contents.UnionArray(tags, index, [content0, content])
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(array.to_arrow()[2:])
+        ak._connect.pyarrow.handle_arrow(array.to_arrow()[2:])
     ) == pyarrow.Array.to_pylist(array.to_arrow()[2:])
 
 
 def test_nonzero_offset_fromarrow_UnionArray_2():
-    content0 = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content = ak._v2.highlevel.Array(
+    content0 = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content = ak.highlevel.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
-    index = ak._v2.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    array = ak._v2.contents.UnionArray(tags, index, [content0, content])
+    tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak.contents.UnionArray(tags, index, [content0, content])
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(array.to_arrow()[2:5])
+        ak._connect.pyarrow.handle_arrow(array.to_arrow()[2:5])
     ) == pyarrow.Array.to_pylist(array.to_arrow()[2:5])
 
 
 def test_nonzero_offset_fromarrow_UnionArray_3():
-    content0 = ak._v2.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    content = ak._v2.highlevel.Array(
+    content0 = ak.highlevel.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content = ak.highlevel.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    tags = ak._v2.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
-    index = ak._v2.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-    array = ak._v2.contents.UnionArray(tags, index, [content0, content])
+    tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.index.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak.contents.UnionArray(tags, index, [content0, content])
     assert to_list(
-        ak._v2._connect.pyarrow.handle_arrow(array.to_arrow()[0:5:1])
+        ak._connect.pyarrow.handle_arrow(array.to_arrow()[0:5:1])
     ) == pyarrow.Array.to_pylist(array.to_arrow()[0:5:1])
 
 
@@ -2141,7 +2133,7 @@ def test_nonzero_offset_fromarrow_ArrowDictionaryArray_1():
         pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
         pyarrow.array(["one", None, "three"]),
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[2:])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[2:])) == [
         "three",
         "three",
         None,
@@ -2157,7 +2149,7 @@ def test_nonzero_offset_fromarrow_ArrowDictionaryArray_2():
         pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
         pyarrow.array(["one", None, "three"]),
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[2:5])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[2:5])) == [
         "three",
         "three",
         None,
@@ -2169,7 +2161,7 @@ def test_nonzero_offset_fromarrow_ArrowDictionaryArray_3():
         pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
         pyarrow.array(["one", None, "three"]),
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[0:8:2])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[0:8:2])) == [
         "one",
         "three",
         None,
@@ -2182,7 +2174,7 @@ def test_nonzero_offset_fromarrow_ArrowDictionaryArray_4():
         pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
         pyarrow.array(["one", None, "three"]),
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[-3:3:-1])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[-3:3:-1])) == [
         "three",
         "one",
         None,
@@ -2197,7 +2189,7 @@ def test_nonzero_offset_fromarrow_ArrowRecordBatch_1():
         ],
         ["a", "b"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[0])) == a[0].to_pylist()
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[0])) == a[0].to_pylist()
 
 
 def test_nonzero_offset_fromarrow_ArrowRecordBatch_2():
@@ -2208,7 +2200,7 @@ def test_nonzero_offset_fromarrow_ArrowRecordBatch_2():
         ],
         ["a", "b"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[2:])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[2:])) == [
         {"a": 3.3, "b": []},
         {"a": 4.4, "b": [4, 5]},
         {"a": 5.5, "b": [6]},
@@ -2223,7 +2215,7 @@ def test_nonzero_offset_fromarrow_ArrowRecordBatch_3():
         ],
         ["a", "b"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[2:5])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[2:5])) == [
         {"a": 3.3, "b": []},
         {"a": 4.4, "b": [4, 5]},
         {"a": 5.5, "b": [6]},
@@ -2238,7 +2230,7 @@ def test_nonzero_offset_fromarrow_ArrowRecordBatch_4():
         ],
         ["a", "b"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[0:5:2])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[0:5:2])) == [
         {"a": 1.1, "b": [1, 2, 3]},
         {"a": 3.3, "b": []},
         {"a": 5.5, "b": [6]},
@@ -2253,7 +2245,7 @@ def test_nonzero_offset_fromarrow_ArrowRecordBatch_4_again():
         ],
         ["a", "b"],
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[-2:0:-1])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[-2:0:-1])) == [
         {"a": 4.4, "b": [4, 5]},
         {"a": 3.3, "b": []},
         {"a": 2.2, "b": []},
@@ -2341,7 +2333,7 @@ def test_nonzero_offset_fromarrow_ArrowTable_1():
             ),
         ]
     )
-    assert to_list(ak._v2._connect.pyarrow.handle_arrow(a[0:5:2])) == [
+    assert to_list(ak._connect.pyarrow.handle_arrow(a[0:5:2])) == [
         {
             "a": 1.1,
             "b": [1, 2, 3],

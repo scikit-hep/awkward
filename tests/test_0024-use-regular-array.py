@@ -4,17 +4,17 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_empty_array_slice():
     # inspired by PR021::test_getitem
-    a = ak._v2.operations.from_json("[[], [[], []], [[], [], []]]")
+    a = ak.operations.from_json("[[], [[], []], [[], [], []]]")
     assert to_list(a[2, 1, np.array([], dtype=np.int64)]) == []
     # FIXME: assert [[]] == []
     # assert to_list(a[2, np.array([1], dtype=np.int64), np.array([], dtype=np.int64)]) == []
 
-    a = ak._v2.operations.from_iter([[], [[], []], [[], [], []]], highlevel=False)
+    a = ak.operations.from_iter([[], [[], []], [[], [], []]], highlevel=False)
     assert to_list(a[2, 1, np.array([], dtype=np.int64)]) == []
     assert (
         a.typetracer[2, 1, np.array([], dtype=np.int64)].form
@@ -29,12 +29,12 @@ def test_empty_array_slice():
     )
 
     # inspired by PR015::test_deep_numpy
-    content = ak._v2.contents.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5], [6.6, 7.7], [8.8, 9.9]])
     )
-    listarray = ak._v2.contents.ListArray(
-        ak._v2.index.Index64(np.array([0, 3, 3])),
-        ak._v2.index.Index64(np.array([3, 3, 5])),
+    listarray = ak.contents.ListArray(
+        ak.index.Index64(np.array([0, 3, 3])),
+        ak.index.Index64(np.array([3, 3, 5])),
         content,
     )
     assert to_list(listarray[[2, 0, 0, -1], [1, -1, 0, 0], [0, 1, 0, 1]]) == [
@@ -63,11 +63,11 @@ def test_empty_array_slice():
 def test_nonflat_slice():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
 
-    content = ak._v2.contents.NumpyArray(array.reshape(-1))
-    inneroffsets = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
-    outeroffsets = ak._v2.index.Index64(np.array([0, 3, 6]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(
-        outeroffsets, ak._v2.contents.ListOffsetArray(inneroffsets, content)
+    content = ak.contents.NumpyArray(array.reshape(-1))
+    inneroffsets = ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
+    outeroffsets = ak.index.Index64(np.array([0, 3, 6]))
+    listoffsetarray = ak.contents.ListOffsetArray(
+        outeroffsets, ak.contents.ListOffsetArray(inneroffsets, content)
     )
 
     assert to_list(
@@ -91,11 +91,11 @@ def test_nonflat_slice():
 
 def test_nonflat_slice_2():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
-    content = ak._v2.contents.NumpyArray(array.reshape(-1))
-    inneroffsets = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
-    outeroffsets = ak._v2.index.Index64(np.array([0, 3, 6]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(
-        outeroffsets, ak._v2.contents.ListOffsetArray(inneroffsets, content)
+    content = ak.contents.NumpyArray(array.reshape(-1))
+    inneroffsets = ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
+    outeroffsets = ak.index.Index64(np.array([0, 3, 6]))
+    listoffsetarray = ak.contents.ListOffsetArray(
+        outeroffsets, ak.contents.ListOffsetArray(inneroffsets, content)
     )
 
     two = listoffsetarray[
@@ -109,11 +109,11 @@ def test_nonflat_slice_2():
 def test_newaxis():
     array = np.arange(2 * 3 * 5).reshape(2, 3, 5)
 
-    content = ak._v2.contents.NumpyArray(array.reshape(-1))
-    inneroffsets = ak._v2.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
-    outeroffsets = ak._v2.index.Index64(np.array([0, 3, 6]))
-    listoffsetarray = ak._v2.contents.ListOffsetArray(
-        outeroffsets, ak._v2.contents.ListOffsetArray(inneroffsets, content)
+    content = ak.contents.NumpyArray(array.reshape(-1))
+    inneroffsets = ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30]))
+    outeroffsets = ak.index.Index64(np.array([0, 3, 6]))
+    listoffsetarray = ak.contents.ListOffsetArray(
+        outeroffsets, ak.contents.ListOffsetArray(inneroffsets, content)
     )
 
     assert to_list(array[:, np.newaxis]) == [

@@ -4,18 +4,18 @@ import pytest
 import awkward as ak
 
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_types():
-    t0 = ak._v2.types.UnknownType()
-    t1 = ak._v2.types.NumpyType("int32")
-    t2 = ak._v2.types.OptionType(t1)
-    t3 = ak._v2.types.UnionType((t1, ak._v2.types.NumpyType("float64")))
-    t4 = ak._v2.types.ListType(t1)
-    t4b = ak._v2.types.ListType(ak._v2.types.NumpyType("int32"))
-    t5 = ak._v2.types.ListType(t4)
-    t6 = ak._v2.types.OptionType(t4)
+    t0 = ak.types.UnknownType()
+    t1 = ak.types.NumpyType("int32")
+    t2 = ak.types.OptionType(t1)
+    t3 = ak.types.UnionType((t1, ak.types.NumpyType("float64")))
+    t4 = ak.types.ListType(t1)
+    t4b = ak.types.ListType(ak.types.NumpyType("int32"))
+    t5 = ak.types.ListType(t4)
+    t6 = ak.types.OptionType(t4)
     assert str(t0) == "unknown"
     assert str(t1) == "int32"
     assert str(t2) == "?int32"
@@ -35,7 +35,7 @@ def test_types():
 
 
 def test_boolean():
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     a.boolean(True)
     a.boolean(True)
     a.boolean(False)
@@ -46,7 +46,7 @@ def test_boolean():
 
 
 def test_big():
-    a = ak._v2.highlevel.ArrayBuilder(initial=90)
+    a = ak.highlevel.ArrayBuilder(initial=90)
     for i in range(2000):
         if i == 200:
             tmp = a.snapshot()
@@ -56,7 +56,7 @@ def test_big():
 
 
 def test_integer():
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     a.integer(10)
     a.integer(9)
     a.integer(8)
@@ -68,7 +68,7 @@ def test_integer():
 
 
 def test_real():
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     a.real(1.1)
     a.real(2.2)
     a.real(3.3)
@@ -80,7 +80,7 @@ def test_real():
 
 
 def test_integer_real():
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     a.integer(1)
     a.integer(2)
     a.real(3.3)
@@ -92,7 +92,7 @@ def test_integer_real():
 
 
 def test_real_integer():
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     a.real(1.1)
     a.real(2.2)
     a.integer(3)
@@ -104,7 +104,7 @@ def test_real_integer():
 
 
 def test_list_real():
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     a.begin_list()
     a.real(1.1)
     a.real(2.2)
@@ -123,7 +123,7 @@ def test_list_real():
 
 
 def test_list_list_real():
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     a.begin_list()
     a.begin_list()
     a.real(1.1)
@@ -164,23 +164,23 @@ def test_list_list_real():
 
 def test_list_errors():
     with pytest.raises(ValueError):
-        a = ak._v2.highlevel.ArrayBuilder()
+        a = ak.highlevel.ArrayBuilder()
         a.end_list()
 
     with pytest.raises(ValueError):
-        a = ak._v2.highlevel.ArrayBuilder()
+        a = ak.highlevel.ArrayBuilder()
         a.real(3.14)
         a.end_list()
 
     with pytest.raises(ValueError):
-        a = ak._v2.highlevel.ArrayBuilder()
+        a = ak.highlevel.ArrayBuilder()
         a.begin_list()
         a.real(3.14)
         a.end_list()
         a.end_list()
 
     with pytest.raises(ValueError):
-        a = ak._v2.highlevel.ArrayBuilder()
+        a = ak.highlevel.ArrayBuilder()
         a.begin_list()
         a.begin_list()
         a.real(3.14)
@@ -188,7 +188,7 @@ def test_list_errors():
         a.end_list()
         a.end_list()
 
-    a = ak._v2.highlevel.ArrayBuilder()
+    a = ak.highlevel.ArrayBuilder()
     a.begin_list()
     a.real(1.1)
     a.real(2.2)

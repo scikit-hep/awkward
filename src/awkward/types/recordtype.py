@@ -4,15 +4,15 @@ import json
 from collections.abc import Iterable
 
 import awkward as ak
-import awkward._v2._prettyprint
-from awkward._v2.types.type import Type
-from awkward._v2.forms.form import _parameters_equal
+import awkward._prettyprint
+from awkward.types.type import Type
+from awkward.forms.form import _parameters_equal
 
 
 class RecordType(Type):
     def __init__(self, contents, fields, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -23,7 +23,7 @@ class RecordType(Type):
             contents = list(contents)
         for content in contents:
             if not isinstance(content, Type):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     TypeError(
                         "{} all 'contents' must be Type subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -31,7 +31,7 @@ class RecordType(Type):
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'fields' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -39,15 +39,15 @@ class RecordType(Type):
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
                     )
                 )
             )
-        if typestr is not None and not ak._v2._util.isstr(typestr):
-            raise ak._v2._util.error(
+        if typestr is not None and not ak._util.isstr(typestr):
+            raise ak._util.error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)
@@ -102,7 +102,7 @@ class RecordType(Type):
 
             if name is not None:
                 if (
-                    not ak._v2._prettyprint.is_identifier.match(name)
+                    not ak._prettyprint.is_identifier.match(name)
                     or name
                     in (
                         "unknown",
@@ -114,7 +114,7 @@ class RecordType(Type):
                         "union",
                         "categorical",
                     )
-                    or name in ak._v2.types.numpytype._primitive_to_dtype_dict
+                    or name in ak.types.numpytype._primitive_to_dtype_dict
                 ):
                     if params is None:
                         params = 'parameters={"__record__": ' + json.dumps(name) + "}"
@@ -130,7 +130,7 @@ class RecordType(Type):
             if not self.is_tuple:
                 pairs = []
                 for k, v in zip(self._fields, children):
-                    if ak._v2._prettyprint.is_identifier.match(k) is None:
+                    if ak._prettyprint.is_identifier.match(k) is None:
                         key_str = json.dumps(k)
                     else:
                         key_str = k
@@ -203,13 +203,13 @@ class RecordType(Type):
             return False
 
     def index_to_field(self, index):
-        return ak._v2.forms.recordform.RecordForm.index_to_field(self, index)
+        return ak.forms.recordform.RecordForm.index_to_field(self, index)
 
     def field_to_index(self, field):
-        return ak._v2.forms.recordform.RecordForm.field_to_index(self, field)
+        return ak.forms.recordform.RecordForm.field_to_index(self, field)
 
     def has_field(self, field):
-        return ak._v2.forms.recordform.RecordForm.has_field(self, field)
+        return ak.forms.recordform.RecordForm.has_field(self, field)
 
     def content(self, index_or_field):
-        return ak._v2.forms.recordform.RecordForm.content(self, index_or_field)
+        return ak.forms.recordform.RecordForm.content(self, index_or_field)

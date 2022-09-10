@@ -25,18 +25,18 @@ def zip(
             that get broadcasted. The minimum value is `1`, for no
             broadcasting.
         parameters (None or dict): Parameters for the new
-            #ak.layout.RecordArray node that is created by this operation.
+            #ak.contents.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
-            #ak.layout.RecordArray node that is created by this operation
+            #ak.contents.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described in #ak.broadcast_arrays.
         optiontype_outside_record (bool): If True, continue broadcasting past
-            any option types before creating the new #ak.layout.RecordArray node.
+            any option types before creating the new #ak.contents.RecordArray node.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -108,7 +108,7 @@ def zip(
     structure or not.
 
     When zipping together arrays with optional values, it can be useful to create
-    the #ak.layout.RecordArray node after the option types. By default, #ak.zip
+    the #ak.contents.RecordArray node after the option types. By default, #ak.zip
     does not do this:
 
         >>> one = ak.Array([1, 2, None])
@@ -123,8 +123,8 @@ def zip(
         >>> ak.zip([one, two], optiontype_outside_record=True)
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.zip",
+    with ak._util.OperationErrorContext(
+        "ak.zip",
         dict(
             arrays=arrays,
             depth_limit=depth_limit,
@@ -159,40 +159,40 @@ def _impl(
     optiontype_outside_record,
 ):
     if depth_limit is not None and depth_limit <= 0:
-        raise ak._v2._util.error(ValueError("depth_limit must be None or at least 1"))
+        raise ak._util.error(ValueError("depth_limit must be None or at least 1"))
 
     if isinstance(arrays, dict):
-        behavior = ak._v2._util.behavior_of(*arrays.values(), behavior=behavior)
+        behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
         recordlookup = []
         layouts = []
         num_scalars = 0
         for n, x in arrays.items():
             recordlookup.append(n)
             try:
-                layout = ak._v2.operations.to_layout(
+                layout = ak.operations.to_layout(
                     x, allow_record=False, allow_other=False
                 )
             except TypeError:
                 num_scalars += 1
-                layout = ak._v2.operations.to_layout(
+                layout = ak.operations.to_layout(
                     [x], allow_record=False, allow_other=False
                 )
             layouts.append(layout)
 
     else:
         arrays = list(arrays)
-        behavior = ak._v2._util.behavior_of(*arrays, behavior=behavior)
+        behavior = ak._util.behavior_of(*arrays, behavior=behavior)
         recordlookup = None
         layouts = []
         num_scalars = 0
         for x in arrays:
             try:
-                layout = ak._v2.operations.to_layout(
+                layout = ak.operations.to_layout(
                     x, allow_record=False, allow_other=False
                 )
             except TypeError:
                 num_scalars += 1
-                layout = ak._v2.operations.to_layout(
+                layout = ak.operations.to_layout(
                     [x], allow_record=False, allow_other=False
                 )
             layouts.append(layout)
@@ -224,14 +224,12 @@ def _impl(
                 return None
 
             return (
-                ak._v2.contents.RecordArray(
-                    inputs, recordlookup, parameters=parameters
-                ),
+                ak.contents.RecordArray(inputs, recordlookup, parameters=parameters),
             )
         else:
             return None
 
-    out = ak._v2._broadcasting.broadcast_and_apply(
+    out = ak._broadcasting.broadcast_and_apply(
         layouts, action, behavior, right_broadcast=right_broadcast
     )
     assert isinstance(out, tuple) and len(out) == 1
@@ -239,6 +237,6 @@ def _impl(
 
     if to_record:
         out = out[0]
-        assert isinstance(out, ak._v2.record.Record)
+        assert isinstance(out, ak.record.Record)
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

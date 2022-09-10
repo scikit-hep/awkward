@@ -6,7 +6,7 @@ import copy as _copy
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("copy")
+@ak._connect.numpy.implements("copy")
 def copy(array):
     """
     Returns a deep copy of the array (no memory shared with original).
@@ -51,8 +51,8 @@ def copy(array):
     changes, so we don't support it. However, an #ak.Array's data might come from
     a mutable third-party library, so this function allows you to make a true copy.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.fill_none",
+    with ak._util.OperationErrorContext(
+        "ak.fill_none",
         dict(array=array),
     ):
         return _impl(array)

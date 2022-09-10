@@ -10,6 +10,7 @@ import re
 import threading
 import traceback
 import packaging.version
+import warnings
 
 from collections.abc import Sequence, Sized, Mapping, Iterable
 
@@ -140,18 +141,18 @@ class ErrorContext:
             self._slate.__dict__.clear()
 
     def format_argument(self, width, value):
-        if isinstance(value, ak._v2.contents.Content):
-            return self.format_argument(width, ak._v2.highlevel.Array(value))
-        elif isinstance(value, ak._v2.record.Record):
-            return self.format_argument(width, ak._v2.highlevel.Record(value))
+        if isinstance(value, ak.contents.Content):
+            return self.format_argument(width, ak.highlevel.Array(value))
+        elif isinstance(value, ak.record.Record):
+            return self.format_argument(width, ak.highlevel.Record(value))
 
         valuestr = None
         if isinstance(
             value,
             (
-                ak._v2.highlevel.Array,
-                ak._v2.highlevel.Record,
-                ak._v2.highlevel.ArrayBuilder,
+                ak.highlevel.Array,
+                ak.highlevel.Record,
+                ak.highlevel.ArrayBuilder,
             ),
         ):
             try:
@@ -321,18 +322,18 @@ with
         elif isinstance(x, tuple):
             return "(" + ", ".join(SlicingErrorContext.format_slice(y) for y in x) + ")"
 
-        elif isinstance(x, ak._v2.index.Index64):
+        elif isinstance(x, ak.index.Index64):
             return str(x.data)
 
-        elif isinstance(x, ak._v2.contents.Content):
+        elif isinstance(x, ak.contents.Content):
             try:
-                return str(ak._v2.highlevel.Array(x))
+                return str(ak.highlevel.Array(x))
             except Exception:
                 return x._repr("    ", "", "")
 
-        elif isinstance(x, ak._v2.record.Record):
+        elif isinstance(x, ak.record.Record):
             try:
-                return str(ak._v2.highlevel.Record(x))
+                return str(ak.highlevel.Record(x))
             except Exception:
                 return x._repr("    ", "", "")
 
@@ -389,40 +390,36 @@ Error details: {details}."""
 
 ###############################################################################
 
-# # Enable warnings for the Awkward package
-# warnings.filterwarnings("default", module="awkward.*")
+# Enable warnings for the Awkward package
+warnings.filterwarnings("default", module="awkward.*")
 
 
-# def deprecate(
-#     message,
-#     version,
-#     date=None,
-#     will_be="an error",
-#     category=DeprecationWarning,
-#     stacklevel=2,
-# ):
-#     if date is None:
-#         date = ""
-#     else:
-#         date = " (target date: " + date + ")"
-#     warning = """In version {0}{1}, this will be {2}.
-
-# To raise these warnings as errors (and get stack traces to find out where they're called), run
-
-#     import warnings
-#     warnings.filterwarnings("error", module="awkward.*")
-
-# after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
-
-# Issue: {3}.""".format(
-#         version, date, will_be, message
-#     )
-#     warnings.warn(warning, category, stacklevel=stacklevel + 1)
+def deprecate(
+    message,
+    version,
+    date=None,
+    will_be="an error",
+    category=DeprecationWarning,
+    stacklevel=2,
+):
+    if date is None:
+        date = ""
+    else:
+        date = " (target date: " + date + ")"
+    warning = """In version {}{}, this will be {}.
+To raise these warnings as errors (and get stack traces to find out where they're called), run
+    import warnings
+    warnings.filterwarnings("error", module="awkward.*")
+after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
+Issue: {}.""".format(
+        version, date, will_be, message
+    )
+    warnings.warn(warning, category, stacklevel=stacklevel + 1)
 
 
-# # Sentinel object for catching pass-through values
-# class Unspecified(object):
-#     pass
+# Sentinel object for catching pass-through values
+class Unspecified:
+    pass
 
 
 def regularize_path(path):
@@ -481,22 +478,22 @@ class Behavior(Mapping):
 
 
 def arrayclass(layout, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     arr = layout.parameter("__array__")
     if isstr(arr):
         cls = behavior[arr]
-        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
+        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
     if isstr(deeprec):
         cls = behavior["*", deeprec]
-        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Array):
+        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
-    return ak._v2.highlevel.Array
+    return ak.highlevel.Array
 
 
 def custom_cast(obj, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     for key, fcn in behavior.items():
         if (
             isinstance(key, tuple)
@@ -509,7 +506,7 @@ def custom_cast(obj, behavior):
 
 
 def custom_broadcast(layout, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     custom = layout.parameter("__array__")
     if not isstr(custom):
         custom = layout.parameter("__record__")
@@ -530,7 +527,7 @@ def custom_broadcast(layout, behavior):
 def custom_ufunc(ufunc, layout, behavior):
     import numpy
 
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     custom = layout.parameter("__array__")
     if not isstr(custom):
         custom = layout.parameter("__record__")
@@ -547,7 +544,7 @@ def custom_ufunc(ufunc, layout, behavior):
 
 
 def numba_array_typer(layouttype, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isstr(arr):
         typer = behavior["__numba_typer__", arr]
@@ -562,7 +559,7 @@ def numba_array_typer(layouttype, behavior):
 
 
 def numba_array_lower(layouttype, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isstr(arr):
         lower = behavior["__numba_lower__", arr]
@@ -577,24 +574,24 @@ def numba_array_lower(layouttype, behavior):
 
 
 def recordclass(layout, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
         cls = behavior[rec]
-        if isinstance(cls, type) and issubclass(cls, ak._v2.highlevel.Record):
+        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
             return cls
-    return ak._v2.highlevel.Record
+    return ak.highlevel.Record
 
 
 def reducer_recordclass(reducer, layout, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
         return behavior[reducer.highlevel_function(), rec]
 
 
 def typestrs(behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     out = {}
     for key, typestr in behavior.items():
         if (
@@ -624,7 +621,7 @@ def gettypestr(parameters, typestrs):
 
 
 def numba_record_typer(layouttype, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
         typer = behavior["__numba_typer__", rec]
@@ -634,7 +631,7 @@ def numba_record_typer(layouttype, behavior):
 
 
 def numba_record_lower(layouttype, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
         lower = behavior["__numba_lower__", rec]
@@ -645,7 +642,7 @@ def numba_record_lower(layouttype, behavior):
 
 def overload(behavior, signature):
     if not any(s is None for s in signature):
-        behavior = Behavior(ak._v2.behavior, behavior)
+        behavior = Behavior(ak.behavior, behavior)
         for key, custom in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -663,7 +660,7 @@ def overload(behavior, signature):
 
 
 def numba_attrs(layouttype, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
         for key, typer in behavior.items():
@@ -678,7 +675,7 @@ def numba_attrs(layouttype, behavior):
 
 
 def numba_methods(layouttype, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
         for key, typer in behavior.items():
@@ -694,10 +691,10 @@ def numba_methods(layouttype, behavior):
 
 
 def numba_unaryops(unaryop, left, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     done = False
 
-    if isinstance(left, ak._v2._connect.numba.layout.ContentType):
+    if isinstance(left, ak._connect.numba.layout.ContentType):
         left = left.parameters.get("__record__")
         if not isstr(left):
             done = True
@@ -716,15 +713,15 @@ def numba_unaryops(unaryop, left, behavior):
 
 
 def numba_binops(binop, left, right, behavior):
-    behavior = Behavior(ak._v2.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     done = False
 
-    if isinstance(left, ak._v2._connect.numba.layout.ContentType):
+    if isinstance(left, ak._connect.numba.layout.ContentType):
         left = left.parameters.get("__record__")
         if not isstr(left):
             done = True
 
-    if isinstance(right, ak._v2._connect.numba.layout.ContentType):
+    if isinstance(right, ak._connect.numba.layout.ContentType):
         right = right.parameters.get("__record__")
         if not isstr(right):
             done = True
@@ -751,9 +748,9 @@ def behavior_of(*arrays, **kwargs):
 
     copied = False
     highs = (
-        ak._v2.highlevel.Array,
-        ak._v2.highlevel.Record,
-        #        ak._v2.highlevel.ArrayBuilder,
+        ak.highlevel.Array,
+        ak.highlevel.Record,
+        #        ak.highlevel.ArrayBuilder,
     )
     for x in arrays[::-1]:
         if isinstance(x, highs) and x.behavior is not None:
@@ -773,7 +770,7 @@ def behavior_of(*arrays, **kwargs):
 # maybe_wrap and maybe_wrap_like go here
 def wrap(content, behavior=None, highlevel=True, like=None):
     assert content is None or isinstance(
-        content, (ak._v2.contents.Content, ak._v2.record.Record)
+        content, (ak.contents.Content, ak.record.Record)
     )
     assert behavior is None or isinstance(behavior, Mapping)
     assert isinstance(highlevel, bool)
@@ -781,10 +778,10 @@ def wrap(content, behavior=None, highlevel=True, like=None):
         if like is not None and behavior is None:
             behavior = behavior_of(like)
 
-        if isinstance(content, ak._v2.contents.Content):
-            return ak._v2.highlevel.Array(content, behavior=behavior)
-        elif isinstance(content, ak._v2.record.Record):
-            return ak._v2.highlevel.Record(content, behavior=behavior)
+        if isinstance(content, ak.contents.Content):
+            return ak.highlevel.Array(content, behavior=behavior)
+        elif isinstance(content, ak.record.Record):
+            return ak.highlevel.Record(content, behavior=behavior)
 
     return content
 
@@ -801,42 +798,6 @@ def extra(args, kwargs, defaults):
     return out
 
 
-# def key2index(keys, key):
-#     if keys is None:
-#         attempt = None
-#     else:
-#         try:
-#             attempt = keys.index(key)
-#         except ValueError:
-#             attempt = None
-
-#     if attempt is None:
-#         m = key2index._pattern.match(key)
-#         if m is not None:
-#             attempt = m.group(0)
-
-#     if attempt is None:
-#         raise error(ValueError(
-#             "key {0} not found in record".format(repr(key))
-#         ))
-#     else:
-#         return attempt
-
-
-# key2index._pattern = re.compile(r"^[1-9][0-9]*$")
-
-
-# def make_union(tags, index, contents, identifier, parameters):
-#     if isinstance(index, ak._v2.contents.Index32):
-#         return ak._v2.contents.UnionArray8_32(tags, index, contents, identities, parameters)
-#     elif isinstance(index, ak._v2.contents.IndexU32):
-#         return ak._v2.contents.UnionArray8_U32(tags, index, contents, identities, parameters)
-#     elif isinstance(index, ak._v2.index.Index64):
-#         return ak._v2.contents.UnionArray8_64(tags, index, contents, identities, parameters)
-#     else:
-#         raise error(AssertionError(index))
-
-
 def union_to_record(unionarray, anonymous):
     nplike = ak.nplike.of(unionarray)
 
@@ -848,13 +809,13 @@ def union_to_record(unionarray, anonymous):
             contents.append(union_to_record(layout, anonymous))
         elif layout.is_OptionType:
             contents.append(
-                ak._v2.operations.fill_none(layout, np.nan, axis=0, highlevel=False)
+                ak.operations.fill_none(layout, np.nan, axis=0, highlevel=False)
             )
         else:
             contents.append(layout)
 
-    if not any(isinstance(x, ak._v2.contents.RecordArray) for x in contents):
-        return ak._v2.contents.UnionArray(
+    if not any(isinstance(x, ak.contents.RecordArray) for x in contents):
+        return ak.contents.UnionArray(
             unionarray.tags,
             unionarray.index,
             contents,
@@ -866,7 +827,7 @@ def union_to_record(unionarray, anonymous):
         seen = set()
         all_names = []
         for layout in contents:
-            if isinstance(layout, ak._v2.contents.RecordArray):
+            if isinstance(layout, ak.contents.RecordArray):
                 for field in layout.fields:
                     if field not in seen:
                         seen.add(field)
@@ -876,16 +837,16 @@ def union_to_record(unionarray, anonymous):
                     seen.add(anonymous)
                     all_names.append(anonymous)
 
-        missingarray = ak._v2.contents.IndexedOptionArray(
-            ak._v2.index.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
-            ak._v2.contents.EmptyArray(),
+        missingarray = ak.contents.IndexedOptionArray(
+            ak.index.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
+            ak.contents.EmptyArray(),
         )
 
         all_fields = []
         for name in all_names:
             union_contents = []
             for layout in contents:
-                if isinstance(layout, ak._v2.contents.RecordArray):
+                if isinstance(layout, ak.contents.RecordArray):
                     for field in layout.fields:
                         if name == field:
                             union_contents.append(layout._getitem_field(field))
@@ -899,7 +860,7 @@ def union_to_record(unionarray, anonymous):
                         union_contents.append(missingarray)
 
             all_fields.append(
-                ak._v2.contents.UnionArray(
+                ak.contents.UnionArray(
                     unionarray.tags,
                     unionarray.index,
                     union_contents,
@@ -908,7 +869,7 @@ def union_to_record(unionarray, anonymous):
                 ).simplify_uniontype()
             )
 
-        return ak._v2.contents.RecordArray(all_fields, all_names, len(unionarray))
+        return ak.contents.RecordArray(all_fields, all_names, len(unionarray))
 
 
 def direct_Content_subclass(node):
@@ -916,7 +877,7 @@ def direct_Content_subclass(node):
         return None
     else:
         mro = type(node).mro()
-        return mro[mro.index(ak._v2.contents.Content) - 1]
+        return mro[mro.index(ak.contents.Content) - 1]
 
 
 def direct_Content_subclass_name(node):
@@ -982,30 +943,30 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
 
     def recurse(array, mask=None):
         if regulararray and len(array.shape) > 1:
-            return ak._v2.contents.RegularArray(
+            return ak.contents.RegularArray(
                 recurse(array.reshape((-1,) + array.shape[2:])),
                 array.shape[1],
                 array.shape[0],
             )
 
         if len(array.shape) == 0:
-            array = ak._v2.contents.NumpyArray(array.reshape(1))
+            array = ak.contents.NumpyArray(array.reshape(1))
 
         if array.dtype.kind == "S":
             asbytes = array.reshape(-1)
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
             stops = starts + numpy.char.str_len(asbytes)
-            data = ak._v2.contents.ListArray(
-                ak._v2.index.Index64(starts),
-                ak._v2.index.Index64(stops),
-                ak._v2.contents.NumpyArray(
+            data = ak.contents.ListArray(
+                ak.index.Index64(starts),
+                ak.index.Index64(stops),
+                ak.contents.NumpyArray(
                     asbytes.view("u1"), parameters={"__array__": "byte"}, nplike=numpy
                 ),
                 parameters={"__array__": "bytestring"},
             )
             for i in range(len(array.shape) - 1, 0, -1):
-                data = ak._v2.contents.RegularArray(
+                data = ak.contents.RegularArray(
                     data, array.shape[i], array.shape[i - 1]
                 )
 
@@ -1014,21 +975,21 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
             itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes) * itemsize, itemsize, dtype=np.int64)
             stops = starts + numpy.char.str_len(asbytes)
-            data = ak._v2.contents.ListArray(
-                ak._v2.index.Index64(starts),
-                ak._v2.index.Index64(stops),
-                ak._v2.contents.NumpyArray(
+            data = ak.contents.ListArray(
+                ak.index.Index64(starts),
+                ak.index.Index64(stops),
+                ak.contents.NumpyArray(
                     asbytes.view("u1"), parameters={"__array__": "char"}, nplike=numpy
                 ),
                 parameters={"__array__": "string"},
             )
             for i in range(len(array.shape) - 1, 0, -1):
-                data = ak._v2.contents.RegularArray(
+                data = ak.contents.RegularArray(
                     data, array.shape[i], array.shape[i - 1]
                 )
 
         else:
-            data = ak._v2.contents.NumpyArray(array)
+            data = ak.contents.NumpyArray(array)
 
         if mask is None:
             return data
@@ -1036,14 +997,14 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
         elif mask is False or (isinstance(mask, np.bool_) and not mask):
             # NumPy's MaskedArray with mask == False is an UnmaskedArray
             if len(array.shape) == 1:
-                return ak._v2.contents.UnmaskedArray(data)
+                return ak.contents.UnmaskedArray(data)
             else:
 
                 def attach(x):
-                    if isinstance(x, ak._v2.contents.NumpyArray):
-                        return ak._v2.contents.UnmaskedArray(x)
+                    if isinstance(x, ak.contents.NumpyArray):
+                        return ak.contents.UnmaskedArray(x)
                     else:
-                        return ak._v2.contents.RegularArray(
+                        return ak.contents.RegularArray(
                             attach(x.content), x.size, len(x)
                         )
 
@@ -1051,8 +1012,8 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
 
         else:
             # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
-            return ak._v2.contents.ByteMaskedArray(
-                ak._v2.index.Index8(mask), data, valid_when=False
+            return ak.contents.ByteMaskedArray(
+                ak.index.Index8(mask), data, valid_when=False
             )
 
         return data
@@ -1073,9 +1034,9 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
         contents = []
         for name in array.dtype.names:
             contents.append(recurse(array[name], mask))
-        layout = ak._v2.contents.RecordArray(contents, array.dtype.names)
+        layout = ak.contents.RecordArray(contents, array.dtype.names)
 
-    return ak._v2._util.wrap(layout, behavior, highlevel)
+    return ak._util.wrap(layout, behavior, highlevel)
 
 
 def to_arraylib(module, array, allow_missing):
@@ -1089,35 +1050,35 @@ def to_arraylib(module, array, allow_missing):
         elif isinstance(array, np.ndarray):
             return module.asarray(array)
 
-        elif isinstance(array, ak._v2.highlevel.Array):
+        elif isinstance(array, ak.highlevel.Array):
             return _impl(array.layout)
 
-        elif isinstance(array, ak._v2.highlevel.Record):
-            raise ak._v2._util.error(
+        elif isinstance(array, ak.highlevel.Record):
+            raise ak._util.error(
                 ValueError(f"{module.__name__} does not support record structures")
             )
 
-        elif isinstance(array, ak._v2.highlevel.ArrayBuilder):
+        elif isinstance(array, ak.highlevel.ArrayBuilder):
             return _impl(array.snapshot().layout)
 
-        elif isinstance(array, ak.layout.ArrayBuilder):
+        elif isinstance(array, ak._ext.ArrayBuilder):
             return _impl(array.snapshot())
 
-        elif ak._v2.operations.parameters(array).get("__array__") in (
+        elif ak.operations.parameters(array).get("__array__") in (
             "bytestring",
             "string",
         ):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(f"{module.__name__} does not support arrays of strings")
             )
 
-        elif isinstance(array, ak._v2.contents.EmptyArray):
+        elif isinstance(array, ak.contents.EmptyArray):
             return module.array([])
 
-        elif isinstance(array, ak._v2.contents.IndexedArray):
+        elif isinstance(array, ak.contents.IndexedArray):
             return _impl(array.project())
 
-        elif isinstance(array, ak._v2.contents.UnionArray):
+        elif isinstance(array, ak.contents.UnionArray):
             contents = [_impl(array.project(i)) for i in range(len(array.contents))]
             out = module.concatenate(contents)
 
@@ -1130,41 +1091,39 @@ def to_arraylib(module, array, allow_missing):
                     out[mask] = content
             return out
 
-        elif isinstance(array, ak._v2.contents.UnmaskedArray):
+        elif isinstance(array, ak.contents.UnmaskedArray):
             return _impl(array.content)
 
-        elif isinstance(array, ak._v2.contents.IndexedOptionArray):
+        elif isinstance(array, ak.contents.IndexedOptionArray):
             content = _impl(array.project())
 
             mask0 = array.mask_as_bool(valid_when=False)
             if mask0.any():
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(f"{module.__name__} does not support masked arrays")
                 )
             else:
                 return content
 
-        elif isinstance(array, ak._v2.contents.RegularArray):
+        elif isinstance(array, ak.contents.RegularArray):
             out = _impl(array.content)
             head, tail = out.shape[0], out.shape[1:]
             shape = (head // array.size, array.size) + tail
             return out[: shape[0] * array.size].reshape(shape)
 
-        elif isinstance(
-            array, (ak._v2.contents.ListArray, ak._v2.contents.ListOffsetArray)
-        ):
+        elif isinstance(array, (ak.contents.ListArray, ak.contents.ListOffsetArray)):
             return _impl(array.toRegularArray())
 
-        elif isinstance(array, ak._v2.contents.recordarray.RecordArray):
-            raise ak._v2._util.error(
+        elif isinstance(array, ak.contents.recordarray.RecordArray):
+            raise ak._util.error(
                 ValueError(f"{module.__name__} does not support record structures")
             )
 
-        elif isinstance(array, ak._v2.contents.NumpyArray):
+        elif isinstance(array, ak.contents.NumpyArray):
             return module.asarray(array.data)
 
-        elif isinstance(array, ak._v2.contents.Content):
-            raise ak._v2._util.error(
+        elif isinstance(array, ak.contents.Content):
+            raise ak._util.error(
                 AssertionError(f"unrecognized Content type: {type(array)}")
             )
 
@@ -1172,20 +1131,20 @@ def to_arraylib(module, array, allow_missing):
             return module.asarray(array)
 
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(f"cannot convert {array} into {type(module.array([]))}")
             )
 
     if module.__name__ in ("jax.numpy", "cupy"):
         return _impl(array)
     elif module.__name__ == "numpy":
-        layout = ak._v2.operations.to_layout(array, allow_record=True, allow_other=True)
+        layout = ak.operations.to_layout(array, allow_record=True, allow_other=True)
 
-        if isinstance(layout, (ak._v2.contents.Content, ak._v2.record.Record)):
+        if isinstance(layout, (ak.contents.Content, ak.record.Record)):
             return layout.to_numpy(allow_missing=allow_missing)
         else:
             return module.asarray(array)
     else:
-        raise ak._v2._util.error(
+        raise ak._util.error(
             ValueError(f"{module.__name__} is not supported by to_arraylib")
         )

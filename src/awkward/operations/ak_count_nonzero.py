@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("count_nonzero")
+@ak._connect.numpy.implements("count_nonzero")
 def count_nonzero(
     array, axis=None, keepdims=False, mask_identity=False, flatten_records=False
 ):
@@ -41,8 +41,8 @@ def count_nonzero(
     count None values. If it is desirable to count them, use #ak.fill_none
     to turn them into something that would be counted.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.count_nonzero",
+    with ak._util.OperationErrorContext(
+        "ak.count_nonzero",
         dict(
             array=array,
             axis=axis,
@@ -55,14 +55,14 @@ def count_nonzero(
 
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
-    layout = ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
     if axis is None:
         if not layout.nplike.known_data or not layout.nplike.known_shape:
-            reducer_cls = ak._v2._reducers.CountNonzero
+            reducer_cls = ak._reducers.CountNonzero
 
             def map(x):
-                return ak._v2._typetracer.UnknownScalar(
+                return ak._typetracer.UnknownScalar(
                     np.dtype(reducer_cls.return_dtype(x.dtype))
                 )
 
@@ -87,11 +87,11 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         )
 
     else:
-        behavior = ak._v2._util.behavior_of(array)
+        behavior = ak._util.behavior_of(array)
         out = layout.count_nonzero(
             axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
         )
-        if isinstance(out, (ak._v2.contents.Content, ak._v2.record.Record)):
-            return ak._v2._util.wrap(out, behavior)
+        if isinstance(out, (ak.contents.Content, ak.record.Record)):
+            return ak._util.wrap(out, behavior)
         else:
             return out

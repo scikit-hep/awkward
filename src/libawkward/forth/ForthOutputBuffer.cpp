@@ -3,10 +3,8 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthOutputBuffer.cpp", line)
 
 #include <cmath>
+#include <sstream>
 
-#include "awkward/kernel-dispatch.h"
-
-#include "awkward/array/NumpyArray.h"
 #include "awkward/forth/ForthOutputBuffer.h"
 
 namespace awkward {
@@ -127,12 +125,56 @@ namespace awkward {
   template <typename OUT>
   ForthOutputBufferOf<OUT>::ForthOutputBufferOf(int64_t initial, double resize)
     : ForthOutputBuffer(initial, resize)
-    , ptr_(new OUT[initial], kernel::array_deleter<OUT>()) { }
+    , ptr_(new OUT[initial], util::array_deleter<OUT>()) { }
 
   template <typename OUT>
   const std::shared_ptr<void>
   ForthOutputBufferOf<OUT>::ptr() const noexcept {
     return ptr_;
+  }
+
+  template <typename OUT>
+  util::dtype
+  ForthOutputBufferOf<OUT>::dtype() const {
+    if (std::is_same<OUT, bool>::value) {
+      return util::dtype::boolean;
+    }
+    else if (std::is_same<OUT, std::int8_t>::value) {
+      return util::dtype::int8;
+    }
+    else if (std::is_same<OUT, std::int16_t>::value) {
+      return util::dtype::int16;
+    }
+    else if (std::is_same<OUT, std::int32_t>::value) {
+      return util::dtype::int32;
+    }
+    else if (std::is_same<OUT, std::int64_t>::value) {
+      return util::dtype::int64;
+    }
+    else if (std::is_same<OUT, std::uint8_t>::value) {
+      return util::dtype::uint8;
+    }
+    else if (std::is_same<OUT, std::uint16_t>::value) {
+      return util::dtype::uint16;
+    }
+    else if (std::is_same<OUT, std::uint32_t>::value) {
+      return util::dtype::uint32;
+    }
+    else if (std::is_same<OUT, std::uint64_t>::value) {
+      return util::dtype::uint64;
+    }
+    else if (std::is_same<OUT, float>::value) {
+      return util::dtype::float32;
+    }
+    else if (std::is_same<OUT, double>::value) {
+      return util::dtype::float64;
+    }
+    else {
+      throw std::runtime_error(
+        std::string("unrecognized ForthOutputBuffer specialization: ")
+        + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+      );
+    }
   }
 
   template <typename OUT>
@@ -150,136 +192,6 @@ namespace awkward {
       }
       length_ = next;
     }
-  }
-
-  template <typename OUT>
-  const ContentPtr
-  ForthOutputBufferOf<OUT>::toNumpyArray() const {
-    util::dtype dtype;
-    if (std::is_same<OUT, bool>::value) {
-      dtype = util::dtype::boolean;
-    }
-    else if (std::is_same<OUT, std::int8_t>::value) {
-      dtype = util::dtype::int8;
-    }
-    else if (std::is_same<OUT, std::int16_t>::value) {
-      dtype = util::dtype::int16;
-    }
-    else if (std::is_same<OUT, std::int32_t>::value) {
-      dtype = util::dtype::int32;
-    }
-    else if (std::is_same<OUT, std::int64_t>::value) {
-      dtype = util::dtype::int64;
-    }
-    else if (std::is_same<OUT, std::uint8_t>::value) {
-      dtype = util::dtype::uint8;
-    }
-    else if (std::is_same<OUT, std::uint16_t>::value) {
-      dtype = util::dtype::uint16;
-    }
-    else if (std::is_same<OUT, std::uint32_t>::value) {
-      dtype = util::dtype::uint32;
-    }
-    else if (std::is_same<OUT, std::uint64_t>::value) {
-      dtype = util::dtype::uint64;
-    }
-    else if (std::is_same<OUT, float>::value) {
-      dtype = util::dtype::float32;
-    }
-    else if (std::is_same<OUT, double>::value) {
-      dtype = util::dtype::float64;
-    }
-    else {
-      throw std::runtime_error(
-        std::string("unrecognized ForthOutputBuffer specialization: ")
-        + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
-      );
-    }
-    return std::make_shared<NumpyArray>(Identities::none(),
-                                        util::Parameters(),
-                                        ptr_,
-                                        std::vector<ssize_t>({ (ssize_t)length_ }),
-                                        std::vector<ssize_t>({ (ssize_t)sizeof(OUT) }),
-                                        0,
-                                        (ssize_t)sizeof(OUT),
-                                        util::dtype_to_format(dtype),
-                                        dtype,
-                                        kernel::lib::cpu);
-  }
-
-  template <typename OUT>
-  const Index8
-  ForthOutputBufferOf<OUT>::toIndex8() const {
-    throw std::runtime_error(
-      std::string("ForthOutputBuffer type is incompatible with Index8: ")
-      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
-    );
-  }
-
-  template <typename OUT>
-  const IndexU8
-  ForthOutputBufferOf<OUT>::toIndexU8() const {
-    throw std::runtime_error(
-      std::string("ForthOutputBuffer type is incompatible with IndexU8: ")
-      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
-    );
-  }
-
-  template <typename OUT>
-  const Index32
-  ForthOutputBufferOf<OUT>::toIndex32() const {
-    throw std::runtime_error(
-      std::string("ForthOutputBuffer type is incompatible with Index32: ")
-      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
-    );
-  }
-
-  template <typename OUT>
-  const IndexU32
-  ForthOutputBufferOf<OUT>::toIndexU32() const {
-    throw std::runtime_error(
-      std::string("ForthOutputBuffer type is incompatible with IndexU32: ")
-      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
-    );
-  }
-
-  template <typename OUT>
-  const Index64
-  ForthOutputBufferOf<OUT>::toIndex64() const {
-    throw std::runtime_error(
-      std::string("ForthOutputBuffer type is incompatible with Index64: ")
-      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
-    );
-  }
-
-  template <>
-  const Index8
-  ForthOutputBufferOf<int8_t>::toIndex8() const {
-    return Index8(ptr_, 0, length_, kernel::lib::cpu);
-  }
-
-  template <>
-  const IndexU8
-  ForthOutputBufferOf<uint8_t>::toIndexU8() const {
-    return IndexU8(ptr_, 0, length_, kernel::lib::cpu);
-  }
-
-  template <>
-  const Index32
-  ForthOutputBufferOf<int32_t>::toIndex32() const {
-    return Index32(ptr_, 0, length_, kernel::lib::cpu);
-  }
-
-  template <>
-  const IndexU32
-  ForthOutputBufferOf<uint32_t>::toIndexU32() const {
-    return IndexU32(ptr_, 0, length_, kernel::lib::cpu);
-  }
-
-  template <>
-  const Index64
-  ForthOutputBufferOf<int64_t>::toIndex64() const {
-    return Index64(ptr_, 0, length_, kernel::lib::cpu);
   }
 
   template <typename OUT>
@@ -780,6 +692,22 @@ namespace awkward {
   }
 
   template <typename OUT>
+  std::string
+  ForthOutputBufferOf<OUT>::tostring() const {
+    std::stringstream ss;
+    ss << "[";
+    if (length_ > 0) {
+      ss << ptr_.get()[0];
+      for (auto i = 1; i < length_; i++) {
+        ss << ", ";
+        ss << ptr_.get()[i];
+      }
+    }
+    ss << "]";
+    return ss.str();
+  }
+
+  template <typename OUT>
   void
   ForthOutputBufferOf<OUT>::maybe_resize(int64_t next) {
     if (next > reserved_) {
@@ -788,7 +716,7 @@ namespace awkward {
         reservation = (int64_t)std::ceil(reservation * resize_);
       }
       std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
-                                                             kernel::array_deleter<OUT>());
+                                                             util::array_deleter<OUT>());
       std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * (size_t)reserved_);
       ptr_ = new_buffer;
       reserved_ = reservation;

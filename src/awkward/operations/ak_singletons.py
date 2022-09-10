@@ -11,7 +11,7 @@ def singletons(array, highlevel=True, behavior=None):
         array: Data to wrap in lists of length 1 if present and length 0
             if missing (None).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -26,8 +26,8 @@ def singletons(array, highlevel=True, behavior=None):
 
     See #ak.firsts to invert this function.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.singletons",
+    with ak._util.OperationErrorContext(
+        "ak.singletons",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, highlevel, behavior)
@@ -45,15 +45,15 @@ def _impl(array, highlevel, behavior):
             offsets[0] = 0
             offsets[1:][nulls] = 0
             nplike.index_nplike.cumsum(offsets, out=offsets)
-            return ak._v2.contents.ListOffsetArray(
-                ak._v2.index.Index64(offsets), layout.project()
+            return ak.contents.ListOffsetArray(
+                ak.index.Index64(offsets), layout.project()
             )
 
-        elif isinstance(layout, ak._v2.contents.IndexedArray) and isinstance(
-            layout.content, (ak._v2.contents.EmptyArray, ak._v2.contents.NumpyArray)
+        elif isinstance(layout, ak.contents.IndexedArray) and isinstance(
+            layout.content, (ak.contents.EmptyArray, ak.contents.NumpyArray)
         ):
             return action(
-                ak._v2.contents.IndexedOptionArray(
+                ak.contents.IndexedOptionArray(
                     layout.index,
                     layout.content,
                     layout.identifier,
@@ -61,16 +61,16 @@ def _impl(array, highlevel, behavior):
                 )
             )
 
-        elif isinstance(layout, ak._v2.contents.EmptyArray):
-            return action(ak._v2.contents.UnmaskedArray(layout.toNumpyArray(np.int64)))
+        elif isinstance(layout, ak.contents.EmptyArray):
+            return action(ak.contents.UnmaskedArray(layout.toNumpyArray(np.int64)))
 
-        elif isinstance(layout, ak._v2.contents.NumpyArray):
-            return action(ak._v2.contents.UnmaskedArray(layout))
+        elif isinstance(layout, ak.contents.NumpyArray):
+            return action(ak.contents.UnmaskedArray(layout))
 
         else:
             return None
 
-    layout = ak._v2.operations.to_layout(array)
+    layout = ak.operations.to_layout(array)
     out = layout.recursively_apply(action, behavior)
 
-    return ak._v2._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel)

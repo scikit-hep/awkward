@@ -14,8 +14,8 @@ def from_rdataframe(data_frame, columns):
 
      See also #ak.to_rdataframe.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.from_rdataframe",
+    with ak._util.OperationErrorContext(
+        "ak.from_rdataframe",
         dict(
             data_frame=data_frame,
             columns=columns,
@@ -31,9 +31,9 @@ def _impl(
     data_frame,
     columns,
 ):
-    import awkward._v2._connect.rdataframe.from_rdataframe  # noqa: F401
+    import awkward._connect.rdataframe.from_rdataframe  # noqa: F401
 
-    return ak._v2._connect.rdataframe.from_rdataframe.from_rdataframe(
+    return ak._connect.rdataframe.from_rdataframe.from_rdataframe(
         data_frame,
         columns,
     )

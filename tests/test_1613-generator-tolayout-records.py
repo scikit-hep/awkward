@@ -4,8 +4,8 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-import awkward._v2._lookup  # noqa: E402
-import awkward._v2._connect.cling  # noqa: E402
+import awkward._lookup  # noqa: E402
+import awkward._connect.cling  # noqa: E402
 
 ROOT = pytest.importorskip("ROOT")
 
@@ -16,13 +16,13 @@ cpp17 = hasattr(ROOT.std, "optional")
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_EmptyArray(flatlist_as_rvec):
-    array = ak._v2.contents.EmptyArray()
+    array = ak.contents.EmptyArray()
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -31,16 +31,16 @@ def test_EmptyArray(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.NumpyArray(
+    array = ak.contents.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3]),
         parameters={"some": "stuff", "other": [1, 2, "three"]},
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -49,16 +49,16 @@ def test_NumpyArray(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_RegularArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.RegularArray(
-        ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+    array = ak.contents.RegularArray(
+        ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         3,
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -67,17 +67,17 @@ def test_RegularArray_NumpyArray(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_ListArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.ListArray(
-        ak._v2.index.Index(np.array([4, 100, 1], np.int64)),
-        ak._v2.index.Index(np.array([7, 100, 3, 200], np.int64)),
-        ak._v2.contents.NumpyArray(np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])),
+    array = ak.contents.ListArray(
+        ak.index.Index(np.array([4, 100, 1], np.int64)),
+        ak.index.Index(np.array([7, 100, 3, 200], np.int64)),
+        ak.contents.NumpyArray(np.array([6.6, 4.4, 5.5, 7.7, 1.1, 2.2, 3.3, 8.8])),
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -86,19 +86,19 @@ def test_ListArray_NumpyArray(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
-        ak._v2.contents.ListOffsetArray(
-            ak._v2.index.Index(np.array([1, 1, 4, 4, 6, 7], np.int64)),
-            ak._v2.contents.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.array([1, 1, 4, 4, 6, 7], np.int64)),
+            ak.contents.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7]),
         ),
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -107,19 +107,19 @@ def test_nested_ListOffsetArray_NumpyArray(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_RecordArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.RecordArray(
+    array = ak.contents.RecordArray(
         [
-            ak._v2.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-            ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+            ak.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
         ["x", "y"],
         parameters={"__record__": "Something"},
     )
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._lookup.Lookup(layout)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -131,21 +131,21 @@ def test_RecordArray_NumpyArray(flatlist_as_rvec):
 )
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_Record(flatlist_as_rvec):
-    array = ak._v2.contents.RecordArray(
+    array = ak.contents.RecordArray(
         [
-            ak._v2.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-            ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+            ak.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
+            ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
         ["x", "y"],
         parameters={"__record__": "Something"},
     )
-    assert isinstance(array[2], ak._v2.record.Record)
+    assert isinstance(array[2], ak.record.Record)
 
     layout = array[2]
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         array.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._lookup.Lookup(layout)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -154,13 +154,13 @@ def test_Record(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_RecordArray_tuple(flatlist_as_rvec):
-    array = ak._v2.Array([(1, 2)])
+    array = ak.Array([(1, 2)])
 
     layout = array.layout
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout)
+    lookup = ak._lookup.Lookup(layout)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -170,16 +170,16 @@ def test_RecordArray_tuple(flatlist_as_rvec):
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_IndexedArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.IndexedArray(
-        ak._v2.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
-        ak._v2.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+    array = ak.contents.IndexedArray(
+        ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4], np.int64)),
+        ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -188,16 +188,16 @@ def test_IndexedArray_NumpyArray(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_IndexedOptionArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.IndexedOptionArray(
-        ak._v2.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
+    array = ak.contents.IndexedOptionArray(
+        ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4], np.int64)),
+        ak.contents.numpyarray.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -207,17 +207,17 @@ def test_IndexedOptionArray_NumpyArray(flatlist_as_rvec):
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_ByteMaskedArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.ByteMaskedArray(
-        ak._v2.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
-        ak._v2.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+    array = ak.contents.ByteMaskedArray(
+        ak.index.Index(np.array([1, 0, 1, 0, 1], np.int8)),
+        ak.contents.numpyarray.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
         valid_when=True,
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -227,8 +227,8 @@ def test_ByteMaskedArray_NumpyArray(flatlist_as_rvec):
 @pytest.mark.skipif(not cpp17, reason="ROOT was compiled without C++17 support")
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_BitMaskedArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.BitMaskedArray(
-        ak._v2.index.Index(
+    array = ak.contents.BitMaskedArray(
+        ak.index.Index(
             np.packbits(
                 np.array(
                     [
@@ -250,7 +250,7 @@ def test_BitMaskedArray_NumpyArray(flatlist_as_rvec):
                 )
             )
         ),
-        ak._v2.contents.NumpyArray(
+        ak.contents.NumpyArray(
             np.array(
                 [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6]
             )
@@ -261,10 +261,10 @@ def test_BitMaskedArray_NumpyArray(flatlist_as_rvec):
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -273,18 +273,18 @@ def test_BitMaskedArray_NumpyArray(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_nested_UnmaskedArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.ListOffsetArray(
-        ak._v2.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
-        ak._v2.contents.UnmaskedArray(
-            ak._v2.contents.NumpyArray(np.array([999, 0.0, 1.1, 2.2, 3.3]))
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 1, 5], dtype=np.int64)),
+        ak.contents.UnmaskedArray(
+            ak.contents.NumpyArray(np.array([999, 0.0, 1.1, 2.2, 3.3]))
         ),
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -293,20 +293,20 @@ def test_nested_UnmaskedArray_NumpyArray(flatlist_as_rvec):
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_UnionArray_NumpyArray(flatlist_as_rvec):
-    array = ak._v2.contents.UnionArray(
-        ak._v2.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
-        ak._v2.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
+    array = ak.contents.UnionArray(
+        ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], np.int8)),
+        ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100], np.int64)),
         [
-            ak._v2.contents.NumpyArray(np.array([1, 2, 3], np.int64)),
-            ak._v2.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
+            ak.contents.NumpyArray(np.array([1, 2, 3], np.int64)),
+            ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5])),
         ],
     )
 
     layout = array
-    generator = ak._v2._connect.cling.togenerator(
+    generator = ak._connect.cling.togenerator(
         layout.form, flatlist_as_rvec=flatlist_as_rvec
     )
-    lookup = ak._v2._lookup.Lookup(layout, generator)
+    lookup = ak._lookup.Lookup(layout, generator)
     generator.generate(compiler)
 
     array_out = generator.tolayout(lookup, 0, ())
@@ -327,10 +327,10 @@ def test_data_frame_from_json():
     with path.open() as f:
         data = json.load(f)
 
-    array = ak._v2.operations.from_iter(data)
+    array = ak.operations.from_iter(data)
 
-    data_frame = ak._v2.to_rdataframe({"variants": array})
-    out = ak._v2.from_rdataframe(
+    data_frame = ak.to_rdataframe({"variants": array})
+    out = ak.from_rdataframe(
         data_frame,
         columns=("variants",),
     )

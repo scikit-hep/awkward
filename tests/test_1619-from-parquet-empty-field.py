@@ -10,7 +10,7 @@ pytest.importorskip("pyarrow.parquet")
 
 
 def test_no_extension(tmp_path):
-    array = ak._v2.Array(
+    array = ak.Array(
         [
             [
                 {"x": 1, "y": 1.1},
@@ -25,7 +25,7 @@ def test_no_extension(tmp_path):
     )
     path = os.path.join(tmp_path, "array-no-ext.parquet")
 
-    ak._v2.to_parquet(array, path, extensionarray=False)
+    ak.to_parquet(array, path, extensionarray=False)
 
-    result = ak._v2.from_parquet(path, columns=["x"])
+    result = ak.from_parquet(path, columns=["x"])
     assert result.fields == ["x"]

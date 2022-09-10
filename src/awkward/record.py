@@ -4,23 +4,23 @@ import copy
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._v2.contents.content import Content
+from awkward.contents.content import Content
 
 np = ak.nplike.NumpyMetadata.instance()
 
 
 class Record:
     def __init__(self, array, at):
-        if not isinstance(array, ak._v2.contents.recordarray.RecordArray):
-            raise ak._v2._util.error(
+        if not isinstance(array, ak.contents.recordarray.RecordArray):
+            raise ak._util.error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )
-        if not ak._v2._util.isint(at):
-            raise ak._v2._util.error(
+        if not ak._util.isint(at):
+            raise ak._util.error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
         if at < 0 or at >= array.length:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     f"Record 'at' must be >= 0 and < len(array) == {array.length}, not {at}"
                 )
@@ -105,36 +105,36 @@ class Record:
 
     def axis_wrap_if_negative(self, axis):
         if axis == 0:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 np.AxisError("Record type at axis=0 is a scalar, not an array")
             )
         return self._array.axis_wrap_if_negative(axis)
 
     def __getitem__(self, where):
-        with ak._v2._util.SlicingErrorContext(self, where):
+        with ak._util.SlicingErrorContext(self, where):
             return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._v2._util.isint(where):
-            raise ak._v2._util.error(
+        if ak._util.isint(where):
+            raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by an integer")
             )
 
         elif isinstance(where, slice):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by a range slice (`:`)")
             )
 
-        elif ak._v2._util.isstr(where):
+        elif ak._util.isstr(where):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by np.newaxis (`None`)")
             )
 
         elif where is Ellipsis:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by an ellipsis (`...`)")
             )
 
@@ -144,34 +144,34 @@ class Record:
         elif isinstance(where, tuple) and len(where) == 1:
             return self._getitem(where[0])
 
-        elif isinstance(where, tuple) and ak._v2._util.isstr(where[0]):
+        elif isinstance(where, tuple) and ak._util.isstr(where[0]):
             return self._getitem_field(where[0])._getitem(where[1:])
 
         elif isinstance(where, ak.highlevel.Array):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
-        elif isinstance(where, ak.layout.Content):
-            raise ak._v2._util.error(
+        elif isinstance(where, ak.contents.Content):
+            raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
         elif isinstance(where, Content):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
-        elif isinstance(where, Iterable) and all(ak._v2._util.isstr(x) for x in where):
+        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
         else:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "only field name (str) or names (non-tuple iterable of str) "
                     "are valid indices for slicing a scalar record, not\n\n    "
@@ -196,18 +196,16 @@ class Record:
 
     def _to_list(self, behavior, json_conversions):
         overloaded = (
-            ak._v2._util.recordclass(self._array, behavior).__getitem__
-            is not ak._v2.highlevel.Record.__getitem__
+            ak._util.recordclass(self._array, behavior).__getitem__
+            is not ak.highlevel.Record.__getitem__
         )
 
         if overloaded:
-            record = ak._v2._util.wrap(self, behavior=behavior)
+            record = ak._util.wrap(self, behavior=behavior)
             contents = []
             for field in self._array.fields:
                 contents.append(record[field])
-                if isinstance(
-                    contents[-1], (ak._v2.highlevel.Array, ak._v2.highlevel.Record)
-                ):
+                if isinstance(contents[-1], (ak.highlevel.Array, ak.highlevel.Record)):
                     contents[-1] = contents[-1]._layout._to_list(
                         behavior, json_conversions
                     )
@@ -262,7 +260,7 @@ class Record:
             return None
 
     def _jax_flatten(self):
-        from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData
+        from awkward._connect.jax import _find_numpyarray_nodes, AuxData
 
         numpyarray_nodes = _find_numpyarray_nodes(self)
         return (numpyarray_nodes, AuxData(self))
@@ -274,8 +272,6 @@ class Record:
 
     @classmethod
     def jax_unflatten(cls, aux_data, children):
-        from awkward._v2._connect.jax import _replace_numpyarray_nodes
+        from awkward._connect.jax import _replace_numpyarray_nodes
 
-        return ak._v2._util.wrap(
-            _replace_numpyarray_nodes(aux_data.layout, list(children))
-        )
+        return ak._util.wrap(_replace_numpyarray_nodes(aux_data.layout, list(children)))

@@ -9,9 +9,6 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/Content.h"
-#include "awkward/array/NumpyArray.h"
-#include "awkward/array/ListOffsetArray.h"
 #include "awkward/forth/ForthInputBuffer.h"
 #include "awkward/forth/ForthOutputBuffer.h"
 
@@ -41,8 +38,12 @@ namespace awkward {
       source() const noexcept;
 
     /// @brief HERE
-    const ContentPtr
+    const std::vector<I>
       bytecodes() const;
+
+    /// @brief HERE
+    const std::vector<int64_t>
+      bytecodes_offsets() const;
 
     /// @brief HERE
     const std::string
@@ -166,54 +167,6 @@ namespace awkward {
     /// @brief HERE
     const std::shared_ptr<ForthOutputBuffer>
       output_at(int64_t index) const noexcept;
-
-    /// @brief HERE
-    const ContentPtr
-      output_NumpyArray_at(const std::string& name) const;
-
-    /// @brief HERE
-    const ContentPtr
-      output_NumpyArray_at(int64_t index) const;
-
-    /// @brief HERE
-    const Index8
-      output_Index8_at(const std::string& name) const;
-
-    /// @brief HERE
-    const Index8
-      output_Index8_at(int64_t index) const;
-
-    /// @brief HERE
-    const IndexU8
-      output_IndexU8_at(const std::string& name) const;
-
-    /// @brief HERE
-    const IndexU8
-      output_IndexU8_at(int64_t index) const;
-
-    /// @brief HERE
-    const Index32
-      output_Index32_at(const std::string& name) const;
-
-    /// @brief HERE
-    const Index32
-      output_Index32_at(int64_t index) const;
-
-    /// @brief HERE
-    const IndexU32
-      output_IndexU32_at(const std::string& name) const;
-
-    /// @brief HERE
-    const IndexU32
-      output_IndexU32_at(int64_t index) const;
-
-    /// @brief HERE
-    const Index64
-      output_Index64_at(const std::string& name) const;
-
-    /// @brief HERE
-    const Index64
-      output_Index64_at(int64_t index) const;
 
     /// @brief Returns a string at 'index'.
     /// The strings are defined with an 's"' core word.

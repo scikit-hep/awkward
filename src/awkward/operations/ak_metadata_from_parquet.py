@@ -43,10 +43,10 @@ def metadata_from_parquet(
 
     See also #ak.from_parquet, #ak.to_parquet.
     """
-    import awkward._v2._connect.pyarrow  # noqa: F401
+    import awkward._connect.pyarrow  # noqa: F401
 
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.metadata_from_parquet",
+    with ak._util.OperationErrorContext(
+        "ak.metadata_from_parquet",
         dict(
             path=path,
             storage_options=storage_options,
@@ -64,7 +64,7 @@ def metadata_from_parquet(
 def _impl(
     path, storage_options, row_groups=None, ignore_metadata=False, scan_files=True
 ):
-    results = ak._v2.operations.ak_from_parquet.metadata(
+    results = ak.operations.ak_from_parquet.metadata(
         path, storage_options, row_groups, None, ignore_metadata, scan_files
     )
     parquet_columns, subform, actual_paths, fs, subrg, col_counts, metadata = results

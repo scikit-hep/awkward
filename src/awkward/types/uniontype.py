@@ -3,14 +3,14 @@
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._v2.types.type import Type
-from awkward._v2.forms.form import _parameters_equal
+from awkward.types.type import Type
+from awkward.forms.form import _parameters_equal
 
 
 class UnionType(Type):
     def __init__(self, contents, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -21,7 +21,7 @@ class UnionType(Type):
             contents = list(contents)
         for content in contents:
             if not isinstance(content, Type):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     TypeError(
                         "{} all 'contents' must be Type subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -29,15 +29,15 @@ class UnionType(Type):
                     )
                 )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
                     )
                 )
             )
-        if typestr is not None and not ak._v2._util.isstr(typestr):
-            raise ak._v2._util.error(
+        if typestr is not None and not ak._util.isstr(typestr):
+            raise ak._util.error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)

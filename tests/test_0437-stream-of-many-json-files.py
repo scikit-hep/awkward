@@ -8,123 +8,123 @@ from pathlib import Path
 
 samples_path = Path(__file__).parent / "samples"
 
-to_list = ak._v2.operations.to_list
+to_list = ak.operations.to_list
 
 
 def test_unfinished_fragment_exception():
     # read unfinished json fragments
     strs0 = """{"one": 1, "two": 2.2,"""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(strs0)
+        ak.operations.from_json(strs0)
 
     strs1 = """{"one": 1,
         "two": 2.2,"""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(strs1)
+        ak.operations.from_json(strs1)
 
     strs2 = """{"one": 1,
         "two": 2.2,
         """
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(strs2)
+        ak.operations.from_json(strs2)
 
     strs3 = """{"one": 1, "two": 2.2, "three": "THREE"}
         {"one": 10, "two": 22,"""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(strs3)
+        ak.operations.from_json(strs3)
 
     strs4 = """{"one": 1, "two": 2.2, "three": "THREE"}
         {"one": 10, "two": 22,
         """
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(strs4)
+        ak.operations.from_json(strs4)
 
     strs5 = """["one", "two","""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(strs5)
+        ak.operations.from_json(strs5)
 
     strs6 = """["one",
         "two","""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(strs6)
+        ak.operations.from_json(strs6)
 
     strs7 = """["one",
         "two",
         """
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(strs7)
+        ak.operations.from_json(strs7)
 
 
 def test_two_arrays():
     str = """{"one": 1, "two": 2.2}{"one": 10, "two": 22}"""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(str)
+        ak.operations.from_json(str)
 
     str = """{"one": 1, "two": 2.2}     {"one": 10, "two": 22}"""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(str)
+        ak.operations.from_json(str)
 
     str = """{"one": 1, \t "two": 2.2}{"one": 10, "two": 22}"""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(str)
+        ak.operations.from_json(str)
 
     str = """{"one": 1, "two": 2.2}  \t   {"one": 10, "two": 22}"""
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json(str)
+        ak.operations.from_json(str)
 
     str = """{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}     \n     {"one": 10, "two": 22}"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}     \n\r     {"one": 10, "two": 22}"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}\n"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}\n\r"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """["one", "two"]\n["uno", "dos"]"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [["one", "two"], ["uno", "dos"]]
 
     str = """["one", "two"]\n\r["uno", "dos"]"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [["one", "two"], ["uno", "dos"]]
 
     str = """["one", "two"]  \n   ["uno", "dos"]"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [["one", "two"], ["uno", "dos"]]
 
     str = """["one", "two"]  \n\r   ["uno", "dos"]"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [["one", "two"], ["uno", "dos"]]
 
     str = '"one"\n"two"'
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == ["one", "two"]
 
     str = '"one"\n\r"two"'
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == ["one", "two"]
 
     str = '"one"  \n   "two"'
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == ["one", "two"]
 
-    array = ak._v2.operations.from_json(
+    array = ak.operations.from_json(
         samples_path / "test-two-arrays.json", line_delimited=True
     )
     assert array.tolist() == [
@@ -181,21 +181,21 @@ def test_blanc_lines():
     str = """{"one": 1, "two": 2.2}
 
     {"one": 10, "two": 22}"""
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """{"one": 1, "two": 2.2}
 
     {"one": 10, "two": 22}
     """
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [{"one": 1, "two": 2.2}, {"one": 10, "two": 22.0}]
 
     str = """ 1
     2
 
     3   """
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [1, 2, 3]
 
     str = """
@@ -204,7 +204,7 @@ def test_blanc_lines():
 
         3
         """
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [1, 2, 3]
 
 
@@ -218,7 +218,7 @@ def test_tostring():
              {"x": 5.5, "y": [1, 2, 3, 4]}
              {"x": 6.6, "y": [1, 2, 3, 4, 5]}"""
 
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [
         {"x": 1.1, "y": []},
         {"x": 2.2, "y": [1]},
@@ -229,7 +229,7 @@ def test_tostring():
     ]
 
     assert (
-        ak._v2.operations.to_json(array)
+        ak.operations.to_json(array)
         == '[{"x":1.1,"y":[]},{"x":2.2,"y":[1]},{"x":3.3,"y":[1,2]},{"x":4.4,"y":[1,2,3]},{"x":5.5,"y":[1,2,3,4]},{"x":6.6,"y":[1,2,3,4,5]}]'
     )
 
@@ -243,7 +243,7 @@ def test_fromstring():
              {"x": 5.5, "y": [1, 2, 3, 4]}
              {"x": 6.6, "y": [1, 2, 3, 4, 5]}"""
 
-    array = ak._v2.operations.from_json(str, line_delimited=True)
+    array = ak.operations.from_json(str, line_delimited=True)
     assert array.tolist() == [
         {"x": 1.1, "y": []},
         {"x": 2.2, "y": [1]},
@@ -256,29 +256,29 @@ def test_fromstring():
 
 def test_array_tojson():
     # convert float 'nan' and 'inf' to user-defined strings
-    array = ak._v2.contents.NumpyArray(
+    array = ak.contents.NumpyArray(
         np.array(
             [[float("nan"), float("nan"), 1.1], [float("inf"), 3.3, float("-inf")]]
         )
     )
 
     assert (
-        ak._v2.operations.to_json(
+        ak.operations.to_json(
             array, nan_string="NaN", posinf_string="inf", neginf_string="-inf"
         )
         == '[["NaN","NaN",1.1],["inf",3.3,"-inf"]]'
     )
 
-    array2 = ak._v2.highlevel.Array([[0, 2], None, None, None, "NaN", "NaN"])
+    array2 = ak.highlevel.Array([[0, 2], None, None, None, "NaN", "NaN"])
     assert (
-        ak._v2.operations.to_json(array2, nan_string="NaN")
+        ak.operations.to_json(array2, nan_string="NaN")
         == '[[0,2],null,null,null,"NaN","NaN"]'
     )
 
 
 def test_fromfile():
     # read multiple json fragments from a json file
-    array = ak._v2.operations.from_json(
+    array = ak.operations.from_json(
         samples_path / "test-record-array.json", line_delimited=True
     )
     assert array.tolist() == [
@@ -292,7 +292,7 @@ def test_fromfile():
 
     # read json file containing 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with floats
-    array = ak._v2.operations.from_json(
+    array = ak.operations.from_json(
         samples_path / "test.json",
         posinf_string="inf",
         neginf_string="-inf",
@@ -355,7 +355,7 @@ def test_fromfile():
     ]
 
     # read json file containing 'nan' and 'inf' user-defined strings
-    array = ak._v2.operations.from_json(samples_path / "test.json")
+    array = ak.operations.from_json(samples_path / "test.json")
 
     assert array.tolist() == [
         1.1,
@@ -415,7 +415,7 @@ def test_fromfile():
 
     # read json file containing 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with a predefined 'None' string
-    array = ak._v2.operations.from_json(
+    array = ak.operations.from_json(
         samples_path / "test.json",
         posinf_string="inf",
         neginf_string="-inf",
@@ -491,7 +491,7 @@ def test_fromfile():
     # read json file containing multiple definitions of 'nan' and 'inf'
     # user-defined strings
     # replace can only work for one string definition
-    array = ak._v2.operations.from_json(
+    array = ak.operations.from_json(
         samples_path / "test-nan-inf.json",
         posinf_string="Infinity",
         nan_string="None at all",
@@ -555,39 +555,37 @@ def test_fromfile():
 
 
 def test_three():
-    array = ak._v2.operations.from_json(
-        '["one", "two"] \n ["three"]', line_delimited=True
-    )
+    array = ak.operations.from_json('["one", "two"] \n ["three"]', line_delimited=True)
     assert array.tolist() == [["one", "two"], ["three"]]
 
 
 def test_jpivarski():
-    assert to_list(ak._v2.operations.from_json('{"x": 1, "y": [1, 2, 3]}')) == {
+    assert to_list(ak.operations.from_json('{"x": 1, "y": [1, 2, 3]}')) == {
         "x": 1,
         "y": [1, 2, 3],
     }
 
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json('{"x": 1, "y": [1, 2, 3]} {"x": 2, "y": []}')
+        ak.operations.from_json('{"x": 1, "y": [1, 2, 3]} {"x": 2, "y": []}')
 
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json('{"x": 1, "y": [1, 2, 3]} 123')
+        ak.operations.from_json('{"x": 1, "y": [1, 2, 3]} 123')
 
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json('{"x": 1, "y": [1, 2, 3]} [1, 2, 3, 4, 5]')
+        ak.operations.from_json('{"x": 1, "y": [1, 2, 3]} [1, 2, 3, 4, 5]')
 
-    assert ak._v2.operations.from_json("123") == 123
-
-    with pytest.raises(ValueError):
-        ak._v2.operations.from_json("123 456")
+    assert ak.operations.from_json("123") == 123
 
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json('123 {"x": 1, "y": [1, 2, 3]}')
-
-    assert ak._v2.operations.from_json("null") is None
+        ak.operations.from_json("123 456")
 
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json("null 123")
+        ak.operations.from_json('123 {"x": 1, "y": [1, 2, 3]}')
+
+    assert ak.operations.from_json("null") is None
 
     with pytest.raises(ValueError):
-        ak._v2.operations.from_json("123 null")
+        ak.operations.from_json("null 123")
+
+    with pytest.raises(ValueError):
+        ak.operations.from_json("123 null")

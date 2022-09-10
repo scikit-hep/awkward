@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._v2._connect.numpy.implements("ptp")
+@ak._connect.numpy.implements("ptp")
 def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
     """
     Args:
@@ -55,8 +55,8 @@ def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=Fa
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    with ak._v2._util.OperationErrorContext(
-        "ak._v2.ptp",
+    with ak._util.OperationErrorContext(
+        "ak.ptp",
         dict(
             array=array,
             axis=axis,
@@ -69,24 +69,24 @@ def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=Fa
 
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
-    array = ak._v2.highlevel.Array(
-        ak._v2.operations.to_layout(array, allow_record=False, allow_other=False)
+    array = ak.highlevel.Array(
+        ak.operations.to_layout(array, allow_record=False, allow_other=False)
     )
 
     if axis is None:
-        out = ak._v2.operations.ak_max._impl(
+        out = ak.operations.ak_max._impl(
             array, axis, keepdims, None, mask_identity, flatten_records
-        ) - ak._v2.operations.ak_min._impl(
+        ) - ak.operations.ak_min._impl(
             array, axis, keepdims, None, mask_identity, flatten_records
         )
         if not mask_identity and out is None:
             out = 0
 
     else:
-        maxi = ak._v2.operations.ak_max._impl(
+        maxi = ak.operations.ak_max._impl(
             array, axis, True, None, mask_identity, flatten_records
         )
-        mini = ak._v2.operations.ak_min._impl(
+        mini = ak.operations.ak_min._impl(
             array, axis, True, None, True, flatten_records
         )
 
@@ -97,9 +97,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
             out = maxi - mini
 
             if not mask_identity:
-                out = ak._v2.highlevel.Array(
-                    ak._v2.operations.fill_none(out, 0, axis=-1)
-                )
+                out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
 
             if not keepdims:
                 posaxis = out.layout.axis_wrap_if_negative(axis)

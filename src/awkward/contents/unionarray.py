@@ -8,11 +8,11 @@ import ctypes
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward._v2.index import Index
-from awkward._v2.index import Index8
-from awkward._v2.index import Index64
-from awkward._v2.contents.content import Content, unset
-from awkward._v2.forms.unionform import UnionForm
+from awkward.index import Index
+from awkward.index import Index8
+from awkward.index import Index64
+from awkward.contents.content import Content, unset
+from awkward.forms.unionform import UnionForm
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -55,7 +55,7 @@ class UnionArray(Content):
         self, tags, index, contents, identifier=None, parameters=None, nplike=None
     ):
         if not (isinstance(tags, Index) and tags.dtype == np.dtype(np.int8)):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'tags' must be an Index with dtype=int8, not {}".format(
                         type(self).__name__, repr(tags)
@@ -67,7 +67,7 @@ class UnionArray(Content):
             np.dtype(np.uint32),
             np.dtype(np.int64),
         ):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
                     "not {}".format(type(self).__name__, repr(index))
@@ -75,7 +75,7 @@ class UnionArray(Content):
             )
 
         if not isinstance(contents, Iterable):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -87,7 +87,7 @@ class UnionArray(Content):
 
         for content in contents:
             if not isinstance(content, Content):
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     TypeError(
                         "{} all 'contents' must be Content subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -100,7 +100,7 @@ class UnionArray(Content):
             and index.nplike.known_shape
             and tags.length > index.length
         ):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     "{} len(tags) ({}) must be <= len(index) ({})".format(
                         type(self).__name__, tags.length, index.length
@@ -113,7 +113,7 @@ class UnionArray(Content):
                     nplike = content.nplike
                     break
                 elif nplike is not content.nplike:
-                    raise ak._v2._util.error(
+                    raise ak._util.error(
                         TypeError(
                             "{} 'contents' must use the same array library (nplike): {} vs {}".format(
                                 type(self).__name__,
@@ -162,17 +162,17 @@ class UnionArray(Content):
         assert isinstance(form, self.Form)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
-        container[key1] = ak._v2._util.little_endian(self._tags.raw(nplike))
-        container[key2] = ak._v2._util.little_endian(self._index.raw(nplike))
+        container[key1] = ak._util.little_endian(self._tags.raw(nplike))
+        container[key2] = ak._util.little_endian(self._index.raw(nplike))
         for i, content in enumerate(self._contents):
             content._to_buffers(form.content(i), getkey, container, nplike)
 
     @property
     def typetracer(self):
-        tt = ak._v2._typetracer.TypeTracer.instance()
+        tt = ak._typetracer.TypeTracer.instance()
         return UnionArray(
-            ak._v2.index.Index(self._tags.raw(tt)),
-            ak._v2.index.Index(self._index.raw(tt)),
+            ak.index.Index(self._tags.raw(tt)),
+            ak.index.Index(self._index.raw(tt)),
             [x.typetracer for x in self._contents],
             self._typetracer_identifier(),
             self._parameters,
@@ -220,7 +220,7 @@ class UnionArray(Content):
             self._index,
             self._contents,
             self._identifier,
-            ak._v2._util.merge_parameters(self._parameters, parameters),
+            ak._util.merge_parameters(self._parameters, parameters),
             self._nplike,
         )
 
@@ -229,14 +229,12 @@ class UnionArray(Content):
 
     def _getitem_at(self, where):
         if not self._nplike.known_data:
-            return ak._v2._typetracer.OneOf(
-                [x._getitem_at(where) for x in self._contents]
-            )
+            return ak._typetracer.OneOf([x._getitem_at(where) for x in self._contents])
 
         if where < 0:
             where += self.length
         if self._nplike.known_shape and not 0 <= where < self.length:
-            raise ak._v2._util.indexerror(self, where)
+            raise ak._util.indexerror(self, where)
         tag, index = self._tags[where], self._index[where]
         return self._contents[tag]._getitem_at(index)
 
@@ -276,13 +274,13 @@ class UnionArray(Content):
         ).simplify_uniontype()
 
     def _carry(self, carry, allow_lazy):
-        assert isinstance(carry, ak._v2.index.Index)
+        assert isinstance(carry, ak.index.Index)
 
         try:
             nexttags = self._tags[carry.data]
             nextindex = self._index[: self._tags.length][carry.data]
         except IndexError as err:
-            raise ak._v2._util.indexerror(self, carry.data, str(err)) from err
+            raise ak._util.indexerror(self, carry.data, str(err)) from err
 
         return UnionArray(
             nexttags,
@@ -296,8 +294,8 @@ class UnionArray(Content):
     def project(self, index):
         lentags = self._tags.length
         assert not self._index.length < lentags
-        lenout = ak._v2.index.Index64.empty(1, self._nplike)
-        tmpcarry = ak._v2.index.Index64.empty(lentags, self._nplike)
+        lenout = ak.index.Index64.empty(1, self._nplike)
+        tmpcarry = ak.index.Index64.empty(lentags, self._nplike)
         assert (
             lenout.nplike is self._nplike
             and tmpcarry.nplike is self._nplike
@@ -320,9 +318,7 @@ class UnionArray(Content):
                 index,
             )
         )
-        nextcarry = ak._v2.index.Index64(
-            tmpcarry.data[: lenout[0]], nplike=self._nplike
-        )
+        nextcarry = ak.index.Index64(tmpcarry.data[: lenout[0]], nplike=self._nplike)
         return self._contents[index]._carry(nextcarry, False)
 
     @staticmethod
@@ -331,7 +327,7 @@ class UnionArray(Content):
             nplike = ak.nplike.of(tags)
 
         lentags = tags.length
-        size = ak._v2.index.Index64.empty(1, nplike)
+        size = ak.index.Index64.empty(1, nplike)
         assert size.nplike is nplike and tags.nplike is nplike
         Content._selfless_handle_error(
             nplike[
@@ -379,7 +375,7 @@ class UnionArray(Content):
         if nplike is None:
             nplike = ak.nplike.of(offsets, counts)
 
-        f_offsets = ak._v2.index.Index64(copy.deepcopy(offsets.data))
+        f_offsets = ak.index.Index64(copy.deepcopy(offsets.data))
         contentlen = f_offsets[f_offsets.length - 1]
 
         tags = TagsClass.empty(contentlen, nplike)
@@ -421,10 +417,10 @@ class UnionArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         simplified = self.simplify_uniontype()
-        if isinstance(simplified, ak._v2.contents.UnionArray):
-            raise ak._v2._util.indexerror(
+        if isinstance(simplified, ak.contents.UnionArray):
+            raise ak._util.indexerror(
                 self,
-                ak._v2.contents.ListArray(
+                ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
                 ),
                 "cannot apply jagged slices to irreducible union arrays",
@@ -443,7 +439,7 @@ class UnionArray(Content):
             return self
 
         elif isinstance(
-            head, (int, slice, ak._v2.index.Index64, ak._v2.contents.ListOffsetArray)
+            head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
             outcontents = []
             for i in range(len(self._contents)):
@@ -461,7 +457,7 @@ class UnionArray(Content):
             )
             return out.simplify_uniontype()
 
-        elif ak._v2._util.isstr(head):
+        elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
@@ -473,21 +469,21 @@ class UnionArray(Content):
         elif head is Ellipsis:
             return self._getitem_next_ellipsis(tail, advanced)
 
-        elif isinstance(head, ak._v2.contents.IndexedOptionArray):
+        elif isinstance(head, ak.contents.IndexedOptionArray):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._v2._util.error(AssertionError(repr(head)))
+            raise ak._util.error(AssertionError(repr(head)))
 
     def simplify_uniontype(self, merge=True, mergebool=False):
         if self._nplike.known_shape and self._index.length < self._tags.length:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError("invalid UnionArray: len(index) < len(tags)")
             )
 
         length = self._tags.length
-        tags = ak._v2.index.Index8.empty(length, self._nplike)
-        index = ak._v2.index.Index64.empty(length, self._nplike)
+        tags = ak.index.Index8.empty(length, self._nplike)
+        index = ak.index.Index64.empty(length, self._nplike)
         contents = []
 
         for i, self_cont in enumerate(self._contents):
@@ -657,7 +653,7 @@ class UnionArray(Content):
                     contents.append(self_cont)
 
         if len(contents) > 2**7:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 NotImplementedError(
                     "FIXME: handle UnionArray with more than 127 contents"
                 )
@@ -675,7 +671,7 @@ class UnionArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             out = self.length
-            if ak._v2._util.isint(out):
+            if ak._util.isint(out):
                 return np.int64(out)
             else:
                 return out
@@ -692,7 +688,7 @@ class UnionArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
 
         if posaxis == depth:
-            raise ak._v2._util.error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._util.error(np.AxisError("axis=0 not allowed for flatten"))
 
         else:
             has_offsets = False
@@ -710,7 +706,7 @@ class UnionArray(Content):
                 has_offsets = offsets.length != 0
 
             if has_offsets:
-                total_length = ak._v2.index.Index64.empty(1, self._nplike)
+                total_length = ak.index.Index64.empty(1, self._nplike)
                 assert (
                     total_length.nplike is self._nplike
                     and self._tags.nplike is self._nplike
@@ -734,11 +730,9 @@ class UnionArray(Content):
                     )
                 )
 
-                totags = ak._v2.index.Index8.empty(total_length[0], self._nplike)
-                toindex = ak._v2.index.Index64.empty(total_length[0], self._nplike)
-                tooffsets = ak._v2.index.Index64.empty(
-                    self._tags.length + 1, self._nplike
-                )
+                totags = ak.index.Index8.empty(total_length[0], self._nplike)
+                toindex = ak.index.Index64.empty(total_length[0], self._nplike)
+                tooffsets = ak.index.Index64.empty(self._tags.length + 1, self._nplike)
 
                 assert (
                     totags.nplike is self._nplike
@@ -777,7 +771,7 @@ class UnionArray(Content):
                 )
 
             else:
-                offsets = ak._v2.index.Index64.zeros(0, self._nplike, dtype=np.int64)
+                offsets = ak.index.Index64.zeros(0, self._nplike, dtype=np.int64)
                 return (
                     offsets,
                     UnionArray(
@@ -795,7 +789,7 @@ class UnionArray(Content):
 
     def merging_strategy(self, others):
         if len(others) == 0:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     "to merge this array with 'others', at least one other must be provided"
                 )
@@ -807,19 +801,13 @@ class UnionArray(Content):
         for i in range(len(others)):
             head.append(others[i])
 
-        if any(
-            isinstance(x.nplike, ak._v2._typetracer.TypeTracer) for x in head + tail
-        ):
+        if any(isinstance(x.nplike, ak._typetracer.TypeTracer) for x in head + tail):
             head = [
-                x
-                if isinstance(x.nplike, ak._v2._typetracer.TypeTracer)
-                else x.typetracer
+                x if isinstance(x.nplike, ak._typetracer.TypeTracer) else x.typetracer
                 for x in head
             ]
             tail = [
-                x
-                if isinstance(x.nplike, ak._v2._typetracer.TypeTracer)
-                else x.typetracer
+                x if isinstance(x.nplike, ak._typetracer.TypeTracer) else x.typetracer
                 for x in tail
             ]
 
@@ -829,8 +817,8 @@ class UnionArray(Content):
         theirlength = other.length
         mylength = self.length
 
-        tags = ak._v2.index.Index8.empty(theirlength + mylength, self._nplike)
-        index = ak._v2.index.Index64.empty(theirlength + mylength, self._nplike)
+        tags = ak.index.Index8.empty(theirlength + mylength, self._nplike)
+        index = ak.index.Index64.empty(theirlength + mylength, self._nplike)
 
         contents = [other]
         contents.extend(self.contents)
@@ -884,12 +872,12 @@ class UnionArray(Content):
         )
 
         if len(contents) > 2**7:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 AssertionError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        parameters = ak._v2._util.merge_parameters(self._parameters, other._parameters)
-        return ak._v2.contents.unionarray.UnionArray(
+        parameters = ak._util.merge_parameters(self._parameters, other._parameters)
+        return ak.contents.unionarray.UnionArray(
             tags, index, contents, None, parameters, self._nplike
         )
 
@@ -903,8 +891,8 @@ class UnionArray(Content):
         for array in head:
             total_length += array.length
 
-        nexttags = ak._v2.index.Index8.empty(total_length, self._nplike)
-        nextindex = ak._v2.index.Index64.empty(total_length, self._nplike)
+        nexttags = ak.index.Index8.empty(total_length, self._nplike)
+        nextindex = ak.index.Index64.empty(total_length, self._nplike)
 
         nextcontents = []
         length_so_far = 0
@@ -912,12 +900,10 @@ class UnionArray(Content):
 
         parameters = self._parameters
         for array in head:
-            parameters = ak._v2._util.merge_parameters(
-                parameters, array._parameters, True
-            )
-            if isinstance(array, ak._v2.contents.unionarray.UnionArray):
-                union_tags = ak._v2.index.Index(array.tags)
-                union_index = ak._v2.index.Index(array.index)
+            parameters = ak._util.merge_parameters(parameters, array._parameters, True)
+            if isinstance(array, ak.contents.unionarray.UnionArray):
+                union_tags = ak.index.Index(array.tags)
+                union_index = ak.index.Index(array.index)
                 union_contents = array.contents
                 assert (
                     nexttags.nplike is self._nplike
@@ -955,7 +941,7 @@ class UnionArray(Content):
                 length_so_far += array.length
                 nextcontents.extend(union_contents)
 
-            elif isinstance(array, ak._v2.contents.emptyarray.EmptyArray):
+            elif isinstance(array, ak.contents.emptyarray.EmptyArray):
                 pass
 
             else:
@@ -983,11 +969,11 @@ class UnionArray(Content):
                 nextcontents.append(array)
 
         if len(nextcontents) > 127:
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        next = ak._v2.contents.unionarray.UnionArray(
+        next = ak.contents.unionarray.UnionArray(
             nexttags, nextindex, nextcontents, None, parameters, self._nplike
         )
 
@@ -1045,7 +1031,7 @@ class UnionArray(Content):
                         n, replacement, recordlookup, parameters, posaxis, depth
                     )
                 )
-            return ak._v2.unionarray.UnionArray(
+            return ak.unionarray.UnionArray(
                 self._tags,
                 self._index,
                 contents,
@@ -1058,7 +1044,7 @@ class UnionArray(Content):
         contents = []
         for x in self._contents:
             contents.append(x.numbers_to_type(name))
-        return ak._v2.contents.unionarray.UnionArray(
+        return ak.contents.unionarray.UnionArray(
             self._tags,
             self._index,
             contents,
@@ -1069,8 +1055,8 @@ class UnionArray(Content):
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         simplified = self.simplify_uniontype(True, True)
-        if isinstance(simplified, ak._v2.contents.UnionArray):
-            raise ak._v2._util.error(
+        if isinstance(simplified, ak.contents.UnionArray):
+            raise ak._util.error(
                 ValueError("cannot check if an irreducible UnionArray is unique")
             )
 
@@ -1078,8 +1064,8 @@ class UnionArray(Content):
 
     def _unique(self, negaxis, starts, parents, outlength):
         simplified = self.simplify_uniontype(True, True)
-        if isinstance(simplified, ak._v2.contents.UnionArray):
-            raise ak._v2._util.error(
+        if isinstance(simplified, ak.contents.UnionArray):
+            raise ak._util.error(
                 ValueError("cannot make a unique irreducible UnionArray")
             )
 
@@ -1099,14 +1085,12 @@ class UnionArray(Content):
     ):
         simplified = self.simplify_uniontype(mergebool=True)
         if simplified.length == 0:
-            return ak._v2.contents.NumpyArray(
+            return ak.contents.NumpyArray(
                 self._nplike.empty(0, np.int64), None, None, self._nplike
             )
 
-        if isinstance(simplified, ak._v2.contents.UnionArray):
-            raise ak._v2._util.error(
-                ValueError("cannot argsort an irreducible UnionArray")
-            )
+        if isinstance(simplified, ak.contents.UnionArray):
+            raise ak._util.error(ValueError("cannot argsort an irreducible UnionArray"))
 
         return simplified._argsort_next(
             negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order
@@ -1122,10 +1106,8 @@ class UnionArray(Content):
         if simplified.length == 0:
             return simplified
 
-        if isinstance(simplified, ak._v2.contents.UnionArray):
-            raise ak._v2._util.error(
-                ValueError("cannot sort an irreducible UnionArray")
-            )
+        if isinstance(simplified, ak.contents.UnionArray):
+            raise ak._util.error(ValueError("cannot sort an irreducible UnionArray"))
 
         return simplified._sort_next(
             negaxis, starts, parents, outlength, ascending, stable, kind, order
@@ -1145,7 +1127,7 @@ class UnionArray(Content):
     ):
         simplified = self.simplify_uniontype(mergebool=True)
         if isinstance(simplified, UnionArray):
-            raise ak._v2._util.error(
+            raise ak._util.error(
                 ValueError(
                     f"cannot call ak.{reducer.name} on an irreducible UnionArray"
                 )
@@ -1165,7 +1147,7 @@ class UnionArray(Content):
 
     def _validity_error(self, path):
         for i in range(len(self.contents)):
-            if isinstance(self.contents[i], ak._v2.contents.unionarray.UnionArray):
+            if isinstance(self.contents[i], ak.contents.unionarray.UnionArray):
                 return "{} contains {}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
                     type(self), type(self.contents[i])
                 )
@@ -1227,7 +1209,7 @@ class UnionArray(Content):
             contents = []
             for content in self._contents:
                 contents.append(content._pad_none(target, posaxis, depth, clip))
-            out = ak._v2.contents.unionarray.UnionArray(
+            out = ak.contents.unionarray.UnionArray(
                 self.tags,
                 self.index,
                 contents,
@@ -1295,7 +1277,7 @@ class UnionArray(Content):
             npindex = npindex.astype(np.int32)
 
         return pyarrow.Array.from_buffers(
-            ak._v2._connect.pyarrow.to_awkwardarrow_type(
+            ak._connect.pyarrow.to_awkwardarrow_type(
                 types,
                 options["extensionarray"],
                 options["record_is_scalar"],
@@ -1305,15 +1287,15 @@ class UnionArray(Content):
             nptags.shape[0],
             [
                 None,
-                ak._v2._connect.pyarrow.to_length(nptags, length),
-                ak._v2._connect.pyarrow.to_length(npindex, length),
+                ak._connect.pyarrow.to_length(nptags, length),
+                ak._connect.pyarrow.to_length(npindex, length),
             ],
             children=values,
         )
 
     def _to_numpy(self, allow_missing):
         contents = [
-            ak._v2.operations.to_numpy(self.project(i), allow_missing=allow_missing)
+            ak.operations.to_numpy(self.project(i), allow_missing=allow_missing)
             for i in range(len(self.contents))
         ]
 
@@ -1321,14 +1303,14 @@ class UnionArray(Content):
             try:
                 out = self._nplike.ma.concatenate(contents)
             except Exception as err:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(f"cannot convert {self} into numpy.ma.MaskedArray")
                 ) from err
         else:
             try:
                 out = numpy.concatenate(contents)
             except Exception as err:
-                raise ak._v2._util.error(
+                raise ak._util.error(
                     ValueError(f"cannot convert {self} into np.ndarray")
                 ) from err
 
@@ -1403,7 +1385,7 @@ class UnionArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._v2._util.error(AssertionError(result))
+            raise ak._util.error(AssertionError(result))
 
     def packed(self):
         tags = self._tags.raw(self._nplike)
@@ -1426,8 +1408,8 @@ class UnionArray(Content):
             contents[tag] = contents[tag].packed()
 
         return UnionArray(
-            ak._v2.index.Index8(tags, nplike=self.nplike),
-            ak._v2.index.Index(index, nplike=self.nplike),
+            ak.index.Index8(tags, nplike=self.nplike),
+            ak.index.Index(index, nplike=self.nplike),
             contents,
             self._identifier,
             self._parameters,
