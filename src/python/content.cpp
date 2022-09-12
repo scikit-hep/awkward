@@ -125,12 +125,6 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endrecord();
   }
-  else if (py::isinstance(obj, py::module::import("awkward").attr("Array"))) {
-    builder_fromiter(self, obj.attr("to_list")());
-  }
-  else if (py::isinstance(obj, py::module::import("awkward").attr("Record"))) {
-    builder_fromiter(self, obj.attr("to_list")());
-  }
   else if (py::isinstance<py::iterable>(obj)) {
     py::iterable seq = obj.cast<py::iterable>();
     self.beginlist();
@@ -138,9 +132,6 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
       builder_fromiter(self, x);
     }
     self.endlist();
-  }
-  else if (py::isinstance<py::array>(obj)) {
-    builder_fromiter(self, obj.attr("tolist")());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("datetime64"))) {
     builder_datetime(self, obj);
@@ -156,6 +147,12 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
     self.real(obj.cast<double>());
+  }
+  else if (py::hasattr(obj, "to_list")) {
+    builder_fromiter(self, obj.attr("to_list")());
+  }
+  else if (py::hasattr(obj, "tolist")) {
+    builder_fromiter(self, obj.attr("tolist")());
   }
   else {
 
