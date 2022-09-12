@@ -967,53 +967,6 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   }
 }
 
-template <>
-py::object
-getitem<ak::ArrayBuilder>(const ak::ArrayBuilder& self, const py::object& obj) {
-  if (py::isinstance<py::int_>(obj)) {
-    return box(unbox_content(::builder_snapshot(self.builder())).get()->getitem_at(obj.cast<int64_t>()));
-  }
-  if (py::isinstance<py::slice>(obj)) {
-    py::object pystep = obj.attr("step");
-    if ((py::isinstance<py::int_>(pystep)  &&  pystep.cast<int64_t>() == 1)  ||
-        pystep.is(py::none())) {
-      int64_t start = ak::Slice::none();
-      int64_t stop = ak::Slice::none();
-      py::object pystart = obj.attr("start");
-      py::object pystop = obj.attr("stop");
-      if (!pystart.is(py::none())) {
-        start = pystart.cast<int64_t>();
-      }
-      if (!pystop.is(py::none())) {
-        stop = pystop.cast<int64_t>();
-      }
-      return box(unbox_content(::builder_snapshot(self.builder())).get()->getitem_range(start, stop));
-    }
-    // control flow can pass through here; don't make the last line an 'else'!
-  }
-  if (py::isinstance<py::str>(obj)) {
-    return box(unbox_content(::builder_snapshot(self.builder())).get()->getitem_field(obj.cast<std::string>()));
-  }
-  if (!py::isinstance<py::tuple>(obj)  &&  py::isinstance<py::iterable>(obj)) {
-    std::vector<std::string> strings;
-    bool all_strings = true;
-    for (auto x : obj) {
-      if (py::isinstance<py::str>(x)) {
-        strings.push_back(x.cast<std::string>());
-      }
-      else {
-        all_strings = false;
-        break;
-      }
-    }
-    if (all_strings  &&  !strings.empty()) {
-      return box(unbox_content(::builder_snapshot(self.builder())).get()->getitem_fields(strings));
-    }
-    // control flow can pass through here; don't make the last line an 'else'!
-  }
-  return box(unbox_content(::builder_snapshot(self.builder())).get()->getitem(toslice(obj)));
-}
-
 py::class_<ak::ArrayBuilder>
 make_ArrayBuilder(const py::handle& m, const std::string& name) {
   return (py::class_<ak::ArrayBuilder>(m, name.c_str())
@@ -1026,9 +979,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       })
       .def("__len__", &ak::ArrayBuilder::length)
       .def("clear", &ak::ArrayBuilder::clear)
-      .def("type", [](const ak::ArrayBuilder& self, const std::map<std::string, std::string>& typestrs) -> std::shared_ptr<ak::Type> {
-        return unbox_content(::builder_snapshot(self.builder()))->type(typestrs);
-      })
       .def("form", [](const ak::ArrayBuilder& self) -> py::object {
         ::EmptyBuffersContainer container;
         int64_t form_key_id = 0;
@@ -1043,13 +993,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         out[1] = py::int_(self.length());
         out[2] = container.container();
         return out;
-      })
-      .def("snapshot", [](const ak::ArrayBuilder& self) -> py::object {
-        return ::builder_snapshot(self.builder());
-      })
-      .def("__getitem__", &getitem<ak::ArrayBuilder>)
-      .def("__iter__", [](const ak::ArrayBuilder& self) -> ak::Iterator {
-        return ak::Iterator(unbox_content(::builder_snapshot(self.builder())));
       })
       .def("null", &ak::ArrayBuilder::null)
       .def("boolean", &ak::ArrayBuilder::boolean)
@@ -1349,13 +1292,4 @@ void
 setparameter(T& self, const std::string& key, const py::object& value) {
   py::object valuestr = py::module::import("json").attr("dumps")(value);
   self.setparameter(key, valuestr.cast<std::string>());
-}
-
-template <typename T>
-py::object
-withparameter(T& self, const std::string& key, const py::object& value) {
-  py::object valuestr = py::module::import("json").attr("dumps")(value);
-  ak::ContentPtr out = self.shallow_copy();
-  out.get()->setparameter(key, valuestr.cast<std::string>());
-  return box(out);
 }
