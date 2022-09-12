@@ -136,6 +136,50 @@ namespace awkward {
   }
 
   template <typename OUT>
+  util::dtype
+  ForthOutputBufferOf<OUT>::dtype() const {
+    if (std::is_same<OUT, bool>::value) {
+      return util::dtype::boolean;
+    }
+    else if (std::is_same<OUT, std::int8_t>::value) {
+      return util::dtype::int8;
+    }
+    else if (std::is_same<OUT, std::int16_t>::value) {
+      return util::dtype::int16;
+    }
+    else if (std::is_same<OUT, std::int32_t>::value) {
+      return util::dtype::int32;
+    }
+    else if (std::is_same<OUT, std::int64_t>::value) {
+      return util::dtype::int64;
+    }
+    else if (std::is_same<OUT, std::uint8_t>::value) {
+      return util::dtype::uint8;
+    }
+    else if (std::is_same<OUT, std::uint16_t>::value) {
+      return util::dtype::uint16;
+    }
+    else if (std::is_same<OUT, std::uint32_t>::value) {
+      return util::dtype::uint32;
+    }
+    else if (std::is_same<OUT, std::uint64_t>::value) {
+      return util::dtype::uint64;
+    }
+    else if (std::is_same<OUT, float>::value) {
+      return util::dtype::float32;
+    }
+    else if (std::is_same<OUT, double>::value) {
+      return util::dtype::float64;
+    }
+    else {
+      throw std::runtime_error(
+        std::string("unrecognized ForthOutputBuffer specialization: ")
+        + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+      );
+    }
+  }
+
+  template <typename OUT>
   void
   ForthOutputBufferOf<OUT>::dup(int64_t num_times, util::ForthError& err) noexcept {
     if (length_ == 0) {
@@ -150,61 +194,6 @@ namespace awkward {
       }
       length_ = next;
     }
-  }
-
-  template <typename OUT>
-  const ContentPtr
-  ForthOutputBufferOf<OUT>::toNumpyArray() const {
-    util::dtype dtype;
-    if (std::is_same<OUT, bool>::value) {
-      dtype = util::dtype::boolean;
-    }
-    else if (std::is_same<OUT, std::int8_t>::value) {
-      dtype = util::dtype::int8;
-    }
-    else if (std::is_same<OUT, std::int16_t>::value) {
-      dtype = util::dtype::int16;
-    }
-    else if (std::is_same<OUT, std::int32_t>::value) {
-      dtype = util::dtype::int32;
-    }
-    else if (std::is_same<OUT, std::int64_t>::value) {
-      dtype = util::dtype::int64;
-    }
-    else if (std::is_same<OUT, std::uint8_t>::value) {
-      dtype = util::dtype::uint8;
-    }
-    else if (std::is_same<OUT, std::uint16_t>::value) {
-      dtype = util::dtype::uint16;
-    }
-    else if (std::is_same<OUT, std::uint32_t>::value) {
-      dtype = util::dtype::uint32;
-    }
-    else if (std::is_same<OUT, std::uint64_t>::value) {
-      dtype = util::dtype::uint64;
-    }
-    else if (std::is_same<OUT, float>::value) {
-      dtype = util::dtype::float32;
-    }
-    else if (std::is_same<OUT, double>::value) {
-      dtype = util::dtype::float64;
-    }
-    else {
-      throw std::runtime_error(
-        std::string("unrecognized ForthOutputBuffer specialization: ")
-        + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
-      );
-    }
-    return std::make_shared<NumpyArray>(Identities::none(),
-                                        util::Parameters(),
-                                        ptr_,
-                                        std::vector<ssize_t>({ (ssize_t)length_ }),
-                                        std::vector<ssize_t>({ (ssize_t)sizeof(OUT) }),
-                                        0,
-                                        (ssize_t)sizeof(OUT),
-                                        util::dtype_to_format(dtype),
-                                        dtype,
-                                        kernel::lib::cpu);
   }
 
   template <typename OUT>
@@ -777,6 +766,22 @@ namespace awkward {
     length_++;
     maybe_resize(length_);
     ptr_.get()[length_ - 1] = previous + (OUT)value;
+  }
+
+  template <typename OUT>
+  std::string
+  ForthOutputBufferOf<OUT>::tostring() const {
+    std::stringstream ss;
+    ss << "[";
+    if (length_ > 0) {
+      ss << ptr_.get()[0];
+      for (auto i = 1; i < length_; i++) {
+        ss << ", ";
+        ss << ptr_.get()[i];
+      }
+    }
+    ss << "]";
+    return ss.str();
   }
 
   template <typename OUT>

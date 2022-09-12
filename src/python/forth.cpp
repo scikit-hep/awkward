@@ -2,6 +2,8 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/forth.cpp", line)
 
+#include <type_traits>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
@@ -108,6 +110,71 @@ py::object maybe_throw(const ak::ForthMachineOf<T, I>& self,
   }
 }
 
+
+template <typename T>
+py::object capsule_for_shared_pointer(std::shared_ptr<T> ptr) {
+  /**
+   * Return a py::capsule that destructs the given pointer on GC
+   */
+  return py::capsule(new auto(ptr), [](void* p) {
+    delete reinterpret_cast<decltype(ptr)*>(p);
+  });
+}
+
+
+py::object output_buffer_to_numpy(std::shared_ptr<ak::ForthOutputBuffer> output) {
+  auto ptr = output->ptr();
+  // Hold long-lived shared_ptr, and delete when out of scope
+  // `new auto(ptr)` creates long-lived pointer to a shared_ptr that shares
+  // ownership with the shared-ptr `ptr`
+  auto lifetime = capsule_for_shared_pointer(ptr);
+  return py::array(py::dtype(ak::util::dtype_to_format(output->dtype())),
+                        output->len(),
+                        ptr.get(),
+                        lifetime);
+}
+
+
+template <typename T>
+py::object index_to_python_index(const ak::IndexOf<T>& output) {
+  auto ptr = output.ptr();
+  // Hold long-lived shared_ptr, and delete when out of scope
+  // `new auto(ptr)` creates long-lived pointer to a shared_ptr that shares
+  // ownership with the shared-ptr `ptr`
+  auto lifetime = capsule_for_shared_pointer(ptr);
+  auto data = py::array_t<T>(output.length(),
+                             output.data(), // Include offset
+                             lifetime);
+  return py::module::import("awkward").attr("index").attr("Index")(data);
+}
+
+
+template <typename T, typename I>
+py::object machine_bytecodes_at_to_python_content(std::shared_ptr<ak::ForthMachineOf<T, I>> machine, int64_t index) {
+  // Single-copy into shared-ptr for offsets and bytecodes
+  const auto offsets = machine->bytecodes_offsets();
+  const auto length = offsets.size() - 1;
+  const auto bytecodes_holder = std::make_shared<std::vector<I>>(std::move(machine->bytecodes()));
+
+  // Build capsules which release their usage of the held memory on GC
+  auto bytecodes_capsule = capsule_for_shared_pointer(bytecodes_holder);
+
+  // Create buffer from typed pointer and lifetime capsule
+  auto bytecodes_array = py::array_t<I>(bytecodes_holder->size(), bytecodes_holder->data(), bytecodes_capsule);
+  if (index >= length || index < 0) {
+    throw std::invalid_argument(
+        std::string("out of bounds index in ForthMachineOf.__getitem__: ")
+        + FILENAME(__LINE__));
+  }
+  // Build Python objects for buffer sublist
+  auto start = offsets[index];
+  auto stop = offsets[index+1];
+  return bytecodes_array[py::slice(start, stop, 1)];
+
+
+}
+
+
 template <typename T, typename I>
 py::class_<ak::ForthMachineOf<T, I>, std::shared_ptr<ak::ForthMachineOf<T, I>>>
 make_ForthMachineOf(const py::handle& m, const std::string& name) {
@@ -141,7 +208,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               return py::cast(out);
             }
             else if (self.get()->is_output(key)) {
-              return box(self.get()->output_NumpyArray_at(key));
+                auto output = self.get()->output_at(key);
+                return output_buffer_to_numpy(output);
             }
             else if (self.get()->is_defined(key)) {
               const std::vector<std::string> dictionary = self.get()->dictionary();
@@ -151,8 +219,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                   break;
                 }
               }
-              ak::ContentPtr bytecodes = self.get()->bytecodes();
-              return box(bytecodes.get()->getitem_at_nowrap(index + 1));
+              return machine_bytecodes_at_to_python_content(self, index+1);
             }
             else {
                 throw std::invalid_argument(
@@ -164,6 +231,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               &ak::ForthMachineOf<T, I>::source)
           .def_property_readonly("bytecodes",
               &ak::ForthMachineOf<T, I>::bytecodes)
+          .def_property_readonly("bytecodes_offsets",
+              &ak::ForthMachineOf<T, I>::bytecodes_offsets)
           .def_property_readonly("decompiled",
               &ak::ForthMachineOf<T, I>::decompiled)
           .def_property_readonly("dictionary",
@@ -209,39 +278,41 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               py::dict out;
               for (auto name : self.get()->output_index()) {
                 py::object pyname = py::cast(name);
-                out[pyname] = box(self.get()->output_NumpyArray_at(name));
+                auto output = self.get()->output_at(name);
+                out[pyname] = output_buffer_to_numpy(output);
               }
               return out;
           })
           .def("output_NumpyArray",
             [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
                const std::string& name) -> py::object {
-              return box(self.get()->output_NumpyArray_at(name));
+              auto output = self.get()->output_at(name);
+              return output_buffer_to_numpy(output);
           })
           .def("output_Index8",
             [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> ak::Index8 {
-              return self.get()->output_Index8_at(name);
+               const std::string& name) -> py::object {
+              return index_to_python_index(self.get()->output_Index8_at(name));
           })
           .def("output_IndexU8",
             [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> ak::IndexU8 {
-              return self.get()->output_IndexU8_at(name);
+               const std::string& name) -> py::object {
+              return index_to_python_index(self.get()->output_IndexU8_at(name));
           })
           .def("output_Index32",
             [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> ak::Index32 {
-              return self.get()->output_Index32_at(name);
+               const std::string& name) -> py::object {
+              return index_to_python_index(self.get()->output_Index32_at(name));
           })
           .def("output_IndexU32",
             [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> ak::IndexU32 {
-              return self.get()->output_IndexU32_at(name);
+               const std::string& name) -> py::object {
+              return index_to_python_index(self.get()->output_IndexU32_at(name));
           })
           .def("output_Index64",
             [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> ak::Index64 {
-              return self.get()->output_Index64_at(name);
+               const std::string& name) -> py::object {
+              return index_to_python_index(self.get()->output_Index64_at(name));
           })
           .def("reset", &ak::ForthMachineOf<T, I>::reset)
           .def("begin", [](ak::ForthMachineOf<T, I>& self,

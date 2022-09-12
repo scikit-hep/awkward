@@ -41,8 +41,12 @@ namespace awkward {
       source() const noexcept;
 
     /// @brief HERE
-    const ContentPtr
+    const std::vector<I>
       bytecodes() const;
+
+    /// @brief HERE
+    const std::vector<int64_t>
+      bytecodes_offsets() const;
 
     /// @brief HERE
     const std::string
@@ -166,14 +170,6 @@ namespace awkward {
     /// @brief HERE
     const std::shared_ptr<ForthOutputBuffer>
       output_at(int64_t index) const noexcept;
-
-    /// @brief HERE
-    const ContentPtr
-      output_NumpyArray_at(const std::string& name) const;
-
-    /// @brief HERE
-    const ContentPtr
-      output_NumpyArray_at(int64_t index) const;
 
     /// @brief HERE
     const Index8

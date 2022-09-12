@@ -284,19 +284,15 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const ContentPtr
+  const std::vector<I>
   ForthMachineOf<T, I>::bytecodes() const {
-    IndexOf<I> content((int64_t)bytecodes_.size(), kernel::lib::cpu);
-    std::memcpy(content.data(), bytecodes_.data(), bytecodes_.size() * sizeof(I));
+    return bytecodes_;
+  }
 
-    IndexOf<int64_t> offsets((int64_t)bytecodes_offsets_.size(), kernel::lib::cpu);
-    std::memcpy(offsets.data(), bytecodes_offsets_.data(), bytecodes_offsets_.size() * sizeof(int64_t));
-
-    return std::make_shared<ListOffsetArrayOf<int64_t>>(Identities::none(),
-                                                        util::Parameters(),
-                                                        offsets,
-                                                        std::make_shared<NumpyArray>(content),
-                                                        false);
+  template <typename T, typename I>
+  const std::vector<int64_t>
+  ForthMachineOf<T, I>::bytecodes_offsets() const {
+    return bytecodes_offsets_;
   }
 
   template <typename T, typename I>
@@ -958,27 +954,6 @@ namespace awkward {
   const std::shared_ptr<ForthOutputBuffer>
   ForthMachineOf<T, I>::output_at(int64_t index) const noexcept {
     return current_outputs_[(IndexTypeOf<int64_t>)index];
-  }
-
-  template <typename T, typename I>
-  const ContentPtr
-  ForthMachineOf<T, I>::output_NumpyArray_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;
-         i < output_names_.size()  &&  i < current_outputs_.size();
-         i++) {
-      if (output_names_[i] == name) {
-        return current_outputs_[i].get()->toNumpyArray();
-      }
-    }
-    throw std::invalid_argument(
-      std::string("output not found: ") + name + FILENAME(__LINE__)
-    );
-  }
-
-  template <typename T, typename I>
-  const ContentPtr
-  ForthMachineOf<T, I>::output_NumpyArray_at(int64_t index) const {
-    return current_outputs_[(IndexTypeOf<int64_t>)index].get()->toNumpyArray();
   }
 
   template <typename T, typename I>

@@ -62,9 +62,8 @@ namespace awkward {
     virtual const std::shared_ptr<void>
       ptr() const noexcept = 0;
 
-    /// @brief HERE
-    virtual const ContentPtr
-      toNumpyArray() const = 0;
+    virtual util::dtype
+      dtype() const = 0;
 
     /// @brief HERE
     virtual const Index8
@@ -206,6 +205,9 @@ namespace awkward {
     virtual void
       write_add_int64(int64_t value) noexcept = 0;
 
+    virtual std::string
+      tostring() const = 0;
+
   protected:
     int64_t length_;
     int64_t reserved_;
@@ -223,8 +225,8 @@ namespace awkward {
     const std::shared_ptr<void>
       ptr() const noexcept override;
 
-    const ContentPtr
-      toNumpyArray() const override;
+    util::dtype
+      dtype() const override;
 
     const Index8
       toIndex8() const override;
@@ -330,6 +332,8 @@ namespace awkward {
 
     void
       write_add_int64(int64_t value) noexcept override;
+
+    std::string tostring() const override;
 
   private:
 

@@ -627,7 +627,7 @@ namespace awkward {
     std::cout << "\n";
     for (auto const& i : vm_.get()->outputs()) {
       std::cout << i.first << " : ";
-      std::cout << i.second.get()->toNumpyArray().get()->tostring();
+      std::cout << i.second.get()->tostring();
       std::cout << "\n";
     }
   }
