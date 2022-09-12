@@ -1108,37 +1108,8 @@ template py::class_<ak::LayoutBuilder64>
 make_LayoutBuilder(const py::handle& m, const std::string& name);
 
 
-////////// Iterator
-
-py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>>
-make_Iterator(const py::handle& m, const std::string& name) {
-  auto next = [](ak::Iterator& iterator) -> py::object {
-    if (iterator.isdone()) {
-      throw py::stop_iteration();
-    }
-    return box(iterator.next());
-  };
-
-  return (py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>>(m,
-                                                                  name.c_str())
-      .def(py::init([](const py::object& content) -> ak::Iterator {
-        return ak::Iterator(unbox_content(content));
-      }))
-      .def("__repr__", &ak::Iterator::tostring)
-      .def("__next__", next)
-      .def("next", next)
-      .def("__iter__",
-           [](const py::object& self) -> py::object { return self; })
-  );
-}
 
 ////////// Content
-
-template <typename T>
-ak::Iterator
-iter(const T& self) {
-  return ak::Iterator(self.shallow_copy());
-}
 
 ak::util::Parameters
 dict2parameters(const py::object& in) {
