@@ -9,7 +9,7 @@
 #include "awkward/kernels.h"
 #include "awkward/kernel-utils.h"
 
-#include "awkward/Reducer.h"
+
 
 #include "awkward/io/json.h"
 

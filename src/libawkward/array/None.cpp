@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 
-#include "awkward/Reducer.h"
+
 #include "awkward/io/json.h"
 
 

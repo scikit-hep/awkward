@@ -9,7 +9,7 @@
 
 #include "awkward/kernels.h"
 
-#include "awkward/Reducer.h"
+
 #include "awkward/io/json.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
