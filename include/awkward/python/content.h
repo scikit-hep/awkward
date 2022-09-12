@@ -7,29 +7,12 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "awkward/Slice.h"
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/Content.h"
-#include "awkward/array/EmptyArray.h"
-#include "awkward/array/IndexedArray.h"
-#include "awkward/array/ByteMaskedArray.h"
-#include "awkward/array/BitMaskedArray.h"
-#include "awkward/array/UnmaskedArray.h"
-#include "awkward/array/ListArray.h"
-#include "awkward/array/ListOffsetArray.h"
-#include "awkward/array/NumpyArray.h"
-#include "awkward/array/RecordArray.h"
-#include "awkward/array/RegularArray.h"
-#include "awkward/array/UnionArray.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
-
-py::object
-box(const std::shared_ptr<ak::Content>& content);
-
-std::shared_ptr<ak::Content>
-unbox_content(const py::handle& obj);
 
 template <typename T>
 std::string
@@ -137,39 +120,5 @@ namespace {
     return py::module::import("awkward").attr("from_buffers")(**kwargs);
   }
 }
-
-/// @class PersistentSharedPtr
-///
-/// @brief Array nodes are frequently copied, but for some applications
-/// (one in Numba) it's better to keep a persistent `std::shared_ptr`.
-class PersistentSharedPtr {
-public:
-  /// @brief Creates a PersistentSharedPtr from a `std::shared_ptr` to a
-  /// Content array.
-  PersistentSharedPtr(const std::shared_ptr<ak::Content>& ptr);
-
-  /// @brief Returns a layout object (Content in Python) from this #ptr.
-  py::object
-    layout() const;
-
-  /// @brief Returns a raw pointer to the persistent `std::shared_ptr`
-  /// (a raw pointer to a smart pointer).
-  size_t
-    ptr() const;
-
-private:
-  /// @brief The wrapped `std::shared_ptr`.
-  const std::shared_ptr<ak::Content> ptr_;
-};
-
-/// @brief Makes a PersistentSharedPtr class in Python that mirrors the one
-/// in C++.
-py::class_<PersistentSharedPtr>
-  make_PersistentSharedPtr(const py::handle& m, const std::string& name);
-
-/// @brief Makes an abstract Content class in Python that mirrors the one
-/// in C++.
-py::class_<ak::Content, std::shared_ptr<ak::Content>>
-  make_Content(const py::handle& m, const std::string& name);
 
 #endif // AWKWARDPY_CONTENT_H_

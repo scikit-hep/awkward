@@ -6,7 +6,7 @@
 // #include <cstring>
 
 #include "awkward/common.h"
-#include "awkward/Content.h"
+
 #include "awkward/Index.h"
 
 namespace awkward {

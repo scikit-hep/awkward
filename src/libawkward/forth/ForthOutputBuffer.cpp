@@ -6,7 +6,6 @@
 
 #include "awkward/kernel-dispatch.h"
 
-#include "awkward/array/NumpyArray.h"
 #include "awkward/forth/ForthOutputBuffer.h"
 
 namespace awkward {
