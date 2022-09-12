@@ -15,7 +15,6 @@
 #endif
 
 namespace awkward {
-  class Identities;
   template <typename T>
   class IndexOf;
 
@@ -93,11 +92,9 @@ namespace awkward {
     /// @param err The Error struct from a cpu-kernel.
     /// @param classname The name of this class to include in the error
     /// message.
-    /// @param id The Identities to include in the error message.
     void
     handle_error(const struct Error &err,
-                 const std::string &classname = std::string(""),
-                 const Identities *id = nullptr);
+                 const std::string &classname = std::string(""));
 
     /// @brief Puts quotation marks around a string and escapes the appropriate
     /// characters.

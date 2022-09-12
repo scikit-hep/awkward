@@ -108,7 +108,7 @@ namespace awkward {
         length,
         tags.data(),
         length);
-      util::handle_error(err, "UnionArray", nullptr);
+      util::handle_error(err, "UnionArray");
 
       container.copy_buffer(form_key() + "-tags",
                             tags.ptr().get(),

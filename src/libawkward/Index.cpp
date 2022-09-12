@@ -217,8 +217,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < length_)) {
       util::handle_error(failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
-                         classname(),
-                         nullptr);
+                         classname());
     }
     return getitem_at_nowrap(regular_at);
   }
