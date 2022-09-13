@@ -27,24 +27,6 @@
 #include "awkward/python/dlpack_util.h"
 
 
-////////// slicing
-
-
-int64_t
-check_maxdecimals(const py::object& maxdecimals) {
-  if (maxdecimals.is(py::none())) {
-    return -1;
-  }
-  try {
-    return maxdecimals.cast<int64_t>();
-  }
-  catch (py::cast_error err) {
-    throw std::invalid_argument(
-      std::string("maxdecimals must be None or an integer")
-      + FILENAME(__LINE__));
-  }
-}
-
 ////////// ArrayBuilder
 
 bool

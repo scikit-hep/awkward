@@ -188,11 +188,6 @@ def test_ByteMaskedArray_to_slice():
     maskedarray = ak.contents.ByteMaskedArray(mask, content, valid_when=False)
     assert to_list(maskedarray) == [5, 2, None, 3, 9, None, 1]
 
-    assert (
-        ak._ext._slice_tostring(maskedarray)
-        == "[missing([0, 1, -1, 2, 3, -1, 4], array([5, 2, 3, 9, 1]))]"
-    )
-
 
 def test_ByteMaskedArray_as_slice():
     array = ak.highlevel.Array(

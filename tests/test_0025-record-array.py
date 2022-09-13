@@ -310,11 +310,6 @@ def test_recordtype():
 
 
 def test_getitem():
-    assert (
-        ak._ext._slice_tostring((1, 2, [3], "four", ["five", "six"], slice(7, 8, 9)))
-        == '[array([1]), array([2]), array([3]), "four", ["five", "six"], 7:8:9]'
-    )
-
     content1 = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int64))
     content2 = ak.contents.NumpyArray(
         np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], dtype=np.float64)

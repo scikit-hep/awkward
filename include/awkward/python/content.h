@@ -7,7 +7,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "awkward/Slice.h"
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
 
@@ -34,10 +33,6 @@ dict2parameters(const py::object& in);
 
 py::dict
 parameters2dict(const ak::util::Parameters& in);
-
-/// @brief Converts Python objects in a slice into a C++ Slice.
-ak::Slice
-  toslice(py::object obj);
 
 /// @brief Makes an ArrayBuilder class in Python that mirrors the one in C++.
 py::class_<ak::ArrayBuilder>

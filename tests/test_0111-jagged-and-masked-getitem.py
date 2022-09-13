@@ -207,41 +207,21 @@ def test_new_slices():
 
     assert to_list(indexedarray) == [5, 2, None, 3, 9, None, 1]
 
-    assert (
-        ak._ext._slice_tostring(indexedarray)
-        == "[missing([0, 1, -1, 2, 3, -1, 4], array([5, 2, 3, 9, 1]))]"
-    )
-
     offsets = ak.index.Index64(np.array([0, 4, 4, 7], dtype=np.int64))
     listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
     assert to_list(listoffsetarray) == [[1, 0, 9, 3], [], [2, 2, 5]]
-
-    assert (
-        ak._ext._slice_tostring(listoffsetarray)
-        == "[jagged([0, 4, 4, 7], array([1, 0, 9, 3, 2, 2, 5]))]"
-    )
 
     offsets = ak.index.Index64(np.array([1, 4, 4, 6], dtype=np.int64))
     listoffsetarray = ak.contents.ListOffsetArray(offsets, content)
 
     assert to_list(listoffsetarray) == [[0, 9, 3], [], [2, 2]]
 
-    assert (
-        ak._ext._slice_tostring(listoffsetarray)
-        == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 2]))]"
-    )
-
     starts = ak.index.Index64(np.array([1, 99, 5], dtype=np.int64))
     stops = ak.index.Index64(np.array([4, 99, 7], dtype=np.int64))
     listarray = ak.contents.ListArray(starts, stops, content)
 
     assert to_list(listarray) == [[0, 9, 3], [], [2, 5]]
-
-    assert (
-        ak._ext._slice_tostring(listarray)
-        == "[jagged([0, 3, 3, 5], array([0, 9, 3, 2, 5]))]"
-    )
 
 
 def test_missing():
