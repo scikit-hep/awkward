@@ -49,11 +49,7 @@ from awkward.operations import *
 
 # version
 __version__ = awkward._ext.__version__
-
-# call C++ startup function
-awkward._ext.startup()
-
-__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("numpy",)]
+__all__ = [x for x in globals() if not x.startswith("_") and x not in ("numpy",)]
 
 
 def __dir__():

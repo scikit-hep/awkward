@@ -11,14 +11,11 @@ from awkward._ext import ArrayBuilder
 from awkward._ext import LayoutBuilder32
 from awkward._ext import LayoutBuilder64
 
-from awkward._ext import kernel_lib
-
 
 __all__ = [
     "ArrayBuilder",
     "LayoutBuilder32",
     "LayoutBuilder64",
-    "kernel_lib",
 ]
 
 
