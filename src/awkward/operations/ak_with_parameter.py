@@ -12,7 +12,7 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
         parameter (str): Name of the parameter to set on that array.
         value (JSON): Value of the parameter to set on that array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

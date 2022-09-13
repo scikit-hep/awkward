@@ -15,7 +15,7 @@ def broadcast_arrays(*arrays, **kwargs):
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described below.
         highlevel (bool, default is True): If True, return an #ak.Array;
-            otherwise, return a low-level #ak.layout.Content subclass.
+            otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         depth_limit (None or int, default is None): If None, attempt to fully

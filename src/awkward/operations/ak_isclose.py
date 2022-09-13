@@ -20,7 +20,7 @@ def isclose(
         equal_nan (bool): Whether to compare `NaN` as equal. If True, `NaN` in `a`
             will be considered equal to `NaN` in `b`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

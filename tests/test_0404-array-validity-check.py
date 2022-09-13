@@ -671,8 +671,8 @@ def test_IndexedArray():
     content = ak.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
     )
-    index = ak.layout.Index64(np.array([4, 3, 2, 1, 0], dtype=np.int64))
-    indexedarray = ak.layout.IndexedArray64(index, content)
+    index = ak.index.Index64(np.array([4, 3, 2, 1, 0], dtype=np.int64))
+    indexedarray = ak.contents.IndexedArray(index, content)
 
     assert indexedarray.is_unique() is True
 

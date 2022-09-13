@@ -15,7 +15,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
             dimension, `-2` is the next level up, etc. If None, convert all
             regular dimensions into variable ones.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

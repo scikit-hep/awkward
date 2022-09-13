@@ -14,7 +14,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
             `fill_value`.
         fill_value: Value to fill new new array with.
         highlevel (bool, default is True): If True, return an #ak.Array;
-            otherwise, return a low-level #ak.layout.Content subclass.
+            otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         dtype (None or NumPy dtype)): Overrides the data type of the result.

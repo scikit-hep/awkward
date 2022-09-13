@@ -11,7 +11,7 @@ def ones_like(array, highlevel=True, behavior=None, dtype=None):
     Args:
         array: Array to use as a model for a replacement that contains only `1`.
         highlevel (bool, default is True): If True, return an #ak.Array;
-            otherwise, return a low-level #ak.layout.Content subclass.
+            otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         dtype (None or NumPy dtype): Overrides the data type of the result.

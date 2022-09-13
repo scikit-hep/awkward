@@ -28,8 +28,8 @@ def to_arrow(
         bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
         emptyarray_to (None or dtype): If None, #ak.types.UnknownType maps to Arrow's
             null type; otherwise, it is converted a given numeric dtype.
-        categorical_as_dictionary (bool): If True, #ak.layout.IndexedArray and
-            #ak.layout.IndexedOptionArray labeled with `__array__ = "categorical"`
+        categorical_as_dictionary (bool): If True, #ak.contents.IndexedArray and
+            #ak.contents.IndexedOptionArray labeled with `__array__ = "categorical"`
             are mapped to Arrow `DictionaryArray`; otherwise, the projection is
             evaluated before conversion (always the case without
             `__array__ = "categorical"`).

@@ -11,7 +11,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
         array: Array whose numbers should be converted to a new numeric type.
         to (dtype or dtype specifier): Type to convert the numbers into.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

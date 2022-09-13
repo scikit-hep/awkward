@@ -21,7 +21,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
             output lists will have in-principle variable lengths
             (#ak.types.ListType) of at least `target`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -144,9 +143,6 @@ def normalise_item(item, nplike):
 
     elif isinstance(item, ak.highlevel.Array):
         return normalise_item(item.layout, nplike)
-
-    elif isinstance(item, ak.layout.Content):
-        return normalise_item(v1_to_v2(item), nplike)
 
     elif isinstance(item, ak.highlevel.Array):
         return normalise_item(item.layout, nplike)

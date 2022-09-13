@@ -25,18 +25,18 @@ def zip(
             that get broadcasted. The minimum value is `1`, for no
             broadcasting.
         parameters (None or dict): Parameters for the new
-            #ak.layout.RecordArray node that is created by this operation.
+            #ak.contents.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
-            #ak.layout.RecordArray node that is created by this operation
+            #ak.contents.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         right_broadcast (bool): If True, follow rules for implicit
             right-broadcasting, as described in #ak.broadcast_arrays.
         optiontype_outside_record (bool): If True, continue broadcasting past
-            any option types before creating the new #ak.layout.RecordArray node.
+            any option types before creating the new #ak.contents.RecordArray node.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -108,7 +108,7 @@ def zip(
     structure or not.
 
     When zipping together arrays with optional values, it can be useful to create
-    the #ak.layout.RecordArray node after the option types. By default, #ak.zip
+    the #ak.contents.RecordArray node after the option types. By default, #ak.zip
     does not do this:
 
         >>> one = ak.Array([1, 2, None])

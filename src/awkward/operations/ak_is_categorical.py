@@ -8,8 +8,8 @@ def is_categorical(array):
     Args:
         array: A possibly-categorical Awkward Array.
 
-    If the `array` is categorical (contains #ak.layout.IndexedArray or
-    #ak.layout.IndexedOptionArray labeled with parameter
+    If the `array` is categorical (contains #ak.contents.IndexedArray or
+    #ak.contents.IndexedOptionArray labeled with parameter
     `"__array__" = "categorical"`), then this function returns True;
     otherwise, it returns False.
 

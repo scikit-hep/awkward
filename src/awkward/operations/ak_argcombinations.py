@@ -32,12 +32,12 @@ def argcombinations(
             tuples with unnamed fields; otherwise, these `fields` name the
             fields. The number of `fields` must be equal to `n`.
         parameters (None or dict): Parameters for the new
-            #ak.layout.RecordArray node that is created by this operation.
+            #ak.contents.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
-            #ak.layout.RecordArray node that is created by this operation
+            #ak.contents.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
 
     Computes a Cartesian product (i.e. cross product) of `array` with itself
     that is restricted to combinations sampled without replacement,

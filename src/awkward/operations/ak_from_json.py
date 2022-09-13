@@ -60,7 +60,7 @@ def from_json(
             #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
             should be strictly greater than 1.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -219,7 +219,7 @@ def from_json(
       * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
         supported. Remember that the `source` data are ASCII; Unicode is derived from
         "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
-        as categorical values (#ak.layout.IndexedArray or #ak.layout.IndexedOptionArray).
+        as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
       * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
         `"minItems"` and `"maxItems"` are specified and equal to each other, the
         list has regular-type (#ak.types.RegularType); otherwise, it has variable-length

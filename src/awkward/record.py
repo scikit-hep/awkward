@@ -152,7 +152,7 @@ class Record:
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
-        elif isinstance(where, ak.layout.Content):
+        elif isinstance(where, ak.contents.Content):
             raise ak._util.error(
                 IndexError("scalar Record cannot be sliced by an array")
             )

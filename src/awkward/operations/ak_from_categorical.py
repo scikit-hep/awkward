@@ -8,7 +8,7 @@ def from_categorical(array, highlevel=True):
     Args:
         array: Awkward Array from which to remove the 'categorical' parameter.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
 
     This function replaces categorical data with non-categorical data (by
     removing the label that declares it as such).

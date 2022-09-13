@@ -16,21 +16,21 @@ def to_layout(
 ):
     """
     Args:
-        array: Data to convert into a low-level #ak.layout.Content layout
-            or maybe #ak.layout.Record, its record equivalent, or other types.
-        allow_record (bool): If True, allow #ak.layout.Record as an output;
+        array: Data to convert into a low-level #ak.contents.Content layout
+            or maybe #ak.contents.Record, its record equivalent, or other types.
+        allow_record (bool): If True, allow #ak.contents.Record as an output;
             otherwise, if the output would be a scalar record, raise an error.
         allow_other (bool): If True, allow non-Awkward outputs; otherwise,
             if the output would be another type, raise an error.
         numpytype (tuple of NumPy types): Dtypes to allow from NumPy arrays.
 
     Converts `array` (many types supported, including all Awkward Arrays and
-    Records) into a #ak.layout.Content and maybe #ak.layout.Record or
+    Records) into a #ak.contents.Content and maybe #ak.contents.Record or
     other types.
 
     This function is usually used to sanitize inputs for other functions; it
-    would rarely be used in a data analysis because #ak.layout.Content and
-    #ak.layout.Record are lower-level than #ak.Array.
+    would rarely be used in a data analysis because #ak.contents.Content and
+    #ak.contents.Record are lower-level than #ak.Array.
     """
     with ak._util.OperationErrorContext(
         "ak.to_layout",

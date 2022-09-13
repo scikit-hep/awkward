@@ -11,7 +11,7 @@ def nan_to_none(array, highlevel=True, behavior=None):
     Args:
         array: Array whose `NaN` values should be converted to None (missing values).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

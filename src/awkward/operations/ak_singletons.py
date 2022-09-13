@@ -11,7 +11,7 @@ def singletons(array, highlevel=True, behavior=None):
         array: Data to wrap in lists of length 1 if present and length 0
             if missing (None).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

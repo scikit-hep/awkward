@@ -7,7 +7,6 @@ from collections.abc import Sized, Iterable
 
 import awkward as ak
 import awkward._reducers
-from awkward.tmp_for_testing import v1_to_v2
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -533,9 +532,6 @@ class Content:
 
         elif isinstance(where, ak.highlevel.Array):
             return self._getitem(where.layout)
-
-        elif isinstance(where, ak.layout.Content):
-            return self._getitem(v1_to_v2(where))
 
         elif isinstance(where, ak.highlevel.Array):
             return self._getitem(where.layout)

@@ -22,7 +22,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
     """
     Args:
-        data (#ak.layout.Content, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
+        data (#ak.contents.Content, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
                - If a NumPy array, the regularity of its dimensions is preserved
                  and the data are viewed, not copied.
@@ -258,20 +258,20 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @property
     def layout(self):
         """
-        The composable #ak.layout.Content elements that determine how this
+        The composable #ak.contents.Content elements that determine how this
         Array is structured.
 
         This may be considered a "low-level" view, as it distinguishes between
         arrays that have the same logical meaning (i.e. same JSON output and
         high-level #type) but different
 
-           * node types, such as #ak.layout.ListArray64 and
-             #ak.layout.ListOffsetArray64,
-           * integer type specialization, such as #ak.layout.ListArray64
-             and #ak.layout.ListArray64,
-           * or specific values, such as gaps in a #ak.layout.ListArray64.
+           * node types, such as #ak.contents.ListArray and
+             #ak.contents.ListOffsetArray,
+           * integer type specialization, such as #ak.contents.ListArray
+             and #ak.contents.ListArray,
+           * or specific values, such as gaps in a #ak.contents.ListArray.
 
-        The #ak.layout.Content elements are fully composable, whereas an
+        The #ak.contents.Content elements are fully composable, whereas an
         Array is not; the high-level Array is a single-layer "shell" around
         its layout.
 
@@ -389,9 +389,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @property
     def nbytes(self):
         """
-        The total number of bytes in all the #ak.layout.Index,
-        #ak.layout.Identifier, and #ak.layout.NumpyArray buffers in this
-        array tree.
+        The total number of bytes in all the #ak.index.Index,
+        and #ak.contents.NumpyArray buffers in this array tree.
 
         It does not count buffers that must be kept in memory because
         of ownership, but are not directly used in the array. Nor does it count
@@ -449,7 +448,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         Note that the outermost element of an Array's type is always an
         #ak.types.ArrayType, which specifies the number of elements in the array.
 
-        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        The type of a #ak.contents.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
         return ak.types.ArrayType(
@@ -464,7 +463,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         Note that the outermost element of an Array's type is always an
         #ak.types.ArrayType, which specifies the number of elements in the array.
 
-        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        The type of a #ak.contents.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)
@@ -975,7 +974,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         Unlike #__getitem__, which allows a wide variety of slice types,
         only single field-slicing is supported for assignment.
-        (#ak.layout.Content arrays are immutable; field assignment replaces
+        (#ak.contents.Content arrays are immutable; field assignment replaces
         the #layout with an array that has the new field using #ak.with_field.)
 
         However, a field can be assigned deeply into a nested record e.g.
@@ -1454,7 +1453,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 class Record(NDArrayOperatorsMixin):
     """
     Args:
-        data (#ak.layout.Record, #ak.Record, str, or dict):
+        data (#ak.contents.Record, #ak.Record, str, or dict):
             Data to wrap or convert into a record.
             If a string, the data are assumed to be JSON.
             If a dict, calls #ak.from_iter, which assumes all inner
@@ -1535,20 +1534,20 @@ class Record(NDArrayOperatorsMixin):
     @property
     def layout(self):
         """
-        The #ak.layout.Record that contains composable #ak.layout.Content
+        The #ak.contents.Record that contains composable #ak.contents.Content
         elements to determine how the array is structured.
 
         See #ak.Array.layout for a more complete description.
 
-        The #ak.layout.Record is not a subclass of #ak.layout.Content in
+        The #ak.contents.Record is not a subclass of #ak.contents.Content in
         Python (note: [Record](../_static/classawkward_1_1Record.html) *is* a
         subclass of [Content](../_static/classawkward_1_1Content.html) in
-        C++!) and it is not composable with them: #ak.layout.Record contains
-        one #ak.layout.RecordArray (which is a #ak.layout.Content), but
-        #ak.layout.Content nodes cannot contain a #ak.layout.Record.
+        C++!) and it is not composable with them: #ak.contents.Record contains
+        one #ak.contents.RecordArray (which is a #ak.contents.Content), but
+        #ak.contents.Content nodes cannot contain a #ak.contents.Record.
 
-        A #ak.layout.Record is not an independent entity from its
-        #ak.layout.RecordArray; it's really just a marker indicating which
+        A #ak.contents.Record is not an independent entity from its
+        #ak.contents.RecordArray; it's really just a marker indicating which
         element to select. The XML representation reflects that:
 
             >>> vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
@@ -1626,9 +1625,8 @@ class Record(NDArrayOperatorsMixin):
     @property
     def nbytes(self):
         """
-        The total number of bytes in all the #ak.layout.Index,
-        #ak.layout.Identifier, and #ak.layout.NumpyArray buffers in this
-        array tree.
+        The total number of bytes in all the #ak.index.Index,
+        and #ak.contents.NumpyArray buffers in this array tree.
 
         It does not count buffers that must be kept in memory because
         of ownership, but are not directly used in the array. Nor does it count
@@ -2273,7 +2271,7 @@ class ArrayBuilder(Sized):
         Note that the outermost element of an Array's type is always an
         #ak.types.ArrayType, which specifies the number of elements in the array.
 
-        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        The type of a #ak.contents.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
         form = ak.forms.from_json(self._layout.form())
@@ -2289,7 +2287,7 @@ class ArrayBuilder(Sized):
         Note that the outermost element of an Array's type is always an
         #ak.types.ArrayType, which specifies the number of elements in the array.
 
-        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        The type of a #ak.contents.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)
@@ -2843,7 +2841,7 @@ class LayoutBuilder(Sized):
         Note that the outermost element of an Array's type is always an
         #ak.types.ArrayType, which specifies the number of elements in the array.
 
-        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        The type of a #ak.contents.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
         form = ak.forms.from_json(self._layout.form())
@@ -2859,7 +2857,7 @@ class LayoutBuilder(Sized):
         Note that the outermost element of an Array's type is always an
         #ak.types.ArrayType, which specifies the number of elements in the array.
 
-        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        The type of a #ak.contents.Content (from #ak.Array.layout) is not
         wrapped by an #ak.types.ArrayType.
         """
         return str(self.type)

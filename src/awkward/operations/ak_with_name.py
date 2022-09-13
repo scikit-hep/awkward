@@ -12,7 +12,7 @@ def with_name(array, name, highlevel=True, behavior=None):
         name (str): Name to give to the records or tuples; this assigns
             the `"__record__"` parameter.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

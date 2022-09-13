@@ -8,10 +8,10 @@ def categories(array, highlevel=True):
     Args:
         array: A possibly-categorical Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
 
-    If the `array` is categorical (contains #ak.layout.IndexedArray or
-    #ak.layout.IndexedOptionArray labeled with parameter
+    If the `array` is categorical (contains #ak.contents.IndexedArray or
+    #ak.contents.IndexedOptionArray labeled with parameter
     `"__array__" = "categorical"`), then this function returns its categories.
 
     See also #ak.is_categorical, #ak.to_categorical, #ak.from_categorical.

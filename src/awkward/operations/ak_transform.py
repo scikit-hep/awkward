@@ -60,7 +60,7 @@ def transform(
         regular_to_jagged (bool): If True, regular-type lists are converted into
             variable-length lists before calling `transformation`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

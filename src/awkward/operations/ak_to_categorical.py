@@ -10,18 +10,18 @@ def to_categorical(array, highlevel=True):
     Args:
         array: Data convertible to an Awkward Array
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
 
     Creates a categorical dataset, which has the following properties:
 
        * only distinct values (categories) are stored in their entirety,
        * pointers to those distinct values are represented by integers
-         (an #ak.layout.IndexedArray or #ak.layout.IndexedOptionArray
+         (an #ak.contents.IndexedArray or #ak.contents.IndexedOptionArray
          labeled with parameter `"__array__" = "categorical"`.
 
     This is equivalent to R's "factor", Pandas's "categorical", and
     Arrow/Parquet's "dictionary encoding." It differs from generic uses of
-    #ak.layout.IndexedArray and #ak.layout.IndexedOptionArray in Awkward
+    #ak.contents.IndexedArray and #ak.contents.IndexedOptionArray in Awkward
     Arrays by the guarantee of no duplicate categories and the `"categorical"`
     parameter.
 

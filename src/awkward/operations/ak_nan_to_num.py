@@ -20,7 +20,7 @@ def nan_to_num(
         neginf (None, int, float, broadcastable array): Value to be used to fill negative infinity
             values. If None, negative infinities are replaced with a very small number.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

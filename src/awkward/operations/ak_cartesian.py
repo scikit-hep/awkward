@@ -30,12 +30,12 @@ def cartesian(
             items for a chosen set of keys from the `array` dict or integer
             slots of the `array` iterable.
         parameters (None or dict): Parameters for the new
-            #ak.layout.RecordArray node that is created by this operation.
+            #ak.contents.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
-            #ak.layout.RecordArray node that is created by this operation
+            #ak.contents.RecordArray node that is created by this operation
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -87,7 +87,7 @@ def cartesian(
          [[(4, 'd')], [(5, 'd')]],
          [[(6, 'e'), (6, 'f')]]]
 
-    These tuples are #ak.layout.RecordArray nodes with unnamed fields. To
+    These tuples are #ak.contents.RecordArray nodes with unnamed fields. To
     name the fields, we can pass `one` and `two` in a dict, rather than a list.
 
         >>> ak.to_list(ak.cartesian({"x": one, "y": two}))

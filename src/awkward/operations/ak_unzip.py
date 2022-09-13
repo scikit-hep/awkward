@@ -10,7 +10,7 @@ def unzip(array, highlevel=True, behavior=None):
     Args:
         array: Array to unzip into individual fields.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

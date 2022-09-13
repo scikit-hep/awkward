@@ -14,7 +14,7 @@ def num(array, axis=1, highlevel=True, behavior=None):
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

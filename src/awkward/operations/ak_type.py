@@ -13,10 +13,10 @@ def type(array):
     Awkward Arrays and Records) as #ak.types.Type objects.
 
     The high-level type ignores #layout differences like
-    #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
+    #ak.contents.ListArray versus #ak.contents.ListOffsetArray, but
     not differences like "regular-sized lists" (i.e.
-    #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
-    #ak.layout.ListArray64 and similar).
+    #ak.contents.RegularArray) versus "variable-sized lists" (i.e.
+    #ak.contents.ListArray and similar).
 
     Types are rendered as [Datashape](https://datashape.readthedocs.io/)
     strings, which makes the same distinctions.
@@ -117,18 +117,6 @@ def _impl(array):
 
     elif isinstance(array, ak.contents.Content):
         return array.form.type
-
-    elif isinstance(
-        array,
-        (
-            ak.highlevel.Array,
-            ak.highlevel.Record,
-            ak.highlevel.ArrayBuilder,
-            ak.layout.Content,
-            ak.layout.Record,
-        ),
-    ):
-        raise ak._util.error(TypeError("do not use ak.operations.type on v1 arrays"))
 
     else:
         raise ak._util.error(TypeError(f"unrecognized array type: {array!r}"))

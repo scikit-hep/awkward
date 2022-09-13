@@ -12,11 +12,11 @@ def from_iter(
     Args:
         iterable (Python iterable): Data to convert into an Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         allow_record (bool): If True, the outermost element may be a record
-            (returning #ak.Record or #ak.layout.Record type, depending on
+            (returning #ak.Record or #ak.contents.Record type, depending on
             `highlevel`); if False, the outermost element must be an array.
         initial (int): Initial size (in bytes) of buffers used by
             #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
@@ -34,19 +34,19 @@ def from_iter(
 
     The following Python types are supported.
 
-       * bool, including `np.bool_`: converted into #ak.layout.NumpyArray.
-       * int, including `np.integer`: converted into #ak.layout.NumpyArray.
-       * float, including `np.floating`: converted into #ak.layout.NumpyArray.
-       * bytes: converted into #ak.layout.ListOffsetArray with parameter
+       * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
+       * int, including `np.integer`: converted into #ak.contents.NumpyArray.
+       * float, including `np.floating`: converted into #ak.contents.NumpyArray.
+       * bytes: converted into #ak.contents.ListOffsetArray with parameter
          `"__array__"` equal to `"bytestring"` (unencoded bytes).
-       * str: converted into #ak.layout.ListOffsetArray with parameter
+       * str: converted into #ak.contents.ListOffsetArray with parameter
          `"__array__"` equal to `"string"` (UTF-8 encoded string).
-       * tuple: converted into #ak.layout.RecordArray without field names
+       * tuple: converted into #ak.contents.RecordArray without field names
          (i.e. homogeneously typed, uniform sized tuples).
-       * dict: converted into #ak.layout.RecordArray with field names
+       * dict: converted into #ak.contents.RecordArray with field names
          (i.e. homogeneously typed records with the same sets of fields).
        * iterable, including np.ndarray: converted into
-         #ak.layout.ListOffsetArray.
+         #ak.contents.ListOffsetArray.
 
     See also #ak.to_list.
     """

@@ -62,18 +62,6 @@ def _impl(array):
         layout = ak.operations.from_buffers(form, length, container)
         return layout.to_list(None)
 
-    elif isinstance(
-        array,
-        (
-            ak.highlevel.Array,
-            ak.highlevel.Record,
-            ak.highlevel.ArrayBuilder,
-            ak.layout.Content,
-            ak.layout.Record,
-        ),
-    ):
-        raise ak._util.error(TypeError("do not use ak.operations.to_list on v1 arrays"))
-
     elif hasattr(array, "tolist"):
         return array.tolist()
 

@@ -16,7 +16,7 @@ def from_avro_file(
         debug_forth (bool): If True, prints the generated Forth code for debugging.
         limit_entries (int): The number of rows of the Avro file to be read into the Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
     Reads Avro files as Awkward Arrays.

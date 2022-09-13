@@ -11,7 +11,7 @@ def run_lengths(array, highlevel=True, behavior=None):
     Args:
         array: Data containing runs of numbers to count.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

@@ -15,7 +15,7 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
             valid (passed from `array` to the output); if False, False
             values in `mask` are considered valid.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

@@ -18,7 +18,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
             string); If str, the name of the new field. If iterable, it is
             interpreted as a path where to add the field in a nested record.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

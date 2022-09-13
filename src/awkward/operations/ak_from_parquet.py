@@ -35,7 +35,7 @@ def from_parquet(
             types that don't have bitmasks in the Arrow/Parquet data, so that the
             Form (BitMaskedForm vs UnmaskedForm) is predictable.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

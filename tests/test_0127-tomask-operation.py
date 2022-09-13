@@ -568,8 +568,8 @@ def test_ByteMaskedArray_reduce():
     )
     offsets1 = ak.index.Index64(np.array([0, 5, 10, 15, 20, 25, 30], dtype=np.int64))
     listoffsetarray = ak.contents.ListOffsetArray(offsets1, content)
-    # index = ak.layout.Index64(np.array([0, -1, 2, 3, -1, 5], dtype=np.int64))
-    # optionarray = ak.layout.IndexedOptionArray64(index, listoffsetarray)
+    # index = ak.index.Index64(np.array([0, -1, 2, 3, -1, 5], dtype=np.int64))
+    # optionarray = ak.contents.IndexedOptionArray(index, listoffsetarray)
     mask = ak.index.Index8(np.array([0, 1, 0, 0, 1, 0], dtype=np.int8))
     optionarray = ak.contents.ByteMaskedArray(mask, listoffsetarray, valid_when=False)
     offsets2 = ak.index.Index64(np.array([0, 3, 6], dtype=np.int64))
@@ -632,8 +632,8 @@ def test_ByteMaskedArray_reduce():
             dtype=np.int64,
         )
     )
-    # index = ak.layout.Index64(np.array([0, 1, 2, 3, 4, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, -1, -1, -1, -1, -1, 25, 26, 27, 28, 29], dtype=np.int64))
-    # optionarray = ak.layout.IndexedOptionArray64(index, content)
+    # index = ak.index.Index64(np.array([0, 1, 2, 3, 4, -1, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, -1, -1, -1, -1, -1, 25, 26, 27, 28, 29], dtype=np.int64))
+    # optionarray = ak.contents.IndexedOptionArray(index, content)
     mask = ak.index.Index8(
         np.array(
             [

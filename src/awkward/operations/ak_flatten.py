@@ -16,7 +16,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
             innermost: `-1` is the innermost dimension, `-2` is the next
             level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
@@ -71,7 +71,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
         <Array [[1.1, 2.2, 3.3], [4.4], [], [5.5]] type='4 * var * float64'>
 
     As a technical detail, the flattening operation can be trivial in a common
-    case, #ak.layout.ListOffsetArray in which the first `offset` is `0`.
+    case, #ak.contents.ListOffsetArray in which the first `offset` is `0`.
     In that case, the flattened data is simply the array node's `content`.
 
         >>> array.layout

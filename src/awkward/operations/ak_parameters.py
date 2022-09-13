@@ -14,7 +14,7 @@ def parameters(array):
     supported, including all Awkward Arrays and Records).
 
     Parameters are a dict from str to JSON-like objects, usually strings.
-    Every #ak.layout.Content node has a different set of parameters. Some
+    Every #ak.contents.Content node has a different set of parameters. Some
     key names are special, such as `"__record__"` and `"__array__"` that name
     particular records and arrays as capable of supporting special behaviors.
 

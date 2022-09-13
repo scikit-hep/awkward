@@ -18,9 +18,9 @@ def where(condition, *args, **kwargs):
         mergebool (bool, default is True): If True, boolean and numeric data
             can be combined into the same buffer, losing information about
             False vs `0` and True vs `1`; otherwise, they are kept in separate
-            buffers with distinct types (using an #ak.layout.UnionArray8_64).
+            buffers with distinct types (using an #ak.contents.UnionArray).
         highlevel (bool, default is True): If True, return an #ak.Array;
-            otherwise, return a low-level #ak.layout.Content subclass.
+            otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

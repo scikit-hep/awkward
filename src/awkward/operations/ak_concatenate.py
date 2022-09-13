@@ -19,14 +19,14 @@ def concatenate(
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
         merge (bool): If True, combine data into the same buffers wherever
-            possible, eliminating unnecessary #ak.layout.UnionArray8_64 types
-            at the expense of materializing #ak.layout.VirtualArray nodes.
+            possible, eliminating unnecessary #ak.contents.UnionArray8_64 types
+            at the expense of materializing #ak.contents.VirtualArray nodes.
         mergebool (bool): If True, boolean and numeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
-            distinct types (using an #ak.layout.UnionArray8_64).
+            distinct types (using an #ak.contents.UnionArray).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 

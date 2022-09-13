@@ -468,8 +468,8 @@ class Numpy(NumpyLike):
                 ak.Array,
                 ak.Record,
                 ak.ArrayBuilder,
-                ak.layout.Content,
-                ak.layout.Record,
+                ak.contents.Content,
+                ak.contents.Record,
                 ak.layout.ArrayBuilder,
                 ak.layout.LayoutBuilder32,
                 ak.layout.LayoutBuilder64,
@@ -568,8 +568,8 @@ class Cupy(NumpyLike):
             (
                 ak.highlevel.Array,
                 ak.highlevel.Record,
-                ak.layout.Content,
-                ak.layout.Record,
+                ak.contents.Content,
+                ak.contents.Record,
             ),
         ):
             out = ak.operations.convert.to_cupy(array)
@@ -602,8 +602,8 @@ class Cupy(NumpyLike):
             (
                 ak.highlevel.Array,
                 ak.highlevel.Record,
-                ak.layout.Content,
-                ak.layout.Record,
+                ak.contents.Content,
+                ak.contents.Record,
             ),
         ):
             out = ak.operations.convert.to_cupy(array)
@@ -732,8 +732,8 @@ class Jax(NumpyLike):
                 ak.Array,
                 ak.Record,
                 ak.ArrayBuilder,
-                ak.layout.Content,
-                ak.layout.Record,
+                ak.contents.Content,
+                ak.contents.Record,
                 ak.layout.ArrayBuilder,
                 ak.layout.LayoutBuilder32,
                 ak.layout.LayoutBuilder64,
@@ -786,8 +786,8 @@ class Jax(NumpyLike):
             (
                 ak.highlevel.Array,
                 ak.highlevel.Record,
-                ak.layout.Content,
-                ak.layout.Record,
+                ak.contents.Content,
+                ak.contents.Record,
             ),
         ):
             out = ak.operations.convert.to_jax(array)

@@ -383,8 +383,8 @@ def test_IndexedArray_getitem():
     content = ak.from_iter(
         [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], highlevel=False
     )
-    index = ak.layout.Index64(np.array([3, 2, 2, 5, 0, 7], dtype=np.int64))
-    array = ak.highlevel.Array(ak.layout.IndexedArray64(index, content))
+    index = ak.index.Index64(np.array([3, 2, 2, 5, 0, 7], dtype=np.int64))
+    array = ak.highlevel.Array(ak.contents.IndexedArray(index, content))
 
     @numba.njit
     def f1(x, i):
@@ -900,7 +900,7 @@ def test_RecordArray_deep_field():
 
 
 def test_ListArray_deep_at():
-    content = ak.layout.NumpyArray(
+    content = ak.contents.NumpyArray(
         np.array(
             [
                 1.1,
@@ -925,14 +925,14 @@ def test_ListArray_deep_at():
             ]
         )
     )
-    offsets1 = ak.layout.Index32(
+    offsets1 = ak.index.Index32(
         np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18], dtype=np.int32)
     )
-    listarray1 = ak.layout.ListOffsetArray32(offsets1, content)
-    offsets2 = ak.layout.Index64(np.array([0, 2, 4, 6, 8], dtype=np.int64))
-    listarray2 = ak.layout.ListOffsetArray64(offsets2, listarray1)
-    offsets3 = ak.layout.Index32(np.array([0, 2, 4], dtype=np.int32))
-    listarray3 = ak.layout.ListOffsetArray32(offsets3, listarray2)
+    listarray1 = ak.contents.ListOffsetArray(offsets1, content)
+    offsets2 = ak.index.Index64(np.array([0, 2, 4, 6, 8], dtype=np.int64))
+    listarray2 = ak.contents.ListOffsetArray(offsets2, listarray1)
+    offsets3 = ak.index.Index32(np.array([0, 2, 4], dtype=np.int32))
+    listarray3 = ak.contents.ListOffsetArray(offsets3, listarray2)
     array = ak.highlevel.Array(listarray3)
 
     @numba.njit
@@ -964,13 +964,13 @@ def test_ListArray_deep_at():
 
 
 def test_IndexedArray_deep_at():
-    content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    index1 = ak.layout.Index32(np.array([1, 2, 3, 4], dtype=np.int32))
-    indexedarray1 = ak.layout.IndexedArray32(index1, content)
-    index2 = ak.layout.Index64(np.array([1, 2, 3], dtype=np.int64))
-    indexedarray2 = ak.layout.IndexedArray64(index2, indexedarray1)
-    index3 = ak.layout.Index32(np.array([1, 2], dtype=np.int32))
-    indexedarray3 = ak.layout.IndexedArray32(index3, indexedarray2)
+    content = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    index1 = ak.index.Index32(np.array([1, 2, 3, 4], dtype=np.int32))
+    indexedarray1 = ak.contents.IndexedArray(index1, content)
+    index2 = ak.index.Index64(np.array([1, 2, 3], dtype=np.int64))
+    indexedarray2 = ak.contents.IndexedArray(index2, indexedarray1)
+    index3 = ak.index.Index32(np.array([1, 2], dtype=np.int32))
+    indexedarray3 = ak.contents.IndexedArray(index3, indexedarray2)
     # This is not a valid array (IndexedArray inside IndexedArray), but instructive!  :)
     array = ak.highlevel.Array(indexedarray3, check_valid=False)
 

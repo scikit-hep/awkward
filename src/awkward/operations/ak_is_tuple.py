@@ -6,7 +6,7 @@ import awkward as ak
 def is_tuple(array):
     """
     Args:
-        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record, #ak.ArrayBuilder, #ak.layout.ArrayBuilder):
+        array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.contents.Record, #ak.ArrayBuilder, #ak.layout.ArrayBuilder):
             Array or record to check.
 
     If `array` is a record, this returns True if the record is a tuple.

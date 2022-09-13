@@ -22,7 +22,7 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=N
             use a sorting algorithm that is not guaranteed to be stable
             (heapsort).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
+            a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
