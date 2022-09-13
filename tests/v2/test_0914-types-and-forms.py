@@ -39,10 +39,6 @@ def test_UnknownType():
     )
 
 
-@pytest.mark.skipif(
-    ak._util.win,
-    reason="NumPy does not have float16, float128, and complex256 -- on Windows",
-)
 def test_NumpyType():
     assert str(ak._v2.types.numpytype.NumpyType("bool")) == "bool"
     assert str(ak._v2.types.numpytype.NumpyType("int8")) == "int8"
@@ -53,13 +49,16 @@ def test_NumpyType():
     assert str(ak._v2.types.numpytype.NumpyType("uint32")) == "uint32"
     assert str(ak._v2.types.numpytype.NumpyType("int64")) == "int64"
     assert str(ak._v2.types.numpytype.NumpyType("uint64")) == "uint64"
-    assert str(ak._v2.types.numpytype.NumpyType("float16")) == "float16"
+    if hasattr(np, "float16"):
+        assert str(ak._v2.types.numpytype.NumpyType("float16")) == "float16"
     assert str(ak._v2.types.numpytype.NumpyType("float32")) == "float32"
     assert str(ak._v2.types.numpytype.NumpyType("float64")) == "float64"
-    assert str(ak._v2.types.numpytype.NumpyType("float128")) == "float128"
+    if hasattr(np, "float128"):
+        assert str(ak._v2.types.numpytype.NumpyType("float128")) == "float128"
     assert str(ak._v2.types.numpytype.NumpyType("complex64")) == "complex64"
     assert str(ak._v2.types.numpytype.NumpyType("complex128")) == "complex128"
-    assert str(ak._v2.types.numpytype.NumpyType("complex256")) == "complex256"
+    if hasattr(np, "complex256"):
+        assert str(ak._v2.types.numpytype.NumpyType("complex256")) == "complex256"
     assert (
         str(ak._v2.types.numpytype.NumpyType("bool", {"x": 123}))
         == 'bool[parameters={"x": 123}]'
@@ -1524,10 +1523,6 @@ def test_EmptyForm():
     }
 
 
-@pytest.mark.skipif(
-    ak._util.win,
-    reason="NumPy does not have float16, float128, and complex256 -- on Windows",
-)
 def test_NumpyForm():
     assert (
         str(ak._v2.forms.numpyform.NumpyForm("bool"))
@@ -1615,10 +1610,11 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "uint64",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("float16").tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "float16",
-    }
+    if hasattr(np, "float16"):
+        assert ak._v2.forms.numpyform.NumpyForm("float16").tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "float16",
+        }
     assert ak._v2.forms.numpyform.NumpyForm("float32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
@@ -1627,10 +1623,11 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "float64",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("float128").tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "float128",
-    }
+    if hasattr(np, "float128"):
+        assert ak._v2.forms.numpyform.NumpyForm("float128").tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "float128",
+        }
     assert ak._v2.forms.numpyform.NumpyForm("complex64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
@@ -1639,10 +1636,11 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "complex128",
     }
-    assert ak._v2.forms.numpyform.NumpyForm("complex256").tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "complex256",
-    }
+    if hasattr(np, "complex256"):
+        assert ak._v2.forms.numpyform.NumpyForm("complex256").tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "complex256",
+        }
     assert ak._v2.forms.numpyform.NumpyForm("datetime64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
@@ -1734,12 +1732,13 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "uint64",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("float16")).tolist(
-        verbose=False
-    ) == {
-        "class": "NumpyArray",
-        "primitive": "float16",
-    }
+    if hasattr(np, "float16"):
+        assert ak._v2.forms.numpyform.from_dtype(np.dtype("float16")).tolist(
+            verbose=False
+        ) == {
+            "class": "NumpyArray",
+            "primitive": "float16",
+        }
     assert ak._v2.forms.numpyform.from_dtype(np.dtype("float32")).tolist(
         verbose=False
     ) == {
@@ -1752,12 +1751,13 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "float64",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("float128")).tolist(
-        verbose=False
-    ) == {
-        "class": "NumpyArray",
-        "primitive": "float128",
-    }
+    if hasattr(np, "float128"):
+        assert ak._v2.forms.numpyform.from_dtype(np.dtype("float128")).tolist(
+            verbose=False
+        ) == {
+            "class": "NumpyArray",
+            "primitive": "float128",
+        }
     assert ak._v2.forms.numpyform.from_dtype(np.dtype("complex64")).tolist(
         verbose=False
     ) == {
@@ -1770,12 +1770,13 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "complex128",
     }
-    assert ak._v2.forms.numpyform.from_dtype(np.dtype("complex256")).tolist(
-        verbose=False
-    ) == {
-        "class": "NumpyArray",
-        "primitive": "complex256",
-    }
+    if hasattr(np, "complex256"):
+        assert ak._v2.forms.numpyform.from_dtype(np.dtype("complex256")).tolist(
+            verbose=False
+        ) == {
+            "class": "NumpyArray",
+            "primitive": "complex256",
+        }
     assert ak._v2.forms.numpyform.from_dtype(np.dtype("M8")).tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
@@ -1861,10 +1862,11 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "uint64",
     }
-    assert ak._v2.forms.from_iter("float16").tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "float16",
-    }
+    if hasattr(np, "float16"):
+        assert ak._v2.forms.from_iter("float16").tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "float16",
+        }
     assert ak._v2.forms.from_iter("float32").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
@@ -1873,10 +1875,11 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "float64",
     }
-    assert ak._v2.forms.from_iter("float128").tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "float128",
-    }
+    if hasattr(np, "float128"):
+        assert ak._v2.forms.from_iter("float128").tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "float128",
+        }
     assert ak._v2.forms.from_iter("complex64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
@@ -1885,10 +1888,11 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "complex128",
     }
-    assert ak._v2.forms.from_iter("complex256").tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "complex256",
-    }
+    if hasattr(np, "complex256"):
+        assert ak._v2.forms.from_iter("complex256").tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "complex256",
+        }
     assert ak._v2.forms.from_iter("datetime64").tolist(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
@@ -1996,12 +2000,13 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "uint64",
     }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "float16"}
-    ).tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "float16",
-    }
+    if hasattr(np, "float16"):
+        assert ak._v2.forms.from_iter(
+            {"class": "NumpyArray", "primitive": "float16"}
+        ).tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "float16",
+        }
     assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "float32"}
     ).tolist(verbose=False) == {
@@ -2014,12 +2019,13 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "float64",
     }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "float128"}
-    ).tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "float128",
-    }
+    if hasattr(np, "float128"):
+        assert ak._v2.forms.from_iter(
+            {"class": "NumpyArray", "primitive": "float128"}
+        ).tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "float128",
+        }
     assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "complex64"}
     ).tolist(verbose=False) == {
@@ -2032,12 +2038,13 @@ def test_NumpyForm():
         "class": "NumpyArray",
         "primitive": "complex128",
     }
-    assert ak._v2.forms.from_iter(
-        {"class": "NumpyArray", "primitive": "complex256"}
-    ).tolist(verbose=False) == {
-        "class": "NumpyArray",
-        "primitive": "complex256",
-    }
+    if hasattr(np, "complex256"):
+        assert ak._v2.forms.from_iter(
+            {"class": "NumpyArray", "primitive": "complex256"}
+        ).tolist(verbose=False) == {
+            "class": "NumpyArray",
+            "primitive": "complex256",
+        }
     assert ak._v2.forms.from_iter(
         {"class": "NumpyArray", "primitive": "datetime64"}
     ).tolist(verbose=False) == {
