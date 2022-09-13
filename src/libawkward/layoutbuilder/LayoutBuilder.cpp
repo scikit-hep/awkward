@@ -2,6 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/layoutbuilder/LayoutBuilder.cpp", line)
 
+#include "awkward/kernel-dispatch.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
@@ -44,7 +45,7 @@ namespace awkward {
       return "int64";
     }
     throw std::runtime_error(
-      std::string("unrecognized Index::Form ") + FILENAME(__LINE__));
+      std::string("unrecognized index form ") + FILENAME(__LINE__));
 
   }
 
@@ -66,7 +67,7 @@ namespace awkward {
       return "q";
     }
     throw std::runtime_error(
-      std::string("unrecognized Index::Form ") + FILENAME(__LINE__));
+      std::string("unrecognized index form ") + FILENAME(__LINE__));
   }
 
   const std::string

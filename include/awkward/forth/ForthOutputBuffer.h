@@ -7,7 +7,6 @@
 
 #include "awkward/common.h"
 
-#include "awkward/Index.h"
 
 namespace awkward {
   #define NATIVELY_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
@@ -64,26 +63,6 @@ namespace awkward {
 
     virtual util::dtype
       dtype() const = 0;
-
-    /// @brief HERE
-    virtual const Index8
-      toIndex8() const = 0;
-
-    /// @brief HERE
-    virtual const IndexU8
-      toIndexU8() const = 0;
-
-    /// @brief HERE
-    virtual const Index32
-      toIndex32() const = 0;
-
-    /// @brief HERE
-    virtual const IndexU32
-      toIndexU32() const = 0;
-
-    /// @brief HERE
-    virtual const Index64
-      toIndex64() const = 0;
 
     /// @brief HERE
     virtual void
@@ -227,21 +206,6 @@ namespace awkward {
 
     util::dtype
       dtype() const override;
-
-    const Index8
-      toIndex8() const override;
-
-    const IndexU8
-      toIndexU8() const override;
-
-    const Index32
-      toIndex32() const override;
-
-    const IndexU32
-      toIndexU32() const override;
-
-    const Index64
-      toIndex64() const override;
 
     void
       write_one_bool(bool value, bool byteswap) noexcept override;

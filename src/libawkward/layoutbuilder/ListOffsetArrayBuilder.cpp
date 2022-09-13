@@ -69,18 +69,26 @@ namespace awkward {
     BuffersContainer& container,
     const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data());
-    auto offsets = search->second.get()->toIndex64();
+    auto output = search->second;
+    if (output->dtype() != util::dtype::int64) {
+      throw std::invalid_argument(
+          std::string("to_buffers of a ") + classname()
+          + std::string(" needs int64 offsets, not ")
+          + util::dtype_to_name(output->dtype())
+          + FILENAME(__LINE__));
+    }
+    auto offsets = reinterpret_cast<int64_t*>(output->ptr().get());
 
     // FIXME: deal with complex numbers in the builder itself
     if (content().get()->is_complex()) {
-      for (int64_t i = 0; i < offsets.length(); i++) {
-        offsets.ptr().get()[i] = offsets.ptr().get()[i] >> 1;
+      for (int64_t i = 0; i < output->len(); i++) {
+        offsets[i] = offsets[i] >> 1;
       }
     }
 
     container.copy_buffer(form_key() + "-offsets",
-                          offsets.ptr().get(),
-                          (int64_t)(offsets.length() * (int64_t)sizeof(int64_t)));
+                          offsets,
+                          (int64_t)(output->len() * (int64_t)sizeof(int64_t)));
 
     return "{\"class\": \"ListOffsetArray\", \"offsets\": \"i64\", \"content\": "
       + content()->to_buffers(container, outputs) + ", "

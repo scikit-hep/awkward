@@ -2,6 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/layoutbuilder/UnionArrayBuilder.cpp", line)
 
+#include "awkward/kernel-dispatch.h"
 #include "awkward/layoutbuilder/UnionArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
 
@@ -95,28 +96,40 @@ namespace awkward {
     const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_tags());
     if (search != outputs.end()) {
-      auto length = (ssize_t)search->second.get()->len();
+      auto output = search->second;
+      auto length = (ssize_t)output->len();
 
-      auto tags = search->second.get()->toIndex8();
+      if (output->dtype() != util::dtype::int8) {
+        throw std::invalid_argument(
+            std::string("Snapshot of a ") + classname()
+            + std::string(" needs int8 tags, not ")
+            + util::dtype_to_name(output->dtype())
+            + FILENAME(__LINE__));
+      }
+      auto tags = reinterpret_cast<int8_t*>(output->ptr().get());
 
-      Index64 current(length);
-      Index64 index(length);
+      auto current = std::shared_ptr<int64_t>(
+          new int64_t[length],
+          kernel::array_deleter<int64_t>());
+      auto index = std::shared_ptr<int64_t>(
+          new int64_t[length],
+          kernel::array_deleter<int64_t>());
       struct Error err = kernel::UnionArray_regular_index<int8_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.data(),
-        current.data(),
+        index.get(),
+        current.get(),
         length,
-        tags.data(),
+        tags,
         length);
       util::handle_error(err, "UnionArray");
 
       container.copy_buffer(form_key() + "-tags",
-                            tags.ptr().get(),
+                            tags,
                             (int64_t)(length * (ssize_t)sizeof(int8_t)));
 
       container.copy_buffer(form_key() + "-index",
-                            index.ptr().get(),
-                            (int64_t)(index.length() * (ssize_t)sizeof(int64_t)));
+                            index.get(),
+                            (int64_t)(length * (ssize_t)sizeof(int64_t)));
 
       std::stringstream out;
       out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";

@@ -135,20 +135,6 @@ py::object output_buffer_to_numpy(std::shared_ptr<ak::ForthOutputBuffer> output)
 }
 
 
-template <typename T>
-py::object index_to_python_index(const ak::IndexOf<T>& output) {
-  auto ptr = output.ptr();
-  // Hold long-lived shared_ptr, and delete when out of scope
-  // `new auto(ptr)` creates long-lived pointer to a shared_ptr that shares
-  // ownership with the shared-ptr `ptr`
-  auto lifetime = capsule_for_shared_pointer(ptr);
-  auto data = py::array_t<T>(output.length(),
-                             output.data(), // Include offset
-                             lifetime);
-  return py::module::import("awkward").attr("index").attr("Index")(data);
-}
-
-
 template <typename T, typename I>
 py::object machine_bytecodes_at_to_python_content(std::shared_ptr<ak::ForthMachineOf<T, I>> machine, int64_t index) {
   // Single-copy into shared-ptr for offsets and bytecodes
@@ -283,36 +269,11 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               }
               return out;
           })
-          .def("output_NumpyArray",
+          .def("output",
             [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
                const std::string& name) -> py::object {
               auto output = self.get()->output_at(name);
               return output_buffer_to_numpy(output);
-          })
-          .def("output_Index8",
-            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> py::object {
-              return index_to_python_index(self.get()->output_Index8_at(name));
-          })
-          .def("output_IndexU8",
-            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> py::object {
-              return index_to_python_index(self.get()->output_IndexU8_at(name));
-          })
-          .def("output_Index32",
-            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> py::object {
-              return index_to_python_index(self.get()->output_Index32_at(name));
-          })
-          .def("output_IndexU32",
-            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> py::object {
-              return index_to_python_index(self.get()->output_IndexU32_at(name));
-          })
-          .def("output_Index64",
-            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
-               const std::string& name) -> py::object {
-              return index_to_python_index(self.get()->output_Index64_at(name));
           })
           .def("reset", &ak::ForthMachineOf<T, I>::reset)
           .def("begin", [](ak::ForthMachineOf<T, I>& self,

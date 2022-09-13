@@ -15,9 +15,6 @@
 #endif
 
 namespace awkward {
-  template <typename T>
-  class IndexOf;
-
   namespace util {
     /// @brief NumPy dtypes that can be interpreted within Awkward C++
     /// (only the primitive, fixed-width types). Non-native-endian types
@@ -108,20 +105,6 @@ namespace awkward {
     /// [scikit-hep/awkward-1.0#186](https://github.com/scikit-hep/awkward-1.0/issues/186).
     std::string
       quote(const std::string& x);
-
-    /// @brief Converts an `offsets` index (from
-    /// {@link ListOffsetArrayOf ListOffsetArray}, for instance) into a
-    /// `starts` index by viewing it with the last element dropped.
-    template <typename T>
-    IndexOf <T>
-      make_starts(const IndexOf <T> &offsets);
-
-    /// @brief Converts an `offsets` index (from
-    /// {@link ListOffsetArrayOf ListOffsetArray}, for instance) into a
-    /// `stops` index by viewing it with the first element dropped.
-    template <typename T>
-    IndexOf<T>
-      make_stops(const IndexOf<T>& offsets);
 
     using RecordLookup    = std::vector<std::string>;
     using RecordLookupPtr = std::shared_ptr<RecordLookup>;

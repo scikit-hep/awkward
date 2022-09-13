@@ -12,7 +12,6 @@
 #include "awkward/kernels.h"
 
 #include "awkward/util.h"
-#include "awkward/Index.h"
 #include "awkward/datetime_util.h"
 
 namespace rj = rapidjson;
@@ -447,34 +446,6 @@ namespace awkward {
         }
       }
     }
-
-    template<typename T>
-    IndexOf<T> make_starts(const IndexOf<T> &offsets) {
-      return IndexOf<T>(offsets.ptr(),
-                        offsets.offset(),
-                        offsets.length() - 1,
-                        offsets.ptr_lib());
-    }
-
-    template<typename T>
-    IndexOf<T> make_stops(const IndexOf<T> &offsets) {
-      return IndexOf<T>(offsets.ptr(),
-                        offsets.offset() + 1,
-                        offsets.length() - 1,
-                        offsets.ptr_lib());
-    }
-
-    template IndexOf<int32_t> make_starts(const IndexOf<int32_t> &offsets);
-
-    template IndexOf<uint32_t> make_starts(const IndexOf<uint32_t> &offsets);
-
-    template IndexOf<int64_t> make_starts(const IndexOf<int64_t> &offsets);
-
-    template IndexOf<int32_t> make_stops(const IndexOf<int32_t> &offsets);
-
-    template IndexOf<uint32_t> make_stops(const IndexOf<uint32_t> &offsets);
-
-    template IndexOf<int64_t> make_stops(const IndexOf<int64_t> &offsets);
 
     std::string
     quote(const std::string &x) {
