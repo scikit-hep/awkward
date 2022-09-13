@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/layoutbuilder/UnionArrayBuilder.cpp", line)
 
-#include "awkward/kernel-dispatch.h"
+#include "awkward/kernels.h"
 #include "awkward/layoutbuilder/UnionArrayBuilder.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
 
@@ -110,10 +110,10 @@ namespace awkward {
 
       auto current = std::shared_ptr<int64_t>(
           new int64_t[length],
-          kernel::array_deleter<int64_t>());
+          util::array_deleter<int64_t>());
       auto index = std::shared_ptr<int64_t>(
           new int64_t[length],
-          kernel::array_deleter<int64_t>());
+          util::array_deleter<int64_t>());
 
       struct Error err = awkward_UnionArray8_64_regular_index(
           index.get(),

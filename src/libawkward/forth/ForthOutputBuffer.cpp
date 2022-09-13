@@ -3,8 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthOutputBuffer.cpp", line)
 
 #include <cmath>
-
-#include "awkward/kernel-dispatch.h"
+#include <sstream>
 
 #include "awkward/forth/ForthOutputBuffer.h"
 
@@ -126,7 +125,7 @@ namespace awkward {
   template <typename OUT>
   ForthOutputBufferOf<OUT>::ForthOutputBufferOf(int64_t initial, double resize)
     : ForthOutputBuffer(initial, resize)
-    , ptr_(new OUT[initial], kernel::array_deleter<OUT>()) { }
+    , ptr_(new OUT[initial], util::array_deleter<OUT>()) { }
 
   template <typename OUT>
   const std::shared_ptr<void>
@@ -717,7 +716,7 @@ namespace awkward {
         reservation = (int64_t)std::ceil(reservation * resize_);
       }
       std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
-                                                             kernel::array_deleter<OUT>());
+                                                             util::array_deleter<OUT>());
       std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * (size_t)reserved_);
       ptr_ = new_buffer;
       reserved_ = reservation;

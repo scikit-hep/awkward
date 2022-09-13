@@ -3,9 +3,8 @@
 #ifndef AWKWARD_FORTHOUTPUTBUFFER_H_
 #define AWKWARD_FORTHOUTPUTBUFFER_H_
 
-// #include <cstring>
-
 #include "awkward/common.h"
+#include "awkward/util.h"
 
 
 namespace awkward {

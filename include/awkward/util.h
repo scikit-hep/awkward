@@ -225,6 +225,29 @@ namespace awkward {
         size
     };
 
+    /// @class array_deleter
+    ///
+    /// @brief Used as a `std::shared_ptr` deleter (second argument) to
+    /// overload `delete ptr` with `delete[] ptr`.
+    ///
+    /// This is necessary for `std::shared_ptr` to contain array buffers.
+    ///
+    /// See also
+    ///   - pyobject_deleter, which reduces the reference count of a
+    ///     Python object when there are no more C++ shared pointers
+    ///     referencing it.
+    template <typename T>
+    class LIBAWKWARD_EXPORT_SYMBOL array_deleter {
+    public:
+      /// @brief Called by `std::shared_ptr` when its reference count reaches
+      /// zero.
+      void
+      operator()(T const* ptr) {
+        uint8_t const* in = reinterpret_cast<uint8_t const*>(ptr);
+        delete [] in;
+      }
+    };
+
   }
 }
 

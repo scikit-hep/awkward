@@ -228,7 +228,7 @@ class ForthOutputBufferOf : public ForthOutputBuffer {
 public:
   ForthOutputBufferOf(int64_t initial=1024, double resize=1.5)
     : ForthOutputBuffer(initial, resize)
-    , ptr_(new OUT[initial], array_deleter<OUT>()) { }
+    , ptr_(new OUT[initial], util::array_deleter<OUT>()) { }
 
   std::shared_ptr<void> ptr() const noexcept override {
     return ptr_;
@@ -363,8 +363,8 @@ private:
       while (next > reservation) {
         reservation = (int64_t)std::ceil(reservation * resize_);
       }
-      std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
-                                                             array_deleter<OUT>());
+      auto new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
+                                             util::array_deleter<OUT>());
       std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * reserved_);
       ptr_ = new_buffer;
       reserved_ = reservation;
@@ -3549,8 +3549,8 @@ int main() {
   const int64_t length = 10000000;
   // const int64_t length = 20;
 
-  std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
-      new int32_t[length], array_deleter<int32_t>());
+  auto test_input_ptr = std::shared_ptr<int32_t>(
+      new int32_t[length], util::array_deleter<int32_t>());
   for (int64_t i = 0;  i < length;  i++) {
     test_input_ptr.get()[i] = (i % 9) - 4;
   }
