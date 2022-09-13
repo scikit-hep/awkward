@@ -24,8 +24,6 @@
 #include "awkward/python/util.h"
 #include "awkward/datetime_util.h"
 
-#include "awkward/python/dlpack_util.h"
-
 
 ////////// ArrayBuilder
 
