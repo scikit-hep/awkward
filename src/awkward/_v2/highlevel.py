@@ -1793,9 +1793,9 @@ class Record(NDArrayOperatorsMixin):
         """
         Whenever possible, fields can be accessed as attributes.
 
-        For example, the fields of an `record` like
+        For example, the fields of a record like
 
-            ak.Record({"x": 1.1, "y": [2, 2], "z": "three"})
+            record = ak.Record({"x": 1.1, "y": [2, 2], "z": "three"})
 
         can be accessed as
 
@@ -1832,6 +1832,45 @@ class Record(NDArrayOperatorsMixin):
                     ) from err
             else:
                 raise ak._v2._util.error(AttributeError(f"no field named {where!r}"))
+
+    def __setattr__(self, name, value):
+        """
+        Args:
+            where (str): Attribute name to set
+
+        Set an attribute on the record.
+
+        Only existing public attributes e.g. #ak.Record.layout, or private
+        attributes (with leading underscores), can be set.
+
+        Fields are not assignable to as attributes, i.e. the following doesn't work:
+
+            record.z = new_field
+
+        Instead, always use #ak.Record.__setitem__:
+
+            record["z"] = new_field
+
+        or #ak.with_field:
+
+            record = ak.with_field(record, new_field, "z")
+
+        to add or modify a field.
+        """
+        if name.startswith("_") or hasattr(type(self), name):
+            super().__setattr__(name, value)
+        elif name in self._layout.fields:
+            raise ak._v2._util.error(
+                AttributeError(
+                    "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
+                )
+            )
+        else:
+            raise ak._v2._util.error(
+                AttributeError(
+                    "only private attributes (started with an underscore) can be set on records"
+                )
+            )
 
     def __dir__(self):
         """
