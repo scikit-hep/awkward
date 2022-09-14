@@ -26,7 +26,7 @@ class RegularArray(Content):
         return RegularArray(
             self._content if content is unset else content,
             self._size if size is unset else size,
-            self._zeros_length if zeros_length is unset else zeros_length,
+            self._length if zeros_length is unset else zeros_length,
             self._identifier if identifier is unset else identifier,
             self._parameters if parameters is unset else parameters,
             self._nplike if nplike is unset else nplike,
