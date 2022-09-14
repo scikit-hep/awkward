@@ -1196,15 +1196,15 @@ T = TypeVar("T")
 def deep_copy_instance(
     obj: T,
     memo: dict[int, Any],
-    mutable_fields: Iterable[str],
-    immutable_fields: Iterable[str] = None,
+    deep_copy_fields: Iterable[str],
+    reference_fields: Iterable[str] = None,
 ) -> T:
     """
     Args:
         obj: object to copy
         memo: memo dict
-        mutable_fields: fields to deep-copy from object
-        immutable_fields: fields to take directly from the object
+        deep_copy_fields: fields to deep-copy from object
+        reference_fields: fields to take directly from the object
 
     Return a deep-copy of the given object, populating the memo-dict before copying
     the fields.
@@ -1215,15 +1215,15 @@ def deep_copy_instance(
     memo[id(obj)] = new_obj
 
     # Now deep-copy fields
-    attributes = {n: copy.deepcopy(getattr(obj, n), memo) for n in mutable_fields}
+    attributes = {n: copy.deepcopy(getattr(obj, n), memo) for n in deep_copy_fields}
 
     # If the caller doesn't specify immutable fields, just take everything that
     # wasn't deep copied
-    if immutable_fields is None:
-        immutable_fields = vars(obj).keys() - attributes.keys()
+    if reference_fields is None:
+        reference_fields = vars(obj).keys() - attributes.keys()
 
     # Now take non-mutable fields
-    attributes.update({k: getattr(obj, k) for k in immutable_fields})
+    attributes.update({k: getattr(obj, k) for k in reference_fields})
 
     # Update instance dict
     vars(new_obj).update(attributes)
@@ -1236,7 +1236,6 @@ def copy_instance(obj: T, fields: Iterable[str]) -> T:
     """
     Args:
         obj: object to copy
-        memo: memo dict
         fields: fields to reference from object
 
     Return a copy of the given object.
