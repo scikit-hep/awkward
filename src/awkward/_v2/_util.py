@@ -2,7 +2,9 @@
 
 # First, transition all the _v2 code to start using implementations in this file.
 # Then build up the high-level replacements.
+from __future__ import annotations
 
+import copy
 import itertools
 import numbers
 import os
@@ -12,6 +14,7 @@ import traceback
 import packaging.version
 
 from collections.abc import Sequence, Mapping, Iterable
+from typing import Any, TypeVar
 
 import awkward as ak
 
@@ -1185,3 +1188,68 @@ def to_arraylib(module, array, allow_missing):
         raise ak._v2._util.error(
             ValueError(f"{module.__name__} is not supported by to_arraylib")
         )
+
+
+T = TypeVar("T")
+
+
+def deep_copy_instance(
+    obj: T,
+    memo: dict[int, Any],
+    mutable_fields: Iterable[str],
+    immutable_fields: Iterable[str] = None,
+) -> T:
+    """
+    Args:
+        obj: object to copy
+        memo: memo dict
+        mutable_fields: fields to deep-copy from object
+        immutable_fields: fields to take directly from the object
+
+    Return a deep-copy of the given object, populating the memo-dict before copying
+    the fields.
+    """
+    # First, create a bare instance
+    cls = type(obj)
+    new_obj = cls.__new__(cls)
+    memo[id(obj)] = new_obj
+
+    # Now deep-copy fields
+    attributes = {n: copy.deepcopy(getattr(obj, n), memo) for n in mutable_fields}
+
+    # If the caller doesn't specify immutable fields, just take everything that
+    # wasn't deep copied
+    if immutable_fields is None:
+        immutable_fields = vars(obj).keys() - attributes.keys()
+
+    # Now take non-mutable fields
+    attributes.update({k: getattr(obj, k) for k in immutable_fields})
+
+    # Update instance dict
+    vars(new_obj).update(attributes)
+
+    # Return the copy
+    return new_obj
+
+
+def copy_instance(obj: T, fields: Iterable[str]) -> T:
+    """
+    Args:
+        obj: object to copy
+        memo: memo dict
+        fields: fields to reference from object
+
+    Return a copy of the given object.
+    """
+    # First, create a bare instance
+    cls = type(obj)
+    new_obj = cls.__new__(cls)
+
+    # Now deep-copy fields
+    attributes = {n: getattr(obj, n) for n in fields}
+
+    # Update instance dict
+    vars(new_obj).update(attributes)
+
+    # Return the copy
+    return new_obj
