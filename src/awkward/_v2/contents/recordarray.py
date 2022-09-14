@@ -38,7 +38,7 @@ class RecordArray(Content):
     def __copy__(self):
         return self.copy()
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return self.copy(
             contents=[copy.deepcopy(x, memo) for x in self._contents],
             fields=copy.deepcopy(self._fields, memo),

@@ -29,7 +29,7 @@ class EmptyArray(Content):
     def __copy__(self):
         return self.copy()
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return self.copy(
             identifier=copy.deepcopy(self._identifier, memo),
             parameters=copy.deepcopy(self._parameters, memo),

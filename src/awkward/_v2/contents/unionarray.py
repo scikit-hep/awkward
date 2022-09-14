@@ -42,7 +42,7 @@ class UnionArray(Content):
     def __copy__(self):
         return self.copy()
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return self.copy(
             tags=copy.deepcopy(self._tags, memo),
             index=copy.deepcopy(self._index, memo),

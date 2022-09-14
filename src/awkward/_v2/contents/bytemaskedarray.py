@@ -37,7 +37,7 @@ class ByteMaskedArray(Content):
     def __copy__(self):
         return self.copy()
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return self.copy(
             mask=copy.deepcopy(self._mask, memo),
             content=copy.deepcopy(self._content, memo),

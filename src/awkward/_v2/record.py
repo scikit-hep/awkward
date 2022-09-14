@@ -228,7 +228,7 @@ class Record:
     def __copy__(self):
         return Record(self._array, self._at)
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._array, memo), self._at)
 
     def recursively_apply(

@@ -33,7 +33,7 @@ class IndexedArray(Content):
     def __copy__(self):
         return self.copy()
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return self.copy(
             index=copy.deepcopy(self._index, memo),
             content=copy.deepcopy(self._content, memo),

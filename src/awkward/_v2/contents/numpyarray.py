@@ -31,7 +31,7 @@ class NumpyArray(Content):
     def __copy__(self):
         return self.copy()
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return self.copy(
             data=copy.deepcopy(self._data, memo),
             identifier=copy.deepcopy(self._identifier, memo),

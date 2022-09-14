@@ -181,7 +181,7 @@ class Index:
     def __copy__(self):
         return type(self)(self._data, self._metadata, self._nplike)
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return type(self)(
             copy.deepcopy(self._data, memo),
             copy.deepcopy(self._metadata, memo),

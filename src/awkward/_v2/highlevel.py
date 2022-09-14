@@ -1421,7 +1421,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __copy__(self):
         return Array(self._layout, behavior=self._behavior)
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return Array(copy.deepcopy(self._layout, memo), behavior=self._behavior)
 
     def __bool__(self):
@@ -2010,7 +2010,7 @@ class Record(NDArrayOperatorsMixin):
     def __copy__(self):
         return Record(self._layout, behavior=self._behavior)
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return Record(copy.deepcopy(self._layout, memo), behavior=self._behavior)
 
     def __bool__(self):

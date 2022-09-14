@@ -35,7 +35,7 @@ class ListArray(Content):
     def __copy__(self):
         return self.copy()
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return self.copy(
             starts=copy.deepcopy(self._starts, memo),
             stops=copy.deepcopy(self._stops, memo),
