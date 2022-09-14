@@ -39,16 +39,8 @@ class BitMaskedArray(Content):
             self._nplike if nplike is unset else nplike,
         )
 
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            mask=copy.deepcopy(self._mask, memo),
-            content=copy.deepcopy(self._content, memo),
-            identifier=copy.deepcopy(self._identifier, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
+    _deep_copy_attributes = ("_mask", "_content", "_identifier", "_parameters")
+    _reference_attributes = ("_valid_when", "_length", "_lsb_order", "_nplike")
 
     def __init__(
         self,

@@ -27,15 +27,8 @@ class UnmaskedArray(Content):
             self._nplike if nplike is unset else nplike,
         )
 
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            content=copy.deepcopy(self._content, memo),
-            identifier=copy.deepcopy(self._identifier, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
+    _deep_copy_attributes = ("_content", "_identifier", "_parameters")
+    _reference_attributes = ("_nplike",)
 
     def __init__(self, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(content, Content):

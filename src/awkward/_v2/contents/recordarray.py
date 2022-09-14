@@ -17,6 +17,9 @@ numpy = ak.nplike.Numpy.instance()
 class RecordArray(Content):
     is_RecordType = True
 
+    _deep_copy_attributes = ("_contents", "_fields", "_identifier", "_parameters")
+    _reference_attributes = ("_nplike", "_length")
+
     def copy(
         self,
         contents=unset,
@@ -33,17 +36,6 @@ class RecordArray(Content):
             self._identifier if identifier is unset else identifier,
             self._parameters if parameters is unset else parameters,
             self._nplike if nplike is unset else nplike,
-        )
-
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            contents=[copy.deepcopy(x, memo) for x in self._contents],
-            fields=copy.deepcopy(self._fields, memo),
-            identifier=copy.deepcopy(self._identifier, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
         )
 
     def __init__(

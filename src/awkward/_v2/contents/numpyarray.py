@@ -1,7 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import copy
-
 import awkward as ak
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.numpyform import NumpyForm
@@ -28,15 +26,8 @@ class NumpyArray(Content):
             self._nplike if nplike is unset else nplike,
         )
 
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            data=copy.deepcopy(self._data, memo),
-            identifier=copy.deepcopy(self._identifier, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
+    _deep_copy_attributes = ("_data", "_identifier", "_parameters")
+    _reference_attributes = ("_nplike",)
 
     def __init__(self, data, identifier=None, parameters=None, nplike=None):
         if nplike is None:

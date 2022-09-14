@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import numbers
 import math
@@ -731,7 +732,7 @@ class Content:
         else:
             return self._mergeable(other, mergebool)
 
-    def _mergeable(self, other: "Content", mergebool: bool) -> bool:
+    def _mergeable(self, other: Content, mergebool: bool) -> bool:
         raise ak._v2._util.error(NotImplementedError)
 
     def mergemany(self, others):
@@ -1559,11 +1560,27 @@ class Content:
 
         return out
 
-    def __copy__(self):
+    @property
+    def _deep_copy_attributes(self) -> tuple[str]:
         raise ak._v2._util.error(NotImplementedError)
 
-    def __deepcopy__(self, memo):
+    @property
+    def _reference_attributes(self) -> tuple[str]:
         raise ak._v2._util.error(NotImplementedError)
+
+    def __copy__(self):
+        return ak._v2._util.copy_instance(
+            self,
+            self._reference_attributes + self._deep_copy_attributes,
+        )
+
+    def __deepcopy__(self, memo):
+        return ak._v2._util.deep_copy_instance(
+            self,
+            memo,
+            self._deep_copy_attributes,
+            self._reference_attributes,
+        )
 
     def _jax_flatten(self):
         from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData

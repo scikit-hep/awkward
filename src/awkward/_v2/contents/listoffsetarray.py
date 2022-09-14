@@ -30,16 +30,8 @@ class ListOffsetArray(Content):
             self._nplike if nplike is unset else nplike,
         )
 
-    def __copy__(self):
-        return self.copy()
-
-    def __deepcopy__(self, memo):
-        return self.copy(
-            offsets=copy.deepcopy(self._offsets, memo),
-            content=copy.deepcopy(self._content, memo),
-            identifier=copy.deepcopy(self._identifier, memo),
-            parameters=copy.deepcopy(self._parameters, memo),
-        )
+    _deep_copy_attributes = ("_offsets", "_content", "_identifier", "_parameters")
+    _reference_attributes = ("_nplike",)
 
     def __init__(self, offsets, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(offsets, Index) and offsets.dtype in (
