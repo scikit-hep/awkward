@@ -1422,7 +1422,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return Array(self._layout, behavior=self._behavior)
 
     def __deepcopy__(self, memo):
-        return Array(copy.deepcopy(self._layout, memo), behavior=self._behavior)
+        return Array(
+            copy.deepcopy(self._layout, memo), behavior=copy.deepcopy(self._behavior)
+        )
 
     def __bool__(self):
         if len(self) == 1:
@@ -2011,7 +2013,9 @@ class Record(NDArrayOperatorsMixin):
         return Record(self._layout, behavior=self._behavior)
 
     def __deepcopy__(self, memo):
-        return Record(copy.deepcopy(self._layout, memo), behavior=self._behavior)
+        return Record(
+            copy.deepcopy(self._layout, memo), behavior=copy.deepcopy(self._behavior)
+        )
 
     def __bool__(self):
         raise ak._v2._util.error(
