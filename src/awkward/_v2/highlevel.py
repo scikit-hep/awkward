@@ -1423,7 +1423,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     def __deepcopy__(self, memo):
         return Array(
-            copy.deepcopy(self._layout, memo), behavior=copy.deepcopy(self._behavior)
+            copy.deepcopy(self._layout, memo),
+            behavior=copy.deepcopy(self._behavior, memo),
         )
 
     def __bool__(self):
@@ -2053,7 +2054,8 @@ class Record(NDArrayOperatorsMixin):
 
     def __deepcopy__(self, memo):
         return Record(
-            copy.deepcopy(self._layout, memo), behavior=copy.deepcopy(self._behavior)
+            copy.deepcopy(self._layout, memo),
+            behavior=copy.deepcopy(self._behavior, memo),
         )
 
     def __bool__(self):
