@@ -26,7 +26,11 @@ class BadBehavior(ak._v2.Array):
 
     @property
     def fields(self):
-        return self.FIELD_STRING
+        return self.__class__.FIELD_STRING
+
+    @fields.setter
+    def fields(self, value):
+        self.__class__.FIELD_STRING = value
 
 
 behavior = {("*", "bad"): BadBehavior}
@@ -38,4 +42,7 @@ def test_bad_behavior():
     )
     array = ak._v2.Array(record, with_name="bad", behavior=behavior)
     assert isinstance(array, BadBehavior)
+
     assert array.fields == BadBehavior.FIELD_STRING
+    array.fields = "yo ho ho and a bottle of rum"
+    assert array.fields == "yo ho ho and a bottle of rum"
