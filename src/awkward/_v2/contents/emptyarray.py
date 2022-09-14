@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import copy
+
 import awkward as ak
 from awkward._v2.contents.content import Content, unset
 from awkward._v2.forms.emptyform import EmptyForm
@@ -22,6 +24,15 @@ class EmptyArray(Content):
             self._identifier if identifier is unset else identifier,
             self._parameters if parameters is unset else parameters,
             self._nplike if nplike is unset else nplike,
+        )
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            identifier=copy.deepcopy(self._identifier, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
         )
 
     def __init__(self, identifier=None, parameters=None, nplike=None):

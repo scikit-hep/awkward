@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
+import copy as _copy
 
 np = ak.nplike.NumpyMetadata.instance()
 
@@ -58,9 +59,4 @@ def copy(array):
 
 
 def _impl(array):
-    layout = ak._v2.operations.to_layout(
-        array,
-        allow_record=True,
-        allow_other=False,
-    )
-    return ak._v2._util.wrap(layout.__deepcopy__(), ak._v2._util.behavior_of(array))
+    return _copy.deepcopy(array)

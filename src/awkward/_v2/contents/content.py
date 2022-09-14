@@ -1559,16 +1559,11 @@ class Content:
 
         return out
 
-    def __deepcopy__(self, memo=None):
-        cls = self.__class__
-        new_instance = cls.__new__(cls)
-        memo = {id(self): new_instance}
-        for k, v in self.__dict__.items():
-            if k == "_nplike":
-                new_instance._nplike = v
-            else:
-                setattr(new_instance, k, copy.deepcopy(v, memo))
-        return new_instance
+    def __copy__(self):
+        raise ak._v2._util.error(NotImplementedError)
+
+    def __deepcopy__(self, memo):
+        raise ak._v2._util.error(NotImplementedError)
 
     def _jax_flatten(self):
         from awkward._v2._connect.jax import _find_numpyarray_nodes, AuxData

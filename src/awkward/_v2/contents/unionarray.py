@@ -39,6 +39,18 @@ class UnionArray(Content):
             self._nplike if nplike is unset else nplike,
         )
 
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            tags=copy.deepcopy(self._tags, memo),
+            index=copy.deepcopy(self._index, memo),
+            contents=[copy.deepcopy(x, memo) for x in self._contents],
+            identifier=copy.deepcopy(self._identifier, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
     def __init__(
         self, tags, index, contents, identifier=None, parameters=None, nplike=None
     ):

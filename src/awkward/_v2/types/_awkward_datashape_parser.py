@@ -1508,7 +1508,7 @@ class LexerConf(Serialize):
     def _deserialize(self):
         self.terminals_by_name = {t.name: t for t in self.terminals}
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo):
         return type(self)(
             deepcopy(self.terminals, memo),
             self.re_module,

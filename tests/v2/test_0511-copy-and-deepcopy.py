@@ -77,7 +77,7 @@ def test():
             {"x": 4, "y": 4.4},
         ]
     )
-    record = a[2].layout.__deepcopy__()
+    record = copy.deepcopy(a[2].layout)
     a["z"] = a.x**2
 
     assert to_list(a) == [

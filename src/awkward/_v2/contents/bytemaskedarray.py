@@ -34,6 +34,17 @@ class ByteMaskedArray(Content):
             self._nplike if nplike is unset else nplike,
         )
 
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo):
+        return self.copy(
+            mask=copy.deepcopy(self._mask, memo),
+            content=copy.deepcopy(self._content, memo),
+            identifier=copy.deepcopy(self._identifier, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
     def __init__(
         self, mask, content, valid_when, identifier=None, parameters=None, nplike=None
     ):
