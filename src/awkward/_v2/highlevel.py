@@ -1095,7 +1095,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         Note that while fields can be accessed as attributes, they cannot be
         *assigned* as attributes. See #ak.Array.__setitem__ for more.
         """
-        if where in dir(type(self)):
+        if hasattr(type(self), where):
             return super().__getattribute__(where)
         else:
             if where in self._layout.fields:
@@ -1135,7 +1135,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         to add or modify a field.
         """
-        if name in dir(type(self)) or name.startswith("_"):
+        if name.startswith("_") or hasattr(type(self), name):
             super().__setattr__(name, value)
         elif name in self._layout.fields:
             raise ak._v2._util.error(
@@ -1816,7 +1816,7 @@ class Record(NDArrayOperatorsMixin):
            * the field name is not a valid Python identifier or is a Python
              keyword.
         """
-        if where in dir(type(self)):
+        if hasattr(type(self), where):
             return super().__getattribute__(where)
         else:
             if where in self._layout.fields:
