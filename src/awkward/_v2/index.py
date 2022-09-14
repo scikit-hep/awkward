@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import copy
+
 import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -177,13 +179,14 @@ class Index:
         return Index(self._data.astype(np.int64))
 
     def __copy__(self):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        result.__dict__.update(self.__dict__)
-        return result
+        return type(self)(self._data, self._metadata, self._nplike)
 
     def __deepcopy__(self, memo=None):
-        return Index(self._data.copy(), self.metadata.copy(), self.nplike)
+        return type(self)(
+            copy.deepcopy(self._data, memo),
+            copy.deepcopy(self._metadata, memo),
+            self._nplike,
+        )
 
     def _nbytes_part(self):
         return self.data.nbytes

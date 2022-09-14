@@ -32,6 +32,16 @@ class RegularArray(Content):
             self._nplike if nplike is unset else nplike,
         )
 
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo=None):
+        return self.copy(
+            content=copy.deepcopy(self._content, memo),
+            identifier=copy.deepcopy(self._identifier, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
     def __init__(
         self,
         content,

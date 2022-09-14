@@ -32,6 +32,18 @@ class ListArray(Content):
             self._nplike if nplike is unset else nplike,
         )
 
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self, memo=None):
+        return self.copy(
+            starts=copy.deepcopy(self._starts, memo),
+            stops=copy.deepcopy(self._stops, memo),
+            content=copy.deepcopy(self._content, memo),
+            identifier=copy.deepcopy(self._identifier, memo),
+            parameters=copy.deepcopy(self._parameters, memo),
+        )
+
     def __init__(
         self, starts, stops, content, identifier=None, parameters=None, nplike=None
     ):
