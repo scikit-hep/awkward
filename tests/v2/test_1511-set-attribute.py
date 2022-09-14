@@ -19,3 +19,23 @@ def test():
 
     array._not_an_existing_attribute = 10
     assert array._not_an_existing_attribute == 10
+
+
+class BadBehavior(ak._v2.Array):
+    FIELD_STRING = "I am not a list of fields!"
+
+    @property
+    def fields(self):
+        return self.FIELD_STRING
+
+
+behavior = {("*", "bad"): BadBehavior}
+
+
+def test_bad_behavior():
+    record = ak._v2.contents.RecordArray(
+        [ak._v2.contents.NumpyArray(np.arange(10))], ["x"]
+    )
+    array = ak._v2.Array(record, with_name="bad", behavior=behavior)
+    assert isinstance(array, BadBehavior)
+    assert array.fields == BadBehavior.FIELD_STRING
