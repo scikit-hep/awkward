@@ -4,7 +4,6 @@ import io
 import sys
 import re
 import keyword
-import copy
 
 from collections.abc import Iterable
 from collections.abc import Sized
@@ -1419,12 +1418,10 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         self.behavior = behavior
 
     def __copy__(self):
-        return Array(self._layout, behavior=self._behavior)
+        return ak._v2._util.copy_instance(self, ("_layout", "_behavior"))
 
     def __deepcopy__(self, memo):
-        return Array(
-            copy.deepcopy(self._layout, memo), behavior=copy.deepcopy(self._behavior)
-        )
+        return ak._v2._util.deep_copy_instance(self, memo, ("_layout", "_behavior"), ())
 
     def __bool__(self):
         if len(self) == 1:
@@ -2010,12 +2007,10 @@ class Record(NDArrayOperatorsMixin):
         self.behavior = behavior
 
     def __copy__(self):
-        return Record(self._layout, behavior=self._behavior)
+        return ak._v2._util.copy_instance(self, ("_layout", "_behavior"))
 
     def __deepcopy__(self, memo):
-        return Record(
-            copy.deepcopy(self._layout, memo), behavior=copy.deepcopy(self._behavior)
-        )
+        return ak._v2._util.deep_copy_instance(self, memo, ("_layout", "_behavior"), ())
 
     def __bool__(self):
         raise ak._v2._util.error(
