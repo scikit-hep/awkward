@@ -1330,24 +1330,24 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         with ak._util.OperationErrorContext(name, arguments):
             return ak._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
-    #     def __array_function__(self, func, types, args, kwargs):
-    #         """
-    #         Intercepts attempts to pass this Array to those NumPy functions other
-    #         than universal functions that have an Awkward equivalent.
+    def __array_function__(self, func, types, args, kwargs):
+        """
+        Intercepts attempts to pass this Array to those NumPy functions other
+        than universal functions that have an Awkward equivalent.
 
-    #         This method conforms to NumPy's
-    #         [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html)
-    #         for overriding functions, which has been
-    #         [available since NumPy 1.17](https://numpy.org/devdocs/release/1.17.0-notes.html#numpy-functions-now-always-support-overrides-with-array-function)
-    #         (and
-    #         [NumPy 1.16 with an experimental flag set](https://numpy.org/devdocs/release/1.16.0-notes.html#numpy-functions-now-support-overrides-with-array-function)).
-    #         This is not crucial for Awkward Array to work correctly, as NumPy
-    #         functions like np.concatenate can be manually replaced with
-    #         #ak.concatenate for early versions of NumPy.
+        This method conforms to NumPy's
+        [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html)
+        for overriding functions, which has been
+        [available since NumPy 1.17](https://numpy.org/devdocs/release/1.17.0-notes.html#numpy-functions-now-always-support-overrides-with-array-function)
+        (and
+        [NumPy 1.16 with an experimental flag set](https://numpy.org/devdocs/release/1.16.0-notes.html#numpy-functions-now-support-overrides-with-array-function)).
+        This is not crucial for Awkward Array to work correctly, as NumPy
+        functions like np.concatenate can be manually replaced with
+        #ak.concatenate for early versions of NumPy.
 
-    #         See also #__array_ufunc__.
-    #         """
-    #         return ak._connect.numpy.array_function(func, types, args, kwargs)
+        See also #__array_ufunc__.
+        """
+        return ak._connect.numpy.array_function(func, types, args, kwargs)
 
     @property
     def numba_type(self):
