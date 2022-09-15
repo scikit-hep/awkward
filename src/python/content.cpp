@@ -5,6 +5,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/complex.h>
 #include <pybind11/chrono.h>
+#include <math.h>
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
 #include "awkward/layoutbuilder/ByteMaskedArrayBuilder.h"
@@ -24,9 +25,9 @@
 #include "awkward/python/util.h"
 #include "awkward/datetime_util.h"
 
+using namespace pybind11::literals;
 
 ////////// ArrayBuilder
-
 bool
 builder_fromiter_iscomplex(const py::handle& obj) {
 #if PY_MAJOR_VERSION < 3
@@ -48,6 +49,31 @@ builder_datetime(ak::ArrayBuilder& self, const py::handle& obj) {
     auto ptr = obj.attr("astype")(py::module::import("numpy").attr("int64"));
     self.datetime(ptr.cast<int64_t>(), py::str(obj.attr("dtype")));
   }
+  else if (py::isinstance(obj, py::module::import("datetime").attr("datetime"))) {
+    auto datetime = py::module::import("datetime");
+    auto time_since_epoch = obj - datetime.attr("datetime")(1970, 1, 1, 0, 0, 0);
+    auto resolution_microseconds = datetime.attr("timedelta")("microseconds"_a=1);
+    auto time_since_epoch_us = time_since_epoch.attr("__floordiv__")(resolution_microseconds).cast<int64_t>();
+    self.datetime(time_since_epoch_us, "datetime64[us]");
+  }
+  else if (py::isinstance(obj, py::module::import("datetime").attr("date"))) {
+    auto datetime = py::module::import("datetime");
+    auto time_since_epoch = obj - datetime.attr("date")(1970, 1, 1);
+    auto resolution_days = datetime.attr("timedelta")("days"_a=1);
+    auto time_since_epoch_days = time_since_epoch.attr("__floordiv__")(resolution_days).cast<int64_t>();
+    self.datetime(time_since_epoch_days, "datetime64[D]");
+  }
+  else if (py::isinstance(obj, py::module::import("datetime").attr("time"))) {
+    auto datetime = py::module::import("datetime");
+    auto time_since_midnight = datetime.attr("timedelta")(
+        "hours"_s=obj.attr("hour"),
+        "minutes"_s=obj.attr("minute"),
+        "seconds"_s=obj.attr("second")
+    );
+    auto resolution_microseconds = datetime.attr("timedelta")("microseconds"_a=1);
+    auto time_since_midnight_us = time_since_midnight.attr("__floordiv__")(resolution_microseconds).cast<int64_t>();
+    self.datetime(time_since_midnight_us, "datetime64[us]");
+  }
   else {
     throw std::invalid_argument(
       std::string("cannot convert ")
@@ -68,6 +94,10 @@ builder_timedelta(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
     auto ptr = obj.attr("astype")(py::module::import("numpy").attr("int64"));
     self.timedelta(ptr.cast<int64_t>(), py::str(obj.attr("dtype")));
+  }
+  else if (py::isinstance(obj, py::module::import("datetime").attr("timedelta"))) {
+    auto interval_us = obj.cast<std::chrono::microseconds>();
+    self.datetime(interval_us.count(), "timedelta64[us]");
   }
   else {
     throw std::invalid_argument(
@@ -137,6 +167,18 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     builder_datetime(self, obj);
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("timedelta64"))) {
+    builder_timedelta(self, obj);
+  }
+  else if (py::isinstance(obj, py::module::import("datetime").attr("datetime"))) {
+    builder_datetime(self, obj);
+  }
+  else if (py::isinstance(obj, py::module::import("datetime").attr("date"))) {
+    builder_datetime(self, obj);
+  }
+  else if (py::isinstance(obj, py::module::import("datetime").attr("time"))) {
+    builder_datetime(self, obj);
+  }
+  else if (py::isinstance(obj, py::module::import("datetime").attr("timedelta"))) {
     builder_timedelta(self, obj);
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {

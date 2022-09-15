@@ -31,7 +31,7 @@ def test_date_time():
     assert np.datetime64(array1[0], "us") == date_time
 
     assert to_list(ak.operations.from_iter(array1)) == [
-        np.datetime64("2020-07-27T10:41:11.200000")
+        datetime.datetime.fromisoformat("2020-07-27T10:41:11.200000")
     ]
 
 
