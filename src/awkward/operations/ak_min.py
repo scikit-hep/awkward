@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("min")
+@ak._connect.numpy.implements("min")
 def min(
     array,
     axis=None,
@@ -65,7 +65,7 @@ def min(
         return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nanmin")
+@ak._connect.numpy.implements("nanmin")
 def nanmin(
     array,
     axis=None,

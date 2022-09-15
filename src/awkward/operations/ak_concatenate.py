@@ -7,7 +7,7 @@ from awkward.operations.ak_fill_none import fill_none
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("concatenate")
+@ak._connect.numpy.implements("concatenate")
 def concatenate(
     arrays, axis=0, merge=True, mergebool=True, highlevel=True, behavior=None
 ):

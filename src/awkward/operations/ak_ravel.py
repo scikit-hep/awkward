@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("ravel")
+@ak._connect.numpy.implements("ravel")
 def ravel(array, highlevel=True, behavior=None):
     """
     Args:

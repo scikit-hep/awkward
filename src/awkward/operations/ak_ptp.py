@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("ptp")
+@ak._connect.numpy.implements("ptp")
 def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
     """
     Args:

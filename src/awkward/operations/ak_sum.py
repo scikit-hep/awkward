@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("sum")
+@ak._connect.numpy.implements("sum")
 def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
     """
     Args:
@@ -194,7 +194,7 @@ def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
         return _impl(array, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nansum")
+@ak._connect.numpy.implements("nansum")
 def nansum(
     array, axis=None, keepdims=False, mask_identity=False, flatten_records=False
 ):

@@ -7,7 +7,8 @@ np = ak.nplike.NumpyMetadata.instance()
 
 ### FIXME: ak._connect.numpy.implements needs to exist!
 
-# @ak._connect.numpy.implements("isclose")
+
+@ak._connect.numpy.implements("isclose")
 def isclose(
     a, b, rtol=1e-05, atol=1e-08, equal_nan=False, highlevel=True, behavior=None
 ):

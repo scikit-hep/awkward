@@ -8,7 +8,7 @@ np = ak.nplike.NumpyMetadata.instance()
 _ZEROS = object()
 
 
-# @ak._connect.numpy.implements("zeros_like")
+@ak._connect.numpy.implements("zeros_like")
 def zeros_like(array, highlevel=True, behavior=None, dtype=None):
     """
     Args:

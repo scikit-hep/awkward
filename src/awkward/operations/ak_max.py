@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("max")
+@ak._connect.numpy.implements("max")
 def max(
     array,
     axis=None,
@@ -65,7 +65,7 @@ def max(
         return _impl(array, axis, keepdims, initial, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nanmax")
+@ak._connect.numpy.implements("nanmax")
 def nanmax(
     array,
     axis=None,

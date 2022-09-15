@@ -21,50 +21,50 @@ def convert_to_array(layout, args, kwargs):
         return numpy.array(out, *args, **kwargs)
 
 
-# implemented = {}
+implemented = {}
 
 
-# def _to_rectilinear(arg):
-#     if isinstance(
-#         arg,
-#         (
-#             ak.Array,
-#             ak.Record,
-#             ak.ArrayBuilder,
-#             ak.contents.Content,
-#             ak.record.Record,
-#             ak.layout.ArrayBuilder,
-#             ak.layout.LayoutBuilder32,
-#             ak.layout.LayoutBuilder64,
-#         ),
-#     ):
-#         nplike = ak.nplike.of(arg)
-#         return nplike.to_rectilinear(arg)
-#     else:
-#         return arg
+def _to_rectilinear(arg):
+    if isinstance(
+        arg,
+        (
+            ak.Array,
+            ak.Record,
+            ak.ArrayBuilder,
+            ak.contents.Content,
+            ak.record.Record,
+            ak.layout.ArrayBuilder,
+            ak.layout.LayoutBuilder32,
+            ak.layout.LayoutBuilder64,
+        ),
+    ):
+        nplike = ak.nplike.of(arg)
+        return nplike.to_rectilinear(arg)
+    else:
+        return arg
 
 
-# def array_function(func, types, args, kwargs):
-#     function = implemented.get(func)
-#     if function is None:
-#         args = tuple(_to_rectilinear(x) for x in args)
-#         kwargs = dict((k, _to_rectilinear(v)) for k, v in kwargs.items())
-#         out = func(*args, **kwargs)
-#         nplike = ak.nplike.of(out)
-#         if isinstance(out, nplike.ndarray) and len(out.shape) != 0:
-#             return ak.Array(out)
-#         else:
-#             return out
-#     else:
-#         return function(*args, **kwargs)
+def array_function(func, types, args, kwargs):
+    function = implemented.get(func)
+    if function is None:
+        args = tuple(_to_rectilinear(x) for x in args)
+        kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
+        out = func(*args, **kwargs)
+        nplike = ak.nplike.of(out)
+        if isinstance(out, nplike.ndarray) and len(out.shape) != 0:
+            return ak.Array(out)
+        else:
+            return out
+    else:
+        return function(*args, **kwargs)
 
 
-# def implements(numpy_function):
-#     def decorator(function):
-#         implemented[getattr(numpy, numpy_function)] = function
-#         return function
+def implements(numpy_function):
+    def decorator(function):
+        implemented[getattr(numpy, numpy_function)] = function
+        return function
 
-#     return decorator
+    return decorator
 
 
 def _array_ufunc_custom_cast(inputs, behavior):

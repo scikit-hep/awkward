@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("var")
+@ak._connect.numpy.implements("var")
 def var(
     x,
     weight=None,
@@ -81,7 +81,7 @@ def var(
         return _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nanvar")
+@ak._connect.numpy.implements("nanvar")
 def nanvar(
     x,
     weight=None,

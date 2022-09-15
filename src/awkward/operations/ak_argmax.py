@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("argmax")
+@ak._connect.numpy.implements("argmax")
 def argmax(array, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
     """
     Args:
@@ -57,7 +57,7 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True, flatten_records
         return _impl(array, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nanargmax")
+@ak._connect.numpy.implements("nanargmax")
 def nanargmax(
     array, axis=None, keepdims=False, mask_identity=True, flatten_records=False
 ):

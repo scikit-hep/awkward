@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("ones_like")
+@ak._connect.numpy.implements("ones_like")
 def ones_like(array, highlevel=True, behavior=None, dtype=None):
     """
     Args:

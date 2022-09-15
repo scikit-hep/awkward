@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("broadcast_arrays")
+@ak._connect.numpy.implements("broadcast_arrays")
 def broadcast_arrays(*arrays, **kwargs):
     """
     Args:

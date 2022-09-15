@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("count_nonzero")
+@ak._connect.numpy.implements("count_nonzero")
 def count_nonzero(
     array, axis=None, keepdims=False, mask_identity=False, flatten_records=False
 ):

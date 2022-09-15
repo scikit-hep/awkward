@@ -6,7 +6,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("full_like")
+@ak._connect.numpy.implements("full_like")
 def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
     """
     Args:

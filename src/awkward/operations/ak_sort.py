@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("sort")
+@ak._connect.numpy.implements("sort")
 def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:

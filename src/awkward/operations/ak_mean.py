@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("mean")
+@ak._connect.numpy.implements("mean")
 def mean(
     x, weight=None, axis=None, keepdims=False, mask_identity=True, flatten_records=False
 ):
@@ -87,7 +87,7 @@ def mean(
         return _impl(x, weight, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nanmean")
+@ak._connect.numpy.implements("nanmean")
 def nanmean(
     x, weight=None, axis=None, keepdims=False, mask_identity=True, flatten_records=False
 ):

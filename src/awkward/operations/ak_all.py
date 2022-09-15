@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("all")
+@ak._connect.numpy.implements("all")
 def all(array, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
     """
     Args:

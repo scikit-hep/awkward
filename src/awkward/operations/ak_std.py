@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("std")
+@ak._connect.numpy.implements("std")
 def std(
     x,
     weight=None,
@@ -75,7 +75,7 @@ def std(
         return _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nanstd")
+@ak._connect.numpy.implements("nanstd")
 def nanstd(
     x,
     weight=None,

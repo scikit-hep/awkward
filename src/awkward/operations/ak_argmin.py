@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("argmin")
+@ak._connect.numpy.implements("argmin")
 def argmin(array, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
     """
     Args:
@@ -57,7 +57,7 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True, flatten_records
         return _impl(array, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nanargmin")
+@ak._connect.numpy.implements("nanargmin")
 def nanargmin(
     array, axis=None, keepdims=False, mask_identity=True, flatten_records=False
 ):

@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("prod")
+@ak._connect.numpy.implements("prod")
 def prod(array, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
     """
     Args:
@@ -50,7 +50,7 @@ def prod(array, axis=None, keepdims=False, mask_identity=False, flatten_records=
         return _impl(array, axis, keepdims, mask_identity, flatten_records)
 
 
-# @ak._connect.numpy.implements("nanprod")
+@ak._connect.numpy.implements("nanprod")
 def nanprod(
     array, axis=None, keepdims=False, mask_identity=False, flatten_records=False
 ):

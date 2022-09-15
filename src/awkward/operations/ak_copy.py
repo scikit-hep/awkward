@@ -6,7 +6,7 @@ import copy as _copy
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# @ak._connect.numpy.implements("copy")
+@ak._connect.numpy.implements("copy")
 def copy(array):
     """
     Returns a deep copy of the array (no memory shared with original).
