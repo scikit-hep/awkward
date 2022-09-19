@@ -2,30 +2,30 @@ ak.forms.Form
 -------------
 
 Superclass of type nodes that describe a low-level data type or "form". Unlike
-the high-level type (see :doc:`_auto/ak.type`), there is an exact one-to-one
-relationship between each :doc:`ak.layout.Content` class (see
-`ak.Array.layout <_auto/ak.Array.html#ak-array-layout>`_) and each Form.
+the high-level type (see :class:`ak.contents.type`), there is an exact one-to-one
+relationship between each :class:`ak.contents.Content` class (see
+:attr:`ak.Array.layout`) and each Form.
 
 Forms are rendered as JSON strings, the same JSON that can be used to construct
 them.
 
 The type subclasses are listed below.
 
-   * :doc:`ak.forms.EmptyForm` for :doc:`ak.layout.EmptyArray`
-   * :doc:`ak.forms.NumpyForm` for :doc:`ak.layout.NumpyArray`
-   * :doc:`ak.forms.RegularForm` for :doc:`ak.layout.RegularArray`
-   * :doc:`ak.forms.ListForm` for :doc:`ak.layout.ListArray`
-   * :doc:`ak.forms.ListOffsetForm` for :doc:`ak.layout.ListOffsetArray`
-   * :doc:`ak.forms.RecordForm` for :doc:`ak.layout.RecordArray`
-   * :doc:`ak.forms.IndexedForm` for :doc:`ak.layout.IndexedArray`
-   * :doc:`ak.forms.IndexedOptionForm` for :doc:`ak.layout.IndexedOptionArray`
-   * :doc:`ak.forms.ByteMaskedForm` for :doc:`ak.layout.ByteMaskedArray`
-   * :doc:`ak.forms.BitMaskedForm` for :doc:`ak.layout.BitMaskedArray`
-   * :doc:`ak.forms.UnmaskedForm` for :doc:`ak.layout.UnmaskedArray`
-   * :doc:`ak.forms.UnionForm` for :doc:`ak.layout.UnionArray`
-   * :doc:`ak.forms.VirtualForm` for :doc:`ak.layout.VirtualArray`
+   * :class:`ak.forms.EmptyForm` for :class:`ak.contents.EmptyArray`
+   * :class:`ak.forms.NumpyForm` for :class:`ak.contents.NumpyArray`
+   * :class:`ak.forms.RegularForm` for :class:`ak.contents.RegularArray`
+   * :class:`ak.forms.ListForm` for :class:`ak.contents.ListArray`
+   * :class:`ak.forms.ListOffsetForm` for :class:`ak.contents.ListOffsetArray`
+   * :class:`ak.forms.RecordForm` for :class:`ak.contents.RecordArray`
+   * :class:`ak.forms.IndexedForm` for :class:`ak.contents.IndexedArray`
+   * :class:`ak.forms.IndexedOptionForm` for :class:`ak.contents.IndexedOptionArray`
+   * :class:`ak.forms.ByteMaskedForm` for :class:`ak.contents.ByteMaskedArray`
+   * :class:`ak.forms.BitMaskedForm` for :class:`ak.contents.BitMaskedArray`
+   * :class:`ak.forms.UnmaskedForm` for :class:`ak.contents.UnmaskedArray`
+   * :class:`ak.forms.UnionForm` for :class:`ak.contents.UnionArray`
+   * :class:`ak.forms.VirtualForm` for :class:`ak.contents.VirtualArray`
 
-All :doc:`ak.forms.Form` instances have the following properties and methods
+All :class:`ak.forms.Form` instances have the following properties and methods
 in common.
 
 ak.forms.Form.__eq__

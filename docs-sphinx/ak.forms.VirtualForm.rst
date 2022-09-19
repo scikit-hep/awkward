@@ -1,9 +1,9 @@
 ak.forms.VirtualForm
 --------------------
 
-The form of a :doc:`ak.layout.VirtualArray`, which has the type of its ``form`` (if known).
+The form of a :class:`ak.contents.VirtualArray`, which has the type of its ``form`` (if known).
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 ak.forms.VirtualForm.__init__

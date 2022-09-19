@@ -123,8 +123,8 @@ and it may be accessed as the ``"__record__"`` property, through the
     {'__record__': 'point'}
 
 We have to dig into the layout's content because the ``"__record__"`` parameter
-is set on the :doc:`ak.layout.RecordArray`, which is buried inside of a
-:doc:`ak.layout.ListOffsetArray`.
+is set on the :class:`ak.contents.RecordArray`, which is buried inside of a
+:class:`ak.contents.ListOffsetArray`.
 
 Alternatively, we can navigate to a single :doc:`_auto/ak.Record` first:
 

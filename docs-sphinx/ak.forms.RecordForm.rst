@@ -1,9 +1,9 @@
 ak.forms.RecordForm
 -------------------
 
-The form of a :doc:`ak.layout.RecordArray`, which has :doc:`ak.types.RecordType`.
+The form of a :class:`ak.contents.RecordArray`, which has :class:`ak.types.RecordType`.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 ak.forms.RecordForm.__init__

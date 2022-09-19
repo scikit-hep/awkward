@@ -1,9 +1,9 @@
 ak.forms.ByteMaskedForm
 -----------------------
 
-The form of a :doc:`ak.layout.ByteMaskedArray`, which has :doc:`ak.types.OptionType`.
+The form of a :class:`ak.contents.ByteMaskedArray`, which has :class:`ak.types.OptionType`.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 ak.forms.ByteMaskedForm.__init__

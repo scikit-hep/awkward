@@ -1,9 +1,9 @@
 ak.forms.UnionForm
 ------------------
 
-The form of a :doc:`ak.layout.UnionArray`, which has :doc:`ak.types.UnionType`.
+The form of a :class:`ak.contents.UnionArray`, which has :class:`ak.types.UnionType`.
 
-In addition to the properties and methods described in :doc:`ak.forms.Form`,
+In addition to the properties and methods described in :class:`ak.forms.Form`,
 this has the following.
 
 ak.forms.UnionForm.__init__
