@@ -25,23 +25,12 @@ implemented = {}
 
 
 def _to_rectilinear(arg):
-    if isinstance(
-        arg,
-        (
-            ak.Array,
-            ak.Record,
-            ak.ArrayBuilder,
-            ak.contents.Content,
-            ak.record.Record,
-            ak.layout.ArrayBuilder,
-            ak.layout.LayoutBuilder32,
-            ak.layout.LayoutBuilder64,
-        ),
-    ):
-        nplike = ak.nplike.of(arg)
-        return nplike.to_rectilinear(arg)
+    if isinstance(arg, tuple):
+        nplike = ak.nplike.of(*arg)
+        return tuple(nplike.to_rectilinear(x) for x in arg)
     else:
-        return arg
+        nplike = ak.nplike.of(arg)
+        nplike.to_rectilinear(arg)
 
 
 def array_function(func, types, args, kwargs):

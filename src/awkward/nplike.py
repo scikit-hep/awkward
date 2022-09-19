@@ -469,13 +469,13 @@ class Numpy(NumpyLike):
                 ak.Record,
                 ak.ArrayBuilder,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
                 ak.layout.ArrayBuilder,
                 ak.layout.LayoutBuilder32,
                 ak.layout.LayoutBuilder64,
             ),
         ):
-            return ak.operations.convert.to_numpy(array, *args, **kwargs)
+            return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
 
         elif isinstance(array, Iterable):
             return [self.to_rectilinear(x, *args, **kwargs) for x in array]
@@ -524,7 +524,7 @@ class Cupy(NumpyLike):
         return self
 
     def to_rectilinear(self, array, *args, **kwargs):
-        return ak.operations.convert.to_cupy(array, *args, **kwargs)
+        return ak.operations.ak_to_cupy.to_cupy(array, *args, **kwargs)
 
     def __getitem__(self, name_and_types):
         cupy = ak._connect.cuda.import_cupy("Awkward Arrays with CUDA")
@@ -572,7 +572,7 @@ class Cupy(NumpyLike):
                 ak.contents.Record,
             ),
         ):
-            out = ak.operations.convert.to_cupy(array)
+            out = ak.operations.ak_to_cupy.to_cupy(array)
             if dtype is not None and out.dtype != dtype:
                 return self._module.asarray(out, dtype=dtype, order=order)
             else:
@@ -606,7 +606,7 @@ class Cupy(NumpyLike):
                 ak.contents.Record,
             ),
         ):
-            out = ak.operations.convert.to_cupy(array)
+            out = ak.operations.ak_to_cupy.to_cupy(array)
             if dtype is not None and out.dtype != dtype:
                 return self._module.ascontiguousarray(out, dtype=dtype)
             else:
@@ -739,7 +739,7 @@ class Jax(NumpyLike):
                 ak.layout.LayoutBuilder64,
             ),
         ):
-            return ak.operations.convert.to_jax(array, *args, **kwargs)
+            return ak.operations.ak_to_jax.to_jax(array, *args, **kwargs)
 
         elif isinstance(array, Iterable):
             return [self.to_rectilinear(x, *args, **kwargs) for x in array]
@@ -790,7 +790,7 @@ class Jax(NumpyLike):
                 ak.contents.Record,
             ),
         ):
-            out = ak.operations.convert.to_jax(array)
+            out = ak.operations.ak_to_jax.to_jax(array)
             if dtype is not None and out.dtype != dtype:
                 return self._module.ascontiguousarray(out, dtype=dtype)
             else:
