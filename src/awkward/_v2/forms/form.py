@@ -221,11 +221,10 @@ def _parameters_intersect(
     Returns the intersected key-value pairs of `left` and `right` as a dictionary.
 
     """
-    sentinel = object()
     result = {}
-    for key, value in left.items():
-        if value == right.get(key, sentinel):
-            result[key] = value
+    for key in left.keys() & right.keys():
+        if left[key] == right[key]:
+            result[key] = left[key]
     return result
 
 
