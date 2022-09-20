@@ -6,8 +6,7 @@ import copy
 import enum
 import functools
 import itertools
-import operator
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Mapping, Union
 from collections.abc import Sequence
 
 import awkward as ak
@@ -201,6 +200,25 @@ def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
         return default
 
 
+def _intersect_parameters(
+    left: Mapping[str, Any], right: Mapping[str, Any]
+) -> dict[str, Any]:
+    """
+    Args:
+        left: first parameters mapping
+        right: second parameters mapping
+
+    Returns the intersected key-value pairs of `left` and `right` as a dictionary.
+
+    """
+    sentinel = object()
+    result = {}
+    for key, value in left.items():
+        if value == right.get(key, sentinel):
+            result[key] = value
+    return result
+
+
 def _all_or_nothing_parameters_factory(
     inputs: Sequence,
 ) -> BroadcastParameterFactory:
@@ -268,11 +286,11 @@ def _intersection_parameters_factory(
         if ak._v2.forms.form._parameters_is_empty(parameters):
             break
         else:
-            parameters_to_intersect.append(parameters.items())
+            parameters_to_intersect.append(parameters)
     # Otherwise, build the intersected parameter dict
     else:
         intersected_parameters = dict(
-            functools.reduce(operator.and_, parameters_to_intersect)
+            functools.reduce(_intersect_parameters, parameters_to_intersect)
         )
 
     def apply(n_outputs: int) -> list[dict[str, Any] | None]:
