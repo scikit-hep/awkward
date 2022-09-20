@@ -270,10 +270,8 @@ def _intersection_parameters_factory(
             parameters_to_intersect.append(parameters)
     # Otherwise, build the intersected parameter dict
     else:
-        intersected_parameters = dict(
-            functools.reduce(
-                ak._v2.forms.form._parameters_intersect, parameters_to_intersect
-            )
+        intersected_parameters = functools.reduce(
+            ak._v2.forms.form._parameters_intersect, parameters_to_intersect
         )
 
     def apply(n_outputs: int) -> list[dict[str, Any] | None]:
