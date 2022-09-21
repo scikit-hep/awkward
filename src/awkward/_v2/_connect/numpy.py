@@ -140,21 +140,6 @@ def _array_ufunc_signature(ufunc, inputs):
     return signature
 
 
-def _array_ufunc_deregulate(inputs):
-    nextinputs = []
-    for x in inputs:
-        if isinstance(x, ak._v2.contents.RegularArray):
-            y = x.maybe_toNumpyArray()
-            if y is not None:
-                nextinputs.append(y)
-            else:
-                nextinputs.append(x)
-        else:
-            nextinputs.append(x)
-
-    return nextinputs
-
-
 def array_ufunc(ufunc, method, inputs, kwargs):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
@@ -174,8 +159,6 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             custom_matmul = action_for_matmul(inputs)
             if custom_matmul is not None:
                 return custom_matmul()
-
-        inputs = _array_ufunc_deregulate(inputs)
 
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak._v2.contents.Content)
