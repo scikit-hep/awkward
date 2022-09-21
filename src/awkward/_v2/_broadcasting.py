@@ -200,7 +200,7 @@ def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
         return default
 
 
-def _all_or_nothing_parameters_factory(
+def all_or_nothing_parameters_factory(
     inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
@@ -239,7 +239,7 @@ def _all_or_nothing_parameters_factory(
     return apply
 
 
-def _intersection_parameters_factory(
+def intersection_parameters_factory(
     inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
@@ -282,7 +282,7 @@ def _intersection_parameters_factory(
     return apply
 
 
-def _one_to_one_parameters_factory(
+def one_to_one_parameters_factory(
     inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
@@ -314,7 +314,7 @@ def _one_to_one_parameters_factory(
     return apply
 
 
-def _none_parameters_factory(
+def none_parameters_factory(
     inputs: Sequence,
 ) -> BroadcastParameterFactory:
     """
@@ -336,10 +336,10 @@ def _none_parameters_factory(
 
 # Mapping from rule enum values to factory implementations
 BROADCAST_RULE_TO_FACTORY_IMPL = {
-    BroadcastParameterRule.INTERSECT: _intersection_parameters_factory,
-    BroadcastParameterRule.ALL_OR_NOTHING: _all_or_nothing_parameters_factory,
-    BroadcastParameterRule.ONE_TO_ONE: _one_to_one_parameters_factory,
-    BroadcastParameterRule.NONE: _none_parameters_factory,
+    BroadcastParameterRule.INTERSECT: intersection_parameters_factory,
+    BroadcastParameterRule.ALL_OR_NOTHING: all_or_nothing_parameters_factory,
+    BroadcastParameterRule.ONE_TO_ONE: one_to_one_parameters_factory,
+    BroadcastParameterRule.NONE: none_parameters_factory,
 }
 
 
