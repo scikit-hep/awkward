@@ -15,7 +15,6 @@
 
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/common.h"
-#include "awkward/kernel-dispatch.h"
 
 #include "awkward/io/json.h"
 
@@ -358,7 +357,7 @@ namespace awkward {
   class ToJsonFile::Impl {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
-        : buffer_(kernel::malloc<char>(kernel::lib::cpu, buffersize))
+        : buffer_(new char[buffersize], util::array_deleter<char>())
         , stream_(destination,
                   buffer_.get(),
                   ((size_t)buffersize)*sizeof(char))
@@ -498,7 +497,7 @@ namespace awkward {
   class ToJsonPrettyFile::Impl {
   public:
     Impl(FILE* destination, int64_t maxdecimals, int64_t buffersize)
-        : buffer_(kernel::malloc<char>(kernel::lib::cpu, buffersize))
+        : buffer_(new char[buffersize], util::array_deleter<char>())
         , stream_(destination,
                   buffer_.get(),
                   ((size_t)buffersize)*sizeof(char))
@@ -828,7 +827,8 @@ namespace awkward {
                const char* infinity_string,
                const char* minus_infinity_string) {
     rj::Reader reader;
-    std::shared_ptr<char> buffer = kernel::malloc<char>(kernel::lib::cpu, buffersize);
+    std::shared_ptr<char> buffer(new char[buffersize],
+                                 util::array_deleter<char>());
     rj::FileReadStream stream(source,
                               buffer.get(),
                               ((size_t)buffersize)*sizeof(char));

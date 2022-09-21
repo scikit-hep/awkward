@@ -2,7 +2,6 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/layoutbuilder/LayoutBuilder.cpp", line)
 
-#include "awkward/kernel-dispatch.h"
 #include "awkward/layoutbuilder/LayoutBuilder.h"
 
 #include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
@@ -578,8 +577,7 @@ namespace awkward {
     if (vm_ == nullptr) {
       vm_ = vm;
 
-      std::shared_ptr<void> ptr(
-        kernel::malloc<void>(kernel::lib::cpu, 8*sizeof(uint8_t)));
+      std::shared_ptr<void> ptr(malloc(8*sizeof(uint8_t)), free);
 
       vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, 8);
       vm_.get()->run(vm_inputs_map_);
@@ -597,7 +595,7 @@ namespace awkward {
     vm_ = std::make_shared<ForthMachineOf<T, I>>(vm_source());
 
     std::shared_ptr<void> ptr(
-      kernel::malloc<void>(kernel::lib::cpu, initial_*(int64_t)sizeof(uint8_t)));
+      malloc(initial_*(int64_t)sizeof(uint8_t)), free);
 
     vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, initial_);
     vm_.get()->run(vm_inputs_map_);
