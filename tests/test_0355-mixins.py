@@ -8,7 +8,9 @@ to_list = ak.operations.to_list
 
 
 def test_make_mixins():
-    @ak.behaviors.mixins.mixin_class(ak.behavior)
+    behavior = {}
+
+    @ak.behaviors.mixins.mixin_class(behavior)
     class Point:
         def distance(self, other):
             return np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
@@ -28,7 +30,7 @@ def test_make_mixins():
                 with_name="Point",
             )
 
-    @ak.behaviors.mixins.mixin_class(ak.behavior)
+    @ak.behaviors.mixins.mixin_class(behavior)
     class WeightedPoint(Point):
         @ak.behaviors.mixins.mixin_class_method(np.equal, {"WeightedPoint"})
         def weighted_equal(self, other):
@@ -53,6 +55,7 @@ def test_make_mixins():
             [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
         ],
         with_name="Point",
+        behavior=behavior,
     )
     two = ak.Array(
         [
@@ -61,16 +64,18 @@ def test_make_mixins():
             [{"x": 3.9, "y": 4}, {"x": 5, "y": 5.5}],
         ],
         with_name="Point",
+        behavior=behavior,
     )
     wone = ak.Array(
         ak.operations.with_field(one, abs(one), "weight"),
         with_name="WeightedPoint",
+        behavior=behavior,
     )
     wtwo = ak.Array(
         ak.operations.with_field(two, abs(two), "weight"),
         with_name="WeightedPoint",
+        behavior=behavior,
     )
-
     assert to_list(one + wone) == [
         [{"x": 2, "y": 2.2}, {"x": 4, "y": 4.4}, {"x": 6, "y": 6.6}],
         [],
