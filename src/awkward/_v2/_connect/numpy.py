@@ -183,6 +183,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         ):
             nplike = ak.nplike.of(*inputs)
 
+            # Broadcast parameters against one another
+            parameters_factory = ak._v2._broadcasting.intersection_parameters_factory(
+                inputs
+            )
+            (parameters,) = parameters_factory(1)
             if nplike.known_data:
                 args = []
                 for x in inputs:
@@ -211,8 +216,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 assert shape is not None
                 tmp = getattr(ufunc, method)(*args, **kwargs)
                 result = nplike.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
-
-            return (NumpyArray(result, nplike=nplike),)
+            return (NumpyArray(result, nplike=nplike, parameters=parameters),)
 
         for x in inputs:
             if isinstance(x, ak._v2.contents.Content):
