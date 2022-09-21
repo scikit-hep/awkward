@@ -83,7 +83,7 @@ def test_ArrayBuilder_of_timedeltas():
 
 
 def test_ArrayBuilder_of_strings():
-    @nb.njit(debug=True)
+    @nb.njit
     def add_a_string(builder, string):
         builder.string(string)
         return builder
