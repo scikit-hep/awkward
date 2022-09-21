@@ -255,12 +255,22 @@ def test_transform_float_int_2d_different_intersect():
     this = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
         ak._v2.contents.NumpyArray(numpy.array([1.0, 2.0, 3.0, 4.0], dtype="float64")),
-        parameters={"name": "this"},
+        parameters={
+            "name": "this",
+            "key": "value",
+            "parent": {"child": 1},
+            "pets": [{"name": "fido"}],
+        },
     )
     that = ak._v2.contents.ListOffsetArray(
         ak._v2.index.Index64(numpy.array([0, 3, 4], dtype="int64")),
         ak._v2.contents.NumpyArray(numpy.array([1, 2, 1, 9], dtype="int64")),
-        parameters={"name": "that"},
+        parameters={
+            "name": "that",
+            "key": "value",
+            "parent": {"child": 2},
+            "pets": [{"name": "fido"}],
+        },
     )
     this_next, that_next = ak._v2.operations.ak_transform.transform(
         lambda *a, **k: None,
@@ -270,8 +280,8 @@ def test_transform_float_int_2d_different_intersect():
         broadcast_parameters_rule="intersect",
     )
 
-    assert this_next.parameters == {}
-    assert that_next.parameters == {}
+    assert this_next.parameters == that_next.parameters
+    assert that_next.parameters == {"key": "value", "pets": [{"name": "fido"}]}
 
 
 def test_transform_float_int_2d_one_to_one_error():

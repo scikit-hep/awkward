@@ -140,21 +140,6 @@ def _array_ufunc_signature(ufunc, inputs):
     return signature
 
 
-def _array_ufunc_deregulate(inputs):
-    nextinputs = []
-    for x in inputs:
-        if isinstance(x, ak._v2.contents.RegularArray):
-            y = x.maybe_toNumpyArray()
-            if y is not None:
-                nextinputs.append(y)
-            else:
-                nextinputs.append(x)
-        else:
-            nextinputs.append(x)
-
-    return nextinputs
-
-
 def array_ufunc(ufunc, method, inputs, kwargs):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
@@ -175,14 +160,17 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             if custom_matmul is not None:
                 return custom_matmul()
 
-        inputs = _array_ufunc_deregulate(inputs)
-
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak._v2.contents.Content)
             for x in inputs
         ):
             nplike = ak.nplike.of(*inputs)
 
+            # Broadcast parameters against one another
+            parameters_factory = ak._v2._broadcasting.intersection_parameters_factory(
+                inputs
+            )
+            (parameters,) = parameters_factory(1)
             if nplike.known_data:
                 args = []
                 for x in inputs:
@@ -211,8 +199,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 assert shape is not None
                 tmp = getattr(ufunc, method)(*args, **kwargs)
                 result = nplike.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
-
-            return (NumpyArray(result, nplike=nplike),)
+            return (NumpyArray(result, nplike=nplike, parameters=parameters),)
 
         for x in inputs:
             if isinstance(x, ak._v2.contents.Content):

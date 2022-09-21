@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Mapping
 
 import awkward as ak
 
@@ -208,6 +208,24 @@ def _parameters_equal(one, two, only_array_record=False):
             if one.get(key) != two.get(key):
                 return False
         return True
+
+
+def _parameters_intersect(
+    left: Mapping[str, Any], right: Mapping[str, Any]
+) -> dict[str, Any]:
+    """
+    Args:
+        left: first parameters mapping
+        right: second parameters mapping
+
+    Returns the intersected key-value pairs of `left` and `right` as a dictionary.
+
+    """
+    result = {}
+    for key in left.keys() & right.keys():
+        if left[key] == right[key]:
+            result[key] = left[key]
+    return result
 
 
 def _parameters_update(one, two):
