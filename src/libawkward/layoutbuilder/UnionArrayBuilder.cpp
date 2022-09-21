@@ -114,13 +114,13 @@ namespace awkward {
       auto index = std::shared_ptr<int64_t>(
           new int64_t[length],
           kernel::array_deleter<int64_t>());
-      struct Error err = kernel::UnionArray_regular_index<int8_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        index.get(),
-        current.get(),
-        length,
-        tags,
-        length);
+
+      struct Error err = awkward_UnionArray8_64_regular_index(
+          index.get(),
+          current.get(),
+          length,
+          tags,
+          length);
       util::handle_error(err, "UnionArray");
 
       container.copy_buffer(form_key() + "-tags",
