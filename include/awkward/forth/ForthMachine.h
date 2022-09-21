@@ -9,9 +9,6 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/Content.h"
-#include "awkward/array/NumpyArray.h"
-#include "awkward/array/ListOffsetArray.h"
 #include "awkward/forth/ForthInputBuffer.h"
 #include "awkward/forth/ForthOutputBuffer.h"
 
