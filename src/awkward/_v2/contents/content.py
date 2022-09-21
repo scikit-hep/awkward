@@ -587,17 +587,17 @@ class Content:
         elif isinstance(where, Content):
             return self._getitem((where,))
 
-        elif ak._util.is_sized_iterable(where) and len(where) == 0:
+        elif ak._v2._util.is_sized_iterable(where) and len(where) == 0:
             return self._carry(
                 ak._v2.index.Index64.empty(0, self._nplike), allow_lazy=True
             )
 
-        elif ak._util.is_sized_iterable(where) and all(
+        elif ak._v2._util.is_sized_iterable(where) and all(
             ak._v2._util.isstr(x) for x in where
         ):
             return self._getitem_fields(where)
 
-        elif ak._util.is_sized_iterable(where):
+        elif ak._v2._util.is_sized_iterable(where):
             layout = ak._v2.operations.to_layout(where)
             as_array = layout.maybe_to_array(layout.nplike)
             if as_array is None:

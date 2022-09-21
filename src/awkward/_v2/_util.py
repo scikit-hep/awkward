@@ -11,7 +11,7 @@ import threading
 import traceback
 import packaging.version
 
-from collections.abc import Sequence, Mapping, Iterable
+from collections.abc import Sequence, Sized, Mapping, Iterable
 
 import awkward as ak
 
@@ -65,6 +65,10 @@ def is_file_path(x):
         return os.path.isfile(x)
     except ValueError:
         return False
+
+
+def is_sized_iterable(obj):
+    return isinstance(obj, Iterable) and isinstance(obj, Sized)
 
 
 def isint(x):
