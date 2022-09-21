@@ -60,46 +60,46 @@ def test_ArrayBuilder_of_complex():
     assert out.to_list() == [(1.0 + 0.1j), (2.0 + 0.2j)]
 
 
-#
-# def test_ArrayBuilder_of_datetimes():
-#     @nb.njit
-#     def add_a_datetime(builder, datetime):
-#         builder.datetime(datetime)
-#         return builder
-#
-#     builder = add_a_datetime(ak.ArrayBuilder(), "2020-09-04")
-#     out = builder.snapshot()
-#     assert out.to_list() == ["2020-09-04"]
-#
-#
-# def test_ArrayBuilder_of_timedeltas():
-#     @nb.njit
-#     def add_a_timedelta(builder, timedelta):
-#         builder.timedelta(timedelta)
-#         return builder
-#
-#     builder = add_a_timedelta(ak.ArrayBuilder(), np.timedelta64(5, "s"))
-#     out = builder.snapshot()
-#     assert out.to_list() == [np.timedelta64(5, "s")]
-#
-#
-# def test_ArrayBuilder_of_strings():
-#     @nb.njit
-#     def add_a_string(builder, string):
-#         builder.string(string)
-#         return builder
-#
-#     builder = add_a_string(ak.ArrayBuilder(), "hello")
-#     out = builder.snapshot()
-#     assert out.to_list() == ['hello']
-#
-#
-# def test_ArrayBuilder_of_bytestrings():
-#     @nb.njit
-#     def add_a_bytestring(builder, bytestring):
-#         builder.bytestring(bytestring)
-#         return builder
-#
-#     builder = add_a_bytestring(ak.ArrayBuilder(), b"hello")
-#     out = builder.snapshot()
-#     assert out.to_list() == [b"hello"]
+def test_ArrayBuilder_of_datetimes():
+    @nb.njit
+    def add_a_datetime(builder, datetime):
+        builder.datetime(datetime)
+        return builder
+
+    builder = add_a_datetime(ak.ArrayBuilder(), np.datetime64("2020-09-04"))
+    out = builder.snapshot()
+    assert out.to_list() == [np.datetime64("2020-09-04")]
+
+
+def test_ArrayBuilder_of_timedeltas():
+    @nb.njit
+    def add_a_timedelta(builder, timedelta):
+        builder.timedelta(timedelta)
+        return builder
+
+    builder = add_a_timedelta(ak.ArrayBuilder(), np.timedelta64(5, "s"))
+    out = builder.snapshot()
+    assert out.to_list() == [np.timedelta64(5, "s")]
+
+
+def test_ArrayBuilder_of_strings():
+    @nb.njit(debug=True)
+    def add_a_string(builder, string):
+        builder.string(string)
+        return builder
+
+    builder = add_a_string(ak.ArrayBuilder(), "hello")
+    builder = add_a_string(builder, "world")
+    out = builder.snapshot()
+    assert out.to_list() == ["hello", "world"]
+
+
+def test_ArrayBuilder_of_bytestrings():
+    @nb.njit
+    def add_a_bytestring(builder, bytestring):
+        builder.bytestring(bytestring)
+        return builder
+
+    builder = add_a_bytestring(ak.ArrayBuilder(), b"hello")
+    out = builder.snapshot()
+    assert out.to_list() == [b"hello"]

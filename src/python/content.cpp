@@ -231,6 +231,7 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         self.bytestring(x.cast<std::string>());
       })
       .def("string", [](ak::ArrayBuilder& self, const py::str& x) -> void {
+        std::cout << "=====>>>> ak::ArrayBuilder::string " << x << std::endl;
         self.string(x.cast<std::string>());
       })
       .def("beginlist", &ak::ArrayBuilder::beginlist)

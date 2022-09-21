@@ -393,6 +393,32 @@ uint8_t awkward_ArrayBuilder_string(void* arraybuilder,
   return 0;
 }
 
+uint8_t awkward_ArrayBuilder_string_uint8(void* arraybuilder,
+                                          const uint8_t* x) {
+  awkward::ArrayBuilder* obj =
+    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+  try {
+    obj->string(reinterpret_cast<const char*>(x));
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
+uint8_t awkward_ArrayBuilder_string_int64(void* arraybuilder,
+                                          const int64_t* x) {
+  awkward::ArrayBuilder* obj =
+    reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
+  try {
+    obj->string(reinterpret_cast<const char*>(x));
+  }
+  catch (...) {
+    return 1;
+  }
+  return 0;
+}
+
 uint8_t awkward_ArrayBuilder_string_length(void* arraybuilder,
                                            const char* x,
                                            int64_t length) {

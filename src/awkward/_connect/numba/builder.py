@@ -8,8 +8,9 @@ import awkward as ak
 
 numpy = ak.nplike.Numpy.instance()
 
-#
+
 dynamic_addrs = {}
+dynamic_unit_addrs = {}
 
 
 def globalstring(context, builder, pyvalue):
@@ -19,6 +20,20 @@ def globalstring(context, builder, pyvalue):
         buf = dynamic_addrs[pyvalue] = numpy.array(pyvalue.encode("utf-8") + b"\x00")
         context.add_dynamic_addr(builder, buf.ctypes.data, info=f"str({repr(pyvalue)})")
     ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
+    return builder.inttoptr(ptr, llvmlite.ir.PointerType(llvmlite.ir.IntType(8)))
+
+
+def global_unit_string(context, builder, pyvalue):
+    import llvmlite.ir.types
+
+    if pyvalue not in dynamic_unit_addrs:
+        buf = dynamic_unit_addrs[pyvalue] = numpy.array(
+            pyvalue.encode("utf-8") + b"\x00"
+        )
+        context.add_dynamic_addr(builder, buf.ctypes.data, info=f"str({repr(pyvalue)})")
+    ptr = context.get_constant(
+        numba.types.uintp, dynamic_unit_addrs[pyvalue].ctypes.data
+    )
     return builder.inttoptr(ptr, llvmlite.ir.PointerType(llvmlite.ir.IntType(8)))
 
 
@@ -201,6 +216,58 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.complex"
+            )
+
+    @numba.core.typing.templates.bound_function("datetime")
+    def resolve_datetime(self, arraybuildertype, args, kwargs):
+        if (
+            len(args) == 1
+            and len(kwargs) == 0
+            and isinstance(args[0], (numba.types.NPDatetime, numba.types.UnicodeType))
+        ):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError(
+                "wrong number or types of arguments for ArrayBuilder.datetime"
+            )
+
+    @numba.core.typing.templates.bound_function("timedelta")
+    def resolve_timedelta(self, arraybuildertype, args, kwargs):
+        if (
+            len(args) == 1
+            and len(kwargs) == 0
+            and isinstance(args[0], (numba.types.NPTimedelta, numba.types.UnicodeType))
+        ):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError(
+                "wrong number or types of arguments for ArrayBuilder.timedelta"
+            )
+
+    @numba.core.typing.templates.bound_function("string")
+    def resolve_string(self, arraybuildertype, args, kwargs):
+        if (
+            len(args) == 1
+            and len(kwargs) == 0
+            and isinstance(args[0], (numba.types.UnicodeType))
+        ):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError(
+                "wrong number or types of arguments for ArrayBuilder.string"
+            )
+
+    @numba.core.typing.templates.bound_function("bytestring")
+    def resolve_bytestring(self, arraybuildertype, args, kwargs):
+        if (
+            len(args) == 1
+            and len(kwargs) == 0
+            and isinstance(args[0], (numba.types.Bytes))
+        ):
+            return numba.types.none(args[0])
+        else:
+            raise TypeError(
+                "wrong number or types of arguments for ArrayBuilder.bytestring"
             )
 
     @numba.core.typing.templates.bound_function("begin_list")
@@ -415,14 +482,101 @@ def lower_complex(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    z_imag = xval.operands.pop()
-    z_real = xval.operands.pop().value
+    # FIXME:
+    # allow accepting an Integer and a Float
+    # complex_from_doubles
+    z = context.make_complex(builder, xtype, xval)
+    z_real, z_imag = z.real, z.imag
 
     call(
         context,
         builder,
         ak._libawkward.ArrayBuilder_complex,
         (proxyin.rawptr, z_real, z_imag),
+    )
+    return context.get_dummy_value()
+
+
+@numba.extending.lower_builtin("datetime", ArrayBuilderType, numba.types.NPDatetime)
+@numba.extending.lower_builtin("datetime", ArrayBuilderType, numba.types.UnicodeType)
+def lower_datetime(context, builder, sig, args):
+    arraybuildertype, xtype = sig.args
+    arraybuilderval, xval = args
+    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
+    unit = global_unit_string(context, builder, f"datetime64[{xtype.unit}]")
+    call(
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_datetime,
+        (proxyin.rawptr, xval, unit),
+    )
+    return context.get_dummy_value()
+
+
+@numba.extending.lower_builtin("timedelta", ArrayBuilderType, numba.types.NPTimedelta)
+@numba.extending.lower_builtin("timedelta", ArrayBuilderType, numba.types.UnicodeType)
+def lower_timedelta(context, builder, sig, args):
+    arraybuildertype, xtype = sig.args
+    arraybuilderval, xval = args
+    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
+    unit = global_unit_string(context, builder, f"timedelta64[{xtype.unit}]")
+    call(
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_timedelta,
+        (proxyin.rawptr, xval, unit),
+    )
+    return context.get_dummy_value()
+
+
+@numba.extending.lower_builtin("string", ArrayBuilderType, numba.types.UnicodeType)
+def lower_string(context, builder, sig, args):
+    arraybuildertype, xtype = sig.args
+    arraybuilderval, xval = args
+
+    pyapi = context.get_python_api(builder)
+    gil = pyapi.gil_ensure()
+
+    strptr = pyapi.from_native_value(xtype, xval)
+    cstrptr = builder.bitcast(strptr, pyapi.cstring)
+    out = pyapi.string_as_string(cstrptr)
+
+    pyapi.gil_release(gil)
+
+    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
+    call(
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_string,
+        (proxyin.rawptr, out),
+    )
+    return context.get_dummy_value()
+
+
+@numba.extending.lower_builtin("bytestring", ArrayBuilderType, numba.types.Bytes)
+def lower_bytestring(context, builder, sig, args):
+    arraybuildertype, xtype = sig.args
+    arraybuilderval, xval = args
+    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
+
+    pyapi = context.get_python_api(builder)
+    gil = pyapi.gil_ensure()
+
+    strptr = pyapi.from_native_value(xtype, xval)
+    cstrptr = builder.bitcast(
+        strptr, context.get_value_type(numba.types.byte).as_pointer()
+    )
+    # FIXME:
+    # ???
+    out = cstrptr
+
+    pyapi.gil_release(gil)
+
+    call(
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_bytestring,
+        (proxyin.rawptr, out),
     )
     return context.get_dummy_value()
 
@@ -614,6 +768,26 @@ def lower_append_complex(context, builder, sig, args):
     return lower_complex(context, builder, sig, args)
 
 
+@numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.NPDatetime)
+def lower_append_datetime(context, builder, sig, args):
+    return lower_datetime(context, builder, sig, args)
+
+
+@numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.NPTimedelta)
+def lower_append_timedelta(context, builder, sig, args):
+    return lower_timedelta(context, builder, sig, args)
+
+
+@numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.UnicodeType)
+def lower_append_string(context, builder, sig, args):
+    return lower_string(context, builder, sig, args)
+
+
+@numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.Bytes)
+def lower_append_bytestring(context, builder, sig, args):
+    return lower_bytestring(context, builder, sig, args)
+
+
 @numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.Optional)
 def lower_append_optional(context, builder, sig, args):
     arraybuildertype, opttype = sig.args
@@ -647,6 +821,13 @@ def lower_append_optional(context, builder, sig, args):
                 )
             elif isinstance(opttype.type, numba.types.Complex):
                 lower_complex(
+                    context,
+                    builder,
+                    numba.types.none(arraybuildertype, opttype.type),
+                    (arraybuilderval, optproxy.data),
+                )
+            elif isinstance(opttype.type, numba.types.UnicodeType):
+                lower_string(
                     context,
                     builder,
                     numba.types.none(arraybuildertype, opttype.type),

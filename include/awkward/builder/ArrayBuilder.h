@@ -308,6 +308,16 @@ extern "C" {
 
   /// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
   LIBAWKWARD_EXPORT_SYMBOL uint8_t
+    awkward_ArrayBuilder_string_uint8(void* arraybuilder,
+                                      const uint8_t* x);
+
+  /// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
+    awkward_ArrayBuilder_string_int64(void* arraybuilder,
+                                      const int64_t* x);
+
+  /// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_string_length(void* arraybuilder,
                                        const char* x,
                                        int64_t length);
