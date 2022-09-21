@@ -5,7 +5,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "awkward/type/Type.h"
+
 #include "awkward/python/content.h"
 
 #include "awkward/python/forms.h"
@@ -94,12 +94,6 @@ form_methods(py::class_<T, std::shared_ptr<T>, ak::Form>& x) {
           .def_property_readonly("form_key", [](
                 const std::shared_ptr<ak::Form>& self) -> py::object {
             return form_key2obj(self.get()->form_key());
-          })
-          .def("type",
-               [](const T& self,
-                  const std::map<std::string, std::string>& typestrs)
-               -> std::shared_ptr<ak::Type> {
-            return self.type(typestrs);
           })
           .def("tojson", &T::tojson,
                          py::arg("pretty") = false,
@@ -801,55 +795,6 @@ make_UnmaskedForm(const py::handle& m, const std::string& name) {
                    dict2parameters(state[1]),
                    obj2form_key(state[2]),
                    state[3].cast<std::shared_ptr<ak::Form>>());
-      }))
-  );
-}
-
-py::class_<ak::VirtualForm, std::shared_ptr<ak::VirtualForm>, ak::Form>
-make_VirtualForm(const py::handle& m, const std::string& name) {
-  return form_methods(py::class_<ak::VirtualForm,
-                      std::shared_ptr<ak::VirtualForm>,
-                      ak::Form>(m, name.c_str())
-      .def(py::init([](const std::shared_ptr<ak::Form>& form,
-                       bool has_length,
-                       bool has_identities,
-                       const py::object& parameters,
-                       const py::object& form_key) -> ak::VirtualForm {
-        return ak::VirtualForm(has_identities,
-                               dict2parameters(parameters),
-                               obj2form_key(form_key),
-                               form,
-                               has_length);
-      }), py::arg("form"),
-          py::arg("has_length"),
-          py::arg("has_identities") = false,
-          py::arg("parameters") = py::none(),
-          py::arg("form_key") = py::none())
-      .def_property_readonly("form", &ak::VirtualForm::form)
-      .def_property_readonly("has_length", &ak::VirtualForm::has_length)
-      .def(py::pickle([](const ak::VirtualForm& self) {
-        py::object form = py::none();
-        if (self.has_form()) {
-          form = py::cast(self.form());
-        }
-        return py::make_tuple(
-                   py::cast(self.has_identities()),
-                   parameters2dict(self.parameters()),
-                   form_key2obj(self.form_key()),
-                   form,
-                   py::cast(self.has_length()));
-      }, [](const py::tuple& state) {
-        py::object pyform = state[3];
-        std::shared_ptr<ak::Form> form(nullptr);
-        if (!pyform.is(py::none())) {
-          form = pyform.cast<std::shared_ptr<ak::Form>>();
-        }
-        return ak::VirtualForm(
-                   state[0].cast<bool>(),
-                   dict2parameters(state[1]),
-                   obj2form_key(state[2]),
-                   form,
-                   state[4].cast<bool>());
       }))
   );
 }

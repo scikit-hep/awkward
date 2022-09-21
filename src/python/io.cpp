@@ -6,7 +6,6 @@
 #include <string>
 
 #include "awkward/io/json.h"
-#include "awkward/io/uproot.h"
 
 #include "awkward/python/io.h"
 
@@ -201,11 +200,4 @@ make_fromjsonobj_schema(py::module& m, const std::string& name) {
      py::arg("instructions"),
      py::arg("initial"),
      py::arg("resize"));
-}
-
-////////// Uproot connector
-
-void
-make_uproot_issue_90(py::module& m) {
-  m.def("uproot_issue_90", &ak::uproot_issue_90);
 }
