@@ -15,44 +15,6 @@
 #include "awkward/util.h"
 
 namespace awkward {
-  /// @brief Parses a JSON-encoded string using an
-  /// ArrayBuilder.
-  ///
-  /// @param source Null-terminated string containing any valid JSON data.
-  /// @param builder To build the array.
-  /// @param nan_string User-defined string for a not-a-number (NaN) value
-  /// representation in JSON format.
-  /// @param infinity_string User-defined string for a positive infinity
-  /// representation in JSON format.
-  /// @param minus_infinity_string User-defined string for a negative
-  /// infinity representation in JSON format.
-  LIBAWKWARD_EXPORT_SYMBOL int64_t
-    FromJsonString(const char* source,
-                   ArrayBuilder& builder,
-                   const char* nan_string = nullptr,
-                   const char* infinity_string = nullptr,
-                   const char* minus_infinity_string = nullptr);
-
-  /// @brief Parses a JSON-encoded file using an
-  /// ArrayBuilder.
-  ///
-  /// @param source C file handle to a file containing any valid JSON data.
-  /// @param builder To build the array.
-  /// @param buffersize Number of bytes for an intermediate buffer.
-  /// @param nan_string User-defined string for a not-a-number (NaN) value
-  /// representation in JSON format.
-  /// @param infinity_string User-defined string for a positive infinity
-  /// representation in JSON format.
-  /// @param minus_infinity_string User-defined string for a negative
-  /// infinity representation in JSON format.
-  LIBAWKWARD_EXPORT_SYMBOL int64_t
-    FromJsonFile(FILE* source,
-                 ArrayBuilder& builder,
-                 int64_t buffersize,
-                 const char* nan_string = nullptr,
-                 const char* infinity_string = nullptr,
-                 const char* minus_infinity_string = nullptr);
-
   /// @class FileLikeObject
   ///
   /// @brief Abstract class to represent a file-like object, something with

@@ -8,12 +8,6 @@
 namespace py = pybind11;
 
 void
-make_fromjson(py::module& m, const std::string& name);
-
-void
-make_fromjsonfile(py::module& m, const std::string& name);
-
-void
 make_fromjsonobj(py::module& m, const std::string& name);
 
 void
