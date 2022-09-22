@@ -28,9 +28,6 @@ def test_unknown():
     )
 
 
-@pytest.mark.skip(
-    reason="FIXME:  ArrayType(ListType(UnknownType()), 3) == ListType(UnknownType())"
-)
 def test_unknown_arraybuilder():
     a = ak.highlevel.ArrayBuilder()
     a.begin_list()
@@ -41,14 +38,20 @@ def test_unknown_arraybuilder():
     a.end_list()
     assert to_list(a) == [[], [], []]
     assert str(ak.operations.type(a)) == "3 * var * unknown"
-    assert ak.operations.type(a) == ak.types.ListType(ak.types.UnknownType())
+    assert ak.operations.type(a) == ak.types.ArrayType(
+        ak.types.ListType(ak.types.UnknownType()), 3
+    )
     assert not ak.operations.type(a) == ak.types.NumpyType("float64")
 
     a = a.snapshot()
     assert to_list(a) == [[], [], []]
-    assert str(ak.operations.type(a)) == "var * unknown"
-    assert ak.operations.type(a) == ak.types.ListType(ak.types.UnknownType())
-    assert not ak.operations.type(a) == ak.types.NumpyType("float64")
+    assert str(ak.operations.type(a)) == "3 * var * unknown"
+    assert ak.operations.type(a) == ak.types.ArrayType(
+        ak.types.ListType(ak.types.UnknownType()), 3
+    )
+    assert not ak.operations.type(a) == ak.types.ArrayType(
+        ak.types.NumpyType("float64"), 3
+    )
 
 
 def test_getitem():
