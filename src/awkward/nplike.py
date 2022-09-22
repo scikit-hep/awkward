@@ -470,7 +470,7 @@ class Numpy(NumpyLike):
                 ak.ArrayBuilder,
                 ak.contents.Content,
                 ak.record.Record,
-                ak.layout.ArrayBuilder,
+                ak._ext.ArrayBuilder,
             ),
         ):
             return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
@@ -732,9 +732,7 @@ class Jax(NumpyLike):
                 ak.ArrayBuilder,
                 ak.contents.Content,
                 ak.contents.Record,
-                ak.layout.ArrayBuilder,
-                ak.layout.LayoutBuilder32,
-                ak.layout.LayoutBuilder64,
+                ak._ext.ArrayBuilder,
             ),
         ):
             return ak.operations.ak_to_jax.to_jax(array, *args, **kwargs)

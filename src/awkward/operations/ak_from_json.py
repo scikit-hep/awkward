@@ -54,10 +54,10 @@ def from_json(
         buffersize (int): Number of bytes in each read from source: larger
             values use more memory but read less frequently. (Python GIL is
             released before and after read events.)
-        initial (int): Initial size (in bytes) of buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
-        resize (float): Resize multiplier for buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+        initial (int): Initial size (in bytes) of buffers used by the
+            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
+        resize (float): Resize multiplier for buffers used by the
+            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
             should be strictly greater than 1.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -469,7 +469,7 @@ def _no_schema(
     highlevel,
     behavior,
 ):
-    builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
+    builder = ak._ext.ArrayBuilder(initial=initial, resize=resize)
 
     read_one = not line_delimited
 

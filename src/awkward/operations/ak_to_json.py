@@ -165,7 +165,7 @@ def _impl(
     elif isinstance(array, ak.record.Record):
         out = array.array[array.at : array.at + 1]
 
-    elif isinstance(array, ak.layout.ArrayBuilder):
+    elif isinstance(array, ak._ext.ArrayBuilder):
         formstr, length, buffers = array.to_buffers()
         form = ak.forms.from_json(formstr)
 

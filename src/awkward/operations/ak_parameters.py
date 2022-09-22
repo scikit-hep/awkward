@@ -39,10 +39,12 @@ def _impl(array):
         return _copy(array.parameters)
 
     elif isinstance(array, ak.highlevel.ArrayBuilder):
-        return array.snapshot().layout.parameters
+        form = ak.forms.from_json(array._layout.form())
+        return form.parameters
 
-    elif isinstance(array, ak.layout.ArrayBuilder):
-        return array.snapshot().parameters
+    elif isinstance(array, ak._ext.ArrayBuilder):
+        form = ak.forms.from_json(array.form())
+        return form.parameters
 
     else:
         return {}

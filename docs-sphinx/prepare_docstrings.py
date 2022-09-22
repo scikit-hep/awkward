@@ -277,7 +277,6 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
                         "ak.numexpr.evaluate.rst",
                         "ak.numexpr.re_evaluate.rst",
                         "ak.autograd.elementwise_grad.rst",
-                        "ak.layout.ArrayBuilder.rst",
                         "awkwardforth.rst",
                         ])
 

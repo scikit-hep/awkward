@@ -109,8 +109,9 @@ def _impl(array):
                 out = ak.types.RegularType(out, x)
             return ak.types.ArrayType(out, array.shape[0])
 
-    elif isinstance(array, ak.layout.ArrayBuilder):
-        raise ak._util.error(NotImplementedError)
+    elif isinstance(array, ak._ext.ArrayBuilder):
+        form = ak.forms.from_json(array.form())
+        return ak.types.ArrayType(form.type_from_behavior(None), len(array))
 
     elif isinstance(array, ak.record.Record):
         return array.array.form.type

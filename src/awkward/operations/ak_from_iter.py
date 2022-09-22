@@ -18,17 +18,17 @@ def from_iter(
         allow_record (bool): If True, the outermost element may be a record
             (returning #ak.Record or #ak.contents.Record type, depending on
             `highlevel`); if False, the outermost element must be an array.
-        initial (int): Initial size (in bytes) of buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
-        resize (float): Resize multiplier for buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+        initial (int): Initial size (in bytes) of buffers used by the
+            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
+        resize (float): Resize multiplier for buffers used by the
+            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
             should be strictly greater than 1.
 
     Converts Python data into an Awkward Array.
 
-    Internally, this function uses #ak.layout.ArrayBuilder (see the high-level
-    #ak.ArrayBuilder documentation for a more complete description), so it
-    has the same flexibility and the same constraints. Any heterogeneous
+    Internally, this function uses [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html)
+    (see the high-level #ak.ArrayBuilder documentation for a more complete description),
+    so it has the same flexibility and the same constraints. Any heterogeneous
     and deeply nested Python data can be converted, but the output will never
     have regular-typed array lengths.
 
@@ -85,7 +85,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     if isinstance(iterable, tuple):
         iterable = list(iterable)
 
-    builder = ak.layout.ArrayBuilder(initial=initial, resize=resize)
+    builder = ak._ext.ArrayBuilder(initial=initial, resize=resize)
     builder.fromiter(iterable)
 
     formstr, length, buffers = builder.to_buffers()

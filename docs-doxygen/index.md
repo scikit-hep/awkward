@@ -97,7 +97,7 @@ This is the type of a [ak::Content](classawkward_1_1Content.html) array expresse
 
 ### ArrayBuilder structure
 
-The [ak.ArrayBuilder](../_auto/ak.ArrayBuilder.html) is an append-only array for generating data backed by [ak.layout.ArrayBuilder](../_auto/ak.layout.ArrayBuilder.html) (layout-level ArrayBuilder) and [ak::ArrayBuilder](classawkward_1_1ArrayBuilder.html) (C++ implementation).
+The [ak.ArrayBuilder](../_auto/ak.ArrayBuilder.html) is an append-only array for generating data backed by `ak._ext.ArrayBuilder` (layout-level ArrayBuilder) and [ak::ArrayBuilder](classawkward_1_1ArrayBuilder.html) (C++ implementation).
 
 [ak::ArrayBuilder](classawkward_1_1ArrayBuilder.html) is the front-end for a tree of [ak::Builder](classawkward_1_1Builder.html) instances. The structure of this tree indicates the current state of knowledge about the type of the data it's being filled with, and this tree can grow from any node. Types always grow in the direction of more generality, so the tree only gets bigger.
 

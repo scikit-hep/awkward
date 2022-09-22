@@ -1061,7 +1061,7 @@ def to_arraylib(module, array, allow_missing):
         elif isinstance(array, ak.highlevel.ArrayBuilder):
             return _impl(array.snapshot().layout)
 
-        elif isinstance(array, ak.layout.ArrayBuilder):
+        elif isinstance(array, ak._ext.ArrayBuilder):
             return _impl(array.snapshot())
 
         elif ak.operations.parameters(array).get("__array__") in (

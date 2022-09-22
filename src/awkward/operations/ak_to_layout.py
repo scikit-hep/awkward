@@ -67,11 +67,11 @@ def _impl(array, allow_record, allow_other, numpytype):
         else:
             return array.layout
 
-    # elif isinstance(array, ak.highlevel.ArrayBuilder):
-    #     return array.snapshot().layout
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
+        return array.snapshot().layout
 
-    # elif isinstance(array, ak.layout.ArrayBuilder):
-    #     return array.snapshot()
+    elif isinstance(array, ak._ext.ArrayBuilder):
+        return array.snapshot()
 
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):

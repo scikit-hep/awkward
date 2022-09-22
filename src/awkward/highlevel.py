@@ -2075,10 +2075,10 @@ class ArrayBuilder(Sized):
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by
             this ArrayBuilder.
-        initial (int): Initial size (in bytes) of buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
-        resize (float): Resize multiplier for buffers used by
-            #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions);
+        initial (int): Initial size (in bytes) of buffers used by the
+            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
+        resize (float): Resize multiplier for buffers used by the
+            [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html);
             should be strictly greater than 1.
 
     General tool for building arrays of nested data structures from a sequence
@@ -2193,25 +2193,25 @@ class ArrayBuilder(Sized):
     """
 
     def __init__(self, behavior=None, initial=1024, resize=1.5):
-        self._layout = ak.layout.ArrayBuilder(initial=initial, resize=resize)
+        self._layout = ak._ext.ArrayBuilder(initial=initial, resize=resize)
         self.behavior = behavior
 
     @classmethod
     def _wrap(cls, layout, behavior=None):
         """
         Args:
-            layout (#ak.layout.ArrayBuilder): Low-level builder to wrap.
+            layout (`ak._ext.ArrayBuilder`): Low-level builder to wrap.
             behavior (None or dict): Custom #ak.behavior for arrays built by
                 this ArrayBuilder.
 
-        Wraps a low-level #ak.layout.ArrayBuilder as a high-level
+        Wraps a low-level `ak._ext.ArrayBuilder` as a high-level
         #ak.ArrayBulider.
 
-        The #ak.ArrayBuilder constructor creates a new #ak.layout.ArrayBuilder
+        The #ak.ArrayBuilder constructor creates a new `ak._ext.ArrayBuilder`
         with no accumulated data, but Numba needs to wrap existing data
         when returning from a lowered function.
         """
-        assert isinstance(layout, ak.layout.ArrayBuilder)
+        assert isinstance(layout, ak._ext.ArrayBuilder)
         out = cls.__new__(cls)
         out._layout = layout
         out.behavior = behavior

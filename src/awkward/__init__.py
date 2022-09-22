@@ -4,7 +4,7 @@
 import awkward.nplike
 
 # shims for C++ (now everything is compiled into one 'awkward._ext' module)
-import awkward.layout
+import awkward._ext
 
 # Compiled dynamic modules
 import awkward._cpu_kernels
