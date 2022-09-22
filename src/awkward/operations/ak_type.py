@@ -109,7 +109,7 @@ def _impl(array):
                 out = ak.types.RegularType(out, x)
             return ak.types.ArrayType(out, array.shape[0])
 
-    elif isinstance(array, ak.highlevel.ArrayBuilder):
+    elif isinstance(array, ak.layout.ArrayBuilder):
         raise ak._util.error(NotImplementedError)
 
     elif isinstance(array, ak.record.Record):
