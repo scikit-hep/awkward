@@ -162,7 +162,7 @@ Navigation
 
 Most layout nodes contain another content node (:class:`ak.contents.RecordArray` and :class:`ak.contents.UnionArray` can contain more than one), thus forming a tree. Only :class:`ak.contents.EmptyArray` and :class:`ak.contents.NumpyArray` cannot contain a content, and hence these are leaves of the tree.
 
-**Layout-level ArrayBuilder:** :class:`ak.contents.ArrayBuilder` (used internally).
+**Layout-level ArrayBuilder:** :class:`ak.layout.ArrayBuilder` (used internally).
 
 **Index for layout nodes:** integer and boolean arrays that define the shape of the data structure, such as boolean masks in :class:`ak.contents.ByteMaskedArray`, are not :class:`ak.contents.NumpyArray` but a more constrained type called :class:`ak.index.Index`.
 
