@@ -390,40 +390,36 @@ Error details: {details}."""
 
 ###############################################################################
 
-# # Enable warnings for the Awkward package
-# warnings.filterwarnings("default", module="awkward.*")
+# Enable warnings for the Awkward package
+warnings.filterwarnings("default", module="awkward.*")
 
 
-# def deprecate(
-#     message,
-#     version,
-#     date=None,
-#     will_be="an error",
-#     category=DeprecationWarning,
-#     stacklevel=2,
-# ):
-#     if date is None:
-#         date = ""
-#     else:
-#         date = " (target date: " + date + ")"
-#     warning = """In version {0}{1}, this will be {2}.
-
-# To raise these warnings as errors (and get stack traces to find out where they're called), run
-
-#     import warnings
-#     warnings.filterwarnings("error", module="awkward.*")
-
-# after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
-
-# Issue: {3}.""".format(
-#         version, date, will_be, message
-#     )
-#     warnings.warn(warning, category, stacklevel=stacklevel + 1)
+def deprecate(
+    message,
+    version,
+    date=None,
+    will_be="an error",
+    category=DeprecationWarning,
+    stacklevel=2,
+):
+    if date is None:
+        date = ""
+    else:
+        date = " (target date: " + date + ")"
+    warning = """In version {}{}, this will be {}.
+To raise these warnings as errors (and get stack traces to find out where they're called), run
+    import warnings
+    warnings.filterwarnings("error", module="awkward.*")
+after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
+Issue: {}.""".format(
+        version, date, will_be, message
+    )
+    warnings.warn(warning, category, stacklevel=stacklevel + 1)
 
 
-# # Sentinel object for catching pass-through values
-# class Unspecified(object):
-#     pass
+# Sentinel object for catching pass-through values
+class Unspecified:
+    pass
 
 
 def regularize_path(path):
@@ -1188,30 +1184,3 @@ def to_arraylib(module, array, allow_missing):
         raise ak._util.error(
             ValueError(f"{module.__name__} is not supported by to_arraylib")
         )
-
-
-def deprecate(
-    message,
-    version,
-    date=None,
-    will_be="an error",
-    category=DeprecationWarning,
-    stacklevel=2,
-):
-    if date is None:
-        date = ""
-    else:
-        date = " (target date: " + date + ")"
-    warning = """In version {}{}, this will be {}.
-
-To raise these warnings as errors (and get stack traces to find out where they're called), run
-
-    import warnings
-    warnings.filterwarnings("error", module="awkward.*")
-
-after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
-
-Issue: {}.""".format(
-        version, date, will_be, message
-    )
-    warnings.warn(warning, category, stacklevel=stacklevel + 1)
