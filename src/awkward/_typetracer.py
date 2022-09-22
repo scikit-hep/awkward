@@ -10,18 +10,13 @@ import awkward as ak
 np = ak.nplike.NumpyMetadata.instance()
 
 
-# FIXME: deduplicate this
-# matches include/awkward/common.h
-kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
-kSliceNone = kMaxInt64 + 1  # for Slice::none()
-
-
 class NoError:
-    str = None
-    filename = None
-    pass_through = False
-    attempt = kSliceNone
-    id = kSliceNone
+    def __init__(self):
+        self.str = None
+        self.filename = None
+        self.pass_through = False
+        self.attempt = ak._util.kSliceNone
+        self.id = ak._util.kSliceNone
 
 
 class NoKernel:
