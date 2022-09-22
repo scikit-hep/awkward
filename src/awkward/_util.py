@@ -798,42 +798,6 @@ def extra(args, kwargs, defaults):
     return out
 
 
-# def key2index(keys, key):
-#     if keys is None:
-#         attempt = None
-#     else:
-#         try:
-#             attempt = keys.index(key)
-#         except ValueError:
-#             attempt = None
-
-#     if attempt is None:
-#         m = key2index._pattern.match(key)
-#         if m is not None:
-#             attempt = m.group(0)
-
-#     if attempt is None:
-#         raise error(ValueError(
-#             "key {0} not found in record".format(repr(key))
-#         ))
-#     else:
-#         return attempt
-
-
-# key2index._pattern = re.compile(r"^[1-9][0-9]*$")
-
-
-# def make_union(tags, index, contents, identifier, parameters):
-#     if isinstance(index, ak.contents.Index32):
-#         return ak.contents.UnionArray8_32(tags, index, contents, identities, parameters)
-#     elif isinstance(index, ak.contents.IndexU32):
-#         return ak.contents.UnionArray8_U32(tags, index, contents, identities, parameters)
-#     elif isinstance(index, ak.index.Index64):
-#         return ak.contents.UnionArray8_64(tags, index, contents, identities, parameters)
-#     else:
-#         raise error(AssertionError(index))
-
-
 def union_to_record(unionarray, anonymous):
     nplike = ak.nplike.of(unionarray)
 
