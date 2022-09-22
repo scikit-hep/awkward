@@ -110,7 +110,7 @@ def _impl(array):
             return ak.types.ArrayType(out, array.shape[0])
 
     elif isinstance(array, ak.highlevel.ArrayBuilder):
-        return NotImplementedError
+        raise ak._util.error(NotImplementedError)
 
     elif isinstance(array, ak.record.Record):
         return array.array.form.type
