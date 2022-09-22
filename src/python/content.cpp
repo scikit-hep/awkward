@@ -7,20 +7,6 @@
 #include <pybind11/chrono.h>
 #include <math.h>
 
-#include "awkward/layoutbuilder/BitMaskedArrayBuilder.h"
-#include "awkward/layoutbuilder/ByteMaskedArrayBuilder.h"
-#include "awkward/layoutbuilder/EmptyArrayBuilder.h"
-#include "awkward/layoutbuilder/IndexedArrayBuilder.h"
-#include "awkward/layoutbuilder/IndexedOptionArrayBuilder.h"
-#include "awkward/layoutbuilder/LayoutBuilder.h"
-#include "awkward/layoutbuilder/ListArrayBuilder.h"
-#include "awkward/layoutbuilder/ListOffsetArrayBuilder.h"
-#include "awkward/layoutbuilder/NumpyArrayBuilder.h"
-#include "awkward/layoutbuilder/RecordArrayBuilder.h"
-#include "awkward/layoutbuilder/RegularArrayBuilder.h"
-#include "awkward/layoutbuilder/UnionArrayBuilder.h"
-#include "awkward/layoutbuilder/UnmaskedArrayBuilder.h"
-
 #include "awkward/python/content.h"
 #include "awkward/python/util.h"
 #include "awkward/datetime_util.h"
@@ -269,79 +255,3 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       .def("fromiter", &builder_fromiter)
   );
 }
-
-////////// LayoutBuilder<T, I>
-template <typename T, typename I>
-py::class_<ak::LayoutBuilder<T, I>>
-make_LayoutBuilder(const py::handle& m, const std::string& name) {
-  return (py::class_<ak::LayoutBuilder<T, I>>(m, name.c_str())
-      .def(py::init([](const std::string& form, const int64_t initial, double resize, bool vm_init) -> ak::LayoutBuilder<T, I> {
-        return ak::LayoutBuilder<T, I>(form, initial, vm_init);
-      }), py::arg("form"), py::arg("initial") = 8, py::arg("resize") = 1.5, py::arg("vm_init") = true)
-      .def_property_readonly("_ptr",
-                             [](const ak::LayoutBuilder<T, I>* self) -> size_t {
-        return reinterpret_cast<size_t>(self);
-      })
-      .def("__len__", &ak::LayoutBuilder<T, I>::length)
-      .def("json_form", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
-        return py::str(self.json_form());
-      })
-      .def("form", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
-        ::EmptyBuffersContainer container;
-        return py::str(self.to_buffers(container));
-      })
-      .def("to_buffers", [](const ak::LayoutBuilder<T, I>& self) -> py::object {
-        ::NumpyBuffersContainer container;
-        std::string form = self.to_buffers(container);
-        py::tuple out(3);
-        out[0] = py::str(form);
-        out[1] = py::int_(self.length());
-        out[2] = container.container();
-        return out;
-      })
-      .def("null", &ak::LayoutBuilder<T, I>::null)
-      .def("boolean", &ak::LayoutBuilder<T, I>::boolean)
-      .def("int64", &ak::LayoutBuilder<T, I>::int64)
-      .def("float64", &ak::LayoutBuilder<T, I>::float64)
-      .def("complex", &ak::LayoutBuilder<T, I>::complex)
-      .def("bytestring",
-           [](ak::LayoutBuilder<T, I>& self, const py::bytes& x) -> void {
-        self.bytestring(x.cast<std::string>());
-      })
-      .def("string", [](ak::LayoutBuilder<T, I>& self, const py::str& x) -> void {
-        self.string(x.cast<std::string>());
-      })
-      .def("begin_list", &ak::LayoutBuilder<T, I>::begin_list)
-      .def("end_list", &ak::LayoutBuilder<T, I>::end_list)
-      .def("tag", [](ak::LayoutBuilder<T, I>& self, int64_t tag) -> void {
-        self.tag(tag);
-      })
-      .def("debug_step",
-           [](const ak::LayoutBuilder<T, I>& self) -> void {
-        return self.debug_step();
-      })
-      .def("vm_source",
-            [](ak::LayoutBuilder<T, I>& self) -> const std::string {
-         return self.vm_source();
-      })
-      .def("connect",
-           [](ak::LayoutBuilder<T, I>& self,
-              const std::shared_ptr<ak::ForthMachineOf<T, I>>& vm) -> void {
-        self.connect(vm);
-      })
-      .def("vm",
-           [](ak::LayoutBuilder<T, I>& self) -> const std::shared_ptr<ak::ForthMachineOf<T, I>> {
-        return self.vm();
-      })
-      .def("resume",
-            [](ak::LayoutBuilder<T, I>& self) -> void {
-         return self.resume();
-      })
-  );
-}
-
-template py::class_<ak::LayoutBuilder32>
-make_LayoutBuilder(const py::handle& m, const std::string& name);
-
-template py::class_<ak::LayoutBuilder64>
-make_LayoutBuilder(const py::handle& m, const std::string& name);

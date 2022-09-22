@@ -8,7 +8,7 @@
 #include <pybind11/stl.h>
 
 #include "awkward/builder/ArrayBuilder.h"
-#include "awkward/layoutbuilder/LayoutBuilder.h"
+#include "awkward/util.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -37,11 +37,6 @@ parameters2dict(const ak::util::Parameters& in);
 /// @brief Makes an ArrayBuilder class in Python that mirrors the one in C++.
 py::class_<ak::ArrayBuilder>
   make_ArrayBuilder(const py::handle& m, const std::string& name);
-
-/// @brief Makes a LayoutBuilder class in Python that mirrors the one in C++.
-template <typename T, typename I>
-py::class_<ak::LayoutBuilder<T, I>>
-  make_LayoutBuilder(const py::handle& m, const std::string& name);
 
 namespace {
   class NumpyBuffersContainer: public ak::BuffersContainer {

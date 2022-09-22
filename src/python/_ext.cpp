@@ -19,8 +19,6 @@ PYBIND11_MODULE(_ext, m) {
   ////////// content.h
 
   make_ArrayBuilder(m, "ArrayBuilder");
-  make_LayoutBuilder<int32_t, int32_t>(m, "LayoutBuilder32");
-  make_LayoutBuilder<int64_t, int32_t>(m, "LayoutBuilder64");
 
   ////////// io.h
 

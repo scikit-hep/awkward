@@ -8,15 +8,9 @@
 # Ignore the identities, VirtualArray stuff, kernel_lib, _PersistentSharedPtr, Iterator.
 
 from awkward._ext import ArrayBuilder
-from awkward._ext import LayoutBuilder32
-from awkward._ext import LayoutBuilder64
 
 
-__all__ = [
-    "ArrayBuilder",
-    "LayoutBuilder32",
-    "LayoutBuilder64",
-]
+__all__ = ["ArrayBuilder"]
 
 
 def __dir__():

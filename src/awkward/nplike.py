@@ -471,8 +471,6 @@ class Numpy(NumpyLike):
                 ak.contents.Content,
                 ak.record.Record,
                 ak.layout.ArrayBuilder,
-                ak.layout.LayoutBuilder32,
-                ak.layout.LayoutBuilder64,
             ),
         ):
             return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
