@@ -498,7 +498,6 @@ def lower_complex(context, builder, sig, args):
 
 
 @numba.extending.lower_builtin("datetime", ArrayBuilderType, numba.types.NPDatetime)
-@numba.extending.lower_builtin("datetime", ArrayBuilderType, numba.types.UnicodeType)
 def lower_datetime(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
@@ -514,7 +513,6 @@ def lower_datetime(context, builder, sig, args):
 
 
 @numba.extending.lower_builtin("timedelta", ArrayBuilderType, numba.types.NPTimedelta)
-@numba.extending.lower_builtin("timedelta", ArrayBuilderType, numba.types.UnicodeType)
 def lower_timedelta(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args

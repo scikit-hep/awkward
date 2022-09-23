@@ -100,6 +100,6 @@ def test_ArrayBuilder_of_bytestrings():
         builder.bytestring(bytestring)
         return builder
 
-    builder = add_a_bytestring(ak.ArrayBuilder(), b"hello")
+    builder = add_a_bytestring(ak.ArrayBuilder(), b"hello\0world")
     out = builder.snapshot()
-    assert out.to_list() == [b"hello"]
+    assert out.to_list() == [b"hello\0world"]
