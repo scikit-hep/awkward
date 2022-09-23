@@ -210,7 +210,9 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if (
             len(args) == 1
             and len(kwargs) == 0
-            and isinstance(args[0], (numba.types.Complex))
+            and isinstance(
+                args[0], (numba.types.Integer, numba.types.Float, numba.types.Complex)
+            )
         ):
             return numba.types.none(args[0])
         else:
@@ -477,14 +479,46 @@ def lower_real(context, builder, sig, args):
     return context.get_dummy_value()
 
 
-@numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Complex)
-def lower_complex(context, builder, sig, args):
+def imag(x):
+    return x
+
+
+@numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Integer)
+@numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Float)
+def lower_complex(context, builder, sig, args):  # noqa: F811
+    import llvmlite
+
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    # FIXME:
-    # allow accepting an Integer and a Float
-    # complex_from_doubles
+    if isinstance(xtype, numba.types.Integer) and xtype.signed:
+        z_real = builder.sitofp(xval, context.get_value_type(numba.types.float64))
+    elif isinstance(xtype, numba.types.Integer):
+        z_real = builder.uitofp(xval, context.get_value_type(numba.types.float64))
+    elif xtype.bitwidth < 64:
+        z_real = builder.fpext(xval, context.get_value_type(numba.types.float64))
+    elif xtype.bitwidth > 64:
+        z_real = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
+    else:
+        z_real = xval
+
+    ZERO = llvmlite.ir.Constant(z_real.type, 0.0)
+
+    call(
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_complex,
+        (proxyin.rawptr, z_real, ZERO),
+    )
+    return context.get_dummy_value()
+
+
+@numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Complex)
+def lower_complex(context, builder, sig, args):  # noqa: F811
+    arraybuildertype, xtype = sig.args
+    arraybuilderval, xval = args
+    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
+
     z = context.make_complex(builder, xtype, xval)
     z_real, z_imag = z.real, z.imag
 
@@ -598,7 +632,8 @@ def lower_bytestring(context, builder, sig, args):
     gil = pyapi.gil_ensure()
 
     strptr = pyapi.from_native_value(xtype, xval)
-    ### out = bytes_as_string(pyapi, strptr)
+    # This function will work only if the bytestring does not have zero characters
+    # out = bytes_as_string(pyapi, strptr)
     ok, out, size = bytes_as_string_and_size(pyapi, strptr)
 
     call(

@@ -59,6 +59,14 @@ def test_ArrayBuilder_of_complex():
     out = builder.snapshot()
     assert out.to_list() == [(1.0 + 0.1j), (2.0 + 0.2j)]
 
+    builder = add_a_complex(builder, 2)
+    out = builder.snapshot()
+    assert out.to_list() == [(1.0 + 0.1j), (2.0 + 0.2j), (2.0 + 0j)]
+
+    builder = add_a_complex(builder, 2.0)
+    out = builder.snapshot()
+    assert out.to_list() == [(1.0 + 0.1j), (2.0 + 0.2j), (2.0 + 0j), (2.0 + 0j)]
+
 
 def test_ArrayBuilder_of_datetimes():
     @nb.njit
