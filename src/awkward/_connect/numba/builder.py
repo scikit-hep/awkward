@@ -10,7 +10,6 @@ numpy = ak.nplike.Numpy.instance()
 
 
 dynamic_addrs = {}
-dynamic_unit_addrs = {}
 
 
 def globalstring(context, builder, pyvalue):
@@ -20,20 +19,6 @@ def globalstring(context, builder, pyvalue):
         buf = dynamic_addrs[pyvalue] = numpy.array(pyvalue.encode("utf-8") + b"\x00")
         context.add_dynamic_addr(builder, buf.ctypes.data, info=f"str({repr(pyvalue)})")
     ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
-    return builder.inttoptr(ptr, llvmlite.ir.PointerType(llvmlite.ir.IntType(8)))
-
-
-def global_unit_string(context, builder, pyvalue):
-    import llvmlite.ir.types
-
-    if pyvalue not in dynamic_unit_addrs:
-        buf = dynamic_unit_addrs[pyvalue] = numpy.array(
-            pyvalue.encode("utf-8") + b"\x00"
-        )
-        context.add_dynamic_addr(builder, buf.ctypes.data, info=f"str({repr(pyvalue)})")
-    ptr = context.get_constant(
-        numba.types.uintp, dynamic_unit_addrs[pyvalue].ctypes.data
-    )
     return builder.inttoptr(ptr, llvmlite.ir.PointerType(llvmlite.ir.IntType(8)))
 
 
@@ -536,7 +521,7 @@ def lower_datetime(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    unit = global_unit_string(context, builder, f"datetime64[{xtype.unit}]")
+    unit = globalstring(context, builder, f"datetime64[{xtype.unit}]")
     call(
         context,
         builder,
@@ -551,7 +536,7 @@ def lower_timedelta(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    unit = global_unit_string(context, builder, f"timedelta64[{xtype.unit}]")
+    unit = globalstring(context, builder, f"timedelta64[{xtype.unit}]")
     call(
         context,
         builder,
