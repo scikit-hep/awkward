@@ -41,8 +41,8 @@ import awkward.behaviors.mixins
 import awkward.behaviors.string
 
 behavior = {}
-awkward.behaviors.string.register(behavior)  # noqa: F405 pylint: disable=E0602
-awkward.behaviors.categorical.register(behavior)  # noqa: F405 pylint: disable=E0602
+awkward.behaviors.string.register(behavior)  # noqa: F405
+awkward.behaviors.categorical.register(behavior)  # noqa: F405
 
 # operations
 from awkward.operations import *
