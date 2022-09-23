@@ -154,8 +154,3 @@ def re_evaluate(local_dict=None):
     )
     assert isinstance(out, tuple) and len(out) == 1
     return ak._util.wrap(out[0], behavior)
-
-
-# ak._connect.numexpr = types.ModuleType("numexpr")
-# ak._connect.numexpr.evaluate = evaluate
-# ak._connect.numexpr.re_evaluate = re_evaluate
