@@ -115,10 +115,7 @@ class ReadAvroFT:
                 break
 
         for elem in form_keys:
-            if "offsets" in elem:
-                container[elem] = machine.output(elem)
-            else:
-                container[elem] = machine.output(elem)
+            container[elem] = machine.output(elem)
 
         self.outcontents = (self.form, self.blocks, container)
 
