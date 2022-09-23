@@ -571,29 +571,25 @@ def lower_string(context, builder, sig, args):
 
 
 # FIXME: Submit PR with the function to Numba
-def bytes_as_string(self, strobj):
+def bytes_as_string(self, obj):
     from llvmlite import ir
 
     fnty = ir.FunctionType(self.cstring, [self.pyobj])
     fname = "PyBytes_AsString"
     fn = self._get_function(fnty, name=fname)
-    return self.builder.call(fn, [strobj])
+    return self.builder.call(fn, [obj])
 
 
 # FIXME: Submit PR with the function to Numba
-def bytes_as_string_and_size(self, strobj):
+# int PyBytes_AsStringAndSize(PyObject *obj, char **buffer, Py_ssize_t *length)
+def bytes_as_string_and_size(self, obj, p_buffer, p_length):
+    # """
+    # Returns a value of ``ok``.
+    # The ``ok`` is i1 value that is set if ok.
+    # """
     from llvmlite import ir
     from llvmlite.ir import Constant
-    from numba.core import cgutils
 
-    """
-    Returns a tuple of ``(ok, buffer, length)``.
-    The ``ok`` is i1 value that is set if ok.
-    The ``buffer`` is a i8** of the output buffer.
-    The ``length`` is a i32*/i64* (py_ssize_t.as_pointer()) of the length of the buffer.
-    """
-
-    p_length = cgutils.alloca_once(self.builder, self.py_ssize_t)
     fnty = ir.FunctionType(
         self.pyobj,
         [self.pyobj, self.cstring.as_pointer(), self.py_ssize_t.as_pointer()],
@@ -601,14 +597,15 @@ def bytes_as_string_and_size(self, strobj):
     fname = "PyBytes_AsStringAndSize"
     fn = self._get_function(fnty, name=fname)
 
-    buffer = cgutils.alloca_once(self.builder, self.cstring)
-    result = self.builder.call(fn, [strobj, buffer, p_length])
+    result = self.builder.call(fn, [obj, p_buffer, p_length])
     ok = self.builder.icmp_unsigned("!=", Constant(result.type, None), result)
-    return (ok, self.builder.load(buffer), self.builder.load(p_length))
+    return ok
 
 
 @numba.extending.lower_builtin("bytestring", ArrayBuilderType, numba.types.Bytes)
 def lower_bytestring(context, builder, sig, args):
+    from numba.core import cgutils
+
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
@@ -617,15 +614,22 @@ def lower_bytestring(context, builder, sig, args):
     gil = pyapi.gil_ensure()
 
     strptr = pyapi.from_native_value(xtype, xval)
-    # This function will work only if the bytestring does not have zero characters
+    # FIXME: This function will work only if the bytestring does not have zero characters
     # out = bytes_as_string(pyapi, strptr)
-    ok, out, size = bytes_as_string_and_size(pyapi, strptr)
+    p_length = cgutils.alloca_once(pyapi.builder, pyapi.py_ssize_t)
+    p_buffer = cgutils.alloca_once(pyapi.builder, pyapi.cstring)
 
+    # FIXME: ok =
+    bytes_as_string_and_size(pyapi, strptr, p_buffer, p_length)
+    # FIXME: pyapi.if_object_ok
+    length = ak._v2._connect.numba.layout.castint(
+        context, builder, numba.int64, numba.intp, builder.load(p_length)
+    )
     call(
         context,
         builder,
         ak._libawkward.ArrayBuilder_bytestring_length,
-        (proxyin.rawptr, out, size),
+        (proxyin.rawptr, pyapi.builder.load(p_buffer), length),
     )
     pyapi.gil_release(gil)
 
