@@ -95,7 +95,7 @@ def test_ArrayBuilder_of_strings():
 
 
 def test_ArrayBuilder_of_bytestrings():
-    @nb.njit
+    @nb.njit(debug=True)
     def add_a_bytestring(builder, bytestring):
         builder.bytestring(bytestring)
         return builder

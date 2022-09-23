@@ -541,8 +541,6 @@ def lower_string(context, builder, sig, args):
     cstrptr = builder.bitcast(strptr, pyapi.cstring)
     out = pyapi.string_as_string(cstrptr)
 
-    pyapi.gil_release(gil)
-
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(
         context,
@@ -550,7 +548,46 @@ def lower_string(context, builder, sig, args):
         ak._libawkward.ArrayBuilder_string,
         (proxyin.rawptr, out),
     )
+    pyapi.gil_release(gil)
+
     return context.get_dummy_value()
+
+
+# FIXME: Submit PR with the function to Numba
+def bytes_as_string(self, strobj):
+    from llvmlite import ir
+
+    fnty = ir.FunctionType(self.cstring, [self.pyobj])
+    fname = "PyBytes_AsString"
+    fn = self._get_function(fnty, name=fname)
+    return self.builder.call(fn, [strobj])
+
+
+# FIXME: Submit PR with the function to Numba
+def bytes_as_string_and_size(self, strobj):
+    from llvmlite import ir
+    from llvmlite.ir import Constant
+    from numba.core import cgutils
+
+    """
+    Returns a tuple of ``(ok, buffer, length)``.
+    The ``ok`` is i1 value that is set if ok.
+    The ``buffer`` is a i8** of the output buffer.
+    The ``length`` is a i32*/i64* (py_ssize_t.as_pointer()) of the length of the buffer.
+    """
+
+    p_length = cgutils.alloca_once(self.builder, self.py_ssize_t)
+    fnty = ir.FunctionType(
+        self.pyobj,
+        [self.pyobj, self.cstring.as_pointer(), self.py_ssize_t.as_pointer()],
+    )
+    fname = "PyBytes_AsStringAndSize"
+    fn = self._get_function(fnty, name=fname)
+
+    buffer = cgutils.alloca_once(self.builder, self.cstring)
+    result = self.builder.call(fn, [strobj, buffer, p_length])
+    ok = self.builder.icmp_unsigned("!=", Constant(result.type, None), result)
+    return (ok, self.builder.load(buffer), self.builder.load(p_length))
 
 
 @numba.extending.lower_builtin("bytestring", ArrayBuilderType, numba.types.Bytes)
@@ -563,21 +600,17 @@ def lower_bytestring(context, builder, sig, args):
     gil = pyapi.gil_ensure()
 
     strptr = pyapi.from_native_value(xtype, xval)
-    cstrptr = builder.bitcast(
-        strptr, context.get_value_type(numba.types.byte).as_pointer()
-    )
-    # FIXME:
-    # ???
-    out = cstrptr
-
-    pyapi.gil_release(gil)
+    ### out = bytes_as_string(pyapi, strptr)
+    ok, out, size = bytes_as_string_and_size(pyapi, strptr)
 
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_bytestring,
-        (proxyin.rawptr, out),
+        ak._libawkward.ArrayBuilder_bytestring_length,
+        (proxyin.rawptr, out, size),
     )
+    pyapi.gil_release(gil)
+
     return context.get_dummy_value()
 
 
