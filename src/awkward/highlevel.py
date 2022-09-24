@@ -198,6 +198,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         elif isinstance(data, Array):
             layout = data._layout
+            behavior = ak._util.behavior_of(data, behavior=behavior)
 
         elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
             layout = ak.operations.from_numpy(data, highlevel=False)
