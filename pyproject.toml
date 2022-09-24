@@ -78,6 +78,11 @@ filterwarnings = [
 ]
 log_cli_level = "info"
 
+
+[tool.isort]
+profile = "black"
+
+
 [tool.pylint]
 master.py-version = "3.7"
 master.jobs = "0"

@@ -5,8 +5,8 @@ from collections.abc import Iterable
 
 import awkward as ak
 import awkward._prettyprint
-from awkward.types.type import Type
 from awkward.forms.form import _parameters_equal
+from awkward.types.type import Type
 
 
 class RecordType(Type):

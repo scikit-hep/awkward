@@ -1,15 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import pytest  # noqa: F401
-import awkward as ak  # noqa: F401
 
-from awkward.types.numpytype import NumpyType
-from awkward.types.unknowntype import UnknownType
-from awkward.types.regulartype import RegularType
+import awkward as ak  # noqa: F401
 from awkward.types.listtype import ListType
+from awkward.types.numpytype import NumpyType
 from awkward.types.optiontype import OptionType
 from awkward.types.recordtype import RecordType
+from awkward.types.regulartype import RegularType
 from awkward.types.uniontype import UnionType
+from awkward.types.unknowntype import UnknownType
 
 
 def test_primitive_1():

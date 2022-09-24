@@ -2,8 +2,8 @@
 
 
 import copy
-import os
 import datetime
+import os
 import shutil
 from collections import OrderedDict
 from itertools import product

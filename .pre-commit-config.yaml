@@ -19,6 +19,12 @@ repos:
   - id: requirements-txt-fixer
   - id: trailing-whitespace
 
+- repo: https://github.com/PyCQA/isort
+  rev: "5.10.1"
+  hooks:
+    - id: isort
+      exclude: ^src/(awkward|awkward/_v2)/__init__\.py$
+
 - repo: https://github.com/asottile/setup-cfg-fmt
   rev: v2.0.0
   hooks:

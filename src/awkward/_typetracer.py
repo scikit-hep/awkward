@@ -4,8 +4,8 @@ import numbers
 
 import numpy
 
-import awkward.nplike
 import awkward as ak
+import awkward.nplike
 
 np = ak.nplike.NumpyMetadata.instance()
 
