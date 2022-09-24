@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward.types.type import Type
 from awkward.forms.form import _parameters_equal
+from awkward.types.type import Type
 
 
 class RegularType(Type):

@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import copy
+
 import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.numpyform import NumpyForm

@@ -1,7 +1,7 @@
-import awkward as ak
 import numpy as np
 import pytest
 
+import awkward as ak
 
 typetracer = ak._typetracer.TypeTracer.instance()
 

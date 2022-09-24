@@ -4,15 +4,12 @@
 
 import copy
 import ctypes
-
 from collections.abc import Iterable
 
 import awkward as ak
-from awkward.index import Index
-from awkward.index import Index8
-from awkward.index import Index64
 from awkward.contents.content import Content, unset
 from awkward.forms.unionform import UnionForm
+from awkward.index import Index, Index8, Index64
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()

@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numbers
-import math
 import copy
-from collections.abc import Sized, Iterable
+import math
+import numbers
+from collections.abc import Iterable, Sized
 
 import awkward as ak
 import awkward._reducers
@@ -1542,7 +1542,7 @@ class Content:
         raise ak._util.error(NotImplementedError)
 
     def _jax_flatten(self):
-        from awkward._connect.jax import _find_numpyarray_nodes, AuxData
+        from awkward._connect.jax import AuxData, _find_numpyarray_nodes
 
         layout = ak.operations.to_layout(self, allow_record=True, allow_other=False)
 

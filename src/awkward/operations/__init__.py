@@ -36,11 +36,11 @@ from awkward.operations.ak_from_parquet import from_parquet
 from awkward.operations.ak_from_rdataframe import from_rdataframe
 from awkward.operations.ak_from_regular import from_regular
 from awkward.operations.ak_full_like import full_like
-from awkward.operations.ak_isclose import isclose
 from awkward.operations.ak_is_categorical import is_categorical
 from awkward.operations.ak_is_none import is_none
 from awkward.operations.ak_is_tuple import is_tuple
 from awkward.operations.ak_is_valid import is_valid
+from awkward.operations.ak_isclose import isclose
 from awkward.operations.ak_linear_fit import linear_fit
 from awkward.operations.ak_local_index import local_index
 from awkward.operations.ak_mask import mask
@@ -56,28 +56,28 @@ from awkward.operations.ak_ones_like import ones_like
 from awkward.operations.ak_packed import packed
 from awkward.operations.ak_pad_none import pad_none
 from awkward.operations.ak_parameters import parameters
-from awkward.operations.ak_prod import prod, nanprod
+from awkward.operations.ak_prod import nanprod, prod
 from awkward.operations.ak_ptp import ptp
 from awkward.operations.ak_ravel import ravel
 from awkward.operations.ak_run_lengths import run_lengths
 from awkward.operations.ak_singletons import singletons
 from awkward.operations.ak_softmax import softmax
 from awkward.operations.ak_sort import sort
-from awkward.operations.ak_std import std, nanstd
+from awkward.operations.ak_std import nanstd, std
 from awkward.operations.ak_strings_astype import strings_astype
-from awkward.operations.ak_sum import sum, nansum
+from awkward.operations.ak_sum import nansum, sum
 from awkward.operations.ak_to_arrow import to_arrow
 from awkward.operations.ak_to_arrow_table import to_arrow_table
 from awkward.operations.ak_to_backend import to_backend
 from awkward.operations.ak_to_buffers import to_buffers
-from awkward.operations.ak_to_cupy import to_cupy
 from awkward.operations.ak_to_categorical import to_categorical
+from awkward.operations.ak_to_cupy import to_cupy
+from awkward.operations.ak_to_dataframe import to_dataframe
 from awkward.operations.ak_to_jax import to_jax
 from awkward.operations.ak_to_json import to_json
 from awkward.operations.ak_to_layout import to_layout
 from awkward.operations.ak_to_list import to_list
 from awkward.operations.ak_to_numpy import to_numpy
-from awkward.operations.ak_to_dataframe import to_dataframe
 from awkward.operations.ak_to_parquet import to_parquet
 from awkward.operations.ak_to_rdataframe import to_rdataframe
 from awkward.operations.ak_to_regular import to_regular
@@ -87,11 +87,11 @@ from awkward.operations.ak_unflatten import unflatten
 from awkward.operations.ak_unzip import unzip
 from awkward.operations.ak_validity_error import validity_error
 from awkward.operations.ak_values_astype import values_astype
-from awkward.operations.ak_var import var, nanvar
+from awkward.operations.ak_var import nanvar, var
 from awkward.operations.ak_where import where
 from awkward.operations.ak_with_field import with_field
 from awkward.operations.ak_with_name import with_name
-from awkward.operations.ak_without_parameters import without_parameters
 from awkward.operations.ak_with_parameter import with_parameter
+from awkward.operations.ak_without_parameters import without_parameters
 from awkward.operations.ak_zeros_like import zeros_like
 from awkward.operations.ak_zip import zip

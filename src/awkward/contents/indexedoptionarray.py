@@ -3,9 +3,9 @@
 import copy
 
 import awkward as ak
-from awkward.index import Index
 from awkward.contents.content import Content, unset
 from awkward.forms.indexedoptionform import IndexedOptionForm
+from awkward.index import Index
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()

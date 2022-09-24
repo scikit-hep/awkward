@@ -1,14 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import json
 import copy
+import json
 import math
 
 import awkward as ak
-from awkward.index import Index
-from awkward.contents.content import Content, unset
 from awkward.contents.bytemaskedarray import ByteMaskedArray
+from awkward.contents.content import Content, unset
 from awkward.forms.bitmaskedform import BitMaskedForm
+from awkward.index import Index
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()

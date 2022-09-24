@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import glob
 import multiprocessing
 import os
 import platform
@@ -7,15 +8,13 @@ import re
 import shutil
 import subprocess
 import sys
-import glob
+from sysconfig import get_platform
 
 import setuptools
 import setuptools.command.build_ext
 import setuptools.command.build_py
 import setuptools.command.install
-from setuptools import setup, Extension
-from sysconfig import get_platform
-
+from setuptools import Extension, setup
 
 try:
     import cmake
