@@ -1,10 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import pytest  # noqa: F401
-import numpy as np  # noqa: F401
-import awkward as ak  # noqa: F401
 import os  # noqa: F401
 
+import numpy as np  # noqa: F401
+import pytest  # noqa: F401
+
+import awkward as ak  # noqa: F401
 
 DIR = os.path.dirname(__file__)
 SAMPLES_DIR = os.path.join(os.path.abspath(DIR), "samples")

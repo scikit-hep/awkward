@@ -1,14 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import io
-import sys
-import re
-import keyword
 import copy
-
-from collections.abc import Iterable
-from collections.abc import Sized
-from collections.abc import Mapping
+import io
+import keyword
+import re
+import sys
+from collections.abc import Iterable, Mapping, Sized
 
 import awkward as ak
 from awkward._connect.numpy import NDArrayOperatorsMixin
@@ -198,6 +195,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         elif isinstance(data, Array):
             layout = data._layout
+            behavior = ak._util.behavior_of(data, behavior=behavior)
 
         elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
             layout = ak.operations.from_numpy(data, highlevel=False)

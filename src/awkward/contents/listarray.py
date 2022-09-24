@@ -3,10 +3,10 @@
 import copy
 
 import awkward as ak
-from awkward.index import Index
 from awkward.contents.content import Content, unset
 from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.listform import ListForm
+from awkward.index import Index
 
 np = ak.nplike.NumpyMetadata.instance()
 

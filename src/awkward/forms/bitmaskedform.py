@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward.forms.form import Form, _parameters_equal
 from awkward.forms.bytemaskedform import ByteMaskedForm
+from awkward.forms.form import Form, _parameters_equal
 
 
 class BitMaskedForm(Form):

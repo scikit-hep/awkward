@@ -3,10 +3,9 @@
 import json
 import re
 
-from awkward.types.type import Type
-from awkward.forms.form import _parameters_equal
-
 import awkward as ak
+from awkward.forms.form import _parameters_equal
+from awkward.types.type import Type
 
 np = ak.nplike.NumpyMetadata.instance()
 

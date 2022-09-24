@@ -9,10 +9,10 @@ import os
 import re
 import threading
 import traceback
-import packaging.version
 import warnings
+from collections.abc import Iterable, Mapping, Sequence, Sized
 
-from collections.abc import Sequence, Sized, Mapping, Iterable
+import packaging.version
 
 import awkward as ak
 

@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from awkward.operations.ak_zeros_like import _ZEROS
 import awkward as ak
+from awkward.operations.ak_zeros_like import _ZEROS
 
 np = ak.nplike.NumpyMetadata.instance()
 

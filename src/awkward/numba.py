@@ -37,9 +37,10 @@ def register():
         return
 
     import numba
+
     import awkward._connect.numba.arrayview
-    import awkward._connect.numba.layout
     import awkward._connect.numba.builder
+    import awkward._connect.numba.layout
 
     n = ak.numba
     n.ArrayViewType = awkward._connect.numba.arrayview.ArrayViewType

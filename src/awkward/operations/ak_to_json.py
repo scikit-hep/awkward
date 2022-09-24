@@ -2,8 +2,8 @@
 
 import json
 import pathlib
-from urllib.parse import urlparse
 from numbers import Number
+from urllib.parse import urlparse
 
 import awkward as ak
 

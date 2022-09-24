@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import awkward as ak
 import copy as _copy
+
+import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
