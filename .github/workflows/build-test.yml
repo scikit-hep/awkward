@@ -209,8 +209,8 @@ jobs:
           python -m pytest -vv -rs tests --cov=awkward --cov-report=term
           --cov-report=xml
 
-      - name: Codecov
-        run: 'bash <(curl -s https://codecov.io/bash)'
+      - name: Upload Codecov results
+        uses: codecov/codecov-action@v3
         if: matrix.python-version == '3.9'
 
   Linux-ROOT:
