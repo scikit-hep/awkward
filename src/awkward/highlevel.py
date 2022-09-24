@@ -1655,8 +1655,8 @@ class Record(NDArrayOperatorsMixin):
     def _ipython_key_completions_(self):
         return self._layout.array.fields
 
-    def __iter__(self):
-        yield from self._layout.array.fields
+    # Disable iteration (and prevent old-style iteration from being used)
+    __iter__ = None
 
     @property
     def type(self):
