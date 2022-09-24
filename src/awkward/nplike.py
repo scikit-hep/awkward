@@ -3,7 +3,6 @@
 # v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
 
 import ctypes
-
 from collections.abc import Iterable
 
 import numpy

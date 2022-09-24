@@ -1,8 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import pytest  # noqa: F401
-import awkward as ak  # noqa: F401
 import numpy as np
+import pytest  # noqa: F401
+
+import awkward as ak  # noqa: F401
 
 one = ak.Array([[0.0, 1.1, 2.2, None], [], [3.3, 4.4]])
 two = ak.Array([[100, 200, 300, 400], [300], [400, 500]])

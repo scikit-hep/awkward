@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import sys
 import argparse
+import sys
 
 if sys.version_info < (3, 9):
     import importlib_resources

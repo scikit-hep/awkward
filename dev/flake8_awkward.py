@@ -1,6 +1,6 @@
 import ast
 import sys
-from typing import NamedTuple, Iterator
+from typing import Iterator, NamedTuple
 
 
 class Flake8ASTErrorInfo(NamedTuple):

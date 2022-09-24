@@ -260,7 +260,7 @@ class Record:
             return None
 
     def _jax_flatten(self):
-        from awkward._connect.jax import _find_numpyarray_nodes, AuxData
+        from awkward._connect.jax import AuxData, _find_numpyarray_nodes
 
         numpyarray_nodes = _find_numpyarray_nodes(self)
         return (numpyarray_nodes, AuxData(self))

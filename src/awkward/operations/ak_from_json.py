@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import pathlib
 import json
+import pathlib
+from collections.abc import Iterable, Sized
 from urllib.parse import urlparse
-from collections.abc import Sized, Iterable
 
 import awkward as ak
 

@@ -6,7 +6,6 @@ import sys
 import awkward as ak
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
-
 np = ak.nplike.NumpyMetadata.instance()
 
 
@@ -305,9 +304,9 @@ def from_datashape(datashape, highlevel=True):
     If `highlevel=False`, the type is assumed to represent a layout (e.g. a number
     indicates a #ak.types.RegularType, rather than a #ak.types.ArrayType).
     """
-    from awkward.types.regulartype import RegularType
-    from awkward.types.recordtype import RecordType
     from awkward.types.arraytype import ArrayType
+    from awkward.types.recordtype import RecordType
+    from awkward.types.regulartype import RegularType
 
     parser = Lark_StandAlone(transformer=_DataShapeTransformer())
     out = parser.parse(datashape)

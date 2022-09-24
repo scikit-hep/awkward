@@ -2,9 +2,8 @@
 
 from collections.abc import Iterable
 
-from awkward.forms.form import Form, _parameters_equal
-
 import awkward as ak
+from awkward.forms.form import Form, _parameters_equal
 
 np = ak.nplike.NumpyMetadata.instance()
 

@@ -164,8 +164,8 @@ def _string_numba_typer(viewtype):
 def _string_numba_lower(
     context, builder, rettype, viewtype, viewval, viewproxy, attype, atval
 ):
-    import numba
     import llvmlite.ir
+    import numba
 
     whichpos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.CONTENT

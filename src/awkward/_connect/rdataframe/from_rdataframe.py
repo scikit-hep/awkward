@@ -1,14 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import awkward as ak
-
-import awkward._lookup  # noqa: E402
-import awkward._connect.cling  # noqa: E402
-
-import ROOT
-import cppyy
 import ctypes
 import os
+
+import cppyy
+import ROOT
+
+import awkward as ak
+import awkward._connect.cling  # noqa: E402
+import awkward._lookup  # noqa: E402
 from awkward.types.numpytype import primitive_to_dtype
 
 cpp_type_of = {
