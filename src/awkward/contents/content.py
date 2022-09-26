@@ -4,7 +4,7 @@ from __future__ import annotations
 import copy
 import math
 import numbers
-from collections.abc import Callable, Iterable, Sized
+from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
 from typing import Any
 
 import awkward as ak
@@ -155,12 +155,12 @@ class Content:
 
     def to_buffers(
         self,
-        container=None,
+        container: MutableMapping[str, Any] | None = None,
         buffer_key="{form_key}-{attribute}",
-        form_key="node{id}",
-        id_start=0,
-        nplike=None,
-    ):
+        form_key: str | None = "node{id}",
+        id_start: int = 0,
+        nplike: ak.nplike.NumpyLike | None = None,
+    ) -> tuple[ak.forms.Form, int, Mapping[str, Any]]:
         if container is None:
             container = {}
         if nplike is None:
