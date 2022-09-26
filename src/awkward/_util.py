@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 # First, transition all the _v2 code to start using implementations in this file.
 # Then build up the high-level replacements.
