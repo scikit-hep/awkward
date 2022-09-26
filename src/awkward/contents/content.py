@@ -897,7 +897,7 @@ class Content:
 
     def _reduce(
         self,
-        reducer: type[ak._v2._reducers.Reducer],
+        reducer: type[ak._reducers.Reducer],
         axis: int = -1,
         mask: bool = True,
         keepdims: bool = False,
