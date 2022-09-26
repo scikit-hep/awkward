@@ -1590,6 +1590,9 @@ class Content:
     def to_numpy(self, allow_missing: bool):
         return self._to_numpy(allow_missing)
 
+    def _to_numpy(self, allow_missing: bool):
+        raise ak._util.error(NotImplementedError)
+
     def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
         if nplike is None:
             nplike = self._nplike
