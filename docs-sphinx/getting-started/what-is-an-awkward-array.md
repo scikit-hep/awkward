@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.0
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -17,7 +17,7 @@ kernelspec:
 %config InteractiveShell.ast_node_interactivity = "last_expr_or_assign"
 
 import numpy as np
-import awkward._v2 as ak
+import awkward as ak
 ```
 
 +++ {"tags": []}
