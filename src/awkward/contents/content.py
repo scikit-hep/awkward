@@ -1006,7 +1006,13 @@ class Content:
             awkward._reducers.CountNonzero, axis, mask, keepdims, behavior
         )
 
-    def sum(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def sum(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: dict | None = None,
+    ):
         return self._reduce(awkward._reducers.Sum, axis, mask, keepdims, behavior)
 
     def prod(self, axis=-1, mask=False, keepdims=False, behavior=None):
