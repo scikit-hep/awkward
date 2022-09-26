@@ -1472,6 +1472,15 @@ class Content:
             )
         )
 
+    def _unique(
+        self,
+        negaxis: int | None,
+        starts: ak.index.Index,
+        parents: ak.index.Index,
+        outlength: int,
+    ):
+        raise ak._util.error(NotImplementedError)
+
     @property
     def is_identity_like(self):
         return self.Form.is_identity_like.__get__(self)
