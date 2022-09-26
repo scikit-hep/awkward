@@ -1293,7 +1293,7 @@ class Content:
     ):
         raise ak._util.error(NotImplementedError)
 
-    def validity_error_parameters(self, path):
+    def validity_error_parameters(self, path: str) -> str:
         if self.parameter("__array__") == "string":
             content = None
             if isinstance(
