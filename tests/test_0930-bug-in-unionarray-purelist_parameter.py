@@ -7,7 +7,9 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    @ak.behaviors.mixins.mixin_class(ak.behavior)
+    behavior = {}
+
+    @ak.behaviors.mixins.mixin_class(behavior)
     class Blah:
         @property
         def blah(self):
@@ -18,6 +20,8 @@ def test():
 
     a2 = a[a.x % 2 == 0]
     b2 = b[b.x % 2 == 0]
-    c2 = ak.operations.with_name(ak.operations.concatenate([a2, b2], axis=1), "Blah")
+    c2 = ak.operations.with_name(
+        ak.operations.concatenate([a2, b2], axis=1), "Blah", behavior=behavior
+    )
 
     assert c2.blah.tolist() == [[2, -2], [-4]]
