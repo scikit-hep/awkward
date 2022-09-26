@@ -1262,7 +1262,14 @@ class Content:
             contents, recordlookup, length, None, parameters, self._nplike
         )
 
-    def combinations(self, n, replacement=False, axis=1, fields=None, parameters=None):
+    def combinations(
+        self,
+        n: int,
+        replacement: bool = False,
+        axis: int = 1,
+        fields: list[str] | None = None,
+        parameters: dict | None = None,
+    ):
         if n < 1:
             raise ak._util.error(ValueError("in combinations, 'n' must be at least 1"))
 
