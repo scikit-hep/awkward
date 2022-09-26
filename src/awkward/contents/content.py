@@ -147,7 +147,7 @@ class Content:
     def length(self) -> int:
         raise ak._util.error(NotImplementedError)
 
-    def forget_length(self):
+    def forget_length(self) -> Self:
         if not isinstance(self._nplike, ak._typetracer.TypeTracer):
             return self.typetracer._forget_length()
         else:
