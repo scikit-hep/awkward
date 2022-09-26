@@ -366,7 +366,7 @@ class Content:
             return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
 
     def _getitem_next_regular_missing(
-        self, head, tail, advanced: ak.index.Index | None, raw, length
+        self, head, tail, advanced: ak.index.Index | None, raw, length: int
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
