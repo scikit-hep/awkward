@@ -1066,7 +1066,14 @@ class Content:
             awkward._reducers.Max(initial), axis, mask, keepdims, behavior
         )
 
-    def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+    def argsort(
+        self,
+        axis: int = -1,
+        ascending: bool = True,
+        stable: bool = False,
+        kind: Any = None,
+        order: Any = None,
+    ):
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:
