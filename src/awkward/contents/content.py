@@ -1409,7 +1409,7 @@ class Content:
     def purelist_parameter(self, key: str):
         return self.Form.purelist_parameter(self, key)
 
-    def is_unique(self, axis=None):
+    def is_unique(self, axis: int | None = None) -> bool:
         negaxis = axis if axis is None else -axis
         starts = ak.index.Index64.zeros(1, self._nplike)
         parents = ak.index.Index64.zeros(self.length, self._nplike)
