@@ -713,7 +713,7 @@ class Content:
         else:
             raise ak._util.error(NotImplementedError)
 
-    def _range_identifier(self, start, stop):
+    def _range_identifier(self, start: int, stop: int):
         if self._identifier is None:
             return None
         else:
