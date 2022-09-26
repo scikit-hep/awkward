@@ -1610,6 +1610,11 @@ class Content:
         )
         return tuple(arrays)
 
+    def _completely_flatten(
+        self, nplike: ak.nplike.NumpyLike | None, options: dict[str, Any]
+    ) -> list:
+        raise ak._util.error(NotImplementedError)
+
     def recursively_apply(
         self,
         action,
