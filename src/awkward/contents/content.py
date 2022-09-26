@@ -1415,6 +1415,15 @@ class Content:
         parents = ak.index.Index64.zeros(self.length, self._nplike)
         return self._is_unique(negaxis, starts, parents, 1)
 
+    def _is_unique(
+        self,
+        negaxis: int | None,
+        starts: ak.index.Index,
+        parents: ak.index.Index,
+        outlength: int,
+    ) -> bool:
+        raise ak._util.error(NotImplementedError)
+
     def unique(self, axis=None):
         if axis == -1 or axis is None:
             negaxis = axis if axis is None else -axis
