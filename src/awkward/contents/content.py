@@ -1490,7 +1490,7 @@ class Content:
         return self.Form.purelist_isregular.__get__(self)
 
     @property
-    def purelist_depth(self):
+    def purelist_depth(self) -> int:
         return self.Form.purelist_depth.__get__(self)
 
     @property
