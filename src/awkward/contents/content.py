@@ -1865,7 +1865,9 @@ class Content:
 
         return _replace_numpyarray_nodes(aux_data.layout, list(children))
 
-    def layout_equal(self, other, index_dtype=True, numpyarray=True):
+    def layout_equal(
+        self, other: Content, index_dtype: bool = True, numpyarray: bool = True
+    ) -> bool:
         return (
             self.__class__ is other.__class__
             and len(self) == len(other)
