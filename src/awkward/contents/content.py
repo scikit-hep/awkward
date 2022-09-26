@@ -5,7 +5,7 @@ import copy
 import math
 import numbers
 from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
-from typing import Any
+from typing import Any, TypeVar
 
 import awkward as ak
 import awkward._reducers
@@ -13,6 +13,8 @@ from awkward.typing import Self
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
+
+AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 
 
 # FIXME: introduce sentinel type for this
@@ -737,7 +739,7 @@ class Content:
         else:
             raise ak._util.error(NotImplementedError)
 
-    def axis_wrap_if_negative(self, axis):
+    def axis_wrap_if_negative(self, axis: AxisMaybeNone) -> AxisMaybeNone:
         if axis is None or axis >= 0:
             return axis
 
