@@ -1282,6 +1282,17 @@ class Content:
                 )
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
 
+    def _combinations(
+        self,
+        n: int,
+        replacement: bool,
+        recordlookup: list[str] | None,
+        parameters: dict[str, Any] | None,
+        axis: int,
+        depth: int,
+    ):
+        raise ak._util.error(NotImplementedError)
+
     def validity_error_parameters(self, path):
         if self.parameter("__array__") == "string":
             content = None
