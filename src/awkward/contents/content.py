@@ -1502,7 +1502,7 @@ class Content:
         return self.Form.branch_depth.__get__(self)
 
     @property
-    def fields(self):
+    def fields(self) -> list[str]:
         return self.Form.fields.__get__(self)
 
     @property
