@@ -447,7 +447,7 @@ def regularize_path(path):
     return is_path, path
 
 
-def overlay_behavior(behavior: dict | None) -> collections.ChainMap:
+def overlay_behavior(behavior: dict | None) -> collections.abc.Mapping:
     """
     Args:
         behavior: behavior dictionary, or None
@@ -464,12 +464,12 @@ def arrayclass(layout, behavior):
     behavior = overlay_behavior(behavior)
     arr = layout.parameter("__array__")
     if isstr(arr):
-        cls = behavior[arr]
+        cls = behavior.get(arr)
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
     if isstr(deeprec):
-        cls = behavior["*", deeprec]
+        cls = behavior.get(("*", deeprec))
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     return ak.highlevel.Array
@@ -530,12 +530,12 @@ def numba_array_typer(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     arr = layouttype.parameters.get("__array__")
     if isstr(arr):
-        typer = behavior["__numba_typer__", arr]
+        typer = behavior.get(("__numba_typer__", arr))
         if callable(typer):
             return typer
     deeprec = layouttype.parameters.get("__record__")
     if isstr(deeprec):
-        typer = behavior["__numba_typer__", "*", deeprec]
+        typer = behavior.get(("__numba_typer__", "*", deeprec))
         if callable(typer):
             return typer
     return None
@@ -545,12 +545,12 @@ def numba_array_lower(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     arr = layouttype.parameters.get("__array__")
     if isstr(arr):
-        lower = behavior["__numba_lower__", arr]
+        lower = behavior.get(("__numba_lower__", arr))
         if callable(lower):
             return lower
     deeprec = layouttype.parameters.get("__record__")
     if isstr(deeprec):
-        lower = behavior["__numba_lower__", "*", deeprec]
+        lower = behavior.get(("__numba_lower__", "*", deeprec))
         if callable(lower):
             return lower
     return None
@@ -560,7 +560,7 @@ def recordclass(layout, behavior):
     behavior = overlay_behavior(behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
-        cls = behavior[rec]
+        cls = behavior.get(rec)
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
             return cls
     return ak.highlevel.Record
@@ -570,7 +570,7 @@ def reducer_recordclass(reducer, layout, behavior):
     behavior = overlay_behavior(behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
-        return behavior[reducer.highlevel_function(), rec]
+        return behavior.get((reducer.highlevel_function(), rec))
 
 
 def typestrs(behavior):
@@ -607,7 +607,7 @@ def numba_record_typer(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
-        typer = behavior["__numba_typer__", rec]
+        typer = behavior.get(("__numba_typer__", rec))
         if callable(typer):
             return typer
     return None
@@ -617,7 +617,7 @@ def numba_record_lower(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
-        lower = behavior["__numba_lower__", rec]
+        lower = behavior.get(("__numba_lower__", rec))
         if callable(lower):
             return lower
     return None
