@@ -834,7 +834,9 @@ class Content:
             tags, index, contents, None, None, self._nplike
         )
 
-    def _merging_strategy(self, others):
+    def _merging_strategy(
+        self, others: list[Content]
+    ) -> tuple[list[Content], list[Content]]:
         if len(others) == 0:
             raise ak._util.error(
                 ValueError(
