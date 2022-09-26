@@ -1707,10 +1707,10 @@ class Content:
     def tolist(self, behavior: dict | None = None) -> list:
         return self.to_list(behavior)
 
-    def to_list(self, behavior=None):
-        return self.packed()._to_list(behavior, None)
+    def _to_list(self, behavior: dict | None, json_conversions: dict[str, Any]) -> list:
+        raise ak._util.error(NotImplementedError)
 
-    def _to_list_custom(self, behavior, json_conversions):
+    def _to_list_custom(self, behavior: dict | None, json_conversions: dict[str, Any]):
         if self.is_RecordType:
             getitem = ak._util.recordclass(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Record.__getitem__ and not getattr(
@@ -1810,7 +1810,7 @@ class Content:
 
             return out
 
-    def flatten(self, axis=1, depth=0):
+    def flatten(self, axis: int = 1, depth: int = 0) -> Content:
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
 
