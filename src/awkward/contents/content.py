@@ -1482,7 +1482,7 @@ class Content:
         raise ak._util.error(NotImplementedError)
 
     @property
-    def is_identity_like(self):
+    def is_identity_like(self) -> bool:
         return self.Form.is_identity_like.__get__(self)
 
     @property
