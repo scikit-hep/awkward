@@ -892,6 +892,9 @@ class Content:
     def local_index(self, axis: int):
         return self._local_index(axis, 0)
 
+    def _local_index(self, axis: int, depth: int):
+        raise ak._util.error(NotImplementedError)
+
     def _reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
         if axis is None:
             raise ak._util.error(NotImplementedError)
