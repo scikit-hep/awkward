@@ -4,6 +4,7 @@ import copy
 import math
 import numbers
 from collections.abc import Iterable, Sized
+from typing import Any
 
 import awkward as ak
 import awkward._reducers
@@ -32,7 +33,12 @@ class Content:
     is_RecordType = False
     is_UnionType = False
 
-    def _init(self, identifier, parameters, nplike):
+    def _init(
+        self,
+        identifier: ak.identifier.Identifier | None,
+        parameters: dict[str, Any] | None,
+        nplike: ak.nplike.NumpyLike | None,
+    ):
         if identifier is not None and not isinstance(
             identifier, ak.identifier.Identifier
         ):
