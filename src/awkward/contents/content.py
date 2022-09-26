@@ -1054,7 +1054,14 @@ class Content:
             awkward._reducers.Min(initial), axis, mask, keepdims, behavior
         )
 
-    def max(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
+    def max(
+        self,
+        axis: int = -1,
+        mask: bool = True,
+        keepdims: bool = False,
+        initial: dict | None = None,
+        behavior=None,
+    ):
         return self._reduce(
             awkward._reducers.Max(initial), axis, mask, keepdims, behavior
         )
