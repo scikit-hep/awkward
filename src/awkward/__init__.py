@@ -47,6 +47,10 @@ awkward.behaviors.categorical.register(behavior)  # noqa: F405
 # operations
 from awkward.operations import *
 
+import sys
+
+_v2 = sys.modules[f"{__name__}._v2"] = sys.modules[__name__]
+
 # version
 __version__ = awkward._ext.__version__
 __all__ = [x for x in globals() if not x.startswith("_") and x not in ("numpy",)]
