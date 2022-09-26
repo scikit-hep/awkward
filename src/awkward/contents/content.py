@@ -1587,7 +1587,7 @@ class Content:
     ):
         raise ak._util.error(NotImplementedError)
 
-    def to_numpy(self, allow_missing):
+    def to_numpy(self, allow_missing: bool):
         return self._to_numpy(allow_missing)
 
     def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
