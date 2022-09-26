@@ -1819,7 +1819,7 @@ class Content:
     ) -> tuple[ak.index.Index, Content]:
         raise ak._util.error(NotImplementedError)
 
-    def to_backend(self, backend):
+    def to_backend(self, backend: str) -> Self:
         if self.nplike is ak._util.regularize_backend(backend):
             return self
         else:
