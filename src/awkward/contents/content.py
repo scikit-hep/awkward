@@ -780,7 +780,7 @@ class Content:
         others = [other]
         return self.mergemany(others)
 
-    def mergeable(self, other, mergebool=True):
+    def mergeable(self, other: Content, mergebool: bool = True) -> bool:
         # Is the other content is an identity, or a union?
         if other.is_identity_like or other.is_UnionType:
             return True
