@@ -1198,7 +1198,13 @@ class Content:
     ):
         raise ak._util.error(NotImplementedError)
 
-    def _combinations_axis0(self, n, replacement, recordlookup, parameters):
+    def _combinations_axis0(
+        self,
+        n: int,
+        replacement: bool,
+        recordlookup: list[str] | None,
+        parameters: dict | None,
+    ):
         size = self.length
         if replacement:
             size = size + (n - 1)
