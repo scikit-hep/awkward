@@ -776,7 +776,7 @@ class Content:
         )
         return ak.contents.NumpyArray(localindex, None, None, self._nplike)
 
-    def merge(self, other):
+    def merge(self, other: Content) -> Content:
         others = [other]
         return self.mergemany(others)
 
