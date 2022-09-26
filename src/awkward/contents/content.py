@@ -1577,6 +1577,16 @@ class Content:
             },
         )
 
+    def _to_arrow(
+        self,
+        pyarrow: Any,
+        mask_node: Any,
+        validbytes: Any,
+        length: int,
+        options: dict[str, Any],
+    ):
+        raise ak._util.error(NotImplementedError)
+
     def to_numpy(self, allow_missing):
         return self._to_numpy(allow_missing)
 
