@@ -1814,6 +1814,11 @@ class Content:
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
 
+    def _offsets_and_flattened(
+        self, axis: int, depth: int
+    ) -> tuple[ak.index.Index, Content]:
+        raise ak._util.error(NotImplementedError)
+
     def to_backend(self, backend):
         if self.nplike is ak._util.regularize_backend(backend):
             return self
