@@ -36,7 +36,7 @@ jobs:
           - '3.9'
           - '3.8'
           - '3.7'
-          - 'pypy3.10'
+          - 'pypy3.9'
 
         python-architecture:
           - x64
@@ -91,7 +91,7 @@ jobs:
           - '3.9'
           - '3.8'
           - '3.7'
-          - 'pypy3.10'
+          - 'pypy3.9'
 
     runs-on: macOS-11
 
@@ -148,7 +148,7 @@ jobs:
           - '3.9'
           - '3.8'
           - '3.7'
-          - 'pypy3.10'
+          - 'pypy3.9'
         numpy-package:
           - "numpy"
         include:
