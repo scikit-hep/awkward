@@ -462,7 +462,12 @@ class Content:
             self._nplike,
         )
 
-    def _getitem_next_missing(self, head, tail, advanced: ak.index.Index | None):
+    def _getitem_next_missing(
+        self,
+        head: ak.contents.IndexedOptionArray,
+        tail,
+        advanced: ak.index.Index | None,
+    ):
         assert isinstance(head, ak.contents.IndexedOptionArray)
 
         if advanced is not None:
