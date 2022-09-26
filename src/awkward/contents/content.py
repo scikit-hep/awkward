@@ -1185,6 +1185,19 @@ class Content:
             order,
         )
 
+    def _sort_next(
+        self,
+        negaxis: int,
+        starts: ak.index.Index,
+        parents: ak.index.Index,
+        outlength: int,
+        ascending: bool,
+        stable: bool,
+        kind: Any,
+        order: Any,
+    ):
+        raise ak._util.error(NotImplementedError)
+
     def _combinations_axis0(self, n, replacement, recordlookup, parameters):
         size = self.length
         if replacement:
