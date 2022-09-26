@@ -682,7 +682,7 @@ class Content:
     def _carry(self, carry: ak.index.Index, allow_lazy: bool):
         raise ak._util.error(NotImplementedError)
 
-    def _carry_asrange(self, carry: ak._v2.index.Index):
+    def _carry_asrange(self, carry: ak.index.Index):
         assert isinstance(carry, ak.index.Index)
 
         result = self._nplike.index_nplike.empty(1, dtype=np.bool_)
