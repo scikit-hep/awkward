@@ -662,6 +662,24 @@ class Content:
                 )
             )
 
+    def _getitem_at(self, where: int):
+        raise ak._util.error(NotImplementedError)
+
+    def _getitem_range(self, where: slice):
+        raise ak._util.error(NotImplementedError)
+
+    def _getitem_field(self, where: str):
+        raise ak._util.error(NotImplementedError)
+
+    def _getitem_fields(self, where: list[str], only_fields: tuple[str, ...] = ()):
+        raise ak._util.error(NotImplementedError)
+
+    def _getitem_next(self, head, tail, advanced: ak.index.Index | None):
+        raise ak._util.error(NotImplementedError)
+
+    def _carry(self, carry: ak.index.Index, allow_lazy: bool):
+        raise ak._util.error(NotImplementedError)
+
     def _carry_asrange(self, carry):
         assert isinstance(carry, ak.index.Index)
 
