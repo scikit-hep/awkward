@@ -1540,7 +1540,7 @@ class Content:
         )
         return next.simplify_optiontype()
 
-    def pad_none(self, length, axis, clip=False):
+    def pad_none(self, length: int, axis: int, clip: bool = False) -> Content:
         return self._pad_none(length, axis, 0, clip)
 
     def to_arrow(
