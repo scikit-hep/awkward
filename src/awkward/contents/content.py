@@ -1119,6 +1119,20 @@ class Content:
             order,
         )
 
+    def _argsort_next(
+        self,
+        negaxis: int,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        parents: ak.index.Index,
+        outlength: int,
+        ascending: bool,
+        stable: bool,
+        kind: Any,
+        order: Any,
+    ):
+        raise ak._util.error(NotImplementedError)
+
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
         branch, depth = self.branch_depth
