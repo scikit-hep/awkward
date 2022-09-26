@@ -719,7 +719,7 @@ class Content:
         else:
             raise ak._util.error(NotImplementedError)
 
-    def _field_identifier(self, field):
+    def _field_identifier(self, field: str):
         if self._identifier is None:
             return None
         else:
