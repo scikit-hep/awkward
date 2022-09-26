@@ -801,7 +801,7 @@ class Content:
     def mergemany(self, others):
         raise ak._util.error(NotImplementedError)
 
-    def merge_as_union(self, other):
+    def merge_as_union(self, other: Content) -> ak.contents.UnionArray:
         mylength = self.length
         theirlength = other.length
         tags = ak.index.Index8.empty((mylength + theirlength), self._nplike)
