@@ -1593,7 +1593,12 @@ class Content:
     def _to_numpy(self, allow_missing: bool):
         raise ak._util.error(NotImplementedError)
 
-    def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
+    def completely_flatten(
+        self,
+        nplike: ak.nplike.NumpyLike | None = None,
+        flatten_records: bool = True,
+        function_name: str | None = None,
+    ):
         if nplike is None:
             nplike = self._nplike
         arrays = self._completely_flatten(
