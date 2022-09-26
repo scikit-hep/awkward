@@ -472,24 +472,23 @@ def lower_complex(context, builder, sig, args):
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
 
-    if isinstance(xtype, numba.types.Complex):
-        z = context.make_complex(builder, xtype, xval)
-        z_real, z_imag = z.real, z.imag
-    elif isinstance(xtype, numba.types.Integer) and xtype.signed:
+    if isinstance(xtype, numba.types.Integer) and xtype.signed:
         z_real = builder.sitofp(xval, context.get_value_type(numba.types.float64))
         z_imag = z_real.type(0)
     elif isinstance(xtype, numba.types.Integer):
         z_real = builder.uitofp(xval, context.get_value_type(numba.types.float64))
         z_imag = z_real.type(0)
-    elif xtype.bitwidth < 64:
-        z_real = builder.fpext(xval, context.get_value_type(numba.types.float64))
-        z_imag = z_real.type(0)
-    elif xtype.bitwidth > 64:
-        z_real = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
+    elif isinstance(xtype, numba.types.Float):
+        if xtype.bitwidth < 64:
+            z_real = builder.fpext(xval, context.get_value_type(numba.types.float64))
+        elif xtype.bitwidth > 64:
+            z_real = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
+        else:
+            z_real = xval
         z_imag = z_real.type(0)
     else:
-        z_real = xval
-        z_imag = z_real.type(0)
+        z = context.make_complex(builder, xtype, xval)
+        z_real, z_imag = z.real, z.imag
 
     call(
         context,
@@ -606,7 +605,7 @@ def lower_bytestring(context, builder, sig, args):
     # FIXME: ok =
     bytes_as_string_and_size(pyapi, strptr, p_buffer, result)
     # FIXME: pyapi.if_object_ok
-    length = ak._v2._connect.numba.layout.castint(
+    length = ak._connect.numba.layout.castint(
         context, builder, numba.int64, numba.intp, builder.load(result)
     )
     call(
