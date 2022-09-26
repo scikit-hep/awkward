@@ -216,7 +216,7 @@ class Content:
     ) -> tuple[ak.forms.Form, int, Mapping[str, Any]]:
         raise ak._util.error(NotImplementedError)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.length
 
     def _repr_extra(self, indent):
