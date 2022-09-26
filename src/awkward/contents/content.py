@@ -7,6 +7,7 @@ from collections.abc import Iterable, Sized
 
 import awkward as ak
 import awkward._reducers
+from awkward.typing import Self
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
@@ -120,6 +121,14 @@ class Content:
             )
 
         return self._form_with_key(getkey)
+
+    @property
+    def typetracer(self) -> Self:
+        raise ak._util.error(NotImplementedError)
+
+    @property
+    def length(self) -> int:
+        raise ak._util.error(NotImplementedError)
 
     def forget_length(self):
         if not isinstance(self._nplike, ak._typetracer.TypeTracer):
