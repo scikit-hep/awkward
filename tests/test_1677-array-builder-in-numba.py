@@ -2,21 +2,12 @@
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
-<<<<<<< HEAD:tests/test_1677-array-builder-in-numba.py
 import awkward as ak  # noqa: F401
 
 nb = pytest.importorskip("numba")
 
 ak_numba_arrayview = pytest.importorskip("awkward._connect.numba.arrayview")
 ak_numba_builder = pytest.importorskip("awkward._connect.numba.builder")
-=======
-import awkward._v2 as ak  # noqa: F401
-
-nb = pytest.importorskip("numba")
-
-ak_numba_arrayview = pytest.importorskip("awkward._v2._connect.numba.arrayview")
-ak_numba_builder = pytest.importorskip("awkward._v2._connect.numba.builder")
->>>>>>> 8912aafd (fix: rename test):tests/v2/test_1677-array-builder-in-numba.py
 
 ak.numba.register_and_check()
 
@@ -31,7 +22,6 @@ def test_ArrayBuilder_of_booleans():
     out = builder.snapshot()
     assert out.to_list() == [True]
 
-<<<<<<< HEAD:tests/test_1677-array-builder-in-numba.py
 def test_ArrayBuilder_append():
     @nb.njit
     def append_complex(builder, value):
@@ -56,8 +46,6 @@ def test_ArrayBuilder_append():
     builder = append(builder, z)
     out = builder.snapshot()
     assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j)]
-=======
->>>>>>> 8912aafd (fix: rename test):tests/v2/test_1677-array-builder-in-numba.py
 
 def test_ArrayBuilder_of_integers():
     @nb.njit
@@ -95,7 +83,6 @@ def test_ArrayBuilder_of_complex():
     out = builder.snapshot()
     assert out.to_list() == [(1.0 + 0.1j), (2.0 + 0.2j)]
 
-<<<<<<< HEAD:tests/test_1677-array-builder-in-numba.py
     builder = add_a_complex(builder, 2)
     out = builder.snapshot()
     assert out.to_list() == [(1.0 + 0.1j), (2.0 + 0.2j), (2.0 + 0j)]
@@ -148,49 +135,3 @@ def test_ArrayBuilder_of_bytestrings():
     builder = add_a_bytestring(ak.ArrayBuilder(), b"hello\0world")
     out = builder.snapshot()
     assert out.to_list() == [b"hello\0world"]
-=======
-
-#
-# def test_ArrayBuilder_of_datetimes():
-#     @nb.njit
-#     def add_a_datetime(builder, datetime):
-#         builder.datetime(datetime)
-#         return builder
-#
-#     builder = add_a_datetime(ak.ArrayBuilder(), "2020-09-04")
-#     out = builder.snapshot()
-#     assert out.to_list() == ["2020-09-04"]
-#
-#
-# def test_ArrayBuilder_of_timedeltas():
-#     @nb.njit
-#     def add_a_timedelta(builder, timedelta):
-#         builder.timedelta(timedelta)
-#         return builder
-#
-#     builder = add_a_timedelta(ak.ArrayBuilder(), np.timedelta64(5, "s"))
-#     out = builder.snapshot()
-#     assert out.to_list() == [np.timedelta64(5, "s")]
-#
-#
-# def test_ArrayBuilder_of_strings():
-#     @nb.njit
-#     def add_a_string(builder, string):
-#         builder.string(string)
-#         return builder
-#
-#     builder = add_a_string(ak.ArrayBuilder(), "hello")
-#     out = builder.snapshot()
-#     assert out.to_list() == ['hello']
-#
-#
-# def test_ArrayBuilder_of_bytestrings():
-#     @nb.njit
-#     def add_a_bytestring(builder, bytestring):
-#         builder.bytestring(bytestring)
-#         return builder
-#
-#     builder = add_a_bytestring(ak.ArrayBuilder(), b"hello")
-#     out = builder.snapshot()
-#     assert out.to_list() == [b"hello"]
->>>>>>> 8912aafd (fix: rename test):tests/v2/test_1677-array-builder-in-numba.py
