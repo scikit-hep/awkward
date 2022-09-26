@@ -72,27 +72,27 @@ class Content:
         self._nplike = nplike
 
     @property
-    def identifier(self):
+    def identifier(self) -> ak.identifier.Identifier | None:
         return self._identifier
 
     @property
-    def parameters(self):
+    def parameters(self) -> dict[str, Any]:
         if self._parameters is None:
             self._parameters = {}
         return self._parameters
 
-    def parameter(self, key):
+    def parameter(self, key: str):
         if self._parameters is None:
             return None
         else:
             return self._parameters.get(key)
 
     @property
-    def nplike(self):
+    def nplike(self) -> ak.nplike.NumpyLike | None:
         return self._nplike
 
     @property
-    def form(self):
+    def form(self) -> ak.forms.Form:
         return self.form_with_key(None)
 
     def form_with_key(self, form_key="node{id}", id_start=0):
