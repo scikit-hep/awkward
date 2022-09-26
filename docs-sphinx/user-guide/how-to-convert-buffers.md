@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.10.3
+    jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -87,10 +87,10 @@ Here is an example of an array in need of packing:
 
 ```{code-cell} ipython3
 unpacked = ak.Array(
-    ak.layout.ListArray64(
-        ak.layout.Index64(np.array([4, 10, 1])),
-        ak.layout.Index64(np.array([7, 10, 3])),
-        ak.layout.NumpyArray(
+    ak.contents.ListArray(
+        ak.index.Index64(np.array([4, 10, 1])),
+        ak.index.Index64(np.array([7, 10, 3])),
+        ak.contents.NumpyArray(
             np.array([999, 4.4, 5.5, 999, 1.1, 2.2, 3.3, 999])
         )
     )
@@ -159,13 +159,13 @@ container.keys()
 Here's one.
 
 ```{code-cell} ipython3
-np.asarray(container["part0-node0-offsets"])
+np.asarray(container["node0-offsets"])
 ```
 
 Now we need to add the other information to the group as metadata. Since HDF5 accepts string-valued metadata, we can put it all in as JSON or numbers.
 
 ```{code-cell} ipython3
-group.attrs["form"] = form.tojson()
+group.attrs["form"] = form.to_json()
 group.attrs["form"]
 ```
 
@@ -183,54 +183,9 @@ The group can't be used as a `container` as-is, since subscripting it returns `h
 
 ```{code-cell} ipython3
 reconstituted = ak.from_buffers(
-    ak.forms.Form.fromjson(group.attrs["form"]),
+    ak.forms.from_json(group.attrs["form"]),
     json.loads(group.attrs["length"]),
     {k: np.asarray(v) for k, v in group.items()},
 )
 reconstituted
 ```
-
-Like [ak.from_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_parquet.html), [ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) has the option to read lazily, only accessing record fields and partitions that are accessed.
-
-```{code-cell} ipython3
-class LazyGet:
-    def __init__(self, group):
-        self.group = group
-    
-    def __getitem__(self, key):
-        print(key)
-        return np.asarray(self.group[key])
-
-lazy = ak.from_buffers(
-    ak.forms.Form.fromjson(group.attrs["form"]),
-    json.loads(group.attrs["length"]),
-    LazyGet(group),
-    lazy=True,
-)
-```
-
-The `LazyGet` class prints out any keys that actually get read from the HDF5 file, when they get read. Nothing has been printed yet.
-
-```{code-cell} ipython3
-lazy.x
-```
-
-Now that we have looked at the `"x"` field, `"node0-offsets"` (for the outer list structure) and `"node2"` (the `"x"` values) have been read.
-
-```{code-cell} ipython3
-lazy.x
-```
-
-They were only read once.
-
-```{code-cell} ipython3
-lazy.y
-```
-
-Looking at the `"y"` field causes the `"node3-offsets"` (inner list structure) and `"node4"` (`"y"` values) to be read.
-
-```{code-cell} ipython3
-lazy.y
-```
-
-Only once.
