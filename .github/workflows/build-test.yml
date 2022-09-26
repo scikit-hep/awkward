@@ -146,6 +146,7 @@ jobs:
           - '3.9'
           - '3.8'
           - '3.7'
+          - 'pypy3.10'
         numpy-package:
           - "numpy"
         include:
