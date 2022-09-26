@@ -1494,7 +1494,7 @@ class Content:
         return self.Form.purelist_depth.__get__(self)
 
     @property
-    def minmax_depth(self):
+    def minmax_depth(self) -> tuple[int, int]:
         return self.Form.minmax_depth.__get__(self)
 
     @property
