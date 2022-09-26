@@ -954,6 +954,20 @@ class Content:
 
         return next[0]
 
+    def _reduce_next(
+        self,
+        reducer: type[ak._v2._reducers.Reducer],
+        negaxis: int,
+        starts: ak._v2.index.Index,
+        shifts: ak._v2.index.Index | None,
+        parents: ak._v2.index.Index,
+        outlength: int,
+        mask: bool,
+        keepdims: bool,
+        behavior: dict | None,
+    ):
+        raise ak._util.error(NotImplementedError)
+
     def argmin(self, axis=-1, mask=True, keepdims=False, behavior=None):
         return self._reduce(awkward._reducers.ArgMin, axis, mask, keepdims, behavior)
 
