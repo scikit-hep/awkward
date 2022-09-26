@@ -1877,3 +1877,8 @@ class Content:
             )
             and self._layout_equal(other, index_dtype, numpyarray)
         )
+
+    def _layout_equal(
+        self, other: Self, index_dtype: bool = True, numpyarray: bool = True
+    ) -> bool:
+        raise ak._util.error(NotImplementedError)
