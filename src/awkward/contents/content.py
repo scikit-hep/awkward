@@ -1403,7 +1403,7 @@ class Content:
         raise ak._v2._util.error(NotImplementedError)
 
     @property
-    def nbytes(self):
+    def nbytes(self) -> int:
         return self._nbytes_part()
 
     def purelist_parameter(self, key):
