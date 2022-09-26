@@ -9,12 +9,25 @@ from typing import Any, TypeVar
 
 import awkward as ak
 import awkward._reducers
-from awkward.typing import Self
+from awkward.typing import Self, TypeAlias
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
 AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
+ActionType: TypeAlias = """Callable[
+    [
+        Content,
+        int,
+        dict | None,
+        dict | None,
+        Callable[[], None],
+        dict | None,
+        ak.nplike.NumpyLike | None,
+        dict[str, Any],
+    ],
+    Content | None,
+]"""
 
 
 # FIXME: introduce sentinel type for this
@@ -1617,16 +1630,16 @@ class Content:
 
     def recursively_apply(
         self,
-        action,
-        behavior=None,
-        depth_context=None,
-        lateral_context=None,
-        allow_records=True,
-        keep_parameters=True,
-        numpy_to_regular=True,
-        return_array=True,
-        function_name=None,
-    ):
+        action: ActionType,
+        behavior: dict | None = None,
+        depth_context: dict[str, Any] | None = None,
+        lateral_context: dict[str, Any] | None = None,
+        allow_records: bool = True,
+        keep_parameters: bool = True,
+        numpy_to_regular: bool = True,
+        return_array: bool = True,
+        function_name: str | None = None,
+    ) -> Content | None:
         return self._recursively_apply(
             action,
             behavior,
