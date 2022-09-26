@@ -1406,7 +1406,7 @@ class Content:
     def nbytes(self) -> int:
         return self._nbytes_part()
 
-    def purelist_parameter(self, key):
+    def purelist_parameter(self, key: str):
         return self.Form.purelist_parameter(self, key)
 
     def is_unique(self, axis=None):
