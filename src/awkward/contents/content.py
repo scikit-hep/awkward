@@ -1060,7 +1060,7 @@ class Content:
         mask: bool = True,
         keepdims: bool = False,
         initial: dict | None = None,
-        behavior=None,
+        behavior: dict = None,
     ):
         return self._reduce(
             awkward._reducers.Max(initial), axis, mask, keepdims, behavior
