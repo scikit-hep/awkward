@@ -956,11 +956,11 @@ class Content:
 
     def _reduce_next(
         self,
-        reducer: type[ak._v2._reducers.Reducer],
+        reducer: type[ak._reducers.Reducer],
         negaxis: int,
-        starts: ak._v2.index.Index,
-        shifts: ak._v2.index.Index | None,
-        parents: ak._v2.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        parents: ak.index.Index,
         outlength: int,
         mask: bool,
         keepdims: bool,
