@@ -317,11 +317,11 @@ class Content:
         for i in range(len(self)):
             yield self._getitem_at(i)
 
-    def _getitem_next_field(self, head, tail, advanced):
+    def _getitem_next_field(self, head, tail, advanced: ak.index.Index | None):
         nexthead, nexttail = ak._slicing.headtail(tail)
         return self._getitem_field(head)._getitem_next(nexthead, nexttail, advanced)
 
-    def _getitem_next_fields(self, head, tail, advanced):
+    def _getitem_next_fields(self, head, tail, advanced: ak.index.Index | None):
         only_fields, not_fields = [], []
         for x in tail:
             if ak._util.isstr(x) or isinstance(x, list):
@@ -333,7 +333,7 @@ class Content:
             nexthead, nexttail, advanced
         )
 
-    def _getitem_next_newaxis(self, tail, advanced):
+    def _getitem_next_newaxis(self, tail, advanced: ak.index.Index | None):
         nexthead, nexttail = ak._slicing.headtail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced),
@@ -344,7 +344,7 @@ class Content:
             self._nplike,
         )
 
-    def _getitem_next_ellipsis(self, tail, advanced):
+    def _getitem_next_ellipsis(self, tail, advanced: ak.index.Index | None):
         mindepth, maxdepth = self.minmax_depth
 
         dimlength = sum(
@@ -365,7 +365,9 @@ class Content:
         else:
             return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
 
-    def _getitem_next_regular_missing(self, head, tail, advanced, raw, length):
+    def _getitem_next_regular_missing(
+        self, head, tail, advanced: ak.index.Index | None, raw, length
+    ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
         index = ak.index.Index64(head.index, nplike=self.nplike)
@@ -400,7 +402,9 @@ class Content:
             self._nplike,
         )
 
-    def _getitem_next_missing_jagged(self, head, tail, advanced, that):
+    def _getitem_next_missing_jagged(
+        self, head, tail, advanced: ak.index.Index | None, that
+    ):
         head = head._to_nplike(self._nplike)
         jagged = head.content.toListOffsetArray64()
 
@@ -458,7 +462,7 @@ class Content:
             self._nplike,
         )
 
-    def _getitem_next_missing(self, head, tail, advanced):
+    def _getitem_next_missing(self, head, tail, advanced: ak.index.Index | None):
         assert isinstance(head, ak.contents.IndexedOptionArray)
 
         if advanced is not None:
