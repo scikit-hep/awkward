@@ -1543,6 +1543,9 @@ class Content:
     def pad_none(self, length: int, axis: int, clip: bool = False) -> Content:
         return self._pad_none(length, axis, 0, clip)
 
+    def _pad_none(self, target: int, axis: int, depth: int, clip: bool) -> Content:
+        raise ak._util.error(NotImplementedError)
+
     def to_arrow(
         self,
         list_to32=False,
