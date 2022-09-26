@@ -207,6 +207,15 @@ class Content:
 
         return form, len(self), container
 
+    def _to_buffers(
+        self,
+        form: ak.forms.Form,
+        getkey: Callable[[Content, ak.forms.Form, str], str],
+        container: MutableMapping[str, Any] | None,
+        nplike: ak.nplike.NumpyLike | None,
+    ) -> tuple[ak.forms.Form, int, Mapping[str, Any]]:
+        raise ak._util.error(NotImplementedError)
+
     def __len__(self):
         return self.length
 
