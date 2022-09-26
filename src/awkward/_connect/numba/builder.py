@@ -464,48 +464,32 @@ def lower_real(context, builder, sig, args):
     return context.get_dummy_value()
 
 
-def imag(x):
-    return x
-
-
 @numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Integer)
 @numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Float)
-def lower_complex(context, builder, sig, args):  # noqa: F811
-    import llvmlite
-
+@numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Complex)
+def lower_complex(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    if isinstance(xtype, numba.types.Integer) and xtype.signed:
+
+    if isinstance(xtype, numba.types.Complex):
+        z = context.make_complex(builder, xtype, xval)
+        z_real, z_imag = z.real, z.imag
+    elif isinstance(xtype, numba.types.Integer) and xtype.signed:
         z_real = builder.sitofp(xval, context.get_value_type(numba.types.float64))
+        z_imag = z_real.type(0)
     elif isinstance(xtype, numba.types.Integer):
         z_real = builder.uitofp(xval, context.get_value_type(numba.types.float64))
+        z_imag = z_real.type(0)
     elif xtype.bitwidth < 64:
         z_real = builder.fpext(xval, context.get_value_type(numba.types.float64))
+        z_imag = z_real.type(0)
     elif xtype.bitwidth > 64:
         z_real = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
+        z_imag = z_real.type(0)
     else:
         z_real = xval
-
-    ZERO = llvmlite.ir.Constant(z_real.type, 0.0)
-
-    call(
-        context,
-        builder,
-        ak._libawkward.ArrayBuilder_complex,
-        (proxyin.rawptr, z_real, ZERO),
-    )
-    return context.get_dummy_value()
-
-
-@numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Complex)
-def lower_complex(context, builder, sig, args):  # noqa: F811
-    arraybuildertype, xtype = sig.args
-    arraybuilderval, xval = args
-    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-
-    z = context.make_complex(builder, xtype, xval)
-    z_real, z_imag = z.real, z.imag
+        z_imag = z_real.type(0)
 
     call(
         context,
