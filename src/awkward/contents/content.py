@@ -11,8 +11,14 @@ import awkward._reducers
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
-# FIXME: use common Sentinel class for this
-unset = object()
+
+# FIXME: introduce sentinel type for this
+class _Unset:
+    def __repr__(self):
+        return f"{__name__}.unset"
+
+
+unset = _Unset()
 
 
 class Content:
