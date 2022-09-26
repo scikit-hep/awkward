@@ -1548,14 +1548,14 @@ class Content:
 
     def to_arrow(
         self,
-        list_to32=False,
-        string_to32=False,
-        bytestring_to32=False,
+        list_to32: bool = False,
+        string_to32: bool = False,
+        bytestring_to32: bool = False,
         emptyarray_to=None,
-        categorical_as_dictionary=False,
-        extensionarray=True,
-        count_nulls=True,
-        record_is_scalar=False,
+        categorical_as_dictionary: bool = False,
+        extensionarray: bool = True,
+        count_nulls: bool = True,
+        record_is_scalar: bool = False,
     ):
         import awkward._connect.pyarrow
 
