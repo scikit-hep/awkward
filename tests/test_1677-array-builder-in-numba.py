@@ -1,7 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import pytest  # noqa: F401
 import numpy as np  # noqa: F401
+import pytest  # noqa: F401
+
 import awkward as ak  # noqa: F401
 
 nb = pytest.importorskip("numba")
@@ -21,6 +22,7 @@ def test_ArrayBuilder_of_booleans():
     builder = add_a_boolean(ak.ArrayBuilder(), True)
     out = builder.snapshot()
     assert out.to_list() == [True]
+
 
 def test_ArrayBuilder_append():
     @nb.njit
@@ -45,6 +47,7 @@ def test_ArrayBuilder_append():
     # builder = append(builder, z)
     # out = builder.snapshot()
     # assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j)]
+
 
 def test_ArrayBuilder_of_integers():
     @nb.njit
