@@ -1400,7 +1400,7 @@ class Content:
         return self._validity_error(path)
 
     def _validity_error(self, path: str) -> str:
-        raise ak._v2._util.error(NotImplementedError)
+        raise ak._util.error(NotImplementedError)
 
     @property
     def nbytes(self) -> int:
