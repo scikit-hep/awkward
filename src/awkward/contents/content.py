@@ -1655,6 +1655,17 @@ class Content:
             },
         )
 
+    def _recursively_apply(
+        self,
+        action: ActionType,
+        behavior: dict | None,
+        depth: int,
+        depth_context: dict | None,
+        lateral_context: dict | None,
+        options: dict[str, Any],
+    ) -> Content | None:
+        raise ak._util.error(NotImplementedError)
+
     def to_json(
         self,
         nan_string=None,
