@@ -766,7 +766,7 @@ class Content:
 
         return axis
 
-    def _local_index_axis0(self):
+    def _local_index_axis0(self) -> ak.contents.NumpyArray:
         localindex = ak.index.Index64.empty(self.length, self._nplike)
         self._handle_error(
             self._nplike["awkward_localindex", np.int64](
