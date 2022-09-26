@@ -1486,7 +1486,7 @@ class Content:
         return self.Form.is_identity_like.__get__(self)
 
     @property
-    def purelist_isregular(self):
+    def purelist_isregular(self) -> bool:
         return self.Form.purelist_isregular.__get__(self)
 
     @property
