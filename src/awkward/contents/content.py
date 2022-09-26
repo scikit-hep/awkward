@@ -1133,7 +1133,14 @@ class Content:
     ):
         raise ak._util.error(NotImplementedError)
 
-    def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
+    def sort(
+        self,
+        axis: int = -1,
+        ascending: bool = True,
+        stable: bool = False,
+        kind: Any = None,
+        order: Any = None,
+    ):
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:
