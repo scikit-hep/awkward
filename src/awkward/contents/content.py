@@ -731,7 +731,7 @@ class Content:
         else:
             raise ak._util.error(NotImplementedError)
 
-    def _carry_identifier(self, carry):
+    def _carry_identifier(self, carry: ak.index.Index):
         if self._identifier is None:
             return None
         else:
