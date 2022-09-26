@@ -1710,10 +1710,17 @@ class Content:
     def tolist(self, behavior: dict | None = None) -> list:
         return self.to_list(behavior)
 
-    def _to_list(self, behavior: dict | None, json_conversions: dict[str, Any]) -> list:
+    def to_list(self, behavior: dict | None = None) -> list:
+        return self.packed()._to_list(behavior, None)
+
+    def _to_list(
+        self, behavior: dict | None, json_conversions: dict[str, Any] | None
+    ) -> list:
         raise ak._util.error(NotImplementedError)
 
-    def _to_list_custom(self, behavior: dict | None, json_conversions: dict[str, Any]):
+    def _to_list_custom(
+        self, behavior: dict | None, json_conversions: dict[str, Any] | None
+    ):
         if self.is_RecordType:
             getitem = ak._util.recordclass(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Record.__getitem__ and not getattr(
