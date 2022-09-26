@@ -168,6 +168,9 @@ class Content:
         else:
             return self._forget_length()
 
+    def _forget_length(self) -> Self:
+        raise ak._util.error(NotImplementedError)
+
     def to_buffers(
         self,
         container: MutableMapping[str, Any] | None = None,
