@@ -1510,7 +1510,7 @@ class Content:
         return self.Form.is_tuple.__get__(self)
 
     @property
-    def dimension_optiontype(self):
+    def dimension_optiontype(self) -> bool:
         return self.Form.dimension_optiontype.__get__(self)
 
     def pad_none_axis0(self, target, clip):
