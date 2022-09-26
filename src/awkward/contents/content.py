@@ -1701,6 +1701,9 @@ class Content:
             },
         )
 
+    def packed(self) -> Content:
+        raise ak._util.error(NotImplementedError)
+
     def tolist(self, behavior=None):
         return self.to_list(behavior)
 
