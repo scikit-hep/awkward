@@ -1506,7 +1506,7 @@ class Content:
         return self.Form.fields.__get__(self)
 
     @property
-    def is_tuple(self):
+    def is_tuple(self) -> bool:
         return self.Form.is_tuple.__get__(self)
 
     @property
