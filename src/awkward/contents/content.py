@@ -798,7 +798,7 @@ class Content:
     def _mergeable(self, other: Content, mergebool: bool) -> bool:
         raise ak._util.error(NotImplementedError)
 
-    def mergemany(self, others):
+    def mergemany(self, others: list[Content]) -> Content:
         raise ak._util.error(NotImplementedError)
 
     def merge_as_union(self, other: Content) -> ak.contents.UnionArray:
