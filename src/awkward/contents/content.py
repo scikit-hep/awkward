@@ -1024,7 +1024,13 @@ class Content:
     ):
         return self._reduce(awkward._reducers.Prod, axis, mask, keepdims, behavior)
 
-    def any(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def any(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: dict | None = None,
+    ):
         return self._reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
 
     def all(self, axis=-1, mask=False, keepdims=False, behavior=None):
