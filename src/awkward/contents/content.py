@@ -1825,7 +1825,10 @@ class Content:
         else:
             return self._to_nplike(ak._util.regularize_backend(backend))
 
-    def with_parameter(self, key, value):
+    def _to_nplike(self, nplike: ak.nplike.NumpyLike) -> Self:
+        raise ak._util.error(NotImplementedError)
+
+    def with_parameter(self, key: str, value: Any) -> Self:
         out = copy.copy(self)
 
         if self._parameters is None:
