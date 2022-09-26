@@ -1393,7 +1393,7 @@ class Content:
 
         return ""
 
-    def validity_error(self, path="layout"):
+    def validity_error(self, path: str = "layout") -> str:
         paramcheck = self.validity_error_parameters(path)
         if paramcheck != "":
             return paramcheck
