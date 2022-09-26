@@ -47,6 +47,7 @@ awkward.behaviors.categorical.register(behavior)  # noqa: F405
 # operations
 from awkward.operations import *
 
+# temporary shim to access v2 under _v2
 import sys
 
 _v2 = sys.modules[f"{__name__}._v2"] = sys.modules[__name__]
