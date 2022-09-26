@@ -1668,13 +1668,13 @@ class Content:
 
     def to_json(
         self,
-        nan_string=None,
-        posinf_string=None,
-        neginf_string=None,
-        complex_record_fields=None,
-        convert_bytes=None,
-        behavior=None,
-    ):
+        nan_string: str | None = None,
+        posinf_string: str | None = None,
+        neginf_string: str | None = None,
+        complex_record_fields: tuple[str, str] | None = None,
+        convert_bytes: bool | None = None,
+        behavior: dict | None = None,
+    ) -> list:
         if complex_record_fields is None:
             complex_real_string = None
             complex_imag_string = None
