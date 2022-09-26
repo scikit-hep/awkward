@@ -1498,7 +1498,7 @@ class Content:
         return self.Form.minmax_depth.__get__(self)
 
     @property
-    def branch_depth(self):
+    def branch_depth(self) -> tuple[bool, int]:
         return self.Form.branch_depth.__get__(self)
 
     @property
