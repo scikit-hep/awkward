@@ -1,9 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
 import math
 import numbers
-from collections.abc import Iterable, Sized
+from collections.abc import Callable, Iterable, Sized
 from typing import Any
 
 import awkward as ak
@@ -127,6 +128,16 @@ class Content:
             )
 
         return self._form_with_key(getkey)
+
+    def _form_with_key(
+        self,
+        key_func: Callable[[Content], ak.forms.Form],
+    ) -> ak._v2.forms.Form:
+        raise ak._v2._util.error(NotImplementedError)
+
+    @property
+    def Form(self) -> type[ak.forms.Form]:
+        raise ak._util.error(NotImplementedError)
 
     @property
     def typetracer(self) -> Self:
@@ -746,7 +757,7 @@ class Content:
         else:
             return self._mergeable(other, mergebool)
 
-    def _mergeable(self, other: "Content", mergebool: bool) -> bool:
+    def _mergeable(self, other: Content, mergebool: bool) -> bool:
         raise ak._util.error(NotImplementedError)
 
     def mergemany(self, others):
