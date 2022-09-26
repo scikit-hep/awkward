@@ -1033,7 +1033,13 @@ class Content:
     ):
         return self._reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
 
-    def all(self, axis=-1, mask=False, keepdims=False, behavior=None):
+    def all(
+        self,
+        axis: int = -1,
+        mask: bool = False,
+        keepdims: bool = False,
+        behavior: dict | None = None,
+    ):
         return self._reduce(awkward._reducers.All, axis, mask, keepdims, behavior)
 
     def min(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
