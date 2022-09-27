@@ -25,7 +25,7 @@ import pandas as pd
 From Python to Awkward
 ----------------------
 
-The function for Python → Awkward conversion is [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html).
+The function for Python → Awkward conversion is {func}`ak.from_iter`.
 
 ```{code-cell} ipython3
 py_objects = [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
@@ -39,9 +39,9 @@ ak_array
 
 See the sections below for how Python types are mapped to Awkward types.
 
-Note that this should be considered a slow, memory-intensive function: not only does it need to iterate over Python data, but it needs to discover the type of the data progressively. Internally, this function uses an [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) to accumulate data and discover types simultaneously. Don't, for instance, convert a large, numerical dataset from NumPy or Arrow into Python objects just to use [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html). There are specialized functions for that: see their tutorials (left-bar or ≡ button on mobile).
+Note that this should be considered a slow, memory-intensive function: not only does it need to iterate over Python data, but it needs to discover the type of the data progressively. Internally, this function uses an {class}`ak.ArrayBuilder` to accumulate data and discover types simultaneously. Don't, for instance, convert a large, numerical dataset from NumPy or Arrow into Python objects just to use {func}`ak.from_iter`. There are specialized functions for that: see their tutorials (left-bar or ≡ button on mobile).
 
-This is also the fallback operation of the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) and [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) constructors. Usually, small examples are built by passing Python objects directly to these constructors.
+This is also the fallback operation of the {class}`ak.Array` and {class}`ak.Record` constructors. Usually, small examples are built by passing Python objects directly to these constructors.
 
 ```{code-cell} ipython3
 ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
@@ -491,7 +491,7 @@ ak.Array([
 Union types: heterogeneous data
 -------------------------------
 
-If the data in a Python iterable have different types at the same level of nesting ("heterogeneous"), the Awkward Arrays produced by [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) have union types.
+If the data in a Python iterable have different types at the same level of nesting ("heterogeneous"), the Awkward Arrays produced by {func}`ak.from_iter` have union types.
 
 Most Awkward operations are defined on union typed Arrays, but they're not generally not as efficient as the same operations on simply typed Arrays.
 
