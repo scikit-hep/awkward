@@ -9,7 +9,7 @@ from typing import Any, TypeVar
 
 import awkward as ak
 import awkward._reducers
-from awkward.forms import Form
+import awkward.forms.form as form
 from awkward.nplike import NumpyLike
 from awkward.typing import Self, TypeAlias
 
@@ -110,7 +110,7 @@ class Content:
         return self._nplike
 
     @property
-    def form(self) -> Form:
+    def form(self) -> form.Form:
         return self.form_with_key(None)
 
     def form_with_key(self, form_key="node{id}", id_start=0):
@@ -148,12 +148,12 @@ class Content:
 
     def _form_with_key(
         self,
-        key_func: Callable[[Content], Form],
-    ) -> Form:
+        key_func: Callable[[Content], form.Form],
+    ) -> form.Form:
         raise ak._util.error(NotImplementedError)
 
     @property
-    def Form(self) -> type[Form]:
+    def Form(self) -> type[form.Form]:
         raise ak._util.error(NotImplementedError)
 
     @property
@@ -180,7 +180,7 @@ class Content:
         form_key: str | None = "node{id}",
         id_start: Integral = 0,
         nplike: NumpyLike | None = None,
-    ) -> tuple[Form, int, Mapping[str, Any]]:
+    ) -> tuple[form.Form, int, Mapping[str, Any]]:
         if container is None:
             container = {}
         if nplike is None:
@@ -229,11 +229,11 @@ class Content:
 
     def _to_buffers(
         self,
-        form: Form,
-        getkey: Callable[[Content, Form, str], str],
+        form: form.Form,
+        getkey: Callable[[Content, form.Form, str], str],
         container: MutableMapping[str, Any] | None,
         nplike: NumpyLike | None,
-    ) -> tuple[Form, int, Mapping[str, Any]]:
+    ) -> tuple[form.Form, int, Mapping[str, Any]]:
         raise ak._util.error(NotImplementedError)
 
     def __len__(self) -> int:
@@ -804,7 +804,7 @@ class Content:
             return True
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not (
-            Form._parameters_equal(
+            form._parameters_equal(
                 self._parameters, other._parameters, only_array_record=True
             )
         ):
@@ -1884,7 +1884,7 @@ class Content:
             self.__class__ is other.__class__
             and len(self) == len(other)
             and ak.identifier._identifiers_equal(self.identifier, other.identifier)
-            and Form._parameters_equal(
+            and form._parameters_equal(
                 self.parameters, other.parameters, only_array_record=False
             )
             and self._layout_equal(other, index_dtype, numpyarray)
