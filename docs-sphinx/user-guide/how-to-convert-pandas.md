@@ -136,7 +136,7 @@ ak.to_dataframe(ak_array, how="outer")
 Conversion through Apache Arrow
 -------------------------------
 
-Since [Apache Arrow](https://arrow.apache.org/) can be converted to and from Awkward Arrays and Pandas, Arrow can connect Awkward and Pandas in both directions. This is an alternative to [ak.to_pandas](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_pandas.html) (described above) with different behavior.
+Since [Apache Arrow](https://arrow.apache.org/) can be converted to and from Awkward Arrays and Pandas, Arrow can connect Awkward and Pandas in both directions. This is an alternative to {func}`ak.to_pandas` (described above) with different behavior.
 
 As described in the tutorial on Arrow, the {func}`ak.to_arrow` function returns a {class}`pyarrow.lib.Arrow` object. Arrow's conversion to Pandas requires a {class}`pyarrow.lib.Table`.
 
@@ -169,7 +169,7 @@ pa_table
 pa_table.to_pandas()
 ```
 
-Note that this is different from the output of [ak.to_pandas](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_pandas.html):
+Note that this is different from the output of {func}`ak.to_pandas`:
 
 ```{code-cell} ipython3
 ak.to_dataframe(ak_array)
