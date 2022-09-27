@@ -28,14 +28,14 @@ import urllib.request
 From Arrow to Awkward
 ---------------------
 
-The function for Arrow → Awkward conversion is [ak.from_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrow.html).
+The function for Arrow → Awkward conversion is {func}`ak.from_arrow`.
 
 The argument to this function can be any of the following types from the pyarrow library:
 
-   * `pyarrow.lib.Array`
-   * `pyarrow.lib.ChunkedArray`
-   * `pyarrow.lib.RecordBatch`
-   * `pyarrow.lib.Table`
+   * {class}`pyarrow.lib.Array`
+   * {class}`pyarrow.lib.ChunkedArray`
+   * {class}`pyarrow.lib.RecordBatch`
+   * {class}`pyarrow.lib.Table`
 
 and they are converted into non-partitioned, non-virtual Awkward Arrays. (Any disjoint chunks in the Arrow array are concatenated.)
 
@@ -63,7 +63,7 @@ array = ak.from_arrow(table)
 array
 ```
 
-The Awkward equivalent of Arrow's schemas is [ak.type](https://awkward-array.readthedocs.io/en/latest/_auto/ak.type.html).
+The Awkward equivalent of Arrow's schemas is {func}`ak.type`.
 
 ```{code-cell} ipython3
 ak.type(array)
@@ -82,9 +82,9 @@ array[array.Legendary].Attack - array[array.Legendary].Defense
 From Awkward to Arrow
 ---------------------
 
-The function for Awkward → Arrow conversion is [ak.to_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrow.html). This function always returns
+The function for Awkward → Arrow conversion is {func}`ak.to_arrow`. This function always returns
 
-   * `pyarrow.lib.Array`
+   * {class}`pyarrow.lib.Array`
 
 type.
 
@@ -106,7 +106,7 @@ type(pa_array)
 isinstance(pa_array, pa.lib.Array)
 ```
 
-If you need `pyarrow.lib.RecordBatch`, you can build this using pyarrow:
+If you need {class}`pyarrow.lib.RecordBatch`, you can build this using pyarrow:
 
 ```{code-cell} ipython3
 pa_batch = pa.RecordBatch.from_arrays([
@@ -116,14 +116,14 @@ pa_batch = pa.RecordBatch.from_arrays([
 pa_batch
 ```
 
-If you need `pyarrow.lib.Table`, you can build this using pyarrow:
+If you need {class}`pyarrow.lib.Table`, you can build this using pyarrow:
 
 ```{code-cell} ipython3
 pa_table = pa.Table.from_batches([pa_batch])
 pa_table
 ```
 
-The columns of this Table are `pa.lib.ChunkedArray` instances:
+The columns of this Table are {class}`pa.lib.ChunkedArray` instances:
 
 ```{code-cell} ipython3
 pa_table[0]
@@ -135,16 +135,16 @@ pa_table[1]
 
 shares memory as much as is possible, which [can be faster than constructing Pandas directly](https://ursalabs.org/blog/fast-pandas-loading/).
 
-+++
++++ {"tags": []}
 
 Reading/writing data streams and random access files
 ----------------------------------------------------
 
 Arrow has several methods for interfacing to data streams and disk-bound files, [see the official documentation](https://arrow.apache.org/docs/python/ipc.html) for instructions.
 
-When following those instructions, remember that [ak.from_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrow.html) can accept pyarrow Arrays, ChunkedArrays, RecordBatches, and Tables, but [ak.to_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrow.html) _only returns Arrow Arrays_.
+When following those instructions, remember that {func}`ak.from_arrow` can accept {class}`pyarrow.lib.Array`, {class}`pyarrow.lib.ChunkedArray`, {class}`pyarrow.lib.RecordBatch`, and {class}`pyarrow.lib.Table`, but {func}`ak.to_arrow` _only returns {class}`pyarrow.lib.Array`_.
 
-For instance, when writing to an IPC stream, Arrow requires RecordBatches, so you need to build them:
+For instance, when writing to an IPC stream, Arrow requires {class}`pyarrow.lib.RecordBatch`, so you need to build them:
 
 ```{code-cell} ipython3
 ak_array = ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])
@@ -180,7 +180,7 @@ writer.close()
 bytes(sink.getvalue())
 ```
 
-But when reading them back, we can just pass the RecordBatches (yielded by the RecordBatchStreamReader `reader`), we can just pass them to [ak.from_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrow.html):
+But when reading them back, we can just pass the record batches (yielded by the {class}`pyarrow.lib.RecordBatchStreamReader` `reader`) to {func}`ak.from_arrow`:
 
 ```{code-cell} ipython3
 reader = pa.ipc.open_stream(sink.getvalue())
@@ -197,9 +197,9 @@ Reading/writing the Feather file format
 
 Feather is a lightweight file format that puts Arrow Tables in disk-bound files, [see the official documentation](https://arrow.apache.org/docs/python/feather.html) for instructions.
 
-When following those instructions, remember that [ak.from_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrow.html) can accept Arrow Tables, but [ak.to_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrow.html) _only returns Arrow Arrays_.
+When following those instructions, remember that {func}`ak.from_arrow` can accept {class}`pyarrow.lib.Table`, but {func}`ak.to_arrow` _only returns {class}`pyarrow.lib.Array`_.
 
-For instance, when writing to a Feather file, Arrow requires Tables, so you need to build them:
+For instance, when writing to a Feather file, Arrow requires {class}`pyarrow.lib.Table`, so you need to build them:
 
 ```{code-cell} ipython3
 ak_array = ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])
@@ -222,7 +222,7 @@ import pyarrow.feather
 pyarrow.feather.write_feather(pa_table, "/tmp/example.feather")
 ```
 
-But when reading them back, we can just pass the Arrow Table to [ak.from_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrow.html).
+But when reading them back, we can just pass the Arrow Table to {func}`ak.from_arrow`.
 
 ```{code-cell} ipython3
 from_feather = pyarrow.feather.read_table("/tmp/example.feather")
@@ -242,7 +242,7 @@ Reading/writing the Parquet file format
 
 With data converted to and from Arrow, it can then be saved and loaded from Parquet files. [Arrow's official Parquet documentation](https://arrow.apache.org/docs/python/parquet.html) provides instructions for converting Arrow to and from Parquet, but Parquet is a sufficiently important file format that Awkward has specialized functions for it.
 
-The [ak.to_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_parquet.html) function writes Awkward Arrays as Parquet files. It has relatively few options.
+The {func}`ak.to_parquet` function writes Awkward Arrays as Parquet files. It has relatively few options.
 
 ```{code-cell} ipython3
 ak_array = ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])
@@ -253,7 +253,7 @@ ak_array
 ak.to_parquet(ak_array, "/tmp/example.parquet")
 ```
 
-The [ak.from_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_parquet.html) function reads Parquet files as Awkward Arrays, with quite a few more options. Basic usage just gives you the Awkward Array back.
+The {func}`ak.from_parquet` function reads Parquet files as Awkward Arrays, with quite a few more options. Basic usage just gives you the Awkward Array back.
 
 ```{code-cell} ipython3
 ak.from_parquet("/tmp/example.parquet")
