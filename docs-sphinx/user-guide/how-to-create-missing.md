@@ -20,7 +20,7 @@ This functionality is somewhat like NumPy's [masked arrays](https://numpy.org/do
 
 Pandas also handles missing data, but in several different ways. For floating point columns, `NaN` (not a number) is used to mean "missing," and [as of version 1.0](https://pandas.pydata.org/pandas-docs/stable/user_guide/missing_data.html#missing-data-na), Pandas has a `pd.NA` object for missing data in other data types.
 
-In Awkward Array, floating point `NaN` and a missing value are clearly distinct. Missing data, like all data in Awkward Arrays, are also not represented by any Python object; they are converted _to_ and _from_ `None` by [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html) and [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html).
+In Awkward Array, floating point `NaN` and a missing value are clearly distinct. Missing data, like all data in Awkward Arrays, are also not represented by any Python object; they are converted _to_ and _from_ `None` by {func}`ak.to_list` and {func}`ak.from_iter`.
 
 ```{code-cell} ipython3
 import awkward as ak
@@ -30,7 +30,7 @@ import numpy as np
 From Python None
 ----------------
 
-The [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor and [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) interpret `None` as a missing value, and [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html) converts them back into `None`.
+The {class}`ak.Array` constructor and {func}`ak.from_iter` interpret `None` as a missing value, and {func}`ak.to_list` converts them back into `None`.
 
 ```{code-cell} ipython3
 ak.Array([1, 2, 3, None, 4, 5])
@@ -86,14 +86,14 @@ But it uses `None` for missing values in `tolist`:
 numpy_array.tolist()
 ```
 
-The [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html) function converts masked arrays into Awkward Arrays with missing values, as does the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor.
+The {func}`ak.from_numpy` function converts masked arrays into Awkward Arrays with missing values, as does the {class}`ak.Array` constructor.
 
 ```{code-cell} ipython3
 awkward_array = ak.Array(numpy_array)
 awkward_array
 ```
 
-The reverse, [ak.to_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_numpy.html), returns masked arrays if the Awkward Array has missing data.
+The reverse, {func}`ak.to_numpy`, returns masked arrays if the Awkward Array has missing data.
 
 ```{code-cell} ipython3
 ak.to_numpy(awkward_array)
@@ -110,7 +110,7 @@ np.asarray(awkward_array)
 Missing rows vs missing numbers
 -------------------------------
 
-In Awkward Array, a missing list is a different thing from a list whose values are missing. However, [ak.to_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_numpy.html) converts it for you.
+In Awkward Array, a missing list is a different thing from a list whose values are missing. However, {func}`ak.to_numpy` converts it for you.
 
 ```{code-cell} ipython3
 missing_row = ak.Array([[1, 2, 3], None, [4, 5, 6]])
@@ -140,7 +140,7 @@ Missing values as empty lists
 
 Sometimes, it's useful to think about a potentially missing value as a length-1 list if it is not missing and a length-0 list if it is. (Some languages define the [option type as a kind of list](https://www.scala-lang.org/api/2.13.3/scala/Option.html).)
 
-The Awkward functions [ak.singletons](https://awkward-array.readthedocs.io/en/latest/_auto/ak.singletons.html) and [ak.firsts](https://awkward-array.readthedocs.io/en/latest/_auto/ak.firsts.html) convert from "`None` form" to and from "lists form."
+The Awkward functions {func}`ak.singletons` and {func}`ak.firsts` convert from "`None` form" to and from "lists form."
 
 ```{code-cell} ipython3
 none_form = ak.Array([1, 2, 3, None, None, 5])
@@ -181,7 +181,7 @@ The data can also be effectively filtered by replacing values with `None`. The f
 array.mask[booleans]
 ```
 
-(Or use the [ak.mask](https://awkward-array.readthedocs.io/en/latest/_auto/ak.mask.html) function.)
+(Or use the {func}`ak.mask` function.)
 
 +++
 
@@ -202,9 +202,9 @@ array + array[booleans]
 With ArrayBuilder
 -----------------
 
-[ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can add missing values to an array using the `null` method or appending `None`.
+{class}`ak.ArrayBuilder` is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can add missing values to an array using the `null` method or appending `None`.
 
-(This is what [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) uses internally to accumulate data.)
+(This is what {func}`ak.from_iter` uses internally to accumulate data.)
 
 ```{code-cell} ipython3
 builder = ak.ArrayBuilder()
@@ -222,9 +222,9 @@ array
 In Numba
 --------
 
-Functions that Numba Just-In-Time (JIT) compiles can use [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) or construct a boolean array for [ak.mask](https://awkward-array.readthedocs.io/en/latest/_auto/ak.mask.html).
+Functions that Numba Just-In-Time (JIT) compiles can use {class}`ak.ArrayBuilder` or construct a boolean array for {func}`ak.mask`.
 
-([ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context.)
+({class}`ak.ArrayBuilder` can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context.)
 
 ```{code-cell} ipython3
 import numba as nb
