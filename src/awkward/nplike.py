@@ -566,7 +566,7 @@ class Cupy(NumpyLike):
                 ak.highlevel.Array,
                 ak.highlevel.Record,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
             ),
         ):
             out = ak.operations.ak_to_cupy.to_cupy(array)
@@ -600,7 +600,7 @@ class Cupy(NumpyLike):
                 ak.highlevel.Array,
                 ak.highlevel.Record,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
             ),
         ):
             out = ak.operations.ak_to_cupy.to_cupy(array)
@@ -730,7 +730,7 @@ class Jax(NumpyLike):
                 ak.Record,
                 ak.ArrayBuilder,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
                 ak._ext.ArrayBuilder,
             ),
         ):
@@ -782,7 +782,7 @@ class Jax(NumpyLike):
                 ak.highlevel.Array,
                 ak.highlevel.Record,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
             ),
         ):
             out = ak.operations.ak_to_jax.to_jax(array)

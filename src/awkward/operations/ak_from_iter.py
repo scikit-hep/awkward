@@ -16,7 +16,7 @@ def from_iter(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         allow_record (bool): If True, the outermost element may be a record
-            (returning #ak.Record or #ak.contents.Record type, depending on
+            (returning #ak.Record or #ak.record.Record type, depending on
             `highlevel`); if False, the outermost element must be an array.
         initial (int): Initial size (in bytes) of buffers used by the
             [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
