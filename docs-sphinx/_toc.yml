@@ -53,8 +53,6 @@ subtrees:
                         title: "Unflattening and grouping [todo]"
                       - file: user-guide/how-to-create-arraybuilder
                         title: "ArrayBuilder (easy & general)"
-                      - file: user-guide/how-to-create-layoutbuilder
-                        title: "LayoutBuilder (more control)"
                       - file: user-guide/how-to-create-constructors
                         title: "Direct constructors (fastest)"
 
