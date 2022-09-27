@@ -14,9 +14,9 @@ kernelspec:
 How to create arrays with ArrayBuilder (easy and general)
 =========================================================
 
-If you're not getting data from a file or conversion from another format, you may need to create it from scratch. [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is a general, high-level way to do that, though it has performance limitations.
+If you're not getting data from a file or conversion from another format, you may need to create it from scratch. {class}`ak.ArrayBuilder` is a general, high-level way to do that, though it has performance limitations.
 
-The biggest difference between an [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) and an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) is that you can append data to a builder, but an array is immutable ([see qualifications on mutability](how-to-convert-numpy.html#mutability-of-awkward-arrays-from-numpy)). It's a bit like a Python list, which has an `append` method, but [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) has many methods for appending different types of structures.
+The biggest difference between an {class}`ak.ArrayBuilder` and an {class}`ak.Array` is that you can append data to a builder, but an array is immutable ([see qualifications on mutability](how-to-convert-numpy.html#mutability-of-awkward-arrays-from-numpy)). It's a bit like a Python list, which has an `append` method, but {class}`ak.ArrayBuilder` has many methods for appending different types of structures.
 
 +++
 
@@ -89,7 +89,7 @@ builder.type
 Snapshot
 --------
 
-To turn an [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) into an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html), call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffected).
+To turn an {class}`ak.ArrayBuilder` into an {class}`ak.Array`, call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffected).
 
 ```{code-cell}
 array = builder.snapshot()
@@ -176,7 +176,7 @@ with builder.list():
 builder
 ```
 
-(Note that the Python `with` statement, a.k.a. "context manager," is not available in Numba jit-compiled functions, in case you're using [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) in Numba.)
+(Note that the Python `with` statement, a.k.a. "context manager," is not available in Numba jit-compiled functions, in case you're using {class}`ak.ArrayBuilder` in Numba.)
 
 +++
 
@@ -246,7 +246,7 @@ If the set of fields changes while collecting records, the builder algorithm cou
    1. Assume that the new field or fields have simply been missing up to this point, and that any now-unspecified fields are also missing.
    2. Assume that a different set of fields means a different type and make a union.
 
-By default, [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) follows policy (1), but it can be made to follow policy (2) if the names of the records are different.
+By default, {class}`ak.ArrayBuilder` follows policy (1), but it can be made to follow policy (2) if the names of the records are different.
 
 ```{code-cell}
 policy1 = ak.ArrayBuilder()
@@ -281,7 +281,7 @@ policy2.type
 Comments on union-type
 ----------------------
 
-Although it's easy to make [union-type](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html) data with [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html), the applications of union-type data are more limited. For instance, we can select a field that belongs to _all_ types of the union, but not any fields that don't share that field.
+Although it's easy to make [union-type](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html) data with {class}`ak.ArrayBuilder`, the applications of union-type data are more limited. For instance, we can select a field that belongs to _all_ types of the union, but not any fields that don't share that field.
 
 ```{code-cell}
 array2 = policy2.snapshot()
@@ -318,7 +318,7 @@ At the time of writing, [union-types](https://awkward-array.readthedocs.io/en/la
 Use in Numba
 ------------
 
-[ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) can be used in Numba-compiled functions, and that can often be the most convenient way to build up an array, relatively quickly (see below).
+{class}`ak.ArrayBuilder` can be used in Numba-compiled functions, and that can often be the most convenient way to build up an array, relatively quickly (see below).
 
 There are a few limitations, though:
 
@@ -376,14 +376,14 @@ new_array
 new_array.layout
 ```
 
-Above, we see that `new_array` is just making references ([ak.layout.IndexedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedArray.html)) of an [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) with `x = [1, 2, 3]` and `y = [1.1, 2.2, 3.3]`.
+Above, we see that `new_array` is just making references ({classY}`ak.layout.IndexedArray`) of an {classY}`ak.layout.RecordArray` with `x = [1, 2, 3]` and `y = [1.1, 2.2, 3.3]`.
 
 +++
 
 Comments on performance
 -----------------------
 
-Although [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is implemented in C++, it is dynamically typed by design. The advantage of compiled code over interpreted code often comes in the knowledge of data types at compile-time, enabling fewer runtime checks and more compiler optimizations.
+Although {class}`ak.ArrayBuilder` is implemented in C++, it is dynamically typed by design. The advantage of compiled code over interpreted code often comes in the knowledge of data types at compile-time, enabling fewer runtime checks and more compiler optimizations.
 
 If you're using a builder in Python, there's also the overhead of calling from Python.
 
@@ -391,8 +391,8 @@ If you're using a builder in Numba, the builder calls are external function call
 
 Whenever you have a choice between
 
-   1. using the [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html),
+   1. using the {class}`ak.ArrayBuilder`,
    2. constructing an array manually from layouts (next chapter), or
    3. filling a NumPy array and using it as an index,
 
-the alternatives are often faster. The point of [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is that it is *easy*.
+the alternatives are often faster. The point of {class}`ak.ArrayBuilder` is that it is *easy*.
