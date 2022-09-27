@@ -1451,7 +1451,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 class Record(NDArrayOperatorsMixin):
     """
     Args:
-        data (#ak.contents.Record, #ak.Record, str, or dict):
+        data (#ak.record.Record, #ak.Record, str, or dict):
             Data to wrap or convert into a record.
             If a string, the data are assumed to be JSON.
             If a dict, calls #ak.from_iter, which assumes all inner
@@ -1532,19 +1532,19 @@ class Record(NDArrayOperatorsMixin):
     @property
     def layout(self):
         """
-        The #ak.contents.Record that contains composable #ak.contents.Content
+        The #ak.record.Record that contains composable #ak.contents.Content
         elements to determine how the array is structured.
 
         See #ak.Array.layout for a more complete description.
 
-        The #ak.contents.Record is not a subclass of #ak.contents.Content in
+        The #ak.record.Record is not a subclass of #ak.contents.Content in
         Python (note: [Record](../_static/classawkward_1_1Record.html) *is* a
         subclass of [Content](../_static/classawkward_1_1Content.html) in
-        C++!) and it is not composable with them: #ak.contents.Record contains
+        C++!) and it is not composable with them: #ak.record.Record contains
         one #ak.contents.RecordArray (which is a #ak.contents.Content), but
-        #ak.contents.Content nodes cannot contain a #ak.contents.Record.
+        #ak.contents.Content nodes cannot contain a #ak.record.Record.
 
-        A #ak.contents.Record is not an independent entity from its
+        A #ak.record.Record is not an independent entity from its
         #ak.contents.RecordArray; it's really just a marker indicating which
         element to select. The XML representation reflects that:
 
