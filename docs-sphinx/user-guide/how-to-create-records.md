@@ -108,7 +108,7 @@ from_rows.type
 Using ak.zip
 ------------
 
-The {PTOLEMY}`ak.zip` function combines columns into an array of records, similar to the Pandas-style constructor described above.
+The {func}`ak.zip` function combines columns into an array of records, similar to the Pandas-style constructor described above.
 
 ```{code-cell} ipython3
 from_columns = ak.zip({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
