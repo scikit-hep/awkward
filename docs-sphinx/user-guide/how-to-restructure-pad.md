@@ -16,7 +16,7 @@ How to pad and clip arrays, particularly for machine learning
 
 Most applications of arrays expect them to be rectilinear—a rectangular table of numbers in _N_ dimensions. Machine learning frameworks refer to these blocks of numbers as "tensors," but they are equivalent to _N_-dimensional NumPy arrays. Awkward Array handles more general data than these, but if your intention is to pass the data to a framework that wants a tensor, you have to reduce your data to a tensor.
 
-This tutorial presents several ways of doing that. Like [flattening for plots](how-to-restructure-flatten), the method you choose will depend on what your data mean and what you want to get out of the machine learning process. For instance, if you remove all list structures with [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html), you can't expect the machine learning algorithm to learn about lists (whatever they mean in your application), and if you truncate them at a particular length, it won't learn about the values that have been removed.
+This tutorial presents several ways of doing that. Like [flattening for plots](how-to-restructure-flatten), the method you choose will depend on what your data mean and what you want to get out of the machine learning process. For instance, if you remove all list structures with {func}`ak.flatten`, you can't expect the machine learning algorithm to learn about lists (whatever they mean in your application), and if you truncate them at a particular length, it won't learn about the values that have been removed.
 
 (In principle, graph neural networks should be able to learn about variable-length data without any losses, but I'm not familiar enough with how to set up these processes to explain it. If you're an expert, we'd like to hear tips and tricks in [GitHub Discussions](https://github.com/scikit-hep/awkward-1.0/discussions)!)
 
@@ -35,19 +35,19 @@ array = ak.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
 array
 ```
 
-If the list boundaries are irrelevant to your machine learning application, you can simply [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) them.
+If the list boundaries are irrelevant to your machine learning application, you can simply {func}`ak.flatten` them.
 
 ```{code-cell} ipython3
 ak.flatten(array)
 ```
 
-The default `axis` for [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) is `1`, which is to say, the first level of nested list (`axis=1`) gets squashed to the outer level of array nesting (`axis=0`). If you have many levels to flatten at once, you can use `axis=None`:
+The default `axis` for {func}`ak.flatten` is `1`, which is to say, the first level of nested list (`axis=1`) gets squashed to the outer level of array nesting (`axis=0`). If you have many levels to flatten at once, you can use `axis=None`:
 
 ```{code-cell} ipython3
 ak.flatten(ak.Array([[[[[[1.1, 2.2, 3.3]]], [[[4.4, 5.5]]]]]]), axis=None)
 ```
 
-However, be aware that [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) with `axis=None` will also merge all fields of a record, which is usually undesirable, and the order might not be what you expect.
+However, be aware that {func}`ak.flatten` with `axis=None` will also merge all fields of a record, which is usually undesirable, and the order might not be what you expect.
 
 ```{code-cell} ipython3
 ak.flatten(ak.Array([{"x": 1.1, "y": 10}, {"x": 2.2, "y": 20}, {"x": 3.3, "y": 30}]), axis=None)
@@ -83,7 +83,7 @@ Flattening it would turn them into a big run-on sentence, which may be a bad thi
 ak.flatten(array)
 ```
 
-Suppose that we want to fix this by adding `0` as a marker meaning "end of sentence/stop." One way to do it is to make an array of `[0]` lists with the same length as `array` and [ak.concatenate](https://awkward-array.readthedocs.io/en/latest/_auto/ak.concatenate.html) them at `axis=1`.
+Suppose that we want to fix this by adding `0` as a marker meaning "end of sentence/stop." One way to do it is to make an array of `[0]` lists with the same length as `array` and {func}`ak.concatenate` them at `axis=1`.
 
 ```{code-cell} ipython3
 periods = np.zeros((len(array), 1), np.int64)
@@ -105,7 +105,7 @@ ak.flatten(ak.concatenate([array, periods], axis=1))
 Padding lists to a common length
 --------------------------------
 
-A general function for turning an array of lists into lists of the same length is [ak.pad_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.pad_none.html). With the default `clip=False`, it ensures that a set of lists have _at least_ a given target length.
+A general function for turning an array of lists into lists of the same length is {func}`ak.pad_none`. With the default `clip=False`, it ensures that a set of lists have _at least_ a given target length.
 
 ```{code-cell} ipython3
 array = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
@@ -132,15 +132,15 @@ ak.pad_none(array, 2, clip=True).tolist()
 ak.pad_none(array, 2, clip=True).type
 ```
 
-Now the type string says that the nested lists all have exactly two elements each. This can be directly converted into NumPy (allowing for missing data with [ak.to_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_numpy.html); casting as `np.asarray` doesn't allow the arrays to be [NumPy masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html)).
+Now the type string says that the nested lists all have exactly two elements each. This can be directly converted into NumPy (allowing for missing data with {func}`ak.to_numpy`; casting as `np.asarray` doesn't allow the arrays to be [NumPy masked arrays](https://numpy.org/doc/stable/reference/maskedarray.html)).
 
 ```{code-cell} ipython3
 ak.to_numpy(ak.pad_none(array, 2, clip=True))
 ```
 
-Perhaps your machine learning library knows how to deal with NumPy masked arrays. If it does not, you can replace all of the missing values with [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html).
+Perhaps your machine learning library knows how to deal with NumPy masked arrays. If it does not, you can replace all of the missing values with {func}`ak.fill_none`.
 
-[ak.pad_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.pad_none.html) and [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) are frequently used together.
+{func}`ak.pad_none` and {func}`ak.fill_none` are frequently used together.
 
 ```{code-cell} ipython3
 ak.fill_none(ak.pad_none(array, 2, clip=True), 999)
@@ -153,7 +153,7 @@ np.asarray(ak.fill_none(ak.pad_none(array, 2, clip=True), 999))
 Record fields into lists
 ------------------------
 
-Sometimes, the data you need to put into one big array (tensor) for machine learning is scattered among several record fields. In Awkward Array, record fields are discontiguous (are stored in separate arrays) and nested lists are contiguous (same array). This will require a copy using [ak.concatenate](https://awkward-array.readthedocs.io/en/latest/_auto/ak.concatenate.html).
+Sometimes, the data you need to put into one big array (tensor) for machine learning is scattered among several record fields. In Awkward Array, record fields are discontiguous (are stored in separate arrays) and nested lists are contiguous (same array). This will require a copy using {func}`ak.concatenate`.
 
 ```{code-cell} ipython3
 array = ak.Array([
@@ -176,7 +176,7 @@ array.a[:, np.newaxis], array.b[:, np.newaxis]
 ak.concatenate([array.a[:, np.newaxis], array.b[:, np.newaxis]], axis=1)
 ```
 
-If there are a lot of fields, doing this manually for each one would be a chore, so we use [ak.fields](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fields.html) and [ak.unzip](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unzip.html).
+If there are a lot of fields, doing this manually for each one would be a chore, so we use {func}`ak.fields` and {func}`ak.unzip`.
 
 ```{code-cell} ipython3
 ak.fields(array)
