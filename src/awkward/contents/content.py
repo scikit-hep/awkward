@@ -148,7 +148,7 @@ class Content:
 
     def _form_with_key(
         self,
-        key_func: Callable[[Content], form.Form],
+        getkey: Callable[[Content], form.Form],
     ) -> form.Form:
         raise ak._util.error(NotImplementedError)
 
