@@ -24,7 +24,7 @@ import pathlib
 From JSON to Awkward
 --------------------
 
-The function for JSON → Awkward conversion is [ak.from_json](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_json.html).
+The function for JSON → Awkward conversion is {func}`ak.from_json`.
 
 It can be given a JSON string:
 
@@ -42,7 +42,7 @@ or a file name:
 ak.from_json(pathlib.Path("/tmp/awkward-example-1.json"))
 ```
 
-If the dataset contains a single JSON object, an [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) is returned, rather than an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html).
+If the dataset contains a single JSON object, an {class}`ak.Record` is returned, rather than an {class}`ak.Array`.
 
 ```{code-cell} ipython3
 ak.from_json('{"x": 1, "y": [1, 2], "z": "hello"}')
@@ -51,7 +51,7 @@ ak.from_json('{"x": 1, "y": [1, 2], "z": "hello"}')
 From Awkward to JSON
 --------------------
 
-The function for Awkward → JSON conversion is [ak.to_json](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_json.html).
+The function for Awkward → JSON conversion is {func}`ak.to_json`.
 
 With one argument, it returns a string.
 
@@ -72,11 +72,11 @@ ak.to_json(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]), "/tmp/awkward-example-2.
 Conversion of different types
 -----------------------------
 
-All of the rules that apply for Python objects in [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) and [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html) apply to [ak.from_json](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_json.html) and [ak.to_json](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_json.html), replacing builtin Python types for JSON types. (One exception: JSON has no equivalent of a Python tuple.)
+All of the rules that apply for Python objects in {func}`ak.from_iter` and {func}`ak.to_list` apply to {func}`ak.from_json` and {func}`ak.to_json`, replacing builtin Python types for JSON types. (One exception: JSON has no equivalent of a Python tuple.)
 
 +++
 
 Performance
 -----------
 
-Since Awkward Array internally uses [RapidJSON](https://rapidjson.org/) to simultaneously parse and convert the JSON string, [ak.from_json](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_json.html) and [ak.to_json](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_json.html) should always be faster and use less memory than [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) and [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html). Don't convert JSON strings into or out of Python objects for the sake of converting them as Python objects: use the JSON converters directly.
+Since Awkward Array internally uses [RapidJSON](https://rapidjson.org/) to simultaneously parse and convert the JSON string, {func}`ak.from_json` and {func}`ak.to_json` should always be faster and use less memory than {func}`ak.from_iter` and {func}`ak.to_list`. Don't convert JSON strings into or out of Python objects for the sake of converting them as Python objects: use the JSON converters directly.
