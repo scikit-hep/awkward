@@ -26,7 +26,7 @@ import numpy as np
 From Python strings
 -------------------
 
-The [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor and [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) recognize strings, and strings are returned by [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html).
+The {class}`ak.Array` constructor and {func}`ak.from_iter` recognize strings, and strings are returned by {func}`ak.to_list`.
 
 ```{code-cell} ipython3
 ak.Array(["one", "two", "three"])
@@ -41,7 +41,7 @@ ak.Array([["one", "two"], [], ["three"]])
 From NumPy arrays
 -----------------
 
-NumPy strings are also recognized by [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html) and [ak.to_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_numpy.html).
+NumPy strings are also recognized by {func}`ak.from_numpy` and {func}`ak.to_numpy`.
 
 ```{code-cell} ipython3
 numpy_array = np.array(["one", "two", "three", "four"])
@@ -76,7 +76,7 @@ awkward_array == "three"
 awkward_array == ak.Array(["ONE", "TWO", "three", "four"])
 ```
 
-Similarly, [ak.sort](https://awkward-array.readthedocs.io/en/latest/_auto/ak.sort.html) and [ak.argsort](https://awkward-array.readthedocs.io/en/latest/_auto/ak.argsort.html) sort strings lexicographically, not individual characters.
+Similarly, {func}`ak.sort` and {func}`ak.argsort` sort strings lexicographically, not individual characters.
 
 ```{code-cell} ipython3
 ak.sort(awkward_array)
@@ -95,7 +95,7 @@ Categorical strings
 
 A large set of strings with few unique values are more efficiently manipulated as integers than as strings. In Pandas, this is [categorical data](https://pandas.pydata.org/pandas-docs/stable/user_guide/categorical.html), in R, it's called a [factor](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/factor), and in Arrow and Parquet, it's [dictionary encoding](https://arrow.apache.org/blog/2019/09/05/faster-strings-cpp-parquet/).
 
-The [ak.to_categorical](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_categorical.html) function makes Awkward Arrays categorical in this sense. [ak.to_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrow.html) and [ak.to_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_parquet.html) recognize categorical data and convert it to the corresponding Arrow and Parquet types.
+The {func}`ak.to_categorical` function makes Awkward Arrays categorical in this sense. {func}`ak.to_arrow` and {func}`ak.to_parquet` recognize categorical data and convert it to the corresponding Arrow and Parquet types.
 
 ```{code-cell} ipython3
 uncategorized = ak.Array(["three", "one", "two", "two", "three", "one", "one", "one"])
@@ -126,9 +126,9 @@ categorized == "one"
 With ArrayBuilder
 -----------------
 
-[ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can add strings by calling the `string` method or simply appending them.
+{func}`ak.ArrayBuilder` is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can add strings by calling the `string` method or simply appending them.
 
-(This is what [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) uses internally to accumulate data.)
+(This is what {func}`ak.from_iter` uses internally to accumulate data.)
 
 ```{code-cell} ipython3
 builder = ak.ArrayBuilder()
