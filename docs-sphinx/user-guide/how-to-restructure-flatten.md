@@ -31,9 +31,9 @@ To destructure an array for plotting, you'll want to
    * remove record structures,
    * remove missing data
 
-There is a function that does all of these things in one call, [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) with `axis=None`, but you don't want to apply that without thinking because structure is important to the meaning of your data and you want to be able to interpret the plot. Destructuring is an information-losing operation, so your guidance is required to eliminate exactly the structure you want to eliminate, and there are several ways to do that, depending on what you want to do.
+There is a function that does all of these things in one call, {func}`ak.flatten` with `axis=None`, but you don't want to apply that without thinking because structure is important to the meaning of your data and you want to be able to interpret the plot. Destructuring is an information-losing operation, so your guidance is required to eliminate exactly the structure you want to eliminate, and there are several ways to do that, depending on what you want to do.
 
-After destructuring, you might _still_ need to call `np.asarray` on the output because the plotting library might not recognize an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) as an array. You'll probably also want to develop your destructuring on a commandline or a different Jupyter cell from the plotting library function call, to understand what structure the output has without the added complication of the plotting library's error messages.
+After destructuring, you might _still_ need to call `np.asarray` on the output because the plotting library might not recognize an {class}`ak.Array` as an array. You'll probably also want to develop your destructuring on a commandline or a different Jupyter cell from the plotting library function call, to understand what structure the output has without the added complication of the plotting library's error messages.
 
 ```{code-cell} ipython3
 import awkward as ak
@@ -43,7 +43,7 @@ import numpy as np
 ak.flatten with axis=None
 -------------------------
 
-As mentioned above, [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) with `axis=None` is the sledgehammer that turns any array into a 1-dimensional array with no nested lists, no nested records, and no missing data.
+As mentioned above, {func}`ak.flatten` with `axis=None` is the sledgehammer that turns any array into a 1-dimensional array with no nested lists, no nested records, and no missing data.
 
 ```{code-cell} ipython3
 array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]])
@@ -92,7 +92,7 @@ array.x
 array["x"]
 ```
 
-This controls the biggest deficiency of [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) with `axis=None`, the mixing of data with different meanings.
+This controls the biggest deficiency of {func}`ak.flatten` with `axis=None`, the mixing of data with different meanings.
 
 ```{code-cell} ipython3
 ak.flatten(array.x, axis=None)
@@ -135,7 +135,7 @@ ak.flatten(array[["x", "y"], "up"], axis=None)
 ak.flatten for one axis
 -----------------------
 
-Since `axis=None` is so dangerous, the default value of [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) is `axis=1`. This flattens only the first nested dimension.
+Since `axis=None` is so dangerous, the default value of {func}`ak.flatten` is `axis=1`. This flattens only the first nested dimension.
 
 ```{code-cell} ipython3
 ak.flatten(ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]))
@@ -165,7 +165,7 @@ Moreover, you can't flatten already-flat data because a 1-dimensional array does
 ak.flatten(ak.Array([1, 2, 3, 4, 5]))
 ```
 
-`axis=0` is a valid option for [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html), but since there can't be any lists at this level, it only removes missing values.
+`axis=0` is a valid option for {func}`ak.flatten`, but since there can't be any lists at this level, it only removes missing values.
 
 ```{code-cell} ipython3
 ak.flatten(ak.Array([1, 2, 3, None, None, 4, 5]), axis=0)
@@ -224,7 +224,7 @@ But this array still has structure, so you can flatten it _as an additional step
 ak.flatten(array[:, :1])
 ```
 
-Alternatively, you may want to attack the problem head-on: the issue is that some lists have too few elements, so why not remove those lists with an explicit slice? The [ak.num](https://awkward-array.readthedocs.io/en/latest/_auto/ak.num.html) function tells us the length of each nested list.
+Alternatively, you may want to attack the problem head-on: the issue is that some lists have too few elements, so why not remove those lists with an explicit slice? The {func}`ak.num` function tells us the length of each nested list.
 
 ```{code-cell} ipython3
 ak.num(array)
@@ -269,7 +269,7 @@ Aggregating each list
 
 Reductions should be familiar to users of SQL and Pandas; after grouping data by some quantity, one must apply some aggregating operation on each group to get one number for each group. The one-element slices of the previous section are like SQL's `FIRST_VALUE` and `LAST_VALUE`, which is a special case of reducing.
 
-The architypical aggregation function is "sum," which reduces a list by adding up its values. [ak.sum](https://awkward-array.readthedocs.io/en/latest/_auto/ak.sum.html) and its relatives, [ak.prod](https://awkward-array.readthedocs.io/en/latest/_auto/ak.prod.html) (product/multiplication), [ak.mean](https://awkward-array.readthedocs.io/en/latest/_auto/ak.mean.html), etc., are all reducers in Awkward Array.
+The architypical aggregation function is "sum," which reduces a list by adding up its values. {func}`ak.sum` and its relatives, {func}`ak.prod` (product/multiplication), {func}`ak.mean`, etc., are all reducers in Awkward Array.
 
 Following NumPy, their default `axis` is `None`, but for this application, you'll need to specify an explicit axis.
 
@@ -282,7 +282,7 @@ array
 ak.sum(array, axis=1)
 ```
 
-Some of these are not defined for empty lists, so you'll need to either replace the missing values with [ak.fill_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.fill_none.html) or flatten them.
+Some of these are not defined for empty lists, so you'll need to either replace the missing values with {func}`ak.fill_none` or flatten them.
 
 ```{code-cell} ipython3
 ak.mean(array, axis=1)
@@ -307,7 +307,7 @@ Each of these has a different effect: filling with `0` puts an identifiable valu
 Minimizing/maximizing over each list
 ------------------------------------
 
-Minimizing and maximizing are also reducers, [ak.min](https://awkward-array.readthedocs.io/en/latest/_auto/ak.min.html) and [ak.max](https://awkward-array.readthedocs.io/en/latest/_auto/ak.max.html) (and [ak.ptp](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ptp.html) for the peak-to-peak difference between the minimum and maximum).
+Minimizing and maximizing are also reducers, {func}`ak.min` and {func}`ak.max` (and {func}`ak.ptp` for the peak-to-peak difference between the minimum and maximum).
 
 They deserve their own section because they are an important case.
 
@@ -328,7 +328,7 @@ As before, they aren't defined for empty lists, so you'll have to _choose_ a met
 
 +++
 
-Sometimes, you want the "top N" elements from each list, rather than the "top 1." Awkward Array doesn't ([yet](https://github.com/scikit-hep/awkward-1.0/issues/554)) have a function for the "top N" elements, but it can be done with [ak.sort](https://awkward-array.readthedocs.io/en/latest/_auto/ak.sort.html) and a slice.
+Sometimes, you want the "top N" elements from each list, rather than the "top 1." Awkward Array doesn't ([yet](https://github.com/scikit-hep/awkward-1.0/issues/554)) have a function for the "top N" elements, but it can be done with {func}`ak.sort` and a slice.
 
 ```{code-cell} ipython3
 ak.sort(array, axis=1)
@@ -353,7 +353,7 @@ ak.flatten(ak.sort(array, axis=1)[:, -2:])
 Minimizing/maximizing lists of records
 --------------------------------------
 
-Unlike numbers, records do not have an ordering: you cannot call [ak.min](https://awkward-array.readthedocs.io/en/latest/_auto/ak.min.html) on an array of records. But usually, what you want to do instead is to find the minimum or maximum of some quantity calculated from the records and pick records (or record fields) from that.
+Unlike numbers, records do not have an ordering: you cannot call {func}`ak.min` on an array of records. But usually, what you want to do instead is to find the minimum or maximum of some quantity calculated from the records and pick records (or record fields) from that.
 
 ```{code-cell} ipython3
 array = ak.Array([
@@ -365,7 +365,7 @@ array = ak.Array([
 array
 ```
 
-The [ak.argmin](https://awkward-array.readthedocs.io/en/latest/_auto/ak.argmin.html) and [ak.argmax](https://awkward-array.readthedocs.io/en/latest/_auto/ak.argmax.html) functions return the integer index where the minimum or maximum of some numeric formula can be found.
+The {func}`ak.argmin` and {func}`ak.argmax` functions return the integer index where the minimum or maximum of some numeric formula can be found.
 
 ```{code-cell} ipython3
 np.sqrt(array.x**2 + array.y**2)
@@ -392,7 +392,7 @@ array[maximize_by]
 array[maximize_by].tolist()
 ```
 
-This still has list structures and missing values, so it's ready for [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html), assuming that we extract the appropriate record field to plot.
+This still has list structures and missing values, so it's ready for {func}`ak.flatten`, assuming that we extract the appropriate record field to plot.
 
 ```{code-cell} ipython3
 ak.flatten(array[maximize_by].z, axis=None)
@@ -418,7 +418,7 @@ ak.flatten(array.x)
 ak.flatten(ak.max(array.y, axis=2), axis=None)
 ```
 
-To get all of these into one array (because the plotting function only accepts one argument), you'll need to [ak.concatenate](https://awkward-array.readthedocs.io/en/latest/_auto/ak.concatenate.html) them.
+To get all of these into one array (because the plotting function only accepts one argument), you'll need to {func}`ak.concatenate` them.
 
 ```{code-cell} ipython3
 ak.concatenate([
@@ -430,9 +430,9 @@ ak.concatenate([
 Maintaining alignment between arrays with missing values
 --------------------------------------------------------
 
-Dropping missing values with [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) doesn't keep track of where they were removed. This is a problem if the plotting library takes separate sequences for the x-axis and y-axis, and these must be aligned.
+Dropping missing values with {func}`ak.flatten` doesn't keep track of where they were removed. This is a problem if the plotting library takes separate sequences for the x-axis and y-axis, and these must be aligned.
 
-Instead of [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html), you can use [ak.is_none](https://awkward-array.readthedocs.io/en/latest/_auto/ak.is_none.html).
+Instead of {func}`ak.flatten`, you can use {func}`ak.is_none`.
 
 ```{code-cell} ipython3
 array = ak.Array([
