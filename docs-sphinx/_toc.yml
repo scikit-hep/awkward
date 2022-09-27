@@ -28,8 +28,6 @@ subtrees:
                         title: "Python objects"
                       - file: user-guide/how-to-convert-json
                         title: "JSON"
-                      - file: user-guide/how-to-convert-uproot
-                        title: "ROOT via Uproot"
                       - file: user-guide/how-to-convert-arrow
                         title: "Arrow and Parquet"
                       - file: user-guide/how-to-convert-pandas
