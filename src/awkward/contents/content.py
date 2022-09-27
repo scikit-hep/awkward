@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import copy
 import math
-import numbers
 from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
+from numbers import Complex, Integral, Real
 from typing import Any, TypeVar
 
 import awkward as ak
 import awkward._reducers
+from awkward.forms import Form
+from awkward.nplike import NumpyLike
 from awkward.typing import Self, TypeAlias
 
 np = ak.nplike.NumpyMetadata.instance()
@@ -23,7 +25,7 @@ ActionType: TypeAlias = """Callable[
         dict | None,
         Callable[[], None],
         dict | None,
-        ak.nplike.NumpyLike | None,
+        NumpyLike | None,
         dict[str, Any],
     ],
     Content | None,
@@ -53,7 +55,7 @@ class Content:
         self,
         identifier: ak.identifier.Identifier | None,
         parameters: dict[str, Any] | None,
-        nplike: ak.nplike.NumpyLike | None,
+        nplike: NumpyLike | None,
     ):
         if identifier is not None and not isinstance(
             identifier, ak.identifier.Identifier
@@ -74,10 +76,10 @@ class Content:
                 )
             )
 
-        if nplike is not None and not isinstance(nplike, ak.nplike.NumpyLike):
+        if nplike is not None and not isinstance(nplike, NumpyLike):
             raise ak._util.error(
                 TypeError(
-                    "{} 'nplike' must be an ak.nplike.NumpyLike or None, not {}".format(
+                    "{} 'nplike' must be an NumpyLike or None, not {}".format(
                         type(self).__name__, repr(nplike)
                     )
                 )
@@ -104,11 +106,11 @@ class Content:
             return self._parameters.get(key)
 
     @property
-    def nplike(self) -> ak.nplike.NumpyLike | None:
+    def nplike(self) -> NumpyLike | None:
         return self._nplike
 
     @property
-    def form(self) -> ak.forms.Form:
+    def form(self) -> Form:
         return self.form_with_key(None)
 
     def form_with_key(self, form_key="node{id}", id_start=0):
@@ -146,12 +148,12 @@ class Content:
 
     def _form_with_key(
         self,
-        key_func: Callable[[Content], ak.forms.Form],
-    ) -> ak.forms.Form:
+        key_func: Callable[[Content], Form],
+    ) -> Form:
         raise ak._util.error(NotImplementedError)
 
     @property
-    def Form(self) -> type[ak.forms.Form]:
+    def Form(self) -> type[Form]:
         raise ak._util.error(NotImplementedError)
 
     @property
@@ -176,9 +178,9 @@ class Content:
         container: MutableMapping[str, Any] | None = None,
         buffer_key="{form_key}-{attribute}",
         form_key: str | None = "node{id}",
-        id_start: int = 0,
-        nplike: ak.nplike.NumpyLike | None = None,
-    ) -> tuple[ak.forms.Form, int, Mapping[str, Any]]:
+        id_start: Integral = 0,
+        nplike: NumpyLike | None = None,
+    ) -> tuple[Form, int, Mapping[str, Any]]:
         if container is None:
             container = {}
         if nplike is None:
@@ -227,11 +229,11 @@ class Content:
 
     def _to_buffers(
         self,
-        form: ak.forms.Form,
-        getkey: Callable[[Content, ak.forms.Form, str], str],
+        form: Form,
+        getkey: Callable[[Content, Form, str], str],
         container: MutableMapping[str, Any] | None,
-        nplike: ak.nplike.NumpyLike | None,
-    ) -> tuple[ak.forms.Form, int, Mapping[str, Any]]:
+        nplike: NumpyLike | None,
+    ) -> tuple[Form, int, Mapping[str, Any]]:
         raise ak._util.error(NotImplementedError)
 
     def __len__(self) -> int:
@@ -384,7 +386,7 @@ class Content:
             return self._getitem_next(slice(None), (Ellipsis,) + tail, advanced)
 
     def _getitem_next_regular_missing(
-        self, head, tail, advanced: ak.index.Index | None, raw, length: int
+        self, head, tail, advanced: ak.index.Index | None, raw, length: Integral
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
@@ -680,7 +682,7 @@ class Content:
                 )
             )
 
-    def _getitem_at(self, where: int):
+    def _getitem_at(self, where: Integral):
         raise ak._util.error(NotImplementedError)
 
     def _getitem_range(self, where: slice):
@@ -731,7 +733,7 @@ class Content:
         else:
             raise ak._util.error(NotImplementedError)
 
-    def _range_identifier(self, start: int, stop: int):
+    def _range_identifier(self, start: Integral, stop: Integral):
         if self._identifier is None:
             return None
         else:
@@ -802,7 +804,7 @@ class Content:
             return True
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not (
-            ak.forms.form._parameters_equal(
+            Form._parameters_equal(
                 self._parameters, other._parameters, only_array_record=True
             )
         ):
@@ -905,16 +907,16 @@ class Content:
             )
         )
 
-    def local_index(self, axis: int):
+    def local_index(self, axis: Integral):
         return self._local_index(axis, 0)
 
-    def _local_index(self, axis: int, depth: int):
+    def _local_index(self, axis: Integral, depth: Integral):
         raise ak._util.error(NotImplementedError)
 
     def _reduce(
         self,
         reducer: type[ak._reducers.Reducer],
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = True,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -973,11 +975,11 @@ class Content:
     def _reduce_next(
         self,
         reducer: type[ak._reducers.Reducer],
-        negaxis: int,
+        negaxis: Integral,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         parents: ak.index.Index,
-        outlength: int,
+        outlength: Integral,
         mask: bool,
         keepdims: bool,
         behavior: dict | None,
@@ -986,7 +988,7 @@ class Content:
 
     def argmin(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = True,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -995,7 +997,7 @@ class Content:
 
     def argmax(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = True,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1004,7 +1006,7 @@ class Content:
 
     def count(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1013,7 +1015,7 @@ class Content:
 
     def count_nonzero(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1024,7 +1026,7 @@ class Content:
 
     def sum(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1033,7 +1035,7 @@ class Content:
 
     def prod(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1042,7 +1044,7 @@ class Content:
 
     def any(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1051,7 +1053,7 @@ class Content:
 
     def all(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1060,7 +1062,7 @@ class Content:
 
     def min(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = True,
         keepdims: bool = False,
         initial: dict | None = None,
@@ -1072,7 +1074,7 @@ class Content:
 
     def max(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         mask: bool = True,
         keepdims: bool = False,
         initial: dict | None = None,
@@ -1084,7 +1086,7 @@ class Content:
 
     def argsort(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         ascending: bool = True,
         stable: bool = False,
         kind: Any = None,
@@ -1137,11 +1139,11 @@ class Content:
 
     def _argsort_next(
         self,
-        negaxis: int,
+        negaxis: Integral,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         parents: ak.index.Index,
-        outlength: int,
+        outlength: Integral,
         ascending: bool,
         stable: bool,
         kind: Any,
@@ -1151,7 +1153,7 @@ class Content:
 
     def sort(
         self,
-        axis: int = -1,
+        axis: Integral = -1,
         ascending: bool = True,
         stable: bool = False,
         kind: Any = None,
@@ -1203,10 +1205,10 @@ class Content:
 
     def _sort_next(
         self,
-        negaxis: int,
+        negaxis: Integral,
         starts: ak.index.Index,
         parents: ak.index.Index,
-        outlength: int,
+        outlength: Integral,
         ascending: bool,
         stable: bool,
         kind: Any,
@@ -1216,7 +1218,7 @@ class Content:
 
     def _combinations_axis0(
         self,
-        n: int,
+        n: Integral,
         replacement: bool,
         recordlookup: list[str] | None,
         parameters: dict | None,
@@ -1280,9 +1282,9 @@ class Content:
 
     def combinations(
         self,
-        n: int,
+        n: Integral,
         replacement: bool = False,
-        axis: int = 1,
+        axis: Integral = 1,
         fields: list[str] | None = None,
         parameters: dict | None = None,
     ):
@@ -1300,12 +1302,12 @@ class Content:
 
     def _combinations(
         self,
-        n: int,
+        n: Integral,
         replacement: bool,
         recordlookup: list[str] | None,
         parameters: dict[str, Any] | None,
-        axis: int,
-        depth: int,
+        axis: Integral,
+        depth: Integral,
     ):
         raise ak._util.error(NotImplementedError)
 
@@ -1425,7 +1427,7 @@ class Content:
     def purelist_parameter(self, key: str):
         return self.Form.purelist_parameter(self, key)
 
-    def is_unique(self, axis: int | None = None) -> bool:
+    def is_unique(self, axis: Integral | None = None) -> bool:
         negaxis = axis if axis is None else -axis
         starts = ak.index.Index64.zeros(1, self._nplike)
         parents = ak.index.Index64.zeros(self.length, self._nplike)
@@ -1433,10 +1435,10 @@ class Content:
 
     def _is_unique(
         self,
-        negaxis: int | None,
+        negaxis: Integral | None,
         starts: ak.index.Index,
         parents: ak.index.Index,
-        outlength: int,
+        outlength: Integral,
     ) -> bool:
         raise ak._util.error(NotImplementedError)
 
@@ -1490,10 +1492,10 @@ class Content:
 
     def _unique(
         self,
-        negaxis: int | None,
+        negaxis: Integral | None,
         starts: ak.index.Index,
         parents: ak.index.Index,
-        outlength: int,
+        outlength: Integral,
     ):
         raise ak._util.error(NotImplementedError)
 
@@ -1529,7 +1531,7 @@ class Content:
     def dimension_optiontype(self) -> bool:
         return self.Form.dimension_optiontype.__get__(self)
 
-    def pad_none_axis0(self, target: int, clip: bool) -> Content:
+    def pad_none_axis0(self, target: Integral, clip: bool) -> Content:
         if not clip and target < self.length:
             index = ak.index.Index64(
                 self._nplike.index_nplike.arange(self.length, dtype=np.int64),
@@ -1556,10 +1558,12 @@ class Content:
         )
         return next.simplify_optiontype()
 
-    def pad_none(self, length: int, axis: int, clip: bool = False) -> Content:
+    def pad_none(self, length: Integral, axis: Integral, clip: bool = False) -> Content:
         return self._pad_none(length, axis, 0, clip)
 
-    def _pad_none(self, target: int, axis: int, depth: int, clip: bool) -> Content:
+    def _pad_none(
+        self, target: Integral, axis: Integral, depth: Integral, clip: bool
+    ) -> Content:
         raise ak._util.error(NotImplementedError)
 
     def to_arrow(
@@ -1598,7 +1602,7 @@ class Content:
         pyarrow: Any,
         mask_node: Any,
         validbytes: Any,
-        length: int,
+        length: Integral,
         options: dict[str, Any],
     ):
         raise ak._util.error(NotImplementedError)
@@ -1611,7 +1615,7 @@ class Content:
 
     def completely_flatten(
         self,
-        nplike: ak.nplike.NumpyLike | None = None,
+        nplike: NumpyLike | None = None,
         flatten_records: bool = True,
         function_name: str | None = None,
     ):
@@ -1627,7 +1631,7 @@ class Content:
         return tuple(arrays)
 
     def _completely_flatten(
-        self, nplike: ak.nplike.NumpyLike | None, options: dict[str, Any]
+        self, nplike: NumpyLike | None, options: dict[str, Any]
     ) -> list:
         raise ak._util.error(NotImplementedError)
 
@@ -1662,7 +1666,7 @@ class Content:
         self,
         action: ActionType,
         behavior: dict | None,
-        depth: int,
+        depth: Integral,
         depth_context: dict | None,
         lateral_context: dict | None,
         options: dict[str, Any],
@@ -1758,8 +1762,6 @@ class Content:
                 complex_real_string = json_conversions["complex_real_string"]
                 complex_imag_string = json_conversions["complex_imag_string"]
                 if complex_real_string is not None:
-                    Real = numbers.Real
-                    Complex = numbers.Complex
                     if any(
                         not isinstance(x, Real) and isinstance(x, Complex) for x in out
                     ):
@@ -1820,12 +1822,12 @@ class Content:
 
             return out
 
-    def flatten(self, axis: int = 1, depth: int = 0) -> Content:
+    def flatten(self, axis: Integral = 1, depth: Integral = 0) -> Content:
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
 
     def _offsets_and_flattened(
-        self, axis: int, depth: int
+        self, axis: Integral, depth: Integral
     ) -> tuple[ak.index.Index, Content]:
         raise ak._util.error(NotImplementedError)
 
@@ -1835,7 +1837,7 @@ class Content:
         else:
             return self._to_nplike(ak._util.regularize_backend(backend))
 
-    def _to_nplike(self, nplike: ak.nplike.NumpyLike) -> Self:
+    def _to_nplike(self, nplike: NumpyLike) -> Self:
         raise ak._util.error(NotImplementedError)
 
     def with_parameter(self, key: str, value: Any) -> Self:
@@ -1882,7 +1884,7 @@ class Content:
             self.__class__ is other.__class__
             and len(self) == len(other)
             and ak.identifier._identifiers_equal(self.identifier, other.identifier)
-            and ak.forms.form._parameters_equal(
+            and Form._parameters_equal(
                 self.parameters, other.parameters, only_array_record=False
             )
             and self._layout_equal(other, index_dtype, numpyarray)
