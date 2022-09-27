@@ -37,7 +37,7 @@ ak_array = ak.Array([
 ak_array
 ```
 
-The [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) function decomposes it into a set of one-dimensional arrays (a zero-copy operation).
+The {func}`ak.to_buffers` function decomposes it into a set of one-dimensional arrays (a zero-copy operation).
 
 ```{code-cell} ipython3
 form, length, container = ak.to_buffers(ak_array)
@@ -45,13 +45,13 @@ form, length, container = ak.to_buffers(ak_array)
 
 The pieces needed to reconstitute this array are:
 
-   * the [Form](https://awkward-array.readthedocs.io/en/latest/ak.forms.Form.html), which defines how structure is built from one-dimensional arrays,
-   * the length of the original array or lengths of all of its partitions ([ak.partitions](https://awkward-array.readthedocs.io/en/latest/_auto/ak.partitions.html)),
-   * the one-dimensional arrays in the `container` (a [MutableMapping](https://docs.python.org/3/library/collections.abc.html#collections-abstract-base-classes)).
+   * the {class}`ak.forms.Form`, which defines how structure is built from one-dimensional arrays,
+   * the length of the original array,
+   * the one-dimensional arrays in the `container` (a {class}`collections.abc.MutableMapping`).
 
-The [Form](https://awkward-array.readthedocs.io/en/latest/ak.forms.Form.html) is like an Awkward [Type](https://awkward-array.readthedocs.io/en/latest/ak.types.Type.html) in that it describes how the data are structured, but with more detail: it includes distinctions such as the difference between [ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) and [ListOffsetArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListOffsetArray.html), as well as the integer types of structural [Indexes](https://awkward-array.readthedocs.io/en/latest/ak.layout.Index.html).
+The {class}`ak.forms.Form` is like an Awkward {class}`ak.types.Type` in that it describes how the data are structured, but with more detail: it includes distinctions such as the difference between {class}`ak.contents.ListArray` and {class}`ak.contents.ListOffsetArray`, as well as the integer types of structural {class}`ak.index.Index`.
 
-It is usually presented as JSON, and has a compact JSON format (when [Form.tojson](https://awkward-array.readthedocs.io/en/latest/ak.forms.Form.html#ak-forms-form-tojson) is invoked).
+It is usually presented as JSON, and has a compact JSON format (when {method}`ak.forms.Form.tojson` is invoked).
 
 ```{code-cell} ipython3
 form
@@ -63,7 +63,7 @@ In this case, the `length` is just an integer. It would be a list of integers if
 length
 ```
 
-This `container` is a new dict, but it could have been a user-specified [MutableMapping](https://docs.python.org/3/library/collections.abc.html#collections-abstract-base-classes) if passed into [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) as an argument.
+This `container` is a new dict, but it could have been a user-specified {class}`collections.abc.MutableMapping` if passed into {func}`ak.to_buffers` as an argument.
 
 ```{code-cell} ipython3
 container
@@ -72,7 +72,7 @@ container
 From buffers to Awkward
 -----------------------
 
-The function that reverses [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) is [ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html). Its first three arguments are `form`, `length`, and `container`.
+The function that reverses {func}`ak.to_buffers` is {func}`ak.from_buffers`. Its first three arguments are `form`, `length`, and `container`.
 
 ```{code-cell} ipython3
 ak.from_buffers(form, length, container)
@@ -81,7 +81,7 @@ ak.from_buffers(form, length, container)
 Minimizing the size of the output buffers
 -----------------------------------------
 
-The [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html)/[ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) functions exactly preserve an array, warts and all. Often, you'll want to only write [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html) arrays. "Packing" replaces an array structure with an equivalent structure that has no unreachable elements—data that you can't see as part of the array, and therefore probably don't want to write.
+The {func}`ak.to_buffers`/{func}`ak.from_buffers` functions exactly preserve an array, warts and all. Often, you'll want to only write {func}`ak.packed` arrays. "Packing" replaces an array structure with an equivalent structure that has no unreachable elements—data that you can't see as part of the array, and therefore probably don't want to write.
 
 Here is an example of an array in need of packing:
 
@@ -98,15 +98,15 @@ unpacked = ak.Array(
 unpacked
 ```
 
-This [ListArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.ListArray.html) is in a strange order and the `999` values are unreachable. (Also, using `starts[1] == stops[1] == 10` to represent an empty list is a little odd, though allowed by the specification.)
+This {class}`ak.contents.ListArray` is in a strange order and the `999` values are unreachable. (Also, using `starts[1] == stops[1] == 10` to represent an empty list is a little odd, though allowed by the specification.)
 
-The [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) function dutifully writes the `999` values into the output, even though they're not visible in the array.
+The {func}`ak.to_buffers` function dutifully writes the `999` values into the output, even though they're not visible in the array.
 
 ```{code-cell} ipython3
 ak.to_buffers(unpacked)
 ```
 
-If the intended purpose of calling [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html) is to write to a file or send data over a network, this is wasted space. It can be trimmed by calling the [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html) function.
+If the intended purpose of calling {func}`ak.to_buffers` is to write to a file or send data over a network, this is wasted space. It can be trimmed by calling the {func}`ak.packed` function.
 
 ```{code-cell} ipython3
 packed = ak.packed(unpacked)
@@ -123,7 +123,7 @@ unpacked.layout
 packed.layout
 ```
 
-This version of the array is more concise when written with [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html):
+This version of the array is more concise when written with {func}`ak.to_buffers`:
 
 ```{code-cell} ipython3
 ak.to_buffers(packed)
@@ -132,7 +132,7 @@ ak.to_buffers(packed)
 Saving Awkward Arrays to HDF5
 -----------------------------
 
-The [h5py](https://www.h5py.org/) library presents each group in an HDF5 file as a [MutableMapping](https://docs.python.org/3/library/collections.abc.html#collections-abstract-base-classes), which we can use as a container for an array-set. We must also save the `form` and `length` as metadata for the array to be retrievable.
+The [h5py](https://www.h5py.org/) library presents each group in an HDF5 file as a {class}`collections.abc.MutableMapping`, which we can use as a container for an array-set. We must also save the `form` and `length` as metadata for the array to be retrievable.
 
 ```{code-cell} ipython3
 file = h5py.File("/tmp/example.hdf5", "w")
@@ -140,7 +140,7 @@ group = file.create_group("awkward")
 group
 ```
 
-We can fill this `group` as a `container` by passing it in to [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html). (See the previous section for more on [ak.packed](https://awkward-array.readthedocs.io/en/latest/_auto/ak.packed.html).)
+We can fill this `group` as a `container` by passing it in to {func}`ak.to_buffers`. (See the previous section for more on {func}`ak.packed`.)
 
 ```{code-cell} ipython3
 form, length, container = ak.to_buffers(ak.packed(ak_array), container=group)
@@ -177,9 +177,9 @@ group.attrs["length"]
 Reading Awkward Arrays from HDF5
 --------------------------------
 
-With that, we can reconstitute the array by supplying [ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) the right arguments from the group and metadata.
+With that, we can reconstitute the array by supplying {func}`ak.from_buffers` the right arguments from the group and metadata.
 
-The group can't be used as a `container` as-is, since subscripting it returns `h5py.Dataset` objects, rather than arrays.
+The group can't be used as a `container` as-is, since subscripting it returns {class}`h5py.Dataset` objects, rather than arrays.
 
 ```{code-cell} ipython3
 reconstituted = ak.from_buffers(
