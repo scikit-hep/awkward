@@ -782,7 +782,7 @@ def extra(args, kwargs, defaults):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = ak.nplikes.of(unionarray)
+    nplike = ak.nplikes.nplike_for(unionarray)
 
     contents = []
     for layout in unionarray.contents:

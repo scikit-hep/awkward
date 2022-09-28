@@ -321,7 +321,7 @@ class UnionArray(Content):
     @staticmethod
     def regular_index(tags, IndexClass=Index64, nplike=None):
         if nplike is None:
-            nplike = ak.nplikes.of(tags)
+            nplike = ak.nplikes.nplike_for(tags)
 
         lentags = tags.length
         size = ak.index.Index64.empty(1, nplike)
@@ -370,7 +370,7 @@ class UnionArray(Content):
         offsets, counts, TagsClass=Index8, IndexClass=Index64, nplike=None
     ):
         if nplike is None:
-            nplike = ak.nplikes.of(offsets, counts)
+            nplike = ak.nplikes.nplike_for(offsets, counts)
 
         f_offsets = ak.index.Index64(copy.deepcopy(offsets.data))
         contentlen = f_offsets[f_offsets.length - 1]

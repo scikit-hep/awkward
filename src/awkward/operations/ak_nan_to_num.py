@@ -68,7 +68,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         broadcasting_ids[id(neginf)] = len(broadcasting)
         broadcasting.append(neginf_layout)
 
-    nplike = ak.nplikes.of(layout)
+    nplike = ak.nplikes.nplike_for(layout)
 
     if len(broadcasting) == 1:
 

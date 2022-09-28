@@ -59,7 +59,7 @@ def _impl(x, axis, keepdims, mask_identity, flatten_records):
     )
 
     with np.errstate(invalid="ignore"):
-        nplike = ak.nplikes.of(x)
+        nplike = ak.nplikes.nplike_for(x)
         expx = nplike.exp(x)
         denom = ak.operations.ak_sum._impl(
             expx, axis, keepdims, mask_identity, flatten_records

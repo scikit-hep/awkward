@@ -170,4 +170,4 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
             sumwx = ak.operations.ak_sum._impl(
                 x * weight, axis, keepdims, mask_identity, flatten_records
             )
-        return ak.nplikes.of(sumwx, sumw).true_divide(sumwx, sumw)
+        return ak.nplikes.nplike_for(sumwx, sumw).true_divide(sumwx, sumw)

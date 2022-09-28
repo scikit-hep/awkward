@@ -186,8 +186,8 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records):
                 flatten_records,
             )
         if ddof != 0:
-            return ak.nplikes.of(sumwxx, sumw).true_divide(
+            return ak.nplikes.nplike_for(sumwxx, sumw).true_divide(
                 sumwxx, sumw
-            ) * ak.nplikes.of(sumw).true_divide(sumw, sumw - ddof)
+            ) * ak.nplikes.nplike_for(sumw).true_divide(sumw, sumw - ddof)
         else:
-            return ak.nplikes.of(sumwxx, sumw).true_divide(sumwxx, sumw)
+            return ak.nplikes.nplike_for(sumwxx, sumw).true_divide(sumwxx, sumw)

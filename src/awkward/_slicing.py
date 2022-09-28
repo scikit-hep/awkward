@@ -61,7 +61,7 @@ def prepare_advanced_indexing(items):
         )
 
     # Then broadcast the index items
-    nplike = ak.nplikes.of(*broadcastable)
+    nplike = ak.nplikes.nplike_for(*broadcastable)
     broadcasted = nplike.broadcast_arrays(*broadcastable)
 
     # And re-assemble the index with the broadcasted items

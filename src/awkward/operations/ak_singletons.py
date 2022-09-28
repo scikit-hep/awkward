@@ -35,7 +35,7 @@ def singletons(array, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     def action(layout, **kwargs):
-        nplike = ak.nplikes.of(layout)
+        nplike = ak.nplikes.nplike_for(layout)
 
         if layout.is_OptionType:
             nulls = nplike.index_nplike.asarray(

@@ -866,7 +866,7 @@ def is_jax_tracer(tracer):
     return type(tracer).__module__.startswith("jax.")
 
 
-def of(*arrays, default_cls=Numpy):
+def nplike_for(*arrays, default_cls=Numpy):
     """
     Args:
         *arrays: iterable of possible array objects

@@ -20,7 +20,7 @@ class Index:
 
     def __init__(self, data, metadata=None, nplike=None):
         if nplike is None:
-            nplike = ak.nplikes.of(data)
+            nplike = ak.nplikes.nplike_for(data)
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
             raise ak._util.error(TypeError("Index metadata must be None or a dict"))

@@ -40,7 +40,7 @@ class NumpyArray(Content):
 
     def __init__(self, data, identifier=None, parameters=None, nplike=None):
         if nplike is None:
-            nplike = ak.nplikes.of(data)
+            nplike = ak.nplikes.nplike_for(data)
         if isinstance(data, ak.index.Index):
             data = data.data
         self._data = nplike.asarray(data)

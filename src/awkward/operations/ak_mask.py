@@ -102,7 +102,7 @@ def _impl(array, mask, valid_when, highlevel, behavior):
     def action(inputs, **kwargs):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak.contents.NumpyArray):
-            m = ak.nplikes.of(layoutmask).asarray(layoutmask)
+            m = ak.nplikes.nplike_for(layoutmask).asarray(layoutmask)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
                 raise ak._util.error(
                     ValueError(
