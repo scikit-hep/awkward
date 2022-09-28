@@ -47,9 +47,20 @@ def test_ArrayBuilder_append():
     out = builder.snapshot()
     assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j)]
 
-    # builder = append(builder, np.datetime64("2020-09-04"))
-    # out = builder.snapshot()
-    # assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j)]
+    builder = append(builder, np.datetime64("2020-09-04"))
+    out = builder.snapshot()
+    assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j), np.datetime64("2020-09-04")]
+
+    builder = append(builder, np.timedelta64(5, "s"))
+    out = builder.snapshot()
+    assert out.to_list() == [
+        True,
+        1,
+        1.1,
+        (1.1 + 0.1j),
+        np.datetime64("2020-09-04"),
+        np.timedelta64(5, "s"),
+    ]
 
 
 def test_ArrayBuilder_of_integers():

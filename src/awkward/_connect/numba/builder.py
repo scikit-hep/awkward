@@ -349,6 +349,8 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                     numba.types.Integer,
                     numba.types.Float,
                     numba.types.Complex,
+                    numba.types.NPDatetime,
+                    numba.types.NPTimedelta,
                 ),
             )
         ):
@@ -364,6 +366,8 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                     numba.types.Integer,
                     numba.types.Float,
                     numba.types.Complex,
+                    numba.types.NPDatetime,
+                    numba.types.NPTimedelta,
                 ),
             )
         ):
