@@ -74,6 +74,19 @@ def test_ArrayBuilder_append():
         "hello",
     ]
 
+    builder = append(builder, b"hello\0world")
+    out = builder.snapshot()
+    assert out.to_list() == [
+        True,
+        1,
+        1.1,
+        (1.1 + 0.1j),
+        np.datetime64("2020-09-04"),
+        np.timedelta64(5, "s"),
+        "hello",
+        b"hello\0world",
+    ]
+
 
 def test_ArrayBuilder_of_integers():
     @nb.njit
