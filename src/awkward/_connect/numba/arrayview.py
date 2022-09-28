@@ -73,7 +73,7 @@ class LookupType(numba.types.Type):
     arraytype = numba.types.Array(numba.intp, 1, "C")
 
     def __init__(self):
-        super().__init__(name="ak2.LookupType()")
+        super().__init__(name="ak.LookupType()")
 
 
 @numba.extending.register_model(LookupType)
@@ -155,7 +155,7 @@ def repr_behavior(behavior):
 class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
         super().__init__(
-            name="ak2.ArrayView({}, {}, {})".format(
+            name="ak.ArrayView({}, {}, {})".format(
                 type.name, repr_behavior(behavior), repr(fields)
             )
         )
@@ -418,7 +418,7 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
 class IteratorType(numba.types.common.SimpleIteratorType):
     def __init__(self, viewtype):
         super().__init__(
-            f"ak2.Iterator({viewtype.name})",
+            f"ak.Iterator({viewtype.name})",
             viewtype.type.getitem_at_check(viewtype),
         )
         self.viewtype = viewtype
@@ -535,7 +535,7 @@ def typeof_RecordView(obj, c):
 
 class RecordViewType(numba.types.Type):
     def __init__(self, arrayviewtype):
-        super().__init__(name=f"ak2.RecordViewType({arrayviewtype.name})")
+        super().__init__(name=f"ak.RecordViewType({arrayviewtype.name})")
         self.arrayviewtype = arrayviewtype
 
     @property

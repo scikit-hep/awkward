@@ -25,7 +25,7 @@ def globalstring(context, builder, pyvalue):
 class ArrayBuilderType(numba.types.Type):
     def __init__(self, behavior):
         super().__init__(
-            name="ak2.ArrayBuilderType({})".format(
+            name="ak.ArrayBuilderType({})".format(
                 ak._connect.numba.arrayview.repr_behavior(behavior)
             )
         )
@@ -348,6 +348,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                     numba.types.Boolean,
                     numba.types.Integer,
                     numba.types.Float,
+                    numba.types.Complex,
                 ),
             )
         ):
@@ -358,7 +359,12 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
             and isinstance(args[0], numba.types.Optional)
             and isinstance(
                 args[0].type,
-                (numba.types.Boolean, numba.types.Integer, numba.types.Float),
+                (
+                    numba.types.Boolean,
+                    numba.types.Integer,
+                    numba.types.Float,
+                    numba.types.Complex,
+                ),
             )
         ):
             return numba.types.none(args[0])
@@ -466,7 +472,7 @@ def lower_real(context, builder, sig, args):
 
 @numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Integer)
 @numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Float)
-def lower_complex_1(context, builder, sig, args):
+def lower_complex_from_integer_or_float(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)

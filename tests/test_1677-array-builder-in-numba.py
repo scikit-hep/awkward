@@ -42,9 +42,12 @@ def test_ArrayBuilder_append():
     out = builder.snapshot()
     assert out.to_list() == [True, 1, 1.1]
 
-    # FIXME:
-    # z = (1.1 + 0.1j)
-    # builder = append(builder, z)
+    z = 1.1 + 0.1j
+    builder = append(builder, z)
+    out = builder.snapshot()
+    assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j)]
+
+    # builder = append(builder, np.datetime64("2020-09-04"))
     # out = builder.snapshot()
     # assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j)]
 
