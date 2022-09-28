@@ -3,14 +3,14 @@
 import awkward as ak
 from awkward.highlevel import Array
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 class ByteBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = ak.nplike.of(self.layout).asarray(self.layout)
+        tmp = ak.nplikes.nplike_of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -51,7 +51,7 @@ class CharBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = ak.nplike.of(self.layout).asarray(self.layout)
+        tmp = ak.nplikes.nplike_of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -105,7 +105,7 @@ class StringBehavior(Array):
 
 
 def _string_equal(one, two):
-    nplike = ak.nplike.of(one, two)
+    nplike = ak.nplikes.nplike_of(one, two)
     behavior = ak._util.behavior_of(one, two)
 
     one, two = (
@@ -141,7 +141,7 @@ def _string_notequal(one, two):
 
 
 def _string_broadcast(layout, offsets):
-    nplike = ak.nplike.of(offsets)
+    nplike = ak.nplikes.nplike_of(offsets)
     offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if ak._util.win or ak._util.bits32:
@@ -247,10 +247,10 @@ def register(behavior):
     behavior["string"] = StringBehavior
     behavior["__typestr__", "string"] = "string"
 
-    behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
-    behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
-    behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
-    behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
+    behavior[ak.nplikes.numpy.equal, "bytestring", "bytestring"] = _string_equal
+    behavior[ak.nplikes.numpy.equal, "string", "string"] = _string_equal
+    behavior[ak.nplikes.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
+    behavior[ak.nplikes.numpy.not_equal, "string", "string"] = _string_notequal
 
     behavior["__broadcast__", "bytestring"] = _string_broadcast
     behavior["__broadcast__", "string"] = _string_broadcast

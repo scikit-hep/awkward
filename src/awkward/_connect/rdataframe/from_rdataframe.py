@@ -29,8 +29,8 @@ cpp_type_of = {
     "timedelta64": "std::difftime",
 }
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 cppyy.add_include_path(
@@ -64,7 +64,7 @@ def from_rdataframe(data_frame, columns):
     def empty_buffers(cpp_buffers_self, names_nbytes):
         buffers = {}
         for item in names_nbytes:
-            buffers[item.first] = ak.nplike.numpy.empty(item.second)
+            buffers[item.first] = ak.nplikes.numpy.empty(item.second)
             cpp_buffers_self.append(
                 item.first,
                 buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),

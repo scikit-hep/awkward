@@ -2,9 +2,9 @@
 
 import awkward as ak
 
-numpy = ak.nplike.Numpy.instance()
+numpy = ak.nplikes.Numpy.instance()
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def to_dataframe(

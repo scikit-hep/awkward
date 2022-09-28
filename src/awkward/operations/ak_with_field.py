@@ -5,7 +5,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def with_field(base, what, where=None, highlevel=True, behavior=None):
@@ -101,7 +101,7 @@ def _impl(base, what, where, highlevel, behavior):
         else:
 
             def action(inputs, **kwargs):
-                nplike = ak.nplike.of(*inputs)
+                nplike = ak.nplikes.nplike_of(*inputs)
                 base, what = inputs
                 if isinstance(base, ak.contents.RecordArray):
                     if what is None:

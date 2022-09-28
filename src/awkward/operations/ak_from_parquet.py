@@ -234,7 +234,7 @@ def _load(
         )
 
     if len(arrays) == 0:
-        numpy = ak.nplike.Numpy.instance()
+        numpy = ak.nplikes.Numpy.instance()
         return ak.operations.ak_from_buffers._impl(
             subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
         )

@@ -674,7 +674,7 @@ def gencudakerneltests(specdict):
                 )
 
                 f.write(
-                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._connect.cuda as ak_cu\n\ncupy_nplike = ak.nplike.Cupy.instance()\n\n"
+                    "import cupy\nimport pytest\n\nimport awkward as ak\nimport awkward._connect.cuda as ak_cu\n\ncupy_nplike = ak.nplikes.Cupy.instance()\n\n"
                 )
                 num = 1
                 if spec.tests == []:

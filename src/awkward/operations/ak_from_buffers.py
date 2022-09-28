@@ -4,8 +4,8 @@ import math
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 def from_buffers(
@@ -30,8 +30,8 @@ def from_buffers(
             `"{form_key}"` and/or `"{attribute}"` or a function that takes these
             as keyword arguments and returns a string to use as a key for a buffer
             in the `container`.
-        nplike (#ak.nplike.NumpyLike): Library to use to generate values that are
-            put into the new array. The default, #ak.nplike.Numpy, makes NumPy
+        nplike (#ak.nplikes.NumpyLike): Library to use to generate values that are
+            put into the new array. The default, #ak.nplikes.Numpy, makes NumPy
             arrays, which are in main memory (e.g. not GPU). If all the values in
             `container` have the same `nplike` as this, they won't be copied.
         highlevel (bool): If True, return an #ak.Array; otherwise, return

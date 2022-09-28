@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def singletons(array, highlevel=True, behavior=None):
@@ -35,7 +35,7 @@ def singletons(array, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     def action(layout, **kwargs):
-        nplike = ak.nplike.of(layout)
+        nplike = ak.nplikes.nplike_of(layout)
 
         if layout.is_OptionType:
             nulls = nplike.index_nplike.asarray(

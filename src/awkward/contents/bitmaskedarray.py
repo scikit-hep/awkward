@@ -10,8 +10,8 @@ from awkward.contents.content import Content, unset
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 class BitMaskedArray(Content):

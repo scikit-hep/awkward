@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def _identifiers_equal(one, two):
@@ -32,7 +32,7 @@ class Identifier:
             raise ak._util.error(
                 TypeError("Identifier fieldloc must be a dict of int -> str")
             )
-        self._nplike = ak.nplike.of(data)
+        self._nplike = ak.nplikes.nplike_of(data)
 
         self._data = self._nplike.asarray(data, order="C")
         if len(self._data.shape) != 2:

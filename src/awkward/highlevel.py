@@ -10,8 +10,8 @@ from collections.abc import Iterable, Mapping, Sized
 import awkward as ak
 from awkward._connect.numpy import NDArrayOperatorsMixin
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 

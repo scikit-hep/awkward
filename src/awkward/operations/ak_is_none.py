@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def is_none(array, axis=0, highlevel=True, behavior=None):
@@ -36,7 +36,7 @@ def _impl(array, axis, highlevel, behavior):
         if not isinstance(layout, ak.contents.Content):
             return
 
-        nplike = ak.nplike.of(layout)
+        nplike = ak.nplikes.nplike_of(layout)
 
         if layout.is_OptionType:
             layout = layout.toIndexedOptionArray64()
