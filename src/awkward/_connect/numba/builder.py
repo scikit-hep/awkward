@@ -622,9 +622,7 @@ def lower_bytestring(context, builder, sig, args):
     gil = pyapi.gil_ensure()
 
     strptr = pyapi.from_native_value(xtype, xval)
-    p_result = numba.core.cgutils.alloca_once(
-        builder, context.get_value_type(numba.int64)
-    )
+    p_result = numba.core.cgutils.alloca_once(builder, pyapi.py_ssize_t)
     p_buffer = numba.core.cgutils.alloca_once(builder, pyapi.cstring)
 
     ok = bytes_as_string_and_size(pyapi, strptr, p_buffer, p_result)

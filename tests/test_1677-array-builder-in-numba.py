@@ -24,70 +24,6 @@ def test_ArrayBuilder_of_booleans():
     assert out.to_list() == [True]
 
 
-def test_ArrayBuilder_append():
-    @nb.njit
-    def append(builder, value):
-        builder.append(value)
-        return builder
-
-    builder = append(ak.ArrayBuilder(), True)
-    out = builder.snapshot()
-    assert out.to_list() == [True]
-
-    builder = append(builder, 1)
-    out = builder.snapshot()
-    assert out.to_list() == [True, 1]
-
-    builder = append(builder, 1.1)
-    out = builder.snapshot()
-    assert out.to_list() == [True, 1, 1.1]
-
-    z = 1.1 + 0.1j
-    builder = append(builder, z)
-    out = builder.snapshot()
-    assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j)]
-
-    builder = append(builder, np.datetime64("2020-09-04"))
-    out = builder.snapshot()
-    assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j), np.datetime64("2020-09-04")]
-
-    builder = append(builder, np.timedelta64(5, "s"))
-    out = builder.snapshot()
-    assert out.to_list() == [
-        True,
-        1,
-        1.1,
-        (1.1 + 0.1j),
-        np.datetime64("2020-09-04"),
-        np.timedelta64(5, "s"),
-    ]
-
-    builder = append(builder, "hello")
-    out = builder.snapshot()
-    assert out.to_list() == [
-        True,
-        1,
-        1.1,
-        (1.1 + 0.1j),
-        np.datetime64("2020-09-04"),
-        np.timedelta64(5, "s"),
-        "hello",
-    ]
-
-    builder = append(builder, b"hello\0world")
-    out = builder.snapshot()
-    assert out.to_list() == [
-        True,
-        1,
-        1.1,
-        (1.1 + 0.1j),
-        np.datetime64("2020-09-04"),
-        np.timedelta64(5, "s"),
-        "hello",
-        b"hello\0world",
-    ]
-
-
 def test_ArrayBuilder_of_integers():
     @nb.njit
     def add_an_integer(builder, integer):
@@ -176,3 +112,67 @@ def test_ArrayBuilder_of_bytestrings():
     builder = add_a_bytestring(ak.ArrayBuilder(), b"hello\0world")
     out = builder.snapshot()
     assert out.to_list() == [b"hello\0world"]
+
+
+def test_ArrayBuilder_append():
+    @nb.njit
+    def append(builder, value):
+        builder.append(value)
+        return builder
+
+    builder = append(ak.ArrayBuilder(), True)
+    out = builder.snapshot()
+    assert out.to_list() == [True]
+
+    builder = append(builder, 1)
+    out = builder.snapshot()
+    assert out.to_list() == [True, 1]
+
+    builder = append(builder, 1.1)
+    out = builder.snapshot()
+    assert out.to_list() == [True, 1, 1.1]
+
+    z = 1.1 + 0.1j
+    builder = append(builder, z)
+    out = builder.snapshot()
+    assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j)]
+
+    builder = append(builder, np.datetime64("2020-09-04"))
+    out = builder.snapshot()
+    assert out.to_list() == [True, 1, 1.1, (1.1 + 0.1j), np.datetime64("2020-09-04")]
+
+    builder = append(builder, np.timedelta64(5, "s"))
+    out = builder.snapshot()
+    assert out.to_list() == [
+        True,
+        1,
+        1.1,
+        (1.1 + 0.1j),
+        np.datetime64("2020-09-04"),
+        np.timedelta64(5, "s"),
+    ]
+
+    builder = append(builder, "hello")
+    out = builder.snapshot()
+    assert out.to_list() == [
+        True,
+        1,
+        1.1,
+        (1.1 + 0.1j),
+        np.datetime64("2020-09-04"),
+        np.timedelta64(5, "s"),
+        "hello",
+    ]
+
+    builder = append(builder, b"hello\0world")
+    out = builder.snapshot()
+    assert out.to_list() == [
+        True,
+        1,
+        1.1,
+        (1.1 + 0.1j),
+        np.datetime64("2020-09-04"),
+        np.timedelta64(5, "s"),
+        "hello",
+        b"hello\0world",
+    ]
