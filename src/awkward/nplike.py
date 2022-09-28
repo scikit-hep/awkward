@@ -870,15 +870,18 @@ def is_numpy_buffer(array):
 
 
 def is_cupy_buffer(array):
-    return type(array).__module__.startswith("cupy.")
+    module, _, suffix = type(array).__module__.partition(".")
+    return module == "cupy"
 
 
 def is_jax_buffer(array):
-    return type(array).__module__.startswith("jaxlib.")
+    module, _, suffix = type(array).__module__.partition(".")
+    return module == "jaxlib"
 
 
 def is_jax_tracer(tracer):
-    return type(tracer).__module__.startswith("jax.")
+    module, _, suffix = type(tracer).__module__.partition(".")
+    return module == "jax"
 
 
 def of(*arrays, default_cls=Numpy):
