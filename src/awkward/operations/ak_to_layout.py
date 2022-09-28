@@ -4,8 +4,8 @@ from collections.abc import Iterable
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 def to_layout(
@@ -85,7 +85,7 @@ def _impl(array, allow_record, allow_other, numpytype):
             numpytype,
         )
 
-    elif ak.nplike.is_cupy_buffer(array) and type(array).__name__ == "ndarray":
+    elif ak.nplikes.is_cupy_buffer(array) and type(array).__name__ == "ndarray":
         if not issubclass(array.dtype.type, numpytype):
             raise ak._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
         return _impl(
@@ -95,7 +95,7 @@ def _impl(array, allow_record, allow_other, numpytype):
             numpytype,
         )
 
-    elif ak.nplike.is_jax_buffer(array) and type(array).__name__ == "DeviceArray":
+    elif ak.nplikes.is_jax_buffer(array) and type(array).__name__ == "DeviceArray":
         if not issubclass(array.dtype.type, numpytype):
             raise ak._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
         return _impl(

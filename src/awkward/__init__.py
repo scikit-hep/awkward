@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 # NumPy-like alternatives
-import awkward.nplike
+import awkward.nplikes
 
 # shims for C++ (now everything is compiled into one 'awkward._ext' module)
 import awkward._ext

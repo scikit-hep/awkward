@@ -6,7 +6,7 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward.contents.content import Content
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 class Record:

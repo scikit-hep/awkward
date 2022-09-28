@@ -6,7 +6,7 @@ import re
 
 import awkward as ak
 
-numpy = ak.nplike.Numpy.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 def half(integer):

@@ -3,7 +3,7 @@
 import awkward as ak
 from awkward.operations.ak_fill_none import fill_none
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
@@ -50,14 +50,14 @@ def concatenate(
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
-    single_nplike = ak.nplike.of(arrays)
+    single_nplike = ak.nplikes.of(arrays)
     if (
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is a NumPy Array
-        or ak.nplike.is_numpy_buffer(arrays)
+        or ak.nplikes.is_numpy_buffer(arrays)
         # Is an array with a known NumpyLike
-        or single_nplike is not ak.nplike.Numpy.instance()
+        or single_nplike is not ak.nplikes.Numpy.instance()
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
@@ -132,7 +132,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                nplike = ak.nplike.of(*inputs)
+                nplike = ak.nplikes.of(*inputs)
 
                 length = ak._typetracer.UnknownLength
                 for x in inputs:

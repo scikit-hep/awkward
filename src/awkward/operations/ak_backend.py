@@ -48,13 +48,13 @@ def _impl(arrays):
             allow_other=True,
         )
         if isinstance(layout, (ak.contents.Content, ak.index.Index)):
-            if isinstance(layout.nplike, ak.nplike.Numpy):
+            if isinstance(layout.nplike, ak.nplikes.Numpy):
                 backends.add("cpu")
-            elif isinstance(layout.nplike, ak.nplike.Cupy):
+            elif isinstance(layout.nplike, ak.nplikes.Cupy):
                 backends.add("cuda")
-            elif isinstance(layout.nplike, ak.nplike.Jax):
+            elif isinstance(layout.nplike, ak.nplikes.Jax):
                 backends.add("jax")
-        elif isinstance(layout, ak.nplike.numpy.ndarray):
+        elif isinstance(layout, ak.nplikes.numpy.ndarray):
             backends.add("cpu")
         elif type(layout).__module__.startswith("cupy."):
             backends.add("cuda")

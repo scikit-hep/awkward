@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 ### FIXME: ak._connect.numpy.implements needs to exist!

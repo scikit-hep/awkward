@@ -11,8 +11,8 @@ from awkward.contents.content import Content, unset
 from awkward.forms.unionform import UnionForm
 from awkward.index import Index, Index8, Index64
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 class UnionArray(Content):
@@ -321,7 +321,7 @@ class UnionArray(Content):
     @staticmethod
     def regular_index(tags, IndexClass=Index64, nplike=None):
         if nplike is None:
-            nplike = ak.nplike.of(tags)
+            nplike = ak.nplikes.of(tags)
 
         lentags = tags.length
         size = ak.index.Index64.empty(1, nplike)
@@ -370,7 +370,7 @@ class UnionArray(Content):
         offsets, counts, TagsClass=Index8, IndexClass=Index64, nplike=None
     ):
         if nplike is None:
-            nplike = ak.nplike.of(offsets, counts)
+            nplike = ak.nplikes.of(offsets, counts)
 
         f_offsets = ak.index.Index64(copy.deepcopy(offsets.data))
         contentlen = f_offsets[f_offsets.length - 1]

@@ -4,7 +4,7 @@ import pytest  # noqa: F401
 
 import awkward as ak  # noqa: F401
 
-numpy = ak.nplike.Numpy.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 class MyBehavior(ak.Array):

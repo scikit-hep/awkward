@@ -5,7 +5,7 @@ import numbers
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def parameters(array):

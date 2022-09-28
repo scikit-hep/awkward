@@ -30,8 +30,8 @@ from awkward.index import (  # IndexU8,  # noqa: F401; Index32,  # noqa: F401; I
 )
 from awkward.record import Record  # noqa: F401
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 listtypes = (ListOffsetArray, ListArray, RegularArray)
@@ -48,7 +48,7 @@ def broadcast_pack(inputs, isscalar):
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = ak.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = ak.nplikes.of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
@@ -1006,7 +1006,7 @@ def broadcast_and_apply(
     function_name=None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
-    nplike = ak.nplike.of(*inputs)
+    nplike = ak.nplikes.of(*inputs)
     isscalar = []
     out = apply_step(
         nplike,

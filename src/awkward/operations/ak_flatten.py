@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def flatten(array, axis=1, highlevel=True, behavior=None):
@@ -99,7 +99,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    nplike = ak.nplike.of(layout)
+    nplike = ak.nplikes.of(layout)
 
     if axis is None:
         out = layout.completely_flatten(function_name="ak.flatten")

@@ -17,10 +17,10 @@ import packaging.version
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 win = os.name == "nt"
-bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
+bits32 = ak.nplikes.numpy.iinfo(np.intp).bits == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -32,9 +32,9 @@ kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
 
 _backends = {
-    "cpu": ak.nplike.Numpy,
-    "cuda": ak.nplike.Cupy,
-    "jax": ak.nplike.Jax,
+    "cpu": ak.nplikes.Numpy,
+    "cuda": ak.nplikes.Cupy,
+    "jax": ak.nplikes.Jax,
 }
 
 
@@ -782,7 +782,7 @@ def extra(args, kwargs, defaults):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = ak.nplike.of(unionarray)
+    nplike = ak.nplikes.of(unionarray)
 
     contents = []
     for layout in unionarray.contents:
@@ -921,8 +921,8 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-    np = ak.nplike.NumpyMetadata.instance()
-    numpy = ak.nplike.Numpy.instance()
+    np = ak.nplikes.NumpyMetadata.instance()
+    numpy = ak.nplikes.Numpy.instance()
 
     def recurse(array, mask=None):
         if regulararray and len(array.shape) > 1:

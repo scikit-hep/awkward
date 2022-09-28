@@ -8,8 +8,8 @@ from collections.abc import Iterable, Sized
 import awkward as ak
 import awkward._reducers
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 # FIXME: use common Sentinel class for this
 unset = object()
@@ -45,10 +45,10 @@ class Content:
                 )
             )
 
-        if nplike is not None and not isinstance(nplike, ak.nplike.NumpyLike):
+        if nplike is not None and not isinstance(nplike, ak.nplikes.NumpyLike):
             raise ak._util.error(
                 TypeError(
-                    "{} 'nplike' must be an ak.nplike.NumpyLike or None, not {}".format(
+                    "{} 'nplike' must be an ak.nplikes.NumpyLike or None, not {}".format(
                         type(self).__name__, repr(nplike)
                     )
                 )

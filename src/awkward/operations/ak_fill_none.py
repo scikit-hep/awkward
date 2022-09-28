@@ -5,7 +5,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
@@ -60,7 +60,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    nplike = ak.nplike.of(arraylayout)
+    nplike = ak.nplikes.of(arraylayout)
 
     # Convert value type to appropriate layout
     if (

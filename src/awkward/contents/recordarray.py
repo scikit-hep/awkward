@@ -9,8 +9,8 @@ from awkward.contents.content import Content, unset
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 class RecordArray(Content):

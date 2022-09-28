@@ -3,7 +3,7 @@
 import awkward as ak
 from awkward._connect.jax import import_jax
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 class Reducer:

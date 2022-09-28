@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("broadcast_arrays")
@@ -167,7 +167,7 @@ def _impl(arrays, kwargs):
     for x in arrays:
         y = ak.operations.to_layout(x, allow_record=True, allow_other=True)
         if not isinstance(y, (ak.contents.Content, ak.Record)):
-            y = ak.contents.NumpyArray(ak.nplike.of(*arrays).array([y]))
+            y = ak.contents.NumpyArray(ak.nplikes.of(*arrays).array([y]))
         inputs.append(y)
 
     def action(inputs, depth, **kwargs):

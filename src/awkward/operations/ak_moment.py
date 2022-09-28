@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def moment(
@@ -104,4 +104,4 @@ def _impl(x, n, weight, axis, keepdims, mask_identity, flatten_records):
                 mask_identity,
                 flatten_records,
             )
-        return ak.nplike.of(sumwxn, sumw).true_divide(sumwxn, sumw)
+        return ak.nplikes.of(sumwxn, sumw).true_divide(sumwxn, sumw)

@@ -8,7 +8,7 @@ import numba.core.typing.ctypes_utils
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def code_to_function(code, function_name, externals=None, debug=False):
@@ -871,7 +871,7 @@ def array_supported(dtype):
     ) or isinstance(dtype, (numba.types.NPDatetime, numba.types.NPTimedelta))
 
 
-@numba.extending.overload(ak.nplike.numpy.array)
+@numba.extending.overload(ak.nplikes.numpy.array)
 def overload_np_array(array, dtype=None):
     if isinstance(array, ArrayViewType):
         ndim = array.type.ndim
@@ -936,11 +936,11 @@ def array_impl(array, dtype=None):
                     "\n    ".join(fill_array),
                 ),
                 "array_impl",
-                {"numpy": ak.nplike.numpy},
+                {"numpy": ak.nplikes.numpy},
             )
 
 
-@numba.extending.type_callable(ak.nplike.numpy.asarray)
+@numba.extending.type_callable(ak.nplikes.numpy.asarray)
 def type_asarray(context):
     def typer(arrayview):
         if (
@@ -954,7 +954,7 @@ def type_asarray(context):
     return typer
 
 
-@numba.extending.lower_builtin(ak.nplike.numpy.asarray, ArrayViewType)
+@numba.extending.lower_builtin(ak.nplikes.numpy.asarray, ArrayViewType)
 def lower_asarray(context, builder, sig, args):
     rettype, (viewtype,) = sig.return_type, sig.args
     (viewval,) = args

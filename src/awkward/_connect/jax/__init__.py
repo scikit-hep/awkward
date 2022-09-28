@@ -84,7 +84,7 @@ def _replace_numpyarray_nodes(layout, buffers):
                 buffer,
                 layout.identifier,
                 layout.parameters,
-                nplike=ak.nplike.Jax.instance(),
+                nplike=ak.nplikes.Jax.instance(),
             )
 
     return layout.recursively_apply(action=replace_numpyarray_nodes)

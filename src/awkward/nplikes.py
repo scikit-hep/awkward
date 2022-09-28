@@ -717,7 +717,7 @@ class Cupy(NumpyLike):
 class Jax(NumpyLike):
     @property
     def index_nplike(self):
-        return ak.nplike.Numpy.instance()
+        return ak.nplikes.Numpy.instance()
 
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, self._module.DeviceArray):
@@ -796,11 +796,11 @@ class Jax(NumpyLike):
     def raw(self, array, nplike):
         if isinstance(nplike, Jax):
             return array
-        elif isinstance(nplike, ak.nplike.Cupy):
-            cupy = ak.nplike.Cupy.instance()
+        elif isinstance(nplike, ak.nplikes.Cupy):
+            cupy = ak.nplikes.Cupy.instance()
             return cupy.asarray(array)
-        elif isinstance(nplike, ak.nplike.Numpy):
-            numpy = ak.nplike.Numpy.instance()
+        elif isinstance(nplike, ak.nplikes.Numpy):
+            numpy = ak.nplikes.Numpy.instance()
             return numpy.asarray(array)
         elif isinstance(nplike, ak._typetracer.TypeTracer):
             return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
@@ -872,7 +872,7 @@ def of(*arrays, default_cls=Numpy):
         *arrays: iterable of possible array objects
         default_cls: default NumpyLike class if no array objects found
 
-    Return the #ak.nplike.NumpyLike that is best-suited to operating upon the given
+    Return the #ak.nplikes.NumpyLike that is best-suited to operating upon the given
     iterable of arrays. Return an instance of the `default_cls` if no known array types
     are found.
     """
