@@ -351,6 +351,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                     numba.types.Complex,
                     numba.types.NPDatetime,
                     numba.types.NPTimedelta,
+                    numba.types.UnicodeType,
                 ),
             )
         ):
@@ -368,6 +369,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                     numba.types.Complex,
                     numba.types.NPDatetime,
                     numba.types.NPTimedelta,
+                    numba.types.UnicodeType,
                 ),
             )
         ):
