@@ -580,7 +580,7 @@ def lower_string(context, builder, sig, args):
     return context.get_dummy_value()
 
 
-# FIXME: Submit PR with the function to Numba
+# FIXME: Take the function from Numba
 def bytes_as_string(self, obj):
     from llvmlite import ir
 
@@ -590,7 +590,7 @@ def bytes_as_string(self, obj):
     return self.builder.call(fn, [obj])
 
 
-# FIXME: Submit PR with the function to Numba
+# FIXME: Take the function from Numba
 # int PyBytes_AsStringAndSize(PyObject *obj, char **buffer, Py_ssize_t *length)
 def bytes_as_string_and_size(self, obj, p_buffer, p_length):
     # """
@@ -622,26 +622,26 @@ def lower_bytestring(context, builder, sig, args):
     gil = pyapi.gil_ensure()
 
     strptr = pyapi.from_native_value(xtype, xval)
-    result = numba.core.cgutils.alloca_once(
+    p_length = numba.core.cgutils.alloca_once(
         builder, context.get_value_type(numba.int64)
     )
     p_buffer = numba.core.cgutils.alloca_once(builder, pyapi.cstring)
 
-    # FIXME: ok =
-    bytes_as_string_and_size(pyapi, strptr, p_buffer, result)
-    # FIXME: pyapi.if_object_ok
-    length = ak._connect.numba.layout.castint(
-        context, builder, numba.intp, numba.int64, builder.load(result)
-    )
-    call(
-        context,
-        builder,
-        ak._libawkward.ArrayBuilder_bytestring_length,
-        (proxyin.rawptr, builder.load(p_buffer), length),
-    )
-    pyapi.gil_release(gil)
+    ok = bytes_as_string_and_size(pyapi, strptr, p_buffer, p_length)
+    if pyapi.if_object_ok(ok):
+        length = builder.load(p_length)
+        l = ak._connect.numba.layout.castint(
+            context, builder, length.type, numba.int64, length
+        )
+        call(
+            context,
+            builder,
+            ak._libawkward.ArrayBuilder_bytestring_length,
+            (proxyin.rawptr, builder.load(p_buffer), l),
+        )
+        pyapi.gil_release(gil)
 
-    return context.get_dummy_value()
+        return context.get_dummy_value()
 
 
 @numba.extending.lower_builtin("begin_list", ArrayBuilderType)
