@@ -850,20 +850,51 @@ class Jax(NumpyLike):
         return out
 
 
-def is_numpy_buffer(array):
-    return isinstance(array, numpy.ndarray)
+def is_numpy_buffer(obj) -> bool:
+    """
+    Args:
+        obj: object to test
+
+    Return `True` if the given object is a numpy buffer, otherwise `False`.
+
+    """
+    return isinstance(obj, numpy.ndarray)
 
 
-def is_cupy_buffer(array):
-    return type(array).__module__.startswith("cupy.")
+def is_cupy_buffer(obj) -> bool:
+    """
+    Args:
+        obj: object to test
+
+    Return `True` if the given object is a cupy buffer, otherwise `False`.
+
+    """
+    module, _, suffix = type(obj).__module__.partition(".")
+    return module == "cupy"
 
 
-def is_jax_buffer(array):
-    return type(array).__module__.startswith("jaxlib.")
+def is_jax_buffer(obj) -> bool:
+    """
+    Args:
+        obj: object to test
+
+    Return `True` if the given object is a jax buffer, otherwise `False`.
+
+    """
+    module, _, suffix = type(obj).__module__.partition(".")
+    return module == "jaxlib"
 
 
-def is_jax_tracer(tracer):
-    return type(tracer).__module__.startswith("jax.")
+def is_jax_tracer(obj) -> bool:
+    """
+    Args:
+        obj: object to test
+
+    Return `True` if the given object is a jax tracer, otherwise `False`.
+
+    """
+    module, _, suffix = type(obj).__module__.partition(".")
+    return module == "jax"
 
 
 def nplike_of(*arrays, default_cls=Numpy):

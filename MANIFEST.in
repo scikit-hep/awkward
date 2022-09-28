@@ -10,9 +10,6 @@ recursive-include tests-cuda-kernels *.py
 recursive-include tests-cuda *.py
 recursive-include tests-spec *.py
 
-recursive-include dlpack *.c *.cc *.h *.in
-include dlpack/LICENSE dlpack/CMakeLists.txt
-
 recursive-include rapidjson/include *
 recursive-include rapidjson *.cmake *.in CMakeLists.txt
 include rapidjson/license.txt
