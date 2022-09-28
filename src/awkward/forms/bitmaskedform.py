@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -120,66 +119,6 @@ class BitMaskedForm(Form):
             )
         else:
             return False
-
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, BitMaskedForm):
-            return (
-                self._mask == other._mask
-                and self._valid_when == other._valid_when
-                and self._lsb_order == other._lsb_order
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
-                and self._content.generated_compatibility(other._content)
-            )
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return ByteMaskedForm(
-            "i8",
-            self._content._getitem_range(),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        return BitMaskedForm(
-            self._mask,
-            self._content._getitem_field(where, only_fields),
-            self._valid_when,
-            self._lsb_order,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _getitem_fields(self, where, only_fields=()):
-        return BitMaskedForm(
-            self._mask,
-            self._content._getitem_fields(where, only_fields),
-            self._valid_when,
-            self._lsb_order,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        return ByteMaskedForm(
-            "i8",
-            self._content._carry(allow_lazy),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
 
     def simplify_optiontype(self):
         if isinstance(

@@ -385,9 +385,6 @@ class Form:
     def simplify_optiontype(self):
         return self
 
-    def simplify_uniontype(self, merge=True, mergebool=False):
-        return self
-
     def columns(self, list_indicator=None, column_prefix=()):
         output = []
         self._columns(column_prefix, output, list_indicator)
@@ -426,18 +423,6 @@ class Form:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _column_types(self):
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def generated_compatibility(self, other):
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def _getitem_range(self):
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def _getitem_field(self, where, only_fields=()):
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def _getitem_fields(self, where, only_fields=()):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _tolist_part(self, verbose, toplevel):

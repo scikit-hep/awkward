@@ -99,63 +99,6 @@ class ListForm(Form):
         else:
             return False
 
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, ListForm):
-            return (
-                self._starts == other._starts
-                and self._stops == other._stops
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
-                and self._content.generated_compatibility(other._content)
-            )
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return ListForm(
-            self._starts,
-            self._stops,
-            self._content,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        return ListForm(
-            self._starts,
-            self._stops,
-            self._content._getitem_field(where, only_fields),
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _getitem_fields(self, where, only_fields=()):
-        return ListForm(
-            self._starts,
-            self._stops,
-            self._content._getitem_fields(where, only_fields),
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        return ListForm(
-            self._starts,
-            self._stops,
-            self._content,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:
             return self._content.purelist_parameter(key)

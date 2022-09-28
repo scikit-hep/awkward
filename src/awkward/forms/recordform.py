@@ -5,7 +5,6 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward.forms.form import Form, _parameters_equal
-from awkward.forms.indexedform import IndexedForm
 
 
 class RecordForm(Form):
@@ -175,95 +174,6 @@ class RecordForm(Form):
                 return False
         else:
             return False
-
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, RecordForm):
-            if self.is_tuple == other.is_tuple:
-                self_fields = set(self._fields)
-                other_fields = set(other._fields)
-                if self_fields == other_fields:
-                    return _parameters_equal(
-                        self._parameters, other._parameters
-                    ) and all(
-                        self.content(x).generated_compatibility(other.content(x))
-                        for x in self_fields
-                    )
-                else:
-                    return False
-            else:
-                return False
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return RecordForm(
-            self._contents,
-            self._fields,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        if len(only_fields) == 0:
-            return self.content(where)
-
-        else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
-            if ak._util.isstr(nexthead):
-                return self.content(where)._getitem_field(nexthead, nexttail)
-            else:
-                return self.content(where)._getitem_fields(nexthead, nexttail)
-
-    def _getitem_fields(self, where, only_fields=()):
-        indexes = [self.field_to_index(field) for field in where]
-        if self._fields is None:
-            fields = None
-        else:
-            fields = [self._fields[i] for i in indexes]
-
-        if len(only_fields) == 0:
-            contents = [self.content(i) for i in indexes]
-        else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
-            if ak._util.isstr(nexthead):
-                contents = [
-                    self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
-                ]
-            else:
-                contents = [
-                    self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
-                ]
-
-        return RecordForm(
-            contents,
-            fields,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        if allow_lazy:
-            return IndexedForm(
-                "i64",
-                self,
-                has_identifier=self._has_identifier,
-                parameters=None,
-                form_key=None,
-            )
-        else:
-            return RecordForm(
-                self._contents,
-                self._fields,
-                has_identifier=self._has_identifier,
-                parameters=self._parameters,
-                form_key=None,
-            )
 
     def purelist_parameter(self, key):
         return self.parameter(key)
