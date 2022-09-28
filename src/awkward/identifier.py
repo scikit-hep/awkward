@@ -32,7 +32,7 @@ class Identifier:
             raise ak._util.error(
                 TypeError("Identifier fieldloc must be a dict of int -> str")
             )
-        self._nplike = ak.nplikes.nplike_for(data)
+        self._nplike = ak.nplikes.nplike_of(data)
 
         self._data = self._nplike.asarray(data, order="C")
         if len(self._data.shape) != 2:

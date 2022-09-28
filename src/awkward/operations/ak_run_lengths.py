@@ -95,7 +95,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    nplike = ak.nplikes.nplike_for(array)
+    nplike = ak.nplikes.nplike_of(array)
 
     def lengths_of(data, offsets):
         if len(data) == 0:

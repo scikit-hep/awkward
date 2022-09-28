@@ -96,7 +96,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
         )
 
     with np.errstate(invalid="ignore"):
-        nplike = ak.nplikes.nplike_for(x, y, weight)
+        nplike = ak.nplikes.nplike_of(x, y, weight)
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x, axis, keepdims, mask_identity, flatten_records

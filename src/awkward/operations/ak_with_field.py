@@ -101,7 +101,7 @@ def _impl(base, what, where, highlevel, behavior):
         else:
 
             def action(inputs, **kwargs):
-                nplike = ak.nplikes.nplike_for(*inputs)
+                nplike = ak.nplikes.nplike_of(*inputs)
                 base, what = inputs
                 if isinstance(base, ak.contents.RecordArray):
                     if what is None:

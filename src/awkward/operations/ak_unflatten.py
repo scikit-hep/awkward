@@ -75,7 +75,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
 
 def _impl(array, counts, axis, highlevel, behavior):
-    nplike = ak.nplikes.nplike_for(array)
+    nplike = ak.nplikes.nplike_of(array)
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 

@@ -10,7 +10,7 @@ class ByteBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = ak.nplikes.nplike_for(self.layout).asarray(self.layout)
+        tmp = ak.nplikes.nplike_of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -51,7 +51,7 @@ class CharBehavior(Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = ak.nplikes.nplike_for(self.layout).asarray(self.layout)
+        tmp = ak.nplikes.nplike_of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -105,7 +105,7 @@ class StringBehavior(Array):
 
 
 def _string_equal(one, two):
-    nplike = ak.nplikes.nplike_for(one, two)
+    nplike = ak.nplikes.nplike_of(one, two)
     behavior = ak._util.behavior_of(one, two)
 
     one, two = (
@@ -141,7 +141,7 @@ def _string_notequal(one, two):
 
 
 def _string_broadcast(layout, offsets):
-    nplike = ak.nplikes.nplike_for(offsets)
+    nplike = ak.nplikes.nplike_of(offsets)
     offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if ak._util.win or ak._util.bits32:

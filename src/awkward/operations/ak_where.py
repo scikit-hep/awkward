@@ -77,7 +77,7 @@ def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
-    nplike = ak.nplikes.nplike_for(akcondition)
+    nplike = ak.nplikes.nplike_of(akcondition)
 
     akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
     out = nplike.nonzero(ak.operations.to_numpy(akcondition))
@@ -106,7 +106,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         good_arrays.append(left)
     if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
-    nplike = ak.nplikes.nplike_for(*good_arrays)
+    nplike = ak.nplikes.nplike_of(*good_arrays)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs

@@ -50,7 +50,7 @@ def concatenate(
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
-    single_nplike = ak.nplikes.nplike_for(arrays)
+    single_nplike = ak.nplikes.nplike_of(arrays)
     if (
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
@@ -132,7 +132,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                nplike = ak.nplikes.nplike_for(*inputs)
+                nplike = ak.nplikes.nplike_of(*inputs)
 
                 length = ak._typetracer.UnknownLength
                 for x in inputs:

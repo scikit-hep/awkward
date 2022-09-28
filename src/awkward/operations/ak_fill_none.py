@@ -60,7 +60,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    nplike = ak.nplikes.nplike_for(arraylayout)
+    nplike = ak.nplikes.nplike_of(arraylayout)
 
     # Convert value type to appropriate layout
     if (

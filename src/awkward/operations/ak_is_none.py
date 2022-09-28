@@ -36,7 +36,7 @@ def _impl(array, axis, highlevel, behavior):
         if not isinstance(layout, ak.contents.Content):
             return
 
-        nplike = ak.nplikes.nplike_for(layout)
+        nplike = ak.nplikes.nplike_of(layout)
 
         if layout.is_OptionType:
             layout = layout.toIndexedOptionArray64()

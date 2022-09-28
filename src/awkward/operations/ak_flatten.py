@@ -99,7 +99,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    nplike = ak.nplikes.nplike_for(layout)
+    nplike = ak.nplikes.nplike_of(layout)
 
     if axis is None:
         out = layout.completely_flatten(function_name="ak.flatten")

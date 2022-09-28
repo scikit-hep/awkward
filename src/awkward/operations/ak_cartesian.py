@@ -232,7 +232,7 @@ def cartesian(
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
         behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
-        nplike = ak.nplikes.nplike_for(*arrays.values())
+        nplike = ak.nplikes.nplike_of(*arrays.values())
         new_arrays = {}
         for n, x in arrays.items():
             new_arrays[n] = ak.operations.to_layout(
@@ -242,7 +242,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     else:
         arrays = list(arrays)
         behavior = ak._util.behavior_of(*arrays, behavior=behavior)
-        nplike = ak.nplikes.nplike_for(*arrays)
+        nplike = ak.nplikes.nplike_of(*arrays)
         new_arrays = []
         for x in arrays:
             new_arrays.append(
