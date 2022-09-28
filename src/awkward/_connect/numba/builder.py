@@ -622,26 +622,26 @@ def lower_bytestring(context, builder, sig, args):
     gil = pyapi.gil_ensure()
 
     strptr = pyapi.from_native_value(xtype, xval)
-    p_length = numba.core.cgutils.alloca_once(
+    p_result = numba.core.cgutils.alloca_once(
         builder, context.get_value_type(numba.int64)
     )
     p_buffer = numba.core.cgutils.alloca_once(builder, pyapi.cstring)
 
-    ok = bytes_as_string_and_size(pyapi, strptr, p_buffer, p_length)
+    ok = bytes_as_string_and_size(pyapi, strptr, p_buffer, p_result)
     if pyapi.if_object_ok(ok):
-        length = builder.load(p_length)
-        l = ak._connect.numba.layout.castint(
-            context, builder, length.type, numba.int64, length
+        result = builder.load(p_result)
+        length = ak._connect.numba.layout.castint(
+            context, builder, result.type, numba.int64, result
         )
         call(
             context,
             builder,
             ak._libawkward.ArrayBuilder_bytestring_length,
-            (proxyin.rawptr, builder.load(p_buffer), l),
+            (proxyin.rawptr, builder.load(p_buffer), length),
         )
-        pyapi.gil_release(gil)
+    pyapi.gil_release(gil)
 
-        return context.get_dummy_value()
+    return context.get_dummy_value()
 
 
 @numba.extending.lower_builtin("begin_list", ArrayBuilderType)
