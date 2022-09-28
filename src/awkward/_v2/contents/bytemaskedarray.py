@@ -655,15 +655,15 @@ class ByteMaskedArray(Content):
             for x in others
         ):
             parameters = self._parameters
-            masks = [self._mask.data]
+            masks = [self._mask.data[: self.length]]
             tail_contents = []
             length = 0
             for x in others:
                 parameters = ak._v2._util.merge_parameters(
                     parameters, x._parameters, True
                 )
-                masks.append(x._mask.data)
-                tail_contents.append(x._content[: self.length])
+                masks.append(x._mask.data[: x.length])
+                tail_contents.append(x._content[: x.length])
                 length += x.length
 
             return ByteMaskedArray(
