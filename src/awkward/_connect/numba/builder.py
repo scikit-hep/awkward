@@ -560,15 +560,12 @@ def lower_timedelta(context, builder, sig, args):
 def lower_string(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
+    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
 
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()
 
-    strptr = pyapi.from_native_value(xtype, xval)
-    cstrptr = builder.bitcast(strptr, pyapi.cstring)
-    out = pyapi.string_as_string(cstrptr)
-
-    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
+    out = pyapi.string_as_string(xval.value)
     call(
         context,
         builder,
