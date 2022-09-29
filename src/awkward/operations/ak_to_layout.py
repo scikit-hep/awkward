@@ -32,7 +32,7 @@ def to_layout(
     would rarely be used in a data analysis because #ak.contents.Content and
     #ak.record.Record are lower-level than #ak.Array.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_layout",
         dict(
             array=array,
@@ -50,7 +50,7 @@ def _impl(array, allow_record, allow_other, numpytype):
 
     elif isinstance(array, ak.record.Record):
         if not allow_record:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("ak.Record objects are not allowed in this function")
             )
         else:
@@ -61,7 +61,7 @@ def _impl(array, allow_record, allow_other, numpytype):
 
     elif isinstance(array, ak.highlevel.Record):
         if not allow_record:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("ak.Record objects are not allowed in this function")
             )
         else:
@@ -75,7 +75,9 @@ def _impl(array, allow_record, allow_other, numpytype):
 
     elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
-            raise ak._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
+            raise ak._errors.wrap_error(
+                ValueError(f"dtype {array.dtype!r} not allowed")
+            )
         return _impl(
             ak.operations.from_numpy(
                 array, regulararray=True, recordarray=True, highlevel=False
@@ -87,7 +89,9 @@ def _impl(array, allow_record, allow_other, numpytype):
 
     elif ak.nplikes.is_cupy_buffer(array) and type(array).__name__ == "ndarray":
         if not issubclass(array.dtype.type, numpytype):
-            raise ak._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
+            raise ak._errors.wrap_error(
+                ValueError(f"dtype {array.dtype!r} not allowed")
+            )
         return _impl(
             ak.operations.from_cupy(array, regulararray=True, highlevel=False),
             allow_record,
@@ -97,7 +101,9 @@ def _impl(array, allow_record, allow_other, numpytype):
 
     elif ak.nplikes.is_jax_buffer(array) and type(array).__name__ == "DeviceArray":
         if not issubclass(array.dtype.type, numpytype):
-            raise ak._util.error(ValueError(f"dtype {array.dtype!r} not allowed"))
+            raise ak._errors.wrap_error(
+                ValueError(f"dtype {array.dtype!r} not allowed")
+            )
         return _impl(
             ak.operations.from_jax(array, regulararray=True, highlevel=False),
             allow_record,
@@ -122,7 +128,7 @@ def _impl(array, allow_record, allow_other, numpytype):
         )
 
     elif not allow_other:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(f"{array} cannot be converted into an Awkward Array")
         )
 

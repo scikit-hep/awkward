@@ -31,7 +31,7 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=N
         >>> ak.sort(ak.Array([[7, 5, 7], [], [2], [8, 2]]))
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.sort",
         dict(
             array=array,

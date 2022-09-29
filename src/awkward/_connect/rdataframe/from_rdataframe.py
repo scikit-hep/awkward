@@ -208,7 +208,9 @@ def from_rdataframe(data_frame, columns):
                 )
                 fill_from_func[builder_type, col_type](builder, result_ptrs[col])
             else:
-                raise ak._util.error(AssertionError(f"unrecognized Form: {type(form)}"))
+                raise ak._errors.wrap_error(
+                    AssertionError(f"unrecognized Form: {type(form)}")
+                )
 
             names_nbytes = cpp_buffers_self.names_nbytes[builder_type](builder)
             buffers = empty_buffers(cpp_buffers_self, names_nbytes)

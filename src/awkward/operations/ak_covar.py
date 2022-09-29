@@ -53,7 +53,7 @@ def covar(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.covar",
         dict(
             x=x,

@@ -72,7 +72,7 @@ class DataSourceGenerator:
 
             self.entry_types[key] = self.generators[key].entry_type()
             if self.entry_types[key] == "bool":
-                raise ak._util.error(NotImplementedError)
+                raise ak._errors.wrap_error(NotImplementedError)
 
             if isinstance(self.generators[key], ak._connect.cling.NumpyArrayGenerator):
                 pass

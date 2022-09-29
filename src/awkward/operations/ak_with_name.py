@@ -27,7 +27,7 @@ def with_name(array, name, highlevel=True, behavior=None):
     to the data; see #ak.Array and #ak.behavior for a more complete
     description.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.with_name",
         dict(array=array, name=name, highlevel=highlevel, behavior=behavior),
     ):

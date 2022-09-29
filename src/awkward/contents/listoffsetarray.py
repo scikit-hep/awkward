@@ -47,14 +47,14 @@ class ListOffsetArray(Content):
             np.dtype(np.uint32),
             np.dtype(np.int64),
         ):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'offsets' must be an Index with dtype in (int32, uint32, int64), "
                     "not {}".format(type(self).__name__, repr(offsets))
                 )
             )
         if not isinstance(content, Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Content subtype, not {}".format(
                         type(self).__name__, repr(content)
@@ -62,7 +62,7 @@ class ListOffsetArray(Content):
                 )
             )
         if offsets.nplike.known_shape and not offsets.length >= 1:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(offsets) ({}) must be >= 1".format(
                         type(self).__name__, offsets.length
@@ -222,7 +222,7 @@ class ListOffsetArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise ak._util.indexerror(self, where)
+            raise ak._errors.index_error(self, where)
         start, stop = self._offsets[where], self._offsets[where + 1]
         return self._content._getitem_range(slice(start, stop))
 
@@ -270,7 +270,7 @@ class ListOffsetArray(Content):
             nextstarts = self.starts[carry.data]
             nextstops = self.stops[carry.data]
         except IndexError as err:
-            raise ak._util.indexerror(self, carry.data, str(err)) from err
+            raise ak._errors.index_error(self, carry.data, str(err)) from err
 
         return ak.contents.listarray.ListArray(
             nextstarts,
@@ -296,7 +296,7 @@ class ListOffsetArray(Content):
 
     def _broadcast_tooffsets64(self, offsets):
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AssertionError(
                     "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
                         "(empty)" if offsets.length == 0 else str(offsets[0])
@@ -305,7 +305,7 @@ class ListOffsetArray(Content):
             )
 
         if offsets.nplike.known_shape and offsets.length - 1 != self.length:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AssertionError(
                     "cannot broadcast {} of length {} to length {}".format(
                         type(self).__name__, self.length, offsets.length - 1
@@ -629,7 +629,7 @@ class ListOffsetArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -670,7 +670,7 @@ class ListOffsetArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise ak._util.error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         elif posaxis == depth + 1:
             listoffsetarray = self.toListOffsetArray64(True)
@@ -841,7 +841,7 @@ class ListOffsetArray(Content):
             or self.parameter("__array__") == "bytestring"
         ):
             if branch or (negaxis is not None and negaxis != depth):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "array with strings can only be checked on uniqueness with axis=-1"
                     )
@@ -900,7 +900,7 @@ class ListOffsetArray(Content):
             or self.parameter("__array__") == "bytestring"
         ):
             if branch or (negaxis != depth):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
@@ -921,7 +921,7 @@ class ListOffsetArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
@@ -1027,7 +1027,7 @@ class ListOffsetArray(Content):
             or self.parameter("__array__") == "bytestring"
         ):
             if branch or (negaxis != depth):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
@@ -1073,7 +1073,7 @@ class ListOffsetArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
@@ -1214,7 +1214,7 @@ class ListOffsetArray(Content):
             or self.parameter("__array__") == "bytestring"
         ):
             if branch or (negaxis != depth):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
@@ -1260,7 +1260,7 @@ class ListOffsetArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     np.AxisError("array with strings can only be sorted with axis=-1")
                 )
 
@@ -1359,7 +1359,7 @@ class ListOffsetArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
                     )
@@ -2100,7 +2100,7 @@ class ListOffsetArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         next = self.toListOffsetArray64(True)

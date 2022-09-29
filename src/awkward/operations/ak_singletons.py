@@ -26,7 +26,7 @@ def singletons(array, highlevel=True, behavior=None):
 
     See #ak.firsts to invert this function.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.singletons",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):

@@ -52,7 +52,7 @@ def register_pytrees():
 
 def import_jax(name="Awkward Arrays with JAX"):
     if jax is None:
-        raise ak._util.error(ModuleNotFoundError(error_message.format(name)))
+        raise ak._errors.wrap_error(ModuleNotFoundError(error_message.format(name)))
 
     global pytrees_registered
 

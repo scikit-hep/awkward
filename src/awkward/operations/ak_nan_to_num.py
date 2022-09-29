@@ -29,7 +29,7 @@ def nan_to_num(
 
     See also #ak.nan_to_none to convert NaN to None, i.e. missing values with option-type.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nan_to_num",
         dict(
             array=array,

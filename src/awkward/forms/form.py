@@ -154,10 +154,12 @@ def from_iter(input):
         )
 
     elif input["class"] == "VirtualArray":
-        raise ak._util.error(ValueError("Awkward 1.x VirtualArrays are not supported"))
+        raise ak._errors.wrap_error(
+            ValueError("Awkward 1.x VirtualArrays are not supported")
+        )
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "Input class: {} was not recognised".format(repr(input["class"]))
             )
@@ -263,7 +265,7 @@ class Form:
 
     def _init(self, has_identifier, parameters, form_key):
         if not isinstance(has_identifier, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'has_identifier' must be of type bool, not {}".format(
                         type(self).__name__, repr(has_identifier)
@@ -271,7 +273,7 @@ class Form:
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
@@ -279,7 +281,7 @@ class Form:
                 )
             )
         if form_key is not None and not ak._util.isstr(form_key):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'form_key' must be of type string or None, not {}".format(
                         type(self).__name__, repr(form_key)
@@ -304,7 +306,7 @@ class Form:
     @property
     def is_identity_like(self):
         """Return True if the content or its non-list descendents are an identity"""
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def parameter(self, key):
         if self._parameters is None:
@@ -313,31 +315,31 @@ class Form:
             return self._parameters.get(key)
 
     def purelist_parameter(self, key):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def purelist_isregular(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def purelist_depth(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def minmax_depth(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def branch_depth(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def fields(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def is_tuple(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def form_key(self):
@@ -397,7 +399,7 @@ class Form:
 
         for item in specifier:
             if not ak._util.isstr(item):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError("a column-selection specifier must be a list of strings")
                 )
 
@@ -418,28 +420,28 @@ class Form:
         return self._column_types()
 
     def _columns(self, path, output, list_indicator):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _select_columns(self, index, specifier, matches, output):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _column_types(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def generated_compatibility(self, other):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_range(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_field(self, where, only_fields=()):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_fields(self, where, only_fields=()):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _tolist_part(self, verbose, toplevel):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _type(self, typestrs):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)

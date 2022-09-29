@@ -27,7 +27,7 @@ def from_jax(array, regulararray=False, highlevel=True, behavior=None):
 
     See also #ak.to_jax, #ak.from_numpy and #ak.from_jax.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_jax",
         dict(
             array=array,

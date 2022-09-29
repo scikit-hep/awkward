@@ -48,7 +48,7 @@ class NumpyArray(Content):
         if not isinstance(nplike, ak.nplikes.Jax):
             ak.types.numpytype.dtype_to_primitive(self._data.dtype)
         if len(self._data.shape) == 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'data' must be an array, not {}".format(
                         type(self).__name__, repr(data)
@@ -87,7 +87,7 @@ class NumpyArray(Content):
         elif isinstance(self.nplike, ak.nplikes.Jax):
             return self._data.device_buffer.unsafe_buffer_pointer()
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AssertionError(
                     "Unrecognized nplike encountered while fetching ptr to raw data"
                 )
@@ -219,7 +219,7 @@ class NumpyArray(Content):
         try:
             out = self._data[where]
         except IndexError as err:
-            raise ak._util.indexerror(self, where, str(err)) from err
+            raise ak._errors.index_error(self, where, str(err)) from err
 
         if hasattr(out, "shape") and len(out.shape) != 0:
             return NumpyArray(out, None, None, self._nplike)
@@ -236,7 +236,7 @@ class NumpyArray(Content):
         try:
             out = self._data[where]
         except IndexError as err:
-            raise ak._util.indexerror(self, where, str(err)) from err
+            raise ak._errors.index_error(self, where, str(err)) from err
 
         return NumpyArray(
             out,
@@ -246,19 +246,19 @@ class NumpyArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        raise ak._util.indexerror(self, where, "not an array of records")
+        raise ak._errors.index_error(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
         if len(where) == 0:
             return self._getitem_range(slice(0, 0))
-        raise ak._util.indexerror(self, where, "not an array of records")
+        raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
         try:
             nextdata = self._data[carry.data]
         except IndexError as err:
-            raise ak._util.indexerror(self, carry.data, str(err)) from err
+            raise ak._errors.index_error(self, carry.data, str(err)) from err
         return NumpyArray(
             nextdata,
             self._carry_identifier(carry),
@@ -268,7 +268,7 @@ class NumpyArray(Content):
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         if self._data.ndim == 1:
-            raise ak._util.indexerror(
+            raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -291,7 +291,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._util.indexerror(self, (head,) + tail, str(err)) from err
+                raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
 
             if hasattr(out, "shape") and len(out.shape) != 0:
                 return NumpyArray(out, None, None, self._nplike)
@@ -303,7 +303,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._util.indexerror(self, (head,) + tail, str(err)) from err
+                raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
             out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 
@@ -325,7 +325,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._util.indexerror(self, (head,) + tail, str(err)) from err
+                raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
 
             return NumpyArray(out, None, self._parameters, self._nplike)
 
@@ -334,7 +334,7 @@ class NumpyArray(Content):
             try:
                 out = self._data[where]
             except IndexError as err:
-                raise ak._util.indexerror(self, (head,) + tail, str(err)) from err
+                raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
             out2 = NumpyArray(out, None, self._parameters, self._nplike)
             return out2
 
@@ -343,7 +343,7 @@ class NumpyArray(Content):
             return next._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -364,7 +364,7 @@ class NumpyArray(Content):
             i += 1
             depth += 1
         if posaxis > depth:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
 
@@ -382,13 +382,13 @@ class NumpyArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise ak._util.error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         elif len(self.shape) != 1:
             return self.toRegularArray()._offsets_and_flattened(posaxis, depth)
 
         else:
-            raise ak._util.error(np.AxisError("axis out of range for flatten"))
+            raise ak._errors.wrap_error(np.AxisError("axis out of range for flatten"))
 
     def _mergeable(self, other, mergebool):
         if isinstance(
@@ -468,7 +468,7 @@ class NumpyArray(Content):
             elif isinstance(array, ak.contents.numpyarray.NumpyArray):
                 contiguous_arrays.append(array.data)
             else:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     AssertionError(
                         "cannot merge "
                         + type(self).__name__
@@ -498,7 +498,9 @@ class NumpyArray(Content):
         if posaxis == depth:
             return self._local_index_axis0()
         elif len(self.shape) <= 1:
-            raise ak._util.error(np.AxisError("'axis' out of range for local_index"))
+            raise ak._errors.wrap_error(
+                np.AxisError("'axis' out of range for local_index")
+            )
         else:
             return self.toRegularArray()._local_index(posaxis, depth)
 
@@ -870,7 +872,7 @@ class NumpyArray(Content):
         order,
     ):
         if len(self.shape) == 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(f"{type(self).__name__} attempting to argsort a scalar ")
             )
         elif len(self.shape) != 1 or not self.is_contiguous:
@@ -980,7 +982,7 @@ class NumpyArray(Content):
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
         if len(self.shape) == 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(f"{type(self).__name__} attempting to sort a scalar ")
             )
 
@@ -1064,7 +1066,9 @@ class NumpyArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         elif len(self.shape) <= 1:
-            raise ak._util.error(np.AxisError("'axis' out of range for combinations"))
+            raise ak._errors.wrap_error(
+                np.AxisError("'axis' out of range for combinations")
+            )
         else:
             return self.toRegularArray()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
@@ -1197,12 +1201,14 @@ class NumpyArray(Content):
 
     def _pad_none(self, target, axis, depth, clip):
         if len(self.shape) == 0:
-            raise ak._util.error(ValueError("cannot apply ak.pad_none to a scalar"))
+            raise ak._errors.wrap_error(
+                ValueError("cannot apply ak.pad_none to a scalar")
+            )
         elif len(self.shape) > 1 or not self.is_contiguous:
             return self.toRegularArray()._pad_none(target, axis, depth, clip)
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
             )
         if not clip:
@@ -1296,7 +1302,7 @@ class NumpyArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         return self.contiguous().toRegularArray()

@@ -83,7 +83,7 @@ def run_lengths(array, highlevel=True, behavior=None):
 
     See also #ak.num, #ak.argsort, #ak.unflatten.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.run_lengths",
         dict(
             array=array,
@@ -135,7 +135,7 @@ def _impl(array, highlevel, behavior):
                 return ak.contents.NumpyArray(nextcontent)
 
             if not isinstance(layout, (ak.contents.NumpyArray, ak.contents.EmptyArray)):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     NotImplementedError("run_lengths on " + type(layout).__name__)
                 )
 
@@ -147,7 +147,7 @@ def _impl(array, highlevel, behavior):
                 layout = layout.project()
 
             if not layout.is_ListType:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     NotImplementedError("run_lengths on " + type(layout).__name__)
                 )
 
@@ -180,7 +180,7 @@ def _impl(array, highlevel, behavior):
             if not isinstance(
                 content, (ak.contents.NumpyArray, ak.contents.EmptyArray)
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     NotImplementedError(
                         "run_lengths on "
                         + type(layout).__name__

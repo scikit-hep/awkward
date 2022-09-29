@@ -8,7 +8,7 @@ from awkward.types.type import Type
 class RegularType(Type):
     def __init__(self, content, size, parameters=None, typestr=None):
         if not isinstance(content, Type):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Type subtype, not {}".format(
                         type(self).__name__, repr(content)
@@ -16,7 +16,7 @@ class RegularType(Type):
                 )
             )
         if not ak._util.isint(size) or size < 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'size' must be of a positive integer, not {}".format(
                         type(self).__name__, repr(size)
@@ -24,7 +24,7 @@ class RegularType(Type):
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
@@ -32,7 +32,7 @@ class RegularType(Type):
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)

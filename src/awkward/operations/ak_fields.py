@@ -18,7 +18,7 @@ def fields(array):
     If the array contains neither tuples nor records, this returns an empty
     list.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.fields",
         dict(array=array),
     ):

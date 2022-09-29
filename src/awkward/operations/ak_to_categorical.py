@@ -71,7 +71,7 @@ def to_categorical(array, highlevel=True):
 
     See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_categorical",
         dict(array=array, highlevel=highlevel),
     ):

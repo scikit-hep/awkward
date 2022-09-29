@@ -38,7 +38,7 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 
     See also #ak.numbers_astype.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.strings_astype",
         dict(array=array, to=to, highlevel=highlevel, behavior=behavior),
     ):

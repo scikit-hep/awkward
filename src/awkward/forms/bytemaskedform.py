@@ -17,7 +17,7 @@ class ByteMaskedForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(mask):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be of type str, not {}".format(
                         type(self).__name__, repr(mask)
@@ -25,7 +25,7 @@ class ByteMaskedForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -33,7 +33,7 @@ class ByteMaskedForm(Form):
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'valid_when' must be bool, not {}".format(
                         type(self).__name__, repr(valid_when)

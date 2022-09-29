@@ -60,7 +60,7 @@ def std(
 
     See also #ak.nanstd.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.std",
         dict(
             x=x,
@@ -121,7 +121,7 @@ def nanstd(
 
     See also #ak.std.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nanstd",
         dict(
             x=x,

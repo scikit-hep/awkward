@@ -132,7 +132,7 @@ def broadcast_arrays(*arrays, **kwargs):
         >>> ak.to_list(that)
         [[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]]
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.broadcast_arrays",
         dict(arrays=arrays, kwargs=kwargs),
     ):

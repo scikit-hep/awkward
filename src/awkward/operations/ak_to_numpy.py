@@ -32,7 +32,7 @@ def to_numpy(array, allow_missing=True):
 
     See also #ak.from_numpy and #ak.to_cupy.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_numpy",
         dict(array=array, allow_missing=allow_missing),
     ):
