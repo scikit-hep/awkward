@@ -719,7 +719,9 @@ class Content:
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not (
             ak.forms.form._parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
+                self.dimension_parameters,
+                other.dimension_parameters,
+                only_array_record=True,
             )
         ):
             return False
@@ -1572,7 +1574,9 @@ class Content:
             and len(self) == len(other)
             and ak.identifier._identifiers_equal(self.identifier, other.identifier)
             and ak.forms.form._parameters_equal(
-                self.parameters, other.parameters, only_array_record=False
+                self.dimension_parameters,
+                other.dimension_parameters,
+                only_array_record=False,
             )
             and self._layout_equal(other, index_dtype, numpyarray)
         )
