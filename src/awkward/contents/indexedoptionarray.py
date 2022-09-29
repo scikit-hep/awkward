@@ -924,7 +924,7 @@ class IndexedOptionArray(Content):
             )
             self._handle_error(
                 self._nplike[
-                    "awkward_IndexedArray_local_preparenext_64",
+                    "awkward_IndexedArray_local_preparenext",
                     nextoutindex.dtype.type,
                     starts.dtype.type,
                     parents.dtype.type,
@@ -1219,7 +1219,7 @@ class IndexedOptionArray(Content):
         )
         self._handle_error(
             self._nplike[
-                "awkward_IndexedArray_local_preparenext_64",
+                "awkward_IndexedArray_local_preparenext",
                 nextoutindex.dtype.type,
                 starts.dtype.type,
                 parents.dtype.type,
@@ -1235,7 +1235,7 @@ class IndexedOptionArray(Content):
         )
 
         if nulls_merged:
-            # awkward_IndexedArray_local_preparenext_64 uses -1 to
+            # awkward_IndexedArray_local_preparenext uses -1 to
             # indicate `None` values. Given that this code-path runs
             # only when the `None` value indices are explicitly stored in out,
             # we need to mapping the -1 values to their corresponding indices
@@ -1302,7 +1302,7 @@ class IndexedOptionArray(Content):
 
         self._handle_error(
             self._nplike[
-                "awkward_IndexedArray_local_preparenext_64",
+                "awkward_IndexedArray_local_preparenext",
                 nextoutindex.dtype.type,
                 starts.dtype.type,
                 parents.dtype.type,
