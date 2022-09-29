@@ -50,7 +50,7 @@ def from_iter(
 
     See also #ak.to_list.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_iter",
         dict(
             iterable=iterable,
@@ -76,7 +76,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 resize,
             )[0]
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "cannot produce an array from a single dict (that would be a record)"
                 )

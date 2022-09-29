@@ -26,7 +26,7 @@ class ReadAvroFT:
             try:
                 self.temp_header += self.data.read(numbytes)
                 if not self.check_valid():
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         TypeError("invalid Avro file: first 4 bytes are not b'Obj\x01'")
                     )
                 pos = 4
@@ -911,4 +911,4 @@ class ReadAvroFT:
             #         exec_code = exec_code+hh
             #         exec_code = exec_code+jj
             #         exec_code = exec_code+kk
-            raise ak._util.error(NotImplementedError)
+            raise ak._errors.wrap_error(NotImplementedError)

@@ -48,7 +48,7 @@ class NumpyForm(Form):
             ak.types.numpytype.primitive_to_dtype(primitive)
         )
         if not isinstance(inner_shape, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'inner_shape' must be iterable, not {}".format(
                         type(self).__name__, repr(inner_shape)
@@ -161,10 +161,10 @@ class NumpyForm(Form):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        raise ak._util.indexerror(self, where, "not an array of records")
+        raise ak._errors.index_error(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
-        raise ak._util.indexerror(self, where, "not an array of records")
+        raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, allow_lazy):
         return NumpyForm(

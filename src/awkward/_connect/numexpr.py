@@ -13,7 +13,7 @@ def import_numexpr():
     try:
         import numexpr
     except ModuleNotFoundError as err:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ModuleNotFoundError(
                 """install the 'numexpr' package with:
 
@@ -122,7 +122,7 @@ def re_evaluate(local_dict=None):
     try:
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
     except KeyError as err:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             RuntimeError(
                 "not a previous evaluate() execution found"
                 + ak._util.exception_suffix(__file__)

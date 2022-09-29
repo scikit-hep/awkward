@@ -15,7 +15,7 @@ def is_categorical(array):
 
     See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.is_categorical",
         dict(array=array),
     ):

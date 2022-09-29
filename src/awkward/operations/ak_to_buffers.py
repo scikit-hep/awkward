@@ -111,7 +111,7 @@ def to_buffers(
 
     See also #ak.from_buffers and #ak.packed.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_buffers",
         dict(
             array=array,

@@ -51,14 +51,14 @@ class IndexedArray(Content):
                 np.dtype(np.int64),
             )
         ):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'index' must be an Index with dtype in (int32, uint32, int64), "
                     "not {}".format(type(self).__name__, repr(index))
                 )
             )
         if not isinstance(content, Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Content subtype, not {}".format(
                         type(self).__name__, repr(content)
@@ -169,7 +169,7 @@ class IndexedArray(Content):
         if where < 0:
             where += self.length
         if self._nplike.known_shape and not 0 <= where < self.length:
-            raise ak._util.indexerror(self, where)
+            raise ak._errors.index_error(self, where)
         return self._content._getitem_at(self._index[where])
 
     def _getitem_range(self, where):
@@ -210,7 +210,7 @@ class IndexedArray(Content):
         try:
             nextindex = self._index[carry.data]
         except IndexError as err:
-            raise ak._util.indexerror(self, carry.data, str(err)) from err
+            raise ak._errors.index_error(self, carry.data, str(err)) from err
 
         return IndexedArray(
             nextindex,
@@ -222,7 +222,7 @@ class IndexedArray(Content):
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         if self._nplike.known_shape and slicestarts.length != self.length:
-            raise ak._util.indexerror(
+            raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -302,12 +302,12 @@ class IndexedArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def project(self, mask=None):
         if mask is not None:
             if self._nplike.known_shape and self._index.length != mask.length:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
                             mask.length(), type(self).__name__, self._index.length
@@ -456,7 +456,7 @@ class IndexedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise ak._util.error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         else:
             return self.project()._offsets_and_flattened(posaxis, depth)
@@ -479,7 +479,7 @@ class IndexedArray(Content):
 
     def _merging_strategy(self, others):
         if len(others) == 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "to merge this array with 'others', at least one other must be provided"
                 )
@@ -638,7 +638,7 @@ class IndexedArray(Content):
         else:
             return reversed.mergemany(tail[1:])
 
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             NotImplementedError(
                 "not implemented: " + type(self).__name__ + " ::mergemany"
             )
@@ -646,7 +646,7 @@ class IndexedArray(Content):
 
     def fill_none(self, value):
         if value.nplike.known_shape and value.length != 1:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
         return IndexedArray(
@@ -830,7 +830,7 @@ class IndexedArray(Content):
 
             if isinstance(unique, ak.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         AssertionError(
                             "reduce_next with unbranching depth > negaxis expects a "
                             "ListOffsetArray64 whose offsets start at zero ({})".format(
@@ -887,7 +887,7 @@ class IndexedArray(Content):
 
                 return out
 
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _argsort_next(
         self,
@@ -1017,7 +1017,7 @@ class IndexedArray(Content):
             # belongs to add the new index
             if isinstance(out, ak.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         AssertionError(
                             "reduce_next with unbranching depth > negaxis expects a "
                             "ListOffsetArray64 whose offsets start at zero ({})".format(
@@ -1060,7 +1060,7 @@ class IndexedArray(Content):
                 )
 
             else:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     AssertionError(
                         "reduce_next with unbranching depth > negaxis is only "
                         "expected to return RegularArray or ListOffsetArray64; "
@@ -1240,7 +1240,7 @@ class IndexedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         if self.parameter("__array__") == "categorical":

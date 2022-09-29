@@ -20,7 +20,7 @@ class RecordForm(Form):
         form_key=None,
     ):
         if not isinstance(contents, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -29,7 +29,7 @@ class RecordForm(Form):
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "{} all 'contents' must be Form subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -37,7 +37,7 @@ class RecordForm(Form):
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'fields' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -75,7 +75,7 @@ class RecordForm(Form):
             else:
                 return self._fields[index]
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError(
                     "no index {} in record with {} fields".format(
                         index, len(self._contents)
@@ -99,7 +99,7 @@ class RecordForm(Form):
                 pass
             else:
                 return i
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             IndexError(
                 "no field {} in record with {} fields".format(
                     repr(field), len(self._contents)
@@ -124,7 +124,7 @@ class RecordForm(Form):
         elif ak._util.isstr(index_or_field):
             index = self.field_to_index(index_or_field)
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "index_or_field must be an integer (index) or string (field), not {}".format(
                         repr(index_or_field)

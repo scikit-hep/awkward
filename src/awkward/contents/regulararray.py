@@ -52,7 +52,7 @@ class RegularArray(Content):
         nplike=None,
     ):
         if not isinstance(content, Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Content subtype, not {}".format(
                         type(self).__name__, repr(content)
@@ -61,7 +61,7 @@ class RegularArray(Content):
             )
         if not isinstance(size, ak._typetracer.UnknownLengthType):
             if not (ak._util.isint(size) and size >= 0):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'size' must be a non-negative integer, not {}".format(
                             type(self).__name__, size
@@ -72,7 +72,7 @@ class RegularArray(Content):
                 size = int(size)
         if not isinstance(zeros_length, ak._typetracer.UnknownLengthType):
             if not (ak._util.isint(zeros_length) and zeros_length >= 0):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'zeros_length' must be a non-negative integer, not {}".format(
                             type(self).__name__, zeros_length
@@ -199,7 +199,7 @@ class RegularArray(Content):
             where += self._length
 
         if where < 0 or where >= self._length:
-            raise ak._util.indexerror(self, where)
+            raise ak._errors.index_error(self, where)
         start, stop = (where) * self._size, (where + 1) * self._size
         return self._content._getitem_range(slice(start, stop))
 
@@ -258,7 +258,7 @@ class RegularArray(Content):
             where[negative] += self._length
 
         if self._nplike.index_nplike.any(where >= self._length, prefer=False):
-            raise ak._util.indexerror(self, where)
+            raise ak._errors.index_error(self, where)
 
         nextcarry = ak.index.Index64.empty(where.shape[0] * self._size, self._nplike)
 
@@ -300,7 +300,7 @@ class RegularArray(Content):
 
     def _broadcast_tooffsets64(self, offsets):
         if offsets.nplike.known_data and (offsets.length == 0 or offsets[0] != 0):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AssertionError(
                     "broadcast_tooffsets64 can only be used with offsets that start at 0, not {}".format(
                         "(empty)" if offsets.length == 0 else str(offsets[0])
@@ -309,7 +309,7 @@ class RegularArray(Content):
             )
 
         if offsets.nplike.known_shape and offsets.length - 1 != self._length:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AssertionError(
                     "cannot broadcast RegularArray of length {} to length {}".format(
                         self._length, offsets.length - 1
@@ -578,14 +578,14 @@ class RegularArray(Content):
             head = head._to_nplike(self._nplike)
 
             if advanced is not None:
-                raise ak._util.indexerror(
+                raise ak._errors.index_error(
                     self,
                     head,
                     "cannot mix jagged slice with NumPy-style advanced indexing",
                 )
 
             if self._nplike.known_shape and head.length != self._size:
-                raise ak._util.indexerror(
+                raise ak._errors.index_error(
                     self,
                     head,
                     "cannot fit jagged slice with length {} into {} of size {}".format(
@@ -630,7 +630,7 @@ class RegularArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -887,7 +887,7 @@ class RegularArray(Content):
                 self.parameter("__array__") == "string"
                 or self.parameter("__array__") == "bytestring"
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "ak.combinations does not compute combinations of the characters of a string; please split it into lists"
                     )
@@ -1243,7 +1243,7 @@ class RegularArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         length = self._length * self._size

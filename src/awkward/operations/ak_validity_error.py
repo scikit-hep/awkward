@@ -19,7 +19,7 @@ def validity_error(array, exception=False):
 
     See also #ak.is_valid.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.validity_error",
         dict(array=array, exception=exception),
     ):
@@ -31,6 +31,6 @@ def _impl(array, exception):
     out = layout.validity_error(path="highlevel")
 
     if out not in (None, "") and exception:
-        raise ak._util.error(ValueError(out))
+        raise ak._errors.wrap_error(ValueError(out))
     else:
         return out

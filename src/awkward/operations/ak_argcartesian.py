@@ -70,7 +70,7 @@ def argcartesian(
     All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
     so see the #ak.cartesian documentation for a more complete description.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.argcartesian",
         dict(
             arrays=arrays,

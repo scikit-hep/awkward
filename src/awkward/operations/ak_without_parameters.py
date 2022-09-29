@@ -20,7 +20,7 @@ def without_parameters(array, highlevel=True, behavior=None):
     Note that a "new array" is a lightweight shallow copy, not a duplication
     of large data buffers.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.without_parameters",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):

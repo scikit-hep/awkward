@@ -214,7 +214,7 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.cartesian",
         dict(
             arrays=arrays,
@@ -263,10 +263,10 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
     posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
     if posaxis < 0:
-        raise ak._util.error(ValueError("negative axis depth is ambiguous"))
+        raise ak._errors.wrap_error(ValueError("negative axis depth is ambiguous"))
     for x in new_arrays_values[1:]:
         if x.axis_wrap_if_negative(axis) != posaxis:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "arrays to cartesian-product do not have the same depth for negative axis"
                 )
@@ -280,7 +280,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             if nested is True:
                 nested = list(new_arrays.keys())  # last key is ignored below
             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "the 'nested' parameter of cartesian must be dict keys "
                         "for a dict of arrays"
@@ -303,7 +303,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                 for x in nested
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "the 'nested' prarmeter of cartesian must be integers in "
                         "[0, len(arrays) - 1) for an iterable of arrays"
@@ -359,7 +359,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                         layout.parameter("__array__") == "string"
                         or layout.parameter("__array__") == "bytestring"
                     ):
-                        raise ak._util.error(
+                        raise ak._errors.wrap_error(
                             ValueError(
                                 "ak.cartesian does not compute combinations of the "
                                 "characters of a string; please split it into lists"
@@ -386,7 +386,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             if nested is True:
                 nested = list(new_arrays.keys())  # last key is ignored below
             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "the 'nested' parameter of cartesian must be dict keys "
                         "for a dict of arrays"
@@ -407,7 +407,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 not (isinstance(x, int) and 0 <= x < len(new_arrays) - 1)
                 for x in nested
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "the 'nested' parameter of cartesian must be integers in "
                         "[0, len(arrays) - 1) for an iterable of arrays"

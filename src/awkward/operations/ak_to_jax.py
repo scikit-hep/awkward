@@ -17,7 +17,7 @@ def to_jax(array):
 
     See also #ak.from_jax and #ak.to_numpy.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_jax",
         dict(array=array),
     ):

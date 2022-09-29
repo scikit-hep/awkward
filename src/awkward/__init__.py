@@ -23,6 +23,7 @@ import awkward._typetracer
 
 # internal
 import awkward._util
+import awkward._errors
 import awkward._lookup
 
 # third-party connectors

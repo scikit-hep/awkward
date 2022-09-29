@@ -90,7 +90,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
     However, it is important to keep in mind that this is a special case:
     #ak.flatten and `content` are not interchangeable!
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.flatten",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):

@@ -17,7 +17,7 @@ class IndexedOptionForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(index):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(
                         type(self).__name__, repr(index)
@@ -25,7 +25,7 @@ class IndexedOptionForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
