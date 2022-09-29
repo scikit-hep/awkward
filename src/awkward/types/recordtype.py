@@ -203,13 +203,13 @@ class RecordType(Type):
             return False
 
     def index_to_field(self, index):
-        return ak.forms.recordform.RecordForm.index_to_field(self, index)
+        return ak.forms.RecordForm.index_to_field(self, index)
 
     def field_to_index(self, field):
-        return ak.forms.recordform.RecordForm.field_to_index(self, field)
+        return ak.forms.RecordForm.field_to_index(self, field)
 
     def has_field(self, field):
-        return ak.forms.recordform.RecordForm.has_field(self, field)
+        return ak.forms.RecordForm.has_field(self, field)
 
     def content(self, index_or_field):
-        return ak.forms.recordform.RecordForm.content(self, index_or_field)
+        return ak.forms.RecordForm.content(self, index_or_field)

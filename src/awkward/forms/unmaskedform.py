@@ -67,11 +67,11 @@ class UnmaskedForm(Form):
         if isinstance(
             self._content,
             (
-                ak.forms.indexedform.IndexedForm,
-                ak.forms.indexedoptionform.IndexedOptionForm,
-                ak.forms.bytemaskedform.ByteMaskedForm,
-                ak.forms.bitmaskedform.BitMaskedForm,
-                ak.forms.unmaskedform.UnmaskedForm,
+                ak.forms.IndexedForm,
+                ak.forms.IndexedOptionForm,
+                ak.forms.ByteMaskedForm,
+                ak.forms.BitMaskedForm,
+                ak.forms.UnmaskedForm,
             ),
         ):
             return self._content
