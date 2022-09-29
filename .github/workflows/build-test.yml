@@ -21,6 +21,9 @@ on:
       - src/cuda-kernels
       - cuda-kernels
 
+  schedule:
+    - cron: 0 12 1 * *
+
   workflow_dispatch:
 
 concurrency:
