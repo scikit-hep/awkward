@@ -520,29 +520,28 @@ class IndexedArray(Content):
 
         content = other.merge(self._content)
 
+        # Fill `index` with a range starting at zero, up to `theirlength`
         assert index.nplike is self._nplike
         self._handle_error(
-            self._nplike["awkward_IndexedArray_fill_to64_count", index.dtype.type](
+            self._nplike["awkward_IndexedArray_fill_count", index.dtype.type](
                 index.data,
                 0,
                 theirlength,
                 0,
             )
         )
-        reinterpreted_index = ak.index.Index(np.asarray(index.data.view(self[0].dtype)))
 
-        assert (
-            index.nplike is self._nplike and reinterpreted_index.nplike is self._nplike
-        )
+        # Fill remaining indices
+        assert index.nplike is self._nplike
         self._handle_error(
             self._nplike[
                 "awkward_IndexedArray_fill",
                 index.dtype.type,
-                reinterpreted_index.dtype.type,
+                self.index.dtype.type,
             ](
                 index.data,
                 theirlength,
-                reinterpreted_index.data,
+                self.index.data,
                 mylength,
                 theirlength,
             )
@@ -567,7 +566,6 @@ class IndexedArray(Content):
         contentlength_so_far = 0
         length_so_far = 0
         nextindex = ak.index.Index64.empty(total_length, self._nplike)
-        parameters = self._parameters
 
         parameters = self._parameters
         for array in head:
@@ -801,7 +799,7 @@ class IndexedArray(Content):
             )
             self._handle_error(
                 self._nplike[
-                    "awkward_IndexedArray_local_preparenext_64",
+                    "awkward_IndexedArray_local_preparenext",
                     nextoutindex.dtype.type,
                     starts.dtype.type,
                     parents.dtype.type,
