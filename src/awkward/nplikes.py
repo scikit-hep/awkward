@@ -445,7 +445,7 @@ class CupyKernel(NumpyKernel):
         ak._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak._connect.cuda.Invocation(
                 name=self._name_and_types[0],
-                error_context=ak._util.ErrorContext.primary(),
+                error_context=ak._errors.ErrorContext.primary(),
             )
         )
 

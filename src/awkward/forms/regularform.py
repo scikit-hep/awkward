@@ -44,12 +44,12 @@ class RegularForm(Form):
         args = [repr(self._content), repr(self._size)] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra(
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra(
             {
                 "class": "RegularArray",
                 "size": self._size,
-                "content": self._content._tolist_part(verbose, toplevel=False),
+                "content": self._content._to_dict_part(verbose, toplevel=False),
             },
             verbose,
         )
@@ -75,58 +75,6 @@ class RegularForm(Form):
             )
         else:
             return False
-
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, RegularForm):
-            return (
-                self._size == other._size
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
-                and self._content.generated_compatibility(other._content)
-            )
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return RegularForm(
-            self._content._getitem_range(),
-            self._size,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        return RegularForm(
-            self._content._getitem_field(where, only_fields),
-            self._size,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _getitem_fields(self, where, only_fields=()):
-        return RegularForm(
-            self._content._getitem_fields(where, only_fields),
-            self._size,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        return RegularForm(
-            self._content._carry(allow_lazy),
-            self._size,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

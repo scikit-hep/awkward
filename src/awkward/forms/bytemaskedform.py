@@ -70,13 +70,13 @@ class ByteMaskedForm(Form):
         ] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra(
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra(
             {
                 "class": "ByteMaskedArray",
                 "mask": self._mask,
                 "valid_when": self._valid_when,
-                "content": self._content._tolist_part(verbose, toplevel=False),
+                "content": self._content._to_dict_part(verbose, toplevel=False),
             },
             verbose,
         )
@@ -102,63 +102,6 @@ class ByteMaskedForm(Form):
             )
         else:
             return False
-
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, ByteMaskedForm):
-            return (
-                self._mask == other._mask
-                and self._valid_when == other._valid_when
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
-                and self._content.generated_compatibility(other._content)
-            )
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._getitem_range(),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._getitem_field(where, only_fields),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _getitem_fields(self, where, only_fields=()):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._getitem_fields(where, only_fields),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._carry(allow_lazy),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
 
     def simplify_optiontype(self):
         if isinstance(

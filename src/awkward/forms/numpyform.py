@@ -79,7 +79,7 @@ class NumpyForm(Form):
         args += self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
+    def _to_dict_part(self, verbose, toplevel):
         if (
             not verbose
             and not toplevel
@@ -97,7 +97,7 @@ class NumpyForm(Form):
             }
             if verbose or len(self._inner_shape) > 0:
                 out["inner_shape"] = list(self._inner_shape)
-            return self._tolist_extra(out, verbose)
+            return self._to_dict_extra(out, verbose)
 
     def _type(self, typestrs):
         out = ak.types.numpytype.NumpyType(
@@ -133,47 +133,6 @@ class NumpyForm(Form):
         out._has_identifier = self._has_identifier
         out._parameters = self._parameters
         return out
-
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, NumpyForm):
-            return (
-                ak.types.numpytype.primitive_to_dtype(self._primitive)
-                == ak.types.numpytype.primitive_to_dtype(other._primitive)
-                and self._inner_shape == other._inner_shape
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
-            )
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return NumpyForm(
-            self._primitive,
-            inner_shape=self._inner_shape,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        raise ak._errors.index_error(self, where, "not an array of records")
-
-    def _getitem_fields(self, where, only_fields=()):
-        raise ak._errors.index_error(self, where, "not an array of records")
-
-    def _carry(self, allow_lazy):
-        return NumpyForm(
-            self._primitive,
-            inner_shape=self._inner_shape,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

@@ -80,7 +80,7 @@ def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
         else:
             form = ak.forms.from_json(form)
     elif isinstance(form, dict):
-        form = ak.forms.from_iter(form)
+        form = ak.forms.from_dict(form)
 
     if not (ak._util.isint(length) and length >= 0):
         raise ak._errors.wrap_error(
