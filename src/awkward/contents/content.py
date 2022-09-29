@@ -1,9 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
 import math
 import numbers
 from collections.abc import Iterable, Sized
+from typing import Any
 
 import awkward as ak
 import awkward._reducers
@@ -725,7 +727,7 @@ class Content:
         else:
             return self._mergeable(other, mergebool)
 
-    def _mergeable(self, other: "Content", mergebool: bool) -> bool:
+    def _mergeable(self, other: Content, mergebool: bool) -> bool:
         raise ak._util.error(NotImplementedError)
 
     def mergemany(self, others):
@@ -1268,6 +1270,10 @@ class Content:
     @property
     def dimension_optiontype(self):
         return self.Form.dimension_optiontype.__get__(self)
+
+    @property
+    def dimension_parameters(self) -> dict[str, Any] | None:
+        return self.Form.dimension_parameters.__get__(self)
 
     def pad_none_axis0(self, target, clip):
         if not clip and target < self.length:

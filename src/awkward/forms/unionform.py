@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import Any
 
 import awkward as ak
 from awkward.forms.form import Form, _parameters_equal
@@ -252,6 +254,17 @@ class UnionForm(Form):
             if content.dimension_optiontype:
                 return True
         return False
+
+    @property
+    def dimension_parameters(self) -> dict[str, Any] | None:
+        parameters = self._contents[0].dimension_parameters
+        for content in self._contents[1:]:
+            # Merge parameters that are equal between contents
+            parameters = ak._util.merge_parameters(
+                content.dimension_parameters, parameters, merge_equal=True
+            )
+        # Merge any additional parameters from this layout
+        return ak._util.merge_parameters(parameters, self._parameters)
 
     def _columns(self, path, output, list_indicator):
         for content, field in zip(self._contents, self.fields):

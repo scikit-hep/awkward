@@ -302,6 +302,10 @@ class Form:
         return self._parameters
 
     @property
+    def dimension_parameters(self) -> dict[str, Any] | None:
+        raise ak._util.error(NotImplementedError)
+
+    @property
     def is_identity_like(self):
         """Return True if the content or its non-list descendents are an identity"""
         raise ak._util.error(NotImplementedError)

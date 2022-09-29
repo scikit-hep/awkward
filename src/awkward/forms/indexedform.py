@@ -1,4 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
+from typing import Any
 
 import awkward as ak
 from awkward.forms.form import Form, _parameters_equal, _parameters_update
@@ -185,6 +188,12 @@ class IndexedForm(Form):
     @property
     def dimension_optiontype(self):
         return False
+
+    @property
+    def dimension_parameters(self) -> dict[str, Any] | None:
+        return ak._util.merge_parameters(
+            self._parameters, self._content.dimension_parameters
+        )
 
     def _columns(self, path, output, list_indicator):
         self._content._columns(path, output, list_indicator)

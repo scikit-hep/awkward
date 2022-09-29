@@ -1,4 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
+
+from typing import Any
 
 import awkward as ak
 from awkward.forms.form import Form, _parameters_equal
@@ -103,6 +106,10 @@ class EmptyForm(Form):
     @property
     def dimension_optiontype(self):
         return False
+
+    @property
+    def dimension_parameters(self) -> dict[str, Any] | None:
+        return self._parameters
 
     def _columns(self, path, output, list_indicator):
         output.append(".".join(path))
