@@ -132,18 +132,18 @@ class RecordForm(Form):
             )
         return self._contents[index]
 
-    def _tolist_part(self, verbose, toplevel):
+    def _to_dict_part(self, verbose, toplevel):
         out = {"class": "RecordArray"}
 
         contents_tolist = [
-            content._tolist_part(verbose, toplevel=False) for content in self._contents
+            content._to_dict_part(verbose, toplevel=False) for content in self._contents
         ]
         if self._fields is not None:
             out["contents"] = dict(zip(self._fields, contents_tolist))
         else:
             out["contents"] = contents_tolist
 
-        return self._tolist_extra(out, verbose)
+        return self._to_dict_extra(out, verbose)
 
     def _type(self, typestrs):
         return ak.types.recordtype.RecordType(

@@ -34,11 +34,11 @@ class UnmaskedForm(Form):
         args = [repr(self._content)] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra(
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra(
             {
                 "class": "UnmaskedArray",
-                "content": self._content._tolist_part(verbose, toplevel=False),
+                "content": self._content._to_dict_part(verbose, toplevel=False),
             },
             verbose,
         )

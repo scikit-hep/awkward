@@ -80,14 +80,14 @@ class UnionForm(Form):
         ] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra(
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra(
             {
                 "class": "UnionArray",
                 "tags": self._tags,
                 "index": self._index,
                 "contents": [
-                    content._tolist_part(verbose, toplevel=False)
+                    content._to_dict_part(verbose, toplevel=False)
                     for content in self._contents
                 ],
             },

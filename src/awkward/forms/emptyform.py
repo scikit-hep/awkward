@@ -15,8 +15,8 @@ class EmptyForm(Form):
         args = self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra({"class": "EmptyArray"}, verbose)
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra({"class": "EmptyArray"}, verbose)
 
     def _type(self, typestrs):
         return ak.types.unknowntype.UnknownType(

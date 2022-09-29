@@ -79,7 +79,7 @@ class NumpyForm(Form):
         args += self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
+    def _to_dict_part(self, verbose, toplevel):
         if (
             not verbose
             and not toplevel
@@ -97,7 +97,7 @@ class NumpyForm(Form):
             }
             if verbose or len(self._inner_shape) > 0:
                 out["inner_shape"] = list(self._inner_shape)
-            return self._tolist_extra(out, verbose)
+            return self._to_dict_extra(out, verbose)
 
     def _type(self, typestrs):
         out = ak.types.numpytype.NumpyType(

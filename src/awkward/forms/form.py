@@ -9,7 +9,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def from_iter(input):
+def from_dict(input: dict) -> Form:
     if input is None:
         return None
 
@@ -33,7 +33,7 @@ def from_iter(input):
 
     elif input["class"] == "RegularArray":
         return ak.forms.regularform.RegularForm(
-            content=from_iter(input["content"]),
+            content=from_dict(input["content"]),
             size=input["size"],
             has_identifier=has_identifier,
             parameters=parameters,
@@ -44,7 +44,7 @@ def from_iter(input):
         return ak.forms.listform.ListForm(
             starts=input["starts"],
             stops=input["stops"],
-            content=from_iter(input["content"]),
+            content=from_dict(input["content"]),
             has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
@@ -58,7 +58,7 @@ def from_iter(input):
     ):
         return ak.forms.listoffsetform.ListOffsetForm(
             offsets=input["offsets"],
-            content=from_iter(input["content"]),
+            content=from_dict(input["content"]),
             has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
@@ -69,10 +69,10 @@ def from_iter(input):
             contents = []
             fields = []
             for key, content in input["contents"].items():
-                contents.append(from_iter(content))
+                contents.append(from_dict(content))
                 fields.append(key)
         else:
-            contents = [from_iter(content) for content in input["contents"]]
+            contents = [from_dict(content) for content in input["contents"]]
             fields = None
         return ak.forms.recordform.RecordForm(
             contents=contents,
@@ -90,7 +90,7 @@ def from_iter(input):
     ):
         return ak.forms.indexedform.IndexedForm(
             index=input["index"],
-            content=from_iter(input["content"]),
+            content=from_dict(input["content"]),
             has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
@@ -103,7 +103,7 @@ def from_iter(input):
     ):
         return ak.forms.indexedoptionform.IndexedOptionForm(
             index=input["index"],
-            content=from_iter(input["content"]),
+            content=from_dict(input["content"]),
             has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
@@ -112,7 +112,7 @@ def from_iter(input):
     elif input["class"] == "ByteMaskedArray":
         return ak.forms.bytemaskedform.ByteMaskedForm(
             mask=input["mask"],
-            content=from_iter(input["content"]),
+            content=from_dict(input["content"]),
             valid_when=input["valid_when"],
             has_identifier=has_identifier,
             parameters=parameters,
@@ -122,7 +122,7 @@ def from_iter(input):
     elif input["class"] == "BitMaskedArray":
         return ak.forms.bitmaskedform.BitMaskedForm(
             mask=input["mask"],
-            content=from_iter(input["content"]),
+            content=from_dict(input["content"]),
             valid_when=input["valid_when"],
             lsb_order=input["lsb_order"],
             has_identifier=has_identifier,
@@ -132,7 +132,7 @@ def from_iter(input):
 
     elif input["class"] == "UnmaskedArray":
         return ak.forms.unmaskedform.UnmaskedForm(
-            content=from_iter(input["content"]),
+            content=from_dict(input["content"]),
             has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
@@ -147,7 +147,7 @@ def from_iter(input):
         return ak.forms.unionform.UnionForm(
             tags=input["tags"],
             index=input["index"],
-            contents=[from_iter(content) for content in input["contents"]],
+            contents=[from_dict(content) for content in input["contents"]],
             has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
@@ -166,8 +166,8 @@ def from_iter(input):
         )
 
 
-def from_json(input):
-    return from_iter(json.loads(input))
+def from_json(input: str) -> Form:
+    return from_dict(json.loads(input))
 
 
 def _parameters_equal(one, two, only_array_record=False):
@@ -346,12 +346,12 @@ class Form:
         return self._form_key
 
     def __str__(self):
-        return json.dumps(self.tolist(verbose=False), indent=4)
+        return json.dumps(self.to_dict(verbose=False), indent=4)
 
-    def tolist(self, verbose=True):
-        return self._tolist_part(verbose, toplevel=True)
+    def to_dict(self, verbose=True):
+        return self._to_dict_part(verbose, toplevel=True)
 
-    def _tolist_extra(self, out, verbose):
+    def _to_dict_extra(self, out, verbose):
         if verbose or self._has_identifier:
             out["has_identifier"] = self._has_identifier
         if verbose or (self._parameters is not None and len(self._parameters) > 0):
@@ -361,7 +361,7 @@ class Form:
         return out
 
     def to_json(self):
-        return json.dumps(self.tolist(verbose=True))
+        return json.dumps(self.to_dict(verbose=True))
 
     def _repr_args(self):
         out = []
@@ -425,8 +425,8 @@ class Form:
     def _column_types(self):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _tolist_part(self, verbose, toplevel):
-        raise ak._errors.wrap_error(NotImplementedError)
+    def _to_dict_part(self, verbose, toplevel):
+        raise ak._errors._errors(NotImplementedError)
 
     def _type(self, typestrs):
         raise ak._errors.wrap_error(NotImplementedError)
