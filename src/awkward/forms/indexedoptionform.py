@@ -67,7 +67,7 @@ class IndexedOptionForm(Form):
         else:
             parameters = self._parameters
 
-        return ak.types.optiontype.OptionType(
+        return ak.types.OptionType(
             self._content._type(typestrs),
             parameters,
             ak._util.gettypestr(self._parameters, typestrs),
@@ -91,14 +91,14 @@ class IndexedOptionForm(Form):
         if isinstance(
             self._content,
             (
-                ak.forms.indexedform.IndexedForm,
-                ak.forms.indexedoptionform.IndexedOptionForm,
-                ak.forms.bytemaskedform.ByteMaskedForm,
-                ak.forms.bitmaskedform.BitMaskedForm,
-                ak.forms.unmaskedform.UnmaskedForm,
+                ak.forms.IndexedForm,
+                ak.forms.IndexedOptionForm,
+                ak.forms.ByteMaskedForm,
+                ak.forms.BitMaskedForm,
+                ak.forms.UnmaskedForm,
             ),
         ):
-            return ak.forms.indexedoptionform.IndexedOptionForm(
+            return ak.forms.IndexedOptionForm(
                 "i64",
                 self._content.content,
                 has_identifier=self._has_identifier,

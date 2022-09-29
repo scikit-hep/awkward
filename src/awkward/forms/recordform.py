@@ -146,7 +146,7 @@ class RecordForm(Form):
         return self._to_dict_extra(out, verbose)
 
     def _type(self, typestrs):
-        return ak.types.recordtype.RecordType(
+        return ak.types.RecordType(
             [x._type(typestrs) for x in self._contents],
             self._fields,
             self._parameters,

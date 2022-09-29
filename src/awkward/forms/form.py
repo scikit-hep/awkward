@@ -14,7 +14,7 @@ def from_dict(input: dict) -> Form:
         return None
 
     if ak._util.isstr(input):
-        return ak.forms.numpyform.NumpyForm(primitive=input)
+        return ak.forms.NumpyForm(primitive=input)
 
     assert isinstance(input, dict)
     has_identifier = input.get("has_identifier", input.get("has_identities", False))
@@ -24,15 +24,15 @@ def from_dict(input: dict) -> Form:
     if input["class"] == "NumpyArray":
         primitive = input["primitive"]
         inner_shape = input.get("inner_shape", [])
-        return ak.forms.numpyform.NumpyForm(
+        return ak.forms.NumpyForm(
             primitive, inner_shape, has_identifier, parameters, form_key
         )
 
     elif input["class"] == "EmptyArray":
-        return ak.forms.emptyform.EmptyForm(has_identifier, parameters, form_key)
+        return ak.forms.EmptyForm(has_identifier, parameters, form_key)
 
     elif input["class"] == "RegularArray":
-        return ak.forms.regularform.RegularForm(
+        return ak.forms.RegularForm(
             content=from_dict(input["content"]),
             size=input["size"],
             has_identifier=has_identifier,
@@ -41,7 +41,7 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] in ("ListArray", "ListArray32", "ListArrayU32", "ListArray64"):
-        return ak.forms.listform.ListForm(
+        return ak.forms.ListForm(
             starts=input["starts"],
             stops=input["stops"],
             content=from_dict(input["content"]),
@@ -56,7 +56,7 @@ def from_dict(input: dict) -> Form:
         "ListOffsetArrayU32",
         "ListOffsetArray64",
     ):
-        return ak.forms.listoffsetform.ListOffsetForm(
+        return ak.forms.ListOffsetForm(
             offsets=input["offsets"],
             content=from_dict(input["content"]),
             has_identifier=has_identifier,
@@ -74,7 +74,7 @@ def from_dict(input: dict) -> Form:
         else:
             contents = [from_dict(content) for content in input["contents"]]
             fields = None
-        return ak.forms.recordform.RecordForm(
+        return ak.forms.RecordForm(
             contents=contents,
             fields=fields,
             has_identifier=has_identifier,
@@ -88,7 +88,7 @@ def from_dict(input: dict) -> Form:
         "IndexedArrayU32",
         "IndexedArray64",
     ):
-        return ak.forms.indexedform.IndexedForm(
+        return ak.forms.IndexedForm(
             index=input["index"],
             content=from_dict(input["content"]),
             has_identifier=has_identifier,
@@ -101,7 +101,7 @@ def from_dict(input: dict) -> Form:
         "IndexedOptionArray32",
         "IndexedOptionArray64",
     ):
-        return ak.forms.indexedoptionform.IndexedOptionForm(
+        return ak.forms.IndexedOptionForm(
             index=input["index"],
             content=from_dict(input["content"]),
             has_identifier=has_identifier,
@@ -110,7 +110,7 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] == "ByteMaskedArray":
-        return ak.forms.bytemaskedform.ByteMaskedForm(
+        return ak.forms.ByteMaskedForm(
             mask=input["mask"],
             content=from_dict(input["content"]),
             valid_when=input["valid_when"],
@@ -120,7 +120,7 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] == "BitMaskedArray":
-        return ak.forms.bitmaskedform.BitMaskedForm(
+        return ak.forms.BitMaskedForm(
             mask=input["mask"],
             content=from_dict(input["content"]),
             valid_when=input["valid_when"],
@@ -131,7 +131,7 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] == "UnmaskedArray":
-        return ak.forms.unmaskedform.UnmaskedForm(
+        return ak.forms.UnmaskedForm(
             content=from_dict(input["content"]),
             has_identifier=has_identifier,
             parameters=parameters,
@@ -144,7 +144,7 @@ def from_dict(input: dict) -> Form:
         "UnionArray8_U32",
         "UnionArray8_64",
     ):
-        return ak.forms.unionform.UnionForm(
+        return ak.forms.UnionForm(
             tags=input["tags"],
             index=input["index"],
             contents=[from_dict(content) for content in input["contents"]],

@@ -194,7 +194,7 @@ class ByteMaskedArray(Content):
             ),
         )
 
-        return ak.contents.indexedoptionarray.IndexedOptionArray(
+        return ak.contents.IndexedOptionArray(
             index, self._content, self._identifier, self._parameters, self._nplike
         )
 
@@ -412,7 +412,7 @@ class ByteMaskedArray(Content):
         next = self._content._carry(nextcarry, True)
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
 
-        out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+        out2 = ak.contents.IndexedOptionArray(
             outindex, out, self._identifier, self._parameters, self._nplike
         )
         return out2.simplify_optiontype()
@@ -435,7 +435,7 @@ class ByteMaskedArray(Content):
 
             next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
-            out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak.contents.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,
@@ -544,11 +544,11 @@ class ByteMaskedArray(Content):
         if isinstance(
             self._content,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self.toIndexedOptionArray64().simplify_optiontype()
@@ -570,7 +570,7 @@ class ByteMaskedArray(Content):
             next = self._content._carry(nextcarry, False)
             out = next.num(posaxis, depth)
 
-            out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak.contents.IndexedOptionArray(
                 outindex, out, None, self.parameters, self._nplike
             )
             return out2.simplify_optiontype()
@@ -590,7 +590,7 @@ class ByteMaskedArray(Content):
             if offsets.length == 0:
                 return (
                     offsets,
-                    ak.contents.indexedoptionarray.IndexedOptionArray(
+                    ak.contents.IndexedOptionArray(
                         outindex, flattened, None, self._parameters, self._nplike
                     ),
                 )
@@ -625,11 +625,11 @@ class ByteMaskedArray(Content):
         if isinstance(
             other,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self._content.mergeable(other.content, mergebool)
@@ -683,7 +683,7 @@ class ByteMaskedArray(Content):
 
             next = self._content._carry(nextcarry, False)
             out = next._local_index(posaxis, depth)
-            out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak.contents.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,
@@ -693,7 +693,7 @@ class ByteMaskedArray(Content):
             return out2.simplify_optiontype()
 
     def numbers_to_type(self, name):
-        return ak.contents.bytemaskedarray.ByteMaskedArray(
+        return ak.contents.ByteMaskedArray(
             self._mask,
             self._content.numbers_to_type(name),
             self._valid_when,
@@ -770,7 +770,7 @@ class ByteMaskedArray(Content):
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
-            out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak.contents.IndexedOptionArray(
                 outindex, out, None, parameters, self._nplike
             )
             return out2.simplify_optiontype()
@@ -946,11 +946,11 @@ class ByteMaskedArray(Content):
         elif isinstance(
             self._content,
             (
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
@@ -983,7 +983,7 @@ class ByteMaskedArray(Content):
                 )
             )
             next = self.project()._pad_none(target, posaxis, depth, clip)
-            return ak.contents.indexedoptionarray.IndexedOptionArray(
+            return ak.contents.IndexedOptionArray(
                 index,
                 next,
                 None,
@@ -991,7 +991,7 @@ class ByteMaskedArray(Content):
                 self._nplike,
             ).simplify_optiontype()
         else:
-            return ak.contents.bytemaskedarray.ByteMaskedArray(
+            return ak.contents.ByteMaskedArray(
                 self._mask,
                 self._content._pad_none(target, posaxis, depth, clip),
                 self._valid_when,
@@ -1081,7 +1081,7 @@ class ByteMaskedArray(Content):
             if content.length > self._mask.length:
                 content = content[: self._mask.length]
 
-            return ak.contents.indexedoptionarray.IndexedOptionArray(
+            return ak.contents.IndexedOptionArray(
                 next._index,
                 content,
                 next._identifier,

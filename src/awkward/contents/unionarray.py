@@ -874,7 +874,7 @@ class UnionArray(Content):
             )
 
         parameters = ak._util.merge_parameters(self._parameters, other._parameters)
-        return ak.contents.unionarray.UnionArray(
+        return ak.contents.UnionArray(
             tags, index, contents, None, parameters, self._nplike
         )
 
@@ -898,7 +898,7 @@ class UnionArray(Content):
         parameters = self._parameters
         for array in head:
             parameters = ak._util.merge_parameters(parameters, array._parameters, True)
-            if isinstance(array, ak.contents.unionarray.UnionArray):
+            if isinstance(array, ak.contents.UnionArray):
                 union_tags = ak.index.Index(array.tags)
                 union_index = ak.index.Index(array.index)
                 union_contents = array.contents
@@ -938,7 +938,7 @@ class UnionArray(Content):
                 length_so_far += array.length
                 nextcontents.extend(union_contents)
 
-            elif isinstance(array, ak.contents.emptyarray.EmptyArray):
+            elif isinstance(array, ak.contents.EmptyArray):
                 pass
 
             else:
@@ -970,7 +970,7 @@ class UnionArray(Content):
                 ValueError("FIXME: handle UnionArray with more than 127 contents")
             )
 
-        next = ak.contents.unionarray.UnionArray(
+        next = ak.contents.UnionArray(
             nexttags, nextindex, nextcontents, None, parameters, self._nplike
         )
 
@@ -1041,7 +1041,7 @@ class UnionArray(Content):
         contents = []
         for x in self._contents:
             contents.append(x.numbers_to_type(name))
-        return ak.contents.unionarray.UnionArray(
+        return ak.contents.UnionArray(
             self._tags,
             self._index,
             contents,
@@ -1148,7 +1148,7 @@ class UnionArray(Content):
 
     def _validity_error(self, path):
         for i in range(len(self.contents)):
-            if isinstance(self.contents[i], ak.contents.unionarray.UnionArray):
+            if isinstance(self.contents[i], ak.contents.UnionArray):
                 return "{} contains {}, the operation that made it might have forgotten to call 'simplify_uniontype'".format(
                     type(self), type(self.contents[i])
                 )
@@ -1210,7 +1210,7 @@ class UnionArray(Content):
             contents = []
             for content in self._contents:
                 contents.append(content._pad_none(target, posaxis, depth, clip))
-            out = ak.contents.unionarray.UnionArray(
+            out = ak.contents.UnionArray(
                 self.tags,
                 self.index,
                 contents,

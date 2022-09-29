@@ -44,7 +44,7 @@ class UnmaskedForm(Form):
         )
 
     def _type(self, typestrs):
-        return ak.types.optiontype.OptionType(
+        return ak.types.OptionType(
             self._content._type(typestrs),
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
@@ -67,11 +67,11 @@ class UnmaskedForm(Form):
         if isinstance(
             self._content,
             (
-                ak.forms.indexedform.IndexedForm,
-                ak.forms.indexedoptionform.IndexedOptionForm,
-                ak.forms.bytemaskedform.ByteMaskedForm,
-                ak.forms.bitmaskedform.BitMaskedForm,
-                ak.forms.unmaskedform.UnmaskedForm,
+                ak.forms.IndexedForm,
+                ak.forms.IndexedOptionForm,
+                ak.forms.ByteMaskedForm,
+                ak.forms.BitMaskedForm,
+                ak.forms.UnmaskedForm,
             ),
         ):
             return self._content
