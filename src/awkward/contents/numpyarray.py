@@ -375,7 +375,7 @@ class NumpyArray(Content):
                 tonum.data, size, reps
             )
         )
-        return ak.contents.numpyarray.NumpyArray(
+        return ak.contents.NumpyArray(
             tonum.data.reshape(shape), None, self.parameters, self._nplike
         )
 
@@ -394,11 +394,11 @@ class NumpyArray(Content):
         if isinstance(
             other,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self.mergeable(other._content, mergebool)
@@ -463,9 +463,9 @@ class NumpyArray(Content):
         parameters = self._parameters
         for array in head:
             parameters = ak._util.merge_parameters(parameters, array._parameters, True)
-            if isinstance(array, ak.contents.emptyarray.EmptyArray):
+            if isinstance(array, ak.contents.EmptyArray):
                 pass
-            elif isinstance(array, ak.contents.numpyarray.NumpyArray):
+            elif isinstance(array, ak.contents.NumpyArray):
                 contiguous_arrays.append(array.data)
             else:
                 raise ak._errors.wrap_error(

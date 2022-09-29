@@ -787,7 +787,7 @@ def to_arraylib(module, array, allow_missing):
         elif isinstance(array, (ak.contents.ListArray, ak.contents.ListOffsetArray)):
             return _impl(array.toRegularArray())
 
-        elif isinstance(array, ak.contents.recordarray.RecordArray):
+        elif isinstance(array, ak.contents.RecordArray):
             raise ak._errors.wrap_error(
                 ValueError(f"{module.__name__} does not support record structures")
             )

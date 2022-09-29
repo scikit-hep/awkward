@@ -23,17 +23,17 @@ pytrees_registered = False
 
 def register_pytrees():
     for cls in [
-        ak.contents.bitmaskedarray.BitMaskedArray,
-        ak.contents.bytemaskedarray.ByteMaskedArray,
-        ak.contents.emptyarray.EmptyArray,
-        ak.contents.indexedarray.IndexedArray,
-        ak.contents.indexedoptionarray.IndexedOptionArray,
-        ak.contents.numpyarray.NumpyArray,
-        ak.contents.listarray.ListArray,
-        ak.contents.listoffsetarray.ListOffsetArray,
-        ak.contents.recordarray.RecordArray,
-        ak.contents.unionarray.UnionArray,
-        ak.contents.unmaskedarray.UnmaskedArray,
+        ak.contents.BitMaskedArray,
+        ak.contents.ByteMaskedArray,
+        ak.contents.EmptyArray,
+        ak.contents.IndexedArray,
+        ak.contents.IndexedOptionArray,
+        ak.contents.NumpyArray,
+        ak.contents.ListArray,
+        ak.contents.ListOffsetArray,
+        ak.contents.RecordArray,
+        ak.contents.UnionArray,
+        ak.contents.UnmaskedArray,
         ak.record.Record,
     ]:
         jax.tree_util.register_pytree_node(
@@ -67,7 +67,7 @@ def _find_numpyarray_nodes(layout):
     data_ptrs = []
 
     def find_nparray_ptrs(node, **kwargs):
-        if isinstance(node, ak.contents.numpyarray.NumpyArray):
+        if isinstance(node, ak.contents.NumpyArray):
             data_ptrs.append(node.data)
 
     layout.recursively_apply(action=find_nparray_ptrs, return_array=False)
@@ -77,7 +77,7 @@ def _find_numpyarray_nodes(layout):
 
 def _replace_numpyarray_nodes(layout, buffers):
     def replace_numpyarray_nodes(node, **kwargs):
-        if isinstance(node, ak.contents.numpyarray.NumpyArray):
+        if isinstance(node, ak.contents.NumpyArray):
             buffer = buffers[0]
             buffers.pop(0)
             return ak.contents.NumpyArray(

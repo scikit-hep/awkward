@@ -385,7 +385,7 @@ class RecordArray(Content):
                 raise ak._errors.index_error(self, where)
 
             nextindex = ak.index.Index64(where, nplike=self.nplike)
-            return ak.contents.indexedarray.IndexedArray(
+            return ak.contents.IndexedArray(
                 nextindex,
                 self,
                 self._carry_identifier(carry),
@@ -471,11 +471,9 @@ class RecordArray(Content):
         if posaxis == depth:
             npsingle = self._nplike.index_nplike.full((1,), self.length, np.int64)
             single = ak.index.Index64(npsingle, nplike=self._nplike)
-            singleton = ak.contents.numpyarray.NumpyArray(
-                single, None, None, self._nplike
-            )
+            singleton = ak.contents.NumpyArray(single, None, None, self._nplike)
             contents = [singleton] * len(self._contents)
-            record = ak.contents.recordarray.RecordArray(
+            record = ak.contents.RecordArray(
                 contents, self._fields, 1, None, self._parameters, self._nplike
             )
             return record[0]
@@ -483,7 +481,7 @@ class RecordArray(Content):
             contents = []
             for content in self._contents:
                 contents.append(content.num(posaxis, depth))
-            return ak.contents.recordarray.RecordArray(
+            return ak.contents.RecordArray(
                 contents,
                 self._fields,
                 self._length,
@@ -533,11 +531,11 @@ class RecordArray(Content):
         if isinstance(
             other,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self.mergeable(other.content, mergebool)
@@ -588,7 +586,7 @@ class RecordArray(Content):
                     parameters, array._parameters, True
                 )
 
-                if isinstance(array, ak.contents.recordarray.RecordArray):
+                if isinstance(array, ak.contents.RecordArray):
                     if self.is_tuple:
                         if len(self.contents) == len(array.contents):
                             for i in range(len(self.contents)):
@@ -604,7 +602,7 @@ class RecordArray(Content):
                         raise ak._errors.wrap_error(
                             ValueError("cannot merge tuple with non-tuple record")
                         )
-                elif isinstance(array, ak.contents.emptyarray.EmptyArray):
+                elif isinstance(array, ak.contents.EmptyArray):
                     pass
                 else:
                     raise ak._errors.wrap_error(
@@ -625,7 +623,7 @@ class RecordArray(Content):
                     parameters, array._parameters, True
                 )
 
-                if isinstance(array, ak.contents.recordarray.RecordArray):
+                if isinstance(array, ak.contents.RecordArray):
                     if not array.is_tuple:
                         those_fields = array._fields.copy()
                         those_fields.sort()
@@ -647,7 +645,7 @@ class RecordArray(Content):
                             AssertionError("cannot merge non-tuple record with tuple")
                         )
 
-                elif isinstance(array, ak.contents.emptyarray.EmptyArray):
+                elif isinstance(array, ak.contents.EmptyArray):
                     pass
                 else:
                     raise ak._errors.wrap_error(
@@ -727,7 +725,7 @@ class RecordArray(Content):
         contents = []
         for x in self._contents:
             contents.append(x.numbers_to_type(name))
-        return ak.contents.recordarray.RecordArray(
+        return ak.contents.RecordArray(
             contents,
             self._fields,
             self._length,
@@ -797,7 +795,7 @@ class RecordArray(Content):
                         n, replacement, recordlookup, parameters, posaxis, depth
                     )
                 )
-            return ak.contents.recordarray.RecordArray(
+            return ak.contents.RecordArray(
                 contents,
                 recordlookup,
                 self.length,
@@ -861,7 +859,7 @@ class RecordArray(Content):
             for content in self._contents:
                 contents.append(content._pad_none(target, posaxis, depth, clip))
             if len(contents) == 0:
-                return ak.contents.recordarray.RecordArray(
+                return ak.contents.RecordArray(
                     contents,
                     self._fields,
                     self._length,
@@ -870,7 +868,7 @@ class RecordArray(Content):
                     self._nplike,
                 )
             else:
-                return ak.contents.recordarray.RecordArray(
+                return ak.contents.RecordArray(
                     contents,
                     self._fields,
                     self._length,

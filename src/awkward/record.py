@@ -11,7 +11,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 class Record:
     def __init__(self, array, at):
-        if not isinstance(array, ak.contents.recordarray.RecordArray):
+        if not isinstance(array, ak.contents.RecordArray):
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )

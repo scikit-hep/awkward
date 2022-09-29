@@ -338,7 +338,7 @@ class RegularArray(Content):
                 )
             )
             nextcontent = self._content._carry(nextcarry, True)
-            return ak.contents.listoffsetarray.ListOffsetArray(
+            return ak.contents.ListOffsetArray(
                 offsets, nextcontent, identifier, self._parameters, self._nplike
             )
 
@@ -353,7 +353,7 @@ class RegularArray(Content):
                     self._size,
                 )
             )
-            return ak.contents.listoffsetarray.ListOffsetArray(
+            return ak.contents.ListOffsetArray(
                 offsets, self._content, self._identifier, self._parameters, self._nplike
             )
 
@@ -648,10 +648,10 @@ class RegularArray(Content):
                     tonum.data, self._size, self._length
                 )
             )
-            return ak.contents.numpyarray.NumpyArray(tonum, None, None, self._nplike)
+            return ak.contents.NumpyArray(tonum, None, None, self._nplike)
         else:
             next = self._content.num(posaxis, depth + 1)
-            return ak.contents.regulararray.RegularArray(
+            return ak.contents.RegularArray(
                 next, self._size, self._length, None, self._parameters, self._nplike
             )
 
@@ -662,11 +662,11 @@ class RegularArray(Content):
         if isinstance(
             other,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self.mergeable(other.content, mergebool)
@@ -674,9 +674,9 @@ class RegularArray(Content):
         elif isinstance(
             other,
             (
-                ak.contents.regulararray.RegularArray,
-                ak.contents.listarray.ListArray,
-                ak.contents.listoffsetarray.ListOffsetArray,
+                ak.contents.RegularArray,
+                ak.contents.ListArray,
+                ak.contents.ListOffsetArray,
             ),
         ):
             return self._content.mergeable(other.content, mergebool)
@@ -684,10 +684,7 @@ class RegularArray(Content):
         # For n-dimensional NumpyArrays, let's now convert them to RegularArray
         # We could add a special case that tries to first convert self to NumpyArray
         # and merge conventionally, but it's not worth it at this stage.
-        elif (
-            isinstance(other, ak.contents.numpyarray.NumpyArray)
-            and other.purelist_depth > 1
-        ):
+        elif isinstance(other, ak.contents.NumpyArray) and other.purelist_depth > 1:
             return self._content.mergeable(other.toRegularArray().content, mergebool)
         else:
             return False
@@ -701,9 +698,7 @@ class RegularArray(Content):
 
         # Regularize NumpyArray into RegularArray (or NumpyArray if 1D)
         others = [
-            o.toRegularArray()
-            if isinstance(o, ak.contents.numpyarray.NumpyArray)
-            else o
+            o.toRegularArray() if isinstance(o, ak.contents.NumpyArray) else o
             for o in others
         ]
 
@@ -751,7 +746,7 @@ class RegularArray(Content):
                 )
             )
             return ak.contents.RegularArray(
-                ak.contents.numpyarray.NumpyArray(localindex),
+                ak.contents.NumpyArray(localindex),
                 self._size,
                 self._length,
                 self._identifier,
@@ -769,7 +764,7 @@ class RegularArray(Content):
             )
 
     def numbers_to_type(self, name):
-        return ak.contents.regulararray.RegularArray(
+        return ak.contents.RegularArray(
             self._content.numbers_to_type(name),
             self._size,
             self._length,
@@ -948,10 +943,10 @@ class RegularArray(Content):
                 contents.append(self._content._carry(ptr, True))
                 length = contents[-1].length
             assert length is not None
-            recordarray = ak.contents.recordarray.RecordArray(
+            recordarray = ak.contents.RecordArray(
                 contents, recordlookup, length, None, parameters, self._nplike
             )
-            return ak.contents.regulararray.RegularArray(
+            return ak.contents.RegularArray(
                 recordarray,
                 combinationslen,
                 self._length,
@@ -965,7 +960,7 @@ class RegularArray(Content):
             )._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth + 1
             )
-            return ak.contents.regulararray.RegularArray(
+            return ak.contents.RegularArray(
                 next,
                 self._size,
                 self._length,
@@ -1088,14 +1083,14 @@ class RegularArray(Content):
                         "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type
                     ](index.data, target, self._size, self._length)
                 )
-                next = ak.contents.indexedoptionarray.IndexedOptionArray(
+                next = ak.contents.IndexedOptionArray(
                     index,
                     self._content,
                     None,
                     self._parameters,
                     self._nplike,
                 )
-                return ak.contents.regulararray.RegularArray(
+                return ak.contents.RegularArray(
                     next.simplify_optiontype(),
                     target,
                     self._length,
@@ -1105,7 +1100,7 @@ class RegularArray(Content):
                 )
 
         else:
-            return ak.contents.regulararray.RegularArray(
+            return ak.contents.RegularArray(
                 self._content._pad_none(target, posaxis, depth + 1, clip),
                 self._size,
                 self._length,

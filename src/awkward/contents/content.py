@@ -346,11 +346,11 @@ class Content:
             slicer=head,
         )
 
-        out = ak.contents.indexedoptionarray.IndexedOptionArray(
+        out = ak.contents.IndexedOptionArray(
             outindex, raw.content, None, self._parameters, self._nplike
         )
 
-        return ak.contents.regulararray.RegularArray(
+        return ak.contents.RegularArray(
             out.simplify_optiontype(),
             indexlength,
             1,
@@ -405,10 +405,10 @@ class Content:
         )
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
-        out = ak.contents.indexedoptionarray.IndexedOptionArray(
+        out = ak.contents.IndexedOptionArray(
             outputmask, tmp, None, self._parameters, self._nplike
         )
-        return ak.contents.regulararray.RegularArray(
+        return ak.contents.RegularArray(
             out.simplify_optiontype(),
             index.length,
             1,
@@ -427,32 +427,32 @@ class Content:
                 "cannot mix missing values in slice with NumPy-style advanced indexing",
             )
 
-        if isinstance(head.content, ak.contents.listoffsetarray.ListOffsetArray):
+        if isinstance(head.content, ak.contents.ListOffsetArray):
             if self.nplike.known_shape and self.length != 1:
                 raise ak._errors.wrap_error(
                     NotImplementedError("reached a not-well-considered code path")
                 )
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
-        if isinstance(head.content, ak.contents.numpyarray.NumpyArray):
+        if isinstance(head.content, ak.contents.NumpyArray):
             headcontent = ak.index.Index64(head.content.data)
             nextcontent = self._getitem_next(headcontent, tail, advanced)
         else:
             nextcontent = self._getitem_next(head.content, tail, advanced)
 
-        if isinstance(nextcontent, ak.contents.regulararray.RegularArray):
+        if isinstance(nextcontent, ak.contents.RegularArray):
             return self._getitem_next_regular_missing(
                 head, tail, advanced, nextcontent, nextcontent.length
             )
 
-        elif isinstance(nextcontent, ak.contents.recordarray.RecordArray):
+        elif isinstance(nextcontent, ak.contents.RecordArray):
             if len(nextcontent._fields) == 0:
                 return nextcontent
 
             contents = []
 
             for content in nextcontent.contents:
-                if isinstance(content, ak.contents.regulararray.RegularArray):
+                if isinstance(content, ak.contents.RegularArray):
                     contents.append(
                         self._getitem_next_regular_missing(
                             head, tail, advanced, content, content.length
@@ -467,7 +467,7 @@ class Content:
                         )
                     )
 
-            return ak.contents.recordarray.RecordArray(
+            return ak.contents.RecordArray(
                 contents,
                 nextcontent._fields,
                 None,
@@ -543,10 +543,10 @@ class Content:
         ):
             return self._getitem_fields(ak.operations.to_list(where))
 
-        elif isinstance(where, ak.contents.emptyarray.EmptyArray):
+        elif isinstance(where, ak.contents.EmptyArray):
             return where.toNumpyArray(np.int64)
 
-        elif isinstance(where, ak.contents.numpyarray.NumpyArray):
+        elif isinstance(where, ak.contents.NumpyArray):
             if issubclass(where.dtype.type, np.int64):
                 carry = ak.index.Index64(where.data.reshape(-1))
                 allow_lazy = True
@@ -760,9 +760,7 @@ class Content:
             )
         )
 
-        return ak.contents.unionarray.UnionArray(
-            tags, index, contents, None, None, self._nplike
-        )
+        return ak.contents.UnionArray(tags, index, contents, None, None, self._nplike)
 
     def _merging_strategy(self, others):
         if len(others) == 0:
@@ -781,12 +779,12 @@ class Content:
             if isinstance(
                 other,
                 (
-                    ak.contents.indexedarray.IndexedArray,
-                    ak.contents.indexedoptionarray.IndexedOptionArray,
-                    ak.contents.bytemaskedarray.ByteMaskedArray,
-                    ak.contents.bitmaskedarray.BitMaskedArray,
-                    ak.contents.unmaskedarray.UnmaskedArray,
-                    ak.contents.unionarray.UnionArray,
+                    ak.contents.IndexedArray,
+                    ak.contents.IndexedOptionArray,
+                    ak.contents.ByteMaskedArray,
+                    ak.contents.BitMaskedArray,
+                    ak.contents.UnmaskedArray,
+                    ak.contents.UnionArray,
                 ),
             ):
                 break
@@ -1053,7 +1051,7 @@ class Content:
             )
             length = contents[-1].length
         assert length is not None
-        return ak.contents.recordarray.RecordArray(
+        return ak.contents.RecordArray(
             contents, recordlookup, length, None, parameters, self._nplike
         )
 
@@ -1078,9 +1076,9 @@ class Content:
             if isinstance(
                 self,
                 (
-                    ak.contents.listarray.ListArray,
-                    ak.contents.listoffsetarray.ListOffsetArray,
-                    ak.contents.regulararray.RegularArray,
+                    ak.contents.ListArray,
+                    ak.contents.ListOffsetArray,
+                    ak.contents.RegularArray,
                 ),
             ):
                 content = self.content
@@ -1092,7 +1090,7 @@ class Content:
                 return 'at {} ("{}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
                     path, type(self)
                 )
-            if isinstance(content, ak.contents.numpyarray.NumpyArray):
+            if isinstance(content, ak.contents.NumpyArray):
                 if content.dtype.type != np.uint8:
                     return 'at {} ("{}"): __array__ = "char" requires dtype == uint8'.format(
                         path, type(self)
@@ -1112,9 +1110,9 @@ class Content:
             if isinstance(
                 self,
                 (
-                    ak.contents.listarray.ListArray,
-                    ak.contents.listoffsetarray.ListOffsetArray,
-                    ak.contents.regulararray.RegularArray,
+                    ak.contents.ListArray,
+                    ak.contents.ListOffsetArray,
+                    ak.contents.RegularArray,
                 ),
             ):
                 content = self.content
@@ -1126,7 +1124,7 @@ class Content:
                 return 'at {} ("{}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
                     path, type(self)
                 )
-            if isinstance(content, ak.contents.numpyarray.NumpyArray):
+            if isinstance(content, ak.contents.NumpyArray):
                 if content.dtype.type != np.uint8:
                     return 'at {} ("{}"): __array__ = "byte" requires dtype == uint8'.format(
                         path, type(self)
@@ -1156,8 +1154,8 @@ class Content:
             if isinstance(
                 self,
                 (
-                    ak.contents.indexedarray.IndexedArray,
-                    ak.contents.indexedoptionarray.IndexedOptionArray,
+                    ak.contents.IndexedArray,
+                    ak.contents.IndexedOptionArray,
                 ),
             ):
                 content = self.content
@@ -1289,7 +1287,7 @@ class Content:
                 ](index.data, target, self.length)
             )
 
-        next = ak.contents.indexedoptionarray.IndexedOptionArray(
+        next = ak.contents.IndexedOptionArray(
             index,
             self,
             None,

@@ -90,7 +90,7 @@ class EmptyArray(Content):
             nplike = self._nplike
         if nplike is None:
             nplike = numpy
-        return ak.contents.numpyarray.NumpyArray(
+        return ak.contents.NumpyArray(
             nplike.empty(0, dtype), self._identifier, self._parameters, nplike
         )
 
@@ -182,7 +182,7 @@ class EmptyArray(Content):
                 return out
         else:
             out = ak.index.Index64.empty(0, self._nplike)
-            return ak.contents.numpyarray.NumpyArray(out, None, None, self._nplike)
+            return ak.contents.NumpyArray(out, None, None, self._nplike)
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -212,14 +212,12 @@ class EmptyArray(Content):
         return EmptyArray(None, self._parameters, self._nplike)
 
     def _local_index(self, axis, depth):
-        return ak.contents.numpyarray.NumpyArray(
+        return ak.contents.NumpyArray(
             self._nplike.empty(0, np.int64), None, None, self._nplike
         )
 
     def numbers_to_type(self, name):
-        return ak.contents.emptyarray.EmptyArray(
-            self._identifier, self._parameters, self._nplike
-        )
+        return ak.contents.EmptyArray(self._identifier, self._parameters, self._nplike)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -258,9 +256,7 @@ class EmptyArray(Content):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ak.contents.emptyarray.EmptyArray(
-            self._identifier, self._parameters, self._nplike
-        )
+        return ak.contents.EmptyArray(self._identifier, self._parameters, self._nplike)
 
     def _reduce_next(
         self,
@@ -323,7 +319,7 @@ class EmptyArray(Content):
 
         else:
             dtype = np.dtype(options["emptyarray_to"])
-            next = ak.contents.numpyarray.NumpyArray(
+            next = ak.contents.NumpyArray(
                 numpy.empty(length, dtype),
                 self._identifier,
                 self._parameters,
