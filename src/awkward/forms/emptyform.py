@@ -19,7 +19,7 @@ class EmptyForm(Form):
         return self._to_dict_extra({"class": "EmptyArray"}, verbose)
 
     def _type(self, typestrs):
-        return ak.types.unknowntype.UnknownType(
+        return ak.types.UnknownType(
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
         )

@@ -100,13 +100,13 @@ class NumpyForm(Form):
             return self._to_dict_extra(out, verbose)
 
     def _type(self, typestrs):
-        out = ak.types.numpytype.NumpyType(
+        out = ak.types.NumpyType(
             self._primitive,
             None,
             ak._util.gettypestr(self._parameters, typestrs),
         )
         for x in self._inner_shape[::-1]:
-            out = ak.types.regulartype.RegularType(out, x)
+            out = ak.types.RegularType(out, x)
 
         out._parameters = self._parameters
 

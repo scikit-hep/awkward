@@ -82,7 +82,7 @@ class ByteMaskedForm(Form):
         )
 
     def _type(self, typestrs):
-        return ak.types.optiontype.OptionType(
+        return ak.types.OptionType(
             self._content._type(typestrs),
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
