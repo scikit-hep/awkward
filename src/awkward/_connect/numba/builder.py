@@ -581,16 +581,6 @@ def lower_string(context, builder, sig, args):
 
 
 # FIXME: Take the function from Numba
-def bytes_as_string(self, obj):
-    from llvmlite import ir
-
-    fnty = ir.FunctionType(self.cstring, [self.pyobj])
-    fname = "PyBytes_AsString"
-    fn = self._get_function(fnty, name=fname)
-    return self.builder.call(fn, [obj])
-
-
-# FIXME: Take the function from Numba
 # int PyBytes_AsStringAndSize(PyObject *obj, char **buffer, Py_ssize_t *length)
 def bytes_as_string_and_size(self, obj, p_buffer, p_length):
     # """
@@ -622,14 +612,13 @@ def lower_bytestring(context, builder, sig, args):
     gil = pyapi.gil_ensure()
 
     strptr = pyapi.from_native_value(xtype, xval)
-    p_result = numba.core.cgutils.alloca_once(builder, pyapi.py_ssize_t)
+    p_length = numba.core.cgutils.alloca_once(builder, pyapi.py_ssize_t)
     p_buffer = numba.core.cgutils.alloca_once(builder, pyapi.cstring)
 
-    ok = bytes_as_string_and_size(pyapi, strptr, p_buffer, p_result)
+    ok = bytes_as_string_and_size(pyapi, strptr, p_buffer, p_length)
     if pyapi.if_object_ok(ok):
-        result = builder.load(p_result)
         length = ak._connect.numba.layout.castint(
-            context, builder, result.type, numba.int64, result
+            context, builder, pyapi.py_ssize_t, numba.int64, builder.load(p_length)
         )
         call(
             context,
