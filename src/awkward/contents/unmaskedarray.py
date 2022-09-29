@@ -39,7 +39,7 @@ class UnmaskedArray(Content):
 
     def __init__(self, content, identifier=None, parameters=None, nplike=None):
         if not isinstance(content, Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Content subtype, not {}".format(
                         type(self).__name__, repr(content)
@@ -250,7 +250,7 @@ class UnmaskedArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def project(self, mask=None):
         if mask is not None:
@@ -296,7 +296,7 @@ class UnmaskedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise ak._util.error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
             offsets, flattened = self._content._offsets_and_flattened(posaxis, depth)
             if offsets.length == 0:
@@ -597,7 +597,7 @@ class UnmaskedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         return UnmaskedArray(

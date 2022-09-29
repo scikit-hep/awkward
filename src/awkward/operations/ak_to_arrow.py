@@ -61,7 +61,7 @@ def to_arrow(
 
     See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet, #ak.from_arrow_schema.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_arrow",
         dict(
             array=array,

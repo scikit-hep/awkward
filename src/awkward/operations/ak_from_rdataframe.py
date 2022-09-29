@@ -14,7 +14,7 @@ def from_rdataframe(data_frame, columns):
 
      See also #ak.to_rdataframe.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_rdataframe",
         dict(
             data_frame=data_frame,

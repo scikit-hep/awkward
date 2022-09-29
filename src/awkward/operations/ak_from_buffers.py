@@ -58,7 +58,7 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_buffers",
         dict(
             form=form,
@@ -83,12 +83,12 @@ def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
         form = ak.forms.from_iter(form)
 
     if not (ak._util.isint(length) and length >= 0):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError("'length' argument must be a non-negative integer")
         )
 
     if not isinstance(form, ak.forms.Form):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 "'form' argument must be a Form or its Python dict/JSON string representation"
             )
@@ -105,7 +105,7 @@ def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
             return buffer_key(form_key=form.form_key, attribute=attribute, form=form)
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 f"buffer_key must be a string or a callable, not {type(buffer_key)}"
             )
@@ -126,7 +126,7 @@ _index_to_dtype = {
 
 def reconstitute(form, length, container, getkey, nplike):
     if form.has_identifier:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             NotImplementedError("ak.from_buffers for an array with an Identifier")
         )
     else:
@@ -134,7 +134,7 @@ def reconstitute(form, length, container, getkey, nplike):
 
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(f"EmptyForm node, but the expected length is {length}")
             )
         return ak.contents.EmptyArray(identifier, form.parameters)
@@ -296,6 +296,6 @@ def reconstitute(form, length, container, getkey, nplike):
         )
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             AssertionError("unexpected form node type: " + str(type(form)))
         )

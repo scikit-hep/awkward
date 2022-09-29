@@ -15,7 +15,7 @@ class RegularForm(Form):
         self, content, size, has_identifier=False, parameters=None, form_key=None
     ):
         if not isinstance(content, Form):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -23,7 +23,7 @@ class RegularForm(Form):
                 )
             )
         if not ak._util.isint(size):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'size' must be of type int, not {}".format(
                         type(self).__name__, repr(size)

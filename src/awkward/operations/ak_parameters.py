@@ -21,7 +21,7 @@ def parameters(array):
     See #ak.Array and #ak.behavior for a more complete description of
     behaviors.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.parameters",
         dict(array=array),
     ):

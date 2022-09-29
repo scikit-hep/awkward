@@ -52,7 +52,7 @@ def copy(array):
     changes, so we don't support it. However, an #ak.Array's data might come from
     a mutable third-party library, so this function allows you to make a true copy.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.fill_none",
         dict(array=array),
     ):

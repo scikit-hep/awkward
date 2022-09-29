@@ -16,7 +16,7 @@ def categories(array, highlevel=True):
 
     See also #ak.is_categorical, #ak.to_categorical, #ak.from_categorical.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.categories",
         dict(array=array, highlevel=highlevel),
     ):

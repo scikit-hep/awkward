@@ -40,7 +40,7 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.softmax",
         dict(
             x=x,

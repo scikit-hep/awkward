@@ -49,7 +49,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
     The values could be floating-point numbers or strings.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.fill_none",
         dict(
             array=array, value=value, axis=axis, highlevel=highlevel, behavior=behavior

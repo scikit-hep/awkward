@@ -41,7 +41,7 @@ def ravel(array, highlevel=True, behavior=None):
     Missing values are eliminated by flattening: there is no distinction
     between an empty list and a value of None at the level of flattening.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.ravel",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):

@@ -32,7 +32,7 @@ def backend(*arrays):
 
     See #ak.to_backend.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.backend",
         {"*arrays": arrays},
     ):

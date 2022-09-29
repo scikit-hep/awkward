@@ -27,7 +27,7 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
 
     See also #ak.to_cupy, #ak.from_numpy and #ak.from_jax.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_cupy",
         dict(
             array=array,

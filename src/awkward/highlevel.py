@@ -216,7 +216,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 if length is None:
                     length = len(contents[-1])
                 elif length != len(contents[-1]):
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         ValueError(
                             "dict of arrays in ak.Array constructor must have arrays "
                             "of equal length ({} vs {})".format(
@@ -233,7 +233,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = ak.operations.from_iter(data, highlevel=False, allow_record=False)
 
         if not isinstance(layout, ak.contents.Content):
-            raise ak._util.error(TypeError("could not convert data into an ak.Array"))
+            raise ak._errors.wrap_error(
+                TypeError("could not convert data into an ak.Array")
+            )
 
         if with_name is not None:
             layout = ak.operations.with_name(
@@ -303,7 +305,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._layout = layout
             self._numbaview = None
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("layout must be a subclass of ak.contents.Content")
             )
 
@@ -332,14 +334,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self.__class__ = ak._util.arrayclass(self._layout, behavior)
             self._behavior = behavior
         else:
-            raise ak._util.error(TypeError("behavior must be None or a dict"))
+            raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
 
     class Mask:
         def __init__(self, array):
             self._array = array
 
         def __getitem__(self, where):
-            with ak._util.OperationErrorContext(
+            with ak._errors.OperationErrorContext(
                 "ak.Array.mask", {0: self._array, 1: where}
             ):
                 return ak.operations.mask(self._array, where, True)
@@ -949,7 +951,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        with ak._util.SlicingErrorContext(self, where):
+        with ak._errors.SlicingErrorContext(self, where):
             out = self._layout[where]
             if isinstance(out, ak.contents.NumpyArray):
                 array_param = out.parameter("__array__")
@@ -1015,7 +1017,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        with ak._util.OperationErrorContext(
+        with ak._errors.OperationErrorContext(
             "ak.Array.__setitem__",
             dict(self=self, field_name=where, field_value=what),
         ):
@@ -1023,7 +1025,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 ak._util.isstr(where)
                 or (isinstance(where, tuple) and all(ak._util.isstr(x) for x in where))
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
@@ -1039,13 +1041,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         Removes a field from records in the array.
         """
-        with ak._util.OperationErrorContext(
+        with ak._errors.OperationErrorContext(
             "ak.Array.__delitem__",
             dict(self=self, field_name=where),
         ):
             names = ak.operations.fields(self._layout)
             if where not in names:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(f"array fields do not contain {where!r}")
                 )
             self._layout = self._layout[[x for x in names if x != where]]
@@ -1092,14 +1094,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 try:
                     return self[where]
                 except Exception as err:
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         AttributeError(
                             "while trying to get field {}, an exception "
                             "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         )
                     ) from err
             else:
-                raise ak._util.error(AttributeError(f"no field named {where!r}"))
+                raise ak._errors.wrap_error(AttributeError(f"no field named {where!r}"))
 
     def __setattr__(self, name, value):
         """
@@ -1128,13 +1130,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if name.startswith("_") or hasattr(type(self), name):
             super().__setattr__(name, value)
         elif name in self._layout.fields:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AttributeError(
                     "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
                 )
             )
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AttributeError(
                     "only private attributes (started with an underscore) can be set on arrays"
                 )
@@ -1260,7 +1262,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         for i, arg in enumerate(args):
             arguments[i + 1] = arg
         arguments.update(kwargs)
-        with ak._util.OperationErrorContext("numpy.asarray", arguments):
+        with ak._errors.OperationErrorContext("numpy.asarray", arguments):
             return ak._connect.numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
@@ -1325,7 +1327,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         for i, arg in enumerate(inputs):
             arguments[i] = arg
         arguments.update(kwargs)
-        with ak._util.OperationErrorContext(name, arguments):
+        with ak._errors.OperationErrorContext(name, arguments):
             return ak._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
@@ -1378,7 +1380,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
                 )
@@ -1421,7 +1423,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if len(self) == 1:
             return bool(self[0])
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "the truth value of an array whose length is not 1 is ambiguous; "
                     "use ak.any() or ak.all()"
@@ -1503,7 +1505,7 @@ class Record(NDArrayOperatorsMixin):
             layout = ak.operations.from_iter([data], highlevel=False)[0]
 
         elif isinstance(data, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("could not convert non-dict into an ak.Record; try ak.Array")
             )
 
@@ -1511,7 +1513,9 @@ class Record(NDArrayOperatorsMixin):
             layout = None
 
         if not isinstance(layout, ak.record.Record):
-            raise ak._util.error(TypeError("could not convert data into an ak.Record"))
+            raise ak._errors.wrap_error(
+                TypeError("could not convert data into an ak.Record")
+            )
 
         if with_name is not None:
             layout = ak.operations.with_name(layout, with_name, highlevel=False)
@@ -1575,7 +1579,7 @@ class Record(NDArrayOperatorsMixin):
             self._layout = layout
             self._numbaview = None
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("layout must be a subclass of ak.record.Record")
             )
 
@@ -1604,7 +1608,7 @@ class Record(NDArrayOperatorsMixin):
             self.__class__ = ak._util.recordclass(self._layout, behavior)
             self._behavior = behavior
         else:
-            raise ak._util.error(TypeError("behavior must be None or a dict"))
+            raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
 
     def tolist(self):
         """
@@ -1704,7 +1708,7 @@ class Record(NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        with ak._util.SlicingErrorContext(self, where):
+        with ak._errors.SlicingErrorContext(self, where):
             out = self._layout[where]
             if isinstance(out, ak.contents.NumpyArray):
                 array_param = out.parameter("__array__")
@@ -1737,7 +1741,7 @@ class Record(NDArrayOperatorsMixin):
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        with ak._util.OperationErrorContext(
+        with ak._errors.OperationErrorContext(
             "ak.Record.__setitem__",
             dict(self=self, field_name=where, field_value=what),
         ):
@@ -1745,7 +1749,7 @@ class Record(NDArrayOperatorsMixin):
                 ak._util.isstr(where)
                 or (isinstance(where, tuple) and all(ak._util.isstr(x) for x in where))
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError("only fields may be assigned in-place (by field name)")
                 )
 
@@ -1761,13 +1765,13 @@ class Record(NDArrayOperatorsMixin):
 
         Removes a field from records in the array.
         """
-        with ak._util.OperationErrorContext(
+        with ak._errors.OperationErrorContext(
             "ak.Record.__delitem__",
             dict(self=self, field_name=where),
         ):
             names = ak.operations.fields(self._layout)
             if where not in names:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(f"array fields do not contain {where!r}")
                 )
             self._layout = self._layout[[x for x in names if x != where]]
@@ -1808,14 +1812,14 @@ class Record(NDArrayOperatorsMixin):
                 try:
                     return self[where]
                 except Exception as err:
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         AttributeError(
                             "while trying to get field {}, an exception "
                             "occurred:\n{}: {}".format(repr(where), type(err), str(err))
                         )
                     ) from err
             else:
-                raise ak._util.error(AttributeError(f"no field named {where!r}"))
+                raise ak._errors.wrap_error(AttributeError(f"no field named {where!r}"))
 
     def __setattr__(self, name, value):
         """
@@ -1844,13 +1848,13 @@ class Record(NDArrayOperatorsMixin):
         if name.startswith("_") or hasattr(type(self), name):
             super().__setattr__(name, value)
         elif name in self._layout.fields:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AttributeError(
                     "fields cannot be set as attributes. use #__setitem__ or #ak.with_field"
                 )
             )
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AttributeError(
                     "only private attributes (started with an underscore) can be set on records"
                 )
@@ -1966,7 +1970,7 @@ class Record(NDArrayOperatorsMixin):
         for i, arg in enumerate(inputs):
             arguments[i] = arg
         arguments.update(kwargs)
-        with ak._util.OperationErrorContext(name, arguments):
+        with ak._errors.OperationErrorContext(name, arguments):
             return ak._connect.numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     @property
@@ -2000,7 +2004,7 @@ class Record(NDArrayOperatorsMixin):
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "Awkward 2.x and later can only unpickle arrays from 1.0.1 and later"
                 )
@@ -2041,7 +2045,7 @@ class Record(NDArrayOperatorsMixin):
         )
 
     def __bool__(self):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "the truth value of a record is ambiguous; "
                 "use ak.any() or ak.all() or pick a field"
@@ -2239,7 +2243,7 @@ class ArrayBuilder(Sized):
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise ak._util.error(TypeError("behavior must be None or a dict"))
+            raise ak._errors.wrap_error(TypeError("behavior must be None or a dict"))
 
     def tolist(self):
         """
@@ -2343,7 +2347,7 @@ class ArrayBuilder(Sized):
         for i, arg in enumerate(args):
             arguments[i + 1] = arg
         arguments.update(kwargs)
-        with ak._util.OperationErrorContext("numpy.asarray", arguments):
+        with ak._errors.OperationErrorContext("numpy.asarray", arguments):
             return ak._connect.numpy.convert_to_array(self.snapshot(), args, kwargs)
 
     @property
@@ -2364,7 +2368,7 @@ class ArrayBuilder(Sized):
         if len(self) == 1:
             return bool(self[0])
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "the truth value of an array whose length is not 1 is ambiguous; "
                     "use ak.any() or ak.all()"

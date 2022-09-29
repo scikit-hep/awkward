@@ -43,20 +43,20 @@ def where(condition, *args, **kwargs):
     )
 
     if len(args) == 0:
-        with ak._util.OperationErrorContext(
+        with ak._errors.OperationErrorContext(
             "ak.where",
             dict(condition=condition, mergebool=mergebool, highlevel=highlevel),
         ):
             return _impl1(condition, mergebool, highlevel, behavior)
 
     elif len(args) == 1:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("either both or neither of x and y should be given")
         )
 
     elif len(args) == 2:
         x, y = args
-        with ak._util.OperationErrorContext(
+        with ak._errors.OperationErrorContext(
             "ak.where",
             dict(
                 condition=condition, x=x, y=y, mergebool=mergebool, highlevel=highlevel
@@ -65,7 +65,7 @@ def where(condition, *args, **kwargs):
             return _impl3(condition, x, y, mergebool, highlevel, behavior)
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 "where() takes from 1 to 3 positional arguments but {} were "
                 "given".format(len(args) + 1)

@@ -68,7 +68,7 @@ def linear_fit(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.linear_fit",
         dict(
             x=x,

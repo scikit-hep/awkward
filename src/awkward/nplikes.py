@@ -378,11 +378,11 @@ class NumpyKernel:
             if is_numpy_buffer(x):
                 return ctypes.cast(x.ctypes.data, t)
             elif is_cupy_buffer(x):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
                 )
             elif is_jax_buffer(x):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "JAX Buffers can't be passed as function args for the C Kernels"
                     )
@@ -740,7 +740,9 @@ class Jax(NumpyLike):
             return [self.to_rectilinear(x, *args, **kwargs) for x in array]
 
         else:
-            raise ak._util.error(ValueError("to_rectilinear argument must be iterable"))
+            raise ak._errors.wrap_error(
+                ValueError("to_rectilinear argument must be iterable")
+            )
 
     def __getitem__(self, name_and_types):
         return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
@@ -752,7 +754,7 @@ class Jax(NumpyLike):
 
     @property
     def ma(self):
-        ak._util.error(
+        ak._errors.wrap_error(
             ValueError(
                 "JAX arrays cannot have missing values until JAX implements "
                 "numpy.ma.MaskedArray" + ak._util.exception_suffix(__file__)
@@ -761,7 +763,7 @@ class Jax(NumpyLike):
 
     @property
     def char(self):
-        ak._util.error(
+        ak._errors.wrap_error(
             ValueError(
                 "JAX arrays cannot do string manipulations until JAX implements "
                 "numpy.char"
@@ -805,7 +807,7 @@ class Jax(NumpyLike):
         elif isinstance(nplike, ak._typetracer.TypeTracer):
             return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
         else:
-            ak._util.error(
+            ak._errors.wrap_error(
                 TypeError(
                     "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax",
                 )

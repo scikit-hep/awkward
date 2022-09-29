@@ -22,7 +22,7 @@ class BitMaskedForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(mask):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be of type str, not {}".format(
                         type(self).__name__, repr(mask)
@@ -30,7 +30,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -38,7 +38,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'valid_when' must be bool, not {}".format(
                         type(self).__name__, repr(valid_when)
@@ -46,7 +46,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(lsb_order, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'lsb_order' must be bool, not {}".format(
                         type(self).__name__, repr(lsb_order)

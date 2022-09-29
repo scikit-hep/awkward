@@ -45,7 +45,7 @@ class ArgMin(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        raise ak._util.error("Cannot differentiate through argmin")
+        raise ak._errors.wrap_error("Cannot differentiate through argmin")
 
 
 class ArgMax(Reducer):
@@ -59,7 +59,7 @@ class ArgMax(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        raise ak._util.error("Cannot differentiate through argmax")
+        raise ak._errors.wrap_error("Cannot differentiate through argmax")
 
 
 class Count(Reducer):
@@ -72,7 +72,7 @@ class Count(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        raise ak._util.error("Cannot differentiate through count_zero")
+        raise ak._errors.wrap_error("Cannot differentiate through count_zero")
 
 
 class CountNonzero(Reducer):
@@ -85,7 +85,7 @@ class CountNonzero(Reducer):
 
     @classmethod
     def apply(cls, array, parents, outlength):
-        raise ak._util.error("Cannot differentiate through count_nonzero")
+        raise ak._errors.wrap_error("Cannot differentiate through count_nonzero")
 
 
 class Sum(Reducer):
@@ -97,7 +97,7 @@ class Sum(Reducer):
 
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
             )
 

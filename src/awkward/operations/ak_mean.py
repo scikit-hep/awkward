@@ -73,7 +73,7 @@ def mean(
 
     See also #ak.nanmean.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.mean",
         dict(
             x=x,
@@ -124,7 +124,7 @@ def nanmean(
 
     See also #ak.mean.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nanmean",
         dict(
             x=x,

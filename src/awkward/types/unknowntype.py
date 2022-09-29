@@ -8,7 +8,7 @@ from awkward.types.type import Type
 class UnknownType(Type):
     def __init__(self, parameters=None, typestr=None):
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
@@ -16,7 +16,7 @@ class UnknownType(Type):
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)

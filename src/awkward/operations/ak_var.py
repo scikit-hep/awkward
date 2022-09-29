@@ -66,7 +66,7 @@ def var(
 
     See also #ak.nanvar.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.var",
         dict(
             x=x,
@@ -127,7 +127,7 @@ def nanvar(
 
     See also #ak.var.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nanvar",
         dict(
             x=x,

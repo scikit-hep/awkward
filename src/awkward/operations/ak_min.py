@@ -51,7 +51,7 @@ def min(
 
     See also #ak.nanmin.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.min",
         dict(
             array=array,
@@ -106,7 +106,7 @@ def nanmin(
 
     See also #ak.min.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nanmin",
         dict(
             array=array,

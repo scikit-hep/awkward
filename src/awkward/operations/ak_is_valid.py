@@ -18,7 +18,7 @@ def is_valid(array, exception=False):
 
     See also #ak.validity_error.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.is_valid",
         dict(array=array, exception=exception),
     ):

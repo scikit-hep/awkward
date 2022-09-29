@@ -55,7 +55,7 @@ def packed(array, highlevel=True, behavior=None):
 
     See also #ak.to_buffers.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.packed",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):

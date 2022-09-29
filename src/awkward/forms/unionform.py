@@ -21,7 +21,7 @@ class UnionForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(tags):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'tags' must be of type str, not {}".format(
                         type(self).__name__, repr(tags)
@@ -29,7 +29,7 @@ class UnionForm(Form):
                 )
             )
         if not ak._util.isstr(index):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(
                         type(self).__name__, repr(index)
@@ -37,7 +37,7 @@ class UnionForm(Form):
                 )
             )
         if not isinstance(contents, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -46,7 +46,7 @@ class UnionForm(Form):
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "{} all 'contents' must be Form subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -178,7 +178,7 @@ class UnionForm(Form):
         )
 
     def simplify_uniontype(self, merge=True, mergebool=False):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

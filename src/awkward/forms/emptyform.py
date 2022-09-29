@@ -57,10 +57,10 @@ class EmptyForm(Form):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        raise ak._util.indexerror(self, where, "not an array of records")
+        raise ak._errors.index_error(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
-        raise ak._util.indexerror(self, where, "not an array of records")
+        raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, allow_lazy):
         return EmptyForm(
