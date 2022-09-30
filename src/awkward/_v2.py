@@ -17,6 +17,8 @@ from awkward import contents  # noqa: F401
 from awkward import forms  # noqa: F401
 from awkward import identifier  # noqa: F401
 from awkward import index  # noqa: F401
+from awkward import numba  # noqa: F401
+from awkward import operations  # noqa: F401
 from awkward import record  # noqa: F401
 from awkward import types  # noqa: F401
 from awkward.operations import *  # noqa: F401,F403 pylint: disable=W0401,W0614
