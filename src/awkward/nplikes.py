@@ -358,6 +358,17 @@ class NumpyLike(Singleton):
     def datetime_as_string(self, *args, **kwargs):
         return self._module.datetime_as_string(*args, **kwargs)
 
+    @classmethod
+    def is_own_buffer(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a numpy buffer, otherwise `False`.
+
+        """
+        raise NotImplementedError
+
 
 class NumpyKernel:
     def __init__(self, kernel, name_and_types):
