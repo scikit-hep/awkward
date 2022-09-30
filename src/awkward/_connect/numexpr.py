@@ -123,10 +123,7 @@ def re_evaluate(local_dict=None):
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
     except KeyError as err:
         raise ak._errors.wrap_error(
-            RuntimeError(
-                "not a previous evaluate() execution found"
-                + ak._util.exception_suffix(__file__)
-            )
+            RuntimeError("not a previous evaluate() execution found")
         ) from err
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
