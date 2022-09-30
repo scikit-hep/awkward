@@ -893,3 +893,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     def datetime_as_string(self, *args, **kwargs):
         raise ak._errors.wrap_error(NotImplementedError)
+
+    @classmethod
+    def is_own_buffer(cls, obj) -> bool:
+        return isinstance(obj, TypeTracerArray)
