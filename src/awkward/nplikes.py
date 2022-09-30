@@ -921,7 +921,7 @@ def nplike_of(*arrays, default_cls=Numpy):
     are found.
     """
     nplikes = set()
-    nplike_classes = (Numpy, Cupy, Jax)
+    nplike_classes = (Numpy, Cupy, Jax, ak._typetracer.TypeTracer)
 
     for array in arrays:
         nplike = getattr(array, "nplike", None)
