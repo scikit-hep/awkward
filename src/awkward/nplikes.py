@@ -931,7 +931,7 @@ def nplike_of(*arrays, default_cls=Numpy):
             for cls in nplike_classes:
                 if cls.is_own_buffer(array):
                     nplikes.add(cls.instance())
-                    continue
+                    break
 
     if any(isinstance(x, ak._typetracer.TypeTracer) for x in nplikes):
         return ak._typetracer.TypeTracer.instance()
