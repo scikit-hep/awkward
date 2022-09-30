@@ -406,7 +406,7 @@ class NumpyKernel:
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
 
-        if not any(is_jax_tracer(arg) for arg in args):
+        if not any(Jax.is_tracer(arg) for arg in args):
             return self._kernel(
                 *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
             )
@@ -897,17 +897,17 @@ class Jax(NumpyLike):
         module, _, suffix = type(obj).__module__.partition(".")
         return module == "jaxlib"
 
+    @classmethod
+    def is_tracer(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
 
-def is_jax_tracer(obj) -> bool:
-    """
-    Args:
-        obj: object to test
+        Return `True` if the given object is a jax tracer, otherwise `False`.
 
-    Return `True` if the given object is a jax tracer, otherwise `False`.
-
-    """
-    module, _, suffix = type(obj).__module__.partition(".")
-    return module == "jax"
+        """
+        module, _, suffix = type(obj).__module__.partition(".")
+        return module == "jax"
 
 
 def nplike_of(*arrays, default_cls=Numpy):
