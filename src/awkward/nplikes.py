@@ -782,9 +782,7 @@ class Jax(NumpyLike):
         return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
-        from awkward._connect.jax import import_jax  # noqa: F401
-
-        self._module = import_jax().numpy
+        self._module = ak.jax.import_jax().numpy
 
     @property
     def ma(self):

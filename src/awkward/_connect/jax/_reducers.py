@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward._connect.jax import import_jax
+from awkward.jax import import_jax
 
 np = ak.nplikes.NumpyMetadata.instance()
 

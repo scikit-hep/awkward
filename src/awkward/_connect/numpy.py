@@ -165,7 +165,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         args.append(x)
 
                 if isinstance(nplike, ak.nplikes.Jax):
-                    from awkward._connect.jax import import_jax
+                    from awkward.jax import import_jax
 
                     jax = import_jax()
                     result = getattr(jax.numpy, ufunc.__name__)(*args, **kwargs)

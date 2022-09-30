@@ -2,65 +2,6 @@
 
 import awkward as ak
 
-try:
-    import jax
-
-    error_message = None
-
-except ModuleNotFoundError:
-    jax = None
-    error_message = """to use {0}, you must install jax:
-
-    pip install jax jaxlib
-
-or
-
-    conda install -c conda-forge jax jaxlib
-"""
-
-pytrees_registered = False
-
-
-def register_pytrees():
-    for cls in [
-        ak.contents.BitMaskedArray,
-        ak.contents.ByteMaskedArray,
-        ak.contents.EmptyArray,
-        ak.contents.IndexedArray,
-        ak.contents.IndexedOptionArray,
-        ak.contents.NumpyArray,
-        ak.contents.ListArray,
-        ak.contents.ListOffsetArray,
-        ak.contents.RecordArray,
-        ak.contents.UnionArray,
-        ak.contents.UnmaskedArray,
-        ak.record.Record,
-    ]:
-        jax.tree_util.register_pytree_node(
-            cls,
-            cls.jax_flatten,
-            cls.jax_unflatten,
-        )
-
-    for cls in [ak.highlevel.Array, ak.highlevel.Record]:
-        jax.tree_util.register_pytree_node(
-            cls,
-            cls._jax_flatten,
-            cls._jax_unflatten,
-        )
-
-
-def import_jax(name="Awkward Arrays with JAX"):
-    if jax is None:
-        raise ak._errors.wrap_error(ModuleNotFoundError(error_message.format(name)))
-
-    global pytrees_registered
-
-    if not pytrees_registered:
-        register_pytrees()
-        pytrees_registered = True
-    return jax
-
 
 def _find_numpyarray_nodes(layout):
 
