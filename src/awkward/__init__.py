@@ -49,13 +49,11 @@ awkward.behaviors.categorical.register(behavior)  # noqa: F405
 from awkward.operations import *
 
 # temporary shim to access v2 under _v2
-import sys
-
-_v2 = sys.modules[f"{__name__}._v2"] = sys.modules[__name__]
+import awkward._v2
 
 # version
 __version__ = awkward._ext.__version__
-__all__ = [x for x in globals() if not x.startswith("_") and x not in ("numpy",)]
+__all__ = [x for x in globals() if not x.startswith("_")]
 
 
 def __dir__():
