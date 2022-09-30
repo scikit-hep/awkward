@@ -51,13 +51,15 @@ def concatenate(
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
     single_nplike = ak.nplikes.nplike_of(arrays)
+    numpy = ak.nplikes.Numpy.instance()
+
     if (
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is a NumPy Array
-        or ak.nplikes.is_numpy_buffer(arrays)
+        or numpy.is_own_buffer(arrays)
         # Is an array with a known NumpyLike
-        or single_nplike is not ak.nplikes.Numpy.instance()
+        or single_nplike is not numpy
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)

@@ -375,13 +375,13 @@ class NumpyKernel:
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
 
-            if is_numpy_buffer(x):
+            if Numpy.is_own_buffer(x):
                 return ctypes.cast(x.ctypes.data, t)
-            elif is_cupy_buffer(x):
+            elif Cupy.is_own_buffer(x):
                 raise ak._errors.wrap_error(
                     AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
                 )
-            elif is_jax_buffer(x):
+            elif Jax.is_own_buffer(x):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "JAX Buffers can't be passed as function args for the C Kernels"
@@ -513,6 +513,17 @@ class Numpy(NumpyLike):
             raise TypeError(
                 "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
             )
+
+    @classmethod
+    def is_own_buffer(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a numpy buffer, otherwise `False`.
+
+        """
+        return isinstance(obj, numpy.ndarray)
 
 
 class Cupy(NumpyLike):
@@ -713,6 +724,18 @@ class Cupy(NumpyLike):
         # array, max_line_width, precision=None, suppress_small=None
         return self._module.array_str(array, max_line_width, precision, suppress_small)
 
+    @classmethod
+    def is_own_buffer(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a cupy buffer, otherwise `False`.
+
+        """
+        module, _, suffix = type(obj).__module__.partition(".")
+        return module == "cupy"
+
 
 class Jax(NumpyLike):
     @property
@@ -851,40 +874,17 @@ class Jax(NumpyLike):
         out = self._module.argmax(*args, **kwargs)
         return out
 
+    @classmethod
+    def is_own_buffer(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
 
-def is_numpy_buffer(obj) -> bool:
-    """
-    Args:
-        obj: object to test
+        Return `True` if the given object is a jax buffer, otherwise `False`.
 
-    Return `True` if the given object is a numpy buffer, otherwise `False`.
-
-    """
-    return isinstance(obj, numpy.ndarray)
-
-
-def is_cupy_buffer(obj) -> bool:
-    """
-    Args:
-        obj: object to test
-
-    Return `True` if the given object is a cupy buffer, otherwise `False`.
-
-    """
-    module, _, suffix = type(obj).__module__.partition(".")
-    return module == "cupy"
-
-
-def is_jax_buffer(obj) -> bool:
-    """
-    Args:
-        obj: object to test
-
-    Return `True` if the given object is a jax buffer, otherwise `False`.
-
-    """
-    module, _, suffix = type(obj).__module__.partition(".")
-    return module == "jaxlib"
+        """
+        module, _, suffix = type(obj).__module__.partition(".")
+        return module == "jaxlib"
 
 
 def is_jax_tracer(obj) -> bool:
@@ -910,16 +910,17 @@ def nplike_of(*arrays, default_cls=Numpy):
     are found.
     """
     nplikes = set()
+    nplike_classes = (Numpy, Cupy, Jax)
+
     for array in arrays:
         nplike = getattr(array, "nplike", None)
         if nplike is not None:
             nplikes.add(nplike)
-        elif is_numpy_buffer(array):
-            nplikes.add(Numpy.instance())
-        elif is_cupy_buffer(array):
-            nplikes.add(Cupy.instance())
-        elif is_jax_buffer(array):
-            nplikes.add(Jax.instance())
+        else:
+            for cls in nplike_classes:
+                if cls.is_own_buffer(array):
+                    nplikes.add(cls.instance())
+                    continue
 
     if any(isinstance(x, ak._typetracer.TypeTracer) for x in nplikes):
         return ak._typetracer.TypeTracer.instance()
