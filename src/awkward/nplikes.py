@@ -754,7 +754,7 @@ class Jax(NumpyLike):
 
     @property
     def ma(self):
-        ak._errors.wrap_error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "JAX arrays cannot have missing values until JAX implements "
                 "numpy.ma.MaskedArray" + ak._util.exception_suffix(__file__)
@@ -763,7 +763,7 @@ class Jax(NumpyLike):
 
     @property
     def char(self):
-        ak._errors.wrap_error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "JAX arrays cannot do string manipulations until JAX implements "
                 "numpy.char"
