@@ -125,7 +125,7 @@ def re_evaluate(local_dict=None):
         raise ak._errors.wrap_error(
             RuntimeError(
                 "not a previous evaluate() execution found"
-                + ak._errors.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
         ) from err
     names = numexpr.necompiler._numexpr_last["argnames"]
