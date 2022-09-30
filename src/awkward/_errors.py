@@ -1,11 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
+import sys
 import threading
 import traceback
 import warnings
 from collections.abc import Mapping, Sequence
 
+import awkward as ak
 from awkward import _util, nplikes
 
 np = nplikes.NumpyMetadata.instance()
@@ -327,3 +329,25 @@ Issue: {}.""".format(
         version, date, will_be, message
     )
     warnings.warn(warning, category, stacklevel=stacklevel + 1)
+
+
+def exception_suffix(filename: str) -> str:
+    """
+    Args:
+        filename: name of file that raises the Exception
+
+    Return a parenthesised URL to the given file on GitHub, including the
+    line number of the raised Exception.
+    """
+    line = ""
+    if hasattr(sys, "_getframe"):
+        line = "#L" + str(sys._getframe(1).f_lineno)
+    filename = filename.replace("\\", "/")
+    filename = "/src/awkward/" + filename.split("awkward/")[1]
+    return (
+        "\n\n(https://github.com/scikit-hep/awkward-1.0/blob/"
+        + ak.__version__
+        + filename
+        + line
+        + ")"
+    )
