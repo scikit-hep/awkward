@@ -404,6 +404,7 @@ if sys.version_info >= (3, 11):
     import re._constants as sre_constants
     import re._parser as sre_parse
 else:
+    import sre_constants
     import sre_parse
 
 categ_pattern = re.compile(r'\\p{[A-Za-z_]+}')
