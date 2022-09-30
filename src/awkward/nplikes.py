@@ -545,14 +545,14 @@ class Cupy(NumpyLike):
     def ma(self):
         raise ValueError(
             "CUDA arrays cannot have missing values until CuPy implements "
-            "numpy.ma.MaskedArray" + ak._util.exception_suffix(__file__)
+            "numpy.ma.MaskedArray"
         )
 
     @property
     def char(self):
         raise ValueError(
             "CUDA arrays cannot do string manipulations until CuPy implements "
-            "numpy.char" + ak._util.exception_suffix(__file__)
+            "numpy.char"
         )
 
     @property
@@ -757,7 +757,7 @@ class Jax(NumpyLike):
         raise ak._errors.wrap_error(
             ValueError(
                 "JAX arrays cannot have missing values until JAX implements "
-                "numpy.ma.MaskedArray" + ak._util.exception_suffix(__file__)
+                "numpy.ma.MaskedArray"
             )
         )
 
@@ -937,5 +937,4 @@ def nplike_of(*arrays, default_cls=Numpy):
     ak.to_backend(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
-            + ak._util.exception_suffix(__file__)
         )
