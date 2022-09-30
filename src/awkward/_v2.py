@@ -2,11 +2,6 @@
 
 # Following https://github.com/scikit-hep/awkward/blob/main-v1/src/awkward/_v2/__init__.py
 
-# behaviors
-# high-level interface
-# third-party connectors
-# internal
-# layout classes; functionality that used to be in C++ (in Awkward 1.x)
 from awkward import Array  # noqa: F401
 from awkward import ArrayBuilder  # noqa: F401
 from awkward import Record  # noqa: F401
@@ -24,6 +19,4 @@ from awkward import identifier  # noqa: F401
 from awkward import index  # noqa: F401
 from awkward import record  # noqa: F401
 from awkward import types  # noqa: F401
-
-# operations
-from awkward.operations import *  # noqa: F401
+from awkward.operations import *  # noqa: F401,F403 pylint: disable=W0401,W0614
