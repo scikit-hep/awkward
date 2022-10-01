@@ -4,7 +4,7 @@ import types
 from typing import TypeVar
 
 import awkward as ak
-from awkward import _errors, nplikes
+from awkward import _errors, highlevel, nplikes
 
 numpy = nplikes.Numpy()
 
@@ -36,7 +36,7 @@ def register_and_check():
     _register(jax)
 
 
-T = TypeVar("T", bound="type[ak.Array | ak.Record]")
+T = TypeVar("T", bound="type[highlevel.Array | highlevel.Record]")
 
 
 def register_behavior_class(cls: T) -> T:
