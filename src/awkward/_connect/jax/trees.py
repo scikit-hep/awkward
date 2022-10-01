@@ -25,7 +25,7 @@ def find_numpyarray_nodes(
 def replace_numpyarray_nodes(
     layout: contents.Content | record.Record, buffers: list[numpy.ndarray]
 ):
-    def replace_numpyarray_nodes(node, **kwargs):
+    def action(node, **kwargs):
         if isinstance(node, ak.contents.NumpyArray):
             buffer = buffers[0]
             buffers.pop(0)
@@ -36,7 +36,7 @@ def replace_numpyarray_nodes(
                 nplike=ak.nplikes.Jax.instance(),
             )
 
-    return layout.recursively_apply(action=replace_numpyarray_nodes)
+    return layout.recursively_apply(action=action, trim=False)
 
 
 class AuxData:
