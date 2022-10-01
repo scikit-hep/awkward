@@ -2,13 +2,13 @@
 
 import awkward as ak
 
-checked_version = False
+_has_checked_version = False
 
 
 def register_and_check():
-    global checked_version
+    global _has_checked_version
 
-    if not checked_version:
+    if not _has_checked_version:
         try:
             import numba
         except ImportError as err:
@@ -22,21 +22,19 @@ or
     conda install numba"""
             ) from err
 
-        checked_version = True
+        _has_checked_version = True
         if ak._util.parse_version(numba.__version__) < ak._util.parse_version("0.50"):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
                 "(you have version {})".format(numba.__version__)
             )
 
-    register()
+    _register(numba)
 
 
-def register():
+def _register(numba):
     if hasattr(ak.numba, "ArrayViewType"):
         return
-
-    import numba
 
     import awkward._connect.numba.arrayview
     import awkward._connect.numba.builder
