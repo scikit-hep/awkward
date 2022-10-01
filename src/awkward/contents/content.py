@@ -1543,18 +1543,13 @@ class Content:
     def __deepcopy__(self, memo):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _jax_flatten(self):
+    def jax_flatten(self):
         from awkward._connect.jax import AuxData, find_numpyarray_nodes
 
         layout = ak.operations.to_layout(self, allow_record=True, allow_other=False)
 
         numpyarray_nodes = find_numpyarray_nodes(layout)
         return (numpyarray_nodes, AuxData(layout))
-
-    @classmethod
-    def jax_flatten(cls, array):
-        assert type(array) is cls
-        return array._jax_flatten()
 
     @classmethod
     def jax_unflatten(cls, aux_data, children):

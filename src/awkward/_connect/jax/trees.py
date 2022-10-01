@@ -61,7 +61,7 @@ class AuxData:
 def jax_flatten_highlevel(
     array: highlevel.Array | highlevel.Record,
 ) -> tuple[list[numpy.ndarray], AuxData]:
-    return array._layout._jax_flatten()
+    return array._layout.jax_flatten()
 
 
 def jax_unflatten_highlevel(
