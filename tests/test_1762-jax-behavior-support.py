@@ -12,11 +12,10 @@ jax.config.update("jax_enable_x64", True)
 ak.jax.register_and_check()
 
 
-class GradBehavior(ak.Array):
-    ...
+def test_behavior():
+    class GradBehavior(ak.Array):
+        ...
 
-
-def test():
     def square_fifth_entry(x):
         return x[4] ** 2
 
@@ -32,3 +31,75 @@ def test():
 
     assert value_jvp_grad == pytest.approx(16.0)
     assert jvp_grad_grad == pytest.approx(32.0)
+
+
+def test_recursively_apply_trim():
+    numpy = ak.nplikes.Numpy.instance()
+
+    layout = ak.contents.ListOffsetArray(
+        ak.index.Index(numpy.array([0, 3, 6], dtype=np.int64)),
+        ak.contents.NumpyArray(numpy.arange(24)),
+    )
+
+    # Test trimmed
+    visitor_was_called = False
+
+    def visitor(layout, depth, **kwargs):
+        nonlocal visitor_was_called
+        visitor_was_called = True
+
+        if depth == 1:
+            assert len(layout) == 2
+        elif depth == 2:
+            assert len(layout) == 6
+
+    layout.recursively_apply(visitor)
+    assert visitor_was_called
+
+
+def test_recursively_apply_no_trim():
+    numpy = ak.nplikes.Numpy.instance()
+
+    layout = ak.contents.ListOffsetArray(
+        ak.index.Index(numpy.array([0, 3, 6], dtype=np.int64)),
+        ak.contents.NumpyArray(numpy.arange(24)),
+    )
+
+    # Test untrimmed
+    visitor_was_called = False
+
+    def visitor(layout, depth, **kwargs):
+        nonlocal visitor_was_called
+        visitor_was_called = True
+
+        if depth == 1:
+            assert len(layout) == 2
+        elif depth == 2:
+            assert len(layout) == 24
+
+    layout.recursively_apply(visitor, trim=False)
+    assert visitor_was_called
+
+
+def test_ak_transform_no_trim():
+    numpy = ak.nplikes.Numpy.instance()
+
+    layout = ak.contents.ListOffsetArray(
+        ak.index.Index(numpy.array([0, 3, 6], dtype=np.int64)),
+        ak.contents.NumpyArray(numpy.arange(24)),
+    )
+
+    # Test untrimmed
+    visitor_was_called = False
+
+    def visitor(layout, depth, **kwargs):
+        nonlocal visitor_was_called
+        visitor_was_called = True
+
+        if depth == 1:
+            assert len(layout) == 2
+        elif depth == 2:
+            assert len(layout) == 24
+
+    ak.transform(visitor, layout, trim=False)
+    assert visitor_was_called
