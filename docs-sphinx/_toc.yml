@@ -47,8 +47,6 @@ subtrees:
                         title: "Arrays of missing data"
                       - file: user-guide/how-to-create-strings
                         title: "Arrays of strings"
-                      - file: user-guide/how-to-create-lazy
-                        title: "Lazy arrays [todo]"
                       - file: user-guide/how-to-create-unflatten-group
                         title: "Unflattening and grouping [todo]"
                       - file: user-guide/how-to-create-arraybuilder
