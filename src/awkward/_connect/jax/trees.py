@@ -7,7 +7,7 @@ from awkward import contents, highlevel, nplikes, record
 numpy = nplikes.Numpy.instance()
 
 
-def find_numpyarray_nodes(
+def find_all_buffers(
     layout: contents.Content | record.Record,
 ) -> list[numpy.ndarray]:
 
@@ -22,7 +22,7 @@ def find_numpyarray_nodes(
     return data_ptrs
 
 
-def replace_numpyarray_nodes(
+def replace_all_buffers(
     layout: contents.Content | record.Record, buffers: list[numpy.ndarray]
 ):
     def replace_numpyarray_nodes(node, **kwargs):
