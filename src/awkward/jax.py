@@ -6,8 +6,6 @@ from typing import Any
 import awkward as ak
 from awkward import highlevel, nplikes
 
-_is_registered = False
-
 numpy = nplikes.Numpy()
 
 
@@ -25,6 +23,9 @@ def jax_unflatten_highlevel(
     import awkward._connect.jax as jax_connect
 
     return jax_connect.jax_unflatten_highlevel(aux_data, children)
+
+
+_is_registered = False
 
 
 def register():
@@ -79,7 +80,7 @@ def import_jax() -> types.ModuleType:
     except ModuleNotFoundError:
         raise ak._errors.wrap_error(
             ModuleNotFoundError(
-                """install the 'numba' package with:
+                """install the 'jax' package with:
 
         python3 -m pip install jax jaxlib
 
