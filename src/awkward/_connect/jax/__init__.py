@@ -3,7 +3,7 @@
 import awkward as ak
 
 
-def _find_numpyarray_nodes(layout):
+def find_numpyarray_nodes(layout):
 
     data_ptrs = []
 
@@ -16,7 +16,7 @@ def _find_numpyarray_nodes(layout):
     return data_ptrs
 
 
-def _replace_numpyarray_nodes(layout, buffers):
+def replace_numpyarray_nodes(layout, buffers):
     def replace_numpyarray_nodes(node, **kwargs):
         if isinstance(node, ak.contents.NumpyArray):
             buffer = buffers[0]

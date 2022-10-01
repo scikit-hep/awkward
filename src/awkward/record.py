@@ -260,9 +260,9 @@ class Record:
             return None
 
     def _jax_flatten(self):
-        from awkward._connect.jax import AuxData, _find_numpyarray_nodes
+        from awkward._connect.jax import AuxData, find_numpyarray_nodes
 
-        numpyarray_nodes = _find_numpyarray_nodes(self)
+        numpyarray_nodes = find_numpyarray_nodes(self)
         return (numpyarray_nodes, AuxData(self))
 
     @classmethod
@@ -272,6 +272,6 @@ class Record:
 
     @classmethod
     def jax_unflatten(cls, aux_data, children):
-        from awkward._connect.jax import _replace_numpyarray_nodes
+        from awkward._connect.jax import replace_numpyarray_nodes
 
-        return ak._util.wrap(_replace_numpyarray_nodes(aux_data.layout, list(children)))
+        return ak._util.wrap(replace_numpyarray_nodes(aux_data.layout, list(children)))
