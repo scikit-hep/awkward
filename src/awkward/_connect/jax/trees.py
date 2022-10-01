@@ -40,12 +40,19 @@ def replace_numpyarray_nodes(
 
 
 class AuxData:
-    def __init__(self, layout: contents.Content | record.Record, behavior=None):
+    def __init__(
+        self, layout: contents.Content | record.Record, behavior: dict | None = None
+    ):
         self._layout = layout
+        self._behavior = behavior
 
     @property
     def layout(self) -> contents.Content | record.Record:
         return self._layout
+
+    @property
+    def behavior(self) -> dict | None:
+        return self._behavior
 
     def __eq__(self, other: AuxData) -> bool:
         return self.layout.layout_equal(
@@ -62,4 +69,6 @@ def jax_flatten_highlevel(
 def jax_unflatten_highlevel(
     aux_data: AuxData, children: list[numpy.ndarray]
 ) -> highlevel.Array | highlevel.Record:
-    return ak._util.wrap(aux_data.layout.jax_unflatten(aux_data, children))
+    return ak._util.wrap(
+        aux_data.layout.jax_unflatten(aux_data, children), behavior=aux_data.behavior
+    )
