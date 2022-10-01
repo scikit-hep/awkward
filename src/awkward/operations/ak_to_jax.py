@@ -21,5 +21,4 @@ def to_jax(array):
         "ak.to_jax",
         dict(array=array),
     ):
-        jax_numpy = jax.import_jax().numpy
-        return _util.to_arraylib(jax_numpy, array, True)
+        return _util.to_arraylib(jax.import_jax().numpy, array, True)

@@ -4,7 +4,7 @@ import types
 from typing import Any
 
 import awkward as ak
-from awkward import highlevel, nplikes
+from awkward import _errors, highlevel, nplikes
 
 numpy = nplikes.Numpy()
 
@@ -28,51 +28,9 @@ def jax_unflatten_highlevel(
 _is_registered = False
 
 
-def register():
+def register_and_check():
     """
     Register Awkward Array node types with Jax's tree mechanism.
-    """
-    # Let's only do this once
-    global _is_registered
-    if _is_registered:
-        return
-    _is_registered = True
-
-    import jax
-
-    import awkward._connect.jax as jax_connect
-
-    for cls in [
-        ak.contents.BitMaskedArray,
-        ak.contents.ByteMaskedArray,
-        ak.contents.EmptyArray,
-        ak.contents.IndexedArray,
-        ak.contents.IndexedOptionArray,
-        ak.contents.NumpyArray,
-        ak.contents.ListArray,
-        ak.contents.ListOffsetArray,
-        ak.contents.RecordArray,
-        ak.contents.UnionArray,
-        ak.contents.UnmaskedArray,
-        ak.record.Record,
-    ]:
-        jax.tree_util.register_pytree_node(
-            cls,
-            cls.jax_flatten,
-            cls.jax_unflatten,
-        )
-
-    for cls in [ak.highlevel.Array, ak.highlevel.Record]:
-        jax.tree_util.register_pytree_node(
-            cls,
-            jax_connect.jax_flatten_highlevel,
-            jax_connect.jax_unflatten_highlevel,
-        )
-
-
-def import_jax() -> types.ModuleType:
-    """
-    Import jax and return the module, or raise a helpful error message if it is not available.
     """
     try:
         import jax
@@ -91,5 +49,63 @@ def import_jax() -> types.ModuleType:
             )
         ) from None
 
-    register()
+    _register(jax)
+
+
+def _register(jax: types.ModuleType):
+    """
+    Register Awkward Array node types with Jax's tree mechanism.
+    """
+
+    # Let's only do this once
+    global _is_registered
+    if _is_registered:
+        return
+
+    try:
+        import awkward._connect.jax as jax_connect
+
+        for cls in [
+            ak.contents.BitMaskedArray,
+            ak.contents.ByteMaskedArray,
+            ak.contents.EmptyArray,
+            ak.contents.IndexedArray,
+            ak.contents.IndexedOptionArray,
+            ak.contents.NumpyArray,
+            ak.contents.ListArray,
+            ak.contents.ListOffsetArray,
+            ak.contents.RecordArray,
+            ak.contents.UnionArray,
+            ak.contents.UnmaskedArray,
+            ak.record.Record,
+        ]:
+            jax.tree_util.register_pytree_node(
+                cls,
+                cls.jax_flatten,
+                cls.jax_unflatten,
+            )
+
+        for cls in [ak.highlevel.Array, ak.highlevel.Record]:
+            jax.tree_util.register_pytree_node(
+                cls,
+                jax_connect.jax_flatten_highlevel,
+                jax_connect.jax_unflatten_highlevel,
+            )
+    finally:
+        _is_registered = True
+
+
+def assert_registered():
+    """Ensure that Jax integration is registered. Raise a RuntimeError if not."""
+    if not _is_registered:
+        raise _errors.wrap_error(
+            RuntimeError("Jax features require `ak.jax.register()`")
+        )
+
+
+def import_jax():
+    """Ensure that Jax integration is registered, and return the Jax module. Raise a RuntimeError if not."""
+    assert_registered()
+    import jax
+
     return jax

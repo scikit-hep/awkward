@@ -36,5 +36,5 @@ def from_jax(array, regulararray=False, highlevel=True, behavior=None):
             behavior=behavior,
         ),
     ):
-        jax.register()
+        jax.assert_registered()
         return _util.from_arraylib(array, regulararray, False, highlevel, behavior)
