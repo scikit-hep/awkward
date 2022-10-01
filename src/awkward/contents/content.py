@@ -1545,9 +1545,12 @@ class Content:
 
     def jax_flatten(self):
         from awkward._connect.jax import AuxData, find_all_buffers, replace_all_buffers
+        from awkward.nplikes import Jax
+
+        jax = Jax.instance()
 
         buffers = find_all_buffers(self)
-        empty_buffers = [numpy.empty(len(n), n.dtype) for n in buffers]
+        empty_buffers = [jax.empty(len(n), n.dtype) for n in buffers]
         this = replace_all_buffers(self, empty_buffers)
         return buffers, AuxData(this)
 
