@@ -8,26 +8,26 @@ _has_checked_version = False
 def register_and_check():
     global _has_checked_version
 
-    if not _has_checked_version:
-        try:
-            import numba
-        except ImportError as err:
-            raise ImportError(
-                """install the 'numba' package with:
+    try:
+        import numba
+    except ImportError as err:
+        raise ImportError(
+            """install the 'numba' package with:
 
-    pip install numba --upgrade
+pip install numba --upgrade
 
 or
 
-    conda install numba"""
-            ) from err
+conda install numba"""
+        ) from err
 
-        _has_checked_version = True
+    if not _has_checked_version:
         if ak._util.parse_version(numba.__version__) < ak._util.parse_version("0.50"):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
                 "(you have version {})".format(numba.__version__)
             )
+        _has_checked_version = True
 
     _register(numba)
 
