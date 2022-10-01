@@ -255,6 +255,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         if check_valid:
             ak.operations.validity_error(self, exception=True)
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        ak.jax.maybe_register_behavior_class(cls)
+
     @property
     def layout(self):
         """
@@ -1519,6 +1524,11 @@ class Record(NDArrayOperatorsMixin):
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        ak.jax.maybe_register_behavior_class(cls)
 
     @property
     def layout(self):
