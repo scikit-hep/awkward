@@ -1550,6 +1550,9 @@ class Content:
         jax = Jax.instance()
 
         buffers = find_all_buffers(self)
+        # Drop the references to the existing buffers by replacing them with empty buffers
+        # This works-around the fact that AuxData should probably contain only a form and length,
+        # rather than the actual layout (which holds references to the buffers that we're returning)
         empty_buffers = [jax.empty(len(n), n.dtype) for n in buffers]
         this = replace_all_buffers(self, empty_buffers)
         return buffers, AuxData(this)
