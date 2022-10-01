@@ -29,12 +29,14 @@ conda install numba"""
             )
         _has_checked_version = True
 
-    _register(numba)
+    _register()
 
 
-def _register(numba):
+def _register():
     if hasattr(ak.numba, "ArrayViewType"):
         return
+
+    import numba
 
     import awkward._connect.numba.arrayview
     import awkward._connect.numba.builder
