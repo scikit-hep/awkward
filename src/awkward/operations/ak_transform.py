@@ -19,6 +19,7 @@ def transform(
     numpy_to_regular=False,
     regular_to_jagged=False,
     return_array=True,
+    trim=True,
     highlevel=True,
     behavior=None,
 ):
@@ -59,6 +60,8 @@ def transform(
             calling `transformation`.
         regular_to_jagged (bool): If True, regular-type lists are converted into
             variable-length lists before calling `transformation`.
+        trim (bool): If True, trim content nodes to the length of their parents.
+            Otherwise, operate upon the raw #ak.contents.Content objects.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if

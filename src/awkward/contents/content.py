@@ -1356,6 +1356,7 @@ class Content:
         numpy_to_regular=True,
         return_array=True,
         function_name=None,
+        trim=True,
     ):
         return self._recursively_apply(
             action,
@@ -1369,6 +1370,7 @@ class Content:
                 "numpy_to_regular": numpy_to_regular,
                 "return_array": return_array,
                 "function_name": function_name,
+                "trim": trim,
             },
         )
 

@@ -2045,7 +2045,7 @@ class ListOffsetArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._nplike.known_shape and self._nplike.known_data:
+        if self._nplike.known_shape and self._nplike.known_data and options["trim"]:
             offsetsmin = self._offsets[0]
             offsets = ak.index.Index(
                 self._offsets.data - offsetsmin, nplike=self._nplike

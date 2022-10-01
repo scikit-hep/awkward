@@ -956,7 +956,7 @@ class RecordArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._nplike.known_shape:
+        if self._nplike.known_shape and options["trim"]:
             contents = [x[: self._length] for x in self._contents]
         else:
             contents = self._contents

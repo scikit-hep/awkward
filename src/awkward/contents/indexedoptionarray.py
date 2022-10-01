@@ -1619,6 +1619,7 @@ class IndexedOptionArray(Content):
             self._nplike.known_shape
             and self._nplike.known_data
             and self._index.length != 0
+            and options["trim"]
         ):
             npindex = self._index.data
             npselect = npindex >= 0

@@ -233,6 +233,9 @@ class NumpyArray(Content):
         start, stop, step = where.indices(self.length)
         assert step == 1
 
+        # if start == 0 and stop == self.length and step == 1:
+        #     return self
+
         try:
             out = self._data[where]
         except IndexError as err:

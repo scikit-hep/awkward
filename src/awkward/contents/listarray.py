@@ -1412,6 +1412,7 @@ class ListArray(Content):
             self._nplike.known_shape
             and self._nplike.known_data
             and self._starts.length != 0
+            and options["trim"]
         ):
             startsmin = self._starts.data.min()
             starts = ak.index.Index(self._starts.data - startsmin, nplike=self._nplike)

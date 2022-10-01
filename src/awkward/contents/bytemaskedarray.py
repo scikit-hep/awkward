@@ -1020,7 +1020,7 @@ class ByteMaskedArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._nplike.known_shape:
+        if self._nplike.known_shape and options["trim"]:
             content = self._content[0 : self._mask.length]
         else:
             content = self._content

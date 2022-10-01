@@ -1186,7 +1186,7 @@ class RegularArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._nplike.known_shape:
+        if self._nplike.known_shape and options["trim"]:
             content = self._content[: self._length * self._size]
         else:
             content = self._content
