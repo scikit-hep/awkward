@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import types
+import weakref
 from typing import TypeVar
 
 import awkward as ak
@@ -60,6 +61,23 @@ def register_behavior_class(cls: HighLevelType) -> HighLevelType:
     return cls
 
 
+_known_highlevel_classes = weakref.WeakSet([highlevel.Array, highlevel.Record])
+
+
+def maybe_register_behavior_class(cls: HighLevelType):
+    """
+    Args:
+        cls: behavior class to register with Jax
+
+    Register the behavior class with Jax, if Jax integration is enabled. Otherwise,
+    queue the type for subsequent registration when/if Jax is registered.
+    """
+    if _is_registered:
+        register_behavior_class(cls)
+    else:
+        _known_highlevel_classes.add(cls)
+
+
 def _register(jax: types.ModuleType):
     """
     Register Awkward Array node types with Jax's tree mechanism.
@@ -93,7 +111,7 @@ def _register(jax: types.ModuleType):
                 cls.jax_unflatten,
             )
 
-        for cls in [ak.highlevel.Array, ak.highlevel.Record]:
+        for cls in _known_highlevel_classes:
             jax.tree_util.register_pytree_node(
                 cls,
                 jax_connect.jax_flatten_highlevel,
