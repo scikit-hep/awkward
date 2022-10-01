@@ -1544,18 +1544,18 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def jax_flatten(self):
-        from awkward._connect.jax import AuxData, find_numpyarray_nodes
+        from awkward._connect.jax import AuxData, find_all_buffers, replace_all_buffers
 
-        layout = ak.operations.to_layout(self, allow_record=True, allow_other=False)
-
-        numpyarray_nodes = find_numpyarray_nodes(layout)
-        return (numpyarray_nodes, AuxData(layout))
+        buffers = find_all_buffers(self)
+        empty_buffers = [numpy.empty(len(n), n.dtype) for n in buffers]
+        this = replace_all_buffers(self, empty_buffers)
+        return buffers, AuxData(this)
 
     @classmethod
     def jax_unflatten(cls, aux_data, children):
-        from awkward._connect.jax import replace_numpyarray_nodes
+        from awkward._connect.jax import replace_all_buffers
 
-        return replace_numpyarray_nodes(aux_data.layout, list(children))
+        return replace_all_buffers(aux_data.layout, list(children))
 
     def layout_equal(self, other, index_dtype=True, numpyarray=True):
         return (
