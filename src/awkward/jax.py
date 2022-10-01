@@ -39,7 +39,7 @@ def register_and_check():
 T = TypeVar("T", bound="type[highlevel.Array | highlevel.Record]")
 
 
-def register_behavior_class(cls: T) -> T:
+def behavior_class(cls: T) -> T:
     """
     Args:
         cls: behavior class to register with Jax
