@@ -36,10 +36,12 @@ def register_and_check():
     _register(jax)
 
 
-T = TypeVar("T", bound="type[highlevel.Array | highlevel.Record]")
+HighLevelType = TypeVar(
+    "HighLevelType", bound="type[highlevel.Array | highlevel.Record]"
+)
 
 
-def behavior_class(cls: T) -> T:
+def register_behavior_class(cls: HighLevelType) -> HighLevelType:
     """
     Args:
         cls: behavior class to register with Jax
@@ -47,7 +49,7 @@ def behavior_class(cls: T) -> T:
     Return the behavior class, after registering it with Jax.
 
     """
-    jax = assert_registered()
+    jax = import_jax()
     import awkward._connect.jax as jax_connect
 
     jax.tree_util.register_pytree_node(
