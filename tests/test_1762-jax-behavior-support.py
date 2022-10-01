@@ -33,6 +33,19 @@ def test_behavior():
     assert jvp_grad_grad == pytest.approx(32.0)
 
 
+def test_jvp_nested_list():
+    # with jax.checking_leaks():
+    array = ak.Array(np.array([[1.0, 2.0, 3.0, 4.0, 5.0]]), backend="jax")
+    tangent = ak.Array(np.array([[0.0, 0.0, 0.0, 0.0, 1.0]]), backend="jax")
+
+    def func(x):
+        return x[::-1] ** 2
+
+    value_jvp, jvp_grad = jax.jvp(func, (array,), (tangent,))
+    assert value_jvp.to_list() == [[1.0, 4.0, 9.0, 16.0, 25.0]]
+    assert jvp_grad.to_list() == [[0.0, 0.0, 0.0, 0.0, 10.0]]
+
+
 def test_recursively_apply_trim():
     numpy = ak.nplikes.Numpy.instance()
 
