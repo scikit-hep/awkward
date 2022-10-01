@@ -782,8 +782,7 @@ class Jax(NumpyLike):
         return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
-        import jax.numpy
-
+        jax = ak.jax.import_jax()
         self._module = jax.numpy
 
     @property

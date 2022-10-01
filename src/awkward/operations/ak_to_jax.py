@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import awkward as ak
-from awkward.jax import import_jax
+from awkward import _errors, _util, jax
 
 
 def to_jax(array):
@@ -18,9 +17,8 @@ def to_jax(array):
 
     See also #ak.from_jax and #ak.to_numpy.
     """
-    with ak._errors.OperationErrorContext(
+    with _errors.OperationErrorContext(
         "ak.to_jax",
         dict(array=array),
     ):
-        jax = import_jax().numpy
-        return ak._util.to_arraylib(jax, array, True)
+        return _util.to_arraylib(jax.import_jax().numpy, array, True)
