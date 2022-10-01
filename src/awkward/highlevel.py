@@ -1436,19 +1436,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 return True
         return False
 
-    def _jax_flatten_layout(self):
-        return self._layout._jax_flatten()
-
-    @classmethod
-    def _jax_flatten(cls, array):
-        assert type(array) is cls
-        return array._jax_flatten_layout()
-
-    @classmethod
-    def _jax_unflatten(cls, aux_data, children):
-        layout_cls = aux_data.layout.__class__
-        return ak._util.wrap(layout_cls.jax_unflatten(aux_data, children))
-
 
 class Record(NDArrayOperatorsMixin):
     """
