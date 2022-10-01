@@ -13,11 +13,11 @@ def find_numpyarray_nodes(
 
     data_ptrs = []
 
-    def find_nparray_ptrs(node, **kwargs):
+    def action(node, **kwargs):
         if isinstance(node, ak.contents.NumpyArray):
             data_ptrs.append(node.data)
 
-    layout.recursively_apply(action=find_nparray_ptrs, return_array=False)
+    layout.recursively_apply(action=action, return_array=False)
 
     return data_ptrs
 
@@ -27,10 +27,8 @@ def replace_numpyarray_nodes(
 ):
     def replace_numpyarray_nodes(node, **kwargs):
         if isinstance(node, ak.contents.NumpyArray):
-            buffer = buffers[0]
-            buffers.pop(0)
             return ak.contents.NumpyArray(
-                buffer,
+                buffers.pop(0),
                 layout.identifier,
                 layout.parameters,
                 nplike=ak.nplikes.Jax.instance(),
