@@ -53,7 +53,7 @@ def test_recursively_apply_trim():
         elif depth == 2:
             assert len(layout) == 6
 
-    layout.recursively_apply(visitor)
+    layout.recursively_apply(visitor, trim=True)
     assert visitor_was_called
 
 
@@ -78,6 +78,30 @@ def test_recursively_apply_no_trim():
             assert len(layout) == 24
 
     layout.recursively_apply(visitor, trim=False)
+    assert visitor_was_called
+
+
+def test_ak_transform_trim():
+    numpy = ak.nplikes.Numpy.instance()
+
+    layout = ak.contents.ListOffsetArray(
+        ak.index.Index(numpy.array([0, 3, 6], dtype=np.int64)),
+        ak.contents.NumpyArray(numpy.arange(24)),
+    )
+
+    # Test trimmed
+    visitor_was_called = False
+
+    def visitor(layout, depth, **kwargs):
+        nonlocal visitor_was_called
+        visitor_was_called = True
+
+        if depth == 1:
+            assert len(layout) == 2
+        elif depth == 2:
+            assert len(layout) == 6
+
+    ak.transform(visitor, layout, trim=True)
     assert visitor_was_called
 
 
