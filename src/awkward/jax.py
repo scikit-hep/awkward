@@ -1,10 +1,30 @@
 from __future__ import annotations
 
 import types
+from typing import Any
 
 import awkward as ak
+from awkward import highlevel, nplikes
 
 _is_registered = False
+
+numpy = nplikes.Numpy()
+
+
+def jax_flatten_highlevel(
+    array: highlevel.Array | highlevel.Record,
+) -> tuple[list[numpy.ndarray], Any]:
+    import awkward._connect.jax as jax_connect
+
+    return jax_connect.jax_flatten_highlevel(array)
+
+
+def jax_unflatten_highlevel(
+    aux_data: Any, children: list[numpy.ndarray]
+) -> highlevel.Array | highlevel.Record:
+    import awkward._connect.jax as jax_connect
+
+    return jax_connect.jax_unflatten_highlevel(aux_data, children)
 
 
 def register():
@@ -15,8 +35,11 @@ def register():
     global _is_registered
     if _is_registered:
         return
+    _is_registered = True
 
     import jax
+
+    import awkward._connect.jax as jax_connect
 
     for cls in [
         ak.contents.BitMaskedArray,
@@ -41,10 +64,9 @@ def register():
     for cls in [ak.highlevel.Array, ak.highlevel.Record]:
         jax.tree_util.register_pytree_node(
             cls,
-            cls._jax_flatten,
-            cls._jax_unflatten,
+            jax_connect.jax_flatten_highlevel,
+            jax_connect.jax_unflatten_highlevel,
         )
-    _is_registered = True
 
 
 def import_jax() -> types.ModuleType:
