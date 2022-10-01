@@ -1,37 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import jax
+
 import awkward as ak
-from awkward.jax import import_jax
+from awkward._reducers import Reducer
 
 np = ak.nplikes.NumpyMetadata.instance()
-
-
-class Reducer:
-    needs_position = False
-    jax = import_jax()
-
-    @classmethod
-    def return_dtype(cls, given_dtype):
-        if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
-            return np.int32 if ak._util.win or ak._util.bits32 else np.int64
-
-        if given_dtype in (np.uint8, np.uint16, np.uint32):
-            return np.uint32 if ak._util.win or ak._util.bits32 else np.uint64
-
-        return given_dtype
-
-    @classmethod
-    def maybe_double_length(cls, type, length):
-        return 2 * length if type in (np.complex128, np.complex64) else length
-
-    @classmethod
-    def maybe_other_type(cls, dtype):
-        type = np.int64 if dtype.kind.upper() == "M" else dtype.type
-        if dtype == np.complex128:
-            type = np.float64
-        if dtype == np.complex64:
-            type = np.float32
-        return type
 
 
 class ArgMin(Reducer):
@@ -101,7 +75,7 @@ class Sum(Reducer):
                 ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
             )
 
-        result = cls.jax.ops.segment_sum(array.data, parents.data)
+        result = jax.ops.segment_sum(array.data, parents.data)
 
         if array.dtype.kind == "m":
             return ak.contents.NumpyArray(array.nplike.asarray(result, array.dtype))
@@ -119,8 +93,8 @@ class Prod(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         # See issue https://github.com/google/jax/issues/9296
-        result = cls.jax.numpy.exp(
-            cls.jax.ops.segment_sum(cls.jax.numpy.log(array.data), parents.data)
+        result = jax.numpy.exp(
+            jax.ops.segment_sum(jax.numpy.log(array.data), parents.data)
         )
 
         if array.dtype.type in (np.complex128, np.complex64):
@@ -140,8 +114,8 @@ class Any(Reducer):
     @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
-        result = cls.jax.ops.segment_max(array.data, parents.data)
-        result = cls.jax.numpy.asarray(result, dtype=bool)
+        result = jax.ops.segment_max(array.data, parents.data)
+        result = jax.numpy.asarray(result, dtype=bool)
 
         return ak.contents.NumpyArray(result, nplike=array.nplike)
 
@@ -157,8 +131,8 @@ class All(Reducer):
     @classmethod
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
-        result = cls.jax.ops.segment_min(array.data, parents.data)
-        result = cls.jax.numpy.asarray(result, dtype=bool)
+        result = jax.ops.segment_min(array.data, parents.data)
+        result = jax.numpy.asarray(result, dtype=bool)
 
         return ak.contents.NumpyArray(result, nplike=array.nplike)
 
@@ -197,10 +171,8 @@ class Min(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
 
-        result = cls.jax.ops.segment_min(array.data, parents.data)
-        result = cls.jax.numpy.minimum(
-            result, cls._min_initial(cls.initial, array.dtype)
-        )
+        result = jax.ops.segment_min(array.data, parents.data)
+        result = jax.numpy.minimum(result, cls._min_initial(cls.initial, array.dtype))
 
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
@@ -245,11 +217,9 @@ class Max(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
 
-        result = cls.jax.ops.segment_max(array.data, parents.data)
+        result = jax.ops.segment_max(array.data, parents.data)
 
-        result = cls.jax.numpy.maximum(
-            result, cls._max_initial(cls.initial, array.dtype)
-        )
+        result = jax.numpy.maximum(result, cls._max_initial(cls.initial, array.dtype))
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
                 array.nplike.array(result.view(array.dtype), array.dtype),
@@ -257,3 +227,10 @@ class Max(Reducer):
             )
         else:
             return ak.contents.NumpyArray(result, nplike=array.nplike)
+
+
+def get_jax_reducer(reducer: Reducer) -> Reducer:
+    if isinstance(reducer, type):
+        return globals()[reducer.__name__]
+    else:
+        return globals()[type(reducer).__name__]
