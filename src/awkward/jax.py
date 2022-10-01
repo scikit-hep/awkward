@@ -1,28 +1,12 @@
 from __future__ import annotations
 
 import types
-from typing import Any
+from typing import TypeVar
 
 import awkward as ak
-from awkward import _errors, highlevel, nplikes
+from awkward import _errors, nplikes
 
 numpy = nplikes.Numpy()
-
-
-def jax_flatten_highlevel(
-    array: highlevel.Array | highlevel.Record,
-) -> tuple[list[numpy.ndarray], Any]:
-    import awkward._connect.jax as jax_connect
-
-    return jax_connect.jax_flatten_highlevel(array)
-
-
-def jax_unflatten_highlevel(
-    aux_data: Any, children: list[numpy.ndarray]
-) -> highlevel.Array | highlevel.Record:
-    import awkward._connect.jax as jax_connect
-
-    return jax_connect.jax_unflatten_highlevel(aux_data, children)
 
 
 _is_registered = False
@@ -50,6 +34,28 @@ def register_and_check():
         ) from None
 
     _register(jax)
+
+
+T = TypeVar("T", bound="type[ak.Array | ak.Record]")
+
+
+def register_behavior_class(cls: T) -> T:
+    """
+    Args:
+        cls: behavior class to register with Jax
+
+    Return the behavior class, after registering it with Jax.
+
+    """
+    jax = assert_registered()
+    import awkward._connect.jax as jax_connect
+
+    jax.tree_util.register_pytree_node(
+        cls,
+        jax_connect.jax_flatten_highlevel,
+        jax_connect.jax_unflatten_highlevel,
+    )
+    return cls
 
 
 def _register(jax: types.ModuleType):
