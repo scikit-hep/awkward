@@ -8,7 +8,7 @@ import awkward as ak
 _has_checked_version = False
 
 
-def import_numexpr():
+def _import_numexpr():
     global _has_checked_version
     try:
         import numexpr
@@ -69,7 +69,7 @@ def getArguments(names, local_dict=None, global_dict=None):
 def evaluate(
     expression, local_dict=None, global_dict=None, order="K", casting="safe", **kwargs
 ):
-    numexpr = import_numexpr()
+    numexpr = _import_numexpr()
 
     context = numexpr.necompiler.getContext(kwargs, frame_depth=1)
     expr_key = (expression, tuple(sorted(context.items())))
@@ -118,7 +118,7 @@ evaluate.evaluate = evaluate
 
 
 def re_evaluate(local_dict=None):
-    numexpr = import_numexpr()
+    numexpr = _import_numexpr()
 
     try:
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
