@@ -5,11 +5,11 @@ import warnings
 
 import awkward as ak
 
-checked_version = False
+_has_checked_version = False
 
 
-def import_numexpr():
-    global checked_version
+def _import_numexpr():
+    global _has_checked_version
     try:
         import numexpr
     except ModuleNotFoundError as err:
@@ -25,15 +25,16 @@ or
             )
         ) from err
     else:
-        if not checked_version and ak._util.parse_version(
-            numexpr.__version__
-        ) < ak._util.parse_version("2.7.1"):
-            warnings.warn(
-                "Awkward Array is only known to work with numexpr 2.7.1 or later"
-                "(you have version {})".format(numexpr.__version__),
-                RuntimeWarning,
-            )
-        checked_version = True
+        if not _has_checked_version:
+            if ak._util.parse_version(numexpr.__version__) < ak._util.parse_version(
+                "2.7.1"
+            ):
+                warnings.warn(
+                    "Awkward Array is only known to work with numexpr 2.7.1 or later"
+                    "(you have version {})".format(numexpr.__version__),
+                    RuntimeWarning,
+                )
+            _has_checked_version = True
         return numexpr
 
 
@@ -68,7 +69,7 @@ def getArguments(names, local_dict=None, global_dict=None):
 def evaluate(
     expression, local_dict=None, global_dict=None, order="K", casting="safe", **kwargs
 ):
-    numexpr = import_numexpr()
+    numexpr = _import_numexpr()
 
     context = numexpr.necompiler.getContext(kwargs, frame_depth=1)
     expr_key = (expression, tuple(sorted(context.items())))
@@ -117,7 +118,7 @@ evaluate.evaluate = evaluate
 
 
 def re_evaluate(local_dict=None):
-    numexpr = import_numexpr()
+    numexpr = _import_numexpr()
 
     try:
         compiled_ex = numexpr.necompiler._numexpr_last["ex"]  # noqa: F841
