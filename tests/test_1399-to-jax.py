@@ -8,6 +8,8 @@ import awkward as ak  # noqa: F401
 jax = pytest.importorskip("jax")
 jax.config.update("jax_enable_x64", True)
 
+ak.jax.register_and_check()
+
 
 def test_from_jax_1():
     ak_array_1d = ak.Array(np.arange(10))
