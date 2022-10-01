@@ -400,6 +400,7 @@ def transform(
             numpy_to_regular=numpy_to_regular,
             regular_to_jagged=regular_to_jagged,
             return_array=return_array,
+            trim=trim,
             behavior=behavior,
             highlevel=highlevel,
         ),
@@ -417,6 +418,7 @@ def transform(
             numpy_to_regular,
             regular_to_jagged,
             return_array,
+            trim,
             behavior,
             highlevel,
         )
@@ -435,6 +437,7 @@ def _impl(
     numpy_to_regular,
     regular_to_jagged,
     return_array,
+    trim,
     behavior,
     highlevel,
 ):
@@ -454,6 +457,7 @@ def _impl(
         "regular_to_jagged": regular_to_jagged,
         "keep_parameters": True,
         "return_array": return_array,
+        "trim": trim,
         "function_name": "ak.transform",
         "broadcast_parameters_rule": broadcast_parameters_rule,
     }
