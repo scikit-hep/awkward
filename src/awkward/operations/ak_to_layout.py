@@ -87,7 +87,7 @@ def _impl(array, allow_record, allow_other, numpytype):
             numpytype,
         )
 
-    elif ak.nplikes.Cupy.is_own_buffer(array) and type(array).__name__ == "ndarray":
+    elif ak.nplikes.Cupy.is_own_buffer(array):
         if not issubclass(array.dtype.type, numpytype):
             raise ak._errors.wrap_error(
                 ValueError(f"dtype {array.dtype!r} not allowed")
@@ -99,7 +99,7 @@ def _impl(array, allow_record, allow_other, numpytype):
             numpytype,
         )
 
-    elif ak.nplikes.Jax.is_own_buffer(array) and type(array).__name__ == "DeviceArray":
+    elif ak.nplikes.Jax.is_own_buffer(array):
         if not issubclass(array.dtype.type, numpytype):
             raise ak._errors.wrap_error(
                 ValueError(f"dtype {array.dtype!r} not allowed")

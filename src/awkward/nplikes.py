@@ -893,6 +893,17 @@ class Jax(NumpyLike):
         Return `True` if the given object is a jax buffer, otherwise `False`.
 
         """
+        return cls.is_array(obj) or cls.is_tracer(obj)
+
+    @classmethod
+    def is_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a jax buffer, otherwise `False`.
+
+        """
         module, _, suffix = type(obj).__module__.partition(".")
         return module == "jaxlib"
 
@@ -909,11 +920,15 @@ class Jax(NumpyLike):
         return module == "jax"
 
 
-def nplike_of(*arrays, default_cls=Numpy):
+# Temporary sentinel marking "argument not given"
+_UNSET = object()
+
+
+def nplike_of(*arrays, default=_UNSET):
     """
     Args:
         *arrays: iterable of possible array objects
-        default_cls: default NumpyLike class if no array objects found
+        default: default NumpyLike instance if no array objects found
 
     Return the #ak.nplikes.NumpyLike that is best-suited to operating upon the given
     iterable of arrays. Return an instance of the `default_cls` if no known array types
@@ -936,7 +951,10 @@ def nplike_of(*arrays, default_cls=Numpy):
         return ak._typetracer.TypeTracer.instance()
 
     if nplikes == set():
-        return default_cls.instance()
+        if default is _UNSET:
+            return Numpy.instance()
+        else:
+            return default
     elif len(nplikes) == 1:
         return next(iter(nplikes))
     else:
