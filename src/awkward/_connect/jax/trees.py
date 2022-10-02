@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Union
 
 import awkward as ak
 from awkward import _errors, contents, highlevel, nplikes, record
@@ -42,7 +42,7 @@ def replace_all_buffers(
 
 
 T = TypeVar(
-    "T", bound=highlevel.Array | highlevel.Record | contents.Content | record.Record
+    "T", bound=Union[highlevel.Array, highlevel.Record, contents.Content, record.Record]
 )
 
 
