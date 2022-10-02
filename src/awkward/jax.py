@@ -125,7 +125,7 @@ def assert_registered():
     """Ensure that Jax integration is registered. Raise a RuntimeError if not."""
     if not _is_registered:
         raise _errors.wrap_error(
-            RuntimeError("Jax features require `ak.jax.register()`")
+            RuntimeError("Jax features require `ak.jax.register_and_check()`")
         )
 
 
