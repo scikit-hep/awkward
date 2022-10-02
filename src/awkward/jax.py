@@ -55,8 +55,8 @@ def register_behavior_class(cls: HighLevelType) -> HighLevelType:
 
     jax.tree_util.register_pytree_node(
         cls,
-        jax_connect.jax_flatten_highlevel,
-        jax_connect.jax_unflatten_highlevel,
+        jax_connect.jax_flatten,
+        jax_connect.jax_unflatten,
     )
     return cls
 
@@ -107,15 +107,15 @@ def _register(jax: types.ModuleType):
         ]:
             jax.tree_util.register_pytree_node(
                 cls,
-                cls.jax_flatten,
-                cls.jax_unflatten,
+                jax_connect.jax_flatten,
+                jax_connect.jax_unflatten,
             )
 
         for cls in _known_highlevel_classes:
             jax.tree_util.register_pytree_node(
                 cls,
-                jax_connect.jax_flatten_highlevel,
-                jax_connect.jax_unflatten_highlevel,
+                jax_connect.jax_flatten,
+                jax_connect.jax_unflatten,
             )
     finally:
         _is_registered = True

@@ -1541,26 +1541,6 @@ class Content:
     def __deepcopy__(self, memo):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def jax_flatten(self):
-        from awkward._connect.jax import AuxData, find_all_buffers, replace_all_buffers
-        from awkward.nplikes import Jax
-
-        jax = Jax.instance()
-
-        buffers = find_all_buffers(self)
-        # Drop the references to the existing buffers by replacing them with empty buffers
-        # This works-around the fact that AuxData should probably contain only a form and length,
-        # rather than the actual layout (which holds references to the buffers that we're returning)
-        empty_buffers = [jax.empty(len(n), n.dtype) for n in buffers]
-        this = replace_all_buffers(self, empty_buffers)
-        return buffers, AuxData(this)
-
-    @classmethod
-    def jax_unflatten(cls, aux_data, children):
-        from awkward._connect.jax import replace_all_buffers
-
-        return replace_all_buffers(aux_data.layout, list(children))
-
     def layout_equal(self, other, index_dtype=True, numpyarray=True):
         return (
             self.__class__ is other.__class__
