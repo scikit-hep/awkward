@@ -132,5 +132,5 @@ def _impl(array, container, buffer_key, form_key, id_start, nplike):
         buffer_key=buffer_key,
         form_key=form_key,
         id_start=id_start,
-        nplike=numpy,
+        nplike=nplike,
     )
