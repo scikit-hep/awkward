@@ -615,6 +615,11 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
     numpy = ak.nplikes.Numpy.instance()
 
     def recurse(array, mask=None):
+        if ak.nplikes.Jax.is_tracer(array):
+            raise ak._errors.wrap_error(
+                TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
+            )
+
         if regulararray and len(array.shape) > 1:
             return ak.contents.RegularArray(
                 recurse(array.reshape((-1,) + array.shape[2:])),
