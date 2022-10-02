@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Generic, TypeVar
 
 import awkward as ak
-from awkward import contents, highlevel, nplikes, record
+from awkward import _errors, contents, highlevel, nplikes, record
 
 numpy = nplikes.Numpy.instance()
 
@@ -61,7 +61,14 @@ class AuxData(Generic[T]):
     def from_array_or_layout(cls, obj: T):
         from awkward.nplikes import Numpy
 
-        layout = ak.to_layout(obj)
+        is_highlevel = isinstance(obj, (highlevel.Array, highlevel.Record))
+        if is_highlevel:
+            layout = obj.layout
+        elif isinstance(obj, (contents.Content, record.Record)):
+            layout = obj
+        else:
+            raise _errors.wrap_error(TypeError)
+
         buffers = find_all_buffers(layout)
         # Drop the references to the existing buffers by replacing them with empty buffers
         # This works-around the fact that AuxData should probably contain only a form and length,
@@ -71,7 +78,7 @@ class AuxData(Generic[T]):
         placeholder_buffers = [numpy.empty(len(n), n.dtype) for n in buffers]
         return buffers, AuxData(
             layout=replace_all_buffers(layout, placeholder_buffers),
-            is_highlevel=isinstance(obj, (ak.Array, ak.Record)),
+            is_highlevel=is_highlevel,
             behavior=ak._util.behavior_of(obj),
         )
 
@@ -102,7 +109,8 @@ class AuxData(Generic[T]):
 def jax_flatten(
     array: T,
 ) -> tuple[list[numpy.ndarray], AuxData]:
-    return AuxData.from_array_or_layout(array)
+    result = AuxData.from_array_or_layout(array)
+    return result
 
 
 def jax_unflatten(aux_data: AuxData, children: list[numpy.ndarray]) -> T:
