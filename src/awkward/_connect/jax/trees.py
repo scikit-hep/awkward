@@ -75,6 +75,7 @@ class AuxData(Generic[T]):
         # rather than the actual layout (which holds references to the buffers that we're returning)
         # Use NumPy buffers here to ensure that we don't create any new tracers (they're just placeholders)
         numpy = Numpy.instance()
+        # FIXME: this is wasteful - we allocate unused memory.
         placeholder_buffers = [numpy.empty(len(n), n.dtype) for n in buffers]
         return buffers, AuxData(
             layout=replace_all_buffers(layout, placeholder_buffers),
