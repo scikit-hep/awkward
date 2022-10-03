@@ -59,7 +59,7 @@ class AuxData(Generic[T]):
 
     @classmethod
     def from_array_or_layout(cls, obj: T):
-        from awkward.nplikes import Numpy
+        import numpy
 
         is_highlevel = isinstance(obj, (highlevel.Array, highlevel.Record))
         if is_highlevel:
@@ -71,14 +71,22 @@ class AuxData(Generic[T]):
 
         buffers = find_all_buffers(layout)
         # Drop the references to the existing buffers by replacing them with empty buffers
-        # This works-around the fact that AuxData should probably contain only a form and length,
+        # FIXME: This works-around the fact that AuxData should probably contain only a form and length,
         # rather than the actual layout (which holds references to the buffers that we're returning)
-        # Use NumPy buffers here to ensure that we don't create any new tracers (they're just placeholders)
-        numpy = Numpy.instance()
-        # FIXME: this is wasteful - we allocate unused memory.
-        placeholder_buffers = [numpy.empty(len(n), n.dtype) for n in buffers]
+        # We use NumPy buffers here to ensure that we don't create any new tracers (they're just placeholders)
+        # We should use `to_buffers`.
+
+        def create_placeholder_like(array) -> numpy.ndarray:
+            data = numpy.empty(1, dtype=array.dtype)
+            strides = tuple([0 for _ in array.shape])
+            return numpy.lib.stride_tricks.as_strided(
+                data, array.shape, strides=strides, writeable=False
+            )
+
         return buffers, AuxData(
-            layout=replace_all_buffers(layout, placeholder_buffers),
+            layout=replace_all_buffers(
+                layout, [create_placeholder_like(n) for n in buffers]
+            ),
             is_highlevel=is_highlevel,
             behavior=ak._util.behavior_of(obj),
         )
