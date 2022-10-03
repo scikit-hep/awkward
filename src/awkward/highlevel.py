@@ -2654,7 +2654,7 @@ class ArrayBuilder(Sized):
         _name = "tuple"
 
         def __init__(self, arraybuilder, numfields):
-            super(ArrayBuilder.Tuple, self).__init__(arraybuilder)
+            super().__init__(arraybuilder)
             self._numfields = numfields
 
         def __enter__(self):
@@ -2690,7 +2690,7 @@ class ArrayBuilder(Sized):
         _name = "record"
 
         def __init__(self, arraybuilder, name):
-            super(ArrayBuilder.Record, self).__init__(arraybuilder)
+            super().__init__(arraybuilder)
             self._name = name
 
         def __enter__(self):
