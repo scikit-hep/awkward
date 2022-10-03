@@ -32,13 +32,13 @@ def replace_all_buffers(
     else:
         nplike = nplikes.nplike_of(buffers)
 
-    def replace_numpyarray_nodes(node, **kwargs):
+    def action(node, **kwargs):
         if isinstance(node, ak.contents.NumpyArray):
             return ak.contents.NumpyArray(
                 buffers.pop(0), layout.identifier, layout.parameters, nplike=nplike
             )
 
-    return layout.recursively_apply(action=replace_numpyarray_nodes)
+    return layout.recursively_apply(action=action)
 
 
 T = TypeVar(
