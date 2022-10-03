@@ -36,19 +36,33 @@ Why header-only Layout Builder?
 
 The users can directly include `LayoutBuilder.h` in their compilation, rather than linking against platform-specific libraries or worrying about native dependencies. This makes the integration of Awkward Arrays into other projects easier and more portable.
 
-The code is minimal, it does not include all of the code needed to use Awkward Arrays in Python, nor does it include references to Python or pybind11. The C++ users can use it to make arrays and then copy them to Python without any specialised data types - only raw buffers, strings, and integers.
+The code is minimal, it does not include all of the code needed to use Awkward Arrays in Python, nor does it have helper methods to pass the data through pybind11, so that different projects can use different binding generators. The C++ users can use it to make arrays and then copy them to Python without any specialised data types - only raw buffers, strings, and integers.
 
 How to use Layout Builders?
 -----------------------------
 
-The following cpp-headers which reside in this [directory](https://github.com/scikit-hep/awkward/tree/main/src/awkward/_v2/cpp-headers/awkward) are needed to use Layout Builders in an external project.
+The following cpp-headers which reside in this [directory](https://github.com/scikit-hep/awkward/tree/main/src/awkward/_v2/cpp-headers/awkward) are needed to use Layout Builders and can be included in an external project as a git submodule.
 
 1. BuilderOptions.h
 2. GrowableBuffer.h
 3. LayoutBuilder.h
 4. utils.h
 
-It is recommended to use an awkward installation (e.g. a versioned set of files with pip install) and the config options described above.
+It is recommended to use an awkward installation (e.g. a versioned set of files with pip install) and the config options described.
+
+Awkward Array can be installed from PyPI using pip:
+
+```shell
+pip install awkward
+```
+
+To get the `-I` compiler flags needed to pick up the LayoutBuilder from this installation:
+
+```shell
+python -m awkward._v2.config --cflags
+```
+
+A user would need to pass these options to the compiler in order to use it.
 
 Three phases of using Layout Builder
 ------------------------------------
@@ -194,7 +208,7 @@ builder.buffer_nbytes(names_nbytes);
 names_nbytes
 ```
 
-Allocate the buffers map using the user-given pointers and same names/sizes as above, and fill the data in the pointers by calling `to_buffers()` method.
+Next, allocate the memory for these buffers using the user-given pointers and the same names/sizes as above. Then, let the LayoutBuilder fill these buffers with `to_buffers()` method.
 
 ```{code-cell}
 std::map<std::string, void*> buffers = {};
@@ -251,6 +265,13 @@ The is the Awkward Form generated for this example.
 ```{code-cell}
 display::JSON(builder.form())
 ```
+
+Passing from C++ to Python
+--------------------------
+
+We want NumPy to own the array buffers, so that they get deleted when the Awkward Array goes out of Python scope, not when the LayoutBuilder goes out of C++ scope. For the hand-off, you can allocate memory for those buffers in Python, presumably with `np.empty(nbytes, dtype=np.uint8)` and get void* pointers to these buffers by casting the output of `numpy_array.ctypes.data` (pointer as integer).
+
+Now you can pass everything over the border from C++ to Python using pybind11's `py::buffer_protocol` for the buffers, as well as an integer for the length and a string for the Form.
 
 More Examples
 -------------
