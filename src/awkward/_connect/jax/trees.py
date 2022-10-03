@@ -27,10 +27,7 @@ def find_all_buffers(
 def replace_all_buffers(
     layout: contents.Content | record.Record, buffers: list[numpy.ndarray]
 ):
-    if any(nplikes.Jax.is_own_buffer(b) for b in buffers):
-        nplike = nplikes.Jax.instance()
-    else:
-        nplike = nplikes.nplike_of(buffers)
+    nplike = nplikes.nplike_of(*buffers)
 
     def action(node, **kwargs):
         if isinstance(node, ak.contents.NumpyArray):
