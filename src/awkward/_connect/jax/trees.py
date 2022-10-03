@@ -75,7 +75,7 @@ class AuxData(Generic[T]):
 
         def create_placeholder_like(array) -> numpy.ndarray:
             data = numpy.empty(1, dtype=array.dtype)
-            strides = tuple([0 for _ in array.shape])
+            strides = tuple(0 for _ in array.shape)
             return numpy.lib.stride_tricks.as_strided(
                 data, array.shape, strides=strides, writeable=False
             )
