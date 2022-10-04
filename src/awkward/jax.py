@@ -107,9 +107,9 @@ def _register():
 
             for cls in _known_highlevel_classes:
                 jax_connect.register_pytree_class(cls)
-
         except Exception:
             _registration_state = _RegistrationState.FAILED
+            raise
         else:
             _registration_state = _RegistrationState.SUCCESS
 
