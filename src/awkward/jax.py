@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import enum
 import threading
-import types
 import weakref
 from typing import TypeVar
 
@@ -31,7 +30,7 @@ def register_and_check():
     Register Awkward Array node types with JAX's tree mechanism.
     """
     try:
-        import jax
+        import jax  # noqa: F401
 
     except ModuleNotFoundError:
         raise ak._errors.wrap_error(
@@ -47,7 +46,7 @@ def register_and_check():
             )
         ) from None
 
-    _register(jax)
+    _register()
 
 
 HighLevelType = TypeVar(
@@ -77,7 +76,7 @@ def register_behavior_class(cls: HighLevelType):
             _known_highlevel_classes.add(cls)
 
 
-def _register(jax: types.ModuleType):
+def _register():
     """
     Register Awkward Array node types with JAX's tree mechanism.
     """
