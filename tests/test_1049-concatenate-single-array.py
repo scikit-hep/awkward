@@ -5,8 +5,6 @@ import pytest  # noqa: F401
 
 import awkward as ak  # noqa: F401
 
-ak.jax.register_and_check()
-
 
 def test_single_numpy_array():
     array = np.arange(4 * 3 * 2).reshape(4, 3, 2)
@@ -35,6 +33,8 @@ def test_single_awkward_array():
 
 def test_single_jax_array():
     jnp = pytest.importorskip("jax.numpy")
+    ak.jax.register_and_check()
+
     array = jnp.arange(4 * 3 * 2).reshape(4, 3, 2)
     result = ak.concatenate(array)
     assert result.tolist() == [
