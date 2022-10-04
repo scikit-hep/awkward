@@ -359,7 +359,7 @@ class NumpyLike(Singleton):
         return self._module.datetime_as_string(*args, **kwargs)
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         """
         Args:
             obj: object to test
@@ -386,13 +386,13 @@ class NumpyKernel:
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
 
-            if Numpy.is_own_buffer(x):
+            if Numpy.is_own_array(x):
                 return ctypes.cast(x.ctypes.data, t)
-            elif Cupy.is_own_buffer(x):
+            elif Cupy.is_own_array(x):
                 raise ak._errors.wrap_error(
                     AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
                 )
-            elif Jax.is_own_buffer(x):
+            elif Jax.is_own_array(x):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "JAX Buffers can't be passed as function args for the C Kernels"
@@ -526,7 +526,7 @@ class Numpy(NumpyLike):
             )
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         """
         Args:
             obj: object to test
@@ -736,7 +736,7 @@ class Cupy(NumpyLike):
         return self._module.array_str(array, max_line_width, precision, suppress_small)
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         """
         Args:
             obj: object to test
@@ -885,7 +885,7 @@ class Jax(NumpyLike):
         return out
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         """
         Args:
             obj: object to test
@@ -943,7 +943,7 @@ def nplike_of(*arrays, default=_UNSET):
             nplikes.add(nplike)
         else:
             for cls in nplike_classes:
-                if cls.is_own_buffer(array):
+                if cls.is_own_array(array):
                     nplikes.add(cls.instance())
                     break
 
