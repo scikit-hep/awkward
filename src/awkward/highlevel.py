@@ -258,7 +258,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
 
-        ak.jax.maybe_register_behavior_class(cls)
+        ak.jax.register_behavior_class(cls)
 
     @property
     def layout(self):

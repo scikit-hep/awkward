@@ -3,6 +3,7 @@
 import awkward as ak
 
 _has_checked_version = False
+_is_registered = False
 
 
 def register_and_check():

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import enum
+import threading
 import types
 import weakref
 from typing import TypeVar
@@ -10,7 +12,18 @@ from awkward import _errors, highlevel, nplikes
 numpy = nplikes.Numpy()
 
 
-_is_registered = False
+def assert_never(arg) -> None:
+    raise AssertionError(f"this should never be run: {arg}")
+
+
+class _RegistrationState(enum.Enum):
+    INIT = enum.auto()
+    SUCCESS = enum.auto()
+    FAILED = enum.auto()
+
+
+_registration_lock = threading.Lock()
+_registration_state = _RegistrationState.INIT
 
 
 def register_and_check():
@@ -42,7 +55,7 @@ HighLevelType = TypeVar(
 )
 
 
-def register_behavior_class(cls: HighLevelType) -> HighLevelType:
+def _register_behavior_class(cls: HighLevelType) -> HighLevelType:
     """
     Args:
         cls: behavior class to register with Jax
@@ -64,7 +77,7 @@ def register_behavior_class(cls: HighLevelType) -> HighLevelType:
 _known_highlevel_classes = weakref.WeakSet([highlevel.Array, highlevel.Record])
 
 
-def maybe_register_behavior_class(cls: HighLevelType):
+def register_behavior_class(cls: HighLevelType):
     """
     Args:
         cls: behavior class to register with Jax
@@ -72,61 +85,73 @@ def maybe_register_behavior_class(cls: HighLevelType):
     Register the behavior class with Jax, if Jax integration is enabled. Otherwise,
     queue the type for subsequent registration when/if Jax is registered.
     """
-    if _is_registered:
-        register_behavior_class(cls)
-    else:
-        _known_highlevel_classes.add(cls)
+    with _registration_lock:
+        if _registration_state == _RegistrationState.SUCCESS:
+            _register_behavior_class(cls)
+        else:
+            _known_highlevel_classes.add(cls)
 
 
 def _register(jax: types.ModuleType):
     """
     Register Awkward Array node types with Jax's tree mechanism.
     """
+    global _registration_state
+    # Require that no threads are trying to register before checking this flag
+    with _registration_lock:
+        if _registration_state != _RegistrationState.INIT:
+            return
 
-    # Let's only do this once
-    global _is_registered
-    if _is_registered:
-        return
+        try:
+            import awkward._connect.jax as jax_connect
 
-    try:
-        import awkward._connect.jax as jax_connect
+            for cls in [
+                ak.contents.BitMaskedArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.EmptyArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.NumpyArray,
+                ak.contents.ListArray,
+                ak.contents.ListOffsetArray,
+                ak.contents.RecordArray,
+                ak.contents.UnionArray,
+                ak.contents.UnmaskedArray,
+                ak.record.Record,
+            ]:
+                jax.tree_util.register_pytree_node(
+                    cls,
+                    jax_connect.jax_flatten,
+                    jax_connect.jax_unflatten,
+                )
 
-        for cls in [
-            ak.contents.BitMaskedArray,
-            ak.contents.ByteMaskedArray,
-            ak.contents.EmptyArray,
-            ak.contents.IndexedArray,
-            ak.contents.IndexedOptionArray,
-            ak.contents.NumpyArray,
-            ak.contents.ListArray,
-            ak.contents.ListOffsetArray,
-            ak.contents.RecordArray,
-            ak.contents.UnionArray,
-            ak.contents.UnmaskedArray,
-            ak.record.Record,
-        ]:
-            jax.tree_util.register_pytree_node(
-                cls,
-                jax_connect.jax_flatten,
-                jax_connect.jax_unflatten,
-            )
-
-        for cls in _known_highlevel_classes:
-            jax.tree_util.register_pytree_node(
-                cls,
-                jax_connect.jax_flatten,
-                jax_connect.jax_unflatten,
-            )
-    finally:
-        _is_registered = True
+            for cls in _known_highlevel_classes:
+                jax.tree_util.register_pytree_node(
+                    cls,
+                    jax_connect.jax_flatten,
+                    jax_connect.jax_unflatten,
+                )
+        except Exception:
+            _registration_state = _RegistrationState.FAILED
+        else:
+            _registration_state = _RegistrationState.SUCCESS
 
 
 def assert_registered():
     """Ensure that Jax integration is registered. Raise a RuntimeError if not."""
-    if not _is_registered:
-        raise _errors.wrap_error(
-            RuntimeError("Jax features require `ak.jax.register_and_check()`")
-        )
+    with _registration_lock:
+        if _registration_state == _RegistrationState.INIT:
+            raise _errors.wrap_error(
+                RuntimeError("Jax features require `ak.jax.register_and_check()`")
+            )
+        elif _registration_state == _RegistrationState.FAILED:
+            raise _errors.wrap_error(
+                RuntimeError("Jax features require `ak.jax.register_and_check()`")
+            )
+        elif _registration_state == _RegistrationState.SUCCESS:
+            return
+
+        assert_never(_registration_state)
 
 
 def import_jax():
