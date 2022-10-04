@@ -1,12 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from typing import Generic, TypeVar, Union
+from typing import Generic, NoReturn, TypeVar, Union
 
 import awkward as ak
 from awkward import _errors, contents, highlevel, nplikes, record
 
 numpy = nplikes.Numpy.instance()
+np = nplikes.NumpyMetadata.instance()
 
 
 def find_all_buffers(
@@ -100,7 +101,21 @@ class AuxData(Generic[T]):
     def is_highlevel(self) -> bool:
         return self._is_highlevel
 
-    def unflatten(self, buffers) -> T:
+    def _validate_buffers(self, buffers: list) -> NoReturn:
+        for buffer in buffers:
+            if buffer.dtype == np.dtype([("float0", "V")]):
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
+                        "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "
+                        "reasonably be differentiated. Make sure that you are not computing the derivative "
+                        "of a boolean/integer (array) valued function."
+                    )
+                )
+
+    def unflatten(self, buffers: list) -> T:
+        self._validate_buffers(buffers)
+
         layout = replace_all_buffers(self._layout, list(buffers))
         return ak._util.wrap(
             layout, behavior=self._behavior, highlevel=self._is_highlevel
