@@ -22,7 +22,7 @@ def find_all_buffers(
         if isinstance(node, ak.contents.NumpyArray):
             data_ptrs.append(node.data)
 
-    layout.recursively_apply(action=action, return_array=False)
+    layout.recursively_apply(action=action, return_array=False, numpy_to_regular=False)
 
     return data_ptrs
 
@@ -46,7 +46,7 @@ def replace_all_buffers(
                     buffer, layout.identifier, layout.parameters, nplike=nplike
                 )
 
-    return layout.recursively_apply(action=action)
+    return layout.recursively_apply(action=action, numpy_to_regular=False)
 
 
 T = TypeVar(
@@ -123,7 +123,6 @@ class AuxData(Generic[T]):
         layout = replace_all_buffers(
             self._layout, list(buffers), nplike=nplikes.Jax.instance()
         )
-        assert layout.nplike is nplikes.Jax.instance()
         return ak._util.wrap(
             layout, behavior=self._behavior, highlevel=self._is_highlevel
         )
