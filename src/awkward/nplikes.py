@@ -359,7 +359,7 @@ class NumpyLike(Singleton):
         return self._module.datetime_as_string(*args, **kwargs)
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         """
         Args:
             obj: object to test
@@ -386,13 +386,13 @@ class NumpyKernel:
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
 
-            if Numpy.is_own_buffer(x):
+            if Numpy.is_own_array(x):
                 return ctypes.cast(x.ctypes.data, t)
-            elif Cupy.is_own_buffer(x):
+            elif Cupy.is_own_array(x):
                 raise ak._errors.wrap_error(
                     AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
                 )
-            elif Jax.is_own_buffer(x):
+            elif Jax.is_own_array(x):
                 raise ak._errors.wrap_error(
                     ValueError(
                         "JAX Buffers can't be passed as function args for the C Kernels"
@@ -526,7 +526,7 @@ class Numpy(NumpyLike):
             )
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         """
         Args:
             obj: object to test
@@ -736,7 +736,7 @@ class Cupy(NumpyLike):
         return self._module.array_str(array, max_line_width, precision, suppress_small)
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         """
         Args:
             obj: object to test
@@ -782,9 +782,8 @@ class Jax(NumpyLike):
         return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
-        from awkward._connect.jax import import_jax  # noqa: F401
-
-        self._module = import_jax().numpy
+        jax = ak.jax.import_jax()
+        self._module = jax.numpy
 
     @property
     def ma(self):
@@ -886,7 +885,18 @@ class Jax(NumpyLike):
         return out
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a jax buffer, otherwise `False`.
+
+        """
+        return cls.is_array(obj) or cls.is_tracer(obj)
+
+    @classmethod
+    def is_array(cls, obj) -> bool:
         """
         Args:
             obj: object to test
@@ -910,11 +920,15 @@ class Jax(NumpyLike):
         return module == "jax"
 
 
-def nplike_of(*arrays, default_cls=Numpy):
+# Temporary sentinel marking "argument not given"
+_UNSET = object()
+
+
+def nplike_of(*arrays, default=_UNSET):
     """
     Args:
         *arrays: iterable of possible array objects
-        default_cls: default NumpyLike class if no array objects found
+        default: default NumpyLike instance if no array objects found
 
     Return the #ak.nplikes.NumpyLike that is best-suited to operating upon the given
     iterable of arrays. Return an instance of the `default_cls` if no known array types
@@ -929,7 +943,7 @@ def nplike_of(*arrays, default_cls=Numpy):
             nplikes.add(nplike)
         else:
             for cls in nplike_classes:
-                if cls.is_own_buffer(array):
+                if cls.is_own_array(array):
                     nplikes.add(cls.instance())
                     break
 
@@ -937,7 +951,10 @@ def nplike_of(*arrays, default_cls=Numpy):
         return ak._typetracer.TypeTracer.instance()
 
     if nplikes == set():
-        return default_cls.instance()
+        if default is _UNSET:
+            return Numpy.instance()
+        else:
+            return default
     elif len(nplikes) == 1:
         return next(iter(nplikes))
     else:

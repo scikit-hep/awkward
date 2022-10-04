@@ -895,5 +895,5 @@ class TypeTracer(ak.nplikes.NumpyLike):
         raise ak._errors.wrap_error(NotImplementedError)
 
     @classmethod
-    def is_own_buffer(cls, obj) -> bool:
+    def is_own_array(cls, obj) -> bool:
         return isinstance(obj, TypeTracerArray)

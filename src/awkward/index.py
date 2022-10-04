@@ -168,7 +168,7 @@ class Index:
         if hasattr(out, "shape") and len(out.shape) != 0:
             return Index(out, metadata=self.metadata, nplike=self.nplike)
         elif (
-            ak.nplikes.Jax.is_own_buffer(out) or ak.nplikes.Cupy.is_own_buffer(out)
+            ak.nplikes.Jax.is_own_array(out) or ak.nplikes.Cupy.is_own_array(out)
         ) and len(out.shape) == 0:
             return out.item()
         else:

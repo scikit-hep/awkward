@@ -2,37 +2,38 @@
 
 import awkward as ak
 
-checked_version = False
+_has_checked_version = False
+_is_registered = False
 
 
 def register_and_check():
-    global checked_version
+    global _has_checked_version
 
-    if not checked_version:
-        try:
-            import numba
-        except ImportError as err:
-            raise ImportError(
-                """install the 'numba' package with:
+    try:
+        import numba
+    except ImportError as err:
+        raise ImportError(
+            """install the 'numba' package with:
 
-    pip install numba --upgrade
+pip install numba --upgrade
 
 or
 
-    conda install numba"""
-            ) from err
+conda install numba"""
+        ) from err
 
-        checked_version = True
+    if not _has_checked_version:
         if ak._util.parse_version(numba.__version__) < ak._util.parse_version("0.50"):
             raise ImportError(
                 "Awkward Array can only work with numba 0.50 or later "
                 "(you have version {})".format(numba.__version__)
             )
+        _has_checked_version = True
 
-    register()
+    _register()
 
 
-def register():
+def _register():
     if hasattr(ak.numba, "ArrayViewType"):
         return
 

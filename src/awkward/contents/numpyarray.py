@@ -1100,12 +1100,9 @@ class NumpyArray(Content):
             )
 
         if isinstance(self.nplike, ak.nplikes.Jax):
-            import awkward._connect.jax._reducers  # noqa: F401
+            from awkward._connect.jax.reducers import get_jax_reducer  # noqa: F401
 
-            if isinstance(reducer, type):
-                reducer = getattr(ak._connect.jax._reducers, reducer.__name__)
-            else:
-                reducer = getattr(ak._connect.jax._reducers, type(reducer).__name__)
+            reducer = get_jax_reducer(reducer)
         out = reducer.apply(self, parents, outlength)
 
         if reducer.needs_position:

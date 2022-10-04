@@ -6,8 +6,9 @@ import pytest  # noqa: F401
 import awkward as ak  # noqa: F401
 
 jax = pytest.importorskip("jax")
-
 jax.config.update("jax_enable_x64", True)
+
+ak.jax.register_and_check()
 
 
 def test_from_jax():

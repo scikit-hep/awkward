@@ -615,6 +615,11 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
     numpy = ak.nplikes.Numpy.instance()
 
     def recurse(array, mask=None):
+        if ak.nplikes.Jax.is_tracer(array):
+            raise ak._errors.wrap_error(
+                TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
+            )
+
         if regulararray and len(array.shape) > 1:
             return ak.contents.RegularArray(
                 recurse(array.reshape((-1,) + array.shape[2:])),
@@ -758,7 +763,7 @@ def to_arraylib(module, array, allow_missing):
             tags = module.asarray(array.tags)
             for tag, content in enumerate(contents):
                 mask = tags == tag
-                if type(out).__module__.startswith("jaxlib."):
+                if ak.nplikes.Jax.is_own_array(out):
                     out = out.at[mask].set(content)
                 else:
                     out[mask] = content

@@ -47,19 +47,16 @@ def _impl(arrays):
             allow_record=True,
             allow_other=True,
         )
-        if isinstance(layout, (ak.contents.Content, ak.index.Index)):
-            if isinstance(layout.nplike, ak.nplikes.Numpy):
-                backends.add("cpu")
-            elif isinstance(layout.nplike, ak.nplikes.Cupy):
-                backends.add("cuda")
-            elif isinstance(layout.nplike, ak.nplikes.Jax):
-                backends.add("jax")
-        elif isinstance(layout, ak.nplikes.numpy.ndarray):
-            backends.add("cpu")
-        elif type(layout).__module__.startswith("cupy."):
-            backends.add("cuda")
-        elif type(layout).__module__.startswith("jaxlib."):
+        # Find the nplike, if it is explicitly associated with this object
+        nplike = ak.nplikes.nplike_of(layout, default=None)
+        if nplike is None:
+            continue
+        if isinstance(nplike, ak.nplikes.Jax):
             backends.add("jax")
+        elif isinstance(nplike, ak.nplikes.Cupy):
+            backends.add("cuda")
+        elif isinstance(nplike, ak.nplikes.Numpy):
+            backends.add("cpu")
 
     if backends == set():
         return None

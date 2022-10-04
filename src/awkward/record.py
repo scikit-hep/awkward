@@ -259,19 +259,14 @@ class Record:
         else:
             return None
 
-    def _jax_flatten(self):
-        from awkward._connect.jax import AuxData, _find_numpyarray_nodes
+    def jax_flatten(self):
+        from awkward._connect.jax import AuxData, find_all_buffers
 
-        numpyarray_nodes = _find_numpyarray_nodes(self)
+        numpyarray_nodes = find_all_buffers(self)
         return (numpyarray_nodes, AuxData(self))
 
     @classmethod
-    def jax_flatten(cls, array):
-        assert type(array) is cls
-        return array._jax_flatten()
-
-    @classmethod
     def jax_unflatten(cls, aux_data, children):
-        from awkward._connect.jax import _replace_numpyarray_nodes
+        from awkward._connect.jax import replace_all_buffers
 
-        return ak._util.wrap(_replace_numpyarray_nodes(aux_data.layout, list(children)))
+        return ak._util.wrap(replace_all_buffers(aux_data.layout, list(children)))

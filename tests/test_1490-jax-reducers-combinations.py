@@ -9,6 +9,8 @@ jax = pytest.importorskip("jax")
 jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
 
+ak.jax.register_and_check()
+
 # #### ak.contents.NumpyArray ####
 
 test_numpyarray = ak.Array(np.arange(10, dtype=np.float64), backend="jax")
@@ -147,25 +149,10 @@ def test_numpyarray_grad_any_1():
     def func_numpyarray_1(x):
         return ak.any(x)
 
-    def func_nummpyarray_1_jax(x):
-        return jax.numpy.any(x)
-
     value_jvp, jvp_grad = jax.jvp(
         func_numpyarray_1, (test_numpyarray,), (test_numpyarray_tangent,)
     )
-    value_jvp_jax, jvp_grad_jax = jax.jvp(
-        func_nummpyarray_1_jax, (test_numpyarray_jax,), (test_numpyarray_tangent_jax,)
-    )
-
-    value_vjp, vjp_func = jax.vjp(func_numpyarray_1, test_numpyarray)
-    value_vjp_jax, vjp_func_jax = jax.vjp(func_nummpyarray_1_jax, test_numpyarray_jax)
-
-    assert value_jvp == value_jvp_jax
-    assert value_vjp == value_vjp_jax
-    assert jvp_grad == jvp_grad_jax
-    assert (
-        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
-    )
+    assert jvp_grad.dtype == np.dtype([("float0", "V")])
 
 
 test_regulararray = ak.Array(
@@ -535,58 +522,24 @@ def test_regular_array_all_0():
     def func_regulararray_all_0(x):
         return ak.all(x, 0)
 
-    def func_regulararray_all_0_jax(x):
-        return jax.numpy.all(x, 0)
-
-    value_jvp, jvp_grad = jax.jvp(
-        func_regulararray_all_0, (test_regulararray,), (test_regulararray_tangent,)
-    )
-    value_jvp_jax, jvp_grad_jax = jax.jvp(
-        func_regulararray_all_0_jax,
-        (test_regulararray_jax,),
-        (test_regulararray_tangent_jax,),
-    )
-
-    value_vjp, vjp_func = jax.vjp(func_regulararray_all_0, test_regulararray)
-    value_vjp_jax, vjp_func_jax = jax.vjp(
-        func_regulararray_all_0_jax, test_regulararray_jax
-    )
-
-    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
-    assert (
-        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
-    )
+    with pytest.raises(
+        TypeError, match=".*Make sure that you are not computing the derivative.*"
+    ):
+        jax.jvp(
+            func_regulararray_all_0, (test_regulararray,), (test_regulararray_tangent,)
+        )
 
 
 def test_regular_array_all_1():
     def func_regulararray_all_1(x):
         return ak.all(x, 1)
 
-    def func_regulararray_all_1_jax(x):
-        return jax.numpy.all(x, 1)
-
-    value_jvp, jvp_grad = jax.jvp(
-        func_regulararray_all_1, (test_regulararray,), (test_regulararray_tangent,)
-    )
-    value_jvp_jax, jvp_grad_jax = jax.jvp(
-        func_regulararray_all_1_jax,
-        (test_regulararray_jax,),
-        (test_regulararray_tangent_jax,),
-    )
-
-    value_vjp, vjp_func = jax.vjp(func_regulararray_all_1, test_regulararray)
-    value_vjp_jax, vjp_func_jax = jax.vjp(
-        func_regulararray_all_1_jax, test_regulararray_jax
-    )
-
-    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
-    assert (
-        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
-    )
+    with pytest.raises(
+        TypeError, match=".*Make sure that you are not computing the derivative.*"
+    ):
+        jax.jvp(
+            func_regulararray_all_1, (test_regulararray,), (test_regulararray_tangent,)
+        )
 
 
 def test_regular_array_all_none():
@@ -622,58 +575,24 @@ def test_regular_array_any_0():
     def func_regulararray_any_0(x):
         return ak.any(x, 0)
 
-    def func_regulararray_any_0_jax(x):
-        return jax.numpy.any(x, 0)
-
-    value_jvp, jvp_grad = jax.jvp(
-        func_regulararray_any_0, (test_regulararray,), (test_regulararray_tangent,)
-    )
-    value_jvp_jax, jvp_grad_jax = jax.jvp(
-        func_regulararray_any_0_jax,
-        (test_regulararray_jax,),
-        (test_regulararray_tangent_jax,),
-    )
-
-    value_vjp, vjp_func = jax.vjp(func_regulararray_any_0, test_regulararray)
-    value_vjp_jax, vjp_func_jax = jax.vjp(
-        func_regulararray_any_0_jax, test_regulararray_jax
-    )
-
-    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
-    assert (
-        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
-    )
+    with pytest.raises(
+        TypeError, match=".*Make sure that you are not computing the derivative.*"
+    ):
+        jax.jvp(
+            func_regulararray_any_0, (test_regulararray,), (test_regulararray_tangent,)
+        )
 
 
 def test_regular_array_any_1():
     def func_regulararray_any_1(x):
         return ak.any(x, 1)
 
-    def func_regulararray_any_1_jax(x):
-        return jax.numpy.any(x, 1)
-
-    value_jvp, jvp_grad = jax.jvp(
-        func_regulararray_any_1, (test_regulararray,), (test_regulararray_tangent,)
-    )
-    value_jvp_jax, jvp_grad_jax = jax.jvp(
-        func_regulararray_any_1_jax,
-        (test_regulararray_jax,),
-        (test_regulararray_tangent_jax,),
-    )
-
-    value_vjp, vjp_func = jax.vjp(func_regulararray_any_1, test_regulararray)
-    value_vjp_jax, vjp_func_jax = jax.vjp(
-        func_regulararray_any_1_jax, test_regulararray_jax
-    )
-
-    assert ak.to_list(value_jvp) == value_jvp_jax.tolist()
-    assert ak.to_list(value_vjp) == value_vjp_jax.tolist()
-    assert ak.to_list(jvp_grad) == jvp_grad_jax.tolist()
-    assert (
-        ak.to_list(vjp_func(value_vjp)[0]) == (vjp_func_jax(value_vjp_jax)[0]).tolist()
-    )
+    with pytest.raises(
+        TypeError, match=".*Make sure that you are not computing the derivative.*"
+    ):
+        jax.jvp(
+            func_regulararray_any_1, (test_regulararray,), (test_regulararray_tangent,)
+        )
 
 
 def test_regular_array_any_none():

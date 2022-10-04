@@ -30,6 +30,7 @@ import awkward._lookup
 import awkward._connect.numpy
 import awkward._connect.numexpr
 import awkward.numba
+import awkward.jax
 
 # high-level interface
 from awkward.highlevel import Array

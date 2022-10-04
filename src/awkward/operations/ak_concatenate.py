@@ -57,7 +57,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is a NumPy Array
-        or numpy.is_own_buffer(arrays)
+        or numpy.is_own_array(arrays)
         # Is an array with a known NumpyLike
         or single_nplike is not numpy
     ):
