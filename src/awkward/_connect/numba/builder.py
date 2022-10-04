@@ -595,7 +595,7 @@ def bytes_as_string_and_size(self, obj, p_buffer, p_length):
     fn = self._get_function(fnty, name=fname)
 
     result = self.builder.call(fn, [obj, p_buffer, p_length])
-    ok = self.builder.icmp_unsigned("!=", Constant(result.type, None), result)
+    ok = self.builder.icmp_unsigned("!=", Constant(result.type, -1), result)
     return ok
 
 
@@ -609,10 +609,12 @@ def lower_bytestring(context, builder, sig, args):
     gil = pyapi.gil_ensure()
 
     strptr = pyapi.from_native_value(xtype, xval)
+
     p_length = numba.core.cgutils.alloca_once(builder, pyapi.py_ssize_t)
     p_buffer = numba.core.cgutils.alloca_once(builder, pyapi.cstring)
 
     ok = bytes_as_string_and_size(pyapi, strptr, p_buffer, p_length)
+
     if pyapi.if_object_ok(ok):
         length = ak._connect.numba.layout.castint(
             context, builder, pyapi.py_ssize_t, numba.int64, builder.load(p_length)
