@@ -22,7 +22,7 @@ class _RegistrationState(enum.Enum):
     FAILED = enum.auto()
 
 
-_registration_lock = threading.Lock()
+_registration_lock = threading.RLock()
 _registration_state = _RegistrationState.INIT
 
 
