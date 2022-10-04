@@ -1997,7 +1997,7 @@ class Record(NDArrayOperatorsMixin):
             behavior = None
         else:
             behavior = self._behavior
-        return form, length, container, behavior, packed.at
+        return form.to_dict(), length, container, behavior, packed.at
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
