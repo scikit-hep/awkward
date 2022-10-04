@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Generic, NoReturn, TypeVar, Union
 
+import jax
+
 import awkward as ak
 from awkward import _errors, contents, highlevel, nplikes, record
 
@@ -136,3 +138,24 @@ def jax_flatten(
 
 def jax_unflatten(aux_data: AuxData, children: list[numpy.ndarray]) -> T:
     return aux_data.unflatten(children)
+
+
+HighLevelType = TypeVar(
+    "HighLevelType", bound="type[highlevel.Array | highlevel.Record]"
+)
+
+
+def register_pytree_class(cls: T) -> T:
+    """
+    Args:
+        cls: class to register with JAX
+
+    Return the class, after registering it with JAX.
+
+    """
+    jax.tree_util.register_pytree_node(
+        cls,
+        jax_flatten,
+        jax_unflatten,
+    )
+    return cls

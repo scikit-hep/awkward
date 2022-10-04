@@ -55,25 +55,6 @@ HighLevelType = TypeVar(
 )
 
 
-def _register_behavior_class(cls: HighLevelType) -> HighLevelType:
-    """
-    Args:
-        cls: behavior class to register with JAX
-
-    Return the behavior class, after registering it with JAX.
-
-    """
-    jax = import_jax()
-    import awkward._connect.jax as jax_connect
-
-    jax.tree_util.register_pytree_node(
-        cls,
-        jax_connect.jax_flatten,
-        jax_connect.jax_unflatten,
-    )
-    return cls
-
-
 _known_highlevel_classes = weakref.WeakSet([highlevel.Array, highlevel.Record])
 
 
@@ -85,9 +66,13 @@ def register_behavior_class(cls: HighLevelType):
     Register the behavior class with JAX, if JAX integration is enabled. Otherwise,
     queue the type for subsequent registration when/if JAX is registered.
     """
+    # Acquire lock so that we know registration has completed
     with _registration_lock:
         if _registration_state == _RegistrationState.SUCCESS:
-            _register_behavior_class(cls)
+            # Safe to invoke JAX code here
+            import awkward._connect.jax as jax_connect
+
+            jax_connect.register_pytree_class(cls)
         else:
             _known_highlevel_classes.add(cls)
 
@@ -119,18 +104,11 @@ def _register(jax: types.ModuleType):
                 ak.contents.UnmaskedArray,
                 ak.record.Record,
             ]:
-                jax.tree_util.register_pytree_node(
-                    cls,
-                    jax_connect.jax_flatten,
-                    jax_connect.jax_unflatten,
-                )
+                jax_connect.register_pytree_class(cls)
 
             for cls in _known_highlevel_classes:
-                jax.tree_util.register_pytree_node(
-                    cls,
-                    jax_connect.jax_flatten,
-                    jax_connect.jax_unflatten,
-                )
+                jax_connect.register_pytree_class(cls)
+
         except Exception:
             _registration_state = _RegistrationState.FAILED
         else:
@@ -146,7 +124,11 @@ def assert_registered():
             )
         elif _registration_state == _RegistrationState.FAILED:
             raise _errors.wrap_error(
-                RuntimeError("JAX features require `ak.jax.register_and_check()`")
+                RuntimeError(
+                    "JAX features require `ak.jax.register_and_check()`, "
+                    "but the last call to `ak.jax.register_and_check()` did not succeed. "
+                    "Please look for a traceback to identify the error."
+                )
             )
         elif _registration_state == _RegistrationState.SUCCESS:
             return
