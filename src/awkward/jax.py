@@ -28,7 +28,7 @@ _registration_state = _RegistrationState.INIT
 
 def register_and_check():
     """
-    Register Awkward Array node types with Jax's tree mechanism.
+    Register Awkward Array node types with JAX's tree mechanism.
     """
     try:
         import jax
@@ -58,9 +58,9 @@ HighLevelType = TypeVar(
 def _register_behavior_class(cls: HighLevelType) -> HighLevelType:
     """
     Args:
-        cls: behavior class to register with Jax
+        cls: behavior class to register with JAX
 
-    Return the behavior class, after registering it with Jax.
+    Return the behavior class, after registering it with JAX.
 
     """
     jax = import_jax()
@@ -80,10 +80,10 @@ _known_highlevel_classes = weakref.WeakSet([highlevel.Array, highlevel.Record])
 def register_behavior_class(cls: HighLevelType):
     """
     Args:
-        cls: behavior class to register with Jax
+        cls: behavior class to register with JAX
 
-    Register the behavior class with Jax, if Jax integration is enabled. Otherwise,
-    queue the type for subsequent registration when/if Jax is registered.
+    Register the behavior class with JAX, if JAX integration is enabled. Otherwise,
+    queue the type for subsequent registration when/if JAX is registered.
     """
     with _registration_lock:
         if _registration_state == _RegistrationState.SUCCESS:
@@ -94,7 +94,7 @@ def register_behavior_class(cls: HighLevelType):
 
 def _register(jax: types.ModuleType):
     """
-    Register Awkward Array node types with Jax's tree mechanism.
+    Register Awkward Array node types with JAX's tree mechanism.
     """
     global _registration_state
     # Require that no threads are trying to register before checking this flag
@@ -138,15 +138,15 @@ def _register(jax: types.ModuleType):
 
 
 def assert_registered():
-    """Ensure that Jax integration is registered. Raise a RuntimeError if not."""
+    """Ensure that JAX integration is registered. Raise a RuntimeError if not."""
     with _registration_lock:
         if _registration_state == _RegistrationState.INIT:
             raise _errors.wrap_error(
-                RuntimeError("Jax features require `ak.jax.register_and_check()`")
+                RuntimeError("JAX features require `ak.jax.register_and_check()`")
             )
         elif _registration_state == _RegistrationState.FAILED:
             raise _errors.wrap_error(
-                RuntimeError("Jax features require `ak.jax.register_and_check()`")
+                RuntimeError("JAX features require `ak.jax.register_and_check()`")
             )
         elif _registration_state == _RegistrationState.SUCCESS:
             return
@@ -155,7 +155,7 @@ def assert_registered():
 
 
 def import_jax():
-    """Ensure that Jax integration is registered, and return the Jax module. Raise a RuntimeError if not."""
+    """Ensure that JAX integration is registered, and return the JAX module. Raise a RuntimeError if not."""
     assert_registered()
     import jax
 
