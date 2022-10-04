@@ -43,7 +43,7 @@ def replace_all_buffers(
                 return
             else:
                 return ak.contents.NumpyArray(
-                    buffer, layout.identifier, layout.parameters, nplike=nplike
+                    buffer, node.identifier, node.parameters, nplike=nplike
                 )
 
     return layout.recursively_apply(action=action, numpy_to_regular=False)
