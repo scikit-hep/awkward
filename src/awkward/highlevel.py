@@ -1381,7 +1381,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             behavior = None
         else:
             behavior = self._behavior
-        return form, length, container, behavior
+        return form.to_dict(), length, container, behavior
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
