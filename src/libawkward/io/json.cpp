@@ -355,6 +355,7 @@ namespace awkward {
       , nan_string_(nan_string)
       , posinf_string_(posinf_string)
       , neginf_string_(neginf_string)
+      , ignore_(0)
       , moved_(false)
       , schema_okay_(true) { }
 
@@ -376,6 +377,11 @@ namespace awkward {
     bool Null() {
       moved_ = true;
       // std::cout << "null " << specializedjson_->debug() << std::endl;
+
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
 
       switch (specializedjson_->instruction()) {
         case FillByteMaskedArray:
@@ -420,6 +426,11 @@ namespace awkward {
       moved_ = true;
       // std::cout << "bool " << x << " " << specializedjson_->debug() << std::endl;
 
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
+
       bool out;
       switch (specializedjson_->instruction()) {
         case FillByteMaskedArray:
@@ -448,6 +459,11 @@ namespace awkward {
     bool Int(int x) {
       moved_ = true;
       // std::cout << "int " << x << " " << specializedjson_->debug() << std::endl;
+
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
 
       bool out;
       switch (specializedjson_->instruction()) {
@@ -481,6 +497,11 @@ namespace awkward {
       moved_ = true;
       // std::cout << "uint " << x << " " << specializedjson_->debug() << std::endl;
 
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
+
       bool out;
       switch (specializedjson_->instruction()) {
         case FillByteMaskedArray:
@@ -512,6 +533,11 @@ namespace awkward {
     bool Int64(int64_t x) {
       moved_ = true;
       // std::cout << "int64 " << x << " " << specializedjson_->debug() << std::endl;
+
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
 
       bool out;
       switch (specializedjson_->instruction()) {
@@ -545,6 +571,11 @@ namespace awkward {
       moved_ = true;
       // std::cout << "uint64 " << x << " " << specializedjson_->debug() << std::endl;
 
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
+
       bool out;
       switch (specializedjson_->instruction()) {
         case FillByteMaskedArray:
@@ -577,6 +608,11 @@ namespace awkward {
       moved_ = true;
       // std::cout << "double " << x << " " << specializedjson_->debug() << std::endl;
 
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
+
       bool out;
       switch (specializedjson_->instruction()) {
         case FillByteMaskedArray:
@@ -608,6 +644,11 @@ namespace awkward {
     String(const char* str, rj::SizeType length, bool copy) {
       moved_ = true;
       // std::cout << "string " << str << " " << specializedjson_->debug() << std::endl;
+
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
 
       bool out;
       int64_t enumi;
@@ -675,6 +716,12 @@ namespace awkward {
       moved_ = true;
       // std::cout << "startarray " << specializedjson_->debug() << std::endl;
 
+      if (ignore_) {
+        ignore_++;
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
+
       switch (specializedjson_->instruction()) {
         case TopLevelArray:
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
@@ -705,6 +752,13 @@ namespace awkward {
     EndArray(rj::SizeType numfields) {
       moved_ = true;
       // std::cout << "endarray " << specializedjson_->debug() << std::endl;
+      // std::cout << "  ignore state " << ignore_ << std::endl;
+
+      if (ignore_) {
+        ignore_--;
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
 
       bool out;
       specializedjson_->pop_stack();
@@ -746,6 +800,12 @@ namespace awkward {
       moved_ = true;
       // std::cout << "startobject " << specializedjson_->debug() << std::endl;
 
+      if (ignore_) {
+        ignore_++;
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
+
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
           specializedjson_->write_int64(
@@ -766,6 +826,17 @@ namespace awkward {
     EndObject(rj::SizeType numfields) {
       moved_ = true;
       // std::cout << "endobject " << specializedjson_->debug() << std::endl;
+      // std::cout << "  ignore state " << ignore_ << std::endl;
+
+      if (ignore_ == 1) {
+        // we have ignored a single previous key, now reach EndObject
+        ignore_--;
+      }
+      if (ignore_) {
+        ignore_--;
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
 
       specializedjson_->pop_stack();
 
@@ -784,7 +855,17 @@ namespace awkward {
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
       moved_ = true;
-      // std::cout << "key " << specializedjson_->debug() << std::endl;
+      // std::cout << "key " << str << " " << specializedjson_->debug() << std::endl;
+      // std::cout << "  ignore state " << ignore_ << std::endl;
+
+      if (ignore_ == 1) {
+        // we have ignored a single previous key, now reach a new Key
+        ignore_--;
+      }
+      if (ignore_) {
+        // std::cout << "  ignoring!" << std::endl;
+        return true;
+      }
 
       int64_t jump_to;
       specializedjson_->pop_stack();
@@ -795,23 +876,21 @@ namespace awkward {
         case FillIndexedOptionArray:
           specializedjson_->step_forward();
           jump_to = specializedjson_->find_key(str);
+          specializedjson_->step_backward();
           if (jump_to == -1) {
-            return schema_okay_ = false;
+            ignore_ = 1;
           }
-          else {
-            specializedjson_->step_backward();
-            specializedjson_->push_stack(jump_to);
-            return true;
-          }
+          // jump_to might be -1, but it will be popped by the next Key or EndObject
+          specializedjson_->push_stack(jump_to);
+          return true;
         case KeyTableHeader:
           jump_to = specializedjson_->find_key(str);
           if (jump_to == -1) {
-            return schema_okay_ = false;
+            ignore_ = 1;
           }
-          else {
-            specializedjson_->push_stack(jump_to);
-            return true;
-          }
+          // jump_to might be -1, but it will be popped by the next Key or EndObject
+          specializedjson_->push_stack(jump_to);
+          return true;
         default:
           return schema_okay_ = false;
       }
@@ -824,6 +903,12 @@ namespace awkward {
     const char* neginf_string_;
     bool moved_;
     bool schema_okay_;
+
+    // if 0, read data; otherwise, ignore data
+    // if 1, ignore this key, but go to ignore_ = 0 for the next Key/EndObject
+    // StartArray/StartObject increases ignore_ by 1
+    // EndArray/EndObject decrease ignore_ by 1
+    int64_t ignore_;
   };
 
   FromJsonObjectSchema::FromJsonObjectSchema(FileLikeObject* source,
