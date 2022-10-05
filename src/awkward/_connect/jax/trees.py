@@ -123,7 +123,7 @@ class AuxData(Generic[T]):
             # Check that JAX isn't trying to give us float0 types
             dtype = getattr(buffer, "dtype", None)
             if dtype == np.dtype([("float0", "V")]):
-                raise ak._errors.wrap_error(
+                raise _errors.wrap_error(
                     TypeError(
                         f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
                         "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "
