@@ -11,6 +11,7 @@ jax.config.update("jax_enable_x64", True)
 ak.jax.register_and_check()
 
 
+@pytest.mark.skip("Jacobian support not implemented")
 def test():
     array = ak.Array([[1, 2, 3], [4, 5, 6.0]])
 
