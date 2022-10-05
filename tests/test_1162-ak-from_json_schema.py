@@ -746,3 +746,183 @@ def test_complex_substitutions():
     )
     assert result.tolist() == [1 + 1.1j, 2 + 2.2j, np.inf + 3.3j]
     assert str(result.type) == "3 * complex128"
+
+
+def test_ignore_before():
+    for what in [
+        "null",
+        "true",
+        "2",
+        "2.2",
+        "[]",
+        "[2]",
+        "[2, 2.2]",
+        "{}",
+        '{"z": 2.2}',
+        '{"z": []}',
+        '{"z": [2]}',
+        '{"z": [2, 2.2]}',
+    ]:
+        array = ak.from_json(
+            '[{"y": ' + what + ', "x": 1}, {"x": 3}]',
+            schema={
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {"x": {"type": "integer"}},
+                    "required": ["x"],
+                },
+            },
+        )
+        assert array.tolist() == [{"x": 1}, {"x": 3}]
+        assert str(array.type) == "2 * {x: int64}"
+
+
+def test_ignore_after():
+    for what in [
+        "null",
+        "true",
+        "2",
+        "2.2",
+        "[]",
+        "[2]",
+        "[2, 2.2]",
+        "{}",
+        '{"z": 2.2}',
+        '{"z": []}',
+        '{"z": [2]}',
+        '{"z": [2, 2.2]}',
+    ]:
+        array = ak.from_json(
+            '[{"x": 1, "y": ' + what + '}, {"x": 3}]',
+            schema={
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {"x": {"type": "integer"}},
+                    "required": ["x"],
+                },
+            },
+        )
+        assert array.tolist() == [{"x": 1}, {"x": 3}]
+        assert str(array.type) == "2 * {x: int64}"
+
+
+def test_ignore_between():
+    for what in [
+        "null",
+        "true",
+        "2",
+        "2.2",
+        "[]",
+        "[2]",
+        "[2, 2.2]",
+        "{}",
+        '{"z": 2.2}',
+        '{"z": []}',
+        '{"z": [2]}',
+        '{"z": [2, 2.2]}',
+    ]:
+        array = ak.from_json(
+            '[{"x": 1, "y": ' + what + ', "z": true}, {"x": 3, "z": false}]',
+            schema={
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {"z": {"type": "boolean"}, "x": {"type": "integer"}},
+                    "required": ["z", "x"],
+                },
+            },
+        )
+        assert array.tolist() == [{"x": 1, "z": True}, {"x": 3, "z": False}]
+        assert str(array.type) == "2 * {z: bool, x: int64}"
+
+
+def test_option_ignore_before():
+    for what in [
+        "null",
+        "true",
+        "2",
+        "2.2",
+        "[]",
+        "[2]",
+        "[2, 2.2]",
+        "{}",
+        '{"z": 2.2}',
+        '{"z": []}',
+        '{"z": [2]}',
+        '{"z": [2, 2.2]}',
+    ]:
+        array = ak.from_json(
+            '[{"y": ' + what + ', "x": 1}, {"x": 3}]',
+            schema={
+                "type": "array",
+                "items": {
+                    "type": ["object", "null"],
+                    "properties": {"x": {"type": "integer"}},
+                    "required": ["x"],
+                },
+            },
+        )
+        assert array.tolist() == [{"x": 1}, {"x": 3}]
+        assert str(array.type) == "2 * ?{x: int64}"
+
+
+def test_option_ignore_after():
+    for what in [
+        "null",
+        "true",
+        "2",
+        "2.2",
+        "[]",
+        "[2]",
+        "[2, 2.2]",
+        "{}",
+        '{"z": 2.2}',
+        '{"z": []}',
+        '{"z": [2]}',
+        '{"z": [2, 2.2]}',
+    ]:
+        array = ak.from_json(
+            '[{"x": 1, "y": ' + what + '}, {"x": 3}]',
+            schema={
+                "type": "array",
+                "items": {
+                    "type": ["object", "null"],
+                    "properties": {"x": {"type": "integer"}},
+                    "required": ["x"],
+                },
+            },
+        )
+        assert array.tolist() == [{"x": 1}, {"x": 3}]
+        assert str(array.type) == "2 * ?{x: int64}"
+
+
+def test_option_ignore_between():
+    for what in [
+        "null",
+        "true",
+        "2",
+        "2.2",
+        "[]",
+        "[2]",
+        "[2, 2.2]",
+        "{}",
+        '{"z": 2.2}',
+        '{"z": []}',
+        '{"z": [2]}',
+        '{"z": [2, 2.2]}',
+    ]:
+        array = ak.from_json(
+            '[{"x": 1, "y": ' + what + ', "z": true}, {"x": 3, "z": false}]',
+            schema={
+                "type": "array",
+                "items": {
+                    "type": ["object", "null"],
+                    "properties": {"z": {"type": "boolean"}, "x": {"type": "integer"}},
+                    "required": ["z", "x"],
+                },
+            },
+        )
+        assert array.tolist() == [{"x": 1, "z": True}, {"x": 3, "z": False}]
+        assert str(array.type) == "2 * ?{z: bool, x: int64}"
