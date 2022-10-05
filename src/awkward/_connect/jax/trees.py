@@ -119,6 +119,19 @@ class AuxData(Generic[T]):
         return self._is_highlevel
 
     def unflatten(self, buffers: tuple) -> T:
+        for buffer in buffers:
+            # Check that JAX isn't trying to give us float0 types
+            dtype = getattr(buffer, "dtype", None)
+            if dtype == np.dtype([("float0", "V")]):
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        f"a buffer with the dtype {buffer.dtype} was encountered during unflattening. "
+                        "JAX uses this dtype for the tangents of integer/boolean outputs; these cannot "
+                        "reasonably be differentiated. Make sure that you are not computing the derivative "
+                        "of a boolean/integer (array) valued function."
+                    )
+                )
+
         # Replace the mixed NumPy-JAX layout leaves with the given buffers (and use the JAX nplike)
         layout = replace_all_buffers(
             self._layout, list(buffers), nplike=nplikes.Jax.instance()
