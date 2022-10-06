@@ -43,8 +43,9 @@ def test_basic():
     assert json.loads(ak.forms.form.Form.to_json(recordarray.form)) == (
         {
             "class": "RecordArray",
-            "contents": {
-                "one": {
+            "fields": ["one", "two", "2", "wonky"],
+            "contents": [
+                {
                     "class": "NumpyArray",
                     "primitive": "int64",
                     "inner_shape": [],
@@ -52,7 +53,7 @@ def test_basic():
                     "parameters": {},
                     "form_key": None,
                 },
-                "two": {
+                {
                     "class": "ListOffsetArray",
                     "offsets": "i64",
                     "content": {
@@ -67,7 +68,7 @@ def test_basic():
                     "parameters": {},
                     "form_key": None,
                 },
-                "2": {
+                {
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
@@ -75,7 +76,7 @@ def test_basic():
                     "parameters": {},
                     "form_key": None,
                 },
-                "wonky": {
+                {
                     "class": "NumpyArray",
                     "primitive": "int64",
                     "inner_shape": [],
@@ -83,7 +84,7 @@ def test_basic():
                     "parameters": {},
                     "form_key": None,
                 },
-            },
+            ],
             "has_identifier": False,
             "parameters": {},
             "form_key": None,
@@ -135,8 +136,9 @@ def test_basic():
 
     assert json.loads(ak.forms.form.Form.to_json(recordarray.form)) == {
         "class": "RecordArray",
-        "contents": {
-            "one": {
+        "fields": ["one", "two", "2", "wonky"],
+        "contents": [
+            {
                 "class": "NumpyArray",
                 "primitive": "int64",
                 "inner_shape": [],
@@ -144,7 +146,7 @@ def test_basic():
                 "parameters": {},
                 "form_key": None,
             },
-            "two": {
+            {
                 "class": "ListOffsetArray",
                 "offsets": "i64",
                 "content": {
@@ -159,7 +161,7 @@ def test_basic():
                 "parameters": {},
                 "form_key": None,
             },
-            "2": {
+            {
                 "class": "NumpyArray",
                 "primitive": "float64",
                 "inner_shape": [],
@@ -167,7 +169,7 @@ def test_basic():
                 "parameters": {},
                 "form_key": None,
             },
-            "wonky": {
+            {
                 "class": "NumpyArray",
                 "primitive": "int64",
                 "inner_shape": [],
@@ -175,7 +177,7 @@ def test_basic():
                 "parameters": {},
                 "form_key": None,
             },
-        },
+        ],
         "has_identifier": False,
         "parameters": {},
         "form_key": None,

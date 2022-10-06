@@ -139,10 +139,11 @@ class RecordForm(Form):
             content._to_dict_part(verbose, toplevel=False) for content in self._contents
         ]
         if self._fields is not None:
-            out["contents"] = dict(zip(self._fields, contents_tolist))
+            out["fields"] = list(self._fields)
         else:
-            out["contents"] = contents_tolist
+            out["fields"] = None
 
+        out["contents"] = contents_tolist
         return self._to_dict_extra(out, verbose)
 
     def _type(self, typestrs):

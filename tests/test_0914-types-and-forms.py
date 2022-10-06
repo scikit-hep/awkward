@@ -2581,6 +2581,7 @@ def test_RecordForm():
         )
         == """{
     "class": "RecordArray",
+    "fields": null,
     "contents": [
         {
             "class": "EmptyArray"
@@ -2601,12 +2602,16 @@ def test_RecordForm():
         )
         == """{
     "class": "RecordArray",
-    "contents": {
-        "x": {
+    "fields": [
+        "x",
+        "y"
+    ],
+    "contents": [
+        {
             "class": "EmptyArray"
         },
-        "y": "bool"
-    }
+        "bool"
+    ]
 }"""
     )
     assert (
@@ -2624,6 +2629,7 @@ def test_RecordForm():
         )
         == """{
     "class": "RecordArray",
+    "fields": null,
     "contents": [
         {
             "class": "EmptyArray"
@@ -2652,12 +2658,16 @@ def test_RecordForm():
         )
         == """{
     "class": "RecordArray",
-    "contents": {
-        "x": {
+    "fields": [
+        "x",
+        "y"
+    ],
+    "contents": [
+        {
             "class": "EmptyArray"
         },
-        "y": "bool"
-    },
+        "bool"
+    ],
     "has_identifier": true,
     "parameters": {
         "x": 123
@@ -2726,6 +2736,7 @@ def test_RecordForm():
         None,
     ).to_dict(verbose=False) == {
         "class": "RecordArray",
+        "fields": None,
         "contents": [
             {"class": "EmptyArray"},
             "bool",
@@ -2736,16 +2747,18 @@ def test_RecordForm():
         ["x", "y"],
     ).to_dict(verbose=False) == {
         "class": "RecordArray",
-        "contents": {
-            "x": {"class": "EmptyArray"},
-            "y": "bool",
-        },
+        "fields": ["x", "y"],
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
     }
     assert ak.forms.recordform.RecordForm(
         [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         None,
     ).to_dict() == {
         "class": "RecordArray",
+        "fields": None,
         "contents": [
             {
                 "class": "EmptyArray",
@@ -2771,14 +2784,15 @@ def test_RecordForm():
         ["x", "y"],
     ).to_dict() == {
         "class": "RecordArray",
-        "contents": {
-            "x": {
+        "fields": ["x", "y"],
+        "contents": [
+            {
                 "class": "EmptyArray",
                 "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
-            "y": {
+            {
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
@@ -2786,7 +2800,7 @@ def test_RecordForm():
                 "parameters": {},
                 "form_key": None,
             },
-        },
+        ],
         "has_identifier": False,
         "parameters": {},
         "form_key": None,
@@ -2802,6 +2816,7 @@ def test_RecordForm():
         form_key="hello",
     ).to_dict(verbose=False) == {
         "class": "RecordArray",
+        "fields": None,
         "contents": [
             {"class": "EmptyArray"},
             "bool",
@@ -2821,87 +2836,7 @@ def test_RecordForm():
         form_key="hello",
     ).to_dict(verbose=False) == {
         "class": "RecordArray",
-        "contents": {
-            "x": {"class": "EmptyArray"},
-            "y": "bool",
-        },
-        "has_identifier": True,
-        "parameters": {"x": 123},
-        "form_key": "hello",
-    }
-    assert ak.forms.from_dict(
-        {
-            "class": "RecordArray",
-            "contents": [
-                {"class": "EmptyArray"},
-                "bool",
-            ],
-        }
-    ).to_dict() == {
-        "class": "RecordArray",
-        "contents": [
-            {
-                "class": "EmptyArray",
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-            {
-                "class": "NumpyArray",
-                "primitive": "bool",
-                "inner_shape": [],
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-        ],
-        "has_identifier": False,
-        "parameters": {},
-        "form_key": None,
-    }
-    assert ak.forms.from_dict(
-        {
-            "class": "RecordArray",
-            "contents": {
-                "x": {"class": "EmptyArray"},
-                "y": "bool",
-            },
-        }
-    ).to_dict() == {
-        "class": "RecordArray",
-        "contents": {
-            "x": {
-                "class": "EmptyArray",
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-            "y": {
-                "class": "NumpyArray",
-                "primitive": "bool",
-                "inner_shape": [],
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-        },
-        "has_identifier": False,
-        "parameters": {},
-        "form_key": None,
-    }
-    assert ak.forms.from_dict(
-        {
-            "class": "RecordArray",
-            "contents": [
-                {"class": "EmptyArray"},
-                "bool",
-            ],
-            "has_identifier": True,
-            "parameters": {"x": 123},
-            "form_key": "hello",
-        }
-    ).to_dict(verbose=False) == {
-        "class": "RecordArray",
+        "fields": ["x", "y"],
         "contents": [
             {"class": "EmptyArray"},
             "bool",
@@ -2913,20 +2848,109 @@ def test_RecordForm():
     assert ak.forms.from_dict(
         {
             "class": "RecordArray",
-            "contents": {
-                "x": {"class": "EmptyArray"},
-                "y": "bool",
+            "fields": None,
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+        }
+    ).to_dict() == {
+        "class": "RecordArray",
+        "fields": None,
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
             },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak.forms.from_dict(
+        {
+            "class": "RecordArray",
+            "fields": ["x", "y"],
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+        }
+    ).to_dict() == {
+        "class": "RecordArray",
+        "fields": ["x", "y"],
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak.forms.from_dict(
+        {
+            "class": "RecordArray",
+            "fields": None,
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
             "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
     ).to_dict(verbose=False) == {
         "class": "RecordArray",
-        "contents": {
-            "x": {"class": "EmptyArray"},
-            "y": "bool",
-        },
+        "fields": None,
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
+        "has_identifier": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak.forms.from_dict(
+        {
+            "class": "RecordArray",
+            "fields": ["x", "y"],
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+            "has_identifier": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).to_dict(verbose=False) == {
+        "class": "RecordArray",
+        "fields": ["x", "y"],
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
         "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",

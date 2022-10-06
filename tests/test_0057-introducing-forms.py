@@ -265,49 +265,7 @@ def test_forms():
     assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "RecordArray",
-        "contents": {
-            "one": {
-                "class": "NumpyArray",
-                "inner_shape": [],
-                "primitive": "float64",
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-            "two": {
-                "class": "NumpyArray",
-                "inner_shape": [],
-                "primitive": "bool",
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-        },
-        "has_identifier": False,
-        "parameters": {"hey": ["you"]},
-        "form_key": "yowzers",
-    }
-    assert json.loads(str(form)) == {
-        "class": "RecordArray",
-        "contents": {
-            "one": "float64",
-            "two": "bool",
-        },
-        "parameters": {"hey": ["you"]},
-        "form_key": "yowzers",
-    }
-
-    form = ak.forms.RecordForm(
-        [ak.forms.NumpyForm("float64"), ak.forms.NumpyForm("bool")],
-        None,
-        parameters={"hey": ["you"]},
-        form_key="yowzers",
-    )
-    assert form == form
-    assert pickle.loads(pickle.dumps(form, -1)) == form
-    assert ak.forms.from_json(form.to_json()) == form
-    assert json.loads(form.to_json()) == {
-        "class": "RecordArray",
+        "fields": ["one", "two"],
         "contents": [
             {
                 "class": "NumpyArray",
@@ -332,6 +290,52 @@ def test_forms():
     }
     assert json.loads(str(form)) == {
         "class": "RecordArray",
+        "fields": ["one", "two"],
+        "contents": [
+            "float64",
+            "bool",
+        ],
+        "parameters": {"hey": ["you"]},
+        "form_key": "yowzers",
+    }
+
+    form = ak.forms.RecordForm(
+        [ak.forms.NumpyForm("float64"), ak.forms.NumpyForm("bool")],
+        None,
+        parameters={"hey": ["you"]},
+        form_key="yowzers",
+    )
+    assert form == form
+    assert pickle.loads(pickle.dumps(form, -1)) == form
+    assert ak.forms.from_json(form.to_json()) == form
+    assert json.loads(form.to_json()) == {
+        "class": "RecordArray",
+        "fields": None,
+        "contents": [
+            {
+                "class": "NumpyArray",
+                "inner_shape": [],
+                "primitive": "float64",
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "inner_shape": [],
+                "primitive": "bool",
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identifier": False,
+        "parameters": {"hey": ["you"]},
+        "form_key": "yowzers",
+    }
+    assert json.loads(str(form)) == {
+        "class": "RecordArray",
+        "fields": None,
         "contents": ["float64", "bool"],
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
