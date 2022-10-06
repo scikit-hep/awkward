@@ -34,7 +34,12 @@ def test_new_style_record():
     }
 
     array = ak.from_buffers(
-        form, 1, {"node1-data": np.array([1]), "node2-data": np.array([2])}
+        form,
+        1,
+        {
+            "node1-data": np.array([1], dtype=np.int64),
+            "node2-data": np.array([2], dtype=np.int64),
+        },
     )
     assert not array.is_tuple
     assert array.fields == ["z", "y"]
@@ -69,7 +74,12 @@ def test_new_style_tuple():
     }
 
     array = ak.from_buffers(
-        form, 1, {"node1-data": np.array([1]), "node2-data": np.array([2])}
+        form,
+        1,
+        {
+            "node1-data": np.array([1], dtype=np.int64),
+            "node2-data": np.array([2], dtype=np.int64),
+        },
     )
     assert array.is_tuple
     assert array.fields == ["0", "1"]
@@ -103,7 +113,12 @@ def test_old_style_record():
     }
 
     array = ak.from_buffers(
-        form, 1, {"node1-data": np.array([1]), "node2-data": np.array([2])}
+        form,
+        1,
+        {
+            "node1-data": np.array([1], dtype=np.int64),
+            "node2-data": np.array([2], dtype=np.int64),
+        },
     )
     assert not array.is_tuple
     assert array.fields == ["z", "y"]
@@ -137,7 +152,12 @@ def test_old_style_tuple():
     }
 
     array = ak.from_buffers(
-        form, 1, {"node1-data": np.array([1]), "node2-data": np.array([2])}
+        form,
+        1,
+        {
+            "node1-data": np.array([1], dtype=np.int64),
+            "node2-data": np.array([2], dtype=np.int64),
+        },
     )
     assert array.is_tuple
     assert array.fields == ["0", "1"]
@@ -180,5 +200,10 @@ def test_new_style_old_style_record():
 
     with pytest.raises(ValueError, match=".*Forms should not mix RecordArray styles.*"):
         ak.from_buffers(
-            form, 1, {"node2-offsets": np.array([0, 1]), "node3-data": np.array([0])}
+            form,
+            1,
+            {
+                "node2-offsets": np.array([0, 1], dtype=np.int64),
+                "node3-data": np.array([0], dtype=np.int64),
+            },
         )
