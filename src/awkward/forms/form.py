@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 import awkward as ak
 from awkward import _errors
@@ -68,6 +69,10 @@ def from_dict(input: dict) -> Form:
     elif input["class"] == "RecordArray":
         # New serialisation
         if "fields" in input:
+            if isinstance(input["contents"], Mapping):
+                raise _errors.wrap_error(
+                    TypeError("new-style RecordForm contents must not be mappings")
+                )
             contents = [from_dict(content) for content in input["contents"]]
             fields = input["fields"]
         # Old style record
@@ -168,7 +173,7 @@ def from_dict(input: dict) -> Form:
     else:
         raise _errors.wrap_error(
             ValueError(
-                "Input class: {} was not recognised".format(repr(input["class"]))
+                "input class: {} was not recognised".format(repr(input["class"]))
             )
         )
 
