@@ -65,12 +65,18 @@ def from_dict(input: dict) -> Form:
         )
 
     elif input["class"] == "RecordArray":
-        if isinstance(input["contents"], dict):
+        # New serialisation
+        if "fields" in input:
+            contents = [from_dict(content) for content in input["contents"]]
+            fields = input["fields"]
+        # Old style record
+        elif isinstance(input["contents"], dict):
             contents = []
             fields = []
             for key, content in input["contents"].items():
                 contents.append(from_dict(content))
                 fields.append(key)
+        # Old style tuple
         else:
             contents = [from_dict(content) for content in input["contents"]]
             fields = None
