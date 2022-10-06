@@ -130,7 +130,7 @@ python -m pytest -vv -rs tests-spec
 python -m pytest -vv -rs tests-cpu-kernels
 ```
 
-   * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
+   * [Continuous integration](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml) and [continuous deployment](https://github.com/scikit-hep/awkward/actions/workflows/wheels.yml) are hosted by [GitHub Actions](https://github.com/features/actions/).
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
    * [CONTRIBUTING.md](CONTRIBUTING.md) for technical information on how to contribute.
    * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.

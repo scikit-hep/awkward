@@ -28,9 +28,9 @@
    :alt: BSD-3 Clause License
    :target: https://opensource.org/licenses/BSD-3-Clause
 
-.. image:: https://img.shields.io/azure-devops/build/jpivarski/Scikit-HEP/3/main?label=tests
+.. image:: https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml/badge.svg?branch=main
    :alt: Continuous integration tests
-   :target: https://dev.azure.com/jpivarski/Scikit-HEP/_build
+   :target: https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml
 
 :raw-html:`</p><p>`
 
