@@ -197,11 +197,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = data._layout
             behavior = ak._util.behavior_of(data, behavior=behavior)
 
-        elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
+        elif numpy.is_own_array(data):
             layout = ak.operations.from_numpy(data, highlevel=False)
 
-        elif ak._util.in_module(data, "cupy"):
+        elif ak.nplikes.Cupy.is_own_array(data):
             layout = ak.operations.from_cupy(data, highlevel=False)
+
+        elif ak.nplikes.Jax.is_own_array(data):
+            layout = ak.operations.from_jax(data, highlevel=False)
 
         elif ak._util.in_module(data, "pyarrow"):
             layout = ak.operations.from_arrow(data, highlevel=False)

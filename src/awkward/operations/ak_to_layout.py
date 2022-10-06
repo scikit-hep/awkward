@@ -73,7 +73,7 @@ def _impl(array, allow_record, allow_other, numpytype):
     elif isinstance(array, ak._ext.ArrayBuilder):
         return array.snapshot()
 
-    elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
+    elif numpy.is_own_array(array):
         if not issubclass(array.dtype.type, numpytype):
             raise ak._errors.wrap_error(
                 ValueError(f"dtype {array.dtype!r} not allowed")
