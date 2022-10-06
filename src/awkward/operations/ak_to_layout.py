@@ -111,6 +111,16 @@ def _impl(array, allow_record, allow_other, numpytype):
             numpytype,
         )
 
+    elif ak._typetracer.TypeTracer.is_own_array(array):
+        typetracer = ak._typetracer.TypeTracer.instance()
+
+        return ak.contents.NumpyArray(
+            array,
+            parameters=None,
+            identifier=None,
+            nplike=typetracer,
+        )
+
     elif isinstance(array, (str, bytes)):
         return _impl(
             ak.operations.from_iter([array], highlevel=False),
