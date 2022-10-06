@@ -556,19 +556,14 @@ class TypeTracer(ak.nplikes.NumpyLike):
         return TypeTracerArray(dtype, shape)
 
     def full(self, shape, value, dtype=None, **kwargs):
-        # shape/len, value[, dtype=]
-        if dtype is None:
-            dtype = numpy.array(value).dtype
-        return TypeTracerArray(dtype, shape)
+        array = TypeTracerArray.from_array(value, dtype=dtype)
+        return array.reshape(shape)
 
     def zeros_like(self, a, dtype=None, **kwargs):
-        if dtype is None:
-            dtype = a.dtype
-
         if isinstance(a, UnknownScalar):
             return UnknownScalar(dtype)
 
-        return TypeTracerArray(dtype, a.shape)
+        return TypeTracerArray.from_array(a, dtype=dtype)
 
     def ones_like(self, a, dtype=None, **kwargs):
         return self.zeros_like(a, dtype)
