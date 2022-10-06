@@ -162,3 +162,43 @@ def test_old_style_tuple():
     assert array.is_tuple
     assert array.fields == ["0", "1"]
     assert array.to_list() == [(1, 2)]
+
+
+def test_old_style_contents_new_style_list():
+    form = {
+        "class": "RecordArray",
+        "fields": ["x", "y"],
+        "contents": {
+            "x": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": "node1",
+            },
+            "y": {
+                "class": "NumpyArray",
+                "primitive": "int64",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": "node2",
+            },
+        },
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": "node0",
+    }
+
+    with pytest.raises(
+        TypeError, match=".*new-style RecordForm contents must not be mappings.*"
+    ):
+        ak.from_buffers(
+            form,
+            1,
+            {
+                "node1-data": np.array([1], dtype=np.int64),
+                "node2-data": np.array([2], dtype=np.int64),
+            },
+        )
