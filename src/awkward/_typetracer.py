@@ -1,13 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numbers
+from typing import TypeVar
 
 import numpy
 
 import awkward as ak
-import awkward.nplikes
+from awkward import index, nplikes
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = nplikes.NumpyMetadata.instance()
 
 
 class NoError:
@@ -198,23 +199,34 @@ def _length_after_slice(slice, original_length):
         return 0
 
 
+TTypeTracerArray = TypeVar("TTypeTracerArray", bound="TypeTracerArray")
+
+
 class TypeTracerArray:
     @classmethod
-    def from_array(cls, array, dtype=None):
-        if isinstance(array, ak.index.Index):
+    def from_array(cls: TTypeTracerArray, array, dtype=None) -> TTypeTracerArray:
+        """
+        Args:
+            array: array-like object, e.g. np.ndarray, #ak.index.Index
+            dtype: dtype of returned #ak._typetracer.TypeTracerArray
+
+        Returns an #ak._typetracer.TypeTracerArray that describes the type information
+        of the given array.
+        """
+        if isinstance(array, index.Index):
             array = array.data
 
-        # not array-like
-        if not hasattr(array, "shape"):
-            sequence = list(array)
-            array = numpy.array(sequence)
-            if array.dtype == np.dtype("O"):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
-                        f"from a sequence of non-primitive types: {sequence}"
-                    )
+        # not array-like, try and cast to a NumPy array
+        elif not hasattr(array, "shape"):
+            array = numpy.array(array)
+
+        if array.dtype == np.dtype("O"):
+            raise ak._errors.wrap_error(
+                ValueError(
+                    f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
+                    f"from a sequence of non-primitive types: {array}"
                 )
+            )
 
         if dtype is None:
             dtype = array.dtype
@@ -514,20 +526,14 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     def array(self, data, dtype=None, **kwargs):
         # data[, dtype=[, copy=]]
-        if dtype is None:
-            dtype = data.dtype
         return TypeTracerArray.from_array(data, dtype=dtype)
 
     def asarray(self, array, dtype=None, **kwargs):
         # array[, dtype=][, order=]
-        if dtype is None:
-            dtype = array.dtype
         return TypeTracerArray.from_array(array, dtype=dtype)
 
     def ascontiguousarray(self, array, dtype=None, **kwargs):
         # array[, dtype=]
-        if dtype is None:
-            dtype = array.dtype
         return TypeTracerArray.from_array(array, dtype=dtype)
 
     def isscalar(self, *args, **kwargs):
@@ -550,19 +556,14 @@ class TypeTracer(ak.nplikes.NumpyLike):
         return TypeTracerArray(dtype, shape)
 
     def full(self, shape, value, dtype=None, **kwargs):
-        # shape/len, value[, dtype=]
-        if dtype is None:
-            dtype = numpy.array(value).dtype
-        return TypeTracerArray(dtype, shape)
+        array = TypeTracerArray.from_array(value, dtype=dtype)
+        return array.reshape(shape)
 
     def zeros_like(self, a, dtype=None, **kwargs):
-        if dtype is None:
-            dtype = a.dtype
-
         if isinstance(a, UnknownScalar):
             return UnknownScalar(dtype)
 
-        return TypeTracerArray(dtype, a.shape)
+        return TypeTracerArray.from_array(a, dtype=dtype)
 
     def ones_like(self, a, dtype=None, **kwargs):
         return self.zeros_like(a, dtype)

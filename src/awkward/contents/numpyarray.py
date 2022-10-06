@@ -50,7 +50,7 @@ class NumpyArray(Content):
         if len(self._data.shape) == 0:
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'data' must be an array, not {}".format(
+                    "{} 'data' must be an array, not a scalar: {}".format(
                         type(self).__name__, repr(data)
                     )
                 )
