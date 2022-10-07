@@ -588,14 +588,15 @@ def bytes_as_string_and_size(self, obj, p_buffer, p_length):
     from llvmlite.ir import Constant
 
     fnty = ir.FunctionType(
-        self.pyobj,
+        ir.IntType(32),
         [self.pyobj, self.cstring.as_pointer(), self.py_ssize_t.as_pointer()],
     )
     fname = "PyBytes_AsStringAndSize"
     fn = self._get_function(fnty, name=fname)
 
     result = self.builder.call(fn, [obj, p_buffer, p_length])
-    ok = self.builder.icmp_unsigned("!=", Constant(result.type, -1), result)
+
+    ok = self.builder.icmp_unsigned("!=", Constant(result.type, None), result)
     return ok
 
 
@@ -608,6 +609,8 @@ def lower_bytestring(context, builder, sig, args):
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()
 
+    # xval_proxy = numba.core.cgutils.create_struct_proxy(xtype)(context, builder)
+    # strptr = xval_proxy.data
     strptr = pyapi.from_native_value(xtype, xval)
 
     p_length = numba.core.cgutils.alloca_once(builder, pyapi.py_ssize_t)
