@@ -5,9 +5,10 @@ import argparse
 import io
 import os
 import re
-import requests
 import subprocess
 import zipfile
+
+import requests
 
 
 def get_sha_head():
