@@ -596,7 +596,7 @@ def bytes_as_string_and_size(self, obj, p_buffer, p_length):
 
     result = self.builder.call(fn, [obj, p_buffer, p_length])
 
-    ok = self.builder.icmp_unsigned("!=", Constant(result.type, None), result)
+    ok = self.builder.icmp_unsigned("!=", Constant(result.type, -1), result)
     return ok
 
 
