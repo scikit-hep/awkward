@@ -26,14 +26,14 @@ How to differentiate Awkward Arrays?
 
 Before using JAX on functions which deal with Awkward Arrays we need to configure JAX to use only the CPU
 
-```{code-cell} ipython3
+```{code-cell}
 import jax
 jax.config.update("jax_platform_name", "cpu")
 ```
 
-Next, we must call `ak.jax.register_and_check()` to register Awkward's JAX integration
+Next, we must call {func}`ak.jax.register_and_check()` to register Awkward's JAX integration
 
-```{code-cell} ipython3
+```{code-cell}
 import awkward as ak
 
 ak.jax.register_and_check()
@@ -41,28 +41,28 @@ ak.jax.register_and_check()
 
 Let's define a simple function that accepts an Awkward Array
 
-```{code-cell} ipython3
+```{code-cell}
 def reverse_sum(array):
     return ak.sum(array[::-1], axis=0)
 ```
 
-We can then create an array with which to evaluate `reverse_sum`. The `backend` argument ensures that we build an Awkward Array that is backed by JAX `DeviceArray` buffers, which power JAX's automatic differentiation and JIT compiling features.
+We can then create an array with which to evaluate `reverse_sum`. The `backend` argument ensures that we build an Awkward Array that is backed by {class}`jaxlib.DeviceArray` buffers, which power JAX's automatic differentiation and JIT compiling features.
 
-```{code-cell} ipython3
+```{code-cell}
 array = ak.Array([[1.0, 2.0, 3.0], [], [4.0, 5.0]], backend="jax")
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 reverse_sum(array)
 ```
 
 To compute the JVP of `reverse_sum` requires a _tangent_ vector, which can also be defined as an Awkward Array:
 
-```{code-cell} ipython3
+```{code-cell}
 tangent = ak.Array([[0.0, 0.0, 0.0], [], [0.0, 1.0]], backend="jax")
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 value_jvp, jvp_grad = jax.jvp(
     reverse_sum, (array,), (tangent,)
 )
@@ -70,17 +70,17 @@ value_jvp, jvp_grad = jax.jvp(
 
 {func}`jax.jvp` returns both the value of `reverse_sum` evaluated at `array`:
 
-```{code-cell} ipython3
+```{code-cell}
 value_jvp
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 assert value_jvp.to_list() == reverse_sum(array).to_list()
 ```
 
 and the JVP evaluted at `array` for the given `tangent`:
 
-```{code-cell} ipython3
+```{code-cell}
 jvp_grad
 ```
 
