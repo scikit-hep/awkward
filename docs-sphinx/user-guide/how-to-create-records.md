@@ -65,7 +65,7 @@ array
 ```
 
 ```{code-cell} ipython3
-array.tolist()
+array.to_list()
 ```
 
 ```{code-cell} ipython3
@@ -83,7 +83,7 @@ from_columns
 ```
 
 ```{code-cell} ipython3
-from_columns.tolist()
+from_columns.to_list()
 ```
 
 ```{code-cell} ipython3
@@ -98,7 +98,7 @@ from_rows
 ```
 
 ```{code-cell} ipython3
-from_rows.tolist()
+from_rows.to_list()
 ```
 
 ```{code-cell} ipython3
@@ -116,7 +116,7 @@ from_columns
 ```
 
 ```{code-cell} ipython3
-from_columns.tolist()
+from_columns.to_list()
 ```
 
 ```{code-cell} ipython3
@@ -133,7 +133,7 @@ zipped
 ```
 
 ```{code-cell} ipython3
-zipped.tolist()
+zipped.to_list()
 ```
 
 By contrast, the same input to {class}`ak.Array`'s Pandas-style constructor keeps nested lists separate.
@@ -144,7 +144,7 @@ not_zipped
 ```
 
 ```{code-cell} ipython3
-not_zipped.tolist()
+not_zipped.to_list()
 ```
 
 The difference can be seen in a comparison of their types:
@@ -161,7 +161,7 @@ tuples
 ```
 
 ```{code-cell} ipython3
-tuples.tolist()
+tuples.to_list()
 ```
 
 ```{code-cell} ipython3
@@ -344,7 +344,7 @@ without_names
 ```
 
 ```{code-cell} ipython3
-without_names.tolist()
+without_names.to_list()
 ```
 
 With names:
@@ -365,7 +365,7 @@ with_names
 ```
 
 ```{code-cell} ipython3
-with_names.tolist()
+with_names.to_list()
 ```
 
 The difference can be seen in the type: `without_names` has only one record type, but the _x_ and _z_ fields are optional, and `with_names` has a union of two record types, neither of which have optional fields.

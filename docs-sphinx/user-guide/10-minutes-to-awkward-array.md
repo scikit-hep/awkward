@@ -222,10 +222,10 @@ lat_lon_taxi_75 = ak.concatenate(
 )
 ```
 
-We can convert this to a list with `tolist()`:
+We can convert this to a list with `to_list()`:
 
 ```{code-cell} ipython3
-lat_lon_taxi_75.tolist()
+lat_lon_taxi_75.to_list()
 ```
 
 What does our route look like?
@@ -240,7 +240,7 @@ map_taxi_75 = ipl.Map(
 )
 for route in lat_lon_taxi_75:
     path = ipl.AntPath(
-        locations=route.tolist(),
+        locations=route.to_list(),
         delay=1000
     )
     map_taxi_75.add_layer(path)

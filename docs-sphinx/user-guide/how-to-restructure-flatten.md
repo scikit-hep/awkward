@@ -389,7 +389,7 @@ array[maximize_by]
 ```
 
 ```{code-cell} ipython3
-array[maximize_by].tolist()
+array[maximize_by].to_list()
 ```
 
 This still has list structures and missing values, so it's ready for {func}`ak.flatten`, assuming that we extract the appropriate record field to plot.

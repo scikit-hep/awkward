@@ -95,7 +95,7 @@ ak.concatenate([array, periods], axis=1)
 ```
 
 ```{code-cell} ipython3
-ak.concatenate([array, periods], axis=1).tolist()
+ak.concatenate([array, periods], axis=1).to_list()
 ```
 
 ```{code-cell} ipython3
@@ -113,7 +113,7 @@ array
 ```
 
 ```{code-cell} ipython3
-ak.pad_none(array, 2).tolist()
+ak.pad_none(array, 2).to_list()
 ```
 
 "At least length 2" means that the list is still a variable-length type, which we can see with the "`var *`" in its type string.
@@ -125,7 +125,7 @@ ak.pad_none(array, 2).type
 To produce lists of an exact length, set `clip=True`.
 
 ```{code-cell} ipython3
-ak.pad_none(array, 2, clip=True).tolist()
+ak.pad_none(array, 2, clip=True).to_list()
 ```
 
 ```{code-cell} ipython3

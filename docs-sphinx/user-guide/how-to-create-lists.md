@@ -107,7 +107,7 @@ irregular_array
 Both `regular_array` and `irregular_array` have the same data values:
 
 ```{code-cell} ipython3
-regular_array.tolist() == irregular_array.tolist()
+regular_array.to_list() == irregular_array.to_list()
 ```
 
 but they have different types:
