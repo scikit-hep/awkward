@@ -197,7 +197,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = data._layout
             behavior = ak._util.behavior_of(data, behavior=behavior)
 
-        elif numpy.is_own_array(data):
+        elif numpy.is_own_array(data) and data.dtype != np.dtype("O"):
             layout = ak.operations.from_numpy(data, highlevel=False)
 
         elif ak.nplikes.Cupy.is_own_array(data):
