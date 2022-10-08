@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-```{code-cell} ipython3
+```{code-cell}
 :tags: [remove-input, remove-output]
 
 %config InteractiveShell.ast_node_interactivity = "last_expr_or_assign"
@@ -40,13 +40,13 @@ Awkward Arrays are general tree-like data structures, like JSON, but contiguous 
 
 They look like NumPy arrays:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([1, 2, 3])
 ```
 
 Like NumPy, they can have multiple dimensions:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([
     [1, 2, 3],
     [4, 5, 6]
@@ -55,7 +55,7 @@ ak.Array([
 
 These dimensions can have varying lengths; arrays can be [ragged](https://en.wikipedia.org/wiki/Jagged_array):
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([
     [1, 2, 3],
     [4],
@@ -65,7 +65,7 @@ ak.Array([
 
 Each dimension can contain missing values:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([
     [1, 2, 3],
     [4],
@@ -75,7 +75,7 @@ ak.Array([
 
 Awkward Arrays can store _numbers_:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array([
     [3, 141], 
     [59, 26, 535], 
@@ -85,7 +85,7 @@ ak.Array([
 
 They can also work with _dates_:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(
     [
         [np.datetime64("1815-12-10"), np.datetime64("1969-07-16")],
@@ -96,7 +96,7 @@ ak.Array(
 
 They can even work with _strings_:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(
     [
         [
@@ -113,7 +113,7 @@ ak.Array(
 
 Awkward Arrays can have structure through _records_:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(
     [
         [
@@ -135,7 +135,7 @@ ak.Array(
 
 In fact, Awkward Arrays can represent many kinds of jagged data. They can possess complex structures that mix records, and primitive types.
 
-```{code-cell} ipython3
+```{code-cell}
 :tags: []
 
 ak.Array(
@@ -162,7 +162,7 @@ ak.Array(
 
 They can even contain unions!
 
-```{code-cell} ipython3
+```{code-cell}
 ak.Array(
     [
         [np.datetime64("1815-12-10"), "Cassini"],
@@ -175,20 +175,20 @@ ak.Array(
 
 Awkward Array _looks like_ NumPy. It behaves identically to NumPy for regular arrays
 
-```{code-cell} ipython3
+```{code-cell}
 x = ak.Array([
     [1, 2, 3],
     [4, 5, 6]
 ]);
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.sum(x, axis=-1)
 ```
 
 providing a similar high-level API, and implementing the [ufunc](https://numpy.org/doc/stable/reference/ufuncs.html) mechanism:
 
-```{code-cell} ipython3
+```{code-cell}
 powers_of_two = ak.Array(
     [
         [1, 2, 4],
@@ -198,7 +198,7 @@ powers_of_two = ak.Array(
 );
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 ak.sum(powers_of_two)
 ```
 
@@ -208,7 +208,7 @@ But generalises to the tricky kinds of data that NumPy struggles to work with. I
 
 ![](../image/example-reduction-sum.svg)
 
-```{code-cell} ipython3
+```{code-cell}
 ak.sum(powers_of_two, axis=0)
 ```
 
@@ -218,7 +218,7 @@ ak.sum(powers_of_two, axis=0)
 
 Awkward makes it east to pull apart record structures:
 
-```{code-cell} ipython3
+```{code-cell}
 nobel_prize_winner = ak.Array(
     [
         [
@@ -238,17 +238,17 @@ nobel_prize_winner = ak.Array(
 );
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 nobel_prize_winner.name
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 nobel_prize_winner.age
 ```
 
 These records are lightweight, and simple to compose:
 
-```{code-cell} ipython3
+```{code-cell}
 nobel_prize_winner_with_birth_year = ak.zip({
     "name": nobel_prize_winner.name,
     "age": nobel_prize_winner.age,
@@ -256,7 +256,7 @@ nobel_prize_winner_with_birth_year = ak.zip({
 });
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 nobel_prize_winner_with_birth_year.show()
 ```
 
@@ -266,19 +266,19 @@ nobel_prize_winner_with_birth_year.show()
 
 Like NumPy, Awkward Array performs computations in fast, optimised kernels.
 
-```{code-cell} ipython3
+```{code-cell}
 large_array = ak.Array([[1, 2, 3], [], [4, 5]] * 1_000_000)
 ```
 
 We can compute the sum in `3.37 ms ± 107 µs` on a reference CPU:
 
-```{code-cell} ipython3
+```{code-cell}
 ak.sum(large_array)
 ```
 
 The same sum can be computed with pure-Python over the flattened array in `369 ms ± 8.07 ms`:
 
-```{code-cell} ipython3
+```{code-cell}
 large_flat_array = ak.ravel(large_array)
 
 sum(large_flat_array)
@@ -290,9 +290,9 @@ These performance values are not benchmarks; they are only an indication of the 
 
 Some problems are hard to solve with array-oriented programming. Awkward Array supports [Numba](https://numba.pydata.org/) out of the box.
 
-```{code-cell} ipython3
+```{code-cell}
 import numba as nb
-ak.numba.register()
+ak.numba.register_and_check()
 
 @nb.njit
 def cumulative_sum(arr):
@@ -303,6 +303,6 @@ def cumulative_sum(arr):
     return result
 ```
 
-```{code-cell} ipython3
+```{code-cell}
 cumulative_sum(large_array)
 ```
