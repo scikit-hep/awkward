@@ -9,7 +9,7 @@ on:
     types: [released]
   workflow_dispatch:
 env:
-  PYTHON_VERSION: "3.10"
+  PYTHON_VERSION: "3.10.2"
 jobs:
   awkward-wasm:
     runs-on: ubuntu-22.04
