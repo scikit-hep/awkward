@@ -222,7 +222,7 @@ np_array
 ```
 
 ```{code-cell} ipython3
-np_array.to_list()
+np_array.tolist()
 ```
 
 ```{code-cell} ipython3
@@ -245,7 +245,7 @@ ak.to_numpy(ak_array)
 ```
 
 ```{code-cell} ipython3
-ak.to_numpy(ak_array).to_list()
+ak.to_numpy(ak_array).tolist()
 ```
 
 Note, however, that the structure of an Awkward Array's option type is not always preserved when converting to NumPy masked arrays. Masked arrays can only have missing numbers, not missing lists, so missing lists are expanded into lists of missing numbers.
@@ -258,7 +258,7 @@ ak_array1
 ```
 
 ```{code-cell} ipython3
-ak.to_numpy(ak_array1).to_list()
+ak.to_numpy(ak_array1).tolist()
 ```
 
 But an array of type `option[var * int64]` must have its missing lists expanded into lists of missing numbers.
@@ -269,7 +269,7 @@ ak_array2
 ```
 
 ```{code-cell} ipython3
-ak.to_numpy(ak_array2).to_list()
+ak.to_numpy(ak_array2).tolist()
 ```
 
 Finally, it is possible to prevent the {func}`ak.to_numpy` function from creating NumPy masked arrays by passing `allow_missing=False`.

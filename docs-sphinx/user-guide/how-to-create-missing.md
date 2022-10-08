@@ -80,10 +80,10 @@ It returns `np.ma.masked` objects if you try to access missing values:
 numpy_array[0], numpy_array[1], numpy_array[2], numpy_array[3], numpy_array[4]
 ```
 
-But it uses `None` for missing values in `to_list`:
+But it uses `None` for missing values in `tolist`:
 
 ```{code-cell} ipython3
-numpy_array.to_list()
+numpy_array.tolist()
 ```
 
 The {func}`ak.from_numpy` function converts masked arrays into Awkward Arrays with missing values, as does the {class}`ak.Array` constructor.
