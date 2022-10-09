@@ -11,6 +11,7 @@ build:
     pre_build:
       - pip install requests
       - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 jupyter-cache -d docs-sphinx/_build/.jupyter_cache
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 awkward-wasm-wheel -d docs-sphinx/lite/pypi
 
 python:
   install:
