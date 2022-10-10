@@ -289,6 +289,6 @@ class Install(setuptools.command.install.install):
 setup(
     install_requires=install_requires,
     extras_require=extras,
-    ext_modules=[CMakeExtension("awkward")],
-    cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
+    # ext_modules=[CMakeExtension("awkward")],
+    # cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
 )
