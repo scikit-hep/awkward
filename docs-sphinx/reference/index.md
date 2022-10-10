@@ -18,7 +18,7 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 **Converting to other formats:** {func}`ak.to_numpy`, {func}`ak.to_list`, {func}`ak.to_json`, {func}`ak.to_dataframe`, {func}`ak.to_arrow`, {func}`ak.to_parquet`.
 
-**Conversion functions used internally:** {func}`ak.to_layout`, {func}`ak.regularize_numpyarray`.
+**Conversion functions used internally:** {func}`ak.to_layout`.
 
 **Alternative to filtering:** {func}`ak.mask`, which is the same as `array.mask[filter]`. Creates an array with missing values instead of removing values.
 
@@ -70,13 +70,13 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 **String behaviors:** defined in the {doc}`ak.behaviors.string` submodule; rarely needed for analysis (strings are a built-in behavior).
 
-**Numba compatibility:** {func}`ak.numba.register` informs Numba about Awkward Array types; rarely needed because this should happen automatically.
+**Numba compatibility:** {func}`ak.numba.register_and_check` informs Numba about Awkward Array types; rarely needed because this should happen automatically.
 
 **Pandas compatibility:** {func}`ak.to_dataframe` turns an Awkward Array into a list of DataFrames or joins them with [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html) if necessary.
 
 **NumExpr compatibility:** {func}`ak.numexpr.evaluate` and {func}`ak.numexpr.re_evaluate` are like the NumExpr functions, but with Awkward Array support.
 
-**JAX compatibility:** {func}`ak.jax.register_and_check()` registers Awkward Array integration with JAX.
+**JAX compatibility:** {func}`ak.jax.register_and_check` registers Awkward Array integration with JAX.
 
 **Layout nodes:** the high-level {func}`ak.Array` and {func}`ak.Record` types hide the tree-structure that build the array, but they can be accessed with [ak.Array.layout](_auto/ak.Array.html#ak-array-layout). This layout structure is the core of the library, but usually doesn't have to be accessed by data analysts.
 
@@ -97,13 +97,11 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 Most layout nodes contain another content node ({class}`ak.contents.RecordArray` and {class}`ak.contents.UnionArray` can contain more than one), thus forming a tree. Only {class}`ak.contents.EmptyArray` and {class}`ak.contents.NumpyArray` cannot contain a content, and hence these are leaves of the tree.
 
-**Iterator for layout nodes:** {class}`ak.layout.Iterator` (used internally).
-
 **Layout-level ArrayBuilder:** {class}`ak.layout.ArrayBuilder` (used internally).
 
-**Index for layout nodes:** integer and boolean arrays that define the shape of the data structure, such as boolean masks in {class}`ak.contents.ByteMaskedArray`, are not {class}`ak.contents.NumpyArray` but a more constrained type called {class}`ak.layout.Index`.
+**Index for layout nodes:** integer and boolean arrays that define the shape of the data structure, such as boolean masks in {class}`ak.contents.ByteMaskedArray`, are not {class}`ak.contents.NumpyArray` but a more constrained type called {class}`ak.index.Index`.
 
-**Identities for layout nodes:** {class}`ak.layout.Identities` are an optional surrogate key for certain join operations. (Not yet used.)
+**Identities for layout nodes:** {class}`ak.identifier.Identifier` are an optional surrogate key for certain join operations. (Not yet used.)
 
 **High-level data types:**
 
