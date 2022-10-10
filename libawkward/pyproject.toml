@@ -1,0 +1,23 @@
+
+[tool.cibuildwheel]
+test-extras = [
+    "test",
+]
+test-command = "pytest {project}/tests"
+skip = [
+    "pp*win*",
+    "pp*-manylinux_i686",
+]
+test-skip = [
+    "*universal2:arm64",
+    "pp*",
+    "*musllinux*",
+]
+manylinux-x86_64-image = "manylinux2014"
+build-verbosity = 1
+overrides = [
+    { select = "cp3?-*", manylinux-x86_64-image = "manylinux2014" },
+]
+
+[tool.cibuildwheel.environment]
+PIP_ONLY_BINARY = "cmake,numpy"
