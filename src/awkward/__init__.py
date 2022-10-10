@@ -53,7 +53,7 @@ from awkward.operations import *
 import awkward._v2
 
 # version
-__version__ = awkward._ext.__version__
+__version__ = "2.0.0rc0"
 __all__ = [x for x in globals() if not x.startswith("_")]
 
 
