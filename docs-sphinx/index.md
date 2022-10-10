@@ -1,6 +1,12 @@
 # Awkward Array documentation
 
-::::{card}
+
+% TODO mention left side-bar
+:::::{grid} 1 1 2 2
+:class-container: intro-grid text-center
+
+::::{grid-item-card} 
+:columns: 12
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**. 
 
@@ -10,12 +16,7 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 
 What is an Awkward Array?
 :::
-
 ::::
-
-% TODO mention left side-bar
-:::::{grid} 1 1 2 2
-:class-container: intro-grid text-center
 
 ::::{grid-item-card} 
 :link-type: doc
