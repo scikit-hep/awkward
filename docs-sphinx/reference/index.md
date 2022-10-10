@@ -14,7 +14,7 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 **Describing an array:** {func}`ak.is_valid`, {func}`ak.validity_error`, {func}`ak.type`, {func}`ak.parameters`, {func}`ak.fields`.
 
-**Converting from other formats:** {func}`ak.from_numpy`, {func}`ak.from_iter`, {func}`ak.from_json`, {func}`ak.from_dataframe`, {func}`ak.from_arrow`, {func}`ak.from_parquet`. Note that the {func}`ak.Array` and {func}`ak.Record` constructors use these functions.
+**Converting from other formats:** {func}`ak.from_numpy`, {func}`ak.from_iter`, {func}`ak.from_json`, {func}`ak.from_arrow`, {func}`ak.from_parquet`. Note that the {func}`ak.Array` and {func}`ak.Record` constructors use these functions.
 
 **Converting to other formats:** {func}`ak.to_numpy`, {func}`ak.to_list`, {func}`ak.to_json`, {func}`ak.to_dataframe`, {func}`ak.to_arrow`, {func}`ak.to_parquet`.
 
@@ -70,15 +70,13 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 **String behaviors:** defined in the {doc}`ak.behaviors.string` submodule; rarely needed for analysis (strings are a built-in behavior).
 
-**Partition functions:** defined in the {mod}`ak.partition` submodule; rarely needed for analysis: use {func}`ak.partitions`, {func}`ak.partitioned`, {func}`ak.repartition`.
-
 **Numba compatibility:** {func}`ak.numba.register` informs Numba about Awkward Array types; rarely needed because this should happen automatically.
 
 **Pandas compatibility:** {func}`ak.to_dataframe` turns an Awkward Array into a list of DataFrames or joins them with [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html) if necessary.
 
 **NumExpr compatibility:** {func}`ak.numexpr.evaluate` and {func}`ak.numexpr.re_evaluate` are like the NumExpr functions, but with Awkward Array support.
 
-**Autograd compatibility:** {func}`ak.autograd.elementwise_grad` is like the Autograd function, but with Awkward Array support.
+**JAX compatibility:** {func}`ak.jax.register_and_check()` registers Awkward Array integration with JAX.
 
 **Layout nodes:** the high-level {func}`ak.Array` and {func}`ak.Record` types hide the tree-structure that build the array, but they can be accessed with [ak.Array.layout](_auto/ak.Array.html#ak-array-layout). This layout structure is the core of the library, but usually doesn't have to be accessed by data analysts.
 
@@ -98,8 +96,6 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 * {class}`ak.contents.UnionArray`: interleaves a set of arrays as a tagged union, can represent heterogeneous data.
 
 Most layout nodes contain another content node ({class}`ak.contents.RecordArray` and {class}`ak.contents.UnionArray` can contain more than one), thus forming a tree. Only {class}`ak.contents.EmptyArray` and {class}`ak.contents.NumpyArray` cannot contain a content, and hence these are leaves of the tree.
-
-Note that {func}`ak.partition.PartitionedArray` and its concrete class,  {func}`ak.partition.IrregularlyPartitionedArray`, are not {class}`ak.contents.Content` because they cannot be nested within a tree. Partitioning is only allowed at the root of the tree.
 
 **Iterator for layout nodes:** {class}`ak.layout.Iterator` (used internally).
 
