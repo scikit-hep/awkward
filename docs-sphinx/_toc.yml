@@ -156,4 +156,5 @@ subtrees:
 
       - file: reference/index
       - file: contributor-guide
-      - file: release/index
+      - url: https://github.com/scikit-hep/awkward/releases
+        title: Release history
