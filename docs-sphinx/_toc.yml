@@ -155,6 +155,7 @@ subtrees:
                 title: "Differentiation using JAX"
 
       - file: reference/index
-      - file: contributor-guide
+      - url: https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md
+        title: Contributor guide
       - url: https://github.com/scikit-hep/awkward/releases
         title: Release history

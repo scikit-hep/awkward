@@ -57,8 +57,7 @@ The reference guide contains a detailed description of the functions, modules, a
 :::
 
 :::{grid-item-card}
-:link-type: doc
-:link: contributor-guide
+:link: https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md
 
 {fas}`terminal`
 
