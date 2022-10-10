@@ -609,10 +609,7 @@ def lower_bytestring(context, builder, sig, args):
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()
 
-    # xval_proxy = numba.core.cgutils.create_struct_proxy(xtype)(context, builder)
-    # strptr = xval_proxy.data
     strptr = pyapi.from_native_value(xtype, xval)
-
     p_length = numba.core.cgutils.alloca_once(builder, pyapi.py_ssize_t)
     p_buffer = numba.core.cgutils.alloca_once(builder, pyapi.cstring)
 
