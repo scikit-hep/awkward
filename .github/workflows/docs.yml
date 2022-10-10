@@ -2,11 +2,11 @@ name: Docs
 on:
   push:
     branches:
-      - main
+#      - main
       - docs
   pull_request:
-  release:
-    types: [released]
+#  release:
+#    types: [released]
   workflow_dispatch:
 env:
   PYTHON_VERSION: "3.10.7"
