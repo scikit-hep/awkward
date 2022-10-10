@@ -101,8 +101,15 @@ target_link_libraries(awkward PUBLIC awkward-parent)
 include(CTest)
 
 if(BUILD_TESTING)
+  macro(addtest name filename)
+    add_executable(${name} ${filename})
+    target_link_libraries(${name} PRIVATE awkward-static awkward-cpu-kernels-static)
+    set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
+    set_target_properties(${name} PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
+    add_test(${name} ${name})
+  endmacro(addtest)
+
   add_subdirectory(tests-cpp)
-  add_subdirectory(tests)
 
   addtest_nolibs(test_1494-layout-builder tests-cpp/test_1494-layout-builder.cpp)
   addtest_nolibs(test_1542-growable-buffer tests-cpp/test_1542-growable-buffer.cpp)
