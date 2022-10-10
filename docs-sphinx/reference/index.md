@@ -14,9 +14,9 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 **Describing an array:** {func}`ak.is_valid`, {func}`ak.validity_error`, {func}`ak.type`, {func}`ak.parameters`, {func}`ak.fields`.
 
-**Converting from other formats:** {func}`ak.from_numpy`, {func}`ak.from_iter`, {func}`ak.from_json`, {func}`ak.from_awkward0`. Note that the {func}`ak.Array` and {func}`ak.Record` constructors use these functions.
+**Converting from other formats:** {func}`ak.from_numpy`, {func}`ak.from_iter`, {func}`ak.from_json`, {func}`ak.from_dataframe`, {func}`ak.from_arrow`, {func}`ak.from_parquet`. Note that the {func}`ak.Array` and {func}`ak.Record` constructors use these functions.
 
-**Converting to other formats:** {func}`ak.to_numpy`, {func}`ak.to_list`, {func}`ak.to_json`, {func}`ak.to_awkward0`.
+**Converting to other formats:** {func}`ak.to_numpy`, {func}`ak.to_list`, {func}`ak.to_json`, {func}`ak.to_dataframe`, {func}`ak.to_arrow`, {func}`ak.to_parquet`.
 
 **Conversion functions used internally:** {func}`ak.to_layout`, {func}`ak.regularize_numpyarray`.
 
@@ -74,7 +74,7 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 **Numba compatibility:** {func}`ak.numba.register` informs Numba about Awkward Array types; rarely needed because this should happen automatically.
 
-**Pandas compatibility:** {func}`ak.to_pandas` turns an Awkward Array into a list of DataFrames or joins them with [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html) if necessary.
+**Pandas compatibility:** {func}`ak.to_dataframe` turns an Awkward Array into a list of DataFrames or joins them with [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html) if necessary.
 
 **NumExpr compatibility:** {func}`ak.numexpr.evaluate` and {func}`ak.numexpr.re_evaluate` are like the NumExpr functions, but with Awkward Array support.
 
