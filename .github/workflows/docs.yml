@@ -2,11 +2,11 @@ name: Docs
 on:
   push:
     branches:
-#      - main
+      - main
       - docs
   pull_request:
-#  release:
-#    types: [released]
+  release:
+    types: [released]
   workflow_dispatch:
 env:
   PYTHON_VERSION: "3.10.7"
@@ -111,6 +111,6 @@ jobs:
       with:
         name: jupyter-cache
         path: docs-sphinx/_build/.jupyter_cache
-    - name: Trigger RTD Build
-      # NB: head_ref is only valid for PR triggers
-      run: curl -X POST -d "branches=${{ github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
+#    - name: Trigger RTD Build
+#      # NB: head_ref is only valid for PR triggers
+#      run: curl -X POST -d "branches=${{ github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
