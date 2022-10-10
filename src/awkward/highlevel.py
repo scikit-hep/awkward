@@ -167,12 +167,12 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     See #ak.numexpr.re_evaluate to recalculate an expression without
     rebuilding its virtual machine.
 
-    Autograd
+    JAX
     ********
 
-    Derivatives of a calculation on a set of ak.Arrays can be calculated with
-    [Autograd](https://github.com/HIPS/autograd#readme), but only if the
-    function in `ak.autograd` is used, not the functions in the `autograd`
+    Derivatives of a calculation on an #ak.Array (s) can be calculated with
+    [JAX](https://github.com/google/jax#readme), but only if the
+    function in `ak` / `numpy` are used, not the functions in the `jax`
     library directly.
 
     Like NumPy ufuncs, the function and its derivatives are evaluated on the
