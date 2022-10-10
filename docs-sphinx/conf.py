@@ -85,6 +85,16 @@ html_theme_options = {
         }
     ],
     "use_edit_page_button": True,
+    "external_links": [
+        {
+            "name": "Contributor guide",
+            "url": "https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md",
+        },
+        {
+            "name": "Release history",
+            "url": "https://github.com/scikit-hep/awkward/releases",
+        },
+    ],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
