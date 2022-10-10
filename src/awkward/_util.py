@@ -622,7 +622,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
 
         if regulararray and len(array.shape) > 1:
             return ak.contents.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:])),
+                recurse(array.reshape((-1,) + array.shape[2:]), mask),
                 array.shape[1],
                 array.shape[0],
             )
