@@ -44,14 +44,7 @@ def read_requirements(name):
         return f.read().strip().split("\n")
 
 
-extras = {
-    "cuda": [f"awkward-cuda-kernels=={VERSION_INFO}"],
-    "test": read_requirements("requirements-test.txt"),
-    "dev": read_requirements("requirements-dev.txt"),
-}
-extras["all"] = sum(extras.values(), [])
-
-install_requires = read_requirements("requirements.txt")
+install_requires = ["numpy>=1.13.1"]
 
 
 class CMakeExtension(Extension):
@@ -165,9 +158,10 @@ def tree(x):
 class BuildPy(setuptools.command.build_py.build_py):
     def run(self):
         # generate include/awkward/kernels.h and src/awkward/_kernel_signatures.py
-        subprocess.check_call(
-            [PYTHON, os.path.join("dev", "generate-kernel-signatures.py")]
-        )
+        # TODO
+        # subprocess.check_call(
+        #     [PYTHON, os.path.join("dev", "generate-kernel-signatures.py")]
+        # )
 
         setuptools.command.build_py.build_py.run(self)
 
@@ -194,11 +188,11 @@ class Install(setuptools.command.install.install):
 
         print("--- copying includes ------------------------------------------")
         # Python 3.8 can use dirs_exist_ok=True instead.
-        include_dir = os.path.join(outerdir, "awkward", "include")
+        include_dir = os.path.join(outerdir, "libawkward", "include")
         if os.path.exists(include_dir):
             shutil.rmtree(include_dir)
         shutil.copytree(
-            os.path.join("include"), os.path.join(outerdir, "awkward", "include")
+            os.path.join("include"), os.path.join(outerdir, "libawkward", "include")
         )
 
         print("--- outerdir after copy ---------------------------------------")
@@ -222,11 +216,11 @@ class Install(setuptools.command.install.install):
                         "copying",
                         os.path.join(dlldir, x),
                         "-->",
-                        os.path.join(self.build_lib, "awkward", x),
+                        os.path.join(self.build_lib, "libawkward", x),
                     )
                     shutil.copyfile(
                         os.path.join(dlldir, x),
-                        os.path.join(self.build_lib, "awkward", x),
+                        os.path.join(self.build_lib, "libawkward", x),
                     )
                     found = True
             if not found:
@@ -237,11 +231,11 @@ class Install(setuptools.command.install.install):
                             "copying",
                             os.path.join(dlldir, x),
                             "-->",
-                            os.path.join(self.build_lib, "awkward", x),
+                            os.path.join(self.build_lib, "libawkward", x),
                         )
                         shutil.copyfile(
                             os.path.join(dlldir, x),
-                            os.path.join(self.build_lib, "awkward", x),
+                            os.path.join(self.build_lib, "libawkward", x),
                         )
                         found = True
 
@@ -265,7 +259,7 @@ class Install(setuptools.command.install.install):
                 ),
             )
         )
-        outputdir = os.path.join(outerdir, "awkward")
+        outputdir = os.path.join(outerdir, "libawkward")
         outbase = self.install_lib.rstrip(os.path.sep)
 
         outputs = []
@@ -273,7 +267,7 @@ class Install(setuptools.command.install.install):
         for original in setuptools.command.install.install.get_outputs(self):
             if "egg-info" in original:
                 outputs.append(original)
-            if original.startswith(os.path.join(outbase, "awkward") + os.path.sep):
+            if original.startswith(os.path.join(outbase, "libawkward") + os.path.sep):
                 outputs.append(original)
 
         for root, _, files in os.walk(outputdir):
@@ -288,7 +282,6 @@ class Install(setuptools.command.install.install):
 
 setup(
     install_requires=install_requires,
-    extras_require=extras,
-    # ext_modules=[CMakeExtension("awkward")],
-    # cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
+    ext_modules=[CMakeExtension("libawkward")],
+    cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
 )
