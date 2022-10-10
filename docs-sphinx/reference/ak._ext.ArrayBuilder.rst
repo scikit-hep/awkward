@@ -1,12 +1,12 @@
 .. py:currentmodule:: ak.layout
 
-ak.layout.ArrayBuilder
+ak._ext.ArrayBuilder
 ----------------------
 
-The low-level ArrayBuilder that builds :class:`ak.layout.Content` arrays. This
+The low-level ArrayBuilder that builds :class:`ak.contents.Content` arrays. This
 object is wrapped by :class:`ak.ArrayBuilder`.
 
-(Method names in the high-level interface have been chnaged to include
+(Method names in the high-level interface have been changed to include
 underscores after "begin" and "end," but that hasn't happened in the
 low-level interface, yet or possibly at all.)
 

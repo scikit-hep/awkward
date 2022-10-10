@@ -14,9 +14,9 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 **Describing an array:** {func}`ak.is_valid`, {func}`ak.validity_error`, {func}`ak.type`, {func}`ak.parameters`, {func}`ak.fields`.
 
-**Converting from other formats:** {func}`ak.from_numpy`, {func}`ak.from_iter`, {func}`ak.from_json`, {func}`ak.from_awkward0`. Note that the {func}`ak.Array` and {func}`ak.Record` constructors use these functions.
+**Converting from other formats:** {func}`ak.from_numpy`, {func}`ak.from_iter`, {func}`ak.from_json`, {func}`ak.from_arrow`, {func}`ak.from_parquet`. Note that the {func}`ak.Array` and {func}`ak.Record` constructors use these functions.
 
-**Converting to other formats:** {func}`ak.to_numpy`, {func}`ak.to_list`, {func}`ak.to_json`, {func}`ak.to_awkward0`.
+**Converting to other formats:** {func}`ak.to_numpy`, {func}`ak.to_list`, {func}`ak.to_json`, {func}`ak.to_dataframe`, {func}`ak.to_arrow`, {func}`ak.to_parquet`.
 
 **Conversion functions used internally:** {func}`ak.to_layout`, {func}`ak.regularize_numpyarray`.
 
@@ -41,10 +41,6 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 **Converting missing values to and from empty lists:** {func}`ak.singletons` turns `[1, None, 3]` into `[[1], [], [3]]` and {func}`ak.firsts` turns `[[1], [], [3]]` into `[1, None, 3]`. This can be useful with {func}`ak.argmin` and {func}`ak.argmax`.
 
 **Combinatorics:** {func}`ak.cartesian` produces tuples of*n* items from*n* arrays, usually per-sublist, and {func}`ak.combinations` produces unique tuples of*n* items from the same array. To get integer arrays for selecting these tuples, use {func}`ak.argcartesian` and {func}`ak.argcombinations`.
-
-**Partitioned arrays:** {func}`ak.partitions` reveals how an array is internally partitioned (if at all) and {func}`ak.partitioned`, {func}`ak.repartition` create or change the partitioning.
-
-**Virtual arrays:** {func}`ak.virtual` creates an array that will be generated on demand and {func}`ak.with_cache` assigns a new cache to all virtual arrays in a structure.
 
 **NumPy compatibility:** {func}`ak.size`, {func}`ak.atleast_1d`.
 
@@ -74,53 +70,48 @@ The C++ classes, cpu-kernels, and gpu-kernels are documented separately. Click h
 
 **String behaviors:** defined in the {doc}`ak.behaviors.string` submodule; rarely needed for analysis (strings are a built-in behavior).
 
-**Partition functions:** defined in the {mod}`ak.partition` submodule; rarely needed for analysis: use {func}`ak.partitions`, {func}`ak.partitioned`, {func}`ak.repartition`.
-
 **Numba compatibility:** {func}`ak.numba.register` informs Numba about Awkward Array types; rarely needed because this should happen automatically.
 
-**Pandas compatibility:** {func}`ak.to_pandas` turns an Awkward Array into a list of DataFrames or joins them with [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html) if necessary.
+**Pandas compatibility:** {func}`ak.to_dataframe` turns an Awkward Array into a list of DataFrames or joins them with [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html) if necessary.
 
 **NumExpr compatibility:** {func}`ak.numexpr.evaluate` and {func}`ak.numexpr.re_evaluate` are like the NumExpr functions, but with Awkward Array support.
 
-**Autograd compatibility:** {func}`ak.autograd.elementwise_grad` is like the Autograd function, but with Awkward Array support.
+**JAX compatibility:** {func}`ak.jax.register_and_check()` registers Awkward Array integration with JAX.
 
 **Layout nodes:** the high-level {func}`ak.Array` and {func}`ak.Record` types hide the tree-structure that build the array, but they can be accessed with [ak.Array.layout](_auto/ak.Array.html#ak-array-layout). This layout structure is the core of the library, but usually doesn't have to be accessed by data analysts.
 
-* {class}`ak.layout.Content`: the abstract base class.
-* {class}`ak.layout.EmptyArray`: an array of unknown type with no elements (usually produced by {func}`ak.ArrayBuilder`, which can't determine type at a given level without samples).
-* {class}`ak.layout.NumpyArray`: any NumPy array (e.g. multidimensional shape, arbitrary dtype), though usually only one-dimensional arrays of numbers.
-* {class}`ak.layout.RegularArray`: splits its nested content into equal-length lists.
-* {class}`ak.layout.ListArray`: splits its nested content into variable-length lists with full generality (may use its content non-contiguously, overlapping, or out-of-order).
-* {class}`ak.layout.ListOffsetArray`: splits its nested content into variable-length lists, assuming contiguous, non-overlapping, in-order content.
-* {class}`ak.layout.RecordArray`: represents a logical array of records with a "struct of arrays" layout in memory.
-* {class}`ak.layout.Record`: represents a single record (not a subclass of {class}`ak.layout.Content` in Python).
-* {class}`ak.layout.IndexedArray`: rearranges and/or duplicates its content by lazily applying an integer index.
-* {class}`ak.layout.IndexedOptionArray`: same as {class}`ak.layout.IndexedArray` with missing values as negative indexes.
-* {class}`ak.layout.ByteMaskedArray`: represents its content with missing values with an 8-bit boolean mask.
-* {class}`ak.layout.BitMaskedArray`: represents its content with missing values with a 1-bit boolean mask.
-* {class}`ak.layout.UnmaskedArray`: specifies that its content can contain missing values in principle, but no mask is supplied because all elements are non-missing.
-* {class}`ak.layout.UnionArray`: interleaves a set of arrays as a tagged union, can represent heterogeneous data.
-* {class}`ak.layout.VirtualArray`: generates an array on demand from an {class}`ak.layout.ArrayGenerator` or a {class}`ak.layout.SliceGenerator` and optionally caches the generated array in an {class}`ak.layout.ArrayCache`.
+* {class}`ak.contents.Content`: the abstract base class.
+* {class}`ak.contents.EmptyArray`: an array of unknown type with no elements (usually produced by {func}`ak.ArrayBuilder`, which can't determine type at a given level without samples).
+* {class}`ak.contents.NumpyArray`: any NumPy array (e.g. multidimensional shape, arbitrary dtype), though usually only one-dimensional arrays of numbers.
+* {class}`ak.contents.RegularArray`: splits its nested content into equal-length lists.
+* {class}`ak.contents.ListArray`: splits its nested content into variable-length lists with full generality (may use its content non-contiguously, overlapping, or out-of-order).
+* {class}`ak.contents.ListOffsetArray`: splits its nested content into variable-length lists, assuming contiguous, non-overlapping, in-order content.
+* {class}`ak.contents.RecordArray`: represents a logical array of records with a "struct of arrays" layout in memory.
+* {class}`ak.record.Record`: represents a single record (not a subclass of {class}`ak.contents.Content` in Python).
+* {class}`ak.contents.IndexedArray`: rearranges and/or duplicates its content by lazily applying an integer index.
+* {class}`ak.contents.IndexedOptionArray`: same as {class}`ak.contents.IndexedArray` with missing values as negative indexes.
+* {class}`ak.contents.ByteMaskedArray`: represents its content with missing values with an 8-bit boolean mask.
+* {class}`ak.contents.BitMaskedArray`: represents its content with missing values with a 1-bit boolean mask.
+* {class}`ak.contents.UnmaskedArray`: specifies that its content can contain missing values in principle, but no mask is supplied because all elements are non-missing.
+* {class}`ak.contents.UnionArray`: interleaves a set of arrays as a tagged union, can represent heterogeneous data.
 
-Most layout nodes contain another content node ({class}`ak.layout.RecordArray` and {class}`ak.layout.UnionArray` can contain more than one), thus forming a tree. Only {class}`ak.layout.EmptyArray` and {class}`ak.layout.NumpyArray` cannot contain a content, and hence these are leaves of the tree.
-
-Note that {func}`ak.partition.PartitionedArray` and its concrete class,  {func}`ak.partition.IrregularlyPartitionedArray`, are not {class}`ak.layout.Content` because they cannot be nested within a tree. Partitioning is only allowed at the root of the tree.
+Most layout nodes contain another content node ({class}`ak.contents.RecordArray` and {class}`ak.contents.UnionArray` can contain more than one), thus forming a tree. Only {class}`ak.contents.EmptyArray` and {class}`ak.contents.NumpyArray` cannot contain a content, and hence these are leaves of the tree.
 
 **Iterator for layout nodes:** {class}`ak.layout.Iterator` (used internally).
 
 **Layout-level ArrayBuilder:** {class}`ak.layout.ArrayBuilder` (used internally).
 
-**Index for layout nodes:** integer and boolean arrays that define the shape of the data structure, such as boolean masks in {class}`ak.layout.ByteMaskedArray`, are not {class}`ak.layout.NumpyArray` but a more constrained type called {class}`ak.layout.Index`.
+**Index for layout nodes:** integer and boolean arrays that define the shape of the data structure, such as boolean masks in {class}`ak.contents.ByteMaskedArray`, are not {class}`ak.contents.NumpyArray` but a more constrained type called {class}`ak.layout.Index`.
 
 **Identities for layout nodes:** {class}`ak.layout.Identities` are an optional surrogate key for certain join operations. (Not yet used.)
 
 **High-level data types:**
 
-This is the type of data in a high-level {func}`ak.Array` or {func}`ak.Record` as reported by {func}`ak.type`. It represents as much information as a data analyst needs to know (e.g. the distinction between variable and fixed-length lists, but not the distinction between {class}`ak.layout.ListArray` and {class}`ak.layout.ListOffsetArray`).
+This is the type of data in a high-level {func}`ak.Array` or {func}`ak.Record` as reported by {func}`ak.type`. It represents as much information as a data analyst needs to know (e.g. the distinction between variable and fixed-length lists, but not the distinction between {class}`ak.contents.ListArray` and {class}`ak.contents.ListOffsetArray`).
 
 * {class}`ak.types.Type`: the abstract base class.
 * {class}`ak.types.ArrayType`: type of a non-composable, high-level {func}`ak.Array`, which includes the length of the array.
-* {class}`ak.types.UnknownType`: a type that is not known because it is represented by an {class}`ak.layout.EmptyArray`.
+* {class}`ak.types.UnknownType`: a type that is not known because it is represented by an {class}`ak.contents.EmptyArray`.
 * {class}`ak.types.PrimitiveType`: a numeric or boolean type.
 * {class}`ak.types.RegularType`: lists of a fixed length; this `size` is part of the type description.
 * {class}`ak.types.ListType`: lists of unspecified or variable length.
@@ -132,22 +123,21 @@ All concrete {class}`ak.types.Type` subclasses are composable except {class}`ak.
 
 **Low-level array forms:**
 
-This is the type of a {class}`ak.layout.Content` array expressed with low-level granularity (e.g. including the distinction between {class}`ak.layout.ListArray` and {class}`ak.layout.ListOffsetArray`). There is a one-to-one relationship between {class}`ak.layout.Content` subclasses and {class}`ak.forms.Form` subclasses, and each {class}`ak.forms.Form` maps to only one {class}`ak.types.Type`.
+This is the type of a {class}`ak.contents.Content` array expressed with low-level granularity (e.g. including the distinction between {class}`ak.contents.ListArray` and {class}`ak.contents.ListOffsetArray`). There is a one-to-one relationship between {class}`ak.contents.Content` subclasses and {class}`ak.forms.Form` subclasses, and each {class}`ak.forms.Form` maps to only one {class}`ak.types.Type`.
 
 * {class}`ak.forms.Form`: the abstract base class.
-* {class}`ak.forms.EmptyForm` for {class}`ak.layout.EmptyArray`.
-* {class}`ak.forms.NumpyForm` for {class}`ak.layout.NumpyArray`.
-* {class}`ak.forms.RegularForm` for {class}`ak.layout.RegularArray`.
-* {class}`ak.forms.ListForm` for {class}`ak.layout.ListArray`.
-* {class}`ak.forms.ListOffsetForm` for {class}`ak.layout.ListOffsetArray`.
-* {class}`ak.forms.RecordForm` for {class}`ak.layout.RecordArray`.
-* {class}`ak.forms.IndexedForm` for {class}`ak.layout.IndexedArray`.
-* {class}`ak.forms.IndexedOptionForm` for {class}`ak.layout.IndexedOptionArray`.
-* {class}`ak.forms.ByteMaskedForm` for {class}`ak.layout.ByteMaskedArray`.
-* {class}`ak.forms.BitMaskedForm` for {class}`ak.layout.BitMaskedArray`.
-* {class}`ak.forms.UnmaskedForm` for {class}`ak.layout.UnmaskedArray`.
-* {class}`ak.forms.UnionForm` for {class}`ak.layout.UnionArray`.
-* {class}`ak.forms.VirtualForm` for {class}`ak.layout.VirtualArray`.
+* {class}`ak.forms.EmptyForm` for {class}`ak.contents.EmptyArray`.
+* {class}`ak.forms.NumpyForm` for {class}`ak.contents.NumpyArray`.
+* {class}`ak.forms.RegularForm` for {class}`ak.contents.RegularArray`.
+* {class}`ak.forms.ListForm` for {class}`ak.contents.ListArray`.
+* {class}`ak.forms.ListOffsetForm` for {class}`ak.contents.ListOffsetArray`.
+* {class}`ak.forms.RecordForm` for {class}`ak.contents.RecordArray`.
+* {class}`ak.forms.IndexedForm` for {class}`ak.contents.IndexedArray`.
+* {class}`ak.forms.IndexedOptionForm` for {class}`ak.contents.IndexedOptionArray`.
+* {class}`ak.forms.ByteMaskedForm` for {class}`ak.contents.ByteMaskedArray`.
+* {class}`ak.forms.BitMaskedForm` for {class}`ak.contents.BitMaskedArray`.
+* {class}`ak.forms.UnmaskedForm` for {class}`ak.contents.UnmaskedArray`.
+* {class}`ak.forms.UnionForm` for {class}`ak.contents.UnionArray`.
 
 ## Additional documentation
 

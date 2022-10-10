@@ -12,6 +12,7 @@
 #
 import os
 import json
+import datetime
 
 # import sys
 # sys.path.insert(0, os.path.abspath("."))
@@ -19,7 +20,7 @@ import json
 # -- Project information -----------------------------------------------------
 
 project = "Awkward Array"
-copyright = "2020, Jim Pivarski"
+copyright = f"{datetime.datetime.now().year}, Awkward Array development team"
 author = "Jim Pivarski"
 
 # -- General configuration ---------------------------------------------------
@@ -28,14 +29,14 @@ author = "Jim Pivarski"
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 extensions = [
-    'sphinx_copybutton',
-    'sphinx_design',
-    'sphinx_external_toc',
+    "sphinx_copybutton",
+    "sphinx_design",
+    "sphinx_external_toc",
     "sphinx.ext.intersphinx",
-    'myst_nb',
+    "myst_nb",
     # Preserve old links
-    'sphinx_reredirects',
-    'jupyterlite_sphinx',
+    "sphinx_reredirects",
+    "jupyterlite_sphinx",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -44,7 +45,14 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_templates", "jupyter_execute", ".jupyter_cache"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "_templates",
+    "jupyter_execute",
+    ".jupyter_cache",
+]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -61,26 +69,43 @@ html_context = {
 html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = True
 html_theme_options = {
-  "logo": {
-      "image_light": "image/logo-300px.png",
-      "image_dark": "image/logo-300px-white.png",
-  },
-  "github_url": "https://github.com/scikit-hep/awkward",
-  # Add light/dark mode and documentation version switcher:
-  "navbar_end": ["theme-switcher", "navbar-icon-links"],
-  "footer_items": ["copyright", "sphinx-version", "funding"],
-  "use_edit_page_button": True,
+    "logo": {
+        "image_light": "image/logo-300px.png",
+        "image_dark": "image/logo-300px-white.png",
+    },
+    "github_url": "https://github.com/scikit-hep/awkward",
+    # Add light/dark mode and documentation version switcher:
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "footer_items": ["copyright", "sphinx-version", "funding"],
+    "icon_links": [
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/awkward",
+            "icon": "fab fa-python",
+        }
+    ],
+    "use_edit_page_button": True,
+    "external_links": [
+        {
+            "name": "Contributor guide",
+            "url": "https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md",
+        },
+        {
+            "name": "Release history",
+            "url": "https://github.com/scikit-hep/awkward/releases",
+        },
+    ],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_css_files = ['css/awkward.css']
+html_css_files = ["css/awkward.css"]
 
 # MyST settings
 myst_enable_extensions = [
-  "colon_fence",
+    "colon_fence",
 ]
 
 nb_execution_mode = "cache"
@@ -108,6 +133,8 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "numba": ("https://numba.pydata.org/numba-doc/latest", None),
+    "arrow": ("https://arrow.apache.org/docs/", None),
+    "jax": ("https://jax.readthedocs.io/en/latest", None),
 }
 
 # Preserve legacy routes

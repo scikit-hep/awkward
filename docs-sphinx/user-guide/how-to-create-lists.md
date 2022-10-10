@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.10.3
+    jupytext_version: 1.14.1
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
@@ -22,7 +22,7 @@ import numpy as np
 From Python lists
 -----------------
 
-If you have a collection of Python lists, the easiest way to turn them into an Awkward Array is to pass them to the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor, which recognizes a non-dict, non-NumPy iterable and calls [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html).
+If you have a collection of Python lists, the easiest way to turn them into an Awkward Array is to pass them to the {class}`ak.Array` constructor, which recognizes a non-dict, non-NumPy iterable and calls {func}`ak.from_iter`.
 
 ```{code-cell} ipython3
 python_lists = [[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]]
@@ -76,7 +76,7 @@ Some operations are possible with union arrays, but not all. ([Iteration in Numb
 From NumPy arrays
 -----------------
 
-The [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor loads NumPy arrays differently from Python lists. The inner dimensions of a NumPy array are guaranteed to have the same lengths, so they are interpreted as a fixed-length list type.
+The {class}`ak.Array` constructor loads NumPy arrays differently from Python lists. The inner dimensions of a NumPy array are guaranteed to have the same lengths, so they are interpreted as a fixed-length list type.
 
 ```{code-cell} ipython3
 numpy_array = np.arange(2*3*5).reshape(2, 3, 5)
@@ -107,7 +107,7 @@ irregular_array
 Both `regular_array` and `irregular_array` have the same data values:
 
 ```{code-cell} ipython3
-regular_array.tolist() == irregular_array.tolist()
+regular_array.to_list() == irregular_array.to_list()
 ```
 
 but they have different types:
@@ -120,16 +120,16 @@ This can make a difference in some operations, such as [broadcasting](how-to-mat
 
 +++
 
-If you want more control over this, use the explicit [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) and [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html) functions instead of the general-purpose [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor.
+If you want more control over this, use the explicit {func}`ak.from_iter` and {func}`ak.from_numpy` functions instead of the general-purpose {class}`ak.Array` constructor.
 
 +++
 
 Unflattening
 ------------
 
-Another difference between [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) and [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html) is that iteration over Python lists is slow and necessarily copies the data, whereas ingesting a NumPy array is zero-copy. (You can see that it's zero copy by [changing the data in-place](how-to-convert-numpy.html#mutability-of-awkward-arrays-from-numpy).)
+Another difference between {func}`ak.from_iter` and {func}`ak.from_numpy` is that iteration over Python lists is slow and necessarily copies the data, whereas ingesting a NumPy array is zero-copy. (You can see that it's zero copy by [changing the data in-place](how-to-convert-numpy.html#mutability-of-awkward-arrays-from-numpy).)
 
-In some cases, list-making can be vectorized. If you have a flat NumPy array of data and an array of "counts" that add up to the length of the data, then you can [ak.unflatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unflatten.html) it.
+In some cases, list-making can be vectorized. If you have a flat NumPy array of data and an array of "counts" that add up to the length of the data, then you can {func}`ak.unflatten` it.
 
 ```{code-cell} ipython3
 data = np.array([1, 2, 3, 4, 5, 6, 7, 8])
@@ -143,7 +143,7 @@ The first list has length `3`, the second has length `0`, the third has length `
 
 +++
 
-This function is named [ak.unflatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unflatten.html) because it has the opposite effect as [ak.flatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.flatten.html) and [ak.num](https://awkward-array.readthedocs.io/en/latest/_auto/ak.num.html):
+This function is named {func}`ak.unflatten` because it has the opposite effect as {func}`ak.flatten` and {func}`ak.num`:
 
 ```{code-cell} ipython3
 ak.flatten(unflattened)
@@ -156,9 +156,9 @@ ak.num(unflattened)
 With ArrayBuilder
 -----------------
 
-[ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can also construct arrays of lists using the `begin_list`/`end_list` methods or the `list` context manager.
+{class}`ak.ArrayBuilder` is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can also construct arrays of lists using the `begin_list`/`end_list` methods or the `list` context manager.
 
-(This is what [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) uses internally to accumulate lists.)
+(This is what {func}`ak.from_iter` uses internally to accumulate lists.)
 
 ```{code-cell} ipython3
 builder = ak.ArrayBuilder()
@@ -203,9 +203,9 @@ array
 In Numba
 --------
 
-Functions that Numba Just-In-Time (JIT) compiles can use [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) or construct flat data and "counts" arrays for [ak.unflatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unflatten.html).
+Functions that Numba Just-In-Time (JIT) compiles can use {class}`ak.ArrayBuilder` or construct flat data and "counts" arrays for {func}`ak.unflatten`.
 
-([At this time](https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#language), Numba can't use context managers, the `with` statement, in fully compiled code. [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context. Similarly, `ak.*` functions like [ak.unflatten](https://awkward-array.readthedocs.io/en/latest/_auto/ak.unflatten.html) can't be called inside a JIT-compiled function, but can be outside.)
+([At this time](https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#language), Numba can't use context managers, the `with` statement, in fully compiled code. {class}`ak.ArrayBuilder` can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context. Similarly, `ak.*` functions like {func}`ak.unflatten` can't be called inside a JIT-compiled function, but can be outside.)
 
 ```{code-cell} ipython3
 import numba as nb

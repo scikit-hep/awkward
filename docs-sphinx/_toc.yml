@@ -28,14 +28,14 @@ subtrees:
                         title: "Python objects"
                       - file: user-guide/how-to-convert-json
                         title: "JSON"
-                      - file: user-guide/how-to-convert-uproot
-                        title: "ROOT via Uproot"
                       - file: user-guide/how-to-convert-arrow
                         title: "Arrow and Parquet"
                       - file: user-guide/how-to-convert-pandas
                         title: "Pandas"
                       - file: user-guide/how-to-convert-buffers
                         title: "Generic buffers"
+                      - url: https://uproot.readthedocs.io/en/latest/basic.html#reading-a-tbranch-as-an-array
+                        title: "ROOT via Uproot"
 
               - file: user-guide/how-to-create
                 title: "Creating new arrays"
@@ -49,14 +49,10 @@ subtrees:
                         title: "Arrays of missing data"
                       - file: user-guide/how-to-create-strings
                         title: "Arrays of strings"
-                      - file: user-guide/how-to-create-lazy
-                        title: "Lazy arrays [todo]"
                       - file: user-guide/how-to-create-unflatten-group
                         title: "Unflattening and grouping [todo]"
                       - file: user-guide/how-to-create-arraybuilder
                         title: "ArrayBuilder (easy & general)"
-                      - file: user-guide/how-to-create-layoutbuilder
-                        title: "LayoutBuilder (more control)"
                       - file: user-guide/how-to-create-constructors
                         title: "Direct constructors (fastest)"
 
@@ -159,5 +155,3 @@ subtrees:
                 title: "Differentiation using JAX"
 
       - file: reference/index
-      - file: contributor-guide
-      - file: release/index

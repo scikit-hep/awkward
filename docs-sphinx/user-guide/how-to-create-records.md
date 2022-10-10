@@ -26,7 +26,7 @@ import numpy as np
 From a list of Python dicts
 ---------------------------
 
-Records have a natural representation in JSON and Python as dicts, but only if all dicts in a series have the same set of field names. The [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) invokes [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) whenever presented with a list (or other non-string, non-dict iterable).
+Records have a natural representation in JSON and Python as dicts, but only if all dicts in a series have the same set of field names. The {class}`ak.Array` invokes {func}`ak.from_iter` whenever presented with a list (or other non-string, non-dict iterable).
 
 ```{code-cell} ipython3
 python_dicts = [
@@ -52,7 +52,7 @@ awkward_array.type
 
 That is to say, an array of records is not a mapping from one type to another, such as from strings to numbers. The above record has exactly three fields: _x_, _y_, and _z_, and they have fixed types: `int64`, `float64`, and `string`. A mapping could have a variable set of keys, but the value type would have to be uniform.
 
-If you _try_ to mix field types in [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) (ultimately from [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html)), the union of all sets of fields will be assumed, and any that aren't filled in every item will be presumed "missing."
+If you _try_ to mix field types in {func}`ak.from_iter` (ultimately from {class}`ak.ArrayBuilder`), the union of all sets of fields will be assumed, and any that aren't filled in every item will be presumed "missing."
 
 ```{code-cell} ipython3
 array = ak.Array([
@@ -65,7 +65,7 @@ array
 ```
 
 ```{code-cell} ipython3
-array.tolist()
+array.to_list()
 ```
 
 ```{code-cell} ipython3
@@ -75,7 +75,7 @@ array.type
 From a single dict of columns
 -----------------------------
 
-If a _single dict_ is passed to [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html), it will be interpreted as a set of columns, like [Pandas's DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) constructor. This is to provide a familiar interface to Pandas users.
+If a _single dict_ is passed to {class}`ak.Array`, it will be interpreted as a set of columns, like [Pandas's DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) constructor. This is to provide a familiar interface to Pandas users.
 
 ```{code-cell} ipython3
 from_columns = ak.Array({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
@@ -83,14 +83,14 @@ from_columns
 ```
 
 ```{code-cell} ipython3
-from_columns.tolist()
+from_columns.to_list()
 ```
 
 ```{code-cell} ipython3
 from_columns.type
 ```
 
-This is _not_ the same as calling [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) on the same input, which could not be a valid [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) because a single dict would be an [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html).
+This is _not_ the same as calling {func}`ak.from_iter` on the same input, which could not be a valid {class}`ak.Array` because a single dict would be an {class}`ak.Record`.
 
 ```{code-cell} ipython3
 from_rows = ak.from_iter({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
@@ -98,7 +98,7 @@ from_rows
 ```
 
 ```{code-cell} ipython3
-from_rows.tolist()
+from_rows.to_list()
 ```
 
 ```{code-cell} ipython3
@@ -108,7 +108,7 @@ from_rows.type
 Using ak.zip
 ------------
 
-The [ak.zip](https://awkward-array.readthedocs.io/en/latest/_auto/ak.zip.html) function combines columns into an array of records, similar to the Pandas-style constructor described above.
+The {func}`ak.zip` function combines columns into an array of records, similar to the Pandas-style constructor described above.
 
 ```{code-cell} ipython3
 from_columns = ak.zip({"x": [1, 2, 3, 4, 5], "y": [1.1, 2.2, 3.3, 4.4, 5.5], "z": ["one", "two", "three", "four", "five"]})
@@ -116,14 +116,14 @@ from_columns
 ```
 
 ```{code-cell} ipython3
-from_columns.tolist()
+from_columns.to_list()
 ```
 
 ```{code-cell} ipython3
 from_columns.type
 ```
 
-The difference is that [ak.zip](https://awkward-array.readthedocs.io/en/latest/_auto/ak.zip.html) attempts to nested lists deeply, up to a `depth_limit`.
+The difference is that {func}`ak.zip` attempts to nested lists deeply, up to a `depth_limit`.
 
 Given columns with nested lists:
 
@@ -133,10 +133,10 @@ zipped
 ```
 
 ```{code-cell} ipython3
-zipped.tolist()
+zipped.to_list()
 ```
 
-By contrast, the same input to [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html)'s Pandas-style constructor keeps nested lists separate.
+By contrast, the same input to {class}`ak.Array`'s Pandas-style constructor keeps nested lists separate.
 
 ```{code-cell} ipython3
 not_zipped = ak.Array({"x": ak.Array([[1, 2, 3], [], [4, 5]]), "y": ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])})
@@ -144,7 +144,7 @@ not_zipped
 ```
 
 ```{code-cell} ipython3
-not_zipped.tolist()
+not_zipped.to_list()
 ```
 
 The difference can be seen in a comparison of their types:
@@ -153,7 +153,7 @@ The difference can be seen in a comparison of their types:
 zipped.type, not_zipped.type
 ```
 
-Also, [ak.zip](https://awkward-array.readthedocs.io/en/latest/_auto/ak.zip.html) can build records without field names, also known as "tuples."
+Also, {func}`ak.zip` can build records without field names, also known as "tuples."
 
 ```{code-cell} ipython3
 tuples = ak.zip((ak.Array([[1, 2, 3], [], [4, 5]]), ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])))
@@ -161,14 +161,14 @@ tuples
 ```
 
 ```{code-cell} ipython3
-tuples.tolist()
+tuples.to_list()
 ```
 
 ```{code-cell} ipython3
 tuples.type
 ```
 
-Functions that return lists of pairs, such as [ak.cartesian](https://awkward-array.readthedocs.io/en/latest/_auto/ak.cartesian.html) and [ak.combinations](https://awkward-array.readthedocs.io/en/latest/_auto/ak.combinations.html), also use the tuple type.
+Functions that return lists of pairs, such as {func}`ak.cartesian` and {func}`ak.combinations`, also use the tuple type.
 
 ```{code-cell} ipython3
 one = ak.Array([[1, 2, 3], [], [4, 5], [6]])
@@ -207,7 +207,7 @@ ak.zip(
 ak.cartesian({"L": ak.Array([1, 2, 3]), "R": ak.Array(["a", "b"])}, with_name="LeftRight", axis=0)
 ```
 
-Names are for giving records [specialized behavior](how-to-specialize) through the [ak.behavior](https://awkward-array.readthedocs.io/en/latest/ak.behavior.html) registry. These are like attaching methods to a class in the sense that all records with a particular name can be given Python properties and methods.
+Names are for giving records [specialized behavior](how-to-specialize) through the {data}`ak.behavior` registry. These are like attaching methods to a class in the sense that all records with a particular name can be given Python properties and methods.
 
 ```{code-cell} ipython3
 class XYZRecord(ak.Record):
@@ -248,9 +248,9 @@ np.sqrt(array)
 With ArrayBuilder
 -----------------
 
-[ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can also construct arrays of records using the `begin_record`/`end_record` methods or the `record` context manager.
+{class}`ak.ArrayBuilder` is described in more detail [in this tutorial](how-to-create-arraybuilder), but you can also construct arrays of records using the `begin_record`/`end_record` methods or the `record` context manager.
 
-(This is what [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) uses internally to accumulate records.)
+(This is what {func}`ak.from_iter` uses internally to accumulate records.)
 
 ```{code-cell} ipython3
 builder = ak.ArrayBuilder()
@@ -344,7 +344,7 @@ without_names
 ```
 
 ```{code-cell} ipython3
-without_names.tolist()
+without_names.to_list()
 ```
 
 With names:
@@ -365,7 +365,7 @@ with_names
 ```
 
 ```{code-cell} ipython3
-with_names.tolist()
+with_names.to_list()
 ```
 
 The difference can be seen in the type: `without_names` has only one record type, but the _x_ and _z_ fields are optional, and `with_names` has a union of two record types, neither of which have optional fields.
@@ -381,9 +381,9 @@ with_names.type
 In Numba
 --------
 
-Functions that Numba Just-In-Time (JIT) compiles can use [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) to accumulate records or columns can be accumulated in the compiled part and later combined with [ak.zip](https://awkward-array.readthedocs.io/en/latest/_auto/ak.zip.html). Combining columns outside of a JIT-compiled function is generally faster.
+Functions that Numba Just-In-Time (JIT) compiles can use {class}`ak.ArrayBuilder` to accumulate records or columns can be accumulated in the compiled part and later combined with {func}`ak.zip`. Combining columns outside of a JIT-compiled function is generally faster.
 
-([At this time](https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#language), Numba can't use context managers, the `with` statement, in fully compiled code. [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context. Similarly, `ak.*` functions like [ak.zip](https://awkward-array.readthedocs.io/en/latest/_auto/ak.zip.html) can't be called inside a JIT-compiled function, but can be outside.)
+([At this time](https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#language), Numba can't use context managers, the `with` statement, in fully compiled code. {class}`ak.ArrayBuilder` can't be constructed or converted to an array using `snapshot` inside a JIT-compiled function, but can be outside the compiled context. Similarly, `ak.*` functions like {func}`ak.zip` can't be called inside a JIT-compiled function, but can be outside.)
 
 ```{code-cell} ipython3
 import numba as nb
@@ -427,4 +427,4 @@ array = ak.zip(dict(zip(["x", "y"], faster_example())))
 array
 ```
 
-Combining columns into arrays is a metadata-only operation, which does not scale with the size of the dataset. The second example is faster because it only requires Numba to fill NumPy arrays, which it's designed for, without involving the machinery of [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) to identify types at runtime.
+Combining columns into arrays is a metadata-only operation, which does not scale with the size of the dataset. The second example is faster because it only requires Numba to fill NumPy arrays, which it's designed for, without involving the machinery of {class}`ak.ArrayBuilder` to identify types at runtime.
