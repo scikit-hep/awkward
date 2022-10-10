@@ -34,6 +34,8 @@ subtrees:
                         title: "Pandas"
                       - file: user-guide/how-to-convert-buffers
                         title: "Generic buffers"
+                      - url: https://uproot.readthedocs.io/en/latest/basic.html#reading-a-tbranch-as-an-array
+                        title: "ROOT via Uproot"
 
               - file: user-guide/how-to-create
                 title: "Creating new arrays"
