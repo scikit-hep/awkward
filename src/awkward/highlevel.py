@@ -177,9 +177,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     Like NumPy ufuncs, the function and its derivatives are evaluated on the
     numeric leaves of the data structure, maintaining structure in the output.
-
-    See #ak.autograd.elementwise_grad to calculate a function and its
-    derivatives elementwise on each numeric value in an ak.Array.
     """
 
     def __init__(
