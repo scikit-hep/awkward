@@ -12,6 +12,7 @@
 #
 import os
 import json
+import datetime
 
 # import sys
 # sys.path.insert(0, os.path.abspath("."))
@@ -19,7 +20,7 @@ import json
 # -- Project information -----------------------------------------------------
 
 project = "Awkward Array"
-copyright = "2020, Jim Pivarski"
+copyright = f"{datetime.datetime.now().year}, Awkward Array development team"
 author = "Jim Pivarski"
 
 # -- General configuration ---------------------------------------------------
