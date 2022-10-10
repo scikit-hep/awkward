@@ -80,7 +80,7 @@ html_theme_options = {
         {
             "name": "PyPI",
             "url": "https://pypi.org/project/awkward",
-            "icon": "fa-brands fa-python",
+            "icon": "fab fa-python",
         }
     ],
     "use_edit_page_button": True,
