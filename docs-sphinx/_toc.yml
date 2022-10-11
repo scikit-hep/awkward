@@ -149,8 +149,7 @@ subtrees:
                         title: "In Numba [todo]"
                       - file: user-guide/how-to-specialize-lorentz
                         title: "For physics: Lorentz vectors [todo]"
-
-              - file: user-guide/how-to-differentiate-using-jax
-                title: "Differentiation using JAX"
+                      - file: user-guide/how-to-specialize-differentiate-jax
+                        title: "Differentiation using JAX"
 
       - file: reference/index
