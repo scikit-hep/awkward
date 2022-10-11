@@ -14,7 +14,7 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 :color: primary
 :shadow:
 
-What is an Awkward Array?
+Try Awkward Array
 :::
 ::::
 
