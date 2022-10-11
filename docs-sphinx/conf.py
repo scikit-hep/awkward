@@ -143,7 +143,14 @@ with open("redirects.json") as f:
 
 redirect_html_template_file = "_templates/redirect.html"
 
+# JupyterLite configuration
 jupyterlite_dir = "./lite"
+# Don't override ipynb format
+jupyterlite_bind_ipynb_suffix = False
+# We've disabled localstorage, so we must provide the contents explicitly
+jupyterlite_contents = [
+    "getting-started/demo/*"
+]
 
 import sys
 import subprocess

@@ -10,7 +10,7 @@
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**. 
 
-:::{button-ref} getting-started/what-is-an-awkward-array
+:::{button-ref} getting-started/try-awkward-array
 :color: primary
 :shadow:
 
