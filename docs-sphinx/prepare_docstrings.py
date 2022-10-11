@@ -6,11 +6,11 @@ import glob
 import io
 import subprocess
 import pathlib
+import os
 
 import sphinx.ext.napoleon
 
-config = sphinx.ext.napoleon.Config(napoleon_use_param=True,
-                                    napoleon_use_rtype=True)
+config = sphinx.ext.napoleon.Config(napoleon_use_param=True, napoleon_use_rtype=True)
 
 reference_path = pathlib.Path("reference")
 output_path = reference_path / "generated"
@@ -18,12 +18,12 @@ output_path.mkdir(exist_ok=True)
 
 latest_commit = (
     subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE)
-              .stdout
-              .decode("utf-8")
-              .strip()
+    .stdout.decode("utf-8")
+    .strip()
 )
 
 toctree = ["ak.behavior.rst"]
+
 
 def tostr(node):
     if isinstance(node, ast.NameConstant):
@@ -49,16 +49,17 @@ def tostr(node):
 
     elif isinstance(node, ast.Slice):
         start = "" if node.lower is None else tostr(node.lower)
-        stop  = "" if node.upper is None else tostr(node.upper)
-        step  = "" if node.step  is None else tostr(node.step)
+        stop = "" if node.upper is None else tostr(node.upper)
+        step = "" if node.step is None else tostr(node.step)
         if step == "":
             return "{0}:{1}".format(start, stop)
         else:
             return "{0}:{1}:{2}".format(start, stop, step)
 
     elif isinstance(node, ast.Call):
-        return "{0}({1})".format(tostr(node.func),
-                                 ", ".join(tostr(x) for x in node.args))
+        return "{0}({1})".format(
+            tostr(node.func), ", ".join(tostr(x) for x in node.args)
+        )
 
     elif isinstance(node, ast.List):
         return "[{0}]".format(", ".join(tostr(x) for x in node.elts))
@@ -67,17 +68,23 @@ def tostr(node):
         return "{{{0}}}".format(", ".join(tostr(x) for x in node.elts))
 
     elif isinstance(node, ast.Tuple):
-        return "({0})".format(", ".join(tostr(x) for x in node.elts)
-                              + ("," if len(node.elts) == 1 else ""))
+        return "({0})".format(
+            ", ".join(tostr(x) for x in node.elts)
+            + ("," if len(node.elts) == 1 else "")
+        )
 
     elif isinstance(node, ast.Dict):
-        return "{{{0}}}".format(", ".join("{0}: {1}".format(tostr(x), tostr(y))
-                                      for x, y in zip(node.keys, node.values)))
+        return "{{{0}}}".format(
+            ", ".join(
+                "{0}: {1}".format(tostr(x), tostr(y))
+                for x, y in zip(node.keys, node.values)
+            )
+        )
 
     elif isinstance(node, ast.Lambda):
         return "lambda {0}: {1}".format(
-            ", ".join(x.arg for x in node.args.args),
-            tostr(node.body))
+            ", ".join(x.arg for x in node.args.args), tostr(node.body)
+        )
 
     elif isinstance(node, ast.UnaryOp):
         return tostr.op[type(node.op)] + tostr(node.operand)
@@ -86,14 +93,16 @@ def tostr(node):
         return tostr(node.left) + tostr.op[type(node.op)] + tostr(node.right)
 
     elif isinstance(node, ast.Compare):
-        return tostr(node.left) + "".join(tostr.op[type(x)] + tostr(y)
-                                  for x, y in zip(node.ops, node.comparators))
+        return tostr(node.left) + "".join(
+            tostr.op[type(x)] + tostr(y) for x, y in zip(node.ops, node.comparators)
+        )
 
     elif isinstance(node, ast.BoolOp):
         return tostr.op[type(node.op)].join(tostr(x) for x in node.values)
 
     else:
         raise Exception(ast.dump(node))
+
 
 tostr.op = {
     ast.And: " and ",
@@ -124,7 +133,9 @@ tostr.op = {
     ast.Is: " is ",
     ast.IsNot: " is not ",
     ast.In: " in ",
-    ast.NotIn: " not in "}
+    ast.NotIn: " not in ",
+}
+
 
 def dosig(node):
     if node is None:
@@ -132,31 +143,27 @@ def dosig(node):
     else:
         argnames = [x.arg for x in node.args.args]
         defaults = ["=" + tostr(x) for x in node.args.defaults]
-        defaults = [""]*(len(argnames) - len(defaults)) + defaults
+        defaults = [""] * (len(argnames) - len(defaults)) + defaults
         return ", ".join(x + y for x, y in zip(argnames, defaults))
+
 
 def dodoc(docstring, qualname, names):
     out = docstring.replace("`", "``")
-    out = re.sub(r"<<([^>]*)>>",
-                 r"`\1`_",
-                 out)
-    out = re.sub(r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
-                 r":py:obj:`\1`",
-                 out)
+    out = re.sub(r"<<([^>]*)>>", r"`\1`_", out)
+    out = re.sub(r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])", r":py:obj:`\1`", out)
     for x in names:
-        out = out.replace("#" + x,
-                          ":py:meth:`{1} <{0}.{1}>`".format(qualname, x))
-    out = re.sub(r"\[([^\]]*)\]\(([^\)]*)\)",
-                 r"`\1 <\2>`__",
-                 out)
+        out = out.replace("#" + x, ":py:meth:`{1} <{0}.{1}>`".format(qualname, x))
+    out = re.sub(r"\[([^\]]*)\]\(([^\)]*)\)", r"`\1 <\2>`__", out)
     out = str(sphinx.ext.napoleon.GoogleDocstring(out, config))
-    out = re.sub(r"([^\. \t].*\n[ \t]*)((\n    .*[^ \t].*)(\n    .*[^ \t].*|\n[ \t]*)*)",
-                 "\\1\n.. code-block:: python\n\n\\2",
-                 out)
-    out = re.sub(r"(\n:param|^:param)",     "\n    :param",   out)
-    out = re.sub(r"(\n:type|^:type)",       "\n    :type",    out)
+    out = re.sub(
+        r"([^\. \t].*\n[ \t]*)((\n    .*[^ \t].*)(\n    .*[^ \t].*|\n[ \t]*)*)",
+        "\\1\n.. code-block:: python\n\n\\2",
+        out,
+    )
+    out = re.sub(r"(\n:param|^:param)", "\n    :param", out)
+    out = re.sub(r"(\n:type|^:type)", "\n    :type", out)
     out = re.sub(r"(\n:returns|^:returns)", "\n    :returns", out)
-    out = re.sub(r"(\n:raises|^:raises)",   "\n    :raises",  out)
+    out = re.sub(r"(\n:raises|^:raises)", "\n    :raises", out)
     return out
 
 
@@ -164,7 +171,8 @@ def make_anchor(name):
     name = name.lower()
     parts = name.split(".")
     anchor = "-".join(parts)
-    return f'\n\n.. _{anchor}:\n\n'
+    return f"\n\n.. _{anchor}:\n\n"
+
 
 def doclass(link, linelink, shortname, name, astcls):
     if name.startswith("_"):
@@ -180,14 +188,16 @@ def doclass(link, linelink, shortname, name, astcls):
             else:
                 rest.append(node)
                 names.append(node.name)
-        elif (isinstance(node, ast.Assign) and
-              len(node.targets) == 1 and
-              isinstance(node.targets[0], ast.Name)):
+        elif (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+        ):
             rest.append(node)
             names.append(node.targets[0].id)
 
     outfile = io.StringIO()
-    outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
+    outfile.write(qualname + "\n" + "-" * len(qualname) + "\n\n")
     outfile.write(f".. py:module: {qualname}\n\n")
     outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
     outfile.write(".. py:class:: {0}({1})\n\n".format(qualname, dosig(init)))
@@ -204,15 +214,18 @@ def doclass(link, linelink, shortname, name, astcls):
             outfile.write("    :value: {0}\n\n".format(tostr(node.value)))
             docstring = None
 
-        elif any(isinstance(x, ast.Name) and x.id == "property"
-                 for x in node.decorator_list):
+        elif any(
+            isinstance(x, ast.Name) and x.id == "property" for x in node.decorator_list
+        ):
             attrtext = "{0}.{1}".format(qualname, node.name)
             outfile.write(make_anchor(attrtext))
             outfile.write(".. py:attribute:: " + attrtext + "\n\n")
             docstring = ast.get_docstring(node)
 
-        elif any(isinstance(x, ast.Attribute) and x.attr == "setter"
-                 for x in node.decorator_list):
+        elif any(
+            isinstance(x, ast.Attribute) and x.attr == "setter"
+            for x in node.decorator_list
+        ):
             docstring = None
 
         else:
@@ -232,6 +245,7 @@ def doclass(link, linelink, shortname, name, astcls):
         print("writing", toctree[-1])
         entry_path.write_text(out)
 
+
 def dofunction(link, linelink, shortname, name, astfcn):
     if name.startswith("_"):
         return
@@ -239,7 +253,7 @@ def dofunction(link, linelink, shortname, name, astfcn):
     qualname = shortname + "." + name
 
     outfile = io.StringIO()
-    outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
+    outfile.write(qualname + "\n" + "-" * len(qualname) + "\n\n")
     outfile.write(f".. py:module: {qualname}\n\n")
     outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
 
@@ -259,42 +273,49 @@ def dofunction(link, linelink, shortname, name, astfcn):
         print("writing", toctree[-1])
         entry_path.write_text(out)
 
+
 done_extra = False
-for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
-                       key=lambda x: x.replace("/__init__.py",    "!")
-                                      .replace("/highlevel",      "#")
-                                      .replace("/operations",     "$")
-                                      .replace("/categorical.py", "'")
+for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
 
-                                      .replace("/_", "/~")):
+    modulename = (
+        filename.replace("../src/", "")
+        .replace("/__init__.py", "")
+        .replace(".py", "")
+        .replace("/", ".")
+    )
 
-    modulename = (filename.replace("../src/", "")
-                          .replace("/__init__.py", "")
-                          .replace(".py", "")
-                          .replace("/", "."))
-
-    shortname = (modulename.replace("awkward.", "ak.")
-                           .replace(".highlevel", "")
-                           .replace(".behaviors.mixins", "")
-                           .replace(".behaviors.categorical", "")
-                           .replace(".behaviors.string", ""))
+    shortname = (
+        modulename.replace("awkward.", "ak.")
+        .replace(".highlevel", "")
+        .replace(".behaviors.mixins", "")
+        .replace(".behaviors.categorical", "")
+        .replace(".behaviors.string", "")
+    )
     shortname = re.sub(r"\.operations\.ak_\w+", "", shortname)
     shortname = re.sub(r"\.(contents|types|forms)\.\w+", r".\1", shortname)
 
     if not done_extra and modulename.startswith("awkward._"):
         done_extra = True
-        toctree.extend(["ak.numba.register.rst",
-                        "ak.numexpr.evaluate.rst",
-                        "ak.numexpr.re_evaluate.rst",
-                        "ak.autograd.elementwise_grad.rst",
-                        "awkwardforth.rst",
-                        ])
+        toctree.extend(
+            [
+                "ak.numba.register.rst",
+                "ak.numexpr.evaluate.rst",
+                "ak.numexpr.re_evaluate.rst",
+                "ak.autograd.elementwise_grad.rst",
+                "awkwardforth.rst",
+            ]
+        )
 
-    if modulename.startswith("awkward._") or modulename == "awkward.nplikes" or modulename == "awkward.types._awkward_datashape_parser":
+    if (
+        modulename.startswith("awkward._")
+        or modulename == "awkward.nplikes"
+        or modulename == "awkward.types._awkward_datashape_parser"
+    ):
         continue  # don't show awkward._*, including _v2
 
-    link = ("`{0} <https://github.com/scikit-hep/awkward-1.0/blob/"
-            "{1}/{2}>`__".format(modulename, latest_commit, filename.replace("../", "")))
+    link = "`{0} <https://github.com/scikit-hep/awkward-1.0/blob/" "{1}/{2}>`__".format(
+        modulename, latest_commit, filename.replace("../", "")
+    )
 
     module = ast.parse(open(filename).read())
 
@@ -313,13 +334,156 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
         if isinstance(toplevel, ast.FunctionDef):
             dofunction(link, linelink, shortname, toplevel.name, toplevel)
 
-outfile = io.StringIO()
-outfile.write(".. toctree::\n    :hidden:\n\n")
-for x in toctree:
-    outfile.write("    " + x + "\n")
 
-out = outfile.getvalue()
+categories = [
+    ["ak.Array", "ak.Record"],
+    ["ak.ArrayBuilder"],
+    ["ak.behavior"],
+    ["ak.fields", "ak.is_valid", "ak.parameters", "ak.type", "ak.validity_error"],
+    [
+        "ak.from_arrow",
+        "ak.from_iter",
+        "ak.from_json",
+        "ak.from_numpy",
+        "ak.from_parquet",
+    ],
+    [
+        "ak.to_arrow",
+        "ak.to_dataframe",
+        "ak.to_json",
+        "ak.to_list",
+        "ak.to_numpy",
+        "ak.to_parquet",
+    ],
+    ["ak.mask"],
+    ["ak.count", "ak.num"],
+    ["ak.unzip", "ak.zip"],
+    ["ak.with_field", "ak.with_name"],
+    ["ak.with_parameter", "ak.without_parameters"],
+    ["ak.broadcast_arrays"],
+    ["ak.concatenate", "ak.where"],
+    ["ak.flatten"],
+    ["ak.fill_none", "ak.is_none", "ak.pad_none"],
+    ["ak.argmax", "ak.argmin", "ak.firsts", "ak.singletons"],
+    ["ak.argcartesian", "ak.argcombinations", "ak.cartesian", "ak.combinations"],
+    ["ak.atleast_1d", "ak.size"],
+    [
+        "ak.all",
+        "ak.any",
+        "ak.argmax",
+        "ak.argmin",
+        "ak.count",
+        "ak.count_nonzero",
+        "ak.max",
+        "ak.min",
+        "ak.num",
+        "ak.prod",
+        "ak.sum",
+    ],
+    [
+        "ak.corr",
+        "ak.covar",
+        "ak.linear_fit",
+        "ak.mean",
+        "ak.moment",
+        "ak.softmax",
+        "ak.std",
+        "ak.var",
+    ],
+    ["ak.behaviors.string"],
+    ["ak.numba.register_and_check"],
+    ["ak.to_dataframe"],
+    ["ak.numexpr.evaluate", "ak.numexpr.re_evaluate"],
+    ["ak.jax.register_and_check"],
+    [
+        "ak.contents.BitMaskedArray",
+        "ak.contents.ByteMaskedArray",
+        "ak.contents.Content",
+        "ak.contents.Content",
+        "ak.contents.EmptyArray",
+        "ak.contents.EmptyArray",
+        "ak.contents.IndexedArray",
+        "ak.contents.IndexedArray",
+        "ak.contents.IndexedOptionArray",
+        "ak.contents.ListArray",
+        "ak.contents.ListOffsetArray",
+        "ak.contents.NumpyArray",
+        "ak.contents.NumpyArray",
+        "ak.contents.RecordArray",
+        "ak.contents.RecordArray",
+        "ak.contents.RegularArray",
+        "ak.contents.UnionArray",
+        "ak.contents.UnionArray",
+        "ak.contents.UnmaskedArray",
+        "ak.record.Record",
+    ],
+    ["ak.layout.ArrayBuilder"],
+    ["ak.index.Index"],
+    ["ak.identifier.Identifier"],
+    [
+        "ak.types.ArrayType",
+        "ak.types.ArrayType",
+        "ak.types.ListType",
+        "ak.types.OptionType",
+        "ak.types.PrimitiveType",
+        "ak.types.RecordType",
+        "ak.types.RegularType",
+        "ak.types.Type",
+        "ak.types.Type",
+        "ak.types.UnionType",
+        "ak.types.UnknownType",
+    ],
+    [
+        "ak.contents.BitMaskedArray",
+        "ak.contents.ByteMaskedArray",
+        "ak.contents.Content",
+        "ak.contents.Content",
+        "ak.contents.EmptyArray",
+        "ak.contents.IndexedArray",
+        "ak.contents.IndexedOptionArray",
+        "ak.contents.ListArray",
+        "ak.contents.ListArray",
+        "ak.contents.ListOffsetArray",
+        "ak.contents.ListOffsetArray",
+        "ak.contents.NumpyArray",
+        "ak.contents.RecordArray",
+        "ak.contents.RegularArray",
+        "ak.contents.UnionArray",
+        "ak.contents.UnmaskedArray",
+        "ak.forms.BitMaskedForm",
+        "ak.forms.ByteMaskedForm",
+        "ak.forms.EmptyForm",
+        "ak.forms.Form",
+        "ak.forms.Form",
+        "ak.forms.Form",
+        "ak.forms.IndexedForm",
+        "ak.forms.IndexedOptionForm",
+        "ak.forms.ListForm",
+        "ak.forms.ListOffsetForm",
+        "ak.forms.NumpyForm",
+        "ak.forms.RecordForm",
+        "ak.forms.RegularForm",
+        "ak.forms.UnionForm",
+        "ak.forms.UnmaskedForm",
+        "ak.types.Type",
+        "generated/kernels",
+    ],
+    ["ak.to_layout"],
+]
+
+
+def get_category_index(path: str) -> int:
+    for i, contents in enumerate(categories):
+        for c in contents:
+            if c in path:
+                return i
+    return len(categories)
+
+
+toctree.sort(key=get_category_index)
+toctree_lines = "\n    ".join(toctree)
+toctree_contents = f""".. toctree::\n    :hidden\n\n    {toctree_lines}"""
 toctree_path = output_path / "toctree.txt"
-if not (toctree_path.exists() and toctree_path.read_text() == out):
+if not (toctree_path.exists() and toctree_path.read_text() == toctree_contents):
     print("writing", toctree_path)
-    toctree_path.write_text(out)
+    toctree_path.write_text(toctree_contents)
