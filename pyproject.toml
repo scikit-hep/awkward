@@ -1,14 +1,12 @@
 [build-system]
 requires = [
     "hatchling>=1.10.0",
+    "hatch-requirements-txt>=0.2.0"
 ]
 build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-dynamic = [
-    "version",
-]
 description = "Manipulate JSON-like data with NumPy-like idioms."
 readme = "README.md"
 license = "BSD-3-Clause"
@@ -41,44 +39,18 @@ classifiers = [
     "Topic :: Software Development",
     "Topic :: Utilities",
 ]
-dependencies = [
-    "importlib_resources;python_version < \"3.9\"",
-    "numpy>=1.13.1",
-    "packaging",
+dynamic = [
+    "version",
+    "dependencies",
+    "optional-dependencies"
 ]
 
-[project.optional-dependencies]
-all = [
-    "autograd",
-    "awkward-cuda-kernels==2.0.0rc1",
-    "flake8",
-    "fsspec;sys_platform != \"win32\"",
-    "jax>=0.2.7;sys_platform != \"win32\" and python_version < \"3.11\"",
-    "jaxlib>=0.1.57,!=0.1.68;sys_platform != \"win32\" and python_version < \"3.11\"",
-    "numba>=0.50.0;python_version < \"3.11\"",
-    "numexpr;python_version < \"3.11\"",
-    "pandas>=0.24.0",
-    "pyarrow>=7.0.0;sys_platform != \"win32\" and python_version < \"3.11\"",
-    "pytest-cov",
-    "pytest>=6",
-    "PyYAML",
-]
-dev = [
-    "autograd",
-    "flake8",
-    "fsspec;sys_platform != \"win32\"",
-    "jax>=0.2.7;sys_platform != \"win32\" and python_version < \"3.11\"",
-    "jaxlib>=0.1.57,!=0.1.68;sys_platform != \"win32\" and python_version < \"3.11\"",
-    "numba>=0.50.0;python_version < \"3.11\"",
-    "numexpr;python_version < \"3.11\"",
-    "pandas>=0.24.0",
-    "pyarrow>=7.0.0;sys_platform != \"win32\" and python_version < \"3.11\"",
-    "PyYAML",
-]
-test = [
-    "pytest-cov",
-    "pytest>=6",
-]
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
+dev = ["requirements-dev.txt"]
+test = ["requirements-test.txt"]
 
 [project.entry-points.numba_extensions]
 init = "awkward.numba:_register"
