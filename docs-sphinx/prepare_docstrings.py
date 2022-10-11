@@ -264,7 +264,6 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
                        key=lambda x: x.replace("/__init__.py",    "!")
                                       .replace("/highlevel",      "#")
                                       .replace("/operations",     "$")
-                                      .replace("/reducers.py",    "&")
                                       .replace("/categorical.py", "'")
 
                                       .replace("/_", "/~")):
