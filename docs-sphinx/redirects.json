@@ -1,7 +1,4 @@
 {
-  "ak._io.fromjson.any-ext": "reference/ak._io.fromjson.html",
-  "ak._io.fromroot_nestedvector.any-ext": "reference/ak._io.fromroot_nestedvector.html",
-  "ak.autograd.elementwise_grad.any-ext": "reference/ak.autograd.elementwise_grad.html",
   "ak.behavior.any-ext": "reference/ak.behavior.html",
   "ak.forms.BitMaskedForm.any-ext": "reference/ak.forms.BitMaskedForm.html",
   "ak.forms.ByteMaskedForm.any-ext": "reference/ak.forms.ByteMaskedForm.html",
@@ -29,7 +26,7 @@
   "ak.layout.ListArray.any-ext": "reference/ak.contents.ListArray.html",
   "ak.layout.ListOffsetArray.any-ext": "reference/ak.contents.ListOffsetArray.html",
   "ak.layout.NumpyArray.any-ext": "reference/ak.contents.NumpyArray.html",
-  "ak.layout.Record.any-ext": "reference/ak.record.Record.html",
+  "ak.layout.Record.any-ext": "reference/ak.content.Record.html",
   "ak.layout.RecordArray.any-ext": "reference/ak.contents.RecordArray.html",
   "ak.layout.RegularArray.any-ext": "reference/ak.contents.RegularArray.html",
   "ak.layout.UnionArray.any-ext": "reference/ak.contents.UnionArray.html",
