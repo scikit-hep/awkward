@@ -120,4 +120,4 @@ jobs:
     - name: Trigger RTD Build
       if: github.ref_name != 'main'
       # NB: head_ref is only valid for PR triggers
-      run: curl -X POST -d "branches=${{ github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
+      run: curl -X POST -d "branches=${{ github.head_ref || github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
