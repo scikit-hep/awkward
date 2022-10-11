@@ -127,7 +127,18 @@ The {func}`ak.flatten` and {func}`ak.ravel` functions can be used to remove surp
 ::::{dropdown} How do I compute reductions or summary statistics?
 
 Awkward Array supports NumPy's {np:doc}`reference/ufuncs` mechanism, and many of the high-level NumPy reducers (e.g. {func}`numpy.sum`).
-
+```pycon
+>>> array = ak.Array([
+...     [1,    2, 4], 
+...     [          ],
+...     [None, 8   ],
+...     [16        ]
+... ])
+>>> ak.sum(array, axis=1)
+<Array [7, 0, 8, 16] type='4 * int64'>
+>>> ak.sum(array, axis=0)
+<Array [17, 10, 4] type='3 * int64'>
+``` 
 :::{figure} ../image/example-reduction-sum-only.svg
 
 ::::
