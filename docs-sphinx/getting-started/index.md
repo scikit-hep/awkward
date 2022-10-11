@@ -138,10 +138,10 @@ Awkward Array supports NumPy's {np:doc}`reference/ufuncs` mechanism, and many of
 ...     [None, 8      ],
 ...     [16           ]
 ... ])
->>> ak.sum(array, axis=1)
-<Array [7, 0, 8, 16] type='4 * int64'>
 >>> ak.sum(array, axis=0)
 <Array [17, 10, 4] type='3 * int64'>
+>>> ak.sum(array, axis=1)
+<Array [7, 0, 8, 16] type='4 * int64'>
 ``` 
 ::::
 
