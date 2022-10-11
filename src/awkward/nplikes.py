@@ -5,6 +5,7 @@
 import ctypes
 from collections.abc import Iterable
 
+import awkward_core.cpu_kernels
 import numpy
 
 import awkward as ak
@@ -493,7 +494,9 @@ class Numpy(NumpyLike):
             raise TypeError("to_rectilinear argument must be iterable")
 
     def __getitem__(self, name_and_types):
-        return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
+        return NumpyKernel(
+            awkward_core.cpu_kernels.kernel[name_and_types], name_and_types
+        )
 
     def __init__(self):
         self._module = numpy
@@ -782,7 +785,9 @@ class Jax(NumpyLike):
             )
 
     def __getitem__(self, name_and_types):
-        return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
+        return NumpyKernel(
+            awkward_core.cpu_kernels.kernel[name_and_types], name_and_types
+        )
 
     def __init__(self):
         jax = ak.jax.import_jax()

@@ -6,10 +6,6 @@ import awkward.nplikes
 # shims for C++ (now everything is compiled into one 'awkward._ext' module)
 import awkward._ext
 
-# Compiled dynamic modules
-import awkward._cpu_kernels
-import awkward._libawkward
-
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward.index
 import awkward.identifier
