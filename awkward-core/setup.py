@@ -39,14 +39,6 @@ with open("VERSION_INFO") as f:
     VERSION_INFO = f.read().strip()
 
 
-def read_requirements(name):
-    with open(name) as f:
-        return f.read().strip().split("\n")
-
-
-install_requires = ["numpy>=1.13.1"]
-
-
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
         Extension.__init__(self, name, sources=[])
@@ -157,10 +149,9 @@ def tree(x):
 class BuildPy(setuptools.command.build_py.build_py):
     def run(self):
         # generate include/awkward/kernels.h and src/awkward/_kernel_signatures.py
-        # TODO
-        # subprocess.check_call(
-        #     [PYTHON, os.path.join("dev", "generate-kernel-signatures.py")]
-        # )
+        subprocess.check_call(
+            [PYTHON, os.path.join("..", "dev", "generate-kernel-signatures.py")]
+        )
 
         setuptools.command.build_py.build_py.run(self)
 
@@ -280,7 +271,6 @@ class Install(setuptools.command.install.install):
 
 
 setup(
-    install_requires=install_requires,
     ext_modules=[CMakeExtension("libawkward")],
     cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
 )
