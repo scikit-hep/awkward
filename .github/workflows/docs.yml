@@ -8,6 +8,11 @@ on:
   release:
     types: [released]
   workflow_dispatch:
+
+concurrency:
+  group: 'docs-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
 env:
   PYTHON_VERSION: "3.10.7"
 jobs:
