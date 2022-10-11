@@ -7,6 +7,7 @@ import io
 import subprocess
 import pathlib
 import os
+import warnings
 
 import sphinx.ext.napoleon
 
@@ -346,6 +347,9 @@ categories = [
         "ak.from_json",
         "ak.from_numpy",
         "ak.from_parquet",
+        "ak.from_cupy",
+        "ak.from_jax",
+        "ak.from_buffers"
     ],
     [
         "ak.to_arrow",
@@ -354,17 +358,22 @@ categories = [
         "ak.to_list",
         "ak.to_numpy",
         "ak.to_parquet",
+        "ak.to_cupy",
+        "ak.to_jax",
+        "ak.to_buffers"
     ],
     ["ak.mask"],
     ["ak.count", "ak.num"],
     ["ak.unzip", "ak.zip"],
-    ["ak.with_field", "ak.with_name"],
-    ["ak.with_parameter", "ak.without_parameters"],
+    ["ak.with_field", "ak.with_name",
+     "ak.with_parameter", "ak.without_parameters"],
     ["ak.broadcast_arrays"],
+    ["ak.sort", "ak.argsort"],
+    ["ak.ones_like", "ak.zeros_like", "ak.full_like"],
     ["ak.concatenate", "ak.where"],
-    ["ak.flatten"],
+    ["ak.flatten", "ak.unflatten", "ak.ravel"],
     ["ak.fill_none", "ak.is_none", "ak.pad_none"],
-    ["ak.argmax", "ak.argmin", "ak.firsts", "ak.singletons"],
+    ["ak.firsts", "ak.singletons"],
     ["ak.argcartesian", "ak.argcombinations", "ak.cartesian", "ak.combinations"],
     ["ak.atleast_1d", "ak.size"],
     [
@@ -379,6 +388,12 @@ categories = [
         "ak.num",
         "ak.prod",
         "ak.sum",
+        "ak.nansum",
+        "ak.nanprod",
+        "ak.nanmin",
+        "ak.nanmax",
+        "ak.nanargmax",
+        "ak.nanargmin",
     ],
     [
         "ak.corr",
@@ -388,7 +403,11 @@ categories = [
         "ak.moment",
         "ak.softmax",
         "ak.std",
+        "ak.ptp",
         "ak.var",
+        "ak.nanstd",
+        "ak.nanvar",
+        "ak.nanmean",
     ],
     ["ak.behaviors.string"],
     ["ak.numba.register_and_check"],
@@ -472,18 +491,18 @@ categories = [
 ]
 
 
-def get_category_index(path: str) -> int:
+def get_category_index(path: str) -> tuple[int, str]:
     for i, contents in enumerate(categories):
         for c in contents:
             if c in path:
-                return i
-    return len(categories)
+                return i, path
+    warnings.warn(f"couldn't find category for {path}", )
+    return len(categories), path
 
 
-toctree.sort(key=get_category_index)
-toctree_lines = "\n    ".join(toctree)
-toctree_contents = f""".. toctree::\n    :hidden\n\n    {toctree_lines}"""
-toctree_path = output_path / "toctree.txt"
-if not (toctree_path.exists() and toctree_path.read_text() == toctree_contents):
-    print("writing", toctree_path)
-    toctree_path.write_text(toctree_contents)
+toctree_path = reference_path / "toctree.rst"
+toctree_contents = toctree_path.read_text()
+
+for p in toctree:
+    if p not in toctree_contents:
+        warnings.warn(f"Couldn't find {p} in toctree contents")
