@@ -26,10 +26,29 @@ pip install awkward
 :::::{grid-item} 
 ::::{dropdown} What kind of data does Awkward Array handle?
 
-Awkward Array is designed to make working with [_ragged_ arrays](https://en.wikipedia.org/wiki/Jagged_array) as trivial as manipulating regular (non-ragged) N-dimensional arrays in NumPy. It understands variable-length lists and missing ({data}`None`) values.
-
-:::{figure} ../image/example-array.svg
-:::
+Awkward Array is designed to make working with [_ragged_ arrays](https://en.wikipedia.org/wiki/Jagged_array) as trivial as manipulating regular (non-ragged) N-dimensional arrays in NumPy. It understands data with variable-length lists,
+```pycon
+>>> ak.Array([
+...     [1, 2, 3],
+...     [4]
+... ])
+<Array [[1, 2, 3], [4]] type='2 * var * int64'>
+```
+missing ({data}`None`) values,
+```pycon
+>>> ak.Array([1, None])
+<Array [1, None] type='2 * ?int64]'>
+```
+record structures,
+```pycon
+>>> ak.Array([{'x': 1, 'y': 2}])
+<Array [{x: 1, y: 2}] type='1 * {x: int64, y: int64}'>
+```
+and even union-types!
+```pycon
+>>> ak.Array([1, "hi", None])
+<Array [1, 'hi', None] type='3 * union[?int64, ?string]'>
+```
 ::::
 :::::
 
@@ -38,40 +57,68 @@ Awkward Array is designed to make working with [_ragged_ arrays](https://en.wiki
 
 Awkward Array provides a suite of high-level IO functions (`ak.to_*` and `ak.from_*`), such as {func}`ak.to_parquet` and {func}`ak.from_parquet` that make it simple to serialise Awkward Arrays to disk, or read ragged arrays from other formats. 
 
-It is straightforward to implement new IO functions using {func}`ak.to_buffers` and {func}`ak.from_buffers`, which convert/load Awkward Arrays from a metadata object and a collection of 1D arrays.
+It is straightforward to implement new IO functions using {func}`ak.to_buffers` and {func}`ak.from_buffers` API, which convert/load Awkward Arrays to/from a collection of 1D arrays and a metadata object ({class}`ak.forms.Form`).
 ::::
 :::::
 
 :::::{grid-item} 
 ::::{dropdown} How do I see the type and shape of an array?
 
-Awkward Array extends the [DataShape](https://datashape.readthedocs.io/en/latest/) layout language to support union types.
-
-E.g., the following ragged array with three rows, and a variable number of columns of records with "x" and "y" fields
-```python3
-ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-          [],
-          [{"x": 3.3, "y": [3, 3, 3]}]])
-```
-has the type:
-```python3
+Ragged arrays do not have shapes that can be described by a collection of integers. Instead, Awkward Array uses an extended version of the [DataShape](https://datashape.readthedocs.io/en/latest/) layout language to describe the structure and type of an Array. The {attr}`ak.Array.type` attribute of an array reveals its DataShape:
+```pycon
+>>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+...           [],
+...           [{"x": 3.3, "y": [3, 3, 3]}]])
+>>> array.type
 3 * var * {"x": float64, "y": var * int64}
-``` 
+```
 ::::
 :::::
 
 :::::{grid-item} 
 ::::{dropdown} How do I select a subset of an array?
 
-Awkward Array extends the rich indexing syntax used by NumPy to support named fields and ragged indexing. The {attr}`ak.Array.mask` interface makes it easy to select a subset of an array whilst preserving its datashape.
+Awkward Array extends the rich indexing syntax used by NumPy to support named fields and ragged indexing:
+```pycon
+>>> array = ak.Array([
+...     [1, 2, 3], 
+...     [6, 7, 8, 9]
+... ])
+>>> is_even = (array % 2) == 0
+>>> array[is_even].to_list()
+<Array [[2], [6, 8]] type='2 * var * int64'>
+``` 
+
+Meanwhile, the {attr}`ak.Array.mask` interface makes it easy to select a subset of an array whilst preserving its structure:
+```pycon
+>>> array.mask[is_even].to_list()
+[[None, 2, None], [4, None], [6, None, 8, None]]
+``` 
 ::::
 :::::
 
 
 :::::{grid-item} 
 ::::{dropdown} How do I reshape ragged arrays to change their dimensions?
-
-Ragged arrays do not have shapes that can be described by a collection of integers. Instead, the {func}`ak.flatten` and {func}`ak.ravel` functions can be used to remove surplus dimensions from Awkward Arrays. New, regular, dimensions can be added using {data}`numpy.newaxis`, whilst {func}`ak.unflatten` can be used to introduce a new _ragged_ axis.
+New, regular, dimensions can be added using {data}`numpy.newaxis`, whilst {func}`ak.unflatten` can be used to introduce a new _ragged_ axis.
+```pycon
+>>> array = ak.Array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+>>> array[:, np.newaxis]
+<Array [[1], [2], [3], [4], [5], [6], [7], [8], [9]] type='9 * 1 * int64'>
+>>> ak.unflatten(array, [3, 2, 4])
+<Array [[0, 1, 2], [3, 4], [5, 6, 7, 8]] type='3 * var * int64'>
+``` 
+The {func}`ak.flatten` and {func}`ak.ravel` functions can be used to remove surplus (or all) dimensions from Awkward Arrays. 
+```pycon
+>>> array = ak.Array([
+...     [1, 2, 3], 
+...     [6, 7, 8, 9]
+... ])
+>>> ak.flatten(array, axis=1)
+<Array [1, 2, 3, 6, 7, 8, 9] type='7 * int64'>
+>>> ak.ravel(array)
+<Array [1, 2, 3, 6, 7, 8, 9] type='7 * int64'>
+``` 
 ::::
 :::::
 
