@@ -134,9 +134,9 @@ Awkward Array supports NumPy's {np:doc}`reference/ufuncs` mechanism, and many of
 ```pycon
 >>> array = ak.Array([
 ...     [1,    2,    4], 
-...     [            ],
-...     [None, 8     ],
-...     [16          ]
+...     [             ],
+...     [None, 8      ],
+...     [16           ]
 ... ])
 >>> ak.sum(array, axis=1)
 <Array [7, 0, 8, 16] type='4 * int64'>
