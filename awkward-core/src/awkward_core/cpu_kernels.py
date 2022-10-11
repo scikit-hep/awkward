@@ -11,7 +11,7 @@ if sys.version_info < (3, 9):
 else:
     import importlib.resources as importlib_resources
 
-import awkward._kernel_signatures
+import awkward_core._kernel_signatures
 
 if platform.system() == "Windows":
     name = "awkward-cpu-kernels.dll"
@@ -20,8 +20,8 @@ elif platform.system() == "Darwin":
 else:
     name = "libawkward-cpu-kernels.so"
 
-libpath_ref = importlib_resources.files("awkward") / name
+libpath_ref = importlib_resources.files(awkward_core) / "lib" / name
 with importlib_resources.as_file(libpath_ref) as libpath:
     lib = ctypes.cdll.LoadLibrary(str(libpath))
 
-kernel = awkward._kernel_signatures.by_signature(lib)
+kernel = awkward_core._kernel_signatures.by_signature(lib)

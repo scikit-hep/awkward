@@ -18,7 +18,7 @@ elif platform.system() == "Darwin":
 else:
     name = "libawkward.so"
 
-libpath_ref = importlib_resources.files("awkward") / name
+libpath_ref = importlib_resources.files(__package__) / "lib" / name
 with importlib_resources.as_file(libpath_ref) as libpath:
     lib = ctypes.cdll.LoadLibrary(str(libpath))
 
