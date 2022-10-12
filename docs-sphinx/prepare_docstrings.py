@@ -505,5 +505,5 @@ toctree_path = reference_path / "toctree.rst"
 toctree_contents = toctree_path.read_text()
 
 for p in toctree:
-    if p not in toctree_contents:
+    if p.removesuffix(".rst") not in toctree_contents:
         warnings.warn(f"Couldn't find {p} in toctree contents")
