@@ -10,12 +10,12 @@
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
-:::{image} https://img.shields.io/conda/vn/conda-forge/awkward?style=for-the-badge&color=green
+:::{image} https://img.shields.io/conda/vn/conda-forge/awkward?style=for-the-badge&color=brightgreen&logo=condaforge
 :alt: Conda (channel only)
 :target: https://anaconda.org/conda-forge/awkward
 :::
 
-:::{image} https://img.shields.io/pypi/v/awkward?style=for-the-badge
+:::{image} https://img.shields.io/pypi/v/awkward?style=for-the-badge&logo=pypi
 :alt: PyPI
 :target: https://pypi.org/project/awkward
 :::
@@ -23,6 +23,11 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 :::{image} https://img.shields.io/badge/GitHub-scikit--hep%2Fawkward-lightgrey?style=for-the-badge&logo=GitHub
 :alt: GitHub
 :target: https://github.com/scikit-hep/awkward
+:::
+
+:::{image} https://img.shields.io/badge/-Try%20It%21-orange?style=for-the-badge
+:alt: Try It!
+:target: getting-started/try-it-in-your-browser
 :::
 
 ::::
