@@ -62,7 +62,7 @@ html_context = {
     "github_user": "scikit-hep",
     "github_repo": "awkward",
     # TODO: set this
-    "github_version": os.environ.get("READTHEDOCS_VERSION", "latest"),
+    "github_version": os.environ.get("READTHEDOCS_VERSION", "main"),
     "doc_path": "docs-sphinx",
 }
 html_theme = "pydata_sphinx_theme"
