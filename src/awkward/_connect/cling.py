@@ -149,7 +149,7 @@ namespace awkward {
     ssize_t stop_;
     ssize_t which_;
     ssize_t* ptrs_;
-    PyObject* lookup_;
+    PyObject* lookup_; //! lookup
   };
 }
 """.strip()
@@ -186,7 +186,7 @@ namespace awkward {
     ssize_t at_;
     ssize_t which_;
     ssize_t* ptrs_;
-    PyObject* lookup_;
+    PyObject* lookup_; //! lookup
 
   };
 }
