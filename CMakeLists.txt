@@ -31,6 +31,7 @@ elseif(EMSCRIPTEN)
   message(STATUS "Using Emscripten")
   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
   set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+  # TODO: this can be removed with pyodide-build>=0.22.0a1
   set(CMAKE_STRIP "emstrip")
   string(APPEND CMAKE_CXX_FLAGS " -s DISABLE_EXCEPTION_CATCHING=0")
 else()
