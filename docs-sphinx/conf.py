@@ -13,9 +13,10 @@
 import os
 import json
 import datetime
-
-# import sys
-# sys.path.insert(0, os.path.abspath("."))
+import runpy
+import sys
+import subprocess
+import pathlib
 
 # -- Project information -----------------------------------------------------
 
@@ -45,13 +46,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [
-    "_build",
-    "_templates",
-    "Thumbs.db",
-    "jupyter_execute",
-    ".*"
-]
+exclude_patterns = ["_build", "_templates", "Thumbs.db", "jupyter_execute", ".*"]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -147,17 +142,17 @@ jupyterlite_dir = "./lite"
 # Don't override ipynb format
 jupyterlite_bind_ipynb_suffix = False
 # We've disabled localstorage, so we must provide the contents explicitly
-jupyterlite_contents = [
-    "getting-started/demo/*"
-]
+jupyterlite_contents = ["getting-started/demo/*"]
 
-import sys
-import subprocess
+HERE = pathlib.Path(__file__).parent
 
-subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd="..")
+# Generate C++ bindings
+subprocess.check_call(
+    ["doxygen", str(HERE.parent / "docs-doxygen" / "Doxyfile")], cwd=HERE.parent
+)
 
-exec(open("prepare_docstrings.py").read(), dict(globals()))
+# Generate Python docstrings
+runpy.run_path(HERE / "prepare_docstrings.py")
 
-current_dir = os.path.dirname(os.path.realpath(__file__))
-docgen = os.path.join(current_dir, "..", "dev", "generate-kerneldocs.py")
-subprocess.check_call([sys.executable, docgen])
+# Generate kernel docs
+runpy.run_path(HERE.parent / "dev" / "generate-kerneldocs.py")
