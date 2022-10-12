@@ -501,7 +501,7 @@ def get_category_index(path: str) -> tuple[int, str]:
     return len(categories), path
 
 
-toctree_path = reference_path / "toctree.rst"
+toctree_path = reference_path / "toctree.txt"
 toctree_contents = toctree_path.read_text()
 
 for p in toctree:
