@@ -57,7 +57,7 @@ and even union-types!
 
 Awkward Array provides a suite of high-level IO functions (`ak.to_*` and `ak.from_*`), such as {func}`ak.to_parquet` and {func}`ak.from_parquet` that make it simple to serialise Awkward Arrays to disk, or read ragged arrays from other formats. 
 
-It is straightforward to implement new IO functions using {func}`ak.to_buffers` and {func}`ak.from_buffers` API, which convert/load Awkward Arrays to/from a collection of 1D arrays and a metadata object ({class}`ak.forms.Form`).
+In addition to specialised IO reading and writing routines, Awkward Arrays can also be serialised to/from a set of one dimensional buffers with the {func}`ak.to_buffers`/{func}`ak.from_buffers` functions. These buffers can then be written to/read from a wide range of existing array serialisation formats that understand NumPy arrays, e.g. {func}`numpy.savez`. 
 ::::::
 :::::::
 
