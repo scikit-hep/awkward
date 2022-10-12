@@ -34,10 +34,8 @@ jobs:
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-    - name: Set EM_CONFIG
+    - name: Set Emscripten config
       run: echo "EM_CONFIG=$EMSDK/.emscripten" >> $GITHUB_ENV
-    - name: Debug
-      run: env
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
