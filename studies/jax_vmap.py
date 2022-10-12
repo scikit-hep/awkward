@@ -165,12 +165,20 @@ class ListOffsetArray(Content):
         return len(self._offsets) - 1
 
     @property
+    def content(self) -> Content:
+        return self._content
+
+    @property
     def offsets(self) -> np.ndarray:
         return self._offsets
 
     @property
-    def content(self) -> Content:
-        return self._content
+    def is_regular(self) -> bool:
+        count = np.diff(self._offsets)
+        return np.alltrue(count[1:] == count[:-1])
+
+    def ravel(self) -> Content:
+        return self._content.getitem_range(self._offsets[0], self._offsets[-1]).ravel()
 
     def simplify(self) -> ListOffsetArray:
         """Return a new version of this array with trivial (starting at zero) offsets"""
@@ -178,14 +186,6 @@ class ListOffsetArray(Content):
             self._offsets - self._offsets[0],
             self._content.getitem_range(self._offsets[0], self._offsets[-1]),
         )
-
-    @property
-    def is_regular(self) -> bool:
-        count = np.diff(self._offsets)
-        return np.alltrue(count[1:] == count[:-1])
-
-    def ravel(self):
-        return self._content.getitem_range(self._offsets[0], self._offsets[-1]).ravel()
 
     def getitem_one(self, item: int) -> Content:
         start = self._offsets[item]
@@ -198,12 +198,16 @@ class ListOffsetArray(Content):
     def getitem_index(self, index: np.ndarray) -> ListOffsetArray:
         assert index.dtype == np.dtype("int64")
 
+        # Compute the indices into the content items that appear in the index result
         content_index = kernel_list_index_to_content_index(index, self._offsets)
         new_content = self._content.getitem_index(content_index)
 
+        # Determine the lengths of the indexed sublists
         inner_lengths = np.diff(self._offsets)
         new_inner_lengths = inner_lengths[index]
 
+        # Compute new zero-based offsets from the lengths
+        # of the indexed sublists
         new_offsets = np.empty(len(index) + 1, dtype=np.int64)
         new_offsets[0] = 0
         new_offsets[1:] = np.cumsum(new_inner_lengths)
