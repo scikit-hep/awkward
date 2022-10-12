@@ -1,297 +1,300 @@
 .. toctree::
     :caption: High-level data types
 
-    generated/ak.Array.rst
-    generated/ak.Record.rst
+    generated/ak.Array
+    generated/ak.Record
 
 .. toctree::
     :caption: Append-only data type
 
-    generated/ak.ArrayBuilder.rst
+    generated/ak.ArrayBuilder
 
 .. toctree::
     :caption: Describing an array
 
-    generated/ak.fields.rst
-    generated/ak.is_valid.rst
-    generated/ak.parameters.rst
-    generated/ak.is_tuple.rst
-    generated/ak.type.rst
-    generated/ak.validity_error.rst
+    generated/ak.fields
+    generated/ak.is_valid
+    generated/ak.parameters
+    generated/ak.is_tuple
+    generated/ak.type
+    generated/ak.validity_error
 
 .. toctree::
     :caption: Converting from other formats
 
-    generated/ak.from_arrow.rst
-    generated/ak.from_arrow_schema.rst
-    generated/ak.from_buffers.rst
-    generated/ak.from_cupy.rst
-    generated/ak.from_iter.rst
-    generated/ak.from_jax.rst
-    generated/ak.from_json.rst
-    generated/ak.from_numpy.rst
-    generated/ak.from_parquet.rst
-    generated/ak.from_rdataframe.rst
-    generated/ak.from_avro_file.rst
+    generated/ak.from_arrow
+    generated/ak.from_arrow_schema
+    generated/ak.from_buffers
+    generated/ak.from_cupy
+    generated/ak.from_iter
+    generated/ak.from_jax
+    generated/ak.from_json
+    generated/ak.from_numpy
+    generated/ak.from_parquet
+    generated/ak.from_rdataframe
+    generated/ak.from_avro_file
 
 .. toctree::
     :caption: Converting to other formats
 
-    generated/ak.to_arrow.rst
-    generated/ak.to_arrow_table.rst
-    generated/ak.to_buffers.rst
-    generated/ak.to_cupy.rst
-    generated/ak.to_dataframe.rst
-    generated/ak.to_jax.rst
-    generated/ak.to_json.rst
-    generated/ak.to_list.rst
-    generated/ak.to_numpy.rst
-    generated/ak.to_parquet.rst
-    generated/ak.to_rdataframe.rst
+    generated/ak.to_arrow
+    generated/ak.to_arrow_table
+    generated/ak.to_buffers
+    generated/ak.to_cupy
+    generated/ak.to_dataframe
+    generated/ak.to_jax
+    generated/ak.to_json
+    generated/ak.to_list
+    generated/ak.to_numpy
+    generated/ak.to_parquet
+    generated/ak.to_rdataframe
 
 .. toctree::
     :caption: Number of elements in each list
 
-    generated/ak.count.rst
-    generated/ak.count_nonzero.rst
-    generated/ak.num.rst
+    generated/ak.count
+    generated/ak.count_nonzero
+    generated/ak.num
 
 .. toctree::
     :caption: Making and breaking arrays of records
 
-    generated/ak.unzip.rst
-    generated/ak.zip.rst
+    generated/ak.unzip
+    generated/ak.zip
 
 .. toctree::
     :caption: Manipulating records
 
-    generated/ak.with_field.rst
-    generated/ak.with_name.rst
+    generated/ak.with_field
+    generated/ak.with_name
+
+.. toctree::
+    :caption: Behavior classes
+
+    ak.behavior
+    generated/ak.mixin_class
+    generated/ak.mixin_class_method
 
 .. toctree::
     :caption: Manipulating parameters
 
-    generated/ak.with_parameter.rst
-    generated/ak.without_parameters.rst
+    generated/ak.with_parameter
+    generated/ak.without_parameters
 
 .. toctree::
     :caption: Broadcasting
 
-    generated/ak.broadcast_arrays.rst
+    generated/ak.broadcast_arrays
 
 .. toctree::
     :caption: Merging arrays
 
-    generated/ak.concatenate.rst
-    generated/ak.where.rst
+    generated/ak.concatenate
+    generated/ak.where
 
 .. toctree::
     :caption: Flattening lists and missing values
 
-    generated/ak.flatten.rst
-    generated/ak.ravel.rst
-    generated/ak.unflatten.rst
+    generated/ak.flatten
+    generated/ak.ravel
+    generated/ak.unflatten
 
 .. toctree::
     :caption: Working with missing values
 
-    generated/ak.mask.rst
-    generated/ak.is_none.rst
-    generated/ak.fill_none.rst
-    generated/ak.pad_none.rst
-    generated/ak.firsts.rst
-    generated/ak.singletons.rst
+    generated/ak.mask
+    generated/ak.is_none
+    generated/ak.fill_none
+    generated/ak.pad_none
+    generated/ak.firsts
+    generated/ak.singletons
 
 .. toctree::
     :caption: Combinatorics
 
-    generated/ak.argcartesian.rst
-    generated/ak.argcombinations.rst
-    generated/ak.cartesian.rst
-    generated/ak.combinations.rst
+    generated/ak.argcartesian
+    generated/ak.argcombinations
+    generated/ak.cartesian
+    generated/ak.combinations
 
 .. toctree::
     :caption: NumPy compatibility
 
-    generated/ak.isclose.rst
-    generated/ak.ones_like.rst
-    generated/ak.zeros_like.rst
-    generated/ak.full_like.rst
+    generated/ak.isclose
+    generated/ak.ones_like
+    generated/ak.zeros_like
+    generated/ak.full_like
 
 .. toctree::
     :caption: Reducers
 
-    generated/ak.argsort.rst
-    generated/ak.sort.rst
-    generated/ak.all.rst
-    generated/ak.any.rst
-    generated/ak.argmax.rst
-    generated/ak.argmin.rst
-    generated/ak.max.rst
-    generated/ak.min.rst
-    generated/ak.nanargmax.rst
-    generated/ak.nanargmin.rst
-    generated/ak.nanmax.rst
-    generated/ak.nanmin.rst
-    generated/ak.nanprod.rst
-    generated/ak.nansum.rst
-    generated/ak.prod.rst
-    generated/ak.sum.rst
+    generated/ak.argsort
+    generated/ak.sort
+    generated/ak.all
+    generated/ak.any
+    generated/ak.argmax
+    generated/ak.argmin
+    generated/ak.max
+    generated/ak.min
+    generated/ak.nanargmax
+    generated/ak.nanargmin
+    generated/ak.nanmax
+    generated/ak.nanmin
+    generated/ak.nanprod
+    generated/ak.nansum
+    generated/ak.prod
+    generated/ak.sum
 
 .. toctree::
     :caption: Non-reducers
 
-    generated/ak.corr.rst
-    generated/ak.covar.rst
-    generated/ak.linear_fit.rst
-    generated/ak.mean.rst
-    generated/ak.moment.rst
-    generated/ak.nanmean.rst
-    generated/ak.nanstd.rst
-    generated/ak.nanvar.rst
-    generated/ak.ptp.rst
-    generated/ak.softmax.rst
-    generated/ak.std.rst
-    generated/ak.var.rst
+    generated/ak.corr
+    generated/ak.covar
+    generated/ak.linear_fit
+    generated/ak.mean
+    generated/ak.moment
+    generated/ak.nanmean
+    generated/ak.nanstd
+    generated/ak.nanvar
+    generated/ak.ptp
+    generated/ak.softmax
+    generated/ak.std
+    generated/ak.var
 
 .. toctree::
     :caption: Working with categorical arrays
 
-    generated/ak.categories.rst
-    generated/ak.is_categorical.rst
-    generated/ak.to_categorical.rst
-    generated/ak.from_categorical.rst
+    generated/ak.categories
+    generated/ak.is_categorical
+    generated/ak.to_categorical
+    generated/ak.from_categorical
 
 .. toctree::
-    :caption: Converting between regular and ragged arrays
+    :caption: Converting to/from ragged arrays
 
-    generated/ak.to_regular.rst
-    generated/ak.from_regular.rst
+    generated/ak.to_regular
+    generated/ak.from_regular
 
 .. toctree::
     :caption: Value and type conversions
 
-    generated/ak.strings_astype.rst
-    generated/ak.values_astype.rst
-    generated/ak.nan_to_none.rst
-    generated/ak.nan_to_num.rst
+    generated/ak.strings_astype
+    generated/ak.values_astype
+    generated/ak.nan_to_none
+    generated/ak.nan_to_num
 
 .. toctree::
     :caption: Low-level layouts
 
-    generated/ak.to_layout.rst
-    generated/ak.contents.BitMaskedArray.rst
-    generated/ak.contents.ByteMaskedArray.rst
-    generated/ak.contents.Content.rst
-    generated/ak.contents.EmptyArray.rst
-    generated/ak.contents.IndexedArray.rst
-    generated/ak.contents.IndexedOptionArray.rst
-    generated/ak.contents.ListArray.rst
-    generated/ak.contents.ListOffsetArray.rst
-    generated/ak.contents.NumpyArray.rst
-    generated/ak.contents.RecordArray.rst
-    generated/ak.contents.RegularArray.rst
-    generated/ak.contents.UnionArray.rst
-    generated/ak.contents.UnmaskedArray.rst
-    generated/ak.record.Record.rst
+    generated/ak.to_layout
+    generated/ak.contents.BitMaskedArray
+    generated/ak.contents.ByteMaskedArray
+    generated/ak.contents.Content
+    generated/ak.contents.EmptyArray
+    generated/ak.contents.IndexedArray
+    generated/ak.contents.IndexedOptionArray
+    generated/ak.contents.ListArray
+    generated/ak.contents.ListOffsetArray
+    generated/ak.contents.NumpyArray
+    generated/ak.contents.RecordArray
+    generated/ak.contents.RegularArray
+    generated/ak.contents.UnionArray
+    generated/ak.contents.UnmaskedArray
+    generated/ak.record.Record
 
 .. toctree::
     :caption: Index for layout nodes
 
-    generated/ak.index.Index.rst
-    generated/ak.index.Index32.rst
-    generated/ak.index.Index64.rst
-    generated/ak.index.Index8.rst
-    generated/ak.index.IndexU32.rst
+    generated/ak.index.Index
+    generated/ak.index.Index32
+    generated/ak.index.Index64
+    generated/ak.index.Index8
+    generated/ak.index.IndexU32
     generated/ak.index.IndexU8.
 
 .. toctree::
     :caption: Identities for layout nodes
 
-    generated/ak.identifier.Identifier.rst
+    generated/ak.identifier.Identifier
 
 .. toctree::
     :caption: String behaviors
 
-    generated/ak.ByteBehavior.rst
-    generated/ak.ByteStringBehavior.rst
-    generated/ak.CategoricalBehavior.rst
-    generated/ak.CharBehavior.rst
-    generated/ak.StringBehavior.rst
+    generated/ak.ByteBehavior
+    generated/ak.ByteStringBehavior
+    generated/ak.CategoricalBehavior
+    generated/ak.CharBehavior
+    generated/ak.StringBehavior
 
 .. toctree::
     :caption: Converting between backends
 
-    generated/ak.backend.rst
-    generated/ak.to_backend.rst
-
-.. toctree::
-    :caption: Behavior classes
-
-    generated/ak.mixin_class.rst
-    generated/ak.mixin_class_method.rst
+    generated/ak.backend
+    generated/ak.to_backend
 
 .. toctree::
     :caption: Indexing and grouping
 
-    generated/ak.local_index.rst
-    generated/ak.run_lengths.rst
+    generated/ak.local_index
+    generated/ak.run_lengths
 
 .. toctree::
     :caption: Copying and packing arrays
-    generated/ak.packed.rst
-    generated/ak.copy.rst
+
+    generated/ak.packed
+    generated/ak.copy
 
 .. toctree::
     :caption: Layout node transformations
-    generated/ak.transform.rst
+
+    generated/ak.transform
 
 
 .. toctree::
     :caption: High-level data types
 
-    generated/ak.types.ArrayType.rst
-    generated/ak.types.ListType.rst
-    generated/ak.types.NumpyType.rst
-    generated/ak.types.OptionType.rst
-    generated/ak.types.RecordType.rst
-    generated/ak.types.RegularType.rst
-    generated/ak.types.Type.rst
-    generated/ak.types.UnionType.rst
-    generated/ak.types.UnknownType.rst
-    generated/ak.types.dtype_to_primitive.rst
-    generated/ak.types.from_datashape.rst
-    generated/ak.types.is_primitive.rst
-    generated/ak.types.primitive_to_dtype.rst
+    generated/ak.types.ArrayType
+    generated/ak.types.ListType
+    generated/ak.types.NumpyType
+    generated/ak.types.OptionType
+    generated/ak.types.RecordType
+    generated/ak.types.RegularType
+    generated/ak.types.Type
+    generated/ak.types.UnionType
+    generated/ak.types.UnknownType
+    generated/ak.types.dtype_to_primitive
+    generated/ak.types.from_datashape
+    generated/ak.types.is_primitive
+    generated/ak.types.primitive_to_dtype
 
 .. toctree::
     :caption: Low-level array forms
 
-    generated/ak.forms.from_dict.rst
-    generated/ak.forms.from_json.rst
-    generated/ak.forms.BitMaskedForm.rst
-    generated/ak.forms.ByteMaskedForm.rst
-    generated/ak.forms.EmptyForm.rst
-    generated/ak.forms.Form.rst
-    generated/ak.forms.IndexedForm.rst
-    generated/ak.forms.IndexedOptionForm.rst
-    generated/ak.forms.ListForm.rst
-    generated/ak.forms.ListOffsetForm.rst
-    generated/ak.forms.NumpyForm.rst
-    generated/ak.forms.RecordForm.rst
-    generated/ak.forms.RegularForm.rst
-    generated/ak.forms.UnionForm.rst
-    generated/ak.forms.UnmaskedForm.rst
+    generated/ak.forms.from_dict
+    generated/ak.forms.from_json
+    generated/ak.forms.BitMaskedForm
+    generated/ak.forms.ByteMaskedForm
+    generated/ak.forms.EmptyForm
+    generated/ak.forms.Form
+    generated/ak.forms.IndexedForm
+    generated/ak.forms.IndexedOptionForm
+    generated/ak.forms.ListForm
+    generated/ak.forms.ListOffsetForm
+    generated/ak.forms.NumpyForm
+    generated/ak.forms.RecordForm
+    generated/ak.forms.RegularForm
+    generated/ak.forms.UnionForm
+    generated/ak.forms.UnmaskedForm
 
 .. toctree::
     :caption: Third-party integration
 
-    generated/ak.numba.register_and_check.rst
-    generated/ak.jax.register_and_check.rst
-    generated/ak.jax.assert_registered.rst
-    generated/ak.jax.import_jax.rst
+    generated/ak.numba.register_and_check
+    generated/ak.jax.register_and_check
+    generated/ak.jax.assert_registered
+    generated/ak.jax.import_jax
 
 .. toctree::
     :caption: Forth virtual machine
 
-    awkwardforth.rst
+    awkwardforth
