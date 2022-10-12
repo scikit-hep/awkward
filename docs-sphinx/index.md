@@ -8,14 +8,23 @@
 ::::{grid-item-card} 
 :columns: 12
 
-Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**. 
+Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
-:::{button-ref} getting-started/try-awkward-array
-:color: primary
-:shadow:
-
-Try Awkward Array
+:::{image} https://img.shields.io/conda/vn/conda-forge/awkward?style=for-the-badge&color=green
+:alt: Conda (channel only)
+:target: https://anaconda.org/conda-forge/awkward
 :::
+
+:::{image} https://img.shields.io/pypi/v/awkward?style=for-the-badge
+:alt: PyPI
+:target: https://pypi.org/project/awkward
+:::
+
+:::{image} https://img.shields.io/badge/GitHub-scikit--hep%2Fawkward-lightgrey?style=for-the-badge&logo=GitHub
+:alt: GitHub
+:target: https://github.com/scikit-hep/awkward
+:::
+
 ::::
 
 ::::{grid-item-card} 
