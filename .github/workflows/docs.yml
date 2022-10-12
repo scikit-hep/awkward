@@ -14,7 +14,6 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.10.7"
-  _EMCC_CCACHE: 1
 
 jobs:
   awkward-wasm:
@@ -35,6 +34,8 @@ jobs:
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+    - name: Debug
+      run: env
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
