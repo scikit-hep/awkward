@@ -25,9 +25,10 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 :target: https://github.com/scikit-hep/awkward
 :::
 
+% Unfortunately, `target` does not support document references
 :::{image} https://img.shields.io/badge/-Try%20It%21-orange?style=for-the-badge
 :alt: Try It!
-:target: getting-started/try-it-in-your-browser
+:target: getting-started/try-awkward-array.html
 :::
 
 ::::
