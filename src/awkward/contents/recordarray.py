@@ -743,23 +743,14 @@ class RecordArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
-        raise ak._errors.wrap_error(NotImplementedError)
+    def _transform_next(self, transformer, negaxis, starts, shifts, parents, outlength):
+        if not transformer.through_record:
+            raise ak._errors.wrap_error(
+                NotImplementedError(
+                    f"cannot apply transformer {transformer.name} through records"
+                )
+            )
 
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
                 self._nplike.instance().empty(0, np.int64), None, None, self._nplike
@@ -768,15 +759,8 @@ class RecordArray(Content):
         contents = []
         for content in self._contents:
             contents.append(
-                content._sort_next(
-                    negaxis,
-                    starts,
-                    parents,
-                    outlength,
-                    ascending,
-                    stable,
-                    kind,
-                    order,
+                content._transform_next(
+                    transformer, negaxis, starts, parents, outlength
                 )
             )
         return RecordArray(

@@ -1137,24 +1137,8 @@ class IndexedOptionArray(Content):
         next = self._content._carry(nextcarry, False)
         return next, nextparents, numnull, outindex
 
-    def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
-        assert (
-            starts.nplike is self._nplike
-            and parents.nplike is self._nplike
-            and self._index.nplike is self._nplike
-        )
-
+    def _transform_next(self, transformer, negaxis, starts, shifts, parents, outlength):
+        assert starts.nplike is self._nplike and parents.nplike is self._nplike
         branch, depth = self.branch_depth
 
         next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
@@ -1164,51 +1148,49 @@ class IndexedOptionArray(Content):
         else:
             nextshifts = None
 
-        out = next._argsort_next(
+        out = next._transform_next(
+            transformer,
             negaxis,
             starts,
             nextshifts,
             nextparents,
             outlength,
-            ascending,
-            stable,
-            kind,
-            order,
         )
 
-        # `next._argsort_next` is given the non-None values. We choose to
-        # sort None values to the end of the list, meaning we need to grow `out`
-        # to account for these None values. First, we locate these nones within
-        # their sublists
         nulls_merged = False
-        nulls_index = ak.index.Index64.empty(numnull[0], self._nplike)
-        assert nulls_index.nplike is self._nplike
-        self._handle_error(
-            self._nplike[
-                "awkward_IndexedArray_index_of_nulls",
-                nulls_index.dtype.type,
-                self._index.dtype.type,
-                parents.dtype.type,
-                starts.dtype.type,
-            ](
-                nulls_index.data,
-                self._index.data,
-                self._index.length,
-                parents.data,
-                starts.data,
+        if transformer.needs_position:
+            # `next._argsort_next` is given the non-None values. We choose to
+            # sort None values to the end of the list, meaning we need to grow `out`
+            # to account for these None values. First, we locate these nones within
+            # their sublists
+            nulls_index = ak.index.Index64.empty(numnull[0], self._nplike)
+            assert nulls_index.nplike is self._nplike
+            self._handle_error(
+                self._nplike[
+                    "awkward_IndexedArray_index_of_nulls",
+                    nulls_index.dtype.type,
+                    self._index.dtype.type,
+                    parents.dtype.type,
+                    starts.dtype.type,
+                ](
+                    nulls_index.data,
+                    self._index.data,
+                    self._index.length,
+                    parents.data,
+                    starts.data,
+                )
             )
-        )
-        # If we wrap a NumpyArray (i.e., axis=-1), then we want `argmax` to return
-        # the indices of each `None` value, rather than `None` itself.
-        # We can test for this condition by seeing whether the NumpyArray of indices
-        # is mergeable with our content (`out = next._argsort_next result`).
-        # If so, try to concatenate them at the end of `out`.`
-        nulls_index_content = ak.contents.NumpyArray(
-            nulls_index, None, None, self._nplike
-        )
-        if out.mergeable(nulls_index_content, True):
-            out = out.merge(nulls_index_content)
-            nulls_merged = True
+            # If we wrap a NumpyArray (i.e., axis=-1), then we want `argmax` to return
+            # the indices of each `None` value, rather than `None` itself.
+            # We can test for this condition by seeing whether the NumpyArray of indices
+            # is mergeable with our content (`out = next._argsort_next result`).
+            # If so, try to concatenate them at the end of `out`.`
+            nulls_index_content = ak.contents.NumpyArray(
+                nulls_index, None, None, self._nplike
+            )
+            if out.mergeable(nulls_index_content, True):
+                out = out.merge(nulls_index_content)
+                nulls_merged = True
 
         nextoutindex = ak.index.Index64.empty(parents.length, self._nplike)
         assert (
@@ -1248,74 +1230,6 @@ class IndexedOptionArray(Content):
                 )
             )
 
-        out = ak.contents.IndexedOptionArray(
-            nextoutindex,
-            out,
-            None,
-            self._parameters,
-            self._nplike,
-        ).simplify_optiontype()
-
-        inject_nones = (
-            True if (numnull[0] > 0 and not branch and negaxis != depth) else False
-        )
-
-        # If we want the None's at this depth to be injected
-        # into the dense ([x y z None None]) rearranger result.
-        # Here, we index the dense content with an index
-        # that maps the values to the correct locations
-        if inject_nones:
-            return ak.contents.IndexedOptionArray(
-                outindex,
-                out,
-                None,
-                self._parameters,
-                self._nplike,
-            ).simplify_optiontype()
-        # Otherwise, if we are rearranging (e.g sorting) the contents of this layout,
-        # then we do NOT want to return an optional layout,
-        # OR we are branching
-        else:
-            return out
-
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
-        assert starts.nplike is self._nplike and parents.nplike is self._nplike
-        branch, depth = self.branch_depth
-
-        next, nextparents, numnull, outindex = self._rearrange_prepare_next(parents)
-
-        out = next._sort_next(
-            negaxis,
-            starts,
-            nextparents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
-
-        nextoutindex = ak.index.Index64.empty(parents.length, self._nplike)
-        assert nextoutindex.nplike is self._nplike
-
-        self._handle_error(
-            self._nplike[
-                "awkward_IndexedArray_local_preparenext",
-                nextoutindex.dtype.type,
-                starts.dtype.type,
-                parents.dtype.type,
-                nextparents.dtype.type,
-            ](
-                nextoutindex.data,
-                starts.data,
-                parents.data,
-                parents.length,
-                nextparents.data,
-                nextparents.length,
-            )
-        )
         out = ak.contents.IndexedOptionArray(
             nextoutindex,
             out,

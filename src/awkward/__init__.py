@@ -20,6 +20,8 @@ import awkward.forms
 import awkward._slicing
 import awkward._broadcasting
 import awkward._typetracer
+import awkward._reducers
+import awkward._transformers
 
 # internal
 import awkward._util

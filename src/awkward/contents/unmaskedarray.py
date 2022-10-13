@@ -381,28 +381,9 @@ class UnmaskedArray(Content):
             return self
         return self._content._unique(negaxis, starts, parents, outlength)
 
-    def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
-        out = self._content._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
+    def _transform_next(self, transformer, negaxis, starts, shifts, parents, outlength):
+        out = self._content._transform_next(
+            transformer, negaxis, starts, shifts, parents, outlength
         )
 
         if isinstance(out, ak.contents.RegularArray):
@@ -419,40 +400,6 @@ class UnmaskedArray(Content):
                 out._length,
                 None,
                 None,
-                self._nplike,
-            )
-
-        else:
-            return out
-
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
-        out = self._content._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
-
-        if isinstance(out, ak.contents.RegularArray):
-            tmp = ak.contents.UnmaskedArray(
-                out._content,
-                self._identifier,
-                self._parameters,
-                self._nplike,
-            ).simplify_optiontype()
-
-            return ak.contents.RegularArray(
-                tmp,
-                out._size,
-                out._length,
-                self._identifier,
-                self._parameters,
                 self._nplike,
             )
 

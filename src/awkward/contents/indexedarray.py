@@ -887,54 +887,6 @@ class IndexedArray(Content):
 
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
-        next = self._content._carry(self._index, False)
-        return next._argsort_next(
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
-
-    def _sort_next(
-        self,
-        negaxis,
-        starts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
-        next = self._content._carry(self._index, False)
-        return next._sort_next(
-            negaxis,
-            starts,
-            parents,
-            outlength,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
-
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
@@ -943,6 +895,25 @@ class IndexedArray(Content):
             return self.project()._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
+
+    def _transform_next(
+        self,
+        transformer,
+        negaxis,
+        starts,
+        shifts,
+        parents,
+        outlength,
+    ):
+        next = self._content._carry(self._index, False)
+        return next._transform_next(
+            transformer,
+            negaxis,
+            starts,
+            shifts,
+            parents,
+            outlength,
+        )
 
     def _reduce_next(
         self,

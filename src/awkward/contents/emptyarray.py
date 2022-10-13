@@ -225,35 +225,16 @@ class EmptyArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         return self
 
-    def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
+    def _transform_next(self, transformer, negaxis, starts, shifts, parents, outlength):
         as_numpy = self.toNumpyArray(np.float64)
-        return as_numpy._argsort_next(
+        return as_numpy._transform_next(
+            transformer,
             negaxis,
             starts,
             shifts,
             parents,
             outlength,
-            ascending,
-            stable,
-            kind,
-            order,
         )
-
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
-        return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ak.contents.EmptyArray(self._identifier, self._parameters, self._nplike)

@@ -1551,3 +1551,6 @@ class Content:
             )
             and self._layout_equal(other, index_dtype, numpyarray)
         )
+
+    def _transform_next(self, transformer, negaxis, starts, shifts, parents, outlength):
+        raise ak._errors.wrap_error(NotImplementedError)

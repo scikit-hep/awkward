@@ -1068,18 +1068,7 @@ class UnionArray(Content):
 
         return simplified._unique(negaxis, starts, parents, outlength)
 
-    def _argsort_next(
-        self,
-        negaxis,
-        starts,
-        shifts,
-        parents,
-        outlength,
-        ascending,
-        stable,
-        kind,
-        order,
-    ):
+    def _transform_next(self, transformer, negaxis, starts, shifts, parents, outlength):
         simplified = self.simplify_uniontype(mergebool=True)
         if simplified.length == 0:
             return ak.contents.NumpyArray(
@@ -1088,30 +1077,11 @@ class UnionArray(Content):
 
         if isinstance(simplified, ak.contents.UnionArray):
             raise ak._errors.wrap_error(
-                ValueError("cannot argsort an irreducible UnionArray")
+                ValueError("cannot transform an irreducible UnionArray")
             )
 
-        return simplified._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order
-        )
-
-    def _sort_next(
-        self, negaxis, starts, parents, outlength, ascending, stable, kind, order
-    ):
-        if self.length == 0:
-            return self
-
-        simplified = self.simplify_uniontype(mergebool=True)
-        if simplified.length == 0:
-            return simplified
-
-        if isinstance(simplified, ak.contents.UnionArray):
-            raise ak._errors.wrap_error(
-                ValueError("cannot sort an irreducible UnionArray")
-            )
-
-        return simplified._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable, kind, order
+        return simplified._transform_next(
+            transformer, negaxis, starts, shifts, parents, outlength
         )
 
     def _reduce_next(
