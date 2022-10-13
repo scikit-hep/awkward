@@ -226,15 +226,18 @@ class EmptyArray(Content):
         return self
 
     def _transform_next(self, transformer, negaxis, starts, shifts, parents, outlength):
-        as_numpy = self.toNumpyArray(np.float64)
-        return as_numpy._transform_next(
-            transformer,
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-        )
+        if transformer.needs_position:
+            as_numpy = self.toNumpyArray(np.int64)
+            return as_numpy._transform_next(
+                transformer,
+                negaxis,
+                starts,
+                shifts,
+                parents,
+                outlength,
+            )
+        else:
+            return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         return ak.contents.EmptyArray(self._identifier, self._parameters, self._nplike)
