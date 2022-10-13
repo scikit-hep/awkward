@@ -940,7 +940,7 @@ class Content:
 
         starts = ak.index.Index64.zeros(1, self._nplike)
         parents = ak.index.Index64.zeros(self.length, self._nplike)
-        transformer = ak._transformers.Sort(ascending, stable)
+        transformer = ak._transformers.ArgSort(ascending, stable)
         return self._transform_next(transformer, negaxis, starts, None, parents, 1)
 
     def cumsum(self, axis=None, dtype=None):
