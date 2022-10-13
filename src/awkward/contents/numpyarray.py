@@ -865,7 +865,10 @@ class NumpyArray(Content):
                 TypeError(f"{type(self).__name__} attempting to transform a scalar ")
             )
         elif len(self.shape) != 1 or not self.is_contiguous:
-            raise NotImplementedError
+            contiguous_self = self if self.is_contiguous else self.contiguous()
+            return contiguous_self.toRegularArray()._transform_next(
+                transformer, negaxis, starts, shifts, parents, outlength
+            )
 
         else:
             parents_length = parents.length
