@@ -132,3 +132,52 @@ class ArgSort(Transformer):
         return ak.contents.NumpyArray(
             array.nplike.asarray(nextcarry, nextcarry.dtype), None, None, array.nplike
         )
+
+
+class CumSum(Transformer):
+    def __init__(self, dtype):
+        self._dtype = dtype
+
+    @property
+    def dtype(self):
+        return self._dtype
+
+    def apply(self, array, offsets, parents):
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "M":
+            raise ak._errors.wrap_error(
+                ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
+            )
+        else:
+            dtype = self.maybe_other_type(array.dtype)
+        result = array.nplike.empty(
+            self.maybe_double_length(array.dtype.type, array.length),
+            dtype=self.return_dtype(dtype),
+        )
+
+        if array.dtype == np.bool_:
+            raise NotImplementedError
+        elif array.dtype.type in (np.complex128, np.complex64):
+            raise NotImplementedError
+        else:
+            assert parents.nplike is array.nplike
+            array._handle_error(
+                array.nplike[
+                    "awkward_transform_cumsum",
+                    result.dtype.type,
+                    np.int64 if array.dtype.kind == "m" else array.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    result,
+                    array.data,
+                    offsets.data,
+                    offsets.length,
+                )
+            )
+
+        if array.dtype.kind == "m":
+            return ak.contents.NumpyArray(array.nplike.asarray(result, array.dtype))
+        elif array.dtype.type in (np.complex128, np.complex64):
+            return ak.contents.NumpyArray(result.view(array.dtype))
+        else:
+            return ak.contents.NumpyArray(result)

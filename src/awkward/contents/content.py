@@ -943,6 +943,16 @@ class Content:
         transformer = ak._transformers.Sort(ascending, stable)
         return self._transform_next(transformer, negaxis, starts, None, parents, 1)
 
+    def cumsum(self, axis=None, dtype=None):
+        transformer = ak._transformers.CumSum(dtype)
+        starts = ak.index.Index64.zeros(1, self._nplike)
+        parents = ak.index.Index64.zeros(self.length, self._nplike)
+        if axis is not None:
+            negaxis = -axis
+        else:
+            negaxis = None
+        return self._transform_next(transformer, negaxis, starts, None, parents, 1)
+
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
         branch, depth = self.branch_depth

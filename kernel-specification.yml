@@ -5513,6 +5513,109 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_transform_cumsum
+    specializations:
+      - name: awkward_transform_cumsum_int32_int8_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_int32_int16_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_int32_int32_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_int64_int8_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_int64_int16_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_int64_int32_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_int64_int64_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_uint32_uint8_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_uint32_uint16_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_uint32_uint32_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_uint64_uint8_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_uint64_uint16_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_uint64_uint32_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_uint64_uint64_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_float32_float32_64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_float64_float64_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_sum_complex
     specializations:
       - name: awkward_reduce_sum_complex64_complex64_64
