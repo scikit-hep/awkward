@@ -760,7 +760,7 @@ class RecordArray(Content):
         for content in self._contents:
             contents.append(
                 content._transform_next(
-                    transformer, negaxis, starts, parents, outlength
+                    transformer, negaxis, starts, shifts, parents, outlength
                 )
             )
         return RecordArray(
