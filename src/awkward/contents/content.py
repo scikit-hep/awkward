@@ -940,17 +940,8 @@ class Content:
 
         starts = ak.index.Index64.zeros(1, self._nplike)
         parents = ak.index.Index64.zeros(self.length, self._nplike)
-        return self._argsort_next(
-            negaxis,
-            starts,
-            None,
-            parents,
-            1,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+        transformer = ak._transformers.Sort(ascending, stable)
+        return self._transform_next(transformer, negaxis, starts, None, parents, 1)
 
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
@@ -986,16 +977,8 @@ class Content:
 
         starts = ak.index.Index64.zeros(1, self._nplike)
         parents = ak.index.Index64.zeros(self.length, self._nplike)
-        return self._sort_next(
-            negaxis,
-            starts,
-            parents,
-            1,
-            ascending,
-            stable,
-            kind,
-            order,
-        )
+        transformer = ak._transformers.Sort(ascending, stable)
+        return self._transform_next(transformer, negaxis, starts, None, parents, 1)
 
     def _combinations_axis0(self, n, replacement, recordlookup, parameters):
         size = self.length
