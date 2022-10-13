@@ -1018,6 +1018,7 @@ class ListOffsetArray(Content):
         ) and isinstance(
             transformer, (ak._transformers.Sort, ak._transformers.ArgSort)
         ):
+            is_argsort = isinstance(transformer, ak._transformers.ArgSort)
             if branch or (negaxis != depth):
                 raise ak._errors.wrap_error(
                     np.AxisError("array with strings can only be sorted with axis=-1")
@@ -1054,13 +1055,13 @@ class ListOffsetArray(Content):
                         stops.data,
                         transformer.stable,
                         transformer.ascending,
-                        False,
+                        is_argsort,
                     )
                 )
-                if isinstance(transformer, ak._transformers.Sort):
-                    return self._carry(nextcarry, False)
-                else:
+                if is_argsort:
                     return ak.contents.NumpyArray(nextcarry, None, None, self._nplike)
+                else:
+                    return self._carry(nextcarry, False)
 
         if not branch and (negaxis == depth):
             if self._nplike.known_shape and parents.nplike.known_shape:
