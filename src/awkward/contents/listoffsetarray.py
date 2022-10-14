@@ -1509,6 +1509,8 @@ class ListOffsetArray(Content):
             )
 
     def _rearrange_prepare_next(self, outlength, parents):
+        # Compute the length of the longest sublist, and copy the current offsets here
+        # given that we're already looping over the data
         nextlen = self._offsets[-1] - self._offsets[0]
         maxcount = ak.index.Index64.empty(1, self._nplike)
         offsetscopy = ak.index.Index64.empty(self.offsets.length, self._nplike)
@@ -1531,6 +1533,29 @@ class ListOffsetArray(Content):
             )
         )
 
+        # The fundamental mechanism by which reduction is performed is to keep
+        # track of the reduction sublist identity, i.e. ultimately which elements
+        # of the flat NumpyArray layout are reduced together. This is done by
+        # keeping track of `parents`, a list of integers describing the left-to-right
+        # ordering of the sublists after reduction. The equality of two parents
+        # ensures that same-parent values are reduced together, whilst the value
+        # of the parent determines the index into the final flat reduction result
+        # buffer.
+        # The following kernel computes these parent values. Note that the order
+        # of reduction is in principle unimportant. However, for ease of supporting
+        # libraries like JAX, which expose primitives for ragged reductions within
+        # contiguous sublists, we must ensure that the final buffer satisfies these
+        # constraints. We could do this by sorting the final buffer by the parents,
+        # but it is possible (and performant) to do so during this tree recursion.
+        # This motivates a `carry` array, which ensures that the contiguous `parents`
+        # array aligns with the contents of the list. Note that, we don't seem yet
+        # to explicitly label this assumption of parents-as-contiguous-sublists.
+        # Requiring contiguous parents makes computing the reduction along axis=0
+        # equivalent to computing the reduction along axis=-1 of the transpose.
+        # Hence, this kernel computes the transpose `carry` and corresponding
+        # `parents` such that the final to-be-reduced array has like-parents adjacent
+        # to one another. The kernel uses `maxcount` to compute a `row*width + column`
+        # parent that reconstructs the original array (C-like) ordering.
         np_nextcarry = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
         np_nextparents = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
         maxnextparents = ak.index.Index64.empty(1, self._nplike)
