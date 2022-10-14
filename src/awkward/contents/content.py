@@ -1477,6 +1477,9 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _transform(self, transformer, axis=-1):
+        if axis is None:
+            raise ak._errors.wrap_error(NotImplementedError)
+
         negaxis = -axis
         branch, depth = self.branch_depth
         if branch:
