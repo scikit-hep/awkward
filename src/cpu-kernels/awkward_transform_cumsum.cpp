@@ -31,6 +31,28 @@ ERROR awkward_transform_cumsum(
 
   return success();
 }
+ERROR awkward_transform_cumsum_int64_bool_64(
+    int64_t* toptr,
+    const bool* fromptr,
+    const int64_t* offsets,
+    int64_t offsetslength) {
+  return awkward_transform_cumsum<int64_t, bool>(
+      toptr,
+      fromptr,
+      offsets,
+      offsetslength);
+}
+ERROR awkward_transform_cumsum_int32_bool_64(
+    int32_t* toptr,
+    const bool* fromptr,
+    const int64_t* offsets,
+    int64_t offsetslength) {
+  return awkward_transform_cumsum<int32_t, bool>(
+      toptr,
+      fromptr,
+      offsets,
+      offsetslength);
+}
 ERROR awkward_transform_cumsum_int64_int8_64(
     int64_t* toptr,
     const int8_t* fromptr,

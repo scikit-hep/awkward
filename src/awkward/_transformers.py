@@ -155,9 +155,7 @@ class CumSum(Transformer):
             dtype=self.return_dtype(dtype),
         )
 
-        if array.dtype == np.bool_:
-            raise NotImplementedError
-        elif array.dtype.type in (np.complex128, np.complex64):
+        if array.dtype.type in (np.complex128, np.complex64):
             raise NotImplementedError
         else:
             assert parents.nplike is array.nplike

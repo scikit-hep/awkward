@@ -5515,6 +5515,18 @@ kernels:
 
   - name: awkward_transform_cumsum
     specializations:
+      - name: awkward_transform_cumsum_int64_bool_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
+      - name: awkward_transform_cumsum_int32_bool_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: transformer-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: transformer-offsetslength}
       - name: awkward_transform_cumsum_int32_int8_64
         args:
           - {name: toptr, type: "List[int32_t]", dir: out}
