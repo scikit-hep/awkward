@@ -7,12 +7,15 @@ class Transformer:
     needs_position = False
     through_record = False
 
-    @classmethod
-    def highlevel_function(cls):
-        return getattr(ak.operations, cls.name)
+    @property
+    def name(self):
+        raise ak._errors.wrap_error(NotImplementedError)
 
-    @classmethod
-    def return_dtype(cls, given_dtype):
+    @property
+    def highlevel_function(self):
+        return getattr(ak.operations, self.name)
+
+    def return_dtype(self, given_dtype):
         if given_dtype in (np.bool_, np.int8, np.int16, np.int32):
             return np.int32 if ak._util.win or ak._util.bits32 else np.int64
 
@@ -21,12 +24,10 @@ class Transformer:
 
         return given_dtype
 
-    @classmethod
-    def maybe_double_length(cls, type, length):
+    def maybe_double_length(self, type, length):
         return 2 * length if type in (np.complex128, np.complex64) else length
 
-    @classmethod
-    def maybe_other_type(cls, dtype):
+    def maybe_other_type(self, dtype):
         type = np.int64 if dtype.kind.upper() == "M" else dtype.type
         if dtype == np.complex128:
             type = np.float64
