@@ -6,6 +6,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 class Transformer:
     needs_position = False
     through_record = False
+    preferred_dtype = None
 
     @property
     def name(self):
@@ -97,6 +98,7 @@ class Sort(Transformer):
 
 class ArgSort(Transformer):
     needs_position = True
+    preferred_dtype = np.int64
 
     def __init__(self, ascending: bool, stable: bool):
         self._ascending = ascending

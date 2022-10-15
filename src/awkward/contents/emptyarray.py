@@ -226,8 +226,8 @@ class EmptyArray(Content):
         return self
 
     def _transform_next(self, transformer, negaxis, starts, shifts, parents, outlength):
-        if transformer.needs_position:
-            as_numpy = self.toNumpyArray(np.int64)
+        if transformer.preferred_dtype is not None:
+            as_numpy = self.toNumpyArray(transformer.preferred_dtype)
             return as_numpy._transform_next(
                 transformer,
                 negaxis,
