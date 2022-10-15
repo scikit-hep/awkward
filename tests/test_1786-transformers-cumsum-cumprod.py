@@ -13,10 +13,10 @@ def test():
     )
     nparray = ak.to_numpy(akarray)
 
-    assert ak.cumsum(akarray, axis=3).tolist() == np.sum(nparray, axis=3).tolist()
-    assert ak.cumsum(akarray, axis=2).tolist() == np.sum(nparray, axis=2).tolist()
-    assert ak.cumsum(akarray, axis=1).tolist() == np.sum(nparray, axis=1).tolist()
-    assert ak.cumsum(akarray, axis=0).tolist() == np.sum(nparray, axis=0).tolist()
+    assert ak.cumsum(akarray, axis=3).tolist() == np.cumsum(nparray, axis=3).tolist()
+    assert ak.cumsum(akarray, axis=2).tolist() == np.cumsum(nparray, axis=2).tolist()
+    assert ak.cumsum(akarray, axis=1).tolist() == np.cumsum(nparray, axis=1).tolist()
+    assert ak.cumsum(akarray, axis=0).tolist() == np.cumsum(nparray, axis=0).tolist()
 
 
 def test_nones():
@@ -28,7 +28,7 @@ def test_nones():
     )
     nparray = ak.to_numpy(akarray)
 
-    assert ak.cumsum(akarray, axis=3).tolist() == np.sum(nparray, axis=3).tolist()
-    assert ak.cumsum(akarray, axis=2).tolist() == np.sum(nparray, axis=2).tolist()
-    assert ak.cumsum(akarray, axis=1).tolist() == np.sum(nparray, axis=1).tolist()
-    assert ak.cumsum(akarray, axis=0).tolist() == np.sum(nparray, axis=0).tolist()
+    assert ak.cumsum(akarray, axis=3).tolist() == np.cumsum(nparray, axis=3).tolist()
+    assert ak.cumsum(akarray, axis=2).tolist() == np.cumsum(nparray, axis=2).tolist()
+    assert ak.cumsum(akarray, axis=1).tolist() == np.cumsum(nparray, axis=1).tolist()
+    assert ak.cumsum(akarray, axis=0).tolist() == np.cumsum(nparray, axis=0).tolist()
