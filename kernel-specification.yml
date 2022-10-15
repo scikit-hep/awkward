@@ -605,7 +605,6 @@ kernels:
       - name: awkward_IndexedArray_local_preparenext_64
         args:
           - {name: tocarry, type: "List[int64_t]", dir: out}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: parents, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
           - {name: parentslength, type: "Const[int64_t]", dir: in, role: default}
           - {name: nextparents, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}

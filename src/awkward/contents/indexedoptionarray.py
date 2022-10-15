@@ -1195,7 +1195,6 @@ class IndexedOptionArray(Content):
         nextoutindex = ak.index.Index64.empty(parents.length, self._nplike)
         assert (
             nextoutindex.nplike is self._nplike
-            and starts.nplike is self._nplike
             and parents.nplike is self._nplike
             and nextparents.nplike is self._nplike
         )
@@ -1203,12 +1202,10 @@ class IndexedOptionArray(Content):
             self._nplike[
                 "awkward_IndexedArray_local_preparenext",
                 nextoutindex.dtype.type,
-                starts.dtype.type,
                 parents.dtype.type,
                 nextparents.dtype.type,
             ](
                 nextoutindex.data,
-                starts.data,
                 parents.data,
                 parents.length,
                 nextparents.data,
