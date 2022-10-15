@@ -5,6 +5,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 class Transformer:
     needs_position = False
+    maintain_none_position = True
     through_record = False
     preferred_dtype = None
 
@@ -57,6 +58,7 @@ class Transformer:
 
 class Sort(Transformer):
     through_record = True
+    maintain_none_position = False
 
     def __init__(self, ascending: bool, stable: bool):
         self._ascending = ascending
@@ -98,6 +100,7 @@ class Sort(Transformer):
 
 class ArgSort(Transformer):
     needs_position = True
+    maintain_none_position = False
     preferred_dtype = np.int64
 
     def __init__(self, ascending: bool, stable: bool):
@@ -168,7 +171,6 @@ class CumSum(Transformer):
                     offsets.length,
                 )
             )
-
         if array.dtype.kind == "m":
             return ak.contents.NumpyArray(array.nplike.asarray(result, array.dtype))
         elif array.dtype.type in (np.complex128, np.complex64):
