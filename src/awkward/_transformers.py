@@ -138,13 +138,6 @@ class ArgSort(Transformer):
 
 
 class CumSum(Transformer):
-    def __init__(self, dtype):
-        self._dtype = dtype
-
-    @property
-    def dtype(self):
-        return self._dtype
-
     def apply(self, array, offsets, parents):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":

@@ -910,8 +910,8 @@ class Content:
         transformer = ak._transformers.ArgSort(ascending, stable)
         return self._transform(transformer, axis)
 
-    def cumsum(self, axis=None, dtype=None):
-        transformer = ak._transformers.CumSum(dtype)
+    def cumsum(self, axis=None):
+        transformer = ak._transformers.CumSum()
         return self._transform(transformer, axis)
 
     def sort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
