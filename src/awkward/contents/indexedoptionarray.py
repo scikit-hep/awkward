@@ -1248,13 +1248,7 @@ class IndexedOptionArray(Content):
 
         # Always inject nones if branching / not transforming this axis. Otherwise,
         # let the transformer decide e.g. cumsum maintains option position.
-        maintain_none_positions = (
-            True
-            if not (branch or negaxis == depth)
-            else transformer.maintain_none_position
-        )
-
-        if maintain_none_positions:
+        if not (branch or negaxis == depth) or transformer.maintain_none_position:
             # At this point, `out` will always have the `None`-associated values at the
             # end of the array. If we want to maintain correspondence between the input
             # and transformed array `None` positions, then we must re-arrange them now.
