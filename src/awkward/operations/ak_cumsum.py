@@ -98,7 +98,7 @@ def _impl(array, axis):
 
     else:
         behavior = ak._util.behavior_of(array)
-        out = layout.cumsum(axis=axis, behavior=behavior)
+        out = layout.cumsum(axis=axis)
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
             return ak._util.wrap(out, behavior)
         else:
