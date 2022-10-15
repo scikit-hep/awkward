@@ -43,8 +43,8 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
   }
 
   for (;  k < outlength;  k++) {
-    outstarts[k] = lendistincts + 1;
-    outstops[k] = lendistincts + 1;
+    outstarts[k] = maxdistinct + 1;
+    outstops[k] = maxdistinct + 1;
   }
 
   return success();
