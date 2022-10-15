@@ -1012,8 +1012,8 @@ class IndexedOptionArray(Content):
             )
 
         if isinstance(out, ak.contents.NumpyArray):
-            # We do not pass None values to the content, so it will have computed
-            # the unique _non null_ values. We therefore need to account for None
+            # We do not pass `None` values to the content, so it will have computed
+            # the unique _non null_ values. We therefore need to account for `None`
             # values in the result. We do this by creating an IndexedOptionArray
             # and tacking the index -1 onto the end
             nextoutindex = ak.index.Index64.empty(out.length + 1, self._nplike)
@@ -1108,6 +1108,13 @@ class IndexedOptionArray(Content):
                 index_length,
             )
         )
+
+        # Determine the new `nextparents` after dropping the `None` values from this array
+        # with `nextcarry`. Compute the index over the (dense) output, appending the missing
+        # `None` values to the end .
+        # e.g. for index    =[0 2 -1 1 -1] and     parents=[0 0 0 1 1],
+        # we have  nextcarry=[0 2    1   ] and nextparents=[0 0   1  ].
+        # The output index is found to be outindex=[0 1 2 -1 -1].
         next_length = index_length - numnull[0]
         nextparents = ak.index.Index64.empty(next_length, self._nplike)
         nextcarry = ak.index.Index64.empty(next_length, self._nplike)
@@ -1159,10 +1166,7 @@ class IndexedOptionArray(Content):
 
         nulls_merged = False
         if transformer.needs_position:
-            # `next._argsort_next` is given the non-None values. We choose to
-            # sort None values to the end of the list, meaning we need to grow `out`
-            # to account for these None values. First, we locate these nones within
-            # their sublists
+            # For the next step, we need to locate `None`s within their sublists
             nulls_index = ak.index.Index64.empty(numnull[0], self._nplike)
             assert nulls_index.nplike is self._nplike
             self._handle_error(
@@ -1180,10 +1184,12 @@ class IndexedOptionArray(Content):
                     starts.data,
                 )
             )
-            # If we wrap a NumpyArray (i.e., axis=-1), then we want `argmax` to return
-            # the indices of each `None` value, rather than `None` itself.
-            # We can test for this condition by seeing whether the NumpyArray of indices
-            # is mergeable with our content (`out = next._argsort_next result`).
+            # A positional transformer should produce an array of integer positions,
+            # with indices of the `None` values rather than `None` values themselves.
+            # If the result of `next._transform_next` is a `NumpyArray`, then we need
+            # to ensure that we handle this differently to non-positional transformers.
+            # We can test for this condition by seeing whether a NumpyArray of the missing
+            # indices is mergeable with our content (`out = next._argsort_next result`).
             # If so, try to concatenate them at the end of `out`.`
             nulls_index_content = ak.contents.NumpyArray(
                 nulls_index, None, None, self._nplike
@@ -1214,11 +1220,16 @@ class IndexedOptionArray(Content):
         )
 
         if nulls_merged:
-            # awkward_IndexedArray_local_preparenext uses -1 to
-            # indicate `None` values. Given that this code-path runs
-            # only when the `None` value indices are explicitly stored in out,
-            # we need to mapping the -1 values to their corresponding indices
-            # in `out`
+            assert transformer.needs_position
+
+            # We should only be here if we have a positional transformer, which expects
+            # the indices of `None` values rather than `None`s themselves. At this point,
+            # we have expanded `out` to include the indices of the `None` values (merged)
+            # at the end of the array. This kernel replaces the `-1` values of the
+            # `nextoutindex` with the indices of the merged values.
+            # e.g. with    nextoutindex=[0, 1, 2, -1, -1], out=[a, b, c, X, Y]
+            # we then have nextoutindex=[0, 1, 2,  4,  5]
+            #         loci of appended values:     ^   ^
             assert nextoutindex.nplike is self._nplike
             self._handle_error(
                 self._nplike["awkward_Index_nones_as_index", nextoutindex.dtype.type](
@@ -1235,13 +1246,14 @@ class IndexedOptionArray(Content):
             self._nplike,
         ).simplify_optiontype()
 
-        inject_nones = True if not branch and negaxis != depth else False
+        # Always inject nones if branching / not transforming this axis. Otherwise,
+        # let the transformer decide e.g. cumsum maintains option position.
+        maintain_none_positions = True if not (branch or negaxis == depth) else False
 
-        # If we want the None's at this depth to be injected
-        # into the dense ([x y z None None]) rearranger result.
-        # Here, we index the dense content with an index
-        # that maps the values to the correct locations
-        if inject_nones:
+        if maintain_none_positions:
+            # At this point, `out` will always have the `None`-associated values at the
+            # end of the array. If we want to maintain correspondence between the input
+            # and transformed array `None` positions, then we must re-arrange them now.
             return ak.contents.IndexedOptionArray(
                 outindex,
                 out,
@@ -1249,9 +1261,6 @@ class IndexedOptionArray(Content):
                 self._parameters,
                 self._nplike,
             ).simplify_optiontype()
-        # Otherwise, if we are rearranging (e.g sorting) the contents of this layout,
-        # then we do NOT want to return an optional layout
-        # OR we are branching
         else:
             return out
 
