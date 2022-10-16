@@ -124,44 +124,21 @@ def nanmin(
 
 def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    reducer = ak._reducers.Min(initial)
+    behavior = ak._util.behavior_of(array)
 
     if axis is None:
-        if not layout.nplike.known_data or not layout.nplike.known_shape:
-            reducer_cls = ak._reducers.Min
-
-            def map(x):
-                return ak._typetracer.MaybeNone(
-                    ak._typetracer.UnknownScalar(
-                        np.dtype(reducer_cls.return_dtype(x.dtype))
-                    )
-                )
-
-        else:
-
-            def map(x):
-                return layout.nplike.min(x.data)
-
-        def reduce(xs):
-            if len(xs) == 0:
-                return None
-            elif len(xs) == 1:
-                return xs[0]
-            else:
-                return layout.nplike.minimum(xs[0], reduce(xs[1:]))
-
-        tmp = layout.completely_flatten(
-            function_name="ak.min", flatten_records=flatten_records
+        return layout.reduce_flattened(
+            reducer_part=reducer,
+            reducer_result=reducer,
+            mask=mask_identity,
+            behavior=behavior,
+            flatten_records=flatten_records,
         )
-        return reduce([map(x) for x in tmp if not x.shape[0] <= 0])
 
     else:
-        behavior = ak._util.behavior_of(array)
-        out = layout.min(
-            axis=axis,
-            mask=mask_identity,
-            keepdims=keepdims,
-            initial=initial,
-            behavior=behavior,
+        out = layout.reduce(
+            reducer, axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
             return ak._util.wrap(out, behavior)
