@@ -6,7 +6,15 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("argmax")
-def argmax(array, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
+def argmax(
+    array,
+    axis=None,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -24,6 +32,10 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True, flatten_records
             results in the operation's identity.
         flatten_records (bool): If True, axis=None combines fields from different
             records; otherwise, records raise an error.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns the index position of the maximum value in each group of elements
     from `array` (many types supported, including all Awkward Arrays and
@@ -52,14 +64,24 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True, flatten_records
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
 @ak._connect.numpy.implements("nanargmax")
 def nanargmax(
-    array, axis=None, keepdims=False, mask_identity=True, flatten_records=False
+    array,
+    axis=None,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
+    highlevel=True,
+    behavior=None,
 ):
     """
     Args:
@@ -78,6 +100,10 @@ def nanargmax(
             results in the operation's identity.
         flatten_records (bool): If True, axis=None combines fields from different
             records; otherwise, records raise an error.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Like #ak.argmax, but treating NaN ("not a number") values as missing.
 
@@ -97,17 +123,21 @@ def nanargmax(
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
-        array = ak.operations.ak_nan_to_none._impl(array, False, None)
+        array = ak.operations.ak_nan_to_none._impl(array, highlevel, behavior)
 
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
-def _impl(array, axis, keepdims, mask_identity, flatten_records):
+def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     reducer = ak.reducers.ArgMax()
-    behavior = ak._util.behavior_of(array)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
 
     if axis is None:
         return layout.reduce_flattened(
@@ -123,6 +153,6 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
             reducer, axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior)
+            return ak._util.wrap(out, behavior, highlevel)
         else:
             return out
