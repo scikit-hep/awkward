@@ -933,9 +933,6 @@ class Content:
     def argmax(self, axis=-1, mask=True, keepdims=False, behavior=None):
         return self.reduce(awkward._reducers.ArgMax, axis, mask, keepdims, behavior)
 
-    def count(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self.reduce(awkward._reducers.Count, axis, mask, keepdims, behavior)
-
     def count_nonzero(self, axis=-1, mask=False, keepdims=False, behavior=None):
         return self.reduce(
             awkward._reducers.CountNonzero, axis, mask, keepdims, behavior
