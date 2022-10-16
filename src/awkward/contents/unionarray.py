@@ -473,6 +473,11 @@ class UnionArray(Content):
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def simplify_uniontype(self, merge=True, mergebool=False):
+        if not self.contents:
+            return ak.contents.EmptyArray(
+                self._identifier, self._parameters, self._nplike
+            )
+
         if self._nplike.known_shape and self._index.length < self._tags.length:
             raise ak._errors.wrap_error(
                 ValueError("invalid UnionArray: len(index) < len(tags)")
