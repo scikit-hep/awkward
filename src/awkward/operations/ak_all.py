@@ -52,7 +52,7 @@ def all(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    reducer = ak._reducers.All()
+    reducer = ak.reducers.All()
     behavior = ak._util.behavior_of(array)
 
     if axis is None:

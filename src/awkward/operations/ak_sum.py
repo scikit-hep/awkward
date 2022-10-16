@@ -244,7 +244,7 @@ def nansum(
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array)
-    reducer = ak._reducers.Sum()
+    reducer = ak.reducers.Sum()
 
     if axis is None:
         return layout.reduce_flattened(

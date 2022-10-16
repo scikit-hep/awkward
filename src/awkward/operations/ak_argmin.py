@@ -106,7 +106,7 @@ def nanargmin(
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    reducer = ak._reducers.ArgMin()
+    reducer = ak.reducers.ArgMin()
     behavior = ak._util.behavior_of(array)
 
     if axis is None:

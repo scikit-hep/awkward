@@ -17,6 +17,7 @@ import awkward.contents
 import awkward.record
 import awkward.types
 import awkward.forms
+import awkward.reducers
 import awkward._slicing
 import awkward._broadcasting
 import awkward._typetracer

@@ -6,7 +6,6 @@ import numbers
 from collections.abc import Iterable, Sized
 
 import awkward as ak
-import awkward._reducers
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()

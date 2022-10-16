@@ -94,11 +94,11 @@ def count(array, axis=None, keepdims=False, mask_identity=False, flatten_records
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    reducer = ak._reducers.Count()
+    reducer = ak.reducers.Count()
     behavior = ak._util.behavior_of(array)
 
     if axis is None:
-        reducer_result = ak._reducers.Sum()
+        reducer_result = ak.reducers.Sum()
         return layout.reduce_flattened(
             reducer_part=reducer,
             reducer_result=reducer_result,
