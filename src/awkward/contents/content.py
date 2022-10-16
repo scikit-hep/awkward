@@ -950,9 +950,6 @@ class Content:
     def any(self, axis=-1, mask=False, keepdims=False, behavior=None):
         return self.reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
 
-    def all(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self.reduce(awkward._reducers.All, axis, mask, keepdims, behavior)
-
     def min(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
         return self.reduce(
             awkward._reducers.Min(initial), axis, mask, keepdims, behavior
