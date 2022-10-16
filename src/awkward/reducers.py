@@ -136,7 +136,7 @@ class ArgMax(Reducer):
 
 class Count(Reducer):
     name = "count"
-    preferred_dtype = np.float64
+    preferred_dtype = np.int64
 
     @classmethod
     def return_dtype(cls, given_dtype):
