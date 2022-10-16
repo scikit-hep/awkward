@@ -927,9 +927,6 @@ class Content:
 
         return next[0]
 
-    def argmin(self, axis=-1, mask=True, keepdims=False, behavior=None):
-        return self.reduce(awkward._reducers.ArgMin, axis, mask, keepdims, behavior)
-
     def argmax(self, axis=-1, mask=True, keepdims=False, behavior=None):
         return self.reduce(awkward._reducers.ArgMax, axis, mask, keepdims, behavior)
 
