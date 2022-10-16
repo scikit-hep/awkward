@@ -846,7 +846,7 @@ class Content:
         # Reduce that!
         return composite.reduce(reducer, axis=-1, mask=mask, behavior=behavior)
 
-    def _reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
+    def reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
         if axis is None:
             raise ak._errors.wrap_error(NotImplementedError)
 
@@ -899,38 +899,38 @@ class Content:
         return next[0]
 
     def argmin(self, axis=-1, mask=True, keepdims=False, behavior=None):
-        return self._reduce(awkward._reducers.ArgMin, axis, mask, keepdims, behavior)
+        return self.reduce(awkward._reducers.ArgMin, axis, mask, keepdims, behavior)
 
     def argmax(self, axis=-1, mask=True, keepdims=False, behavior=None):
-        return self._reduce(awkward._reducers.ArgMax, axis, mask, keepdims, behavior)
+        return self.reduce(awkward._reducers.ArgMax, axis, mask, keepdims, behavior)
 
     def count(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self._reduce(awkward._reducers.Count, axis, mask, keepdims, behavior)
+        return self.reduce(awkward._reducers.Count, axis, mask, keepdims, behavior)
 
     def count_nonzero(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self._reduce(
+        return self.reduce(
             awkward._reducers.CountNonzero, axis, mask, keepdims, behavior
         )
 
     def sum(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self._reduce(awkward._reducers.Sum, axis, mask, keepdims, behavior)
+        return self.reduce(awkward._reducers.Sum, axis, mask, keepdims, behavior)
 
     def prod(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self._reduce(awkward._reducers.Prod, axis, mask, keepdims, behavior)
+        return self.reduce(awkward._reducers.Prod, axis, mask, keepdims, behavior)
 
     def any(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self._reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
+        return self.reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
 
     def all(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self._reduce(awkward._reducers.All, axis, mask, keepdims, behavior)
+        return self.reduce(awkward._reducers.All, axis, mask, keepdims, behavior)
 
     def min(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
-        return self._reduce(
+        return self.reduce(
             awkward._reducers.Min(initial), axis, mask, keepdims, behavior
         )
 
     def max(self, axis=-1, mask=True, keepdims=False, initial=None, behavior=None):
-        return self._reduce(
+        return self.reduce(
             awkward._reducers.Max(initial), axis, mask, keepdims, behavior
         )
 
