@@ -52,40 +52,21 @@ def any(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    reducer = ak._reducers.Any()
+    behavior = ak._util.behavior_of(array)
 
     if axis is None:
-        if not layout.nplike.known_data or not layout.nplike.known_shape:
-            reducer_cls = ak._reducers.Any
-
-            def map(x):
-                return ak._typetracer.UnknownScalar(
-                    np.dtype(reducer_cls.return_dtype(x.dtype))
-                )
-
-        else:
-
-            def map(x):
-                return layout.nplike.any(x.data)
-
-        def reduce(xs):
-            if len(xs) == 1:
-                return xs[0]
-            else:
-                return layout.nplike.logical_or(xs[0], reduce(xs[1:]))
-
-        return reduce(
-            [
-                map(x)
-                for x in layout.completely_flatten(
-                    function_name="ak.any", flatten_records=flatten_records
-                )
-            ]
+        return layout.reduce_flattened(
+            reducer_part=reducer,
+            reducer_result=reducer,
+            mask=mask_identity,
+            behavior=behavior,
+            flatten_records=flatten_records,
         )
 
     else:
-        behavior = ak._util.behavior_of(array)
-        out = layout.any(
-            axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
+        out = layout.reduce(
+            reducer, axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
             return ak._util.wrap(out, behavior)
