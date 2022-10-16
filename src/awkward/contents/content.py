@@ -941,9 +941,6 @@ class Content:
             awkward._reducers.CountNonzero, axis, mask, keepdims, behavior
         )
 
-    def sum(self, axis=-1, mask=False, keepdims=False, behavior=None):
-        return self.reduce(awkward._reducers.Sum, axis, mask, keepdims, behavior)
-
     def prod(self, axis=-1, mask=False, keepdims=False, behavior=None):
         return self.reduce(awkward._reducers.Prod, axis, mask, keepdims, behavior)
 
