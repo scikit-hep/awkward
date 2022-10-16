@@ -106,33 +106,21 @@ def nanargmax(
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    reducer = ak._reducers.ArgMax()
+    behavior = ak._util.behavior_of(array)
 
     if axis is None:
-        if not layout.nplike.known_data or not layout.nplike.known_shape:
-            reducer_cls = ak._reducers.ArgMax
-            return ak._typetracer.MaybeNone(
-                ak._typetracer.UnknownScalar(np.dtype(reducer_cls.return_dtype(None)))
-            )
-
-        layout = ak.operations.fill_none(layout, -np.inf, axis=-1, highlevel=False)
-
-        best_index = None
-        best_value = None
-        for tmp in layout.completely_flatten(
-            function_name="ak.argmax", flatten_records=flatten_records
-        ):
-            tmp = layout.nplike.asarray(tmp)
-            if len(tmp) > 0:
-                out = layout.nplike.argmax(tmp, axis=None)
-                if best_index is None or tmp[out] > best_value:
-                    best_index = out
-                    best_value = tmp[out]
-        return best_index
+        return layout.reduce_flattened(
+            reducer_part=reducer,
+            reducer_result=None,
+            mask=mask_identity,
+            behavior=behavior,
+            flatten_records=flatten_records,
+        )
 
     else:
-        behavior = ak._util.behavior_of(array)
-        out = layout.argmax(
-            axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
+        out = layout.reduce(
+            reducer, axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
         )
         if isinstance(out, (ak.contents.Content, ak.record.Record)):
             return ak._util.wrap(out, behavior)

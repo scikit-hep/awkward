@@ -927,9 +927,6 @@ class Content:
 
         return next[0]
 
-    def argmax(self, axis=-1, mask=True, keepdims=False, behavior=None):
-        return self.reduce(awkward._reducers.ArgMax, axis, mask, keepdims, behavior)
-
     def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
         branch, depth = self.branch_depth
