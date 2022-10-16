@@ -821,9 +821,10 @@ class Content:
     def reduce_flattened(
         self,
         reducer_part,
-        reducer_result,
+        reducer_result=None,
         mask=True,
         flatten_records=True,
+        keepdims=False,
         behavior=None,
     ):
         parts = self.completely_flatten(flatten_records=flatten_records)
@@ -835,25 +836,44 @@ class Content:
             else ak.contents.EmptyArray(nplike=self._nplike)
             for p in parts
         ]
-        # Reduce each layout at axis=-
-        reductions = [
-            part.reduce(
-                reducer_part, axis=-1, mask=mask, behavior=behavior, keepdims=True
+
+        # We can't trivially reduce the results of positional reducers,
+        # so let's handle these the "easy" way by merging them into a single layout
+        if reducer_part.needs_position:
+            assert reducer_result is None
+
+            # So combine them and reduce that way.
+            combined = layouts[0].mergemany(layouts[1:])
+            return combined.reduce(
+                reducer_part,
+                mask=mask,
+                axis=-1,
+                keepdims=keepdims,
+                behavior=behavior,
             )
-            for part in layouts
-        ]
-        # Build final layout of all reductions
-        composite = ak.contents.UnionArray(
-            ak.index.Index(
-                self.nplike.index_nplike.arange(len(reductions), dtype=np.int8)
-            ),
-            ak.index.Index(
-                self.nplike.index_nplike.zeros(len(reductions), dtype=np.int64)
-            ),
-            reductions,
-        )
-        # Reduce that!
-        return composite.reduce(reducer_result, axis=-1, mask=mask, behavior=behavior)
+
+        else:
+            # Reduce each layout at axis=-1
+            reductions = [
+                part.reduce(
+                    reducer_part, axis=-1, mask=mask, behavior=behavior, keepdims=True
+                )
+                for part in layouts
+            ]
+            # Build final layout of all reductions
+            composite = ak.contents.UnionArray(
+                ak.index.Index(
+                    self.nplike.index_nplike.arange(len(reductions), dtype=np.int8)
+                ),
+                ak.index.Index(
+                    self.nplike.index_nplike.zeros(len(reductions), dtype=np.int64)
+                ),
+                reductions,
+            )
+            # Reduce that!
+            return composite.reduce(
+                reducer_result, axis=-1, mask=mask, keepdims=keepdims, behavior=behavior
+            )
 
     def reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
         if axis is None:
