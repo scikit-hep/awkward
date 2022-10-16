@@ -818,19 +818,28 @@ class Content:
     def local_index(self, axis):
         return self._local_index(axis, 0)
 
-    def reduce_flattened(self, reducer, mask=True, flatten_records=True, behavior=None):
+    def reduce_flattened(
+        self,
+        reducer_part,
+        reducer_result,
+        mask=True,
+        flatten_records=True,
+        behavior=None,
+    ):
         parts = self.completely_flatten(flatten_records=flatten_records)
 
         # NOTE: here we assume that we only have raw arrays, or empty lists
         layouts = [
             ak.contents.NumpyArray(p, nplike=self._nplike)
-            if self.nplike.is_own_buffer(p)
+            if self.nplike.is_own_array(p)
             else ak.contents.EmptyArray(nplike=self._nplike)
             for p in parts
         ]
         # Reduce each layout at axis=-
         reductions = [
-            part.reduce(reducer, axis=-1, mask=mask, behavior=behavior)
+            part.reduce(
+                reducer_part, axis=-1, mask=mask, behavior=behavior, keepdims=True
+            )
             for part in layouts
         ]
         # Build final layout of all reductions
@@ -844,7 +853,7 @@ class Content:
             reductions,
         )
         # Reduce that!
-        return composite.reduce(reducer, axis=-1, mask=mask, behavior=behavior)
+        return composite.reduce(reducer_result, axis=-1, mask=mask, behavior=behavior)
 
     def reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
         if axis is None:
