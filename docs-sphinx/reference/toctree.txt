@@ -296,10 +296,12 @@
 
 .. toctree::
     :caption: Forth virtual machine
+    :maxdepth: 1
 
     awkwardforth
 
 .. toctree::
     :caption: Low-level kernels
+    :maxdepth: 1
 
     generated/kernels
