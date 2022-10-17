@@ -182,6 +182,37 @@
     generated/ak.values_astype
     generated/ak.nan_to_none
     generated/ak.nan_to_num
+    
+.. toctree::
+    :caption: Converting between backends
+
+    generated/ak.backend
+    generated/ak.to_backend
+
+.. toctree::
+    :caption: Indexing and grouping
+
+    generated/ak.local_index
+    generated/ak.run_lengths
+
+.. toctree::
+    :caption: Copying and packing arrays
+
+    generated/ak.packed
+    generated/ak.copy
+
+.. toctree::
+    :caption: Layout node transformations
+
+    generated/ak.transform
+    
+.. toctree::
+    :caption: Third-party integration
+
+    generated/ak.numba.register_and_check
+    generated/ak.jax.register_and_check
+    generated/ak.jax.assert_registered
+    generated/ak.jax.import_jax
 
 .. toctree::
     :caption: Low-level layouts
@@ -226,29 +257,6 @@
     generated/ak.CharBehavior
     generated/ak.StringBehavior
 
-.. toctree::
-    :caption: Converting between backends
-
-    generated/ak.backend
-    generated/ak.to_backend
-
-.. toctree::
-    :caption: Indexing and grouping
-
-    generated/ak.local_index
-    generated/ak.run_lengths
-
-.. toctree::
-    :caption: Copying and packing arrays
-
-    generated/ak.packed
-    generated/ak.copy
-
-.. toctree::
-    :caption: Layout node transformations
-
-    generated/ak.transform
-
 
 .. toctree::
     :caption: High-level data types
@@ -285,14 +293,6 @@
     generated/ak.forms.RegularForm
     generated/ak.forms.UnionForm
     generated/ak.forms.UnmaskedForm
-
-.. toctree::
-    :caption: Third-party integration
-
-    generated/ak.numba.register_and_check
-    generated/ak.jax.register_and_check
-    generated/ak.jax.assert_registered
-    generated/ak.jax.import_jax
 
 .. toctree::
     :caption: Forth virtual machine
