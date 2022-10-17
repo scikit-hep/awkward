@@ -78,29 +78,6 @@ The functions are implemented in C with templates for integer specializations (c
                         + "\n\n"
                     )
 
-    if os.path.isfile(
-        os.path.join(
-            CURRENT_DIR,
-            "..",
-            "docs-sphinx",
-            "_auto",
-            "toctree.txt",
-        )
-    ):
-        with open(
-            os.path.join(
-                CURRENT_DIR,
-                "..",
-                "docs-sphinx",
-                "_auto",
-                "toctree.txt",
-            ),
-            "r+",
-        ) as f:
-            if "_auto/kernels.rst" not in f.read():
-                print("Updating toctree.txt")
-                f.write(" " * 4 + "_auto/kernels.rst")
-
 
 if __name__ == "__main__":
     genkerneldocs()
