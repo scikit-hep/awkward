@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
@@ -85,7 +85,7 @@ def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
 
     (which is 5 characters away from simply filtering the `array`).
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.mask",
         dict(
             array=array,
@@ -102,9 +102,9 @@ def _impl(array, mask, valid_when, highlevel, behavior):
     def action(inputs, **kwargs):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak.contents.NumpyArray):
-            m = ak.nplike.of(layoutmask).asarray(layoutmask)
+            m = ak.nplikes.nplike_of(layoutmask).asarray(layoutmask)
             if not issubclass(m.dtype.type, (bool, np.bool_)):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "mask must have boolean type, not " "{}".format(repr(m.dtype))
                     )

@@ -58,12 +58,12 @@ jobs:
       with:
         submodules: true
 
-    - uses: pypa/cibuildwheel@v2.10.0
+    - uses: pypa/cibuildwheel@v2.10.2
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_BUILD: cp39-win_amd64 cp37-manylinux_x86_64 cp38-macosx_universal2
 
-    - uses: pypa/cibuildwheel@v2.10.0
+    - uses: pypa/cibuildwheel@v2.10.2
       if: matrix.os == 'ubuntu-latest'
       env:
         CIBW_BUILD: cp311-manylinux_x86_64

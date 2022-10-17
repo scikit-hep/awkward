@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def zip(
@@ -123,7 +123,7 @@ def zip(
         >>> ak.zip([one, two], optiontype_outside_record=True)
         <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.zip",
         dict(
             arrays=arrays,
@@ -159,7 +159,9 @@ def _impl(
     optiontype_outside_record,
 ):
     if depth_limit is not None and depth_limit <= 0:
-        raise ak._util.error(ValueError("depth_limit must be None or at least 1"))
+        raise ak._errors.wrap_error(
+            ValueError("depth_limit must be None or at least 1")
+        )
 
     if isinstance(arrays, dict):
         behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def local_index(array, axis=-1, highlevel=True, behavior=None):
@@ -71,7 +71,7 @@ def local_index(array, axis=-1, highlevel=True, behavior=None):
                        2               8.8
                        3               9.9
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.local_index",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):

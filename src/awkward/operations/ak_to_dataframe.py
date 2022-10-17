@@ -2,9 +2,9 @@
 
 import awkward as ak
 
-numpy = ak.nplike.Numpy.instance()
+numpy = ak.nplikes.Numpy.instance()
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def to_dataframe(
@@ -120,7 +120,7 @@ def to_dataframe(
               2         3.0  NaN
               3         4.0  NaN
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_layout",
         dict(
             array=array,
@@ -136,7 +136,7 @@ def _impl(array, how, levelname, anonymous):
     try:
         import pandas
     except ImportError as err:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ImportError(
                 """install the 'pandas' package with:
 

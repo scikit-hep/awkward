@@ -6,7 +6,7 @@ import sys
 import awkward as ak
 from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 class Type:
@@ -317,7 +317,7 @@ def from_datashape(datashape, highlevel=True):
         elif isinstance(out, RecordType):
             return out
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     f"type '{type(out).__name__}' is not compatible with highlevel=True"
                 )

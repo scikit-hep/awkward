@@ -19,10 +19,11 @@ class Visitor(ast.NodeVisitor):
     def visit_Raise(self, node):
         if isinstance(node.exc, ast.Call):
             if isinstance(node.exc.func, ast.Attribute):
-                if node.exc.func.attr in {"error", "indexerror"}:
+                if node.exc.func.attr in {"wrap_error", "index_error"}:
                     return
-            if node.exc.func.id in {"ImportError"}:
-                return
+            if isinstance(node.exc.func, ast.Name):
+                if node.exc.func.id in {"ImportError"}:
+                    return
 
         self.errors.append(
             Flake8ASTErrorInfo(node.lineno, node.col_offset, self.msg, type(self))

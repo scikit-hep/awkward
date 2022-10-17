@@ -6,21 +6,21 @@ from collections.abc import Iterable
 import awkward as ak
 from awkward.contents.content import Content
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 class Record:
     def __init__(self, array, at):
-        if not isinstance(array, ak.contents.recordarray.RecordArray):
-            raise ak._util.error(
+        if not isinstance(array, ak.contents.RecordArray):
+            raise ak._errors.wrap_error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )
         if not ak._util.isint(at):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
         if at < 0 or at >= array.length:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     f"Record 'at' must be >= 0 and < len(array) == {array.length}, not {at}"
                 )
@@ -105,23 +105,23 @@ class Record:
 
     def axis_wrap_if_negative(self, axis):
         if axis == 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 np.AxisError("Record type at axis=0 is a scalar, not an array")
             )
         return self._array.axis_wrap_if_negative(axis)
 
     def __getitem__(self, where):
-        with ak._util.SlicingErrorContext(self, where):
+        with ak._errors.SlicingErrorContext(self, where):
             return self._getitem(where)
 
     def _getitem(self, where):
         if ak._util.isint(where):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an integer")
             )
 
         elif isinstance(where, slice):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by a range slice (`:`)")
             )
 
@@ -129,12 +129,12 @@ class Record:
             return self._getitem_field(where)
 
         elif where is np.newaxis:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by np.newaxis (`None`)")
             )
 
         elif where is Ellipsis:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an ellipsis (`...`)")
             )
 
@@ -148,17 +148,17 @@ class Record:
             return self._getitem_field(where[0])._getitem(where[1:])
 
         elif isinstance(where, ak.highlevel.Array):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
         elif isinstance(where, ak.contents.Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
         elif isinstance(where, Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
@@ -166,12 +166,12 @@ class Record:
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "only field name (str) or names (non-tuple iterable of str) "
                     "are valid indices for slicing a scalar record, not\n\n    "
@@ -259,19 +259,14 @@ class Record:
         else:
             return None
 
-    def _jax_flatten(self):
-        from awkward._connect.jax import AuxData, _find_numpyarray_nodes
+    def jax_flatten(self):
+        from awkward._connect.jax import AuxData, find_all_buffers
 
-        numpyarray_nodes = _find_numpyarray_nodes(self)
+        numpyarray_nodes = find_all_buffers(self)
         return (numpyarray_nodes, AuxData(self))
 
     @classmethod
-    def jax_flatten(cls, array):
-        assert type(array) is cls
-        return array._jax_flatten()
-
-    @classmethod
     def jax_unflatten(cls, aux_data, children):
-        from awkward._connect.jax import _replace_numpyarray_nodes
+        from awkward._connect.jax import replace_all_buffers
 
-        return ak._util.wrap(_replace_numpyarray_nodes(aux_data.layout, list(children)))
+        return ak._util.wrap(replace_all_buffers(aux_data.layout, list(children)))

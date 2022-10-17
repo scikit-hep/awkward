@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("where")
@@ -43,20 +43,20 @@ def where(condition, *args, **kwargs):
     )
 
     if len(args) == 0:
-        with ak._util.OperationErrorContext(
+        with ak._errors.OperationErrorContext(
             "ak.where",
             dict(condition=condition, mergebool=mergebool, highlevel=highlevel),
         ):
             return _impl1(condition, mergebool, highlevel, behavior)
 
     elif len(args) == 1:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("either both or neither of x and y should be given")
         )
 
     elif len(args) == 2:
         x, y = args
-        with ak._util.OperationErrorContext(
+        with ak._errors.OperationErrorContext(
             "ak.where",
             dict(
                 condition=condition, x=x, y=y, mergebool=mergebool, highlevel=highlevel
@@ -65,7 +65,7 @@ def where(condition, *args, **kwargs):
             return _impl3(condition, x, y, mergebool, highlevel, behavior)
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 "where() takes from 1 to 3 positional arguments but {} were "
                 "given".format(len(args) + 1)
@@ -77,7 +77,7 @@ def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
-    nplike = ak.nplike.of(akcondition)
+    nplike = ak.nplikes.nplike_of(akcondition)
 
     akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
     out = nplike.nonzero(ak.operations.to_numpy(akcondition))
@@ -106,7 +106,7 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         good_arrays.append(left)
     if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
-    nplike = ak.nplike.of(*good_arrays)
+    nplike = ak.nplikes.nplike_of(*good_arrays)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs

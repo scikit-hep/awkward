@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def nan_to_none(array, highlevel=True, behavior=None):
@@ -19,7 +19,7 @@ def nan_to_none(array, highlevel=True, behavior=None):
 
     See also #ak.nan_to_num to convert NaN or infinity to specified values.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nan_to_none",
         dict(
             array=array,

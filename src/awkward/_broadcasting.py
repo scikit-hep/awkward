@@ -30,8 +30,8 @@ from awkward.index import (  # IndexU8,  # noqa: F401; Index32,  # noqa: F401; I
 )
 from awkward.record import Record  # noqa: F401
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 optiontypes = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 listtypes = (ListOffsetArray, ListArray, RegularArray)
@@ -48,7 +48,7 @@ def broadcast_pack(inputs, isscalar):
     nextinputs = []
     for x in inputs:
         if isinstance(x, Record):
-            index = ak.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            index = ak.nplikes.nplike_of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, Content):
@@ -89,7 +89,7 @@ def checklength(inputs, options):
     length = inputs[0].length
     for x in inputs[1:]:
         if x.length != length:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "cannot broadcast {} of length {} with {} of length {}{}".format(
                         type(inputs[0]).__name__,
@@ -298,7 +298,7 @@ def one_to_one_parameters_factory(
 
     def apply(n_outputs) -> list[dict[str, Any] | None]:
         if n_outputs != len(inputs):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "cannot follow one-to-one parameter broadcasting rule for actions "
                     "which change the number of outputs."
@@ -392,7 +392,7 @@ def apply_step(
     try:
         parameters_factory_impl = BROADCAST_RULE_TO_FACTORY_IMPL[rule]
     except KeyError:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 f"`broadcast_parameters_rule` should be one of {[str(x) for x in BroadcastParameterRule]}, "
                 f"but this routine received `{rule}`"
@@ -506,7 +506,7 @@ def apply_step(
                         if length is None:
                             length = tagslist[-1].shape[0]
                         elif length != tagslist[-1].shape[0]:
-                            raise ak._util.error(
+                            raise ak._errors.wrap_error(
                                 ValueError(
                                     "cannot broadcast UnionArray of length {} "
                                     "with UnionArray of length {}{}".format(
@@ -681,7 +681,7 @@ def apply_step(
                             elif x.size == maxsize:
                                 nextinputs.append(x.content[: x.length * x.size])
                             else:
-                                raise ak._util.error(
+                                raise ak._errors.wrap_error(
                                     ValueError(
                                         "cannot broadcast RegularArray of size "
                                         "{} with RegularArray of size {} {}".format(
@@ -820,7 +820,7 @@ def apply_step(
                         for x, p in zip(outcontent, parameters)
                     )
                 else:
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         AssertionError(
                             "unexpected offsets, starts: {}, {}".format(
                                 type(offsets), type(starts)
@@ -902,7 +902,7 @@ def apply_step(
         # Any RecordArrays?
         elif any(isinstance(x, RecordArray) for x in inputs):
             if not options["allow_records"]:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(f"cannot broadcast records {in_function(options)}")
                 )
 
@@ -912,7 +912,7 @@ def apply_step(
                     if fields is None:
                         fields = x.fields
                     elif set(fields) != set(x.fields):
-                        raise ak._util.error(
+                        raise ak._errors.wrap_error(
                             ValueError(
                                 "cannot broadcast records because fields don't "
                                 "match{}:\n    {}\n    {}".format(
@@ -925,7 +925,7 @@ def apply_step(
                     if length is None:
                         length = x.length
                     elif length != x.length:
-                        raise ak._util.error(
+                        raise ak._errors.wrap_error(
                             ValueError(
                                 "cannot broadcast RecordArray of length {} "
                                 "with RecordArray of length {}{}".format(
@@ -965,7 +965,7 @@ def apply_step(
             )
 
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "cannot broadcast: {}{}".format(
                         ", ".join(repr(type(x)) for x in inputs), in_function(options)
@@ -989,7 +989,7 @@ def apply_step(
     elif result is None:
         return continuation()
     else:
-        raise ak._util.error(AssertionError(result))
+        raise ak._errors.wrap_error(AssertionError(result))
 
 
 def broadcast_and_apply(
@@ -1006,7 +1006,7 @@ def broadcast_and_apply(
     function_name=None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
-    nplike = ak.nplike.of(*inputs)
+    nplike = ak.nplikes.nplike_of(*inputs)
     isscalar = []
     out = apply_step(
         nplike,

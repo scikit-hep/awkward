@@ -1,11 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numbers
-from collections.abc import Iterable
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
@@ -49,7 +48,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
     The values could be floating-point numbers or strings.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.fill_none",
         dict(
             array=array, value=value, axis=axis, highlevel=highlevel, behavior=behavior
@@ -60,7 +59,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
-    nplike = ak.nplike.of(arraylayout)
+    nplike = ak.nplikes.nplike_of(arraylayout)
 
     # Convert value type to appropriate layout
     if (
@@ -79,7 +78,7 @@ def _impl(array, value, axis, highlevel, behavior):
             nplike.asarray(value), allow_record=False, allow_other=False
         )
     elif (
-        isinstance(value, Iterable)
+        ak._util.is_sized_iterable(value)
         and not (isinstance(value, (str, bytes)))
         or isinstance(value, (ak.highlevel.Record, ak.record.Record))
     ):

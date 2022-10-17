@@ -382,7 +382,7 @@ def transform(
     See also: #ak.is_valid and #ak.valid_when to check the validity of transformed
     outputs.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.transform",
         dict(
             transformation=transformation,
@@ -441,7 +441,7 @@ def _impl(
     more_layouts = [
         ak.to_layout(x, allow_record=False, allow_other=False) for x in more_arrays
     ]
-    nplike = ak.nplike.of(layout, *more_layouts)
+    nplike = ak.nplikes.nplike_of(layout, *more_layouts)
 
     options = {
         "allow_records": allow_records,
@@ -473,7 +473,7 @@ def _impl(
                 return ak.contents.NumpyArray(out)
 
             else:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         f"transformation must return an Awkward array, not {type(out)}\n\n{out!r}"
                     )
@@ -527,7 +527,7 @@ def _impl(
 
             for x in out:
                 if not isinstance(x, ak.contents.Content):
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         TypeError(
                             f"transformation must return an Awkward array or tuple of arrays, not {type(x)}\n\n{x!r}"
                         )

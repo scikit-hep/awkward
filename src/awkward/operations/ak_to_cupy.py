@@ -17,7 +17,7 @@ def to_cupy(array):
 
     See also #ak.from_cupy and #ak.to_numpy.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_cupy",
         dict(array=array),
     ):

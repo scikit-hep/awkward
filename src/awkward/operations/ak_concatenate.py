@@ -3,7 +3,7 @@
 import awkward as ak
 from awkward.operations.ak_fill_none import fill_none
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("concatenate")
@@ -34,7 +34,7 @@ def concatenate(
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.concatenate",
         dict(
             arrays=arrays,
@@ -50,14 +50,16 @@ def concatenate(
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
-    single_nplike = ak.nplike.of(arrays)
+    single_nplike = ak.nplikes.nplike_of(arrays)
+    numpy = ak.nplikes.Numpy.instance()
+
     if (
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is a NumPy Array
-        or ak.nplike.is_numpy_buffer(arrays)
+        or numpy.is_own_array(arrays)
         # Is an array with a known NumpyLike
-        or single_nplike is not ak.nplike.Numpy.instance()
+        or single_nplike is not numpy
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
@@ -75,7 +77,9 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
     contents = [x for x in content_or_others if isinstance(x, ak.contents.Content)]
     if len(contents) == 0:
-        raise ak._util.error(ValueError("need at least one array to concatenate"))
+        raise ak._errors.wrap_error(
+            ValueError("need at least one array to concatenate")
+        )
 
     posaxis = contents[0].axis_wrap_if_negative(axis)
     maxdepth = max(
@@ -84,7 +88,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         if isinstance(x, ak.contents.Content)
     )
     if not 0 <= posaxis < maxdepth:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "axis={} is beyond the depth of this array or the depth of this array "
                 "is ambiguous".format(axis)
@@ -93,7 +97,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     for x in content_or_others:
         if isinstance(x, ak.contents.Content):
             if x.axis_wrap_if_negative(axis) != posaxis:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "arrays to concatenate do not have the same depth for negative "
                         "axis={}".format(axis)
@@ -114,7 +118,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 batch = [collapsed.merge_as_union(x)]
 
         out = batch[0].mergemany(batch[1:])
-        if isinstance(out, ak.contents.unionarray.UnionArray):
+        if isinstance(out, ak.contents.UnionArray):
             out = out.simplify_uniontype(merge=merge, mergebool=mergebool)
 
     else:
@@ -132,7 +136,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                nplike = ak.nplike.of(*inputs)
+                nplike = ak.nplikes.nplike_of(*inputs)
 
                 length = ak._typetracer.UnknownLength
                 for x in inputs:
@@ -140,7 +144,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         if not ak._util.isint(length):
                             length = x.length
                         elif length != x.length and ak._util.isint(x.length):
-                            raise ak._util.error(
+                            raise ak._errors.wrap_error(
                                 ValueError(
                                     "all arrays must have the same length for "
                                     "axis={}".format(axis)
@@ -261,7 +265,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 for x in inputs
                 if isinstance(x, ak.contents.Content)
             ):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "at least one array is not deep enough to concatenate at "
                         "axis={}".format(axis)

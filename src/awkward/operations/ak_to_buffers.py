@@ -2,8 +2,8 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 def to_buffers(
@@ -36,8 +36,8 @@ def to_buffers(
         id_start (int): Starting `id` to use in `form_key` and hence `buffer_key`.
             This integer increases in a depth-first walk over the `array` nodes and
             can be used to generate unique keys for each Form.
-        nplike (#ak.nplike.NumpyLike): Library to use to generate values that are
-            put into the `container`. The default, #ak.nplike.Numpy, makes NumPy
+        nplike (#ak.nplikes.NumpyLike): Library to use to generate values that are
+            put into the `container`. The default, #ak.nplikes.Numpy, makes NumPy
             arrays, which are in main memory (e.g. not GPU) and satisfy Python's
             Buffer protocol. If all the buffers in `array` have the same `nplike`
             as this, they won't be copied.
@@ -111,7 +111,7 @@ def to_buffers(
 
     See also #ak.from_buffers and #ak.packed.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_buffers",
         dict(
             array=array,
@@ -132,5 +132,5 @@ def _impl(array, container, buffer_key, form_key, id_start, nplike):
         buffer_key=buffer_key,
         form_key=form_key,
         id_start=id_start,
-        nplike=numpy,
+        nplike=nplike,
     )

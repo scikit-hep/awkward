@@ -7,7 +7,7 @@ import awkward as ak
 from awkward.forms.form import _parameters_equal
 from awkward.types.type import Type
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def is_primitive(primitive):
@@ -27,7 +27,7 @@ def primitive_to_dtype(primitive):
     else:
         out = _primitive_to_dtype_dict.get(primitive)
         if out is None:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "unrecognized primitive: {}. Must be one of\n\n    {}\n\nor a "
                     "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
@@ -44,7 +44,7 @@ def dtype_to_primitive(dtype):
     else:
         out = _dtype_to_primitive_dict.get(dtype)
         if out is None:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
                     "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
@@ -96,7 +96,7 @@ class NumpyType(Type):
     def __init__(self, primitive, parameters=None, typestr=None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
@@ -104,7 +104,7 @@ class NumpyType(Type):
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)

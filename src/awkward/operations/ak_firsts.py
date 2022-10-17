@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def firsts(array, axis=1, highlevel=True, behavior=None):
@@ -29,7 +29,7 @@ def firsts(array, axis=1, highlevel=True, behavior=None):
 
     See #ak.singletons to invert this function.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.firsts",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
@@ -47,7 +47,7 @@ def _impl(array, axis, highlevel, behavior):
             out = layout[0]
     else:
         if posaxis < 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 NotImplementedError("ak.firsts with ambiguous negative axis")
             )
         toslice = (slice(None, None, None),) * posaxis + (0,)

@@ -358,6 +358,17 @@ class NumpyLike(Singleton):
     def datetime_as_string(self, *args, **kwargs):
         return self._module.datetime_as_string(*args, **kwargs)
 
+    @classmethod
+    def is_own_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a numpy buffer, otherwise `False`.
+
+        """
+        raise NotImplementedError
+
 
 class NumpyKernel:
     def __init__(self, kernel, name_and_types):
@@ -375,14 +386,14 @@ class NumpyKernel:
     def _cast(x, t):
         if issubclass(t, ctypes._Pointer):
 
-            if is_numpy_buffer(x):
+            if Numpy.is_own_array(x):
                 return ctypes.cast(x.ctypes.data, t)
-            elif is_cupy_buffer(x):
-                raise ak._util.error(
+            elif Cupy.is_own_array(x):
+                raise ak._errors.wrap_error(
                     AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
                 )
-            elif is_jax_buffer(x):
-                raise ak._util.error(
+            elif Jax.is_own_array(x):
+                raise ak._errors.wrap_error(
                     ValueError(
                         "JAX Buffers can't be passed as function args for the C Kernels"
                     )
@@ -395,7 +406,7 @@ class NumpyKernel:
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
 
-        if not any(is_jax_tracer(arg) for arg in args):
+        if not any(Jax.is_tracer(arg) for arg in args):
             return self._kernel(
                 *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
             )
@@ -445,7 +456,7 @@ class CupyKernel(NumpyKernel):
         ak._connect.cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak._connect.cuda.Invocation(
                 name=self._name_and_types[0],
-                error_context=ak._util.ErrorContext.primary(),
+                error_context=ak._errors.ErrorContext.primary(),
             )
         )
 
@@ -514,6 +525,17 @@ class Numpy(NumpyLike):
                 "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
             )
 
+    @classmethod
+    def is_own_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a numpy buffer, otherwise `False`.
+
+        """
+        return isinstance(obj, numpy.ndarray)
+
 
 class Cupy(NumpyLike):
     @property
@@ -545,14 +567,14 @@ class Cupy(NumpyLike):
     def ma(self):
         raise ValueError(
             "CUDA arrays cannot have missing values until CuPy implements "
-            "numpy.ma.MaskedArray" + ak._util.exception_suffix(__file__)
+            "numpy.ma.MaskedArray"
         )
 
     @property
     def char(self):
         raise ValueError(
             "CUDA arrays cannot do string manipulations until CuPy implements "
-            "numpy.char" + ak._util.exception_suffix(__file__)
+            "numpy.char"
         )
 
     @property
@@ -566,7 +588,7 @@ class Cupy(NumpyLike):
                 ak.highlevel.Array,
                 ak.highlevel.Record,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
             ),
         ):
             out = ak.operations.ak_to_cupy.to_cupy(array)
@@ -600,7 +622,7 @@ class Cupy(NumpyLike):
                 ak.highlevel.Array,
                 ak.highlevel.Record,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
             ),
         ):
             out = ak.operations.ak_to_cupy.to_cupy(array)
@@ -713,11 +735,23 @@ class Cupy(NumpyLike):
         # array, max_line_width, precision=None, suppress_small=None
         return self._module.array_str(array, max_line_width, precision, suppress_small)
 
+    @classmethod
+    def is_own_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a cupy buffer, otherwise `False`.
+
+        """
+        module, _, suffix = type(obj).__module__.partition(".")
+        return module == "cupy"
+
 
 class Jax(NumpyLike):
     @property
     def index_nplike(self):
-        return ak.nplike.Numpy.instance()
+        return ak.nplikes.Numpy.instance()
 
     def to_rectilinear(self, array, *args, **kwargs):
         if isinstance(array, self._module.DeviceArray):
@@ -730,7 +764,7 @@ class Jax(NumpyLike):
                 ak.Record,
                 ak.ArrayBuilder,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
                 ak._ext.ArrayBuilder,
             ),
         ):
@@ -740,28 +774,29 @@ class Jax(NumpyLike):
             return [self.to_rectilinear(x, *args, **kwargs) for x in array]
 
         else:
-            raise ak._util.error(ValueError("to_rectilinear argument must be iterable"))
+            raise ak._errors.wrap_error(
+                ValueError("to_rectilinear argument must be iterable")
+            )
 
     def __getitem__(self, name_and_types):
         return NumpyKernel(ak._cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
-        from awkward._connect.jax import import_jax  # noqa: F401
-
-        self._module = import_jax().numpy
+        jax = ak.jax.import_jax()
+        self._module = jax.numpy
 
     @property
     def ma(self):
-        ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "JAX arrays cannot have missing values until JAX implements "
-                "numpy.ma.MaskedArray" + ak._util.exception_suffix(__file__)
+                "numpy.ma.MaskedArray"
             )
         )
 
     @property
     def char(self):
-        ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "JAX arrays cannot do string manipulations until JAX implements "
                 "numpy.char"
@@ -782,7 +817,7 @@ class Jax(NumpyLike):
                 ak.highlevel.Array,
                 ak.highlevel.Record,
                 ak.contents.Content,
-                ak.contents.Record,
+                ak.record.Record,
             ),
         ):
             out = ak.operations.ak_to_jax.to_jax(array)
@@ -796,16 +831,16 @@ class Jax(NumpyLike):
     def raw(self, array, nplike):
         if isinstance(nplike, Jax):
             return array
-        elif isinstance(nplike, ak.nplike.Cupy):
-            cupy = ak.nplike.Cupy.instance()
+        elif isinstance(nplike, ak.nplikes.Cupy):
+            cupy = ak.nplikes.Cupy.instance()
             return cupy.asarray(array)
-        elif isinstance(nplike, ak.nplike.Numpy):
-            numpy = ak.nplike.Numpy.instance()
+        elif isinstance(nplike, ak.nplikes.Numpy):
+            numpy = ak.nplikes.Numpy.instance()
             return numpy.asarray(array)
         elif isinstance(nplike, ak._typetracer.TypeTracer):
             return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
         else:
-            ak._util.error(
+            ak._errors.wrap_error(
                 TypeError(
                     "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax",
                 )
@@ -849,50 +884,77 @@ class Jax(NumpyLike):
         out = self._module.argmax(*args, **kwargs)
         return out
 
+    @classmethod
+    def is_own_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
 
-def is_numpy_buffer(array):
-    return isinstance(array, numpy.ndarray)
+        Return `True` if the given object is a jax buffer, otherwise `False`.
+
+        """
+        return cls.is_array(obj) or cls.is_tracer(obj)
+
+    @classmethod
+    def is_array(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a jax buffer, otherwise `False`.
+
+        """
+        module, _, suffix = type(obj).__module__.partition(".")
+        return module == "jaxlib"
+
+    @classmethod
+    def is_tracer(cls, obj) -> bool:
+        """
+        Args:
+            obj: object to test
+
+        Return `True` if the given object is a jax tracer, otherwise `False`.
+
+        """
+        module, _, suffix = type(obj).__module__.partition(".")
+        return module == "jax"
 
 
-def is_cupy_buffer(array):
-    return type(array).__module__.startswith("cupy.")
+# Temporary sentinel marking "argument not given"
+_UNSET = object()
 
 
-def is_jax_buffer(array):
-    return type(array).__module__.startswith("jaxlib.")
-
-
-def is_jax_tracer(tracer):
-    return type(tracer).__module__.startswith("jax.")
-
-
-def of(*arrays, default_cls=Numpy):
+def nplike_of(*arrays, default=_UNSET):
     """
     Args:
         *arrays: iterable of possible array objects
-        default_cls: default NumpyLike class if no array objects found
+        default: default NumpyLike instance if no array objects found
 
-    Return the #ak.nplike.NumpyLike that is best-suited to operating upon the given
+    Return the #ak.nplikes.NumpyLike that is best-suited to operating upon the given
     iterable of arrays. Return an instance of the `default_cls` if no known array types
     are found.
     """
     nplikes = set()
+    nplike_classes = (Numpy, Cupy, Jax, ak._typetracer.TypeTracer)
+
     for array in arrays:
         nplike = getattr(array, "nplike", None)
         if nplike is not None:
             nplikes.add(nplike)
-        elif is_numpy_buffer(array):
-            nplikes.add(Numpy.instance())
-        elif is_cupy_buffer(array):
-            nplikes.add(Cupy.instance())
-        elif is_jax_buffer(array):
-            nplikes.add(Jax.instance())
+        else:
+            for cls in nplike_classes:
+                if cls.is_own_array(array):
+                    nplikes.add(cls.instance())
+                    break
 
     if any(isinstance(x, ak._typetracer.TypeTracer) for x in nplikes):
         return ak._typetracer.TypeTracer.instance()
 
     if nplikes == set():
-        return default_cls.instance()
+        if default is _UNSET:
+            return Numpy.instance()
+        else:
+            return default
     elif len(nplikes) == 1:
         return next(iter(nplikes))
     else:
@@ -904,5 +966,4 @@ def of(*arrays, default_cls=Numpy):
     ak.to_backend(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
-            + ak._util.exception_suffix(__file__)
         )

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def is_none(array, axis=0, highlevel=True, behavior=None):
@@ -21,7 +21,7 @@ def is_none(array, axis=0, highlevel=True, behavior=None):
     Returns an array whose value is True where an element of `array` is None;
     False otherwise (at a given `axis` depth).
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.is_none",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
@@ -36,7 +36,7 @@ def _impl(array, axis, highlevel, behavior):
         if not isinstance(layout, ak.contents.Content):
             return
 
-        nplike = ak.nplike.of(layout)
+        nplike = ak.nplikes.nplike_of(layout)
 
         if layout.is_OptionType:
             layout = layout.toIndexedOptionArray64()
@@ -74,7 +74,7 @@ def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
     max_axis = layout.branch_depth[1] - 1
     if axis > max_axis:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             np.AxisError(f"axis={axis} exceeds the depth ({max_axis}) of this array")
         )
     behavior = ak._util.behavior_of(array, behavior=behavior)

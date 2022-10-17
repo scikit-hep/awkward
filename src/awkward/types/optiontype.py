@@ -11,7 +11,7 @@ from awkward.types.uniontype import UnionType
 class OptionType(Type):
     def __init__(self, content, parameters=None, typestr=None):
         if not isinstance(content, Type):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Type subclass, not {}".format(
                         type(self).__name__, repr(content)
@@ -19,7 +19,7 @@ class OptionType(Type):
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
@@ -27,7 +27,7 @@ class OptionType(Type):
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)

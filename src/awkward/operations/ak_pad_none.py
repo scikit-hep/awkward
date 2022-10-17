@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
@@ -121,7 +121,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
         >>> ak.type(ak.pad_none(array, 2, axis=2, clip=True))
         3 * var *   2 * ?float64
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.pad_none",
         dict(
             array=array,

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("nan_to_num")
@@ -29,7 +29,7 @@ def nan_to_num(
 
     See also #ak.nan_to_none to convert NaN to None, i.e. missing values with option-type.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nan_to_num",
         dict(
             array=array,
@@ -68,7 +68,7 @@ def _impl(array, copy, nan, posinf, neginf, highlevel, behavior):
         broadcasting_ids[id(neginf)] = len(broadcasting)
         broadcasting.append(neginf_layout)
 
-    nplike = ak.nplike.of(layout)
+    nplike = ak.nplikes.nplike_of(layout)
 
     if len(broadcasting) == 1:
 

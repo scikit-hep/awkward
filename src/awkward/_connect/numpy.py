@@ -26,10 +26,10 @@ implemented = {}
 
 def _to_rectilinear(arg):
     if isinstance(arg, tuple):
-        nplike = ak.nplike.of(*arg)
+        nplike = ak.nplikes.nplike_of(*arg)
         return tuple(nplike.to_rectilinear(x) for x in arg)
     else:
-        nplike = ak.nplike.of(arg)
+        nplike = ak.nplikes.nplike_of(arg)
         nplike.to_rectilinear(arg)
 
 
@@ -39,7 +39,7 @@ def array_function(func, types, args, kwargs):
         args = tuple(_to_rectilinear(x) for x in args)
         kwargs = {k: _to_rectilinear(v) for k, v in kwargs.items()}
         out = func(*args, **kwargs)
-        nplike = ak.nplike.of(out)
+        nplike = ak.nplikes.nplike_of(out)
         if isinstance(out, nplike.ndarray) and len(out.shape) != 0:
             return ak.Array(out)
         else:
@@ -149,7 +149,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            nplike = ak.nplike.of(*inputs)
+            nplike = ak.nplikes.nplike_of(*inputs)
 
             # Broadcast parameters against one another
             parameters_factory = ak._broadcasting.intersection_parameters_factory(
@@ -164,11 +164,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                     else:
                         args.append(x)
 
-                if isinstance(nplike, ak.nplike.Jax):
-                    from awkward._connect.jax import import_jax
+                if isinstance(nplike, ak.nplikes.Jax):
+                    from awkward._connect.jax import get_jax_ufunc
 
-                    jax = import_jax()
-                    result = getattr(jax.numpy, ufunc.__name__)(*args, **kwargs)
+                    jax_ufunc = get_jax_ufunc(ufunc)
+                    result = jax_ufunc(*args, **kwargs)
                 else:
                     result = getattr(ufunc, method)(*args, **kwargs)
 
@@ -213,7 +213,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         error_message.append(type(x).__name__)
                 else:
                     error_message.append(type(x).__name__)
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "no {}.{} overloads for custom types: {}".format(
                         type(ufunc).__module__, ufunc.__name__, ", ".join(error_message)
@@ -267,7 +267,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 #             if first == -1:
 #                 first = len(Ai)
 #             elif first != len(Ai):
-#                 raise ak._util.error(ValueError(
+#                 raise ak._errors.wrap_error(ValueError(
 #                     "one of the left matrices in np.matmul is not rectangular"
 #                 ))
 #         if first == -1:
@@ -280,7 +280,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 #             if first == -1:
 #                 first = len(Bi)
 #             elif first != len(Bi):
-#                 raise ak._util.error(ValueError(
+#                 raise ak._errors.wrap_error(ValueError(
 #                     "one of the right matrices in np.matmul is not rectangular"
 #                 ))
 #         if first == -1:
@@ -289,7 +289,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 #         colsB = first
 
 #         if colsA != rowsB:
-#             raise ak._util.error(ValueError(
+#             raise ak._errors.wrap_error(ValueError(
 #                 u"one of the pairs of matrices in np.matmul do not match shape: "
 #                 u"(n \u00d7 k) @ (k \u00d7 m)"
 #             ))
@@ -336,7 +336,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
 
 def action_for_matmul(inputs):
-    raise ak._util.error(NotImplementedError)
+    raise ak._errors.wrap_error(NotImplementedError)
 
 
 # def action_for_matmul(inputs):

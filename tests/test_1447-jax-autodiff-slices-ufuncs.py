@@ -9,6 +9,8 @@ jax = pytest.importorskip("jax")
 jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
 
+ak.jax.register_and_check()
+
 # #### ak.contents.NumpyArray ####
 
 test_numpyarray = ak.Array(np.arange(10, dtype=np.float64), backend="jax")

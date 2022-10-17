@@ -36,8 +36,6 @@ ignore = [
     "**/Makefile",
     "rapidjson/*.md",
     "rapidjson/docker/*",
-    "dlpack/apps/**",
-    "dlpack/**/*.md",
     "rapidjson/**/*.json",
     "rapidjson/**/*.yml",
     "rapidjson/**/*.js",

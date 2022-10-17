@@ -10,8 +10,8 @@ from awkward.contents.content import Content, unset
 from awkward.forms.bitmaskedform import BitMaskedForm
 from awkward.index import Index
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 class BitMaskedArray(Content):
@@ -62,7 +62,7 @@ class BitMaskedArray(Content):
         nplike=None,
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be an Index with dtype=uint8, not {}".format(
                         type(self).__name__, repr(mask)
@@ -70,7 +70,7 @@ class BitMaskedArray(Content):
                 )
             )
         if not isinstance(content, Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Content subtype, not {}".format(
                         type(self).__name__, repr(content)
@@ -78,7 +78,7 @@ class BitMaskedArray(Content):
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'valid_when' must be boolean, not {}".format(
                         type(self).__name__, repr(valid_when)
@@ -87,7 +87,7 @@ class BitMaskedArray(Content):
             )
         if not isinstance(length, ak._typetracer.UnknownLengthType):
             if not (ak._util.isint(length) and length >= 0):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'length' must be a non-negative integer, not {}".format(
                             type(self).__name__, length
@@ -95,7 +95,7 @@ class BitMaskedArray(Content):
                     )
                 )
         if not isinstance(lsb_order, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'lsb_order' must be boolean, not {}".format(
                         type(self).__name__, repr(lsb_order)
@@ -103,7 +103,7 @@ class BitMaskedArray(Content):
                 )
             )
         if length > mask.length * 8:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' ({}) must be <= len(mask) * 8 ({})".format(
                         type(self).__name__, length, mask.length * 8
@@ -111,7 +111,7 @@ class BitMaskedArray(Content):
                 )
             )
         if length > content.length:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' ({}) must be <= len(content) ({})".format(
                         type(self).__name__, length, content.length
@@ -243,7 +243,7 @@ class BitMaskedArray(Content):
                 self._lsb_order,
             ),
         )
-        return ak.contents.indexedoptionarray.IndexedOptionArray(
+        return ak.contents.IndexedOptionArray(
             index[0 : self._length],
             self._content,
             self._identifier,
@@ -347,7 +347,7 @@ class BitMaskedArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise ak._util.indexerror(self, where)
+            raise ak._errors.index_error(self, where)
         if self._lsb_order:
             bit = bool(self._mask[where // 8] & (1 << (where % 8)))
         else:
@@ -418,7 +418,7 @@ class BitMaskedArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def project(self, mask=None):
         return self.toByteMaskedArray().project(mask)
@@ -427,11 +427,11 @@ class BitMaskedArray(Content):
         if isinstance(
             self._content,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self.toIndexedOptionArray64().simplify_optiontype()
@@ -448,11 +448,11 @@ class BitMaskedArray(Content):
         if isinstance(
             other,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self._content.mergeable(other.content, mergebool)
@@ -579,11 +579,11 @@ class BitMaskedArray(Content):
         elif isinstance(
             self._content,
             (
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
@@ -667,7 +667,7 @@ class BitMaskedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         if self._content.is_RecordType:
@@ -677,7 +677,7 @@ class BitMaskedArray(Content):
             if content.length > self._length:
                 content = content[: self._length]
 
-            return ak.contents.indexedoptionarray.IndexedOptionArray(
+            return ak.contents.IndexedOptionArray(
                 next._index,
                 content,
                 next._identifier,

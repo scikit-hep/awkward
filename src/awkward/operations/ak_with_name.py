@@ -2,15 +2,15 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def with_name(array, name, highlevel=True, behavior=None):
     """
     Args:
         base: Data containing records or tuples.
-        name (str): Name to give to the records or tuples; this assigns
-            the `"__record__"` parameter.
+        name (str or None): Name to give to the records or tuples; this assigns
+            the `"__record__"` parameter. If None, any existing name is unset.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -18,7 +18,8 @@ def with_name(array, name, highlevel=True, behavior=None):
 
     Returns an #ak.Array or #ak.Record (or low-level equivalent, if
     `highlevel=False`) with a new name. This function does not change the
-    array in-place.
+    array in-place. If the new name is None, then an array without a name is
+    returned.
 
     The records or tuples may be nested within multiple levels of nested lists.
     If records are nested within records, only the outermost are affected.
@@ -27,7 +28,7 @@ def with_name(array, name, highlevel=True, behavior=None):
     to the data; see #ak.Array and #ak.behavior for a more complete
     description.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.with_name",
         dict(array=array, name=name, highlevel=highlevel, behavior=behavior),
     ):

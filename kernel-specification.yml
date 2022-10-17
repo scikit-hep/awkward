@@ -600,7 +600,7 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
-  - name: awkward_IndexedArray_local_preparenext_64
+  - name: awkward_IndexedArray_local_preparenext
     specializations:
       - name: awkward_IndexedArray_local_preparenext_64
         args:

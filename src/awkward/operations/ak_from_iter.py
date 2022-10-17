@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def from_iter(
@@ -16,7 +16,7 @@ def from_iter(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         allow_record (bool): If True, the outermost element may be a record
-            (returning #ak.Record or #ak.contents.Record type, depending on
+            (returning #ak.Record or #ak.record.Record type, depending on
             `highlevel`); if False, the outermost element must be an array.
         initial (int): Initial size (in bytes) of buffers used by the
             [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
@@ -50,7 +50,7 @@ def from_iter(
 
     See also #ak.to_list.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_iter",
         dict(
             iterable=iterable,
@@ -76,7 +76,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
                 resize,
             )[0]
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "cannot produce an array from a single dict (that would be a record)"
                 )

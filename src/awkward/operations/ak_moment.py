@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def moment(
@@ -57,7 +57,7 @@ def moment(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.moment",
         dict(
             x=x,
@@ -104,4 +104,4 @@ def _impl(x, n, weight, axis, keepdims, mask_identity, flatten_records):
                 mask_identity,
                 flatten_records,
             )
-        return ak.nplike.of(sumwxn, sumw).true_divide(sumwxn, sumw)
+        return ak.nplikes.nplike_of(sumwxn, sumw).true_divide(sumwxn, sumw)

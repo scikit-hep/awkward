@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward.forms.form import Form, _parameters_equal
+from awkward.forms.form import Form
 
 
 class EmptyForm(Form):
@@ -15,11 +15,11 @@ class EmptyForm(Form):
         args = self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra({"class": "EmptyArray"}, verbose)
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra({"class": "EmptyArray"}, verbose)
 
     def _type(self, typestrs):
-        return ak.types.unknowntype.UnknownType(
+        return ak.types.UnknownType(
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
         )
@@ -33,38 +33,6 @@ class EmptyForm(Form):
 
     def toNumpyForm(self, dtype):
         return ak.forms.numpyform.from_dtype(dtype, self._parameters)
-
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, EmptyForm):
-            return _parameters_equal(
-                self._parameters, other._parameters, only_array_record=True
-            )
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return EmptyForm(
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        raise ak._util.indexerror(self, where, "not an array of records")
-
-    def _getitem_fields(self, where, only_fields=()):
-        raise ak._util.indexerror(self, where, "not an array of records")
-
-    def _carry(self, allow_lazy):
-        return EmptyForm(
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

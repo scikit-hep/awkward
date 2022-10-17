@@ -8,8 +8,8 @@ import awkward.types.type
 
 class ArrayType:
     def __init__(self, content, length):
-        if not isinstance(content, awkward.types.type.Type):
-            raise ak._util.error(
+        if not isinstance(content, ak.types.Type):
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} all 'contents' must be Type subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -17,7 +17,7 @@ class ArrayType:
                 )
             )
         if not ak._util.isint(length) or length < 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'length' must be of a positive integer, not {}".format(
                         type(self).__name__, repr(length)

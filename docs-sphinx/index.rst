@@ -152,7 +152,7 @@ Navigation
    * :class:`ak.contents.ListArray`: splits its nested content into variable-length lists with full generality (may use its content non-contiguously, overlapping, or out-of-order).
    * :class:`ak.contents.ListOffsetArray`: splits its nested content into variable-length lists, assuming contiguous, non-overlapping, in-order content.
    * :class:`ak.contents.RecordArray`: represents a logical array of records with a "struct of arrays" layout in memory.
-   * :class:`ak.contents.Record`: represents a single record (not a subclass of :class:`ak.contents.Content` in Python).
+   * :class:`ak.record.Record`: represents a single record (not a subclass of :class:`ak.contents.Content` in Python).
    * :class:`ak.contents.IndexedArray`: rearranges and/or duplicates its content by lazily applying an integer index.
    * :class:`ak.contents.IndexedOptionArray`: same as :class:`ak.contents.IndexedArray` with missing values as negative indexes.
    * :class:`ak.contents.ByteMaskedArray`: represents its content with missing values with an 8-bit boolean mask.

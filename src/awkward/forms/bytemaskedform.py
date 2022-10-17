@@ -17,7 +17,7 @@ class ByteMaskedForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(mask):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be of type str, not {}".format(
                         type(self).__name__, repr(mask)
@@ -25,7 +25,7 @@ class ByteMaskedForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -33,7 +33,7 @@ class ByteMaskedForm(Form):
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'valid_when' must be bool, not {}".format(
                         type(self).__name__, repr(valid_when)
@@ -70,19 +70,19 @@ class ByteMaskedForm(Form):
         ] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra(
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra(
             {
                 "class": "ByteMaskedArray",
                 "mask": self._mask,
                 "valid_when": self._valid_when,
-                "content": self._content._tolist_part(verbose, toplevel=False),
+                "content": self._content._to_dict_part(verbose, toplevel=False),
             },
             verbose,
         )
 
     def _type(self, typestrs):
-        return ak.types.optiontype.OptionType(
+        return ak.types.OptionType(
             self._content._type(typestrs),
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
@@ -103,75 +103,18 @@ class ByteMaskedForm(Form):
         else:
             return False
 
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, ByteMaskedForm):
-            return (
-                self._mask == other._mask
-                and self._valid_when == other._valid_when
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
-                and self._content.generated_compatibility(other._content)
-            )
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._getitem_range(),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._getitem_field(where, only_fields),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _getitem_fields(self, where, only_fields=()):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._getitem_fields(where, only_fields),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        return ByteMaskedForm(
-            self._mask,
-            self._content._carry(allow_lazy),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
     def simplify_optiontype(self):
         if isinstance(
             self._content,
             (
-                ak.forms.indexedform.IndexedForm,
-                ak.forms.indexedoptionform.IndexedOptionForm,
-                ak.forms.bytemaskedform.ByteMaskedForm,
-                ak.forms.bitmaskedform.BitMaskedForm,
-                ak.forms.unmaskedform.UnmaskedForm,
+                ak.forms.IndexedForm,
+                ak.forms.IndexedOptionForm,
+                ak.forms.ByteMaskedForm,
+                ak.forms.BitMaskedForm,
+                ak.forms.UnmaskedForm,
             ),
         ):
-            return ak.forms.indexedoptionform.IndexedOptionForm(
+            return ak.forms.IndexedOptionForm(
                 "i64",
                 self._content,
                 has_identifier=self._has_identifier,

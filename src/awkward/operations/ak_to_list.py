@@ -4,7 +4,7 @@ from collections.abc import Iterable, Mapping
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def to_list(array):
@@ -31,7 +31,7 @@ def to_list(array):
 
     See also #ak.from_iter and #ak.Array.tolist.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_list",
         dict(array=array),
     ):

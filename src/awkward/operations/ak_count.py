@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def count(array, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
@@ -79,7 +79,7 @@ def count(array, axis=None, keepdims=False, mask_identity=False, flatten_records
     If it is desirable to exclude NaN ("not a number") values from #ak.count,
     use #ak.nan_to_none to turn them into None, which are not counted.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.count",
         dict(
             array=array,

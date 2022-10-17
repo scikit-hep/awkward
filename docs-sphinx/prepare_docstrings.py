@@ -280,7 +280,7 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
                         "awkwardforth.rst",
                         ])
 
-    if modulename.startswith("awkward._") or modulename == "awkward.nplike" or modulename == "awkward.types._awkward_datashape_parser":
+    if modulename.startswith("awkward._") or modulename == "awkward.nplikes" or modulename == "awkward.types._awkward_datashape_parser":
         continue  # don't show awkward._*, including _v2
 
     link = ("`{0} <https://github.com/scikit-hep/awkward-1.0/blob/"

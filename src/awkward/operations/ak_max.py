@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("max")
@@ -51,7 +51,7 @@ def max(
 
     See also #ak.nanmax.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.max",
         dict(
             array=array,
@@ -106,7 +106,7 @@ def nanmax(
 
     See also #ak.max.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nanmax",
         dict(
             array=array,

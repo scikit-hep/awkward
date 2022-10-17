@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("var")
@@ -66,7 +66,7 @@ def var(
 
     See also #ak.nanvar.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.var",
         dict(
             x=x,
@@ -127,7 +127,7 @@ def nanvar(
 
     See also #ak.var.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.nanvar",
         dict(
             x=x,
@@ -186,8 +186,8 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records):
                 flatten_records,
             )
         if ddof != 0:
-            return ak.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw) * ak.nplike.of(
-                sumw
-            ).true_divide(sumw, sumw - ddof)
+            return ak.nplikes.nplike_of(sumwxx, sumw).true_divide(
+                sumwxx, sumw
+            ) * ak.nplikes.nplike_of(sumw).true_divide(sumw, sumw - ddof)
         else:
-            return ak.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw)
+            return ak.nplikes.nplike_of(sumwxx, sumw).true_divide(sumwxx, sumw)

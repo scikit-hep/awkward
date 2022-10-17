@@ -20,7 +20,7 @@ def from_categorical(array, highlevel=True):
     See also #ak.is_categorical, #ak.categories, #ak.to_categorical,
     #ak.from_categorical.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_categorical",
         dict(array=array, highlevel=highlevel),
     ):
