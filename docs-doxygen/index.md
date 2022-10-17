@@ -6,9 +6,9 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 
 ## Documentation
 
-   * [Main page (quickstart)](https://awkward-array.org>)
+   * [Main page (quickstart)](https://awkward-array.readthedocs.io/>)
    * C++ API reference: **this site**
-   * [Python API reference](../index.html)
+   * [Python API reference](../../index.html)
    * [GitHub repository](https://github.com/scikit-hep/awkward-1.0)
 
 ## Navigation
@@ -17,7 +17,7 @@ The Awkward Array project is divided into 3 layers with 5 main components.
 
 <img src="awkward-1-0-layers.svg" style="max-width: 500px">
 
-The high-level interface and Numba implementation are described in the [Python API reference](../index.html), though the Numba implementation is considered an internal detail (in the `_connect` submodule, which starts with an underscore and is therefore private in Python).
+The high-level interface and Numba implementation are described in the [Python API reference](../../index.html), though the Numba implementation is considered an internal detail (in the `_connect` submodule, which starts with an underscore and is therefore private in Python).
 
 This reference describes the
 

@@ -122,9 +122,7 @@ rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
 
 ### Continuous testing
 
-Pull requests must pass all [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) tests before they are merged. I will sometimes cancel non-essential builds to give priority to pull requests that are almost ready to be merged. If you needed the result of the build as a diagnostic, you can ask me to restart your job or make a trivial change to trigger a new build.
-
-Currently, we only run merge builds (the state of your branch if merged with `main`), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge main`.
+Pull requests must pass all [continuous integration](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml) tests before they are merged. I will sometimes cancel non-essential builds to give priority to pull requests that are almost ready to be merged. If you needed the result of the build as a diagnostic, you can ask me to restart your job or make a trivial change to trigger a new build.
 
 ### The main branch
 
