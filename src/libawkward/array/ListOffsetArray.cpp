@@ -1441,25 +1441,16 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      Index64 gaps(outlength);
-      struct Error err5 = kernel::ListOffsetArray_reduce_nonlocal_findgaps_64(
-        kernel::lib::cpu,   // DERIVE
-        gaps.data(),
-        parents.data(),
-        parents.length());
-      util::handle_error(err5, classname(), identities_.get());
-
       Index64 outstarts(outlength);
       Index64 outstops(outlength);
-      struct Error err6 = kernel::ListOffsetArray_reduce_nonlocal_outstartsstops_64(
+      struct Error err5 = kernel::ListOffsetArray_reduce_nonlocal_outstartsstops_64(
         kernel::lib::cpu,   // DERIVE
         outstarts.data(),
         outstops.data(),
         distincts.data(),
         maxcount * outlength,
-        gaps.data(),
         outlength);
-      util::handle_error(err6, classname(), identities_.get());
+      util::handle_error(err5, classname(), identities_.get());
 
       bool make_shifts = reducer.returns_positions();
 
@@ -1467,7 +1458,7 @@ namespace awkward {
       if (make_shifts) {
         Index64 nummissing(maxcount);
         Index64 missing(offsets_.getitem_at(offsets_.length() - 1));
-        struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
+        struct Error err6 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
           kernel::lib::cpu,   // DERIVE
           nummissing.data(),
           missing.data(),
@@ -1479,7 +1470,7 @@ namespace awkward {
           maxcount,
           nextlen,
           nextcarry.data());
-        util::handle_error(err7, classname(), identities_.get());
+        util::handle_error(err6, classname(), identities_.get());
       }
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, false);

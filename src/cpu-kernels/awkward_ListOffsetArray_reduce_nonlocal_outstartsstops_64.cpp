@@ -1,51 +1,45 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64.cpp", line)
-
+#include <cassert>
 #include "awkward/kernels.h"
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-ERROR awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
-  int64_t* outstarts,
-  int64_t* outstops,
-  const int64_t* distincts,
-  int64_t lendistincts,
-  const int64_t* gaps,
-  int64_t outlength) {
-  int64_t maxcount = (outlength == 0) ? lendistincts : lendistincts / outlength;
+ERROR
+awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
+    int64_t* outstarts,
+    int64_t* outstops,
+    const int64_t* distincts,
+    int64_t lendistincts,
+    int64_t outlength) {
+  if (outlength > 0 && lendistincts > 0) {
+    int64_t maxcount = lendistincts / outlength;
 
-  int64_t j = 0;
-  int64_t k = 0;
-  int64_t maxdistinct = -2;
-  int64_t lasti = -1;
-  for (int64_t i = 0;  i < lendistincts;  i++) {
-    if (maxdistinct < distincts[i]) {
-      maxdistinct = distincts[i];
+    int64_t k = 0;
+    int64_t i_next = 0;
+    for (int64_t i = 0; i < lendistincts; i++) {
+      // Did we hit the start of the next sublist in `distincts`?
+      if (i == i_next) {
+        i_next += maxcount;
 
-      int64_t extra = (i - lasti)/maxcount;
-      lasti = i;
-
-      int64_t numgappy = gaps[j];
-      if (numgappy < extra) {
-        numgappy = extra;
-      }
-
-      for (int64_t gappy = 0;  gappy < numgappy;  gappy++) {
+        // Add a new sublist, which is empty by default
         outstarts[k] = i;
         outstops[k] = i;
         k++;
       }
-      j++;
-    }
 
-    if (distincts[i] != -1) {
-      outstops[k - 1] = i + 1;
+      if (distincts[i] != -1) {
+        outstops[k - 1] = i + 1;
+      }
+    }
+  } else {
+    // If we didn't fill the list, then `lendistincts==0`
+    // This is only true if `outlength==0` or `maxcount==0`
+    for (int64_t k=0; k < outlength; k++) {
+      outstarts[k] = 0;
+      outstops[k] = 0;
     }
   }
-
-  for (;  k < outlength;  k++) {
-    outstarts[k] = lendistincts + 1;
-    outstops[k] = lendistincts + 1;
-  }
-
+  // assert (k == outlength);
   return success();
 }

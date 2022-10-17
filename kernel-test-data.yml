@@ -17034,140 +17034,6 @@ unit-tests:
       parents: [0, 0, 0, 0, 0, 0, 0, 0, 0]
     outputs:
       outoffsets: [0, 9]
-- name: awkward_ListOffsetArray_reduce_nonlocal_findgaps_64
-  tests:
-  - error: false
-    inputs:
-      lenparents: 10
-      parents: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    outputs:
-      gaps: [1]
-  - error: false
-    inputs:
-      lenparents: 4
-      parents: [0, 0, 0, 0]
-    outputs:
-      gaps: [1]
-  - error: false
-    inputs:
-      lenparents: 3
-      parents: [0, 0, 0]
-    outputs:
-      gaps: [1]
-  - error: false
-    inputs:
-      lenparents: 2
-      parents: [0, 0]
-    outputs:
-      gaps: [1]
-  - error: false
-    inputs:
-      lenparents: 1
-      parents: [0]
-    outputs:
-      gaps: [1]
-  - error: false
-    inputs:
-      lenparents: 11
-      parents: [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 13
-      parents: [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 12
-      parents: [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 10
-      parents: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 11
-      parents: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 12
-      parents: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 8
-      parents: [0, 0, 0, 0, 1, 1, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 6
-      parents: [0, 0, 0, 1, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 5
-      parents: [0, 0, 0, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 4
-      parents: [0, 0, 1, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 3
-      parents: [0, 0, 1]
-    outputs:
-      gaps: [1, 1]
-  - error: false
-    inputs:
-      lenparents: 6
-      parents: [0, 0, 1, 1, 2, 2]
-    outputs:
-      gaps: [1, 1, 1]
-  - error: false
-    inputs:
-      lenparents: 3
-      parents: [0, 1, 2]
-    outputs:
-      gaps: [1, 1, 1]
-  - error: false
-    inputs:
-      lenparents: 8
-      parents: [0, 0, 1, 1, 2, 2, 3, 3]
-    outputs:
-      gaps: [1, 1, 1, 1]
-  - error: false
-    inputs:
-      lenparents: 7
-      parents: [0, 0, 1, 1, 2, 2, 3]
-    outputs:
-      gaps: [1, 1, 1, 1]
-  - error: false
-    inputs:
-      lenparents: 6
-      parents: [0, 0, 1, 1, 2, 3]
-    outputs:
-      gaps: [1, 1, 1, 1]
-  - error: false
-    inputs:
-      lenparents: 5
-      parents: [0, 0, 1, 2, 3]
-    outputs:
-      gaps: [1, 1, 1, 1]
 - name: awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64
   tests:
   - error: false
@@ -17777,213 +17643,190 @@ unit-tests:
       nextstarts: [0, 7, 12, 15]
 - name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
   tests:
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0, 0, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1]
-      gaps: [1, 2, 0]
-      lendistincts: 15
-      outlength: 3
-    outputs:
-      outstarts: [0, 10, 10]
-      outstops: [5, 10, 15]
-  - error: false
-    inputs:
-      distincts: [0, 0]
-      gaps: [1]
-      lendistincts: 2
-      outlength: 1
-    outputs:
-      outstarts: [0]
-      outstops: [2]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0]
-      gaps: [1]
-      lendistincts: 3
-      outlength: 1
-    outputs:
-      outstarts: [0]
-      outstops: [3]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 1, 1, -1]
-      gaps: [1, 1]
-      lendistincts: 6
-      outlength: 2
-    outputs:
-      outstarts: [0, 3]
-      outstops: [3, 5]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 1, 1, 1]
-      gaps: [1, 1]
-      lendistincts: 6
-      outlength: 2
-    outputs:
-      outstarts: [0, 3]
-      outstops: [3, 6]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 1, 1, -1, 2, -1, -1]
-      gaps: [1, 1, 1]
-      lendistincts: 9
-      outlength: 3
-    outputs:
-      outstarts: [0, 3, 6]
-      outstops: [3, 5, 7]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 1, -1, -1, 2, 1, -1, 3, -1, -1]
-      gaps: [1, 1, 1, 1]
-      lendistincts: 12
-      outlength: 4
-    outputs:
-      outstarts: [0, 3, 6, 9]
-      outstops: [3, 4, 8, 10]
-  - error: false
-    inputs:
-      distincts: [0, 0, -1, 1, -1, -1, -1, -1, -1, 2, 1, 0]
-      gaps: [1, 1, 1, 1]
-      lendistincts: 12
-      outlength: 4
-    outputs:
-      outstarts: [0, 3, 9, 9]
-      outstops: [2, 4, 9, 12]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0]
-      gaps: [1]
-      lendistincts: 4
-      outlength: 1
-    outputs:
-      outstarts: [0]
-      outstops: [4]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, -1, 1, 1, 1, 0]
-      gaps: [1, 1]
-      lendistincts: 8
-      outlength: 2
-    outputs:
-      outstarts: [0, 4]
-      outstops: [3, 8]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0, 0]
-      gaps: [1]
-      lendistincts: 5
-      outlength: 1
-    outputs:
-      outstarts: [0]
-      outstops: [5]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, -1]
-      gaps: [1, 1, 1]
-      lendistincts: 15
-      outlength: 3
-    outputs:
-      outstarts: [0, 5, 10]
-      outstops: [5, 10, 14]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]
-      gaps: [1, 1, 1]
-      lendistincts: 15
-      outlength: 3
-    outputs:
-      outstarts: [0, 5, 10]
-      outstops: [5, 10, 15]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0, 0, 1, -1, -1, -1, -1, 2, 1, 1, 1, 1]
-      gaps: [1, 1, 1]
-      lendistincts: 15
-      outlength: 3
-    outputs:
-      outstarts: [0, 5, 10]
-      outstops: [5, 6, 15]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, -1, 2, 2, 2, 2, 1]
-      gaps: [1, 1, 1]
-      lendistincts: 15
-      outlength: 3
-    outputs:
-      outstarts: [0, 5, 10]
-      outstops: [5, 9, 15]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1]
-      gaps: [1, 1, 0]
-      lendistincts: 15
-      outlength: 3
-    outputs:
-      outstarts: [0, 5, 16]
-      outstops: [5, 10, 16]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
-      gaps: [1, 1]
-      lendistincts: 10
-      outlength: 2
-    outputs:
-      outstarts: [0, 5]
-      outstops: [5, 10]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, -1, -1, -1, 1, 1, -1]
-      gaps: [1, 2, 0]
-      lendistincts: 9
-      outlength: 3
-    outputs:
-      outstarts: [0, 6, 6]
-      outstops: [3, 6, 8]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, -1, -1, -1, 1, 1, 1]
-      gaps: [1, 1, 1]
-      lendistincts: 9
-      outlength: 3
-    outputs:
-      outstarts: [0, 6, 6]
-      outstops: [3, 6, 9]
-  - error: false
-    inputs:
-      distincts: [0, 0, -1, -1, -1, -1, 1, -1, -1, 2, 1, 0]
-      gaps: [1, 1, 1, 1]
-      lendistincts: 12
-      outlength: 4
-    outputs:
-      outstarts: [0, 6, 6, 9]
-      outstops: [2, 6, 7, 12]
-  - error: false
-    inputs:
-      distincts: [0, 0, -1, -1, -1, -1, -1, -1, -1, 1, 1, 0]
-      gaps: [1, 1, 1, 1]
-      lendistincts: 12
-      outlength: 4
-    outputs:
-      outstarts: [0, 9, 9, 9]
-      outstops: [2, 9, 9, 12]
-  - error: false
-    inputs:
-      distincts: [0, 0, 0, -1, -1, -1, -1, -1, -1, 1, 1, 1]
-      gaps: [1, 1, 1, 1]
-      lendistincts: 12
-      outlength: 4
-    outputs:
-      outstarts: [0, 9, 9, 9]
-      outstops: [3, 9, 9, 12]
-  - error: false
-    inputs:
-      distincts: []
-      gaps: [0]
-      lendistincts: 0
-      outlength: 1
-    outputs:
-      outstarts: [1]
-      outstops: [1]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0, 0, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1]
+        lendistincts: 15
+        outlength: 3
+      outputs:
+        outstarts: [0, 5, 10]
+        outstops: [5, 5, 15]
+    - error: false
+      inputs:
+        distincts: [0, 0]
+        lendistincts: 2
+        outlength: 1
+      outputs:
+        outstarts: [0]
+        outstops: [2]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0]
+        lendistincts: 3
+        outlength: 1
+      outputs:
+        outstarts: [0]
+        outstops: [3]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 1, 1, -1]
+        lendistincts: 6
+        outlength: 2
+      outputs:
+        outstarts: [0, 3]
+        outstops: [3, 5]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 1, 1, 1]
+        lendistincts: 6
+        outlength: 2
+      outputs:
+        outstarts: [0, 3]
+        outstops: [3, 6]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 1, 1, -1, 2, -1, -1]
+        lendistincts: 9
+        outlength: 3
+      outputs:
+        outstarts: [0, 3, 6]
+        outstops: [3, 5, 7]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 1, -1, -1, 2, 1, -1, 3, -1, -1]
+        lendistincts: 12
+        outlength: 4
+      outputs:
+        outstarts: [0, 3, 6, 9]
+        outstops: [3, 4, 8, 10]
+    - error: false
+      inputs:
+        distincts: [0, 0, -1, 1, -1, -1, -1, -1, -1, 2, 1, 0]
+        lendistincts: 12
+        outlength: 4
+      outputs:
+        outstarts: [0, 3, 6, 9]
+        outstops: [2, 4, 6, 12]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0]
+        lendistincts: 4
+        outlength: 1
+      outputs:
+        outstarts: [0]
+        outstops: [4]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, -1, 1, 1, 1, 0]
+        lendistincts: 8
+        outlength: 2
+      outputs:
+        outstarts: [0, 4]
+        outstops: [3, 8]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0, 0]
+        lendistincts: 5
+        outlength: 1
+      outputs:
+        outstarts: [0]
+        outstops: [5]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, -1]
+        lendistincts: 15
+        outlength: 3
+      outputs:
+        outstarts: [0, 5, 10]
+        outstops: [5, 10, 14]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2]
+        lendistincts: 15
+        outlength: 3
+      outputs:
+        outstarts: [0, 5, 10]
+        outstops: [5, 10, 15]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0, 0, 1, -1, -1, -1, -1, 2, 1, 1, 1, 1]
+        lendistincts: 15
+        outlength: 3
+      outputs:
+        outstarts: [0, 5, 10]
+        outstops: [5, 6, 15]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, -1, 2, 2, 2, 2, 1]
+        lendistincts: 15
+        outlength: 3
+      outputs:
+        outstarts: [0, 5, 10]
+        outstops: [5, 9, 15]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1]
+        lendistincts: 15
+        outlength: 3
+      outputs:
+        outstarts: [0, 5, 10]
+        outstops: [5, 10, 10]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
+        lendistincts: 10
+        outlength: 2
+      outputs:
+        outstarts: [0, 5]
+        outstops: [5, 10]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, -1, -1, -1, 1, 1, -1]
+        lendistincts: 9
+        outlength: 3
+      outputs:
+        outstarts: [0, 3, 6]
+        outstops: [3, 3, 8]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, -1, -1, -1, 1, 1, 1]
+        lendistincts: 9
+        outlength: 3
+      outputs:
+        outstarts: [0, 3, 6]
+        outstops: [3, 3, 9]
+    - error: false
+      inputs:
+        distincts: [0, 0, -1, -1, -1, -1, 1, -1, -1, 2, 1, 0]
+        lendistincts: 12
+        outlength: 4
+      outputs:
+        outstarts: [0, 3, 6, 9]
+        outstops: [2, 3, 7, 12]
+    - error: false
+      inputs:
+        distincts: [0, 0, -1, -1, -1, -1, -1, -1, -1, 1, 1, 0]
+        lendistincts: 12
+        outlength: 4
+      outputs:
+        outstarts: [0, 3, 6, 9]
+        outstops: [2, 3, 6, 12]
+    - error: false
+      inputs:
+        distincts: [0, 0, 0, -1, -1, -1, -1, -1, -1, 1, 1, 1]
+        lendistincts: 12
+        outlength: 4
+      outputs:
+        outstarts: [0, 3, 6, 9]
+        outstops: [3, 3, 6, 12]
+    - error: false
+      inputs:
+        distincts: []
+        lendistincts: 0
+        outlength: 1
+      outputs:
+        outstarts: [0]
+        outstops: [0]
 - name: awkward_NumpyArray_getitem_boolean_numtrue
   tests:
   - error: false

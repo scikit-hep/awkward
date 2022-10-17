@@ -1485,7 +1485,6 @@ class ListOffsetArray(Content):
 
         branch, depth = self.branch_depth
         globalstarts_length = self._offsets.length - 1
-        parents_length = parents.length
 
         if not branch and negaxis == depth:
             (
@@ -1497,27 +1496,12 @@ class ListOffsetArray(Content):
                 nextstarts,
             ) = self._rearrange_prepare_next(outlength, parents)
 
-            gaps = ak._v2.index.Index64.empty(outlength, self._nplike)
-            assert gaps.nplike is self._nplike and parents.nplike is self._nplike
-            self._handle_error(
-                self._nplike[
-                    "awkward_ListOffsetArray_reduce_nonlocal_findgaps_64",
-                    gaps.dtype.type,
-                    parents.dtype.type,
-                ](
-                    gaps.data,
-                    parents.data,
-                    parents_length,
-                )
-            )
-
             outstarts = ak._v2.index.Index64.empty(outlength, self._nplike)
             outstops = ak._v2.index.Index64.empty(outlength, self._nplike)
             assert (
                 outstarts.nplike is self._nplike
                 and outstops.nplike is self._nplike
                 and distincts.nplike is self._nplike
-                and gaps.nplike is self._nplike
             )
             self._handle_error(
                 self._nplike[
@@ -1525,13 +1509,11 @@ class ListOffsetArray(Content):
                     outstarts.dtype.type,
                     outstops.dtype.type,
                     distincts.dtype.type,
-                    gaps.dtype.type,
                 ](
                     outstarts.data,
                     outstops.data,
                     distincts.data,
                     distincts.length,
-                    gaps.data,
                     outlength,
                 )
             )
