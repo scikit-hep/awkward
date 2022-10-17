@@ -3,7 +3,17 @@ version: 2
 sphinx:
   configuration: docs-sphinx/conf.py
 
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.10"
+  jobs:
+    pre_build:
+      - pip install requests
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 jupyter-cache -d docs-sphinx/_build/.jupyter_cache
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 awkward-wasm-wheel -d docs-sphinx/lite/pypi
+
 python:
-  version: 3.7
   install:
+    # Don't install the conda env, as we won't run any notebooks!
     - requirements: docs-sphinx/requirements.txt
