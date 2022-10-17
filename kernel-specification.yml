@@ -2430,25 +2430,29 @@ kernels:
           outstarts, outstops, distincts, lendistincts, outlength
       ):
           maxcount = lendistincts if (outlength == 0) else int(lendistincts // outlength)
+          if outlength > 0 and lendistincts > 0:
+              # The sublist index
+              k = 0
+              i_next_sublist = 0
+              for i in range(lendistincts):
+                  # Are we now in the next sublist?
+                  if i == i_next_sublist:
+                      # Advance counter
+                      i_next_sublist += maxcount
 
-          # The sublist index
-          k = 0
-          i_next_sublist = 0
-          for i in range(lendistincts):
-              # Are we now in the next sublist?
-              if i == i_next_sublist:
-                  # Advance counter
-                  i_next_sublist += maxcount
+                      # Add a new sublist
+                      outstarts[k] = i
+                      outstops[k] = i
 
-                  # Add a new sublist
-                  outstarts[k] = i
-                  outstops[k] = i
+                      k += 1
 
-                  k += 1
-
-              # Expand stop index of previous list
-              if distincts[i] != -1:
-                  outstops[k - 1] = i + 1
+                  # Expand stop index of previous list
+                  if distincts[i] != -1:
+                      outstops[k - 1] = i + 1
+          else:
+              for k in range(outlength):
+                outstarts[k] = 0
+                outstops[k] = 0
     automatic-tests: true
     manual-tests: []
 

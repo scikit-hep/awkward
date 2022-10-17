@@ -10454,8 +10454,8 @@ unit-tests:
       lendistincts: 15
       outlength: 3
     outputs:
-      outstarts: [0, 10, 10]
-      outstops: [5, 10, 15]
+      outstarts: [0, 5, 10]
+      outstops: [5, 5, 15]
   - error: false
     inputs:
       distincts: [0, 0]
@@ -10510,8 +10510,8 @@ unit-tests:
       lendistincts: 12
       outlength: 4
     outputs:
-      outstarts: [0, 3, 9, 9]
-      outstops: [2, 4, 9, 12]
+      outstarts: [0, 3, 6, 9]
+      outstops: [2, 4, 6, 12]
   - error: false
     inputs:
       distincts: [0, 0, 0, 0]
@@ -10574,8 +10574,8 @@ unit-tests:
       lendistincts: 15
       outlength: 3
     outputs:
-      outstarts: [0, 5, 16]
-      outstops: [5, 10, 16]
+      outstarts: [0, 5, 10]
+      outstops: [5, 10, 10]
   - error: false
     inputs:
       distincts: [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
@@ -10590,48 +10590,48 @@ unit-tests:
       lendistincts: 9
       outlength: 3
     outputs:
-      outstarts: [0, 6, 6]
-      outstops: [3, 6, 8]
+      outstarts: [0, 3, 6]
+      outstops: [3, 3, 8]
   - error: false
     inputs:
       distincts: [0, 0, 0, -1, -1, -1, 1, 1, 1]
       lendistincts: 9
       outlength: 3
     outputs:
-      outstarts: [0, 6, 6]
-      outstops: [3, 6, 9]
+      outstarts: [0, 3, 6]
+      outstops: [3, 3, 9]
   - error: false
     inputs:
       distincts: [0, 0, -1, -1, -1, -1, 1, -1, -1, 2, 1, 0]
       lendistincts: 12
       outlength: 4
     outputs:
-      outstarts: [0, 6, 6, 9]
-      outstops: [2, 6, 7, 12]
+      outstarts: [0, 3, 6, 9]
+      outstops: [2, 3, 7, 12]
   - error: false
     inputs:
       distincts: [0, 0, -1, -1, -1, -1, -1, -1, -1, 1, 1, 0]
       lendistincts: 12
       outlength: 4
     outputs:
-      outstarts: [0, 9, 9, 9]
-      outstops: [2, 9, 9, 12]
+      outstarts: [0, 3, 6, 9]
+      outstops: [2, 3, 6, 12]
   - error: false
     inputs:
       distincts: [0, 0, 0, -1, -1, -1, -1, -1, -1, 1, 1, 1]
       lendistincts: 12
       outlength: 4
     outputs:
-      outstarts: [0, 9, 9, 9]
-      outstops: [3, 9, 9, 12]
+      outstarts: [0, 3, 6, 9]
+      outstops: [3, 3, 6, 12]
   - error: false
     inputs:
       distincts: []
       lendistincts: 0
       outlength: 1
     outputs:
-      outstarts: [1]
-      outstops: [1]
+      outstarts: [0]
+      outstops: [0]
 - name: awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
   tests:
   - error: false
