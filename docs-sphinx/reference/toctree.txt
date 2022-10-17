@@ -298,3 +298,8 @@
     :caption: Forth virtual machine
 
     awkwardforth
+
+.. toctree::
+    :caption: Low-level kernels
+
+    generated/kernels
