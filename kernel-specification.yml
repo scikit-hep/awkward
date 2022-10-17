@@ -2444,43 +2444,32 @@ kernels:
           - {name: outstops, type: "List[int64_t]", dir: out}
           - {name: distincts, type: "Const[List[int64_t]]", dir: in, role: reducer-distincts}
           - {name: lendistincts, type: "int64_t", dir: in, role: reducer-lendistincts}
-          - {name: gaps, type: "Const[List[int64_t]]", dir: in, role: reducer-gaps}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
-          outstarts, outstops, distincts, lendistincts, gaps, outlength
+          outstarts, outstops, distincts, lendistincts, outlength
       ):
-          maxcount = lendistincts // outlength
+          maxcount = lendistincts if (outlength == 0) else int(lendistincts // outlength)
 
-          j = 0
+          # The sublist index
           k = 0
-          maxdistinct = -2
-          lasti = -1
+          i_next_sublist = 0
           for i in range(lendistincts):
-              if maxdistinct < distincts[i]:
-                  maxdistinct = distincts[i]
+              # Are we now in the next sublist?
+              if i == i_next_sublist:
+                  # Advance counter
+                  i_next_sublist += maxcount
 
-                  extra = (i - lasti) // maxcount
-                  lasti = i
+                  # Add a new sublist
+                  outstarts[k] = i
+                  outstops[k] = i
 
-                  numgappy = gaps[j]
-                  if numgappy < extra:
-                      numgappy = extra
+                  k += 1
 
-                  for gappy in range(numgappy):
-                      outstarts[k] = i
-                      outstops[k] = i
-                      k = k + 1
-                  j = j + 1
-
+              # Expand stop index of previous list
               if distincts[i] != -1:
                   outstops[k - 1] = i + 1
-
-          while k < outlength:
-              outstarts[k] = lendistincts + 1
-              outstops[k] = lendistincts + 1
-              k = k + 1
     automatic-tests: true
     manual-tests: []
 
