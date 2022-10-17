@@ -17,4 +17,7 @@ def test():
         )
     )
 
-    assert ak.sum(small, axis=-2).tolist() == [[], [4, 6]]
+    reduced = ak.sum(small, axis=-2)
+    assert reduced.tolist() == [[], [4, 6]]
+    assert np.asarray(reduced.layout.starts).tolist() == [0, 2]
+    assert np.asarray(reduced.layout.stops).tolist() == [0, 4]
