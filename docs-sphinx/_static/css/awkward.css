@@ -1,5 +1,9 @@
 /* Adapted from SciP: https://github.com/scipy/scipy/blob/66f1201fec94ed920641e0875968406c3d36a1b6/doc/source/_static/scipy.css */
 
+:root {
+    --sd-color-card-border-hover: var(--pst-color-primary)
+}
+
 html[data-theme="dark"] .sd-card {
     background: var(--pst-color-surface);
 }
