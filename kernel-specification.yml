@@ -2328,27 +2328,6 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
-  - name: awkward_ListOffsetArray_reduce_nonlocal_findgaps_64
-    specializations:
-      - name: awkward_ListOffsetArray_reduce_nonlocal_findgaps_64
-        args:
-          - {name: gaps, type: "List[int64_t]", dir: out}
-          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
-    description: null
-    definition: |
-      def awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(gaps, parents, lenparents):
-          k = 0
-          last = -1
-          for i in range(lenparents):
-              parent = parents[i]
-              if last < parent:
-                  gaps[k] = parent - last
-                  k = k + 1
-                  last = parent
-    automatic-tests: true
-    manual-tests: []
-
   - name: awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
     specializations:
       - name: awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
