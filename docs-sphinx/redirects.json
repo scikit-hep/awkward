@@ -13,7 +13,7 @@
   "ak.forms.RegularForm.any-ext": "reference/generated/ak.forms.RegularForm.html",
   "ak.forms.UnionForm.any-ext": "reference/generated/ak.forms.UnionForm.html",
   "ak.forms.UnmaskedForm.any-ext": "reference/generated/ak.forms.UnmaskedForm.html",
-  "ak.layout.ArrayBuilder.any-ext": "reference/generated/ak._ext.ArrayBuilder.html",
+  "ak.layout.ArrayBuilder.any-ext": "reference/ak._ext.ArrayBuilder.html",
   "ak.layout.BitMaskedArray.any-ext": "reference/generated/ak.contents.BitMaskedArray.html",
   "ak.layout.ByteMaskedArray.any-ext": "reference/generated/ak.contents.ByteMaskedArray.html",
   "ak.layout.Content.any-ext": "reference/generated/ak.contents.Content.html",
