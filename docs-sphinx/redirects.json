@@ -25,7 +25,7 @@
   "ak.layout.ListArray.any-ext": "reference/generated/ak.contents.ListArray.html",
   "ak.layout.ListOffsetArray.any-ext": "reference/generated/ak.contents.ListOffsetArray.html",
   "ak.layout.NumpyArray.any-ext": "reference/generated/ak.contents.NumpyArray.html",
-  "ak.layout.Record.any-ext": "reference/generated/ak.content.Record.html",
+  "ak.layout.Record.any-ext": "reference/generated/ak.record.Record.html",
   "ak.layout.RecordArray.any-ext": "reference/generated/ak.contents.RecordArray.html",
   "ak.layout.RegularArray.any-ext": "reference/generated/ak.contents.RegularArray.html",
   "ak.layout.UnionArray.any-ext": "reference/generated/ak.contents.UnionArray.html",
