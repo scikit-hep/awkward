@@ -190,6 +190,7 @@ namespace awkward {
     // ROOT streamer customization is done by giving specific instructions
     // in the comments written after the declaration of data members: the values
     // of `ptrs_` and `lookup_` will be ignored (//!).
+    // https://github.com/root-project/root/blob/master/io/doc/TFile/README.md#streamerinfo
     ssize_t at_;
     ssize_t which_;
     ssize_t* ptrs_;    //! transient data pointer
