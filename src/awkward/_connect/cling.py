@@ -148,7 +148,7 @@ namespace awkward {
     ssize_t start_;
     ssize_t stop_;
     ssize_t which_;
-    ssize_t* ptrs_;
+    ssize_t* ptrs_;    //! data pointer
     PyObject* lookup_; //! lookup
   };
 }
@@ -185,7 +185,7 @@ namespace awkward {
   protected:
     ssize_t at_;
     ssize_t which_;
-    ssize_t* ptrs_;
+    ssize_t* ptrs_;    //! data pointer
     PyObject* lookup_; //! lookup
 
   };
