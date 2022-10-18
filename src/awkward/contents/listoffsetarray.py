@@ -1584,7 +1584,7 @@ class ListOffsetArray(Content):
                     None,
                     None,
                     self._nplike,
-                ).toListOffsetArray64(False)
+                )
 
             return out
 
@@ -1638,13 +1638,13 @@ class ListOffsetArray(Content):
                 )
             )
 
-            represents_regular = getattr(self, "_represents_regular", False)
-
-            if keepdims and (
-                not represents_regular or self._content.dimension_optiontype
-            ):
-                if isinstance(outcontent, ak.contents.RegularArray):
-                    outcontent = outcontent.toListOffsetArray64(False)
+            # `outcontent` represents *this* layout in the reduction
+            # If this layout survives in the reduction (see `if` below), then we want
+            # to ensure that we have a ragged list type.
+            if (keepdims and depth == negaxis + 1) or (depth > negaxis + 1):
+                assert outcontent.is_ListType or outcontent.is_RegularType
+                # Determined by self._content._reduce_next(..., len(self), ...)
+                outcontent = outcontent.toListOffsetArray64(False)
 
             return ak.contents.ListOffsetArray(
                 outoffsets,
