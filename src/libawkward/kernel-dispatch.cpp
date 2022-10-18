@@ -17372,36 +17372,12 @@ namespace awkward {
       }
     }
 
-    ERROR ListOffsetArray_reduce_nonlocal_findgaps_64(
-      kernel::lib ptr_lib,
-      int64_t *gaps,
-      const int64_t *parents,
-      int64_t lenparents) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
-          gaps,
-          parents,
-          lenparents);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_findgaps_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_findgaps_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
     ERROR ListOffsetArray_reduce_nonlocal_outstartsstops_64(
       kernel::lib ptr_lib,
       int64_t *outstarts,
       int64_t *outstops,
       const int64_t *distincts,
       int64_t lendistincts,
-      const int64_t *gaps,
       int64_t outlength) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
@@ -17409,7 +17385,6 @@ namespace awkward {
           outstops,
           distincts,
           lendistincts,
-          gaps,
           outlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
