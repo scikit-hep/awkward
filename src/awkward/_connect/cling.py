@@ -145,11 +145,14 @@ namespace awkward {
     }
 
   protected:
+    // ROOT streamer customization is done by giving specific instructions
+    // in the comments written after the declaration of data members: the values
+    // of `ptrs_` and `lookup_` will be ignored (//!).
     ssize_t start_;
     ssize_t stop_;
     ssize_t which_;
-    ssize_t* ptrs_;    //! data pointer
-    PyObject* lookup_; //! lookup
+    ssize_t* ptrs_;    //! transient data pointer
+    PyObject* lookup_; //! transient lookup
   };
 }
 """.strip()
@@ -183,10 +186,13 @@ namespace awkward {
     }
 
   protected:
+    // ROOT streamer customization is done by giving specific instructions
+    // in the comments written after the declaration of data members: the values
+    // of `ptrs_` and `lookup_` will be ignored (//!).
     ssize_t at_;
     ssize_t which_;
-    ssize_t* ptrs_;    //! data pointer
-    PyObject* lookup_; //! lookup
+    ssize_t* ptrs_;    //! transient data pointer
+    PyObject* lookup_; //! transient lookup
 
   };
 }
