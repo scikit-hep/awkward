@@ -10,7 +10,7 @@ from typing import Any, TypeVar
 import awkward as ak
 import awkward._reducers
 import awkward.forms.form as form
-from awkward.nplike import NumpyLike
+from awkward.nplikes import NumpyLike
 from awkward.typing import Self, TypeAlias
 
 np = ak.nplikes.NumpyMetadata.instance()
