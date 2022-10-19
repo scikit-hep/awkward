@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# import cupy as cp  # noqa: F401
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
@@ -34,4 +33,6 @@ def test_arrays():
     another_akarray = ak.Array(
         [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6, 7.7, 8.8, 9.9]], backend="cuda"
     )
-    something_else(another_akarray)
+    threadsperblock = 32
+    blockspergrid = 128
+    something_else[blockspergrid, threadsperblock](another_akarray)
