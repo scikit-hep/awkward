@@ -1064,71 +1064,139 @@ namespace awkward {
                             int64_t outlength,
                             bool mask,
                             bool keepdims) const {
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    const int64_t nextlen = length() * size();
 
-    ContentPtr out = toListOffsetArray64(true).get()->reduce_next(reducer,
-                                                                  negaxis,
-                                                                  starts,
-                                                                  shifts,
-                                                                  parents,
-                                                                  outlength,
-                                                                  mask,
-                                                                  keepdims);
+    // At or below reduction axis
+    if (!branchdepth.first && negaxis == branchdepth.second) {
+      if (length() != parents.length()) {
+        throw std::runtime_error(std::string("length() != parents.length()") +
+                                 FILENAME(__LINE__));
+      }
+      Index64 nextstarts(length());
+      struct Error err1 =
+          kernel::RegularArray_compact_offsets_64(kernel::lib::cpu,  // DERIVE
+                                                  nextstarts.data(),
+                                                  length()-1,
+                                                  size());
+      util::handle_error(err1, classname(), identities_.get());
 
-    if (!content_.get()->dimension_optiontype()) {
-      std::pair<bool, int64_t> branchdepth = branch_depth();
+      Index64 nextcarry(nextlen);
+      Index64 nextparents(nextlen);
 
-      bool convert_shallow = (negaxis == branchdepth.second);
-      bool convert_deep = (negaxis + 2 == branchdepth.second);
+      struct Error err2 = kernel::RegularArray_reduce_nonlocal_preparenext_64(
+          kernel::lib::cpu,  // DERIVE
+          nextcarry.data(),
+          nextparents.data(),
+          parents.data(),
+          size(),
+          length());
+      util::handle_error(err2, classname(), identities_.get());
+
+      bool make_shifts = reducer.returns_positions();
+      Index64 nextshifts(make_shifts ? nextlen : 0);
+
+      if (make_shifts) {
+        struct Error err3 =
+            kernel::content_reduce_zeroparents_64(kernel::lib::cpu,  // DERIVE
+                                                  nextshifts.data(),
+                                                  nextshifts.length());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+
+      ContentPtr nextcontent = content_->carry(nextcarry, false);
+
+      ContentPtr outcontent = nextcontent->reduce_next(reducer,
+                                                             negaxis - 1,
+                                                             nextstarts,
+                                                             nextshifts,
+                                                             nextparents,
+                                                             outlength * size(),
+                                                             mask,
+                                                             false);
+      ContentPtr out = std::make_shared<RegularArray>(
+          Identities::none(), util::Parameters(), outcontent, size(), length());
 
       if (keepdims) {
-        convert_shallow = false;
-        convert_deep = true;
+        out = std::make_shared<RegularArray>(
+            Identities::none(), util::Parameters(), out, 1, length());
+      }
+      return out;
+
+    } else {
+      Index64 nextparents(nextlen);
+      struct Error err1 = kernel::RegularArray_reduce_local_nextparents_64(
+          kernel::lib::cpu,  // DERIVE
+          nextparents.data(),
+          size(),
+          length());
+      util::handle_error(err1, classname(), identities_.get());
+
+      Index64 nextstarts(size() > 0 ? length() : 0);
+      struct Error err2 =
+          kernel::RegularArray_compact_offsets_64(kernel::lib::cpu,  // DERIVE
+                                                  nextstarts.data(),
+                                                  length()-1,
+                                                  size());
+      util::handle_error(err2, classname(), identities_.get());
+
+      ContentPtr outcontent = content_->reduce_next(reducer,
+                                                          negaxis,
+                                                          nextstarts,
+                                                          shifts,
+                                                          nextparents,
+                                                          length(),
+                                                          mask,
+                                                          keepdims);
+
+      if (keepdims && (branchdepth.second == negaxis + 1)) {
+        if (dynamic_cast<RegularArray*>(outcontent.get()) == nullptr)
+          throw std::runtime_error(
+              std::string("expected regular array for keepdims=true") +
+              FILENAME(__LINE__));
+      } else if (branchdepth.second >= negaxis + 2) {
+        if (ListArray32* raw = dynamic_cast<ListArray32*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false);
+        } else if (ListArrayU32* raw =
+                       dynamic_cast<ListArrayU32*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false);
+        } else if (ListArray64* raw = dynamic_cast<ListArray64*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false);
+        } else if (ListOffsetArray32* raw =
+                       dynamic_cast<ListOffsetArray32*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false);
+        } else if (ListOffsetArrayU32* raw =
+                       dynamic_cast<ListOffsetArrayU32*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false);
+        }
+
+        if (ListOffsetArray64* raw =
+                dynamic_cast<ListOffsetArray64*>(outcontent.get())) {
+          outcontent = std::make_shared<RegularArray>(
+              Identities::none(),
+              util::Parameters(),
+              raw->content()->getitem_range(
+                  raw->offsets().getitem_at(0), raw->offsets().getitem_at(-1)),
+              size(),
+              length());
+
+        } else if (dynamic_cast<RegularArray*>(outcontent.get()) == nullptr)
+          throw std::runtime_error(
+              std::string("expected list or regular array") +
+              FILENAME(__LINE__));
       }
 
-      if (convert_deep) {
-        if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
-          if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
-            out = std::make_shared<ListOffsetArray64>(raw1->identities(),
-                                                      raw1->parameters(),
-                                                      raw1->offsets(),
-                                                      raw2->toRegularArray());
-          }
-          else if (ListArray64* raw2 = dynamic_cast<ListArray64*>(raw1->content().get())) {
-            out = std::make_shared<ListOffsetArray64>(raw1->identities(),
-                                                      raw1->parameters(),
-                                                      raw1->offsets(),
-                                                      raw2->toRegularArray());
-          }
-        }
-        else if (ListArray64* raw1 = dynamic_cast<ListArray64*>(out.get())) {
-          if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
-            out = std::make_shared<ListArray64>(raw1->identities(),
-                                                raw1->parameters(),
-                                                raw1->starts(),
-                                                raw1->stops(),
-                                                raw2->toRegularArray());
-          }
-          else if (ListArray64* raw2 = dynamic_cast<ListArray64*>(raw1->content().get())) {
-            out = std::make_shared<ListArray64>(raw1->identities(),
-                                                raw1->parameters(),
-                                                raw1->starts(),
-                                                raw1->stops(),
-                                                raw2->toRegularArray());
-          }
-        }
-      }
-
-      if (convert_shallow) {
-        if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
-          out = raw1->toRegularArray();
-        }
-        else if (ListArray64* raw1 = dynamic_cast<ListArray64*>(out.get())) {
-          out = raw1->toRegularArray();
-        }
-      }
+      Index64 outoffsets(outlength + 1);
+      struct Error err3 = kernel::ListOffsetArray_reduce_local_outoffsets_64(
+          kernel::lib::cpu,  // DERIVE
+          outoffsets.data(),
+          parents.data(),
+          parents.length(),
+          outlength);
+      util::handle_error(err3, classname(), identities_.get());
+      return std::make_shared<ListOffsetArray64>(
+          Identities::none(), util::Parameters(), outoffsets, outcontent);
     }
-
-    return out;
   }
 
   const ContentPtr
