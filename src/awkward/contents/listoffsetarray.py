@@ -1680,8 +1680,9 @@ class ListOffsetArray(Content):
             )
         )
 
-        np_nextcarry = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
-        np_nextparents = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
+        # A "stable" sort is essential for the subsequent steps.
+        nextcarry = ak.index.Index64.empty(nextlen, nplike=self._nplike)
+        nextparents = ak.index.Index64.empty(nextlen, nplike=self._nplike)
         maxnextparents = ak.index.Index64.empty(1, self._nplike)
         distincts = ak.index.Index64.empty(outlength * maxcount[0], self._nplike)
         assert (
@@ -1694,16 +1695,16 @@ class ListOffsetArray(Content):
         self._handle_error(
             self._nplike[
                 "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
-                np_nextcarry.dtype.type,
-                np_nextparents.dtype.type,
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
                 maxnextparents.dtype.type,
                 distincts.dtype.type,
                 self._offsets.dtype.type,
                 offsetscopy.dtype.type,
                 parents.dtype.type,
             ](
-                np_nextcarry,
-                np_nextparents,
+                nextcarry.data,
+                nextparents.data,
                 nextlen,
                 maxnextparents.data,
                 distincts.data,
@@ -1715,10 +1716,6 @@ class ListOffsetArray(Content):
                 maxcount[0],
             )
         )
-        # A "stable" sort is essential for the subsequent steps.
-        reorder = self._nplike.index_nplike.argsort(np_nextparents, kind="stable")
-        nextcarry = ak.index.Index64(np_nextcarry[reorder], nplike=self.nplike)
-        nextparents = ak.index.Index64(np_nextparents[reorder], nplike=self.nplike)
         nextstarts = ak.index.Index64.empty(maxnextparents[0] + 1, self._nplike)
         assert nextstarts.nplike is self._nplike and nextparents.nplike is self._nplike
         self._handle_error(
