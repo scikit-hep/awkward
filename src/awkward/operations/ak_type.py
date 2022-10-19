@@ -4,7 +4,7 @@ import numbers
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def type(array):
@@ -53,7 +53,7 @@ def type(array):
     similar to existing type-constructors, so it's a plausible addition
     to the language.)
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.type",
         dict(array=array),
     ):
@@ -98,7 +98,7 @@ def _impl(array):
             try:
                 out = ak.types.numpytype._dtype_to_primitive_dict[array.dtype.type]
             except KeyError as err:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "numpy array type is unrecognized by awkward: %r"
                         % array.dtype.type
@@ -120,4 +120,4 @@ def _impl(array):
         return array.form.type
 
     else:
-        raise ak._util.error(TypeError(f"unrecognized array type: {array!r}"))
+        raise ak._errors.wrap_error(TypeError(f"unrecognized array type: {array!r}"))

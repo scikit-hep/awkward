@@ -13,8 +13,8 @@ import awkward.forms.form as form
 from awkward.nplike import NumpyLike
 from awkward.typing import Self, TypeAlias
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 ActionType: TypeAlias = """Callable[
@@ -60,7 +60,7 @@ class Content:
         if identifier is not None and not isinstance(
             identifier, ak.identifier.Identifier
         ):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'identifier' must be an Identifier or None, not {}".format(
                         type(self).__name__, repr(identifier)
@@ -68,7 +68,7 @@ class Content:
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'parameters' must be a dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
@@ -77,7 +77,7 @@ class Content:
             )
 
         if nplike is not None and not isinstance(nplike, NumpyLike):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'nplike' must be an NumpyLike or None, not {}".format(
                         type(self).__name__, repr(nplike)
@@ -136,7 +136,7 @@ class Content:
                 return out
 
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "form_key must be None, a string, or a callable, not {}".format(
                         type(form_key)
@@ -186,7 +186,7 @@ class Content:
         if nplike is None:
             nplike = self._nplike
         if not nplike.known_data:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("cannot call 'to_buffers' on an array without concrete data")
             )
 
@@ -206,7 +206,7 @@ class Content:
                 )
 
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "buffer_key must be a string or a callable, not {}".format(
                         type(buffer_key)
@@ -215,7 +215,7 @@ class Content:
             )
 
         if form_key is None:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "a 'form_key' must be supplied, to match Form elements to buffers in the 'container'"
                 )
@@ -267,7 +267,7 @@ class Content:
             message = error.str.decode(errors="surrogateescape")
 
             if error.pass_through:
-                raise ak._util.error(ValueError(message + filename))
+                raise ak._errors.wrap_error(ValueError(message + filename))
 
             else:
                 if error.id != ak._util.kSliceNone and self._identifier is not None:
@@ -280,9 +280,9 @@ class Content:
                 message += filename
 
                 if slicer is None:
-                    raise ak._util.error(ValueError(message))
+                    raise ak._errors.wrap_error(ValueError(message))
                 else:
-                    raise ak._util.indexerror(self, slicer, message)
+                    raise ak._errors.index_error(self, slicer, message)
 
     @staticmethod
     def _selfless_handle_error(error):
@@ -297,7 +297,7 @@ class Content:
             message = error.str.decode(errors="surrogateescape")
 
             if error.pass_through:
-                raise ak._util.error(ValueError(message + filename))
+                raise ak._errors.wrap_error(ValueError(message + filename))
 
             else:
                 if error.attempt != ak._util.kSliceNone:
@@ -305,24 +305,24 @@ class Content:
 
                 message += filename
 
-                raise ak._util.error(ValueError(message))
+                raise ak._errors.wrap_error(ValueError(message))
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak.highlevel.Array"
             )
         )
 
     def __array_function__(self, func, types, args, kwargs):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 "do not apply NumPy functions to low-level layouts (Content subclasses); put them in ak.highlevel.Array"
             )
         )
 
     def __array__(self, **kwargs):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 "do not try to convert low-level layouts (Content subclasses) into NumPy arrays; put them in ak.highlevel.Array"
             )
@@ -330,7 +330,7 @@ class Content:
 
     def __iter__(self):
         if not self._nplike.known_data:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("cannot iterate on an array without concrete data")
             )
 
@@ -376,7 +376,7 @@ class Content:
             return self._getitem_next(nexthead, nexttail, advanced)
 
         elif dimlength in {mindepth - 1, maxdepth - 1}:
-            raise ak._util.indexerror(
+            raise ak._errors.index_error(
                 self,
                 Ellipsis,
                 "ellipsis (`...`) can't be used on data with different numbers of dimensions",
@@ -409,11 +409,11 @@ class Content:
             slicer=head,
         )
 
-        out = ak.contents.indexedoptionarray.IndexedOptionArray(
+        out = ak.contents.IndexedOptionArray(
             outindex, raw.content, None, self._parameters, self._nplike
         )
 
-        return ak.contents.regulararray.RegularArray(
+        return ak.contents.RegularArray(
             out.simplify_optiontype(),
             indexlength,
             1,
@@ -431,7 +431,7 @@ class Content:
         index = ak.index.Index64(head._index, nplike=self.nplike)
         content = that._getitem_at(0)
         if self._nplike.known_shape and content.length < index.length:
-            raise ak._util.indexerror(
+            raise ak._errors.index_error(
                 self,
                 head,
                 "cannot fit masked jagged slice with length {} into {} of size {}".format(
@@ -470,10 +470,10 @@ class Content:
         )
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
-        out = ak.contents.indexedoptionarray.IndexedOptionArray(
+        out = ak.contents.IndexedOptionArray(
             outputmask, tmp, None, self._parameters, self._nplike
         )
-        return ak.contents.regulararray.RegularArray(
+        return ak.contents.RegularArray(
             out.simplify_optiontype(),
             index.length,
             1,
@@ -491,45 +491,45 @@ class Content:
         assert isinstance(head, ak.contents.IndexedOptionArray)
 
         if advanced is not None:
-            raise ak._util.indexerror(
+            raise ak._errors.index_error(
                 self,
                 head,
                 "cannot mix missing values in slice with NumPy-style advanced indexing",
             )
 
-        if isinstance(head.content, ak.contents.listoffsetarray.ListOffsetArray):
+        if isinstance(head.content, ak.contents.ListOffsetArray):
             if self.nplike.known_shape and self.length != 1:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     NotImplementedError("reached a not-well-considered code path")
                 )
             return self._getitem_next_missing_jagged(head, tail, advanced, self)
 
-        if isinstance(head.content, ak.contents.numpyarray.NumpyArray):
+        if isinstance(head.content, ak.contents.NumpyArray):
             headcontent = ak.index.Index64(head.content.data)
             nextcontent = self._getitem_next(headcontent, tail, advanced)
         else:
             nextcontent = self._getitem_next(head.content, tail, advanced)
 
-        if isinstance(nextcontent, ak.contents.regulararray.RegularArray):
+        if isinstance(nextcontent, ak.contents.RegularArray):
             return self._getitem_next_regular_missing(
                 head, tail, advanced, nextcontent, nextcontent.length
             )
 
-        elif isinstance(nextcontent, ak.contents.recordarray.RecordArray):
+        elif isinstance(nextcontent, ak.contents.RecordArray):
             if len(nextcontent._fields) == 0:
                 return nextcontent
 
             contents = []
 
             for content in nextcontent.contents:
-                if isinstance(content, ak.contents.regulararray.RegularArray):
+                if isinstance(content, ak.contents.RegularArray):
                     contents.append(
                         self._getitem_next_regular_missing(
                             head, tail, advanced, content, content.length
                         )
                     )
                 else:
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         NotImplementedError(
                             "FIXME: unhandled case of SliceMissing with RecordArray containing {}".format(
                                 content
@@ -537,7 +537,7 @@ class Content:
                         )
                     )
 
-            return ak.contents.recordarray.RecordArray(
+            return ak.contents.RecordArray(
                 contents,
                 nextcontent._fields,
                 None,
@@ -547,7 +547,7 @@ class Content:
             )
 
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 NotImplementedError(
                     f"FIXME: unhandled case of SliceMissing with {nextcontent}"
                 )
@@ -613,10 +613,10 @@ class Content:
         ):
             return self._getitem_fields(ak.operations.to_list(where))
 
-        elif isinstance(where, ak.contents.emptyarray.EmptyArray):
+        elif isinstance(where, ak.contents.EmptyArray):
             return where.toNumpyArray(np.int64)
 
-        elif isinstance(where, ak.contents.numpyarray.NumpyArray):
+        elif isinstance(where, ak.contents.NumpyArray):
             if issubclass(where.dtype.type, np.int64):
                 carry = ak.index.Index64(where.data.reshape(-1))
                 allow_lazy = True
@@ -634,7 +634,7 @@ class Content:
                     wheres = self._nplike.nonzero(where.data)
                     return self._getitem(wheres)
             else:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "array slice must be an array of integers or booleans, not\n\n    {}".format(
                             repr(where.data).replace("\n", "\n    ")
@@ -672,7 +672,7 @@ class Content:
                 )
 
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "only integers, slices (`:`), ellipsis (`...`), np.newaxis (`None`), "
                     "integer/boolean arrays (possibly with variable-length nested "
@@ -723,7 +723,7 @@ class Content:
             elif carry.length < self.length:
                 return self._getitem_range(slice(0, carry.length))
             else:
-                raise ak._util.error(IndexError)
+                raise ak._errors.wrap_error(IndexError)
         else:
             return None
 
@@ -731,31 +731,31 @@ class Content:
         if self._identifier is None:
             return None
         else:
-            raise ak._util.error(NotImplementedError)
+            raise ak._errors.wrap_error(NotImplementedError)
 
     def _range_identifier(self, start: Integral, stop: Integral):
         if self._identifier is None:
             return None
         else:
-            raise ak._util.error(NotImplementedError)
+            raise ak._errors.wrap_error(NotImplementedError)
 
     def _field_identifier(self, field: str):
         if self._identifier is None:
             return None
         else:
-            raise ak._util.error(NotImplementedError)
+            raise ak._errors.wrap_error(NotImplementedError)
 
     def _fields_identifier(self, fields: list[str]):
         if self._identifier is None:
             return None
         else:
-            raise ak._util.error(NotImplementedError)
+            raise ak._errors.wrap_error(NotImplementedError)
 
     def _carry_identifier(self, carry: ak.index.Index):
         if self._identifier is None:
             return None
         else:
-            raise ak._util.error(NotImplementedError)
+            raise ak._errors.wrap_error(NotImplementedError)
 
     def axis_wrap_if_negative(self, axis: AxisMaybeNone) -> AxisMaybeNone:
         if axis is None or axis >= 0:
@@ -766,7 +766,7 @@ class Content:
         if mindepth == depth and maxdepth == depth:
             posaxis = depth + axis
             if posaxis < 0:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     np.AxisError(
                         f"axis={axis} exceeds the depth ({depth}) of this array"
                     )
@@ -774,7 +774,7 @@ class Content:
             return posaxis
 
         elif mindepth + axis == 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 np.AxisError(
                     "axis={} exceeds the depth ({}) of at least one record field (or union possibility) of this array".format(
                         axis, depth
@@ -814,10 +814,10 @@ class Content:
             return self._mergeable(other, mergebool)
 
     def _mergeable(self, other: Content, mergebool: bool) -> bool:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def mergemany(self, others: list[Content]) -> Content:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def merge_as_union(self, other: Content) -> ak.contents.UnionArray:
         mylength = self.length
@@ -848,15 +848,13 @@ class Content:
             )
         )
 
-        return ak.contents.unionarray.UnionArray(
-            tags, index, contents, None, None, self._nplike
-        )
+        return ak.contents.UnionArray(tags, index, contents, None, None, self._nplike)
 
     def _merging_strategy(
         self, others: list[Content]
     ) -> tuple[list[Content], list[Content]]:
         if len(others) == 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "to merge this array with 'others', at least one other must be provided"
                 )
@@ -871,12 +869,12 @@ class Content:
             if isinstance(
                 other,
                 (
-                    ak.contents.indexedarray.IndexedArray,
-                    ak.contents.indexedoptionarray.IndexedOptionArray,
-                    ak.contents.bytemaskedarray.ByteMaskedArray,
-                    ak.contents.bitmaskedarray.BitMaskedArray,
-                    ak.contents.unmaskedarray.UnmaskedArray,
-                    ak.contents.unionarray.UnionArray,
+                    ak.contents.IndexedArray,
+                    ak.contents.IndexedOptionArray,
+                    ak.contents.ByteMaskedArray,
+                    ak.contents.BitMaskedArray,
+                    ak.contents.UnmaskedArray,
+                    ak.contents.UnionArray,
                 ),
             ):
                 break
@@ -901,7 +899,7 @@ class Content:
         return (head, tail)
 
     def dummy(self):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             NotImplementedError(
                 "FIXME: need to implement 'dummy', which makes an array of length 1 and an arbitrary value (0?) for this array type"
             )
@@ -922,14 +920,14 @@ class Content:
         behavior: dict | None = None,
     ):
         if axis is None:
-            raise ak._util.error(NotImplementedError)
+            raise ak._errors.wrap_error(NotImplementedError)
 
         negaxis = -axis
         branch, depth = self.branch_depth
 
         if branch:
             if negaxis <= 0:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "cannot use non-negative axis on a nested list structure "
                         "of variable depth (negative axis counts from the leaves of "
@@ -937,7 +935,7 @@ class Content:
                     )
                 )
             if negaxis > depth:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "cannot use axis={} on a nested list structure that splits into "
                         "different depths, the minimum of which is depth={} "
@@ -948,7 +946,7 @@ class Content:
             if negaxis <= 0:
                 negaxis += depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "axis={} exceeds the depth of the nested list structure "
                         "(which is {})".format(axis, depth)
@@ -1096,7 +1094,7 @@ class Content:
         branch, depth = self.branch_depth
         if branch:
             if negaxis <= 0:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "cannot use non-negative axis on a nested list structure "
                         "of variable depth (negative axis counts from the leaves "
@@ -1104,7 +1102,7 @@ class Content:
                     )
                 )
             if negaxis > depth:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "cannot use axis={} on a nested list structure that splits into "
                         "different depths, the minimum of which is depth={} from the leaves".format(
@@ -1116,7 +1114,7 @@ class Content:
             if negaxis <= 0:
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "axis={} exceeds the depth of the nested list structure "
                         "(which is {})".format(axis, depth)
@@ -1163,7 +1161,7 @@ class Content:
         branch, depth = self.branch_depth
         if branch:
             if negaxis <= 0:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "cannot use non-negative axis on a nested list structure "
                         "of variable depth (negative axis counts from the leaves "
@@ -1171,7 +1169,7 @@ class Content:
                     )
                 )
             if negaxis > depth:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "cannot use axis={} on a nested list structure that splits into "
                         "different depths, the minimum of which is depth={} from the leaves".format(
@@ -1183,7 +1181,7 @@ class Content:
             if negaxis <= 0:
                 negaxis = negaxis + depth
             if not (0 < negaxis and negaxis <= depth):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "axis={} exceeds the depth of the nested list structure "
                         "(which is {})".format(axis, depth)
@@ -1276,7 +1274,7 @@ class Content:
             )
             length = contents[-1].length
         assert length is not None
-        return ak.contents.recordarray.RecordArray(
+        return ak.contents.RecordArray(
             contents, recordlookup, length, None, parameters, self._nplike
         )
 
@@ -1289,13 +1287,15 @@ class Content:
         parameters: dict | None = None,
     ):
         if n < 1:
-            raise ak._util.error(ValueError("in combinations, 'n' must be at least 1"))
+            raise ak._errors.wrap_error(
+                ValueError("in combinations, 'n' must be at least 1")
+            )
 
         recordlookup = None
         if fields is not None:
             recordlookup = fields
             if len(recordlookup) != n:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError("if provided, the length of 'fields' must be 'n'")
                 )
         return self._combinations(n, replacement, recordlookup, parameters, axis, 0)
@@ -1317,9 +1317,9 @@ class Content:
             if isinstance(
                 self,
                 (
-                    ak.contents.listarray.ListArray,
-                    ak.contents.listoffsetarray.ListOffsetArray,
-                    ak.contents.regulararray.RegularArray,
+                    ak.contents.ListArray,
+                    ak.contents.ListOffsetArray,
+                    ak.contents.RegularArray,
                 ),
             ):
                 content = self.content
@@ -1331,7 +1331,7 @@ class Content:
                 return 'at {} ("{}"): __array__ = "string" must directly contain a node with __array__ = "char"'.format(
                     path, type(self)
                 )
-            if isinstance(content, ak.contents.numpyarray.NumpyArray):
+            if isinstance(content, ak.contents.NumpyArray):
                 if content.dtype.type != np.uint8:
                     return 'at {} ("{}"): __array__ = "char" requires dtype == uint8'.format(
                         path, type(self)
@@ -1351,9 +1351,9 @@ class Content:
             if isinstance(
                 self,
                 (
-                    ak.contents.listarray.ListArray,
-                    ak.contents.listoffsetarray.ListOffsetArray,
-                    ak.contents.regulararray.RegularArray,
+                    ak.contents.ListArray,
+                    ak.contents.ListOffsetArray,
+                    ak.contents.RegularArray,
                 ),
             ):
                 content = self.content
@@ -1365,7 +1365,7 @@ class Content:
                 return 'at {} ("{}"): __array__ = "bytestring" must directly contain a node with __array__ = "byte"'.format(
                     path, type(self)
                 )
-            if isinstance(content, ak.contents.numpyarray.NumpyArray):
+            if isinstance(content, ak.contents.NumpyArray):
                 if content.dtype.type != np.uint8:
                     return 'at {} ("{}"): __array__ = "byte" requires dtype == uint8'.format(
                         path, type(self)
@@ -1395,8 +1395,8 @@ class Content:
             if isinstance(
                 self,
                 (
-                    ak.contents.indexedarray.IndexedArray,
-                    ak.contents.indexedoptionarray.IndexedOptionArray,
+                    ak.contents.IndexedArray,
+                    ak.contents.IndexedOptionArray,
                 ),
             ):
                 content = self.content
@@ -1449,7 +1449,7 @@ class Content:
                 branch, depth = self.branch_depth
                 if branch:
                     if negaxis <= 0:
-                        raise ak._util.error(
+                        raise ak._errors.wrap_error(
                             np.AxisError(
                                 "cannot use non-negative axis on a nested list structure "
                                 "of variable depth (negative axis counts from the leaves "
@@ -1457,7 +1457,7 @@ class Content:
                             )
                         )
                     if negaxis > depth:
-                        raise ak._util.error(
+                        raise ak._errors.wrap_error(
                             np.AxisError(
                                 "cannot use axis={} on a nested list structure that splits into "
                                 "different depths, the minimum of which is depth={} from the leaves".format(
@@ -1469,7 +1469,7 @@ class Content:
                     if negaxis <= 0:
                         negaxis = negaxis + depth
                     if not (0 < negaxis and negaxis <= depth):
-                        raise ak._util.error(
+                        raise ak._errors.wrap_error(
                             np.AxisError(
                                 "axis={} exceeds the depth of this array ({})".format(
                                     axis, depth
@@ -1482,7 +1482,7 @@ class Content:
 
             return self._unique(negaxis, starts, parents, 1)
 
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             np.AxisError(
                 "unique expects axis 'None' or '-1', got axis={} that is not supported yet".format(
                     axis
@@ -1549,7 +1549,7 @@ class Content:
                 ](index.data, target, self.length)
             )
 
-        next = ak.contents.indexedoptionarray.IndexedOptionArray(
+        next = ak.contents.IndexedOptionArray(
             index,
             self,
             None,
@@ -1853,29 +1853,10 @@ class Content:
         return out
 
     def __copy__(self):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def __deepcopy__(self, memo):
-        raise ak._util.error(NotImplementedError)
-
-    def _jax_flatten(self):
-        from awkward._connect.jax import AuxData, _find_numpyarray_nodes
-
-        layout = ak.operations.to_layout(self, allow_record=True, allow_other=False)
-
-        numpyarray_nodes = _find_numpyarray_nodes(layout)
-        return (numpyarray_nodes, AuxData(layout))
-
-    @classmethod
-    def jax_flatten(cls, array):
-        assert type(array) is cls
-        return array._jax_flatten()
-
-    @classmethod
-    def jax_unflatten(cls, aux_data, children):
-        from awkward._connect.jax import _replace_numpyarray_nodes
-
-        return _replace_numpyarray_nodes(aux_data.layout, list(children))
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def layout_equal(
         self, other: Content, index_dtype: bool = True, numpyarray: bool = True

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def argcombinations(
@@ -48,7 +48,7 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.argcombinations",
         dict(
             array=array,
@@ -86,7 +86,7 @@ def _impl(
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("the 'axis' for argcombinations must be non-negative")
         )
     else:

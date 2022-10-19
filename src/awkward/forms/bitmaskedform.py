@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import awkward as ak
-from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.forms.form import Form, _parameters_equal
 
 
@@ -19,7 +18,7 @@ class BitMaskedForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(mask):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be of type str, not {}".format(
                         type(self).__name__, repr(mask)
@@ -27,7 +26,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(content, Form):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} all 'contents' must be Form subclasses, not {}".format(
                         type(self).__name__, repr(content)
@@ -35,7 +34,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'valid_when' must be bool, not {}".format(
                         type(self).__name__, repr(valid_when)
@@ -43,7 +42,7 @@ class BitMaskedForm(Form):
                 )
             )
         if not isinstance(lsb_order, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'lsb_order' must be bool, not {}".format(
                         type(self).__name__, repr(lsb_order)
@@ -86,20 +85,20 @@ class BitMaskedForm(Form):
         ] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra(
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra(
             {
                 "class": "BitMaskedArray",
                 "mask": self._mask,
                 "valid_when": self._valid_when,
                 "lsb_order": self._lsb_order,
-                "content": self._content._tolist_part(verbose, toplevel=False),
+                "content": self._content._to_dict_part(verbose, toplevel=False),
             },
             verbose,
         )
 
     def _type(self, typestrs):
-        return ak.types.optiontype.OptionType(
+        return ak.types.OptionType(
             self._content._type(typestrs),
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
@@ -121,78 +120,18 @@ class BitMaskedForm(Form):
         else:
             return False
 
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, BitMaskedForm):
-            return (
-                self._mask == other._mask
-                and self._valid_when == other._valid_when
-                and self._lsb_order == other._lsb_order
-                and _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                )
-                and self._content.generated_compatibility(other._content)
-            )
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return ByteMaskedForm(
-            "i8",
-            self._content._getitem_range(),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        return BitMaskedForm(
-            self._mask,
-            self._content._getitem_field(where, only_fields),
-            self._valid_when,
-            self._lsb_order,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _getitem_fields(self, where, only_fields=()):
-        return BitMaskedForm(
-            self._mask,
-            self._content._getitem_fields(where, only_fields),
-            self._valid_when,
-            self._lsb_order,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        return ByteMaskedForm(
-            "i8",
-            self._content._carry(allow_lazy),
-            self._valid_when,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
     def simplify_optiontype(self):
         if isinstance(
             self._content,
             (
-                ak.forms.indexedform.IndexedForm,
-                ak.forms.indexedoptionform.IndexedOptionForm,
-                ak.forms.bytemaskedform.ByteMaskedForm,
-                ak.forms.bitmaskedform.BitMaskedForm,
-                ak.forms.unmaskedform.UnmaskedForm,
+                ak.forms.IndexedForm,
+                ak.forms.IndexedOptionForm,
+                ak.forms.ByteMaskedForm,
+                ak.forms.BitMaskedForm,
+                ak.forms.UnmaskedForm,
             ),
         ):
-            return ak.forms.indexedoptionform.IndexedOptionForm(
+            return ak.forms.IndexedOptionForm(
                 "i64",
                 self._content,
                 has_identifier=self._has_identifier,

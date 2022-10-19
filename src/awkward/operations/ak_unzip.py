@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def unzip(array, highlevel=True, behavior=None):
@@ -31,7 +31,7 @@ def unzip(array, highlevel=True, behavior=None):
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.unzip",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
@@ -50,7 +50,7 @@ def _impl(array, highlevel, behavior):
         elif isinstance(layout, ak.contents.UnionArray):
             for content in layout.contents:
                 if set(ak.operations.fields(content)) != set(fields):
-                    raise ak._util.error(
+                    raise ak._errors.wrap_error(
                         ValueError("union of different sets of fields, cannot ak.unzip")
                     )
 

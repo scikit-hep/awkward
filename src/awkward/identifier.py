@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def _identifiers_equal(one, two):
@@ -29,16 +29,20 @@ class Identifier:
         if not isinstance(fieldloc, dict) or not all(
             ak._util.isint(k) and ak._util.isstr(v) for k, v in fieldloc.items()
         ):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("Identifier fieldloc must be a dict of int -> str")
             )
-        self._nplike = ak.nplike.of(data)
+        self._nplike = ak.nplikes.nplike_of(data)
 
         self._data = self._nplike.asarray(data, order="C")
         if len(self._data.shape) != 2:
-            raise ak._util.error(TypeError("Identifier data must be 2-dimensional"))
+            raise ak._errors.wrap_error(
+                TypeError("Identifier data must be 2-dimensional")
+            )
         if self._data.dtype not in (np.dtype(np.int32), np.dtype(np.int64)):
-            raise ak._util.error(TypeError("Identifier data must be int32, int64"))
+            raise ak._errors.wrap_error(
+                TypeError("Identifier data must be int32, int64")
+            )
 
     @classmethod
     def zeros(cls, ref, fieldloc, length, width, nplike, dtype):

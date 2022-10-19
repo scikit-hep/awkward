@@ -6,7 +6,7 @@ import re
 
 import awkward as ak
 
-numpy = ak.nplike.Numpy.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 def half(integer):
@@ -285,4 +285,4 @@ def valuestr(data, limit_rows, limit_cols):
         return "\n".join(out)
 
     else:
-        raise ak._util.error(AssertionError(type(data)))
+        raise ak._errors.wrap_error(AssertionError(type(data)))

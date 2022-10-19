@@ -70,7 +70,7 @@ class JaxScalar:
     __slots__ = ["_value"]
 
     def __len__(self):
-        raise ak._util.error(TypeError("len() of unsized object"))
+        raise ak._errors.wrap_error(TypeError("len() of unsized object"))
 
     def _binop(self, op, other):
         if isinstance(other, JaxScalar):
@@ -99,7 +99,7 @@ class JaxScalar:
         return self._binop(self._value.__mul__, other)
 
     def __matmul__(self, other):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("Input operand 0 does not have enough dimensions ")
         )
 
@@ -155,7 +155,7 @@ class JaxScalar:
         return self._binop(self._value.__rmul__, other)
 
     def __rmatmul__(self, other):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("Input operand 0 does not have enough dimensions ")
         )
 
@@ -199,7 +199,7 @@ class JaxScalar:
         return self._binop(self._value.__imul__, other)
 
     def __imatmul__(self, other):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("Input operand 0 does not have enough dimensions ")
         )
 
@@ -344,7 +344,7 @@ class CupyScalar:
     __slots__ = ["_value"]
 
     def __len__(self):
-        raise ak._util.error(TypeError("len() of unsized object"))
+        raise ak._errors.wrap_error(TypeError("len() of unsized object"))
 
     def _binop(self, op, other):
         if isinstance(other, CupyScalar):
@@ -373,7 +373,7 @@ class CupyScalar:
         return self._binop(self._value.__mul__, other)
 
     def __matmul__(self, other):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("Input operand 0 does not have enough dimensions ")
         )
 
@@ -429,7 +429,7 @@ class CupyScalar:
         return self._binop(self._value.__rmul__, other)
 
     def __rmatmul__(self, other):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("Input operand 0 does not have enough dimensions ")
         )
 
@@ -473,7 +473,7 @@ class CupyScalar:
         return self._binop(self._value.__imul__, other)
 
     def __imatmul__(self, other):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError("Input operand 0 does not have enough dimensions ")
         )
 

@@ -4,12 +4,12 @@
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
 [![Python 3.7‒3.11](https://img.shields.io/badge/python-3.7%E2%80%923.11-blue)](https://www.python.org)
 [![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Continuous integration tests](https://img.shields.io/azure-devops/build/jpivarski/Scikit-HEP/3/main?label=tests)](https://dev.azure.com/jpivarski/Scikit-HEP/_build)
+[![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml)
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
-[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.org)
+[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.readthedocs.io/)
 [![Gitter](https://img.shields.io/badge/chat-online-success)](https://gitter.im/Scikit-HEP/awkward-array)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
@@ -92,40 +92,7 @@ conda update --all
 ```
 
 ## Getting help
-
-<table>
-  <tr>
-    <td width="66%" valign="top">
-      <a href="https://awkward-array.org">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-tutorials.png" width="570">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.org">
-        How-to tutorials
-        </a>
-      </b></p>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-sphinx.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python API reference
-        </a>
-      </b></p>
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-doxygen.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++ API reference
-        </a>
-      </b></p>
-    </td>
-  </tr>
-</table>
-
+   * View the documentation on [ReadTheDocs](https://awkward-array.readthedocs.io/).
    * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
    * You can vote for issues by adding a "thumbs up" (👍) using the "smile/pick your reaction" menu on the top-right of the issue. See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-1.0/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc+reactions%3A%3E0+).
    * If you have a "How do I...?" question, start a [GitHub Discussion](https://github.com/scikit-hep/awkward-1.0/discussions) with category "Q&A".

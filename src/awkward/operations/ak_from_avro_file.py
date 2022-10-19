@@ -5,7 +5,7 @@ import pathlib
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def from_avro_file(
@@ -27,7 +27,7 @@ def from_avro_file(
     """
     import awkward._connect.avro
 
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_avro_file",
         dict(
             file=file,
@@ -49,13 +49,13 @@ def from_avro_file(
                     ).outcontents
                     return _impl(form, length, container, highlevel, behavior)
             except ImportError as err:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     "the filename is incorrect or the file does not exist"
                 ) from err
 
         else:
             if not hasattr(file, "read"):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError("the fileobject provided is not of the correct type.")
                 )
             else:

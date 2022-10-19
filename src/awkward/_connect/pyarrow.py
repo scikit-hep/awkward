@@ -7,7 +7,7 @@ import numpy
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 try:
     import pyarrow
@@ -369,7 +369,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
     ### Beginning of the big if-elif-elif chain!
 
     if isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
@@ -464,14 +464,14 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
     elif isinstance(storage_type, pyarrow.lib.MapType):
         # FIXME: make a ListOffsetArray of 2-tuples with __array__ == "sorted_map".
         # (Make sure the keys are sorted).
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     elif isinstance(
         storage_type, (pyarrow.lib.Decimal128Type, pyarrow.lib.Decimal256Type)
     ):
         # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType.
         # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
@@ -491,7 +491,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             ak.contents.NumpyArray(
                 numpy.frombuffer(pacontent, dtype=np.uint8),
                 parameters=sub_parameters,
-                nplike=ak.nplike.Numpy.instance(),
+                nplike=ak.nplikes.Numpy.instance(),
             ),
             storage_type.byte_width,
             parameters=parameters,
@@ -527,7 +527,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             ak.contents.NumpyArray(
                 numpy.frombuffer(pacontent, dtype=np.uint8),
                 parameters=sub_parameters,
-                nplike=ak.nplike.Numpy.instance(),
+                nplike=ak.nplikes.Numpy.instance(),
             ),
             parameters=parameters,
         )
@@ -627,7 +627,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         out = ak.contents.NumpyArray(
             bytedata.view(np.bool_),
             parameters=node_parameters(awkwardarrow_type),
-            nplike=ak.nplike.Numpy.instance(),
+            nplike=ak.nplikes.Numpy.instance(),
         )
         return popbuffers_finalize(
             out, paarray, validbits, awkwardarrow_type, generate_bitmasks
@@ -647,14 +647,14 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         out = ak.contents.NumpyArray(
             numpy.frombuffer(data, dtype=dt),
             parameters=node_parameters(awkwardarrow_type),
-            nplike=ak.nplike.Numpy.instance(),
+            nplike=ak.nplikes.Numpy.instance(),
         )
         return popbuffers_finalize(
             out, paarray, validbits, awkwardarrow_type, generate_bitmasks
         )
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(f"unrecognized Arrow array type: {storage_type!r}")
         )
 
@@ -663,7 +663,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
     ### Beginning of the big if-elif-elif chain!
 
     if isinstance(storage_type, pyarrow.lib.PyExtensionType):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
@@ -684,7 +684,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         elif index_type is np.int32:
             index = "i32"
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(f"unrecognized Arrow DictionaryType index type: {index_type}")
             )
 
@@ -737,14 +737,14 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     elif isinstance(storage_type, pyarrow.lib.MapType):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     elif isinstance(
         storage_type, (pyarrow.lib.Decimal128Type, pyarrow.lib.Decimal256Type)
     ):
         # Note: Decimal128Type and Decimal256Type are subtypes of FixedSizeBinaryType.
         # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(
                 "Arrow arrays containing pickled Python objects can't be converted into Awkward Arrays"
             )
@@ -850,7 +850,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         return form_popbuffers_finalize(out, awkwardarrow_type)
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(f"unrecognized Arrow array type: {storage_type!r}")
         )
 
@@ -999,7 +999,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         batches = obj.combine_chunks().to_batches()
         if len(batches) == 0:
             # FIXME: create a zero-length array with the right type
-            raise ak._util.error(NotImplementedError)
+            raise ak._errors.wrap_error(NotImplementedError)
         elif len(batches) == 1:
             return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:
@@ -1031,7 +1031,7 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
         return ak.contents.RecordArray([], [], length=0)
 
     else:
-        raise ak._util.error(TypeError(f"unrecognized Arrow type: {type(obj)}"))
+        raise ak._errors.wrap_error(TypeError(f"unrecognized Arrow type: {type(obj)}"))
 
 
 def form_handle_arrow(schema, pass_empty_field=False):

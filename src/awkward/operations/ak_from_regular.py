@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def from_regular(array, axis=1, highlevel=True, behavior=None):
@@ -33,7 +33,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
 
     See also #ak.to_regular.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_regular",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
@@ -64,7 +64,7 @@ def _impl(array, axis, highlevel, behavior):
             elif posaxis == depth and layout.is_ListType:
                 return layout
             elif posaxis == 0:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     np.AxisError(
                         f"axis={axis} exceeds the depth of this array ({depth})"
                     )

@@ -6,8 +6,8 @@ import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.emptyform import EmptyForm
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 class EmptyArray(Content):
@@ -90,7 +90,7 @@ class EmptyArray(Content):
             nplike = self._nplike
         if nplike is None:
             nplike = numpy
-        return ak.contents.numpyarray.NumpyArray(
+        return ak.contents.NumpyArray(
             nplike.empty(0, dtype), self._identifier, self._parameters, nplike
         )
 
@@ -104,18 +104,18 @@ class EmptyArray(Content):
         return self
 
     def _getitem_at(self, where):
-        raise ak._util.indexerror(self, where, "array is empty")
+        raise ak._errors.index_error(self, where, "array is empty")
 
     def _getitem_range(self, where):
         return self
 
     def _getitem_field(self, where, only_fields=()):
-        raise ak._util.indexerror(self, where, "not an array of records")
+        raise ak._errors.index_error(self, where, "not an array of records")
 
     def _getitem_fields(self, where, only_fields=()):
         if len(where) == 0:
             return self._getitem_range(slice(0, 0))
-        raise ak._util.indexerror(self, where, "not an array of records")
+        raise ak._errors.index_error(self, where, "not an array of records")
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
@@ -123,10 +123,10 @@ class EmptyArray(Content):
         if not carry.nplike.known_shape or carry.length == 0:
             return self
         else:
-            raise ak._util.indexerror(self, carry.data, "array is empty")
+            raise ak._errors.index_error(self, carry.data, "array is empty")
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        raise ak._util.indexerror(
+        raise ak._errors.index_error(
             self,
             ak.contents.ListArray(
                 slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -139,10 +139,10 @@ class EmptyArray(Content):
             return self
 
         elif isinstance(head, int):
-            raise ak._util.indexerror(self, head, "array is empty")
+            raise ak._errors.index_error(self, head, "array is empty")
 
         elif isinstance(head, slice):
-            raise ak._util.indexerror(self, head, "array is empty")
+            raise ak._errors.index_error(self, head, "array is empty")
 
         elif ak._util.isstr(head):
             return self._getitem_next_field(head, tail, advanced)
@@ -160,16 +160,16 @@ class EmptyArray(Content):
             if not head.nplike.known_shape or head.length == 0:
                 return self
             else:
-                raise ak._util.indexerror(self, head.data, "array is empty")
+                raise ak._errors.index_error(self, head.data, "array is empty")
 
         elif isinstance(head, ak.contents.ListOffsetArray):
-            raise ak._util.indexerror(self, head, "array is empty")
+            raise ak._errors.index_error(self, head, "array is empty")
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
-            raise ak._util.indexerror(self, head, "array is empty")
+            raise ak._errors.index_error(self, head, "array is empty")
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -182,12 +182,14 @@ class EmptyArray(Content):
                 return out
         else:
             out = ak.index.Index64.empty(0, self._nplike)
-            return ak.contents.numpyarray.NumpyArray(out, None, None, self._nplike)
+            return ak.contents.NumpyArray(out, None, None, self._nplike)
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise ak._util.error(np.AxisError(self, "axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(
+                np.AxisError(self, "axis=0 not allowed for flatten")
+            )
         else:
             offsets = ak.index.Index64.zeros(1, self._nplike)
             return (offsets, EmptyArray(None, self._parameters, self._nplike))
@@ -210,14 +212,12 @@ class EmptyArray(Content):
         return EmptyArray(None, self._parameters, self._nplike)
 
     def _local_index(self, axis, depth):
-        return ak.contents.numpyarray.NumpyArray(
+        return ak.contents.NumpyArray(
             self._nplike.empty(0, np.int64), None, None, self._nplike
         )
 
     def numbers_to_type(self, name):
-        return ak.contents.emptyarray.EmptyArray(
-            self._identifier, self._parameters, self._nplike
-        )
+        return ak.contents.EmptyArray(self._identifier, self._parameters, self._nplike)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -256,9 +256,7 @@ class EmptyArray(Content):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ak.contents.emptyarray.EmptyArray(
-            self._identifier, self._parameters, self._nplike
-        )
+        return ak.contents.EmptyArray(self._identifier, self._parameters, self._nplike)
 
     def _reduce_next(
         self,
@@ -296,7 +294,7 @@ class EmptyArray(Content):
     def _pad_none(self, target, axis, depth, clip):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis != depth:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 np.AxisError(f"axis={axis} exceeds the depth of this array({depth})")
             )
         else:
@@ -321,7 +319,7 @@ class EmptyArray(Content):
 
         else:
             dtype = np.dtype(options["emptyarray_to"])
-            next = ak.contents.numpyarray.NumpyArray(
+            next = ak.contents.NumpyArray(
                 numpy.empty(length, dtype),
                 self._identifier,
                 self._parameters,
@@ -367,7 +365,7 @@ class EmptyArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         return self

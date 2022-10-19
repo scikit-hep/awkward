@@ -8,7 +8,7 @@ from awkward.contents.listoffsetarray import ListOffsetArray
 from awkward.forms.listform import ListForm
 from awkward.index import Index
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 class ListArray(Content):
@@ -52,14 +52,14 @@ class ListArray(Content):
             np.dtype(np.uint32),
             np.dtype(np.int64),
         ):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'starts' must be an Index with dtype in (int32, uint32, int64), "
                     "not {}".format(type(self).__name__, repr(starts))
                 )
             )
         if not (isinstance(stops, Index) and starts.dtype == stops.dtype):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'stops' must be an Index with the same dtype as 'starts' ({}), "
                     "not {}".format(
@@ -68,7 +68,7 @@ class ListArray(Content):
                 )
             )
         if not isinstance(content, Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Content subtype, not {}".format(
                         type(self).__name__, repr(content)
@@ -80,7 +80,7 @@ class ListArray(Content):
             and stops.nplike.known_shape
             and starts.length > stops.length
         ):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(starts) ({}) must be <= len(stops) ({})".format(
                         type(self).__name__, starts.length, stops.length
@@ -233,7 +233,7 @@ class ListArray(Content):
         if where < 0:
             where += self.length
         if not (0 <= where < self.length) and self._nplike.known_shape:
-            raise ak._util.indexerror(self, where)
+            raise ak._errors.index_error(self, where)
         start, stop = self._starts[where], self._stops[where]
         return self._content._getitem_range(slice(start, stop))
 
@@ -279,7 +279,7 @@ class ListArray(Content):
             nextstarts = self._starts[carry.data]
             nextstops = self._stops[: self._starts.length][carry.data]
         except IndexError as err:
-            raise ak._util.indexerror(self, carry.data, str(err)) from err
+            raise ak._errors.index_error(self, carry.data, str(err)) from err
 
         return ListArray(
             nextstarts,
@@ -320,7 +320,7 @@ class ListArray(Content):
         slicestarts = slicestarts._to_nplike(self.nplike)
         slicestops = slicestops._to_nplike(self.nplike)
         if self._nplike.known_shape and slicestarts.length != self.length:
-            raise ak._util.indexerror(
+            raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -330,7 +330,7 @@ class ListArray(Content):
                 ),
             )
 
-        if isinstance(slicecontent, ak.contents.listoffsetarray.ListOffsetArray):
+        if isinstance(slicecontent, ak.contents.ListOffsetArray):
             outoffsets = ak.index.Index64.empty(slicestarts.length + 1, self._nplike)
             assert (
                 outoffsets.nplike is self._nplike
@@ -369,11 +369,11 @@ class ListArray(Content):
                 sliceoffsets[:-1], sliceoffsets[1:], slicecontent._content, tail
             )
 
-            return ak.contents.listoffsetarray.ListOffsetArray(
+            return ak.contents.ListOffsetArray(
                 outoffsets, outcontent, None, self._parameters, self._nplike
             )
 
-        elif isinstance(slicecontent, ak.contents.numpyarray.NumpyArray):
+        elif isinstance(slicecontent, ak.contents.NumpyArray):
             carrylen = ak.index.Index64.empty(1, self._nplike)
             assert (
                 carrylen.nplike is self._nplike
@@ -435,15 +435,13 @@ class ListArray(Content):
             nexthead, nexttail = ak._slicing.headtail(tail)
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
 
-            return ak.contents.listoffsetarray.ListOffsetArray(
+            return ak.contents.ListOffsetArray(
                 outoffsets, outcontent, None, None, self._nplike
             )
 
-        elif isinstance(
-            slicecontent, ak.contents.indexedoptionarray.IndexedOptionArray
-        ):
+        elif isinstance(slicecontent, ak.contents.IndexedOptionArray):
             if self._nplike.known_shape and self._starts.length < slicestarts.length:
-                raise ak._util.indexerror(
+                raise ak._errors.index_error(
                     self,
                     ak.contents.ListArray(
                         slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -513,13 +511,13 @@ class ListArray(Content):
 
             if isinstance(
                 slicecontent._content,
-                ak.contents.listoffsetarray.ListOffsetArray,
+                ak.contents.ListOffsetArray,
             ):
 
                 # Generate ranges between starts and stops
                 as_list_offset_array = self.toListOffsetArray64(True)
                 nextcontent = as_list_offset_array._content._carry(nextcarry, True)
-                next = ak.contents.listoffsetarray.ListOffsetArray(
+                next = ak.contents.ListOffsetArray(
                     smalloffsets, nextcontent, None, self._parameters, self._nplike
                 )
                 out = next._getitem_next_jagged(
@@ -531,18 +529,18 @@ class ListArray(Content):
                     smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
                 )
 
-            if isinstance(out, ak.contents.listoffsetarray.ListOffsetArray):
+            if isinstance(out, ak.contents.ListOffsetArray):
                 content = out._content
                 if largeoffsets.nplike.known_data:
                     missing_trim = missing[0 : largeoffsets[-1]]
                 else:
                     missing_trim = missing
-                indexedoptionarray = ak.contents.indexedoptionarray.IndexedOptionArray(
+                indexedoptionarray = ak.contents.IndexedOptionArray(
                     missing_trim, content, None, self._parameters, self._nplike
                 )
                 if isinstance(self._nplike, ak._typetracer.TypeTracer):
                     indexedoptionarray = indexedoptionarray.typetracer
-                return ak.contents.listoffsetarray.ListOffsetArray(
+                return ak.contents.ListOffsetArray(
                     largeoffsets,
                     indexedoptionarray.simplify_optiontype(),
                     None,
@@ -550,7 +548,7 @@ class ListArray(Content):
                     self._nplike,
                 )
             else:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     AssertionError(
                         "expected ListOffsetArray from ListArray._getitem_next_jagged, got {}".format(
                             type(out).__name__
@@ -558,11 +556,11 @@ class ListArray(Content):
                     )
                 )
 
-        elif isinstance(slicecontent, ak.contents.emptyarray.EmptyArray):
+        elif isinstance(slicecontent, ak.contents.EmptyArray):
             return self
 
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AssertionError(
                     "expected Index/IndexedOptionArray/ListOffsetArray in ListArray._getitem_next_jagged, got {}".format(
                         type(slicecontent).__name__
@@ -679,7 +677,7 @@ class ListArray(Content):
             nextcontent = self._content._carry(nextcarry, True)
 
             if advanced is None or advanced.length == 0:
-                return ak.contents.listoffsetarray.ListOffsetArray(
+                return ak.contents.ListOffsetArray(
                     nextoffsets,
                     nextcontent._getitem_next(nexthead, nexttail, advanced),
                     self._identifier,
@@ -730,7 +728,7 @@ class ListArray(Content):
                     ),
                     slicer=head,
                 )
-                return ak.contents.listoffsetarray.ListOffsetArray(
+                return ak.contents.ListOffsetArray(
                     nextoffsets,
                     nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
                     self._identifier,
@@ -842,7 +840,7 @@ class ListArray(Content):
             headlength = head.length
             head = head._to_nplike(self.nplike)
             if advanced is not None:
-                raise ak._util.indexerror(
+                raise ak._errors.index_error(
                     self,
                     head,
                     "cannot mix jagged slice with NumPy-style advanced indexing",
@@ -887,7 +885,7 @@ class ListArray(Content):
                 multistarts, multistops, head._content, tail
             )
 
-            return ak.contents.regulararray.RegularArray(
+            return ak.contents.RegularArray(
                 down, headlength, 1, None, self._parameters, self._nplike
             )
 
@@ -895,7 +893,7 @@ class ListArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -925,7 +923,7 @@ class ListArray(Content):
                     self.length,
                 )
             )
-            return ak.contents.numpyarray.NumpyArray(tonum, None, None, self._nplike)
+            return ak.contents.NumpyArray(tonum, None, None, self._nplike)
         else:
             return self.toListOffsetArray64(True).num(posaxis, depth)
 
@@ -936,11 +934,11 @@ class ListArray(Content):
         if isinstance(
             other,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self.mergeable(other.content, mergebool)
@@ -948,9 +946,9 @@ class ListArray(Content):
         if isinstance(
             other,
             (
-                ak.contents.regulararray.RegularArray,
-                ak.contents.listarray.ListArray,
-                ak.contents.listoffsetarray.ListOffsetArray,
+                ak.contents.RegularArray,
+                ak.contents.ListArray,
+                ak.contents.ListOffsetArray,
             ),
         ):
             return self._content.mergeable(other.content, mergebool)
@@ -977,17 +975,17 @@ class ListArray(Content):
             if isinstance(
                 array,
                 (
-                    ak.contents.listarray.ListArray,
-                    ak.contents.listoffsetarray.ListOffsetArray,
-                    ak.contents.regulararray.RegularArray,
+                    ak.contents.ListArray,
+                    ak.contents.ListOffsetArray,
+                    ak.contents.RegularArray,
                 ),
             ):
                 contents.append(array.content)
 
-            elif isinstance(array, ak.contents.emptyarray.EmptyArray):
+            elif isinstance(array, ak.contents.EmptyArray):
                 pass
             else:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "cannot merge "
                         + type(self).__name__
@@ -1010,8 +1008,8 @@ class ListArray(Content):
             if isinstance(
                 array,
                 (
-                    ak.contents.listarray.ListArray,
-                    ak.contents.listoffsetarray.ListOffsetArray,
+                    ak.contents.ListArray,
+                    ak.contents.ListOffsetArray,
                 ),
             ):
                 array_starts = ak.index.Index(array.starts)
@@ -1044,7 +1042,7 @@ class ListArray(Content):
                 contentlength_so_far += array.content.length
                 length_so_far += array.length
 
-            elif isinstance(array, ak.contents.regulararray.RegularArray):
+            elif isinstance(array, ak.contents.RegularArray):
                 listoffsetarray = array.toListOffsetArray64(True)
 
                 array_starts = ak.index.Index64(listoffsetarray.starts)
@@ -1077,10 +1075,10 @@ class ListArray(Content):
                 contentlength_so_far += array.content.length
                 length_so_far += listoffsetarray.length
 
-            elif isinstance(array, ak.contents.emptyarray.EmptyArray):
+            elif isinstance(array, ak.contents.EmptyArray):
                 pass
 
-        next = ak.contents.listarray.ListArray(
+        next = ak.contents.ListArray(
             nextstarts, nextstops, nextcontent, None, parameters, self._nplike
         )
 
@@ -1126,7 +1124,7 @@ class ListArray(Content):
                     offsets.length - 1,
                 )
             )
-            return ak.contents.listoffsetarray.ListOffsetArray(
+            return ak.contents.ListOffsetArray(
                 offsets,
                 ak.contents.NumpyArray(localindex),
                 self._identifier,
@@ -1134,7 +1132,7 @@ class ListArray(Content):
                 self._nplike,
             )
         else:
-            return ak.contents.listarray.ListArray(
+            return ak.contents.ListArray(
                 self._starts,
                 self._stops,
                 self._content._local_index(posaxis, depth + 1),
@@ -1144,7 +1142,7 @@ class ListArray(Content):
             )
 
     def numbers_to_type(self, name):
-        return ak.contents.listarray.ListArray(
+        return ak.contents.ListArray(
             self._starts,
             self._stops,
             self._content.numbers_to_type(name),
@@ -1358,7 +1356,7 @@ class ListArray(Content):
                             self._starts.length,
                         )
                     )
-                    next = ak.contents.indexedoptionarray.IndexedOptionArray(
+                    next = ak.contents.IndexedOptionArray(
                         index,
                         self._content,
                         None,
@@ -1366,7 +1364,7 @@ class ListArray(Content):
                         self._nplike,
                     )
 
-                    return ak.contents.listarray.ListArray(
+                    return ak.contents.ListArray(
                         starts_,
                         stops_,
                         next.simplify_optiontype(),
@@ -1375,7 +1373,7 @@ class ListArray(Content):
                         self._nplike,
                     )
             else:
-                return ak.contents.listarray.ListArray(
+                return ak.contents.ListArray(
                     self._starts,
                     self._stops,
                     self._content._pad_none(target, posaxis, depth + 1, clip),
@@ -1469,7 +1467,7 @@ class ListArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         return self.toListOffsetArray64(True).packed()

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def values_astype(array, to, highlevel=True, behavior=None):
@@ -47,7 +47,7 @@ def values_astype(array, to, highlevel=True, behavior=None):
 
     See also #ak.strings_astype.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.values_astype",
         dict(array=array, to=to, highlevel=highlevel, behavior=behavior),
     ):
@@ -62,7 +62,7 @@ def _impl(array, to, highlevel, behavior):
         if to_dtype.name.startswith("datetime64"):
             to_str = to_dtype.name
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     f"cannot use {to_dtype} to cast the numeric type of an array"
                 )

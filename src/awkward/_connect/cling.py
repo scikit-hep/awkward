@@ -6,8 +6,8 @@ import re
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 cache = {}
@@ -145,11 +145,15 @@ namespace awkward {
     }
 
   protected:
+    // ROOT streamer customization is done by giving specific instructions
+    // in the comments written after the declaration of data members: the values
+    // of `ptrs_` and `lookup_` will be ignored (//!).
+    // https://github.com/root-project/root/blob/master/io/doc/TFile/README.md#streamerinfo
     ssize_t start_;
     ssize_t stop_;
     ssize_t which_;
-    ssize_t* ptrs_;
-    PyObject* lookup_;
+    ssize_t* ptrs_;    //! transient data pointer
+    PyObject* lookup_; //! transient lookup
   };
 }
 """.strip()
@@ -183,10 +187,14 @@ namespace awkward {
     }
 
   protected:
+    // ROOT streamer customization is done by giving specific instructions
+    // in the comments written after the declaration of data members: the values
+    // of `ptrs_` and `lookup_` will be ignored (//!).
+    // https://github.com/root-project/root/blob/master/io/doc/TFile/README.md#streamerinfo
     ssize_t at_;
     ssize_t which_;
-    ssize_t* ptrs_;
-    PyObject* lookup_;
+    ssize_t* ptrs_;    //! transient data pointer
+    PyObject* lookup_; //! transient lookup
 
   };
 }
@@ -470,7 +478,7 @@ def togenerator(form, flatlist_as_rvec):
         return UnionArrayGenerator.from_form(form, flatlist_as_rvec)
 
     else:
-        raise ak._util.error(AssertionError(f"unrecognized Form: {type(form)}"))
+        raise ak._errors.wrap_error(AssertionError(f"unrecognized Form: {type(form)}"))
 
 
 class Generator:
@@ -479,7 +487,7 @@ class Generator:
         if not form.has_identifier:
             return None
         else:
-            raise ak._util.error(NotImplementedError("TODO: identifiers in C++"))
+            raise ak._errors.wrap_error(NotImplementedError("TODO: identifiers in C++"))
 
     def IndexOf(self, arraytype):
         if arraytype == "int8_t":
@@ -495,7 +503,7 @@ class Generator:
         elif arraytype == "uint64_t":
             return ak.index.IndexU64
         else:
-            raise ak._util.error(AssertionError(arraytype))
+            raise ak._errors.wrap_error(AssertionError(arraytype))
 
     def class_type_suffix(self, key):
         return ak._util.identifier_hash(key)
@@ -797,7 +805,7 @@ class ListArrayGenerator(Generator, ak._lookup.ListLookup):
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise ak._util.error(AssertionError(index_type))
+            raise ak._errors.wrap_error(AssertionError(index_type))
         self.content = content
 
         # FIXME: satisfy the ContentLookup super-class
@@ -950,7 +958,7 @@ class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
         elif index_type == "i64":
             self.indextype = "int64_t"
         else:
-            raise ak._util.error(AssertionError(index_type))
+            raise ak._errors.wrap_error(AssertionError(index_type))
         self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
@@ -1029,7 +1037,7 @@ class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
         elif index_type == "i64":
             self.index_type = "int64_t"
         else:
-            raise ak._util.error(AssertionError(index_type))
+            raise ak._errors.wrap_error(AssertionError(index_type))
         self.contenttype = content
         self.identifier = identifier
         self.parameters = parameters
@@ -1543,7 +1551,7 @@ class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
         elif index_type == "i64":
             self.indextype = "int64_t"
         else:
-            raise ak._util.error(AssertionError(index_type))
+            raise ak._errors.wrap_error(AssertionError(index_type))
         self.contenttypes = tuple(contents)
         self.identifier = identifier
         self.parameters = parameters

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def from_arrow(array, generate_bitmasks=False, highlevel=True, behavior=None):
@@ -31,7 +31,7 @@ def from_arrow(array, generate_bitmasks=False, highlevel=True, behavior=None):
 
     See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_arrow",
         dict(
             array=array,

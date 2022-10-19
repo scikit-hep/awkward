@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def without_parameters(array, highlevel=True, behavior=None):
@@ -20,7 +20,7 @@ def without_parameters(array, highlevel=True, behavior=None):
     Note that a "new array" is a lightweight shallow copy, not a duplication
     of large data buffers.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.without_parameters",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):

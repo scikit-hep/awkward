@@ -1443,10 +1443,10 @@ def test_EmptyForm():
         == "EmptyForm(has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak.forms.emptyform.EmptyForm().tolist(verbose=False) == {
+    assert ak.forms.emptyform.EmptyForm().to_dict(verbose=False) == {
         "class": "EmptyArray"
     }
-    assert ak.forms.emptyform.EmptyForm().tolist() == {
+    assert ak.forms.emptyform.EmptyForm().to_dict() == {
         "class": "EmptyArray",
         "has_identifier": False,
         "parameters": {},
@@ -1454,26 +1454,26 @@ def test_EmptyForm():
     }
     assert ak.forms.emptyform.EmptyForm(
         has_identifier=True, parameters={"x": 123}, form_key="hello"
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "EmptyArray",
         "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter({"class": "EmptyArray"}).tolist() == {
+    assert ak.forms.from_dict({"class": "EmptyArray"}).to_dict() == {
         "class": "EmptyArray",
         "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "EmptyArray",
             "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "EmptyArray",
         "has_identifier": True,
         "parameters": {"x": 123},
@@ -1507,11 +1507,11 @@ def test_NumpyForm():
         == "NumpyForm('bool', inner_shape=(1, 2, 3), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak.forms.numpyform.NumpyForm("bool").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("bool").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak.forms.numpyform.NumpyForm("bool").tolist() == {
+    assert ak.forms.numpyform.NumpyForm("bool").to_dict() == {
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [],
@@ -1525,7 +1525,7 @@ def test_NumpyForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [1, 2, 3],
@@ -1534,220 +1534,224 @@ def test_NumpyForm():
         "form_key": "hello",
     }
 
-    assert ak.forms.numpyform.NumpyForm("bool").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("bool").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak.forms.numpyform.NumpyForm("int8").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("int8").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak.forms.numpyform.NumpyForm("uint8").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("uint8").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak.forms.numpyform.NumpyForm("int16").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("int16").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak.forms.numpyform.NumpyForm("uint16").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("uint16").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak.forms.numpyform.NumpyForm("int32").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("int32").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak.forms.numpyform.NumpyForm("uint32").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("uint32").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak.forms.numpyform.NumpyForm("int64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("int64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak.forms.numpyform.NumpyForm("uint64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("uint64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
     if hasattr(np, "float16"):
-        assert ak.forms.numpyform.NumpyForm("float16").tolist(verbose=False) == {
+        assert ak.forms.numpyform.NumpyForm("float16").to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float16",
         }
-    assert ak.forms.numpyform.NumpyForm("float32").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("float32").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak.forms.numpyform.NumpyForm("float64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("float64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
     if hasattr(np, "float128"):
-        assert ak.forms.numpyform.NumpyForm("float128").tolist(verbose=False) == {
+        assert ak.forms.numpyform.NumpyForm("float128").to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float128",
         }
-    assert ak.forms.numpyform.NumpyForm("complex64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("complex64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak.forms.numpyform.NumpyForm("complex128").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("complex128").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
     if hasattr(np, "complex256"):
-        assert ak.forms.numpyform.NumpyForm("complex256").tolist(verbose=False) == {
+        assert ak.forms.numpyform.NumpyForm("complex256").to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "complex256",
         }
-    assert ak.forms.numpyform.NumpyForm("datetime64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("datetime64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
     assert ak.forms.numpyform.NumpyForm(
         "datetime64", parameters={"__unit__": "s"}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s"},
     }
     assert ak.forms.numpyform.NumpyForm(
         "datetime64", parameters={"__unit__": "s", "x": 123}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak.forms.numpyform.NumpyForm("timedelta64").tolist(verbose=False) == {
+    assert ak.forms.numpyform.NumpyForm("timedelta64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
     assert ak.forms.numpyform.NumpyForm(
         "timedelta64", parameters={"__unit__": "s"}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s"},
     }
     assert ak.forms.numpyform.NumpyForm(
         "timedelta64", parameters={"__unit__": "s", "x": 123}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s", "x": 123},
     }
 
-    assert ak.forms.numpyform.from_dtype(np.dtype("bool")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("bool")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("int8")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("int8")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("uint8")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint8")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("int16")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("int16")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("uint16")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint16")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("int32")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("int32")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("uint32")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint32")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("int64")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("int64")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("uint64")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("uint64")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
     if hasattr(np, "float16"):
-        assert ak.forms.numpyform.from_dtype(np.dtype("float16")).tolist(
+        assert ak.forms.numpyform.from_dtype(np.dtype("float16")).to_dict(
             verbose=False
         ) == {
             "class": "NumpyArray",
             "primitive": "float16",
         }
-    assert ak.forms.numpyform.from_dtype(np.dtype("float32")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("float32")).to_dict(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("float64")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("float64")).to_dict(
+        verbose=False
+    ) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
     if hasattr(np, "float128"):
-        assert ak.forms.numpyform.from_dtype(np.dtype("float128")).tolist(
+        assert ak.forms.numpyform.from_dtype(np.dtype("float128")).to_dict(
             verbose=False
         ) == {
             "class": "NumpyArray",
             "primitive": "float128",
         }
-    assert ak.forms.numpyform.from_dtype(np.dtype("complex64")).tolist(
+    assert ak.forms.numpyform.from_dtype(np.dtype("complex64")).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("complex128")).tolist(
+    assert ak.forms.numpyform.from_dtype(np.dtype("complex128")).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
     if hasattr(np, "complex256"):
-        assert ak.forms.numpyform.from_dtype(np.dtype("complex256")).tolist(
+        assert ak.forms.numpyform.from_dtype(np.dtype("complex256")).to_dict(
             verbose=False
         ) == {
             "class": "NumpyArray",
             "primitive": "complex256",
         }
-    assert ak.forms.numpyform.from_dtype(np.dtype("M8")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("M8")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("M8[s]")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("M8[s]")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s"},
     }
     assert ak.forms.numpyform.from_dtype(
         np.dtype("M8[s]"), parameters={"x": 123}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("m8")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("m8")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype("m8[s]")).tolist(verbose=False) == {
+    assert ak.forms.numpyform.from_dtype(np.dtype("m8[s]")).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s"},
     }
     assert ak.forms.numpyform.from_dtype(
         np.dtype("m8[s]"), parameters={"x": 123}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak.forms.numpyform.from_dtype(np.dtype(("bool", (1, 2, 3)))).tolist(
+    assert ak.forms.numpyform.from_dtype(np.dtype(("bool", (1, 2, 3)))).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
@@ -1755,244 +1759,244 @@ def test_NumpyForm():
         "inner_shape": [1, 2, 3],
     }
     with pytest.raises(TypeError):
-        ak.forms.from_dtype(np.dtype("O")).tolist(verbose=False)
+        ak.forms.from_dtype(np.dtype("O")).to_dict(verbose=False)
     with pytest.raises(TypeError):
-        ak.forms.from_dtype(np.dtype([("one", np.int64), ("two", np.float64)])).tolist(
+        ak.forms.from_dtype(np.dtype([("one", np.int64), ("two", np.float64)])).to_dict(
             verbose=False
         )
-    assert ak.forms.from_iter("bool").tolist(verbose=False) == {
+    assert ak.forms.from_dict("bool").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak.forms.from_iter("int8").tolist(verbose=False) == {
+    assert ak.forms.from_dict("int8").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak.forms.from_iter("uint8").tolist(verbose=False) == {
+    assert ak.forms.from_dict("uint8").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak.forms.from_iter("int16").tolist(verbose=False) == {
+    assert ak.forms.from_dict("int16").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak.forms.from_iter("uint16").tolist(verbose=False) == {
+    assert ak.forms.from_dict("uint16").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak.forms.from_iter("int32").tolist(verbose=False) == {
+    assert ak.forms.from_dict("int32").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak.forms.from_iter("uint32").tolist(verbose=False) == {
+    assert ak.forms.from_dict("uint32").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak.forms.from_iter("int64").tolist(verbose=False) == {
+    assert ak.forms.from_dict("int64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak.forms.from_iter("uint64").tolist(verbose=False) == {
+    assert ak.forms.from_dict("uint64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
     if hasattr(np, "float16"):
-        assert ak.forms.from_iter("float16").tolist(verbose=False) == {
+        assert ak.forms.from_dict("float16").to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float16",
         }
-    assert ak.forms.from_iter("float32").tolist(verbose=False) == {
+    assert ak.forms.from_dict("float32").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak.forms.from_iter("float64").tolist(verbose=False) == {
+    assert ak.forms.from_dict("float64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
     if hasattr(np, "float128"):
-        assert ak.forms.from_iter("float128").tolist(verbose=False) == {
+        assert ak.forms.from_dict("float128").to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float128",
         }
-    assert ak.forms.from_iter("complex64").tolist(verbose=False) == {
+    assert ak.forms.from_dict("complex64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak.forms.from_iter("complex128").tolist(verbose=False) == {
+    assert ak.forms.from_dict("complex128").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
     if hasattr(np, "complex256"):
-        assert ak.forms.from_iter("complex256").tolist(verbose=False) == {
+        assert ak.forms.from_dict("complex256").to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "complex256",
         }
-    assert ak.forms.from_iter("datetime64").tolist(verbose=False) == {
+    assert ak.forms.from_dict("datetime64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
             "primitive": "datetime64",
             "parameters": {"__unit__": "s"},
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
             "primitive": "datetime64",
             "parameters": {"__unit__": "s", "x": 123},
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
         "parameters": {"__unit__": "s", "x": 123},
     }
-    assert ak.forms.from_iter("timedelta64").tolist(verbose=False) == {
+    assert ak.forms.from_dict("timedelta64").to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
             "primitive": "timedelta64",
             "parameters": {"__unit__": "s"},
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s"},
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
             "primitive": "timedelta64",
             "parameters": {"__unit__": "s", "x": 123},
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
         "parameters": {"__unit__": "s", "x": 123},
     }
 
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "bool"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "bool"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "bool",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "int8"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "int8"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "int8",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "uint8"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "uint8"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "uint8",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "int16"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "int16"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "int16",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "uint16"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "uint16"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "uint16",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "int32"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "int32"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "int32",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "uint32"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "uint32"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "uint32",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "int64"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "int64"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "int64",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "uint64"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "uint64"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "uint64",
     }
     if hasattr(np, "float16"):
-        assert ak.forms.from_iter(
+        assert ak.forms.from_dict(
             {"class": "NumpyArray", "primitive": "float16"}
-        ).tolist(verbose=False) == {
+        ).to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float16",
         }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "float32"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "float32"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "float32",
     }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "float64"}).tolist(
+    assert ak.forms.from_dict({"class": "NumpyArray", "primitive": "float64"}).to_dict(
         verbose=False
     ) == {
         "class": "NumpyArray",
         "primitive": "float64",
     }
     if hasattr(np, "float128"):
-        assert ak.forms.from_iter(
+        assert ak.forms.from_dict(
             {"class": "NumpyArray", "primitive": "float128"}
-        ).tolist(verbose=False) == {
+        ).to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "float128",
         }
-    assert ak.forms.from_iter({"class": "NumpyArray", "primitive": "complex64"}).tolist(
-        verbose=False
-    ) == {
+    assert ak.forms.from_dict(
+        {"class": "NumpyArray", "primitive": "complex64"}
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex64",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {"class": "NumpyArray", "primitive": "complex128"}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "complex128",
     }
     if hasattr(np, "complex256"):
-        assert ak.forms.from_iter(
+        assert ak.forms.from_dict(
             {"class": "NumpyArray", "primitive": "complex256"}
-        ).tolist(verbose=False) == {
+        ).to_dict(verbose=False) == {
             "class": "NumpyArray",
             "primitive": "complex256",
         }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {"class": "NumpyArray", "primitive": "datetime64"}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "datetime64",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {"class": "NumpyArray", "primitive": "timedelta64"}
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "timedelta64",
     }
 
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "NumpyArray",
             "primitive": "bool",
@@ -2001,7 +2005,7 @@ def test_NumpyForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "NumpyArray",
         "primitive": "bool",
         "inner_shape": [1, 2, 3],
@@ -2066,7 +2070,7 @@ def test_RegularForm():
         == "RegularForm(EmptyForm(), 10, has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak.forms.regularform.RegularForm(ak.forms.emptyform.EmptyForm(), 10).tolist(
+    assert ak.forms.regularform.RegularForm(ak.forms.emptyform.EmptyForm(), 10).to_dict(
         verbose=False
     ) == {
         "class": "RegularArray",
@@ -2075,7 +2079,7 @@ def test_RegularForm():
     }
     assert ak.forms.regularform.RegularForm(
         ak.forms.emptyform.EmptyForm(), 10
-    ).tolist() == {
+    ).to_dict() == {
         "class": "RegularArray",
         "size": 10,
         "content": {
@@ -2094,7 +2098,7 @@ def test_RegularForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "RegularArray",
         "size": 10,
         "content": {"class": "EmptyArray"},
@@ -2102,9 +2106,9 @@ def test_RegularForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {"class": "RegularArray", "size": 10, "content": {"class": "EmptyArray"}}
-    ).tolist() == {
+    ).to_dict() == {
         "class": "RegularArray",
         "size": 10,
         "content": {
@@ -2117,7 +2121,7 @@ def test_RegularForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "RegularArray",
             "size": 10,
@@ -2126,7 +2130,7 @@ def test_RegularForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "RegularArray",
         "size": 10,
         "content": {"class": "EmptyArray"},
@@ -2136,7 +2140,7 @@ def test_RegularForm():
     }
     assert ak.forms.regularform.RegularForm(
         ak.forms.numpyform.NumpyForm("bool"), 10
-    ).tolist() == {
+    ).to_dict() == {
         "class": "RegularArray",
         "content": {
             "class": "NumpyArray",
@@ -2153,7 +2157,7 @@ def test_RegularForm():
     }
     assert ak.forms.regularform.RegularForm(
         ak.forms.numpyform.NumpyForm("bool"), 10
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "RegularArray",
         "content": "bool",
         "size": 10,
@@ -2243,7 +2247,7 @@ def test_ListForm():
 
     assert ak.forms.listform.ListForm(
         "i32", "i32", ak.forms.emptyform.EmptyForm()
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ListArray",
         "starts": "i32",
         "stops": "i32",
@@ -2251,7 +2255,7 @@ def test_ListForm():
     }
     assert ak.forms.listform.ListForm(
         "i32", "i32", ak.forms.emptyform.EmptyForm()
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ListArray",
         "starts": "i32",
         "stops": "i32",
@@ -2272,7 +2276,7 @@ def test_ListForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ListArray",
         "starts": "i32",
         "stops": "i32",
@@ -2281,14 +2285,14 @@ def test_ListForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ListArray",
             "starts": "i32",
             "stops": "i32",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ListArray",
         "starts": "i32",
         "stops": "i32",
@@ -2302,14 +2306,14 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ListArray",
             "starts": "u32",
             "stops": "u32",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ListArray",
         "starts": "u32",
         "stops": "u32",
@@ -2323,14 +2327,14 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ListArray",
             "starts": "i64",
             "stops": "i64",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ListArray",
         "starts": "i64",
         "stops": "i64",
@@ -2344,7 +2348,7 @@ def test_ListForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ListArray",
             "starts": "i32",
@@ -2354,7 +2358,7 @@ def test_ListForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ListArray",
         "starts": "i32",
         "stops": "i32",
@@ -2454,14 +2458,14 @@ def test_ListOffsetForm():
 
     assert ak.forms.listoffsetform.ListOffsetForm(
         "i32", ak.forms.emptyform.EmptyForm()
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {"class": "EmptyArray"},
     }
     assert ak.forms.listoffsetform.ListOffsetForm(
         "i32", ak.forms.emptyform.EmptyForm()
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {
@@ -2480,7 +2484,7 @@ def test_ListOffsetForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {"class": "EmptyArray"},
@@ -2488,13 +2492,13 @@ def test_ListOffsetForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ListOffsetArray",
             "offsets": "i32",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {
@@ -2507,13 +2511,13 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ListOffsetArray",
             "offsets": "u32",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ListOffsetArray",
         "offsets": "u32",
         "content": {
@@ -2526,13 +2530,13 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ListOffsetArray",
             "offsets": "i64",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ListOffsetArray",
         "offsets": "i64",
         "content": {
@@ -2545,7 +2549,7 @@ def test_ListOffsetForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ListOffsetArray",
             "offsets": "i32",
@@ -2554,7 +2558,7 @@ def test_ListOffsetForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ListOffsetArray",
         "offsets": "i32",
         "content": {"class": "EmptyArray"},
@@ -2577,6 +2581,7 @@ def test_RecordForm():
         )
         == """{
     "class": "RecordArray",
+    "fields": null,
     "contents": [
         {
             "class": "EmptyArray"
@@ -2597,12 +2602,16 @@ def test_RecordForm():
         )
         == """{
     "class": "RecordArray",
-    "contents": {
-        "x": {
+    "fields": [
+        "x",
+        "y"
+    ],
+    "contents": [
+        {
             "class": "EmptyArray"
         },
-        "y": "bool"
-    }
+        "bool"
+    ]
 }"""
     )
     assert (
@@ -2620,6 +2629,7 @@ def test_RecordForm():
         )
         == """{
     "class": "RecordArray",
+    "fields": null,
     "contents": [
         {
             "class": "EmptyArray"
@@ -2648,12 +2658,16 @@ def test_RecordForm():
         )
         == """{
     "class": "RecordArray",
-    "contents": {
-        "x": {
+    "fields": [
+        "x",
+        "y"
+    ],
+    "contents": [
+        {
             "class": "EmptyArray"
         },
-        "y": "bool"
-    },
+        "bool"
+    ],
     "has_identifier": true,
     "parameters": {
         "x": 123
@@ -2720,8 +2734,9 @@ def test_RecordForm():
     assert ak.forms.recordform.RecordForm(
         [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         None,
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "RecordArray",
+        "fields": None,
         "contents": [
             {"class": "EmptyArray"},
             "bool",
@@ -2730,18 +2745,20 @@ def test_RecordForm():
     assert ak.forms.recordform.RecordForm(
         [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         ["x", "y"],
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "RecordArray",
-        "contents": {
-            "x": {"class": "EmptyArray"},
-            "y": "bool",
-        },
+        "fields": ["x", "y"],
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
     }
     assert ak.forms.recordform.RecordForm(
         [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         None,
-    ).tolist() == {
+    ).to_dict() == {
         "class": "RecordArray",
+        "fields": None,
         "contents": [
             {
                 "class": "EmptyArray",
@@ -2765,16 +2782,17 @@ def test_RecordForm():
     assert ak.forms.recordform.RecordForm(
         [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
         ["x", "y"],
-    ).tolist() == {
+    ).to_dict() == {
         "class": "RecordArray",
-        "contents": {
-            "x": {
+        "fields": ["x", "y"],
+        "contents": [
+            {
                 "class": "EmptyArray",
                 "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
-            "y": {
+            {
                 "class": "NumpyArray",
                 "primitive": "bool",
                 "inner_shape": [],
@@ -2782,7 +2800,7 @@ def test_RecordForm():
                 "parameters": {},
                 "form_key": None,
             },
-        },
+        ],
         "has_identifier": False,
         "parameters": {},
         "form_key": None,
@@ -2796,8 +2814,9 @@ def test_RecordForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "RecordArray",
+        "fields": None,
         "contents": [
             {"class": "EmptyArray"},
             "bool",
@@ -2815,89 +2834,9 @@ def test_RecordForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "RecordArray",
-        "contents": {
-            "x": {"class": "EmptyArray"},
-            "y": "bool",
-        },
-        "has_identifier": True,
-        "parameters": {"x": 123},
-        "form_key": "hello",
-    }
-    assert ak.forms.from_iter(
-        {
-            "class": "RecordArray",
-            "contents": [
-                {"class": "EmptyArray"},
-                "bool",
-            ],
-        }
-    ).tolist() == {
-        "class": "RecordArray",
-        "contents": [
-            {
-                "class": "EmptyArray",
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-            {
-                "class": "NumpyArray",
-                "primitive": "bool",
-                "inner_shape": [],
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-        ],
-        "has_identifier": False,
-        "parameters": {},
-        "form_key": None,
-    }
-    assert ak.forms.from_iter(
-        {
-            "class": "RecordArray",
-            "contents": {
-                "x": {"class": "EmptyArray"},
-                "y": "bool",
-            },
-        }
-    ).tolist() == {
-        "class": "RecordArray",
-        "contents": {
-            "x": {
-                "class": "EmptyArray",
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-            "y": {
-                "class": "NumpyArray",
-                "primitive": "bool",
-                "inner_shape": [],
-                "has_identifier": False,
-                "parameters": {},
-                "form_key": None,
-            },
-        },
-        "has_identifier": False,
-        "parameters": {},
-        "form_key": None,
-    }
-    assert ak.forms.from_iter(
-        {
-            "class": "RecordArray",
-            "contents": [
-                {"class": "EmptyArray"},
-                "bool",
-            ],
-            "has_identifier": True,
-            "parameters": {"x": 123},
-            "form_key": "hello",
-        }
-    ).tolist(verbose=False) == {
-        "class": "RecordArray",
+        "fields": ["x", "y"],
         "contents": [
             {"class": "EmptyArray"},
             "bool",
@@ -2906,23 +2845,112 @@ def test_RecordForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "RecordArray",
-            "contents": {
-                "x": {"class": "EmptyArray"},
-                "y": "bool",
+            "fields": None,
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+        }
+    ).to_dict() == {
+        "class": "RecordArray",
+        "fields": None,
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
             },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak.forms.from_dict(
+        {
+            "class": "RecordArray",
+            "fields": ["x", "y"],
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+        }
+    ).to_dict() == {
+        "class": "RecordArray",
+        "fields": ["x", "y"],
+        "contents": [
+            {
+                "class": "EmptyArray",
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+            {
+                "class": "NumpyArray",
+                "primitive": "bool",
+                "inner_shape": [],
+                "has_identifier": False,
+                "parameters": {},
+                "form_key": None,
+            },
+        ],
+        "has_identifier": False,
+        "parameters": {},
+        "form_key": None,
+    }
+    assert ak.forms.from_dict(
+        {
+            "class": "RecordArray",
+            "fields": None,
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
             "has_identifier": True,
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "RecordArray",
-        "contents": {
-            "x": {"class": "EmptyArray"},
-            "y": "bool",
-        },
+        "fields": None,
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
+        "has_identifier": True,
+        "parameters": {"x": 123},
+        "form_key": "hello",
+    }
+    assert ak.forms.from_dict(
+        {
+            "class": "RecordArray",
+            "fields": ["x", "y"],
+            "contents": [
+                {"class": "EmptyArray"},
+                "bool",
+            ],
+            "has_identifier": True,
+            "parameters": {"x": 123},
+            "form_key": "hello",
+        }
+    ).to_dict(verbose=False) == {
+        "class": "RecordArray",
+        "fields": ["x", "y"],
+        "contents": [
+            {"class": "EmptyArray"},
+            "bool",
+        ],
         "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
@@ -3006,14 +3034,14 @@ def test_IndexedForm():
 
     assert ak.forms.indexedform.IndexedForm(
         "i32", ak.forms.emptyform.EmptyForm()
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "IndexedArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
     }
     assert ak.forms.indexedform.IndexedForm(
         "i32", ak.forms.emptyform.EmptyForm()
-    ).tolist() == {
+    ).to_dict() == {
         "class": "IndexedArray",
         "index": "i32",
         "content": {
@@ -3032,7 +3060,7 @@ def test_IndexedForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "IndexedArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
@@ -3040,13 +3068,13 @@ def test_IndexedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "IndexedArray",
             "index": "i32",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "IndexedArray",
         "index": "i32",
         "content": {
@@ -3059,13 +3087,13 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "IndexedArray",
             "index": "u32",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "IndexedArray",
         "index": "u32",
         "content": {
@@ -3078,13 +3106,13 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "IndexedArray",
             "index": "i64",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "IndexedArray",
         "index": "i64",
         "content": {
@@ -3097,7 +3125,7 @@ def test_IndexedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "IndexedArray",
             "index": "i32",
@@ -3106,7 +3134,7 @@ def test_IndexedForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "IndexedArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
@@ -3191,14 +3219,14 @@ def test_IndexedOptionForm():
 
     assert ak.forms.indexedoptionform.IndexedOptionForm(
         "i32", ak.forms.emptyform.EmptyForm()
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
     }
     assert ak.forms.indexedoptionform.IndexedOptionForm(
         "i32", ak.forms.emptyform.EmptyForm()
-    ).tolist() == {
+    ).to_dict() == {
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {
@@ -3217,7 +3245,7 @@ def test_IndexedOptionForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
@@ -3225,13 +3253,13 @@ def test_IndexedOptionForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "IndexedOptionArray",
             "index": "i32",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {
@@ -3244,13 +3272,13 @@ def test_IndexedOptionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "IndexedOptionArray",
             "index": "i64",
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "IndexedOptionArray",
         "index": "i64",
         "content": {
@@ -3263,7 +3291,7 @@ def test_IndexedOptionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "IndexedOptionArray",
             "index": "i32",
@@ -3272,7 +3300,7 @@ def test_IndexedOptionForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "IndexedOptionArray",
         "index": "i32",
         "content": {"class": "EmptyArray"},
@@ -3362,7 +3390,7 @@ def test_ByteMaskedForm():
 
     assert ak.forms.bytemaskedform.ByteMaskedForm(
         "i8", ak.forms.emptyform.EmptyForm(), True
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ByteMaskedArray",
         "mask": "i8",
         "valid_when": True,
@@ -3370,7 +3398,7 @@ def test_ByteMaskedForm():
     }
     assert ak.forms.bytemaskedform.ByteMaskedForm(
         "i8", ak.forms.emptyform.EmptyForm(), True
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ByteMaskedArray",
         "mask": "i8",
         "valid_when": True,
@@ -3391,7 +3419,7 @@ def test_ByteMaskedForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ByteMaskedArray",
         "mask": "i8",
         "valid_when": True,
@@ -3400,14 +3428,14 @@ def test_ByteMaskedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ByteMaskedArray",
             "mask": "i8",
             "valid_when": True,
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ByteMaskedArray",
         "mask": "i8",
         "valid_when": True,
@@ -3421,14 +3449,14 @@ def test_ByteMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ByteMaskedArray",
             "mask": "i64",
             "valid_when": True,
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "ByteMaskedArray",
         "mask": "i64",
         "valid_when": True,
@@ -3442,7 +3470,7 @@ def test_ByteMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "ByteMaskedArray",
             "mask": "i8",
@@ -3452,7 +3480,7 @@ def test_ByteMaskedForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "ByteMaskedArray",
         "mask": "i8",
         "valid_when": True,
@@ -3583,7 +3611,7 @@ def test_BitMaskedForm():
 
     assert ak.forms.bitmaskedform.BitMaskedForm(
         "u8", ak.forms.emptyform.EmptyForm(), True, False
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "BitMaskedArray",
         "mask": "u8",
         "valid_when": True,
@@ -3592,7 +3620,7 @@ def test_BitMaskedForm():
     }
     assert ak.forms.bitmaskedform.BitMaskedForm(
         "u8", ak.forms.emptyform.EmptyForm(), True, False
-    ).tolist() == {
+    ).to_dict() == {
         "class": "BitMaskedArray",
         "mask": "u8",
         "valid_when": True,
@@ -3615,7 +3643,7 @@ def test_BitMaskedForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "BitMaskedArray",
         "mask": "u8",
         "valid_when": True,
@@ -3625,7 +3653,7 @@ def test_BitMaskedForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "BitMaskedArray",
             "mask": "u8",
@@ -3633,7 +3661,7 @@ def test_BitMaskedForm():
             "lsb_order": False,
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "BitMaskedArray",
         "mask": "u8",
         "valid_when": True,
@@ -3648,7 +3676,7 @@ def test_BitMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "BitMaskedArray",
             "mask": "i64",
@@ -3656,7 +3684,7 @@ def test_BitMaskedForm():
             "lsb_order": False,
             "content": {"class": "EmptyArray"},
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "BitMaskedArray",
         "mask": "i64",
         "valid_when": True,
@@ -3671,7 +3699,7 @@ def test_BitMaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "BitMaskedArray",
             "mask": "u8",
@@ -3682,7 +3710,7 @@ def test_BitMaskedForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "BitMaskedArray",
         "mask": "u8",
         "valid_when": True,
@@ -3741,7 +3769,7 @@ def test_UnmaskedForm():
         == "UnmaskedForm(EmptyForm(), has_identifier=True, parameters={'x': 123}, form_key='hello')"
     )
 
-    assert ak.forms.unmaskedform.UnmaskedForm(ak.forms.emptyform.EmptyForm()).tolist(
+    assert ak.forms.unmaskedform.UnmaskedForm(ak.forms.emptyform.EmptyForm()).to_dict(
         verbose=False
     ) == {
         "class": "UnmaskedArray",
@@ -3749,7 +3777,7 @@ def test_UnmaskedForm():
     }
     assert ak.forms.unmaskedform.UnmaskedForm(
         ak.forms.emptyform.EmptyForm()
-    ).tolist() == {
+    ).to_dict() == {
         "class": "UnmaskedArray",
         "content": {
             "class": "EmptyArray",
@@ -3766,16 +3794,16 @@ def test_UnmaskedForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "UnmaskedArray",
         "content": {"class": "EmptyArray"},
         "has_identifier": True,
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {"class": "UnmaskedArray", "content": {"class": "EmptyArray"}}
-    ).tolist() == {
+    ).to_dict() == {
         "class": "UnmaskedArray",
         "content": {
             "class": "EmptyArray",
@@ -3787,7 +3815,7 @@ def test_UnmaskedForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "UnmaskedArray",
             "content": {"class": "EmptyArray"},
@@ -3795,7 +3823,7 @@ def test_UnmaskedForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "UnmaskedArray",
         "content": {"class": "EmptyArray"},
         "has_identifier": True,
@@ -3940,7 +3968,7 @@ def test_UnionForm():
         "i8",
         "i32",
         [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "UnionArray",
         "tags": "i8",
         "index": "i32",
@@ -3953,7 +3981,7 @@ def test_UnionForm():
         "i8",
         "i32",
         [ak.forms.emptyform.EmptyForm(), ak.forms.numpyform.NumpyForm("bool")],
-    ).tolist() == {
+    ).to_dict() == {
         "class": "UnionArray",
         "tags": "i8",
         "index": "i32",
@@ -3987,7 +4015,7 @@ def test_UnionForm():
         has_identifier=True,
         parameters={"x": 123},
         form_key="hello",
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "UnionArray",
         "tags": "i8",
         "index": "i32",
@@ -3999,7 +4027,7 @@ def test_UnionForm():
         "parameters": {"x": 123},
         "form_key": "hello",
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4009,7 +4037,7 @@ def test_UnionForm():
                 "bool",
             ],
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "UnionArray",
         "tags": "i8",
         "index": "i32",
@@ -4033,7 +4061,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4043,7 +4071,7 @@ def test_UnionForm():
                 "bool",
             ],
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "UnionArray",
         "tags": "i8",
         "index": "u32",
@@ -4067,7 +4095,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4077,7 +4105,7 @@ def test_UnionForm():
                 "bool",
             ],
         }
-    ).tolist() == {
+    ).to_dict() == {
         "class": "UnionArray",
         "tags": "i8",
         "index": "i64",
@@ -4101,7 +4129,7 @@ def test_UnionForm():
         "parameters": {},
         "form_key": None,
     }
-    assert ak.forms.from_iter(
+    assert ak.forms.from_dict(
         {
             "class": "UnionArray",
             "tags": "i8",
@@ -4114,7 +4142,7 @@ def test_UnionForm():
             "parameters": {"x": 123},
             "form_key": "hello",
         }
-    ).tolist(verbose=False) == {
+    ).to_dict(verbose=False) == {
         "class": "UnionArray",
         "tags": "i8",
         "index": "i32",

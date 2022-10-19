@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 # NumPy-like alternatives
-import awkward.nplike
+import awkward.nplikes
 
 # shims for C++ (now everything is compiled into one 'awkward._ext' module)
 import awkward._ext
@@ -23,12 +23,14 @@ import awkward._typetracer
 
 # internal
 import awkward._util
+import awkward._errors
 import awkward._lookup
 
 # third-party connectors
 import awkward._connect.numpy
 import awkward._connect.numexpr
 import awkward.numba
+import awkward.jax
 
 # high-level interface
 from awkward.highlevel import Array
@@ -48,13 +50,11 @@ awkward.behaviors.categorical.register(behavior)  # noqa: F405
 from awkward.operations import *
 
 # temporary shim to access v2 under _v2
-import sys
-
-_v2 = sys.modules[f"{__name__}._v2"] = sys.modules[__name__]
+import awkward._v2
 
 # version
 __version__ = awkward._ext.__version__
-__all__ = [x for x in globals() if not x.startswith("_") and x not in ("numpy",)]
+__all__ = [x for x in globals() if not x.startswith("_")]
 
 
 def __dir__():

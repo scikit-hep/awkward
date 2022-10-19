@@ -27,14 +27,16 @@ def test():
 
         return getattr(ufunc, method)(*nextinputs, **kwargs)
 
-    ak.behavior[np.ufunc, "categorical"] = _apply_ufunc
+    behavior = {}
+    behavior[np.ufunc, "categorical"] = _apply_ufunc
 
     array = ak.highlevel.Array(
         ak.contents.IndexedArray(
             ak.index.Index64(np.array([0, 1, 2, 1, 3, 1, 4])),
             ak.contents.NumpyArray(np.array([321, 1.1, 123, 999, 2])),
             parameters={"__array__": "categorical"},
-        )
+        ),
+        behavior=behavior,
     )
     assert to_list(array * 10) == [3210, 11, 1230, 11, 9990, 11, 20]
 

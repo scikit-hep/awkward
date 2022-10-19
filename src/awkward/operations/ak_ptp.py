@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("ptp")
@@ -55,7 +55,7 @@ def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=Fa
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.ptp",
         dict(
             array=array,

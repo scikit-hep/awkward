@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def softmax(x, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
@@ -40,7 +40,7 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False, flatten_records=F
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.softmax",
         dict(
             x=x,
@@ -59,7 +59,7 @@ def _impl(x, axis, keepdims, mask_identity, flatten_records):
     )
 
     with np.errstate(invalid="ignore"):
-        nplike = ak.nplike.of(x)
+        nplike = ak.nplikes.nplike_of(x)
         expx = nplike.exp(x)
         denom = ak.operations.ak_sum._impl(
             expx, axis, keepdims, mask_identity, flatten_records

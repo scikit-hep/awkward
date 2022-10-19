@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def flatten(array, axis=1, highlevel=True, behavior=None):
@@ -90,7 +90,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
     However, it is important to keep in mind that this is a special case:
     #ak.flatten and `content` are not interchangeable!
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.flatten",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):
@@ -99,7 +99,7 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    nplike = ak.nplike.of(layout)
+    nplike = ak.nplikes.nplike_of(layout)
 
     if axis is None:
         out = layout.completely_flatten(function_name="ak.flatten")

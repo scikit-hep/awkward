@@ -4,7 +4,7 @@ import copy
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 _dtype_to_form = {
     np.dtype(np.int8): "i8",
@@ -20,16 +20,18 @@ class Index:
 
     def __init__(self, data, metadata=None, nplike=None):
         if nplike is None:
-            nplike = ak.nplike.of(data)
+            nplike = ak.nplikes.nplike_of(data)
         self._nplike = nplike
         if metadata is not None and not isinstance(metadata, dict):
-            raise ak._util.error(TypeError("Index metadata must be None or a dict"))
+            raise ak._errors.wrap_error(
+                TypeError("Index metadata must be None or a dict")
+            )
         self._metadata = metadata
         self._data = self._nplike.index_nplike.asarray(
             data, dtype=self._expected_dtype, order="C"
         )
         if len(self._data.shape) != 1:
-            raise ak._util.error(TypeError("Index data must be one-dimensional"))
+            raise ak._errors.wrap_error(TypeError("Index data must be one-dimensional"))
 
         if issubclass(self._data.dtype.type, np.longlong):
             assert (
@@ -50,7 +52,7 @@ class Index:
             elif self._data.dtype == np.dtype(np.int64):
                 self.__class__ = Index64
             else:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "Index data must be int8, uint8, int32, uint32, int64, not "
                         + repr(self._data.dtype)
@@ -59,7 +61,7 @@ class Index:
         else:
             if self._data.dtype != self._expected_dtype:
                 # self._data = self._data.astype(self._expected_dtype)   # copy/convert
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     NotImplementedError(
                         "while developing, we want to catch these errors"
                     )
@@ -165,9 +167,9 @@ class Index:
 
         if hasattr(out, "shape") and len(out.shape) != 0:
             return Index(out, metadata=self.metadata, nplike=self.nplike)
-        elif (ak.nplike.is_jax_buffer(out) or ak.nplike.is_cupy_buffer(out)) and len(
-            out.shape
-        ) == 0:
+        elif (
+            ak.nplikes.Jax.is_own_array(out) or ak.nplikes.Cupy.is_own_array(out)
+        ) and len(out.shape) == 0:
             return out.item()
         else:
             return out
@@ -198,7 +200,7 @@ class Index:
             return self._to_nplike(ak._util.regularize_backend(backend))
 
     def _to_nplike(self, nplike):
-        # if isinstance(nplike, ak.nplike.Jax):
+        # if isinstance(nplike, ak.nplikes.Jax):
         #     print("YES OFFICER, this nplike right here")
         return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 

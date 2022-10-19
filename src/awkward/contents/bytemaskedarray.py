@@ -9,8 +9,8 @@ from awkward.contents.content import Content, unset
 from awkward.forms.bytemaskedform import ByteMaskedForm
 from awkward.index import Index
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 class ByteMaskedArray(Content):
@@ -49,7 +49,7 @@ class ByteMaskedArray(Content):
         self, mask, content, valid_when, identifier=None, parameters=None, nplike=None
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be an Index with dtype=int8, not {}".format(
                         type(self).__name__, repr(mask)
@@ -57,7 +57,7 @@ class ByteMaskedArray(Content):
                 )
             )
         if not isinstance(content, Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'content' must be a Content subtype, not {}".format(
                         type(self).__name__, repr(content)
@@ -65,7 +65,7 @@ class ByteMaskedArray(Content):
                 )
             )
         if not isinstance(valid_when, bool):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'valid_when' must be boolean, not {}".format(
                         type(self).__name__, repr(valid_when)
@@ -77,7 +77,7 @@ class ByteMaskedArray(Content):
             and content.nplike.known_shape
             and mask.length > content.length
         ):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     "{} len(mask) ({}) must be <= len(content) ({})".format(
                         type(self).__name__, mask.length, content.length
@@ -194,7 +194,7 @@ class ByteMaskedArray(Content):
             ),
         )
 
-        return ak.contents.indexedoptionarray.IndexedOptionArray(
+        return ak.contents.IndexedOptionArray(
             index, self._content, self._identifier, self._parameters, self._nplike
         )
 
@@ -266,7 +266,7 @@ class ByteMaskedArray(Content):
         if where < 0:
             where += self.length
         if self._nplike.known_shape and not 0 <= where < self.length:
-            raise ak._util.indexerror(self, where)
+            raise ak._errors.index_error(self, where)
         if self._mask[where] == self._valid_when:
             return self._content._getitem_at(where)
         else:
@@ -313,7 +313,7 @@ class ByteMaskedArray(Content):
         try:
             nextmask = self._mask[carry.data]
         except IndexError as err:
-            raise ak._util.indexerror(self, carry.data, str(err)) from err
+            raise ak._errors.index_error(self, carry.data, str(err)) from err
 
         return ByteMaskedArray(
             nextmask,
@@ -367,7 +367,7 @@ class ByteMaskedArray(Content):
             and self._nplike.known_shape
             and slicestarts.length != self.length
         ):
-            raise ak._util.indexerror(
+            raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
                     slicestarts, slicestops, slicecontent, None, None, self._nplike
@@ -412,7 +412,7 @@ class ByteMaskedArray(Content):
         next = self._content._carry(nextcarry, True)
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
 
-        out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+        out2 = ak.contents.IndexedOptionArray(
             outindex, out, self._identifier, self._parameters, self._nplike
         )
         return out2.simplify_optiontype()
@@ -435,7 +435,7 @@ class ByteMaskedArray(Content):
 
             next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
-            out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak.contents.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,
@@ -460,7 +460,7 @@ class ByteMaskedArray(Content):
             return self._getitem_next_missing(head, tail, advanced)
 
         else:
-            raise ak._util.error(AssertionError(repr(head)))
+            raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def project(self, mask=None):
         mask_length = self._mask.length
@@ -468,7 +468,7 @@ class ByteMaskedArray(Content):
 
         if mask is not None:
             if self._nplike.known_shape and mask_length != mask.length:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "mask length ({}) is not equal to {} length ({})".format(
                             mask.length, type(self).__name__, mask_length
@@ -544,11 +544,11 @@ class ByteMaskedArray(Content):
         if isinstance(
             self._content,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self.toIndexedOptionArray64().simplify_optiontype()
@@ -570,7 +570,7 @@ class ByteMaskedArray(Content):
             next = self._content._carry(nextcarry, False)
             out = next.num(posaxis, depth)
 
-            out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak.contents.IndexedOptionArray(
                 outindex, out, None, self.parameters, self._nplike
             )
             return out2.simplify_optiontype()
@@ -578,7 +578,7 @@ class ByteMaskedArray(Content):
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            raise ak._util.error(np.AxisError("axis=0 not allowed for flatten"))
+            raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
             numnull = ak.index.Index64.empty(1, self._nplike)
             nextcarry, outindex = self._nextcarry_outindex(numnull)
@@ -590,7 +590,7 @@ class ByteMaskedArray(Content):
             if offsets.length == 0:
                 return (
                     offsets,
-                    ak.contents.indexedoptionarray.IndexedOptionArray(
+                    ak.contents.IndexedOptionArray(
                         outindex, flattened, None, self._parameters, self._nplike
                     ),
                 )
@@ -625,11 +625,11 @@ class ByteMaskedArray(Content):
         if isinstance(
             other,
             (
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return self._content.mergeable(other.content, mergebool)
@@ -649,13 +649,13 @@ class ByteMaskedArray(Content):
             for x in others
         ):
             parameters = self._parameters
-            masks = [self._mask.data]
+            masks = [self._mask.data[: self.length]]
             tail_contents = []
             length = 0
             for x in others:
                 parameters = ak._util.merge_parameters(parameters, x._parameters, True)
-                masks.append(x._mask.data)
-                tail_contents.append(x._content[: self.length])
+                masks.append(x._mask.data[: x.length])
+                tail_contents.append(x._content[: x.length])
                 length += x.length
 
             return ByteMaskedArray(
@@ -683,7 +683,7 @@ class ByteMaskedArray(Content):
 
             next = self._content._carry(nextcarry, False)
             out = next._local_index(posaxis, depth)
-            out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak.contents.IndexedOptionArray(
                 outindex,
                 out,
                 self._identifier,
@@ -693,7 +693,7 @@ class ByteMaskedArray(Content):
             return out2.simplify_optiontype()
 
     def numbers_to_type(self, name):
-        return ak.contents.bytemaskedarray.ByteMaskedArray(
+        return ak.contents.ByteMaskedArray(
             self._mask,
             self._content.numbers_to_type(name),
             self._valid_when,
@@ -756,7 +756,9 @@ class ByteMaskedArray(Content):
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         if n < 1:
-            raise ak._util.error(ValueError("in combinations, 'n' must be at least 1"))
+            raise ak._errors.wrap_error(
+                ValueError("in combinations, 'n' must be at least 1")
+            )
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
@@ -768,7 +770,7 @@ class ByteMaskedArray(Content):
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
-            out2 = ak.contents.indexedoptionarray.IndexedOptionArray(
+            out2 = ak.contents.IndexedOptionArray(
                 outindex, out, None, parameters, self._nplike
             )
             return out2.simplify_optiontype()
@@ -930,7 +932,7 @@ class ByteMaskedArray(Content):
                 )
 
             else:
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(
                         "reduce_next with unbranching depth > negaxis is only "
                         "expected to return RegularArray or ListOffsetArray64; "
@@ -944,11 +946,11 @@ class ByteMaskedArray(Content):
         elif isinstance(
             self._content,
             (
-                ak.contents.bitmaskedarray.BitMaskedArray,
-                ak.contents.bytemaskedarray.ByteMaskedArray,
-                ak.contents.indexedarray.IndexedArray,
-                ak.contents.indexedoptionarray.IndexedOptionArray,
-                ak.contents.unmaskedarray.UnmaskedArray,
+                ak.contents.BitMaskedArray,
+                ak.contents.ByteMaskedArray,
+                ak.contents.IndexedArray,
+                ak.contents.IndexedOptionArray,
+                ak.contents.UnmaskedArray,
             ),
         ):
             return "{0} contains \"{1}\", the operation that made it might have forgotten to call 'simplify_optiontype()'"
@@ -981,7 +983,7 @@ class ByteMaskedArray(Content):
                 )
             )
             next = self.project()._pad_none(target, posaxis, depth, clip)
-            return ak.contents.indexedoptionarray.IndexedOptionArray(
+            return ak.contents.IndexedOptionArray(
                 index,
                 next,
                 None,
@@ -989,7 +991,7 @@ class ByteMaskedArray(Content):
                 self._nplike,
             ).simplify_optiontype()
         else:
-            return ak.contents.bytemaskedarray.ByteMaskedArray(
+            return ak.contents.ByteMaskedArray(
                 self._mask,
                 self._content._pad_none(target, posaxis, depth, clip),
                 self._valid_when,
@@ -1070,7 +1072,7 @@ class ByteMaskedArray(Content):
         elif result is None:
             return continuation()
         else:
-            raise ak._util.error(AssertionError(result))
+            raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
         if self._content.is_RecordType:
@@ -1079,7 +1081,7 @@ class ByteMaskedArray(Content):
             if content.length > self._mask.length:
                 content = content[: self._mask.length]
 
-            return ak.contents.indexedoptionarray.IndexedOptionArray(
+            return ak.contents.IndexedOptionArray(
                 next._index,
                 content,
                 next._identifier,

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def to_categorical(array, highlevel=True):
@@ -71,7 +71,7 @@ def to_categorical(array, highlevel=True):
 
     See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_categorical",
         dict(array=array, highlevel=highlevel),
     ):
@@ -100,8 +100,8 @@ def _impl(array, highlevel):
             hashable = [ak.behaviors.categorical.as_hashable(x) for x in content_list]
 
             lookup = {}
-            is_first = ak.nplike.numpy.empty(len(hashable), dtype=np.bool_)
-            mapping = ak.nplike.numpy.empty(len(hashable), dtype=np.int64)
+            is_first = ak.nplikes.numpy.empty(len(hashable), dtype=np.bool_)
+            mapping = ak.nplikes.numpy.empty(len(hashable), dtype=np.int64)
             for i, x in enumerate(hashable):
                 if x in lookup:
                     is_first[i] = False
@@ -112,17 +112,17 @@ def _impl(array, highlevel):
                     mapping[i] = j
 
             if layout.is_IndexedType and layout.is_OptionType:
-                original_index = ak.nplike.numpy.asarray(layout.index)
+                original_index = ak.nplikes.numpy.asarray(layout.index)
                 index = mapping[original_index]
                 index[original_index < 0] = -1
                 index = ak.index.Index64(index)
 
             elif layout.is_IndexedType:
-                original_index = ak.nplike.numpy.asarray(layout.index)
+                original_index = ak.nplikes.numpy.asarray(layout.index)
                 index = ak.index.Index64(mapping[original_index])
 
             elif layout.is_OptionType:
-                mask = ak.nplike.numpy.asarray(layout.mask_as_bool(valid_when=False))
+                mask = ak.nplikes.numpy.asarray(layout.mask_as_bool(valid_when=False))
                 mapping[mask.view(np.bool_)] = -1
                 index = ak.index.Index64(mapping)
 

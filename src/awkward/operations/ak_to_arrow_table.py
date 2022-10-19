@@ -4,7 +4,7 @@ import json
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def to_arrow_table(
@@ -62,7 +62,7 @@ def to_arrow_table(
 
     See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_arrow_table",
         dict(
             array=array,

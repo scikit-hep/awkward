@@ -5,7 +5,6 @@ from collections.abc import Iterable
 
 import awkward as ak
 from awkward.forms.form import Form, _parameters_equal
-from awkward.forms.indexedform import IndexedForm
 
 
 class RecordForm(Form):
@@ -20,7 +19,7 @@ class RecordForm(Form):
         form_key=None,
     ):
         if not isinstance(contents, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -29,7 +28,7 @@ class RecordForm(Form):
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "{} all 'contents' must be Form subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -37,7 +36,7 @@ class RecordForm(Form):
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'fields' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -75,7 +74,7 @@ class RecordForm(Form):
             else:
                 return self._fields[index]
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 IndexError(
                     "no index {} in record with {} fields".format(
                         index, len(self._contents)
@@ -99,7 +98,7 @@ class RecordForm(Form):
                 pass
             else:
                 return i
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             IndexError(
                 "no field {} in record with {} fields".format(
                     repr(field), len(self._contents)
@@ -124,7 +123,7 @@ class RecordForm(Form):
         elif ak._util.isstr(index_or_field):
             index = self.field_to_index(index_or_field)
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "index_or_field must be an integer (index) or string (field), not {}".format(
                         repr(index_or_field)
@@ -133,21 +132,22 @@ class RecordForm(Form):
             )
         return self._contents[index]
 
-    def _tolist_part(self, verbose, toplevel):
+    def _to_dict_part(self, verbose, toplevel):
         out = {"class": "RecordArray"}
 
         contents_tolist = [
-            content._tolist_part(verbose, toplevel=False) for content in self._contents
+            content._to_dict_part(verbose, toplevel=False) for content in self._contents
         ]
         if self._fields is not None:
-            out["contents"] = dict(zip(self._fields, contents_tolist))
+            out["fields"] = list(self._fields)
         else:
-            out["contents"] = contents_tolist
+            out["fields"] = None
 
-        return self._tolist_extra(out, verbose)
+        out["contents"] = contents_tolist
+        return self._to_dict_extra(out, verbose)
 
     def _type(self, typestrs):
-        return ak.types.recordtype.RecordType(
+        return ak.types.RecordType(
             [x._type(typestrs) for x in self._contents],
             self._fields,
             self._parameters,
@@ -175,95 +175,6 @@ class RecordForm(Form):
                 return False
         else:
             return False
-
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, RecordForm):
-            if self.is_tuple == other.is_tuple:
-                self_fields = set(self._fields)
-                other_fields = set(other._fields)
-                if self_fields == other_fields:
-                    return _parameters_equal(
-                        self._parameters, other._parameters
-                    ) and all(
-                        self.content(x).generated_compatibility(other.content(x))
-                        for x in self_fields
-                    )
-                else:
-                    return False
-            else:
-                return False
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return RecordForm(
-            self._contents,
-            self._fields,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        if len(only_fields) == 0:
-            return self.content(where)
-
-        else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
-            if ak._util.isstr(nexthead):
-                return self.content(where)._getitem_field(nexthead, nexttail)
-            else:
-                return self.content(where)._getitem_fields(nexthead, nexttail)
-
-    def _getitem_fields(self, where, only_fields=()):
-        indexes = [self.field_to_index(field) for field in where]
-        if self._fields is None:
-            fields = None
-        else:
-            fields = [self._fields[i] for i in indexes]
-
-        if len(only_fields) == 0:
-            contents = [self.content(i) for i in indexes]
-        else:
-            nexthead, nexttail = ak._slicing.headtail(only_fields)
-            if ak._util.isstr(nexthead):
-                contents = [
-                    self.content(i)._getitem_field(nexthead, nexttail) for i in indexes
-                ]
-            else:
-                contents = [
-                    self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
-                ]
-
-        return RecordForm(
-            contents,
-            fields,
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        if allow_lazy:
-            return IndexedForm(
-                "i64",
-                self,
-                has_identifier=self._has_identifier,
-                parameters=None,
-                form_key=None,
-            )
-        else:
-            return RecordForm(
-                self._contents,
-                self._fields,
-                has_identifier=self._has_identifier,
-                parameters=self._parameters,
-                form_key=None,
-            )
 
     def purelist_parameter(self, key):
         return self.parameter(key)

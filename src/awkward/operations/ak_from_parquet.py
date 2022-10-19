@@ -48,7 +48,7 @@ def from_parquet(
 
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_parquet",
         dict(
             path=path,
@@ -102,11 +102,11 @@ def metadata(
 
     if row_groups is not None:
         if not all(ak._util.isint(x) and x >= 0 for x in row_groups):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError("row_groups must be a set of non-negative integers")
             )
         if len(set(row_groups)) < len(row_groups):
-            raise ak._util.error(ValueError("row group indices must not repeat"))
+            raise ak._errors.wrap_error(ValueError("row group indices must not repeat"))
 
     fs, _, paths = fsspec.get_fs_token_paths(
         path, mode="rb", storage_options=storage_options
@@ -157,13 +157,13 @@ def metadata(
                 metadata.append_row_groups(md)
     if row_groups is not None:
         if any(_ >= metadata.num_row_groups for _ in row_groups):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(
                     f"Row group selection out of bounds 0..{metadata.num_row_groups - 1}"
                 )
             )
         if not can_sub:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "Requested selection of row-groups, but not scanning metadata"
                 )
@@ -234,7 +234,7 @@ def _load(
         )
 
     if len(arrays) == 0:
-        numpy = ak.nplike.Numpy.instance()
+        numpy = ak.nplikes.Numpy.instance()
         return ak.operations.ak_from_buffers._impl(
             subform, 0, _DictOfEmptyBuffers(), "", numpy, highlevel, behavior
         )
@@ -357,7 +357,7 @@ def _all_and_metadata_paths(path, fs, paths, ignore_metadata=False, scan_files=T
     all_paths = [x for x, is_meta, is_comm in all_paths if not is_meta and not is_comm]
 
     if len(all_paths) == 0:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(f"no *.parquet or *.parq matches for path {path!r}")
         )
 

@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 class Reducer:
@@ -216,7 +216,7 @@ class Sum(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
             )
         else:
@@ -261,7 +261,7 @@ class Sum(Reducer):
                     )
                 )
             else:
-                raise ak._util.error(NotImplementedError)
+                raise ak._errors.wrap_error(NotImplementedError)
         elif array.dtype.type in (np.complex128, np.complex64):
             assert parents.nplike is array.nplike
             array._handle_error(
@@ -311,7 +311,7 @@ class Prod(Reducer):
     def apply(cls, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind.upper() == "M":
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
             )
         result = array.nplike.empty(

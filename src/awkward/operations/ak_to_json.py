@@ -7,8 +7,8 @@ from urllib.parse import urlparse
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 def to_json(
@@ -106,7 +106,7 @@ def to_json(
 
     See also #ak.from_json.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_json",
         dict(
             array=array,
@@ -178,7 +178,9 @@ def _impl(
         out = ak.contents.NumpyArray(array)
 
     else:
-        raise ak._util.error(TypeError(f"unrecognized array type: {repr(array)}"))
+        raise ak._errors.wrap_error(
+            TypeError(f"unrecognized array type: {repr(array)}")
+        )
 
     jsondata = out.to_json(
         nan_string=nan_string,
@@ -286,7 +288,7 @@ def _impl(
                     )
 
     except Exception as err:
-        raise ak._util.error(err) from err
+        raise ak._errors.wrap_error(err) from err
 
 
 class _NoContextManager:

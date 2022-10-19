@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def packed(array, highlevel=True, behavior=None):
@@ -26,7 +26,7 @@ def packed(array, highlevel=True, behavior=None):
     - #ak.contents.ByteMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records, stays a #ak.contents.ByteMaskedArray otherwise
     - #ak.contents.BitMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records, stays a #ak.contents.BitMaskedArray otherwise
     - #ak.contents.UnionArray gets projected contents
-    - #ak.contents.Record becomes a record over a single-item #ak.contents.RecordArray
+    - #ak.record.Record becomes a record over a single-item #ak.contents.RecordArray
 
     Example:
 
@@ -55,7 +55,7 @@ def packed(array, highlevel=True, behavior=None):
 
     See also #ak.to_buffers.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.packed",
         dict(array=array, highlevel=highlevel, behavior=behavior),
     ):

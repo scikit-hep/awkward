@@ -12,7 +12,7 @@ from awkward.types.type import Type
 class RecordType(Type):
     def __init__(self, contents, fields, parameters=None, typestr=None):
         if not isinstance(contents, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -23,7 +23,7 @@ class RecordType(Type):
             contents = list(contents)
         for content in contents:
             if not isinstance(content, Type):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "{} all 'contents' must be Type subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -31,7 +31,7 @@ class RecordType(Type):
                     )
                 )
         if fields is not None and not isinstance(fields, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'fields' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -39,7 +39,7 @@ class RecordType(Type):
                 )
             )
         if parameters is not None and not isinstance(parameters, dict):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'parameters' must be of type dict or None, not {}".format(
                         type(self).__name__, repr(parameters)
@@ -47,7 +47,7 @@ class RecordType(Type):
                 )
             )
         if typestr is not None and not ak._util.isstr(typestr):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(
                         type(self).__name__, repr(typestr)
@@ -203,13 +203,13 @@ class RecordType(Type):
             return False
 
     def index_to_field(self, index):
-        return ak.forms.recordform.RecordForm.index_to_field(self, index)
+        return ak.forms.RecordForm.index_to_field(self, index)
 
     def field_to_index(self, field):
-        return ak.forms.recordform.RecordForm.field_to_index(self, field)
+        return ak.forms.RecordForm.field_to_index(self, field)
 
     def has_field(self, field):
-        return ak.forms.recordform.RecordForm.has_field(self, field)
+        return ak.forms.RecordForm.has_field(self, field)
 
     def content(self, index_or_field):
-        return ak.forms.recordform.RecordForm.content(self, index_or_field)
+        return ak.forms.RecordForm.content(self, index_or_field)

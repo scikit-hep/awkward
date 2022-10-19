@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def fields(array):
@@ -18,7 +18,7 @@ def fields(array):
     If the array contains neither tuples nor records, this returns an empty
     list.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.fields",
         dict(array=array),
     ):

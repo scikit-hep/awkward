@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 class Lookup:
@@ -65,7 +65,9 @@ def tolookup(layout, positions):
         return UnionLookup.tolookup(layout, positions)
 
     else:
-        raise ak._util.error(AssertionError(f"unrecognized Content: {type(layout)}"))
+        raise ak._errors.wrap_error(
+            AssertionError(f"unrecognized Content: {type(layout)}")
+        )
 
 
 class ContentLookup:

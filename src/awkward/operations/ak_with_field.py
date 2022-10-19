@@ -5,7 +5,7 @@ from collections.abc import Iterable
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def with_field(base, what, where=None, highlevel=True, behavior=None):
@@ -31,7 +31,7 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
     #ak.with_field, so performance is not a factor in choosing one over the
     other.)
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.with_field",
         dict(base=base, what=what, where=where, highlevel=highlevel, behavior=behavior),
     ):
@@ -44,7 +44,7 @@ def _impl(base, what, where, highlevel, behavior):
         or ak._util.isstr(where)
         or (isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where))
     ):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 "New fields may only be assigned by field name(s) "
                 "or as a new integer slot by passing None for 'where'"
@@ -82,7 +82,7 @@ def _impl(base, what, where, highlevel, behavior):
         base = ak.operations.to_layout(base, allow_record=True, allow_other=False)
 
         if len(base.fields) == 0:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError("no tuples or records in array; cannot add a new field")
             )
 
@@ -101,7 +101,7 @@ def _impl(base, what, where, highlevel, behavior):
         else:
 
             def action(inputs, **kwargs):
-                nplike = ak.nplike.of(*inputs)
+                nplike = ak.nplikes.nplike_of(*inputs)
                 base, what = inputs
                 if isinstance(base, ak.contents.RecordArray):
                     if what is None:

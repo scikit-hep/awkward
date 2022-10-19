@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def linear_fit(
@@ -68,7 +68,7 @@ def linear_fit(
     missing values (None) in reducers, and #ak.mean for an example with another
     non-reducer.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.linear_fit",
         dict(
             x=x,
@@ -96,7 +96,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
         )
 
     with np.errstate(invalid="ignore"):
-        nplike = ak.nplike.of(x, y, weight)
+        nplike = ak.nplikes.nplike_of(x, y, weight)
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x, axis, keepdims, mask_identity, flatten_records

@@ -6,7 +6,7 @@ import awkward as ak
 def validity_error(array, exception=False):
     """
     Args:
-        array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.contents.Record, #ak.ArrayBuilder):
+        array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.record.Record, #ak.ArrayBuilder):
             Array or record to check.
         exception (bool): If True, validity errors raise exceptions.
 
@@ -19,7 +19,7 @@ def validity_error(array, exception=False):
 
     See also #ak.is_valid.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.validity_error",
         dict(array=array, exception=exception),
     ):
@@ -31,6 +31,6 @@ def _impl(array, exception):
     out = layout.validity_error(path="highlevel")
 
     if out not in (None, "") and exception:
-        raise ak._util.error(ValueError(out))
+        raise ak._errors.wrap_error(ValueError(out))
     else:
         return out

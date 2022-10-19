@@ -4,7 +4,7 @@ import collections
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 ParquetMetadata = collections.namedtuple(
@@ -45,7 +45,7 @@ def metadata_from_parquet(
     """
     import awkward._connect.pyarrow  # noqa: F401
 
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.metadata_from_parquet",
         dict(
             path=path,

@@ -19,7 +19,7 @@ class UnionForm(Form):
         form_key=None,
     ):
         if not ak._util.isstr(tags):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'tags' must be of type str, not {}".format(
                         type(self).__name__, repr(tags)
@@ -27,7 +27,7 @@ class UnionForm(Form):
                 )
             )
         if not ak._util.isstr(index):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(
                         type(self).__name__, repr(index)
@@ -35,7 +35,7 @@ class UnionForm(Form):
                 )
             )
         if not isinstance(contents, Iterable):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'contents' must be iterable, not {}".format(
                         type(self).__name__, repr(contents)
@@ -44,7 +44,7 @@ class UnionForm(Form):
             )
         for content in contents:
             if not isinstance(content, Form):
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     TypeError(
                         "{} all 'contents' must be Form subclasses, not {}".format(
                             type(self).__name__, repr(content)
@@ -80,14 +80,14 @@ class UnionForm(Form):
         ] + self._repr_args()
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
-    def _tolist_part(self, verbose, toplevel):
-        return self._tolist_extra(
+    def _to_dict_part(self, verbose, toplevel):
+        return self._to_dict_extra(
             {
                 "class": "UnionArray",
                 "tags": self._tags,
                 "index": self._index,
                 "contents": [
-                    content._tolist_part(verbose, toplevel=False)
+                    content._to_dict_part(verbose, toplevel=False)
                     for content in self._contents
                 ],
             },
@@ -95,7 +95,7 @@ class UnionForm(Form):
         )
 
     def _type(self, typestrs):
-        return ak.types.uniontype.UnionType(
+        return ak.types.UnionType(
             [x._type(typestrs) for x in self._contents],
             self._parameters,
             ak._util.gettypestr(self._parameters, typestrs),
@@ -116,67 +116,6 @@ class UnionForm(Form):
             return self._contents == other._contents
 
         return False
-
-    def generated_compatibility(self, other):
-        if other is None:
-            return True
-
-        elif isinstance(other, UnionForm):
-            if len(self._contents) == len(other._contents):
-                return _parameters_equal(
-                    self._parameters, other._parameters, only_array_record=True
-                ) and all(
-                    x.generated_compatibility(y)
-                    for x, y in zip(self._contents, other._contents)
-                )
-            else:
-                return False
-
-        else:
-            return False
-
-    def _getitem_range(self):
-        return UnionForm(
-            self._tags,
-            self._index,
-            self._contents,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def _getitem_field(self, where, only_fields=()):
-        return UnionForm(
-            self._tags,
-            self._index,
-            self._content._getitem_field(where, only_fields),
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _getitem_fields(self, where, only_fields=()):
-        return UnionForm(
-            self._tags,
-            self._index,
-            self._content._getitem_fields(where, only_fields),
-            has_identifier=self._has_identifier,
-            parameters=None,
-            form_key=None,
-        )
-
-    def _carry(self, allow_lazy):
-        return UnionForm(
-            self._tags,
-            self._index,
-            self._contents,
-            has_identifier=self._has_identifier,
-            parameters=self._parameters,
-            form_key=None,
-        )
-
-    def simplify_uniontype(self, merge=True, mergebool=False):
-        raise ak._util.error(NotImplementedError)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

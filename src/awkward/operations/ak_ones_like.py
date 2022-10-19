@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("ones_like")
@@ -23,7 +23,7 @@ def ones_like(array, highlevel=True, behavior=None, dtype=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.ones_like",
         dict(array=array, highlevel=highlevel, behavior=behavior, dtype=dtype),
     ):

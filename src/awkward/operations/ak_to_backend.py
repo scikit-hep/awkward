@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def to_backend(array, backend, highlevel=True, behavior=None):
@@ -46,7 +46,7 @@ def to_backend(array, backend, highlevel=True, behavior=None):
 
     See #ak.kernels.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.to_backend",
         dict(array=array, backend=backend, highlevel=highlevel, behavior=behavior),
     ):

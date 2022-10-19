@@ -37,7 +37,7 @@ def from_numpy(
 
     See also #ak.to_numpy and #ak.from_cupy.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_numpy",
         dict(
             array=array,

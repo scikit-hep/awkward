@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("count_nonzero")
@@ -41,7 +41,7 @@ def count_nonzero(
     count None values. If it is desirable to count them, use #ak.fill_none
     to turn them into something that would be counted.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.count_nonzero",
         dict(
             array=array,

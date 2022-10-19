@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def with_parameter(array, parameter, value, highlevel=True, behavior=None):
@@ -25,7 +25,7 @@ def with_parameter(array, parameter, value, highlevel=True, behavior=None):
     You can also remove a single parameter with this function, since setting
     a parameter to None is equivalent to removing it.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.with_parameter",
         dict(
             array=array,

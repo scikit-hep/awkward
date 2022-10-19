@@ -7,8 +7,8 @@ from urllib.parse import urlparse
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 def from_json(
@@ -312,7 +312,7 @@ def from_json(
 
     See also #ak.to_json.
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.from_json",
         dict(
             source=source,
@@ -442,7 +442,7 @@ def _record_to_complex(layout, complex_record_fields):
                                 + node._nplike.asarray(imag) * 1j
                             )
                     else:
-                        raise ak._util.error(
+                        raise ak._errors.wrap_error(
                             ValueError(
                                 f"expected record with fields {complex_record_fields[0]!r} and {complex_record_fields[1]!r} to have integer or floating point types, not {str(real.form.type)!r} and {str(imag.form.type)!r}"
                             )
@@ -451,7 +451,7 @@ def _record_to_complex(layout, complex_record_fields):
         return layout.recursively_apply(action)
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError("complex_record_fields must be None or a pair of strings")
         )
 
@@ -485,7 +485,7 @@ def _no_schema(
                 neginf_string,
             )
         except Exception as err:
-            raise ak._util.error(ValueError(str(err))) from None
+            raise ak._errors.wrap_error(ValueError(str(err))) from None
 
     formstr, length, buffers = builder.to_buffers()
     form = ak.forms.from_json(formstr)
@@ -520,7 +520,7 @@ def _yes_schema(
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
         )
 
@@ -529,7 +529,7 @@ def _yes_schema(
 
     if schema.get("type") == "array":
         if "items" not in schema:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("JSONSchema type is not concrete: array without items")
             )
 
@@ -542,7 +542,7 @@ def _yes_schema(
         is_record = True
 
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(
                 "only 'array' and 'object' types supported at the JSONSchema root"
             )
@@ -565,7 +565,7 @@ def _yes_schema(
                 resize,
             )
         except Exception as err:
-            raise ak._util.error(ValueError(str(err))) from None
+            raise ak._errors.wrap_error(ValueError(str(err))) from None
 
     layout = ak.operations.from_buffers(form, length, container, highlevel=False)
     layout = _record_to_complex(layout, complex_record_fields)
@@ -581,12 +581,12 @@ def _yes_schema(
 
 def build_assembly(schema, container, instructions):
     if not isinstance(schema, dict):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(f"unrecognized JSONSchema: expected dict, got {schema!r}")
         )
 
     if "type" not in schema is None:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             TypeError(f"unrecognized JSONSchema: no 'type' in {schema!r}")
         )
 
@@ -713,7 +713,7 @@ def build_assembly(schema, container, instructions):
         # https://json-schema.org/understanding-json-schema/reference/array.html
 
         if "items" not in schema:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError("JSONSchema type is not concrete: array without 'items'")
             )
 
@@ -761,7 +761,7 @@ def build_assembly(schema, container, instructions):
         # https://json-schema.org/understanding-json-schema/reference/object.html
 
         if "properties" not in schema:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "JSONSchema type is not concrete: object without 'properties'"
                 )
@@ -797,9 +797,9 @@ def build_assembly(schema, container, instructions):
             return out
 
     elif isinstance(tpe, list):
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             NotImplementedError("arbitrary unions of types are not yet supported")
         )
 
     else:
-        raise ak._util.error(TypeError(f"unrecognized JSONSchema: {tpe!r}"))
+        raise ak._errors.wrap_error(TypeError(f"unrecognized JSONSchema: {tpe!r}"))

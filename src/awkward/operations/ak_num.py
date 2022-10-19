@@ -2,7 +2,7 @@
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 
 def num(array, axis=1, highlevel=True, behavior=None):
@@ -66,7 +66,7 @@ def num(array, axis=1, highlevel=True, behavior=None):
         >>> ak.mask(array, ak.num(array) > 0)[:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
-    with ak._util.OperationErrorContext(
+    with ak._errors.OperationErrorContext(
         "ak.num",
         dict(array=array, axis=axis, highlevel=highlevel, behavior=behavior),
     ):

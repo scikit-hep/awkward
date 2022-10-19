@@ -1,25 +1,21 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
-# First, transition all the _v2 code to start using implementations in this file.
-# Then build up the high-level replacements.
-
+import collections
 import itertools
 import numbers
 import os
 import re
-import threading
-import traceback
-import warnings
-from collections.abc import Iterable, Mapping, Sequence, Sized
+from collections.abc import Iterable, Mapping, Sized
 
 import packaging.version
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
+np = ak.nplikes.NumpyMetadata.instance()
 
 win = os.name == "nt"
-bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
+bits32 = ak.nplikes.numpy.iinfo(np.intp).bits == 32
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
@@ -31,9 +27,9 @@ kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
 
 _backends = {
-    "cpu": ak.nplike.Numpy,
-    "cuda": ak.nplike.Cupy,
-    "jax": ak.nplike.Jax,
+    "cpu": ak.nplikes.Numpy,
+    "cuda": ak.nplikes.Cupy,
+    "jax": ak.nplikes.Jax,
 }
 
 
@@ -41,7 +37,7 @@ def regularize_backend(backend):
     if backend in _backends:
         return _backends[backend].instance()
     else:
-        raise error(  # noqa: AK101
+        raise ak._errors.wrap_error(  # noqa: AK101
             ValueError("The available backends for now are `cpu` and `cuda`.")
         )
 
@@ -112,311 +108,6 @@ def identifier_hash(str):
     )
 
 
-###############################################################################
-
-
-class ErrorContext:
-    # Any other threads should get a completely independent _slate.
-    _slate = threading.local()
-
-    _width = 80
-
-    @classmethod
-    def primary(cls):
-        return cls._slate.__dict__.get("__primary_context__")
-
-    def __init__(self, **kwargs):
-        self._kwargs = kwargs
-
-    def __enter__(self):
-        # Make it strictly non-reenterant. Only one ErrorContext (per thread) is primary.
-        if self.primary() is None:
-            self._slate.__dict__.clear()
-            self._slate.__dict__.update(self._kwargs)
-            self._slate.__dict__["__primary_context__"] = self
-
-    def __exit__(self, exception_type, exception_value, traceback):
-        # Step out of the way so that another ErrorContext can become primary.
-        if self.primary() is self:
-            self._slate.__dict__.clear()
-
-    def format_argument(self, width, value):
-        if isinstance(value, ak.contents.Content):
-            return self.format_argument(width, ak.highlevel.Array(value))
-        elif isinstance(value, ak.record.Record):
-            return self.format_argument(width, ak.highlevel.Record(value))
-
-        valuestr = None
-        if isinstance(
-            value,
-            (
-                ak.highlevel.Array,
-                ak.highlevel.Record,
-                ak.highlevel.ArrayBuilder,
-            ),
-        ):
-            try:
-                valuestr = value._repr(width)
-            except Exception as err:
-                valuestr = f"repr-raised-{type(err).__name__}"
-
-        elif value is None or isinstance(value, (bool, int, float)):
-            try:
-                valuestr = repr(value)
-            except Exception as err:
-                valuestr = f"repr-raised-{type(err).__name__}"
-
-        elif isinstance(value, (str, bytes)):
-            try:
-                if len(value) < 60:
-                    valuestr = repr(value)
-                else:
-                    valuestr = repr(value[:57]) + "..."
-            except Exception as err:
-                valuestr = f"repr-raised-{type(err).__name__}"
-
-        elif isinstance(value, np.ndarray):
-            import numpy
-
-            if not numpy.__version__.startswith("1.13."):  # 'threshold' argument
-                prefix = f"{type(value).__module__}.{type(value).__name__}("
-                suffix = ")"
-                try:
-                    valuestr = numpy.array2string(
-                        value,
-                        max_line_width=width - len(prefix) - len(suffix),
-                        threshold=0,
-                    ).replace("\n", " ")
-                    valuestr = prefix + valuestr + suffix
-                except Exception as err:
-                    valuestr = f"array2string-raised-{type(err).__name__}"
-
-                if len(valuestr) > width and "..." in valuestr[:-1]:
-                    last = valuestr.rfind("...") + 3
-                    while last > width:
-                        last = valuestr[: last - 3].rfind("...") + 3
-                    valuestr = valuestr[:last]
-
-                if len(valuestr) > width:
-                    valuestr = valuestr[: width - 3] + "..."
-
-        elif isinstance(value, (Sequence, Mapping)) and len(value) < 10000:
-            valuestr = repr(value)
-            if len(valuestr) > width:
-                valuestr = valuestr[: width - 3] + "..."
-
-        if valuestr is None:
-            return f"{type(value).__name__}-instance"
-        else:
-            return valuestr
-
-
-class OperationErrorContext(ErrorContext):
-    def __init__(self, name, arguments):
-        string_arguments = {}
-        for key, value in arguments.items():
-            if isstr(key):
-                width = self._width - 8 - len(key) - 3
-            else:
-                width = self._width - 8
-
-            string_arguments[key] = self.format_argument(width, value)
-
-        super().__init__(
-            name=name,
-            arguments=string_arguments,
-            traceback=traceback.extract_stack(limit=3)[0],
-        )
-
-    @property
-    def name(self):
-        return self._kwargs["name"]
-
-    @property
-    def arguments(self):
-        return self._kwargs["arguments"]
-
-    @property
-    def traceback(self):
-        return self._kwargs["traceback"]
-
-    def format_exception(self, exception):
-        tb = self.traceback
-        try:
-            location = f" (from {tb.filename}, line {tb.lineno})"
-        except Exception:
-            location = ""
-
-        arguments = []
-        for name, valuestr in self.arguments.items():
-            if isstr(name):
-                arguments.append(f"\n        {name} = {valuestr}")
-            else:
-                arguments.append(f"\n        {valuestr}")
-
-        extra_line = "" if len(arguments) == 0 else "\n    "
-        return f"""while calling{location}
-
-    {self.name}({"".join(arguments)}{extra_line})
-
-Error details: {str(exception)}"""
-
-
-class SlicingErrorContext(ErrorContext):
-    def __init__(self, array, where):
-        super().__init__(
-            array=self.format_argument(self._width - 4, array),
-            where=self.format_slice(where),
-            traceback=traceback.extract_stack(limit=3)[0],
-        )
-
-    @property
-    def array(self):
-        return self._kwargs["array"]
-
-    @property
-    def where(self):
-        return self._kwargs["where"]
-
-    @property
-    def traceback(self):
-        return self._kwargs["traceback"]
-
-    def format_exception(self, exception):
-        tb = self.traceback
-        try:
-            location = f" (from {tb.filename}, line {tb.lineno})"
-        except Exception:
-            location = ""
-
-        if isstr(exception):
-            message = exception
-        else:
-            message = f"Error details: {str(exception)}"
-
-        return f"""while attempting to slice{location}
-
-    {self.array}
-
-with
-
-    {self.where}
-
-{message}"""
-
-    @staticmethod
-    def format_slice(x):
-        if isinstance(x, slice):
-            if x.step is None:
-                return "{}:{}".format(
-                    "" if x.start is None else x.start,
-                    "" if x.stop is None else x.stop,
-                )
-            else:
-                return "{}:{}:{}".format(
-                    "" if x.start is None else x.start,
-                    "" if x.stop is None else x.stop,
-                    x.step,
-                )
-
-        elif isinstance(x, tuple):
-            return "(" + ", ".join(SlicingErrorContext.format_slice(y) for y in x) + ")"
-
-        elif isinstance(x, ak.index.Index64):
-            return str(x.data)
-
-        elif isinstance(x, ak.contents.Content):
-            try:
-                return str(ak.highlevel.Array(x))
-            except Exception:
-                return x._repr("    ", "", "")
-
-        elif isinstance(x, ak.record.Record):
-            try:
-                return str(ak.highlevel.Record(x))
-            except Exception:
-                return x._repr("    ", "", "")
-
-        else:
-            return repr(x)
-
-
-def error(exception, error_context=None):
-    if isinstance(exception, type) and issubclass(exception, Exception):
-        try:
-            exception = exception()
-        except Exception:
-            return exception
-
-    if isinstance(exception, (NotImplementedError, AssertionError)):
-        return type(exception)(
-            str(exception)
-            + "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward-1.0/issues"
-        )
-
-    if error_context is None:
-        error_context = ErrorContext.primary()
-
-    if isinstance(error_context, ErrorContext):
-        # Note: returns an error for the caller to raise!
-        return type(exception)(error_context.format_exception(exception))
-    else:
-        # Note: returns an error for the caller to raise!
-        return exception
-
-
-def indexerror(subarray, slicer, details=None):
-    detailsstr = ""
-    if details is not None:
-        detailsstr = f"""
-
-Error details: {details}."""
-
-    error_context = ErrorContext.primary()
-    if not isinstance(error_context, SlicingErrorContext):
-        # Note: returns an error for the caller to raise!
-        return IndexError(
-            f"cannot slice {type(subarray).__name__} with {SlicingErrorContext.format_slice(slicer)}{detailsstr}"
-        )
-
-    else:
-        # Note: returns an error for the caller to raise!
-        return IndexError(
-            error_context.format_exception(
-                f"at inner {type(subarray).__name__} of length {subarray.length}, using sub-slice {error_context.format_slice(slicer)}.{detailsstr}"
-            )
-        )
-
-
-###############################################################################
-
-# Enable warnings for the Awkward package
-warnings.filterwarnings("default", module="awkward.*")
-
-
-def deprecate(
-    message,
-    version,
-    date=None,
-    will_be="an error",
-    category=DeprecationWarning,
-    stacklevel=2,
-):
-    if date is None:
-        date = ""
-    else:
-        date = " (target date: " + date + ")"
-    warning = """In version {}{}, this will be {}.
-To raise these warnings as errors (and get stack traces to find out where they're called), run
-    import warnings
-    warnings.filterwarnings("error", module="awkward.*")
-after the first `import awkward` or use `@pytest.mark.filterwarnings("error:::awkward.*")` in pytest.
-Issue: {}.""".format(
-        version, date, will_be, message
-    )
-    warnings.warn(warning, category, stacklevel=stacklevel + 1)
-
-
 # Sentinel object for catching pass-through values
 class Unspecified:
     pass
@@ -446,54 +137,36 @@ def regularize_path(path):
     return is_path, path
 
 
-class Behavior(Mapping):
-    def __init__(self, defaults, overrides):
-        self.defaults = defaults
-        if overrides is None:
-            self.overrides = {}
-        else:
-            self.overrides = overrides
+def overlay_behavior(behavior: dict | None) -> collections.abc.Mapping:
+    """
+    Args:
+        behavior: behavior dictionary, or None
 
-    def __getitem__(self, where):
-        try:
-            return self.overrides[where]
-        except KeyError:
-            try:
-                return self.defaults[where]
-            except KeyError:
-                return None
-
-    def items(self):
-        for n, x in self.overrides.items():
-            yield n, x
-        for n, x in self.defaults.items():
-            if n not in self.overrides:
-                yield n, x
-
-    def __iter__(self):
-        yield from self.keys()
-
-    def __len__(self):
-        return len(set(self.defaults) | set(self.overrides))
+    Return a ChainMap object that overlays the given behavior
+    on top of the global #ak.behavior
+    """
+    if behavior is None:
+        return ak.behavior
+    return collections.ChainMap(behavior, ak.behavior)
 
 
 def arrayclass(layout, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     arr = layout.parameter("__array__")
     if isstr(arr):
-        cls = behavior[arr]
+        cls = behavior.get(arr)
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
     if isstr(deeprec):
-        cls = behavior["*", deeprec]
+        cls = behavior.get(("*", deeprec))
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     return ak.highlevel.Array
 
 
 def custom_cast(obj, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     for key, fcn in behavior.items():
         if (
             isinstance(key, tuple)
@@ -506,7 +179,7 @@ def custom_cast(obj, behavior):
 
 
 def custom_broadcast(layout, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
     if not isstr(custom):
         custom = layout.parameter("__record__")
@@ -527,7 +200,7 @@ def custom_broadcast(layout, behavior):
 def custom_ufunc(ufunc, layout, behavior):
     import numpy
 
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
     if not isstr(custom):
         custom = layout.parameter("__record__")
@@ -544,54 +217,54 @@ def custom_ufunc(ufunc, layout, behavior):
 
 
 def numba_array_typer(layouttype, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     arr = layouttype.parameters.get("__array__")
     if isstr(arr):
-        typer = behavior["__numba_typer__", arr]
+        typer = behavior.get(("__numba_typer__", arr))
         if callable(typer):
             return typer
     deeprec = layouttype.parameters.get("__record__")
     if isstr(deeprec):
-        typer = behavior["__numba_typer__", "*", deeprec]
+        typer = behavior.get(("__numba_typer__", "*", deeprec))
         if callable(typer):
             return typer
     return None
 
 
 def numba_array_lower(layouttype, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     arr = layouttype.parameters.get("__array__")
     if isstr(arr):
-        lower = behavior["__numba_lower__", arr]
+        lower = behavior.get(("__numba_lower__", arr))
         if callable(lower):
             return lower
     deeprec = layouttype.parameters.get("__record__")
     if isstr(deeprec):
-        lower = behavior["__numba_lower__", "*", deeprec]
+        lower = behavior.get(("__numba_lower__", "*", deeprec))
         if callable(lower):
             return lower
     return None
 
 
 def recordclass(layout, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
-        cls = behavior[rec]
+        cls = behavior.get(rec)
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
             return cls
     return ak.highlevel.Record
 
 
 def reducer_recordclass(reducer, layout, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     rec = layout.parameter("__record__")
     if isstr(rec):
-        return behavior[reducer.highlevel_function(), rec]
+        return behavior.get((reducer.highlevel_function(), rec))
 
 
 def typestrs(behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     out = {}
     for key, typestr in behavior.items():
         if (
@@ -621,20 +294,20 @@ def gettypestr(parameters, typestrs):
 
 
 def numba_record_typer(layouttype, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
-        typer = behavior["__numba_typer__", rec]
+        typer = behavior.get(("__numba_typer__", rec))
         if callable(typer):
             return typer
     return None
 
 
 def numba_record_lower(layouttype, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
-        lower = behavior["__numba_lower__", rec]
+        lower = behavior.get(("__numba_lower__", rec))
         if callable(lower):
             return lower
     return None
@@ -642,7 +315,7 @@ def numba_record_lower(layouttype, behavior):
 
 def overload(behavior, signature):
     if not any(s is None for s in signature):
-        behavior = Behavior(ak.behavior, behavior)
+        behavior = overlay_behavior(behavior)
         for key, custom in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -660,7 +333,7 @@ def overload(behavior, signature):
 
 
 def numba_attrs(layouttype, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
         for key, typer in behavior.items():
@@ -675,7 +348,7 @@ def numba_attrs(layouttype, behavior):
 
 
 def numba_methods(layouttype, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
     if isstr(rec):
         for key, typer in behavior.items():
@@ -691,7 +364,7 @@ def numba_methods(layouttype, behavior):
 
 
 def numba_unaryops(unaryop, left, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     done = False
 
     if isinstance(left, ak._connect.numba.layout.ContentType):
@@ -713,7 +386,7 @@ def numba_unaryops(unaryop, left, behavior):
 
 
 def numba_binops(binop, left, right, behavior):
-    behavior = Behavior(ak.behavior, behavior)
+    behavior = overlay_behavior(behavior)
     done = False
 
     if isinstance(left, ak._connect.numba.layout.ContentType):
@@ -799,7 +472,7 @@ def extra(args, kwargs, defaults):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = ak.nplike.of(unionarray)
+    nplike = ak.nplikes.nplike_of(unionarray)
 
     contents = []
     for layout in unionarray.contents:
@@ -938,13 +611,18 @@ expand_braces.regex = re.compile(r"\{[^\{\}]*\}")
 
 
 def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
-    np = ak.nplike.NumpyMetadata.instance()
-    numpy = ak.nplike.Numpy.instance()
+    np = ak.nplikes.NumpyMetadata.instance()
+    numpy = ak.nplikes.Numpy.instance()
 
     def recurse(array, mask=None):
+        if ak.nplikes.Jax.is_tracer(array):
+            raise ak._errors.wrap_error(
+                TypeError("Jax tracers cannot be used with `ak.from_arraylib`")
+            )
+
         if regulararray and len(array.shape) > 1:
             return ak.contents.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:])),
+                recurse(array.reshape((-1,) + array.shape[2:]), mask),
                 array.shape[1],
                 array.shape[0],
             )
@@ -1054,7 +732,7 @@ def to_arraylib(module, array, allow_missing):
             return _impl(array.layout)
 
         elif isinstance(array, ak.highlevel.Record):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(f"{module.__name__} does not support record structures")
             )
 
@@ -1068,7 +746,7 @@ def to_arraylib(module, array, allow_missing):
             "bytestring",
             "string",
         ):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(f"{module.__name__} does not support arrays of strings")
             )
 
@@ -1085,7 +763,7 @@ def to_arraylib(module, array, allow_missing):
             tags = module.asarray(array.tags)
             for tag, content in enumerate(contents):
                 mask = tags == tag
-                if type(out).__module__.startswith("jaxlib."):
+                if ak.nplikes.Jax.is_own_array(out):
                     out = out.at[mask].set(content)
                 else:
                     out[mask] = content
@@ -1099,7 +777,7 @@ def to_arraylib(module, array, allow_missing):
 
             mask0 = array.mask_as_bool(valid_when=False)
             if mask0.any():
-                raise ak._util.error(
+                raise ak._errors.wrap_error(
                     ValueError(f"{module.__name__} does not support masked arrays")
                 )
             else:
@@ -1114,8 +792,8 @@ def to_arraylib(module, array, allow_missing):
         elif isinstance(array, (ak.contents.ListArray, ak.contents.ListOffsetArray)):
             return _impl(array.toRegularArray())
 
-        elif isinstance(array, ak.contents.recordarray.RecordArray):
-            raise ak._util.error(
+        elif isinstance(array, ak.contents.RecordArray):
+            raise ak._errors.wrap_error(
                 ValueError(f"{module.__name__} does not support record structures")
             )
 
@@ -1123,7 +801,7 @@ def to_arraylib(module, array, allow_missing):
             return module.asarray(array.data)
 
         elif isinstance(array, ak.contents.Content):
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AssertionError(f"unrecognized Content type: {type(array)}")
             )
 
@@ -1131,7 +809,7 @@ def to_arraylib(module, array, allow_missing):
             return module.asarray(array)
 
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 ValueError(f"cannot convert {array} into {type(module.array([]))}")
             )
 
@@ -1145,6 +823,6 @@ def to_arraylib(module, array, allow_missing):
         else:
             return module.asarray(array)
     else:
-        raise ak._util.error(
+        raise ak._errors.wrap_error(
             ValueError(f"{module.__name__} is not supported by to_arraylib")
         )

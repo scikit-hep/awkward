@@ -6,8 +6,8 @@ import numba
 
 import awkward as ak
 
-np = ak.nplike.NumpyMetadata.instance()
-numpy = ak.nplike.Numpy.instance()
+np = ak.nplikes.NumpyMetadata.instance()
+numpy = ak.nplikes.Numpy.instance()
 
 
 @numba.extending.typeof_impl.register(ak.contents.Content)
@@ -57,7 +57,7 @@ class ContentType(numba.types.Type):
         elif arraytype.dtype.bitwidth == 64:
             return ak.index.Index64
         else:
-            raise ak._util.error(
+            raise ak._errors.wrap_error(
                 AssertionError(f"no Index* type for array: {arraytype}")
             )
 
