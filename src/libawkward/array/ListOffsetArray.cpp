@@ -1490,12 +1490,12 @@ namespace awkward {
                                                      outcontent);
 
       if (keepdims) {
-        out = RegularArray(Identities::none(),
+        out = std::make_shared<RegularArray>(Identities::none(),
                            util::Parameters(),
                            out,
                            1,
                            length()
-              ).toListOffsetArray64(false).get()->shallow_copy();
+              );
       }
 
       return out;
@@ -1524,7 +1524,7 @@ namespace awkward {
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
 
-      ContentPtr outcontent = trimmed.get()->reduce_next(reducer,
+      ContentPtr outcontent = trimmed->reduce_next(reducer,
                                                          negaxis,
                                                          util::make_starts(offsets_),
                                                          shifts,
@@ -1542,9 +1542,11 @@ namespace awkward {
         outlength);
       util::handle_error(err3, classname(), identities_.get());
 
-      if (keepdims  &&  (!represents_regular_  ||  content_.get()->dimension_optiontype())) {
+      if (keepdims  &&  (branchdepth.second == negaxis + 1)) {
+        // assert is regular array
+      } else if (branchdepth.second >= negaxis + 2) {
         if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
-          outcontent = raw->toListOffsetArray64(false).get()->shallow_copy();
+          outcontent = raw->toListOffsetArray64(false);
         }
       }
 
