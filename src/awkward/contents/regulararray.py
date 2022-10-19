@@ -1130,19 +1130,25 @@ class RegularArray(Content):
             # the result can be reinterpreted as a `RegularArray`, because it's not the immediate parent
             # of the reduction, so it must exist in the type.
             elif depth >= negaxis + 2:
-                assert outcontent.is_ListType or outcontent.is_RegularType
-                # Fast-path to convert data that we know should be regular (avoid a kernel call)
-                start, stop = (
-                    outcontent.offsets[0],
-                    outcontent.offsets[outcontent.offsets.length - 1],
-                )
-                trimmed = outcontent.content._getitem_range(slice(start, stop))
-                assert len(trimmed) == self._size * len(outcontent)
-                outcontent = ak.contents.RegularArray(
-                    trimmed,
-                    size=self._size,
-                    zeros_length=len(self),
-                )
+                if outcontent.is_ListType:
+                    # Let's only deal with ListOffsetArray
+                    outcontent = outcontent.toListOffsetArray64(False)
+                    # Fast-path to convert data that we know should be regular (avoid a kernel call)
+                    start, stop = (
+                        outcontent.offsets[0],
+                        outcontent.offsets[outcontent.offsets.length - 1],
+                    )
+
+                    trimmed = outcontent.content._getitem_range(slice(start, stop))
+                    assert len(trimmed) == self._size * len(outcontent)
+
+                    outcontent = ak.contents.RegularArray(
+                        trimmed,
+                        size=self._size,
+                        zeros_length=len(self),
+                    )
+                else:
+                    assert outcontent.is_RegularType
 
             outoffsets = ak.index.Index64.empty(outlength + 1, self._nplike)
             assert outoffsets.nplike is self._nplike and parents.nplike is self._nplike
