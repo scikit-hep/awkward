@@ -1640,10 +1640,13 @@ class ListOffsetArray(Content):
 
             # `outcontent` represents *this* layout in the reduction
             # If this layout survives in the reduction (see `if` below), then we want
-            # to ensure that we have a ragged list type.
-            if (keepdims and depth == negaxis + 1) or (depth > negaxis + 1):
+            # to ensure that we have a ragged list type (unless it's a `keepdims=True` layout)
+            if keepdims and depth == negaxis + 1:
+                # Don't convert the `RegularArray()` to a `ListOffsetArray`,
+                # means this will be broadcastable
+                assert outcontent.is_RegularType
+            elif depth >= negaxis + 2:
                 assert outcontent.is_ListType or outcontent.is_RegularType
-                # Determined by self._content._reduce_next(..., len(self), ...)
                 outcontent = outcontent.toListOffsetArray64(False)
 
             return ak.contents.ListOffsetArray(

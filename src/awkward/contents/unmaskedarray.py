@@ -485,11 +485,7 @@ class UnmaskedArray(Content):
         keepdims,
         behavior,
     ):
-        next = self._content
-        if isinstance(next, ak.contents.RegularArray):
-            next = next.toListOffsetArray64(True)
-
-        return next._reduce_next(
+        return self._content._reduce_next(
             reducer,
             negaxis,
             starts,

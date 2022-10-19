@@ -1080,6 +1080,7 @@ class RegularArray(Content):
                     nplike=self._nplike,
                 )
             else:
+                assert len(nextparents) == 0
                 nextstarts = ak.index.Index64(
                     self._nplike.index_nplike.zeros(0),
                     nplike=self._nplike,
@@ -1106,32 +1107,39 @@ class RegularArray(Content):
             # This corresponds to `RegularArray(NumpyArray(5*4), size=4)`, i.e. the `size=3` layout
             # *disappears*, and is replaced by the bare reduction `NumpyArray`. Therefore, if
             # this layout is _directly_ above the reduction, it won't survive the reduction.
+            #
             # The `_reduce_next` mechanism returns its first result (by recursion) from the
-            # leaf `NumpyArray`. The parent `RegularArray` takes the `negaxis != depth`branch,
-            # and asks the `NumpyArray` to perform the reduction. The `_reduce_next` is such the
+            # leaf `NumpyArray`. The parent `RegularArray` takes the `negaxis != depth` branch,
+            # and asks the `NumpyArray` to perform the reduction. The `_reduce_next` is such that the
             # callee must wrap the reduction result into a list whose length is given by the *caller*,
-            # i.e. the parent. Therefore, the `RegularArray(..., size=3)` layout asks for a reduction
-            # result of length `outlength=len(self)=5*4`. The parent of this `RegularArray` (with `size=4`)
-            # will request a reduction of `outlength=5`. It is *this* reduction that must be returned as a
+            # i.e. the parent. Therefore, the `RegularArray(..., size=3)` layout reduces its content with
+            # `outlength=len(self)=5*4`. The parent of this `RegularArray` (with `size=4`)
+            # will reduce its contents with `outlength=5`. It is *this* reduction that must be returned as a
             # `RegularArray(..., size=4)`. Clearly, the `RegularArray(..., size=3)` layout has disappeared
             # and been replaced by a `NumpyArray` of the appropriate size for the `RegularArray(..., size=4)`
             # to wrap. Hence, we only want to interpret the content as a `RegularArray(..., size=self._size)`
-            # iff. we are not the direct parent of #the reduced layout. If `keepdims=True`, then we can also
-            # wrap the result if we are the direct parent, because the child has introduced a new `RegularArray`
-            # node that takes our place. We need to detect this and use the correct size.
+            # iff. we are not the direct parent of the reduced layout.
+
+            # At `depth == negaxis+1`, we are above the dimension being reduced. All implemented
+            # _dimensional_ types should return `RegularArray` for `keepdims=True`, so we don't need
+            # to convert `outcontent` to a `RegularArray`
             if keepdims and depth == negaxis + 1:
+                assert outcontent.is_RegularType
+            # At `depth >= negaxis + 2`, we are wrapping at _least_ one other list type. This list-type
+            # may return a ListOffsetArray, which we need to convert to a `RegularArray`. We know that
+            # the result can be reinterpreted as a `RegularArray`, because it's not the immediate parent
+            # of the reduction, so it must exist in the type.
+            elif depth >= negaxis + 2:
                 assert outcontent.is_ListType or outcontent.is_RegularType
-                # Determined by self._content._reduce_next(..., len(self), ...)
-                outcontent = ak.contents.RegularArray(
-                    outcontent.content,
-                    size=1,
-                    zeros_length=len(self),
+                # Fast-path to convert data that we know should be regular (avoid a kernel call)
+                start, stop = (
+                    outcontent.offsets[0],
+                    outcontent.offsets[outcontent.offsets.length - 1],
                 )
-            elif depth > negaxis + 1:
-                assert outcontent.is_ListType or outcontent.is_RegularType
-                # Determined by self._content._reduce_next(..., len(self), ...)
+                trimmed = outcontent.content._getitem_range(slice(start, stop))
+                assert len(trimmed) == self._size * len(outcontent)
                 outcontent = ak.contents.RegularArray(
-                    outcontent.content,
+                    trimmed,
                     size=self._size,
                     zeros_length=len(self),
                 )
