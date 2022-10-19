@@ -549,6 +549,20 @@ namespace awkward {
       int64_t lencarry,
       int64_t size);
 
+    ERROR RegularArray_reduce_local_nextparents_64(
+        kernel::lib ptr_lib,
+        int64_t* nextparents,
+        int64_t size,
+        int64_t length);
+
+    ERROR RegularArray_reduce_nonlocal_preparenext_64(
+        kernel::lib ptr_lib,
+        int64_t* nextcarry,
+        int64_t* nextparents,
+        const int64_t* parents,
+        int64_t size,
+        int64_t length);
+
     template <typename T>
     ERROR IndexedArray_numnull(
       kernel::lib ptr_lib,

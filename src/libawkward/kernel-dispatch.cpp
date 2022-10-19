@@ -2444,6 +2444,57 @@ namespace awkward {
       }
     }
 
+    ERROR RegularArray_reduce_local_nextparents_64(
+        kernel::lib ptr_lib,
+        int64_t* nextparents,
+        int64_t size,
+        int64_t length) {
+
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_RegularArray_reduce_local_nextparents_64(
+            nextparents,
+            size,
+            length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+            std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_reduce_local_nextparents_64")
+            + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+            std::string("unrecognized ptr_lib for RegularArray_reduce_local_nextparents_64")
+            + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR RegularArray_reduce_nonlocal_preparenext_64(
+        kernel::lib ptr_lib,
+        int64_t* nextcarry,
+        int64_t* nextparents,
+        const int64_t* parents,
+        int64_t size,
+        int64_t length){
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_RegularArray_reduce_nonlocal_preparenext_64(
+            nextcarry,
+            nextparents,
+            parents,
+            size,
+            length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+            std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_reduce_nonlocal_preparenext_64")
+            + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+            std::string("unrecognized ptr_lib for RegularArray_reduce_nonlocal_preparenext_64")
+            + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR IndexedArray_numnull<int32_t>(
       kernel::lib ptr_lib,
