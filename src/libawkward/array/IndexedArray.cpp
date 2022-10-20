@@ -2300,7 +2300,7 @@ namespace awkward {
 
     }
 
-    return out;q
+    return out;
   }
 
   template <typename T, bool ISOPTION>
