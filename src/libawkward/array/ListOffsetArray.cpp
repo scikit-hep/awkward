@@ -1543,7 +1543,12 @@ namespace awkward {
       util::handle_error(err3, classname(), identities_.get());
 
       if (keepdims  &&  (branchdepth.second == negaxis + 1)) {
-        // assert is regular array
+        if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false);
+        } else {
+          throw std::invalid_argument(
+              std::string("expected regulararray") + FILENAME(__LINE__));
+        }
       } else if (branchdepth.second >= negaxis + 2) {
         if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
           outcontent = raw->toListOffsetArray64(false);
