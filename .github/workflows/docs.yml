@@ -117,6 +117,9 @@ jobs:
         name: jupyter-cache
         path: docs-sphinx/_build/.jupyter_cache
     - name: Trigger RTD Build
-      if: github.ref_name != 'main'
-      # NB: head_ref is only valid for PR triggers
-      run: curl -X POST -d "branches=${{ github.head_ref || github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
+      env:
+          RTD_TOKEN: "${{ secrets.RTD_TOKEN }}"
+      run: |
+        # NB: head_ref is only valid for PR triggers
+        python3 dev/activate-docs-version.py "${{ github.head_ref || github.ref_name }}"
+        python3 dev/trigger-docs-build.py "${{ github.head_ref || github.ref_name }}"
