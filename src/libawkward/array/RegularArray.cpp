@@ -1074,12 +1074,14 @@ namespace awkward {
                                  FILENAME(__LINE__));
       }
       Index64 nextstarts(length());
-      struct Error err1 =
-          kernel::RegularArray_compact_offsets_64(kernel::lib::cpu,  // DERIVE
-                                                  nextstarts.data(),
-                                                  length()-1,
-                                                  size());
-      util::handle_error(err1, classname(), identities_.get());
+      if (length() > 0) {
+        struct Error err1 =
+            kernel::RegularArray_compact_offsets_64(kernel::lib::cpu,  // DERIVE
+                                                    nextstarts.data(),
+                                                    length() - 1,
+                                                    size());
+        util::handle_error(err1, classname(), identities_.get());
+      }
 
       Index64 nextcarry(nextlen);
       Index64 nextparents(nextlen);
@@ -1133,12 +1135,14 @@ namespace awkward {
       util::handle_error(err1, classname(), identities_.get());
 
       Index64 nextstarts(size() > 0 ? length() : 0);
-      struct Error err2 =
-          kernel::RegularArray_compact_offsets_64(kernel::lib::cpu,  // DERIVE
-                                                  nextstarts.data(),
-                                                  length()-1,
-                                                  size());
-      util::handle_error(err2, classname(), identities_.get());
+      if (length() > 0) {
+        struct Error err2 =
+            kernel::RegularArray_compact_offsets_64(kernel::lib::cpu,  // DERIVE
+                                                    nextstarts.data(),
+                                                    length() - 1,
+                                                    size());
+        util::handle_error(err2, classname(), identities_.get());
+      }
 
       ContentPtr outcontent = content_->reduce_next(reducer,
                                                           negaxis,
