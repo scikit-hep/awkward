@@ -117,8 +117,8 @@ def test_keepdims():
     assert to_list(axis1) == np.sum(nparray, axis=-1, keepdims=True).tolist()
     assert to_list(axis2) == np.sum(nparray, axis=-2, keepdims=True).tolist()
     assert to_list(axis3) == np.sum(nparray, axis=-3, keepdims=True).tolist()
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * 1 * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
 
     assert str(ak._v2.highlevel.Array(listoffset_regular).type) == "2 * var * 5 * int64"
@@ -129,7 +129,7 @@ def test_keepdims():
     assert to_list(axis2) == np.sum(nparray, axis=-2, keepdims=True).tolist()
     assert to_list(axis3) == np.sum(nparray, axis=-3, keepdims=True).tolist()
     assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * 1 * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * 5 * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * 5 * int64"
 
     assert str(ak._v2.highlevel.Array(regular_listoffset).type) == "2 * 3 * var * int64"
@@ -139,7 +139,7 @@ def test_keepdims():
     assert to_list(axis1) == np.sum(nparray, axis=-1, keepdims=True).tolist()
     assert to_list(axis2) == np.sum(nparray, axis=-2, keepdims=True).tolist()
     assert to_list(axis3) == np.sum(nparray, axis=-3, keepdims=True).tolist()
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * 1 * int64"
     assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * var * int64"
 
@@ -215,8 +215,8 @@ def test_nokeepdims_none1():
     axis2 = ak._v2.operations.sum(listoffset_regular, axis=-2)
     axis3 = ak._v2.operations.sum(listoffset_regular, axis=-3)
     assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * 5 * int64"
 
     assert (
         str(ak._v2.highlevel.Array(regular_listoffset).type) == "2 * 3 * var * ?int64"
@@ -233,8 +233,8 @@ def test_nokeepdims_none1():
     axis2 = ak._v2.operations.sum(regular_regular, axis=-2)
     axis3 = ak._v2.operations.sum(regular_regular, axis=-3)
     assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * 5 * int64"
 
 
 def test_keepdims_none1():
@@ -286,8 +286,8 @@ def test_keepdims_none1():
     axis1 = ak._v2.operations.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(listoffset_listoffset, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * 1 * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
 
     assert (
@@ -296,9 +296,9 @@ def test_keepdims_none1():
     axis1 = ak._v2.operations.sum(listoffset_regular, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(listoffset_regular, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(listoffset_regular, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * 1 * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * 5 * int64"
 
     assert (
         str(ak._v2.highlevel.Array(regular_listoffset).type) == "2 * 3 * var * ?int64"
@@ -306,7 +306,7 @@ def test_keepdims_none1():
     axis1 = ak._v2.operations.sum(regular_listoffset, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(regular_listoffset, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(regular_listoffset, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * 1 * int64"
     assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * var * int64"
 
@@ -314,9 +314,9 @@ def test_keepdims_none1():
     axis1 = ak._v2.operations.sum(regular_regular, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(regular_regular, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(regular_regular, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * 1 * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * 5 * int64"
 
 
 def test_nokeepdims_mask1():
@@ -386,8 +386,8 @@ def test_nokeepdims_mask1():
     axis2 = ak._v2.operations.sum(listoffset_regular, axis=-2)
     axis3 = ak._v2.operations.sum(listoffset_regular, axis=-3)
     assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * 5 * int64"
 
     assert (
         str(ak._v2.highlevel.Array(regular_listoffset).type) == "2 * 3 * var * ?int64"
@@ -404,8 +404,8 @@ def test_nokeepdims_mask1():
     axis2 = ak._v2.operations.sum(regular_regular, axis=-2)
     axis3 = ak._v2.operations.sum(regular_regular, axis=-3)
     assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * 5 * int64"
 
 
 def test_keepdims_mask1():
@@ -464,8 +464,8 @@ def test_keepdims_mask1():
     axis1 = ak._v2.operations.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(listoffset_listoffset, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * 1 * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
 
     assert (
@@ -474,9 +474,9 @@ def test_keepdims_mask1():
     axis1 = ak._v2.operations.sum(listoffset_regular, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(listoffset_regular, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(listoffset_regular, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * 1 * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * 5 * int64"
 
     assert (
         str(ak._v2.highlevel.Array(regular_listoffset).type) == "2 * 3 * var * ?int64"
@@ -484,7 +484,7 @@ def test_keepdims_mask1():
     axis1 = ak._v2.operations.sum(regular_listoffset, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(regular_listoffset, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(regular_listoffset, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * 1 * int64"
     assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * var * int64"
 
@@ -492,9 +492,9 @@ def test_keepdims_mask1():
     axis1 = ak._v2.operations.sum(regular_regular, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(regular_regular, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(regular_regular, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * 1 * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * 5 * int64"
 
 
 def test_nokeepdims_mask2():
@@ -534,8 +534,8 @@ def test_nokeepdims_mask2():
     axis2 = ak._v2.operations.sum(listoffset_regular, axis=-2)
     axis3 = ak._v2.operations.sum(listoffset_regular, axis=-3)
     assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * ?int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * 5 * int64"
 
     assert (
         str(ak._v2.highlevel.Array(regular_listoffset).type)
@@ -544,7 +544,7 @@ def test_nokeepdims_mask2():
     axis1 = ak._v2.operations.sum(regular_listoffset, axis=-1)
     axis2 = ak._v2.operations.sum(regular_listoffset, axis=-2)
     axis3 = ak._v2.operations.sum(regular_listoffset, axis=-3)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * ?int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * ?int64"
     assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "3 * var * int64"
 
@@ -554,9 +554,9 @@ def test_nokeepdims_mask2():
     axis1 = ak._v2.operations.sum(regular_regular, axis=-1)
     axis2 = ak._v2.operations.sum(regular_regular, axis=-2)
     axis3 = ak._v2.operations.sum(regular_regular, axis=-3)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * ?int64"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * ?int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "3 * 5 * int64"
 
 
 def test_keepdims_mask2():
@@ -584,8 +584,8 @@ def test_keepdims_mask2():
     axis1 = ak._v2.operations.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(listoffset_listoffset, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * option[var * int64]"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * option[1 * int64]"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
 
     assert (
@@ -596,8 +596,8 @@ def test_keepdims_mask2():
     axis2 = ak._v2.operations.sum(listoffset_regular, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(listoffset_regular, axis=-3, keepdims=True)
     assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * option[1 * int64]"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * 5 * int64"
 
     assert (
         str(ak._v2.highlevel.Array(regular_listoffset).type)
@@ -606,9 +606,9 @@ def test_keepdims_mask2():
     axis1 = ak._v2.operations.sum(regular_listoffset, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(regular_listoffset, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(regular_listoffset, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * option[var * int64]"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * option[1 * int64]"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * var * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * var * int64"
 
     assert (
         str(ak._v2.highlevel.Array(regular_regular).type) == "2 * 3 * option[5 * int64]"
@@ -616,9 +616,9 @@ def test_keepdims_mask2():
     axis1 = ak._v2.operations.sum(regular_regular, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(regular_regular, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(regular_regular, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * var * option[1 * int64]"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * var * var * int64"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * 3 * option[1 * int64]"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * 1 * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * 5 * int64"
 
 
 def test_nokeepdims_mask3():
@@ -672,7 +672,7 @@ def test_nokeepdims_mask3():
     axis1 = ak._v2.operations.sum(regular_listoffset, axis=-1)
     axis2 = ak._v2.operations.sum(regular_listoffset, axis=-2)
     axis3 = ak._v2.operations.sum(regular_listoffset, axis=-3)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[var * int64]"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[3 * int64]"
     assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[var * int64]"
     assert str(ak._v2.highlevel.Array(axis3).type) == "3 * var * int64"
 
@@ -682,7 +682,7 @@ def test_nokeepdims_mask3():
     axis1 = ak._v2.operations.sum(regular_regular, axis=-1)
     axis2 = ak._v2.operations.sum(regular_regular, axis=-2)
     axis3 = ak._v2.operations.sum(regular_regular, axis=-3)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[var * int64]"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[3 * int64]"
     assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[5 * int64]"
     assert str(ak._v2.highlevel.Array(axis3).type) == "3 * 5 * int64"
 
@@ -716,8 +716,8 @@ def test_keepdims_mask3():
     axis1 = ak._v2.operations.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(listoffset_listoffset, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[var * var * int64]"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[var * var * int64]"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[var * 1 * int64]"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[1 * var * int64]"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
 
     assert (
@@ -728,7 +728,7 @@ def test_keepdims_mask3():
     axis2 = ak._v2.operations.sum(listoffset_regular, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(listoffset_regular, axis=-3, keepdims=True)
     assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[var * 1 * int64]"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[var * 5 * int64]"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[1 * 5 * int64]"
     assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * 5 * int64"
 
     assert (
@@ -738,9 +738,9 @@ def test_keepdims_mask3():
     axis1 = ak._v2.operations.sum(regular_listoffset, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(regular_listoffset, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(regular_listoffset, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[var * var * int64]"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[var * var * int64]"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * var * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[3 * 1 * int64]"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[1 * var * int64]"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * var * int64"
 
     assert (
         str(ak._v2.highlevel.Array(regular_regular).type) == "2 * option[3 * 5 * int64]"
@@ -748,6 +748,6 @@ def test_keepdims_mask3():
     axis1 = ak._v2.operations.sum(regular_regular, axis=-1, keepdims=True)
     axis2 = ak._v2.operations.sum(regular_regular, axis=-2, keepdims=True)
     axis3 = ak._v2.operations.sum(regular_regular, axis=-3, keepdims=True)
-    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[var * 1 * int64]"
-    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[var * 5 * int64]"
-    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * var * 5 * int64"
+    assert str(ak._v2.highlevel.Array(axis1).type) == "2 * option[3 * 1 * int64]"
+    assert str(ak._v2.highlevel.Array(axis2).type) == "2 * option[1 * 5 * int64]"
+    assert str(ak._v2.highlevel.Array(axis3).type) == "1 * 3 * 5 * int64"
