@@ -152,7 +152,7 @@ subprocess.check_call(
 )
 
 # Generate Python docstrings
-runpy.run_path(HERE / "prepare_docstrings.py")
+runpy.run_path(HERE / "prepare_docstrings.py", run_name="__main__")
 
 # Generate kernel docs
-runpy.run_path(HERE.parent / "dev" / "generate-kerneldocs.py")
+runpy.run_path(HERE.parent / "dev" / "generate-kerneldocs.py", run_name="__main__")
