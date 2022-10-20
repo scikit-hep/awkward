@@ -1155,21 +1155,6 @@ namespace awkward {
               std::string("expected regular array for keepdims=true") +
               FILENAME(__LINE__));
       } else if (branchdepth.second >= negaxis + 2) {
-        if (ListArray32* raw = dynamic_cast<ListArray32*>(outcontent.get())) {
-          outcontent = raw->toListOffsetArray64(false);
-        } else if (ListArrayU32* raw =
-                       dynamic_cast<ListArrayU32*>(outcontent.get())) {
-          outcontent = raw->toListOffsetArray64(false);
-        } else if (ListArray64* raw = dynamic_cast<ListArray64*>(outcontent.get())) {
-          outcontent = raw->toListOffsetArray64(false);
-        } else if (ListOffsetArray32* raw =
-                       dynamic_cast<ListOffsetArray32*>(outcontent.get())) {
-          outcontent = raw->toListOffsetArray64(false);
-        } else if (ListOffsetArrayU32* raw =
-                       dynamic_cast<ListOffsetArrayU32*>(outcontent.get())) {
-          outcontent = raw->toListOffsetArray64(false);
-        }
-
         if (ListOffsetArray64* raw =
                 dynamic_cast<ListOffsetArray64*>(outcontent.get())) {
           outcontent = std::make_shared<RegularArray>(
