@@ -1588,7 +1588,7 @@ class ListOffsetArray(Content):
                     None,
                     None,
                     self._nplike,
-                ).toListOffsetArray64(False)
+                )
 
             return out
 
