@@ -910,8 +910,7 @@ namespace awkward {
                              int64_t outlength,
                              bool mask,
                              bool keepdims) const {
-    ContentPtr next = content_;
-    return next.get()->reduce_next(reducer,
+    return content_.get()->reduce_next(reducer,
                                    negaxis,
                                    starts,
                                    shifts,
