@@ -3014,11 +3014,7 @@ namespace awkward {
   const SliceItemPtr
   NumpyArray::asslice() const {
     if (ndim() != 1) {
-      throw std::invalid_argument(
-        std::string("slice items can have all fixed-size dimensions (to follow "
-                    "NumPy's slice rules) or they can have all var-sized "
-                    "dimensions (for jagged indexing), but not both in the "
-                    "same slice item") + FILENAME(__LINE__));
+      return toRegularArray()->asslice();
     }
     if (dtype_ == util::dtype::int64) {
         int64_t* raw = reinterpret_cast<int64_t*>(ptr_.get());
