@@ -145,9 +145,10 @@ jobs:
           -X POST \
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
               "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
+    - run: env
     - name: Edit PR description
       uses: actions/github-script@v6
       with:
         script: |
             const script = require('./dev/docs-edit-message.js');
-            console.log(script({github, context}));
+            console.log(script(github, context, "${{ env.VERSION_SLUG }}"));
