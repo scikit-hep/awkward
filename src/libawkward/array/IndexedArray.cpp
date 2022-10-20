@@ -2251,42 +2251,13 @@ namespace awkward {
       return out;
     }
     else {
-      if (RegularArray* raw =
-          dynamic_cast<RegularArray*>(out.get())) {
-        out = raw->toListOffsetArray64(true);
+      ContentPtr outcontent;
+      if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
+        outcontent = raw->content();
       }
-      if (ListOffsetArray64* raw =
+      else if (ListOffsetArray64* raw =
           dynamic_cast<ListOffsetArray64*>(out.get())) {
-        Index64 outoffsets(starts.length() + 1);
-        if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
-          throw std::runtime_error(
-            std::string("reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray64 whose offsets start at zero ")
-            + FILENAME(__LINE__));
-        }
-        struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
-          kernel::lib::cpu,   // DERIVE
-          outoffsets.data(),
-          starts.data(),
-          starts.length(),
-          outindex.length());
-        util::handle_error(err4, classname(), identities_.get());
-
-        return std::make_shared<ListOffsetArray64>(
-          raw->identities(),
-          raw->parameters(),
-          outoffsets,
-          ISOPTION ?
-            IndexedOptionArray64(Identities::none(),
-                                 util::Parameters(),
-                                 outindex,
-                                 raw->content()).simplify_optiontype()
-          :
-            IndexedArray64(Identities::none(),
-                           util::Parameters(),
-                           outindex,
-                           raw->content()).simplify_optiontype()
-          );
+        outcontent = raw->content();
       }
       else {
         throw std::runtime_error(
@@ -2295,9 +2266,41 @@ namespace awkward {
                       "instead, it returned ") + out.get()->classname()
           + FILENAME(__LINE__));
       }
+
+    Index64 outoffsets(starts.length() + 1);
+    if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
+      throw std::runtime_error(
+          std::string("reduce_next with unbranching depth > negaxis expects a "
+                      "ListOffsetArray64 whose offsets start at zero ")
+          + FILENAME(__LINE__));
+    }
+    struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+        kernel::lib::cpu,   // DERIVE
+        outoffsets.data(),
+        starts.data(),
+        starts.length(),
+        outindex.length());
+    util::handle_error(err4, classname(), identities_.get());
+
+      out = std::make_shared<ListOffsetArray64>(
+          out->identities(),
+          out->parameters(),
+          outoffsets,
+          ISOPTION ?
+             IndexedOptionArray64(Identities::none(),
+                                  util::Parameters(),
+                                  outindex,
+                                  outcontent).simplify_optiontype()
+             :
+             IndexedArray64(Identities::none(),
+                            util::Parameters(),
+                            outindex,
+                                outcontent).simplify_optiontype()
+      );
+
     }
 
-    return out;
+    return out;q
   }
 
   template <typename T, bool ISOPTION>
