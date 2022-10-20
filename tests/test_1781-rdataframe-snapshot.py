@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import os
+
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
@@ -11,7 +13,9 @@ ROOT = pytest.importorskip("ROOT")
 compiler = ROOT.gInterpreter.Declare
 
 
-def test_data_frame_integers():
+def test_data_frame_integers(tmp_path):
+    filename = os.path.join(tmp_path, "test-integers.root")
+
     ak_array_x = ak.Array([1, 2, 3, 4, 5])
     ak_array_y = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5])
 
@@ -27,10 +31,12 @@ def test_data_frame_integers():
     assert ak_array_x.to_list() == ak_array_out["x"].to_list()
     assert ak_array_y.to_list() == ak_array_out["y"].to_list()
 
-    data_frame.Snapshot("Test", "test-integers.root", ("x", "y"))
+    data_frame.Snapshot("Test", filename, ("x", "y"))
 
 
-def test_data_frame_vec_of_vec_of_real():
+def test_data_frame_vec_of_vec_of_real(tmp_path):
+    filename = os.path.join(tmp_path, "test-listarray.root")
+
     ak_array_in = ak.Array([[[1.1], [2.2]], [[3.3], [4.4, 5.5]]])
 
     data_frame = ak.to_rdataframe({"x": ak_array_in})
@@ -44,10 +50,12 @@ def test_data_frame_vec_of_vec_of_real():
     assert ak_array_in.to_list() == ak_array_out["x"].to_list()
 
     with pytest.raises(SystemError):
-        data_frame.Snapshot("ListArray", "test-listarray.root", ("x",))
+        data_frame.Snapshot("ListArray", filename, ("x",))
 
 
-def test_data_frame_rvec_filter():
+def test_data_frame_rvec_filter(tmp_path):
+    filename = os.path.join(tmp_path, "test-listarray2.root")
+
     ak_array_x = ak.Array([[1, 2], [3], [4, 5]])
     ak_array_y = ak.Array([[1.0, 1.1], [2.2, 3.3, 4.4], [5.5]])
 
@@ -80,7 +88,7 @@ def test_data_frame_rvec_filter():
 
     data_frame.Snapshot(
         "ListArray",
-        "test-listarray.root",
+        filename,
         (
             "x",
             "y",

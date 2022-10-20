@@ -24,15 +24,18 @@ yarn.lock
 
 array*.parquet
 
-############################################################# JupyterBook and Doxygen
+############################################################# Sphinx & Doxygen
 
 docs/.sass-cache
 docs/_site
 docs-mkdocs/docs
 docs-sphinx/_build
-docs-sphinx/_static
-docs-sphinx/_auto
-docs-src/_build
+docs-sphinx/_static/doxygen
+docs-sphinx/reference/generated
+docs-sphinx/release/*
+!docs-sphinx/release/.gitignore
+docs-sphinx/.jupyter_cache
+docs-sphinx/jupyter_execute
 
 ############################################################# IDEs
 .idea

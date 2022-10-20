@@ -9,7 +9,7 @@
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
-[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.org)
+[![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.readthedocs.io/)
 [![Gitter](https://img.shields.io/badge/chat-online-success)](https://gitter.im/Scikit-HEP/awkward-array)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
@@ -92,40 +92,7 @@ conda update --all
 ```
 
 # Getting help
-
-<table>
-  <tr>
-    <td width="66%" valign="top">
-      <a href="https://awkward-array.org">
-        <img src="docs-img/panel-tutorials.png" width="570">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.org">
-        How-to tutorials
-        </a>
-      </b></p>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="docs-img/panel-sphinx.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python API reference
-        </a>
-      </b></p>
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="docs-img/panel-doxygen.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++ API reference
-        </a>
-      </b></p>
-    </td>
-  </tr>
-</table>
-
+   * View the documentation on [ReadTheDocs](https://awkward-array.readthedocs.io/).
    * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward/issues).
    * If you have a "How do I...?" question, start a [GitHub Discussion](https://github.com/scikit-hep/awkward/discussions) with category "Q&A".
    * Alternatively, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
@@ -163,9 +130,8 @@ python -m pytest -vv -rs tests-spec
 python -m pytest -vv -rs tests-cpu-kernels
 ```
 
-   * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
+   * [Continuous integration](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml) and [continuous deployment](https://github.com/scikit-hep/awkward/actions/workflows/wheels.yml) are hosted by [GitHub Actions](https://github.com/features/actions/).
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
-   * [awkward-array.org](https://awkward-array.org) is hosted by [Netlify](https://www.netlify.com).
    * [CONTRIBUTING.md](CONTRIBUTING.md) for technical information on how to contribute.
    * [Code of conduct](https://scikit-hep.org/code-of-conduct) for how we work together.
    * The [LICENSE](LICENSE) is BSD-3.
