@@ -1004,7 +1004,7 @@ class RegularArray(Content):
         branch, depth = self.branch_depth
         nextlen = len(self) * self._size
 
-        if negaxis == depth and not branch:
+        if not branch and negaxis == depth:
             if self.size == 0:
                 nextstarts = ak._v2.index.Index64(
                     self._nplike.index_nplike.full(0, len(self)),
