@@ -127,7 +127,10 @@ jobs:
       run: |
         # Sanitise ref name
         # NB: head_ref is only valid for PR triggers
-        VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@")
+        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@")
+
+        # Export for subsequent steps
+        echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
 
         # Activate version
         curl \
@@ -147,5 +150,5 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-            const script = require('./dev/docs-edit-message.js')
-            console.log(script({github, context}))
+            const script = require('./dev/docs-edit-message.js');
+            console.log(script({github, context}));
