@@ -886,9 +886,6 @@ class ByteMaskedArray(Content):
             nextshifts = None
 
         next = self._content._carry(nextcarry, False)
-        if isinstance(next, ak._v2.contents.RegularArray):
-            next = next.toListOffsetArray64(True)
-
         out = next._reduce_next(
             reducer,
             negaxis,
@@ -904,41 +901,10 @@ class ByteMaskedArray(Content):
         if not branch and negaxis == depth:
             return out
         else:
-            if isinstance(out, ak._v2.contents.RegularArray):
-                out = out.toListOffsetArray64(True)
-
-            if isinstance(out, ak._v2.contents.ListOffsetArray):
-                outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
-                assert outoffsets.nplike is self._nplike
-                self._handle_error(
-                    self._nplike[
-                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
-                        outoffsets.dtype.type,
-                        starts.dtype.type,
-                    ](
-                        outoffsets.data,
-                        starts.data,
-                        starts.length,
-                        outindex.length,
-                    )
-                )
-
-                tmp = ak._v2.contents.IndexedOptionArray(
-                    outindex,
-                    out.content,
-                    None,
-                    None,
-                    self._nplike,
-                ).simplify_optiontype()
-
-                return ak._v2.contents.ListOffsetArray(
-                    outoffsets,
-                    tmp,
-                    None,
-                    None,
-                    self._nplike,
-                )
-
+            if out.is_ListType:
+                out_content = out.content[out.starts[0] :]
+            elif out.is_RegularType:
+                out_content = out.content
             else:
                 raise ak._v2._util.error(
                     ValueError(
@@ -947,6 +913,37 @@ class ByteMaskedArray(Content):
                         "instead, it returned " + out
                     )
                 )
+
+            outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
+            assert outoffsets.nplike is self._nplike
+            self._handle_error(
+                self._nplike[
+                    "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                    outoffsets.dtype.type,
+                    starts.dtype.type,
+                ](
+                    outoffsets.data,
+                    starts.data,
+                    starts.length,
+                    outindex.length,
+                )
+            )
+
+            tmp = ak._v2.contents.IndexedOptionArray(
+                outindex,
+                out_content,
+                None,
+                None,
+                self._nplike,
+            ).simplify_optiontype()
+
+            return ak._v2.contents.ListOffsetArray(
+                outoffsets,
+                tmp,
+                None,
+                None,
+                self._nplike,
+            )
 
     def _validity_error(self, path):
         if self._nplike.known_shape and self._content.length < self.mask.length:

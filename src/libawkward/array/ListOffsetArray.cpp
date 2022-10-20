@@ -255,12 +255,10 @@ namespace awkward {
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const IdentitiesPtr& identities,
                                           const util::Parameters& parameters,
                                           const IndexOf<T>& offsets,
-                                          const ContentPtr& content,
-                                          bool represents_regular)
+                                          const ContentPtr& content)
       : Content(identities, parameters)
       , offsets_(offsets)
-      , content_(content)
-      , represents_regular_(represents_regular) {
+      , content_(content) {
     if (offsets.length() == 0) {
       throw std::invalid_argument(
         std::string("ListOffsetArray offsets length must be at least 1")
@@ -1490,12 +1488,12 @@ namespace awkward {
                                                      outcontent);
 
       if (keepdims) {
-        out = RegularArray(Identities::none(),
+        out = std::make_shared<RegularArray>(Identities::none(),
                            util::Parameters(),
                            out,
                            1,
                            length()
-              ).toListOffsetArray64(false).get()->shallow_copy();
+              );
       }
 
       return out;
@@ -1524,7 +1522,7 @@ namespace awkward {
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
 
-      ContentPtr outcontent = trimmed.get()->reduce_next(reducer,
+      ContentPtr outcontent = trimmed->reduce_next(reducer,
                                                          negaxis,
                                                          util::make_starts(offsets_),
                                                          shifts,
@@ -1542,9 +1540,16 @@ namespace awkward {
         outlength);
       util::handle_error(err3, classname(), identities_.get());
 
-      if (keepdims  &&  (!represents_regular_  ||  content_.get()->dimension_optiontype())) {
+      if (keepdims  &&  (branchdepth.second == negaxis + 1)) {
         if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
-          outcontent = raw->toListOffsetArray64(false).get()->shallow_copy();
+          outcontent = raw->toListOffsetArray64(false);
+        } else {
+          throw std::invalid_argument(
+              std::string("expected regulararray") + FILENAME(__LINE__));
+        }
+      } else if (branchdepth.second >= negaxis + 2) {
+        if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false);
         }
       }
 

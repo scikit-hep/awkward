@@ -970,115 +970,18 @@ class IndexedArray(Content):
         keepdims,
         behavior,
     ):
-        branch, depth = self.branch_depth
-
-        index_length = self._index.length
-
-        nextcarry = ak._v2.index.Index64.empty(index_length, self._nplike)
-        nextparents = ak._v2.index.Index64.empty(index_length, self._nplike)
-        outindex = ak._v2.index.Index64.empty(index_length, self._nplike)
-        assert (
-            nextcarry.nplike is self._nplike
-            and nextparents.nplike is self._nplike
-            and outindex.nplike is self._nplike
-            and self._index.nplike is self._nplike
-            and parents.nplike is self._nplike
-        )
-        self._handle_error(
-            self._nplike[
-                "awkward_IndexedArray_reduce_next_64",
-                nextcarry.dtype.type,
-                nextparents.dtype.type,
-                outindex.dtype.type,
-                self._index.dtype.type,
-                parents.dtype.type,
-            ](
-                nextcarry.data,
-                nextparents.data,
-                outindex.data,
-                self._index.data,
-                parents.data,
-                index_length,
-            )
-        )
-        next = self._content._carry(nextcarry, False)
-        nextshifts = None
-        out = next._reduce_next(
+        next = self._content._carry(self._index, False)
+        return next._reduce_next(
             reducer,
             negaxis,
             starts,
-            nextshifts,
-            nextparents,
+            shifts,
+            parents,
             outlength,
             mask,
             keepdims,
             behavior,
         )
-
-        # If we are reducing the contents of this layout,
-        # then we do NOT want to return an optional layout
-        if not branch and negaxis == depth:
-            return out
-        else:
-            if isinstance(out, ak._v2.contents.RegularArray):
-                out = out.toListOffsetArray64(True)
-
-            # If the result of `_reduce_next` is a list, and we're not applying at this
-            # depth, then it will have offsets given by the boundaries in parents.
-            # This means that we need to look at the _contents_ to which the `outindex`
-            # belongs to add the new index
-            if isinstance(out, ak._v2.contents.ListOffsetArray):
-                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                    raise ak._v2._util.error(
-                        AssertionError(
-                            "reduce_next with unbranching depth > negaxis expects a "
-                            "ListOffsetArray64 whose offsets start at zero ({})".format(
-                                starts[0]
-                            )
-                        )
-                    )
-
-                outoffsets = ak._v2.index.Index64.empty(starts.length + 1, self._nplike)
-                assert (
-                    outoffsets.nplike is self._nplike and starts.nplike is self._nplike
-                )
-                self._handle_error(
-                    self._nplike[
-                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
-                        outoffsets.dtype.type,
-                        starts.dtype.type,
-                    ](
-                        outoffsets.data,
-                        starts.data,
-                        starts.length,
-                        self._index.length,
-                    )
-                )
-
-                inner = ak._v2.contents.IndexedArray(
-                    outindex,
-                    out._content,
-                    None,
-                    None,
-                    self._nplike,
-                )
-
-                return ak._v2.contents.ListOffsetArray(
-                    outoffsets,
-                    inner,
-                    None,
-                    None,
-                    self._nplike,
-                )
-
-            else:
-                raise ak._v2._util.error(
-                    AssertionError(
-                        "reduce_next with unbranching depth > negaxis is only "
-                        "expected to return RegularArray or ListOffsetArray64; "
-                        "instead, it returned " + out.classname
-                    )
-                )
 
     def _validity_error(self, path):
         error = self._nplike["awkward_IndexedArray_validity", self.index.dtype.type](
