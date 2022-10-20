@@ -1544,7 +1544,7 @@ namespace awkward {
 
       if (keepdims  &&  (branchdepth.second == negaxis + 1)) {
         if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
-          outcontent = raw->toListOffsetArray64(false);
+
         } else {
           throw std::invalid_argument(
               std::string("expected regulararray") + FILENAME(__LINE__));
