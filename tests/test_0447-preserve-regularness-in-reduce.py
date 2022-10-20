@@ -101,8 +101,8 @@ def test_keepdims():
     assert ak.to_list(axis1) == np.sum(nparray, axis=-1, keepdims=True).tolist()
     assert ak.to_list(axis2) == np.sum(nparray, axis=-2, keepdims=True).tolist()
     assert ak.to_list(axis3) == np.sum(nparray, axis=-3, keepdims=True).tolist()
-    assert str(ak.type(ak.Array(axis1))) == "2 * var * 1 * int64"
-    assert str(ak.type(ak.Array(axis2))) == "2 * 1 * var * int64"
+    assert str(ak.type(ak.Array(axis1))) == "2 * var * var * int64"
+    assert str(ak.type(ak.Array(axis2))) == "2 * var * var * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * var * int64"
 
     assert str(ak.type(ak.Array(listoffset_regular))) == "2 * var * 5 * int64"
@@ -113,7 +113,7 @@ def test_keepdims():
     assert ak.to_list(axis2) == np.sum(nparray, axis=-2, keepdims=True).tolist()
     assert ak.to_list(axis3) == np.sum(nparray, axis=-3, keepdims=True).tolist()
     assert str(ak.type(ak.Array(axis1))) == "2 * var * 1 * int64"
-    assert str(ak.type(ak.Array(axis2))) == "2 * 1 * 5 * int64"
+    assert str(ak.type(ak.Array(axis2))) == "2 * var * 5 * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * 5 * int64"
 
     assert str(ak.type(ak.Array(regular_listoffset))) == "2 * 3 * var * int64"
@@ -123,7 +123,7 @@ def test_keepdims():
     assert ak.to_list(axis1) == np.sum(nparray, axis=-1, keepdims=True).tolist()
     assert ak.to_list(axis2) == np.sum(nparray, axis=-2, keepdims=True).tolist()
     assert ak.to_list(axis3) == np.sum(nparray, axis=-3, keepdims=True).tolist()
-    assert str(ak.type(ak.Array(axis1))) == "2 * 3 * 1 * int64"
+    assert str(ak.type(ak.Array(axis1))) == "2 * 3 * var * int64"
     assert str(ak.type(ak.Array(axis2))) == "2 * 1 * var * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * 3 * var * int64"
 
@@ -260,8 +260,8 @@ def test_keepdims_none1():
     axis1 = ak.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_listoffset, axis=-3, keepdims=True)
-    assert str(ak.type(ak.Array(axis1))) == "2 * var * 1 * int64"
-    assert str(ak.type(ak.Array(axis2))) == "2 * 1 * var * int64"
+    assert str(ak.type(ak.Array(axis1))) == "2 * var * var * int64"
+    assert str(ak.type(ak.Array(axis2))) == "2 * var * var * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * var * int64"
 
     assert str(ak.type(ak.Array(listoffset_regular))) == "2 * var * 5 * ?int64"
@@ -269,14 +269,14 @@ def test_keepdims_none1():
     axis2 = ak.sum(listoffset_regular, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_regular, axis=-3, keepdims=True)
     assert str(ak.type(ak.Array(axis1))) == "2 * var * 1 * int64"
-    assert str(ak.type(ak.Array(axis2))) == "2 * 1 * 5 * int64"
+    assert str(ak.type(ak.Array(axis2))) == "2 * var * 5 * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * 5 * int64"
 
     assert str(ak.type(ak.Array(regular_listoffset))) == "2 * 3 * var * ?int64"
     axis1 = ak.sum(regular_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(regular_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(regular_listoffset, axis=-3, keepdims=True)
-    assert str(ak.type(ak.Array(axis1))) == "2 * 3 * 1 * int64"
+    assert str(ak.type(ak.Array(axis1))) == "2 * 3 * var * int64"
     assert str(ak.type(ak.Array(axis2))) == "2 * 1 * var * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * 3 * var * int64"
 
@@ -424,8 +424,8 @@ def test_keepdims_mask1():
     axis1 = ak.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_listoffset, axis=-3, keepdims=True)
-    assert str(ak.type(ak.Array(axis1))) == "2 * var * 1 * int64"
-    assert str(ak.type(ak.Array(axis2))) == "2 * 1 * var * int64"
+    assert str(ak.type(ak.Array(axis1))) == "2 * var * var * int64"
+    assert str(ak.type(ak.Array(axis2))) == "2 * var * var * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * var * int64"
 
     assert str(ak.type(ak.Array(listoffset_regular))) == "2 * var * 5 * ?int64"
@@ -433,14 +433,14 @@ def test_keepdims_mask1():
     axis2 = ak.sum(listoffset_regular, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_regular, axis=-3, keepdims=True)
     assert str(ak.type(ak.Array(axis1))) == "2 * var * 1 * int64"
-    assert str(ak.type(ak.Array(axis2))) == "2 * 1 * 5 * int64"
+    assert str(ak.type(ak.Array(axis2))) == "2 * var * 5 * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * 5 * int64"
 
     assert str(ak.type(ak.Array(regular_listoffset))) == "2 * 3 * var * ?int64"
     axis1 = ak.sum(regular_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(regular_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(regular_listoffset, axis=-3, keepdims=True)
-    assert str(ak.type(ak.Array(axis1))) == "2 * 3 * 1 * int64"
+    assert str(ak.type(ak.Array(axis1))) == "2 * 3 * var * int64"
     assert str(ak.type(ak.Array(axis2))) == "2 * 1 * var * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * 3 * var * int64"
 
@@ -522,8 +522,8 @@ def test_keepdims_mask2():
     axis1 = ak.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_listoffset, axis=-3, keepdims=True)
-    assert str(ak.type(ak.Array(axis1))) == "2 * var * option[1 * int64]"
-    assert str(ak.type(ak.Array(axis2))) == "2 * 1 * var * int64"
+    assert str(ak.type(ak.Array(axis1))) == "2 * var * option[var * int64]"
+    assert str(ak.type(ak.Array(axis2))) == "2 * var * var * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * var * int64"
 
     assert str(ak.type(ak.Array(listoffset_regular))) == "2 * var * option[5 * int64]"
@@ -531,14 +531,14 @@ def test_keepdims_mask2():
     axis2 = ak.sum(listoffset_regular, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_regular, axis=-3, keepdims=True)
     assert str(ak.type(ak.Array(axis1))) == "2 * var * option[1 * int64]"
-    assert str(ak.type(ak.Array(axis2))) == "2 * 1 * 5 * int64"
+    assert str(ak.type(ak.Array(axis2))) == "2 * var * 5 * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * 5 * int64"
 
     assert str(ak.type(ak.Array(regular_listoffset))) == "2 * 3 * option[var * int64]"
     axis1 = ak.sum(regular_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(regular_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(regular_listoffset, axis=-3, keepdims=True)
-    assert str(ak.type(ak.Array(axis1))) == "2 * 3 * option[1 * int64]"
+    assert str(ak.type(ak.Array(axis1))) == "2 * 3 * option[var * int64]"
     assert str(ak.type(ak.Array(axis2))) == "2 * 1 * var * int64"
     assert str(ak.type(ak.Array(axis3))) == "1 * 3 * var * int64"
 
@@ -632,8 +632,8 @@ def test_keepdims_mask3():
     axis1 = ak.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_listoffset, axis=-3, keepdims=True)
-    assert str(ak.type(ak.Array(axis1))) == "2 * option[var * 1 * int64]"
-    assert str(ak.type(ak.Array(axis2))) == "2 * option[1 * var * int64]"
+    assert str(ak.type(ak.Array(axis1))) == "2 * option[var * var * int64]"
+    assert str(ak.type(ak.Array(axis2))) == "2 * option[var * var * int64]"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * var * int64"
 
     assert str(ak.type(ak.Array(listoffset_regular))) == "2 * option[var * 5 * int64]"
@@ -641,14 +641,14 @@ def test_keepdims_mask3():
     axis2 = ak.sum(listoffset_regular, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_regular, axis=-3, keepdims=True)
     assert str(ak.type(ak.Array(axis1))) == "2 * option[var * 1 * int64]"
-    assert str(ak.type(ak.Array(axis2))) == "2 * option[1 * 5 * int64]"
+    assert str(ak.type(ak.Array(axis2))) == "2 * option[var * 5 * int64]"
     assert str(ak.type(ak.Array(axis3))) == "1 * var * 5 * int64"
 
     assert str(ak.type(ak.Array(regular_listoffset))) == "2 * option[3 * var * int64]"
     axis1 = ak.sum(regular_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(regular_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(regular_listoffset, axis=-3, keepdims=True)
-    assert str(ak.type(ak.Array(axis1))) == "2 * option[3 * 1 * int64]"
+    assert str(ak.type(ak.Array(axis1))) == "2 * option[3 * var * int64]"
     assert str(ak.type(ak.Array(axis2))) == "2 * option[1 * var * int64]"
     assert str(ak.type(ak.Array(axis3))) == "1 * 3 * var * int64"
 
