@@ -132,8 +132,7 @@ namespace awkward {
     ListOffsetArrayOf<T>(const IdentitiesPtr& identities,
                          const util::Parameters& parameters,
                          const IndexOf<T>& offsets,
-                         const ContentPtr& content,
-                         bool represents_regular = false);
+                         const ContentPtr& content);
 
     /// @brief Positions where one nested list stops and the next starts in
     /// the #content; the `offsets` must be monotonically increasing.
@@ -456,7 +455,6 @@ namespace awkward {
     const IndexOf<T> offsets_;
     /// @brief See #content.
     const ContentPtr content_;
-    const bool represents_regular_;
   };
 
 #ifndef AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE

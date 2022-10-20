@@ -255,12 +255,10 @@ namespace awkward {
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const IdentitiesPtr& identities,
                                           const util::Parameters& parameters,
                                           const IndexOf<T>& offsets,
-                                          const ContentPtr& content,
-                                          bool represents_regular)
+                                          const ContentPtr& content)
       : Content(identities, parameters)
       , offsets_(offsets)
-      , content_(content)
-      , represents_regular_(represents_regular) {
+      , content_(content) {
     if (offsets.length() == 0) {
       throw std::invalid_argument(
         std::string("ListOffsetArray offsets length must be at least 1")

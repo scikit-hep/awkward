@@ -168,9 +168,7 @@ class RegularArray(Content):
 
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
-        tmp = self._broadcast_tooffsets64(offsets)
-        tmp._represents_regular = True
-        return tmp
+        return self._broadcast_tooffsets64(offsets)
 
     def toRegularArray(self):
         return self
