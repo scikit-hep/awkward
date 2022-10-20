@@ -956,72 +956,18 @@ class IndexedArray(Content):
         keepdims,
         behavior,
     ):
-        branch, depth = self.branch_depth
-
         next = self._content._carry(self._index, False)
-        nextshifts = None
-        out = next._reduce_next(
+        return next._reduce_next(
             reducer,
             negaxis,
             starts,
-            nextshifts,
+            shifts,
             parents,
             outlength,
             mask,
             keepdims,
             behavior,
         )
-
-        # If we are reducing the contents of this layout,
-        # then we do NOT want to return an optional layout
-        if not branch and negaxis == depth:
-            return out
-        else:
-            if out.is_ListType:
-                out_content = out.content[out.starts[0] :]
-            elif out.is_RegularType:
-                out_content = out.content
-            else:
-                raise ak._errors.wrap_error(
-                    AssertionError(
-                        "reduce_next with unbranching depth > negaxis is only "
-                        "expected to return RegularArray or ListOffsetArray64; "
-                        "instead, it returned " + out.classname
-                    )
-                )
-
-            if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                raise ak._errors.wrap_error(
-                    AssertionError(
-                        "reduce_next with unbranching depth > negaxis expects a "
-                        "ListOffsetArray64 whose offsets start at zero ({})".format(
-                            starts[0]
-                        )
-                    )
-                )
-
-            outoffsets = ak.index.Index64.empty(starts.length + 1, self._nplike)
-            assert outoffsets.nplike is self._nplike and starts.nplike is self._nplike
-            self._handle_error(
-                self._nplike[
-                    "awkward_IndexedArray_reduce_next_fix_offsets_64",
-                    outoffsets.dtype.type,
-                    starts.dtype.type,
-                ](
-                    outoffsets.data,
-                    starts.data,
-                    starts.length,
-                    self._index.length,
-                )
-            )
-
-            return ak.contents.ListOffsetArray(
-                outoffsets,
-                out_content,
-                None,
-                None,
-                self._nplike,
-            )
 
     def _validity_error(self, path):
         error = self._nplike["awkward_IndexedArray_validity", self.index.dtype.type](
