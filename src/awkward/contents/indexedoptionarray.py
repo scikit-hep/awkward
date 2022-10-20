@@ -1382,10 +1382,6 @@ class IndexedOptionArray(Content):
         if not branch and negaxis == depth:
             return out
         else:
-            # If the result of `_reduce_next` is a list, and we're not applying at this
-            # depth, then it will have offsets given by the boundaries in parents.
-            # This means that we need to look at the _contents_ to which the `outindex`
-            # belongs to add the option type
             if out.is_ListType:
                 out_content = out.content[out.starts[0] :]
             elif out.is_RegularType:
@@ -1409,6 +1405,14 @@ class IndexedOptionArray(Content):
                         )
                     )
                 )
+            # In this branch, we're above the axis at which the reduction takes place.
+            # `next._reduce_next` is therefore expected to return a list/regular layout
+            # node. As detailed in `RegularArray._reduce_next`, `_reduce_next` wraps the
+            # reduction in a list-type of length `outlength` before returning to the caller,
+            # which effectively means that the reduction of *this* layout corresponds to the
+            # child of the returned `next._reduce_next(...)`, i.e. `out.content`. So, we unpack
+            # the returned list type and wrap its child by a new `IndexedOptionArray`, before
+            # re-wrapping the result to have the length and starts requested by the caller.
             outoffsets = ak.index.Index64.empty(starts.length + 1, self._nplike)
             assert outoffsets.nplike is self._nplike and starts.nplike is self._nplike
             self._handle_error(
