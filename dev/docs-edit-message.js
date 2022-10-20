@@ -1,4 +1,4 @@
-export default async function update_pr_description({github, context}) {
+async function update_pr_description({github, context}) {
 
     const {data: pull} = await github.rest.pulls.get({
         owner: context.repo.owner,
@@ -28,3 +28,5 @@ export default async function update_pr_description({github, context}) {
         body: body,
     });
 }
+
+module.exports = update_pr_description;
