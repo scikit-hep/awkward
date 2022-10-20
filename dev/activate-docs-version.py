@@ -19,4 +19,4 @@ if __name__ == "__main__":
         json={"active": True, "hidden": not args.show},
         headers={"Authorization": f"token {token}"},
     )
-    print(response)
+    response.raise_for_status()

@@ -20,4 +20,5 @@ if __name__ == "__main__":
         url,
         headers={"Authorization": f"token {token}"},
     )
-    print(response)
+    response.raise_for_status()
+    print(response.json())
