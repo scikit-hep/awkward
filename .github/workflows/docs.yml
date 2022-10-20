@@ -139,13 +139,11 @@ jobs:
           -d '{"active":true,"hidden":true}'
     - name: Trigger RTD build
       run: |
-
         # Trigger build
         curl \
           -X POST \
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
               "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
-    - run: env
     - name: Edit PR description
       uses: actions/github-script@v6
       with:
