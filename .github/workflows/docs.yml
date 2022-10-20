@@ -78,7 +78,7 @@ jobs:
       with:
         name: awkward-x86-64-wheel
         path: dist/awkward*.whl
-  docs:
+  build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-wasm, awkward-x86-64]
     steps:
@@ -116,10 +116,36 @@ jobs:
       with:
         name: jupyter-cache
         path: docs-sphinx/_build/.jupyter_cache
+  deploy-docs:
+    runs-on: ubuntu-22.04
+    needs: [build-docs]
+    # We can only deploy for PRs on host repo
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+    - uses: actions/checkout@v3
     - name: Trigger RTD Build
-      env:
-          RTD_TOKEN: "${{ secrets.RTD_TOKEN }}"
       run: |
+        # Sanitise ref name
         # NB: head_ref is only valid for PR triggers
-        python3 dev/activate-docs-version.py "${{ github.head_ref || github.ref_name }}"
-        python3 dev/trigger-docs-build.py "${{ github.head_ref || github.ref_name }}"
+        VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@")
+
+        # Activate version
+        curl \
+          -X PATCH \
+          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
+              https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/ \
+          -H "Content-Type: application/json" \
+          -d '{"active":true,"hidden":true}'
+
+        # Trigger build
+        curl \
+          -X POST \
+          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
+              https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/
+
+    - name: Edit PR description
+      uses: actions/github-script@v6
+      with:
+        script: |
+            const script = require('./dev/docs-edit-message.js')
+            console.log(script({github, context}))
