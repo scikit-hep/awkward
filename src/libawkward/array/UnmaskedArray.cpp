@@ -911,9 +911,6 @@ namespace awkward {
                              bool mask,
                              bool keepdims) const {
     ContentPtr next = content_;
-    if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
-      next = raw->toListOffsetArray64(true);
-    }
     return next.get()->reduce_next(reducer,
                                    negaxis,
                                    starts,

@@ -2238,12 +2238,6 @@ namespace awkward {
     }
     ContentPtr next = content_.get()->carry(nextcarry, false);
 
-    if (ISOPTION) {
-      if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
-        next = raw->toListOffsetArray64(true);
-      }
-    }
-
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
