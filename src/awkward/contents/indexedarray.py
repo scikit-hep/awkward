@@ -958,43 +958,14 @@ class IndexedArray(Content):
     ):
         branch, depth = self.branch_depth
 
-        index_length = self._index.length
-
-        nextcarry = ak.index.Index64.empty(index_length, self._nplike)
-        nextparents = ak.index.Index64.empty(index_length, self._nplike)
-        outindex = ak.index.Index64.empty(index_length, self._nplike)
-        assert (
-            nextcarry.nplike is self._nplike
-            and nextparents.nplike is self._nplike
-            and outindex.nplike is self._nplike
-            and self._index.nplike is self._nplike
-            and parents.nplike is self._nplike
-        )
-        self._handle_error(
-            self._nplike[
-                "awkward_IndexedArray_reduce_next_64",
-                nextcarry.dtype.type,
-                nextparents.dtype.type,
-                outindex.dtype.type,
-                self._index.dtype.type,
-                parents.dtype.type,
-            ](
-                nextcarry.data,
-                nextparents.data,
-                outindex.data,
-                self._index.data,
-                parents.data,
-                index_length,
-            )
-        )
-        next = self._content._carry(nextcarry, False)
+        next = self._content._carry(self._index, False)
         nextshifts = None
         out = next._reduce_next(
             reducer,
             negaxis,
             starts,
             nextshifts,
-            nextparents,
+            parents,
             outlength,
             mask,
             keepdims,
@@ -1006,10 +977,6 @@ class IndexedArray(Content):
         if not branch and negaxis == depth:
             return out
         else:
-            # If the result of `_reduce_next` is a list, and we're not applying at this
-            # depth, then it will have offsets given by the boundaries in parents.
-            # This means that we need to look at the _contents_ to which the `outindex`
-            # belongs to add the new index
             if out.is_ListType:
                 out_content = out.content[out.starts[0] :]
             elif out.is_RegularType:
@@ -1048,17 +1015,9 @@ class IndexedArray(Content):
                 )
             )
 
-            inner = ak.contents.IndexedArray(
-                outindex,
-                out_content,
-                None,
-                None,
-                self._nplike,
-            )
-
             return ak.contents.ListOffsetArray(
                 outoffsets,
-                inner,
+                out_content,
                 None,
                 None,
                 self._nplike,
