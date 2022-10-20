@@ -144,9 +144,6 @@ def normalise_item(item, nplike):
     elif isinstance(item, ak.highlevel.Array):
         return normalise_item(item.layout, nplike)
 
-    elif isinstance(item, ak.highlevel.Array):
-        return normalise_item(item.layout, nplike)
-
     elif isinstance(item, ak.contents.EmptyArray):
         return normalise_item(item.toNumpyArray(np.int64), nplike)
 

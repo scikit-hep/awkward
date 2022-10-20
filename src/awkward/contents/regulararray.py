@@ -168,9 +168,7 @@ class RegularArray(Content):
 
     def toListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
-        tmp = self._broadcast_tooffsets64(offsets)
-        tmp._represents_regular = True
-        return tmp
+        return self._broadcast_tooffsets64(offsets)
 
     def toRegularArray(self):
         return self
@@ -981,70 +979,197 @@ class RegularArray(Content):
         keepdims,
         behavior,
     ):
-        out = self.toListOffsetArray64(True)._reduce_next(
-            reducer,
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            outlength,
-            mask,
-            keepdims,
-            behavior,
-        )
+        branch, depth = self.branch_depth
+        nextlen = len(self) * self._size
 
-        if not self._content.dimension_optiontype:
-            branch, depth = self.branch_depth
-            convert_shallow = negaxis == depth
-            convert_deep = negaxis + 2 == depth
+        if not branch and negaxis == depth:
+            if self.size == 0:
+                nextstarts = ak.index.Index64(
+                    self._nplike.index_nplike.full(0, len(self)),
+                    nplike=self._nplike,
+                )
+            else:
+                nextstarts = ak.index.Index64(
+                    self._nplike.index_nplike.arange(0, nextlen, self.size),
+                    nplike=self._nplike,
+                )
+                assert nextstarts.length == len(self)
+
+            nextcarry = ak.index.Index64.empty(nextlen, nplike=self._nplike)
+            nextparents = ak.index.Index64.empty(nextlen, nplike=self._nplike)
+            assert (
+                parents.nplike is self._nplike
+                and nextcarry.nplike is self._nplike
+                and nextparents.nplike is self._nplike
+            )
+            self._handle_error(
+                self._nplike[
+                    "awkward_RegularArray_reduce_nonlocal_preparenext",
+                    nextcarry.dtype.type,
+                    nextparents.dtype.type,
+                    parents.dtype.type,
+                ](
+                    nextcarry.data,
+                    nextparents.data,
+                    parents.data,
+                    self._size,
+                    len(self),
+                )
+            )
+
+            if reducer.needs_position:
+                # Regular arrays have the same length rows, so there can be no "missing" values
+                # unlike ragged list types
+                nextshifts = ak.index.Index64.zeros(nextcarry.length, self._nplike)
+            else:
+                nextshifts = None
+
+            nextcontent = self._content._carry(nextcarry, False)
+            outcontent = nextcontent._reduce_next(
+                reducer,
+                negaxis - 1,
+                nextstarts,
+                nextshifts,
+                nextparents,
+                # We want a result of length
+                outlength * self.size,
+                mask,
+                False,
+                behavior,
+            )
+
+            out = ak.contents.RegularArray(
+                outcontent,
+                self._size,
+                outlength,
+                None,
+                None,
+                self._nplike,
+            )
 
             if keepdims:
-                convert_shallow = False
-                convert_deep = True
+                out = ak.contents.RegularArray(
+                    out,
+                    1,
+                    self.length,
+                    None,
+                    None,
+                    self._nplike,
+                )
+            return out
+        else:
+            nextparents = ak.index.Index64.empty(nextlen, self._nplike)
 
-            if convert_deep:
-                if isinstance(out, ak.contents.ListOffsetArray):
-                    if isinstance(out.content, ak.contents.ListOffsetArray):
-                        out = ak.contents.ListOffsetArray(
-                            out._offsets,
-                            out._content.toRegularArray(),
-                            out._identifier,
-                            out._parameters,
-                            self._nplike,
-                        )
-                    elif isinstance(out.content, ak.contents.ListArray):
-                        out = ak.contents.ListOffsetArray(
-                            out._offsets,
-                            out._content.toRegularArray(),
-                            out._identifier,
-                            out._parameters,
-                            self._nplike,
-                        )
-                elif isinstance(out, ak.contents.ListArray):
-                    if isinstance(out.content, ak.contents.ListOffsetArray):
-                        out = ak.contents.ListOffsetArray(
-                            out._offsets,
-                            out._content.toRegularArray(),
-                            out._identifier,
-                            out._parameters,
-                            self._nplike,
-                        )
-                    elif isinstance(out.content, ak.contents.ListArray):
-                        out = ak.contents.ListOffsetArray(
-                            out._offsets,
-                            out._content.toRegularArray(),
-                            out._identifier,
-                            out._parameters,
-                            self._nplike,
-                        )
+            assert nextparents.nplike is self._nplike
+            self._handle_error(
+                self._nplike[
+                    "awkward_RegularArray_reduce_local_nextparents",
+                    nextparents.dtype.type,
+                ](
+                    nextparents.data,
+                    self._size,
+                    len(self),
+                )
+            )
 
-            if convert_shallow:
-                if isinstance(out, ak.contents.ListOffsetArray):
-                    out = out.toRegularArray()
-                elif isinstance(out, ak.contents.ListArray):
-                    out = out.toRegularArray()
+            if self._size > 0:
+                nextstarts = ak.index.Index64(
+                    self._nplike.index_nplike.arange(0, len(nextparents), self._size),
+                    nplike=self._nplike,
+                )
+            else:
+                assert len(nextparents) == 0
+                nextstarts = ak.index.Index64(
+                    self._nplike.index_nplike.zeros(0),
+                    nplike=self._nplike,
+                )
 
-        return out
+            outcontent = self._content._reduce_next(
+                reducer,
+                negaxis,
+                nextstarts,
+                shifts,
+                nextparents,
+                len(self),
+                mask,
+                keepdims,
+                behavior,
+            )
+
+            # Understanding this logic is nontrivial without examples. So, let's start with a
+            # somewhat simple example of `5 * 4 * 3 * int64`. This is composed of the following layouts
+            #                                     ^........^ NumpyArray(5*4*3)
+            #                                 ^............^ RegularArray(..., size=3)
+            #                             ^................^ RegularArray(..., size=4)
+            # If the reduction axis is 2 (or -1), then the resulting shape is `5 * 4 * int64`.
+            # This corresponds to `RegularArray(NumpyArray(5*4), size=4)`, i.e. the `size=3` layout
+            # *disappears*, and is replaced by the bare reduction `NumpyArray`. Therefore, if
+            # this layout is _directly_ above the reduction, it won't survive the reduction.
+            #
+            # The `_reduce_next` mechanism returns its first result (by recursion) from the
+            # leaf `NumpyArray`. The parent `RegularArray` takes the `negaxis != depth` branch,
+            # and asks the `NumpyArray` to perform the reduction. The `_reduce_next` is such that the
+            # callee must wrap the reduction result into a list whose length is given by the *caller*,
+            # i.e. the parent. Therefore, the `RegularArray(..., size=3)` layout reduces its content with
+            # `outlength=len(self)=5*4`. The parent of this `RegularArray` (with `size=4`)
+            # will reduce its contents with `outlength=5`. It is *this* reduction that must be returned as a
+            # `RegularArray(..., size=4)`. Clearly, the `RegularArray(..., size=3)` layout has disappeared
+            # and been replaced by a `NumpyArray` of the appropriate size for the `RegularArray(..., size=4)`
+            # to wrap. Hence, we only want to interpret the content as a `RegularArray(..., size=self._size)`
+            # iff. we are not the direct parent of the reduced layout.
+
+            # At `depth == negaxis+1`, we are above the dimension being reduced. All implemented
+            # _dimensional_ types should return `RegularArray` for `keepdims=True`, so we don't need
+            # to convert `outcontent` to a `RegularArray`
+            if keepdims and depth == negaxis + 1:
+                assert outcontent.is_RegularType
+            # At `depth >= negaxis + 2`, we are wrapping at _least_ one other list type. This list-type
+            # may return a ListOffsetArray, which we need to convert to a `RegularArray`. We know that
+            # the result can be reinterpreted as a `RegularArray`, because it's not the immediate parent
+            # of the reduction, so it must exist in the type.
+            elif depth >= negaxis + 2:
+                if outcontent.is_ListType:
+                    # Let's only deal with ListOffsetArray
+                    outcontent = outcontent.toListOffsetArray64(False)
+                    # Fast-path to convert data that we know should be regular (avoid a kernel call)
+                    start, stop = (
+                        outcontent.offsets[0],
+                        outcontent.offsets[outcontent.offsets.length - 1],
+                    )
+
+                    trimmed = outcontent.content._getitem_range(slice(start, stop))
+                    assert len(trimmed) == self._size * len(outcontent)
+
+                    outcontent = ak.contents.RegularArray(
+                        trimmed,
+                        size=self._size,
+                        zeros_length=len(self),
+                    )
+                else:
+                    assert outcontent.is_RegularType
+
+            outoffsets = ak.index.Index64.empty(outlength + 1, self._nplike)
+            assert outoffsets.nplike is self._nplike and parents.nplike is self._nplike
+            self._handle_error(
+                self._nplike[
+                    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
+                    outoffsets.dtype.type,
+                    parents.dtype.type,
+                ](
+                    outoffsets.data,
+                    parents.data,
+                    parents.length,
+                    outlength,
+                )
+            )
+
+            return ak.contents.ListOffsetArray(
+                outoffsets,
+                outcontent,
+                None,
+                None,
+                self._nplike,
+            )
 
     def _validity_error(self, path):
         if self.size < 0:
