@@ -123,29 +123,28 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
     - uses: actions/checkout@v3
-    - name: Trigger RTD Build
+    - name: Activate RTD version
       run: |
         # Sanitise ref name
         # NB: head_ref is only valid for PR triggers
         export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@")
-
         # Export for subsequent steps
         echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
-
         # Activate version
         curl \
           -X PATCH \
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-              https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/ \
+              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/" \
           -H "Content-Type: application/json" \
           -d '{"active":true,"hidden":true}'
+    - name: Trigger RTD build
+      run: |
 
         # Trigger build
         curl \
           -X POST \
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-              https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/
-
+              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
     - name: Edit PR description
       uses: actions/github-script@v6
       with:
