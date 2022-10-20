@@ -295,8 +295,7 @@ namespace awkward {
     return std::make_shared<ListOffsetArrayOf<int64_t>>(Identities::none(),
                                                         util::Parameters(),
                                                         offsets,
-                                                        std::make_shared<NumpyArray>(content),
-                                                        false);
+                                                        std::make_shared<NumpyArray>(content));
   }
 
   template <typename T, typename I>

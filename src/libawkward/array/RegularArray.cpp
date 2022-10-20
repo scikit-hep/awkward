@@ -356,8 +356,7 @@ namespace awkward {
     return std::make_shared<ListOffsetArray64>(raw->identities(),
                                                raw->parameters(),
                                                raw->offsets(),
-                                               raw->content(),
-                                               true);
+                                               raw->content());
   }
 
   const std::string
