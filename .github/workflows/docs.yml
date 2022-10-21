@@ -1,0 +1,152 @@
+name: Docs
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  release:
+    types: [released]
+  workflow_dispatch:
+
+concurrency:
+  group: 'docs-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.10.7"
+
+jobs:
+  awkward-wasm:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Install ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: awkward-wasm-${{ github.job }}
+    - name: Install EMSDK
+      uses: mymindstorm/setup-emsdk@v11
+      with:
+        version: 3.1.14
+    - name: Setup ccache
+      run: |
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
+        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+    - name: Install requirements
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements-wasm.txt
+    - name: Build wheel
+      run: CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache" pyodide build --exports whole_archive
+    - name: Upload wheel
+      uses: actions/upload-artifact@v3
+      with:
+        name: awkward-wasm-wheel
+        path: dist/awkward*wasm32.whl
+  awkward-x86-64:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Install ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: awkward-${{ github.job }}
+    - name: Setup ccache
+      run: |
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
+        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+    - name: Install requirements
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install build
+    - name: Build wheel
+      run: python -m build -w
+    - name: Upload wheel
+      uses: actions/upload-artifact@v3
+      with:
+        name: awkward-x86-64-wheel
+        path: dist/awkward*.whl
+  build-docs:
+    runs-on: ubuntu-22.04
+    needs: [awkward-wasm, awkward-x86-64]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+    - name: Download WASM wheel
+      uses: actions/download-artifact@v3
+      with:
+        name: awkward-wasm-wheel
+        path: docs-sphinx/lite/pypi
+    - name: Download x86_64 wheel
+      uses: actions/download-artifact@v3
+      with:
+        name: awkward-x86-64-wheel
+        path: dist
+    - name: Install requirements
+      run: |
+        ls -R docs-sphinx/lite
+        sudo apt-get install -y doxygen
+        python -m pip install -r docs-sphinx/requirements.txt
+        python -m pip install dist/awkward*.whl
+    - name: Generate documentation
+      run: sphinx-build -M html . _build/
+      working-directory: docs-sphinx
+    - name: Upload documentation
+      uses: actions/upload-artifact@v3
+      with:
+        name: docs
+        path: docs-sphinx/_build/html
+    - name: Upload Jupyter Book cache
+      uses: actions/upload-artifact@v3
+      with:
+        name: jupyter-cache
+        path: docs-sphinx/_build/.jupyter_cache
+  deploy-docs:
+    runs-on: ubuntu-22.04
+    needs: [build-docs]
+    # We can only deploy for PRs on host repo
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+    - uses: actions/checkout@v3
+    - name: Activate RTD version
+      run: |
+        # Sanitise ref name
+        # NB: head_ref is only valid for PR triggers
+        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@")
+        # Export for subsequent steps
+        echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
+        # Activate version
+        curl \
+          -X PATCH \
+          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
+              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/" \
+          -H "Content-Type: application/json" \
+          -d '{"active":true,"hidden":true}'
+    - name: Trigger RTD build
+      run: |
+        # Trigger build
+        curl \
+          -X POST \
+          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
+              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
+    - name: Edit PR description
+      uses: actions/github-script@v6
+      with:
+        script: |
+            const script = require('./dev/docs-edit-message.js');
+            console.log(script(github, context, "${{ env.VERSION_SLUG }}"));

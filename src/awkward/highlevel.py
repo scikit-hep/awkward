@@ -167,19 +167,16 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     See #ak.numexpr.re_evaluate to recalculate an expression without
     rebuilding its virtual machine.
 
-    Autograd
+    JAX
     ********
 
-    Derivatives of a calculation on a set of ak.Arrays can be calculated with
-    [Autograd](https://github.com/HIPS/autograd#readme), but only if the
-    function in `ak.autograd` is used, not the functions in the `autograd`
+    Derivatives of a calculation on an #ak.Array (s) can be calculated with
+    [JAX](https://github.com/google/jax#readme), but only if the
+    function in `ak` / `numpy` are used, not the functions in the `jax`
     library directly.
 
     Like NumPy ufuncs, the function and its derivatives are evaluated on the
     numeric leaves of the data structure, maintaining structure in the output.
-
-    See #ak.autograd.elementwise_grad to calculate a function and its
-    derivatives elementwise on each numeric value in an ak.Array.
     """
 
     def __init__(
@@ -197,7 +194,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             layout = data._layout
             behavior = ak._util.behavior_of(data, behavior=behavior)
 
-        elif numpy.is_own_array(data):
+        elif numpy.is_own_array(data) and data.dtype != np.dtype("O"):
             layout = ak.operations.from_numpy(data, highlevel=False)
 
         elif ak.nplikes.Cupy.is_own_array(data):

@@ -1365,9 +1365,6 @@ class IndexedOptionArray(Content):
         else:
             nextshifts = None
 
-        if isinstance(next, ak.contents.RegularArray):
-            next = next.toListOffsetArray64(True)
-
         out = next._reduce_next(
             reducer,
             negaxis,
@@ -1385,58 +1382,10 @@ class IndexedOptionArray(Content):
         if not branch and negaxis == depth:
             return out
         else:
-            if isinstance(out, ak.contents.RegularArray):
-                out = out.toListOffsetArray64(True)
-
-            # If the result of `_reduce_next` is a list, and we're not applying at this
-            # depth, then it will have offsets given by the boundaries in parents.
-            # This means that we need to look at the _contents_ to which the `outindex`
-            # belongs to add the option type
-            if isinstance(out, ak.contents.ListOffsetArray):
-                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                    raise ak._errors.wrap_error(
-                        AssertionError(
-                            "reduce_next with unbranching depth > negaxis expects a "
-                            "ListOffsetArray whose offsets start at zero ({})".format(
-                                starts[0]
-                            )
-                        )
-                    )
-                outoffsets = ak.index.Index64.empty(starts.length + 1, self._nplike)
-                assert (
-                    outoffsets.nplike is self._nplike and starts.nplike is self._nplike
-                )
-                self._handle_error(
-                    self._nplike[
-                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
-                        outoffsets.dtype.type,
-                        starts.dtype.type,
-                    ](
-                        outoffsets.data,
-                        starts.data,
-                        starts.length,
-                        outindex.length,
-                    )
-                )
-
-                # Apply `outindex` to appropriate content
-                inner = ak.contents.IndexedOptionArray(
-                    outindex,
-                    out._content,
-                    None,
-                    self._parameters,
-                    self._nplike,
-                ).simplify_optiontype()
-
-                # Re-wrap content
-                return ak.contents.ListOffsetArray(
-                    outoffsets,
-                    inner,
-                    None,
-                    self._parameters,
-                    self._nplike,
-                )
-
+            if out.is_ListType:
+                out_content = out.content[out.starts[0] :]
+            elif out.is_RegularType:
+                out_content = out.content
             else:
                 raise ak._errors.wrap_error(
                     AssertionError(
@@ -1446,6 +1395,56 @@ class IndexedOptionArray(Content):
                         "instead, it returned " + out
                     )
                 )
+
+            if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
+                raise ak._errors.wrap_error(
+                    AssertionError(
+                        "reduce_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray whose offsets start at zero ({})".format(
+                            starts[0]
+                        )
+                    )
+                )
+            # In this branch, we're above the axis at which the reduction takes place.
+            # `next._reduce_next` is therefore expected to return a list/regular layout
+            # node. As detailed in `RegularArray._reduce_next`, `_reduce_next` wraps the
+            # reduction in a list-type of length `outlength` before returning to the caller,
+            # which effectively means that the reduction of *this* layout corresponds to the
+            # child of the returned `next._reduce_next(...)`, i.e. `out.content`. So, we unpack
+            # the returned list type and wrap its child by a new `IndexedOptionArray`, before
+            # re-wrapping the result to have the length and starts requested by the caller.
+            outoffsets = ak.index.Index64.empty(starts.length + 1, self._nplike)
+            assert outoffsets.nplike is self._nplike and starts.nplike is self._nplike
+            self._handle_error(
+                self._nplike[
+                    "awkward_IndexedArray_reduce_next_fix_offsets_64",
+                    outoffsets.dtype.type,
+                    starts.dtype.type,
+                ](
+                    outoffsets.data,
+                    starts.data,
+                    starts.length,
+                    outindex.length,
+                )
+            )
+
+            # Apply `outindex` to appropriate content
+            inner = ak.contents.IndexedOptionArray(
+                outindex,
+                out_content,
+                None,
+                self._parameters,
+                self._nplike,
+            ).simplify_optiontype()
+
+            # Re-wrap content
+            return ak.contents.ListOffsetArray(
+                outoffsets,
+                inner,
+                None,
+                self._parameters,
+                self._nplike,
+            )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)

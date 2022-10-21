@@ -1481,7 +1481,6 @@ class ListOffsetArray(Content):
 
         branch, depth = self.branch_depth
         globalstarts_length = self._offsets.length - 1
-        parents_length = parents.length
 
         if not branch and negaxis == depth:
             (
@@ -1493,27 +1492,12 @@ class ListOffsetArray(Content):
                 nextstarts,
             ) = self._rearrange_prepare_next(outlength, parents)
 
-            gaps = ak.index.Index64.empty(outlength, self._nplike)
-            assert gaps.nplike is self._nplike and parents.nplike is self._nplike
-            self._handle_error(
-                self._nplike[
-                    "awkward_ListOffsetArray_reduce_nonlocal_findgaps_64",
-                    gaps.dtype.type,
-                    parents.dtype.type,
-                ](
-                    gaps.data,
-                    parents.data,
-                    parents_length,
-                )
-            )
-
             outstarts = ak.index.Index64.empty(outlength, self._nplike)
             outstops = ak.index.Index64.empty(outlength, self._nplike)
             assert (
                 outstarts.nplike is self._nplike
                 and outstops.nplike is self._nplike
                 and distincts.nplike is self._nplike
-                and gaps.nplike is self._nplike
             )
             self._handle_error(
                 self._nplike[
@@ -1521,13 +1505,11 @@ class ListOffsetArray(Content):
                     outstarts.dtype.type,
                     outstops.dtype.type,
                     distincts.dtype.type,
-                    gaps.dtype.type,
                 ](
                     outstarts.data,
                     outstops.data,
                     distincts.data,
                     distincts.length,
-                    gaps.data,
                     outlength,
                 )
             )
@@ -1602,7 +1584,7 @@ class ListOffsetArray(Content):
                     None,
                     None,
                     self._nplike,
-                ).toListOffsetArray64(False)
+                )
 
             return out
 
@@ -1656,13 +1638,16 @@ class ListOffsetArray(Content):
                 )
             )
 
-            represents_regular = getattr(self, "_represents_regular", False)
-
-            if keepdims and (
-                not represents_regular or self._content.dimension_optiontype
-            ):
-                if isinstance(outcontent, ak.contents.RegularArray):
-                    outcontent = outcontent.toListOffsetArray64(False)
+            # `outcontent` represents *this* layout in the reduction
+            # If this layout survives in the reduction (see `if` below), then we want
+            # to ensure that we have a ragged list type (unless it's a `keepdims=True` layout)
+            if keepdims and depth == negaxis + 1:
+                # Don't convert the `RegularArray()` to a `ListOffsetArray`,
+                # means this will be broadcastable
+                assert outcontent.is_RegularType
+            elif depth >= negaxis + 2:
+                assert outcontent.is_ListType or outcontent.is_RegularType
+                outcontent = outcontent.toListOffsetArray64(False)
 
             return ak.contents.ListOffsetArray(
                 outoffsets,
@@ -1695,8 +1680,9 @@ class ListOffsetArray(Content):
             )
         )
 
-        np_nextcarry = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
-        np_nextparents = self._nplike.index_nplike.empty(nextlen, dtype=np.int64)
+        # A "stable" sort is essential for the subsequent steps.
+        nextcarry = ak.index.Index64.empty(nextlen, nplike=self._nplike)
+        nextparents = ak.index.Index64.empty(nextlen, nplike=self._nplike)
         maxnextparents = ak.index.Index64.empty(1, self._nplike)
         distincts = ak.index.Index64.empty(outlength * maxcount[0], self._nplike)
         assert (
@@ -1709,16 +1695,16 @@ class ListOffsetArray(Content):
         self._handle_error(
             self._nplike[
                 "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
-                np_nextcarry.dtype.type,
-                np_nextparents.dtype.type,
+                nextcarry.dtype.type,
+                nextparents.dtype.type,
                 maxnextparents.dtype.type,
                 distincts.dtype.type,
                 self._offsets.dtype.type,
                 offsetscopy.dtype.type,
                 parents.dtype.type,
             ](
-                np_nextcarry,
-                np_nextparents,
+                nextcarry.data,
+                nextparents.data,
                 nextlen,
                 maxnextparents.data,
                 distincts.data,
@@ -1730,10 +1716,6 @@ class ListOffsetArray(Content):
                 maxcount[0],
             )
         )
-        # A "stable" sort is essential for the subsequent steps.
-        reorder = self._nplike.index_nplike.argsort(np_nextparents, kind="stable")
-        nextcarry = ak.index.Index64(np_nextcarry[reorder], nplike=self.nplike)
-        nextparents = ak.index.Index64(np_nextparents[reorder], nplike=self.nplike)
         nextstarts = ak.index.Index64.empty(maxnextparents[0] + 1, self._nplike)
         assert nextstarts.nplike is self._nplike and nextparents.nplike is self._nplike
         self._handle_error(

@@ -23,9 +23,9 @@ All array manipulation takes place in the lowest layer of the Awkward Array proj
 
 A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separate package, ``awkward-cuda-kernels``, which handles arrays that reside on GPUs if CUDA is available. It satisfies the same C interface and implements the same behaviors.
 
-.. raw:: html
+.. figure:: ../../image/awkward-1-0-layers.svg
+   :align: center
 
-    <img src="../_static/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;">
 
 The functions are implemented in C with templates for integer specializations (cpu-kernels) and as CUDA (cuda-kernels), but the function signatures and normative definitions are expressed below using a subset of the Python language. These normative definitions are used as a stable and easy-to-read standard that both implementations must reproduce in tests, regardless of how they are optimized.\n
 """
@@ -35,7 +35,8 @@ The functions are implemented in C with templates for integer specializations (c
                 CURRENT_DIR,
                 "..",
                 "docs-sphinx",
-                "_auto",
+                "reference",
+                "generated",
                 "kernels.rst",
             ),
             "w",
@@ -76,29 +77,6 @@ The functions are implemented in C with templates for integer specializations (c
                         )
                         + "\n\n"
                     )
-
-    if os.path.isfile(
-        os.path.join(
-            CURRENT_DIR,
-            "..",
-            "docs-sphinx",
-            "_auto",
-            "toctree.txt",
-        )
-    ):
-        with open(
-            os.path.join(
-                CURRENT_DIR,
-                "..",
-                "docs-sphinx",
-                "_auto",
-                "toctree.txt",
-            ),
-            "r+",
-        ) as f:
-            if "_auto/kernels.rst" not in f.read():
-                print("Updating toctree.txt")
-                f.write(" " * 4 + "_auto/kernels.rst")
 
 
 if __name__ == "__main__":

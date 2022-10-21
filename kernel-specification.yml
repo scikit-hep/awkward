@@ -2328,27 +2328,6 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
-  - name: awkward_ListOffsetArray_reduce_nonlocal_findgaps_64
-    specializations:
-      - name: awkward_ListOffsetArray_reduce_nonlocal_findgaps_64
-        args:
-          - {name: gaps, type: "List[int64_t]", dir: out}
-          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
-    description: null
-    definition: |
-      def awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(gaps, parents, lenparents):
-          k = 0
-          last = -1
-          for i in range(lenparents):
-              parent = parents[i]
-              if last < parent:
-                  gaps[k] = parent - last
-                  k = k + 1
-                  last = parent
-    automatic-tests: true
-    manual-tests: []
-
   - name: awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
     specializations:
       - name: awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
@@ -2444,43 +2423,36 @@ kernels:
           - {name: outstops, type: "List[int64_t]", dir: out}
           - {name: distincts, type: "Const[List[int64_t]]", dir: in, role: reducer-distincts}
           - {name: lendistincts, type: "int64_t", dir: in, role: reducer-lendistincts}
-          - {name: gaps, type: "Const[List[int64_t]]", dir: in, role: reducer-gaps}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
-          outstarts, outstops, distincts, lendistincts, gaps, outlength
+          outstarts, outstops, distincts, lendistincts, outlength
       ):
-          maxcount = lendistincts // outlength
+          maxcount = lendistincts if (outlength == 0) else int(lendistincts // outlength)
+          if outlength > 0 and lendistincts > 0:
+              # The sublist index
+              k = 0
+              i_next_sublist = 0
+              for i in range(lendistincts):
+                  # Are we now in the next sublist?
+                  if i == i_next_sublist:
+                      # Advance counter
+                      i_next_sublist += maxcount
 
-          j = 0
-          k = 0
-          maxdistinct = -2
-          lasti = -1
-          for i in range(lendistincts):
-              if maxdistinct < distincts[i]:
-                  maxdistinct = distincts[i]
-
-                  extra = (i - lasti) // maxcount
-                  lasti = i
-
-                  numgappy = gaps[j]
-                  if numgappy < extra:
-                      numgappy = extra
-
-                  for gappy in range(numgappy):
+                      # Add a new sublist
                       outstarts[k] = i
                       outstops[k] = i
-                      k = k + 1
-                  j = j + 1
 
-              if distincts[i] != -1:
-                  outstops[k - 1] = i + 1
+                      k += 1
 
-          while k < outlength:
-              outstarts[k] = lendistincts + 1
-              outstops[k] = lendistincts + 1
-              k = k + 1
+                  # Expand stop index of previous list
+                  if distincts[i] != -1:
+                      outstops[k - 1] = i + 1
+          else:
+              for k in range(outlength):
+                outstarts[k] = 0
+                outstops[k] = 0
     automatic-tests: true
     manual-tests: []
 
@@ -3794,6 +3766,48 @@ kernels:
           for i in range(length):
               tonum[i] = size
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_RegularArray_reduce_local_nextparents
+    specializations:
+      - name: awkward_RegularArray_reduce_local_nextparents_64
+        args:
+          - {name: nextparents, type: "List[int64_t]", dir: out}
+          - {name: size, type: "int64_t", dir: in, role: RegularArray-size}
+          - {name: length, type: "int64_t", dir: in, role: reducer-length}
+    description: null
+    definition: |
+      def awkward_RegularArray_reduce_local_nextparents(nextparents, size, length):
+          k = 0
+          for i in range(length):
+              for _ in range(size):
+                  # nextparents should contain the row index
+                  nextparents[k] = i
+                  k += 1
+    automatic-tests: false
+    manual-tests: []
+
+  - name: awkward_RegularArray_reduce_nonlocal_preparenext
+    specializations:
+      - name: awkward_RegularArray_reduce_nonlocal_preparenext_64
+        args:
+          - {name: nextcarry, type: "List[int64_t]", dir: out}
+          - {name: nextparents, type: "List[int64_t]", dir: out}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in}
+          - {name: size, type: "int64_t", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      def awkward_RegularArray_reduce_nonlocal_preparenext(nextcarry, nextparents, parents, size, length):
+          k = 0
+          for j in range(size):
+              for i in range(length):
+                  # nextparents needs to be locally contiguous
+                  # so order our arrays by the transpose
+                  nextcarry[k] = i * size + j
+                  nextparents[k] = parents[i] * size + j
+                  k += 1
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_RegularArray_rpad_and_clip_axis1
