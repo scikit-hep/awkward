@@ -244,19 +244,6 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                 "wrong number or types of arguments for ArrayBuilder.string"
             )
 
-    @numba.core.typing.templates.bound_function("bytestring")
-    def resolve_bytestring(self, arraybuildertype, args, kwargs):
-        if (
-            len(args) == 1
-            and len(kwargs) == 0
-            and isinstance(args[0], (numba.types.Bytes))
-        ):
-            return numba.types.none(args[0])
-        else:
-            raise TypeError(
-                "wrong number or types of arguments for ArrayBuilder.bytestring"
-            )
-
     @numba.core.typing.templates.bound_function("begin_list")
     def resolve_begin_list(self, arraybuildertype, args, kwargs):
         if len(args) == 0 and len(kwargs) == 0:
@@ -352,7 +339,6 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                     numba.types.NPDatetime,
                     numba.types.NPTimedelta,
                     numba.types.UnicodeType,
-                    numba.types.Bytes,
                 ),
             )
         ):
@@ -371,7 +357,6 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                     numba.types.NPDatetime,
                     numba.types.NPTimedelta,
                     numba.types.UnicodeType,
-                    numba.types.Bytes,
                 ),
             )
         ):
@@ -577,59 +562,6 @@ def lower_string(context, builder, sig, args):
     return context.get_dummy_value()
 
 
-# FIXME: Take the function from Numba
-# int PyBytes_AsStringAndSize(PyObject *obj, char **buffer, Py_ssize_t *length)
-def bytes_as_string_and_size(self, obj, p_buffer, p_length):
-    # """
-    # Returns a value of ``ok``.
-    # The ``ok`` is i1 value that is set if ok.
-    # """
-    from llvmlite import ir
-    from llvmlite.ir import Constant
-
-    fnty = ir.FunctionType(
-        ir.IntType(32),
-        [self.pyobj, self.cstring.as_pointer(), self.py_ssize_t.as_pointer()],
-    )
-    fname = "PyBytes_AsStringAndSize"
-    fn = self._get_function(fnty, name=fname)
-
-    result = self.builder.call(fn, [obj, p_buffer, p_length])
-
-    ok = self.builder.icmp_signed("!=", Constant(result.type, -1), result)
-    return ok
-
-
-@numba.extending.lower_builtin("bytestring", ArrayBuilderType, numba.types.Bytes)
-def lower_bytestring(context, builder, sig, args):
-    arraybuildertype, xtype = sig.args
-    arraybuilderval, xval = args
-    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-
-    pyapi = context.get_python_api(builder)
-    gil = pyapi.gil_ensure()
-
-    strptr = pyapi.from_native_value(xtype, xval)
-    p_length = numba.core.cgutils.alloca_once(builder, pyapi.py_ssize_t)
-    p_buffer = numba.core.cgutils.alloca_once(builder, pyapi.cstring)
-
-    ok = bytes_as_string_and_size(pyapi, strptr, p_buffer, p_length)
-
-    if pyapi.if_object_ok(ok):
-        length = ak._connect.numba.layout.castint(
-            context, builder, pyapi.py_ssize_t, numba.int64, builder.load(p_length)
-        )
-        call(
-            context,
-            builder,
-            ak._libawkward.ArrayBuilder_bytestring_length,
-            (proxyin.rawptr, builder.load(p_buffer), length),
-        )
-    pyapi.gil_release(gil)
-
-    return context.get_dummy_value()
-
-
 @numba.extending.lower_builtin("begin_list", ArrayBuilderType)
 def lower_beginlist(context, builder, sig, args):
     (arraybuildertype,) = sig.args
@@ -830,11 +762,6 @@ def lower_append_timedelta(context, builder, sig, args):
 @numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.UnicodeType)
 def lower_append_string(context, builder, sig, args):
     return lower_string(context, builder, sig, args)
-
-
-@numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.Bytes)
-def lower_append_bytestring(context, builder, sig, args):
-    return lower_bytestring(context, builder, sig, args)
 
 
 @numba.extending.lower_builtin("append", ArrayBuilderType, numba.types.Optional)

@@ -103,20 +103,6 @@ def test_ArrayBuilder_of_strings():
     assert out.to_list() == ["hello", "world"]
 
 
-@pytest.mark.skip(
-    reason="bytestring lowering fails on Linux",
-)
-def test_ArrayBuilder_of_bytestrings():
-    @nb.njit(debug=True)
-    def add_a_bytestring(builder, bytestring):
-        builder.bytestring(bytestring)
-        return builder
-
-    builder = add_a_bytestring(ak.ArrayBuilder(), b"hello\0world")
-    out = builder.snapshot()
-    assert out.to_list() == [b"hello\0world"]
-
-
 def test_ArrayBuilder_append():
     @nb.njit
     def append(builder, value):
