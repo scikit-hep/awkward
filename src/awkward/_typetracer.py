@@ -204,67 +204,6 @@ TTypeTracerArray = TypeVar("TTypeTracerArray", bound="TypeTracerArray")
 
 
 class TypeTracerArray:
-    @classmethod
-    def from_array(cls: TTypeTracerArray, array, dtype=None) -> TTypeTracerArray:
-        """
-        Args:
-            array: array-like object, e.g. np.ndarray, #ak.index.Index
-            dtype: dtype of returned #ak._typetracer.TypeTracerArray
-
-        Returns an #ak._typetracer.TypeTracerArray that describes the type information
-        of the given array.
-        """
-        if isinstance(array, index.Index):
-            array_shape = (len(array),)
-            array_dtype = array.dtype
-        elif hasattr(array, "shape"):
-            array_shape = array.shape
-            array_dtype = array.dtype
-        elif ak._util.is_sized_iterable(array):
-            dtypes = []
-
-            # First, find dtype of non-UnknownScalar
-            non_scalars = [x for x in array if not isinstance(x, UnknownScalar)]
-            if len(non_scalars):
-                non_scalar_array = numpy.array(non_scalars)
-                dtypes.append(non_scalar_array.dtype)
-
-            # Now merge in any UnknownScalar
-            scalar_dtypes = [x.dtype for x in array if isinstance(x, UnknownScalar)]
-            dtypes.extend(scalar_dtypes)
-
-            if not dtypes:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
-                        f"from a sized iterable with no discernible dtype: {array}"
-                    )
-                )
-
-            # Construct array
-            array_dtype = reduce(numpy.promote_types, dtypes)
-            array_shape = (len(array),)
-        else:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
-                    f"from a non-sized iterable: {array}"
-                )
-            )
-
-        if array_dtype == np.dtype("O"):
-            raise ak._errors.wrap_error(
-                ValueError(
-                    f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
-                    f"from a sequence of non-primitive types: {array}"
-                )
-            )
-
-        if dtype is None:
-            dtype = array_dtype
-
-        return cls(dtype, shape=array_shape)
-
     def __init__(self, dtype, shape=None):
         self._dtype = np.dtype(dtype)
         self.shape = shape
@@ -552,16 +491,71 @@ class TypeTracer(ak.nplikes.NumpyLike):
     ############################ array creation
 
     def array(self, data, dtype=None, **kwargs):
-        # data[, dtype=[, copy=]]
-        return TypeTracerArray.from_array(data, dtype=dtype)
+        if isinstance(data, UnknownScalar):
+            array_shape = ()
+            array_dtype = data.dtype
+        elif numpy.isscalar(data):
+            data = numpy.array(data)
+            array_shape = ()
+            array_dtype = data.dtype
+        elif isinstance(data, index.Index):
+            array_shape = (data.length,)
+            array_dtype = data.dtype
+        elif hasattr(data, "shape"):
+            array_shape = data.shape
+            array_dtype = data.dtype
+        elif ak._util.is_sized_iterable(data):
+            dtypes = []
+
+            # First, find dtype of non-UnknownScalar
+            non_scalars = [x for x in data if not isinstance(x, UnknownScalar)]
+            if len(non_scalars):
+                non_scalar_array = numpy.array(non_scalars)
+                dtypes.append(non_scalar_array.dtype)
+
+            # Now merge in any UnknownScalar
+            scalar_dtypes = [x.dtype for x in data if isinstance(x, UnknownScalar)]
+            dtypes.extend(scalar_dtypes)
+
+            if not dtypes:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
+                        f"from a sized iterable with no discernible dtype: {data}"
+                    )
+                )
+
+            # Construct array
+            array_dtype = reduce(numpy.promote_types, dtypes)
+            array_shape = (len(data),)
+        else:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
+                    f"from a non-sized iterable: {data}"
+                )
+            )
+
+        if array_dtype == np.dtype("O"):
+            raise ak._errors.wrap_error(
+                ValueError(
+                    f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
+                    f"from a sequence of non-primitive types: {data}"
+                )
+            )
+
+        if dtype is None:
+            dtype = array_dtype
+
+        return TypeTracerArray(dtype, shape=array_shape)
 
     def asarray(self, array, dtype=None, **kwargs):
         # array[, dtype=][, order=]
-        return TypeTracerArray.from_array(array, dtype=dtype)
+        return self.array(array, dtype=dtype)
 
     def ascontiguousarray(self, array, dtype=None, **kwargs):
         # array[, dtype=]
-        return TypeTracerArray.from_array(array, dtype=dtype)
+        return self.array(array, dtype=dtype)
 
     def isscalar(self, *args, **kwargs):
         raise ak._errors.wrap_error(NotImplementedError)
@@ -583,20 +577,17 @@ class TypeTracer(ak.nplikes.NumpyLike):
         return TypeTracerArray(dtype, shape)
 
     def full(self, shape, value, dtype=None, **kwargs):
-        array = TypeTracerArray.from_array(value, dtype=dtype)
-        return array.reshape(shape)
+        value_array = self.array(value, dtype=dtype)
+        return TypeTracerArray(value_array.dtype, shape)
 
     def zeros_like(self, a, dtype=None, **kwargs):
-        if isinstance(a, UnknownScalar):
-            return UnknownScalar(dtype)
-
-        return TypeTracerArray.from_array(a, dtype=dtype)
+        return self.array(a, dtype=dtype)
 
     def ones_like(self, a, dtype=None, **kwargs):
-        return self.zeros_like(a, dtype)
+        return self.array(a, dtype=dtype)
 
     def full_like(self, a, fill_value, dtype=None, **kwargs):
-        return self.zeros_like(a, dtype)
+        return self.array(a, dtype=dtype)
 
     def arange(self, *args, **kwargs):
         # stop[, dtype=]
@@ -946,6 +937,9 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     def datetime_as_string(self, *args, **kwargs):
         raise ak._errors.wrap_error(NotImplementedError)
+
+    def promote_types(self, type1, type2):
+        return numpy.promote_types(type1, type2)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
