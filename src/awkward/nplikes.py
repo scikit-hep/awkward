@@ -366,7 +366,7 @@ class NumpyLike(Singleton):
     def common_type(self, types, default=None):
         if len(types) == 0:
             return default
-        return reduce(self._module.promote_types, types)
+        return reduce(self.promote_types, types)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
