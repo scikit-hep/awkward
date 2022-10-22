@@ -12,52 +12,68 @@ primes = [x for x in range(2, 1000) if all(x % n != 0 for n in range(2, x))]
 
 def test():
     data = ak.highlevel.Array([[1, 3, 5, 4, 2], [], [2, 3, 1], [5]]).layout
-    assert to_list(data.min(axis=1, initial=4)) == [1, None, 1, 4]
+    assert to_list(ak.min(data, axis=1, initial=4)) == [1, None, 1, 4]
     assert (
-        data.typetracer.min(axis=1, initial=4).form == data.min(axis=1, initial=4).form
+        ak.min(data.typetracer, axis=1, initial=4, highlevel=False).form
+        == ak.min(data, axis=1, initial=4, highlevel=False).form
     )
-    assert to_list(data.min(axis=1)) == [1, None, 1, 5]
-    assert data.typetracer.min(axis=1).form == data.min(axis=1).form
-    assert to_list(data.max(axis=1, initial=4)) == [5, None, 4, 5]
+    assert to_list(ak.min(data, axis=1)) == [1, None, 1, 5]
     assert (
-        data.typetracer.max(axis=1, initial=4).form == data.max(axis=1, initial=4).form
+        ak.min(data.typetracer, axis=1, highlevel=False).form
+        == ak.min(data, axis=1, highlevel=False).form
     )
-    assert to_list(data.max(axis=1)) == [5, None, 3, 5]
-    assert data.typetracer.max(axis=1).form == data.max(axis=1).form
+    assert to_list(ak.max(data, axis=1, initial=4)) == [5, None, 4, 5]
+    assert (
+        ak.max(data.typetracer, axis=1, initial=4, highlevel=False).form
+        == ak.max(data, axis=1, initial=4, highlevel=False).form
+    )
+    assert to_list(ak.max(data, axis=1)) == [5, None, 3, 5]
+    assert (
+        ak.max(data.typetracer, axis=1, highlevel=False).form
+        == ak.max(data, axis=1, highlevel=False).form
+    )
 
     data = ak.highlevel.Array(
         [[1.1, 3.3, 5.5, 4.4, 2.2], [], [2.2, 3.3, 1.1], [5.5]]
     ).layout
-    assert to_list(data.min(axis=1, initial=4)) == [1.1, None, 1.1, 4]
+    assert to_list(ak.min(data, axis=1, initial=4)) == [1.1, None, 1.1, 4]
     assert (
-        data.typetracer.min(axis=1, initial=4).form == data.min(axis=1, initial=4).form
+        ak.min(data.typetracer, axis=1, initial=4, highlevel=False).form
+        == ak.min(data, axis=1, initial=4, highlevel=False).form
     )
-    assert to_list(data.min(axis=1)) == [1.1, None, 1.1, 5.5]
-    assert data.typetracer.min(axis=1).form == data.min(axis=1).form
-    assert to_list(data.max(axis=1, initial=4)) == [5.5, None, 4, 5.5]
+    assert to_list(ak.min(data, axis=1)) == [1.1, None, 1.1, 5.5]
     assert (
-        data.typetracer.max(axis=1, initial=4).form == data.max(axis=1, initial=4).form
+        ak.min(data.typetracer, axis=1, highlevel=False).form
+        == ak.min(data, axis=1, highlevel=False).form
     )
-    assert to_list(data.max(axis=1)) == [5.5, None, 3.3, 5.5]
-    assert data.typetracer.max(axis=1).form == data.max(axis=1).form
+    assert to_list(ak.max(data, axis=1, initial=4)) == [5.5, None, 4, 5.5]
+    assert (
+        ak.max(data.typetracer, axis=1, initial=4, highlevel=False).form
+        == ak.max(data, axis=1, initial=4, highlevel=False).form
+    )
+    assert to_list(ak.max(data, axis=1)) == [5.5, None, 3.3, 5.5]
+    assert (
+        ak.max(data.typetracer, axis=1, highlevel=False).form
+        == ak.max(data, axis=1, highlevel=False).form
+    )
 
     data = ak.contents.NumpyArray(np.array(primes[2 : 2 * 3 * 5], dtype=np.int32))
-    assert to_list(data.min(axis=-1, initial=4)) == 4
-    assert to_list(data.min(axis=-1)) == 5
-    assert to_list(data.max(axis=-1, initial=114)) == 114
-    assert to_list(data.max(axis=-1)) == 113
+    assert to_list(ak.min(data, axis=-1, initial=4)) == 4
+    assert to_list(ak.min(data, axis=-1)) == 5
+    assert to_list(ak.max(data, axis=-1, initial=114)) == 114
+    assert to_list(ak.max(data, axis=-1)) == 113
 
     data = ak.contents.NumpyArray(np.array(primes[2 : 2 * 3 * 5], dtype=np.uint64))
-    assert to_list(data.min(axis=-1, initial=4)) == 4
-    assert to_list(data.min(axis=-1)) == 5
-    assert to_list(data.max(axis=-1, initial=114)) == 114
-    assert to_list(data.max(axis=-1)) == 113
+    assert to_list(ak.min(data, axis=-1, initial=4)) == 4
+    assert to_list(ak.min(data, axis=-1)) == 5
+    assert to_list(ak.max(data, axis=-1, initial=114)) == 114
+    assert to_list(ak.max(data, axis=-1)) == 113
 
     data = ak.contents.NumpyArray(np.array(primes[2 : 2 * 3 * 5], dtype=np.uint32))
-    assert to_list(data.min(axis=-1, initial=4)) == 4
-    assert to_list(data.min(axis=-1)) == 5
-    assert to_list(data.max(axis=-1, initial=114)) == 114
-    assert to_list(data.max(axis=-1)) == 113
+    assert to_list(ak.min(data, axis=-1, initial=4)) == 4
+    assert to_list(ak.min(data, axis=-1)) == 5
+    assert to_list(ak.max(data, axis=-1, initial=114)) == 114
+    assert to_list(ak.max(data, axis=-1)) == 113
 
 
 def test_date_time():
@@ -80,5 +96,5 @@ def test_date_time():
         np.datetime64("2020-01-01T00:00:00"),
     ]
 
-    assert array.max() == numpy_array[0]
-    assert array.min() == numpy_array[1]
+    assert ak.max(array) == numpy_array[0]
+    assert ak.min(array) == numpy_array[1]

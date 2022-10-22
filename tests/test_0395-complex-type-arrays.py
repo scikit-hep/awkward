@@ -24,11 +24,11 @@ def test_count_complex():
         [0j, (2.2 + 0j), 0j, (4.4 + 0j)],
     ]
 
-    assert to_list(depth1.count(-1)) == [3, 3, 4]
-    assert to_list(depth1.count(1)) == [3, 3, 4]
+    assert to_list(ak.count(depth1, -1)) == [3, 3, 4]
+    assert to_list(ak.count(depth1, 1)) == [3, 3, 4]
 
-    assert to_list(depth1.count(-2)) == [3, 3, 3, 1]
-    assert to_list(depth1.count(0)) == [3, 3, 3, 1]
+    assert to_list(ak.count(depth1, -2)) == [3, 3, 3, 1]
+    assert to_list(ak.count(depth1, 0)) == [3, 3, 3, 1]
 
 
 def test_count_nonzero_complex():
@@ -43,11 +43,11 @@ def test_count_nonzero_complex():
         [0j, (2.2 + 0j), 0j, (4.4 + 0j)],
     ]
 
-    assert to_list(depth1.count_nonzero(-1)) == [3, 1, 2]
-    assert to_list(depth1.count_nonzero(1)) == [3, 1, 2]
+    assert to_list(ak.count_nonzero(depth1, -1)) == [3, 1, 2]
+    assert to_list(ak.count_nonzero(depth1, 1)) == [3, 1, 2]
 
-    assert to_list(depth1.count_nonzero(-2)) == [1, 3, 1, 1]
-    assert to_list(depth1.count_nonzero(0)) == [1, 3, 1, 1]
+    assert to_list(ak.count_nonzero(depth1, -2)) == [1, 3, 1, 1]
+    assert to_list(ak.count_nonzero(depth1, 0)) == [1, 3, 1, 1]
 
 
 def test_count_min_complex():
@@ -62,11 +62,11 @@ def test_count_min_complex():
         [0j, (2.2 + 0j), 0j, (4.4 + 0j)],
     ]
 
-    assert to_list(depth1.min(-1)) == [(1.1 + 0.1j), 0j, 0j]
-    assert to_list(depth1.min(1)) == [(1.1 + 0.1j), 0j, 0j]
+    assert to_list(ak.min(depth1, -1)) == [(1.1 + 0.1j), 0j, 0j]
+    assert to_list(ak.min(depth1, 1)) == [(1.1 + 0.1j), 0j, 0j]
 
-    assert to_list(depth1.min(-2)) == [0j, (2.2 + 0j), 0j, (4.4 + 0j)]
-    assert to_list(depth1.min(0)) == [0j, (2.2 + 0j), 0j, (4.4 + 0j)]
+    assert to_list(ak.min(depth1, -2)) == [0j, (2.2 + 0j), 0j, (4.4 + 0j)]
+    assert to_list(ak.min(depth1, 0)) == [0j, (2.2 + 0j), 0j, (4.4 + 0j)]
 
     content2 = ak.contents.NumpyArray(
         np.array([True, True, True, False, True, False, False, True, False, True])
@@ -79,11 +79,11 @@ def test_count_min_complex():
         [False, True, False, True],
     ]
 
-    assert to_list(depth1.min(-1)) == [True, False, False]
-    assert to_list(depth1.min(1)) == [True, False, False]
+    assert to_list(ak.min(depth1, -1)) == [True, False, False]
+    assert to_list(ak.min(depth1, 1)) == [True, False, False]
 
-    assert to_list(depth1.min(-2)) == [False, True, False, True]
-    assert to_list(depth1.min(0)) == [False, True, False, True]
+    assert to_list(ak.min(depth1, -2)) == [False, True, False, True]
+    assert to_list(ak.min(depth1, 0)) == [False, True, False, True]
 
 
 def test_count_max_complex():
@@ -98,16 +98,16 @@ def test_count_max_complex():
         [0j, (2.2 + 0j), 0j, (4.4 + 0j)],
     ]
 
-    assert to_list(depth1.max(-1)) == [3.3, 2.2, 4.4]
-    assert to_list(depth1.max(1)) == [3.3, 2.2, 4.4]
+    assert to_list(ak.max(depth1, -1)) == [3.3, 2.2, 4.4]
+    assert to_list(ak.max(depth1, 1)) == [3.3, 2.2, 4.4]
 
-    assert to_list(depth1.max(-2)) == [
+    assert to_list(ak.max(depth1, -2)) == [
         (1.1 + 0.1j),
         (2.2 + 0j),
         (3.3 + 0j),
         (4.4 + 0j),
     ]
-    assert to_list(depth1.max(0)) == [
+    assert to_list(ak.max(depth1, 0)) == [
         (1.1 + 0.1j),
         (2.2 + 0j),
         (3.3 + 0j),
@@ -125,11 +125,11 @@ def test_count_max_complex():
         [False, False, False, False],
     ]
 
-    assert to_list(depth1.max(-1)) == [True, True, False]
-    assert to_list(depth1.max(1)) == [True, True, False]
+    assert to_list(ak.max(depth1, -1)) == [True, True, False]
+    assert to_list(ak.max(depth1, 1)) == [True, True, False]
 
-    assert to_list(depth1.max(-2)) == [False, True, True, False]
-    assert to_list(depth1.max(0)) == [False, True, True, False]
+    assert to_list(ak.max(depth1, -2)) == [False, True, True, False]
+    assert to_list(ak.max(depth1, 0)) == [False, True, True, False]
 
 
 def test_mask_complex():
@@ -139,7 +139,7 @@ def test_mask_complex():
     offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6, 6, 6, 9], dtype=np.int64))
     array = ak.contents.ListOffsetArray(offsets, content)
 
-    assert to_list(array.min(axis=-1, mask=False)) == [
+    assert to_list(ak.min(array, axis=-1, mask_identity=False)) == [
         (1.1 + 0.1j),
         (np.inf + 0j),
         (4.4 + 0j),
@@ -148,7 +148,7 @@ def test_mask_complex():
         (np.inf + 0j),
         (7.7 + 0j),
     ]
-    assert to_list(array.min(axis=-1, mask=True)) == [
+    assert to_list(ak.min(array, axis=-1, mask_identity=True)) == [
         (1.1 + 0.1j),
         None,
         (4.4 + 0j),
@@ -172,23 +172,23 @@ def test_keepdims_complex():
         [[53, 59, 61, 67, 71], [73, 79, 83, 89, 97], [101, 103, 107, 109, 113]],
     ]
 
-    assert to_list(depth2.prod(axis=-1, keepdims=False)) == to_list(
+    assert to_list(ak.prod(depth2, axis=-1, keepdims=False)) == to_list(
         nparray.prod(axis=-1, keepdims=False)
     )
-    assert to_list(depth2.prod(axis=-2, keepdims=False)) == to_list(
+    assert to_list(ak.prod(depth2, axis=-2, keepdims=False)) == to_list(
         nparray.prod(axis=-2, keepdims=False)
     )
-    assert to_list(depth2.prod(axis=-3, keepdims=False)) == to_list(
+    assert to_list(ak.prod(depth2, axis=-3, keepdims=False)) == to_list(
         nparray.prod(axis=-3, keepdims=False)
     )
 
-    assert to_list(depth2.prod(axis=-1, keepdims=True)) == to_list(
+    assert to_list(ak.prod(depth2, axis=-1, keepdims=True)) == to_list(
         nparray.prod(axis=-1, keepdims=True)
     )
-    assert to_list(depth2.prod(axis=-2, keepdims=True)) == to_list(
+    assert to_list(ak.prod(depth2, axis=-2, keepdims=True)) == to_list(
         nparray.prod(axis=-2, keepdims=True)
     )
-    assert to_list(depth2.prod(axis=-3, keepdims=True)) == to_list(
+    assert to_list(ak.prod(depth2, axis=-3, keepdims=True)) == to_list(
         nparray.prod(axis=-3, keepdims=True)
     )
 
@@ -197,8 +197,8 @@ def test_astype_complex():
     content_float64 = ak.contents.NumpyArray(
         np.array([0.25, 0.5, 3.5, 4.5, 5.5], dtype=np.float64)
     )
-    assert content_float64.argmin() == 0
-    assert content_float64.argmax() == 4
+    assert ak.argmin(content_float64) == 0
+    assert ak.argmax(content_float64) == 4
 
     array_float64 = ak.contents.UnmaskedArray(content_float64)
     assert to_list(array_float64) == [0.25, 0.5, 3.5, 4.5, 5.5]
@@ -261,9 +261,9 @@ def test_astype_complex():
         (9.9 + 0j),
     ]
 
-    assert content_complex64.sum() == (14.25 + 0j)
-    assert content_complex64.prod() == (10.828125 + 0j)
-    assert content_complex64.min() == (0.25 + 0j)
-    assert content_complex64.max() == (5.5 + 0j)
-    assert content_complex64.argmin() == 0
-    assert content_complex64.argmax() == 4
+    assert ak.sum(content_complex64) == (14.25 + 0j)
+    assert ak.prod(content_complex64) == (10.828125 + 0j)
+    assert ak.min(content_complex64) == (0.25 + 0j)
+    assert ak.max(content_complex64) == (5.5 + 0j)
+    assert ak.argmin(content_complex64) == 0
+    assert ak.argmax(content_complex64) == 4
