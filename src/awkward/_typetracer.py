@@ -540,23 +540,14 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     def raw(self, array, nplike):
         assert isinstance(array.nplike, TypeTracer)
-
-        if isinstance(nplike, TypeTracer):
-            return TypeTracerArray.from_array(array)
-        elif isinstance(array, TypeTracerArray):
-            return self
-        elif hasattr(nplike, "known_data") and nplike.known_data:
+        if nplike is not self:
             raise ak._errors.wrap_error(
                 TypeError(
                     "Converting a TypeTracer nplike to a nplike with `known_data=True` is not possible"
                 )
             )
-        else:
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer"
-                )
-            )
+
+        return array
 
     ############################ array creation
 
