@@ -6,8 +6,10 @@ from numbers import Integral, Real
 from typing import Any
 
 import awkward as ak
+from awkward import nplikes
 
-np = ak.nplikes.NumpyMetadata.instance()
+np = nplikes.NumpyMetadata.instance()
+numpy = nplikes.Numpy.instance()
 
 
 DTypeLike = Any
@@ -224,7 +226,7 @@ class Count(Reducer):
         nplike = ak.nplikes.nplike_of(*arrays)
         partials = [nplike.size(x, axis=None) for x in arrays]
         dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.multiply, partials, self.identity_for(dtype))
+        return reduce(nplike.add, partials, self.identity_for(dtype))
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
@@ -385,7 +387,13 @@ class Sum(Reducer):
         return reduce(nplike.add, partials, self.identity_for(dtype))
 
     def identity_for(self, dtype: np.dtype | None):
-        return np.array(0, dtype=dtype)
+        if dtype is None:
+            dtype = self.preferred_dtype
+
+        if dtype in {np.timedelta64, np.datetime64}:
+            return np.timedelta64(0)
+        else:
+            return numpy.array(0, dtype=dtype)[()]
 
 
 class Prod(Reducer):
@@ -471,7 +479,13 @@ class Prod(Reducer):
         return reduce(nplike.multiply, partials, self.identity_for(dtype))
 
     def identity_for(self, dtype: np.dtype | None):
-        return np.array(1, dtype=dtype)
+        if dtype is None:
+            dtype = self.preferred_dtype
+
+        if dtype in {np.timedelta64, np.datetime64}:
+            return np.timedelta64(0)
+        else:
+            return numpy.array(1, dtype=dtype)[()]
 
 
 class Any(Reducer):
@@ -598,6 +612,7 @@ class Min(Reducer):
         return self._initial
 
     def identity_for(self, dtype: DTypeLike | None) -> Real:
+        dtype = np.dtype(dtype)
         if self._initial is None:
             if dtype in (
                 np.int8,
@@ -609,7 +624,13 @@ class Min(Reducer):
                 np.uint32,
                 np.uint64,
             ):
-                return np.iinfo(type).max
+                return np.iinfo(dtype).max
+            elif dtype.kind == "M":
+                unit, _ = np.datetime_data(dtype)
+                return np.datetime64(np.iinfo(np.int64).max, unit)
+            elif dtype.kind == "m":
+                unit, _ = np.datetime_data(dtype)
+                return np.timedelta64(np.iinfo(np.int64).max, unit)
             else:
                 return np.inf
 
@@ -696,9 +717,11 @@ class Max(Reducer):
     def initial(self):
         return self._initial
 
-    def identity_for(self, type: DTypeLike | None):
+    def identity_for(self, dtype: DTypeLike | None):
+        dtype = np.dtype(dtype)
+
         if self._initial is None:
-            if type in (
+            if dtype in (
                 np.int8,
                 np.int16,
                 np.int32,
@@ -708,7 +731,13 @@ class Max(Reducer):
                 np.uint32,
                 np.uint64,
             ):
-                return np.iinfo(type).min
+                return np.iinfo(dtype).min
+            elif dtype.kind == "M":
+                unit, _ = np.datetime_data(dtype)
+                return np.datetime64(np.iinfo(np.int64).min + 1, unit)
+            elif dtype.kind == "m":
+                unit, _ = np.datetime_data(dtype)
+                return np.timedelta64(np.iinfo(np.int64).min + 1, unit)
             else:
                 return -np.inf
 
@@ -750,7 +779,7 @@ class Max(Reducer):
                     parents.data,
                     parents.length,
                     outlength,
-                    self._max_initial(self.initial, dtype),
+                    self.identity_for(dtype),
                 )
             )
         else:
@@ -767,7 +796,7 @@ class Max(Reducer):
                     parents.data,
                     parents.length,
                     outlength,
-                    self._max_initial(self.initial, dtype),
+                    self.identity_for(dtype),
                 )
             )
         if array.dtype.type in (np.complex128, np.complex64):
