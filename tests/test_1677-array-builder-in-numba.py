@@ -152,3 +152,16 @@ def test_ArrayBuilder_append():
         np.timedelta64(5, "s"),
         "hello",
     ]
+
+    builder = append(builder, b"arrow \xe2\x86\x92 zero \x00 not the end!".decode("utf-8"))
+    out = builder.snapshot()
+    assert out.to_list() == [
+        True,
+        1,
+        1.1,
+        (1.1 + 0.1j),
+        np.datetime64("2020-09-04"),
+        np.timedelta64(5, "s"),
+        "hello",
+        b"arrow \xe2\x86\x92 zero \x00 not the end!".decode("utf-8"),
+    ]
