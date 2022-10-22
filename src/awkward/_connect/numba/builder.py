@@ -550,13 +550,15 @@ def lower_string(context, builder, sig, args):
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()
 
-    out = pyapi.string_as_string(xval.value)
+    is_ok, out, length = pyapi.string_as_string_and_size(xval.value)
+    length = ak._connect.numba.layout.castint(context, builder, numba.ssize_t, numba.int64, length)
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_string,
-        (proxyin.rawptr, out),
+        ak._libawkward.ArrayBuilder_string_length,
+        (proxyin.rawptr, out, length),
     )
+
     pyapi.gil_release(gil)
 
     return context.get_dummy_value()
