@@ -99,19 +99,19 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
         nplike = ak.nplikes.nplike_of(x, y, weight)
         if weight is None:
             sumw = ak.operations.ak_count._impl(
-                x, axis, keepdims, mask_identity, flatten_records
+                x, axis, keepdims, mask_identity, flatten_records, True, None
             )
             sumwx = ak.operations.ak_sum._impl(
-                x, axis, keepdims, mask_identity, flatten_records
+                x, axis, keepdims, mask_identity, flatten_records, True, None
             )
             sumwy = ak.operations.ak_sum._impl(
-                y, axis, keepdims, mask_identity, flatten_records
+                y, axis, keepdims, mask_identity, flatten_records, True, None
             )
             sumwxx = ak.operations.ak_sum._impl(
-                x**2, axis, keepdims, mask_identity, flatten_records
+                x**2, axis, keepdims, mask_identity, flatten_records, True, None
             )
             sumwxy = ak.operations.ak_sum._impl(
-                x * y, axis, keepdims, mask_identity, flatten_records
+                x * y, axis, keepdims, mask_identity, flatten_records, True, None
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -120,12 +120,14 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 mask_identity,
                 flatten_records,
+                True,
+                None,
             )
             sumwx = ak.operations.ak_sum._impl(
-                x * weight, axis, keepdims, mask_identity, flatten_records
+                x * weight, axis, keepdims, mask_identity, flatten_records, True, None
             )
             sumwy = ak.operations.ak_sum._impl(
-                y * weight, axis, keepdims, mask_identity, flatten_records
+                y * weight, axis, keepdims, mask_identity, flatten_records, True, None
             )
             sumwxx = ak.operations.ak_sum._impl(
                 (x**2) * weight,
@@ -133,6 +135,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 mask_identity,
                 flatten_records,
+                True,
+                None,
             )
             sumwxy = ak.operations.ak_sum._impl(
                 x * y * weight,
@@ -140,6 +144,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 mask_identity,
                 flatten_records,
+                True,
+                None,
             )
         delta = (sumw * sumwxx) - (sumwx * sumwx)
         intercept = nplike.true_divide(((sumwxx * sumwy) - (sumwx * sumwxy)), delta)
@@ -151,6 +157,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
             intercept, allow_record=True, allow_other=True
         )
         slope = ak.operations.to_layout(slope, allow_record=True, allow_other=True)
+
         intercept_error = ak.operations.to_layout(
             intercept_error, allow_record=True, allow_other=True
         )

@@ -93,13 +93,19 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
         ydiff = y - ymean
         if weight is None:
             sumwxx = ak.operations.ak_sum._impl(
-                xdiff**2, axis, keepdims, mask_identity, flatten_records
+                xdiff**2, axis, keepdims, mask_identity, flatten_records, True, None
             )
             sumwyy = ak.operations.ak_sum._impl(
-                ydiff**2, axis, keepdims, mask_identity, flatten_records
+                ydiff**2, axis, keepdims, mask_identity, flatten_records, True, None
             )
             sumwxy = ak.operations.ak_sum._impl(
-                xdiff * ydiff, axis, keepdims, mask_identity, flatten_records
+                xdiff * ydiff,
+                axis,
+                keepdims,
+                mask_identity,
+                flatten_records,
+                True,
+                None,
             )
         else:
             sumwxx = ak.operations.ak_sum._impl(
@@ -108,6 +114,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 mask_identity,
                 flatten_records,
+                True,
+                None,
             )
             sumwyy = ak.operations.ak_sum._impl(
                 (ydiff**2) * weight,
@@ -115,6 +123,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 mask_identity,
                 flatten_records,
+                True,
+                None,
             )
             sumwxy = ak.operations.ak_sum._impl(
                 (xdiff * ydiff) * weight,
@@ -122,6 +132,8 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
                 keepdims,
                 mask_identity,
                 flatten_records,
+                True,
+                None,
             )
         nplike = ak.nplikes.nplike_of(sumwxy, sumwxx, sumwyy)
         return nplike.true_divide(sumwxy, nplike.sqrt(sumwxx * sumwyy))

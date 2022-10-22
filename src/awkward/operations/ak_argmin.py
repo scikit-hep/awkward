@@ -64,9 +64,13 @@ def argmin(
             keepdims=keepdims,
             mask_identity=mask_identity,
             flatten_records=flatten_records,
+            highlevel=highlevel,
+            behavior=behavior,
         ),
     ):
-        return _impl(array, axis, keepdims, mask_identity, flatten_records)
+        return _impl(
+            array, axis, keepdims, mask_identity, flatten_records, highlevel, behavior
+        )
 
 
 @ak._connect.numpy.implements("nanargmin")
@@ -135,20 +139,15 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, beha
     reducer = ak.reducers.ArgMin()
     behavior = ak._util.behavior_of(array, behavior=behavior)
 
-    if axis is None:
-        return layout.reduce_flattened(
-            reducer_part=reducer,
-            reducer_result=None,
-            mask=mask_identity,
-            behavior=behavior,
-            flatten_records=flatten_records,
-        )
-
+    out = layout.reduce(
+        reducer,
+        axis=axis,
+        mask=mask_identity,
+        keepdims=keepdims,
+        behavior=behavior,
+        flatten_records=flatten_records,
+    )
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, behavior, highlevel)
     else:
-        out = layout.reduce(
-            reducer, axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
-        )
-        if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior, highlevel)
-        else:
-            return out
+        return out

@@ -73,21 +73,15 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records, highlevel, beha
     reducer = ak.reducers.CountNonzero()
     behavior = ak._util.behavior_of(array, behavior=behavior)
 
-    if axis is None:
-        reducer_result = ak.reducers.Sum()
-        return layout.reduce_flattened(
-            reducer_part=reducer,
-            reducer_result=reducer_result,
-            mask=mask_identity,
-            behavior=behavior,
-            flatten_records=flatten_records,
-        )
-
+    out = layout.reduce(
+        reducer,
+        axis=axis,
+        mask=mask_identity,
+        keepdims=keepdims,
+        behavior=behavior,
+        flatten_records=flatten_records,
+    )
+    if isinstance(out, (ak.contents.Content, ak.record.Record)):
+        return ak._util.wrap(out, behavior, highlevel)
     else:
-        out = layout.reduce(
-            reducer, axis=axis, mask=mask_identity, keepdims=keepdims, behavior=behavior
-        )
-        if isinstance(out, (ak.contents.Content, ak.record.Record)):
-            return ak._util.wrap(out, behavior, highlevel)
-        else:
-            return out
+        return out
