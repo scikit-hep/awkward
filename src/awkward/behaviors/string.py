@@ -119,12 +119,8 @@ def _string_equal(one, two):
 
     # first condition: string lengths must be the same
     count = ak.reducers.Count()
-    counts1 = nplike.asarray(
-        one.reduce(count, axis=-1, mask_identity=False, keepdims=False)
-    )
-    counts2 = nplike.asarray(
-        two.reduce(count, axis=-1, mask_identity=False, keepdims=False)
-    )
+    counts1 = nplike.asarray(one.reduce(count, axis=-1, mask=False, keepdims=False))
+    counts2 = nplike.asarray(two.reduce(count, axis=-1, mask=False, keepdims=False))
 
     out = counts1 == counts2
 
