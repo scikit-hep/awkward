@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numbers
+from functools import reduce
 from typing import TypeVar
 
 import numpy
@@ -214,13 +215,44 @@ class TypeTracerArray:
         of the given array.
         """
         if isinstance(array, index.Index):
-            array = array.data
+            array_shape = (len(array),)
+            array_dtype = array.dtype
+        elif hasattr(array, "shape"):
+            array_shape = array.shape
+            array_dtype = array.dtype
+        elif ak._util.is_sized_iterable(array):
+            dtypes = []
 
-        # not array-like, try and cast to a NumPy array
-        elif not hasattr(array, "shape"):
-            array = numpy.array(array)
+            # First, find dtype of non-UnknownScalar
+            non_scalars = [x for x in array if not isinstance(x, UnknownScalar)]
+            if len(non_scalars):
+                non_scalar_array = numpy.array(non_scalars)
+                dtypes.append(non_scalar_array.dtype)
 
-        if array.dtype == np.dtype("O"):
+            # Now merge in any UnknownScalar
+            scalar_dtypes = [x.dtype for x in array if isinstance(x, UnknownScalar)]
+            dtypes.extend(scalar_dtypes)
+
+            if not dtypes:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
+                        f"from a sized iterable with no discernible dtype: {array}"
+                    )
+                )
+
+            # Construct array
+            array_dtype = reduce(numpy.promote_types, dtypes)
+            array_shape = (len(array),)
+        else:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
+                    f"from a non-sized iterable: {array}"
+                )
+            )
+
+        if array_dtype == np.dtype("O"):
             raise ak._errors.wrap_error(
                 ValueError(
                     f"bug in Awkward Array: attempt to construct `TypeTracerArray` "
@@ -229,9 +261,9 @@ class TypeTracerArray:
             )
 
         if dtype is None:
-            dtype = array.dtype
+            dtype = array_dtype
 
-        return cls(dtype, shape=array.shape)
+        return cls(dtype, shape=array_shape)
 
     def __init__(self, dtype, shape=None):
         self._dtype = np.dtype(dtype)
@@ -479,6 +511,10 @@ class TypeTracerArray:
 class TypeTracer(ak.nplikes.NumpyLike):
     known_data = False
     known_shape = False
+
+    @property
+    def _module(self):
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def index_nplike(self):
@@ -862,29 +898,54 @@ class TypeTracer(ak.nplikes.NumpyLike):
         # array
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def sum(self, *args, **kwargs):
+    def _reduce(self, array, axis=None, dtype=None, keepdims=False):
+        if dtype is None:
+            dtype = array.dtype
+
+        assert dtype != np.dtype("O")
+
+        if axis is None:
+            if keepdims:
+                return TypeTracerArray(dtype, shape=tuple([1] * array.ndim))
+            else:
+                return UnknownScalar(dtype)
+
+        else:
+            if axis < 0:
+                axis = array.ndim + axis
+
+            new_shape = list(array.shape)
+            if keepdims:
+                new_shape[axis] = 1
+            else:
+                del new_shape[axis]
+
+            new_shape = tuple(new_shape)
+            return TypeTracerArray(dtype, shape=new_shape)
+
+    def sum(self, array, axis=None, dtype=None, out=None, keepdims=False):
         # array
-        raise ak._errors.wrap_error(NotImplementedError)
+        return self._reduce(array, axis, dtype, keepdims)
 
-    def prod(self, *args, **kwargs):
+    def prod(self, array, axis=None, dtype=None, out=None, keepdims=False):
         # array
-        raise ak._errors.wrap_error(NotImplementedError)
+        return self._reduce(array, axis, dtype, keepdims)
 
-    def min(self, *args, **kwargs):
+    def min(self, array, axis=None, dtype=None, out=None, keepdims=False):
         # array
-        raise ak._errors.wrap_error(NotImplementedError)
+        return self._reduce(array, axis, dtype, keepdims)
 
-    def max(self, *args, **kwargs):
+    def max(self, array, axis=None, dtype=None, out=None, keepdims=False):
         # array
-        raise ak._errors.wrap_error(NotImplementedError)
+        return self._reduce(array, axis, dtype, keepdims)
 
-    def argmin(self, *args, **kwargs):
-        # array[, axis=]
-        raise ak._errors.wrap_error(NotImplementedError)
+    def argmin(self, array, axis=None, dtype=None, out=None, keepdims=False):
+        # array
+        return self._reduce(array, axis, np.int64, keepdims)
 
-    def argmax(self, *args, **kwargs):
-        # array[, axis=]
-        raise ak._errors.wrap_error(NotImplementedError)
+    def argmax(self, array, axis=None, dtype=None, out=None, keepdims=False):
+        # array
+        return self._reduce(array, axis, np.int64, keepdims)
 
     def array_str(
         self, array, max_line_width=None, precision=None, suppress_small=None

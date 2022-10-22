@@ -359,6 +359,9 @@ class NumpyLike(Singleton):
     def datetime_as_string(self, *args, **kwargs):
         return self._module.datetime_as_string(*args, **kwargs)
 
+    def promote_types(self, type1, type2):
+        return self._module.promote_types(type1, type2)
+
     @classmethod
     def is_own_array(cls, obj) -> bool:
         """
