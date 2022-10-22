@@ -817,114 +817,85 @@ class Content:
     def local_index(self, axis):
         return self._local_index(axis, 0)
 
-    def reduce_flattened(
+    def reduce(
         self,
-        reducer_part,
-        reducer_result=None,
+        reducer,
+        axis=-1,
         mask=True,
-        flatten_records=True,
         keepdims=False,
         behavior=None,
+        flatten_records=True,
     ):
-        parts = self.completely_flatten(flatten_records=flatten_records)
-
-        # NOTE: here we assume that we only have raw arrays, or empty lists
-        layouts = [
-            ak.contents.NumpyArray(p, nplike=self._nplike)
-            if self.nplike.is_own_array(p)
-            else ak.contents.EmptyArray(nplike=self._nplike)
-            for p in parts
-        ]
-
-        # We can't trivially reduce the results of positional reducers,
-        # so let's handle these the "easy" way by merging them into a single layout
-        if reducer_part.needs_position:
-            assert reducer_result is None
-
-            # So combine them and reduce that way.
-            combined = layouts[0].mergemany(layouts[1:])
-            return combined.reduce(
-                reducer_part,
-                mask=mask,
-                axis=-1,
-                keepdims=keepdims,
-                behavior=behavior,
-            )
-
-        else:
-            # Reduce each layout at axis=-1
-            reductions = [
-                part.reduce(
-                    reducer_part, axis=-1, mask=mask, behavior=behavior, keepdims=True
-                )
-                for part in layouts
-            ]
-            # Build final layout of all reductions
-            composite = ak.contents.UnionArray(
-                ak.index.Index(
-                    self.nplike.index_nplike.arange(len(reductions), dtype=np.int8)
-                ),
-                ak.index.Index(
-                    self.nplike.index_nplike.zeros(len(reductions), dtype=np.int64)
-                ),
-                reductions,
-            )
-            # Reduce that!
-            return composite.reduce(
-                reducer_result, axis=-1, mask=mask, keepdims=keepdims, behavior=behavior
-            )
-
-    def reduce(self, reducer, axis=-1, mask=True, keepdims=False, behavior=None):
-        if axis is None:
-            raise ak._errors.wrap_error(NotImplementedError)
-
-        negaxis = -axis
         branch, depth = self.branch_depth
+        if axis is None:
+            result = reducer.apply_parts(
+                self.completely_flatten(flatten_records=flatten_records)
+            )
+            if keepdims:
+                if branch:
+                    raise ak._errors.wrap_error(
+                        ValueError(
+                            "cannot use axis=None with keepdims=True on a nested list structure "
+                            "of variable depth"
+                        )
+                    )
+                array = self.nplike.array([result])
+                layout = ak.contents.NumpyArray(array, nplike=self._nplike)
+                for _ in range(depth - 1):
+                    layout = ak.contents.RegularArray(
+                        layout, size=1, nplike=self._nplike
+                    )
+                return layout
+            else:
+                return result
 
-        if branch:
-            if negaxis <= 0:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use non-negative axis on a nested list structure "
-                        "of variable depth (negative axis counts from the leaves of "
-                        "the tree; non-negative from the root)"
-                    )
-                )
-            if negaxis > depth:
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "cannot use axis={} on a nested list structure that splits into "
-                        "different depths, the minimum of which is depth={} "
-                        "from the leaves".format(axis, depth)
-                    )
-                )
         else:
-            if negaxis <= 0:
-                negaxis += depth
-            if not (0 < negaxis and negaxis <= depth):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "axis={} exceeds the depth of the nested list structure "
-                        "(which is {})".format(axis, depth)
+            negaxis = -axis
+
+            if branch:
+                if negaxis <= 0:
+                    raise ak._errors.wrap_error(
+                        ValueError(
+                            "cannot use non-negative axis on a nested list structure "
+                            "of variable depth (negative axis counts from the leaves of "
+                            "the tree; non-negative from the root)"
+                        )
                     )
-                )
+                if negaxis > depth:
+                    raise ak._errors.wrap_error(
+                        ValueError(
+                            "cannot use axis={} on a nested list structure that splits into "
+                            "different depths, the minimum of which is depth={} "
+                            "from the leaves".format(axis, depth)
+                        )
+                    )
+            else:
+                if negaxis <= 0:
+                    negaxis += depth
+                if not (0 < negaxis and negaxis <= depth):
+                    raise ak._errors.wrap_error(
+                        ValueError(
+                            "axis={} exceeds the depth of the nested list structure "
+                            "(which is {})".format(axis, depth)
+                        )
+                    )
 
-        starts = ak.index.Index64.zeros(1, self._nplike)
-        parents = ak.index.Index64.zeros(self.length, self._nplike)
-        shifts = None
-        next = self._reduce_next(
-            reducer,
-            negaxis,
-            starts,
-            shifts,
-            parents,
-            1,
-            mask,
-            keepdims,
-            behavior,
-        )
+            starts = ak.index.Index64.zeros(1, self._nplike)
+            parents = ak.index.Index64.zeros(self.length, self._nplike)
+            shifts = None
+            next = self._reduce_next(
+                reducer,
+                negaxis,
+                starts,
+                shifts,
+                parents,
+                1,
+                mask,
+                keepdims,
+                behavior,
+            )
 
-        return next[0]
+            return next[0]
 
     def argsort(self, axis=-1, ascending=True, stable=False, kind=None, order=None):
         negaxis = -axis
