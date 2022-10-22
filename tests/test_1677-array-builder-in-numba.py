@@ -153,7 +153,9 @@ def test_ArrayBuilder_append():
         "hello",
     ]
 
-    builder = append(builder, b"arrow \xe2\x86\x92 zero \x00 not the end!".decode("utf-8"))
+    builder = append(
+        builder, b"arrow \xe2\x86\x92 zero \x00 not the end!".decode("utf-8")
+    )
     out = builder.snapshot()
     assert out.to_list() == [
         True,
