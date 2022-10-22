@@ -828,6 +828,9 @@ class Content:
     ):
         branch, depth = self.branch_depth
         if axis is None:
+            if reducer.needs_position:
+                raise ak._errors.wrap_error(NotImplementedError)
+
             result = reducer.apply_parts(
                 self.completely_flatten(flatten_records=flatten_records)
             )
@@ -839,7 +842,10 @@ class Content:
                             "of variable depth"
                         )
                     )
+                # Wrap result in a 1D array
                 array = self.nplike.array([result])
+
+                # Restore the missing dimensions are RegularArray nodes
                 layout = ak.contents.NumpyArray(array, nplike=self._nplike)
                 for _ in range(depth - 1):
                     layout = ak.contents.RegularArray(
