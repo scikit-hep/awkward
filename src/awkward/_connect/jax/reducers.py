@@ -1,14 +1,44 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from numbers import Real
+
 import jax
 
 import awkward as ak
-from awkward._reducers import Reducer
+from awkward import reducers
+from awkward.reducers import DTypeLike, Reducer
 
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-class ArgMin(Reducer):
+_overloads = {}
+
+
+def overloads(reducer_cls: type[Reducer]):
+    def wrapper(overload_cls):
+        _overloads[reducer_cls] = overload_cls
+        return overload_cls
+
+    return wrapper
+
+
+def get_jax_reducer(reducer: Reducer) -> Reducer:
+    if isinstance(reducer, type):
+        raise ak._errors.wrap_error(TypeError("expected reducer instance"))
+
+    reducer_cls = type(reducer)
+    jax_reducer_cls = _overloads[reducer_cls]
+    return jax_reducer_cls.from_overloaded(reducer)
+
+
+class JaxReducer(Reducer):
+    @classmethod
+    def from_overloaded(cls, overloaded: Reducer):
+        return cls()
+
+
+@overloads(reducers.ArgMin)
+class ArgMin(JaxReducer):
     name = "argmin"
     needs_position = True
     preferred_dtype = np.int64
@@ -17,12 +47,12 @@ class ArgMin(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         raise ak._errors.wrap_error(RuntimeError("Cannot differentiate through argmin"))
 
 
-class ArgMax(Reducer):
+@overloads(reducers.ArgMax)
+class ArgMax(JaxReducer):
     name = "argmax"
     needs_position = True
     preferred_dtype = np.int64
@@ -31,12 +61,12 @@ class ArgMax(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         raise ak._errors.wrap_error(RuntimeError("Cannot differentiate through argmax"))
 
 
-class Count(Reducer):
+@overloads(reducers.Count)
+class Count(JaxReducer):
     name = "count"
     preferred_dtype = np.int64
 
@@ -44,14 +74,14 @@ class Count(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         raise ak._errors.wrap_error(
             RuntimeError("Cannot differentiate through count_zero")
         )
 
 
-class CountNonzero(Reducer):
+@overloads(reducers.CountNonzero)
+class CountNonzero(JaxReducer):
     name = "count_nonzero"
     preferred_dtype = np.int64
 
@@ -59,19 +89,18 @@ class CountNonzero(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         raise ak._errors.wrap_error(
             RuntimeError("Cannot differentiate through count_nonzero")
         )
 
 
-class Sum(Reducer):
+@overloads(reducers.Sum)
+class Sum(JaxReducer):
     name = "sum"
     preferred_dtype = np.float64
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
 
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype.kind == "M":
@@ -89,12 +118,12 @@ class Sum(Reducer):
             return ak.contents.NumpyArray(result, nplike=array.nplike)
 
 
-class Prod(Reducer):
+@overloads(reducers.Prod)
+class Prod(JaxReducer):
     name = "prod"
     preferred_dtype = np.int64
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         # See issue https://github.com/google/jax/issues/9296
         result = jax.numpy.exp(
@@ -107,7 +136,8 @@ class Prod(Reducer):
             return ak.contents.NumpyArray(result, nplike=array.nplike)
 
 
-class Any(Reducer):
+@overloads(reducers.Any)
+class Any(JaxReducer):
     name = "any"
     preferred_dtype = np.bool_
 
@@ -115,8 +145,7 @@ class Any(Reducer):
     def return_dtype(cls, given_dtype):
         return np.bool_
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_max(array.data, parents.data)
         result = jax.numpy.asarray(result, dtype=bool)
@@ -124,7 +153,8 @@ class Any(Reducer):
         return ak.contents.NumpyArray(result, nplike=array.nplike)
 
 
-class All(Reducer):
+@overloads(reducers.All)
+class All(JaxReducer):
     name = "all"
     preferred_dtype = np.bool_
 
@@ -132,8 +162,7 @@ class All(Reducer):
     def return_dtype(cls, given_dtype):
         return np.bool_
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         result = jax.ops.segment_min(array.data, parents.data)
         result = jax.numpy.asarray(result, dtype=bool)
@@ -141,21 +170,26 @@ class All(Reducer):
         return ak.contents.NumpyArray(result, nplike=array.nplike)
 
 
-class Min(Reducer):
+@overloads(reducers.Min)
+class Min(JaxReducer):
     name = "min"
     preferred_dtype = np.float64
-    initial = None
 
     def __init__(self, initial):
-        type(self).initial = initial
+        self._initial = initial
 
-    def __del__(self):
-        type(self).initial = None
+    @property
+    def initial(self):
+        return self._initial
 
-    @staticmethod
-    def _min_initial(initial, type):
-        if initial is None:
-            if type in (
+    @classmethod
+    def from_overloaded(cls, overloaded: reducers.Min):
+        return cls(overloaded.initial)
+
+    def identity_for(self, dtype: DTypeLike | None) -> Real:
+        dtype = np.dtype(dtype)
+        if self._initial is None:
+            if dtype in (
                 np.int8,
                 np.int16,
                 np.int32,
@@ -165,18 +199,23 @@ class Min(Reducer):
                 np.uint32,
                 np.uint64,
             ):
-                return np.iinfo(type).max
+                return np.iinfo(dtype).max
+            elif dtype.kind == "M":
+                unit, _ = np.datetime_data(dtype)
+                return np.datetime64(np.iinfo(np.int64).max, unit)
+            elif dtype.kind == "m":
+                unit, _ = np.datetime_data(dtype)
+                return np.timedelta64(np.iinfo(np.int64).max, unit)
             else:
                 return np.inf
 
-        return initial
+        return self._initial
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
 
         result = jax.ops.segment_min(array.data, parents.data)
-        result = jax.numpy.minimum(result, cls._min_initial(cls.initial, array.dtype))
+        result = jax.numpy.minimum(result, self.identity_for(array.dtype))
 
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
@@ -187,21 +226,23 @@ class Min(Reducer):
             return ak.contents.NumpyArray(result, nplike=array.nplike)
 
 
-class Max(Reducer):
+@overloads(reducers.Max)
+class Max(JaxReducer):
     name = "max"
     preferred_dtype = np.float64
-    initial = None
 
     def __init__(self, initial):
-        type(self).initial = initial
+        self._initial = initial
 
-    def __del__(self):
-        type(self).initial = None
+    @classmethod
+    def from_overloaded(cls, overloaded: reducers.Max):
+        return cls(overloaded.initial)
 
-    @staticmethod
-    def _max_initial(initial, type):
-        if initial is None:
-            if type in (
+    def identity_for(self, dtype: DTypeLike | None):
+        dtype = np.dtype(dtype)
+
+        if self._initial is None:
+            if dtype in (
                 np.int8,
                 np.int16,
                 np.int32,
@@ -211,19 +252,24 @@ class Max(Reducer):
                 np.uint32,
                 np.uint64,
             ):
-                return np.iinfo(type).min
+                return np.iinfo(dtype).min
+            elif dtype.kind == "M":
+                unit, _ = np.datetime_data(dtype)
+                return np.datetime64(np.iinfo(np.int64).min + 1, unit)
+            elif dtype.kind == "m":
+                unit, _ = np.datetime_data(dtype)
+                return np.timedelta64(np.iinfo(np.int64).min + 1, unit)
             else:
                 return -np.inf
 
-        return initial
+        return self._initial
 
-    @classmethod
-    def apply(cls, array, parents, outlength):
+    def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
 
         result = jax.ops.segment_max(array.data, parents.data)
 
-        result = jax.numpy.maximum(result, cls._max_initial(cls.initial, array.dtype))
+        result = jax.numpy.maximum(result, self.identity_for(array.dtype))
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
                 array.nplike.array(result.view(array.dtype), array.dtype),
@@ -231,10 +277,3 @@ class Max(Reducer):
             )
         else:
             return ak.contents.NumpyArray(result, nplike=array.nplike)
-
-
-def get_jax_reducer(reducer: Reducer) -> Reducer:
-    if isinstance(reducer, type):
-        return globals()[reducer.__name__]
-    else:
-        return globals()[type(reducer).__name__]
