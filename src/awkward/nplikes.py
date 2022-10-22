@@ -4,6 +4,7 @@
 
 import ctypes
 from collections.abc import Iterable
+from functools import reduce
 
 import numpy
 
@@ -361,6 +362,11 @@ class NumpyLike(Singleton):
 
     def promote_types(self, type1, type2):
         return self._module.promote_types(type1, type2)
+
+    def common_type(self, types, default=None):
+        if len(types) == 0:
+            return default
+        return reduce(self._module.promote_types, types)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
