@@ -35,6 +35,12 @@ class Reducer:
             type = np.float32
         return type
 
+    def apply(self, array, parents, outlength):
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    def apply_parts(self, arrays):
+        raise ak._errors.wrap_error(NotImplementedError)
+
 
 class ArgMin(Reducer):
     name = "argmin"
