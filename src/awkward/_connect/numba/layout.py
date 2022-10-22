@@ -279,7 +279,7 @@ class NumpyArrayType(ContentType, ak._lookup.NumpyLookup):
 
     def __init__(self, arraytype, identifiertype, parameters):
         super().__init__(
-            name="ak2.NumpyArrayType({}, {}, {})".format(
+            name="ak.NumpyArrayType({}, {}, {})".format(
                 arraytype.name, identifiertype.name, json.dumps(parameters)
             )
         )
@@ -343,7 +343,7 @@ class RegularArrayType(ContentType, ak._lookup.RegularLookup):
 
     def __init__(self, contenttype, size, identifiertype, parameters):
         super().__init__(
-            name="ak2.RegularArrayType({}, {}, {}, {})".format(
+            name="ak.RegularArrayType({}, {}, {}, {})".format(
                 contenttype.name, size, identifiertype.name, json.dumps(parameters)
             )
         )
@@ -426,7 +426,7 @@ class ListArrayType(ContentType, ak._lookup.ListLookup):
 
     def __init__(self, indextype, contenttype, identifiertype, parameters):
         super().__init__(
-            name="ak2.ListArrayType({}, {}, {}, {})".format(
+            name="ak.ListArrayType({}, {}, {}, {})".format(
                 indextype.name,
                 contenttype.name,
                 identifiertype.name,
@@ -519,7 +519,7 @@ class IndexedArrayType(ContentType, ak._lookup.IndexedLookup):
 
     def __init__(self, indextype, contenttype, identifiertype, parameters):
         super().__init__(
-            name="ak2.IndexedArrayType({}, {}, {}, {})".format(
+            name="ak.IndexedArrayType({}, {}, {}, {})".format(
                 indextype.name,
                 contenttype.name,
                 identifiertype.name,
@@ -620,7 +620,7 @@ class IndexedOptionArrayType(ContentType, ak._lookup.IndexedOptionLookup):
 
     def __init__(self, indextype, contenttype, identifiertype, parameters):
         super().__init__(
-            name="ak2.IndexedOptionArrayType({}, {}, {}, {})".format(
+            name="ak.IndexedOptionArrayType({}, {}, {}, {})".format(
                 indextype.name,
                 contenttype.name,
                 identifiertype.name,
@@ -739,7 +739,7 @@ class ByteMaskedArrayType(ContentType, ak._lookup.ByteMaskedLookup):
 
     def __init__(self, masktype, contenttype, valid_when, identifiertype, parameters):
         super().__init__(
-            name="ak2.ByteMaskedArrayType({}, {}, {}, {}, {})".format(
+            name="ak.ByteMaskedArrayType({}, {}, {}, {}, {})".format(
                 masktype.name,
                 contenttype.name,
                 valid_when,
@@ -862,7 +862,7 @@ class BitMaskedArrayType(ContentType, ak._lookup.BitMaskedLookup):
         self, masktype, contenttype, valid_when, lsb_order, identifiertype, parameters
     ):
         super().__init__(
-            name="ak2.BitMaskedArrayType({}, {}, {}, {}, {}, {})".format(
+            name="ak.BitMaskedArrayType({}, {}, {}, {}, {}, {})".format(
                 masktype.name,
                 contenttype.name,
                 valid_when,
@@ -1001,7 +1001,7 @@ class UnmaskedArrayType(ContentType, ak._lookup.UnmaskedLookup):
 
     def __init__(self, contenttype, identifiertype, parameters):
         super().__init__(
-            name="ak2.UnmaskedArrayType({}, {}, {})".format(
+            name="ak.UnmaskedArrayType({}, {}, {})".format(
                 contenttype.name, identifiertype.name, json.dumps(parameters)
             )
         )
@@ -1095,7 +1095,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
 
     def __init__(self, contenttypes, fields, identifiertype, parameters):
         super().__init__(
-            name="ak2.RecordArrayType(({}{}), ({}), {}, {})".format(
+            name="ak.RecordArrayType(({}{}), ({}), {}, {})".format(
                 ", ".join(x.name for x in contenttypes),
                 "," if len(contenttypes) == 1 else "",
                 "None" if fields is None else repr(tuple(fields)),
@@ -1390,7 +1390,7 @@ class UnionArrayType(ContentType, ak._lookup.UnionLookup):
 
     def __init__(self, tagstype, indextype, contenttypes, identifiertype, parameters):
         super().__init__(
-            name="ak2.UnionArrayType({}, {}, ({}{}), {}, {})".format(
+            name="ak.UnionArrayType({}, {}, ({}{}), {}, {})".format(
                 tagstype.name,
                 indextype.name,
                 ", ".join(x.name for x in contenttypes),
