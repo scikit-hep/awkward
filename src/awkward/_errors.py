@@ -126,7 +126,12 @@ class OperationErrorContext(ErrorContext):
         return string_arguments
 
     def __init__(self, name, arguments):
-        if all(nplikes.nplike_of(x).is_eager for x in arguments):
+        if self.primary() is not None or all(
+            nplikes.nplike_of(x).is_eager for x in arguments
+        ):
+            # if primary is not None: we won't be setting an ErrorContext
+            # if all nplikes are eager: no accumulation of large arrays
+            # --> in either case, delay string generation
             string_arguments = (self._string_arguments, self, arguments)
         else:
             string_arguments = self._string_arguments(self, arguments)
@@ -167,7 +172,12 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        if nplikes.nplike_of(array).is_eager and nplikes.nplike_of(where).is_eager:
+        if self.primary() is not None or (
+            nplikes.nplike_of(array).is_eager and nplikes.nplike_of(where).is_eager
+        ):
+            # if primary is not None: we won't be setting an ErrorContext
+            # if all nplikes are eager: no accumulation of large arrays
+            # --> in either case, delay string generation
             formatted_array = (self.format_argument, self._width, array)
             formatted_slice = (self.format_slice, where)
         else:
