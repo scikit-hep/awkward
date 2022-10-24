@@ -38,8 +38,8 @@ def ravel(array, highlevel=True, behavior=None):
         >>> print(ak.ravel(array))
         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
-    Missing values are eliminated by flattening: there is no distinction
-    between an empty list and a value of None at the level of flattening.
+    Missing values are not eliminated by flattening. See #ak.flatten with `axis=None`
+    for an equivalent function that eliminates the option type.
     """
     with ak._errors.OperationErrorContext(
         "ak.ravel",
