@@ -817,6 +817,69 @@ class Content:
     def local_index(self, axis):
         return self._local_index(axis, 0)
 
+    def _reduce_axis_none(self, reducer, mask, keepdims, behavior, flatten_records):
+        branch, depth = self.branch_depth
+        parts = [
+            # TODO: this adds an always-unmasked option to the NumpyArray
+            # to mimic the option type that completely_flatten will return after patching
+            # won't produce correct results, but lets us test the logic
+            ak.contents.UnmaskedArray(ak.contents.NumpyArray(p))
+            for p in self.completely_flatten(flatten_records=flatten_records)
+        ]
+
+        if not parts:
+            raise ak._errors.wrap_error(NotImplementedError)
+
+        context = None
+        result = None
+        offset = 0
+        partial_dtypes = []
+        for part in parts:
+            partial = part.reduce(
+                reducer,
+                axis=-1,
+                mask=mask,
+                keepdims=True,
+                behavior=behavior,
+                flatten_records=False,
+            )
+            # Only coalesce non-null outputs
+            if partial[0] is not None:
+                result, context = reducer.reduce_partial(
+                    part, partial[0], result, offset, context
+                )
+            # Keep track of partial dtypes
+            partial_dtypes.append(
+                partial.content.dtype if partial.is_OptionType else partial.dtype
+            )
+            offset += len(part)
+
+        result_dtype = self._nplike.common_type(partial_dtypes)
+
+        if result is None:
+            array = self._nplike.empty(0, dtype=result_dtype)
+            layout = ak.contents.IndexedOptionArray(
+                ak.index.Index8(np.array([-1], dtype=np.int64)),
+                ak.contents.NumpyArray(array),
+            )
+        else:
+            array = self._nplike.empty(1, dtype=result_dtype)
+            array[0] = result
+            layout = ak.contents.NumpyArray(array)
+
+        if keepdims:
+            if branch:
+                raise ak._errors.wrap_error(
+                    ValueError(
+                        "cannot use axis=None with keepdims=True on a nested list structure "
+                        "of variable depth"
+                    )
+                )
+            for _ in range(depth):
+                layout = ak.contents.RegularArray(layout, size=1, nplike=self._nplike)
+
+        return layout[0]
+
     def reduce(
         self,
         reducer,
@@ -826,38 +889,15 @@ class Content:
         behavior=None,
         flatten_records=True,
     ):
-        branch, depth = self.branch_depth
         if axis is None:
-            if reducer.needs_position:
-                raise ak._errors.wrap_error(NotImplementedError)
-
-            result = reducer.apply_parts(
-                self.completely_flatten(flatten_records=flatten_records)
+            return self._reduce_axis_none(
+                reducer, mask, keepdims, behavior, flatten_records
             )
-            if keepdims:
-                if branch:
-                    raise ak._errors.wrap_error(
-                        ValueError(
-                            "cannot use axis=None with keepdims=True on a nested list structure "
-                            "of variable depth"
-                        )
-                    )
-                # Wrap result in a 1D array
-                array = self.nplike.array([result])
-
-                # Restore the missing dimensions are RegularArray nodes
-                layout = ak.contents.NumpyArray(array, nplike=self._nplike)
-                for _ in range(depth - 1):
-                    layout = ak.contents.RegularArray(
-                        layout, size=1, nplike=self._nplike
-                    )
-                return layout
-            else:
-                return result
 
         else:
             negaxis = -axis
 
+            branch, depth = self.branch_depth
             if branch:
                 if negaxis <= 0:
                     raise ak._errors.wrap_error(

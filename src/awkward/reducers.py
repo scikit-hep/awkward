@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 from __future__ import annotations
 
-from functools import reduce
 from numbers import Integral, Real
 from typing import Any
 
@@ -16,6 +15,7 @@ DTypeLike = Any
 
 
 class Reducer:
+    # Does the output correspond to array positions?
     needs_position = False
 
     @classmethod
@@ -52,7 +52,7 @@ class Reducer:
     def apply(self, array, parents, outlength: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def apply_parts(self, arrays):
+    def reduce_partial(self, array, partial, offset, ctx):
         raise ak._errors.wrap_error(NotImplementedError)
 
 
@@ -103,28 +103,19 @@ class ArgMin(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def apply_parts(self, arrays: list):
-        if len(arrays) == 0:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot compute the argmin (ak.argmin) of an array with empty leaves"
-                )
-            )
+    def reduce_partial(self, array, partial, other, offset, context):
+        this_index = partial + offset
+        this_value = array[partial]
+
+        if other is None:
+            return this_index, this_value
         else:
-            nplike = ak.nplikes.nplike_of(*arrays)
+            other_value = context
 
-            offset = 0
-            best_index = None
-            best_value = None
-            for array in arrays:
-                local_index = nplike.argmin(array, axis=None)
-                value = array[local_index]
-                if best_index is None or value < best_value:
-                    best_value = value
-                    best_index = local_index + offset
-                offset += len(array)
-
-            return best_index
+            if this_value < other_value:
+                return this_index, this_value
+            else:
+                return other, context
 
 
 class ArgMax(Reducer):
@@ -174,28 +165,19 @@ class ArgMax(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def apply_parts(self, arrays: list):
-        if len(arrays) == 0:
-            raise ak._errors.wrap_error(
-                ValueError(
-                    "cannot compute the argmax (ak.argmax) of an array with empty leaves"
-                )
-            )
+    def reduce_partial(self, array, partial, other, offset, context):
+        this_index = partial + offset
+        this_value = array[partial]
+
+        if other is None:
+            return this_index, this_value
         else:
-            nplike = ak.nplikes.nplike_of(*arrays)
+            other_value = context
 
-            offset = 0
-            best_index = None
-            best_value = None
-            for array in arrays:
-                local_index = nplike.argmax(array, axis=None)
-                value = array[local_index]
-                if best_index is None or value > best_value:
-                    best_value = value
-                    best_index = local_index + offset
-                offset += len(array)
-
-            return best_index
+            if this_value > other_value:
+                return this_index, this_value
+            else:
+                return other, context
 
 
 class Count(Reducer):
@@ -222,11 +204,11 @@ class Count(Reducer):
         )
         return ak.contents.NumpyArray(result)
 
-    def apply_parts(self, arrays: list):
-        nplike = ak.nplikes.nplike_of(*arrays)
-        partials = [nplike.size(x, axis=None) for x in arrays]
-        dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.add, partials, self.identity_for(dtype))
+    def reduce_partial(self, array, partial, other, offset, context):
+        if other is None:
+            return partial, None
+        else:
+            return partial + other, None
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
@@ -278,11 +260,11 @@ class CountNonzero(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def apply_parts(self, arrays: list):
-        nplike = ak.nplikes.nplike_of(*arrays)
-        partials = [nplike.count_nonzero(x, axis=None) for x in arrays]
-        dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.add, partials, self.identity_for(dtype))
+    def reduce_partial(self, array, partial, other, offset, context):
+        if other is None:
+            return partial, None
+        else:
+            return partial + other, None
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
@@ -380,11 +362,11 @@ class Sum(Reducer):
         else:
             return ak.contents.NumpyArray(result)
 
-    def apply_parts(self, arrays: list):
-        nplike = ak.nplikes.nplike_of(*arrays)
-        partials = [nplike.sum(x, axis=None) for x in arrays]
-        dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.add, partials, self.identity_for(dtype))
+    def reduce_partial(self, array, partial, other, offset, context):
+        if other is None:
+            return partial, None
+        else:
+            return partial + other, None
 
     def identity_for(self, dtype: np.dtype | None):
         if dtype is None:
@@ -472,11 +454,11 @@ class Prod(Reducer):
         else:
             return ak.contents.NumpyArray(result)
 
-    def apply_parts(self, arrays: list):
-        nplike = ak.nplikes.nplike_of(*arrays)
-        partials = [nplike.prod(x, axis=None) for x in arrays]
-        dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.multiply, partials, self.identity_for(dtype))
+    def reduce_partial(self, array, partial, other, offset, context):
+        if other is None:
+            return partial, None
+        else:
+            return partial * other, None
 
     def identity_for(self, dtype: np.dtype | None):
         if dtype is None:
@@ -534,11 +516,11 @@ class Any(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def apply_parts(self, arrays: list):
-        nplike = ak.nplikes.nplike_of(*arrays)
-        partials = [nplike.any(x, axis=None) for x in arrays]
-        dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.logical_or, partials, self.identity_for(dtype))
+    def reduce_partial(self, array, partial, other, offset, context):
+        if other is None:
+            return partial, None
+        else:
+            return partial or other, None
 
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return False
@@ -590,11 +572,11 @@ class All(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def apply_parts(self, arrays: list):
-        nplike = ak.nplikes.nplike_of(*arrays)
-        partials = [nplike.all(x, axis=None) for x in arrays]
-        dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.logical_and, partials, self.identity_for(dtype))
+    def reduce_partial(self, array, partial, other, offset, context):
+        if other is None:
+            return partial, None
+        else:
+            return partial and other, None
 
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return True
@@ -699,11 +681,11 @@ class Min(Reducer):
         else:
             return ak.contents.NumpyArray(array.nplike.array(result, array.dtype))
 
-    def apply_parts(self, arrays):
-        nplike = ak.nplikes.nplike_of(*arrays)
-        partials = [nplike.min(x, axis=None) for x in arrays]
-        dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.minimum, partials, self.identity_for(dtype))
+    def reduce_partial(self, array, partial, other, offset, context):
+        if other is None:
+            return partial, None
+        else:
+            return array.nplike.minimum(partial, other), None
 
 
 class Max(Reducer):
@@ -806,8 +788,8 @@ class Max(Reducer):
         else:
             return ak.contents.NumpyArray(array.nplike.array(result, array.dtype))
 
-    def apply_parts(self, arrays: list):
-        nplike = ak.nplikes.nplike_of(*arrays)
-        partials = [nplike.max(x, axis=None) for x in arrays]
-        dtype = nplike.common_type([x.dtype for x in arrays])
-        return reduce(nplike.maximum, partials, self.identity_for(dtype))
+    def reduce_partial(self, array, partial, other, offset, context):
+        if other is None:
+            return partial, None
+        else:
+            return array.nplike.maximum(partial, other), None
