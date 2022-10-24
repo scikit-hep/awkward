@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import threading
-import traceback
 import warnings
 from collections.abc import Mapping, Sequence
 
@@ -14,8 +13,6 @@ np = nplikes.NumpyMetadata.instance()
 class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
-
-    _width = 80
 
     @classmethod
     def primary(cls):
@@ -113,20 +110,30 @@ class ErrorContext:
 
 
 class OperationErrorContext(ErrorContext):
-    def __init__(self, name, arguments):
+    _width = 80 - 8
+
+    @staticmethod
+    def _string_arguments(self, arguments):
         string_arguments = {}
         for key, value in arguments.items():
             if _util.isstr(key):
-                width = self._width - 8 - len(key) - 3
+                width = self._width - len(key) - 3
             else:
-                width = self._width - 8
+                width = self._width
 
             string_arguments[key] = self.format_argument(width, value)
+
+        return string_arguments
+
+    def __init__(self, name, arguments):
+        if all(nplikes.nplike_of(x).is_eager for x in arguments):
+            string_arguments = (self._string_arguments, self, arguments)
+        else:
+            string_arguments = self._string_arguments(self, arguments)
 
         super().__init__(
             name=name,
             arguments=string_arguments,
-            traceback=traceback.extract_stack(limit=3)[0],
         )
 
     @property
@@ -135,19 +142,12 @@ class OperationErrorContext(ErrorContext):
 
     @property
     def arguments(self):
-        return self._kwargs["arguments"]
-
-    @property
-    def traceback(self):
-        return self._kwargs["traceback"]
+        out = self._kwargs["arguments"]
+        if isinstance(out, tuple) and len(out) != 0 and callable(out[0]):
+            out = self._kwargs["arguments"] = out[0](*out[1:])
+        return out
 
     def format_exception(self, exception):
-        tb = self.traceback
-        try:
-            location = f" (from {tb.filename}, line {tb.lineno})"
-        except Exception:
-            location = ""
-
         arguments = []
         for name, valuestr in self.arguments.items():
             if _util.isstr(name):
@@ -156,7 +156,7 @@ class OperationErrorContext(ErrorContext):
                 arguments.append(f"\n        {valuestr}")
 
         extra_line = "" if len(arguments) == 0 else "\n    "
-        return f"""while calling{location}
+        return f"""while calling
 
     {self.name}({"".join(arguments)}{extra_line})
 
@@ -164,38 +164,42 @@ Error details: {str(exception)}"""
 
 
 class SlicingErrorContext(ErrorContext):
+    _width = 80 - 4
+
     def __init__(self, array, where):
+        if nplikes.nplike_of(array).is_eager and nplikes.nplike_of(where).is_eager:
+            formatted_array = (self.format_argument, self._width, array)
+            formatted_slice = (self.format_slice, where)
+        else:
+            formatted_array = self.format_argument(self._width, array)
+            formatted_slice = self.format_slice(where)
+
         super().__init__(
-            array=self.format_argument(self._width - 4, array),
-            where=self.format_slice(where),
-            traceback=traceback.extract_stack(limit=3)[0],
+            array=formatted_array,
+            where=formatted_slice,
         )
 
     @property
     def array(self):
-        return self._kwargs["array"]
+        out = self._kwargs["array"]
+        if isinstance(out, tuple) and len(out) != 0 and callable(out[0]):
+            out = self._kwargs["array"] = out[0](*out[1:])
+        return out
 
     @property
     def where(self):
-        return self._kwargs["where"]
-
-    @property
-    def traceback(self):
-        return self._kwargs["traceback"]
+        out = self._kwargs["where"]
+        if isinstance(out, tuple) and len(out) != 0 and callable(out[0]):
+            out = self._kwargs["where"] = out[0](*out[1:])
+        return out
 
     def format_exception(self, exception):
-        tb = self.traceback
-        try:
-            location = f" (from {tb.filename}, line {tb.lineno})"
-        except Exception:
-            location = ""
-
         if _util.isstr(exception):
             message = exception
         else:
             message = f"Error details: {str(exception)}"
 
-        return f"""while attempting to slice{location}
+        return f"""while attempting to slice
 
     {self.array}
 
