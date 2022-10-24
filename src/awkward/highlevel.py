@@ -1435,12 +1435,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 )
             )
 
-    def __contains__(self, element):
-        for test in self._layout.completely_flatten():
-            if element in test:
-                return True
-        return False
-
 
 class Record(NDArrayOperatorsMixin):
     """
@@ -2048,12 +2042,6 @@ class Record(NDArrayOperatorsMixin):
                 "use ak.any() or ak.all() or pick a field"
             )
         )
-
-    def __contains__(self, element):
-        for test in self._layout.completely_flatten():
-            if element in test:
-                return True
-        return False
 
 
 class ArrayBuilder(Sized):

@@ -1333,7 +1333,9 @@ class Content:
     def to_numpy(self, allow_missing):
         return self._to_numpy(allow_missing)
 
-    def completely_flatten(self, nplike=None, flatten_records=True, function_name=None):
+    def completely_flatten(
+        self, nplike=None, flatten_records=True, function_name=None, drop_nones=True
+    ):
         if nplike is None:
             nplike = self._nplike
         arrays = self._completely_flatten(
@@ -1341,6 +1343,7 @@ class Content:
             {
                 "flatten_records": flatten_records,
                 "function_name": function_name,
+                "drop_nones": drop_nones,
             },
         )
         return tuple(arrays)

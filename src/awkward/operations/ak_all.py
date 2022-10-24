@@ -65,7 +65,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         else:
 
             def map(x):
-                return layout.nplike.all(x)
+                return layout.nplike.all(x.data)
 
         def reduce(xs):
             if len(xs) == 1:

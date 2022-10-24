@@ -256,7 +256,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         else:
 
             def map(x):
-                return layout.nplike.sum(x)
+                return layout.nplike.sum(x.data)
 
         def reduce(xs):
             if len(xs) == 1:

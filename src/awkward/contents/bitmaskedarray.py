@@ -608,7 +608,11 @@ class BitMaskedArray(Content):
         return self.toByteMaskedArray()._to_numpy(allow_missing)
 
     def _completely_flatten(self, nplike, options):
-        return self.project()._completely_flatten(nplike, options)
+        branch, depth = self.branch_depth
+        if branch or options["drop_nones"] or depth > 1:
+            return self.project()._completely_flatten(nplike, options)
+        else:
+            return [self.simplify_optiontype()]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

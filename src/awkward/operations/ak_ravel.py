@@ -50,14 +50,12 @@ def ravel(array, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    nplike = ak.nplikes.nplike_of(layout)
 
-    out = layout.completely_flatten(function_name="ak.ravel")
-    assert isinstance(out, tuple) and all(isinstance(x, nplike.ndarray) for x in out)
+    out = layout.completely_flatten(function_name="ak.ravel", drop_nones=False)
+    assert isinstance(out, tuple) and all(
+        isinstance(x, ak.contents.Content) for x in out
+    )
 
-    if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
-        out = ak.contents.NumpyArray(nplike.ma.concatenate(out))
-    else:
-        out = ak.contents.NumpyArray(nplike.concatenate(out))
+    result = out[0].mergemany(out[1:])
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(result, behavior, highlevel)
