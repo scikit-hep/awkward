@@ -113,15 +113,15 @@ class OperationErrorContext(ErrorContext):
     _width = 80 - 8
 
     @staticmethod
-    def _string_arguments(self, arguments):
+    def _string_arguments(selfie, arguments):
         string_arguments = {}
         for key, value in arguments.items():
             if _util.isstr(key):
-                width = self._width - len(key) - 3
+                width = selfie._width - len(key) - 3
             else:
-                width = self._width
+                width = selfie._width
 
-            string_arguments[key] = self.format_argument(width, value)
+            string_arguments[key] = selfie.format_argument(width, value)
 
         return string_arguments
 
