@@ -89,6 +89,10 @@ html_theme_options = {
             "url": "https://github.com/scikit-hep/awkward/releases",
         },
     ],
+    "analytics": {
+        "plausible_analytics_domain": "awkward-array.org",
+        "plausible_analytics_url": "https://views.scientific-python.org/js/plausible.js"
+    }
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
