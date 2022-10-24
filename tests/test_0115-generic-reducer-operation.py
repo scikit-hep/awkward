@@ -1804,3 +1804,30 @@ def test_softmax():
         [],
         pytest.approx([0.5, 0.5]),
     ]
+
+
+def test_prod_bool():
+    # this had been silently broken
+    array = np.array([[True, False, False], [True, False, False]])
+    content2 = ak.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    assert to_list(depth1.prod(axis=-1)) == [0, 1, 0, 0]
+    assert to_list(depth1.all(axis=-1)) == [False, True, False, False]
+    assert to_list(depth1.min(axis=-1)) == [False, None, False, False]
+
+    array = np.array([[True, False, False], [True, False, False]]).view(np.uint8)
+    content2 = ak.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    assert to_list(depth1.prod(axis=-1)) == [0, 1, 0, 0]
+    assert to_list(depth1.all(axis=-1)) == [0, 1, 0, 0]
+    assert to_list(depth1.min(axis=-1)) == [0, None, 0, 0]
+
+    array = np.array([[True, False, False], [True, False, False]]).astype(np.int32)
+    content2 = ak.contents.NumpyArray(array.reshape(-1))
+    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+    assert to_list(depth1.prod(axis=-1)) == [0, 1, 0, 0]
+    assert to_list(depth1.all(axis=-1)) == [0, 1, 0, 0]
+    assert to_list(depth1.min(axis=-1)) == [0, None, 0, 0]

@@ -229,7 +229,6 @@ class Sum(Reducer):
         if array.dtype == np.bool_:
             if result.dtype in (np.int64, np.uint64):
                 assert parents.nplike is array.nplike
-                assert parents.nplike is array.nplike
                 array._handle_error(
                     array.nplike[
                         "awkward_reduce_sum_int64_bool_64",
@@ -314,11 +313,11 @@ class Prod(Reducer):
             raise ak._errors.wrap_error(
                 ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
             )
-        result = array.nplike.empty(
-            cls.maybe_double_length(array.dtype.type, outlength),
-            dtype=cls.return_dtype(array.dtype),
-        )
         if array.dtype == np.bool_:
+            result = array.nplike.empty(
+                cls.maybe_double_length(array.dtype.type, outlength),
+                dtype=np.dtype(np.bool_),
+            )
             assert parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
@@ -334,7 +333,12 @@ class Prod(Reducer):
                     outlength,
                 )
             )
+            result = result.astype(cls.return_dtype(array.dtype))
         elif array.dtype.type in (np.complex128, np.complex64):
+            result = array.nplike.empty(
+                cls.maybe_double_length(array.dtype.type, outlength),
+                dtype=cls.return_dtype(array.dtype),
+            )
             assert parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
@@ -351,6 +355,10 @@ class Prod(Reducer):
                 )
             )
         else:
+            result = array.nplike.empty(
+                cls.maybe_double_length(array.dtype.type, outlength),
+                dtype=cls.return_dtype(array.dtype),
+            )
             assert parents.nplike is array.nplike
             array._handle_error(
                 array.nplike[
