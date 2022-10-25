@@ -1,0 +1,20 @@
+/*Styles for our try-awkward-array demo*/
+[role=main] {
+    flex-grow: 1;
+    /*Allow children to grow*/
+    display: flex;
+    flex-direction: column;
+}
+
+[role=main] > * {
+    /*Accomodate parent size*/
+    flex-grow: 1;
+    /*Allow children to grow*/
+    display: flex;
+    flex-direction: column;
+}
+
+iframe {
+    flex-grow: 1;
+    min-height: 300px;
+}
