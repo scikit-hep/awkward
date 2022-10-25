@@ -322,7 +322,7 @@ class Prod(Reducer):
             array._handle_error(
                 array.nplike[
                     "awkward_reduce_prod_bool",
-                    array.dtype.type,
+                    result.dtype.type,
                     array.dtype.type,
                     parents.dtype.type,
                 ](
