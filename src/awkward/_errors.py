@@ -155,7 +155,7 @@ class OperationErrorContext(ErrorContext):
     def format_exception(self, exception):
         arguments = []
         for name, valuestr in self.arguments.items():
-            if _util.isstr(name):
+            if isinstance(name, str):
                 arguments.append(f"\n        {name} = {valuestr}")
             else:
                 arguments.append(f"\n        {valuestr}")
@@ -204,7 +204,7 @@ class SlicingErrorContext(ErrorContext):
         return out
 
     def format_exception(self, exception):
-        if _util.isstr(exception):
+        if isinstance(exception, str):
             message = exception
         else:
             message = f"Error details: {str(exception)}"
