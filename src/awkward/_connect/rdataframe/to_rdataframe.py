@@ -71,8 +71,6 @@ class DataSourceGenerator:
             self.generators[key].generate(ROOT.gInterpreter.Declare)
 
             self.entry_types[key] = self.generators[key].entry_type()
-            if self.entry_types[key] == "bool":
-                raise ak._errors.wrap_error(NotImplementedError)
 
             if isinstance(self.generators[key], ak._connect.cling.NumpyArrayGenerator):
                 pass
@@ -118,14 +116,24 @@ class DataSourceGenerator:
 
             self.data_ptrs_list.append(self.lookups[key].arrayptrs.ctypes.data)
 
-            cpp_code_declare_slots = (
-                cpp_code_declare_slots
-                + f"""
-        ULong64_t fPtrs_{key} = 0;
-        std::vector<{self.entry_types[key]}>  slots_{key};
-        std::vector<{self.entry_types[key]}*> addrs_{key};
-    """
-            )
+            if self.entry_types[key] == "bool":
+                cpp_code_declare_slots = (
+                    cpp_code_declare_slots
+                    + f"""
+            ULong64_t fPtrs_{key} = 0;
+            std::vector<uint8_t>  slots_{key};
+            std::vector<uint8_t*> addrs_{key};
+        """
+                )
+            else:
+                cpp_code_declare_slots = (
+                    cpp_code_declare_slots
+                    + f"""
+            ULong64_t fPtrs_{key} = 0;
+            std::vector<{self.entry_types[key]}>  slots_{key};
+            std::vector<{self.entry_types[key]}*> addrs_{key};
+        """
+                )
 
             cpp_code_define_readers = (
                 cpp_code_define_readers
