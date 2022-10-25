@@ -819,22 +819,26 @@ class Content:
 
     def _reduce_axis_none(self, reducer, mask, keepdims, behavior, flatten_records):
         branch, depth = self.branch_depth
-        parts = [
-            # TODO: this adds an always-unmasked option to the NumpyArray
-            # to mimic the option type that completely_flatten will return after patching
-            # won't produce correct results, but lets us test the logic
-            ak.contents.UnmaskedArray(ak.contents.NumpyArray(p))
-            for p in self.completely_flatten(flatten_records=flatten_records)
-        ]
+        parts = self.completely_flatten(
+            flatten_records=flatten_records, drop_nones=False
+        )
 
         if not parts:
             raise ak._errors.wrap_error(NotImplementedError)
 
+        # Allow reducer to return additional metadata associated with
+        # its return value
         context = None
         result = None
+        # Keep track of position within virtually flattened array
         offset = 0
+        # Keep track of encountered dtypes for result promotion
         partial_dtypes = []
         for part in parts:
+            # FIXME: if `mask=False` raises errors for empty sublists, we need to avoid that
+            # perhaps test whether `part` is empty
+            # but this would also happen if sublist is entirely `None`, too.
+            # so better to force the mask, and manually recover identity?
             partial = part.reduce(
                 reducer,
                 axis=-1,
