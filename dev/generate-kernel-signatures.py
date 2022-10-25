@@ -130,7 +130,7 @@ def include_kernels_h(specification):
 
     with open(
         os.path.join(
-            CURRENT_DIR, "..", "libawkward", "include", "awkward", "kernels.h"
+            CURRENT_DIR, "..", "awkward-core", "include", "awkward", "kernels.h"
         ),
         "w",
     ) as header:
@@ -456,7 +456,7 @@ def by_signature(cuda_kernel_templates):
 
 if __name__ == "__main__":
     with open(
-        os.path.join(CURRENT_DIR, "..", "libawkward", "kernel-specification.yml")
+        os.path.join(CURRENT_DIR, "..", "awkward-core", "kernel-specification.yml")
     ) as specfile:
         specification = yaml.safe_load(specfile)
         include_kernels_h(specification)

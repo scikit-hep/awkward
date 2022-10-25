@@ -1,6 +1,6 @@
 [submodule "pybind11"]
-	path = libawkward/pybind11
+	path = awkward-core/pybind11
 	url = https://github.com/pybind/pybind11.git
 [submodule "rapidjson"]
-	path = libawkward/rapidjson
+	path = awkward-core/rapidjson
 	url = https://github.com/Tencent/rapidjson.git
