@@ -86,6 +86,7 @@ class NumpyLike(Singleton):
     known_data = True
     known_shape = True
     known_dtype = True
+    is_eager = True
 
     ############################ array creation
 
@@ -538,6 +539,8 @@ class Numpy(NumpyLike):
 
 
 class Cupy(NumpyLike):
+    is_eager = False
+
     @property
     def index_nplike(self):
         return self
