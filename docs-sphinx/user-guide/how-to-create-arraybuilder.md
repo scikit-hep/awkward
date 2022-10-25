@@ -380,8 +380,8 @@ Above, we see that `new_array` is just making references ({class}`ak.layout.Inde
 
 +++
 
-Declaring the type of empty arrays
-----------------------------------
+Setting the type of empty lists
+-------------------------------
 In addition to supporting type-discovery at execution time, {class}`ak.ArrayBuilder` also makes it convenient to work with complex, ragged arrays when the type is known ahead of time. Although it is not the most performant means of constructing an array whose type is already known, it provides a readable abstraction in the event that building the array is not a limiting factor for performance. However, due to this "on-line" type-discovery, it is possible that for certain data the result of {meth}`ak.ArrayBuilder.snapshot` will have different types. Consider this function that builds an array from the contents of some iterable:
 
 ```{code-cell}
