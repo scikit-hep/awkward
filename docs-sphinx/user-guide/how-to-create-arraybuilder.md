@@ -376,9 +376,87 @@ new_array
 new_array.layout
 ```
 
-Above, we see that `new_array` is just making references ({classY}`ak.layout.IndexedArray`) of an {classY}`ak.layout.RecordArray` with `x = [1, 2, 3]` and `y = [1.1, 2.2, 3.3]`.
+Above, we see that `new_array` is just making references ({class}`ak.layout.IndexedArray`) of an {classY}`ak.layout.RecordArray` with `x = [1, 2, 3]` and `y = [1.1, 2.2, 3.3]`.
 
 +++
+
+Declaring the type of empty arrays
+----------------------------------
+In addition to supporting type-discovery at execution time, {class}`ak.ArrayBuilder` also makes it convenient to work with complex, ragged arrays when the type is known ahead of time. Although it is not the most performant means of constructing an array whose type is already known, it provides a readable abstraction in the event that building the array is not a limiting factor for performance. However, due to this "on-line" type-discovery, it is possible that for certain data the result of {meth}`ak.ArrayBuilder.snapshot` will have different types. Consider this function that builds an array from the contents of some iterable:
+
+```{code-cell}
+def process_data(builder, data):
+    for item in data:
+        if item < 0:
+            builder.null()
+        else:
+            builder.integer(item)
+    return builder.snapshot()
+```
+If we pass in only positive integers, the result is an array of integers:
+
+```{code-cell}
+process_data(
+    ak.ArrayBuilder(),
+    [1, 2, 3, 4],
+)
+```
+If we pass in only negative integers, the result is an array of `None`s with an unknown type:
+
+```{code-cell}
+process_data(
+    ak.ArrayBuilder(),
+    [-1, -2, -3, -4],
+)
+```
+
+It is only if we pass in a mix of these values that we see the "full" array type:
+
+```{code-cell}
+process_data(
+    ak.ArrayBuilder(),
+    [1, 2, 3, 4, -1, -2, -3, -4],
+)
+```
+
+A simple way to solve this problem is to explore all code branches explicitly, and remove the generated entry(ies) from the final array:
+
+```{code-cell}
+def process_data(builder, data):
+    for item in data:
+        if item < 0:
+            builder.null()
+        else:
+            builder.integer(item)
+
+    # Ensure we have the proper type
+    builder.integer(1)
+    builder.null()
+    return builder.snapshot()[:-2]
+```
+
+The previous examples now have the same type:
+
+```{code-cell}
+process_data(
+    ak.ArrayBuilder(),
+    [1, 2, 3, 4],
+)
+```
+
+```{code-cell}
+process_data(
+    ak.ArrayBuilder(),
+    [-1, -2, -3, -4],
+)
+```
+
+```{code-cell}
+process_data(
+    ak.ArrayBuilder(),
+    [1, 2, 3, 4, -1, -2, -3, -4],
+)
+```
 
 Comments on performance
 -----------------------
