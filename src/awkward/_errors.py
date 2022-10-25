@@ -5,9 +5,23 @@ import threading
 import warnings
 from collections.abc import Mapping, Sequence
 
-from awkward import _util, nplikes
+from awkward import nplikes
 
 np = nplikes.NumpyMetadata.instance()
+
+
+class PartialFunction:
+    """Analogue of `functools.partial`, but as a distinct type"""
+
+    __slots__ = ("func", "args", "kwargs")
+
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self):
+        return self.func(*self.args, **self.kwargs)
 
 
 class ErrorContext:
@@ -112,19 +126,6 @@ class ErrorContext:
 class OperationErrorContext(ErrorContext):
     _width = 80 - 8
 
-    @staticmethod
-    def _string_arguments(selfie, arguments):
-        string_arguments = {}
-        for key, value in arguments.items():
-            if _util.isstr(key):
-                width = selfie._width - len(key) - 3
-            else:
-                width = selfie._width
-
-            string_arguments[key] = selfie.format_argument(width, value)
-
-        return string_arguments
-
     def __init__(self, name, arguments):
         if self.primary() is not None or all(
             nplikes.nplike_of(x).is_eager for x in arguments
@@ -132,14 +133,26 @@ class OperationErrorContext(ErrorContext):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            string_arguments = (self._string_arguments, self, arguments)
+            string_arguments = PartialFunction(self._string_arguments, arguments)
         else:
-            string_arguments = self._string_arguments(self, arguments)
+            string_arguments = self._string_arguments(arguments)
 
         super().__init__(
             name=name,
             arguments=string_arguments,
         )
+
+    def _string_arguments(self, arguments):
+        string_arguments = {}
+        for key, value in arguments.items():
+            if isinstance(key, str):
+                width = self._width - len(key) - 3
+            else:
+                width = self._width
+
+            string_arguments[key] = self.format_argument(width, value)
+
+        return string_arguments
 
     @property
     def name(self):
@@ -148,8 +161,8 @@ class OperationErrorContext(ErrorContext):
     @property
     def arguments(self):
         out = self._kwargs["arguments"]
-        if isinstance(out, tuple) and len(out) != 0 and callable(out[0]):
-            out = self._kwargs["arguments"] = out[0](*out[1:])
+        if isinstance(out, PartialFunction):
+            out = self._kwargs["arguments"] = out()
         return out
 
     def format_exception(self, exception):
@@ -178,8 +191,8 @@ class SlicingErrorContext(ErrorContext):
             # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
             # --> in either case, delay string generation
-            formatted_array = (self.format_argument, self._width, array)
-            formatted_slice = (self.format_slice, where)
+            formatted_array = PartialFunction(self.format_argument, self._width, array)
+            formatted_slice = PartialFunction(self.format_slice, where)
         else:
             formatted_array = self.format_argument(self._width, array)
             formatted_slice = self.format_slice(where)
@@ -192,15 +205,15 @@ class SlicingErrorContext(ErrorContext):
     @property
     def array(self):
         out = self._kwargs["array"]
-        if isinstance(out, tuple) and len(out) != 0 and callable(out[0]):
-            out = self._kwargs["array"] = out[0](*out[1:])
+        if isinstance(out, PartialFunction):
+            out = self._kwargs["array"] = out()
         return out
 
     @property
     def where(self):
         out = self._kwargs["where"]
-        if isinstance(out, tuple) and len(out) != 0 and callable(out[0]):
-            out = self._kwargs["where"] = out[0](*out[1:])
+        if isinstance(out, PartialFunction):
+            out = self._kwargs["where"] = out()
         return out
 
     def format_exception(self, exception):
