@@ -38,8 +38,8 @@ def ravel(array, highlevel=True, behavior=None):
         >>> print(ak.ravel(array))
         [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
-    Missing values are eliminated by flattening: there is no distinction
-    between an empty list and a value of None at the level of flattening.
+    Missing values are not eliminated by flattening. See #ak.flatten with `axis=None`
+    for an equivalent function that eliminates the option type.
     """
     with ak._errors.OperationErrorContext(
         "ak.ravel",
@@ -50,14 +50,12 @@ def ravel(array, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    nplike = ak.nplikes.nplike_of(layout)
 
-    out = layout.completely_flatten(function_name="ak.ravel")
-    assert isinstance(out, tuple) and all(isinstance(x, nplike.ndarray) for x in out)
+    out = layout.completely_flatten(function_name="ak.ravel", drop_nones=False)
+    assert isinstance(out, tuple) and all(
+        isinstance(x, ak.contents.Content) for x in out
+    )
 
-    if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
-        out = ak.contents.NumpyArray(nplike.ma.concatenate(out))
-    else:
-        out = ak.contents.NumpyArray(nplike.concatenate(out))
+    result = out[0].mergemany(out[1:])
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(result, behavior, highlevel)

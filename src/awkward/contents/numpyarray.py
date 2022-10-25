@@ -1260,7 +1260,7 @@ class NumpyArray(Content):
             return out
 
     def _completely_flatten(self, nplike, options):
-        return [self.raw(nplike).reshape(-1)]
+        return [ak.contents.NumpyArray(self.raw(nplike).reshape(-1), nplike=nplike)]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

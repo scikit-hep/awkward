@@ -31,7 +31,7 @@ To destructure an array for plotting, you'll want to
    * remove record structures,
    * remove missing data
 
-There is a function that does all of these things in one call, {func}`ak.flatten` with `axis=None`, but you don't want to apply that without thinking because structure is important to the meaning of your data and you want to be able to interpret the plot. Destructuring is an information-losing operation, so your guidance is required to eliminate exactly the structure you want to eliminate, and there are several ways to do that, depending on what you want to do.
+There are two functions that do all of these things in one call, {func}`ak.flatten` with `axis=None`; and {func}`ak.ravel` but you don't want to apply them without thinking, because structure is important to the meaning of your data and you want to be able to interpret the plot. Destructuring is an information-losing operation, so your guidance is required to eliminate exactly the structure you want to eliminate, and there are several ways to do that, depending on what you want to do.
 
 After destructuring, you might _still_ need to call `np.asarray` on the output because the plotting library might not recognize an {class}`ak.Array` as an array. You'll probably also want to develop your destructuring on a commandline or a different Jupyter cell from the plotting library function call, to understand what structure the output has without the added complication of the plotting library's error messages.
 
@@ -40,10 +40,44 @@ import awkward as ak
 import numpy as np
 ```
 
+
+ak.ravel
+-------------------------
+
+As mentioned above, {func}`ak.ravel` is one of two functions that turns any array into a 1-dimensional array with no nested lists, no nested records.
+
+```{code-cell} ipython3
+array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]])
+array
+```
+
+```{code-cell} ipython3
+array.type
+```
+
+```{code-cell} ipython3
+ak.ravel(array)
+```
+
+Calling this function on an already flat array does nothing, so you don't have to worry about what state your array had been in before you called it.
+
+```{code-cell} ipython3
+ak.ravel(ak.ravel(array))
+```
+
+Unlike `ak.flatten(..., axis=None)`, {func}`ak.ravel` preserves {data}`None` values at the leaves, meaning that functions which expect a simple array of numbers will usually raise an exception.
+
+However, there are a few questions you should be asking yourself:
+
+   * Did the nested lists have special meaning? What does the plot represent if I just concatenate them all?
+   * Did the record fields have distinct meanings? In this example, what does it mean to put floating-point _x_ values and nested-list _y_ values in the same bucket of numbers to plot? Does it matter that there are more _y_ values than _x_ values? **In most circumstances, you do not want to mix record fields in a plot.**
+
++++
+
 ak.flatten with axis=None
 -------------------------
 
-As mentioned above, {func}`ak.flatten` with `axis=None` is the sledgehammer that turns any array into a 1-dimensional array with no nested lists, no nested records, and no missing data.
+If {func}`ak.ravel` is a sledgehammer, then {func}`ak.flatten` with `axis=None` is a pile driver that turns any array into a 1-dimensional array with no nested lists, no nested records, and no missing data.
 
 ```{code-cell} ipython3
 array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": None, "y": [1, 2]}], [], [{"x": 3.3, "y": [1, 2, 3]}]])
@@ -58,17 +92,22 @@ array.type
 ak.flatten(array, axis=None)
 ```
 
-Calling this function on an already flat array does nothing, so you don't have to worry about what state your array had been in before you called it.
+Like {func}`ak.ravel`, Calling this function on an already flat array does nothing, so you don't have to worry about what state your array had been in before you called it.
 
 ```{code-cell} ipython3
 ak.flatten(ak.flatten(array, axis=None), axis=None)
 ```
 
-However, there are a few questions you should be asking yourself:
+In addition to the concerns raised above, it is also important to consider whether the {data}`None` values in your array are meaningful. For example, consider an array of x-axis and y-axis values. If only the y-axis contains {data}`None` values, `ak.flatten(y_values, axis=None)` would produce an array that does not align with the flattened x-axis values.
 
-   * Did the nested lists have special meaning? What does the plot represent if I just concatenate them all?
-   * Did the record fields have distinct meanings? In this example, what does it mean to put floating-point _x_ values and nested-list _y_ values in the same bucket of numbers to plot? Does it matter that there are more _y_ values than _x_ values? **In most circumstances, you do not want to mix record fields in a plot.**
-   * It's likely that we do want to ignore all the missing data, but does dropping them mean that an array representing x-axis values has lost its alignment with an array representing y-axis values?
+```{code-cell} ipython3
+:tags: [raises-exception]
+
+x = ak.Array([[1, 2, 3], [4, 5, 6, 7]])
+y = ak.Array([[8, None, 6], [5, None, None, 4]])
+
+z = 2 * np.ravel(x) + np.ravel(y)
+```
 
 +++
 
