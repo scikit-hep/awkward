@@ -33,20 +33,10 @@ jobs:
       with:
         version: 3.1.14
 
-    - name: Install ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: awkward-wasm-${{ github.job }}
-
-    - name: Setup ccache
-      run: |
-        echo "/usr/lib/ccache" >> $GITHUB_PATH
-        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-
     - name: Build wheel
       run: |
         python3 -m pip install pyodide-build==0.21.0
-        export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+        export CMAKE_ARGS="-DEMSCRIPTEN=1"
         pyodide build --exports whole_archive
 
     - name: Upload wheel
