@@ -18,7 +18,7 @@ How to use the header-only LayoutBuilder in C++
 :tags: [hide-cell]
 
 // Make Awkward headers available in this notebook
-#pragma cling add_include_path("../../src/awkward/_v2/cpp-headers")
+#pragma cling add_include_path("../../src/awkward/cpp-headers")
 ```
 
 What is header-only Layout Builder?
