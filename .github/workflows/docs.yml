@@ -37,6 +37,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: awkward-wasm-${{ github.job }}
+        verbose: 2
 
     - name: Setup ccache
       run: |
