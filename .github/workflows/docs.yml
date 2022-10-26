@@ -45,6 +45,8 @@ jobs:
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
         # don't hash compiler (it changes each run)
         ccache --set-config=compiler_check=none
+        ccache --set-config=debug=true
+        ccache --set-config=debug_dir=/tmp/ccache-debug
         ccache -p
 
     - name: Build wheel
@@ -59,6 +61,12 @@ jobs:
       with:
         name: awkward-wasm-wheel
         path: dist/awkward*wasm32.whl
+
+    - name: Upload debug logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: ccache-logs
+        path: /tmp/ccache-debug
 
   awkward-x86-64:
     runs-on: ubuntu-22.04
