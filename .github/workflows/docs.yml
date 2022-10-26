@@ -23,21 +23,30 @@ jobs:
       with:
         submodules: true
 
-    - name: Install EMSDK
-      uses: mymindstorm/setup-emsdk@v11
-      with:
-        version: 3.1.14
-
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
+    - name: Install EMSDK
+      uses: mymindstorm/setup-emsdk@v11
+      with:
+        version: 3.1.14
+
+    - name: Install ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: awkward-wasm-${{ github.job }}
+
+    - name: Setup ccache
+      run: |
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
+        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
     - name: Build wheel
       run: |
-        export CMAKE_ARGS="-DEMSCRIPTEN=1"
-        pipx run --spec pyodide-build \
-            pyodide build --exports whole_archive
+        export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+        pipx run --spec pyodide-build pyodide build --exports whole_archive
 
     - name: Upload wheel
       uses: actions/upload-artifact@v3
