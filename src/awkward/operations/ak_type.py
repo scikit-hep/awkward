@@ -96,7 +96,7 @@ def _impl(array):
             return _impl(array.reshape((1,))[0])
         else:
             try:
-                out = ak.types.numpytype._dtype_to_primitive_dict[array.dtype.type]
+                out = ak.types.numpytype._dtype_to_primitive_dict[array.dtype]
             except KeyError as err:
                 raise ak._errors.wrap_error(
                     TypeError(
