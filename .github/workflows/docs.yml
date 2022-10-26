@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: "3.10.7"
+  PYTHON_VERSION: "3.10.6"
 
 jobs:
   awkward-wasm:
