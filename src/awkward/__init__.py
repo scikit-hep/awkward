@@ -39,8 +39,8 @@ from awkward.highlevel import ArrayBuilder
 
 # behaviors
 import awkward.behaviors.categorical
-import awkward.behaviors.mixins
 import awkward.behaviors.string
+from awkward.behaviors.mixins import mixin_class, mixin_class_method
 
 behavior = {}
 awkward.behaviors.string.register(behavior)  # noqa: F405
