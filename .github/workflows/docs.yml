@@ -63,7 +63,7 @@ jobs:
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
 
     - name: Template environment.yml
-      run: pipx run --spec cogapp cog environment.yml.cog -o environment.yml
+      run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
       working-directory: docs-sphinx
 
     - name: Setup Python via Conda
@@ -95,7 +95,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Template environment.yml
-      run: pipx run --spec cogapp cog environment.yml.cog -o environment.yml
+      run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
       working-directory: docs-sphinx
 
     - name: Setup Python via Conda
