@@ -22,46 +22,50 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: true
-    - name: Install ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: awkward-wasm-${{ github.job }}
+
     - name: Install EMSDK
       uses: mymindstorm/setup-emsdk@v11
       with:
         version: 3.1.14
-    - name: Setup ccache
-      run: |
-        echo "/usr/lib/ccache" >> $GITHUB_PATH
-        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
+
     - name: Build wheel
       run: |
-        export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+        export CMAKE_ARGS="-DEMSCRIPTEN=1"
         pipx run --spec pyodide-build \
             pyodide build --exports whole_archive
+
     - name: Upload wheel
       uses: actions/upload-artifact@v3
       with:
         name: awkward-wasm-wheel
         path: dist/awkward*wasm32.whl
+
   awkward-x86-64:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
+
     - name: Install ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: awkward-${{ github.job }}
+
     - name: Setup ccache
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
+    - name: Template environment.yml
+      run: pipx run --spec cogapp cog environment.yml.cog -o environment.yml
+      working-directory: docs-sphinx
+
     - name: Setup Python via Conda
       uses: mamba-org/provision-with-micromamba@main
       with:
@@ -70,13 +74,16 @@ jobs:
         environment-file: docs-sphinx/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
+
     - name: Build wheel
       run: pipx run build -w
+
     - name: Upload wheel
       uses: actions/upload-artifact@v3
       with:
         name: awkward-x86-64-wheel
         path: dist/awkward*.whl
+
   build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-wasm, awkward-x86-64]
@@ -86,6 +93,11 @@ jobs:
         shell: "bash -l {0}"
     steps:
     - uses: actions/checkout@v3
+
+    - name: Template environment.yml
+      run: pipx run --spec cogapp cog environment.yml.cog -o environment.yml
+      working-directory: docs-sphinx
+
     - name: Setup Python via Conda
       uses: mamba-org/provision-with-micromamba@main
       with:
@@ -94,36 +106,44 @@ jobs:
         environment-file: docs-sphinx/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
+
     - name: Download WASM wheel
       uses: actions/download-artifact@v3
       with:
         name: awkward-wasm-wheel
         path: docs-sphinx/lite/pypi
+
     - name: Download x86_64 wheel
       uses: actions/download-artifact@v3
       with:
         name: awkward-x86-64-wheel
         path: dist
+
     - name: Install requirements
       run: |
         ls -R docs-sphinx/lite
         sudo apt-get install -y doxygen
         python3 -m pip install -r docs-sphinx/requirements.txt
+
     - name: Install Awkward
       run: python3 -m pip install dist/awkward*.whl
+
     - name: Generate documentation
       run: sphinx-build -M html . _build/
       working-directory: docs-sphinx
+
     - name: Upload documentation
       uses: actions/upload-artifact@v3
       with:
         name: docs
         path: docs-sphinx/_build/html
+
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
       with:
         name: jupyter-cache
         path: docs-sphinx/_build/.jupyter_cache
+
   deploy-docs:
     runs-on: ubuntu-22.04
     needs: [build-docs]
@@ -131,6 +151,7 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
     - uses: actions/checkout@v3
+
     - name: Activate RTD version
       run: |
         # Sanitise ref name
@@ -145,6 +166,7 @@ jobs:
               "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/" \
           -H "Content-Type: application/json" \
           -d '{"active":true,"hidden":true}'
+
     - name: Trigger RTD build
       run: |
         # Trigger build
@@ -152,6 +174,7 @@ jobs:
           -X POST \
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
               "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
+
     - name: Edit PR description
       uses: actions/github-script@v6
       with:
