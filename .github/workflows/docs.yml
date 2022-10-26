@@ -45,8 +45,9 @@ jobs:
 
     - name: Build wheel
       run: |
+        python3 -m pip install pyodide-build==0.21.0
         export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
-        pipx run --spec pyodide-build pyodide build --exports whole_archive
+        pyodide build --exports whole_archive
 
     - name: Upload wheel
       uses: actions/upload-artifact@v3
