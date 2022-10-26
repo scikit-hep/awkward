@@ -50,7 +50,7 @@ jobs:
         python3 -m pip install pyodide-build==0.21.0
         export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
         # don't hash compiler (it changes each run)
-        export CCACHE_COMPILERCHECK="none"
+        ccache --set-config=compiler_check=none
         pyodide build --exports whole_archive
 
     - name: Upload wheel
