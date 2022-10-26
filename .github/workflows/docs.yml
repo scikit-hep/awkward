@@ -74,6 +74,10 @@ jobs:
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
 
+    - name: Template environment.yml
+      run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
+      working-directory: docs-sphinx
+
     - name: Setup Python via Conda
       uses: mamba-org/provision-with-micromamba@main
       with:
@@ -101,6 +105,10 @@ jobs:
         shell: "bash -l {0}"
     steps:
     - uses: actions/checkout@v3
+
+    - name: Template environment.yml
+      run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
+      working-directory: docs-sphinx
 
     - name: Setup Python via Conda
       uses: mamba-org/provision-with-micromamba@main

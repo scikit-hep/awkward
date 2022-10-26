@@ -1,0 +1,29 @@
+sphinx>=4.5.0
+PyYAML
+black
+pycparser
+lark-parser
+sphinx-copybutton
+sphinx-design
+pydata-sphinx-theme
+myst-nb
+sphinx-external-toc
+sphinx-reredirects
+jupyterlite-sphinx
+ipyleaflet
+jupyterlite>=0.1.0b12
+
+numpy>=1.13.1
+numba>=0.50.0
+pandas>=0.24.0
+numexpr
+autograd
+pyarrow>=7.0.0
+fsspec
+s3fs
+h5py
+matplotlib
+uproot
+uproot3
+jax>=0.2.7;python_version>="3.6" and sys_platform != "win32"
+jaxlib>=0.1.57;python_version>="3.6" and sys_platform != "win32"
