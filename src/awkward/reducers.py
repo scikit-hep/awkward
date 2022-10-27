@@ -83,6 +83,9 @@ class ArgMin(Reducer):
     def return_dtype(cls, given_dtype):
         return np.int64
 
+    def identity_for(self, dtype: np.dtype | None):
+        return np.int64(-1)
+
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
         dtype = self.maybe_other_type(array.dtype)
@@ -144,6 +147,9 @@ class ArgMax(Reducer):
     @classmethod
     def return_dtype(cls, given_dtype):
         return np.int64
+
+    def identity_for(self, dtype: np.dtype | None):
+        return np.int64(-1)
 
     def apply(self, array, parents, outlength):
         assert isinstance(array, ak.contents.NumpyArray)
