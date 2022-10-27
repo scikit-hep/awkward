@@ -65,16 +65,12 @@ def _impl(array):
     if array is None:
         return ak.types.UnknownType()
 
-    elif isinstance(
-        array,
-        tuple(x.type for x in ak.types.numpytype._dtype_to_primitive_dict),
-    ):
-        return ak.types.NumpyType(
-            ak.types.numpytype._dtype_to_primitive_dict[array.dtype]
-        )
-
     elif isinstance(array, np.dtype):
-        return ak.types.NumpyType(ak.types.numpytype._dtype_to_primitive_dict[array])
+        return ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(array))
+
+    elif isinstance(array, builtins.type) and issubclass(array, np.generic):
+        primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array))
+        return ak.types.NumpyType(primitive)
 
     elif isinstance(array, builtins.type) and issubclass(
         array,
