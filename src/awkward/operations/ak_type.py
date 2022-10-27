@@ -72,15 +72,7 @@ def _impl(array):
         primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array))
         return ak.types.NumpyType(primitive)
 
-    elif isinstance(array, builtins.type) and issubclass(
-        array,
-        tuple(x.type for x in ak.types.numpytype._dtype_to_primitive_dict),
-    ):
-        return ak.types.NumpyType(
-            ak.types.numpytype._dtype_to_primitive_dict[np.dtype(array)]
-        )
-
-    elif isinstance(array, (bool, np.bool_)):
+    elif isinstance(array, bool):
         return ak.types.NumpyType("bool")
 
     elif isinstance(array, numbers.Integral):
@@ -103,7 +95,7 @@ def _impl(array):
         if len(array.shape) == 0:
             return _impl(array.reshape((1,))[0])
         else:
-            primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array.dtype))
+            primitive = ak.types.numpytype.dtype_to_primitive(array.dtype)
             out = ak.types.NumpyType(primitive)
             for x in array.shape[-1:0:-1]:
                 out = ak.types.RegularType(out, x)
