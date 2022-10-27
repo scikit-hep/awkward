@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import builtins
 import numbers
 
 import awkward as ak
@@ -70,6 +71,17 @@ def _impl(array):
     ):
         return ak.types.NumpyType(
             ak.types.numpytype._dtype_to_primitive_dict[array.dtype]
+        )
+
+    elif isinstance(array, np.dtype):
+        return ak.types.NumpyType(ak.types.numpytype._dtype_to_primitive_dict[array])
+
+    elif isinstance(array, builtins.type) and issubclass(
+        array,
+        tuple(x.type for x in ak.types.numpytype._dtype_to_primitive_dict),
+    ):
+        return ak.types.NumpyType(
+            ak.types.numpytype._dtype_to_primitive_dict[np.dtype(array)]
         )
 
     elif isinstance(array, (bool, np.bool_)):
