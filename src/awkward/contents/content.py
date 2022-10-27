@@ -826,20 +826,14 @@ class Content:
         if not parts:
             parts = [ak.contents.EmptyArray()]
 
-        # Allow reducer to return additional metadata associated with
-        # its return value
-        context = None
         result = None
+        # Allow reducer to return auxiliary data associated with its return value
+        aux = None
         # Keep track of position within virtually flattened array
         offset = 0
-        # Keep track of encountered dtypes for result promotion
-        partial_dtypes = []
-        for part in parts:
-            # FIXME: if `mask=False` raises errors for empty sublists, we need to avoid that
-            # perhaps test whether `part` is empty
-            # but this would also happen if sublist is entirely `None`, too.
-            # so better to force the mask, and manually recover identity?
-            partial = part.reduce(
+        # Reduce each part
+        partial_reductions = [
+            part.reduce(
                 reducer,
                 axis=-1,
                 mask=mask,
@@ -847,28 +841,38 @@ class Content:
                 behavior=behavior,
                 flatten_records=False,
             )
-            # Only coalesce non-null outputs
-            if partial[0] is not None:
-                result, context = reducer.reduce_partial(
-                    part, partial[0], result, offset, context
-                )
-            # Keep track of partial dtypes
-            partial_dtypes.append(
-                partial.content.dtype if partial.is_OptionType else partial.dtype
-            )
-            offset += len(part)
+            for part in parts
+        ]
+        # Keep track of encountered dtypes for result promotion
+        result_dtype = self._nplike.common_type(
+            [
+                p.content.dtype if p.is_OptionType else p.dtype
+                for p in partial_reductions
+            ]
+        )
+        result_primitive = ak.types.numpytype.dtype_to_primitive(result_dtype)
 
-        result_dtype = self._nplike.common_type(partial_dtypes)
+        for part, reduced in zip(parts, partial_reductions):
+            # FIXME: if `mask=False` raises errors for empty sublists, we need to avoid that
+            # perhaps test whether `part` is empty
+            # but this would also happen if sublist is entirely `None`, too.
+            # so better to force the mask, and manually recover identity?
+            # Only coalesce non-null outputs
+
+            if reduced[0] is not None:
+                # Cast the result to the correct dtype (before merging)
+                value = reduced.numbers_to_type(result_primitive)[0]
+                result, aux = reducer.combine(part, value, result, offset, aux)
+            offset += len(part)
 
         if result is None:
             array = self._nplike.empty(0, dtype=result_dtype)
             layout = ak.contents.IndexedOptionArray(
-                ak.index.Index8(np.array([-1], dtype=np.int64)),
+                ak.index.Index64(self._nplike.index_nplike.array([-1], dtype=np.int64)),
                 ak.contents.NumpyArray(array),
             )
         else:
-            array = self._nplike.empty(1, dtype=result_dtype)
-            array[0] = result
+            array = self._nplike.array([result], dtype=result_dtype)
             layout = ak.contents.NumpyArray(array)
 
         if keepdims:

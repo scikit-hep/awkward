@@ -52,7 +52,25 @@ class Reducer:
     def apply(self, array, parents, outlength: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def reduce_partial(self, array, partial, offset, ctx):
+    def combine(
+        self,
+        array: ak.contents.Content,
+        reduction,
+        other_reduction,
+        offset: Integral,
+        aux,
+    ):
+        """
+        Args:
+            array: array to be partially reduced
+            reduction: result of reducing `array`
+            other_reduction: previous reduction result
+            offset: position of partial reduction in the array formed by merging all partial arrays
+            aux: auxiliary data returned by a previous call to `combine`
+
+        Combine a pair of partial reductions such that the result is equivalent to the reduction over
+        the array formed by merging the input arrays.
+        """
         raise ak._errors.wrap_error(NotImplementedError)
 
 
@@ -103,19 +121,19 @@ class ArgMin(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        this_index = partial + offset
-        this_value = array[partial]
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        this_index = reduction + offset
+        this_value = array[reduction]
 
-        if other is None:
+        if other_reduction is None:
             return this_index, this_value
         else:
-            other_value = context
+            other_value = aux
 
             if this_value < other_value:
                 return this_index, this_value
             else:
-                return other, context
+                return other_reduction, aux
 
 
 class ArgMax(Reducer):
@@ -165,19 +183,19 @@ class ArgMax(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        this_index = partial + offset
-        this_value = array[partial]
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        this_index = reduction + offset
+        this_value = array[reduction]
 
-        if other is None:
+        if other_reduction is None:
             return this_index, this_value
         else:
-            other_value = context
+            other_value = aux
 
             if this_value > other_value:
                 return this_index, this_value
             else:
-                return other, context
+                return other_reduction, aux
 
 
 class Count(Reducer):
@@ -204,11 +222,11 @@ class Count(Reducer):
         )
         return ak.contents.NumpyArray(result)
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        if other is None:
-            return partial, None
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        if other_reduction is None:
+            return reduction, None
         else:
-            return partial + other, None
+            return reduction + other_reduction, None
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
@@ -260,11 +278,11 @@ class CountNonzero(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        if other is None:
-            return partial, None
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        if other_reduction is None:
+            return reduction, None
         else:
-            return partial + other, None
+            return reduction + other_reduction, None
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
@@ -362,11 +380,11 @@ class Sum(Reducer):
         else:
             return ak.contents.NumpyArray(result)
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        if other is None:
-            return partial, None
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        if other_reduction is None:
+            return reduction, None
         else:
-            return partial + other, None
+            return reduction + other_reduction, None
 
     def identity_for(self, dtype: np.dtype | None):
         if dtype is None:
@@ -454,11 +472,11 @@ class Prod(Reducer):
         else:
             return ak.contents.NumpyArray(result)
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        if other is None:
-            return partial, None
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        if other_reduction is None:
+            return reduction, None
         else:
-            return partial * other, None
+            return reduction * other_reduction, None
 
     def identity_for(self, dtype: np.dtype | None):
         if dtype is None:
@@ -516,11 +534,11 @@ class Any(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        if other is None:
-            return partial, None
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        if other_reduction is None:
+            return reduction, None
         else:
-            return partial or other, None
+            return reduction or other_reduction, None
 
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return False
@@ -572,11 +590,11 @@ class All(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        if other is None:
-            return partial, None
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        if other_reduction is None:
+            return reduction, None
         else:
-            return partial and other, None
+            return reduction and other_reduction, None
 
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return True
@@ -595,6 +613,10 @@ class Min(Reducer):
 
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         dtype = np.dtype(dtype)
+
+        assert (
+            dtype.kind.upper() != "M"
+        ), "datetime64/timedelta64 should be converted to int64 before reduction"
         if self._initial is None:
             if dtype in (
                 np.int8,
@@ -607,12 +629,6 @@ class Min(Reducer):
                 np.uint64,
             ):
                 return np.iinfo(dtype).max
-            elif dtype.kind == "M":
-                unit, _ = np.datetime_data(dtype)
-                return np.datetime64(np.iinfo(np.int64).max, unit)
-            elif dtype.kind == "m":
-                unit, _ = np.datetime_data(dtype)
-                return np.timedelta64(np.iinfo(np.int64).max, unit)
             else:
                 return np.inf
 
@@ -681,11 +697,11 @@ class Min(Reducer):
         else:
             return ak.contents.NumpyArray(array.nplike.array(result, array.dtype))
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        if other is None:
-            return partial, None
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        if other_reduction is None:
+            return reduction, None
         else:
-            return array.nplike.minimum(partial, other), None
+            return array.nplike.minimum(reduction, other_reduction), None
 
 
 class Max(Reducer):
@@ -702,6 +718,9 @@ class Max(Reducer):
     def identity_for(self, dtype: DTypeLike | None):
         dtype = np.dtype(dtype)
 
+        assert (
+            dtype.kind.upper() != "M"
+        ), "datetime64/timedelta64 should be converted to int64 before reduction"
         if self._initial is None:
             if dtype in (
                 np.int8,
@@ -714,12 +733,6 @@ class Max(Reducer):
                 np.uint64,
             ):
                 return np.iinfo(dtype).min
-            elif dtype.kind == "M":
-                unit, _ = np.datetime_data(dtype)
-                return np.datetime64(np.iinfo(np.int64).min + 1, unit)
-            elif dtype.kind == "m":
-                unit, _ = np.datetime_data(dtype)
-                return np.timedelta64(np.iinfo(np.int64).min + 1, unit)
             else:
                 return -np.inf
 
@@ -788,8 +801,8 @@ class Max(Reducer):
         else:
             return ak.contents.NumpyArray(array.nplike.array(result, array.dtype))
 
-    def reduce_partial(self, array, partial, other, offset, context):
-        if other is None:
-            return partial, None
+    def combine(self, array, reduction, other_reduction, offset, aux):
+        if other_reduction is None:
+            return reduction, None
         else:
-            return array.nplike.maximum(partial, other), None
+            return array.nplike.maximum(reduction, other_reduction), None
