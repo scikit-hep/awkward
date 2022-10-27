@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+import builtins
 import numbers
+from datetime import datetime, timedelta
 
 import awkward as ak
 
@@ -64,15 +66,18 @@ def _impl(array):
     if array is None:
         return ak.types.UnknownType()
 
-    elif isinstance(
-        array,
-        tuple(x.type for x in ak.types.numpytype._dtype_to_primitive_dict),
-    ):
-        return ak.types.NumpyType(
-            ak.types.numpytype._dtype_to_primitive_dict[array.dtype]
-        )
+    elif isinstance(array, np.dtype):
+        return ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(array))
 
-    elif isinstance(array, (bool, np.bool_)):
+    elif (
+        isinstance(array, np.generic)
+        or isinstance(array, builtins.type)
+        and issubclass(array, np.generic)
+    ):
+        primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array))
+        return ak.types.NumpyType(primitive)
+
+    elif isinstance(array, bool):  # np.bool_ in np.generic (above)
         return ak.types.NumpyType("bool")
 
     elif isinstance(array, numbers.Integral):
@@ -80,6 +85,15 @@ def _impl(array):
 
     elif isinstance(array, numbers.Real):
         return ak.types.NumpyType("float64")
+
+    elif isinstance(array, numbers.Complex):
+        return ak.types.NumpyType("complex128")
+
+    elif isinstance(array, datetime):  # np.datetime64 in np.generic (above)
+        return ak.types.NumpyType("datetime64")
+
+    elif isinstance(array, timedelta):  # np.timedelta64 in np.generic (above)
+        return ak.types.NumpyType("timedelta")
 
     elif isinstance(
         array,
@@ -95,16 +109,8 @@ def _impl(array):
         if len(array.shape) == 0:
             return _impl(array.reshape((1,))[0])
         else:
-            try:
-                out = ak.types.numpytype._dtype_to_primitive_dict[array.dtype.type]
-            except KeyError as err:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "numpy array type is unrecognized by awkward: %r"
-                        % array.dtype.type
-                    )
-                ) from err
-            out = ak.types.NumpyType(out)
+            primitive = ak.types.numpytype.dtype_to_primitive(array.dtype)
+            out = ak.types.NumpyType(primitive)
             for x in array.shape[-1:0:-1]:
                 out = ak.types.RegularType(out, x)
             return ak.types.ArrayType(out, array.shape[0])
