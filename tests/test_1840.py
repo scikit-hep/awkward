@@ -8,6 +8,4 @@ import awkward as ak  # noqa: F401
 
 def test():
     array = np.random.random(size=512).astype(dtype=np.float64)
-    assert ak.type(array) == ak.types.ArrayType(
-        ak.types.NumpyType("float64"), 512
-    )
+    assert ak.type(array) == ak.types.ArrayType(ak.types.NumpyType("float64"), 512)
