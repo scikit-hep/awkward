@@ -76,7 +76,7 @@ def _impl(array):
         primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array))
         return ak.types.NumpyType(primitive)
 
-    elif isinstance(array, bool):
+    elif isinstance(array, (bool, np.bool_)):
         return ak.types.NumpyType("bool")
 
     elif isinstance(array, numbers.Integral):
