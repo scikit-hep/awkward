@@ -824,7 +824,7 @@ class Content:
         )
 
         if not parts:
-            raise ak._errors.wrap_error(NotImplementedError)
+            parts = [ak.contents.EmptyArray()]
 
         # Allow reducer to return additional metadata associated with
         # its return value
