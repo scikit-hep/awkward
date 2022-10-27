@@ -68,7 +68,11 @@ def _impl(array):
     elif isinstance(array, np.dtype):
         return ak.types.NumpyType(ak.types.numpytype.dtype_to_primitive(array))
 
-    elif isinstance(array, builtins.type) and issubclass(array, np.generic):
+    elif (
+        isinstance(array, np.generic)
+        or isinstance(array, builtins.type)
+        and issubclass(array, np.generic)
+    ):
         primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array))
         return ak.types.NumpyType(primitive)
 
