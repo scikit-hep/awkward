@@ -103,16 +103,8 @@ def _impl(array):
         if len(array.shape) == 0:
             return _impl(array.reshape((1,))[0])
         else:
-            try:
-                out = ak.types.numpytype._dtype_to_primitive_dict[array.dtype]
-            except KeyError as err:
-                raise ak._errors.wrap_error(
-                    TypeError(
-                        "numpy array type is unrecognized by awkward: %r"
-                        % array.dtype.type
-                    )
-                ) from err
-            out = ak.types.NumpyType(out)
+            primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array.dtype))
+            out = ak.types.NumpyType(primitive)
             for x in array.shape[-1:0:-1]:
                 out = ak.types.RegularType(out, x)
             return ak.types.ArrayType(out, array.shape[0])
