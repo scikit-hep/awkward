@@ -2,6 +2,7 @@
 
 import builtins
 import numbers
+from datetime import datetime, timedelta
 
 import awkward as ak
 
@@ -76,7 +77,7 @@ def _impl(array):
         primitive = ak.types.numpytype.dtype_to_primitive(np.dtype(array))
         return ak.types.NumpyType(primitive)
 
-    elif isinstance(array, (bool, np.bool_)):
+    elif isinstance(array, bool):  # np.bool_ in np.generic (above)
         return ak.types.NumpyType("bool")
 
     elif isinstance(array, numbers.Integral):
@@ -84,6 +85,15 @@ def _impl(array):
 
     elif isinstance(array, numbers.Real):
         return ak.types.NumpyType("float64")
+
+    elif isinstance(array, numbers.Complex):
+        return ak.types.NumpyType("complex128")
+
+    elif isinstance(array, datetime):  # np.datetime64 in np.generic (above)
+        return ak.types.NumpyType("datetime64")
+
+    elif isinstance(array, timedelta):  # np.timedelta64 in np.generic (above)
+        return ak.types.NumpyType("timedelta")
 
     elif isinstance(
         array,
