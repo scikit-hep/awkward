@@ -26,7 +26,7 @@ What is header-only Layout Builder?
 
 The header-only Layout Builder consists of a set of compile-time, templated, static C++ classes, implemented entirely in header file which can be dropped into any external project, and easily separable from the rest of the Awkward C++ codebase.
 
-The Layout Builder namespace consists of [14 types](https://awkward-array.readthedocs.io/en/docs/_static/doxygen/src_2awkward_2__v2_2cpp-headers_2awkward_2LayoutBuilder_8h.html) of Layout Builders.
+The Layout Builder namespace consists of [14 types of Layout Builders](https://awkward-array.readthedocs.io/en/main/_static/doxygen/LayoutBuilder_8h.html).
 
 All Builders except `Numpy` and `Empty` can take any other Builder as template parameters.
 These Builders are sufficient to build every type of Awkward Array.
@@ -36,12 +36,12 @@ Why header-only Layout Builder?
 
 The users can directly include `LayoutBuilder.h` in their compilation, rather than linking against platform-specific libraries or worrying about native dependencies. This makes the integration of Awkward Arrays into other projects easier and more portable.
 
-The code is minimal, it does not include all of the code needed to use Awkward Arrays in Python, nor does it have helper methods to pass the data through pybind11, so that different projects can use different binding generators. The C++ users can use it to make arrays and then copy them to Python without any specialised data types - only raw buffers, strings, and integers.
+The code is minimal; it does not include all of the code needed to use Awkward Arrays in Python, nor does it have helper methods to pass the data through pybind11, so that different projects can use different binding generators. The C++ users can use it to make arrays and then copy them to Python without any specialised data types - only raw buffers, strings, and integers.
 
 How to use Layout Builders?
 -----------------------------
 
-The following cpp-headers which reside in this [directory](https://github.com/scikit-hep/awkward/tree/main/src/awkward/_v2/cpp-headers/awkward) are needed to use Layout Builders and can be included in an external project as a git submodule.
+The following cpp-headers which reside in this [directory](https://github.com/scikit-hep/awkward/tree/main/src/awkward/cpp-headers/awkward) are needed to use Layout Builders and can be included in an external project as a git submodule.
 
 1. BuilderOptions.h
 2. GrowableBuffer.h
@@ -59,7 +59,7 @@ pip install awkward
 To get the `-I` compiler flags needed to pick up the LayoutBuilder from this installation:
 
 ```shell
-python -m awkward._v2.config --cflags
+python -m awkward.config --cflags
 ```
 
 A user would need to pass these options to the compiler in order to use it.
@@ -67,9 +67,9 @@ A user would need to pass these options to the compiler in order to use it.
 Three phases of using Layout Builder
 ------------------------------------
 
-1. <b>Constructing a Layout Builder:</b> from variadic templates. (It is implicit template instantiation).
-2. <b>Filling the Layout Builder:</b> while repeatedly walking over the raw pointers within the LayoutBuilder.
-3. <b>Taking the data out to user allocated buffers:</b> Then user can pass them to Python if they want.
+1. *Constructing a Layout Builder:* from variadic templates. (It is implicit template instantiation).
+2. *Filling the Layout Builder:* while repeatedly walking over the raw pointers within the LayoutBuilder.
+3. *Taking the data out to user allocated buffers:* Then user can pass them to Python if they want.
 
 Example
 -------
