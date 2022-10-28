@@ -1033,8 +1033,11 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         )
 
     def __init__(self, contenttypes, fields, parameters):
+        tmp1 = ", ".join(x.name for x in contenttypes)
+        tmp2 = "," if len(contenttypes) == 1 else ""
+        tmp3 = "None" if fields is None else repr(tuple(fields))
         super().__init__(
-            name=f"ak.RecordArrayType(({', '.join(x.name for x in contenttypes)}{',' if len(contenttypes) == 1 else ''}), {'None' if fields is None else repr(tuple(fields))}, {json.dumps(parameters)})"
+            name=f"ak.RecordArrayType(({tmp1}{tmp2}), {tmp3}, {json.dumps(parameters)})"
         )
         self.contenttypes = contenttypes
         self.fields = fields
@@ -1320,8 +1323,10 @@ class UnionArrayType(ContentType, ak._lookup.UnionLookup):
         )
 
     def __init__(self, tagstype, indextype, contenttypes, parameters):
+        tmp1 = ", ".join(x.name for x in contenttypes)
+        tmp2 = "," if len(contenttypes) == 1 else ""
         super().__init__(
-            name=f"ak.UnionArrayType({tagstype.name}, {indextype.name}, ({', '.join(x.name for x in contenttypes)}{',' if len(contenttypes) == 1 else ''}), {json.dumps(parameters)})"
+            name=f"ak.UnionArrayType({tagstype.name}, {indextype.name}, ({tmp1}{tmp2}), {json.dumps(parameters)})"
         )
         self.tagstype = tagstype
         self.indextype = indextype
