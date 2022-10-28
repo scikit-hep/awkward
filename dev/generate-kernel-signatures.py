@@ -130,7 +130,7 @@ def include_kernels_h(specification):
 
     with open(
         os.path.join(
-            CURRENT_DIR, "..", "awkward-core", "include", "awkward", "kernels.h"
+            CURRENT_DIR, "..", "awkward-cpp", "include", "awkward", "kernels.h"
         ),
         "w",
     ) as header:
@@ -208,10 +208,17 @@ def type_to_pytype(typename, special):
 
 
 def kernel_signatures_py(specification):
-    print("Generating src/awkward/_kernel_signatures.py...")
+    print("Generating awkward-cpp/src/awkward_cpp/_kernel_signatures.py...")
 
     with open(
-        os.path.join(CURRENT_DIR, "..", "src", "awkward", "_kernel_signatures.py"),
+        os.path.join(
+            CURRENT_DIR,
+            "..",
+            "awkward-cpp",
+            "src",
+            "awkward_cpp",
+            "_kernel_signatures.py",
+        ),
         "w",
     ) as file:
         file.write(
@@ -451,12 +458,12 @@ def by_signature(cuda_kernel_templates):
 """
         )
 
-    print("Done with  src/awkward/_kernel_signatures_cuda.py...")
+    print("Done with  awkward/_kernel_signatures_cuda.py...")
 
 
 if __name__ == "__main__":
     with open(
-        os.path.join(CURRENT_DIR, "..", "awkward-core", "kernel-specification.yml")
+        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
     ) as specfile:
         specification = yaml.safe_load(specfile)
         include_kernels_h(specification)

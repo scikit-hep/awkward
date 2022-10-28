@@ -5,7 +5,7 @@
 import ctypes
 from collections.abc import Iterable
 
-import awkward_core.cpu_kernels
+import awkward_cpp.cpu_kernels
 import numpy
 
 import awkward as ak
@@ -495,7 +495,7 @@ class Numpy(NumpyLike):
 
     def __getitem__(self, name_and_types):
         return NumpyKernel(
-            awkward_core.cpu_kernels.kernel[name_and_types], name_and_types
+            awkward_cpp.cpu_kernels.kernel[name_and_types], name_and_types
         )
 
     def __init__(self):
@@ -786,7 +786,7 @@ class Jax(NumpyLike):
 
     def __getitem__(self, name_and_types):
         return NumpyKernel(
-            awkward_core.cpu_kernels.kernel[name_and_types], name_and_types
+            awkward_cpp.cpu_kernels.kernel[name_and_types], name_and_types
         )
 
     def __init__(self):

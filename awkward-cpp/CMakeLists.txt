@@ -136,8 +136,8 @@ if(PYBUILD)
 
   install(
     TARGETS awkward awkward-parent awkward-cpu-kernels _ext
-    LIBRARY DESTINATION "awkward_core/lib"
-    ARCHIVE DESTINATION awkward_core)
+    LIBRARY DESTINATION "awkward_cpp/lib"
+    ARCHIVE DESTINATION awkward_cpp)
 
   # Third tier: install without Python modules.
 else()

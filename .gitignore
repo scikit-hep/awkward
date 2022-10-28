@@ -2,12 +2,12 @@ studies/**/sample-*
 docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
-.ci/logs/
+
 .clangd/
 
 # Generated includes
-include/awkward/kernels.h
-src/awkward/_kernel_signatures.py
+awkward-cpp/include/awkward/kernels.h
+awkward-cpp/src/awkward_cpp/_kernel_signatures.py
 src/awkward/_kernel_signatures_cuda.py
 src/awkward/_connect/cuda/_kernel_signatures.py
 
