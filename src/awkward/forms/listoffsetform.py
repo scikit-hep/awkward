@@ -7,9 +7,7 @@ from awkward.forms.form import Form, _parameters_equal
 class ListOffsetForm(Form):
     is_ListType = True
 
-    def __init__(
-        self, offsets, content, has_identifier=False, parameters=None, form_key=None
-    ):
+    def __init__(self, offsets, content, parameters=None, form_key=None):
         if not ak._util.isstr(offsets):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -21,7 +19,7 @@ class ListOffsetForm(Form):
 
         self._offsets = offsets
         self._content = content
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def offsets(self):
@@ -58,8 +56,7 @@ class ListOffsetForm(Form):
     def __eq__(self, other):
         if isinstance(other, ListOffsetForm):
             return (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
+                self._form_key == other._form_key
                 and self._offsets == other._offsets
                 and _parameters_equal(
                     self._parameters, other._parameters, only_array_record=True
@@ -130,7 +127,6 @@ class ListOffsetForm(Form):
         return ListOffsetForm(
             self._offsets,
             self._content._select_columns(index, specifier, matches, output),
-            self._has_identifier,
             self._parameters,
             self._form_key,
         )

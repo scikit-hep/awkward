@@ -492,7 +492,6 @@ def union_to_record(unionarray, anonymous):
             unionarray.tags,
             unionarray.index,
             contents,
-            unionarray.identifier,
             unionarray.parameters,
         )
 
@@ -537,7 +536,6 @@ def union_to_record(unionarray, anonymous):
                     unionarray.tags,
                     unionarray.index,
                     union_contents,
-                    unionarray.identifier,
                     unionarray.parameters,
                 ).simplify_uniontype()
             )
