@@ -12,7 +12,6 @@ import awkward._libawkward
 
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward.index
-import awkward.identifier
 import awkward.contents
 import awkward.record
 import awkward.types

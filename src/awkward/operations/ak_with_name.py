@@ -47,7 +47,6 @@ def _impl(array, name, highlevel, behavior):
                 layout.contents,
                 layout.fields,
                 len(layout),
-                layout.identifier,
                 parameters,
             )
         else:

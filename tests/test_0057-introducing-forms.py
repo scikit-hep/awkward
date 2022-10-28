@@ -17,14 +17,12 @@ def test_forms():
     assert form.inner_shape == ()
     assert form.itemsize == 8
     assert form.primitive == "float64"
-    assert form.has_identifier is False
     assert form.parameters == {}
     assert form.form_key is None
     assert json.loads(form.to_json()) == {
         "class": "NumpyArray",
         "inner_shape": [],
         "primitive": "float64",
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -36,7 +34,6 @@ def test_forms():
     form = ak.forms.NumpyForm(
         "float64",
         [1, 2, 3],
-        has_identifier=True,
         parameters={"hey": ["you", {"there": 3}]},
         form_key="yowzers",
     )
@@ -46,14 +43,12 @@ def test_forms():
     assert form.inner_shape == (1, 2, 3)
     assert form.itemsize == 8
     assert form.primitive == "float64"
-    assert form.has_identifier is True
     assert form.parameters == {"hey": ["you", {"there": 3}]}
     assert form.form_key == "yowzers"
     assert json.loads(form.to_json()) == {
         "class": "NumpyArray",
         "inner_shape": [1, 2, 3],
         "primitive": "float64",
-        "has_identifier": True,
         "parameters": {"hey": ["you", {"there": 3}]},
         "form_key": "yowzers",
     }
@@ -61,7 +56,6 @@ def test_forms():
         "class": "NumpyArray",
         "inner_shape": [1, 2, 3],
         "primitive": "float64",
-        "has_identifier": True,
         "parameters": {"hey": ["you", {"there": 3}]},
         "form_key": "yowzers",
     }
@@ -84,13 +78,11 @@ def test_forms():
             "class": "NumpyArray",
             "inner_shape": [],
             "primitive": "float64",
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
         "valid_when": True,
         "lsb_order": False,
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -113,7 +105,6 @@ def test_forms():
     assert ak.forms.from_json(form.to_json()) == form
     assert json.loads(form.to_json()) == {
         "class": "EmptyArray",
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -139,11 +130,9 @@ def test_forms():
             "class": "NumpyArray",
             "inner_shape": [],
             "primitive": "float64",
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -171,11 +160,9 @@ def test_forms():
             "class": "NumpyArray",
             "inner_shape": [],
             "primitive": "float64",
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -205,11 +192,9 @@ def test_forms():
             "class": "NumpyArray",
             "inner_shape": [],
             "primitive": "float64",
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -238,11 +223,9 @@ def test_forms():
             "class": "NumpyArray",
             "inner_shape": [],
             "primitive": "float64",
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -271,7 +254,6 @@ def test_forms():
                 "class": "NumpyArray",
                 "inner_shape": [],
                 "primitive": "float64",
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -279,12 +261,10 @@ def test_forms():
                 "class": "NumpyArray",
                 "inner_shape": [],
                 "primitive": "bool",
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -316,7 +296,6 @@ def test_forms():
                 "class": "NumpyArray",
                 "inner_shape": [],
                 "primitive": "float64",
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -324,12 +303,10 @@ def test_forms():
                 "class": "NumpyArray",
                 "inner_shape": [],
                 "primitive": "bool",
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -356,12 +333,10 @@ def test_forms():
             "class": "NumpyArray",
             "inner_shape": [],
             "primitive": "float64",
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
         "size": 10,
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -392,7 +367,6 @@ def test_forms():
                 "class": "NumpyArray",
                 "inner_shape": [],
                 "primitive": "float64",
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -400,12 +374,10 @@ def test_forms():
                 "class": "NumpyArray",
                 "inner_shape": [],
                 "primitive": "bool",
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
@@ -432,11 +404,9 @@ def test_forms():
             "class": "NumpyArray",
             "inner_shape": [],
             "primitive": "float64",
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }

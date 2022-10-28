@@ -18,7 +18,6 @@
   "ak.layout.ByteMaskedArray.any-ext": "reference/generated/ak.contents.ByteMaskedArray.html",
   "ak.layout.Content.any-ext": "reference/generated/ak.contents.Content.html",
   "ak.layout.EmptyArray.any-ext": "reference/generated/ak.contents.EmptyArray.html",
-  "ak.layout.Identities.any-ext": "reference/generated/ak.identifier.Identifier.html",
   "ak.layout.Index.any-ext": "reference/generated/ak.index.Index.html",
   "ak.layout.IndexedArray.any-ext": "reference/generated/ak.contents.IndexedArray.html",
   "ak.layout.IndexedOptionArray.any-ext": "reference/generated/ak.contents.IndexedOptionArray.html",

@@ -174,19 +174,16 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             if fill_value == 0 or fill_value is _ZEROS:
                 return ak.contents.NumpyArray(
                     nplike.zeros_like(original),
-                    layout.identifier,
                     layout.parameters,
                 )
             elif fill_value == 1:
                 return ak.contents.NumpyArray(
                     nplike.ones_like(original),
-                    layout.identifier,
                     layout.parameters,
                 )
             else:
                 return ak.contents.NumpyArray(
                     nplike.full_like(original, fill_value),
-                    layout.identifier,
                     layout.parameters,
                 )
         else:

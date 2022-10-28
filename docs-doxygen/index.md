@@ -57,8 +57,6 @@ Note that [ak::PartitionedArray](classawkward_1_1PartitionedArray.html) and its 
 
 **Index for layout nodes:** integer and boolean arrays that define the shape of the data structure, such as boolean masks in [ak::ByteMaskedArray](classawkward_1_1ByteMaskedArray.html), are not [ak::NumpyArray](classawkward_1_1NumpyArray.html) but a more constrained type called [ak::IndexOf<T>](classawkward_1_1IndexOf.html).
 
-**Identities for layout nodes:** [ak::IdentitiesOf<T>](classawkward_1_1IdentitiesOf.html) are an optional surrogate key for certain join operations. (Not yet used.)
-
 ### High-level data types
 
 This is the type of data in a high-level [ak.Array](../_auto/ak.Array.html) or [ak.Record](../_auto/ak.Record.html) as reported by [ak.type](../_auto/ak.type.html). It represents as much information as a data analyst needs to know (e.g. the distinction between variable and fixed-length lists, but not the distinction between [ak::ListArrayOf<T>](classawkward_1_1ListArrayOf.html) and [ak::ListOffsetArrayOf<T>](classawkward_1_1ListOffsetArrayOf.html)).
@@ -157,7 +155,7 @@ The [ak::Builder](classawkward_1_1Builder.html) instances contain arrays of accu
 
 After an [ak::ArrayBuilder](classawkward_1_1ArrayBuilder.html) is turned into a [ak::Content](classawkward_1_1Content.html) with [snapshot](classawkward_1_1ArrayBuilder.html#ac064fd827abb99f81772e59706f1a6a8), the read-only data and its append-only source share buffers (with `std::shared_ptr<void*>`). This makes the [snapshot](classawkward_1_1ArrayBuilder.html#ac064fd827abb99f81772e59706f1a6a8) operation fast and capable of being called frequently, and the `std::shared_ptr` manages the lifetime of buffers that stay in scope because a [ak::Content](classawkward_1_1Content.html) is using it, even if a [ak::GrowableBuffer<T>](classawkward_1_1GrowableBuffer.html) is not (because it reallocated its internal buffer).
 
-Array building is not as efficient as computing with pre-built arrays because the type-discovery makes each access a tree-descent. Array building is also an exception to the rule that C++ implementations do not touch array data (do not dereference pointers in [ak::RawArrayOf<T>](classawkward_1_1RawArrayOf.html), [ak::NumpyArray](classawkward_1_1NumpyArray.html), [ak::IndexOf<T>](classawkward_1_1IndexOf.html), and [ak::IdentitiesOf<T>](classawkward_1_1IdentitiesOf.html)). The [ak::Builder](classawkward_1_1Builder.html) instances append to their [ak::GrowableBuffer<T>](classawkward_1_1GrowableBuffer.html), which are assumed to exist in main memory, not a GPU.
+Array building is not as efficient as computing with pre-built arrays because the type-discovery makes each access a tree-descent. Array building is also an exception to the rule that C++ implementations do not touch array data (do not dereference pointers in [ak::RawArrayOf<T>](classawkward_1_1RawArrayOf.html), [ak::NumpyArray](classawkward_1_1NumpyArray.html), and [ak::IndexOf<T>](classawkward_1_1IndexOf.html). The [ak::Builder](classawkward_1_1Builder.html) instances append to their [ak::GrowableBuffer<T>](classawkward_1_1GrowableBuffer.html), which are assumed to exist in main memory, not a GPU.
 
 ### Reducers
 
@@ -202,13 +200,6 @@ The following classes hide Awkward Array's dependence on RapidJSON, so that it's
 ### CPU kernels and GPU kernels
 
 The kernels library is separated from the C++ codebase by a pure C interface, and thus the kernels could be used by other languages.
-
-The CPU kernels are implemented in these files:
-
-   * [kernels/getitem](getitem_8h.html): kernels to implement [ak::Content::getitem](classawkward_1_1Content.html#afe0d7eaa5d9d72290e3211efa4003678).
-   * [kernels/identities](kernels_2identities_8h.html): kernels to implement [ak::IdentitiesOf<T>](classawkward_1_1IdentitiesOf.html).
-   * [kernels/reducers](reducers_8h.html): kernels to implement [ak::Content::reduce_next](classawkward_1_1Content.html#a4f4a15fd7609dbbc75a44e47291c186d).
-   * [kernels/operations](operations_8h.html): kernels to implement all other operations.
 
 The GPU kernels follow exactly the same interface, though a different implementation.
 
