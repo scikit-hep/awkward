@@ -14,7 +14,6 @@ class UnionForm(Form):
         tags,
         index,
         contents,
-        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -55,7 +54,7 @@ class UnionForm(Form):
         self._tags = tags
         self._index = index
         self._contents = list(contents)
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def tags(self):
@@ -104,7 +103,6 @@ class UnionForm(Form):
     def __eq__(self, other):
         if (
             isinstance(other, UnionForm)
-            and self._has_identifier == other._has_identifier
             and self._form_key == other._form_key
             and self._tags == other._tags
             and self._index == other._index
@@ -205,9 +203,7 @@ class UnionForm(Form):
                 contents.append(next_content)
 
         if len(contents) == 0:
-            return ak.forms.EmptyForm(
-                self._has_identifier, self._parameters, self._form_key
-            )
+            return ak.forms.EmptyForm(self._parameters, self._form_key)
         elif len(contents) == 1:
             return contents[0]
         else:
@@ -215,7 +211,6 @@ class UnionForm(Form):
                 self._tags,
                 self._index,
                 contents,
-                self._has_identifier,
                 self._parameters,
                 self._form_key,
             )

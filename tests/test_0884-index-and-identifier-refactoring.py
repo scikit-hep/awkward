@@ -18,21 +18,3 @@ def test_index64():
 
     assert len(py_array) == 10
     assert "i64" == py_array.form
-
-
-def test_identifier32():
-    py_array = ak.identifier.Identifier.zeros(
-        123, {1: "one", 2: "two"}, 5, 10, np, np.int32
-    )
-
-    assert len(py_array) == 5
-    assert py_array._data.dtype == np.dtype(np.int32)
-
-
-def test_identifier64():
-    py_array = ak.identifier.Identifier.zeros(
-        123, {1: "one", 2: "two"}, 5, 10, np, np.int64
-    )
-
-    assert len(py_array) == 5
-    assert py_array._data.dtype == np.dtype(np.int64)

@@ -201,7 +201,7 @@ def test_ByteMaskedArray_as_slice():
     assert to_list(array[slicearray]) == [3.3, 6.6, None, None, 8.8, 6.6]
 
 
-def test_ByteMaskedArray_setidentities():
+def test_ByteMaskedArray_whatever():
     content = ak.operations.from_iter(
         [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9], [321]],
         highlevel=False,

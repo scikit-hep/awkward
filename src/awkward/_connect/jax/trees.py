@@ -42,9 +42,7 @@ def replace_all_buffers(
             if not (numpy.is_own_array(buffer) or jax.is_own_array(buffer)):
                 return
             else:
-                return ak.contents.NumpyArray(
-                    buffer, node.identifier, node.parameters, nplike=nplike
-                )
+                return ak.contents.NumpyArray(buffer, node.parameters, nplike=nplike)
 
     return layout.recursively_apply(action=action, numpy_to_regular=False)
 

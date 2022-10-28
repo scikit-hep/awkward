@@ -19,25 +19,21 @@ def from_dict(input: dict) -> Form:
         return ak.forms.NumpyForm(primitive=input)
 
     assert isinstance(input, dict)
-    has_identifier = input.get("has_identifier", input.get("has_identities", False))
     parameters = input.get("parameters", None)
     form_key = input.get("form_key", None)
 
     if input["class"] == "NumpyArray":
         primitive = input["primitive"]
         inner_shape = input.get("inner_shape", [])
-        return ak.forms.NumpyForm(
-            primitive, inner_shape, has_identifier, parameters, form_key
-        )
+        return ak.forms.NumpyForm(primitive, inner_shape, parameters, form_key)
 
     elif input["class"] == "EmptyArray":
-        return ak.forms.EmptyForm(has_identifier, parameters, form_key)
+        return ak.forms.EmptyForm(parameters, form_key)
 
     elif input["class"] == "RegularArray":
         return ak.forms.RegularForm(
             content=from_dict(input["content"]),
             size=input["size"],
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -47,7 +43,6 @@ def from_dict(input: dict) -> Form:
             starts=input["starts"],
             stops=input["stops"],
             content=from_dict(input["content"]),
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -61,7 +56,6 @@ def from_dict(input: dict) -> Form:
         return ak.forms.ListOffsetForm(
             offsets=input["offsets"],
             content=from_dict(input["content"]),
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -89,7 +83,6 @@ def from_dict(input: dict) -> Form:
         return ak.forms.RecordForm(
             contents=contents,
             fields=fields,
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -103,7 +96,6 @@ def from_dict(input: dict) -> Form:
         return ak.forms.IndexedForm(
             index=input["index"],
             content=from_dict(input["content"]),
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -116,7 +108,6 @@ def from_dict(input: dict) -> Form:
         return ak.forms.IndexedOptionForm(
             index=input["index"],
             content=from_dict(input["content"]),
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -126,7 +117,6 @@ def from_dict(input: dict) -> Form:
             mask=input["mask"],
             content=from_dict(input["content"]),
             valid_when=input["valid_when"],
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -137,7 +127,6 @@ def from_dict(input: dict) -> Form:
             content=from_dict(input["content"]),
             valid_when=input["valid_when"],
             lsb_order=input["lsb_order"],
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -145,7 +134,6 @@ def from_dict(input: dict) -> Form:
     elif input["class"] == "UnmaskedArray":
         return ak.forms.UnmaskedForm(
             content=from_dict(input["content"]),
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -160,7 +148,6 @@ def from_dict(input: dict) -> Form:
             tags=input["tags"],
             index=input["index"],
             contents=[from_dict(content) for content in input["contents"]],
-            has_identifier=has_identifier,
             parameters=parameters,
             form_key=form_key,
         )
@@ -275,15 +262,7 @@ class Form:
     is_RecordType = False
     is_UnionType = False
 
-    def _init(self, has_identifier, parameters, form_key):
-        if not isinstance(has_identifier, bool):
-            raise _errors.wrap_error(
-                TypeError(
-                    "{} 'has_identifier' must be of type bool, not {}".format(
-                        type(self).__name__, repr(has_identifier)
-                    )
-                )
-            )
+    def _init(self, parameters, form_key):
         if parameters is not None and not isinstance(parameters, dict):
             raise _errors.wrap_error(
                 TypeError(
@@ -301,13 +280,8 @@ class Form:
                 )
             )
 
-        self._has_identifier = has_identifier
         self._parameters = parameters
         self._form_key = form_key
-
-    @property
-    def has_identifier(self):
-        return self._has_identifier
 
     @property
     def parameters(self):
@@ -364,8 +338,6 @@ class Form:
         return self._to_dict_part(verbose, toplevel=True)
 
     def _to_dict_extra(self, out, verbose):
-        if verbose or self._has_identifier:
-            out["has_identifier"] = self._has_identifier
         if verbose or (self._parameters is not None and len(self._parameters) > 0):
             out["parameters"] = self.parameters
         if verbose or self._form_key is not None:
@@ -377,12 +349,8 @@ class Form:
 
     def _repr_args(self):
         out = []
-        if self._has_identifier is not False:
-            out.append("has_identifier=" + repr(self._has_identifier))
-
         if self._parameters is not None and len(self._parameters) > 0:
             out.append("parameters=" + repr(self._parameters))
-
         if self._form_key is not None:
             out.append("form_key=" + repr(self._form_key))
         return out
