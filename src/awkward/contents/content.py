@@ -9,7 +9,7 @@ from typing import Any, TypeVar
 
 import awkward as ak
 import awkward._reducers
-import awkward.forms.form as form
+from awkward.forms import form
 from awkward.nplikes import NumpyLike
 from awkward.typing import Self, TypeAlias
 
