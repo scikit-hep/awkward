@@ -488,7 +488,7 @@ def lower_complex_from_integer_or_float(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_complex,
+        libawkward.ArrayBuilder_complex,
         (proxyin.rawptr, z_real, z_imag),
     )
     return context.get_dummy_value()
@@ -506,7 +506,7 @@ def lower_complex(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_complex,
+        libawkward.ArrayBuilder_complex,
         (proxyin.rawptr, z_real, z_imag),
     )
     return context.get_dummy_value()
@@ -521,7 +521,7 @@ def lower_datetime(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_datetime,
+        libawkward.ArrayBuilder_datetime,
         (proxyin.rawptr, xval, unit),
     )
     return context.get_dummy_value()
@@ -536,7 +536,7 @@ def lower_timedelta(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_timedelta,
+        libawkward.ArrayBuilder_timedelta,
         (proxyin.rawptr, xval, unit),
     )
     return context.get_dummy_value()
@@ -558,7 +558,7 @@ def lower_string(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_string_length,
+        libawkward.ArrayBuilder_string_length,
         (proxyin.rawptr, out, length),
     )
 

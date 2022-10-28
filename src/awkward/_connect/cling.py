@@ -4,6 +4,8 @@ import ctypes
 import json
 import re
 
+from awkward_cpp import libawkward
+
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -253,19 +255,19 @@ namespace awkward {{
 
       ArrayBuilderError length(int64_t* out) const noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_length>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_length, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_length, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), out);
       }}
 
       ArrayBuilderError clear() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_clear>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_clear, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_clear, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
       ArrayBuilderError boolean(bool x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_boolean>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_boolean, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_boolean, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
@@ -275,7 +277,7 @@ namespace awkward {{
 
       ArrayBuilderError integer(int64_t x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_integer>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_integer, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_integer, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
@@ -285,7 +287,7 @@ namespace awkward {{
 
       ArrayBuilderError real(double x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_real>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_real, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_real, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
@@ -295,7 +297,7 @@ namespace awkward {{
 
       ArrayBuilderError complex(std::complex<double> x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_complex>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_complex, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_complex, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x.real(), x.imag());
       }}
 
@@ -307,7 +309,7 @@ namespace awkward {{
 
       ArrayBuilderError datetime(int64_t x, const char* unit) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_datetime>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_datetime, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_datetime, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, unit);
       }}
 
@@ -315,19 +317,19 @@ namespace awkward {{
 
       ArrayBuilderError timedelta(int64_t x, const char* unit) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_timedelta>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_timedelta, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_timedelta, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, unit);
       }}
 
       ArrayBuilderError bytestring(const char* x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_bytestring>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_bytestring, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_bytestring, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
       ArrayBuilderError bytestring_length(const char* x, int64_t length) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_bytestring_length>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_bytestring_length, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_bytestring_length, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, length);
       }}
 
@@ -337,13 +339,13 @@ namespace awkward {{
 
       ArrayBuilderError string(const char* x) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_string>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_string, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_string, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x);
       }}
 
       ArrayBuilderError string_length(const char* x, int64_t length) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_string_length>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_string_length, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_string_length, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), x, length);
       }}
 
@@ -365,67 +367,67 @@ namespace awkward {{
 
       ArrayBuilderError begin_list() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_list>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_beginlist, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_beginlist, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
       ArrayBuilderError end_list() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_end_list>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_endlist, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_endlist, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
       ArrayBuilderError begin_tuple(int64_t length) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_tuple>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_begintuple, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_begintuple, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), length);
       }}
 
       ArrayBuilderError index(int64_t length) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_index>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_index, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_index, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), length);
       }}
 
       ArrayBuilderError end_tuple() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_end_tuple>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_endtuple, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_endtuple, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
       ArrayBuilderError begin_record() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_record>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_beginrecord, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
       ArrayBuilderError begin_record_fast(const char* name) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_record_fast>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord_fast, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_beginrecord_fast, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), name);
       }}
 
       ArrayBuilderError begin_record_check(const char* name) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_begin_record_check>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_beginrecord_check, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_beginrecord_check, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), name);
       }}
 
       ArrayBuilderError field_fast(const char* name) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_field_fast>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_field_fast, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_field_fast, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), name);
       }}
 
       ArrayBuilderError field_check(const char* name) noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_field_check>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_field_check, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_field_check, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_), name);
       }}
 
       ArrayBuilderError end_record() noexcept {{
         return reinterpret_cast<ArrayBuilderMethod_end_record>(
-             {ctypes.cast(ak._libawkward.ArrayBuilder_endrecord, ctypes.c_voidp).value}
+             {ctypes.cast(libawkward.ArrayBuilder_endrecord, ctypes.c_voidp).value}
         )(reinterpret_cast<void*>(ptr_));
       }}
 
