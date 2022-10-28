@@ -151,5 +151,7 @@ subtrees:
                         title: "For physics: Lorentz vectors [todo]"
                       - file: user-guide/how-to-specialize-differentiate-jax
                         title: "Differentiation using JAX"
+                      - file: user-guide/how-to-use-header-only-layoutbuilder
+                        title: "Building Awkward Arrays in C++"
 
       - file: reference/index

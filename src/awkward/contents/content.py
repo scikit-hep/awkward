@@ -51,22 +51,7 @@ class Content:
     is_RecordType = False
     is_UnionType = False
 
-    def _init(
-        self,
-        identifier: ak.identifier.Identifier | None,
-        parameters: dict[str, Any] | None,
-        nplike: NumpyLike | None,
-    ):
-        if identifier is not None and not isinstance(
-            identifier, ak.identifier.Identifier
-        ):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "{} 'identifier' must be an Identifier or None, not {}".format(
-                        type(self).__name__, repr(identifier)
-                    )
-                )
-            )
+    def _init(self, parameters: dict[str, Any] | None, nplike: NumpyLike | None):
         if parameters is not None and not isinstance(parameters, dict):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -85,13 +70,8 @@ class Content:
                 )
             )
 
-        self._identifier = identifier
         self._parameters = parameters
         self._nplike = nplike
-
-    @property
-    def identifier(self) -> ak.identifier.Identifier | None:
-        return self._identifier
 
     @property
     def parameters(self) -> dict[str, Any]:
@@ -248,8 +228,6 @@ class Content:
                         indent, repr(k), repr(v)
                     )
                 )
-        if self._identifier is not None:
-            out.append(self._identifier._repr("\n" + indent, "", ""))
         return out
 
     def maybe_to_array(self, nplike):
@@ -270,10 +248,6 @@ class Content:
                 raise ak._errors.wrap_error(ValueError(message + filename))
 
             else:
-                if error.id != ak._util.kSliceNone and self._identifier is not None:
-                    # FIXME https://github.com/scikit-hep/awkward-1.0/blob/45d59ef4ae45eebb02995b8e1acaac0d46fb9573/src/libawkward/util.cpp#L443-L450
-                    pass
-
                 if error.attempt != ak._util.kSliceNone:
                     message += f" while attempting to get index {error.attempt}"
 
@@ -360,7 +334,6 @@ class Content:
             1,  # size
             0,  # zeros_length is irrelevant when the size is 1 (!= 0)
             None,
-            None,
             self._nplike,
         )
 
@@ -410,14 +383,13 @@ class Content:
         )
 
         out = ak.contents.IndexedOptionArray(
-            outindex, raw.content, None, self._parameters, self._nplike
+            outindex, raw.content, self._parameters, self._nplike
         )
 
         return ak.contents.RegularArray(
             out.simplify_optiontype(),
             indexlength,
             1,
-            None,
             self._parameters,
             self._nplike,
         )
@@ -471,13 +443,12 @@ class Content:
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
         out = ak.contents.IndexedOptionArray(
-            outputmask, tmp, None, self._parameters, self._nplike
+            outputmask, tmp, self._parameters, self._nplike
         )
         return ak.contents.RegularArray(
             out.simplify_optiontype(),
             index.length,
             1,
-            None,
             self._parameters,
             self._nplike,
         )
@@ -541,7 +512,6 @@ class Content:
                 contents,
                 nextcontent._fields,
                 None,
-                None,
                 self._parameters,
                 self._nplike,
             )
@@ -588,7 +558,6 @@ class Content:
                 self,
                 self.length if self._nplike.known_shape else 1,
                 1,
-                None,
                 None,
                 self._nplike,
             )
@@ -668,7 +637,7 @@ class Content:
                 return self._getitem(layout)
             else:
                 return self._getitem(
-                    ak.contents.NumpyArray(as_array, None, None, layout.nplike)
+                    ak.contents.NumpyArray(as_array, None, layout.nplike)
                 )
 
         else:
@@ -727,36 +696,6 @@ class Content:
         else:
             return None
 
-    def _typetracer_identifier(self):
-        if self._identifier is None:
-            return None
-        else:
-            raise ak._errors.wrap_error(NotImplementedError)
-
-    def _range_identifier(self, start: Integral, stop: Integral):
-        if self._identifier is None:
-            return None
-        else:
-            raise ak._errors.wrap_error(NotImplementedError)
-
-    def _field_identifier(self, field: str):
-        if self._identifier is None:
-            return None
-        else:
-            raise ak._errors.wrap_error(NotImplementedError)
-
-    def _fields_identifier(self, fields: list[str]):
-        if self._identifier is None:
-            return None
-        else:
-            raise ak._errors.wrap_error(NotImplementedError)
-
-    def _carry_identifier(self, carry: ak.index.Index):
-        if self._identifier is None:
-            return None
-        else:
-            raise ak._errors.wrap_error(NotImplementedError)
-
     def axis_wrap_if_negative(self, axis: AxisMaybeNone) -> AxisMaybeNone:
         if axis is None or axis >= 0:
             return axis
@@ -792,7 +731,7 @@ class Content:
                 localindex.length,
             )
         )
-        return ak.contents.NumpyArray(localindex, None, None, self._nplike)
+        return ak.contents.NumpyArray(localindex, None, self._nplike)
 
     def merge(self, other: Content) -> Content:
         others = [other]
@@ -848,7 +787,7 @@ class Content:
             )
         )
 
-        return ak.contents.UnionArray(tags, index, contents, None, None, self._nplike)
+        return ak.contents.UnionArray(tags, index, contents, None, self._nplike)
 
     def _merging_strategy(
         self, others: list[Content]
@@ -1269,13 +1208,11 @@ class Content:
         contents = []
         length = None
         for ptr in tocarry:
-            contents.append(
-                ak.contents.IndexedArray(ptr, self, None, None, self._nplike)
-            )
+            contents.append(ak.contents.IndexedArray(ptr, self, None, self._nplike))
             length = contents[-1].length
         assert length is not None
         return ak.contents.RecordArray(
-            contents, recordlookup, length, None, parameters, self._nplike
+            contents, recordlookup, length, parameters, self._nplike
         )
 
     def combinations(
@@ -1552,7 +1489,6 @@ class Content:
         next = ak.contents.IndexedOptionArray(
             index,
             self,
-            None,
             self._parameters,
             self._nplike,
         )
@@ -1618,6 +1554,7 @@ class Content:
         nplike: NumpyLike | None = None,
         flatten_records: bool = True,
         function_name: str | None = None,
+        drop_nones: bool = True,
     ):
         if nplike is None:
             nplike = self._nplike
@@ -1626,6 +1563,7 @@ class Content:
             {
                 "flatten_records": flatten_records,
                 "function_name": function_name,
+                "drop_nones": drop_nones,
             },
         )
         return tuple(arrays)
@@ -1864,8 +1802,7 @@ class Content:
         return (
             self.__class__ is other.__class__
             and len(self) == len(other)
-            and ak.identifier._identifiers_equal(self.identifier, other.identifier)
-            and form._parameters_equal(
+            and ak.forms.form._parameters_equal(
                 self.parameters, other.parameters, only_array_record=False
             )
             and self._layout_equal(other, index_dtype, numpyarray)

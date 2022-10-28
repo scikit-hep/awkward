@@ -89,6 +89,10 @@ html_theme_options = {
             "url": "https://github.com/scikit-hep/awkward/releases",
         },
     ],
+    "analytics": {
+        "plausible_analytics_domain": "awkward-array.org",
+        "plausible_analytics_url": "https://views.scientific-python.org/js/plausible.js"
+    }
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -152,7 +156,19 @@ subprocess.check_call(
 )
 
 # Generate Python docstrings
-runpy.run_path(HERE / "prepare_docstrings.py")
+runpy.run_path(HERE / "prepare_docstrings.py", run_name="__main__")
 
 # Generate kernel docs
-runpy.run_path(HERE.parent / "dev" / "generate-kerneldocs.py")
+runpy.run_path(HERE.parent / "dev" / "generate-kerneldocs.py", run_name="__main__")
+
+
+# Sphinx doesn't usually want content to fit the screen, so we hack the styles for this page
+def install_jupyterlite_styles(app, pagename, templatename, context, event_arg) -> None:
+    if pagename != "getting-started/try-awkward-array":
+        return
+
+    app.add_css_file("css/try-awkward-array.css")
+
+
+def setup(app):
+    app.connect('html-page-context', install_jupyterlite_styles)

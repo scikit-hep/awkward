@@ -9,13 +9,10 @@ import awkward as ak  # noqa: F401
 
 
 def test_EmptyArray():
-    v1 = json.loads(
-        '{"class":"EmptyArray","has_identities":false,"parameters":{},"form_key":null}'
-    )
+    v1 = json.loads('{"class":"EmptyArray","parameters":{},"form_key":null}')
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
         "class": "EmptyArray",
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -23,27 +20,25 @@ def test_EmptyArray():
 
 def test_NumpyArray():
     v1 = json.loads(
-        '{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
         "class": "NumpyArray",
         "primitive": "float64",
         "inner_shape": [],
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"NumpyArray","inner_shape":[3,5],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"NumpyArray","inner_shape":[3,5],"itemsize":8,"format":"l","primitive":"int64","parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
         "class": "NumpyArray",
         "primitive": "int64",
         "inner_shape": [3, 5],
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -51,7 +46,7 @@ def test_NumpyArray():
 
 def test_RegularArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"RegularArray","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"size":3,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"RegularArray","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"size":3,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -61,17 +56,15 @@ def test_RegularArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"RegularArray","content":{"class":"EmptyArray","has_identities":false,"parameters":{},"form_key":null},"size":0,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"RegularArray","content":{"class":"EmptyArray","parameters":{},"form_key":null},"size":0,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -79,11 +72,9 @@ def test_RegularArray_NumpyArray():
         "size": 0,
         "content": {
             "class": "EmptyArray",
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -91,7 +82,7 @@ def test_RegularArray_NumpyArray():
 
 def test_ListArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"ListArray64","starts":"i64","stops":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"ListArray64","starts":"i64","stops":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -102,11 +93,9 @@ def test_ListArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -114,7 +103,7 @@ def test_ListArray_NumpyArray():
 
 def test_ListOffsetArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"ListOffsetArray64","offsets":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"ListOffsetArray64","offsets":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -124,11 +113,9 @@ def test_ListOffsetArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -136,7 +123,7 @@ def test_ListOffsetArray_NumpyArray():
 
 def test_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"RecordArray","contents":{"x":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null},"y":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"RecordArray","contents":{"x":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","parameters":{},"form_key":null},"y":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -147,7 +134,6 @@ def test_RecordArray_NumpyArray():
                 "class": "NumpyArray",
                 "primitive": "int64",
                 "inner_shape": [],
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -155,18 +141,16 @@ def test_RecordArray_NumpyArray():
                 "class": "NumpyArray",
                 "primitive": "float64",
                 "inner_shape": [],
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"RecordArray","contents":[{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null},{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}],"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"RecordArray","contents":[{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","parameters":{},"form_key":null},{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}],"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -177,7 +161,6 @@ def test_RecordArray_NumpyArray():
                 "class": "NumpyArray",
                 "primitive": "int64",
                 "inner_shape": [],
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -185,38 +168,34 @@ def test_RecordArray_NumpyArray():
                 "class": "NumpyArray",
                 "primitive": "float64",
                 "inner_shape": [],
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"RecordArray","contents":{},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"RecordArray","contents":{},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
         "class": "RecordArray",
         "fields": [],
         "contents": [],
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"RecordArray","contents":[],"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"RecordArray","contents":[],"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
         "class": "RecordArray",
         "fields": None,
         "contents": [],
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -224,7 +203,7 @@ def test_RecordArray_NumpyArray():
 
 def test_IndexedArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"IndexedArray64","index":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"IndexedArray64","index":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -234,11 +213,9 @@ def test_IndexedArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -246,7 +223,7 @@ def test_IndexedArray_NumpyArray():
 
 def test_IndexedOptionArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"IndexedOptionArray64","index":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"IndexedOptionArray64","index":"i64","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -256,11 +233,9 @@ def test_IndexedOptionArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -268,7 +243,7 @@ def test_IndexedOptionArray_NumpyArray():
 
 def test_ByteMaskedArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"valid_when":true,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -279,17 +254,15 @@ def test_ByteMaskedArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"valid_when":false,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -300,11 +273,9 @@ def test_ByteMaskedArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -312,7 +283,7 @@ def test_ByteMaskedArray_NumpyArray():
 
 def test_BitMaskedArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"lsb_order":false,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"valid_when":true,"lsb_order":false,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -324,17 +295,15 @@ def test_BitMaskedArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"lsb_order":false,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"valid_when":false,"lsb_order":false,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -346,17 +315,15 @@ def test_BitMaskedArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"lsb_order":true,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"valid_when":true,"lsb_order":true,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -368,17 +335,15 @@ def test_BitMaskedArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"lsb_order":true,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"valid_when":false,"lsb_order":true,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -390,11 +355,9 @@ def test_BitMaskedArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -402,7 +365,7 @@ def test_BitMaskedArray_NumpyArray():
 
 def test_UnmaskedArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"UnmaskedArray","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"UnmaskedArray","content":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -411,11 +374,9 @@ def test_UnmaskedArray_NumpyArray():
             "class": "NumpyArray",
             "primitive": "float64",
             "inner_shape": [],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -423,7 +384,7 @@ def test_UnmaskedArray_NumpyArray():
 
 def test_UnionArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"UnionArray8_64","tags":"i8","index":"i64","contents":[{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null},{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}],"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"UnionArray8_64","tags":"i8","index":"i64","contents":[{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","parameters":{},"form_key":null},{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}],"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -435,7 +396,6 @@ def test_UnionArray_NumpyArray():
                 "class": "NumpyArray",
                 "primitive": "int64",
                 "inner_shape": [],
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -443,12 +403,10 @@ def test_UnionArray_NumpyArray():
                 "class": "NumpyArray",
                 "primitive": "float64",
                 "inner_shape": [],
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -456,7 +414,7 @@ def test_UnionArray_NumpyArray():
 
 def test_RegularArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"RegularArray","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"size":3,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"RegularArray","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"size":3,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -470,22 +428,19 @@ def test_RegularArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"RegularArray","content":{"class":"RecordArray","contents":{"nest":{"class":"EmptyArray","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"size":0,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"RegularArray","content":{"class":"RecordArray","contents":{"nest":{"class":"EmptyArray","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"size":0,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -497,16 +452,13 @@ def test_RegularArray_RecordArray_NumpyArray():
             "contents": [
                 {
                     "class": "EmptyArray",
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -514,7 +466,7 @@ def test_RegularArray_RecordArray_NumpyArray():
 
 def test_ListArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"ListArray64","starts":"i64","stops":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"ListArray64","starts":"i64","stops":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -529,16 +481,13 @@ def test_ListArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -546,7 +495,7 @@ def test_ListArray_RecordArray_NumpyArray():
 
 def test_ListOffsetArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"ListOffsetArray64","offsets":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"ListOffsetArray64","offsets":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -560,16 +509,13 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -577,7 +523,7 @@ def test_ListOffsetArray_RecordArray_NumpyArray():
 
 def test_IndexedArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"IndexedArray64","index":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"IndexedArray64","index":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -591,16 +537,13 @@ def test_IndexedArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -608,7 +551,7 @@ def test_IndexedArray_RecordArray_NumpyArray():
 
 def test_IndexedOptionArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"IndexedOptionArray64","index":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"IndexedOptionArray64","index":"i64","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -622,16 +565,13 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -639,7 +579,7 @@ def test_IndexedOptionArray_RecordArray_NumpyArray():
 
 def test_ByteMaskedArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"valid_when":true,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -654,22 +594,19 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"ByteMaskedArray","mask":"i8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"valid_when":false,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -684,16 +621,13 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -701,7 +635,7 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
 
 def test_BitMaskedArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"lsb_order":false,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"valid_when":true,"lsb_order":false,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -717,22 +651,19 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"lsb_order":false,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"valid_when":false,"lsb_order":false,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -748,22 +679,19 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":true,"lsb_order":true,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"valid_when":true,"lsb_order":true,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -779,22 +707,19 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
 
     v1 = json.loads(
-        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"valid_when":false,"lsb_order":true,"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"BitMaskedArray","mask":"u8","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"valid_when":false,"lsb_order":true,"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -810,16 +735,13 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -827,7 +749,7 @@ def test_BitMaskedArray_RecordArray_NumpyArray():
 
 def test_UnmaskedArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"UnmaskedArray","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"UnmaskedArray","content":{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -840,16 +762,13 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
                     "class": "NumpyArray",
                     "primitive": "float64",
                     "inner_shape": [],
-                    "has_identifier": False,
                     "parameters": {},
                     "form_key": None,
                 }
             ],
-            "has_identifier": False,
             "parameters": {},
             "form_key": None,
         },
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }
@@ -857,7 +776,7 @@ def test_UnmaskedArray_RecordArray_NumpyArray():
 
 def test_UnionArray_RecordArray_NumpyArray():
     v1 = json.loads(
-        '{"class":"UnionArray8_64","tags":"i8","index":"i64","contents":[{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null},{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","has_identities":false,"parameters":{},"form_key":null}},"has_identities":false,"parameters":{},"form_key":null}],"has_identities":false,"parameters":{},"form_key":null}'
+        '{"class":"UnionArray8_64","tags":"i8","index":"i64","contents":[{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"l","primitive":"int64","parameters":{},"form_key":null}},"parameters":{},"form_key":null},{"class":"RecordArray","contents":{"nest":{"class":"NumpyArray","inner_shape":[],"itemsize":8,"format":"d","primitive":"float64","parameters":{},"form_key":null}},"parameters":{},"form_key":null}],"parameters":{},"form_key":null}'
     )
     v2 = ak.forms.from_dict(v1).to_dict()
     assert v2 == {
@@ -873,12 +792,10 @@ def test_UnionArray_RecordArray_NumpyArray():
                         "class": "NumpyArray",
                         "primitive": "int64",
                         "inner_shape": [],
-                        "has_identifier": False,
                         "parameters": {},
                         "form_key": None,
                     }
                 ],
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
@@ -890,17 +807,14 @@ def test_UnionArray_RecordArray_NumpyArray():
                         "class": "NumpyArray",
                         "primitive": "float64",
                         "inner_shape": [],
-                        "has_identifier": False,
                         "parameters": {},
                         "form_key": None,
                     }
                 ],
-                "has_identifier": False,
                 "parameters": {},
                 "form_key": None,
             },
         ],
-        "has_identifier": False,
         "parameters": {},
         "form_key": None,
     }

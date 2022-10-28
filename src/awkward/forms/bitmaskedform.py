@@ -13,7 +13,6 @@ class BitMaskedForm(Form):
         content,
         valid_when,
         lsb_order,
-        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -54,7 +53,7 @@ class BitMaskedForm(Form):
         self._content = content
         self._valid_when = valid_when
         self._lsb_order = lsb_order
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def mask(self):
@@ -107,8 +106,7 @@ class BitMaskedForm(Form):
     def __eq__(self, other):
         if isinstance(other, BitMaskedForm):
             return (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
+                self._form_key == other._form_key
                 and self._mask == other._mask
                 and self._valid_when == other._valid_when
                 and self._lsb_order == other._lsb_order
@@ -134,7 +132,6 @@ class BitMaskedForm(Form):
             return ak.forms.IndexedOptionForm(
                 "i64",
                 self._content,
-                has_identifier=self._has_identifier,
                 parameters=self._parameters,
             ).simplify_optiontype()
         else:
@@ -183,7 +180,6 @@ class BitMaskedForm(Form):
             self._content._select_columns(index, specifier, matches, output),
             self._valid_when,
             self._lsb_order,
-            self._has_identifier,
             self._parameters,
             self._form_key,
         )

@@ -126,32 +126,6 @@ def test_RecordArray_NumpyArray(flatlist_as_rvec):
     assert array.to_list() == array_out.to_list()
 
 
-@pytest.mark.skip(
-    reason="AttributeError: 'Record' object has no attribute 'form', 'Record' object has no attribute 'identifier'"
-)
-@pytest.mark.parametrize("flatlist_as_rvec", [False, True])
-def test_Record(flatlist_as_rvec):
-    array = ak.contents.RecordArray(
-        [
-            ak.contents.NumpyArray(np.array([0, 1, 2, 3, 4], np.int64)),
-            ak.contents.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5])),
-        ],
-        ["x", "y"],
-        parameters={"__record__": "Something"},
-    )
-    assert isinstance(array[2], ak.record.Record)
-
-    layout = array[2]
-    generator = ak._connect.cling.togenerator(
-        array.form, flatlist_as_rvec=flatlist_as_rvec
-    )
-    lookup = ak._lookup.Lookup(layout)
-    generator.generate(compiler)
-
-    array_out = generator.tolayout(lookup, 0, ())
-    assert layout.to_list() == array_out.to_list()
-
-
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])
 def test_RecordArray_tuple(flatlist_as_rvec):
     array = ak.Array([(1, 2)])

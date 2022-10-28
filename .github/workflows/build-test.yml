@@ -5,17 +5,12 @@ on:
     paths-ignore:
       - README.md
       - VERSION_INFO
-      - .ci/*
+      - .ci/**
       - .readthedocs.yml
-      - docs-src/*
-      - docs-img/*
-      - docs-jupyter/*
-      - docs-doxygen/*
-      - docs-sphinx/*
-      - docs/*
-      - studies/*
-      - src/cuda-kernels
-      - cuda-kernels
+      - docs-img/**
+      - docs-doxygen/**
+      - docs-sphinx/**
+      - studies/**
 
   schedule:
     - cron: 0 12 1 * *
@@ -31,7 +26,7 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - '3.11-dev'
+          - '3.11'
           - '3.10'
           - '3.9'
           - '3.8'
@@ -85,7 +80,7 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - '3.11-dev'
+          - '3.11'
           - '3.10'
           - '3.9'
           - '3.8'
@@ -141,7 +136,7 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - '3.11-dev'
+          - '3.11'
           - '3.10'
           - '3.9'
           - '3.8'

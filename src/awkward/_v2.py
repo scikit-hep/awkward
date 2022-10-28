@@ -15,7 +15,6 @@ from awkward import behavior  # noqa: F401
 from awkward import behaviors  # noqa: F401
 from awkward import contents  # noqa: F401
 from awkward import forms  # noqa: F401
-from awkward import identifier  # noqa: F401
 from awkward import index  # noqa: F401
 from awkward import numba  # noqa: F401
 from awkward import operations  # noqa: F401

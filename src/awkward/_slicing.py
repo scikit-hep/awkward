@@ -144,9 +144,6 @@ def normalise_item(item, nplike):
     elif isinstance(item, ak.highlevel.Array):
         return normalise_item(item.layout, nplike)
 
-    elif isinstance(item, ak.highlevel.Array):
-        return normalise_item(item.layout, nplike)
-
     elif isinstance(item, ak.contents.EmptyArray):
         return normalise_item(item.toNumpyArray(np.int64), nplike)
 
@@ -198,7 +195,6 @@ def normalise_item_RegularArray_toListOffsetArray64(item):
         return ak.contents.ListOffsetArray(
             next.offsets,
             normalise_item_RegularArray_toListOffsetArray64(next.content),
-            identifier=item.identifier,
             parameters=item.parameters,
         )
 
@@ -222,7 +218,6 @@ def normalise_item_nested(item):
         else:
             next = ak.contents.NumpyArray(
                 item.data.astype(np.int64),
-                identifier=item.identifier,
                 parameters=item.parameters,
                 nplike=item.nplike,
             )
@@ -237,7 +232,6 @@ def normalise_item_nested(item):
         return ak.contents.ListOffsetArray(
             item.offsets,
             normalise_item_nested(item.content),
-            identifier=item.identifier,
             parameters=item.parameters,
         )
 
@@ -296,7 +290,6 @@ def normalise_item_nested(item):
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(nextindex, nplike=item.nplike),
             normalise_item_nested(projected),
-            identifier=item.identifier,
             parameters=item.parameters,
         )
 
@@ -323,7 +316,6 @@ def normalise_item_nested(item):
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(nextindex, nplike=item.nplike),
             nextcontent,
-            identifier=item.identifier,
             parameters=item.parameters,
         )
 
@@ -522,5 +514,5 @@ def getitem_next_array_wrap(outcontent, shape, outer_length=0):
         size = shape[i]
         if isinstance(size, ak._typetracer.UnknownLengthType):
             size = 1
-        outcontent = ak.contents.RegularArray(outcontent, size, length, None, None)
+        outcontent = ak.contents.RegularArray(outcontent, size, length, None)
     return outcontent
