@@ -35,6 +35,8 @@ subtrees:
                         title: "Generic buffers"
                       - url: https://uproot.readthedocs.io/en/latest/basic.html#reading-a-tbranch-as-an-array
                         title: "ROOT via Uproot"
+                      - file: user-guide/how-to-convert-rdataframe
+                        title: "ROOT via RDataFrame"
 
               - file: user-guide/how-to-create
                 title: "Creating new arrays"
