@@ -81,6 +81,7 @@ jobs:
         cache-env: true
         environment-file: false
         environment-name: awkward-x86-64
+        channels: conda-forge
         extra-specs: |
           python=${{ env.PYTHON_VERSION }}
           cmake>=3.14
