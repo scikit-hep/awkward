@@ -80,6 +80,7 @@ jobs:
         # Cache invalidates daily by default
         cache-env: true
         environment-file: false
+        environment-name: awkward-x86-64
         extra-specs: |
           python=${{ env.PYTHON_VERSION }}
           cmake>=3.14
