@@ -862,7 +862,7 @@ class Content:
                 # Cast the result to the correct dtype (before merging)
                 value = reduced.numbers_to_type(result_primitive)[0]
                 result, aux = reducer.combine(part, value, result, offset, aux)
-            offset += len(part)
+            offset += part.length
 
         if result is None:
             array = self._nplike.empty(0, dtype=result_dtype)
