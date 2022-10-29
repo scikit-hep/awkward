@@ -856,23 +856,45 @@ class Content:
         )
         result_primitive = ak.types.numpytype.dtype_to_primitive(result_dtype)
 
-        for part, reduced in zip(parts, partial_reductions):
-            # Only coalesce non-null outputs
-            if reduced[0] is not None:
-                # Cast the result to the correct dtype (before merging)
-                value = reduced.numbers_to_type(result_primitive)[0]
-                result, aux = reducer.combine(part, value, result, offset, aux)
-            offset += part.length
+        if self._nplike.known_data and self._nplike.known_shape:
+            for part, reduced in zip(parts, partial_reductions):
+                # Only coalesce non-null outputs
+                if reduced[0] is not None:
+                    # Cast the result to the correct dtype (before merging)
+                    value = reduced.numbers_to_type(result_primitive)[0]
+                    result, aux = reducer.combine(part, value, result, offset, aux)
+                offset += part.length
 
-        if result is None:
-            array = self._nplike.empty(0, dtype=result_dtype)
-            layout = ak.contents.IndexedOptionArray(
-                ak.index.Index64(self._nplike.index_nplike.array([-1], dtype=np.int64)),
-                ak.contents.NumpyArray(array),
-            )
+            if mask:
+                assert result is not None
+                array = self._nplike.array(
+                    [] if result is None else [result], dtype=result_dtype
+                )
+                layout = ak.contents.IndexedOptionArray(
+                    ak.index.Index64(
+                        self._nplike.index_nplike.array(
+                            [-1 if result is None else 0], dtype=np.int64
+                        )
+                    ),
+                    ak.contents.NumpyArray(array),
+                )
+            else:
+                assert result is not None
+                array = self._nplike.array([result], dtype=result_dtype)
+                layout = ak.contents.NumpyArray(array)
+
         else:
-            array = self._nplike.array([result], dtype=result_dtype)
-            layout = ak.contents.NumpyArray(array)
+            # For non-known shape/data nplikes, it's easier to directly compute the result information
+            array = self._nplike.empty(1, dtype=result_dtype)
+            if mask:
+                layout = ak.contents.IndexedOptionArray(
+                    ak.index.Index64(
+                        self._nplike.index_nplike.empty(1, dtype=np.int64)
+                    ),
+                    ak.contents.NumpyArray(array),
+                )
+            else:
+                layout = ak.contents.NumpyArray(array)
 
         if keepdims:
             if branch:
