@@ -74,18 +74,23 @@ jobs:
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
 
+    - name: Template environment.yml
+      run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
+      working-directory: docs-sphinx
+
+      # Technically this give us an environment that is incompatible with
+      # the wheel built in the awkward-x86-64 job if the environments
+      # solve with different external library versions. By default,
+      # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
       uses: mamba-org/provision-with-micromamba@main
       with:
         # Cache invalidates daily by default
         cache-env: true
-        environment-file: false
-        environment-name: awkward-x86-64
-        channels: conda-forge
+        environment-file: docs-sphinx/environment.yml
         extra-specs: |
-          python=${{ env.PYTHON_VERSION }}
-          cmake>=3.14
-          cxx-compiler
+           python=${{ env.PYTHON_VERSION }}
+           doxygen
 
     - name: Build wheel
       run: pipx run build -w
