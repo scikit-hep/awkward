@@ -10,7 +10,6 @@ from awkward import nplikes
 np = nplikes.NumpyMetadata.instance()
 numpy = nplikes.Numpy.instance()
 
-
 DTypeLike = Any
 
 
@@ -169,42 +168,46 @@ class ArgMin(Reducer):
 
     def combine_many(self, partials: ak.contents.UnionArray, arrays, mask):
         nplike = ak.nplikes.nplike_of(*partials)
+        n_parts = len(arrays)
         index = ak.contents.UnionArray(
-            ak.index.Index8(nplike.index_nplike.arange(len(partials), dtype=np.int8)),
-            ak.index.Index64(nplike.index_nplike.zeros(len(partials), dtype=np.int64)),
+            ak.index.Index8(nplike.index_nplike.arange(n_parts, dtype=np.int8)),
+            ak.index.Index64(nplike.index_nplike.zeros(n_parts, dtype=np.int64)),
             partials,
         )
         if not mask:
+            # If we didn't set `mask=True`, then we want to apply one now
+            # Then, later, remove the mask
             index_array = nplike.index_nplike.asarray(
                 index.simplify_uniontype(mergebool=True)
             )
             index_is_identity = nplike.index_nplike.equal(index_array, -1)
             bytemask = ak.index.Index8(index_is_identity.astype(np.int8))
-            index = (
-                ak.contents.ByteMaskedArray(
-                    bytemask, index, valid_when=True
-                ).simplify_optiontype(),
-            )
+            index = ak.contents.ByteMaskedArray(
+                bytemask, index, valid_when=False
+            ).simplify_optiontype()
 
         value = ak.contents.UnionArray(
-            ak.index.Index8(nplike.index_nplike.arange(len(arrays), dtype=np.int8)),
-            ak.index.Index64(nplike.index_nplike.zeros(len(arrays), dtype=np.int64)),
+            ak.index.Index8(nplike.index_nplike.arange(n_parts, dtype=np.int8)),
+            ak.index.Index64(nplike.index_nplike.zeros(n_parts, dtype=np.int64)),
             [array[partial] for array, partial in zip(arrays, partials)],
         )
 
         local_result = value.reduce(
-            self, axis=-1, mask=mask, keepdims=True, flatten_records=False
+            self, axis=-1, mask=True, keepdims=True, flatten_records=False
         )
+
         offsets = [0] * len(arrays)
         for i in range(1, len(arrays)):
             offsets[i] = len(arrays[i - 1]) + offsets[i - 1]
-        offsets = ak.contents.NumpyArray(index.nplike.array(offsets))
+        offsets = ak.contents.NumpyArray(nplike.array(offsets))
         import numpy
 
         result = numpy.add(ak.Array(index), ak.Array(offsets))[local_result].layout
 
         if not mask:
-            result = result.fill_none(-1)
+            valuelayout = ak.contents.NumpyArray(nplike.asarray(-1)[np.newaxis])
+            result = result.fill_none(valuelayout)
+
         return result
 
 
