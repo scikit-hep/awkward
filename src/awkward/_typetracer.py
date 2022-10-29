@@ -147,6 +147,9 @@ class UnknownScalar:
 
 class MaybeNone:
     def __init__(self, content):
+        # Always simplify `MaybeNone`s
+        if isinstance(content, self.__class__):
+            content = content.content
         self._content = content
 
     @property
