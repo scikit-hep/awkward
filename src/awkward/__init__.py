@@ -41,7 +41,7 @@ import awkward.behaviors.categorical
 import awkward.behaviors.string
 from awkward.behaviors.mixins import mixin_class, mixin_class_method
 
-behavior = {}
+behavior: dict = {}
 awkward.behaviors.string.register(behavior)  # noqa: F405
 awkward.behaviors.categorical.register(behavior)  # noqa: F405
 
