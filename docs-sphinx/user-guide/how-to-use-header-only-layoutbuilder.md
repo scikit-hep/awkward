@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.14.1
 kernelspec:
-  display_name: C++14
-  language: C++14
-  name: xcpp14
+  display_name: ROOT C++
+  language: c++
+  name: root
 ---
 
 How to use the header-only LayoutBuilder in C++
@@ -220,50 +220,10 @@ for(auto it : names_nbytes) {
 builder.to_buffers(buffers);
 ```
 
-Now, let's look at the _form_ of the builder. A Form is a unique description of an Awkward Array and returns a JSON-like `std::string` and its form keys. First, we'll write a small bit of code to display the form in a more pleasing manner for this guide:
+Now, let's look at the _form_ of the builder. A Form is a unique description of an Awkward Array and returns a JSON-like `std::string` and its form keys. The is the Awkward Form generated for this example.
 
 ```{code-cell}
----
-jupyter:
-  source_hidden: true
-tags: [hide-cell]
----
-#include <string>
-
-#include "nlohmann/json.hpp"
-
-namespace nl = nlohmann;
-
-namespace display
-{
-    struct JSON
-    {   
-        inline JSON(const std::string& json)
-        {
-            m_data = nl::json::parse(json);
-        }
-        
-        inline JSON(const nl::json json)
-        {
-            m_data = std::move(json);
-        }
-
-        nl::json m_data;
-    };
-
-    nl::json mime_bundle_repr(const JSON& i)
-    {
-        auto bundle = nl::json::object();
-        bundle["application/json"] = i.m_data;
-        return bundle;
-    }
-}
-```
-
-The is the Awkward Form generated for this example.
-
-```{code-cell}
-display::JSON(builder.form())
+std::cout << builder.form() << std::endl;
 ```
 
 Passing from C++ to Python
