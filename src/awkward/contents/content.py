@@ -828,13 +828,13 @@ class Content:
 
         # The initial total-reduction result is None. It can also be None for reductions
         # that are have `mask=True`
-        result = None
-        # Allow reducer to return auxiliary data associated with its return value, e.g. the value
-        # associated with an `argmin/argmax` index. The auxiliary data of a reducer is not defined
-        # for reductions that produce None
-        aux = None
-        # Keep track of position within virtually flattened array
-        offset = 0
+        # result = None
+        # # Allow reducer to return auxiliary data associated with its return value, e.g. the value
+        # # associated with an `argmin/argmax` index. The auxiliary data of a reducer is not defined
+        # # for reductions that produce None
+        # aux = None
+        # # Keep track of position within virtually flattened array
+        # offset = 0
         # Reduce each part
         partial_reductions = [
             part.reduce(
@@ -847,54 +847,47 @@ class Content:
             )
             for part in parts
         ]
-        # Keep track of encountered dtypes for result promotion
-        result_dtype = self._nplike.common_type(
-            [
-                p.content.dtype if p.is_OptionType else p.dtype
-                for p in partial_reductions
-            ]
-        )
-        result_primitive = ak.types.numpytype.dtype_to_primitive(result_dtype)
+        layout = reducer.combine_many(partial_reductions, parts, mask=mask)
 
-        if self._nplike.known_data and self._nplike.known_shape:
-            for part, reduced in zip(parts, partial_reductions):
-                # Only coalesce non-null outputs
-                if reduced[0] is not None:
-                    # Cast the result to the correct dtype (before merging)
-                    value = reduced.numbers_to_type(result_primitive)[0]
-                    result, aux = reducer.combine(part, value, result, offset, aux)
-                offset += part.length
-
-            if mask:
-                assert result is not None
-                array = self._nplike.array(
-                    [] if result is None else [result], dtype=result_dtype
-                )
-                layout = ak.contents.IndexedOptionArray(
-                    ak.index.Index64(
-                        self._nplike.index_nplike.array(
-                            [-1 if result is None else 0], dtype=np.int64
-                        )
-                    ),
-                    ak.contents.NumpyArray(array),
-                )
-            else:
-                assert result is not None
-                array = self._nplike.array([result], dtype=result_dtype)
-                layout = ak.contents.NumpyArray(array)
-
-        else:
-            # For non-known shape/data nplikes, it's easier to directly compute the result information
-            array = self._nplike.empty(1, dtype=result_dtype)
-            if mask:
-                layout = ak.contents.IndexedOptionArray(
-                    ak.index.Index64(
-                        self._nplike.index_nplike.empty(1, dtype=np.int64)
-                    ),
-                    ak.contents.NumpyArray(array),
-                )
-            else:
-                layout = ak.contents.NumpyArray(array)
+        # if self._nplike.known_data and self._nplike.known_shape:
+        #     for part, reduced in zip(parts, partial_reductions):
+        #         # Only coalesce non-null outputs
+        #         if reduced[0] is not None:
+        #             # Cast the result to the correct dtype (before merging)
+        #             value = reduced.numbers_to_type(result_primitive)[0]
+        #             result, aux = reducer.combine(part, value, result, offset, aux)
+        #         offset += part.length
+        #
+        #     if mask:
+        #         assert result is not None
+        #         array = self._nplike.array(
+        #             [] if result is None else [result], dtype=result_dtype
+        #         )
+        #         layout = ak.contents.IndexedOptionArray(
+        #             ak.index.Index64(
+        #                 self._nplike.index_nplike.array(
+        #                     [-1 if result is None else 0], dtype=np.int64
+        #                 )
+        #             ),
+        #             ak.contents.NumpyArray(array),
+        #         )
+        #     else:
+        #         assert result is not None
+        #         array = self._nplike.array([result], dtype=result_dtype)
+        #         layout = ak.contents.NumpyArray(array)
+        #
+        # else:
+        #     # For non-known shape/data nplikes, it's easier to directly compute the result information
+        #     array = self._nplike.empty(1, dtype=result_dtype)
+        #     if mask:
+        #         layout = ak.contents.IndexedOptionArray(
+        #             ak.index.Index64(
+        #                 self._nplike.index_nplike.empty(1, dtype=np.int64)
+        #             ),
+        #             ak.contents.NumpyArray(array),
+        #         )
+        #     else:
+        #         layout = ak.contents.NumpyArray(array)
 
         if keepdims:
             if branch:

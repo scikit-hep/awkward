@@ -52,6 +52,23 @@ class Reducer:
     def apply(self, array, parents, outlength: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 
+    def _combine_with(self, reductions, mask, reducer=None):
+        if reducer is None:
+            reducer = self
+
+        partial = ak.contents.UnionArray(
+            ak.index.Index8(
+                self._nplike.index_nplike.arange(len(reductions), dtype=np.int8)
+            ),
+            ak.index.Index64(
+                self._nplike.index_nplike.zeros(len(reductions), dtype=np.int64)
+            ),
+            reductions,
+        )
+        return partial.reduce(
+            self, axis=-1, mask=mask, keepdims=False, flatten_records=False
+        )
+
     def combine(
         self,
         array: ak.contents.Content,
@@ -150,6 +167,46 @@ class ArgMin(Reducer):
         else:
             return other_reduction, aux
 
+    def combine_many(self, partials: ak.contents.UnionArray, arrays, mask):
+        nplike = ak.nplikes.nplike_of(*partials)
+        index = ak.contents.UnionArray(
+            ak.index.Index8(nplike.index_nplike.arange(len(partials), dtype=np.int8)),
+            ak.index.Index64(nplike.index_nplike.zeros(len(partials), dtype=np.int64)),
+            partials,
+        )
+        if not mask:
+            index_array = nplike.index_nplike.asarray(
+                index.simplify_uniontype(mergebool=True)
+            )
+            index_is_identity = nplike.index_nplike.equal(index_array, -1)
+            bytemask = ak.index.Index8(index_is_identity.astype(np.int8))
+            index = (
+                ak.contents.ByteMaskedArray(
+                    bytemask, index, valid_when=True
+                ).simplify_optiontype(),
+            )
+
+        value = ak.contents.UnionArray(
+            ak.index.Index8(nplike.index_nplike.arange(len(arrays), dtype=np.int8)),
+            ak.index.Index64(nplike.index_nplike.zeros(len(arrays), dtype=np.int64)),
+            [array[partial] for array, partial in zip(arrays, partials)],
+        )
+
+        local_result = value.reduce(
+            self, axis=-1, mask=mask, keepdims=True, flatten_records=False
+        )
+        offsets = [0] * len(arrays)
+        for i in range(1, len(arrays)):
+            offsets[i] = len(arrays[i - 1]) + offsets[i - 1]
+        offsets = ak.contents.NumpyArray(index.nplike.array(offsets))
+        import numpy
+
+        result = numpy.add(ak.Array(index), ak.Array(offsets))[local_result].layout
+
+        if not mask:
+            result = result.fill_none(-1)
+        return result
+
 
 class ArgMax(Reducer):
     name = "argmax"
@@ -227,6 +284,40 @@ class ArgMax(Reducer):
         else:
             return other_reduction, aux
 
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        if not mask:
+            bytemask = ak.index.Index8(
+                partial.nplike.index_nplike.asarray(partial != -1).astype(np.int8)
+            )
+            partial = (
+                ak.contents.ByteMaskedArray(
+                    bytemask, partial, valid_when=True
+                ).simplify_optiontype(),
+            )
+
+        value_content = ak.contents.UnionArray(
+            ak.index.Index8(
+                partial.nplike.index_nplike.arange(partial.length, dtype=np.int8)
+            ),
+            ak.index.Index64(
+                partial.nplike.index_nplike.zeros(partial.length, dtype=np.int64)
+            ),
+            [arrays[i] for i in partial],
+        )
+
+        local_result = value_content.reduce(
+            self, axis=-1, mask=mask, keepdims=False, flatten_records=False
+        )
+        offsets = [0] * len(arrays)
+        for i in range(1, len(arrays)):
+            offsets[i] = len(arrays[i - 1]) + offsets[i - 1]
+        offsets = ak.contents.NumpyArray(partial.nplike.array(offsets))
+        result = (partial + offsets)[local_result]
+
+        if not mask:
+            result = result.fill_none(-1)
+        return result
+
 
 class Count(Reducer):
     name = "count"
@@ -260,6 +351,9 @@ class Count(Reducer):
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
+
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        return self._combine_with(partial, mask, reducer=Sum())
 
 
 class CountNonzero(Reducer):
@@ -316,6 +410,9 @@ class CountNonzero(Reducer):
 
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
+
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        return self._combine_with(partial, mask, reducer=Sum())
 
 
 class Sum(Reducer):
@@ -425,6 +522,9 @@ class Sum(Reducer):
         else:
             return numpy.array(0, dtype=dtype)[()]
 
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        return self._combine_with(partial, mask)
+
 
 class Prod(Reducer):
     name = "prod"
@@ -517,6 +617,9 @@ class Prod(Reducer):
         else:
             return numpy.array(1, dtype=dtype)[()]
 
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        return self._combine_with(partial, mask)
+
 
 class Any(Reducer):
     name = "any"
@@ -573,6 +676,9 @@ class Any(Reducer):
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return False
 
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        return self._combine_with(partial, mask)
+
 
 class All(Reducer):
     name = "all"
@@ -628,6 +734,9 @@ class All(Reducer):
 
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return True
+
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        return self._combine_with(partial, mask)
 
 
 class Min(Reducer):
@@ -733,6 +842,9 @@ class Min(Reducer):
         else:
             return array.nplike.minimum(reduction, other_reduction), None
 
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        return self._combine_with(partial, mask)
+
 
 class Max(Reducer):
     name = "max"
@@ -836,3 +948,6 @@ class Max(Reducer):
             return reduction, None
         else:
             return array.nplike.maximum(reduction, other_reduction), None
+
+    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
+        return self._combine_with(partial, mask)
