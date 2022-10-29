@@ -826,8 +826,12 @@ class Content:
         if not parts:
             parts = [ak.contents.EmptyArray()]
 
+        # The initial total-reduction result is None. It can also be None for reductions
+        # that are have `mask=True`
         result = None
-        # Allow reducer to return auxiliary data associated with its return value
+        # Allow reducer to return auxiliary data associated with its return value, e.g. the value
+        # associated with an `argmin/argmax` index. The auxiliary data of a reducer is not defined
+        # for reductions that produce None
         aux = None
         # Keep track of position within virtually flattened array
         offset = 0
@@ -853,12 +857,7 @@ class Content:
         result_primitive = ak.types.numpytype.dtype_to_primitive(result_dtype)
 
         for part, reduced in zip(parts, partial_reductions):
-            # FIXME: if `mask=False` raises errors for empty sublists, we need to avoid that
-            # perhaps test whether `part` is empty
-            # but this would also happen if sublist is entirely `None`, too.
-            # so better to force the mask, and manually recover identity?
             # Only coalesce non-null outputs
-
             if reduced[0] is not None:
                 # Cast the result to the correct dtype (before merging)
                 value = reduced.numbers_to_type(result_primitive)[0]

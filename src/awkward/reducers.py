@@ -124,19 +124,31 @@ class ArgMin(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        this_index = reduction + offset
-        this_value = array[reduction]
-
-        if other_reduction is None:
-            return this_index, this_value
+    def combine(
+        self,
+        array: ak.contents.Content,
+        reduction: Integral,
+        other_reduction: Integral | None,
+        offset: Integral,
+        aux: Any,
+    ) -> tuple[int, Any]:
+        # Only slice array for valid indices
+        if reduction == -1:
+            this_index = -1
+            this_value = None
         else:
-            other_value = aux
+            this_index = reduction + offset
+            this_value = array[reduction]
 
-            if this_value < other_value:
-                return this_index, this_value
-            else:
-                return other_reduction, aux
+        # If the previous reduction is not valid, just return this one
+        if other_reduction is None or other_reduction == -1:
+            return this_index, this_value
+        # Else, if this reduction is smaller, return this result
+        elif this_value < aux:
+            return this_index, this_value
+        # Else, return the previous reduction
+        else:
+            return other_reduction, aux
 
 
 class ArgMax(Reducer):
@@ -189,19 +201,31 @@ class ArgMax(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        this_index = reduction + offset
-        this_value = array[reduction]
-
-        if other_reduction is None:
-            return this_index, this_value
+    def combine(
+        self,
+        array: ak.contents.Content,
+        reduction: Integral,
+        other_reduction: Integral | None,
+        offset: Integral,
+        aux: Any,
+    ) -> tuple[int, Any]:
+        # Only slice array for valid indices
+        if reduction == -1:
+            this_index = -1
+            this_value = None
         else:
-            other_value = aux
+            this_index = reduction + offset
+            this_value = array[reduction]
 
-            if this_value > other_value:
-                return this_index, this_value
-            else:
-                return other_reduction, aux
+        # If the previous reduction is not valid, just return this one
+        if other_reduction is None or other_reduction == -1:
+            return this_index, this_value
+        # Else, if this reduction is smaller, return this result
+        elif this_value > aux:
+            return this_index, this_value
+        # Else, return the previous reduction
+        else:
+            return other_reduction, aux
 
 
 class Count(Reducer):
