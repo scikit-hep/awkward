@@ -203,7 +203,7 @@ class ByteMaskedArray(Content):
             return self
         else:
             return ByteMaskedArray(
-                ak.Index8(~self._mask.data),
+                ak.index.Index8(~self._mask.data),
                 self._content,
                 valid_when,
                 self._identifier,
