@@ -2,7 +2,6 @@
 
 import numbers
 from functools import reduce
-from typing import TypeVar
 
 import numpy
 
@@ -201,9 +200,6 @@ def _length_after_slice(slice, original_length):
         return d + (1 if m != 0 else 0)
     else:
         return 0
-
-
-TTypeTracerArray = TypeVar("TTypeTracerArray", bound="TypeTracerArray")
 
 
 class TypeTracerArray:
@@ -435,6 +431,21 @@ class TypeTracerArray:
         else:
             return NotImplemented
 
+    def __eq__(self, other):
+        if ak._util.isscalar(other):
+            return TypeTracerArray(np.bool_, self._shape)
+        else:
+            return NotImplemented
+
+    def __ne__(self, other):
+        if ak._util.isscalar(other):
+            return TypeTracerArray(np.bool_, self._shape)
+        else:
+            return NotImplemented
+
+    def __invert__(self):
+        return TypeTracerArray(np.bool_, self._shape)
+
     def reshape(self, *args):
         if len(args) == 1 and isinstance(args[0], tuple):
             args = args[0]
@@ -607,10 +618,13 @@ class TypeTracer(ak.nplikes.NumpyLike):
             start, stop, step = args[0], args[1], 1
         elif len(args) == 3:
             start, stop, step = args[0], args[1], args[2]
+        else:
+            raise ak._errors.wrap_error(ValueError("incorrect number of arguments"))
 
         if ak._util.isint(start) and ak._util.isint(stop) and ak._util.isint(step):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
-
+        else:
+            length = UnknownLength
         return TypeTracerArray(kwargs["dtype"], (length,))
 
     def meshgrid(self, *args, **kwargs):
@@ -845,6 +859,16 @@ class TypeTracer(ak.nplikes.NumpyLike):
         if isinstance(x, TypeTracerArray):
             is_array = True
         if isinstance(y, TypeTracerArray):
+            is_array = True
+        if is_array:
+            return TypeTracerArray(np.dtype(np.bool_))
+        else:
+            return UnknownScalar(np.dtype(np.bool_))
+
+    def logical_not(self, array):
+        # array1[, out=]
+        is_array = False
+        if isinstance(array, TypeTracerArray):
             is_array = True
         if is_array:
             return TypeTracerArray(np.dtype(np.bool_))
