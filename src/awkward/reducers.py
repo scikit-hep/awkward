@@ -51,38 +51,29 @@ class Reducer:
     def apply(self, array, parents, outlength: Integral):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _combine_with(self, reductions, mask, reducer=None):
-        if reducer is None:
-            reducer = self
+    def _apply_many_trivial(self, arrays, mask, partial_reducer=None):
+        if partial_reducer is None:
+            partial_reducer = self
 
-        partial = ak.contents.UnionArray(
-            ak.index.Index8(
-                self._nplike.index_nplike.arange(len(reductions), dtype=np.int8)
-            ),
-            ak.index.Index64(
-                self._nplike.index_nplike.zeros(len(reductions), dtype=np.int64)
-            ),
-            reductions,
-        )
-        return partial.reduce(
-            self, axis=-1, mask=mask, keepdims=False, flatten_records=False
+        partial_reductions = [
+            x.reduce(
+                self,
+                axis=-1,
+                mask=mask,
+                keepdims=False,
+                flatten_records=False,
+            )
+            for x in arrays
+        ]
+        partial_reduction = partial_reductions[0].mergemany(partial_reductions[1:])
+        return partial_reduction.reduce(
+            partial_reducer, axis=-1, mask=mask, keepdims=False, flatten_records=False
         )
 
-    def combine(
-        self,
-        array: ak.contents.Content,
-        reduction,
-        other_reduction,
-        offset: Integral,
-        aux,
-    ):
+    def apply_many(self, arrays: list[ak.contents.Content], mask: bool):
         """
         Args:
-            array: array to be partially reduced
-            reduction: result of reducing `array`
-            other_reduction: previous reduction result
-            offset: position of partial reduction in the array formed by merging all partial arrays
-            aux: auxiliary data returned by a previous call to `combine`
+            arrays: arrays to be partially reduced
 
         Combine a pair of partial reductions such that the result is equivalent to the reduction over
         the array formed by merging the input arrays.
@@ -140,75 +131,47 @@ class ArgMin(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def combine(
-        self,
-        array: ak.contents.Content,
-        reduction: Integral,
-        other_reduction: Integral | None,
-        offset: Integral,
-        aux: Any,
-    ) -> tuple[int, Any]:
-        # Only slice array for valid indices
-        if reduction == -1:
-            this_index = -1
-            this_value = None
-        else:
-            this_index = reduction + offset
-            this_value = array[reduction]
+    def apply_many(self, arrays, mask):
+        nplike = ak.nplikes.nplike_of(*arrays)
 
-        # If the previous reduction is not valid, just return this one
-        if other_reduction is None or other_reduction == -1:
-            return this_index, this_value
-        # Else, if this reduction is smaller, return this result
-        elif this_value < aux:
-            return this_index, this_value
-        # Else, return the previous reduction
-        else:
-            return other_reduction, aux
-
-    def combine_many(self, partials: ak.contents.UnionArray, arrays, mask):
-        nplike = ak.nplikes.nplike_of(*partials)
-        n_parts = len(arrays)
-        index = ak.contents.UnionArray(
-            ak.index.Index8(nplike.index_nplike.arange(n_parts, dtype=np.int8)),
-            ak.index.Index64(nplike.index_nplike.zeros(n_parts, dtype=np.int64)),
-            partials,
-        )
-        if not mask:
-            # If we didn't set `mask=True`, then we want to apply one now
-            # Then, later, remove the mask
-            index_array = nplike.index_nplike.asarray(
-                index.simplify_uniontype(mergebool=True)
+        partial_indices = [
+            part.reduce(
+                self,
+                axis=-1,
+                mask=True,
+                keepdims=True,
+                behavior=None,
+                flatten_records=False,
             )
-            index_is_identity = nplike.index_nplike.equal(index_array, -1)
-            bytemask = ak.index.Index8(index_is_identity.astype(np.int8))
-            index = ak.contents.ByteMaskedArray(
-                bytemask, index, valid_when=False
-            ).simplify_optiontype()
-
-        value = ak.contents.UnionArray(
-            ak.index.Index8(nplike.index_nplike.arange(n_parts, dtype=np.int8)),
-            ak.index.Index64(nplike.index_nplike.zeros(n_parts, dtype=np.int64)),
-            [array[partial] for array, partial in zip(arrays, partials)],
+            for part in arrays
+        ]
+        index = (
+            partial_indices[0].mergemany(partial_indices[1:]).toByteMaskedArray(True)
         )
 
-        local_result = value.reduce(
+        partial_values = [a[i] for a, i in zip(arrays, partial_indices)]
+        value = partial_values[0].mergemany(partial_values[1:])
+
+        result_index = value.reduce(
             self, axis=-1, mask=True, keepdims=True, flatten_records=False
         )
+        assert isinstance(result_index, ak.contents.ByteMaskedArray), type(value)
 
-        offsets = [0] * len(arrays)
-        for i in range(1, len(arrays)):
-            offsets[i] = len(arrays[i - 1]) + offsets[i - 1]
-        offsets = ak.contents.NumpyArray(nplike.array(offsets))
-        import numpy
+        lengths = [0]
+        lengths.extend([len(x) for x in arrays[:-1]])
+        shifts = nplike.where(
+            index.mask, nplike.cumsum(nplike.array(lengths, dtype=np.int64)), 0
+        )
+        absolute_index = ak.contents.NumpyArray(nplike.asarray(index.content) + shifts)
 
-        result = numpy.add(ak.Array(index), ak.Array(offsets))[local_result].layout
-
-        if not mask:
-            valuelayout = ak.contents.NumpyArray(nplike.asarray(-1)[np.newaxis])
-            result = result.fill_none(valuelayout)
-
-        return result
+        result = absolute_index[result_index]
+        if mask:
+            return result
+        else:
+            raw_result = result.toByteMaskedArray(True)
+            return ak.contents.NumpyArray(
+                nplike.where(raw_result.mask, nplike.asarray(raw_result.content), -1)
+            )
 
 
 class ArgMax(Reducer):
@@ -261,65 +224,47 @@ class ArgMax(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def combine(
-        self,
-        array: ak.contents.Content,
-        reduction: Integral,
-        other_reduction: Integral | None,
-        offset: Integral,
-        aux: Any,
-    ) -> tuple[int, Any]:
-        # Only slice array for valid indices
-        if reduction == -1:
-            this_index = -1
-            this_value = None
-        else:
-            this_index = reduction + offset
-            this_value = array[reduction]
+    def apply_many(self, arrays, mask):
+        nplike = ak.nplikes.nplike_of(*arrays)
 
-        # If the previous reduction is not valid, just return this one
-        if other_reduction is None or other_reduction == -1:
-            return this_index, this_value
-        # Else, if this reduction is smaller, return this result
-        elif this_value > aux:
-            return this_index, this_value
-        # Else, return the previous reduction
-        else:
-            return other_reduction, aux
-
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        if not mask:
-            bytemask = ak.index.Index8(
-                partial.nplike.index_nplike.asarray(partial != -1).astype(np.int8)
+        partial_indices = [
+            part.reduce(
+                self,
+                axis=-1,
+                mask=True,
+                keepdims=True,
+                behavior=None,
+                flatten_records=False,
             )
-            partial = (
-                ak.contents.ByteMaskedArray(
-                    bytemask, partial, valid_when=True
-                ).simplify_optiontype(),
-            )
-
-        value_content = ak.contents.UnionArray(
-            ak.index.Index8(
-                partial.nplike.index_nplike.arange(partial.length, dtype=np.int8)
-            ),
-            ak.index.Index64(
-                partial.nplike.index_nplike.zeros(partial.length, dtype=np.int64)
-            ),
-            [arrays[i] for i in partial],
+            for part in arrays
+        ]
+        index = (
+            partial_indices[0].mergemany(partial_indices[1:]).toByteMaskedArray(True)
         )
 
-        local_result = value_content.reduce(
-            self, axis=-1, mask=mask, keepdims=False, flatten_records=False
-        )
-        offsets = [0] * len(arrays)
-        for i in range(1, len(arrays)):
-            offsets[i] = len(arrays[i - 1]) + offsets[i - 1]
-        offsets = ak.contents.NumpyArray(partial.nplike.array(offsets))
-        result = (partial + offsets)[local_result]
+        partial_values = [a[i] for a, i in zip(arrays, partial_indices)]
+        value = partial_values[0].mergemany(partial_values[1:])
 
-        if not mask:
-            result = result.fill_none(-1)
-        return result
+        result_index = value.reduce(
+            self, axis=-1, mask=True, keepdims=True, flatten_records=False
+        )
+        assert isinstance(result_index, ak.contents.ByteMaskedArray), type(value)
+
+        lengths = [0]
+        lengths.extend([len(x) for x in arrays[:-1]])
+        shifts = nplike.where(
+            index.mask, nplike.cumsum(nplike.array(lengths, dtype=np.int64)), 0
+        )
+        absolute_index = ak.contents.NumpyArray(nplike.asarray(index.content) + shifts)
+
+        result = absolute_index[result_index]
+        if mask:
+            return result
+        else:
+            raw_result = result.toByteMaskedArray(True)
+            return ak.contents.NumpyArray(
+                nplike.where(raw_result.mask, nplike.asarray(raw_result.content), -1)
+            )
 
 
 class Count(Reducer):
@@ -346,17 +291,11 @@ class Count(Reducer):
         )
         return ak.contents.NumpyArray(result)
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        if other_reduction is None:
-            return reduction, None
-        else:
-            return reduction + other_reduction, None
-
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
 
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        return self._combine_with(partial, mask, reducer=Sum())
+    def apply_many(self, arrays, mask):
+        return self._apply_many_trivial(arrays, mask, partial_reducer=Sum())
 
 
 class CountNonzero(Reducer):
@@ -405,17 +344,11 @@ class CountNonzero(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        if other_reduction is None:
-            return reduction, None
-        else:
-            return reduction + other_reduction, None
-
     def identity_for(self, dtype: np.dtype | None):
         return np.int64(0)
 
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        return self._combine_with(partial, mask, reducer=Sum())
+    def apply_many(self, arrays, mask):
+        return self._apply_many_trivial(arrays, mask, partial_reducer=Sum())
 
 
 class Sum(Reducer):
@@ -510,12 +443,6 @@ class Sum(Reducer):
         else:
             return ak.contents.NumpyArray(result)
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        if other_reduction is None:
-            return reduction, None
-        else:
-            return reduction + other_reduction, None
-
     def identity_for(self, dtype: np.dtype | None):
         if dtype is None:
             dtype = self.preferred_dtype
@@ -525,8 +452,8 @@ class Sum(Reducer):
         else:
             return numpy.array(0, dtype=dtype)[()]
 
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        return self._combine_with(partial, mask)
+    def apply_many(self, arrays, mask):
+        return self._apply_many_trivial(arrays, mask)
 
 
 class Prod(Reducer):
@@ -605,12 +532,6 @@ class Prod(Reducer):
         else:
             return ak.contents.NumpyArray(result)
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        if other_reduction is None:
-            return reduction, None
-        else:
-            return reduction * other_reduction, None
-
     def identity_for(self, dtype: np.dtype | None):
         if dtype is None:
             dtype = self.preferred_dtype
@@ -620,8 +541,8 @@ class Prod(Reducer):
         else:
             return numpy.array(1, dtype=dtype)[()]
 
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        return self._combine_with(partial, mask)
+    def apply_many(self, arrays, mask):
+        return self._apply_many_trivial(arrays, mask)
 
 
 class Any(Reducer):
@@ -670,17 +591,11 @@ class Any(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        if other_reduction is None:
-            return reduction, None
-        else:
-            return reduction or other_reduction, None
-
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return False
 
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        return self._combine_with(partial, mask)
+    def apply_many(self, arrays, mask):
+        return self._apply_many_trivial(arrays, mask)
 
 
 class All(Reducer):
@@ -729,17 +644,11 @@ class All(Reducer):
             )
         return ak.contents.NumpyArray(result)
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        if other_reduction is None:
-            return reduction, None
-        else:
-            return reduction and other_reduction, None
-
     def identity_for(self, dtype: DTypeLike | None) -> Real:
         return True
 
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        return self._combine_with(partial, mask)
+    def apply_many(self, arrays, mask):
+        return self._apply_many_trivial(arrays, mask)
 
 
 class Min(Reducer):
@@ -839,14 +748,8 @@ class Min(Reducer):
         else:
             return ak.contents.NumpyArray(array.nplike.array(result, array.dtype))
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        if other_reduction is None:
-            return reduction, None
-        else:
-            return array.nplike.minimum(reduction, other_reduction), None
-
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        return self._combine_with(partial, mask)
+    def apply_many(self, arrays, mask):
+        return self._apply_many_trivial(arrays, mask)
 
 
 class Max(Reducer):
@@ -946,11 +849,5 @@ class Max(Reducer):
         else:
             return ak.contents.NumpyArray(array.nplike.array(result, array.dtype))
 
-    def combine(self, array, reduction, other_reduction, offset, aux):
-        if other_reduction is None:
-            return reduction, None
-        else:
-            return array.nplike.maximum(reduction, other_reduction), None
-
-    def combine_many(self, partial: ak.contents.UnionArray, arrays, mask):
-        return self._combine_with(partial, mask)
+    def apply_many(self, arrays, mask):
+        return self._apply_many_trivial(arrays, mask)
