@@ -1380,3 +1380,8 @@ class NumpyArray(Content):
             )
         else:
             return True
+
+    def dummy(self):
+        return ak.contents.NumpyArray(
+            self._nplike.empty(1, dtype=self.dtype), nplike=self._nplike
+        )
