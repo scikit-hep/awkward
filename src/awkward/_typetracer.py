@@ -73,13 +73,23 @@ class UnknownLengthType:
 UnknownLength = UnknownLengthType()
 
 
-def _emptyarray(x):
+def _empty_array(x):
     if isinstance(x, UnknownScalar):
         return numpy.empty(0, x._dtype)
     elif hasattr(x, "dtype"):
         return numpy.empty(0, x.dtype)
     else:
-        return numpy.empty(0, numpy.array(x).dtype)
+        raise ak._errors.wrap_error(TypeError)
+
+
+def _empty_scalar(x):
+    assert TypeTracerArray.instance().isscalar(x)
+    if isinstance(x, UnknownScalar):
+        return numpy.empty(1, x._dtype)[()]
+    elif isinstance(x, "dtype"):
+        return numpy.empty(1, x.dtype)[()]
+    else:
+        return numpy.empty(1, numpy.min_scalar_type(x))[()]
 
 
 class UnknownScalar:
@@ -100,44 +110,77 @@ class UnknownScalar:
     def __str__(self):
         return f"unknown-{str(self._dtype)}"
 
-    def __eq__(self, other):
-        return isinstance(other, UnknownScalar) and self._dtype == other._dtype
-
     def __add__(self, other):
-        return UnknownScalar((_emptyarray(self) + _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __radd__(self, other):
-        return UnknownScalar((_emptyarray(self) + _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __sub__(self, other):
-        return UnknownScalar((_emptyarray(self) - _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __rsub__(self, other):
-        return UnknownScalar((_emptyarray(self) - _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __mul__(self, other):
-        return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __rmul__(self, other):
-        return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __truediv__(self, other):
-        return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
+        return UnknownScalar((_empty_scalar(self) / _empty_scalar(other)).dtype)
 
     def __floordiv__(self, other):
-        return UnknownScalar((_emptyarray(self) // _emptyarray(other)).dtype)
+        return UnknownScalar((_empty_scalar(self) // _empty_scalar(other)).dtype)
 
     def __lt__(self, other):
-        return False
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
 
     def __le__(self, other):
-        return False
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
 
     def __gt__(self, other):
-        return False
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
 
     def __ge__(self, other):
-        return False
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
+
+    def __eq__(self, other):
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
 
 
 class MaybeNone:
@@ -1007,7 +1050,7 @@ class TypeTracer(ak._nplikes.NumpyLike):
                         )
                     )
                 )
-            emptyarrays.append(_emptyarray(x))
+            emptyarrays.append(_empty_array(x))
 
         if inner_shape is None:
             raise ak._errors.wrap_error(
