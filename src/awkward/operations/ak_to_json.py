@@ -200,7 +200,7 @@ def _impl(
     )
 
     if file is not None:
-        if isinstance(file, str) or isinstance(file, pathlib.Path):
+        if isinstance(file, (str, pathlib.Path)):
             parsed_url = urlparse(file)
             if parsed_url.scheme == "" or parsed_url.netloc == "":
 

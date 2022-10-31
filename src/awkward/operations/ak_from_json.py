@@ -516,7 +516,7 @@ def _yes_schema(
     highlevel,
     behavior,
 ):
-    if isinstance(schema, bytes) or isinstance(schema, str):
+    if isinstance(schema, (bytes, str)):
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):

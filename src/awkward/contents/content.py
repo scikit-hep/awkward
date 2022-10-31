@@ -318,7 +318,7 @@ class Content:
     def _getitem_next_fields(self, head, tail, advanced: ak.index.Index | None):
         only_fields, not_fields = [], []
         for x in tail:
-            if isinstance(x, str) or isinstance(x, list):
+            if isinstance(x, (str, list)):
                 only_fields.append(x)
             else:
                 not_fields.append(x)

@@ -38,9 +38,9 @@ def prepare_advanced_indexing(items):
                     list,  # of strings
                     ak.contents.ListOffsetArray,
                     ak.contents.IndexedOptionArray,
+                    str,
                 ),
             )
-            or isinstance(item, str)
             or item is np.newaxis
             or item is Ellipsis
         ):
