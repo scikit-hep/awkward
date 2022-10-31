@@ -896,15 +896,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def true_divide(self, x, y):
-        # array1, array2
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            is_array = True
-        if isinstance(y, TypeTracerArray):
-            is_array = True
-        array_dtypes = []
-        scalar_dtypes = []
-
         raise ak._errors.wrap_error(NotImplementedError)
 
     def bitwise_or(self, *args, **kwargs):
