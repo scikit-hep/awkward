@@ -36,6 +36,10 @@ class NoKernel:
 
 
 class UnknownLengthType:
+    @property
+    def nplike(self):
+        return TypeTracer.instance()
+
     def __repr__(self):
         return "UnknownLength"
 
@@ -105,6 +109,10 @@ class UnknownScalar:
         self._dtype = np.dtype(dtype)
 
     @property
+    def nplike(self):
+        return TypeTracer.instance()
+
+    @property
     def dtype(self):
         return self._dtype
 
@@ -159,6 +167,10 @@ class MaybeNone:
         self._content = content
 
     @property
+    def nplike(self):
+        return TypeTracer.instance()
+
+    @property
     def content(self):
         return self._content
 
@@ -178,6 +190,10 @@ class MaybeNone:
 class OneOf:
     def __init__(self, contents):
         self._contents = contents
+
+    @property
+    def nplike(self):
+        return TypeTracer.instance()
 
     @property
     def contents(self):
