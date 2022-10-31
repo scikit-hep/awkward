@@ -158,16 +158,28 @@ class UnknownScalar:
         return UnknownScalar((_emptyarray(self) // _emptyarray(other)).dtype)
 
     def __lt__(self, other):
-        return False
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
 
     def __le__(self, other):
-        return False
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
 
     def __gt__(self, other):
-        return False
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
 
     def __ge__(self, other):
-        return False
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
 
 
 class MaybeNone:
