@@ -69,31 +69,23 @@ def is_sized_iterable(obj):
 
 
 def isint(x):
-    return isinstance(x, (int, numbers.Integral, np.integer)) and not isinstance(
-        x, (bool, np.bool_)
-    )
-
-
-def isbool(x):
-    return isinstance(x, (bool, np.bool_))
+    return isinstance(x, numbers.Integral) and not isinstance(x, bool)
 
 
 def isnum(x):
-    return isinstance(x, (numbers.Number, np.number)) and not isinstance(
-        x, (bool, np.bool_)
-    )
-
-
-def isdatetime(x):
-    return isinstance(x, (np.datetime64, np.timedelta64))
-
-
-def isscalar(x):
-    return isnum(x) or isbool(x) or isint(x)
+    return isinstance(x, numbers.Number) and not isinstance(x, bool)
 
 
 def isstr(x):
     return isinstance(x, str)
+
+
+def is_bool(x):
+    return isinstance(x, (bool, np.bool_))
+
+
+def is_datetime(x):
+    return isinstance(x, (np.datetime64, np.timedelta64))
 
 
 def tobytes(array):
