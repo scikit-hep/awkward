@@ -457,25 +457,25 @@ class TypeTracerArray:
             raise ak._errors.wrap_error(NotImplementedError(repr(where)))
 
     def __lt__(self, other):
-        if isinstance(other, numbers.Real):
+        if self.nplike.isscalar(other):
             return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
 
     def __le__(self, other):
-        if isinstance(other, numbers.Real):
+        if self.nplike.isscalar(other):
             return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
 
     def __gt__(self, other):
-        if isinstance(other, numbers.Real):
+        if self.nplike.isscalar(other):
             return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
 
     def __ge__(self, other):
-        if isinstance(other, numbers.Real):
+        if self.nplike.isscalar(other):
             return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
