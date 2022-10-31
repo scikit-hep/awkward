@@ -296,7 +296,7 @@ class NumpyArray(Content):
             out2 = NumpyArray(out, self._parameters, self._nplike)
             return out2
 
-        elif ak._util.isstr(head):
+        elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):

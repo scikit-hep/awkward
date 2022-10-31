@@ -8,7 +8,7 @@ class ListOffsetForm(Form):
     is_ListType = True
 
     def __init__(self, offsets, content, parameters=None, form_key=None):
-        if not ak._util.isstr(offsets):
+        if not isinstance(offsets, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'offsets' must be of type str, not {}".format(

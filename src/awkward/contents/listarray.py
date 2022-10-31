@@ -718,7 +718,7 @@ class ListArray(Content):
                     self._nplike,
                 )
 
-        elif ak._util.isstr(head):
+        elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):

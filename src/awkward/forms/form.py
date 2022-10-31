@@ -15,7 +15,7 @@ def from_dict(input: dict) -> Form:
     if input is None:
         return None
 
-    if ak._util.isstr(input):
+    if isinstance(input, str):
         return ak.forms.NumpyForm(primitive=input)
 
     assert isinstance(input, dict)
@@ -271,7 +271,7 @@ class Form:
                     )
                 )
             )
-        if form_key is not None and not ak._util.isstr(form_key):
+        if form_key is not None and not isinstance(form_key, str):
             raise _errors.wrap_error(
                 TypeError(
                     "{} 'form_key' must be of type string or None, not {}".format(
@@ -371,11 +371,11 @@ class Form:
         return output
 
     def select_columns(self, specifier, expand_braces=True):
-        if ak._util.isstr(specifier):
+        if isinstance(specifier, str):
             specifier = [specifier]
 
         for item in specifier:
-            if not ak._util.isstr(item):
+            if not isinstance(item, str):
                 raise _errors.wrap_error(
                     TypeError("a column-selection specifier must be a list of strings")
                 )

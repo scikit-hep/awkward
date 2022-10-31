@@ -72,10 +72,6 @@ def is_integer(x):
     return isinstance(x, numbers.Integral) and not isinstance(x, bool)
 
 
-def isstr(x):
-    return isinstance(x, str)
-
-
 def tobytes(array):
     if hasattr(array, "tobytes"):
         return array.tobytes()
@@ -145,12 +141,12 @@ def overlay_behavior(behavior: dict | None) -> collections.abc.Mapping:
 def arrayclass(layout, behavior):
     behavior = overlay_behavior(behavior)
     arr = layout.parameter("__array__")
-    if isstr(arr):
+    if isinstance(arr, str):
         cls = behavior.get(arr)
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
-    if isstr(deeprec):
+    if isinstance(deeprec, str):
         cls = behavior.get(("*", deeprec))
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
@@ -173,11 +169,11 @@ def custom_cast(obj, behavior):
 def custom_broadcast(layout, behavior):
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
-    if not isstr(custom):
+    if not isinstance(custom, str):
         custom = layout.parameter("__record__")
-    if not isstr(custom):
+    if not isinstance(custom, str):
         custom = layout.purelist_parameter("__record__")
-    if isstr(custom):
+    if isinstance(custom, str):
         for key, fcn in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -194,9 +190,9 @@ def custom_ufunc(ufunc, layout, behavior):
 
     behavior = overlay_behavior(behavior)
     custom = layout.parameter("__array__")
-    if not isstr(custom):
+    if not isinstance(custom, str):
         custom = layout.parameter("__record__")
-    if isstr(custom):
+    if isinstance(custom, str):
         for key, fcn in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -211,12 +207,12 @@ def custom_ufunc(ufunc, layout, behavior):
 def numba_array_typer(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     arr = layouttype.parameters.get("__array__")
-    if isstr(arr):
+    if isinstance(arr, str):
         typer = behavior.get(("__numba_typer__", arr))
         if callable(typer):
             return typer
     deeprec = layouttype.parameters.get("__record__")
-    if isstr(deeprec):
+    if isinstance(deeprec, str):
         typer = behavior.get(("__numba_typer__", "*", deeprec))
         if callable(typer):
             return typer
@@ -226,12 +222,12 @@ def numba_array_typer(layouttype, behavior):
 def numba_array_lower(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     arr = layouttype.parameters.get("__array__")
-    if isstr(arr):
+    if isinstance(arr, str):
         lower = behavior.get(("__numba_lower__", arr))
         if callable(lower):
             return lower
     deeprec = layouttype.parameters.get("__record__")
-    if isstr(deeprec):
+    if isinstance(deeprec, str):
         lower = behavior.get(("__numba_lower__", "*", deeprec))
         if callable(lower):
             return lower
@@ -241,7 +237,7 @@ def numba_array_lower(layouttype, behavior):
 def recordclass(layout, behavior):
     behavior = overlay_behavior(behavior)
     rec = layout.parameter("__record__")
-    if isstr(rec):
+    if isinstance(rec, str):
         cls = behavior.get(rec)
         if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
             return cls
@@ -251,7 +247,7 @@ def recordclass(layout, behavior):
 def reducer_recordclass(reducer, layout, behavior):
     behavior = overlay_behavior(behavior)
     rec = layout.parameter("__record__")
-    if isstr(rec):
+    if isinstance(rec, str):
         return behavior.get((reducer.highlevel_function(), rec))
 
 
@@ -263,8 +259,8 @@ def typestrs(behavior):
             isinstance(key, tuple)
             and len(key) == 2
             and key[0] == "__typestr__"
-            and isstr(key[1])
-            and isstr(typestr)
+            and isinstance(key[1], str)
+            and isinstance(typestr, str)
         ):
             out[key[1]] = typestr
     return out
@@ -288,7 +284,7 @@ def gettypestr(parameters, typestrs):
 def numba_record_typer(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
-    if isstr(rec):
+    if isinstance(rec, str):
         typer = behavior.get(("__numba_typer__", rec))
         if callable(typer):
             return typer
@@ -298,7 +294,7 @@ def numba_record_typer(layouttype, behavior):
 def numba_record_lower(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
-    if isstr(rec):
+    if isinstance(rec, str):
         lower = behavior.get(("__numba_lower__", rec))
         if callable(lower):
             return lower
@@ -327,7 +323,7 @@ def overload(behavior, signature):
 def numba_attrs(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
-    if isstr(rec):
+    if isinstance(rec, str):
         for key, typer in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -342,7 +338,7 @@ def numba_attrs(layouttype, behavior):
 def numba_methods(layouttype, behavior):
     behavior = overlay_behavior(behavior)
     rec = layouttype.parameters.get("__record__")
-    if isstr(rec):
+    if isinstance(rec, str):
         for key, typer in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -361,7 +357,7 @@ def numba_unaryops(unaryop, left, behavior):
 
     if isinstance(left, ak._connect.numba.layout.ContentType):
         left = left.parameters.get("__record__")
-        if not isstr(left):
+        if not isinstance(left, str):
             done = True
 
     if not done:
@@ -383,12 +379,12 @@ def numba_binops(binop, left, right, behavior):
 
     if isinstance(left, ak._connect.numba.layout.ContentType):
         left = left.parameters.get("__record__")
-        if not isstr(left):
+        if not isinstance(left, str):
             done = True
 
     if isinstance(right, ak._connect.numba.layout.ContentType):
         right = right.parameters.get("__record__")
-        if not isstr(right):
+        if not isinstance(right, str):
             done = True
 
     if not done:

@@ -119,7 +119,7 @@ class RecordForm(Form):
     def content(self, index_or_field):
         if ak._util.is_integer(index_or_field):
             index = index_or_field
-        elif ak._util.isstr(index_or_field):
+        elif isinstance(index_or_field, str):
             index = self.field_to_index(index_or_field)
         else:
             raise ak._errors.wrap_error(
