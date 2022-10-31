@@ -193,11 +193,10 @@ class ByteMaskedArray(Content):
         if valid_when == self._valid_when:
             return self
         else:
-            index_nplike = self._nplike.index_nplike
             return ByteMaskedArray(
                 ak.index.Index8(
-                    index_nplike.logical_not(
-                        index_nplike.asarray(self._mask).astype(np.bool_)
+                    self._nplike.index_nplike.logical_not(
+                        self._mask.data.astype(np.bool_)
                     ).astype(dtype=np.int8)
                 ),
                 self._content,
