@@ -85,13 +85,23 @@ class UnknownLengthType:
 UnknownLength = UnknownLengthType()
 
 
-def _emptyarray(x):
+def _empty_array(x):
     if isinstance(x, UnknownScalar):
         return numpy.empty(0, x._dtype)
     elif hasattr(x, "dtype"):
         return numpy.empty(0, x.dtype)
     else:
-        return numpy.empty(0, numpy.array(x).dtype)
+        raise ak._errors.wrap_error(TypeError)
+
+
+def _empty_scalar(x):
+    assert TypeTracerArray.instance().isscalar(x)
+    if isinstance(x, UnknownScalar):
+        return numpy.empty(1, x._dtype)[()]
+    elif isinstance(x, "dtype"):
+        return numpy.empty(1, x.dtype)[()]
+    else:
+        return numpy.empty(1, numpy.min_scalar_type(x))[()]
 
 
 class UnknownScalar:
@@ -152,10 +162,10 @@ class UnknownScalar:
             return NotImplemented
 
     def __truediv__(self, other):
-        return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
+        return UnknownScalar((_empty_scalar(self) / _empty_scalar(other)).dtype)
 
     def __floordiv__(self, other):
-        return UnknownScalar((_emptyarray(self) // _emptyarray(other)).dtype)
+        return UnknownScalar((_empty_scalar(self) // _empty_scalar(other)).dtype)
 
     def __lt__(self, other):
         if isinstance(other, UnknownScalar):
@@ -820,7 +830,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
                         )
                     )
                 )
-            emptyarrays.append(_emptyarray(x))
+            emptyarrays.append(_empty_array(x))
 
         if inner_shape is None:
             raise ak._errors.wrap_error(
@@ -1046,7 +1056,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
             if self.isscalar(obj):
                 dtypes.append(self.min_scalar_type(obj))
             else:
-                arrays.append(_emptyarray(obj))
+                arrays.append(_empty_array(obj))
         return numpy.result_type(*dtypes, *arrays)
 
     @classmethod
