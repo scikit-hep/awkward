@@ -41,8 +41,23 @@ def test_full_like(dtype, like_dtype, value):
     assert full.to_typetracer().dtype == like_dtype or array.dtype
 
 
-def test_full_like_cast():
-    with pytest.raises(ValueError):
-        ak._typetracer.TypeTracerArray.from_array(
-            [1, ak._typetracer.UnknownScalar(np.uint8)]
-        )
+def test_typetracer_array():
+    array = ak._typetracer.TypeTracer.instance().array(
+        [1, ak._typetracer.UnknownScalar(np.uint8)]
+    )
+    assert array.dtype == np.array([1]).dtype
+
+    array = ak._typetracer.TypeTracer.instance().array(
+        [ak._typetracer.UnknownScalar(np.uint8)]
+    )
+    assert array.dtype == np.dtype(np.uint8)
+
+    array = ak._typetracer.TypeTracer.instance().array(
+        [ak._typetracer.UnknownScalar(np.uint8), np.float32(1)]
+    )
+    assert array.dtype == np.dtype(np.float32)
+
+    array = ak._typetracer.TypeTracer.instance().array(
+        [ak._typetracer.UnknownScalar(np.uint8), np.int64(1)]
+    )
+    assert array.dtype == np.dtype(np.int64)
