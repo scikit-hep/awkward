@@ -74,10 +74,17 @@ jobs:
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
 
+      # TODO: remove this once mamba-org/mamba#1726 is fixed
+      #       and replace with `-r requirements.txt` in a
+      #       non-template `environment.yml`
     - name: Template environment.yml
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
       working-directory: docs-sphinx
 
+      # Technically this give us an environment that is incompatible with
+      # the wheel built in the awkward-x86-64 job if the environments
+      # solve with different external library versions. By default,
+      # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
       uses: mamba-org/provision-with-micromamba@main
       with:
@@ -86,6 +93,7 @@ jobs:
         environment-file: docs-sphinx/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
+           doxygen
 
     - name: Build wheel
       run: pipx run build -w
@@ -106,10 +114,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+      # TODO: remove this once mamba-org/mamba#1726 is fixed
+      #       and replace with `-r requirements.txt` in a
+      #       non-template `environment.yml`
     - name: Template environment.yml
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
       working-directory: docs-sphinx
 
+      # Technically this give us an environment that is incompatible with
+      # the wheel built in the awkward-x86-64 job if the environments
+      # solve with different external library versions. By default,
+      # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
       uses: mamba-org/provision-with-micromamba@main
       with:
@@ -118,6 +133,7 @@ jobs:
         environment-file: docs-sphinx/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
+           doxygen
 
     - name: Download WASM wheel
       uses: actions/download-artifact@v3
@@ -130,11 +146,6 @@ jobs:
       with:
         name: awkward-x86-64-wheel
         path: dist
-
-    - name: Install requirements
-      run: |
-        ls -R docs-sphinx/lite
-        sudo apt-get install -y doxygen
 
     - name: Install Awkward
       run: python3 -m pip install dist/awkward*.whl
