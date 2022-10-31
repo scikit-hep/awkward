@@ -601,6 +601,12 @@ class TypeTracer(ak.nplikes.NumpyLike):
             and ak._util.is_integer(step)
         ):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
+        else:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "internal error: calling arange without integer value for start, stop, or step"
+                )
+            )
 
         return TypeTracerArray(kwargs["dtype"], (length,))
 
