@@ -449,13 +449,13 @@ class TypeTracerArray:
             return NotImplemented
 
     def __eq__(self, other):
-        if ak._util.isscalar(other):
+        if self.nplike.isscalar(other):
             return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
 
     def __ne__(self, other):
-        if ak._util.isscalar(other):
+        if self.nplike.isscalar(other):
             return TypeTracerArray(np.bool_, self._shape)
         else:
             return NotImplemented
