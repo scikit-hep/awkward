@@ -1071,7 +1071,20 @@ class NumpyArray(Content):
         keepdims,
         behavior,
     ):
-        if len(self._data.shape) != 1 or not self.is_contiguous:
+        if not self.is_contiguous:
+            return self.contiguous()._reduce_next(
+                reducer,
+                negaxis,
+                starts,
+                shifts,
+                parents,
+                outlength,
+                mask,
+                keepdims,
+                behavior,
+            )
+
+        elif self._data.ndim > 1:
             return self.toRegularArray()._reduce_next(
                 reducer,
                 negaxis,
@@ -1083,6 +1096,10 @@ class NumpyArray(Content):
                 keepdims,
                 behavior,
             )
+
+        # Yes, we've just tested these, but we need to be explicit that they are invariants
+        assert self.is_contiguous
+        assert self._data.ndim == 1
 
         if isinstance(self.nplike, ak.nplikes.Jax):
             from awkward._connect.jax.reducers import get_jax_reducer  # noqa: F401
