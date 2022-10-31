@@ -1220,7 +1220,7 @@ class IndexedOptionArray(Content):
             nextoutindex, out, parameters=self._parameters
         ).simplify_optiontype()
 
-        if self.nplike.known_data:
+        if self.nplike.index_nplike.known_data:
             inject_nones = (
                 True if (numnull[0] > 0 and not branch and negaxis != depth) else False
             )
