@@ -69,15 +69,7 @@ def is_sized_iterable(obj):
 
 
 def isint(x):
-    return isinstance(x, (int, numbers.Integral, np.integer)) and not isinstance(
-        x, (bool, np.bool_)
-    )
-
-
-def isnum(x):
-    return isinstance(x, (int, float, numbers.Real, np.number)) and not isinstance(
-        x, (bool, np.bool_)
-    )
+    return isinstance(x, numbers.Integral) and not isinstance(x, bool)
 
 
 def isstr(x):
