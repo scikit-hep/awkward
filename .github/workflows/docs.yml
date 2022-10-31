@@ -74,6 +74,9 @@ jobs:
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
 
+      # TODO: remove this once mamba-org/mamba#1726 is fixed
+      #       and replace with `-r requirements.txt` in a
+      #       non-template `environment.yml`
     - name: Template environment.yml
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
       working-directory: docs-sphinx
@@ -111,6 +114,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+      # TODO: remove this once mamba-org/mamba#1726 is fixed
+      #       and replace with `-r requirements.txt` in a
+      #       non-template `environment.yml`
     - name: Template environment.yml
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
       working-directory: docs-sphinx
