@@ -92,7 +92,7 @@ def _emptyarray(x):
 
 class UnknownScalar:
     def __init__(self, dtype):
-        self._dtype = dtype
+        self._dtype = np.dtype(dtype)
 
     @property
     def dtype(self):
@@ -810,29 +810,45 @@ class TypeTracer(ak.nplikes.NumpyLike):
         # array1, array2[, out=output]
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def logical_and(self, x, y):
-        # array1, array2
-        is_array = False
-        if isinstance(x, TypeTracerArray):
-            is_array = True
-        if isinstance(y, TypeTracerArray):
-            is_array = True
-        if is_array:
-            return TypeTracerArray(np.dtype(np.bool_))
-        else:
-            return UnknownScalar(np.dtype(np.bool_))
+    def logical_and(self, x, y, *, dtype=None):
+        if dtype is None:
+            dtype = np.bool_
 
-    def logical_or(self, x, y):
-        # array1, array2[, out=]
         is_array = False
         if isinstance(x, TypeTracerArray):
             is_array = True
         if isinstance(y, TypeTracerArray):
             is_array = True
         if is_array:
-            return TypeTracerArray(np.dtype(np.bool_))
+            return TypeTracerArray(dtype)
         else:
-            return UnknownScalar(np.dtype(np.bool_))
+            return UnknownScalar(dtype)
+
+    def logical_or(self, x, y, *, dtype=None):
+        if dtype is None:
+            dtype = np.bool_
+
+        is_array = False
+        if isinstance(x, TypeTracerArray):
+            is_array = True
+        if isinstance(y, TypeTracerArray):
+            is_array = True
+        if is_array:
+            return TypeTracerArray(dtype)
+        else:
+            return UnknownScalar(dtype)
+
+    def logical_not(self, x, *, dtype=None):
+        if dtype is None:
+            dtype = np.bool_
+
+        is_array = False
+        if isinstance(x, TypeTracerArray):
+            is_array = True
+        if is_array:
+            return TypeTracerArray(dtype)
+        else:
+            return UnknownScalar(dtype)
 
     def equal(self, *args, **kwargs):
         # array1, array2
