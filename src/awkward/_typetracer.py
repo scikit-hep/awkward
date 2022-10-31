@@ -26,7 +26,6 @@ class NoKernel:
 
 
 class UnknownLengthType:
-
     @property
     def nplike(self):
         return TypeTracer.instance()
@@ -237,7 +236,7 @@ def _length_after_slice(slice, original_length):
 class TypeTracerArray:
     def __init__(self, dtype, shape=None):
         self._dtype = np.dtype(dtype)
-        self.shape = shape
+        self._shape = self._coerce_shape(shape)
 
     def __repr__(self):
         dtype = repr(self._dtype)
@@ -256,13 +255,7 @@ class TypeTracerArray:
 
     @shape.setter
     def shape(self, value):
-        if ak._util.isint(value):
-            value = (value,)
-        elif value is None or isinstance(value, (UnknownLengthType, UnknownScalar)):
-            value = (UnknownLength,)
-        elif not isinstance(value, tuple):
-            value = tuple(value)
-        self._shape = value
+        self._shape = self._coerce_shape(value)
 
     @property
     def strides(self):
@@ -278,6 +271,15 @@ class TypeTracerArray:
     @property
     def ndim(self):
         return len(self._shape)
+
+    def _coerce_shape(self, value):
+        if ak._util.isint(value):
+            value = (value,)
+        elif value is None or isinstance(value, (UnknownLengthType, UnknownScalar)):
+            value = (UnknownLength,)
+        elif not isinstance(value, tuple):
+            value = tuple(value)
+        return value
 
     def astype(self, dtype):
         return self.__class__(np.dtype(dtype), self._shape)
