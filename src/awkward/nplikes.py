@@ -364,13 +364,14 @@ class NumpyLike(Singleton):
     def datetime_as_string(self, *args, **kwargs):
         return self._module.datetime_as_string(*args, **kwargs)
 
-    def promote_types(self, type1, type2):
-        return self._module.promote_types(type1, type2)
+    def promote_types(self, *args, **kwargs) -> NumpyMetadata.dtype:
+        return self._module.promote_types(*args, **kwargs)
 
-    def common_type(self, types, default=None):
-        if len(types) == 0:
-            return default
-        return reduce(self.promote_types, types)
+    def min_scalar_type(self, *args, **kwargs) -> NumpyMetadata.dtype:
+        return self._module.min_scalar_type(*args, **kwargs)
+
+    def result_type(self, *args, **kwargs) -> NumpyMetadata.dtype:
+        return self._module.min_scalar_type(*args, **kwargs)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:

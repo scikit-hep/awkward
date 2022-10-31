@@ -993,6 +993,30 @@ class TypeTracer(ak.nplikes.NumpyLike):
     def promote_types(self, type1, type2):
         return numpy.promote_types(type1, type2)
 
+    def min_scalar_type(self, a) -> np.dtype:
+        if isinstance(a, UnknownScalar):
+            # NumPy wants to compute the smallest containing dtype for a scalar
+            # value. This is not possible in the case that we don't have a value here
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot determine the minimum scalar type of an unknown value"
+                )
+            )
+        elif isinstance(a, TypeTracerArray):
+            return a.dtype
+        else:
+            return numpy.min_scalar_type(a)
+
+    def result_type(self, *arrays_and_dtypes) -> np.dtype:
+        dtypes = []
+        arrays = []
+        for obj in arrays_and_dtypes:
+            if self.isscalar(obj):
+                dtypes.append(self.min_scalar_type(obj))
+            else:
+                arrays.append(_emptyarray(obj))
+        return numpy.result_type(*dtypes, *arrays)
+
     @classmethod
     def is_own_array(cls, obj) -> bool:
         return isinstance(obj, TypeTracerArray)
