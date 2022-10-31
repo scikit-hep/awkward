@@ -1240,29 +1240,36 @@ class ListArray(Content):
             if posaxis is not None and posaxis + 1 == depth:
                 return self._pad_none_axis0(target, clip)
             elif posaxis is not None and posaxis + 1 == depth + 1:
-                min_ = ak.index.Index64.empty(1, self._backend.index_nplike)
-                assert (
-                    min_.nplike is self._backend.index_nplike
-                    and self._starts.nplike is self._backend.index_nplike
-                    and self._stops.nplike is self._backend.index_nplike
-                )
-                self._handle_error(
-                    self._backend[
-                        "awkward_ListArray_min_range",
-                        min_.dtype.type,
-                        self._starts.dtype.type,
-                        self._stops.dtype.type,
-                    ](
-                        min_.data,
-                        self._starts.data,
-                        self._stops.data,
-                        self._starts.length,
+                if not self._backend.nplike.known_data:
+                    nextcontent = ak.contents.IndexedOptionArray.simplified(
+                        ak.index.Index64(
+                            self._backend.index_nplike.empty(len(self._content))
+                        ),
+                        self._content,
+                        parameters=None,
+                    ).simplify_optiontype()
+                    return ak.contents.ListArray(
+                        self._starts,
+                        self._stops,
+                        nextcontent,
+                        parameters=self._parameters
                     )
-                )
-                # TODO: Replace the kernel call with below code once typtracer supports '-'
-                # min_ = self._backend.nplike.min(self._stops.data - self._starts.data)
-                if target < min_[0]:
-                    return self
+
+                min_ = self._backend.index_nplike.min(self._stops.data - self._starts.data)
+                if target <= min_:
+                    nextcontent = ak.contents.IndexedOptionArray.simplified(
+                        ak.index.Index64(
+                            self._backend.index_nplike.zeros(len(self._content))
+                        ),
+                        self._content,
+                        parameters=None
+                    ).simplify_optiontype()
+                    return ak.contents.ListArray(
+                        self._starts,
+                        self._stops,
+                        nextcontent,
+                        parameters=self._parameters
+                    )
                 else:
                     tolength = ak.index.Index64.empty(1, self._backend.index_nplike)
                     assert (
