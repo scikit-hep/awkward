@@ -68,7 +68,7 @@ def is_sized_iterable(obj):
     return isinstance(obj, Iterable) and isinstance(obj, Sized)
 
 
-def isint(x):
+def is_integer(x):
     return isinstance(x, numbers.Integral) and not isinstance(x, bool)
 
 

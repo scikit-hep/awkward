@@ -126,7 +126,7 @@ def prepare_advanced_indexing(items):
 
 
 def normalise_item(item, nplike):
-    if ak._util.isint(item):
+    if ak._util.is_integer(item):
         return int(item)
 
     elif isinstance(item, slice):

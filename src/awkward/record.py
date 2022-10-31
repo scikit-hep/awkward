@@ -15,7 +15,7 @@ class Record:
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )
-        if not ak._util.isint(at):
+        if not ak._util.is_integer(at):
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
@@ -122,7 +122,7 @@ class Record:
             return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.isint(where):
+        if ak._util.is_integer(where):
             raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an integer")
             )

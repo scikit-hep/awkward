@@ -76,7 +76,7 @@ class RecordArray(Content):
             else:
                 length = min(lengths)
         if not isinstance(length, ak._typetracer.UnknownLengthType) and not (
-            ak._util.isint(length) and length >= 0
+            ak._util.is_integer(length) and length >= 0
         ):
             raise ak._errors.wrap_error(
                 TypeError(

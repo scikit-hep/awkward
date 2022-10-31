@@ -718,7 +718,7 @@ def build_assembly(schema, container, instructions):
             )
 
         if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
-            assert ak._util.isint(schema.get("minItems"))
+            assert ak._util.is_integer(schema.get("minItems"))
 
             if is_optional:
                 mask = f"node{len(container)}"

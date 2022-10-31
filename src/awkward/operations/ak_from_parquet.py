@@ -101,7 +101,7 @@ def metadata(
     import fsspec.parquet
 
     if row_groups is not None:
-        if not all(ak._util.isint(x) and x >= 0 for x in row_groups):
+        if not all(ak._util.is_integer(x) and x >= 0 for x in row_groups):
             raise ak._errors.wrap_error(
                 ValueError("row_groups must be a set of non-negative integers")
             )

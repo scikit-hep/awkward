@@ -517,7 +517,7 @@ class IndexedOptionArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             out = self.length
-            if ak._util.isint(out):
+            if ak._util.is_integer(out):
                 return np.int64(out)
             else:
                 return out

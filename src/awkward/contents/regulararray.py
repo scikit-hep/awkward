@@ -56,7 +56,7 @@ class RegularArray(Content):
                 )
             )
         if not isinstance(size, ak._typetracer.UnknownLengthType):
-            if not (ak._util.isint(size) and size >= 0):
+            if not (ak._util.is_integer(size) and size >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'size' must be a non-negative integer, not {}".format(
@@ -67,7 +67,7 @@ class RegularArray(Content):
             else:
                 size = int(size)
         if not isinstance(zeros_length, ak._typetracer.UnknownLengthType):
-            if not (ak._util.isint(zeros_length) and zeros_length >= 0):
+            if not (ak._util.is_integer(zeros_length) and zeros_length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'zeros_length' must be a non-negative integer, not {}".format(
@@ -614,7 +614,7 @@ class RegularArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             out = self._length
-            if ak._util.isint(out):
+            if ak._util.is_integer(out):
                 return np.int64(out)
             else:
                 return out

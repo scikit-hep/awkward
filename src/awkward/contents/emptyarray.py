@@ -163,7 +163,7 @@ class EmptyArray(Content):
 
         if posaxis == depth:
             out = self.length
-            if ak._util.isint(out):
+            if ak._util.is_integer(out):
                 return np.int64(out)
             else:
                 return out

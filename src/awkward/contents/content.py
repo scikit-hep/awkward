@@ -527,7 +527,7 @@ class Content:
         return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.isint(where):
+        if ak._util.is_integer(where):
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:

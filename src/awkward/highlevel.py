@@ -1392,7 +1392,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
         else:
             form, length, container, behavior = state
-            if ak._util.isint(length):
+            if ak._util.is_integer(length):
                 layout = ak.operations.from_buffers(
                     form,
                     length,
@@ -2002,7 +2002,7 @@ class Record(NDArrayOperatorsMixin):
             )
         else:
             form, length, container, behavior, at = state
-            if ak._util.isint(length):
+            if ak._util.is_integer(length):
                 layout = ak.operations.from_buffers(
                     form,
                     length,
