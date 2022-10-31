@@ -1180,9 +1180,12 @@ class IndexedOptionArray(Content):
             nextoutindex, out, parameters=self._parameters
         )
 
-        inject_nones = (
-            True if (numnull[0] > 0 and not branch and negaxis != depth) else False
-        )
+        if self.nplike.known_data:
+            inject_nones = (
+                True if (numnull[0] > 0 and not branch and negaxis != depth) else False
+            )
+        else:
+            inject_nones = False
 
         # If we want the None's at this depth to be injected
         # into the dense ([x y z None None]) rearranger result.
