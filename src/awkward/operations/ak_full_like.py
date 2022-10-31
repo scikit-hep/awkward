@@ -164,11 +164,11 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         elif isinstance(layout, ak.contents.NumpyArray):
             original = nplike.asarray(layout.data)
 
-            if fill_value == 0 or fill_value is _ZEROS:
+            if fill_value is _ZEROS or (nplike.known_data and fill_value == 0):
                 return ak.contents.NumpyArray(
                     nplike.zeros_like(original), parameters=layout.parameters
                 )
-            elif fill_value == 1:
+            elif nplike.known_data and fill_value == 1:
                 return ak.contents.NumpyArray(
                     nplike.ones_like(original), parameters=layout.parameters
                 )
