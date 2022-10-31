@@ -128,7 +128,10 @@ class UnknownScalar:
             return NotImplemented
 
     def __sub__(self, other):
-        return UnknownScalar((_emptyarray(self) - _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __rsub__(self, other):
         if isinstance(other, UnknownScalar):
