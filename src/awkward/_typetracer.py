@@ -544,8 +544,8 @@ class TypeTracer(ak.nplikes.NumpyLike):
         # array[, dtype=]
         return TypeTracerArray.from_array(array, dtype=dtype)
 
-    def isscalar(self, *args, **kwargs):
-        raise ak._errors.wrap_error(NotImplementedError)
+    def isscalar(self, element):
+        return numpy.isscalar(element) or isinstance(element, UnknownScalar)
 
     def frombuffer(self, *args, **kwargs):
         # array[, dtype=]
