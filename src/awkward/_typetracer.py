@@ -122,9 +122,6 @@ class UnknownScalar:
     def __str__(self):
         return f"unknown-{str(self._dtype)}"
 
-    def __eq__(self, other):
-        return isinstance(other, UnknownScalar) and self._dtype == other._dtype
-
     def __add__(self, other):
         if isinstance(other, UnknownScalar):
             return UnknownScalar(self.nplike.result_type(self, other))
@@ -186,6 +183,12 @@ class UnknownScalar:
             return NotImplemented
 
     def __ge__(self, other):
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(np.bool_)
+        else:
+            return NotImplemented
+
+    def __eq__(self, other):
         if isinstance(other, UnknownScalar):
             return UnknownScalar(np.bool_)
         else:
