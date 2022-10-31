@@ -367,6 +367,17 @@ class NumpyLike(Singleton):
     def datetime_as_string(self, *args, **kwargs):
         return self._module.datetime_as_string(*args, **kwargs)
 
+    ############################ type conversions
+
+    def promote_types(self, *args, **kwargs) -> NumpyMetadata.dtype:
+        return self._module.promote_types(*args, **kwargs)
+
+    def min_scalar_type(self, *args, **kwargs) -> NumpyMetadata.dtype:
+        return self._module.min_scalar_type(*args, **kwargs)
+
+    def result_type(self, *args, **kwargs) -> NumpyMetadata.dtype:
+        return self._module.min_scalar_type(*args, **kwargs)
+
     def can_cast(self, *args, **kwargs):
         return self._module.can_cast(*args, **kwargs)
 

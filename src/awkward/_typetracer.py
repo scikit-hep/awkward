@@ -15,7 +15,7 @@ np = _nplikes.NumpyMetadata.instance()
 
 class UnknownLengthType:
     @property
-    def nplike(self):
+    def nplike(self) -> TypeTracer:
         return TypeTracer.instance()
 
     def __repr__(self):
@@ -97,7 +97,7 @@ class UnknownScalar:
         self._dtype = np.dtype(dtype)
 
     @property
-    def nplike(self):
+    def nplike(self) -> TypeTracer:
         return TypeTracer.instance()
 
     @property
@@ -111,76 +111,76 @@ class UnknownScalar:
         return f"unknown-{str(self._dtype)}"
 
     def __add__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(self.nplike.result_type(self, other))
+        if self.nplike.isscalar(other):
+            return UnknownScalar(
+                self.nplike.promote_types(self.dtype, self.nplike.dtype_of(other))
+            )
         else:
             return NotImplemented
 
-    def __radd__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(self.nplike.result_type(self, other))
-        else:
-            return NotImplemented
-
-    def __sub__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(self.nplike.result_type(self, other))
-        else:
-            return NotImplemented
-
-    def __rsub__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(self.nplike.result_type(self, other))
-        else:
-            return NotImplemented
-
-    def __mul__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(self.nplike.result_type(self, other))
-        else:
-            return NotImplemented
-
-    def __rmul__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(self.nplike.result_type(self, other))
-        else:
-            return NotImplemented
+    __sub__ = __add__
+    __rsub__ = __add__
+    __mul__ = __add__
+    __rmul__ = __add__
 
     def __truediv__(self, other):
-        return UnknownScalar((_empty_scalar(self) / _empty_scalar(other)).dtype)
+        if issubclass(self._dtype.type, np.number):
+            # TODO: implement type conversion table to predict this
+            return UnknownScalar((_empty_scalar(self) / _empty_scalar(other)).dtype)
+        else:
+            raise ak._errors.wrap_error(
+                TypeError("division operation cannot be performed on non-numeric types")
+            )
 
     def __floordiv__(self, other):
-        return UnknownScalar((_empty_scalar(self) // _empty_scalar(other)).dtype)
-
-    def __lt__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(np.bool_)
+        if issubclass(self._dtype.type, np.number):
+            return UnknownScalar((_empty_scalar(self) // _empty_scalar(other)).dtype)
         else:
-            return NotImplemented
+            raise ak._errors.wrap_error(
+                TypeError("division operation cannot be performed on non-numeric types")
+            )
 
     def __le__(self, other):
-        if isinstance(other, UnknownScalar):
+        if self.nplike.isscalar(other):
             return UnknownScalar(np.bool_)
         else:
             return NotImplemented
 
-    def __gt__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(np.bool_)
-        else:
-            return NotImplemented
+    __lt__ = __le__
+    __gt__ = __le__
+    __ge__ = __le__
+    __eq__ = __le__
 
-    def __ge__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(np.bool_)
-        else:
-            return NotImplemented
+    def __bool__(self) -> bool:
+        raise ak._errors.wrap_error(
+            TypeError("UnknownScalar cannot be realised as a concrete value")
+        )
 
-    def __eq__(self, other):
-        if isinstance(other, UnknownScalar):
-            return UnknownScalar(np.bool_)
+    __int__ = __bool__
+    __float__ = __bool__
+    __complex__ = __bool__
+
+    def __neg__(self):
+        if issubclass(self._dtype.type, np.number):
+            return UnknownScalar(self._dtype)
         else:
-            return NotImplemented
+            raise ak._errors.wrap_error(
+                TypeError("unary operator cannot be performed on non-numeric types")
+            )
+
+    __pos__ = __neg__
+
+    def __abs__(self):
+        if issubclass(self._dtype.type, (np.number, np.bool_)):
+            return UnknownScalar(self._dtype)
+        else:
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "unary operator cannot be performed on non-numeric / non-boolean types"
+                )
+            )
+
+    __invert__ = __abs__
 
 
 class MaybeNone:
@@ -1288,9 +1288,45 @@ class TypeTracer(ak._nplikes.NumpyLike):
             try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
+    def promote_types(self, type1, type2):
+        return numpy.promote_types(type1, type2)
+
+    def min_scalar_type(self, a) -> np.dtype:
+        if isinstance(a, UnknownScalar):
+            # NumPy wants to compute the smallest containing dtype for a scalar
+            # value. This is not possible in the case that we don't have a value here
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "cannot determine the minimum scalar type of an unknown value"
+                )
+            )
+        elif isinstance(a, TypeTracerArray):
+            return a.dtype
+        else:
+            return numpy.min_scalar_type(a)
+
+    def result_type(self, *arrays_and_dtypes) -> np.dtype:
+        dtypes = []
+        arrays = []
+        for obj in arrays_and_dtypes:
+            if self.isscalar(obj):
+                dtypes.append(self.min_scalar_type(obj))
+            else:
+                arrays.append(_empty_array(obj))
+        return numpy.result_type(*dtypes, *arrays)
+
     @classmethod
     def is_own_array(cls, obj) -> bool:
         return isinstance(obj, TypeTracerArray)
+
+    # TypeTracer-only methods
+    def dtype_of(self, value):
+        if hasattr(value, "dtype"):
+            return value.dtype
+        elif self.isscalar(value):
+            return self.min_scalar_type(value)
+        else:
+            raise ak._errors.wrap_error(TypeError(value))
 
     def is_c_contiguous(self, array) -> bool:
         return True
