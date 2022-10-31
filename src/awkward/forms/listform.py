@@ -15,7 +15,7 @@ class ListForm(Form):
         parameters=None,
         form_key=None,
     ):
-        if not ak._util.isstr(starts):
+        if not isinstance(starts, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'starts' must be of type str, not {}".format(
@@ -23,7 +23,7 @@ class ListForm(Form):
                     )
                 )
             )
-        if not ak._util.isstr(stops):
+        if not isinstance(stops, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'starts' must be of type str, not {}".format(

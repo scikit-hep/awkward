@@ -101,7 +101,7 @@ class Content:
             def getkey(layout):
                 return None
 
-        elif ak._util.isstr(form_key):
+        elif isinstance(form_key, str):
 
             def getkey(layout):
                 out = form_key.format(id=hold_id[0])
@@ -170,7 +170,7 @@ class Content:
                 TypeError("cannot call 'to_buffers' on an array without concrete data")
             )
 
-        if ak._util.isstr(buffer_key):
+        if isinstance(buffer_key, str):
 
             def getkey(layout, form, attribute):
                 return buffer_key.format(form_key=form.form_key, attribute=attribute)
@@ -318,7 +318,7 @@ class Content:
     def _getitem_next_fields(self, head, tail, advanced: ak.index.Index | None):
         only_fields, not_fields = [], []
         for x in tail:
-            if ak._util.isstr(x) or isinstance(x, list):
+            if isinstance(x, (str, list)):
                 only_fields.append(x)
             else:
                 not_fields.append(x)
@@ -527,7 +527,7 @@ class Content:
         return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.isint(where):
+        if ak._util.is_integer(where):
             return self._getitem_at(where)
 
         elif isinstance(where, slice) and where.step is None:
@@ -536,7 +536,7 @@ class Content:
         elif isinstance(where, slice):
             return self._getitem((where,))
 
-        elif ak._util.isstr(where):
+        elif isinstance(where, str):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
@@ -626,7 +626,7 @@ class Content:
             return self._carry(ak.index.Index64.empty(0, self._nplike), allow_lazy=True)
 
         elif ak._util.is_sized_iterable(where) and all(
-            ak._util.isstr(x) for x in where
+            isinstance(x, str) for x in where
         ):
             return self._getitem_fields(where)
 
@@ -1627,8 +1627,8 @@ class Content:
             isinstance(complex_record_fields, Sized)
             and isinstance(complex_record_fields, Iterable)
             and len(complex_record_fields) == 2
-            and ak._util.isstr(complex_record_fields[0])
-            and ak._util.isstr(complex_record_fields[1])
+            and isinstance(complex_record_fields[0], str)
+            and isinstance(complex_record_fields[1], str)
         ):
             complex_real_string, complex_imag_string = complex_record_fields
         else:

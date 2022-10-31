@@ -38,9 +38,9 @@ def prepare_advanced_indexing(items):
                     list,  # of strings
                     ak.contents.ListOffsetArray,
                     ak.contents.IndexedOptionArray,
+                    str,
                 ),
             )
-            or ak._util.isstr(item)
             or item is np.newaxis
             or item is Ellipsis
         ):
@@ -126,13 +126,13 @@ def prepare_advanced_indexing(items):
 
 
 def normalise_item(item, nplike):
-    if ak._util.isint(item):
+    if ak._util.is_integer(item):
         return int(item)
 
     elif isinstance(item, slice):
         return item
 
-    elif ak._util.isstr(item):
+    elif isinstance(item, str):
         return item
 
     elif item is np.newaxis:
@@ -160,7 +160,7 @@ def normalise_item(item, nplike):
     elif ak._util.is_sized_iterable(item) and len(item) == 0:
         return nplike.empty(0, dtype=np.int64)
 
-    elif ak._util.is_sized_iterable(item) and all(ak._util.isstr(x) for x in item):
+    elif ak._util.is_sized_iterable(item) and all(isinstance(x, str) for x in item):
         return list(item)
 
     elif ak._util.is_sized_iterable(item):

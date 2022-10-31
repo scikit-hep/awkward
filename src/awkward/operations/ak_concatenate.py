@@ -141,9 +141,9 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 length = ak._typetracer.UnknownLength
                 for x in inputs:
                     if isinstance(x, ak.contents.Content):
-                        if not ak._util.isint(length):
+                        if not ak._util.is_integer(length):
                             length = x.length
-                        elif length != x.length and ak._util.isint(x.length):
+                        elif length != x.length and ak._util.is_integer(x.length):
                             raise ak._errors.wrap_error(
                                 ValueError(
                                     "all arrays must have the same length for "

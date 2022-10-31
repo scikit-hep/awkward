@@ -218,7 +218,7 @@ class UnmaskedArray(Content):
                 self._nplike,
             ).simplify_optiontype()
 
-        elif ak._util.isstr(head):
+        elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
@@ -267,7 +267,7 @@ class UnmaskedArray(Content):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
             out = self.length
-            if ak._util.isint(out):
+            if ak._util.is_integer(out):
                 return np.int64(out)
             else:
                 return out

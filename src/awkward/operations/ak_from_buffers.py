@@ -74,7 +74,7 @@ def from_buffers(
 
 
 def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
-    if ak._util.isstr(form):
+    if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):
             form = ak.forms.NumpyForm(form)
         else:
@@ -82,7 +82,7 @@ def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
     elif isinstance(form, dict):
         form = ak.forms.from_dict(form)
 
-    if not (ak._util.isint(length) and length >= 0):
+    if not (ak._util.is_integer(length) and length >= 0):
         raise ak._errors.wrap_error(
             TypeError("'length' argument must be a non-negative integer")
         )
@@ -94,7 +94,7 @@ def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
             )
         )
 
-    if ak._util.isstr(buffer_key):
+    if isinstance(buffer_key, str):
 
         def getkey(form, attribute):
             return buffer_key.format(form_key=form.form_key, attribute=attribute)

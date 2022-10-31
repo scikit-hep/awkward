@@ -17,7 +17,7 @@ class RegularForm(Form):
                     )
                 )
             )
-        if not ak._util.isint(size):
+        if not ak._util.is_integer(size):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'size' must be of type int, not {}".format(
