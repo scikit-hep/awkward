@@ -254,7 +254,7 @@ class TypeTracerArray:
 
     @shape.setter
     def shape(self, value):
-        if ak._util.isint(value):
+        if ak._util.is_integer(value):
             value = (value,)
         elif value is None or isinstance(value, (UnknownLengthType, UnknownScalar)):
             value = (UnknownLength,)
@@ -347,7 +347,7 @@ class TypeTracerArray:
                 missing = max(0, len(self._shape) - (len(before) + len(after)))
                 where = before + (slice(None, None, None),) * missing + after
 
-        if ak._util.isint(where):
+        if ak._util.is_integer(where):
             if len(self._shape) == 1:
                 if where == 0:
                     return UnknownScalar(self._dtype)
@@ -391,7 +391,7 @@ class TypeTracerArray:
             shapes = []
             for j in range(num_basic, len(where)):
                 wh = where[j]
-                if ak._util.isint(wh):
+                if ak._util.is_integer(wh):
                     shapes.append(numpy.array(0))
                 elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
                     sh = [
@@ -416,7 +416,7 @@ class TypeTracerArray:
         elif (
             isinstance(where, tuple)
             and len(where) > 0
-            and (ak._util.isint(where[0]) or isinstance(where[0], slice))
+            and (ak._util.is_integer(where[0]) or isinstance(where[0], slice))
         ):
             head, tail = where[0], where[1:]
             next = self.__getitem__(head)
@@ -466,8 +466,8 @@ class TypeTracerArray:
             args = args[0]
 
         assert len(args) != 0
-        assert ak._util.isint(args[0]) or isinstance(args[0], UnknownLengthType)
-        assert all(ak._util.isint(x) for x in args[1:])
+        assert ak._util.is_integer(args[0]) or isinstance(args[0], UnknownLengthType)
+        assert all(ak._util.is_integer(x) for x in args[1:])
         assert all(x >= 0 for x in args[1:])
 
         return TypeTracerArray(self._dtype, (UnknownLength,) + args[1:])
@@ -587,7 +587,11 @@ class TypeTracer(ak.nplikes.NumpyLike):
         elif len(args) == 3:
             start, stop, step = args[0], args[1], args[2]
 
-        if ak._util.isint(start) and ak._util.isint(stop) and ak._util.isint(step):
+        if (
+            ak._util.is_integer(start)
+            and ak._util.is_integer(stop)
+            and ak._util.is_integer(step)
+        ):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
 
         return TypeTracerArray(kwargs["dtype"], (length,))

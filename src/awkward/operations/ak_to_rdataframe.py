@@ -57,7 +57,7 @@ def _impl(
         raise ak._errors.wrap_error(
             TypeError("'arrays' must be a dict (to provide C++ names for the arrays)")
         )
-    elif not all(ak._util.isstr(name) for name in arrays):
+    elif not all(isinstance(name, str) for name in arrays):
         raise ak._errors.wrap_error(
             TypeError(
                 "keys of 'arrays' dict must be strings (to provide C++ names for the arrays)"

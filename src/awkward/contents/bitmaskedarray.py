@@ -82,7 +82,7 @@ class BitMaskedArray(Content):
                 )
             )
         if not isinstance(length, ak._typetracer.UnknownLengthType):
-            if not (ak._util.isint(length) and length >= 0):
+            if not (ak._util.is_integer(length) and length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'length' must be a non-negative integer, not {}".format(
@@ -388,7 +388,7 @@ class BitMaskedArray(Content):
         ):
             return self.toByteMaskedArray()._getitem_next(head, tail, advanced)
 
-        elif ak._util.isstr(head):
+        elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):

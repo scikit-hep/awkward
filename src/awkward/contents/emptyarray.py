@@ -131,7 +131,7 @@ class EmptyArray(Content):
         elif isinstance(head, slice):
             raise ak._errors.index_error(self, head, "array is empty")
 
-        elif ak._util.isstr(head):
+        elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
@@ -163,7 +163,7 @@ class EmptyArray(Content):
 
         if posaxis == depth:
             out = self.length
-            if ak._util.isint(out):
+            if ak._util.is_integer(out):
                 return np.int64(out)
             else:
                 return out

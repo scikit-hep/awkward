@@ -26,7 +26,7 @@ class OptionType(Type):
                     )
                 )
             )
-        if typestr is not None and not ak._util.isstr(typestr):
+        if typestr is not None and not isinstance(typestr, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(

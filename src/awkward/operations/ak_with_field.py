@@ -41,8 +41,8 @@ def with_field(base, what, where=None, highlevel=True, behavior=None):
 def _impl(base, what, where, highlevel, behavior):
     if not (
         where is None
-        or ak._util.isstr(where)
-        or (isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where))
+        or isinstance(where, str)
+        or (isinstance(where, Iterable) and all(isinstance(x, str) for x in where))
     ):
         raise ak._errors.wrap_error(
             TypeError(
@@ -51,13 +51,13 @@ def _impl(base, what, where, highlevel, behavior):
             )
         )
 
-    if not ak._util.isstr(where) and isinstance(where, Iterable):
+    if not isinstance(where, str) and isinstance(where, Iterable):
         where = list(where)
 
     if (
-        not ak._util.isstr(where)
+        not isinstance(where, str)
         and isinstance(where, Iterable)
-        and all(ak._util.isstr(x) for x in where)
+        and all(isinstance(x, str) for x in where)
         and len(where) > 1
     ):
         return _impl(
@@ -75,7 +75,7 @@ def _impl(base, what, where, highlevel, behavior):
         )
     else:
 
-        if not (ak._util.isstr(where) or where is None):
+        if not (isinstance(where, str) or where is None):
             where = where[0]
 
         behavior = ak._util.behavior_of(base, what, behavior=behavior)
