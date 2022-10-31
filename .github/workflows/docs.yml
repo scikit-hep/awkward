@@ -198,6 +198,7 @@ jobs:
               "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
 
     - name: Edit PR description
+      if: github.event_name == 'pull_request'
       uses: actions/github-script@v6
       with:
         script: |
