@@ -117,22 +117,37 @@ class UnknownScalar:
         return isinstance(other, UnknownScalar) and self._dtype == other._dtype
 
     def __add__(self, other):
-        return UnknownScalar((_emptyarray(self) + _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __radd__(self, other):
-        return UnknownScalar((_emptyarray(self) + _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __sub__(self, other):
         return UnknownScalar((_emptyarray(self) - _emptyarray(other)).dtype)
 
     def __rsub__(self, other):
-        return UnknownScalar((_emptyarray(self) - _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __mul__(self, other):
-        return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __rmul__(self, other):
-        return UnknownScalar((_emptyarray(self) * _emptyarray(other)).dtype)
+        if isinstance(other, UnknownScalar):
+            return UnknownScalar(self.nplike.result_type(self, other))
+        else:
+            return NotImplemented
 
     def __truediv__(self, other):
         return UnknownScalar((_emptyarray(self) / _emptyarray(other)).dtype)
