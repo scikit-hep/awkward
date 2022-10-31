@@ -747,10 +747,9 @@ class TypeTracer(ak._nplikes.NumpyLike):
         try_touch_data(array)
         return TypeTracerArray.from_array(array, dtype=dtype)
 
-    def isscalar(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
+    def isscalar(self, element):
+        try_touch_data(element)
+        return numpy.isscalar(element) or isinstance(element, UnknownScalar)
 
     def frombuffer(self, *args, **kwargs):
         # array[, dtype=]
