@@ -254,6 +254,10 @@ class NumpyLike(Singleton):
         # array1, array2
         return self._module.logical_and(*args, **kwargs)
 
+    def logical_not(self, *args, **kwargs):
+        # array1, array2
+        return self._module.logical_not(*args, **kwargs)
+
     def sqrt(self, *args, **kwargs):
         # array
         return self._module.sqrt(*args, **kwargs)

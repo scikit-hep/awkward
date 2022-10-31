@@ -194,7 +194,11 @@ class ByteMaskedArray(Content):
             return self
         else:
             return ByteMaskedArray(
-                ak.Index8(~self._mask.data),
+                ak.index.Index8(
+                    self._nplike.index_nplike.logical_not(
+                        self._mask.data.astype(np.bool_)
+                    ).astype(dtype=np.int8)
+                ),
                 self._content,
                 valid_when,
                 self._parameters,
