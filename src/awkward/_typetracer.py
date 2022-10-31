@@ -26,6 +26,11 @@ class NoKernel:
 
 
 class UnknownLengthType:
+
+    @property
+    def nplike(self):
+        return TypeTracer.instance()
+
     def __repr__(self):
         return "UnknownLength"
 
@@ -98,6 +103,10 @@ class UnknownScalar:
     def dtype(self):
         return self._dtype
 
+    @property
+    def nplike(self):
+        return TypeTracer.instance()
+
     def __repr__(self):
         return f"UnknownScalar({self._dtype!r})"
 
@@ -152,6 +161,10 @@ class MaybeNone:
         self._content = content
 
     @property
+    def nplike(self):
+        return TypeTracer.instance()
+
+    @property
     def content(self):
         return self._content
 
@@ -175,6 +188,10 @@ class OneOf:
     @property
     def contents(self):
         return self._contents
+
+    @property
+    def nplike(self):
+        return TypeTracer.instance()
 
     def __eq__(self, other):
         if isinstance(other, OneOf):
@@ -833,8 +850,16 @@ class TypeTracer(ak.nplikes.NumpyLike):
         # array
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def true_divide(self, *args, **kwargs):
+    def true_divide(self, x, y):
         # array1, array2
+        is_array = False
+        if isinstance(x, TypeTracerArray):
+            is_array = True
+        if isinstance(y, TypeTracerArray):
+            is_array = True
+        array_dtypes = []
+        scalar_dtypes = []
+
         raise ak._errors.wrap_error(NotImplementedError)
 
     def bitwise_or(self, *args, **kwargs):

@@ -60,14 +60,14 @@ class Reducer:
                 self,
                 axis=-1,
                 mask=mask,
-                keepdims=False,
+                keepdims=True,
                 flatten_records=False,
             )
             for x in arrays
         ]
         partial_reduction = partial_reductions[0].mergemany(partial_reductions[1:])
         return partial_reduction.reduce(
-            partial_reducer, axis=-1, mask=mask, keepdims=False, flatten_records=False
+            partial_reducer, axis=-1, mask=mask, keepdims=True, flatten_records=False
         )
 
     def apply_many(self, arrays: list[ak.contents.Content], mask: bool):
@@ -134,44 +134,63 @@ class ArgMin(Reducer):
     def apply_many(self, arrays, mask):
         nplike = ak.nplikes.nplike_of(*arrays)
 
-        partial_indices = [
-            part.reduce(
-                self,
-                axis=-1,
-                mask=True,
-                keepdims=True,
-                behavior=None,
-                flatten_records=False,
+        if nplike.known_shape and nplike.known_data:
+            partial_indices = [
+                part.reduce(
+                    self,
+                    axis=-1,
+                    mask=True,
+                    keepdims=True,
+                    behavior=None,
+                    flatten_records=False,
+                )
+                for part in arrays
+            ]
+            index = (
+                partial_indices[0]
+                .mergemany(partial_indices[1:])
+                .toByteMaskedArray(True)
             )
-            for part in arrays
-        ]
-        index = (
-            partial_indices[0].mergemany(partial_indices[1:]).toByteMaskedArray(True)
-        )
 
-        partial_values = [a[i] for a, i in zip(arrays, partial_indices)]
-        value = partial_values[0].mergemany(partial_values[1:])
+            partial_values = [a[i] for a, i in zip(arrays, partial_indices)]
+            value = partial_values[0].mergemany(partial_values[1:])
 
-        result_index = value.reduce(
-            self, axis=-1, mask=True, keepdims=True, flatten_records=False
-        )
-        assert isinstance(result_index, ak.contents.ByteMaskedArray), type(value)
+            result_index = value.reduce(
+                self, axis=-1, mask=True, keepdims=True, flatten_records=False
+            )
+            assert isinstance(result_index, ak.contents.ByteMaskedArray), type(value)
 
-        lengths = [0]
-        lengths.extend([len(x) for x in arrays[:-1]])
-        shifts = nplike.where(
-            index.mask, nplike.cumsum(nplike.array(lengths, dtype=np.int64)), 0
-        )
-        absolute_index = ak.contents.NumpyArray(nplike.asarray(index.content) + shifts)
+            lengths = [0]
+            lengths.extend([len(x) for x in arrays[:-1]])
+            shifts = nplike.where(
+                index.mask, nplike.cumsum(nplike.array(lengths, dtype=np.int64)), 0
+            )
+            absolute_index = ak.contents.NumpyArray(
+                nplike.asarray(index.content) + shifts
+            )
 
-        result = absolute_index[result_index]
-        if mask:
-            return result
+            result = absolute_index[result_index]
+            if mask:
+                return result
+            else:
+                raw_result = result.toByteMaskedArray(True)
+                return ak.contents.NumpyArray(
+                    nplike.where(
+                        raw_result.mask, nplike.asarray(raw_result.content), -1
+                    )
+                )
         else:
-            raw_result = result.toByteMaskedArray(True)
-            return ak.contents.NumpyArray(
-                nplike.where(raw_result.mask, nplike.asarray(raw_result.content), -1)
+            content = ak.contents.NumpyArray(
+                nplike.empty(1, dtype=np.int64), nplike=nplike
             )
+            if mask:
+                return ak.contents.ByteMaskedArray(
+                    ak.index.Index8(nplike.index_nplike.empty(1, dtype=np.int8)),
+                    content,
+                    True,
+                )
+            else:
+                return content
 
 
 class ArgMax(Reducer):
@@ -227,44 +246,63 @@ class ArgMax(Reducer):
     def apply_many(self, arrays, mask):
         nplike = ak.nplikes.nplike_of(*arrays)
 
-        partial_indices = [
-            part.reduce(
-                self,
-                axis=-1,
-                mask=True,
-                keepdims=True,
-                behavior=None,
-                flatten_records=False,
+        if nplike.known_shape and nplike.known_data:
+            partial_indices = [
+                part.reduce(
+                    self,
+                    axis=-1,
+                    mask=True,
+                    keepdims=True,
+                    behavior=None,
+                    flatten_records=False,
+                )
+                for part in arrays
+            ]
+            index = (
+                partial_indices[0]
+                .mergemany(partial_indices[1:])
+                .toByteMaskedArray(True)
             )
-            for part in arrays
-        ]
-        index = (
-            partial_indices[0].mergemany(partial_indices[1:]).toByteMaskedArray(True)
-        )
 
-        partial_values = [a[i] for a, i in zip(arrays, partial_indices)]
-        value = partial_values[0].mergemany(partial_values[1:])
+            partial_values = [a[i] for a, i in zip(arrays, partial_indices)]
+            value = partial_values[0].mergemany(partial_values[1:])
 
-        result_index = value.reduce(
-            self, axis=-1, mask=True, keepdims=True, flatten_records=False
-        )
-        assert isinstance(result_index, ak.contents.ByteMaskedArray), type(value)
+            result_index = value.reduce(
+                self, axis=-1, mask=True, keepdims=True, flatten_records=False
+            )
+            assert isinstance(result_index, ak.contents.ByteMaskedArray), type(value)
 
-        lengths = [0]
-        lengths.extend([len(x) for x in arrays[:-1]])
-        shifts = nplike.where(
-            index.mask, nplike.cumsum(nplike.array(lengths, dtype=np.int64)), 0
-        )
-        absolute_index = ak.contents.NumpyArray(nplike.asarray(index.content) + shifts)
+            lengths = [0]
+            lengths.extend([len(x) for x in arrays[:-1]])
+            shifts = nplike.where(
+                index.mask, nplike.cumsum(nplike.array(lengths, dtype=np.int64)), 0
+            )
+            absolute_index = ak.contents.NumpyArray(
+                nplike.asarray(index.content) + shifts
+            )
 
-        result = absolute_index[result_index]
-        if mask:
-            return result
+            result = absolute_index[result_index]
+            if mask:
+                return result
+            else:
+                raw_result = result.toByteMaskedArray(True)
+                return ak.contents.NumpyArray(
+                    nplike.where(
+                        raw_result.mask, nplike.asarray(raw_result.content), -1
+                    )
+                )
         else:
-            raw_result = result.toByteMaskedArray(True)
-            return ak.contents.NumpyArray(
-                nplike.where(raw_result.mask, nplike.asarray(raw_result.content), -1)
+            content = ak.contents.NumpyArray(
+                nplike.empty(1, dtype=np.int64), nplike=nplike
             )
+            if mask:
+                return ak.contents.ByteMaskedArray(
+                    ak.index.Index8(nplike.index_nplike.empty(1, dtype=np.int8)),
+                    content,
+                    True,
+                )
+            else:
+                return content
 
 
 class Count(Reducer):

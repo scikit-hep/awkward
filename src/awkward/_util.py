@@ -74,10 +74,22 @@ def isint(x):
     )
 
 
+def isbool(x):
+    return isinstance(x, (bool, np.bool_))
+
+
 def isnum(x):
-    return isinstance(x, (int, float, numbers.Real, np.number)) and not isinstance(
+    return isinstance(x, (numbers.Number, np.number)) and not isinstance(
         x, (bool, np.bool_)
     )
+
+
+def isdatetime(x):
+    return isinstance(x, (np.datetime64, np.timedelta64))
+
+
+def isscalar(x):
+    return isnum(x) or isbool(x) or isint(x)
 
 
 def isstr(x):
