@@ -1239,8 +1239,7 @@ def test_rpad_indexed_array():
         [0.0, 1.1, 2.2],
     ]
     assert (
-        indexedarray.typetracer.pad_none(2, 1).form.type
-        == indexedarray.pad_none(2, 1).form.type
+        indexedarray.typetracer.pad_none(2, 1).form == indexedarray.pad_none(2, 1).form
     )
     assert to_list(indexedarray.pad_none(3, 1)) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -1250,8 +1249,7 @@ def test_rpad_indexed_array():
         [0.0, 1.1, 2.2],
     ]
     assert (
-        indexedarray.typetracer.pad_none(3, 1).form.type
-        == indexedarray.pad_none(3, 1).form.type
+        indexedarray.typetracer.pad_none(3, 1).form == indexedarray.pad_none(3, 1).form
     )
     assert to_list(indexedarray.pad_none(4, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -1261,8 +1259,7 @@ def test_rpad_indexed_array():
         [0.0, 1.1, 2.2],
     ]
     assert (
-        indexedarray.typetracer.pad_none(4, 0).form.type
-        == indexedarray.pad_none(4, 0).form.type
+        indexedarray.typetracer.pad_none(4, 0).form == indexedarray.pad_none(4, 0).form
     )
     assert to_list(indexedarray.pad_none(5, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -1272,8 +1269,7 @@ def test_rpad_indexed_array():
         [0.0, 1.1, 2.2],
     ]
     assert (
-        indexedarray.typetracer.pad_none(5, 0).form.type
-        == indexedarray.pad_none(5, 0).form.type
+        indexedarray.typetracer.pad_none(5, 0).form == indexedarray.pad_none(5, 0).form
     )
     assert to_list(indexedarray.pad_none(6, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -1284,8 +1280,7 @@ def test_rpad_indexed_array():
         None,
     ]
     assert (
-        indexedarray.typetracer.pad_none(6, 0).form.type
-        == indexedarray.pad_none(6, 0).form.type
+        indexedarray.typetracer.pad_none(6, 0).form == indexedarray.pad_none(6, 0).form
     )
     assert to_list(indexedarray.pad_none(7, 0)) == [
         [6.6, 7.7, 8.8, 9.9],
@@ -1297,8 +1292,7 @@ def test_rpad_indexed_array():
         None,
     ]
     assert (
-        indexedarray.typetracer.pad_none(7, 0).form.type
-        == indexedarray.pad_none(7, 0).form.type
+        indexedarray.typetracer.pad_none(7, 0).form == indexedarray.pad_none(7, 0).form
     )
 
 
