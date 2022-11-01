@@ -374,6 +374,9 @@ class NumpyLike(Singleton):
         """
         raise NotImplementedError
 
+    def is_c_contiguous(self, array) -> bool:
+        return array.flags["C_CONTIGUOUS"]
+
 
 class NumpyKernel:
     def __init__(self, kernel, name_and_types):

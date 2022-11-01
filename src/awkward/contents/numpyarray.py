@@ -505,24 +505,7 @@ class NumpyArray(Content):
 
     @property
     def is_contiguous(self):
-        if isinstance(self._nplike, ak._typetracer.TypeTracer):
-            return True
-
-        # Alternatively, self._data.flags["C_CONTIGUOUS"], but the following assumes
-        # less of the nplike.
-
-        if isinstance(self.nplike, ak.nplikes.Jax):
-            return True
-
-        x = self._data.dtype.itemsize
-
-        for i in range(len(self._data.shape), 0, -1):
-            if x != self._data.strides[i - 1]:
-                return False
-            else:
-                x = x * self._data.shape[i - 1]
-
-        return True
+        return self._nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak.index.Index64.zeros(1, self._nplike)
