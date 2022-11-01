@@ -42,3 +42,8 @@ html[data-theme="dark"] .sd-card {
   margin-left: auto;
   margin-right: auto;
 }
+
+.shield-badge {
+  margin-top: 0.15em;
+  margin-bottom: 0.15em;
+}

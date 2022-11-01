@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: "3.10.7"
+  PYTHON_VERSION: "3.10.6"
 
 jobs:
   awkward-wasm:
@@ -22,101 +22,185 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: true
-    - name: Install ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: awkward-wasm-${{ github.job }}
-    - name: Install EMSDK
-      uses: mymindstorm/setup-emsdk@v11
-      with:
-        version: 3.1.14
-    - name: Setup ccache
-      run: |
-        echo "/usr/lib/ccache" >> $GITHUB_PATH
-        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
-    - name: Install requirements
+
+    - name: Install EMSDK
+      uses: mymindstorm/setup-emsdk@v11
+      with:
+        version: 3.1.14
+
+    - name: Install ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: awkward-wasm-${{ github.job }}
+        verbose: 2
+
+    - name: Setup ccache
       run: |
-        python -m pip install --upgrade pip
-        python -m pip install -r requirements-wasm.txt
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
+        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
     - name: Build wheel
-      run: CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache" pyodide build --exports whole_archive
+      run: |
+        # pyodide-build doesn't work out of the box with pipx
+        python3 -m pip install pyodide-build==0.21.0
+        export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+        pyodide build --exports whole_archive
+
     - name: Upload wheel
       uses: actions/upload-artifact@v3
       with:
         name: awkward-wasm-wheel
         path: dist/awkward*wasm32.whl
+
   awkward-x86-64:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
+
     - name: Install ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: awkward-${{ github.job }}
+
     - name: Setup ccache
       run: |
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-    - name: Setup Python
-      uses: actions/setup-python@v4
+
+      # TODO: remove this once mamba-org/mamba#1726 is fixed
+      #       and replace with `-r requirements.txt` in a
+      #       non-template `environment.yml`
+    - name: Template environment.yml
+      run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
+      working-directory: docs-sphinx
+
+      # Technically this give us an environment that is incompatible with
+      # the wheel built in the awkward-x86-64 job if the environments
+      # solve with different external library versions. By default,
+      # ROOT uses cxx-compiler too, so hopefully this won't be an issue
+    - name: Setup Python via Conda
+      uses: mamba-org/provision-with-micromamba@main
       with:
-        python-version: "${{ env.PYTHON_VERSION }}"
-    - name: Install requirements
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install build
+        # Cache invalidates daily by default
+        cache-env: true
+        environment-file: docs-sphinx/environment.yml
+        extra-specs: |
+           python=${{ env.PYTHON_VERSION }}
+           doxygen
+
     - name: Build wheel
-      run: python -m build -w
+      run: pipx run build -w
+
     - name: Upload wheel
       uses: actions/upload-artifact@v3
       with:
         name: awkward-x86-64-wheel
         path: dist/awkward*.whl
-  docs:
+
+  build-docs:
     runs-on: ubuntu-22.04
     needs: [awkward-wasm, awkward-x86-64]
+    defaults:
+      run:
+        # Ensure conda env is activated
+        shell: "bash -l {0}"
     steps:
     - uses: actions/checkout@v3
-    - name: Setup Python
-      uses: actions/setup-python@v4
+
+      # TODO: remove this once mamba-org/mamba#1726 is fixed
+      #       and replace with `-r requirements.txt` in a
+      #       non-template `environment.yml`
+    - name: Template environment.yml
+      run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
+      working-directory: docs-sphinx
+
+      # Technically this give us an environment that is incompatible with
+      # the wheel built in the awkward-x86-64 job if the environments
+      # solve with different external library versions. By default,
+      # ROOT uses cxx-compiler too, so hopefully this won't be an issue
+    - name: Setup Python via Conda
+      uses: mamba-org/provision-with-micromamba@main
       with:
-        python-version: "${{ env.PYTHON_VERSION }}"
+        # Cache invalidates daily by default
+        cache-env: true
+        environment-file: docs-sphinx/environment.yml
+        extra-specs: |
+           python=${{ env.PYTHON_VERSION }}
+           doxygen
+
     - name: Download WASM wheel
       uses: actions/download-artifact@v3
       with:
         name: awkward-wasm-wheel
         path: docs-sphinx/lite/pypi
+
     - name: Download x86_64 wheel
       uses: actions/download-artifact@v3
       with:
         name: awkward-x86-64-wheel
         path: dist
-    - name: Install requirements
-      run: |
-        ls -R docs-sphinx/lite
-        sudo apt-get install -y doxygen
-        python -m pip install -r docs-sphinx/requirements.txt
-        python -m pip install dist/awkward*.whl
+
+    - name: Install Awkward
+      run: python3 -m pip install dist/awkward*.whl
+
     - name: Generate documentation
       run: sphinx-build -M html . _build/
       working-directory: docs-sphinx
+
     - name: Upload documentation
       uses: actions/upload-artifact@v3
       with:
         name: docs
         path: docs-sphinx/_build/html
+
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
       with:
         name: jupyter-cache
         path: docs-sphinx/_build/.jupyter_cache
-    - name: Trigger RTD Build
-      if: github.ref_name != 'main'
-      # NB: head_ref is only valid for PR triggers
-      run: curl -X POST -d "branches=${{ github.head_ref || github.ref_name }}" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" "${{ secrets.RTD_WEBHOOK_URL }}"
+
+  deploy-docs:
+    runs-on: ubuntu-22.04
+    needs: [build-docs]
+    # We can only deploy for PRs on host repo, or pushes to main
+    if: ${{ !(github.event_name == 'pull_request' && (github.event.pull_request.head.repo.full_name != github.repository)) }}
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Activate RTD version
+      run: |
+        # Sanitise ref name
+        # NB: head_ref is only valid for PR triggers
+        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@")
+        # Export for subsequent steps
+        echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
+        # Activate version
+        curl \
+          -X PATCH \
+          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
+              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/" \
+          -H "Content-Type: application/json" \
+          -d '{"active":true,"hidden":true}'
+
+    - name: Trigger RTD build
+      run: |
+        # Trigger build
+        curl \
+          -X POST \
+          -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
+              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
+
+    - name: Edit PR description
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+            const script = require('./dev/docs-edit-message.js');
+            console.log(script(github, context, "${{ env.VERSION_SLUG }}"));

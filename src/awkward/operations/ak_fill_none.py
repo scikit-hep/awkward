@@ -107,8 +107,8 @@ def _impl(array, value, axis, highlevel, behavior):
 
     if axis is None:
 
-        def action(layout, depth, depth_context, **kwargs):
-            layout = maybe_fillna(layout)
+        def action(layout, continuation, **kwargs):
+            return maybe_fillna(continuation())
 
     else:
 

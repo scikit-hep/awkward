@@ -86,6 +86,7 @@ class NumpyLike(Singleton):
     known_data = True
     known_shape = True
     known_dtype = True
+    is_eager = True
 
     ############################ array creation
 
@@ -252,6 +253,10 @@ class NumpyLike(Singleton):
     def logical_and(self, *args, **kwargs):
         # array1, array2
         return self._module.logical_and(*args, **kwargs)
+
+    def logical_not(self, *args, **kwargs):
+        # array1, array2
+        return self._module.logical_not(*args, **kwargs)
 
     def sqrt(self, *args, **kwargs):
         # array
@@ -538,6 +543,8 @@ class Numpy(NumpyLike):
 
 
 class Cupy(NumpyLike):
+    is_eager = False
+
     @property
     def index_nplike(self):
         return self

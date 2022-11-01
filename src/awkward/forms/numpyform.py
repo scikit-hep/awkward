@@ -40,7 +40,6 @@ class NumpyForm(Form):
         self,
         primitive,
         inner_shape=(),
-        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -58,7 +57,7 @@ class NumpyForm(Form):
 
         self._primitive = primitive
         self._inner_shape = tuple(inner_shape)
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def primitive(self):
@@ -84,7 +83,6 @@ class NumpyForm(Form):
             not verbose
             and not toplevel
             and len(self._inner_shape) == 0
-            and not self._has_identifier
             and (self._parameters is None or len(self._parameters) == 0)
             and self._form_key is None
         ):
@@ -115,8 +113,7 @@ class NumpyForm(Form):
     def __eq__(self, other):
         if isinstance(other, NumpyForm):
             return (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
+                self._form_key == other._form_key
                 and self._primitive == other._primitive
                 and self._inner_shape == other._inner_shape
                 and _parameters_equal(
@@ -127,10 +124,9 @@ class NumpyForm(Form):
             return False
 
     def toRegularForm(self):
-        out = NumpyForm(self._primitive, (), False, None, None)
+        out = NumpyForm(self._primitive, (), None, None)
         for x in self._inner_shape[::-1]:
-            out = ak.forms.RegularForm(out, x, False, None, None)
-        out._has_identifier = self._has_identifier
+            out = ak.forms.RegularForm(out, x, None, None)
         out._parameters = self._parameters
         return out
 

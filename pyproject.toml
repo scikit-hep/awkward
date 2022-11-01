@@ -159,3 +159,40 @@ messages_control.disable = [
   "wrong-import-order",  # Could use isort
   "wrong-import-position",
 ]
+
+[tool.mypy]
+files = ["src/awkward/**/*.py"]
+exclude = ["^src/awkward/[^/]+\\.py$"]
+plugins = [
+    "numpy.typing.mypy_plugin"
+]
+
+[[tool.mypy.overrides]]
+module = [
+    'awkward.__init__',
+    'awkward._connect.*',
+    'awkward._cpu_kernels',
+    'awkward._errors',
+    'awkward._kernel_signatures',
+    'awkward._libawkward',
+    'awkward._util',
+    'awkward.forms',
+    'awkward.forth',
+    'awkward.highlevel',
+    'awkward.nplike',
+    'awkward.numba',
+    'awkward.types',
+    'awkward.types._awkward_datashape_parser',
+    'numba.*',
+    'llvmlite.*',
+    'ROOT.*',
+    'cppyy.*',
+    'jax.*',
+    'pandas.*',
+    'cupy.*',
+    'pyarrow.*',
+    'fsspec.*',
+    'numexpr.*',
+]
+ignore_errors = true
+ignore_missing_imports = true

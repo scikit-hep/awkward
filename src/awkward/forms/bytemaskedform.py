@@ -12,11 +12,10 @@ class ByteMaskedForm(Form):
         mask,
         content,
         valid_when,
-        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
-        if not ak._util.isstr(mask):
+        if not isinstance(mask, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'mask' must be of type str, not {}".format(
@@ -44,7 +43,7 @@ class ByteMaskedForm(Form):
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def mask(self):
@@ -91,8 +90,7 @@ class ByteMaskedForm(Form):
     def __eq__(self, other):
         if isinstance(other, ByteMaskedForm):
             return (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
+                self._form_key == other._form_key
                 and self._mask == other._mask
                 and self._valid_when == other._valid_when
                 and _parameters_equal(
@@ -117,7 +115,6 @@ class ByteMaskedForm(Form):
             return ak.forms.IndexedOptionForm(
                 "i64",
                 self._content,
-                has_identifier=self._has_identifier,
                 parameters=self._parameters,
             ).simplify_optiontype()
         else:
@@ -165,7 +162,6 @@ class ByteMaskedForm(Form):
             self._mask,
             self._content._select_columns(index, specifier, matches, output),
             self._valid_when,
-            self._has_identifier,
             self._parameters,
             self._form_key,
         )

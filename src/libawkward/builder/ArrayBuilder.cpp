@@ -34,106 +34,76 @@ namespace awkward {
 
   void
   ArrayBuilder::null() {
-    // std::cout << "ArrayBuilder null" << std::endl;
-
     maybeupdate(builder_.get()->null());
   }
 
   void
   ArrayBuilder::boolean(bool x) {
-    // std::cout << "ArrayBuilder boolean" << std::endl;
-
     maybeupdate(builder_.get()->boolean(x));
   }
 
   void
   ArrayBuilder::integer(int64_t x) {
-    // std::cout << "ArrayBuilder integer" << std::endl;
-
     maybeupdate(builder_.get()->integer(x));
   }
 
   void
   ArrayBuilder::real(double x) {
-    // std::cout << "ArrayBuilder real" << std::endl;
-
     maybeupdate(builder_.get()->real(x));
   }
 
   void
   ArrayBuilder::complex(std::complex<double> x) {
-    // std::cout << "ArrayBuilder complex" << std::endl;
-
     maybeupdate(builder_.get()->complex(x));
   }
 
   void
   ArrayBuilder::datetime(int64_t x, const std::string& unit) {
-    // std::cout << "ArrayBuilder datetime" << std::endl;
-
     maybeupdate(builder_.get()->datetime(x, unit));
   }
 
   void
   ArrayBuilder::timedelta(int64_t x, const std::string& unit) {
-    // std::cout << "ArrayBuilder timedelta" << std::endl;
-
     maybeupdate(builder_.get()->timedelta(x, unit));
   }
 
   void
   ArrayBuilder::bytestring(const char* x) {
-    // std::cout << "ArrayBuilder bytestring" << std::endl;
-
     maybeupdate(builder_.get()->string(x, -1, no_encoding));
   }
 
   void
   ArrayBuilder::bytestring(const char* x, int64_t length) {
-    // std::cout << "ArrayBuilder bytestring" << std::endl;
-
     maybeupdate(builder_.get()->string(x, length, no_encoding));
   }
 
   void
   ArrayBuilder::bytestring(const std::string& x) {
-    // std::cout << "ArrayBuilder bytestring" << std::endl;
-
     bytestring(x.c_str(), (int64_t)x.length());
   }
 
   void
   ArrayBuilder::string(const char* x) {
-    // std::cout << "ArrayBuilder string" << std::endl;
-
     maybeupdate(builder_.get()->string(x, -1, utf8_encoding));
   }
 
   void
   ArrayBuilder::string(const char* x, int64_t length) {
-    // std::cout << "ArrayBuilder string" << std::endl;
-
     maybeupdate(builder_.get()->string(x, length, utf8_encoding));
   }
 
   void
   ArrayBuilder::string(const std::string& x) {
-    // std::cout << "ArrayBuilder string" << std::endl;
-
     string(x.c_str(), (int64_t)x.length());
   }
 
   void
   ArrayBuilder::beginlist() {
-    // std::cout << "ArrayBuilder beginlist" << std::endl;
-
     maybeupdate(builder_.get()->beginlist());
   }
 
   void
   ArrayBuilder::endlist() {
-    // std::cout << "ArrayBuilder endlist" << std::endl;
-
     BuilderPtr tmp = builder_.get()->endlist();
     if (tmp.get() == nullptr) {
       throw std::invalid_argument(
@@ -145,78 +115,56 @@ namespace awkward {
 
   void
   ArrayBuilder::begintuple(int64_t numfields) {
-    // std::cout << "ArrayBuilder begintuple" << std::endl;
-
     maybeupdate(builder_.get()->begintuple(numfields));
   }
 
   void
   ArrayBuilder::index(int64_t index) {
-    // std::cout << "ArrayBuilder index" << std::endl;
-
     maybeupdate(builder_.get()->index(index));
   }
 
   void
   ArrayBuilder::endtuple() {
-    // std::cout << "ArrayBuilder endtupel" << std::endl;
-
     maybeupdate(builder_.get()->endtuple());
   }
 
   void
   ArrayBuilder::beginrecord() {
-    // std::cout << "ArrayBuilder beginrecord" << std::endl;
-
     beginrecord_fast(nullptr);
   }
 
   void
   ArrayBuilder::beginrecord_fast(const char* name) {
-    // std::cout << "ArrayBuilder beginrecord_fast" << std::endl;
-
     maybeupdate(builder_.get()->beginrecord(name, false));
   }
 
   void
   ArrayBuilder::beginrecord_check(const char* name) {
-    // std::cout << "ArrayBuilder beginrecord_check" << std::endl;
-
     maybeupdate(builder_.get()->beginrecord(name, true));
   }
 
   void
   ArrayBuilder::beginrecord_check(const std::string& name) {
-    // std::cout << "ArrayBuilder beginrecord_check" << std::endl;
-
     beginrecord_check(name.c_str());
   }
 
   void
   ArrayBuilder::field_fast(const char* key) {
-    // std::cout << "ArrayBuilder field_fast" << std::endl;
-
     builder_.get()->field(key, false);
   }
 
   void
   ArrayBuilder::field_check(const char* key) {
-    // std::cout << "ArrayBuilder field_check" << std::endl;
-
     builder_.get()->field(key, true);
   }
 
   void
   ArrayBuilder::field_check(const std::string& key) {
-    // std::cout << "ArrayBuilder field_check" << std::endl;
-
     field_check(key.c_str());
   }
 
   void
   ArrayBuilder::endrecord() {
-    // std::cout << "ArrayBuilder endrecord" << std::endl;
-
     maybeupdate(builder_.get()->endrecord());
   }
 

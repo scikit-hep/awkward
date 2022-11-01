@@ -121,6 +121,7 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         for tmp in layout.completely_flatten(
             function_name="ak.argmax", flatten_records=flatten_records
         ):
+            tmp = layout.nplike.asarray(tmp)
             if len(tmp) > 0:
                 out = layout.nplike.argmax(tmp, axis=None)
                 if best_index is None or tmp[out] > best_value:

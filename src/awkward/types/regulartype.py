@@ -15,7 +15,7 @@ class RegularType(Type):
                     )
                 )
             )
-        if not ak._util.isint(size) or size < 0:
+        if not ak._util.is_integer(size) or size < 0:
             raise ak._errors.wrap_error(
                 ValueError(
                     "{} 'size' must be of a positive integer, not {}".format(
@@ -31,7 +31,7 @@ class RegularType(Type):
                     )
                 )
             )
-        if typestr is not None and not ak._util.isstr(typestr):
+        if typestr is not None and not isinstance(typestr, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'typestr' must be of type string or None, not {}".format(

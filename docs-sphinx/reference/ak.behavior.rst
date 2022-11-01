@@ -667,9 +667,10 @@ function takes
    * ``attype``: the Numba integer type of the index position
    * ``atval``: the Numba value of the index position
 
-Complete example
-================
+.. Add back once https://github.com/scikit-hep/vector/issues/273 is completed
+.. Complete example
+.. ================
 
-The
-`Vector design prototype <https://vector.readthedocs.io/en/latest/usage/vector_design_prototype.html>`__
-has a complete example, including Numba.
+.. The
+.. `Vector design prototype <https://vector.readthedocs.io/en/latest/usage/vector_design_prototype.html>`__
+.. has a complete example, including Numba.

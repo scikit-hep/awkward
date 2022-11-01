@@ -104,9 +104,12 @@ def _impl(array, axis, highlevel, behavior):
     if axis is None:
         out = layout.completely_flatten(function_name="ak.flatten")
         assert isinstance(out, tuple) and all(
-            isinstance(x, nplike.ndarray) for x in out
+            isinstance(x, ak.contents.NumpyArray) for x in out
         )
-        out = ak.contents.NumpyArray(nplike.concatenate(out))
+
+        result = out[0].mergemany(out[1:])
+
+        return ak._util.wrap(result, behavior, highlevel)
 
     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
@@ -158,4 +161,4 @@ def _impl(array, axis, highlevel, behavior):
 
     else:
         out = layout.flatten(axis)
-    return ak._util.wrap(out, behavior, highlevel)
+        return ak._util.wrap(out, behavior, highlevel)
