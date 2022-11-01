@@ -1093,7 +1093,7 @@ class TypeTracer(ak._nplikes.NumpyLike):
             try_touch_data(x)
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def concatenate(self, arrays, casting="same_kind"):
+    def concatenate(self, arrays):
         for x in arrays:
             try_touch_data(x)
 
@@ -1342,11 +1342,6 @@ class TypeTracer(ak._nplikes.NumpyLike):
 
     def can_cast(self, *args, **kwargs):
         return numpy.can_cast(*args, **kwargs)
-
-    def datetime_as_string(self, *args, **kwargs):
-        for x in args:
-            try_touch_data(x)
-        raise ak._errors.wrap_error(NotImplementedError)
 
     def promote_types(self, type1, type2):
         return numpy.promote_types(type1, type2)
