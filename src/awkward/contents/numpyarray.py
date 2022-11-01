@@ -1071,8 +1071,8 @@ class NumpyArray(Content):
         keepdims,
         behavior,
     ):
-        if not self.is_contiguous:
-            return self.contiguous()._reduce_next(
+        if self._data.ndim > 1:
+            return self.toRegularArray()._reduce_next(
                 reducer,
                 negaxis,
                 starts,
@@ -1083,9 +1083,8 @@ class NumpyArray(Content):
                 keepdims,
                 behavior,
             )
-
-        elif self._data.ndim > 1:
-            return self.toRegularArray()._reduce_next(
+        elif not self.is_contiguous:
+            return self.contiguous()._reduce_next(
                 reducer,
                 negaxis,
                 starts,
