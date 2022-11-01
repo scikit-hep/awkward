@@ -84,13 +84,13 @@ def _empty_array(x):
 
 
 def _empty_scalar(x):
-    assert TypeTracerArray.instance().isscalar(x)
+    assert TypeTracer.instance().isscalar(x)
     if isinstance(x, UnknownScalar):
-        return numpy.empty(1, x._dtype)[()]
+        return numpy.ones(1, x._dtype)[()]
     elif isinstance(x, "dtype"):
-        return numpy.empty(1, x.dtype)[()]
+        return numpy.ones(1, x.dtype)[()]
     else:
-        return numpy.empty(1, numpy.min_scalar_type(x))[()]
+        return numpy.ones(1, numpy.min_scalar_type(x))[()]
 
 
 class UnknownScalar:
