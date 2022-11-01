@@ -3821,7 +3821,7 @@ namespace awkward {
             }
 
             case CODE_PRINT_STACK: {
-              printf("<%lld> ", stack_depth_);
+              printf("<%lld> ", (long long int)stack_depth_);
               for (int64_t i = 0;  i < stack_depth_;  i++) {
                 print_number(stack_buffer_[i]);
               }
@@ -4298,7 +4298,7 @@ namespace awkward {
   template <>
   void
   ForthMachineOf<int64_t, int32_t>::print_number(int64_t num) noexcept {
-    printf("%lld ", num);
+    printf("%lld ", (long long int)num);
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;
