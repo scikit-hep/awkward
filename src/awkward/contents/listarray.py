@@ -1267,10 +1267,11 @@ class ListArray(Content):
             if posaxis == depth:
                 return self.pad_none_axis0(target, clip)
             elif posaxis == depth + 1:
-                # Without known data, all we can say is that there's now
-                # an option here
-                if not self._backend.nplike.known_data:
-                    nextcontent = ak.contents.UnmaskedArray(
+                if not self._nplike.known_data:
+                    nextcontent = ak.contents.IndexedOptionArray(
+                        ak.index.Index64(
+                            self._backend.index_nplike.empty(len(self._content))
+                        ),
                         self._content,
                         parameters=None,
                     ).simplify_optiontype()
@@ -1283,7 +1284,10 @@ class ListArray(Content):
 
                 min_ = self._backend.index_nplike.min(self._stops.data - self._starts.data)
                 if target <= min_:
-                    nextcontent = ak.contents.UnmaskedArray(
+                    nextcontent = ak.contents.IndexedOptionArray(
+                        ak.index.Index64(
+                            self._backend.index_nplike.zeros(len(self._content))
+                        ),
                         self._content,
                         parameters=None
                     ).simplify_optiontype()
