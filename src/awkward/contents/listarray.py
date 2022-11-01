@@ -1270,7 +1270,9 @@ class ListArray(Content):
                 if not self._nplike.known_data:
                     nextcontent = ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            self._backend.index_nplike.empty(len(self._content))
+                            self._backend.index_nplike.empty(
+                                len(self._content), dtype=np.int64
+                            )
                         ),
                         self._content,
                         parameters=None,
@@ -1286,7 +1288,9 @@ class ListArray(Content):
                 if target <= min_:
                     nextcontent = ak.contents.IndexedOptionArray(
                         ak.index.Index64(
-                            self._backend.index_nplike.zeros(len(self._content))
+                            self._backend.index_nplike.arange(
+                                len(self._content), dtype=np.int64
+                            )
                         ),
                         self._content,
                         parameters=None
