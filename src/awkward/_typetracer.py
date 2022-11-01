@@ -725,10 +725,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
         # haystack, needle, side="right"
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def argsort(self, array, *args, **kwargs):
-        # array
-        return TypeTracerArray(np.int64, array.shape)
-
     ############################ manipulation
 
     def broadcast_arrays(self, *arrays):
@@ -821,10 +817,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
         # arrays[, out=]
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def cumprod(self, *args, **kwargs):
-        # arrays[, out=]
-        raise ak._errors.wrap_error(NotImplementedError)
-
     def nonzero(self, array):
         # array
         return (TypeTracerArray(np.int64, (UnknownLength,)),) * len(array.shape)
@@ -871,10 +863,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
         # arrays
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def vstack(self, *args, **kwargs):
-        # arrays
-        raise ak._errors.wrap_error(NotImplementedError)
-
     def packbits(self, *args, **kwargs):
         # array
         raise ak._errors.wrap_error(NotImplementedError)
@@ -883,16 +871,8 @@ class TypeTracer(ak.nplikes.NumpyLike):
         # array
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def atleast_1d(self, *args, **kwargs):
-        # *arrays
-        raise ak._errors.wrap_error(NotImplementedError)
-
     def broadcast_to(self, *args, **kwargs):
         # array, shape
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def append(self, *args, **kwargs):
-        # array, element
         raise ak._errors.wrap_error(NotImplementedError)
 
     def where(self, *args, **kwargs):
@@ -911,10 +891,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     def true_divide(self, *args, **kwargs):
         # array1, array2
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def bitwise_or(self, *args, **kwargs):
-        # array1, array2[, out=output]
         raise ak._errors.wrap_error(NotImplementedError)
 
     def logical_and(self, x, y, *, dtype=None):
@@ -959,10 +935,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     def equal(self, *args, **kwargs):
         # array1, array2
-        raise ak._errors.wrap_error(NotImplementedError)
-
-    def ceil(self, *args, **kwargs):
-        # array
         raise ak._errors.wrap_error(NotImplementedError)
 
     ############################ almost-ufuncs
@@ -1018,9 +990,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
     ):
         # array, max_line_width, precision=None, suppress_small=None
         return "[?? ... ??]"
-
-    def datetime_as_string(self, *args, **kwargs):
-        raise ak._errors.wrap_error(NotImplementedError)
 
     def promote_types(self, type1, type2):
         return numpy.promote_types(type1, type2)
