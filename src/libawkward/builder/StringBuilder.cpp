@@ -52,12 +52,12 @@ namespace awkward {
     offsets_.concatenate(
       reinterpret_cast<int64_t*>(
         container.empty_buffer(outer_form_key.str() + "-offsets",
-        offsets_.length() * (int64_t)sizeof(int64_t))));
+        (int64_t)offsets_.length() * (int64_t)sizeof(int64_t))));
 
     content_.concatenate(
       reinterpret_cast<uint8_t*>(
         container.empty_buffer(inner_form_key.str() + "-data",
-        content_.length() * (int64_t)sizeof(uint8_t))));
+        (int64_t)content_.length() * (int64_t)sizeof(uint8_t))));
 
     std::string char_parameter;
     std::string string_parameter;

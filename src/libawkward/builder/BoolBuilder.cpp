@@ -34,7 +34,7 @@ namespace awkward {
     buffer_.concatenate(
       reinterpret_cast<uint8_t*>(
         container.empty_buffer(form_key.str() + "-data",
-        buffer_.length() * (int64_t)sizeof(bool))));
+        (int64_t)buffer_.length() * (int64_t)sizeof(bool))));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"bool\", \"form_key\": \""
            + form_key.str() + "\"}";

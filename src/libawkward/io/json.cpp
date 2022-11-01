@@ -161,7 +161,7 @@ namespace awkward {
       , readcount_(0)
       , count_(0)
       , eof_(false) {
-      buffer_ = new char[buffersize];
+      buffer_ = new char[(size_t)buffersize];
       read();
     }
 
@@ -178,7 +178,7 @@ namespace awkward {
       return c;
     }
     size_t Tell() const {
-      return count_ + static_cast<size_t>(current_ - buffer_);
+      return (size_t)count_ + static_cast<size_t>(current_ - buffer_);
     }
 
     std::string error_context() const {
@@ -197,10 +197,10 @@ namespace awkward {
         stop = bufferafter;
       }
 
-      std::string context = std::string(buffer_, (size_t)stop).substr(start);
-      int64_t arrow = current - start;
+      std::string context = std::string(buffer_, (size_t)stop).substr((size_t)start);
+      size_t arrow = (size_t)(current - start);
 
-      int64_t pos;
+      size_t pos;
 
       pos = 0;
       while ((size_t)(pos = context.find(9, pos)) != std::string::npos) {
@@ -560,7 +560,7 @@ namespace awkward {
           specializedjson_->write_int64(specializedjson_->argument1(), x);
           return true;
         case FillNumber:
-          specializedjson_->write_float64(specializedjson_->argument1(), x);
+          specializedjson_->write_float64(specializedjson_->argument1(), (double)x);
           return true;
         default:
           return schema_okay_ = false;
@@ -594,10 +594,10 @@ namespace awkward {
           specializedjson_->step_backward();
           return schema_okay_ = out;
         case FillInteger:
-          specializedjson_->write_int64(specializedjson_->argument1(), x);
+          specializedjson_->write_int64(specializedjson_->argument1(), (int64_t)x);
           return true;
         case FillNumber:
-          specializedjson_->write_float64(specializedjson_->argument1(), x);
+          specializedjson_->write_float64(specializedjson_->argument1(), (double)x);
           return true;
         default:
           return schema_okay_ = false;
@@ -977,7 +977,7 @@ namespace awkward {
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int8);
-        int64_t outi = buffers_uint8_.size();
+        int64_t outi = (int64_t)buffers_uint8_.size();
         output_which_.push_back(outi);
         buffers_uint8_.push_back(GrowableBuffer<uint8_t>(options));
         instructions_.push_back(FillByteMaskedArray);
@@ -999,10 +999,10 @@ namespace awkward {
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
-        int64_t outi = buffers_int64_.size();
+        int64_t outi = (int64_t)buffers_int64_.size();
         output_which_.push_back(outi);
         buffers_int64_.push_back(GrowableBuffer<int64_t>(options));
-        int64_t counti = counters_.size();
+        int64_t counti = (int64_t)counters_.size();
         counters_.push_back(0);
         instructions_.push_back(FillIndexedOptionArray);
         instructions_.push_back(outi);
@@ -1023,7 +1023,7 @@ namespace awkward {
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::uint8);
-        int64_t outi = buffers_uint8_.size();
+        int64_t outi = (int64_t)buffers_uint8_.size();
         output_which_.push_back(outi);
         buffers_uint8_.push_back(GrowableBuffer<uint8_t>(options));
         instructions_.push_back(FillBoolean);
@@ -1045,7 +1045,7 @@ namespace awkward {
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
-        int64_t outi = buffers_int64_.size();
+        int64_t outi = (int64_t)buffers_int64_.size();
         output_which_.push_back(outi);
         buffers_int64_.push_back(GrowableBuffer<int64_t>(options));
         instructions_.push_back(FillInteger);
@@ -1067,7 +1067,7 @@ namespace awkward {
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::float64);
-        int64_t outi = buffers_float64_.size();
+        int64_t outi = (int64_t)buffers_float64_.size();
         output_which_.push_back(outi);
         buffers_float64_.push_back(GrowableBuffer<double>(options));
         instructions_.push_back(FillNumber);
@@ -1089,10 +1089,10 @@ namespace awkward {
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
-        int64_t offsetsi = buffers_int64_.size();
+        int64_t offsetsi = (int64_t)buffers_int64_.size();
         output_which_.push_back(offsetsi);
         buffers_int64_.push_back(GrowableBuffer<int64_t>(options));
-        buffers_int64_[offsetsi].append(0);
+        buffers_int64_[(size_t)offsetsi].append(0);
         if (std::string("uint8") != item[4].GetString()) {
           throw std::invalid_argument(
             "FillString argument 4 (dtype:str) must be 'uint8'" + FILENAME(__LINE__)
@@ -1100,7 +1100,7 @@ namespace awkward {
         }
         output_names_.push_back(item[3].GetString());
         output_dtypes_.push_back(util::dtype::uint8);
-        int64_t contenti = buffers_uint8_.size();
+        int64_t contenti = (int64_t)buffers_uint8_.size();
         output_which_.push_back(contenti);
         buffers_uint8_.push_back(GrowableBuffer<uint8_t>(options));
         instructions_.push_back(FillString);
@@ -1124,10 +1124,10 @@ namespace awkward {
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
-        int64_t outi = buffers_int64_.size();
+        int64_t outi = (int64_t)buffers_int64_.size();
         output_which_.push_back(outi);
         buffers_int64_.push_back(GrowableBuffer<int64_t>(options));
-        int64_t start = strings.size();
+        int64_t start = (int64_t)strings.size();
         for (auto& x : item[3].GetArray()) {
           if (!x.IsString()) {
             throw std::invalid_argument(
@@ -1137,7 +1137,7 @@ namespace awkward {
           }
           strings.push_back(x.GetString());
         }
-        int64_t stop = strings.size();
+        int64_t stop = (int64_t)strings.size();
         if (std::string("FillEnumString") == item[0].GetString()) {
           instructions_.push_back(FillEnumString);
         }
@@ -1165,10 +1165,10 @@ namespace awkward {
         }
         output_names_.push_back(item[1].GetString());
         output_dtypes_.push_back(util::dtype::int64);
-        int64_t outi = buffers_int64_.size();
+        int64_t outi = (int64_t)buffers_int64_.size();
         output_which_.push_back(outi);
         buffers_int64_.push_back(GrowableBuffer<int64_t>(options));
-        buffers_int64_[outi].append(0);
+        buffers_int64_[(size_t)outi].append(0);
         instructions_.push_back(VarLengthList);
         instructions_.push_back(outi);
         instructions_.push_back(-1);
@@ -1207,7 +1207,7 @@ namespace awkward {
             "KeyTableItem arguments: key:str jump_to:int" + FILENAME(__LINE__)
           );
         }
-        int64_t stringi = strings.size();
+        int64_t stringi = (int64_t)strings.size();
         strings.push_back(item[1].GetString());
         instructions_.push_back(KeyTableItem);
         instructions_.push_back(stringi);
@@ -1225,7 +1225,7 @@ namespace awkward {
 
     string_offsets_.push_back(0);
     for (auto string : strings) {
-      string_offsets_.push_back(string_offsets_[string_offsets_.size() - 1] + string.length());
+      string_offsets_.push_back(string_offsets_[string_offsets_.size() - 1] + (int64_t)string.length());
       for (auto c : string) {
         characters_.push_back(c);
       }
@@ -1306,7 +1306,7 @@ namespace awkward {
   std::string
   FromJsonObjectSchema::debug() const noexcept {
     std::stringstream out;
-    out << "at " << current_instruction_ << " | " << instructions_[current_instruction_ * 4] << " stack";
+    out << "at " << current_instruction_ << " | " << instructions_[(size_t)current_instruction_ * 4] << " stack";
     for (int64_t i = 0;  (size_t)i < instruction_stack_.size();  i++) {
       if (i == current_stack_depth_) {
         out << " ;";

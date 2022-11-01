@@ -48,7 +48,7 @@ namespace awkward {
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-data",
-      buffer_.length() * (int64_t)sizeof(std::complex<double>));
+      (int64_t)buffer_.length() * (int64_t)sizeof(std::complex<double>));
 
     buffer_.concatenate(reinterpret_cast<std::complex<double>*>(ptr));
 

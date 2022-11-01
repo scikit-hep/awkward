@@ -41,7 +41,7 @@ namespace awkward {
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-offsets",
-      offsets_.length() * (int64_t)sizeof(int64_t));
+      (int64_t)offsets_.length() * (int64_t)sizeof(int64_t));
 
     offsets_.concatenate(reinterpret_cast<int64_t*>(ptr));
 

@@ -49,7 +49,7 @@ namespace awkward {
     buffer_.concatenate(
       reinterpret_cast<double*>(
         container.empty_buffer(form_key.str() + "-data",
-        buffer_.length() * (int64_t)sizeof(double))));
+        (int64_t)buffer_.length() * (int64_t)sizeof(double))));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"float64\", \"form_key\": \""
            + form_key.str() + "\"}";

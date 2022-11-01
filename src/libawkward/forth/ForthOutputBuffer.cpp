@@ -125,7 +125,7 @@ namespace awkward {
   template <typename OUT>
   ForthOutputBufferOf<OUT>::ForthOutputBufferOf(int64_t initial, double resize)
     : ForthOutputBuffer(initial, resize)
-    , ptr_(new OUT[initial], util::array_deleter<OUT>()) { }
+    , ptr_(new OUT[(size_t)initial], util::array_deleter<OUT>()) { }
 
   template <typename OUT>
   const std::shared_ptr<void>
@@ -317,7 +317,7 @@ namespace awkward {
   ForthOutputBufferOf<OUT>::write_one_string(char* string_buffer, int64_t length) noexcept {
     int64_t next = length_ + length;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], string_buffer, length);
+    std::memcpy(&ptr_.get()[length_], string_buffer, (size_t)length);
     length_ = next;
   }
 
@@ -713,9 +713,9 @@ namespace awkward {
     if (next > reserved_) {
       int64_t reservation = reserved_;
       while (next > reservation) {
-        reservation = (int64_t)std::ceil(reservation * resize_);
+        reservation = (int64_t)std::ceil((double)reservation * (double)resize_);
       }
-      std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
+      std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[(size_t)reservation],
                                                              util::array_deleter<OUT>());
       std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * (size_t)reserved_);
       ptr_ = new_buffer;
