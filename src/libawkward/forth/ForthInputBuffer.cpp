@@ -67,7 +67,7 @@ namespace awkward {
 
     int64_t i = 0;
     int64_t howmany = stop - start;
-    size_t len;
+    int64_t len;
 
     for (auto it = strings.begin() + start;  i < howmany;  i++) {
       len = it->length();

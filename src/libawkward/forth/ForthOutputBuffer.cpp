@@ -196,13 +196,13 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_bool(bool value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_bool(bool value, bool) noexcept {
     write_one(value);
   }
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_int8(int8_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_int8(int8_t value, bool) noexcept {
     write_one(value);
   }
 
@@ -249,7 +249,7 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_uint8(uint8_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_uint8(uint8_t value, bool) noexcept {
     write_one(value);
   }
 
@@ -325,7 +325,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_bool(int64_t num_items,
                                        bool* values,
-                                       bool byteswap) noexcept {
+                                       bool) noexcept {
     write_copy(num_items, values);
   }
 
@@ -333,7 +333,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_int8(int64_t num_items,
                                        int8_t* values,
-                                       bool byteswap) noexcept {
+                                       bool) noexcept {
     write_copy(num_items, values);
   }
 
@@ -414,7 +414,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_uint8(int64_t num_items,
                                         uint8_t* values,
-                                        bool byteswap) noexcept {
+                                        bool) noexcept {
     write_copy(num_items, values);
   }
 
@@ -516,7 +516,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<bool>::write_bool(int64_t num_items,
                                         bool* values,
-                                        bool byteswap) noexcept {
+                                        bool) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(bool) * (size_t)num_items);
@@ -527,7 +527,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<int8_t>::write_int8(int64_t num_items,
                                           int8_t* values,
-                                          bool byteswap) noexcept {
+                                          bool) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(int8_t) * (size_t)num_items);
@@ -590,7 +590,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<uint8_t>::write_uint8(int64_t num_items,
                                             uint8_t* values,
-                                            bool byteswap) noexcept {
+                                            bool) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);

@@ -341,7 +341,7 @@ namespace awkward {
   ForthMachineOf<T, I>::decompiled_segment(int64_t segment_position,
                                            const std::string& indent,
                                            bool endline) const {
-    if ((IndexTypeOf<int64_t>)segment_position < 0  ||  (IndexTypeOf<int64_t>)segment_position + 1 >= bytecodes_offsets_.size()) {
+    if (segment_position < 0  ||  (IndexTypeOf<int64_t>)segment_position + 1 >= bytecodes_offsets_.size()) {
       throw std::runtime_error(
         std::string("segment ") + std::to_string(segment_position)
         + std::string(" does not exist in the bytecode") + FILENAME(__LINE__));
@@ -1253,7 +1253,7 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ForthMachineOf<T, I>::maybe_throw(util::ForthError err,
+  ForthMachineOf<T, I>::maybe_throw(util::ForthError,
                                     const std::set<util::ForthError>& ignore) const {
     if (ignore.count(current_error_) == 0) {
       switch (current_error_) {
@@ -2110,7 +2110,7 @@ namespace awkward {
             + FILENAME(__LINE__)
           );
         }
-        for (int64_t i = 0;  i < ofs.size();  i++) {
+        for (int64_t i = 0;  (size_t)i < ofs.size();  i++) {
           if (ofs[i] > endofs[i]) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, stop, "in 'case' .. 'endcase', there must be an 'endof' for every 'of'")
@@ -2124,12 +2124,12 @@ namespace awkward {
         I alternate;
 
         I first_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
-        for(I i = 0; i < ofs.size() + 1; i++){
+        for(I i = 0;  (size_t)i < ofs.size() + 1;  i++){
           dictionary.push_back({});
         }
         bool can_specialize = true;
         int64_t substart = pos + 1;
-        for (int64_t i = 0;  i < ofs.size();  i++) {
+        for (int64_t i = 0;  (size_t)i < ofs.size();  i++) {
           I pred_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> pred;
           dictionary.push_back(pred);
@@ -2216,7 +2216,7 @@ namespace awkward {
           //
           // But the regular case should become a jump table with CODE_CASE_REGULAR.
 
-          for (int64_t i = 0;  i < ofs.size();  i++) {
+          for (int64_t i = 0;  (size_t)i < ofs.size();  i++) {
             auto pred = dictionary.begin() + (predicates[i] - BOUND_DICTIONARY);
             pred->push_back(CODE_OVER);  // append "over"
             pred->push_back(CODE_EQ);    // append "="
@@ -3821,7 +3821,7 @@ namespace awkward {
             }
 
             case CODE_PRINT_STACK: {
-              printf("<%lld> ", stack_depth_);
+              printf("<%ld> ", stack_depth_);
               for (int64_t i = 0;  i < stack_depth_;  i++) {
                 print_number(stack_buffer_[i]);
               }
@@ -4298,7 +4298,7 @@ namespace awkward {
   template <>
   void
   ForthMachineOf<int64_t, int32_t>::print_number(int64_t num) noexcept {
-    printf("%lld ", num);
+    printf("%ld ", num);
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;

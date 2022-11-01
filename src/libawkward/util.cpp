@@ -481,7 +481,7 @@ namespace awkward {
         try {
           out = (int64_t) std::stoi(key);
         }
-        catch (std::invalid_argument err) {
+        catch (std::invalid_argument const&) {
           throw std::invalid_argument(
             std::string("key ") + quote(key)
             + std::string(" does not exist (not in record)") + FILENAME(__LINE__));
@@ -520,7 +520,7 @@ namespace awkward {
       try {
         fieldindex(recordlookup, key, numfields);
       }
-      catch (std::invalid_argument err) {
+      catch (std::invalid_argument const&) {
         return false;
       }
       return true;

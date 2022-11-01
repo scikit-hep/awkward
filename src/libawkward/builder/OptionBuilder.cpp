@@ -28,7 +28,7 @@ namespace awkward {
                                            content);
   }
 
-  OptionBuilder::OptionBuilder(const BuilderOptions& options,
+  OptionBuilder::OptionBuilder(const BuilderOptions&,
                                GrowableBuffer<int64_t> index,
                                const BuilderPtr content)
     : index_(std::move(index))

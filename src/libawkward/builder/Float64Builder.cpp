@@ -74,14 +74,14 @@ namespace awkward {
   Float64Builder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Float64Builder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -100,35 +100,35 @@ namespace awkward {
   Float64Builder::complex(std::complex<double> x) {
     BuilderPtr out = Complex128Builder::fromfloat64(options_, std::move(buffer_));
     out.get()->complex(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Float64Builder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Float64Builder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Float64Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Float64Builder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -142,11 +142,11 @@ namespace awkward {
   Float64Builder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
-  Float64Builder::index(int64_t index) {
+  Float64Builder::index(int64_t) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -163,11 +163,11 @@ namespace awkward {
   Float64Builder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return std::move(out);
+    return out;
   }
 
   void
-  Float64Builder::field(const char* key, bool check) {
+  Float64Builder::field(const char*, bool) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));

@@ -10,7 +10,7 @@ ERROR awkward_ListOffsetArray_flatten_offsets(
   const C* outeroffsets,
   int64_t outeroffsetslen,
   const T* inneroffsets,
-  int64_t inneroffsetslen) {
+  int64_t) {
   for (int64_t i = 0;  i < outeroffsetslen;  i++) {
     tooffsets[i] =
       inneroffsets[outeroffsets[i]];

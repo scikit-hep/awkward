@@ -86,7 +86,7 @@ namespace awkward {
     }
 
     bool
-    String(const char* str, rj::SizeType length, bool copy) {
+    String(const char* str, rj::SizeType length, bool) {
       moved_ = true;
       if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
         builder_.real(std::numeric_limits<double>::quiet_NaN());
@@ -114,7 +114,7 @@ namespace awkward {
     }
 
     bool
-    EndArray(rj::SizeType numfields) {
+    EndArray(rj::SizeType) {
       moved_ = true;
       builder_.endlist();
       return true;
@@ -128,14 +128,14 @@ namespace awkward {
     }
 
     bool
-    EndObject(rj::SizeType numfields) {
+    EndObject(rj::SizeType) {
       moved_ = true;
       builder_.endrecord();
       return true;
     }
 
     bool
-    Key(const char* str, rj::SizeType length, bool copy) {
+    Key(const char* str, rj::SizeType, bool) {
       moved_ = true;
       builder_.field_check(str);
       return true;
@@ -200,10 +200,10 @@ namespace awkward {
       std::string context = std::string(buffer_, (size_t)stop).substr(start);
       int64_t arrow = current - start;
 
-      size_t pos;
+      int64_t pos;
 
       pos = 0;
-      while ((pos = context.find(9, pos)) != std::string::npos) {
+      while ((size_t)(pos = context.find(9, pos)) != std::string::npos) {
         context.replace(pos, 1, "\\t");
         pos++;
         if (pos < arrow) {
@@ -212,7 +212,7 @@ namespace awkward {
       }
 
       pos = 0;
-      while ((pos = context.find(10, pos)) != std::string::npos) {
+      while ((size_t)(pos = context.find(10, pos)) != std::string::npos) {
         context.replace(pos, 1, "\\n");
         pos++;
         if (pos < arrow) {
@@ -221,7 +221,7 @@ namespace awkward {
       }
 
       pos = 0;
-      while ((pos = context.find(13, pos)) != std::string::npos) {
+      while ((size_t)(pos = context.find(13, pos)) != std::string::npos) {
         context.replace(pos, 1, "\\r");
         pos++;
         if (pos < arrow) {
@@ -355,9 +355,9 @@ namespace awkward {
       , nan_string_(nan_string)
       , posinf_string_(posinf_string)
       , neginf_string_(neginf_string)
-      , ignore_(0)
       , moved_(false)
-      , schema_okay_(true) { }
+      , schema_okay_(true)
+      , ignore_(0) { }
 
     void
     reset_moved() {
@@ -823,7 +823,7 @@ namespace awkward {
     }
 
     bool
-    EndObject(rj::SizeType numfields) {
+    EndObject(rj::SizeType) {
       moved_ = true;
       // std::cout << "endobject " << specializedjson_->debug() << std::endl;
       // std::cout << "  ignore state " << ignore_ << std::endl;
@@ -853,7 +853,7 @@ namespace awkward {
     }
 
     bool
-    Key(const char* str, rj::SizeType length, bool copy) {
+    Key(const char* str, rj::SizeType, bool) {
       moved_ = true;
       // std::cout << "key " << str << " " << specializedjson_->debug() << std::endl;
       // std::cout << "  ignore state " << ignore_ << std::endl;
@@ -1307,13 +1307,13 @@ namespace awkward {
   FromJsonObjectSchema::debug() const noexcept {
     std::stringstream out;
     out << "at " << current_instruction_ << " | " << instructions_[current_instruction_ * 4] << " stack";
-    for (int64_t i = 0;  i < instruction_stack_.size();  i++) {
+    for (int64_t i = 0;  (size_t)i < instruction_stack_.size();  i++) {
       if (i == current_stack_depth_) {
         out << " ;";
       }
       out << " " << instruction_stack_.data()[i];
     }
-    if (current_stack_depth_ == instruction_stack_.size()) {
+    if ((size_t)current_stack_depth_ == instruction_stack_.size()) {
       out << " ;";
     }
     return out.str();

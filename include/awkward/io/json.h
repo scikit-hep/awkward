@@ -267,6 +267,8 @@ namespace awkward {
             reinterpret_cast<double*>(external_pointer)
           );
           break;
+        default:
+          break;
       }
     }
 

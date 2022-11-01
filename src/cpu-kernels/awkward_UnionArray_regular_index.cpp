@@ -11,7 +11,6 @@ ERROR awkward_UnionArray_regular_index(
   int64_t size,
   const C* fromtags,
   int64_t length) {
-  int64_t count = 0;
   for (int64_t k = 0;  k < size;  k++) {
     current[k] = 0;
   }

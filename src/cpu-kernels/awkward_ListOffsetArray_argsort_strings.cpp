@@ -42,7 +42,6 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
 
   int64_t firstindex = 0;
   int64_t lastparent = -1;
-  int64_t k = 0;
   std::vector<int64_t> index;
   for (int64_t i = 0;  i < length + 1;  i++) {
     if (i == length  ||  fromparents[i] != lastparent) {

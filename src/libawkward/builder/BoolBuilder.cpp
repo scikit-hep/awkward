@@ -59,7 +59,7 @@ namespace awkward {
   BoolBuilder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -72,49 +72,49 @@ namespace awkward {
   BoolBuilder::integer(int64_t x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->integer(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   BoolBuilder::real(double x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->real(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   BoolBuilder::complex(std::complex<double> x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->complex(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   BoolBuilder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   BoolBuilder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   BoolBuilder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   BoolBuilder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -128,11 +128,11 @@ namespace awkward {
   BoolBuilder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
-  BoolBuilder::index(int64_t index) {
+  BoolBuilder::index(int64_t) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begintuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -149,11 +149,11 @@ namespace awkward {
   BoolBuilder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return std::move(out);
+    return out;
   }
 
   void
-  BoolBuilder::field(const char* key, bool check) {
+  BoolBuilder::field(const char*, bool) {
     throw std::invalid_argument(
       std::string("called 'field' without 'beginrecord' at the same level before it")
       + FILENAME(__LINE__));

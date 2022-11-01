@@ -11,7 +11,7 @@ ERROR awkward_RegularArray_getitem_next_array_advanced(
   const T* fromadvanced,
   const T* fromarray,
   int64_t length,
-  int64_t lenarray,
+  int64_t,
   int64_t size) {
   for (int64_t i = 0;  i < length;  i++) {
     tocarry[i] = i*size + fromarray[fromadvanced[i]];
