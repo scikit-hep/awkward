@@ -180,6 +180,7 @@ def _impl(x, weight, axis, keepdims, mask_identity):
             behavior=behavior,
         )
 
+    nplike = ak._nplikes.nplike_of(x, weight)
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
@@ -215,7 +216,9 @@ def _impl(x, weight, axis, keepdims, mask_identity):
                 highlevel=True,
                 behavior=None,
             )
-        return ak._nplikes.nplike_of(sumwx, sumw).true_divide(sumwx, sumw)
+        # FIXME: this check just ensures that we have the same nplike
+        # This should be handled more cleanly
+        return sumwx / sumw
 
 
 @ak._connect.numpy.implements("mean")
