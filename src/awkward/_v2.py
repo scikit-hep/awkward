@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-raise ModuleNotFoundError("""The awkward._v2 submodule was provided for early access to awkward>=2, as it developed.
+raise ModuleNotFoundError(
+    """The awkward._v2 submodule was provided for early access to awkward>=2, as it developed.
 
 Now that version 2 has been released, awkward._v2 is no longer needed.
 
@@ -21,4 +22,5 @@ or
 
 It is no longer possible to access v1 and v2 in the same process.
 
-Arrays can be written and read as Parquet files or Arrow buffers to share data between processes.""")
+Arrays can be written and read as Parquet files or Arrow buffers to share data between processes."""
+)
