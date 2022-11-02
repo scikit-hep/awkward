@@ -124,7 +124,7 @@ namespace awkward {
       for (int64_t i = stringsstart;  i < argument3();  i++) {
         start = offsets[i];
         stop = offsets[i + 1];
-        if (strncmp(str, &chars[start], stop - start) == 0) {
+        if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
           return i - stringsstart;
         }
       }
@@ -142,7 +142,7 @@ namespace awkward {
         stringi = instructions_.data()[i * 4 + 1];
         start = offsets[stringi];
         stop = offsets[stringi + 1];
-        if (strncmp(str, &chars[start], stop - start) == 0) {
+        if (strncmp(str, &chars[start], (size_t)(stop - start)) == 0) {
           return instructions_.data()[i * 4 + 2];
         }
       }
@@ -151,42 +151,42 @@ namespace awkward {
 
     /// @brief HERE
     inline void write_int8(int64_t index, int8_t x) noexcept {
-      buffers_uint8_[index].append(*reinterpret_cast<uint8_t*>(&x));
+      buffers_uint8_[(size_t)index].append(*reinterpret_cast<uint8_t*>(&x));
     }
 
     /// @brief HERE
     inline void write_uint8(int64_t index, uint8_t x) noexcept {
-      buffers_uint8_[index].append(x);
+      buffers_uint8_[(size_t)index].append(x);
     }
 
     /// @brief HERE
     inline void write_many_uint8(int64_t index, int64_t num_items, const uint8_t* values) noexcept {
-      buffers_uint8_[index].extend(values, num_items);
+      buffers_uint8_[(size_t)index].extend(values, (size_t)num_items);
     }
 
     /// @brief HERE
     inline void write_int64(int64_t index, int64_t x) noexcept {
-      buffers_int64_[index].append(x);
+      buffers_int64_[(size_t)index].append(x);
     }
 
     /// @brief HERE
     inline void write_uint64(int64_t index, uint64_t x) noexcept {
-      buffers_int64_[index].append(static_cast<int64_t>(x));
+      buffers_int64_[(size_t)index].append(static_cast<int64_t>(x));
     }
 
     /// @brief HERE
     inline void write_add_int64(int64_t index, int64_t x) noexcept {
-      buffers_int64_[index].append(buffers_int64_[index].last() + x);
+      buffers_int64_[(size_t)index].append(buffers_int64_[(size_t)index].last() + x);
     }
 
     /// @brief HERE
     inline void write_float64(int64_t index, double x) noexcept {
-      buffers_float64_[index].append(x);
+      buffers_float64_[(size_t)index].append(x);
     }
 
     /// @brief HERE
     inline int64_t get_and_increment(int64_t index) noexcept {
-      return counters_[index]++;
+      return counters_[(size_t)index]++;
     }
 
     /// @brief HERE
@@ -204,17 +204,17 @@ namespace awkward {
 
     /// @brief HERE
     int64_t num_outputs() const {
-      return output_names_.size();
+      return (int64_t)output_names_.size();
     }
 
     /// @brief HERE
     std::string output_name(int64_t i) const {
-      return output_names_[i];
+      return output_names_[(size_t)i];
     }
 
     /// @brief HERE
     std::string output_dtype(int64_t i) const {
-      switch (output_dtypes_[i]) {
+      switch (output_dtypes_[(size_t)i]) {
         case util::dtype::int8:
           return "int8";
         case util::dtype::uint8:
@@ -230,15 +230,15 @@ namespace awkward {
 
     /// @brief HERE
     int64_t output_num_items(int64_t i) const {
-      switch (output_dtypes_[i]) {
+      switch (output_dtypes_[(size_t)i]) {
         case util::dtype::int8:
-          return buffers_uint8_[output_which_[i]].nbytes();
+          return (int64_t)buffers_uint8_[(size_t)output_which_[(size_t)i]].nbytes();
         case util::dtype::uint8:
-          return buffers_uint8_[output_which_[i]].nbytes();
+          return (int64_t)buffers_uint8_[(size_t)output_which_[(size_t)i]].nbytes();
         case util::dtype::int64:
-          return buffers_int64_[output_which_[i]].nbytes() / 8;
+          return (int64_t)buffers_int64_[(size_t)output_which_[(size_t)i]].nbytes() / 8;
         case util::dtype::float64:
-          return buffers_float64_[output_which_[i]].nbytes() / 8;
+          return (int64_t)buffers_float64_[(size_t)output_which_[(size_t)i]].nbytes() / 8;
         default:
           return -1;
       }
@@ -246,26 +246,28 @@ namespace awkward {
 
     /// @brief HERE
     void output_fill(int64_t i, void* external_pointer) const {
-      switch (output_dtypes_[i]) {
+      switch (output_dtypes_[(size_t)i]) {
         case util::dtype::int8:
-          buffers_uint8_[output_which_[i]].concatenate(
+          buffers_uint8_[(size_t)output_which_[(size_t)i]].concatenate(
             reinterpret_cast<uint8_t*>(external_pointer)
           );
           break;
         case util::dtype::uint8:
-          buffers_uint8_[output_which_[i]].concatenate(
+          buffers_uint8_[(size_t)output_which_[(size_t)i]].concatenate(
             reinterpret_cast<uint8_t*>(external_pointer)
           );
           break;
         case util::dtype::int64:
-          buffers_int64_[output_which_[i]].concatenate(
+          buffers_int64_[(size_t)output_which_[(size_t)i]].concatenate(
             reinterpret_cast<int64_t*>(external_pointer)
           );
           break;
         case util::dtype::float64:
-          buffers_float64_[output_which_[i]].concatenate(
+          buffers_float64_[(size_t)output_which_[(size_t)i]].concatenate(
             reinterpret_cast<double*>(external_pointer)
           );
+          break;
+        default:
           break;
       }
     }

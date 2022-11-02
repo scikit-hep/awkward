@@ -139,7 +139,7 @@ template <typename T, typename I>
 py::object machine_bytecodes_at_to_python_content(std::shared_ptr<ak::ForthMachineOf<T, I>> machine, int64_t index) {
   // Single-copy into shared-ptr for offsets and bytecodes
   const auto offsets = machine->bytecodes_offsets();
-  const auto length = offsets.size() - 1;
+  const auto length = (int64_t)offsets.size() - 1;
   const auto bytecodes_holder = std::make_shared<std::vector<I>>(std::move(machine->bytecodes()));
 
   // Build capsules which release their usage of the held memory on GC
@@ -200,7 +200,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
             else if (self.get()->is_defined(key)) {
               const std::vector<std::string> dictionary = self.get()->dictionary();
               int64_t index = 0;
-              for (;  index < dictionary.size();  index++) {
+              for (;  (size_t)index < dictionary.size();  index++) {
                 if (dictionary[index] == key) {
                   break;
                 }

@@ -125,7 +125,7 @@ namespace awkward {
   template <typename OUT>
   ForthOutputBufferOf<OUT>::ForthOutputBufferOf(int64_t initial, double resize)
     : ForthOutputBuffer(initial, resize)
-    , ptr_(new OUT[initial], util::array_deleter<OUT>()) { }
+    , ptr_(new OUT[(size_t)initial], util::array_deleter<OUT>()) { }
 
   template <typename OUT>
   const std::shared_ptr<void>
@@ -196,13 +196,13 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_bool(bool value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_bool(bool value, bool /* byteswap */) noexcept {
     write_one(value);
   }
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_int8(int8_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_int8(int8_t value, bool /* byteswap */) noexcept {
     write_one(value);
   }
 
@@ -249,7 +249,7 @@ namespace awkward {
 
   template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::write_one_uint8(uint8_t value, bool byteswap) noexcept {
+  ForthOutputBufferOf<OUT>::write_one_uint8(uint8_t value, bool /* byteswap */) noexcept {
     write_one(value);
   }
 
@@ -317,7 +317,7 @@ namespace awkward {
   ForthOutputBufferOf<OUT>::write_one_string(char* string_buffer, int64_t length) noexcept {
     int64_t next = length_ + length;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], string_buffer, length);
+    std::memcpy(&ptr_.get()[length_], string_buffer, (size_t)length);
     length_ = next;
   }
 
@@ -325,7 +325,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_bool(int64_t num_items,
                                        bool* values,
-                                       bool byteswap) noexcept {
+                                       bool /* byteswap */) noexcept {
     write_copy(num_items, values);
   }
 
@@ -333,7 +333,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_int8(int64_t num_items,
                                        int8_t* values,
-                                       bool byteswap) noexcept {
+                                       bool /* byteswap */) noexcept {
     write_copy(num_items, values);
   }
 
@@ -414,7 +414,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_uint8(int64_t num_items,
                                         uint8_t* values,
-                                        bool byteswap) noexcept {
+                                        bool /* byteswap */) noexcept {
     write_copy(num_items, values);
   }
 
@@ -516,7 +516,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<bool>::write_bool(int64_t num_items,
                                         bool* values,
-                                        bool byteswap) noexcept {
+                                        bool /* byteswap */) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(bool) * (size_t)num_items);
@@ -527,7 +527,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<int8_t>::write_int8(int64_t num_items,
                                           int8_t* values,
-                                          bool byteswap) noexcept {
+                                          bool /* byteswap */) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(int8_t) * (size_t)num_items);
@@ -590,7 +590,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<uint8_t>::write_uint8(int64_t num_items,
                                             uint8_t* values,
-                                            bool byteswap) noexcept {
+                                            bool /* byteswap */) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
     std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
@@ -713,9 +713,9 @@ namespace awkward {
     if (next > reserved_) {
       int64_t reservation = reserved_;
       while (next > reservation) {
-        reservation = (int64_t)std::ceil(reservation * resize_);
+        reservation = (int64_t)std::ceil((double)reservation * (double)resize_);
       }
-      std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
+      std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[(size_t)reservation],
                                                              util::array_deleter<OUT>());
       std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * (size_t)reserved_);
       ptr_ = new_buffer;
