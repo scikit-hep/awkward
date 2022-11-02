@@ -6,7 +6,7 @@
 
 ERROR awkward_IndexedArray_local_preparenext_64(
     int64_t* tocarry,
-    const int64_t*,
+    const int64_t* /* starts */,   // FIXME: this argument is not needed
     const int64_t* parents,
     const int64_t parentslength,
     const int64_t* nextparents,

@@ -76,15 +76,15 @@ namespace {
   class EmptyBuffersContainer: public ak::BuffersContainer {
   public:
     void*
-      empty_buffer(const std::string&, int64_t) override {
+      empty_buffer(const std::string& /* name */, int64_t /* num_bytes */) override {
         return nullptr;
       }
 
     void
-      copy_buffer(const std::string&, const void*, int64_t) override { }
+      copy_buffer(const std::string& /* name */, const void* /* source */, int64_t /* num_bytes */) override { }
 
     void
-      full_buffer(const std::string&, int64_t, int64_t, const std::string&) override { }
+      full_buffer(const std::string& /* name */, int64_t /* length */, int64_t /* value */, const std::string& /* dtype */) override { }
   };
 }
 

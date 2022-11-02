@@ -132,7 +132,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  BoolBuilder::index(int64_t) {
+  BoolBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begintuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -153,7 +153,7 @@ namespace awkward {
   }
 
   void
-  BoolBuilder::field(const char*, bool) {
+  BoolBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
       std::string("called 'field' without 'beginrecord' at the same level before it")
       + FILENAME(__LINE__));

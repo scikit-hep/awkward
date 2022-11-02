@@ -120,7 +120,7 @@ namespace awkward {
 
       /// @brief Checks for validity and consistency.
       bool
-      is_valid(std::string&) const noexcept {
+      is_valid(std::string& /* error */) const noexcept {
         return true;
       }
 
@@ -585,7 +585,7 @@ namespace awkward {
       }
 
       void
-      set_id(size_t&) noexcept {}
+      set_id(size_t& /* id */) noexcept {}
 
       void
       clear() noexcept {}
@@ -603,18 +603,18 @@ namespace awkward {
       }
 
       void
-      buffer_nbytes(std::map<std::string, size_t>&) const
+      buffer_nbytes(std::map<std::string, size_t>& /* names_nbytes */) const
           noexcept {}
 
       void
-      to_buffers(std::map<std::string, void*>&) const noexcept {}
+      to_buffers(std::map<std::string, void*>& /* buffers */) const noexcept {}
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>&) const noexcept {}
+      to_char_buffers(std::map<std::string, uint8_t*>& /* buffers */) const noexcept {}
 
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
@@ -705,11 +705,11 @@ namespace awkward {
       }
 
       void
-      buffer_nbytes(std::map<std::string, size_t>&) const
+      buffer_nbytes(std::map<std::string, size_t>& /* names_nbytes */) const
           noexcept {}
 
       void
-      to_buffers(std::map<std::string, void*>&) const noexcept {}
+      to_buffers(std::map<std::string, void*>& /* buffers */) const noexcept {}
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.

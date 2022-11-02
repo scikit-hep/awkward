@@ -146,7 +146,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  Float64Builder::index(int64_t) {
+  Float64Builder::index(int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -167,7 +167,7 @@ namespace awkward {
   }
 
   void
-  Float64Builder::field(const char*, bool) {
+  Float64Builder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));

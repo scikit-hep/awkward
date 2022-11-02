@@ -176,7 +176,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  UnknownBuilder::index(int64_t) {
+  UnknownBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -200,7 +200,7 @@ namespace awkward {
   }
 
   void
-  UnknownBuilder::field(const char*, bool) {
+  UnknownBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));

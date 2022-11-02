@@ -1154,6 +1154,7 @@ void
 test_Regular_size0() {
   RegularBuilder<0, NumpyBuilder<double>> builder;
 
+  builder.begin_list();
   builder.end_list();
 
   builder.begin_list();

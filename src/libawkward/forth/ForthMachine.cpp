@@ -1253,7 +1253,7 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ForthMachineOf<T, I>::maybe_throw(util::ForthError,
+  ForthMachineOf<T, I>::maybe_throw(util::ForthError /* err */,  // FIXME: this argument is not needed
                                     const std::set<util::ForthError>& ignore) const {
     if (ignore.count(current_error_) == 0) {
       switch (current_error_) {

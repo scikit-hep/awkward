@@ -31,7 +31,7 @@ public:
   }
   /// @brief Called by `std::shared_ptr` when its reference count reaches
   /// zero.
-  void operator()(T const *) {
+  void operator()(T const * /* p */) {
     Py_DECREF(pyobj_);
   }
 private:

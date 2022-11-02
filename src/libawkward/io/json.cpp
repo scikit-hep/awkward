@@ -86,7 +86,7 @@ namespace awkward {
     }
 
     bool
-    String(const char* str, rj::SizeType length, bool) {
+    String(const char* str, rj::SizeType length, bool /* copy */) {
       moved_ = true;
       if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
         builder_.real(std::numeric_limits<double>::quiet_NaN());
@@ -114,7 +114,7 @@ namespace awkward {
     }
 
     bool
-    EndArray(rj::SizeType) {
+    EndArray(rj::SizeType /* numfields */) {
       moved_ = true;
       builder_.endlist();
       return true;
@@ -128,14 +128,14 @@ namespace awkward {
     }
 
     bool
-    EndObject(rj::SizeType) {
+    EndObject(rj::SizeType /* numfields */) {
       moved_ = true;
       builder_.endrecord();
       return true;
     }
 
     bool
-    Key(const char* str, rj::SizeType, bool) {
+    Key(const char* str, rj::SizeType /* length */, bool /* copy */) {
       moved_ = true;
       builder_.field_check(str);
       return true;
@@ -823,7 +823,7 @@ namespace awkward {
     }
 
     bool
-    EndObject(rj::SizeType) {
+    EndObject(rj::SizeType /* numfields */) {
       moved_ = true;
       // std::cout << "endobject " << specializedjson_->debug() << std::endl;
       // std::cout << "  ignore state " << ignore_ << std::endl;
@@ -853,7 +853,7 @@ namespace awkward {
     }
 
     bool
-    Key(const char* str, rj::SizeType, bool) {
+    Key(const char* str, rj::SizeType /* length */, bool /* copy */) {
       moved_ = true;
       // std::cout << "key " << str << " " << specializedjson_->debug() << std::endl;
       // std::cout << "  ignore state " << ignore_ << std::endl;

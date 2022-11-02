@@ -170,7 +170,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  DatetimeBuilder::index(int64_t) {
+  DatetimeBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -191,7 +191,7 @@ namespace awkward {
   }
 
   void
-  DatetimeBuilder::field(const char*, bool) {
+  DatetimeBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));

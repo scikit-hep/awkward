@@ -148,7 +148,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  StringBuilder::string(const char* x, int64_t length, const char*) {
+  StringBuilder::string(const char* x, int64_t length, const char* /* encoding */) {
     if (length < 0) {
       for (int64_t i = 0;  x[i] != 0;  i++) {
         content_.append((uint8_t)x[i]);
@@ -185,7 +185,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  StringBuilder::index(int64_t) {
+  StringBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -206,7 +206,7 @@ namespace awkward {
   }
 
   void
-  StringBuilder::field(const char*, bool) {
+  StringBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));
