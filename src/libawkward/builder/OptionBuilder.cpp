@@ -28,7 +28,7 @@ namespace awkward {
                                            content);
   }
 
-  OptionBuilder::OptionBuilder(const BuilderOptions& options,
+  OptionBuilder::OptionBuilder(const BuilderOptions&,
                                GrowableBuffer<int64_t> index,
                                const BuilderPtr content)
     : index_(std::move(index))
@@ -45,7 +45,7 @@ namespace awkward {
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-index",
-      index_.length() * (int64_t)sizeof(int64_t));
+      (int64_t)index_.length() * (int64_t)sizeof(int64_t));
 
     index_.concatenate(reinterpret_cast<int64_t*>(ptr));
 

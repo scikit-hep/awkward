@@ -7,7 +7,7 @@
 template <typename T>
 ERROR awkward_unique_ranges(
   T* toptr,
-  int64_t length,
+  int64_t /* length */,   // FIXME: this argument is not needed
   const int64_t* fromoffsets,
   int64_t offsetslength,
   int64_t* tooffsets) {

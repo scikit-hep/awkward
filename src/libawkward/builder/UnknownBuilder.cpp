@@ -85,7 +85,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->boolean(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -95,7 +95,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->integer(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -105,7 +105,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->real(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -115,7 +115,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->complex(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -125,7 +125,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->datetime(x, unit);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -135,7 +135,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->timedelta(x, unit);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -145,7 +145,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->string(x, length, encoding);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -155,7 +155,7 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->beginlist();
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -172,11 +172,11 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->begintuple(numfields);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
-  UnknownBuilder::index(int64_t index) {
+  UnknownBuilder::index(int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -196,11 +196,11 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->beginrecord(name, check);
-    return std::move(out);
+    return out;
   }
 
   void
-  UnknownBuilder::field(const char* key, bool check) {
+  UnknownBuilder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));
