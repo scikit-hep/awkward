@@ -10,6 +10,7 @@
 #include <memory>
 #include <numeric>
 #include <cmath>
+#include <complex>
 #include <iostream>
 #include <utility>
 #include <stdexcept>
@@ -136,6 +137,18 @@ namespace awkward {
     copy_as(TO_PRIMITIVE* to_ptr, size_t offset) {
       for (size_t i = 0; i < length_; i++) {
         to_ptr[offset++] = static_cast<TO_PRIMITIVE>(ptr_.get()[i]);
+      }
+      if (next_) {
+        next_->copy_as(to_ptr, offset);
+      }
+    }
+
+    template <>
+    void
+    copy_as<std::complex<double>>(std::complex<double>* to_ptr, size_t offset) {
+      for (size_t i = 0; i < length_; i++) {
+        double val = static_cast<double>(ptr_.get()[i]);
+        to_ptr[offset++] = std::complex<double>(val);
       }
       if (next_) {
         next_->copy_as(to_ptr, offset);
