@@ -1,23 +1,26 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-# Following https://github.com/scikit-hep/awkward/blob/main-v1/src/awkward/_v2/__init__.py
+raise ModuleNotFoundError(  # noqa: AK101
+    """The awkward._v2 submodule was provided for early access to awkward>=2, as it developed.
 
-from awkward import Array  # noqa: F401
-from awkward import ArrayBuilder  # noqa: F401
-from awkward import Record  # noqa: F401
-from awkward import _broadcasting  # noqa: F401
-from awkward import _connect  # noqa: F401
-from awkward import _lookup  # noqa: F401
-from awkward import _slicing  # noqa: F401
-from awkward import _typetracer  # noqa: F401
-from awkward import _util  # noqa: F401
-from awkward import behavior  # noqa: F401
-from awkward import behaviors  # noqa: F401
-from awkward import contents  # noqa: F401
-from awkward import forms  # noqa: F401
-from awkward import index  # noqa: F401
-from awkward import numba  # noqa: F401
-from awkward import operations  # noqa: F401
-from awkward import record  # noqa: F401
-from awkward import types  # noqa: F401
-from awkward.operations import *  # noqa: F401,F403 pylint: disable=W0401,W0614
+Now that version 2 has been released, awkward._v2 is no longer needed.
+
+If you were an early adopter using
+
+    import awkward._v2 as ak
+
+you can replace it with
+
+    import awkward as ak
+
+or
+
+    try:
+        import awkward._v2 as ak   # provides v2 in 1.8.0rc1<=awkward<=1.10.1
+    except ModuleNotFoundError:
+        import awkward as ak       # provides v2 in awkward>=2
+
+It is no longer possible to access v1 and v2 in the same process.
+
+Arrays can be written and read as Parquet files or Arrow buffers to share data between processes."""
+)

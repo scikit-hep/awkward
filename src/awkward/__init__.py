@@ -48,9 +48,6 @@ awkward.behaviors.categorical.register(behavior)  # noqa: F405
 # operations
 from awkward.operations import *
 
-# temporary shim to access v2 under _v2
-import awkward._v2
-
 # version
 __version__ = awkward._ext.__version__
 __all__ = [x for x in globals() if not x.startswith("_")]
