@@ -7,7 +7,7 @@ import awkward as ak  # noqa: F401
 
 
 class Pointy(ak.highlevel.Record):
-    def __repr__(self):
+    def __str__(self):
         return "<{} {}>".format(self["x"], self["y"])
 
 
@@ -25,7 +25,7 @@ def test():
         behavior=behavior,
         check_valid=True,
     )
-    assert repr(array[0, 0]) == "<1 [1.1]>"
+    assert str(array[0, 0]) == "<1 [1.1]>"
     assert repr(array[0]) == "<Array [<1 [1.1]>, <2 [2, 0.2]>] type='2 * P'>"
     assert (
         repr(array)
