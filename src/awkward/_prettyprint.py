@@ -74,7 +74,7 @@ def custom_str(current):
         ak.highlevel.Array in current.__class__.__bases__
         and not type(current).__str__ is ak.highlevel.Array.__str__
     ):
-        return type(current).__str__(current)
+        return str(current)
 
     elif (
         ak.highlevel.Record in current.__class__.__bases__
@@ -83,7 +83,7 @@ def custom_str(current):
         ak.highlevel.Array in current.__class__.__bases__
         and not type(current).__repr__ is ak.highlevel.Array.__repr__
     ):
-        return type(current).__repr__(current)
+        return repr(current)
 
     else:
         return None
