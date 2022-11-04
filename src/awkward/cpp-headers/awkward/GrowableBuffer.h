@@ -18,6 +18,14 @@
 
 namespace awkward {
 
+  template <template <class...> class TT, class... Args>
+  std::true_type is_tt_impl(TT<Args...>);
+  template <template <class...> class TT>
+  std::false_type is_tt_impl(...);
+
+  template <template <class...> class TT, class T>
+  using is_tt = decltype(is_tt_impl<TT>(std::declval<typename std::decay<T>::type>()));
+
   template <typename PRIMITIVE>
   /// @class Panel
   ///
@@ -133,7 +141,7 @@ namespace awkward {
     ///
     /// Changes the data type from `PRIMITIVE` to `TO_PRIMITIVE`/
     template <typename TO_PRIMITIVE>
-    void
+    typename std::enable_if<!awkward::is_tt<std::complex, TO_PRIMITIVE>::value>::type
     copy_as(TO_PRIMITIVE* to_ptr, size_t offset) {
       for (size_t i = 0; i < length_; i++) {
         to_ptr[offset++] = static_cast<TO_PRIMITIVE>(ptr_.get()[i]);
@@ -143,12 +151,17 @@ namespace awkward {
       }
     }
 
-    template <>
-    void
-    copy_as<std::complex<double>>(std::complex<double>* to_ptr, size_t offset) {
+    /// @brief 'copy_as' specialization of a 'std::complex' template type.
+    /// Fills (one panel) GrowableBuffer<std::complex> with the
+    /// elements of (possibly multi-panels) GrowableBuffer<PRIMITIVE>.
+    ///
+    /// Changes the data type from `PRIMITIVE` to `std::complex`/
+    template <typename TO_PRIMITIVE>
+    typename std::enable_if<awkward::is_tt<std::complex, TO_PRIMITIVE>::value>::type
+    copy_as(TO_PRIMITIVE* to_ptr, size_t offset) {
       for (size_t i = 0; i < length_; i++) {
         double val = static_cast<double>(ptr_.get()[i]);
-        to_ptr[offset++] = std::complex<double>(val);
+        to_ptr[offset++] = TO_PRIMITIVE(val);
       }
       if (next_) {
         next_->copy_as(to_ptr, offset);

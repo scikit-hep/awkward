@@ -4,6 +4,7 @@
 #define AWKWARD_CPP_HEADERS_UTILS_H_
 
 #include <iterator>
+#include <iostream>
 #include <complex>
 #include <type_traits>
 #include <cassert>
