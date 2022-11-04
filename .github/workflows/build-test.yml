@@ -55,7 +55,10 @@ jobs:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
 
-      - name: Build
+      - name: Build C++
+        run: 'python -m pip install -vv ./awkward-cpp'
+
+      - name: Build Python
         run: 'python -m pip install -v .[test,dev]'
 
       - name: Check if kernel specification is sorted
@@ -111,7 +114,10 @@ jobs:
         with:
           python-version: '${{ matrix.python-version }}'
 
-      - name: Build
+      - name: Build C++
+        run: 'python -m pip install -vv ./awkward-cpp'
+
+      - name: Build Python
         run: 'python -m pip install -v .[test,dev]'
 
       - name: Check if kernel specification is sorted
@@ -178,7 +184,10 @@ jobs:
       - name: Install NumPy
         run: python -m pip install "${{ matrix.numpy-package }}"
 
-      - name: Build
+      - name: Build C++
+        run: 'python -m pip install -vv ./awkward-cpp'
+
+      - name: Build Python
         run: 'python -m pip install -v .[test,dev]'
 
       - name: Print versions
@@ -262,7 +271,10 @@ jobs:
           mamba install numpy
           conda list
 
-      - name: Build
+      - name: Build C++
+        run: 'python -m pip install -vv ./awkward-cpp'
+
+      - name: Build Python
         run: 'python -m pip install -v .[test,dev]'
 
       - name: Print versions

@@ -57,7 +57,10 @@ jobs:
       - name: Install NumPy
         run: python -m pip install numpy
 
-      - name: Build
+      - name: Build C++
+        run: 'python -m pip install -vv ./awkward-cpp'
+
+      - name: Build Python
         run: 'python -m pip install -v .[test,dev]'
 
       - name: Print versions
