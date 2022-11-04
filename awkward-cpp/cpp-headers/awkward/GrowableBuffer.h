@@ -277,7 +277,7 @@ namespace awkward {
     template <typename TO_PRIMITIVE>
     static GrowableBuffer<TO_PRIMITIVE>
     copy_as(const GrowableBuffer<PRIMITIVE>& other) {
-      auto len = other.length();
+      int64_t len = (int64_t)other.length();
       int64_t actual =
           (len < other.options_.initial()) ? other.options_.initial() : len;
 
@@ -383,7 +383,7 @@ namespace awkward {
     void
     append(PRIMITIVE datum) {
       if (ptr_->current_length() == ptr_->reserved()) {
-        add_panel((size_t)ceil(ptr_->reserved() * options_.resize()));
+        add_panel((size_t)ceil((double)ptr_->reserved() * (double)options_.resize()));
       }
       fill_panel(datum);
     }

@@ -51,12 +51,12 @@ namespace awkward {
     tags_.concatenate(
       reinterpret_cast<int8_t*>(
         container.empty_buffer(form_key.str() + "-tags",
-        tags_.length() * (int64_t)sizeof(int8_t))));
+        (int64_t)tags_.length() * (int64_t)sizeof(int8_t))));
 
     index_.concatenate(
       reinterpret_cast<int64_t*>(
         container.empty_buffer(form_key.str() + "-index",
-        index_.length() * (int64_t)sizeof(int64_t))));
+        (int64_t)index_.length() * (int64_t)sizeof(int64_t))));
 
     std::stringstream out;
     out << "{\"class\": \"UnionArray\", \"tags\": \"i8\", \"index\": \"i64\", \"contents\": [";
@@ -94,7 +94,7 @@ namespace awkward {
     if (current_ == -1) {
       BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
-      return std::move(out);
+      return out;
     }
     else {
       contents_[(size_t)current_].get()->null();

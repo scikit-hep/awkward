@@ -120,7 +120,7 @@ namespace awkward {
 
       /// @brief Checks for validity and consistency.
       bool
-      is_valid(std::string& error) const noexcept {
+      is_valid(std::string& /* error */) const noexcept {
         return true;
       }
 
@@ -286,7 +286,7 @@ namespace awkward {
       /// @brief Checks for validity and consistency.
       bool
       is_valid(std::string& error) const noexcept {
-        if (content_.length() != offsets_.last()) {
+        if ((int64_t)content_.length() != (int64_t)offsets_.last()) {
           std::stringstream out;
           out << "ListOffset node" << id_ << "has content length "
               << content_.length() << "but last offset " << offsets_.last()
@@ -585,7 +585,7 @@ namespace awkward {
       }
 
       void
-      set_id(size_t& id) noexcept {}
+      set_id(size_t& /* id */) noexcept {}
 
       void
       clear() noexcept {}
@@ -603,18 +603,18 @@ namespace awkward {
       }
 
       void
-      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
+      buffer_nbytes(std::map<std::string, size_t>& /* names_nbytes */) const
           noexcept {}
 
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {}
+      to_buffers(std::map<std::string, void*>& /* buffers */) const noexcept {}
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
-      to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {}
+      to_char_buffers(std::map<std::string, uint8_t*>& /* buffers */) const noexcept {}
 
       /// @brief Generates a unique description of the builder and its
       /// contents in the form of a JSON-like string.
@@ -705,11 +705,11 @@ namespace awkward {
       }
 
       void
-      buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
+      buffer_nbytes(std::map<std::string, size_t>& /* names_nbytes */) const
           noexcept {}
 
       void
-      to_buffers(std::map<std::string, void*>& buffers) const noexcept {}
+      to_buffers(std::map<std::string, void*>& /* buffers */) const noexcept {}
 
       /// @brief Copies and concatenates all the accumulated data in the builder
       /// to a map of user-allocated buffers.
@@ -862,7 +862,7 @@ namespace awkward {
       }
 
       /// @brief Current number of records in first field.
-      const size_t
+      size_t
       length() const noexcept {
         return (std::get<0>(contents).builder.length());
       }
@@ -872,13 +872,13 @@ namespace awkward {
       is_valid(std::string& error) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        size_t length = -1;
-        bool result = false;
+        int64_t length = -1;
         std::vector<size_t> lengths = field_lengths(index_sequence);
         for (size_t i = 0; i < lengths.size(); i++) {
           if (length == -1) {
             length = lengths[i];
-          } else if (length != lengths[i]) {
+          }
+          else if (length != (int64_t)lengths[i]) {
             std::stringstream out;
             out << "Record node" << id_ << " has field \""
                 << field_names().at(i) << "\" length " << lengths[i]
@@ -1071,7 +1071,7 @@ namespace awkward {
       }
 
       /// @brief Current number of records in the first index of the tuple.
-      const size_t
+      size_t
       length() const noexcept {
         return (std::get<0>(contents).builder.length());
       }
@@ -1081,13 +1081,13 @@ namespace awkward {
       is_valid(std::string& error) const noexcept {
         auto index_sequence((std::index_sequence_for<BUILDERS...>()));
 
-        size_t length = -1;
-        bool result = false;
+        int64_t length = -1;
         std::vector<size_t> lengths = content_lengths(index_sequence);
         for (size_t i = 0; i < lengths.size(); i++) {
           if (length == -1) {
-            length = lengths[i];
-          } else if (length != lengths[i]) {
+            length = (int64_t)lengths[i];
+          }
+          else if (length != (int64_t)lengths[i]) {
             std::stringstream out;
             out << "Record node" << id_ << " has index \"" << i << "\" length "
                 << lengths[i] << " that differs from the first length "

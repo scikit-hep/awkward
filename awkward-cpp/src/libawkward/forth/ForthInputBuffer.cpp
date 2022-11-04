@@ -67,12 +67,12 @@ namespace awkward {
 
     int64_t i = 0;
     int64_t howmany = stop - start;
-    size_t len;
+    int64_t len;
 
     for (auto it = strings.begin() + start;  i < howmany;  i++) {
-      len = it->length();
+      len = (int64_t)it->length();
       if (pos_ + len <= length_) {
-        if (strncmp(it->data(), ptr, len) == 0) {
+        if (strncmp(it->data(), ptr, (size_t)len) == 0) {
           pos_ += len;
           return i;
         }
@@ -301,7 +301,7 @@ namespace awkward {
       pos_++;
     } while (pos_ != length_ && ptr[pos_] >= '0' && ptr[pos_] <= '9');
 
-    double result = integral;
+    double result = (double)integral;
 
     if (pos_ != length_ && ptr[pos_] == '.') {
       pos_++;
@@ -320,7 +320,7 @@ namespace awkward {
         pos_++;
       } while (pos_ != length_ && ptr[pos_] >= '0' && ptr[pos_] <= '9');
 
-      result += (double)fractional / power;
+      result += (double)fractional / (double)power;
     }
 
     if (pos_ != length_ && (ptr[pos_] == 'e' || ptr[pos_] == 'E')) {
@@ -446,7 +446,7 @@ namespace awkward {
           case '\"':
           case '/':
           case '\\':
-            string_buffer[length] = ptr[pos_];
+            string_buffer[length] = (char)ptr[pos_];
             break;
           case 'u':
             // check all the positions that will be used *in the following loop*
@@ -474,16 +474,16 @@ namespace awkward {
             }
             // https://stackoverflow.com/a/4609989/1623645
             if (code_point < 0x80) {
-              string_buffer[length] = code_point;
+              string_buffer[length] = (char)code_point;
             }
             else if (code_point < 0x800) {
               if (length + 1 >= max_string_size) {
                 err = util::ForthError::quoted_string_missing;
                 return;
               }
-              string_buffer[length] = 192 + code_point / 64;
+              string_buffer[length] = (char)(192 + code_point / 64);
               length++;
-              string_buffer[length] = 128 + code_point % 64;
+              string_buffer[length] = (char)(128 + code_point % 64);
             }
             else if (code_point - 0xd800u < 0x800) {
               err = util::ForthError::quoted_string_missing;
@@ -494,11 +494,11 @@ namespace awkward {
                 err = util::ForthError::quoted_string_missing;
                 return;
               }
-              string_buffer[length] = 224 + code_point / 4096;
+              string_buffer[length] = (char)(224 + code_point / 4096);
               length++;
-              string_buffer[length] = 128 + code_point / 64 % 64;
+              string_buffer[length] = (char)(128 + code_point / 64 % 64);
               length++;
-              string_buffer[length] = 128 + code_point % 64;
+              string_buffer[length] = (char)(128 + code_point % 64);
             }
             else if (code_point < 0x110000) {
               // this one can't be reached by 4 hex-digits in JSON, but for completeness...
@@ -506,13 +506,13 @@ namespace awkward {
                 err = util::ForthError::quoted_string_missing;
                 return;
               }
-              string_buffer[length] = 240 + code_point / 262144;
+              string_buffer[length] = (char)(240 + code_point / 262144);
               length++;
-              string_buffer[length] = 128 + code_point / 4096 % 64;
+              string_buffer[length] = (char)(128 + code_point / 4096 % 64);
               length++;
-              string_buffer[length] = 128 + code_point / 64 % 64;
+              string_buffer[length] = (char)(128 + code_point / 64 % 64);
               length++;
-              string_buffer[length] = 128 + code_point % 64;
+              string_buffer[length] = (char)(128 + code_point % 64);
             }
             else {
               err = util::ForthError::quoted_string_missing;
@@ -526,7 +526,7 @@ namespace awkward {
       }
       // else unescaped character
       else {
-        string_buffer[length] = ptr[pos_];
+        string_buffer[length] = (char)ptr[pos_];
       }
 
       // whether the input was an escaped sequence or not, pos_ ended on an interpreted byte
