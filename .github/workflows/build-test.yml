@@ -289,11 +289,17 @@ jobs:
           mamba install numpy
           conda list
 
+      - name: Prepare Packages
+        run: |
+          python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
+          python3 dev/copy-cpp-headers.py
+          python3 dev/generate-kernel-signatures.py
+
       - name: Build C++
         run: 'python -m pip install -vv ./awkward-cpp'
 
       - name: Build Python
-        run: 'python -m pip install -v .[test,dev]'
+        run: 'python -m pip install -v .'
 
       - name: Print versions
         run: python -m pip list
