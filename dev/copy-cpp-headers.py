@@ -7,4 +7,6 @@ source_path = root_path / "src" / "awkward" / "_connect" / "header-only"
 dest_path = root_path / "awkward-cpp" / "header-only"
 
 if __name__ == "__main__":
-    shutil.copytree(source_path, dest_path, dirs_exist_ok=True)
+    if dest_path.exists():
+        shutil.rmtree(dest_path)
+    shutil.copytree(source_path, dest_path)
