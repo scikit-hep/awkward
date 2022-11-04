@@ -146,16 +146,6 @@ def tree(x):
             tree(os.path.join(x, y))
 
 
-class BuildPy(setuptools.command.build_py.build_py):
-    def run(self):
-        # generate include/awkward/kernels.h and src/awkward/_kernel_signatures.py
-        subprocess.check_call(
-            [PYTHON, os.path.join("..", "dev", "generate-kernel-signatures.py")]
-        )
-
-        setuptools.command.build_py.build_py.run(self)
-
-
 class Install(setuptools.command.install.install):
     def run(self):
         outerdir = os.path.join(
@@ -272,5 +262,5 @@ class Install(setuptools.command.install.install):
 
 setup(
     ext_modules=[CMakeExtension("libawkward")],
-    cmdclass={"build_ext": CMakeBuild, "install": Install, "build_py": BuildPy},
+    cmdclass={"build_ext": CMakeBuild, "install": Install},
 )
