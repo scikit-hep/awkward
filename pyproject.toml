@@ -65,7 +65,7 @@ init = "awkward.numba:_register"
 "Source Code" = "https://github.com/scikit-hep/awkward-1.0"
 
 [tool.hatch.version]
-path = "awkward/__init__.py"
+path = "src/awkward/__init__.py"
 
 [tool.hatch.build]
 packages = ["src/awkward"]
