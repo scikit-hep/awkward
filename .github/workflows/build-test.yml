@@ -57,9 +57,9 @@ jobs:
 
       - name: Prepare Packages
         run: |
+          python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
           python3 dev/copy-cpp-headers.py
           python3 dev/generate-kernel-signatures.py
-          python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
 
       - name: Build C++
         run: 'python3 -m pip install -vv ./awkward-cpp'
@@ -122,9 +122,9 @@ jobs:
 
       - name: Prepare Packages
         run: |
+          python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
           python3 dev/copy-cpp-headers.py
           python3 dev/generate-kernel-signatures.py
-          python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
 
       - name: Build C++
         run: 'python3 -m pip install -vv ./awkward-cpp'
@@ -198,9 +198,9 @@ jobs:
 
       - name: Prepare Packages
         run: |
+          python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
           python3 dev/copy-cpp-headers.py
           python3 dev/generate-kernel-signatures.py
-          python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
 
       - name: Build C++
         run: 'python3 -m pip install -vv ./awkward-cpp'
