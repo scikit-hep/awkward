@@ -251,7 +251,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         self.behavior = behavior
 
         docstr = layout.purelist_parameter("__doc__")
-        if ak._util.isstr(docstr):
+        if isinstance(docstr, str):
             self.__doc__ = docstr
 
         if check_valid:
@@ -1029,8 +1029,8 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             dict(self=self, field_name=where, field_value=what),
         ):
             if not (
-                ak._util.isstr(where)
-                or (isinstance(where, tuple) and all(ak._util.isstr(x) for x in where))
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
                 raise ak._errors.wrap_error(
                     TypeError("only fields may be assigned in-place (by field name)")
@@ -1394,7 +1394,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             )
         else:
             form, length, container, behavior = state
-            if ak._util.isint(length):
+            if ak._util.is_integer(length):
                 layout = ak.operations.from_buffers(
                     form,
                     length,
@@ -1515,7 +1515,7 @@ class Record(NDArrayOperatorsMixin):
         self.behavior = behavior
 
         docstr = layout.purelist_parameter("__doc__")
-        if ak._util.isstr(docstr):
+        if isinstance(docstr, str):
             self.__doc__ = docstr
 
         if check_valid:
@@ -1739,8 +1739,8 @@ class Record(NDArrayOperatorsMixin):
             dict(self=self, field_name=where, field_value=what),
         ):
             if not (
-                ak._util.isstr(where)
-                or (isinstance(where, tuple) and all(ak._util.isstr(x) for x in where))
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
             ):
                 raise ak._errors.wrap_error(
                     TypeError("only fields may be assigned in-place (by field name)")
@@ -2004,7 +2004,7 @@ class Record(NDArrayOperatorsMixin):
             )
         else:
             form, length, container, behavior, at = state
-            if ak._util.isint(length):
+            if ak._util.is_integer(length):
                 layout = ak.operations.from_buffers(
                     form,
                     length,

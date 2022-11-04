@@ -24,7 +24,6 @@ class BitMaskedArray(Content):
         valid_when=unset,
         length=unset,
         lsb_order=unset,
-        identifier=unset,
         parameters=unset,
         nplike=unset,
     ):
@@ -34,7 +33,6 @@ class BitMaskedArray(Content):
             self._valid_when if valid_when is unset else valid_when,
             self._length if length is unset else length,
             self._lsb_order if lsb_order is unset else lsb_order,
-            self._identifier if identifier is unset else identifier,
             self._parameters if parameters is unset else parameters,
             self._nplike if nplike is unset else nplike,
         )
@@ -46,7 +44,6 @@ class BitMaskedArray(Content):
         return self.copy(
             mask=copy.deepcopy(self._mask, memo),
             content=copy.deepcopy(self._content, memo),
-            identifier=copy.deepcopy(self._identifier, memo),
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
@@ -57,7 +54,6 @@ class BitMaskedArray(Content):
         valid_when,
         length,
         lsb_order,
-        identifier=None,
         parameters=None,
         nplike=None,
     ):
@@ -86,7 +82,7 @@ class BitMaskedArray(Content):
                 )
             )
         if not isinstance(length, ak._typetracer.UnknownLengthType):
-            if not (ak._util.isint(length) and length >= 0):
+            if not (ak._util.is_integer(length) and length >= 0):
                 raise ak._errors.wrap_error(
                     TypeError(
                         "{} 'length' must be a non-negative integer, not {}".format(
@@ -128,7 +124,7 @@ class BitMaskedArray(Content):
         self._valid_when = valid_when
         self._length = length
         self._lsb_order = lsb_order
-        self._init(identifier, parameters, nplike)
+        self._init(parameters, nplike)
 
     @property
     def mask(self):
@@ -155,7 +151,6 @@ class BitMaskedArray(Content):
             self._content._form_with_key(getkey),
             self._valid_when,
             self._lsb_order,
-            has_identifier=self._identifier is not None,
             parameters=self._parameters,
             form_key=form_key,
         )
@@ -175,7 +170,6 @@ class BitMaskedArray(Content):
             self._valid_when,
             self._length,
             self._lsb_order,
-            self._typetracer_identifier(),
             self._parameters,
             tt,
         )
@@ -191,7 +185,6 @@ class BitMaskedArray(Content):
             self._valid_when,
             ak._typetracer.UnknownLength,
             self._lsb_order,
-            self._identifier,
             self._parameters,
             self._nplike,
         )
@@ -222,7 +215,6 @@ class BitMaskedArray(Content):
             self._valid_when,
             self._length,
             self._lsb_order,
-            self._identifier,
             ak._util.merge_parameters(self._parameters, parameters),
             self._nplike,
         )
@@ -246,7 +238,6 @@ class BitMaskedArray(Content):
         return ak.contents.IndexedOptionArray(
             index[0 : self._length],
             self._content,
-            self._identifier,
             self._parameters,
             self._nplike,
         )
@@ -271,7 +262,6 @@ class BitMaskedArray(Content):
             bytemask[: self._length],
             self._content,
             self._valid_when,
-            self._identifier,
             self._parameters,
             self._nplike,
         )
@@ -287,7 +277,6 @@ class BitMaskedArray(Content):
                     valid_when,
                     self._length,
                     lsb_order,
-                    self._identifier,
                     self._parameters,
                     self._nplike,
                 )
@@ -309,7 +298,6 @@ class BitMaskedArray(Content):
                 valid_when,
                 self._length,
                 lsb_order,
-                self._identifier,
                 self._parameters,
                 self._nplike,
             )
@@ -367,7 +355,6 @@ class BitMaskedArray(Content):
             self._valid_when,
             self._length,
             self._lsb_order,
-            self._field_identifier(where),
             None,
             self._nplike,
         ).simplify_optiontype()
@@ -379,7 +366,6 @@ class BitMaskedArray(Content):
             self._valid_when,
             self._length,
             self._lsb_order,
-            self._fields_identifier(where),
             None,
             self._nplike,
         ).simplify_optiontype()
@@ -402,7 +388,7 @@ class BitMaskedArray(Content):
         ):
             return self.toByteMaskedArray()._getitem_next(head, tail, advanced)
 
-        elif ak._util.isstr(head):
+        elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
 
         elif isinstance(head, list):
@@ -591,10 +577,7 @@ class BitMaskedArray(Content):
             return self._content.validity_error(path + ".content")
 
     def _nbytes_part(self):
-        result = self.mask._nbytes_part() + self.content._nbytes_part()
-        if self.identifier is not None:
-            result = result + self.identifier._nbytes_part()
-        return result
+        return self.mask._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
         return self.toByteMaskedArray()._pad_none(target, axis, depth, clip)
@@ -638,7 +621,6 @@ class BitMaskedArray(Content):
                     self._valid_when,
                     self._length,
                     self._lsb_order,
-                    self._identifier,
                     self._parameters if options["keep_parameters"] else None,
                     self._nplike,
                 )
@@ -684,7 +666,6 @@ class BitMaskedArray(Content):
             return ak.contents.IndexedOptionArray(
                 next._index,
                 content,
-                next._identifier,
                 next._parameters,
                 self._nplike,
             )
@@ -706,7 +687,6 @@ class BitMaskedArray(Content):
                 self._valid_when,
                 self._length,
                 self._lsb_order,
-                self._identifier,
                 self._parameters,
                 self._nplike,
             )
@@ -736,7 +716,6 @@ class BitMaskedArray(Content):
             valid_when=self._valid_when,
             length=len(self),
             lsb_order=self._lsb_order,
-            identifier=self._identifier,
             parameters=self._parameters,
             nplike=nplike,
         )

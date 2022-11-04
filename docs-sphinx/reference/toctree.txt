@@ -244,11 +244,6 @@
     generated/ak.index.IndexU8.
 
 .. toctree::
-    :caption: Identities for layout nodes
-
-    generated/ak.identifier.Identifier
-
-.. toctree::
     :caption: String behaviors
 
     generated/ak.ByteBehavior

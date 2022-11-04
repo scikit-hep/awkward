@@ -256,6 +256,10 @@ class NumpyLike(Singleton):
         # array1, array2
         return self._module.logical_and(*args, **kwargs)
 
+    def logical_not(self, *args, **kwargs):
+        # array1, array2
+        return self._module.logical_not(*args, **kwargs)
+
     def sqrt(self, *args, **kwargs):
         # array
         return self._module.sqrt(*args, **kwargs)
@@ -371,6 +375,9 @@ class NumpyLike(Singleton):
 
         """
         raise NotImplementedError
+
+    def is_c_contiguous(self, array) -> bool:
+        raise ak._errors.wrap_error(NotImplementedError)
 
 
 class NumpyKernel:
@@ -540,6 +547,9 @@ class Numpy(NumpyLike):
 
         """
         return isinstance(obj, numpy.ndarray)
+
+    def is_c_contiguous(self, array) -> bool:
+        return array.flags["C_CONTIGUOUS"]
 
 
 class Cupy(NumpyLike):
@@ -754,6 +764,9 @@ class Cupy(NumpyLike):
         module, _, suffix = type(obj).__module__.partition(".")
         return module == "cupy"
 
+    def is_c_contiguous(self, array) -> bool:
+        return array.flags["C_CONTIGUOUS"]
+
 
 class Jax(NumpyLike):
     @property
@@ -927,6 +940,9 @@ class Jax(NumpyLike):
         """
         module, _, suffix = type(obj).__module__.partition(".")
         return module == "jax"
+
+    def is_c_contiguous(self, array) -> bool:
+        return True
 
 
 # Temporary sentinel marking "argument not given"

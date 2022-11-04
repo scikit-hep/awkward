@@ -14,7 +14,6 @@ class RecordForm(Form):
         self,
         contents,
         fields,
-        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
@@ -46,7 +45,7 @@ class RecordForm(Form):
 
         self._fields = fields
         self._contents = list(contents)
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def fields(self):
@@ -118,9 +117,9 @@ class RecordForm(Form):
             return field in self._fields
 
     def content(self, index_or_field):
-        if ak._util.isint(index_or_field):
+        if ak._util.is_integer(index_or_field):
             index = index_or_field
-        elif ak._util.isstr(index_or_field):
+        elif isinstance(index_or_field, str):
             index = self.field_to_index(index_or_field)
         else:
             raise ak._errors.wrap_error(
@@ -157,8 +156,7 @@ class RecordForm(Form):
     def __eq__(self, other):
         if isinstance(other, RecordForm):
             if (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
+                self._form_key == other._form_key
                 and self.is_tuple == other.is_tuple
                 and len(self._contents) == len(other._contents)
                 and _parameters_equal(
@@ -247,7 +245,6 @@ class RecordForm(Form):
         return RecordForm(
             contents,
             fields,
-            self._has_identifier,
             self._parameters,
             self._form_key,
         )

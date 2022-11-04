@@ -484,13 +484,6 @@ def togenerator(form, flatlist_as_rvec):
 
 
 class Generator:
-    @classmethod
-    def form_from_identifier(cls, form):
-        if not form.has_identifier:
-            return None
-        else:
-            raise ak._errors.wrap_error(NotImplementedError("TODO: identifiers in C++"))
-
     def IndexOf(self, arraytype):
         if arraytype == "int8_t":
             return ak.index.Index8
@@ -567,14 +560,12 @@ class NumpyArrayGenerator(Generator, ak._lookup.NumpyLookup):
     def from_form(cls, form, flatlist_as_rvec):
         return NumpyArrayGenerator(
             form.primitive,
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, primitive, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, primitive, parameters, flatlist_as_rvec):
         self.primitive = primitive
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
 
@@ -583,7 +574,6 @@ class NumpyArrayGenerator(Generator, ak._lookup.NumpyLookup):
             (
                 type(self),
                 self.primitive,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -592,7 +582,6 @@ class NumpyArrayGenerator(Generator, ak._lookup.NumpyLookup):
         return (
             isinstance(other, type(self))
             and self.primitive == other.primitive
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -651,15 +640,13 @@ class RegularArrayGenerator(Generator, ak._lookup.RegularLookup):
         return RegularArrayGenerator(
             togenerator(form.content, flatlist_as_rvec),
             form.size,
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, content, size, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, content, size, parameters, flatlist_as_rvec):
         self.contenttype = content
         self.size = size
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
@@ -670,7 +657,6 @@ class RegularArrayGenerator(Generator, ak._lookup.RegularLookup):
                 type(self),
                 self.contenttype,
                 self.size,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -680,7 +666,6 @@ class RegularArrayGenerator(Generator, ak._lookup.RegularLookup):
             isinstance(other, type(self))
             and self.contenttype == other.contenttype
             and self.size == other.size
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -794,12 +779,11 @@ class ListArrayGenerator(Generator, ak._lookup.ListLookup):
         return ListArrayGenerator(
             index_string,
             togenerator(form.content, flatlist_as_rvec),
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, index_type, content, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, index_type, content, parameters, flatlist_as_rvec):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "u32":
@@ -814,7 +798,6 @@ class ListArrayGenerator(Generator, ak._lookup.ListLookup):
         self.contenttype = content
         self.indextype = self.index_type
 
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         assert self.flatlist_as_rvec == self.content.flatlist_as_rvec
@@ -825,7 +808,6 @@ class ListArrayGenerator(Generator, ak._lookup.ListLookup):
                 type(self),
                 self.index_type,
                 self.content,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -835,7 +817,6 @@ class ListArrayGenerator(Generator, ak._lookup.ListLookup):
             isinstance(other, type(self))
             and self.index_type == other.index_type
             and self.content == other.content
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -947,12 +928,11 @@ class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
         return IndexedArrayGenerator(
             form.index,
             togenerator(form.content, flatlist_as_rvec),
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, index_type, content, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, index_type, content, parameters, flatlist_as_rvec):
         if index_type == "i32":
             self.indextype = "int32_t"
         elif index_type == "u32":
@@ -962,7 +942,6 @@ class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
         else:
             raise ak._errors.wrap_error(AssertionError(index_type))
         self.contenttype = content
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
@@ -973,7 +952,6 @@ class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
                 type(self),
                 self.indextype,
                 self.contenttype,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -983,7 +961,6 @@ class IndexedArrayGenerator(Generator, ak._lookup.IndexedLookup):
             isinstance(other, type(self))
             and self.indextype == other.indextype
             and self.contenttype == other.contenttype
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -1028,12 +1005,11 @@ class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
         return IndexedOptionArrayGenerator(
             form.index,
             togenerator(form.content, flatlist_as_rvec),
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, index_type, content, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, index_type, content, parameters, flatlist_as_rvec):
         if index_type == "i32":
             self.index_type = "int32_t"
         elif index_type == "i64":
@@ -1041,7 +1017,6 @@ class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
         else:
             raise ak._errors.wrap_error(AssertionError(index_type))
         self.contenttype = content
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         self.indextype = self.index_type
@@ -1053,7 +1028,6 @@ class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
                 type(self),
                 self.index_type,
                 self.contenttype,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -1063,7 +1037,6 @@ class IndexedOptionArrayGenerator(Generator, ak._lookup.IndexedOptionLookup):
             isinstance(other, type(self))
             and self.index_type == other.index_type
             and self.contenttype == other.contenttype
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -1113,15 +1086,13 @@ class ByteMaskedArrayGenerator(Generator, ak._lookup.ByteMaskedLookup):
         return ByteMaskedArrayGenerator(
             togenerator(form.content, flatlist_as_rvec),
             form.valid_when,
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, content, valid_when, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, content, valid_when, parameters, flatlist_as_rvec):
         self.contenttype = content
         self.valid_when = valid_when
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
@@ -1133,7 +1104,6 @@ class ByteMaskedArrayGenerator(Generator, ak._lookup.ByteMaskedLookup):
                 type(self),
                 self.contenttype,
                 self.valid_when,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -1143,7 +1113,6 @@ class ByteMaskedArrayGenerator(Generator, ak._lookup.ByteMaskedLookup):
             isinstance(other, type(self))
             and self.contenttype == other.contenttype
             and self.valid_when == other.valid_when
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -1196,7 +1165,6 @@ class BitMaskedArrayGenerator(Generator, ak._lookup.BitMaskedLookup):
             togenerator(form.content, flatlist_as_rvec),
             form.valid_when,
             form.lsb_order,
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
@@ -1206,14 +1174,12 @@ class BitMaskedArrayGenerator(Generator, ak._lookup.BitMaskedLookup):
         content,
         valid_when,
         lsb_order,
-        identifier,
         parameters,
         flatlist_as_rvec,
     ):
         self.contenttype = content
         self.valid_when = valid_when
         self.lsb_order = lsb_order
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
@@ -1225,7 +1191,6 @@ class BitMaskedArrayGenerator(Generator, ak._lookup.BitMaskedLookup):
                 self.contenttype,
                 self.valid_when,
                 self.lsb_order,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -1236,7 +1201,6 @@ class BitMaskedArrayGenerator(Generator, ak._lookup.BitMaskedLookup):
             and self.contenttype == other.contenttype
             and self.valid_when == other.valid_when
             and self.lsb_order == other.lsb_order
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -1290,28 +1254,23 @@ class UnmaskedArrayGenerator(Generator, ak._lookup.UnmaskedLookup):
     def from_form(cls, form, flatlist_as_rvec):
         return UnmaskedArrayGenerator(
             togenerator(form.content, flatlist_as_rvec),
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, content, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, content, parameters, flatlist_as_rvec):
         self.contenttype = content
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         assert self.flatlist_as_rvec == self.contenttype.flatlist_as_rvec
 
     def __hash__(self):
-        return hash(
-            (type(self), self.contenttype, self.identifier, json.dumps(self.parameters))
-        )
+        return hash((type(self), self.contenttype, json.dumps(self.parameters)))
 
     def __eq__(self, other):
         return (
             isinstance(other, type(self))
             and self.contenttype == other.contenttype
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -1440,15 +1399,13 @@ class RecordArrayGenerator(Generator, ak._lookup.RecordLookup):
         return RecordArrayGenerator(
             [togenerator(x, flatlist_as_rvec) for x in form.contents],
             None if form.is_tuple else form.fields,
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, contents, fields, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, contents, fields, parameters, flatlist_as_rvec):
         self.contenttypes = tuple(contents)
         self.fields = None if fields is None else tuple(fields)
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         for content in self.contenttypes:
@@ -1462,7 +1419,6 @@ class RecordArrayGenerator(Generator, ak._lookup.RecordLookup):
                 type(self),
                 self.contenttypes,
                 self.fields,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -1472,7 +1428,6 @@ class RecordArrayGenerator(Generator, ak._lookup.RecordLookup):
             isinstance(other, type(self))
             and self.contenttypes == other.contenttypes
             and self.fields == other.fields
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 
@@ -1539,12 +1494,11 @@ class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
         return UnionArrayGenerator(
             form.index,
             [togenerator(x, flatlist_as_rvec) for x in form.contents],
-            cls.form_from_identifier(form),
             form.parameters,
             flatlist_as_rvec,
         )
 
-    def __init__(self, index_type, contents, identifier, parameters, flatlist_as_rvec):
+    def __init__(self, index_type, contents, parameters, flatlist_as_rvec):
         self.tagstype = "int8_t"
         if index_type == "i32":
             self.indextype = "int32_t"
@@ -1555,7 +1509,6 @@ class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
         else:
             raise ak._errors.wrap_error(AssertionError(index_type))
         self.contenttypes = tuple(contents)
-        self.identifier = identifier
         self.parameters = parameters
         self.flatlist_as_rvec = flatlist_as_rvec
         for content in self.contenttypes:
@@ -1567,7 +1520,6 @@ class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
                 type(self),
                 self.indextype,
                 self.contenttypes,
-                self.identifier,
                 json.dumps(self.parameters),
             )
         )
@@ -1577,7 +1529,6 @@ class UnionArrayGenerator(Generator, ak._lookup.UnionLookup):
             isinstance(other, type(self))
             and self.indextype == other.indextype
             and self.contenttypes == other.contenttypes
-            and self.identifier == other.identifier
             and self.parameters == other.parameters
         )
 

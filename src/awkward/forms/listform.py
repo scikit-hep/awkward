@@ -12,11 +12,10 @@ class ListForm(Form):
         starts,
         stops,
         content,
-        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
-        if not ak._util.isstr(starts):
+        if not isinstance(starts, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'starts' must be of type str, not {}".format(
@@ -24,7 +23,7 @@ class ListForm(Form):
                     )
                 )
             )
-        if not ak._util.isstr(stops):
+        if not isinstance(stops, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'starts' must be of type str, not {}".format(
@@ -44,7 +43,7 @@ class ListForm(Form):
         self._starts = starts
         self._stops = stops
         self._content = content
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def starts(self):
@@ -87,8 +86,7 @@ class ListForm(Form):
     def __eq__(self, other):
         if isinstance(other, ListForm):
             return (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
+                self._form_key == other._form_key
                 and self._starts == other._starts
                 and self._stops == other._stops
                 and _parameters_equal(
@@ -161,7 +159,6 @@ class ListForm(Form):
             self._starts,
             self._stops,
             self._content._select_columns(index, specifier, matches, output),
-            self._has_identifier,
             self._parameters,
             self._form_key,
         )

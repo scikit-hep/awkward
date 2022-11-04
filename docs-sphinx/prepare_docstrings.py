@@ -439,7 +439,6 @@ categories = [
     ],
     ["ak.layout.ArrayBuilder"],
     ["ak.index.Index"],
-    ["ak.identifier.Identifier"],
     [
         "ak.types.ArrayType",
         "ak.types.ArrayType",

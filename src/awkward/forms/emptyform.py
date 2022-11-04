@@ -8,8 +8,8 @@ class EmptyForm(Form):
     is_NumpyType = True
     is_UnknownType = True
 
-    def __init__(self, has_identifier=False, parameters=None, form_key=None):
-        self._init(has_identifier, parameters, form_key)
+    def __init__(self, parameters=None, form_key=None):
+        self._init(parameters, form_key)
 
     def __repr__(self):
         args = self._repr_args()
@@ -25,11 +25,7 @@ class EmptyForm(Form):
         )
 
     def __eq__(self, other):
-        return (
-            isinstance(other, EmptyForm)
-            and self._has_identifier == other._has_identifier
-            and self._form_key == other._form_key
-        )
+        return isinstance(other, EmptyForm) and self._form_key == other._form_key
 
     def toNumpyForm(self, dtype):
         return ak.forms.numpyform.from_dtype(dtype, self._parameters)

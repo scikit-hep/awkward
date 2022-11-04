@@ -24,13 +24,6 @@ def fake_typeof(obj, c):
 
 class ContentType(numba.types.Type):
     @classmethod
-    def from_form_identifier(cls, form):
-        if not form.has_identifier:
-            return numba.none
-        else:
-            raise NotImplementedError("TODO: identifiers in Numba")
-
-    @classmethod
     def from_form_index(cls, index_string):
         if index_string == "i8":
             return numba.types.Array(numba.int8, 1, "C")
@@ -273,18 +266,13 @@ class NumpyArrayType(ContentType, ak._lookup.NumpyLookup):
     def from_form(cls, form):
         t = numba.from_dtype(ak.types.numpytype.primitive_to_dtype(form.primitive))
         arraytype = numba.types.Array(t, 1, "C")
-        return NumpyArrayType(
-            arraytype, cls.from_form_identifier(form), form.parameters
-        )
+        return NumpyArrayType(arraytype, form.parameters)
 
-    def __init__(self, arraytype, identifiertype, parameters):
+    def __init__(self, arraytype, parameters):
         super().__init__(
-            name="ak.NumpyArrayType({}, {}, {})".format(
-                arraytype.name, identifiertype.name, json.dumps(parameters)
-            )
+            name=f"ak.NumpyArrayType({arraytype.name}, {json.dumps(parameters)})"
         )
         self.arraytype = arraytype
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):
@@ -337,19 +325,15 @@ class RegularArrayType(ContentType, ak._lookup.RegularLookup):
         return RegularArrayType(
             ak._connect.numba.arrayview.tonumbatype(form.content),
             form.size,
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(self, contenttype, size, identifiertype, parameters):
+    def __init__(self, contenttype, size, parameters):
         super().__init__(
-            name="ak.RegularArrayType({}, {}, {}, {})".format(
-                contenttype.name, size, identifiertype.name, json.dumps(parameters)
-            )
+            name=f"ak.RegularArrayType({contenttype.name}, {size}, {json.dumps(parameters)})"
         )
         self.contenttype = contenttype
         self.size = size
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):
@@ -420,22 +404,15 @@ class ListArrayType(ContentType, ak._lookup.ListLookup):
         return ListArrayType(
             cls.from_form_index(index_string),
             ak._connect.numba.arrayview.tonumbatype(form.content),
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(self, indextype, contenttype, identifiertype, parameters):
+    def __init__(self, indextype, contenttype, parameters):
         super().__init__(
-            name="ak.ListArrayType({}, {}, {}, {})".format(
-                indextype.name,
-                contenttype.name,
-                identifiertype.name,
-                json.dumps(parameters),
-            )
+            name=f"ak.ListArrayType({indextype.name}, {contenttype.name}, {json.dumps(parameters)})"
         )
         self.indextype = indextype
         self.contenttype = contenttype
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):
@@ -513,22 +490,15 @@ class IndexedArrayType(ContentType, ak._lookup.IndexedLookup):
         return IndexedArrayType(
             cls.from_form_index(form.index),
             ak._connect.numba.arrayview.tonumbatype(form.content),
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(self, indextype, contenttype, identifiertype, parameters):
+    def __init__(self, indextype, contenttype, parameters):
         super().__init__(
-            name="ak.IndexedArrayType({}, {}, {}, {})".format(
-                indextype.name,
-                contenttype.name,
-                identifiertype.name,
-                json.dumps(parameters),
-            )
+            name=f"ak.IndexedArrayType({indextype.name}, {contenttype.name}, {json.dumps(parameters)})"
         )
         self.indextype = indextype
         self.contenttype = contenttype
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):
@@ -614,22 +584,15 @@ class IndexedOptionArrayType(ContentType, ak._lookup.IndexedOptionLookup):
         return IndexedOptionArrayType(
             cls.from_form_index(form.index),
             ak._connect.numba.arrayview.tonumbatype(form.content),
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(self, indextype, contenttype, identifiertype, parameters):
+    def __init__(self, indextype, contenttype, parameters):
         super().__init__(
-            name="ak.IndexedOptionArrayType({}, {}, {}, {})".format(
-                indextype.name,
-                contenttype.name,
-                identifiertype.name,
-                json.dumps(parameters),
-            )
+            name=f"ak.IndexedOptionArrayType({indextype.name}, {contenttype.name}, {json.dumps(parameters)})"
         )
         self.indextype = indextype
         self.contenttype = contenttype
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):
@@ -733,24 +696,16 @@ class ByteMaskedArrayType(ContentType, ak._lookup.ByteMaskedLookup):
             cls.from_form_index(form.mask),
             ak._connect.numba.arrayview.tonumbatype(form.content),
             form.valid_when,
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(self, masktype, contenttype, valid_when, identifiertype, parameters):
+    def __init__(self, masktype, contenttype, valid_when, parameters):
         super().__init__(
-            name="ak.ByteMaskedArrayType({}, {}, {}, {}, {})".format(
-                masktype.name,
-                contenttype.name,
-                valid_when,
-                identifiertype.name,
-                json.dumps(parameters),
-            )
+            name=f"ak.ByteMaskedArrayType({masktype.name}, {contenttype.name}, {valid_when}, {json.dumps(parameters)})"
         )
         self.masktype = masktype
         self.contenttype = contenttype
         self.valid_when = valid_when
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):
@@ -854,28 +809,17 @@ class BitMaskedArrayType(ContentType, ak._lookup.BitMaskedLookup):
             ak._connect.numba.arrayview.tonumbatype(form.content),
             form.valid_when,
             form.lsb_order,
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(
-        self, masktype, contenttype, valid_when, lsb_order, identifiertype, parameters
-    ):
+    def __init__(self, masktype, contenttype, valid_when, lsb_order, parameters):
         super().__init__(
-            name="ak.BitMaskedArrayType({}, {}, {}, {}, {}, {})".format(
-                masktype.name,
-                contenttype.name,
-                valid_when,
-                lsb_order,
-                identifiertype.name,
-                json.dumps(parameters),
-            )
+            name=f"ak.BitMaskedArrayType({masktype.name}, {contenttype.name}, {valid_when}, {lsb_order}, {json.dumps(parameters)})"
         )
         self.masktype = masktype
         self.contenttype = contenttype
         self.valid_when = valid_when
         self.lsb_order = lsb_order
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):
@@ -995,18 +939,14 @@ class UnmaskedArrayType(ContentType, ak._lookup.UnmaskedLookup):
     def from_form(cls, form):
         return UnmaskedArrayType(
             ak._connect.numba.arrayview.tonumbatype(form.content),
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(self, contenttype, identifiertype, parameters):
+    def __init__(self, contenttype, parameters):
         super().__init__(
-            name="ak.UnmaskedArrayType({}, {}, {})".format(
-                contenttype.name, identifiertype.name, json.dumps(parameters)
-            )
+            name=f"ak.UnmaskedArrayType({contenttype.name}, {json.dumps(parameters)})"
         )
         self.contenttype = contenttype
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):
@@ -1089,23 +1029,18 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         return RecordArrayType(
             [ak._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
             None if form.is_tuple else form.fields,
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(self, contenttypes, fields, identifiertype, parameters):
+    def __init__(self, contenttypes, fields, parameters):
+        tmp1 = ", ".join(x.name for x in contenttypes)
+        tmp2 = "," if len(contenttypes) == 1 else ""
+        tmp3 = "None" if fields is None else repr(tuple(fields))
         super().__init__(
-            name="ak.RecordArrayType(({}{}), ({}), {}, {})".format(
-                ", ".join(x.name for x in contenttypes),
-                "," if len(contenttypes) == 1 else "",
-                "None" if fields is None else repr(tuple(fields)),
-                identifiertype.name,
-                json.dumps(parameters),
-            )
+            name=f"ak.RecordArrayType(({tmp1}{tmp2}), {tmp3}, {json.dumps(parameters)})"
         )
         self.contenttypes = contenttypes
         self.fields = fields
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def fieldindex(self, key):
@@ -1384,25 +1319,18 @@ class UnionArrayType(ContentType, ak._lookup.UnionLookup):
             cls.from_form_index(form.tags),
             cls.from_form_index(form.index),
             [ak._connect.numba.arrayview.tonumbatype(x) for x in form.contents],
-            cls.from_form_identifier(form),
             form.parameters,
         )
 
-    def __init__(self, tagstype, indextype, contenttypes, identifiertype, parameters):
+    def __init__(self, tagstype, indextype, contenttypes, parameters):
+        tmp1 = ", ".join(x.name for x in contenttypes)
+        tmp2 = "," if len(contenttypes) == 1 else ""
         super().__init__(
-            name="ak.UnionArrayType({}, {}, ({}{}), {}, {})".format(
-                tagstype.name,
-                indextype.name,
-                ", ".join(x.name for x in contenttypes),
-                "," if len(contenttypes) == 1 else "",
-                identifiertype.name,
-                json.dumps(parameters),
-            )
+            name=f"ak.UnionArrayType({tagstype.name}, {indextype.name}, ({tmp1}{tmp2}), {json.dumps(parameters)})"
         )
         self.tagstype = tagstype
         self.indextype = indextype
         self.contenttypes = contenttypes
-        self.identifiertype = identifiertype
         self.parameters = parameters
 
     def has_field(self, key):

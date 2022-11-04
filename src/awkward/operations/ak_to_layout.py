@@ -121,12 +121,7 @@ def _impl(array, allow_record, allow_other, numpytype):
                 )
             )
 
-        return ak.contents.NumpyArray(
-            array,
-            parameters=None,
-            identifier=None,
-            nplike=typetracer,
-        )
+        return ak.contents.NumpyArray(array, parameters=None, nplike=typetracer)
 
     elif isinstance(array, (str, bytes)):
         return _impl(

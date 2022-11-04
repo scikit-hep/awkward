@@ -36,6 +36,7 @@ docs-sphinx/release/*
 !docs-sphinx/release/.gitignore
 docs-sphinx/.jupyter_cache
 docs-sphinx/jupyter_execute
+docs-sphinx/environment.yml
 
 ############################################################# IDEs
 .idea

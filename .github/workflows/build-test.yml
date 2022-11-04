@@ -5,17 +5,12 @@ on:
     paths-ignore:
       - README.md
       - VERSION_INFO
-      - .ci/*
+      - .ci/**
       - .readthedocs.yml
-      - docs-src/*
-      - docs-img/*
-      - docs-jupyter/*
-      - docs-doxygen/*
-      - docs-sphinx/*
-      - docs/*
-      - studies/*
-      - src/cuda-kernels
-      - cuda-kernels
+      - docs-img/**
+      - docs-doxygen/**
+      - docs-sphinx/**
+      - studies/**
 
   schedule:
     - cron: 0 12 1 * *

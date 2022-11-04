@@ -193,7 +193,7 @@ def _impl(
         behavior=ak._util.behavior_of(array),
     )
 
-    if line_delimited and not ak._util.isstr(line_delimited):
+    if line_delimited and not isinstance(line_delimited, str):
         line_delimited = "\n"
 
     separators = (
@@ -202,7 +202,7 @@ def _impl(
     )
 
     if file is not None:
-        if ak._util.isstr(file) or isinstance(file, pathlib.Path):
+        if isinstance(file, (str, pathlib.Path)):
             parsed_url = urlparse(file)
             if parsed_url.scheme == "" or parsed_url.netloc == "":
 
