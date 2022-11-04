@@ -68,13 +68,13 @@ jobs:
         run: python dev/generate-tests.py
 
       - name: Test specification
-        run: python -m pytest -vv -rs tests-spec
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        run: python -m pytest -vv -rs tests-spec-explicit
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        run: python -m pytest -vv -rs tests-cpu-kernels
+        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 
       - name: Test
         run: python -m pytest -vv -rs tests
@@ -127,13 +127,13 @@ jobs:
         run: python dev/generate-tests.py
 
       - name: Test specification
-        run: python -m pytest -vv -rs tests-spec
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        run: python -m pytest -vv -rs tests-spec-explicit
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        run: python -m pytest -vv -rs tests-cpu-kernels
+        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 
       - name: Test
         run: python -m pytest -vv -rs tests
@@ -200,13 +200,13 @@ jobs:
         run: python dev/generate-tests.py
 
       - name: Test specification
-        run: python -m pytest -vv -rs tests-spec
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        run: python -m pytest -vv -rs tests-spec-explicit
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        run: python -m pytest -vv -rs tests-cpu-kernels
+        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 
       - name: Test
         run: >-

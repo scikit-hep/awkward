@@ -12,10 +12,10 @@ src/awkward/_kernel_signatures_cuda.py
 src/awkward/_connect/cuda/_kernel_signatures.py
 
 # Kernel tests
-tests-cpu-kernels
+awkward-cpp/tests-spec
+awkward-cpp/tests-spec-explicit
+awkward-cpp/tests-cpu-kernels
 tests-cuda-kernels
-tests-spec
-tests-spec-explicit
 
 # to use all-contributors-cli without adding it to the project
 node_modules
