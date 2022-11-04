@@ -7,6 +7,7 @@ from collections.abc import Iterable
 
 import awkward_cpp.cpu_kernels
 import numpy
+from awkward_cpp.lib import _ext
 
 import awkward as ak
 
@@ -482,7 +483,7 @@ class Numpy(NumpyLike):
                 ak.ArrayBuilder,
                 ak.contents.Content,
                 ak.record.Record,
-                ak._ext.ArrayBuilder,
+                _ext.ArrayBuilder,
             ),
         ):
             return ak.operations.ak_to_numpy.to_numpy(array, *args, **kwargs)
@@ -771,7 +772,7 @@ class Jax(NumpyLike):
                 ak.ArrayBuilder,
                 ak.contents.Content,
                 ak.record.Record,
-                ak._ext.ArrayBuilder,
+                _ext.ArrayBuilder,
             ),
         ):
             return ak.operations.ak_to_jax.to_jax(array, *args, **kwargs)

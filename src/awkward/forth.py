@@ -2,7 +2,7 @@
 
 # v2: no change; keep this file.
 
-from awkward._ext import ForthMachine32, ForthMachine64
+from awkward_cpp.lib._ext import ForthMachine32, ForthMachine64
 
 __all__ = ["ForthMachine32", "ForthMachine64"]
 

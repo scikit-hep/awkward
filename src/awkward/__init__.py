@@ -3,9 +3,6 @@
 # NumPy-like alternatives
 import awkward.nplikes
 
-# shims for C++ (now everything is compiled into one 'awkward._ext' module)
-import awkward._ext
-
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward.index
 import awkward.identifier

@@ -2,6 +2,8 @@
 
 from collections.abc import Iterable, Mapping
 
+from awkward_cpp.lib import _ext
+
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -52,7 +54,7 @@ def _impl(array):
     elif isinstance(array, (ak.contents.Content, ak.record.Record)):
         return array.to_list(None)
 
-    elif isinstance(array, ak._ext.ArrayBuilder):
+    elif isinstance(array, _ext.ArrayBuilder):
         formstr, length, container = array.to_buffers()
         form = ak.forms.from_json(formstr)
         layout = ak.operations.from_buffers(form, length, container)

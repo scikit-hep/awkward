@@ -9,6 +9,7 @@ import re
 from collections.abc import Iterable, Mapping, Sized
 
 import packaging.version
+from awkward_cpp.lib import _ext
 
 import awkward as ak
 
@@ -739,7 +740,7 @@ def to_arraylib(module, array, allow_missing):
         elif isinstance(array, ak.highlevel.ArrayBuilder):
             return _impl(array.snapshot().layout)
 
-        elif isinstance(array, ak._ext.ArrayBuilder):
+        elif isinstance(array, _ext.ArrayBuilder):
             return _impl(array.snapshot())
 
         elif ak.operations.parameters(array).get("__array__") in (
