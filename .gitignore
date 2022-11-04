@@ -8,6 +8,7 @@ docs/demos/test-program.cpp
 # Generated includes
 awkward-cpp/include/awkward/kernels.h
 awkward-cpp/src/awkward_cpp/_kernel_signatures.py
+awkward-cpp/header-only
 src/awkward/_kernel_signatures_cuda.py
 src/awkward/_connect/cuda/_kernel_signatures.py
 
