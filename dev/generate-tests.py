@@ -179,7 +179,9 @@ class Specification:
 def readspec():
     genpykernels()
     specdict = {}
-    with open(os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")) as specfile:
+    with open(
+        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
+    ) as specfile:
         loadfile = yaml.safe_load(specfile)
         indspec = loadfile["kernels"]
         data = yaml.safe_load(
@@ -214,7 +216,9 @@ def gettypename(spectype):
 
 def getfuncnames():
     funcs = {}
-    with open(os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")) as specfile:
+    with open(
+        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
+    ) as specfile:
         indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             funcs[spec["name"]] = []
@@ -274,7 +278,9 @@ kSliceNone = kMaxInt64 + 1
         shutil.rmtree(unit_tests)
     os.mkdir(unit_tests)
     final_dest = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit")
-    copy_dest = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py")
+    copy_dest = os.path.join(
+        CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py"
+    )
     shutil.copy(copy_dest, final_dest)
 
 
@@ -315,7 +321,11 @@ def genspectests(specdict):
     for spec in specdict.values():
         with open(
             os.path.join(
-                CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "test_py" + spec.name + ".py"
+                CURRENT_DIR,
+                "..",
+                "awkward-cpp",
+                "tests-spec",
+                "test_py" + spec.name + ".py",
             ),
             "w",
         ) as f:
@@ -426,7 +436,9 @@ def getctypelist(arglist):
 def gencpukerneltests(specdict):
     print("Generating files for testing CPU kernels")
 
-    tests_cpu_kernels = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-cpu-kernels")
+    tests_cpu_kernels = os.path.join(
+        CURRENT_DIR, "..", "awkward-cpp", "tests-cpu-kernels"
+    )
     if os.path.exists(tests_cpu_kernels):
         shutil.rmtree(tests_cpu_kernels)
     os.mkdir(tests_cpu_kernels)
@@ -765,13 +777,16 @@ def gencudakerneltests(specdict):
 
 def genunittests():
     print("Generating Unit Tests")
-    datayml = open(os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-test-data.yml"))
+    datayml = open(
+        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-test-data.yml")
+    )
     data = yaml.safe_load(datayml)["unit-tests"]
     for function in data:
         num = 0
         func = "test_" + function["name"] + ".py"
         with open(
-            os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func), "w"
+            os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func),
+            "w",
         ) as file:
             file.write("import pytest\nimport kernels\n\n")
             for test in function["tests"]:

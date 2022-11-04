@@ -14,11 +14,15 @@ def clean_tests():
     if os.path.exists(tests_spec):
         shutil.rmtree(tests_spec)
 
-    tests_spec_explicit = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit")
+    tests_spec_explicit = os.path.join(
+        CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit"
+    )
     if os.path.exists(tests_spec_explicit):
         shutil.rmtree(tests_spec_explicit)
 
-    tests_cpu_kernels = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-cpu-kernels")
+    tests_cpu_kernels = os.path.join(
+        CURRENT_DIR, "..", "awkward-cpp", "tests-cpu-kernels"
+    )
     if os.path.exists(tests_cpu_kernels):
         shutil.rmtree(tests_cpu_kernels)
 
