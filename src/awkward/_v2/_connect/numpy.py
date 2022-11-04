@@ -34,8 +34,6 @@ def convert_to_array(layout, args, kwargs):
 #             ak._v2.contents.Content,
 #             ak._v2.record.Record,
 #             ak.layout.ArrayBuilder,
-#             ak.layout.LayoutBuilder32,
-#             ak.layout.LayoutBuilder64,
 #         ),
 #     ):
 #         nplike = ak.nplike.of(arg)
