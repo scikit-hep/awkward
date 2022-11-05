@@ -3,7 +3,10 @@
 cmake_minimum_required(VERSION 3.15...3.24)
 
 # Project must be near the top
-project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX VERSION ${SKBUILD_PROJECT_VERSION})
+project(
+  ${SKBUILD_PROJECT_NAME}
+  LANGUAGES CXX
+  VERSION ${SKBUILD_PROJECT_VERSION})
 
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
@@ -108,7 +111,6 @@ if(BUILD_TESTING)
 
 endif()
 
-
 # Third tier: Python modules.
 find_package(pybind11 CONFIG REQUIRED)
 
@@ -121,12 +123,9 @@ target_link_libraries(_ext PRIVATE awkward-static)
 file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")
 
 install(
-	TARGETS awkward awkward-parent awkward-cpu-kernels _ext
-	LIBRARY DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
-	RUNTIME DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
-	ARCHIVE DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
-)
+  TARGETS awkward awkward-parent awkward-cpu-kernels _ext
+  LIBRARY DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
+  RUNTIME DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
+  ARCHIVE DESTINATION "${SKBUILD_PROJECT_NAME}/lib")
 
-install(
-	FILES ${PYTHON_SOURCES} DESTINATION ${SKBUILD_PROJECT_NAME}
-)
+install(FILES ${PYTHON_SOURCES} DESTINATION ${SKBUILD_PROJECT_NAME})
