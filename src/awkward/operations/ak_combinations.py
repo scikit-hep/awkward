@@ -177,13 +177,15 @@ def combinations(
             parameters,
             with_name,
             highlevel,
-            array.behavior if behavior is None else behavior,
+            behavior,
         )
 
 
 def _impl(
     array, n, replacement, axis, fields, parameters, with_name, highlevel, behavior
 ):
+    behavior = ak._util.behavior_of(array, behavior=behavior)
+
     if parameters is None:
         parameters = {}
     else:
