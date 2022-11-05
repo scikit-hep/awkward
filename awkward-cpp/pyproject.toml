@@ -1,7 +1,9 @@
 [build-system]
 requires = [
-	"git+https://github.com/scikit-build/scikit-build-core.git",
-    "pybind11"
+	"scikit-build-core @ https://github.com/scikit-build/scikit-build-core/tarball/c263f170bc082c79d47429e47238561189ecdd4e",
+    "pybind11",
+    "ninja==1.10.2.4; platform_system!='Windows'",
+    "cmake"
 ]
 build-backend = "scikit_build_core.build"
 
