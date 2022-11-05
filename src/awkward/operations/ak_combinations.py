@@ -177,7 +177,7 @@ def combinations(
             parameters,
             with_name,
             highlevel,
-            behavior,
+            array.behavior if behavior is None else behavior,
         )
 
 
