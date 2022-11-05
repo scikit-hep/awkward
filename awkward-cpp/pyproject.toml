@@ -1,6 +1,58 @@
 [build-system]
-requires = ["setuptools", "pyyaml", "cmake>=3.14"]
-build-backend = "setuptools.build_meta"
+requires = [
+	"git+https://github.com/scikit-build/scikit-build-core.git",
+    "pybind11"
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "awkward_cpp"
+version = "1"
+dependencies = [
+    "numpy>=1.13.1"
+]
+description = "CPU kernels and compiled extensions for Awkward Array"
+authors = [
+    {name = "Jim Pivarski", email = "pivarski@princeton.edu"},
+]
+maintainers = [
+    {name = "Scikit-HEP", email = "scikit-hep-admins@googlegroups.com"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+]
+license = {text = "BSD-3-Clause"}
+requires-python = ">=3.10"
+[project.urls]
+Homepage = "https://github.com/scikit-hep/awkward-1.0"
+Documentation = "https://awkward-array.readthedocs.io"
+"Source Code" = "https://github.com/scikit-hep/awkward-1.0"
+"Bug Tracker" = "https://github.com/scikit-hep/awkward-1.0/issues"
+Discussions = "https://github.com/scikit-hep/awkward-1.0/discussions"
+Chat = "https://gitter.im/Scikit-HEP/awkward-array"
+Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 [tool.cibuildwheel]
 test-extras = [
