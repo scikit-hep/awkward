@@ -7,7 +7,8 @@ from awkward.contents.bytemaskedarray import ByteMaskedArray  # noqa: F401
 from awkward.contents.content import Content  # noqa: F401
 from awkward.contents.emptyarray import EmptyArray  # noqa: F401
 from awkward.contents.indexedarray import IndexedArray  # noqa: F401
-from awkward.contents.indexedoptionarray import IndexedOptionArray  # noqa: F401
+from awkward.contents.indexedoptionarray import \
+    IndexedOptionArray  # noqa: F401
 from awkward.contents.listarray import ListArray  # noqa: F401
 from awkward.contents.listoffsetarray import ListOffsetArray  # noqa: F401
 from awkward.contents.numpyarray import NumpyArray  # noqa: F401

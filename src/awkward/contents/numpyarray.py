@@ -1084,7 +1084,8 @@ class NumpyArray(Content):
         assert self._data.ndim == 1
 
         if isinstance(self.nplike, ak.nplikes.Jax):
-            from awkward._connect.jax.reducers import get_jax_reducer  # noqa: F401
+            from awkward._connect.jax.reducers import \
+                get_jax_reducer  # noqa: F401
 
             reducer = get_jax_reducer(reducer)
         out = reducer.apply(self, parents, outlength)

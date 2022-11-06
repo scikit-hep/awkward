@@ -4,7 +4,8 @@ import json
 import sys
 
 import awkward as ak
-from awkward.types._awkward_datashape_parser import Lark_StandAlone, Transformer
+from awkward.types._awkward_datashape_parser import (Lark_StandAlone,
+                                                     Transformer)
 
 np = ak.nplikes.NumpyMetadata.instance()
 
