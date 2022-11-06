@@ -307,7 +307,6 @@ jobs:
           python3 -m pip install \
             -r requirements-all.txt \
             -r requirements-test.txt \
-            "${{ matrix.numpy-package }}" \
             build
 
       - name: Prepare generated build sources
