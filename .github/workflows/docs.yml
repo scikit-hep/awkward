@@ -44,6 +44,11 @@ jobs:
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
 
+    - name: Install dependencies
+      run: |
+        # pyodide-build doesn't work out of the box with pipx
+        python3 -m pip install pyyaml pyodide-build==0.21.0
+
     - name: Prepare build files
       run: |
         python3 dev/generate-kernel-signatures.py
@@ -51,8 +56,6 @@ jobs:
 
     - name: Build wheel
       run: |
-        # pyodide-build doesn't work out of the box with pipx
-        python3 -m pip install pyodide-build==0.21.0
         export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
         pyodide build --exports whole_archive
       working-directory: awkward-cpp
@@ -100,6 +103,7 @@ jobs:
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
            doxygen
+           pyyaml
 
     - name: Prepare build files
       run: |
