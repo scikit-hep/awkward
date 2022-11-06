@@ -90,6 +90,7 @@ jobs:
            python=${{ env.PYTHON_VERSION }}
            doxygen
            pyyaml
+           build
 
     - name: Prepare build files
       run: |
@@ -105,7 +106,7 @@ jobs:
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
-      run: pipx run build -w ./awkward-cpp
+      run: python3 -m build -w ./awkward-cpp
 
     - name: Upload wheel
       uses: actions/upload-artifact@v3
