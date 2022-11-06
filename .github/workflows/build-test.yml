@@ -292,8 +292,7 @@ jobs:
           cache-env: true
           environment-file: false
           environment-name: awkward
-          channels:
-            - conda-forge
+          channels: conda-forge
           extra-specs: |
              python=${{ env.PYTHON_VERSION }}
              numpy
