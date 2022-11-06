@@ -1,4 +1,3 @@
-autograd
 flake8
 fsspec;sys_platform != "win32"
 jax>=0.2.7;sys_platform != "win32" and python_version < "3.11"
