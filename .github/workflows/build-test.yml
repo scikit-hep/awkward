@@ -23,7 +23,7 @@ concurrency:
 
 env:
   # Ensure predictable hash
-  SOURCE_DATE_EPOCH: "0"
+  SOURCE_DATE_EPOCH: "1667773939"
 
 jobs:
   Windows:
