@@ -83,9 +83,8 @@ jobs:
         run: python -m build -w awkward-cpp
 
       - name: Install awkward-cpp
-        run: |
-          ls awkward-cpp/dist
-          python -m pip install -v awkward-cpp/dist/*.whl
+        run: python -m pip install -v *.whl
+        working-directory: awkward-cpp/dist
 
       - name: Build & install awkward
         run: python -m pip install -v .
