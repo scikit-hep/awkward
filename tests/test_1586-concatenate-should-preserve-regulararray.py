@@ -4,8 +4,7 @@ import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
 import awkward as ak  # noqa: F401
-from awkward.types import (ArrayType, ListType, NumpyType, OptionType,
-                           RegularType)
+from awkward.types import ArrayType, ListType, NumpyType, OptionType, RegularType
 
 
 def test_simple():
