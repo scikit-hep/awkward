@@ -1,7 +1,6 @@
 [build-system]
 requires = [
-    "hatchling>=1.10.0",
-    "hatch-requirements-txt>=0.2.0"
+    "hatchling>=1.10.0"
 ]
 build-backend = "hatchling.build"
 
@@ -39,18 +38,15 @@ classifiers = [
     "Topic :: Software Development",
     "Topic :: Utilities",
 ]
-dynamic = [
-    "version",
-    "dependencies",
-    "optional-dependencies"
+dependencies = [
+    "awkward_cpp>=1rc0,<=1",
+    "importlib_resources;python_version < \"3.9\"",
+    "numpy>=1.13.1",
+    "packaging",
 ]
-
-[tool.hatch.metadata.hooks.requirements_txt]
-files = ["requirements.txt"]
-
-[tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
-dev = ["requirements-dev.txt"]
-test = ["requirements-test.txt"]
+dynamic = [
+    "version"
+]
 
 [project.entry-points.numba_extensions]
 init = "awkward.numba:_register"
@@ -83,7 +79,8 @@ include = [
     "/docs-img",
     "/docs-sphinx",
     "/CITATION.cff",
-    "/CONTRIBUTING.md"
+    "/CONTRIBUTING.md",
+    "/requirements*.txt"
 ]
 
 [tool.pytest.ini_options]
