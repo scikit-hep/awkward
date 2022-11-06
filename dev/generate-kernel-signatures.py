@@ -126,7 +126,7 @@ def type_to_ctype(typename):
 
 
 def include_kernels_h(specification):
-    print("Generating include/awkward/kernels.h...")
+    print("Generating awkward-cpp/include/awkward/kernels.h...")
 
     with open(
         os.path.join(
@@ -175,7 +175,7 @@ extern "C" {{
 """
         )
 
-    print("Done with  include/awkward/kernels.h.")
+    print("           awkward-cpp/include/awkward/kernels.h.")
 
 
 type_to_dtype = {
@@ -311,7 +311,7 @@ def by_signature(lib):
 """
         )
 
-    print("Done with  src/awkward/_kernel_signatures.py...")
+    print("           awkward-cpp/src/awkward_cpp/_kernel_signatures.py...")
 
 
 def kernel_signatures_cuda_py(specification):
@@ -336,7 +336,7 @@ def kernel_signatures_cuda_py(specification):
 #
 #     python dev/generate-kernel-signatures.py
 #
-# (It is usually run as part of pip install . or localbuild.py.)
+# This step is normally run explicitly before generating a package
 
 # fmt: off
 
@@ -458,7 +458,7 @@ def by_signature(cuda_kernel_templates):
 """
         )
 
-    print("Done with  awkward/_kernel_signatures_cuda.py...")
+    print("Done with  src/awkward/connect/cuda/_kernel_signatures.py...")
 
 
 if __name__ == "__main__":
@@ -466,6 +466,6 @@ if __name__ == "__main__":
         os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
     ) as specfile:
         specification = yaml.safe_load(specfile)
-        include_kernels_h(specification)
-        kernel_signatures_py(specification)
-        kernel_signatures_cuda_py(specification)
+    include_kernels_h(specification)
+    kernel_signatures_py(specification)
+    kernel_signatures_cuda_py(specification)
