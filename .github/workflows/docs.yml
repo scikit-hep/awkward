@@ -91,6 +91,11 @@ jobs:
            doxygen
            pyyaml
 
+    - name: Prepare build files
+      run: |
+        python3 dev/generate-kernel-signatures.py
+        python3 dev/copy-cpp-headers.py
+
     - name: Cache wheel
       id: cache-awkward-cpp-x86-64-wheel
       uses: actions/cache@v3
