@@ -23,6 +23,17 @@ jobs:
       with:
         submodules: true
 
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+
+    - name: Prepare build files
+      run: |
+        python3 -m pip install pyyaml
+        python3 dev/generate-kernel-signatures.py
+        python3 dev/copy-cpp-headers.py
+
     - name: Cache wheel
       id: cache-awkward-cpp-wasm-wheel
       uses: actions/cache@v3
@@ -30,33 +41,17 @@ jobs:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      with:
-        python-version: "${{ env.PYTHON_VERSION }}"
-
     - name: Install EMSDK
       uses: mymindstorm/setup-emsdk@v11
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       with:
         version: 3.1.14
 
-    - name: Install dependencies
+    - name: Build wheel
       if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       run: |
         # pyodide-build doesn't work out of the box with pipx
         python3 -m pip install pyyaml pyodide-build==0.21.0
-
-    - name: Prepare build files
-      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      run: |
-        python3 dev/generate-kernel-signatures.py
-        python3 dev/copy-cpp-headers.py
-
-    - name: Build wheel
-      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
-      run: |
         export CMAKE_ARGS="-DEMSCRIPTEN=1"
         pyodide build --exports whole_archive
       working-directory: awkward-cpp
@@ -74,18 +69,10 @@ jobs:
       with:
         submodules: true
 
-    - name: Cache wheel
-      id: cache-awkward-cpp-x86-64-wheel
-      uses: actions/cache@v3
-      with:
-        path: ./awkward-cpp/dist
-        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
-
       # TODO: remove this once mamba-org/mamba#1726 is fixed
       #       and replace with `-r requirements.txt` in a
       #       non-template `environment.yml`
     - name: Template environment.yml
-      if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
       working-directory: docs-sphinx
 
@@ -94,7 +81,6 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
       uses: mamba-org/provision-with-micromamba@main
       with:
         # Cache invalidates daily by default
@@ -105,16 +91,16 @@ jobs:
            doxygen
            pyyaml
 
-    - name: Prepare build files
-      if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
-      run: |
-        python3 dev/generate-kernel-signatures.py
-        python3 dev/copy-cpp-headers.py
+    - name: Cache wheel
+      id: cache-awkward-cpp-x86-64-wheel
+      uses: actions/cache@v3
+      with:
+        path: ./awkward-cpp/dist
+        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
-      run: pipx run build -w
-      working-directory: awkward-cpp
+      run: pipx run build -w ./awkward-cpp
 
     - name: Upload wheel
       uses: actions/upload-artifact@v3
