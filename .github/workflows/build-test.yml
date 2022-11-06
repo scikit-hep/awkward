@@ -56,7 +56,11 @@ jobs:
           architecture: '${{ matrix.python-architecture }}'
 
       - name: Install requirements
-        run: python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
+        run: |
+          python3 -m pip install \
+            -r requirements-dev.txt \
+            -r requirements-test.txt \
+            build
 
       - name: Prepare generated build sources
         run: |
@@ -72,7 +76,7 @@ jobs:
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: pipx run build -w ./awkward-cpp
+        run: python3 -m build -w ./awkward-cpp
 
       - name: Install awkward-cpp
         run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
@@ -124,7 +128,11 @@ jobs:
           python-version: '${{ matrix.python-version }}'
 
       - name: Install requirements
-        run: python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
+        run: |
+          python3 -m pip install \
+            -r requirements-dev.txt \
+            -r requirements-test.txt \
+            build
 
       - name: Prepare generated build sources
         run: |
@@ -140,7 +148,7 @@ jobs:
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: pipx run build -w ./awkward-cpp
+        run: python3 -m build -w ./awkward-cpp
 
       - name: Install awkward-cpp
         run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
@@ -198,7 +206,12 @@ jobs:
           python-version: '${{ matrix.python-version }}'
 
       - name: Install requirements
-        run: python3 -m pip install -r requirements-dev.txt -r requirements-test.txt "${{ matrix.numpy-package }}"
+        run: |
+          python3 -m pip install \
+            -r requirements-dev.txt \
+            -r requirements-test.txt \
+            "${{ matrix.numpy-package }}" \
+            build
 
       - name: Prepare generated build sources
         run: |
@@ -214,7 +227,7 @@ jobs:
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: pipx run build -w ./awkward-cpp
+        run: python3 -m build -w ./awkward-cpp
 
       - name: Install awkward-cpp
         run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
@@ -284,7 +297,12 @@ jobs:
              root
 
       - name: Install requirements
-        run: python3 -m pip install -r requirements-dev.txt -r requirements-test.txt "${{ matrix.numpy-package }}"
+        run: |
+          python3 -m pip install \
+            -r requirements-dev.txt \
+            -r requirements-test.txt \
+            "${{ matrix.numpy-package }}" \
+            build
 
       - name: Prepare generated build sources
         run: |
@@ -300,7 +318,7 @@ jobs:
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: pipx run build -w ./awkward-cpp
+        run: python3 -m build -w ./awkward-cpp
 
       - name: Install awkward-cpp
         run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
