@@ -55,6 +55,13 @@ jobs:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
 
+      - name: Cache wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
+
       - name: Prepare Packages
         run: |
           python3 -m pip install -r requirements-dev.txt -r requirements-test.txt
