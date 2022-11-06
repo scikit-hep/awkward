@@ -90,7 +90,10 @@ jobs:
            python=${{ env.PYTHON_VERSION }}
            doxygen
            pyyaml
-           build
+
+    - name: Install requirements
+      run: |
+        python3 -m pip install build
 
     - name: Prepare build files
       run: |
