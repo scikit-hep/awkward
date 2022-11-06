@@ -68,7 +68,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./awkward-cpp/dist
-          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -136,7 +136,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./awkward-cpp/dist
-          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -210,7 +210,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./awkward-cpp/dist
-          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -296,7 +296,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./awkward-cpp/dist
-          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
