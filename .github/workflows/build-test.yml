@@ -58,7 +58,7 @@ jobs:
       - name: Install requirements
         run: |
           python3 -m pip install `
-            -r requirements-dev.txt `
+            -r requirements-all.txt `
             -r requirements-test.txt `
             build
 
@@ -130,7 +130,7 @@ jobs:
       - name: Install requirements
         run: |
           python3 -m pip install \
-            -r requirements-dev.txt \
+            -r requirements-all.txt \
             -r requirements-test.txt \
             build
 
@@ -187,7 +187,7 @@ jobs:
           - "numpy"
         include:
           - python-version: '3.7'
-            numpy-package: "oldest-supported-numpy"
+            numpy-package: "numpy>=1.17"
 
     runs-on: ubuntu-20.04
 
@@ -208,7 +208,7 @@ jobs:
       - name: Install requirements
         run: |
           python3 -m pip install \
-            -r requirements-dev.txt \
+            -r requirements-all.txt \
             -r requirements-test.txt \
             "${{ matrix.numpy-package }}" \
             build
@@ -302,7 +302,7 @@ jobs:
       - name: Install requirements
         run: |
           python3 -m pip install \
-            -r requirements-dev.txt \
+            -r requirements-all.txt \
             -r requirements-test.txt \
             "${{ matrix.numpy-package }}" \
             build
