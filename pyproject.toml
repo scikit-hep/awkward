@@ -78,11 +78,12 @@ include = [
     "/src",
     "/tests",
     "/tests-cuda",
-    "/CITATION.cff",
-    "/CONTRIBUTING.md",
+    "/tests-cuda-kernels",
     "/docs-doxygen",
     "/docs-img",
     "/docs-sphinx"
+    "/CITATION.cff",
+    "/CONTRIBUTING.md",
 ]
 
 [tool.pytest.ini_options]
