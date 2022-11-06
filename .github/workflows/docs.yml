@@ -44,6 +44,11 @@ jobs:
         echo "/usr/lib/ccache" >> $GITHUB_PATH
         echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
 
+    - name: Prepare build files
+      run: |
+        python3 dev/generate-kernel-signatures.py
+        python3 dev/copy-cpp-headers.py
+
     - name: Build wheel
       run: |
         # pyodide-build doesn't work out of the box with pipx
@@ -95,6 +100,11 @@ jobs:
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
            doxygen
+
+    - name: Prepare build files
+      run: |
+        python3 dev/generate-kernel-signatures.py
+        python3 dev/copy-cpp-headers.py
 
     - name: Build wheel
       run: pipx run build -w
