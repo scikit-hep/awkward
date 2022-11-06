@@ -29,7 +29,9 @@ A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separa
 
 The functions are implemented in C with templates for integer specializations (cpu-kernels) and as CUDA (cuda-kernels), but the function signatures and normative definitions are expressed below using a subset of the Python language. These normative definitions are used as a stable and easy-to-read standard that both implementations must reproduce in tests, regardless of how they are optimized.\n
 """
-    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
+    with open(
+        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
+    ) as specfile:
         with open(
             os.path.join(
                 CURRENT_DIR,
