@@ -76,10 +76,10 @@ jobs:
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python3 -m build -w ./awkward-cpp
+        run: python3 -m build -w awkward-cpp
 
       - name: Install awkward-cpp
-        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
+        run: python3 -m pip install -v awkward-cpp/dist/*.whl
 
       - name: Build & install awkward
         run: python3 -m pip install -v .
