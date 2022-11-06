@@ -23,38 +23,46 @@ jobs:
       with:
         submodules: true
 
+    - name: Cache wheel
+      id: cache-wasm-wheel
+      uses: actions/cache@v3
+      with:
+        path: ./awkward-cpp/dist
+        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
+
     - name: Setup Python
       uses: actions/setup-python@v4
+      if: steps.cache-wasm-wheel.outputs.cache-hit != 'true'
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
     - name: Install EMSDK
       uses: mymindstorm/setup-emsdk@v11
+      if: steps.cache-wasm-wheel.outputs.cache-hit != 'true'
       with:
         version: 3.1.14
 
     - name: Install ccache
       uses: hendrikmuhs/ccache-action@v1.2
+      if: steps.cache-wasm-wheel.outputs.cache-hit != 'true'
       with:
         key: awkward-wasm-${{ github.job }}
         verbose: 2
 
-    - name: Setup ccache
-      run: |
-        echo "/usr/lib/ccache" >> $GITHUB_PATH
-        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-
     - name: Install dependencies
+      if: steps.cache-wasm-wheel.outputs.cache-hit != 'true'
       run: |
         # pyodide-build doesn't work out of the box with pipx
         python3 -m pip install pyyaml pyodide-build==0.21.0
 
     - name: Prepare build files
+      if: steps.cache-wasm-wheel.outputs.cache-hit != 'true'
       run: |
         python3 dev/generate-kernel-signatures.py
         python3 dev/copy-cpp-headers.py
 
     - name: Build wheel
+      if: steps.cache-wasm-wheel.outputs.cache-hit != 'true'
       run: |
         export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
         pyodide build --exports whole_archive
