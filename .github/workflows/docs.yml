@@ -179,7 +179,9 @@ jobs:
       run: pipx run build -w
 
     - name: Copy awkward wheel to JupyterLite
-      run: cp --parents dist/awkward*.whl docs-sphinx/lite/pypi/
+      run: |
+        mkdir -p docs-sphinx/lite/pypi/
+        cp dist/awkward*.whl docs-sphinx/lite/pypi/
 
     - name: Download awkward-cpp WASM wheel
       uses: actions/download-artifact@v3
