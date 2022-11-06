@@ -68,11 +68,21 @@ init = "awkward.numba:_register"
 path = "src/awkward/__init__.py"
 
 [tool.hatch.build]
-packages = ["src/awkward"]
+sources = ["src"]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["src/awkward"]
 
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
+    "/tests",
+    "/tests-cuda",
+    "/CITATION.cff",
+    "/CONTRIBUTING.md",
+    "/docs-doxygen",
+    "/docs-img",
+    "/docs-sphinx"
 ]
 
 [tool.pytest.ini_options]
