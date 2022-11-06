@@ -58,9 +58,7 @@ Chat = "https://gitter.im/Scikit-HEP/awkward-array"
 Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 [tool.cibuildwheel]
-test-extras = [
-    "test",
-]
+test-requires = ["pytest"]
 test-command = "pytest {project}/tests"
 skip = [
     "pp*win*",

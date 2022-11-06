@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "awkward"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 readme = "README.md"
-license = "BSD-3-Clause"
+license = { text = "BSD-3-Clause" }
 requires-python = ">=3.7"
 authors = [
     { name = "Jim Pivarski", email = "pivarski@princeton.edu" },
@@ -81,9 +81,9 @@ include = [
     "/tests-cuda-kernels",
     "/docs-doxygen",
     "/docs-img",
-    "/docs-sphinx"
+    "/docs-sphinx",
     "/CITATION.cff",
-    "/CONTRIBUTING.md",
+    "/CONTRIBUTING.md"
 ]
 
 [tool.pytest.ini_options]
