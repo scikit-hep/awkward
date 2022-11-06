@@ -57,9 +57,9 @@ jobs:
 
       - name: Install requirements
         run: |
-          python3 -m pip install \
-            -r requirements-dev.txt \
-            -r requirements-test.txt \
+          python3 -m pip install `
+            -r requirements-dev.txt `
+            -r requirements-test.txt `
             build
 
       - name: Prepare generated build sources
