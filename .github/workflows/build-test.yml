@@ -61,15 +61,15 @@ jobs:
 
       - name: Install requirements
         run: |
-          python3 -m pip install `
+          python -m pip install `
             -r requirements-all.txt `
             -r requirements-test.txt `
             build
 
       - name: Prepare generated build sources
         run: |
-          python3 dev/generate-kernel-signatures.py
-          python3 dev/copy-cpp-headers.py
+          python dev/generate-kernel-signatures.py
+          python dev/copy-cpp-headers.py
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
@@ -80,13 +80,13 @@ jobs:
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python3 -m build -w awkward-cpp
+        run: python -m build -w awkward-cpp
 
       - name: Install awkward-cpp
-        run: python3 -m pip install -v awkward-cpp/dist/*.whl
+        run: python -m pip install -v awkward-cpp/dist/*.whl
 
       - name: Build & install awkward
-        run: python3 -m pip install -v .
+        run: python -m pip install -v .
 
       - name: Check if kernel specification is sorted
         run: python dev/kernel-diagnostics.py --check-spec-sorted
