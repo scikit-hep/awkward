@@ -71,7 +71,7 @@ jobs:
         id: cache-awkward-cpp-wheel
         uses: actions/cache@v3
         with:
-          path: ./awkward-cpp/dist
+          path: awkward-cpp/dist
           key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
