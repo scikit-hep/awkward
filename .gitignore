@@ -6,16 +6,10 @@ docs/demos/test-program.cpp
 .clangd/
 
 # Generated includes
-awkward-cpp/include/awkward/kernels.h
-awkward-cpp/src/awkward_cpp/_kernel_signatures.py
-awkward-cpp/header-only
 src/awkward/_kernel_signatures_cuda.py
 src/awkward/_connect/cuda/_kernel_signatures.py
 
 # Kernel tests
-awkward-cpp/tests-spec
-awkward-cpp/tests-spec-explicit
-awkward-cpp/tests-cpu-kernels
 tests-cuda-kernels
 
 # to use all-contributors-cli without adding it to the project
@@ -39,8 +33,6 @@ docs/lite/
 docs/_contents/
 **/.pyodide-xbuildenv
 
-# Doxygen
-awkward-cpp/docs/html
 docs/_static/doxygen
 
 ############################################################# IDEs
