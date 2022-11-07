@@ -187,23 +187,21 @@ def test_behavior_forwarding_structure(operation_behavior):
 
     # Different `where` implementations
     assert (
-        ak.operations.where(mask2, behavior=operation_behavior)[0].behavior
+        ak.operations.where(mask2, behavior=operation_behavior).behavior
         == merged_behavior
     )
     assert (
-        ak.operations.where(mask1, ~mask1, mask1, behavior=operation_behavior)[
-            0
-        ].behavior
+        ak.operations.where(mask1, ~mask1, mask1, behavior=operation_behavior).behavior
         == merged_behavior
     )
     assert (
-        ak.operations.with_field(six, seven, where="y", behavior=operation_behavior)[
-            0
-        ].behavior
+        ak.operations.with_field(
+            six, seven, where="y", behavior=operation_behavior
+        ).behavior
         == merged_behavior
     )
     assert (
-        ak.operations.with_name(six, "cloud", behavior=operation_behavior)[0].behavior
+        ak.operations.with_name(six, "cloud", behavior=operation_behavior).behavior
         == merged_behavior
     )
     assert (
@@ -211,7 +209,7 @@ def test_behavior_forwarding_structure(operation_behavior):
             ak.operations.with_parameter(
                 one, "__array__", "cloud", behavior=operation_behavior
             )
-        )[0].behavior
+        ).behavior
         == merged_behavior
     )
 
