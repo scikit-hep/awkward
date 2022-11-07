@@ -2,11 +2,11 @@
 
 Thank you for your interest in contributing! We're eager to see your ideas and look forward to working with you.
 
-This document describes the technical procedures we follow in this project. I should also stress that as members of the Scikit-HEP community, we are all obliged to maintaining a welcoming, harassment-free environment. See the [Code of Conduct](https://scikit-hep.org/code-of-conduct) for details.
+This document describes the technical procedures we follow in this project. Yet, it should also be stressed that as members of the Scikit-HEP community, we are all obliged to maintaining a welcoming, harassment-free environment. See the [Code of Conduct](https://scikit-hep.org/code-of-conduct) for details.
 
 ### Where to start
 
-The front page for the Awkward Array project is its [GitHub README](https://github.com/scikit-hep/awkward-1.0#readme). This leads directly to tutorials and reference documentation that I assume you've already seen. It also includes instructions for [compiling for development](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), using the localbuild.py script.
+The front page for the Awkward Array project is its [GitHub README](https://github.com/scikit-hep/awkward-1.0#readme). This leads directly to tutorials and reference documentation that you may have already seen. It also includes instructions for [compiling for development](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), using the localbuild.py script.
 
 ### Reporting issues
 
@@ -52,10 +52,47 @@ It is unnecessary to manually edit (rebase) your commit history. If, however, yo
 
 ### Building and testing locally
 
-As described in [the README](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), you can build locally using
+As described in [the README](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), Awkward Array is shipped as two packages: `awkward` and `awkward-cpp`. The `awkward-cpp` package contains the compiled C++ components required for performance. If you do not need to frequently modify this code, then it can simply be installed using `pip`.
 
+Subsequent steps require the generation of code and datafiles (kernel specification, header-only includes). This can be done with the `prepare` nox session:
 ```bash
-python localbuild.py --pytest tests
+nox -s prepare
+```
+
+The `prepare` session accepts flags to disable the test and documentation generation targets, e.g.
+```bash
+nox -s prepare -- --no-tests --no-docs
+```
+This can reduce the time taken to perform the preparation step in the event that only the package-building step is needed.
+
+#### Installing the `awkward-cpp` package
+
+The C++ components can be installed by building the `awkward-cpp` package:
+```bash
+python -m pip install ./awkward-cpp
+```
+
+If you are working on the C++ components of Awkward Array, it might be more convenient to skip the build isolation step, which involves creating an isolated build environment. First, you must install the build requirements:
+```bash
+python -m pip install scikit-build-core pybind11 ninja cmake
+```
+
+Then the installation can be performed without build isolation:
+```bash
+python -m pip install --no-build-isolation ./awkward-cpp
+```
+
+#### Installing the `awkward` package
+With `awkward-cpp` installed, an editable installation of the pure-python `awkward` package can be performed with
+```bash
+python -m pip install -e .
+```
+
+
+#### Testing the installed packages
+Finally, let's run the integration test suite to ensure that everything's working as expected:
+```bash
+python -m pytest tests -n auto
 ```
 
 The `--pytest tests` runs the integration tests from the `tests` directory (drop it to build only).
@@ -63,8 +100,6 @@ The `--pytest tests` runs the integration tests from the `tests` directory (drop
 For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
 
 ```bash
-python dev/generate-kernelspec.py
-python dev/generate-tests.py
 python -m pytest -vv -rs tests-spec
 python -m pytest -vv -rs tests-cpu-kernels
 ```
@@ -72,10 +107,10 @@ python -m pytest -vv -rs tests-cpu-kernels
 Furthermore, if you have an Nvidia GPU and CuPy installed, you can run the CUDA tests with
 
 ```bash
-python dev/generate-tests.py
 python -m pytest -vv -rs tests-cuda-kernels
 python -m pytest -vv -rs tests-cuda
 ```
+
 
 ### Formatting
 
@@ -101,7 +136,7 @@ You need some additional packages installed on your system to build the document
 To build documentation locally, execute the following command from the root directory of the project.
 
 ```bash
-sphinx-build docs-sphinx docs-sphinx/_build
+sphinx-build docs docs/_build
 ```
 
 this command executes multiple custom Python scripts(some require a working internet connection), in addition to using Sphinx and Doxygen to generate the required browser viewable documentation.
@@ -109,7 +144,7 @@ this command executes multiple custom Python scripts(some require a working inte
 To view the built documentation, open
 
 ```bash
-docs-sphinx/_build/index.html
+docs/_build/index.html
 ```
 
 from the root directory of the project in your preferred web browser.
@@ -117,7 +152,7 @@ from the root directory of the project in your preferred web browser.
 Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is
 
 ```bash
-rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
+rm -rf docs-shinx/_auto docs_sphinx/_build docs/_static
 ```
 
 ### Continuous testing
