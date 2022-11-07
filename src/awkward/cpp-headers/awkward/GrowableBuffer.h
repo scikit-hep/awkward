@@ -141,10 +141,26 @@ namespace awkward {
     ///
     /// Changes the data type from `PRIMITIVE` to `TO_PRIMITIVE`/
     template <typename TO_PRIMITIVE>
-    typename std::enable_if<!awkward::is_tt<std::complex, TO_PRIMITIVE>::value>::type
+    typename std::enable_if<(!awkward::is_tt<std::complex, TO_PRIMITIVE>::value &&
+                             !awkward::is_tt<std::complex, PRIMITIVE>::value) ||
+                            (awkward::is_tt<std::complex, TO_PRIMITIVE>::value &&
+                             awkward::is_tt<std::complex, PRIMITIVE>::value)>::type
     copy_as(TO_PRIMITIVE* to_ptr, size_t offset) {
       for (size_t i = 0; i < length_; i++) {
         to_ptr[offset++] = static_cast<TO_PRIMITIVE>(ptr_.get()[i]);
+      }
+      if (next_) {
+        next_->copy_as(to_ptr, offset);
+      }
+    }
+
+    template <typename TO_PRIMITIVE>
+    typename std::enable_if<!awkward::is_tt<std::complex, TO_PRIMITIVE>::value &&
+                             awkward::is_tt<std::complex, PRIMITIVE>::value>::type
+    copy_as(TO_PRIMITIVE* to_ptr, size_t offset) {
+      for (size_t i = 0; i < length_; i++) {
+        to_ptr[offset++] = static_cast<TO_PRIMITIVE>(ptr_.get()[i].real());
+        to_ptr[offset++] = static_cast<TO_PRIMITIVE>(ptr_.get()[i].imag());
       }
       if (next_) {
         next_->copy_as(to_ptr, offset);
@@ -157,7 +173,8 @@ namespace awkward {
     ///
     /// Changes the data type from `PRIMITIVE` to `std::complex`/
     template <typename TO_PRIMITIVE>
-    typename std::enable_if<awkward::is_tt<std::complex, TO_PRIMITIVE>::value>::type
+    typename std::enable_if<awkward::is_tt<std::complex, TO_PRIMITIVE>::value &&
+                            !awkward::is_tt<std::complex, PRIMITIVE>::value>::type
     copy_as(TO_PRIMITIVE* to_ptr, size_t offset) {
       for (size_t i = 0; i < length_; i++) {
         double val = static_cast<double>(ptr_.get()[i]);
@@ -306,6 +323,12 @@ namespace awkward {
       int64_t len = (int64_t)other.length();
       int64_t actual =
           (len < other.options_.initial()) ? other.options_.initial() : len;
+
+      if (!awkward::is_tt<std::complex, TO_PRIMITIVE>::value &&
+        awkward::is_tt<std::complex, PRIMITIVE>::value) {
+          len *= 2;
+          actual *= 2;
+        }
 
       auto ptr =
           std::unique_ptr<TO_PRIMITIVE[]>(new TO_PRIMITIVE[(size_t)actual]);

@@ -12,11 +12,11 @@ void test_full() {
 
   auto buffer = awkward::GrowableBuffer<int16_t>::full(options, -2, data_size);
 
-  int16_t* ptr = new int16_t[buffer.length()];
-  buffer.concatenate(ptr);
+  std::unique_ptr<int16_t[]> ptr(new int16_t[buffer.length()]);
+  buffer.concatenate(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == int16_t(-2));
+    assert(ptr.get()[i] == int16_t(-2));
   }
 }
 
@@ -26,11 +26,11 @@ void test_arange() {
 
   auto buffer = awkward::GrowableBuffer<int64_t>::arange(options, data_size);
 
-  int64_t* ptr = new int64_t[buffer.length()];
-  buffer.concatenate(ptr);
+  std::unique_ptr<int64_t[]> ptr(new int64_t[buffer.length()]);
+  buffer.concatenate(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == (int64_t)i);
+    assert(ptr.get()[i] == (int64_t)i);
   }
 }
 
@@ -40,11 +40,11 @@ void test_zeros() {
 
   auto buffer = awkward::GrowableBuffer<uint32_t>::zeros(options, data_size);
 
-  uint32_t* ptr = new uint32_t[buffer.length()];
-  buffer.concatenate(ptr);
+  std::unique_ptr<uint32_t[]> ptr(new uint32_t[buffer.length()]);
+  buffer.concatenate(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == (uint32_t)0);
+    assert(ptr.get()[i] == (uint32_t)0);
   }
 }
 
@@ -61,11 +61,11 @@ void test_float() {
     buffer.append(data[i]);
   }
 
-  float* ptr = new float[buffer.length()];
-  buffer.concatenate(ptr);
+  std::unique_ptr<float[]> ptr(new float[buffer.length()]);
+  buffer.concatenate(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == data[i]);
+    assert(ptr.get()[i] == data[i]);
   }
 }
 
@@ -73,7 +73,7 @@ void test_int64() {
   size_t data_size = 10;
   awkward::BuilderOptions options { 8, 1 };
 
-  float data[10] = {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4};
+  int64_t data[10] = {-5, -4, -3, -2, -1, 0, 1, 2, 3, 4};
 
   auto buffer = awkward::GrowableBuffer<int64_t>::empty(options);
 
@@ -81,11 +81,11 @@ void test_int64() {
     buffer.append(data[i]);
   }
 
-  int64_t* ptr = new int64_t[buffer.length()];
-  buffer.concatenate(ptr);
+  std::unique_ptr<int64_t[]> ptr(new int64_t[buffer.length()]);
+  buffer.concatenate(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == data[i]);
+    assert(ptr.get()[i] == data[i]);
   }
 }
 
@@ -102,11 +102,11 @@ void test_bool() {
     buffer.append(data[i]);
   }
 
-  bool* ptr = new bool[buffer.length()];
-  buffer.concatenate(ptr);
+  std::unique_ptr<bool[]> ptr(new bool[buffer.length()]);
+  buffer.concatenate(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == data[i]);
+    assert(ptr.get()[i] == data[i]);
   }
 }
 
@@ -122,11 +122,11 @@ void test_double() {
     buffer.append(data[i]);
   }
 
-  double* ptr = new double[buffer.length()];
-  buffer.concatenate(ptr);
+  std::unique_ptr<double[]> ptr(new double[buffer.length()]);
+  buffer.concatenate(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == data[i]);
+    assert(ptr.get()[i] == data[i]);
   }
 }
 
@@ -161,11 +161,11 @@ void test_extend() {
 
   buffer.extend(data, data_size);
 
-  double* ptr = new double[buffer.length()];
-  buffer.concatenate(ptr);
+  std::unique_ptr<double[]> ptr(new double[buffer.length()]);
+  buffer.concatenate(ptr.get());
 
   for (size_t i = 0; i < buffer.length(); i++) {
-    assert(ptr[i] == data[i]);
+    assert(ptr.get()[i] == data[i]);
   }
 }
 
@@ -187,6 +187,68 @@ void test_append_and_get_ref() {
   }
 }
 
+template<typename FROM, typename TO>
+void test_copy_complex_as_complex() {
+  size_t data_size = 10;
+  awkward::BuilderOptions options { 5, 1 };
+
+  std::complex<FROM> data[10] = {{0, 0}, {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
+                                   {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
+
+  auto buffer = awkward::GrowableBuffer<std::complex<FROM>>::empty(options);
+  for (size_t i = 0; i < data_size; i++) {
+    buffer.append(data[i]);
+  }
+
+  std::unique_ptr<std::complex<FROM>[]> ptr(new std::complex<FROM>[buffer.length()]);
+  buffer.concatenate(ptr.get());
+
+  for (size_t i = 0; i < buffer.length(); i++) {
+    assert(ptr.get()[i] == data[i]);
+  }
+
+  auto to_buffer = awkward::GrowableBuffer<std::complex<FROM>>::template copy_as<std::complex<TO>>(buffer);
+  std::complex<TO>* ptr2 = new std::complex<TO>[to_buffer.length()];
+  to_buffer.concatenate(ptr2);
+
+  for (size_t i = 0; i < to_buffer.length(); i++) {
+    assert(ptr2[i].real() == (TO)data[i].real());
+    assert(ptr2[i].imag() == (TO)data[i].imag());
+  }
+
+}
+
+template<typename FROM, typename TO>
+void test_copy_complex_as() {
+  size_t data_size = 10;
+  awkward::BuilderOptions options { 5, 1 };
+
+  std::complex<FROM> data[10] = {{0, 0}, {1.1, 0.1}, {2.2, 0.2}, {3.3, 0.3}, {4.4, 0.4},
+                                   {5.5, 0.5}, {6.6, 0.6}, {7.7, 0.7}, {8.8, 0.8}, {9.9, 0.9}};
+
+  auto buffer = awkward::GrowableBuffer<std::complex<FROM>>::empty(options);
+  for (size_t i = 0; i < data_size; i++) {
+    buffer.append(data[i]);
+  }
+
+  std::unique_ptr<std::complex<FROM>[]> ptr(new std::complex<FROM>[buffer.length()]);
+  buffer.concatenate(ptr.get());
+
+  for (size_t i = 0; i < buffer.length(); i++) {
+    assert(ptr.get()[i] == data[i]);
+  }
+
+  auto to_buffer = awkward::GrowableBuffer<std::complex<FROM>>::template copy_as<TO>(buffer);
+  std::unique_ptr<TO[]> ptr2(new TO[to_buffer.length()]);
+  to_buffer.concatenate(ptr2.get());
+
+  for (size_t i = 0, j = 0; i < to_buffer.length() * 0.5; i++, j+=2) {
+    assert(ptr2.get()[j] == (TO)data[i].real());
+    assert(ptr2.get()[j+1] == (TO)data[i].imag());
+  }
+
+}
+
 int main(int /* argc */, const char ** /* argv */) {
   test_full();
   test_arange();
@@ -198,6 +260,30 @@ int main(int /* argc */, const char ** /* argv */) {
   test_complex();
   test_extend();
   test_append_and_get_ref();
+  test_copy_complex_as_complex<double, double>();
+  test_copy_complex_as_complex<double, long double>();
+  test_copy_complex_as_complex<double, float>();
+  test_copy_complex_as_complex<float, float>();
+  test_copy_complex_as_complex<float, double>();
+  test_copy_complex_as_complex<float, long double>();
+  test_copy_complex_as_complex<long double, float>();
+  test_copy_complex_as_complex<long double, double>();
+  test_copy_complex_as_complex<long double, long double>();
+  test_copy_complex_as<long double, long double>();
+  test_copy_complex_as<long double, double>();
+  test_copy_complex_as<long double, float>();
+  test_copy_complex_as<long double, int64_t>();
+  test_copy_complex_as<long double, uint8_t>();
+  test_copy_complex_as<double, long double>();
+  test_copy_complex_as<double, double>();
+  test_copy_complex_as<double, float>();
+  test_copy_complex_as<double, int64_t>();
+  test_copy_complex_as<double, uint8_t>();
+  test_copy_complex_as<float, long double>();
+  test_copy_complex_as<float, double>();
+  test_copy_complex_as<float, float>();
+  test_copy_complex_as<float, int64_t>();
+  test_copy_complex_as<float, uint8_t>();
 
   return 0;
 }
