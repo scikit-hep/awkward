@@ -60,7 +60,7 @@ jobs:
           architecture: '${{ matrix.python-architecture }}'
 
       - name: Install requirements
-        run: python -m pip install -r requirements-test.txt build
+        run: python -m pip install -r requirements-test.txt PyYAML build
 
       - name: Prepare generated build sources
         run: |
@@ -128,10 +128,7 @@ jobs:
           python-version: '${{ matrix.python-version }}'
 
       - name: Install requirements
-        run: |
-          python3 -m pip install \
-            -r requirements-test.txt \
-            build
+        run: python3 -m pip install -r requirements-test.txt PyYAML build
 
       - name: Prepare generated build sources
         run: |
@@ -205,7 +202,7 @@ jobs:
           python-version: '${{ matrix.python-version }}'
 
       - name: Install requirements
-        run: python3 -m pip install -r requirements-test.txt "${{ matrix.numpy-package }}" build
+        run: python3 -m pip install -r requirements-test.txt PyYAML "${{ matrix.numpy-package }}" build
 
       - name: Prepare generated build sources
         run: |
@@ -293,10 +290,7 @@ jobs:
              root
 
       - name: Install requirements
-        run: |
-          python3 -m pip install \
-            -r requirements-test.txt \
-            build
+        run: python3 -m pip install -r requirements-test.txt PyYAML build
 
       - name: Prepare generated build sources
         run: |
