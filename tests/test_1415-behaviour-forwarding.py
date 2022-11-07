@@ -164,6 +164,17 @@ def test_behavior_forwarding_structure(operation_behavior):
         == merged_behavior
     )
 
+    def transformer(layout, **kwargs):
+        if layout.is_NumpyType:
+            return ak.contents.NumpyArray(layout.data * 2)
+
+    assert (
+        ak.operations.transform(
+            transformer, three, behavior=operation_behavior
+        ).behavior
+        == merged_behavior
+    )
+
     assert (
         ak.operations.to_regular(three, behavior=operation_behavior).behavior
         == merged_behavior
@@ -187,7 +198,7 @@ def test_behavior_forwarding_structure(operation_behavior):
 
     # Different `where` implementations
     assert (
-        ak.operations.where(mask2, behavior=operation_behavior).behavior
+        ak.operations.where(mask2, behavior=operation_behavior)[0].behavior
         == merged_behavior
     )
     assert (
