@@ -83,7 +83,12 @@ jobs:
       with:
         config-file: cibuildwheel.toml
 
+    - name: Build awkward wheel
+      run: pipx run build --wheel .
+
     - name: Upload wheels
       uses: actions/upload-artifact@v3
       with:
-        path: wheelhouse/*.whl
+        path: |
+          wheelhouse/*.whl
+          dist/*.whl
