@@ -7,16 +7,16 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 ## Documentation
 
    * C++ API reference: **this site**
-   * [Main reference](../../index.html)
+   * [Main reference](https://awkward-array.readthedocs.io/en/latest/)
    * [GitHub repository](https://github.com/scikit-hep/awkward-1.0)
 
 ## Navigation
 
-The Awkward Array project is divided into 3 layers with 5 main components.
+The Awkward Array project is divided into three layers:
 
-<img src="awkward-1-0-layers.svg" style="max-width: 500px">
-
-The high-level interface and Numba implementation are described in the [Python API reference](../../index.html), though the Numba implementation is considered an internal detail (in the `_connect` submodule, which starts with an underscore and is therefore private in Python).
+   * **High-level** array objects and operations (Python)
+   * **Low-level** layout objects (Python, C++)
+   * **Primitive** kernel operations (C++, CuPy, JAX)
 
 This reference describes the
 
@@ -26,8 +26,6 @@ This reference describes the
    * **GPU kernels:** FIXME! (not implemented yet)
 
 ### ArrayBuilder structure
-
-The [ak.ArrayBuilder](../../reference/generated/ak.ArrayBuilder.html) is an append-only array for generating data backed by `ak._ext.ArrayBuilder` (layout-level ArrayBuilder) and [ak::ArrayBuilder](classawkward_1_1ArrayBuilder.html) (C++ implementation).
 
 [ak::ArrayBuilder](classawkward_1_1ArrayBuilder.html) is the front-end for a tree of [ak::Builder](classawkward_1_1Builder.html) instances. The structure of this tree indicates the current state of knowledge about the type of the data it's being filled with, and this tree can grow from any node. Types always grow in the direction of more generality, so the tree only gets bigger.
 
@@ -66,20 +64,20 @@ ak.to_list(b.snapshot())
 # [[1.0, 2.0, 3.0], [], [4.0, None, 5.0], [{'x': 1, 'y': [2, 3]}]]
 ```
 
-The [ak::Builder](classawkward_1_1Builder.html) instances contain arrays of accumulated data, and thus store both data (in these arrays) and type (in their tree structure). The hierarchy is not exactly the same as [`ak.Content`](../../reference/generated/ak.contents.Content.html)/[`ak.Form`](../../reference/generated/ak.forms.Form.html) (which are identical to each other) or [`ak.Type`](../../reference/generated/ak.types.Type.html), since it reflects the kinds of data to be encountered in the input data: mostly JSON-like, but with a distinction between records with named fields and tuples with unnamed slots.
+The [ak::Builder](classawkward_1_1Builder.html) instances contain arrays of accumulated data, and thus store both data (in these arrays) and type (in their tree structure). The hierarchy is not exactly the same as `ak.Content`/`ak.Form` (which are identical to each other) or `ak.Type`, since it reflects the kinds of data to be encountered in the input data: mostly JSON-like, but with a distinction between records with named fields and tuples with unnamed slots.
 
    * [ak::Builder](classawkward_1_1Builder.html): the abstract base class.
-   * [ak::UnknownBuilder](classawkward_1_1UnknownBuilder.html): the initial builder; a builder for unknown type; generates an [`ak.forms.EmptyForm`](../../reference/generated/ak.forms.EmptyForm.html) (which is why we have that class).
-   * [ak::BoolBuilder](classawkward_1_1BoolBuilder.html): boolean type; generates a [`ak.forms.NumpyForm`](../../reference/generated/ak.forms.NumpyForm.html) and associated data buffers.
-   * [ak::Int64Builder](classawkward_1_1Int64Builder.html): 64-bit integer type; generates a [`ak.forms.NumpyForm`](../../reference/generated/ak.forms.NumpyForm.html) and associated data buffers. Appending integer data to boolean data generates a union; it does not promote the booleans to integers.
-   * [ak::Float64Builder](classawkward_1_1Float64Builder.html): 64-bit floating point type; generates a [`ak.forms.NumpyForm`](../../reference/generated/ak.forms.NumpyForm.html) and associated data buffers. Appending floating-point data to integer data does not generate a union; it promotes integers to floating-point.
-   * [ak::StringBuilder](classawkward_1_1StringBuilder.html): UTF-8 encoded string or raw bytestring type; generates a [`ak.forms.ListOfsetForm`](../../reference/generated/ak.forms.ListOfsetForm.html) and associated data buffers, with parameter `"__array__"` equal to `"string"` or `"bytestring"`.
-   * [ak::ListBuilder](classawkward_1_1ListBuilder.html): list type; generates a [`ak.forms.ListOffsetForm`](../../reference/generated/ak.forms.ListOffsetForm.html) and associated data buffers.
-   * [ak::OptionBuilder](classawkward_1_1OptionBuilder.html): option type; generates an [`ak.forms.IndexedOptionForm`](../../reference/generated/ak.forms.IndexedOptionForm.html) and associated data buffers.
-   * [ak::RecordBuilder](classawkward_1_1RecordBuilder.html): record type with field names; generates a [`ak.forms.RecordForm`](../../reference/generated/ak.forms.RecordForm.html) and associated data buffers with a non-null `fields`.
-   * [ak::TupleBuilder](classawkward_1_1TupleBuilder.html): tuple type without field names; generates a [`ak.forms.RecordForm`](../../reference/generated/ak.forms.RecordForm.html) and associated data buffers with null `fields`.
-   * [ak::UnionBuilder](classawkward_1_1UnionBuilder.html): union type; generates a [`ak.forms.UnionForm`](../../reference/generated/ak.forms.UnionForm.html) and associated data buffers.
-   * [ak::IndexedBuilder](classawkward_1_1IndexedBuilder.html): indexed [`ak.forms.CoForm`](../../reference/generated/ak.forms.CoForm.html) and associated data buffers; inserts an existing array node into the new array under construction, referencing its elements with an [`ak.forms.IndexedForm`](../../reference/generated/ak.forms.IndexedForm.html). This way, complex structures can be included by reference, rather than by copying.
+   * [ak::UnknownBuilder](classawkward_1_1UnknownBuilder.html): the initial builder; a builder for unknown type; generates an `ak.forms.EmptyForm` (which is why we have that class).
+   * [ak::BoolBuilder](classawkward_1_1BoolBuilder.html): boolean type; generates a `ak.forms.NumpyForm` and associated data buffers.
+   * [ak::Int64Builder](classawkward_1_1Int64Builder.html): 64-bit integer type; generates a `ak.forms.NumpyForm` and associated data buffers. Appending integer data to boolean data generates a union; it does not promote the booleans to integers.
+   * [ak::Float64Builder](classawkward_1_1Float64Builder.html): 64-bit floating point type; generates a `ak.forms.NumpyForm` and associated data buffers. Appending floating-point data to integer data does not generate a union; it promotes integers to floating-point.
+   * [ak::StringBuilder](classawkward_1_1StringBuilder.html): UTF-8 encoded string or raw bytestring type; generates a `ak.forms.ListOfsetForm` and associated data buffers, with parameter `"__array__"` equal to `"string"` or `"bytestring"`.
+   * [ak::ListBuilder](classawkward_1_1ListBuilder.html): list type; generates a `ak.forms.ListOffsetForm` and associated data buffers.
+   * [ak::OptionBuilder](classawkward_1_1OptionBuilder.html): option type; generates an `ak.forms.IndexedOptionForm` and associated data buffers.
+   * [ak::RecordBuilder](classawkward_1_1RecordBuilder.html): record type with field names; generates a `ak.forms.RecordForm` and associated data buffers with a non-null `fields`.
+   * [ak::TupleBuilder](classawkward_1_1TupleBuilder.html): tuple type without field names; generates a `ak.forms.RecordForm` and associated data buffers with null `fields`.
+   * [ak::UnionBuilder](classawkward_1_1UnionBuilder.html): union type; generates a `ak.forms.UnionForm` and associated data buffers.
+   * [ak::IndexedBuilder](classawkward_1_1IndexedBuilder.html): indexed type; generates an `ak.forms.IndexedForm` and associated data buffers; inserts an existing array node into the new array under construction, referencing its elements with an `ak.forms.IndexedForm`. This way, complex structures can be included by reference, rather than by copying.
 
 **Options for building an array:** [ak::ArrayBuilderOptions](classawkward_1_1ArrayBuilderOptions.html) are passed to every [ak::Builder](classawkward_1_1Builder.html) in the tree.
 
@@ -92,7 +90,7 @@ Array building is not as efficient as computing with pre-built arrays because th
 
 ### Conversion from JSON
 
-The [`ak::fromjsonobject`](namespaceawkward.html#a8f042641c01a0ec3206b2f169d3a396b) and [`ak::FromJsonObjectSchema`](classawkward_1_1FromJsonObjectSchema.html) symbols are used to facilitate fast construction of Awkward Arrays from JSON data using [ak::ArrayBuilder](classawkward_1_1ArrayBuilder.html). 
+The [`ak::fromjsonobject`](namespaceawkward.html#a8f042641c01a0ec3206b2f169d3a396b) and [`ak::FromJsonObjectSchema`](classawkward_1_1FromJsonObjectSchema.html) symbols are used to facilitate fast construction of Awkward Arrays from JSON data using [ak::ArrayBuilder](classawkward_1_1ArrayBuilder.html).
 
 ### CPU kernels and GPU kernels
 
