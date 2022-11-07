@@ -6,4 +6,5 @@ pandas>=0.24.0
 pyarrow>=7.0.0;sys_platform != "win32" and python_version < "3.11"
 pytest>=6
 pytest-cov
+pytest-xdist
 uproot
