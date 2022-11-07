@@ -52,7 +52,7 @@ It is unnecessary to manually edit (rebase) your commit history. If, however, yo
 
 ### Building and testing locally
 
-As described in [the README](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), Awkward Array is shipped as two packages: `awkward` and `awkward-cpp`. The `awkward-cpp` package contains the compiled C++ components required for performance. If you do not need to frequently modify this code, then it can simply be installed using `pip`.
+As described in [the README](readme.md), Awkward Array is shipped as two packages: `awkward` and `awkward-cpp`. The `awkward-cpp` package contains the compiled C++ components required for performance. If you do not need to frequently modify this code, then it can simply be installed using `pip`.
 
 Subsequent steps require the generation of code and datafiles (kernel specification, header-only includes). This can be done with the `prepare` nox session:
 ```bash
@@ -100,8 +100,8 @@ The `--pytest tests` runs the integration tests from the `tests` directory (drop
 For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
 
 ```bash
-python -m pytest -vv -rs tests-spec
-python -m pytest -vv -rs tests-cpu-kernels
+python -m pytest -vv -rs awkward-cpp/tests-spec
+python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 ```
 
 Furthermore, if you have an Nvidia GPU and CuPy installed, you can run the CUDA tests with
