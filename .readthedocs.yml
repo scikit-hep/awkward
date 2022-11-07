@@ -14,9 +14,9 @@ build:
       - python3 dev/generate-kernel-docs.py
       - python3 dev/copy-cpp-headers.py
       # Download built artefacts
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 jupyter-cache -d docs/_build/.jupyter_cache
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 awkward-cpp-wasm -d docs/lite/pypi
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 awkward -d docs/lite/pypi
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^jupyter-cache$" -d docs/_build/.jupyter_cache
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^awkward-cpp-wasm$" -d docs/lite/pypi
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^awkward$" -d docs/lite/pypi
 
 python:
   install:
