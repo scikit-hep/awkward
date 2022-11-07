@@ -57,4 +57,4 @@ def _impl(array, axis, highlevel, behavior):
             highlevel=False,
         )[toslice]
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel, like=array)

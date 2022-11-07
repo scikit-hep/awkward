@@ -48,4 +48,4 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=N
 def _impl(array, axis, ascending, stable, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.sort(axis, ascending, stable)
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel, like=array)

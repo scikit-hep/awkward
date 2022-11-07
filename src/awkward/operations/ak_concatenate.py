@@ -51,6 +51,7 @@ def concatenate(
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
     single_nplike = ak.nplikes.nplike_of(arrays)
+    behavior = ak._util.behavior_of(*arrays, behavior=behavior)
     numpy = ak.nplikes.Numpy.instance()
 
     if (
@@ -278,11 +279,9 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
         out = ak._broadcasting.broadcast_and_apply(
             content_or_others,
             action,
-            behavior=ak._util.behavior_of(*arrays, behavior=behavior),
+            behavior=behavior,
             allow_records=True,
             right_broadcast=False,
         )[0]
 
-    return ak._util.wrap(
-        out, ak._util.behavior_of(*arrays, behavior=behavior), highlevel
-    )
+    return ak._util.wrap(out, behavior, highlevel)

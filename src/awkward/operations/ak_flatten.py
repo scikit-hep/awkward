@@ -157,8 +157,8 @@ def _impl(array, axis, highlevel, behavior):
 
         out = apply(layout)
 
-        return ak._util.wrap(out, behavior, highlevel)
+        return ak._util.wrap(out, behavior, highlevel, like=array)
 
     else:
         out = layout.flatten(axis)
-        return ak._util.wrap(out, behavior, highlevel)
+        return ak._util.wrap(out, behavior, highlevel, like=array)

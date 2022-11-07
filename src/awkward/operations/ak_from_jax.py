@@ -6,7 +6,7 @@ from awkward import _errors, _util, jax
 def from_jax(array, regulararray=False, highlevel=True, behavior=None):
     """
     Args:
-        array (jax.numpy.DeviceArray): The JAX Device Array array to convert into an Awkward Array.
+        array (jax.numpy.DeviceArray): The JAX DeviceArray to convert into an Awkward Array.
         regulararray (bool): If True and the array is multidimensional,
             the dimensions are represented by nested #ak.contents.RegularArray
             nodes; if False and the array is multidimensional, the dimensions

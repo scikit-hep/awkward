@@ -42,6 +42,7 @@ def from_regular(array, axis=1, highlevel=True, behavior=None):
 
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
     posaxis = layout.axis_wrap_if_negative(axis)
 
     if axis is None:

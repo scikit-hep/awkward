@@ -190,7 +190,4 @@ def _impl(arrays, kwargs):
         numpy_to_regular=True,
     )
     assert isinstance(out, tuple)
-    if highlevel:
-        return [ak._util.wrap(x, behavior) for x in out]
-    else:
-        return list(out)
+    return [ak._util.wrap(x, behavior, highlevel) for x in out]

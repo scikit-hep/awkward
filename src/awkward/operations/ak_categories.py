@@ -35,11 +35,7 @@ def _impl(array, highlevel):
             return None
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    layout.recursively_apply(action)
+    behavior = ak._util.behavior_of(array)
+    layout.recursively_apply(action, behavior=behavior)
 
-    if output[0] is None:
-        return None
-    elif highlevel:
-        return ak._util.wrap(output[0], ak._util.behavior_of(array))
-    else:
-        return output[0]
+    return ak._util.wrap(output[0], behavior, highlevel)

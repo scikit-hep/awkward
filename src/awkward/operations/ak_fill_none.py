@@ -59,6 +59,7 @@ def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
 
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
     nplike = ak.nplikes.nplike_of(arraylayout)
 
     # Convert value type to appropriate layout
@@ -123,4 +124,4 @@ def _impl(array, value, axis, highlevel, behavior):
     depth_context = {"posaxis": axis}
     out = arraylayout.recursively_apply(action, behavior, depth_context=depth_context)
 
-    return ak._util.wrap(out, ak._util.behavior_of(array, behavior=behavior), highlevel)
+    return ak._util.wrap(out, behavior, highlevel)
