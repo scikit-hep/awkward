@@ -193,7 +193,7 @@ jobs:
       run: python -m pip install dist/awkward*.whl
 
     - name: Copy C++ headers
-      run: python -m dev/copy-cpp-headers.py
+      run: python dev/copy-cpp-headers.py
 
     - name: Generate C++ documentation
       run: doxygen
