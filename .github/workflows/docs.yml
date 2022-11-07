@@ -233,7 +233,7 @@ jobs:
       run: |
         # Sanitise ref name
         # NB: head_ref is only valid for PR triggers
-        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@")
+        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@g")
         # Export for subsequent steps
         echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
         # Activate version
@@ -242,7 +242,8 @@ jobs:
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
               "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/" \
           -H "Content-Type: application/json" \
-          -d '{"active":true,"hidden":true}'
+          -d '{"active":true,"hidden":true}' \
+          --fail
 
     - name: Trigger RTD build
       run: |
@@ -250,7 +251,8 @@ jobs:
         curl \
           -X POST \
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
+              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/" \
+          --fail
 
     - name: Edit PR description
       if: github.event_name == 'pull_request'
