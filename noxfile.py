@@ -1,3 +1,5 @@
+import shutil
+
 import nox
 
 ALL_PYTHONS = ["3.7", "3.8", "3.9", "3.10", "3.11"]
@@ -49,19 +51,30 @@ def docs(session):
     """
     Build the docs. Pass "serve" to serve.
     """
+    # Generate kernel documentation
     session.install("pyyaml")
     session.run("python", "dev/generate-kernel-docs.py")
 
-    session.chdir("docs-sphinx")
-    session.install("-r", "requirements.txt")
-    session.run("sphinx-build", "-M", "html", ".", "_build")
+    # Generate C++ documentation
+    with session.chdir("awkward-cpp/docs"):
+        session.run("doxygen")
 
-    if session.posargs:
-        if "serve" in session.posargs:
-            session.log("Launching docs at http://localhost:8000/ - use Ctrl-C to quit")
-            session.run("python", "-m", "http.server", "8000", "-d", "_build/html")
-        else:
-            session.error("Unsupported argument to docs")
+    # Copy generated C++ docs to Sphinx
+    shutil.copytree("awkward-cpp/docs/html", "docs/_static/doxygen", dirs_exist_ok=True)
+
+    # Build Sphinx docs
+    with session.chdir("docs"):
+        session.install("-r", "requirements.txt")
+        session.run("sphinx-build", "-M", "html", ".", "_build")
+
+        if session.posargs:
+            if "--serve" in session.posargs:
+                session.log(
+                    "Launching docs at http://localhost:8000/ - use Ctrl-C to quit"
+                )
+                session.run("python", "-m", "http.server", "8000", "-d", "_build/html")
+            else:
+                session.error("Unsupported argument to docs")
 
 
 @nox.session
