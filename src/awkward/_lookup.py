@@ -13,6 +13,8 @@ class Lookup:
         def arrayptr(x):
             if isinstance(x, int):
                 return x
+            elif isinstance(self.nplike, ak.nplikes.Cupy):
+                 return x.data
             else:
                 return x.ctypes.data
 
