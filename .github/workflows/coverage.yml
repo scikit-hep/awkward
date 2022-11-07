@@ -31,37 +31,47 @@ jobs:
     env:
       PIP_ONLY_BINARY: cmake
       PYTHON_VERSION: "3.10"
+      # Ensure predictable hash
+      SOURCE_DATE_EPOCH: "1667773939"
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          # Maybe share these across workflows?
-          key: >-
-            ${{ github.job }}
-
-      - name: Use ccache
-        run: |
-          echo "/usr/lib/ccache" >> $GITHUB_PATH
-          echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-
-      - name: 'Python ${{ env.PYTHON_VERSION }}'
+      - name: 'Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v4
         with:
-          python-version: '${{ env.PYTHON_VERSION }}'
+          python-version: '${{ matrix.python-version }}'
 
-      - name: Install NumPy
-        run: python -m pip install numpy
+      - name: Install requirements
+        run: |
+          python3 -m pip install \
+            -r requirements-test.txt \
+            numpy \
+            build
 
-      - name: Build C++
-        run: 'python -m pip install -vv ./awkward-cpp'
+      - name: Prepare generated build sources
+        run: |
+          python3 dev/generate-kernel-signatures.py
+          python3 dev/copy-cpp-headers.py
 
-      - name: Build Python
-        run: 'python -m pip install -v .[test,dev]'
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python3 -m build -w ./awkward-cpp
+
+      - name: Install awkward-cpp
+        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
+
+      - name: Build & install awkward
+        run: python3 -m pip install -v .
 
       - name: Print versions
         run: python -m pip list

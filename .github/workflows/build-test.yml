@@ -62,7 +62,6 @@ jobs:
       - name: Install requirements
         run: |
           python -m pip install `
-            -r requirements-all.txt `
             -r requirements-test.txt `
             build
 
@@ -134,7 +133,6 @@ jobs:
       - name: Install requirements
         run: |
           python3 -m pip install \
-            -r requirements-all.txt \
             -r requirements-test.txt \
             build
 
@@ -212,7 +210,6 @@ jobs:
       - name: Install requirements
         run: |
           python3 -m pip install \
-            -r requirements-all.txt \
             -r requirements-test.txt \
             "${{ matrix.numpy-package }}" \
             build
@@ -305,7 +302,6 @@ jobs:
       - name: Install requirements
         run: |
           python3 -m pip install \
-            -r requirements-all.txt \
             -r requirements-test.txt \
             build
 
