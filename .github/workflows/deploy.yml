@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+    - published
+
+env:
+  # Ensure predictable hash
+  SOURCE_DATE_EPOCH: "1667773939"
+
+
+jobs:
+  build:
+    name: "Build wheel & sdist"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Prepare build files
+      run: pipx run nox -s prepare
+
+    - name: Build distributions
+      run: pipx run build --sdist --wheel
+
+    - name: Check metadata
+      run: pipx run twine check dist/*
+
+    - uses: actions/upload-artifact@v3
+      with:
+        path: |
+          dist/*
+
+  upload:
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: artifact
+        path: dist
+
+    - uses: pypa/gh-action-pypi-publish@v1.5.1
+      with:
+        password: ${{ secrets.pypi_password }}
