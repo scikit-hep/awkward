@@ -76,7 +76,7 @@ jobs:
       #       non-template `environment.yml`
     - name: Template environment.yml
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
-      working-directory: docs-sphinx
+      working-directory: docs
 
       # Technically this give us an environment that is incompatible with
       # the wheel built in the awkward-x86-64 job if the environments
@@ -87,7 +87,7 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
-        environment-file: docs-sphinx/environment.yml
+        environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
            doxygen
@@ -150,7 +150,7 @@ jobs:
       #       non-template `environment.yml`
     - name: Template environment.yml
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
-      working-directory: docs-sphinx
+      working-directory: docs
 
       # Technically this give us an environment that is incompatible with
       # the wheel built in the awkward-x86-64 job if the environments
@@ -161,24 +161,27 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
-        environment-file: docs-sphinx/environment.yml
+        environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
            doxygen
 
-    - name: Build awkward wheel
-      run: pipx run build -w
+    - name: Download awkward wheel
+      uses: actions/download-artifact@v3
+      with:
+        name: awkward
+        path: dist
 
     - name: Copy awkward wheel to JupyterLite
       run: |
-        mkdir -p docs-sphinx/lite/pypi/
-        cp dist/awkward*.whl docs-sphinx/lite/pypi/
+        mkdir -p docs/lite/pypi/
+        cp dist/awkward*.whl docs/lite/pypi/
 
-    - name: Download awkward-cpp WASM wheel
+    - name: Download & copy awkward-cpp WASM wheel to JupyterLite
       uses: actions/download-artifact@v3
       with:
         name: awkward-cpp-wasm
-        path: docs-sphinx/lite/pypi
+        path: docs/lite/pypi
 
     - name: Download awkward-cpp x86_64 wheel
       uses: actions/download-artifact@v3
@@ -186,24 +189,37 @@ jobs:
         name: awkward-cpp-x86-64
         path: dist
 
-    - name: Install awkward wheel
-      run: python3 -m pip install dist/awkward*.whl
+    - name: Install awkward and awkward-cpp wheels
+      run: python -m pip install dist/awkward*.whl
 
-    - name: Generate documentation
+    - name: Copy C++ headers
+      run: python -m dev/copy-cpp-headers.py
+
+    - name: Generate C++ documentation
+      run: doxygen
+      working-directory: awkward-cpp/docs
+
+    - name: Copy C++ documentation
+      run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
+
+    - name: Generate kernel documentation
+      run: python -m dev/generate-kernel-docs.py
+
+    - name: Generate Python documentation
       run: sphinx-build -M html . _build/
-      working-directory: docs-sphinx
+      working-directory: docs
 
     - name: Upload documentation
       uses: actions/upload-artifact@v3
       with:
         name: docs
-        path: docs-sphinx/_build/html
+        path: docs/_build/html
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
       with:
         name: jupyter-cache
-        path: docs-sphinx/_build/.jupyter_cache
+        path: docs/_build/.jupyter_cache
 
   deploy-docs:
     runs-on: ubuntu-22.04
