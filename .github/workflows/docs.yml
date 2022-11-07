@@ -203,7 +203,7 @@ jobs:
       run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
     - name: Generate kernel documentation
-      run: python -m dev/generate-kernel-docs.py
+      run: python dev/generate-kernel-docs.py
 
     - name: Generate Python documentation
       run: sphinx-build -M html . _build/
