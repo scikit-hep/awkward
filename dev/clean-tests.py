@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 
-import argparse
 import os
 import shutil
 
@@ -31,8 +30,4 @@ def clean_tests():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Cleanup generated files")
-    parser.add_argument("--tests", default=True)
-    args = parser.parse_args()
-    if args.tests:
-        clean_tests()
+    clean_tests()

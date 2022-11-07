@@ -159,7 +159,7 @@ subprocess.check_call(
 runpy.run_path(HERE / "prepare_docstrings.py", run_name="__main__")
 
 # Generate kernel docs
-runpy.run_path(HERE.parent / "dev" / "generate-kerneldocs.py", run_name="__main__")
+runpy.run_path(HERE.parent / "dev" / "generate-kernel-docs.py", run_name="__main__")
 
 
 # Sphinx doesn't usually want content to fit the screen, so we hack the styles for this page

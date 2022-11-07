@@ -10,7 +10,7 @@ def tests(session):
     """
     Run the unit and regular tests.
     """
-    session.install(".[test]", "numba", "pandas", "pyarrow", "jax", "numexpr", "uproot")
+    session.install("-r", "requirements-test.txt")
     session.run("pytest", *session.posargs if session.posargs else ["tests"])
 
 
@@ -38,7 +38,7 @@ def coverage(session):
     """
     Run the unit and regular tests.
     """
-    session.install(".[test]", "pytest-cov")
+    session.install("-r", "requirements-test.txt")
     session.run(
         "pytest", "tests", "--cov=awkward", "--cov-report=xml", *session.posargs
     )
@@ -49,6 +49,8 @@ def docs(session):
     """
     Build the docs. Pass "serve" to serve.
     """
+    session.install("pyyaml")
+    session.run("python", "dev/generate-kernel-docs.py")
 
     session.chdir("docs-sphinx")
     session.install("-r", "requirements.txt")
@@ -60,3 +62,28 @@ def docs(session):
             session.run("python", "-m", "http.server", "8000", "-d", "_build/html")
         else:
             session.error("Unsupported argument to docs")
+
+
+@nox.session
+def clean(session):
+    """
+    Clean generated artifacts.
+    """
+    session.run("python", "dev/clean-cpp-headers.py")
+    session.run("python", "dev/clean-kernel-signatures.py")
+    session.run("python", "dev/clean-kernel-docs.py")
+    session.run("python", "dev/clean-tests.py")
+
+
+@nox.session
+def prepare(session):
+    """
+    Prepare for package building.
+    """
+    session.install("PyYAML", "numpy")
+    session.run("python", "dev/copy-cpp-headers.py")
+    session.run("python", "dev/generate-kernel-signatures.py")
+    if "--no-tests" not in session.posargs:
+        session.run("python", "dev/generate-tests.py")
+    if "--no-docs" not in session.posargs:
+        session.run("python", "dev/generate-kernel-docs.py")
