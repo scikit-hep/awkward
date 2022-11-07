@@ -3,12 +3,14 @@
 import awkward as ak
 
 
-def from_categorical(array, highlevel=True):
+def from_categorical(array, highlevel=True, behavior=None):
     """
     Args:
         array: Awkward Array from which to remove the 'categorical' parameter.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     This function replaces categorical data with non-categorical data (by
     removing the label that declares it as such).
@@ -22,12 +24,12 @@ def from_categorical(array, highlevel=True):
     """
     with ak._errors.OperationErrorContext(
         "ak.from_categorical",
-        dict(array=array, highlevel=highlevel),
+        dict(array=array, highlevel=highlevel, behavior=behavior),
     ):
-        return _impl(array, highlevel)
+        return _impl(array, highlevel, behavior)
 
 
-def _impl(array, highlevel):
+def _impl(array, highlevel, behavior):
     def action(layout, **kwargs):
         if layout.parameter("__array__") == "categorical":
             out = ak.operations.with_parameter(
@@ -39,8 +41,9 @@ def _impl(array, highlevel):
             return None
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    out = layout.recursively_apply(action)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
+    out = layout.recursively_apply(action, behavior=behavior)
     if highlevel:
-        return ak._util.wrap(out, ak._util.behavior_of(array))
+        return ak._util.wrap(out, behavior)
     else:
         return out

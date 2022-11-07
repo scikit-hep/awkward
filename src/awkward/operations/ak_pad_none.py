@@ -139,4 +139,4 @@ def _impl(array, target, axis, clip, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     out = layout.pad_none(target, axis, clip=clip)
 
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel, like=array)

@@ -59,7 +59,6 @@ def _impl(array, backend, highlevel, behavior):
         allow_record=True,
         allow_other=True,
     )
+    behavior = ak._util.behavior_of(array, behavior=behavior)
     backend_layout = layout.to_backend(backend)
-    if highlevel:
-        return ak.Array(backend_layout, behavior=behavior)
-    return backend_layout
+    return ak._util.wrap(backend_layout, behavior, highlevel)

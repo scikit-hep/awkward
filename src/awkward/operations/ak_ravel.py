@@ -58,4 +58,4 @@ def _impl(array, highlevel, behavior):
 
     result = out[0].mergemany(out[1:])
 
-    return ak._util.wrap(result, behavior, highlevel)
+    return ak._util.wrap(result, behavior, highlevel, like=array)

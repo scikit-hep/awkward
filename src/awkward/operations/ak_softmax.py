@@ -54,8 +54,9 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False, flatten_records=F
 
 
 def _impl(x, axis, keepdims, mask_identity, flatten_records):
+    behavior = ak._util.behavior_of(x)
     x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False)
+        ak.operations.to_layout(x, allow_record=False, allow_other=False), behavior
     )
 
     with np.errstate(invalid="ignore"):

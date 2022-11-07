@@ -97,6 +97,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
             fill_value = fill_value.view(np.uint8)
 
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
 
     def action(layout, **kwargs):
         if layout.parameter("__array__") == "bytestring" and fill_value is _ZEROS:

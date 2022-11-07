@@ -96,4 +96,4 @@ def _impl(
         out = layout.combinations(
             n, replacement=replacement, axis=axis, fields=fields, parameters=parameters
         )
-        return ak._util.wrap(out, behavior, highlevel)
+        return ak._util.wrap(out, behavior, highlevel, like=array)
