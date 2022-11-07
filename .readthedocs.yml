@@ -17,6 +17,10 @@ build:
       - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^jupyter-cache$" -d docs/_build/.jupyter_cache
       - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^awkward-cpp-wasm$" -d docs/lite/pypi
       - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^awkward$" -d docs/lite/pypi
+      # Build Doxygen
+      - pushd awkward-cpp/docs && doxygen && popd
+      - mkdir -p docs/_static/doxygen
+      - cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
 python:
   install:
