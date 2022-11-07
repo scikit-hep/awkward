@@ -158,9 +158,6 @@ subprocess.check_call(
 # Generate Python docstrings
 runpy.run_path(HERE / "prepare_docstrings.py", run_name="__main__")
 
-# Generate kernel docs
-runpy.run_path(HERE.parent / "dev" / "generate-kernel-docs.py", run_name="__main__")
-
 
 # Sphinx doesn't usually want content to fit the screen, so we hack the styles for this page
 def install_jupyterlite_styles(app, pagename, templatename, context, event_arg) -> None:
