@@ -48,7 +48,7 @@ namespace awkward {
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-data",
-      buffer_.length() * (int64_t)sizeof(std::complex<double>));
+      (int64_t)buffer_.length() * (int64_t)sizeof(std::complex<double>));
 
     buffer_.concatenate(reinterpret_cast<std::complex<double>*>(ptr));
 
@@ -75,14 +75,14 @@ namespace awkward {
   Complex128Builder::null() {
     BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Complex128Builder::boolean(bool x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -107,28 +107,28 @@ namespace awkward {
   Complex128Builder::datetime(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Complex128Builder::timedelta(int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Complex128Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
   Complex128Builder::beginlist() {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
@@ -142,11 +142,11 @@ namespace awkward {
   Complex128Builder::begintuple(int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
-    return std::move(out);
+    return out;
   }
 
   const BuilderPtr
-  Complex128Builder::index(int64_t index) {
+  Complex128Builder::index(int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
@@ -163,11 +163,11 @@ namespace awkward {
   Complex128Builder::beginrecord(const char* name, bool check) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
-    return std::move(out);
+    return out;
   }
 
   void
-  Complex128Builder::field(const char* key, bool check) {
+  Complex128Builder::field(const char* /* key */, bool /* check */) {
     throw std::invalid_argument(
       std::string("called 'field' without 'begin_record' at the same level before it")
       + FILENAME(__LINE__));

@@ -505,24 +505,7 @@ class NumpyArray(Content):
 
     @property
     def is_contiguous(self):
-        if isinstance(self._nplike, ak._typetracer.TypeTracer):
-            return True
-
-        # Alternatively, self._data.flags["C_CONTIGUOUS"], but the following assumes
-        # less of the nplike.
-
-        if isinstance(self.nplike, ak.nplikes.Jax):
-            return True
-
-        x = self._data.dtype.itemsize
-
-        for i in range(len(self._data.shape), 0, -1):
-            if x != self._data.strides[i - 1]:
-                return False
-            else:
-                x = x * self._data.shape[i - 1]
-
-        return True
+        return self._nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak.index.Index64.zeros(1, self._nplike)
@@ -1071,7 +1054,7 @@ class NumpyArray(Content):
         keepdims,
         behavior,
     ):
-        if len(self._data.shape) != 1 or not self.is_contiguous:
+        if self._data.ndim > 1:
             return self.toRegularArray()._reduce_next(
                 reducer,
                 negaxis,
@@ -1083,6 +1066,22 @@ class NumpyArray(Content):
                 keepdims,
                 behavior,
             )
+        elif not self.is_contiguous:
+            return self.contiguous()._reduce_next(
+                reducer,
+                negaxis,
+                starts,
+                shifts,
+                parents,
+                outlength,
+                mask,
+                keepdims,
+                behavior,
+            )
+
+        # Yes, we've just tested these, but we need to be explicit that they are invariants
+        assert self.is_contiguous
+        assert self._data.ndim == 1
 
         if isinstance(self.nplike, ak.nplikes.Jax):
             from awkward._connect.jax.reducers import get_jax_reducer  # noqa: F401

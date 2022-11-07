@@ -12,9 +12,9 @@ awkward_NumpyArray_rearrange_shifted(TO* toptr,
                                      const FROM* offsets,
                                      int64_t offsetslength,
                                      const FROM* parents,
-                                     int64_t parentslength,
+                                     int64_t /* parentslength */,  // FIXME: these arguments are not needed
                                      const FROM* starts,
-                                     int64_t startslength) {
+                                     int64_t /* startslength */) {
   int64_t k = 0;
   for (int64_t i = 0; i < offsetslength - 1; i++) {
     for (int64_t j = 0; j < offsets[i + 1] - offsets[i]; j++) {

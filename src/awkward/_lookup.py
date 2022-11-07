@@ -75,17 +75,15 @@ class ContentLookup:
 
 
 class NumpyLookup(ContentLookup):
-    ARRAY = 1
+    ARRAY = 0
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(layout.contiguous().data)
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         assert fields == ()
         return ak.contents.NumpyArray(
             lookup.positions[pos + self.ARRAY], parameters=self.parameters
@@ -93,20 +91,18 @@ class NumpyLookup(ContentLookup):
 
 
 class RegularLookup(ContentLookup):
-    ZEROS_LENGTH = 1
-    CONTENT = 2
+    ZEROS_LENGTH = 0
+    CONTENT = 1
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(len(layout))
         positions.append(None)
         positions[pos + cls.CONTENT] = tolookup(layout.content, positions)
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
@@ -119,14 +115,13 @@ class RegularLookup(ContentLookup):
 
 
 class ListLookup(ContentLookup):
-    STARTS = 1
-    STOPS = 2
-    CONTENT = 3
+    STARTS = 0
+    STOPS = 1
+    CONTENT = 2
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(layout.starts.data)
         positions.append(layout.stops.data)
         positions.append(None)
@@ -134,7 +129,6 @@ class ListLookup(ContentLookup):
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         starts = self.IndexOf(self.indextype)(lookup.positions[pos + self.STARTS])
         stops = self.IndexOf(self.indextype)(lookup.positions[pos + self.STOPS])
         content = self.contenttype.tolayout(
@@ -144,20 +138,18 @@ class ListLookup(ContentLookup):
 
 
 class IndexedLookup(ContentLookup):
-    INDEX = 1
-    CONTENT = 2
+    INDEX = 0
+    CONTENT = 1
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(layout.index.data)
         positions.append(None)
         positions[pos + cls.CONTENT] = tolookup(layout.content, positions)
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
@@ -166,20 +158,18 @@ class IndexedLookup(ContentLookup):
 
 
 class IndexedOptionLookup(ContentLookup):
-    INDEX = 1
-    CONTENT = 2
+    INDEX = 0
+    CONTENT = 1
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(layout.index.data)
         positions.append(None)
         positions[pos + cls.CONTENT] = tolookup(layout.content, positions)
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
@@ -190,20 +180,18 @@ class IndexedOptionLookup(ContentLookup):
 
 
 class ByteMaskedLookup(ContentLookup):
-    MASK = 1
-    CONTENT = 2
+    MASK = 0
+    CONTENT = 1
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(layout.mask.data)
         positions.append(None)
         positions[pos + cls.CONTENT] = tolookup(layout.content, positions)
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         mask = self.IndexOf(self.masktype)(lookup.positions[pos + self.MASK])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
@@ -214,14 +202,13 @@ class ByteMaskedLookup(ContentLookup):
 
 
 class BitMaskedLookup(ContentLookup):
-    LENGTH = 1
-    MASK = 2
-    CONTENT = 3
+    LENGTH = 0
+    MASK = 1
+    CONTENT = 2
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(len(layout))
         positions.append(layout.mask.data)
         positions.append(None)
@@ -229,7 +216,6 @@ class BitMaskedLookup(ContentLookup):
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         mask = self.IndexOf(self.masktype)(lookup.positions[pos + self.MASK])
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
@@ -245,18 +231,16 @@ class BitMaskedLookup(ContentLookup):
 
 
 class UnmaskedLookup(ContentLookup):
-    CONTENT = 1
+    CONTENT = 0
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(None)
         positions[pos + cls.CONTENT] = tolookup(layout.content, positions)
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
@@ -264,13 +248,12 @@ class UnmaskedLookup(ContentLookup):
 
 
 class RecordLookup(ContentLookup):
-    LENGTH = 1
-    CONTENTS = 2
+    LENGTH = 0
+    CONTENTS = 1
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(len(layout))
         positions.extend([None] * len(layout.contents))
         for i, content in enumerate(layout.contents):
@@ -278,7 +261,6 @@ class RecordLookup(ContentLookup):
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         if len(fields) > 0:
             index = self.fieldindex(fields[0])
             assert index is not None
@@ -302,14 +284,13 @@ class RecordLookup(ContentLookup):
 
 
 class UnionLookup(ContentLookup):
-    TAGS = 1
-    INDEX = 2
-    CONTENTS = 3
+    TAGS = 0
+    INDEX = 1
+    CONTENTS = 2
 
     @classmethod
     def tolookup(cls, layout, positions):
         pos = len(positions)
-        positions.append(-1)  # temporary: remove and decrement all CONSTANTS by 1
         positions.append(layout.tags.data)
         positions.append(layout.index.data)
         positions.extend([None] * len(layout.contents))
@@ -318,7 +299,6 @@ class UnionLookup(ContentLookup):
         return pos
 
     def tolayout(self, lookup, pos, fields):
-        assert lookup.positions[pos] == -1
         tags = self.IndexOf(self.tagstype)(lookup.positions[pos + self.TAGS])
         index = self.IndexOf(self.indextype)(lookup.positions[pos + self.INDEX])
         contents = []

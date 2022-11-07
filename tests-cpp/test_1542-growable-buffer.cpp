@@ -170,7 +170,6 @@ void test_extend() {
 }
 
 void test_append_and_get_ref() {
-  size_t data_size = 15;
   awkward::BuilderOptions options { 5, 1 };
 
   double data[15] = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,

@@ -232,25 +232,25 @@ namespace awkward {
     , output_initial_size_(output_initial_size)
     , output_resize_factor_(output_resize_factor)
 
-    , stack_buffer_(new T[stack_max_depth])
+    , stack_buffer_(new T[(size_t)stack_max_depth])
     , stack_depth_(0)
     , stack_max_depth_(stack_max_depth)
 
-    , string_buffer_(new char[string_buffer_size])
+    , string_buffer_(new char[(size_t)string_buffer_size])
     , string_buffer_size_(string_buffer_size)
 
     , current_inputs_()
     , current_outputs_()
     , is_ready_(false)
 
-    , current_which_(new int64_t[recursion_max_depth])
-    , current_where_(new int64_t[recursion_max_depth])
+    , current_which_(new int64_t[(size_t)recursion_max_depth])
+    , current_where_(new int64_t[(size_t)recursion_max_depth])
     , recursion_current_depth_(0)
     , recursion_max_depth_(recursion_max_depth)
 
-    , do_recursion_depth_(new int64_t[recursion_max_depth])
-    , do_stop_(new int64_t[recursion_max_depth])
-    , do_i_(new int64_t[recursion_max_depth])
+    , do_recursion_depth_(new int64_t[(size_t)recursion_max_depth])
+    , do_stop_(new int64_t[(size_t)recursion_max_depth])
+    , do_i_(new int64_t[(size_t)recursion_max_depth])
     , do_current_depth_(0)
 
     , current_error_(util::ForthError::none)
@@ -341,7 +341,7 @@ namespace awkward {
   ForthMachineOf<T, I>::decompiled_segment(int64_t segment_position,
                                            const std::string& indent,
                                            bool endline) const {
-    if ((IndexTypeOf<int64_t>)segment_position < 0  ||  (IndexTypeOf<int64_t>)segment_position + 1 >= bytecodes_offsets_.size()) {
+    if (segment_position < 0  ||  (IndexTypeOf<int64_t>)segment_position + 1 >= bytecodes_offsets_.size()) {
       throw std::runtime_error(
         std::string("segment ") + std::to_string(segment_position)
         + std::string(" does not exist in the bytecode") + FILENAME(__LINE__));
@@ -531,7 +531,7 @@ namespace awkward {
           out << "case ( regular )\n";
           for (int64_t i = 0;  i < num_cases;  i++) {
             out << indent << "  " << i << " of";
-            I consequent = start + i;
+            I consequent = (I)(start + i);
             if (segment_nonempty(consequent)) {
               out << "\n" << indent << "    ";
               out << decompiled_segment(consequent, indent + "    ");
@@ -588,7 +588,7 @@ namespace awkward {
           std::stringstream out;
           out << input_names_[(IndexTypeOf<int64_t>)in_num] << " enum";
           for (int64_t i = start;  i < stop;  i++) {
-            out << " s\" " << strings_[i] << "\"";
+            out << " s\" " << strings_[(size_t)i] << "\"";
           }
           return out.str();
         }
@@ -599,7 +599,7 @@ namespace awkward {
           std::stringstream out;
           out << input_names_[(IndexTypeOf<int64_t>)in_num] << " enumonly";
           for (int64_t i = start;  i < stop;  i++) {
-            out << " s\" " << strings_[i] << "\"";
+            out << " s\" " << strings_[(size_t)i] << "\"";
           }
           return out.str();
         }
@@ -1253,7 +1253,7 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ForthMachineOf<T, I>::maybe_throw(util::ForthError err,
+  ForthMachineOf<T, I>::maybe_throw(util::ForthError /* err */,  // FIXME: this argument is not needed
                                     const std::set<util::ForthError>& ignore) const {
     if (ignore.count(current_error_) == 0) {
       switch (current_error_) {
@@ -2110,8 +2110,8 @@ namespace awkward {
             + FILENAME(__LINE__)
           );
         }
-        for (int64_t i = 0;  i < ofs.size();  i++) {
-          if (ofs[i] > endofs[i]) {
+        for (int64_t i = 0;  (size_t)i < ofs.size();  i++) {
+          if (ofs[(size_t)i] > endofs[(size_t)i]) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, stop, "in 'case' .. 'endcase', there must be an 'endof' for every 'of'")
             + FILENAME(__LINE__)
@@ -2124,12 +2124,12 @@ namespace awkward {
         I alternate;
 
         I first_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
-        for(I i = 0; i < ofs.size() + 1; i++){
+        for(I i = 0;  (size_t)i < ofs.size() + 1;  i++){
           dictionary.push_back({});
         }
         bool can_specialize = true;
         int64_t substart = pos + 1;
-        for (int64_t i = 0;  i < ofs.size();  i++) {
+        for (int64_t i = 0;  (size_t)i < ofs.size();  i++) {
           I pred_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> pred;
           dictionary.push_back(pred);
@@ -2137,7 +2137,7 @@ namespace awkward {
                 tokenized,
                 linecol,
                 substart,
-                ofs[i],
+                ofs[(size_t)i],
                 pred,
                 dictionary,
                 exitdepth + 1,
@@ -2148,13 +2148,13 @@ namespace awkward {
           dictionary[(IndexTypeOf<int64_t>)pred_bytecode - BOUND_DICTIONARY] = pred;
           predicates.push_back(pred_bytecode);
 
-          I cons_bytecode = first_bytecode + i;
+          I cons_bytecode = first_bytecode + (I)i;
           std::vector<I> cons;
           parse(defn,
                 tokenized,
                 linecol,
-                ofs[i] + 1,
-                endofs[i],
+                ofs[(size_t)i] + 1,
+                endofs[(size_t)i],
                 cons,
                 dictionary,
                 exitdepth + 1,
@@ -2162,11 +2162,11 @@ namespace awkward {
           dictionary[(IndexTypeOf<int64_t>)cons_bytecode - BOUND_DICTIONARY] = cons;
           consequents.push_back(cons_bytecode);
 
-          substart = endofs[i] + 1;
+          substart = endofs[(size_t)i] + 1;
         }
 
         {
-          I alt_bytecode = first_bytecode + ofs.size();
+          I alt_bytecode = first_bytecode + (I)ofs.size();
           std::vector<I> alt;
           parse(defn,
                 tokenized,
@@ -2216,11 +2216,11 @@ namespace awkward {
           //
           // But the regular case should become a jump table with CODE_CASE_REGULAR.
 
-          for (int64_t i = 0;  i < ofs.size();  i++) {
-            auto pred = dictionary.begin() + (predicates[i] - BOUND_DICTIONARY);
+          for (int64_t i = 0;  (size_t)i < ofs.size();  i++) {
+            auto pred = dictionary.begin() + (predicates[(size_t)i] - BOUND_DICTIONARY);
             pred->push_back(CODE_OVER);  // append "over"
             pred->push_back(CODE_EQ);    // append "="
-            auto cons = dictionary.begin() + (consequents[i] - BOUND_DICTIONARY);
+            auto cons = dictionary.begin() + (consequents[(size_t)i] - BOUND_DICTIONARY);
             cons->insert(cons->begin(), CODE_DROP);  // prepend "drop"
           }
           auto alt = dictionary.begin() + (alternate - BOUND_DICTIONARY);
@@ -2228,12 +2228,12 @@ namespace awkward {
 
           I bytecode2 = alternate;
           for (int64_t i = (int64_t)ofs.size() - 1;  i >= 0;  i--) {
-            I bytecode1 = consequents[i];
+            I bytecode1 = consequents[(size_t)i];
 
             I ifthenelse_bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
             std::vector<I> ifthenelse;
             dictionary.push_back(ifthenelse);
-            ifthenelse.push_back(predicates[i]);
+            ifthenelse.push_back(predicates[(size_t)i]);
             ifthenelse.push_back(CODE_IF_ELSE);
             ifthenelse.push_back(bytecode1);
             ifthenelse.push_back(bytecode2);
@@ -3442,7 +3442,7 @@ namespace awkward {
               }
               else {
                 stack_depth_--;
-                which = start + *value;
+                which = start + (I)(*value);
               }
 
               if (recursion_current_depth_ == recursion_max_depth_) {
@@ -3597,7 +3597,7 @@ namespace awkward {
               bytecodes_pointer_where()++;
               I stop = bytecode_get();
               bytecodes_pointer_where()++;
-              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop);
+              T result = (T)(current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop));
               if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
@@ -3613,7 +3613,7 @@ namespace awkward {
               bytecodes_pointer_where()++;
               I stop = bytecode_get();
               bytecodes_pointer_where()++;
-              T result = current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop);
+              T result = (T)(current_inputs_[(IndexTypeOf<int64_t>)in_num].get()->read_enum(strings_, start, stop));
               if (result == -1) {
                 current_error_ = util::ForthError::enumeration_missing;
                 return;
@@ -3795,7 +3795,7 @@ namespace awkward {
                 return;
               }
               stack_push((T)string_num);
-              stack_push((T)strings_[string_num].size());
+              stack_push((T)strings_[(size_t)string_num].size());
               break;
             }
 
@@ -3821,7 +3821,7 @@ namespace awkward {
             }
 
             case CODE_PRINT_STACK: {
-              printf("<%lld> ", stack_depth_);
+              printf("<%lld> ", (long long int)stack_depth_);
               for (int64_t i = 0;  i < stack_depth_;  i++) {
                 print_number(stack_buffer_[i]);
               }
@@ -4298,7 +4298,7 @@ namespace awkward {
   template <>
   void
   ForthMachineOf<int64_t, int32_t>::print_number(int64_t num) noexcept {
-    printf("%lld ", num);
+    printf("%lld ", (long long int)num);
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;

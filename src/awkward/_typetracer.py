@@ -918,3 +918,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
     @classmethod
     def is_own_array(cls, obj) -> bool:
         return isinstance(obj, TypeTracerArray)
+
+    def is_c_contiguous(self, array) -> bool:
+        return True
