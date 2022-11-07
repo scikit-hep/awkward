@@ -60,10 +60,7 @@ jobs:
           architecture: '${{ matrix.python-architecture }}'
 
       - name: Install requirements
-        run: |
-          python -m pip install `
-            -r requirements-test.txt `
-            build
+        run: python -m pip install -r requirements-test.txt build
 
       - name: Prepare generated build sources
         run: |
@@ -208,11 +205,7 @@ jobs:
           python-version: '${{ matrix.python-version }}'
 
       - name: Install requirements
-        run: |
-          python3 -m pip install \
-            -r requirements-test.txt \
-            "${{ matrix.numpy-package }}" \
-            build
+        run: python3 -m pip install -r requirements-test.txt "${{ matrix.numpy-package }}" build
 
       - name: Prepare generated build sources
         run: |
@@ -331,5 +324,4 @@ jobs:
         run: python -m pip list
 
       - name: Test
-        run: >-
-          python -m pytest -vv -rs tests
+        run: python -m pytest -vv -rs tests

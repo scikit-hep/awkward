@@ -51,16 +51,16 @@ def docs(session):
     """
     Build the docs. Pass "serve" to serve.
     """
-    # Generate kernel documentation
-    session.install("pyyaml")
-    session.run("python", "dev/generate-kernel-docs.py")
-
     # Generate C++ documentation
     with session.chdir("awkward-cpp/docs"):
         session.run("doxygen")
 
     # Copy generated C++ docs to Sphinx
     shutil.copytree("awkward-cpp/docs/html", "docs/_static/doxygen", dirs_exist_ok=True)
+
+    # Generate kernel documentation
+    session.install("pyyaml")
+    session.run("python", "dev/generate-kernel-docs.py")
 
     # Build Sphinx docs
     with session.chdir("docs"):
