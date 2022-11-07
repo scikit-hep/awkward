@@ -26,21 +26,22 @@ yarn.lock
 array*.parquet
 
 ############################################################# Sphinx & Doxygen
+docs/_build
+docs/reference/generated
 
-docs/.sass-cache
-docs/_site
-docs-mkdocs/docs
-docs-sphinx/_build
-docs-sphinx/_static/doxygen
-docs-sphinx/reference/generated
-!docs-sphinx/release/.gitignore
-docs-sphinx/.jupyter_cache
-docs-sphinx/jupyter_execute
-docs-sphinx/environment.yml
-docs-sphinx/lite/
-docs-sphinx/_contents/
+# Jupyter Book
+docs/.jupyter_cache
+docs/jupyter_execute
+docs/environment.yml
 
+# Pyodide / JupyterLite
+docs/lite/
+docs/_contents/
 **/.pyodide-xbuildenv
+
+# Doxygen
+awkward-cpp/docs/html
+docs/_static/doxygen
 
 ############################################################# IDEs
 .idea

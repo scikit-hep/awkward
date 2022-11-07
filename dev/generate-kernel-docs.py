@@ -36,7 +36,7 @@ The functions are implemented in C with templates for integer specializations (c
             os.path.join(
                 CURRENT_DIR,
                 "..",
-                "docs-sphinx",
+                "docs",
                 "reference",
                 "generated",
                 "kernels.rst",

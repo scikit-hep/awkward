@@ -77,7 +77,7 @@ include = [
     "/tests-cuda-kernels",
     "/docs-doxygen",
     "/docs-img",
-    "/docs-sphinx",
+    "/docs",
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/requirements*.txt"

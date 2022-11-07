@@ -9,7 +9,7 @@ on:
       - .readthedocs.yml
       - docs-img/**
       - docs-doxygen/**
-      - docs-sphinx/**
+      - docs/**
       - studies/**
 
   schedule:

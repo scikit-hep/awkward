@@ -8,7 +8,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def clean_kernel_docs():
     kernel_docs = os.path.join(
-        CURRENT_DIR, "..", "docs-sphinx", "reference", "generated", "kernels.rst"
+        CURRENT_DIR, "..", "docs", "reference", "generated", "kernels.rst"
     )
     if os.path.exists(kernel_docs):
         os.unlink(kernel_docs)
