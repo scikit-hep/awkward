@@ -9,7 +9,8 @@ build:
     python: "3.10"
   jobs:
     pre_build:
-      - pip install requests
+      - pip install requests pyyaml
+      - python3 dev/generate-kernel-docs.py
       - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 jupyter-cache -d docs/_build/.jupyter_cache
       - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 awkward-wasm-wheel -d docs/lite/pypi
 
