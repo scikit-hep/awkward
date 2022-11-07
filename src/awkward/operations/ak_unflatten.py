@@ -78,6 +78,7 @@ def _impl(array, counts, axis, highlevel, behavior):
     nplike = ak.nplikes.nplike_of(array)
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    behavior = ak._util.behavior_of(array, behavior=behavior)
 
     if isinstance(counts, (numbers.Integral, np.integer)):
         current_offsets = None

@@ -81,4 +81,4 @@ def local_index(array, axis=-1, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     out = layout.local_index(axis)
-    return ak._util.wrap(out, behavior, highlevel)
+    return ak._util.wrap(out, behavior, highlevel, like=array)
