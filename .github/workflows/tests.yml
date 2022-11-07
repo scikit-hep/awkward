@@ -75,6 +75,7 @@ jobs:
         CIBW_BUILD: cp39-win_amd64 cp37-manylinux_x86_64 cp38-macosx_universal2
       with:
         config-file: cibuildwheel.toml
+        package-dir: awkward-cpp
 
     - uses: pypa/cibuildwheel@v2.11.2
       if: matrix.os == 'ubuntu-latest'
@@ -82,6 +83,7 @@ jobs:
         CIBW_BUILD: cp311-manylinux_x86_64
       with:
         config-file: cibuildwheel.toml
+        package-dir: awkward-cpp
 
     - name: Build awkward wheel
       run: pipx run build --wheel .
