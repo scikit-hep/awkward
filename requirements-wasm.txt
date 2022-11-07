@@ -1,2 +1,0 @@
-jupyterlite>=0.1.0b12
-pyodide-build>=0.21.0

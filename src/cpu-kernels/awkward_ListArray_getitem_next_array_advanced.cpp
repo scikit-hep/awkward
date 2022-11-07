@@ -13,7 +13,7 @@ ERROR awkward_ListArray_getitem_next_array_advanced(
   const T* fromarray,
   const T* fromadvanced,
   int64_t lenstarts,
-  int64_t lenarray,
+  int64_t /* lenarray */,  // FIXME: this argument is not needed
   int64_t lencontent) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[i] < fromstarts[i]) {

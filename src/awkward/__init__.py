@@ -12,7 +12,6 @@ import awkward._libawkward
 
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward.index
-import awkward.identifier
 import awkward.contents
 import awkward.record
 import awkward.types
@@ -39,18 +38,15 @@ from awkward.highlevel import ArrayBuilder
 
 # behaviors
 import awkward.behaviors.categorical
-import awkward.behaviors.mixins
 import awkward.behaviors.string
+from awkward.behaviors.mixins import mixin_class, mixin_class_method
 
-behavior = {}
+behavior: dict = {}
 awkward.behaviors.string.register(behavior)  # noqa: F405
 awkward.behaviors.categorical.register(behavior)  # noqa: F405
 
 # operations
 from awkward.operations import *
-
-# temporary shim to access v2 under _v2
-import awkward._v2
 
 # version
 __version__ = awkward._ext.__version__

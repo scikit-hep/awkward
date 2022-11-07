@@ -99,7 +99,7 @@ namespace awkward {
     const BuilderOptions&
       options() const { return options_; }
 
-    const int64_t nullcount() const { return nullcount_; }
+    int64_t nullcount() const { return nullcount_; }
 
   private:
     const BuilderOptions options_;

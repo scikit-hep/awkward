@@ -74,7 +74,7 @@ def from_buffers(
 
 
 def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
-    if ak._util.isstr(form):
+    if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):
             form = ak.forms.NumpyForm(form)
         else:
@@ -82,7 +82,7 @@ def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
     elif isinstance(form, dict):
         form = ak.forms.from_dict(form)
 
-    if not (ak._util.isint(length) and length >= 0):
+    if not (ak._util.is_integer(length) and length >= 0):
         raise ak._errors.wrap_error(
             TypeError("'length' argument must be a non-negative integer")
         )
@@ -94,7 +94,7 @@ def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
             )
         )
 
-    if ak._util.isstr(buffer_key):
+    if isinstance(buffer_key, str):
 
         def getkey(form, attribute):
             return buffer_key.format(form_key=form.form_key, attribute=attribute)
@@ -125,19 +125,12 @@ _index_to_dtype = {
 
 
 def reconstitute(form, length, container, getkey, nplike):
-    if form.has_identifier:
-        raise ak._errors.wrap_error(
-            NotImplementedError("ak.from_buffers for an array with an Identifier")
-        )
-    else:
-        identifier = None
-
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
             raise ak._errors.wrap_error(
                 ValueError(f"EmptyForm node, but the expected length is {length}")
             )
-        return ak.contents.EmptyArray(identifier, form.parameters)
+        return ak.contents.EmptyArray(form.parameters)
 
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
@@ -151,11 +144,11 @@ def reconstitute(form, length, container, getkey, nplike):
                 data = data.reshape((length,) + form.inner_shape)
             else:
                 data = data.reshape((-1,) + form.inner_shape)
-        return ak.contents.NumpyArray(data, identifier, form.parameters, nplike)
+        return ak.contents.NumpyArray(data, form.parameters, nplike)
 
     elif isinstance(form, ak.forms.UnmaskedForm):
         content = reconstitute(form.content, length, container, getkey, nplike)
-        return ak.contents.UnmaskedArray(content, identifier, form.parameters)
+        return ak.contents.UnmaskedArray(content, form.parameters)
 
     elif isinstance(form, ak.forms.BitMaskedForm):
         raw_array = container[getkey(form, "mask")]
@@ -169,7 +162,6 @@ def reconstitute(form, length, container, getkey, nplike):
             form.valid_when,
             length,
             form.lsb_order,
-            identifier,
             form.parameters,
         )
 
@@ -182,7 +174,6 @@ def reconstitute(form, length, container, getkey, nplike):
             ak.index.Index(mask),
             reconstitute(form.content, length, container, getkey, nplike),
             form.valid_when,
-            identifier,
             form.parameters,
         )
 
@@ -197,7 +188,6 @@ def reconstitute(form, length, container, getkey, nplike):
         return ak.contents.IndexedOptionArray(
             ak.index.Index(index),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            identifier,
             form.parameters,
         )
 
@@ -210,7 +200,6 @@ def reconstitute(form, length, container, getkey, nplike):
         return ak.contents.IndexedArray(
             ak.index.Index(index),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            identifier,
             form.parameters,
         )
 
@@ -229,7 +218,6 @@ def reconstitute(form, length, container, getkey, nplike):
             ak.index.Index(starts),
             ak.index.Index(stops),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            identifier,
             form.parameters,
         )
 
@@ -242,7 +230,6 @@ def reconstitute(form, length, container, getkey, nplike):
         return ak.contents.ListOffsetArray(
             ak.index.Index(offsets),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            identifier,
             form.parameters,
         )
 
@@ -252,7 +239,6 @@ def reconstitute(form, length, container, getkey, nplike):
             reconstitute(form.content, next_length, container, getkey, nplike),
             form.size,
             length,
-            identifier,
             form.parameters,
         )
 
@@ -264,7 +250,6 @@ def reconstitute(form, length, container, getkey, nplike):
             ],
             None if form.is_tuple else form.fields,
             length,
-            identifier,
             form.parameters,
         )
 
@@ -291,7 +276,6 @@ def reconstitute(form, length, container, getkey, nplike):
                 reconstitute(content, lengths[i], container, getkey, nplike)
                 for i, content in enumerate(form.contents)
             ],
-            identifier,
             form.parameters,
         )
 

@@ -19,7 +19,7 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
   const int64_t* stringstops) {
 
   auto sorter =
-        [&stringdata, &stringstarts, &stringstops](int left, int right) -> bool {
+        [&stringdata, &stringstarts, &stringstops](int64_t left, int64_t right) -> bool {
           size_t left_n = stringstops[left] - stringstarts[left];
           size_t right_n = stringstops[right] - stringstarts[right];
           const char* left_str = &stringdata[stringstarts[left]];
@@ -42,7 +42,6 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
 
   int64_t firstindex = 0;
   int64_t lastparent = -1;
-  int64_t k = 0;
   std::vector<int64_t> index;
   for (int64_t i = 0;  i < length + 1;  i++) {
     if (i == length  ||  fromparents[i] != lastparent) {

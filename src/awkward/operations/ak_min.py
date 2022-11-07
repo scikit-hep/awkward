@@ -139,7 +139,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
         else:
 
             def map(x):
-                return layout.nplike.min(x)
+                return layout.nplike.min(x.data)
 
         def reduce(xs):
             if len(xs) == 0:

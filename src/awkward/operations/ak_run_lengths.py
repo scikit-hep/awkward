@@ -105,8 +105,21 @@ def _impl(array, highlevel, behavior):
 
             if isinstance(diffs, ak.highlevel.Array):
                 diffs = nplike.asarray(diffs)
+            # Do we have list boundaries to consider?
             if offsets is not None:
-                diffs[offsets[1:-1] - 1] = True
+                # When checking to see whether one element equals its following neighbour
+                # we also want to break runs at list boundaries. The comparison for offset `i`
+                # occurs at `i-1` in `diffs`. Consider this example with an empty sublist:
+                #                                data = [1 1 2 2 2 3 4 4 5  ]
+                #                             offsets = [0           6   9 9]
+                #                        (data) diffs = [  0 1 0 0 1 1 0 1  ]
+                #                        diffs index  = [  0 1 2 3 4 5 6 7  ]
+                #                                      boundary diff ^
+                # To consider only the interior boundaries, we ignore the start and end
+                # offset values. These can be repeated with empty sublists, so we mask them out.
+                is_interior = nplike.logical_and(0 < offsets, offsets < len(data) - 1)
+                interior_offsets = offsets[is_interior]
+                diffs[interior_offsets - 1] = True
             positions = nplike.index_nplike.nonzero(diffs)[0]
             full_positions = nplike.index_nplike.empty(len(positions) + 2, np.int64)
             full_positions[0] = 0
@@ -155,6 +168,8 @@ def _impl(array, highlevel, behavior):
                 layout.content.parameter("__array__") == "string"
                 or layout.content.parameter("__array__") == "bytestring"
             ):
+                # We also want to trim the _upper_ bound of content,
+                # so we manually convert the list type to zero-based
                 listoffsetarray = layout.toListOffsetArray64(False)
                 offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
                 content = listoffsetarray.content[offsets[0] : offsets[-1]]

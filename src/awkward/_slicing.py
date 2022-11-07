@@ -38,9 +38,9 @@ def prepare_advanced_indexing(items):
                     list,  # of strings
                     ak.contents.ListOffsetArray,
                     ak.contents.IndexedOptionArray,
+                    str,
                 ),
             )
-            or ak._util.isstr(item)
             or item is np.newaxis
             or item is Ellipsis
         ):
@@ -126,13 +126,13 @@ def prepare_advanced_indexing(items):
 
 
 def normalise_item(item, nplike):
-    if ak._util.isint(item):
+    if ak._util.is_integer(item):
         return int(item)
 
     elif isinstance(item, slice):
         return item
 
-    elif ak._util.isstr(item):
+    elif isinstance(item, str):
         return item
 
     elif item is np.newaxis:
@@ -140,9 +140,6 @@ def normalise_item(item, nplike):
 
     elif item is Ellipsis:
         return item
-
-    elif isinstance(item, ak.highlevel.Array):
-        return normalise_item(item.layout, nplike)
 
     elif isinstance(item, ak.highlevel.Array):
         return normalise_item(item.layout, nplike)
@@ -163,7 +160,7 @@ def normalise_item(item, nplike):
     elif ak._util.is_sized_iterable(item) and len(item) == 0:
         return nplike.empty(0, dtype=np.int64)
 
-    elif ak._util.is_sized_iterable(item) and all(ak._util.isstr(x) for x in item):
+    elif ak._util.is_sized_iterable(item) and all(isinstance(x, str) for x in item):
         return list(item)
 
     elif ak._util.is_sized_iterable(item):
@@ -198,7 +195,6 @@ def normalise_item_RegularArray_toListOffsetArray64(item):
         return ak.contents.ListOffsetArray(
             next.offsets,
             normalise_item_RegularArray_toListOffsetArray64(next.content),
-            identifier=item.identifier,
             parameters=item.parameters,
         )
 
@@ -222,7 +218,6 @@ def normalise_item_nested(item):
         else:
             next = ak.contents.NumpyArray(
                 item.data.astype(np.int64),
-                identifier=item.identifier,
                 parameters=item.parameters,
                 nplike=item.nplike,
             )
@@ -237,7 +232,6 @@ def normalise_item_nested(item):
         return ak.contents.ListOffsetArray(
             item.offsets,
             normalise_item_nested(item.content),
-            identifier=item.identifier,
             parameters=item.parameters,
         )
 
@@ -296,7 +290,6 @@ def normalise_item_nested(item):
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(nextindex, nplike=item.nplike),
             normalise_item_nested(projected),
-            identifier=item.identifier,
             parameters=item.parameters,
         )
 
@@ -323,7 +316,6 @@ def normalise_item_nested(item):
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(nextindex, nplike=item.nplike),
             nextcontent,
-            identifier=item.identifier,
             parameters=item.parameters,
         )
 
@@ -522,5 +514,5 @@ def getitem_next_array_wrap(outcontent, shape, outer_length=0):
         size = shape[i]
         if isinstance(size, ak._typetracer.UnknownLengthType):
             size = 1
-        outcontent = ak.contents.RegularArray(outcontent, size, length, None, None)
+        outcontent = ak.contents.RegularArray(outcontent, size, length, None)
     return outcontent

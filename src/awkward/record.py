@@ -15,7 +15,7 @@ class Record:
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
             )
-        if not ak._util.isint(at):
+        if not ak._util.is_integer(at):
             raise ak._errors.wrap_error(
                 TypeError(f"Record 'at' must be an integer, not {array!r}")
             )
@@ -58,6 +58,13 @@ class Record:
 
     def content(self, index_or_field):
         return self._array.content(index_or_field)[self._at]
+
+    def completely_flatten(
+        self, nplike=None, flatten_records=True, function_name=None, drop_nones=True
+    ):
+        return self._array[self._at : self._at + 1].completely_flatten(
+            nplike, flatten_records, function_name, drop_nones
+        )
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -115,7 +122,7 @@ class Record:
             return self._getitem(where)
 
     def _getitem(self, where):
-        if ak._util.isint(where):
+        if ak._util.is_integer(where):
             raise ak._errors.wrap_error(
                 IndexError("scalar Record cannot be sliced by an integer")
             )
@@ -125,7 +132,7 @@ class Record:
                 IndexError("scalar Record cannot be sliced by a range slice (`:`)")
             )
 
-        elif ak._util.isstr(where):
+        elif isinstance(where, str):
             return self._getitem_field(where)
 
         elif where is np.newaxis:
@@ -144,7 +151,7 @@ class Record:
         elif isinstance(where, tuple) and len(where) == 1:
             return self._getitem(where[0])
 
-        elif isinstance(where, tuple) and ak._util.isstr(where[0]):
+        elif isinstance(where, tuple) and isinstance(where[0], str):
             return self._getitem_field(where[0])._getitem(where[1:])
 
         elif isinstance(where, ak.highlevel.Array):
@@ -162,7 +169,7 @@ class Record:
                 IndexError("scalar Record cannot be sliced by an array")
             )
 
-        elif isinstance(where, Iterable) and all(ak._util.isstr(x) for x in where):
+        elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):
             return self._getitem_fields(where)
 
         elif isinstance(where, Iterable):

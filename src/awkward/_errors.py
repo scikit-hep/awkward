@@ -2,20 +2,31 @@
 from __future__ import annotations
 
 import threading
-import traceback
 import warnings
 from collections.abc import Mapping, Sequence
 
-from awkward import _util, nplikes
+from awkward import nplikes
 
 np = nplikes.NumpyMetadata.instance()
+
+
+class PartialFunction:
+    """Analogue of `functools.partial`, but as a distinct type"""
+
+    __slots__ = ("func", "args", "kwargs")
+
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self):
+        return self.func(*self.args, **self.kwargs)
 
 
 class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
-
-    _width = 80
 
     @classmethod
     def primary(cls):
@@ -113,21 +124,35 @@ class ErrorContext:
 
 
 class OperationErrorContext(ErrorContext):
-    def __init__(self, name, arguments):
-        string_arguments = {}
-        for key, value in arguments.items():
-            if _util.isstr(key):
-                width = self._width - 8 - len(key) - 3
-            else:
-                width = self._width - 8
+    _width = 80 - 8
 
-            string_arguments[key] = self.format_argument(width, value)
+    def __init__(self, name, arguments):
+        if self.primary() is not None or all(
+            nplikes.nplike_of(x).is_eager for x in arguments
+        ):
+            # if primary is not None: we won't be setting an ErrorContext
+            # if all nplikes are eager: no accumulation of large arrays
+            # --> in either case, delay string generation
+            string_arguments = PartialFunction(self._string_arguments, arguments)
+        else:
+            string_arguments = self._string_arguments(arguments)
 
         super().__init__(
             name=name,
             arguments=string_arguments,
-            traceback=traceback.extract_stack(limit=3)[0],
         )
+
+    def _string_arguments(self, arguments):
+        string_arguments = {}
+        for key, value in arguments.items():
+            if isinstance(key, str):
+                width = self._width - len(key) - 3
+            else:
+                width = self._width
+
+            string_arguments[key] = self.format_argument(width, value)
+
+        return string_arguments
 
     @property
     def name(self):
@@ -135,28 +160,21 @@ class OperationErrorContext(ErrorContext):
 
     @property
     def arguments(self):
-        return self._kwargs["arguments"]
-
-    @property
-    def traceback(self):
-        return self._kwargs["traceback"]
+        out = self._kwargs["arguments"]
+        if isinstance(out, PartialFunction):
+            out = self._kwargs["arguments"] = out()
+        return out
 
     def format_exception(self, exception):
-        tb = self.traceback
-        try:
-            location = f" (from {tb.filename}, line {tb.lineno})"
-        except Exception:
-            location = ""
-
         arguments = []
         for name, valuestr in self.arguments.items():
-            if _util.isstr(name):
+            if isinstance(name, str):
                 arguments.append(f"\n        {name} = {valuestr}")
             else:
                 arguments.append(f"\n        {valuestr}")
 
         extra_line = "" if len(arguments) == 0 else "\n    "
-        return f"""while calling{location}
+        return f"""while calling
 
     {self.name}({"".join(arguments)}{extra_line})
 
@@ -164,38 +182,47 @@ Error details: {str(exception)}"""
 
 
 class SlicingErrorContext(ErrorContext):
+    _width = 80 - 4
+
     def __init__(self, array, where):
+        if self.primary() is not None or (
+            nplikes.nplike_of(array).is_eager and nplikes.nplike_of(where).is_eager
+        ):
+            # if primary is not None: we won't be setting an ErrorContext
+            # if all nplikes are eager: no accumulation of large arrays
+            # --> in either case, delay string generation
+            formatted_array = PartialFunction(self.format_argument, self._width, array)
+            formatted_slice = PartialFunction(self.format_slice, where)
+        else:
+            formatted_array = self.format_argument(self._width, array)
+            formatted_slice = self.format_slice(where)
+
         super().__init__(
-            array=self.format_argument(self._width - 4, array),
-            where=self.format_slice(where),
-            traceback=traceback.extract_stack(limit=3)[0],
+            array=formatted_array,
+            where=formatted_slice,
         )
 
     @property
     def array(self):
-        return self._kwargs["array"]
+        out = self._kwargs["array"]
+        if isinstance(out, PartialFunction):
+            out = self._kwargs["array"] = out()
+        return out
 
     @property
     def where(self):
-        return self._kwargs["where"]
-
-    @property
-    def traceback(self):
-        return self._kwargs["traceback"]
+        out = self._kwargs["where"]
+        if isinstance(out, PartialFunction):
+            out = self._kwargs["where"] = out()
+        return out
 
     def format_exception(self, exception):
-        tb = self.traceback
-        try:
-            location = f" (from {tb.filename}, line {tb.lineno})"
-        except Exception:
-            location = ""
-
-        if _util.isstr(exception):
+        if isinstance(exception, str):
             message = exception
         else:
             message = f"Error details: {str(exception)}"
 
-        return f"""while attempting to slice{location}
+        return f"""while attempting to slice
 
     {self.array}
 

@@ -11,11 +11,10 @@ class IndexedForm(Form):
         self,
         index,
         content=None,
-        has_identifier=False,
         parameters=None,
         form_key=None,
     ):
-        if not ak._util.isstr(index):
+        if not isinstance(index, str):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'index' must be of type str, not {}".format(
@@ -34,7 +33,7 @@ class IndexedForm(Form):
 
         self._index = index
         self._content = content
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def index(self):
@@ -85,8 +84,7 @@ class IndexedForm(Form):
     def __eq__(self, other):
         if isinstance(other, IndexedForm):
             return (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
+                self._form_key == other._form_key
                 and self._index == other._index
                 and _parameters_equal(
                     self._parameters, other._parameters, only_array_record=True
@@ -141,7 +139,6 @@ class IndexedForm(Form):
         return IndexedForm(
             self._index,
             self._content._select_columns(index, specifier, matches, output),
-            self._has_identifier,
             self._parameters,
             self._form_key,
         )

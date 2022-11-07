@@ -419,8 +419,8 @@ def _record_to_complex(layout, complex_record_fields):
         isinstance(complex_record_fields, Sized)
         and isinstance(complex_record_fields, Iterable)
         and len(complex_record_fields) == 2
-        and ak._util.isstr(complex_record_fields[0])
-        and ak._util.isstr(complex_record_fields[1])
+        and isinstance(complex_record_fields[0], str)
+        and isinstance(complex_record_fields[1], str)
     ):
 
         def action(node, **kwargs):
@@ -516,7 +516,7 @@ def _yes_schema(
     highlevel,
     behavior,
 ):
-    if isinstance(schema, bytes) or ak._util.isstr(schema):
+    if isinstance(schema, (bytes, str)):
         schema = json.loads(schema)
 
     if not isinstance(schema, dict):
@@ -641,7 +641,7 @@ def build_assembly(schema, container, instructions):
             strings = schema["enum"]
             assert isinstance(strings, list)
             assert len(strings) >= 1
-            assert all(ak._util.isstr(x) for x in strings)
+            assert all(isinstance(x, str) for x in strings)
             bytestrings = [x.encode("utf-8", errors="surrogateescape") for x in strings]
 
             index = f"node{len(container)}"
@@ -718,7 +718,7 @@ def build_assembly(schema, container, instructions):
             )
 
         if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
-            assert ak._util.isint(schema.get("minItems"))
+            assert ak._util.is_integer(schema.get("minItems"))
 
             if is_optional:
                 mask = f"node{len(container)}"

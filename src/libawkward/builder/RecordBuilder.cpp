@@ -117,7 +117,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -138,7 +138,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->boolean(x);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -159,7 +159,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -180,7 +180,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->real(x);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -201,7 +201,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->complex(x);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -222,7 +222,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->datetime(x, unit);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -243,7 +243,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->timedelta(x, unit);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -264,7 +264,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -288,7 +288,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginlist();
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -329,7 +329,7 @@ namespace awkward {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->begintuple(numfields);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
@@ -407,7 +407,7 @@ namespace awkward {
     else if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginrecord(name, check);
-      return std::move(out);
+      return out;
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(

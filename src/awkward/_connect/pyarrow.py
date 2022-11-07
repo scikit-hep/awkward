@@ -876,7 +876,7 @@ def remove_optiontype(akarray):
     assert type(akarray).is_OptionType
     if isinstance(akarray, ak.contents.IndexedOptionArray):
         return ak.contents.IndexedArray(
-            akarray.index, akarray.content, akarray.identifier, akarray.parameters
+            akarray.index, akarray.content, akarray.parameters
         )
     else:
         return akarray.content
@@ -888,7 +888,6 @@ def form_remove_optiontype(akform):
         return ak.forms.IndexedForm(
             akform.index,
             akform.content,
-            akform.has_identifier,
             akform.parameters,
             akform.form_key,
         )

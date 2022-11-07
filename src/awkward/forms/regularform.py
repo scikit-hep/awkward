@@ -8,9 +8,7 @@ class RegularForm(Form):
     is_ListType = True
     is_RegularType = True
 
-    def __init__(
-        self, content, size, has_identifier=False, parameters=None, form_key=None
-    ):
+    def __init__(self, content, size, parameters=None, form_key=None):
         if not isinstance(content, Form):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -19,7 +17,7 @@ class RegularForm(Form):
                     )
                 )
             )
-        if not ak._util.isint(size):
+        if not ak._util.is_integer(size):
             raise ak._errors.wrap_error(
                 TypeError(
                     "{} 'size' must be of type int, not {}".format(
@@ -30,7 +28,7 @@ class RegularForm(Form):
 
         self._content = content
         self._size = int(size)
-        self._init(has_identifier, parameters, form_key)
+        self._init(parameters, form_key)
 
     @property
     def content(self):
@@ -65,8 +63,7 @@ class RegularForm(Form):
     def __eq__(self, other):
         if isinstance(other, RegularForm):
             return (
-                self._has_identifier == other._has_identifier
-                and self._form_key == other._form_key
+                self._form_key == other._form_key
                 and self._size == other._size
                 and _parameters_equal(
                     self._parameters, other._parameters, only_array_record=True
@@ -137,7 +134,6 @@ class RegularForm(Form):
         return RegularForm(
             self._content._select_columns(index, specifier, matches, output),
             self._size,
-            self._has_identifier,
             self._parameters,
             self._form_key,
         )
