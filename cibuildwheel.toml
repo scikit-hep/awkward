@@ -2,9 +2,9 @@
 test-requires = ["pytest>=6", "."]
 test-command = """
 pytest {project}/tests \
-       {package_dir}/tests-cpu-kernels \
-       {package_dir}/tests-spec \
-       {package_dir}/tests-spec-explicit
+       {package}/tests-cpu-kernels \
+       {package}/tests-spec \
+       {package}/tests-spec-explicit
 """
 skip = [
     "pp*win*",
