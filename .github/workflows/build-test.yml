@@ -215,7 +215,7 @@ jobs:
         run: pipx run build -w ./awkward-cpp
 
       - name: Install awkward-cpp
-        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl "${{ matrix.numpy-package }}
+        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl "${{ matrix.numpy-package }}"
 
       - name: Build & install awkward
         run: python3 -m pip install -v .
