@@ -30,11 +30,8 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
-    - name: Prepare build files
-      run: |
-        python3 -m pip install pyyaml
-        python3 dev/generate-kernel-signatures.py
-        python3 dev/copy-cpp-headers.py
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --headers --signatures
 
     - name: Cache wheel
       id: cache-awkward-cpp-wasm-wheel
@@ -91,16 +88,9 @@ jobs:
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
            doxygen
-           pyyaml
 
-    - name: Install requirements
-      run: |
-        python3 -m pip install build
-
-    - name: Prepare build files
-      run: |
-        python3 dev/generate-kernel-signatures.py
-        python3 dev/copy-cpp-headers.py
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --headers --signatures
 
     - name: Cache wheel
       id: cache-awkward-cpp-x86-64-wheel
@@ -111,7 +101,7 @@ jobs:
 
     - name: Build wheel
       if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
-      run: python3 -m build -w ./awkward-cpp
+      run: pipx run build -w ./awkward-cpp
 
     - name: Upload wheel
       uses: actions/upload-artifact@v3
@@ -125,6 +115,9 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: true
+
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --headers --signatures
 
     - name: Build wheel
       run: pipx run build -w
@@ -192,8 +185,8 @@ jobs:
     - name: Install awkward and awkward-cpp wheels
       run: python -m pip install dist/awkward*.whl
 
-    - name: Copy C++ headers
-      run: python dev/copy-cpp-headers.py
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --docs
 
     - name: Generate C++ documentation
       run: doxygen
@@ -201,9 +194,6 @@ jobs:
 
     - name: Copy C++ documentation
       run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
-
-    - name: Generate kernel documentation
-      run: python dev/generate-kernel-docs.py
 
     - name: Generate Python documentation
       run: sphinx-build -M html . _build/

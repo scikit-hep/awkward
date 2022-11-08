@@ -60,13 +60,8 @@ jobs:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
 
-      - name: Install requirements
-        run: python -m pip install -r requirements-test.txt PyYAML build
-
-      - name: Prepare generated build sources
-        run: |
-          python dev/generate-kernel-signatures.py
-          python dev/copy-cpp-headers.py
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
@@ -87,11 +82,14 @@ jobs:
       - name: Build & install awkward
         run: python -m pip install -v .
 
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
+
       - name: Check if kernel specification is sorted
         run: python dev/kernel-diagnostics.py --check-spec-sorted
-
-      - name: Generate Kernel tests
-        run: python dev/generate-tests.py
 
       - name: Test specification
         run: python -m pytest -vv -rs awkward-cpp/tests-spec
@@ -130,13 +128,8 @@ jobs:
         with:
           python-version: '${{ matrix.python-version }}'
 
-      - name: Install requirements
-        run: python3 -m pip install -r requirements-test.txt PyYAML build
-
-      - name: Prepare generated build sources
-        run: |
-          python3 dev/generate-kernel-signatures.py
-          python3 dev/copy-cpp-headers.py
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
@@ -147,7 +140,7 @@ jobs:
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python3 -m build -w ./awkward-cpp
+        run: pipx run build -w ./awkward-cpp
 
       - name: Install awkward-cpp
         run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
@@ -155,11 +148,14 @@ jobs:
       - name: Build & install awkward
         run: python3 -m pip install -v .
 
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
+
       - name: Check if kernel specification is sorted
         run: python dev/kernel-diagnostics.py --check-spec-sorted
-
-      - name: Generate Kernel tests
-        run: python dev/generate-tests.py
 
       - name: Test specification
         run: python -m pytest -vv -rs awkward-cpp/tests-spec
@@ -204,13 +200,8 @@ jobs:
         with:
           python-version: '${{ matrix.python-version }}'
 
-      - name: Install requirements
-        run: python3 -m pip install -r requirements-test.txt PyYAML "${{ matrix.numpy-package }}" build
-
-      - name: Prepare generated build sources
-        run: |
-          python3 dev/generate-kernel-signatures.py
-          python3 dev/copy-cpp-headers.py
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
@@ -224,7 +215,7 @@ jobs:
         run: python3 -m build -w ./awkward-cpp
 
       - name: Install awkward-cpp
-        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
+        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl "${{ matrix.numpy-package }}
 
       - name: Build & install awkward
         run: python3 -m pip install -v .
@@ -232,11 +223,11 @@ jobs:
       - name: Print versions
         run: python -m pip list
 
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
+
       - name: Check if kernel specification is sorted
         run: python dev/kernel-diagnostics.py --check-spec-sorted
-
-      - name: Generate Kernel tests
-        run: python dev/generate-tests.py
 
       - name: Test specification
         run: python -m pytest -vv -rs awkward-cpp/tests-spec
@@ -292,13 +283,8 @@ jobs:
              numpy
              root
 
-      - name: Install requirements
-        run: python3 -m pip install -r requirements-test.txt PyYAML build
-
-      - name: Prepare generated build sources
-        run: |
-          python3 dev/generate-kernel-signatures.py
-          python3 dev/copy-cpp-headers.py
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
@@ -309,7 +295,7 @@ jobs:
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
-        run: python3 -m build -w ./awkward-cpp
+        run: pipx run build -w ./awkward-cpp
 
       - name: Install awkward-cpp
         run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
@@ -319,6 +305,9 @@ jobs:
 
       - name: Print versions
         run: python -m pip list
+
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
 
       - name: Test
         run: python -m pytest -vv -rs tests

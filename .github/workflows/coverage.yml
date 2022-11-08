@@ -44,17 +44,8 @@ jobs:
         with:
           python-version: '${{ matrix.python-version }}'
 
-      - name: Install requirements
-        run: |
-          python3 -m pip install \
-            -r requirements-test.txt \
-            numpy \
-            build
-
-      - name: Prepare generated build sources
-        run: |
-          python3 dev/generate-kernel-signatures.py
-          python3 dev/copy-cpp-headers.py
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
@@ -75,6 +66,9 @@ jobs:
 
       - name: Print versions
         run: python -m pip list
+
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
 
       - name: Test
         run: >-

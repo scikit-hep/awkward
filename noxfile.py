@@ -94,11 +94,18 @@ def prepare(session):
     Prepare for package building.
     """
     session.install("PyYAML", "numpy")
-    session.run("python", "dev/copy-cpp-headers.py")
-    session.run("python", "dev/generate-kernel-signatures.py")
-    if "--no-tests" not in session.posargs:
+    if not session.posargs:
+        flags = {"headers", "signatures", "tests", "docs"}
+    else:
+        flags = set(session.posargs)
+
+    if "headers" in flags:
+        session.run("python", "dev/copy-cpp-headers.py")
+    if "signatures" in flags:
+        session.run("python", "dev/generate-kernel-signatures.py")
+    if "tests" in flags:
         session.run("python", "dev/generate-tests.py")
-    if "--no-docs" not in session.posargs:
+    if "docs" in flags:
         session.run("python", "dev/generate-kernel-docs.py")
 
 
