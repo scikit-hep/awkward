@@ -39,7 +39,7 @@ jobs:
           python-version: "${{ env.PYTHON_VERSION }}"
 
       - name: Install requirements
-        run: python -m pip install PyYAML build toml
+        run: python -m pip install build toml
 
       - name: Check awkward-cpp is unmodified or unreleased
         run: python dev/check-awkward-cpp-unchanged.py
