@@ -59,9 +59,9 @@ Subsequent steps require the generation of code and datafiles (kernel specificat
 nox -s prepare
 ```
 
-The `prepare` session accepts flags to disable the test and documentation generation targets, e.g.
+The `prepare` session accepts flags to specify exact generation targets, e.g.
 ```bash
-nox -s prepare -- --no-tests --no-docs
+nox -s prepare -- --tests --docs
 ```
 This can reduce the time taken to perform the preparation step in the event that only the package-building step is needed.
 
@@ -101,6 +101,8 @@ For more fine-grained testing, we also have tests of the low-level kernels, whic
 python -m pytest -vv -rs awkward-cpp/tests-spec
 python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 ```
+
+This assumes that the `nox -s prepare` session ran the `--tests` target.
 
 Furthermore, if you have an Nvidia GPU and CuPy installed, you can run the CUDA tests with
 
