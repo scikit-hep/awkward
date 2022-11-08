@@ -119,6 +119,9 @@ file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
 pybind11_add_module(_ext ${LAYOUT_SOURCES})
 target_link_libraries(_ext PRIVATE awkward-static)
 
+# Install pure-python files
+file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")
+
 install(
   TARGETS awkward awkward-parent awkward-cpu-kernels _ext
   LIBRARY DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
