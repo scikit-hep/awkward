@@ -90,27 +90,6 @@ add_library(awkward SHARED $<TARGET_OBJECTS:awkward-objects>)
 target_link_libraries(awkward PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
 target_link_libraries(awkward PUBLIC awkward-parent)
 
-# Tests Macro to add C++ tests (part of CMake build, distinct from pytests in Python).
-include(CTest)
-
-if(BUILD_TESTING)
-  macro(addtest name filename)
-    add_executable(${name} ${filename})
-    target_link_libraries(${name} PRIVATE awkward-static awkward-cpu-kernels-static)
-    set_target_properties(${name} PROPERTIES CXX_VISIBILITY_PRESET hidden)
-    set_target_properties(${name} PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
-    add_test(${name} ${name})
-  endmacro(addtest)
-
-  add_subdirectory(tests-cpp)
-
-  addtest_nolibs(test_1494-layout-builder tests-cpp/test_1494-layout-builder.cpp)
-  addtest_nolibs(test_1542-growable-buffer tests-cpp/test_1542-growable-buffer.cpp)
-  addtest(test_1542-array-builder tests-cpp/test_1542-array-builder.cpp)
-  addtest_nolibs(test_1560-builder-options tests-cpp/test_1560-builder-options.cpp)
-
-endif()
-
 # Third tier: Python modules.
 find_package(pybind11 CONFIG REQUIRED)
 
