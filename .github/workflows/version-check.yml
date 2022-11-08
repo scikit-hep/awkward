@@ -1,0 +1,45 @@
+name: Version Check
+
+on:
+  pull_request:
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - CITATION.cff
+      - LICENSE
+      - .readthedocs.yml
+      - docs-img/**
+      - docs/**
+      - awkward-cpp/docs/**
+      - studies/**
+
+  workflow_dispatch:
+
+concurrency:
+  group: 'version-check-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
+env:
+  # Ensure predictable hash
+  SOURCE_DATE_EPOCH: "1667773939"
+  PYTHON_VERSION: "3.10"
+
+jobs:
+  check-awkward-cpp:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: 'Python ${{ env.PYTHON_VERSION }}'
+        uses: actions/setup-python@v4
+        with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+
+      - name: Install requirements
+        run: python -m pip install -r PyYAML build
+
+      - name: Check awkward-cpp is unmodified or unreleased
+        run: python dev/check-awkward-cpp-unmodified.py
