@@ -1,5 +1,6 @@
 build
-flake8
+packaging
 PyYAML
+requests
 toml
 typing_extensions>=4.3.0
