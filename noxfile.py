@@ -51,6 +51,8 @@ def docs(session):
     """
     Build the docs. Pass "serve" to serve.
     """
+    session.install("-r", "requirements-dev.txt")
+
     # Generate C++ documentation
     with session.chdir("awkward-cpp/docs"):
         session.run("doxygen")
@@ -59,7 +61,6 @@ def docs(session):
     shutil.copytree("awkward-cpp/docs/html", "docs/_static/doxygen", dirs_exist_ok=True)
 
     # Generate kernel documentation
-    session.install("pyyaml")
     session.run("python", "dev/generate-kernel-docs.py")
 
     # Build Sphinx docs
@@ -93,7 +94,7 @@ def prepare(session):
     """
     Prepare for package building.
     """
-    session.install("PyYAML", "numpy")
+    session.install("-r", "requirements-dev.txt")
     if not session.posargs:
         flags = {"headers", "signatures", "tests", "docs"}
     else:
@@ -115,7 +116,7 @@ def check_version(session):
     Check that the awkward-cpp version is compatible with awkward
     and that we are not modifying a released awkward-cpp version
     """
-    session.install("toml", "build", "packaging")
+    session.install("-r", "requirements-dev.txt")
     session.run("python", "dev/check-awkward-cpp-unchanged.py")
     session.run("python", "dev/check-awkward-uses-awkward-cpp.py")
 
@@ -125,5 +126,5 @@ def diagnostics(session):
     """
     Check that the CPU kernels are defined correctly
     """
-    session.install("PyYAML")
+    session.install("-r", "requirements-dev.txt")
     session.run("python", "dev/kernel-diagnostics.py", *session.posargs)
