@@ -4,12 +4,13 @@ on:
   pull_request:
     paths-ignore:
       - README.md
-      - VERSION_INFO
-      - .ci/**
+      - CONTRIBUTING.md
+      - CITATION.cff
+      - LICENSE
       - .readthedocs.yml
       - docs-img/**
-      - docs-doxygen/**
       - docs/**
+      - awkward-cpp/docs/**
       - studies/**
 
   schedule:
