@@ -6,10 +6,6 @@ on:
     types:
     - published
 
-env:
-  # Ensure predictable hash
-  SOURCE_DATE_EPOCH: "1667773939"
-
 
 jobs:
   build:
