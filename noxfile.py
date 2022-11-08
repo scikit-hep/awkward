@@ -100,3 +100,14 @@ def prepare(session):
         session.run("python", "dev/generate-tests.py")
     if "--no-docs" not in session.posargs:
         session.run("python", "dev/generate-kernel-docs.py")
+
+
+@nox.session
+def check_version(session):
+    """
+    Check that the awkward-cpp version is compatible with awkward
+    and that we are not modifying a released awkward-cpp version
+    """
+    session.install("toml", "build", "packaging")
+    session.run("python", "dev/check-awkward-cpp-unchanged.py")
+    session.run("python", "dev/check-awkward-uses-awkward-cpp.py")
