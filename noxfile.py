@@ -118,3 +118,12 @@ def check_version(session):
     session.install("toml", "build", "packaging")
     session.run("python", "dev/check-awkward-cpp-unchanged.py")
     session.run("python", "dev/check-awkward-uses-awkward-cpp.py")
+
+
+@nox.session
+def diagnostics(session):
+    """
+    Check that the CPU kernels are defined correctly
+    """
+    session.install("PyYAML")
+    session.run("python", "dev/kernel-diagnostics.py", *session.posargs)
