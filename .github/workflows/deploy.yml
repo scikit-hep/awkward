@@ -16,6 +16,11 @@ jobs:
       with:
         submodules: true
 
+    - name: Compute SOURCE_DATE_EPOCH
+      run: |
+        SOURCE_DATE_EPOCH="$(git log -1 --format="%ad" --date=unix -- pyproject.toml)"
+        echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+
     - name: Prepare build files
       run: pipx run nox -s prepare
 
