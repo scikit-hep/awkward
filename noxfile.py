@@ -1,4 +1,4 @@
-import re
+import argparse
 import shutil
 
 import nox
@@ -50,8 +50,12 @@ def coverage(session):
 @nox.session
 def docs(session):
     """
-    Build the docs. Pass "serve" to serve.
+    Build the docs.
     """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--serve", action="store_true")
+    args = parser.parse_args(session.posargs)
+
     session.install("-r", "requirements-dev.txt")
 
     # Generate C++ documentation
@@ -69,14 +73,9 @@ def docs(session):
         session.install("-r", "requirements.txt")
         session.run("sphinx-build", "-M", "html", ".", "_build")
 
-        if session.posargs:
-            if "--serve" in session.posargs:
-                session.log(
-                    "Launching docs at http://localhost:8000/ - use Ctrl-C to quit"
-                )
-                session.run("python", "-m", "http.server", "8000", "-d", "_build/html")
-            else:
-                session.error("Unsupported argument to docs")
+        if args.serve:
+            session.log("Launching docs at http://localhost:8000/ - use Ctrl-C to quit")
+            session.run("python", "-m", "http.server", "8000", "-d", "_build/html")
 
 
 @nox.session
@@ -84,10 +83,23 @@ def clean(session):
     """
     Clean generated artifacts.
     """
-    session.run("python", "dev/clean-cpp-headers.py")
-    session.run("python", "dev/clean-kernel-signatures.py")
-    session.run("python", "dev/clean-kernel-docs.py")
-    session.run("python", "dev/clean-tests.py")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--headers", action="store_true")
+    parser.add_argument("--signatures", action="store_true")
+    parser.add_argument("--tests", action="store_true")
+    parser.add_argument("--docs", action="store_true")
+    args = parser.parse_args(session.posargs)
+
+    clean_all = not session.posargs
+
+    if args.headers or clean_all:
+        session.run("python", "dev/clean-cpp-headers.py")
+    if args.signatures or clean_all:
+        session.run("python", "dev/clean-kernel-signatures.py")
+    if args.tests or clean_all:
+        session.run("python", "dev/clean-tests.py")
+    if args.docs or clean_all:
+        session.run("python", "dev/clean-kernel-docs.py")
 
 
 @nox.session
@@ -95,19 +107,24 @@ def prepare(session):
     """
     Prepare for package building.
     """
-    session.install("-r", "requirements-dev.txt")
-    if not session.posargs:
-        flags = {"headers", "signatures", "tests", "docs"}
-    else:
-        flags = {re.sub(r"--(.*)", r"\1", opt) for opt in session.posargs}
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--headers", action="store_true")
+    parser.add_argument("--signatures", action="store_true")
+    parser.add_argument("--tests", action="store_true")
+    parser.add_argument("--docs", action="store_true")
+    args = parser.parse_args(session.posargs)
 
-    if "headers" in flags:
+    session.install("-r", "requirements-dev.txt")
+
+    prepare_all = not session.posargs
+
+    if args.headers or prepare_all:
         session.run("python", "dev/copy-cpp-headers.py")
-    if "signatures" in flags:
+    if args.signatures or prepare_all:
         session.run("python", "dev/generate-kernel-signatures.py")
-    if "tests" in flags:
+    if args.tests or prepare_all:
         session.run("python", "dev/generate-tests.py")
-    if "docs" in flags:
+    if args.docs or prepare_all:
         session.run("python", "dev/generate-kernel-docs.py")
 
 
@@ -115,7 +132,7 @@ def prepare(session):
 def check_version(session):
     """
     Check that the awkward-cpp version is compatible with awkward
-    and that we are not modifying a released awkward-cpp version
+    and that we are not modifying a released awkward-cpp version.
     """
     session.install("-r", "requirements-dev.txt")
     session.run("python", "dev/check-awkward-cpp-unchanged.py")
@@ -125,7 +142,7 @@ def check_version(session):
 @nox.session
 def diagnostics(session):
     """
-    Check that the CPU kernels are defined correctly
+    Check that the CPU kernels are defined correctly.
     """
     session.install("-r", "requirements-dev.txt")
     session.run("python", "dev/kernel-diagnostics.py", *session.posargs)
