@@ -95,8 +95,6 @@ Finally, let's run the integration test suite to ensure that everything's workin
 python -m pytest tests -n auto
 ```
 
-The `--pytest tests` runs the integration tests from the `tests` directory (drop it to build only).
-
 For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
 
 ```bash
@@ -133,10 +131,14 @@ You need some additional packages installed on your system to build the document
 * [sphinx](https://pypi.org/project/sphinx/)
 * [sphinx-rtd-theme](https://pypi.org/project/sphinx-rtd-theme/)
 
-To build documentation locally, execute the following command from the root directory of the project.
-
+To build documentation locally, first prepare the generated data files with
 ```bash
-sphinx-build docs docs/_build
+nox -s prepare
+```
+
+Then, use `nox` to run the various documentation build steps
+```bash
+nox -s docs
 ```
 
 this command executes multiple custom Python scripts(some require a working internet connection), in addition to using Sphinx and Doxygen to generate the required browser viewable documentation.
@@ -144,16 +146,22 @@ this command executes multiple custom Python scripts(some require a working inte
 To view the built documentation, open
 
 ```bash
-docs/_build/index.html
+docs/_build/html/index.html
 ```
 
-from the root directory of the project in your preferred web browser.
+from the root directory of the project in your preferred web browser, e.g.
+
+```bash
+python -m http.server 8080 --directory docs/_build/html/
+```
 
 Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is
 
 ```bash
-rm -rf docs-shinx/_auto docs_sphinx/_build docs/_static
+rm -rf docs/reference/generated docs/_build docs/_static/doxygen
 ```
+
+There is also a cache in the `docs/_build/.jupyter_cache` directory for Jupyter Book, which can be removed.
 
 ### Continuous testing
 
@@ -167,7 +175,7 @@ The `main` branch is also never far from the latest released version. The [relea
 
 Committing directly to `main` is not allowed except for
 
-   * updating the `VERSION_INFO` file, which should be independent of pull requests
+   * updating the `pyproject.toml` file  to bump the version number, which should be independent of pull requests
    * updating documentation or non-code files
    * unprecedented emergencies
 
@@ -175,7 +183,7 @@ and only by me.
 
 ### The main-v1 branch
 
-The `main-v1` branch was split from `main` just before Awkward 1.x code was removed, so it exists to make 1.10.x bug-fix releases. These commits must be be drawn from `main-v1`, not `main`, and pull requests must target `main-v1` (not the GitHub default). A single commit cannot be applied to both `main` and `main-v1` because they have diverged too much. If a bug-fix needs to be applied to both (unlikely), it will have to be reimplemented on both.
+The `main-v1` branch was split from `main` just before Awkward 1.x code was removed, so it exists to make 1.10.x bug-fix releases. These commits must be drawn from `main-v1`, not `main`, and pull requests must target `main-v1` (not the GitHub default). A single commit cannot be applied to both `main` and `main-v1` because they have diverged too much. If a bug-fix needs to be applied to both (unlikely), it will have to be reimplemented on both.
 
 ### Releases
 
