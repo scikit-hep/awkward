@@ -1,3 +1,4 @@
+import re
 import shutil
 
 import nox
@@ -98,7 +99,7 @@ def prepare(session):
     if not session.posargs:
         flags = {"headers", "signatures", "tests", "docs"}
     else:
-        flags = set(session.posargs)
+        flags = {re.sub(r"--(.*)", r"\1", opt) for opt in session.posargs}
 
     if "headers" in flags:
         session.run("python", "dev/copy-cpp-headers.py")
