@@ -1,4 +1,5 @@
 build
+numpy
 packaging
 PyYAML
 requests
