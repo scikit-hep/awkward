@@ -74,7 +74,7 @@ python -m pip install ./awkward-cpp
 
 If you are working on the C++ components of Awkward Array, it might be more convenient to skip the build isolation step, which involves creating an isolated build environment. First, you must install the build requirements:
 ```bash
-python -m pip install scikit-build-core pybind11 ninja cmake
+python -m pip install "scikit-build-core[pyproject,color]" pybind11 ninja cmake
 ```
 
 Then the installation can be performed without build isolation:
