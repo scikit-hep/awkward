@@ -68,9 +68,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: awkward-cpp/dist
-          key: >-
-            ${{ github.job }}-${{ matrix.python-version }}-
-            ${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
@@ -294,9 +292,9 @@ jobs:
           environment-name: awkward
           channels: conda-forge
           extra-specs: |
-             python=${{ env.PYTHON_VERSION }}
-             numpy
-             root
+            python=${{ env.PYTHON_VERSION }}
+            numpy
+            root
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
