@@ -79,7 +79,7 @@ python -m pip install "scikit-build-core[pyproject,color]" pybind11 ninja cmake
 
 Then the installation can be performed without build isolation:
 ```bash
-python -m pip install --no-build-isolation ./awkward-cpp
+python -m pip install --no-build-isolation --check-build-dependencies ./awkward-cpp
 ```
 
 #### Installing the `awkward` package
