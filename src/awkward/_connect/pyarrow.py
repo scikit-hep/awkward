@@ -473,7 +473,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
         raise ak._errors.wrap_error(
             ValueError(
-                "Arrow arrays containing Decimal types can't be converted into Awkward Arrays"
+                "Arrow arrays containing pyarrow.decimal128 or pyarrow.decimal256 types can't be converted into Awkward Arrays"
             )
         )
 
@@ -746,7 +746,7 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         # NumPy doesn't support decimal: https://github.com/numpy/numpy/issues/9789
         raise ak._errors.wrap_error(
             ValueError(
-                "Arrow arrays containing Decimal types can't be converted into Awkward Arrays"
+                "Arrow arrays containing pyarrow.decimal128 or pyarrow.decimal256 types can't be converted into Awkward Arrays"
             )
         )
 
