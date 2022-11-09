@@ -17,6 +17,7 @@ def test():
 
     assert f1(ak.highlevel.Array([[1, 2, 3], [], [4, 5]])) == 2
     assert f1(ak.highlevel.Array([[[1], [2, 3]], [], [[4, 5], []]])) == 3
+    assert f1(ak.highlevel.Array({"x": [1, 2, 3], "y": [None, None, 4]})) == 1
 
     with pytest.raises(numba.core.errors.TypingError):
         f1(ak.highlevel.Record({"x": [1, 2, 3], "y": [4]}))
