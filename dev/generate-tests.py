@@ -5,6 +5,7 @@ import copy
 import datetime
 import os
 import shutil
+import time
 from collections import OrderedDict
 from itertools import product
 
@@ -12,6 +13,13 @@ import yaml
 from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def reproducible_datetime():
+    build_date = datetime.datetime.utcfromtimestamp(
+        int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
+    )
+    return build_date.isoformat().replace("T", " AT ")[:22]
 
 
 class Argument:
@@ -252,7 +260,7 @@ kSliceNone = kMaxInt64 + 1
 # fmt: off
 
 """.format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                reproducible_datetime()
             )
         )
 
@@ -341,7 +349,7 @@ def genspectests(specdict):
 # fmt: off
 
 """.format(
-                    datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                    reproducible_datetime()
                 )
             )
             f.write("import pytest\nimport kernels\n\n")
@@ -455,7 +463,7 @@ def gencpukerneltests(specdict):
 # fmt: off
 
 """.format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                reproducible_datetime()
             )
         )
 
@@ -475,7 +483,7 @@ def gencpukerneltests(specdict):
 # fmt: off
 
 """.format(
-                    datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                    reproducible_datetime()
                 )
             )
 
@@ -660,7 +668,7 @@ def gencudakerneltests(specdict):
 # fmt: off
 
 """.format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                reproducible_datetime()
             )
         )
 
@@ -681,7 +689,7 @@ def gencudakerneltests(specdict):
 # fmt: off
 
 """.format(
-                        datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                        reproducible_datetime()
                     )
                 )
 
