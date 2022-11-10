@@ -7,7 +7,7 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    array = ak.Array([[1, 2], [], [3]])
+    array = ak.Array([[1, 2], [], [-np.inf]])
 
     # monoidal reducers (have identities)
     assert ak.count(array, axis=1)[1] == 0
@@ -38,6 +38,7 @@ def test():
 
     # defined in terms of reducers, but a map-like operation
     assert ak.softmax(array, axis=1)[1].tolist() == []
+    assert np.isnan(ak.softmax(array, axis=1)[2, 0])
 
     # defined in terms of reducers, computed from ak.min and ak.max
     assert ak.ptp(array, axis=1)[1] is None

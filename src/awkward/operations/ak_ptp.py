@@ -73,34 +73,35 @@ def _impl(array, axis, keepdims, mask_identity, flatten_records):
         ak.operations.to_layout(array, allow_record=False, allow_other=False)
     )
 
-    if axis is None:
-        out = ak.operations.ak_max._impl(
-            array, axis, keepdims, None, mask_identity, flatten_records
-        ) - ak.operations.ak_min._impl(
-            array, axis, keepdims, None, mask_identity, flatten_records
-        )
-        if not mask_identity and out is None:
-            out = 0
-
-    else:
-        maxi = ak.operations.ak_max._impl(
-            array, axis, True, None, mask_identity, flatten_records
-        )
-        mini = ak.operations.ak_min._impl(
-            array, axis, True, None, True, flatten_records
-        )
-
-        if maxi is None or mini is None:
-            out = None
+    with np.errstate(invalid="ignore", divide="ignore"):
+        if axis is None:
+            out = ak.operations.ak_max._impl(
+                array, axis, keepdims, None, mask_identity, flatten_records
+            ) - ak.operations.ak_min._impl(
+                array, axis, keepdims, None, mask_identity, flatten_records
+            )
+            if not mask_identity and out is None:
+                out = 0
 
         else:
-            out = maxi - mini
+            maxi = ak.operations.ak_max._impl(
+                array, axis, True, None, mask_identity, flatten_records
+            )
+            mini = ak.operations.ak_min._impl(
+                array, axis, True, None, True, flatten_records
+            )
 
-            if not mask_identity:
-                out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
+            if maxi is None or mini is None:
+                out = None
 
-            if not keepdims:
-                posaxis = out.layout.axis_wrap_if_negative(axis)
-                out = out[(slice(None, None),) * posaxis + (0,)]
+            else:
+                out = maxi - mini
 
-    return out
+                if not mask_identity:
+                    out = ak.highlevel.Array(ak.operations.fill_none(out, 0, axis=-1))
+
+                if not keepdims:
+                    posaxis = out.layout.axis_wrap_if_negative(axis)
+                    out = out[(slice(None, None),) * posaxis + (0,)]
+
+        return out
