@@ -70,6 +70,21 @@ jobs:
       with:
         path: dist/*
 
+  bundle-headers:
+    name: "Bundle header-only libraries"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Create archive
+      run: tar -czvf header-only.tar.gz -C src/awkward/_connect header-only
+
+    - uses: actions/upload-artifact@v3
+      with:
+        path: header-only.tar.gz
+
   upload:
     needs: [build, check-requirements, check-cpp-on-pypi]
     runs-on: ubuntu-latest
