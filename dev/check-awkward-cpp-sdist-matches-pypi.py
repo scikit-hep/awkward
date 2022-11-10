@@ -20,12 +20,10 @@ def main():
     with open(awkward_cpp_path / "pyproject.toml") as f:
         metadata = toml.load(f)
 
-    version = metadata["project"]["version"]
-
     # Load version information from PyPI
     try:
         with urllib.request.urlopen(
-            f"https://pypi.org/pypi/awkward-cpp/{version}/json"
+            "https://pypi.org/pypi/{name}/{version}/json".format_map(project)
         ) as response:
             data = json.load(response)
     except urllib.error.HTTPError as err:
@@ -43,7 +41,7 @@ def main():
     # Check hashes match
     if sdist_shas.pop() != hashlib.sha256(args.sdist.read_bytes()).hexdigest():
         raise ValueError(
-            f"hash of awkward-cpp {version} on PyPI does not match given sdist hash"
+            "hash of awkward-cpp {version} on PyPI does not match given sdist hash".format_map(project)
         )
 
 
