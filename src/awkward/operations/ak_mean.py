@@ -7,7 +7,12 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 @ak._connect.numpy.implements("mean")
 def mean(
-    x, weight=None, axis=None, keepdims=False, mask_identity=True, flatten_records=False
+    x,
+    weight=None,
+    axis=None,
+    keepdims=False,
+    mask_identity=False,
+    flatten_records=False,
 ):
     """
     Args:
@@ -151,7 +156,7 @@ def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
             ak.operations.to_layout(weight, allow_record=False, allow_other=False)
         )
 
-    with np.errstate(invalid="ignore"):
+    with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x, axis, keepdims, mask_identity, flatten_records
