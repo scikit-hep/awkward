@@ -60,7 +60,7 @@ nox -s prepare
 ```
 
 <details>
- 
+
 The `prepare` session accepts flags to specify exact generation targets, e.g.
 ```bash
 nox -s prepare -- --tests --docs
@@ -68,7 +68,7 @@ nox -s prepare -- --tests --docs
 This can reduce the time taken to perform the preparation step in the event that only the package-building step is needed.
 
 </details>
- 
+
 #### Installing the `awkward-cpp` package
 
 The C++ components can be installed by building the `awkward-cpp` package:
@@ -76,7 +76,7 @@ The C++ components can be installed by building the `awkward-cpp` package:
 python -m pip install ./awkward-cpp
 ```
 
-<details> 
+<details>
 
 If you are working on the C++ components of Awkward Array, it might be more convenient to skip the build isolation step, which involves creating an isolated build environment. First, you must install the build requirements:
 ```bash
@@ -89,7 +89,7 @@ python -m pip install --no-build-isolation --check-build-dependencies ./awkward-
 ```
 
  </details>
- 
+
 #### Installing the `awkward` package
 With `awkward-cpp` installed, an editable installation of the pure-python `awkward` package can be performed with
 ```bash
