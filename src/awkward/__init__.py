@@ -1,5 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# Versioning
+from awkward._version import __version__
+
 # NumPy-like alternatives
 import awkward.nplikes
 
@@ -46,7 +49,6 @@ awkward.behaviors.categorical.register(behavior)  # noqa: F405
 from awkward.operations import *
 
 # version
-__version__ = "2.0.0rc3.dev0"
 __all__ = [x for x in globals() if not x.startswith("_")]
 
 

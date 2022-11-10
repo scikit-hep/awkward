@@ -9,6 +9,8 @@ docs/demos/test-program.cpp
 src/awkward/_kernel_signatures_cuda.py
 src/awkward/_connect/cuda/_kernel_signatures.py
 
+src/awkward/_version.py
+
 # Kernel tests
 tests-cuda-kernels
 
