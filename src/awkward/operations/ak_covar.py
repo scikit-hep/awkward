@@ -11,7 +11,7 @@ def covar(
     weight=None,
     axis=None,
     keepdims=False,
-    mask_identity=True,
+    mask_identity=False,
     flatten_records=False,
 ):
     """
@@ -80,7 +80,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
             ak.operations.to_layout(weight, allow_record=False, allow_other=False)
         )
 
-    with np.errstate(invalid="ignore"):
+    with np.errstate(invalid="ignore", divide="ignore"):
         xmean = ak.operations.ak_mean._impl(
             x, weight, axis, False, mask_identity, flatten_records
         )

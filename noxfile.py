@@ -14,7 +14,7 @@ def tests(session):
     """
     Run the unit and regular tests.
     """
-    session.install("-r", "requirements-test.txt")
+    session.install("-r", "requirements-test.txt", "./awkward-cpp", "./awkward")
     session.run("pytest", *session.posargs if session.posargs else ["tests"])
 
 
@@ -42,7 +42,7 @@ def coverage(session):
     """
     Run the unit and regular tests.
     """
-    session.install("-r", "requirements-test.txt")
+    session.install("-r", "requirements-test.txt", "./awkward-cpp", "./awkward")
     session.run(
         "pytest", "tests", "--cov=awkward", "--cov-report=xml", *session.posargs
     )
