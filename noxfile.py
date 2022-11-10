@@ -1,4 +1,5 @@
 import argparse
+import pathlib
 import shutil
 
 import nox
@@ -129,14 +130,27 @@ def prepare(session):
 
 
 @nox.session
-def check_version(session):
+def check_cpp_constraint(session):
     """
-    Check that the awkward-cpp version is compatible with awkward
-    and that we are not modifying a released awkward-cpp version.
+    Check that the awkward-cpp version is compatible with awkward.
     """
     session.install("-r", "requirements-dev.txt")
-    session.run("python", "dev/check-awkward-cpp-unchanged.py")
     session.run("python", "dev/check-awkward-uses-awkward-cpp.py")
+
+
+@nox.session
+def check_cpp_sdist_released(session):
+    """
+    Check that the awkward-cpp sdist is already on PyPI
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("sdist", type=pathlib.Path)
+    args = parser.parse_args(session.posargs)
+
+    session.install("-r", "requirements-dev.txt")
+    session.run(
+        "python", "dev/check-awkward-cpp-sdist-matches-pypi.py", str(args.sdist)
+    )
 
 
 @nox.session
