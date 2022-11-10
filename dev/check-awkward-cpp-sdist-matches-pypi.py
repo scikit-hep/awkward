@@ -41,7 +41,9 @@ def main():
     # Check hashes match
     if sdist_shas.pop() != hashlib.sha256(args.sdist.read_bytes()).hexdigest():
         raise ValueError(
-            "hash of awkward-cpp {version} on PyPI does not match given sdist hash".format_map(project)
+            "hash of awkward-cpp {version} on PyPI does not match given sdist hash".format_map(
+                project
+            )
         )
 
 
