@@ -11,7 +11,7 @@ def linear_fit(
     weight=None,
     axis=None,
     keepdims=False,
-    mask_identity=True,
+    mask_identity=False,
     flatten_records=False,
 ):
     """
@@ -95,7 +95,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, flatten_records):
             ak.operations.to_layout(weight, allow_record=False, allow_other=False)
         )
 
-    with np.errstate(invalid="ignore"):
+    with np.errstate(invalid="ignore", divide="ignore"):
         nplike = ak.nplikes.nplike_of(x, y, weight)
         if weight is None:
             sumw = ak.operations.ak_count._impl(

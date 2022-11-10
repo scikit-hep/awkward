@@ -12,7 +12,7 @@ def std(
     ddof=0,
     axis=None,
     keepdims=False,
-    mask_identity=True,
+    mask_identity=False,
     flatten_records=False,
 ):
     """
@@ -151,7 +151,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records):
             behavior,
         )
 
-    with np.errstate(invalid="ignore"):
+    with np.errstate(invalid="ignore", divide="ignore"):
         return ak.nplikes.nplike_of(x, weight).sqrt(
             ak.operations.ak_var._impl(
                 x,
