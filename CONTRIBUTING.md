@@ -67,6 +67,11 @@ nox -s prepare -- --tests --docs
 ```
 This can reduce the time taken to perform the preparation step in the event that only the package-building step is needed.
 
+`nox` also lets us re-use the virtualenvs that it creates for each session with the `-R` flag, eliminating the dependency reinstall time:
+```bash
+nox -R -s prepare
+```
+
 </details>
 
 #### Installing the `awkward-cpp` package
