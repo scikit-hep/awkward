@@ -3,6 +3,7 @@ import hashlib
 import json
 import pathlib
 import urllib.error
+import urllib.parse
 import urllib.request
 
 import toml
@@ -13,6 +14,7 @@ THIS_FILE = pathlib.Path(__file__)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("sdist", type=pathlib.Path)
+    parser.add_argument("--endpoint", default="https://pypi.org/pypi")
     args = parser.parse_args()
 
     awkward_cpp_path = THIS_FILE.parents[1] / "awkward-cpp"
@@ -24,7 +26,9 @@ def main():
     # Load version information from PyPI
     try:
         with urllib.request.urlopen(
-            "https://pypi.org/pypi/{name}/{version}/json".format_map(project)
+            urllib.parse.urljoin(
+                args.endpoint, "{name}/{version}/json".format_map(project)
+            )
         ) as response:
             data = json.load(response)
     except urllib.error.HTTPError as err:
