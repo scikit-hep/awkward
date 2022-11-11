@@ -1,4 +1,5 @@
 import argparse
+import os
 import pathlib
 import shutil
 
@@ -7,6 +8,14 @@ import nox
 ALL_PYTHONS = ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
 nox.options.sessions = ["lint", "tests"]
+
+
+def remove_if_found(*paths):
+    for path in paths:
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        elif os.path.exists(path):
+            os.unlink(path)
 
 
 @nox.session(python=ALL_PYTHONS)
@@ -94,13 +103,22 @@ def clean(session):
     clean_all = not session.posargs
 
     if args.headers or clean_all:
-        session.run("python", "dev/clean-cpp-headers.py")
+        remove_if_found(pathlib.Path("awkward-cpp", "header-only"))
     if args.signatures or clean_all:
-        session.run("python", "dev/clean-kernel-signatures.py")
+        remove_if_found(
+            pathlib.Path("awkward-cpp", "include", "awkward", "kernels.h"),
+            pathlib.Path("awkward-cpp", "src", "awkward_cpp", "_kernel_signatures.py"),
+            pathlib.Path("src", "awkward", "_connect", "cuda", "_kernel_signatures.py"),
+        )
     if args.tests or clean_all:
-        session.run("python", "dev/clean-tests.py")
+        remove_if_found(
+            pathlib.Path("awkward-cpp", "tests-spec"),
+            pathlib.Path("awkward-cpp", "tests-spec-explicit"),
+            pathlib.Path("awkward-cpp", "tests-cpu-kernels"),
+            pathlib.Path("tests-cuda-kernels"),
+        )
     if args.docs or clean_all:
-        session.run("python", "dev/clean-kernel-docs.py")
+        remove_if_found(pathlib.Path("docs", "reference", "generated", "kernels.rst"))
 
 
 @nox.session
