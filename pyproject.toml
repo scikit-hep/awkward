@@ -80,6 +80,7 @@ include = [
     "/docs",
     "/CITATION.cff",
     "/CONTRIBUTING.md",
+    "/README.md",
     "/requirements*.txt"
 ]
 
