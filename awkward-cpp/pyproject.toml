@@ -58,6 +58,10 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 [tool.scikit-build.sdist]
 include = [
-    "header-only/**",
-    "src/awkward_cpp/_kernel_signatures.py"
+    "header-only",
+    "include/awkward/kernels.h",
+    "src/awkward_cpp/_kernel_signatures.py",
+    "tests-spec",
+    "tests-spec-explicit",
+    "tests-cpu-kernels"
 ]
