@@ -19,6 +19,7 @@ jobs:
 
     - name: Compute SOURCE_DATE_EPOCH
       run: |
+        # Set SOURCE_DATE_EPOCH to datetime of last change to awkward-cpp/pyproject.toml
         SOURCE_DATE_EPOCH="$(git log -1 --format="%ad" --date=unix -- awkward-cpp/pyproject.toml)"
         echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
 
