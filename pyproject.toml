@@ -62,10 +62,9 @@ init = "awkward.numba:_register"
 "Source Code" = "https://github.com/scikit-hep/awkward-1.0"
 
 [tool.hatch.build]
-sources = ["src"]
 
 [tool.hatch.build.targets.wheel]
-only-include = ["src/awkward"]
+packages = ["src/awkward"]
 
 [tool.hatch.build.targets.wheel.hooks.version]
 path = "src/awkward/_version.py"
@@ -81,7 +80,7 @@ include = [
     "/CITATION.cff",
     "/CONTRIBUTING.md",
     "/README.md",
-    "/requirements*.txt"
+    "/requirements-test.txt"
 ]
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
