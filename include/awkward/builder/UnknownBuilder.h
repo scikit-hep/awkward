@@ -1,90 +1,110 @@
-// BSD 3-Clause License; see
-// https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 #ifndef AWKWARD_UNKNOWNBUILDER_H_
 #define AWKWARD_UNKNOWNBUILDER_H_
 
 #include <vector>
 
+#include "awkward/common.h"
 #include "awkward/BuilderOptions.h"
 #include "awkward/builder/Builder.h"
-#include "awkward/common.h"
 
 namespace awkward {
 
-/// @class UnknownBuilder
-///
-/// @brief Builder node for accumulated data whose type is not yet known.
-class LIBAWKWARD_EXPORT_SYMBOL UnknownBuilder : public Builder {
-public:
-  /// @brief Create an empty UnknownBuilder.
-  /// @param options Configuration options for building an array;
-  /// these are passed to every Builder's constructor.
-  static const BuilderPtr fromempty(const BuilderOptions &options);
-
-  /// @brief Create a ListBuilder from a full set of parameters.
+  /// @class UnknownBuilder
   ///
-  /// @param options Configuration options for building an array;
-  /// these are passed to every Builder's constructor.
-  /// @param nullcount The number of null values encountered so far.
-  UnknownBuilder(const BuilderOptions &options, int64_t nullcount);
+  /// @brief Builder node for accumulated data whose type is not yet known.
+  class LIBAWKWARD_EXPORT_SYMBOL UnknownBuilder: public Builder {
+  public:
+    /// @brief Create an empty UnknownBuilder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    static const BuilderPtr
+      fromempty(const BuilderOptions& options);
 
-  /// @brief User-friendly name of this class: `"UnknownBuilder"`.
-  const std::string classname() const override;
+    /// @brief Create a ListBuilder from a full set of parameters.
+    ///
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param nullcount The number of null values encountered so far.
+    UnknownBuilder(const BuilderOptions& options, int64_t nullcount);
 
-  const std::string to_buffers(BuffersContainer &container,
-                               int64_t &form_key_id) const override;
+    /// @brief User-friendly name of this class: `"UnknownBuilder"`.
+    const std::string
+      classname() const override;
 
-  int64_t length() const override;
+    const std::string
+      to_buffers(BuffersContainer& container, int64_t& form_key_id) const override;
 
-  void clear() override;
+    int64_t
+      length() const override;
 
-  /// @copydoc Builder::active()
-  ///
-  /// An UnknownBuilder is never active.
-  bool active() const override;
+    void
+      clear() override;
 
-  const BuilderPtr null() override;
+    /// @copydoc Builder::active()
+    ///
+    /// An UnknownBuilder is never active.
+    bool
+      active() const override;
 
-  const BuilderPtr boolean(bool x) override;
+    const BuilderPtr
+      null() override;
 
-  const BuilderPtr integer(int64_t x) override;
+    const BuilderPtr
+      boolean(bool x) override;
 
-  const BuilderPtr real(double x) override;
+    const BuilderPtr
+      integer(int64_t x) override;
 
-  const BuilderPtr complex(std::complex<double> x) override;
+    const BuilderPtr
+      real(double x) override;
 
-  const BuilderPtr datetime(int64_t x, const std::string &unit) override;
+    const BuilderPtr
+      complex(std::complex<double> x) override;
 
-  const BuilderPtr timedelta(int64_t x, const std::string &unit) override;
+    const BuilderPtr
+      datetime(int64_t x, const std::string& unit) override;
 
-  const BuilderPtr string(const char *x, int64_t length,
-                          const char *encoding) override;
+    const BuilderPtr
+      timedelta(int64_t x, const std::string& unit) override;
 
-  const BuilderPtr beginlist() override;
+    const BuilderPtr
+      string(const char* x, int64_t length, const char* encoding) override;
 
-  const BuilderPtr endlist() override;
+    const BuilderPtr
+      beginlist() override;
 
-  const BuilderPtr begintuple(int64_t numfields) override;
+    const BuilderPtr
+      endlist() override;
 
-  const BuilderPtr index(int64_t index) override;
+    const BuilderPtr
+      begintuple(int64_t numfields) override;
 
-  const BuilderPtr endtuple() override;
+    const BuilderPtr
+      index(int64_t index) override;
 
-  const BuilderPtr beginrecord(const char *name, bool check) override;
+    const BuilderPtr
+      endtuple() override;
 
-  void field(const char *key, bool check) override;
+    const BuilderPtr
+      beginrecord(const char* name, bool check) override;
 
-  const BuilderPtr endrecord() override;
+    void
+      field(const char* key, bool check) override;
 
-  const BuilderOptions &options() const { return options_; }
+    const BuilderPtr
+      endrecord() override;
 
-  int64_t nullcount() const { return nullcount_; }
+    const BuilderOptions&
+      options() const { return options_; }
 
-private:
-  const BuilderOptions options_;
-  int64_t nullcount_;
-};
-} // namespace awkward
+    int64_t nullcount() const { return nullcount_; }
+
+  private:
+    const BuilderOptions options_;
+    int64_t nullcount_;
+  };
+}
 
 #endif // AWKWARD_UNKNOWNBUILDER_H_
