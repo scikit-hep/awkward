@@ -3,5 +3,5 @@
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
-  Builder::~Builder() = default;
+Builder::~Builder() = default;
 }
