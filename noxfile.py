@@ -161,13 +161,9 @@ def check_cpp_sdist_released(session):
     """
     Check that the awkward-cpp sdist is already on PyPI
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("sdist", type=pathlib.Path)
-    args = parser.parse_args(session.posargs)
-
     session.install("-r", "requirements-dev.txt")
     session.run(
-        "python", "dev/check-awkward-cpp-sdist-matches-pypi.py", str(args.sdist)
+        "python", "dev/check-awkward-cpp-sdist-matches-pypi.py", *session.posargs
     )
 
 
