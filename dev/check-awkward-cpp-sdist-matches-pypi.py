@@ -19,6 +19,7 @@ def main():
 
     with open(awkward_cpp_path / "pyproject.toml") as f:
         metadata = toml.load(f)
+    project = metadata["project"]
 
     # Load version information from PyPI
     try:
