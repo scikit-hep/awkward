@@ -158,6 +158,15 @@ To build documentation locally, first prepare the generated data files with
 nox -s prepare
 ```
 
+<details>
+
+Only the `--headers` and `--docs` flags are actually required at the time of writing. These can be passed with:
+```bash
+nox -s prepare -- --docs --headers
+```
+
+ </details>
+
 Then, use `nox` to run the various documentation build steps
 ```bash
 nox -s docs
