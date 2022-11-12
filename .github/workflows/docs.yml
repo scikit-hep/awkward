@@ -186,7 +186,7 @@ jobs:
       run: python -m pip install dist/awkward*.whl
 
     - name: Generate build files
-      run: pipx run nox -s prepare -- --docs
+      run: pipx run nox -s prepare -- --docs --headers
 
     - name: Generate C++ documentation
       run: doxygen
