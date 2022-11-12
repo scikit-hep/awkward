@@ -62,6 +62,9 @@ init = "awkward.numba:_register"
 "Source Code" = "https://github.com/scikit-hep/awkward-1.0"
 
 [tool.hatch.build]
+artifacts = [
+    "src/awkward/_connect/header-only"
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/awkward"]
