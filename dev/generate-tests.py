@@ -182,7 +182,6 @@ class Specification:
 
 
 def readspec():
-    genpykernels()
     specdict = {}
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as f:
         loadfile = yaml.load(f, Loader=yaml.CSafeLoader)
@@ -810,11 +809,16 @@ def genunittests():
                 file.write("\n\n")
 
 
-if __name__ == "__main__":
+def evalkernels():
     with open(
         os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py")
     ) as kernelfile:
         exec(kernelfile.read(), globals(), locals())
+
+
+if __name__ == "__main__":
+    genpykernels()
+    evalkernels()
     specdict = readspec()
     genspectests(specdict)
     gencpukerneltests(specdict)
