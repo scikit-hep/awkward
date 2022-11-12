@@ -3,6 +3,7 @@
 
 import copy
 import datetime
+import json
 import os
 import shutil
 import time
@@ -99,87 +100,83 @@ class Specification:
 
     def gettests(self, testdata):
         allvals = []
-        with open(
-            os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py")
-        ) as kernelfile:
-            wrap_exec(kernelfile.read(), globals(), locals())
-            instancedict = {}
-            funcpassdict = OrderedDict()
-            count = 0
-            for arg in self.args:
-                funcpassdict[arg.name] = []
-                if arg.role == "default":
-                    group = str(count)
-                    assert group not in instancedict.keys()
-                    instancedict[group] = [arg.name]
-                    if arg.direction == "out":
-                        funcpassdict[arg.name].append({})
-                    else:
-                        funcpassdict[arg.name].append(testdata["num"])
-                    assert len(funcpassdict[arg.name]) == 1
-                    count += 1
+        instancedict = {}
+        funcpassdict = OrderedDict()
+        count = 0
+        for arg in self.args:
+            funcpassdict[arg.name] = []
+            if arg.role == "default":
+                group = str(count)
+                assert group not in instancedict.keys()
+                instancedict[group] = [arg.name]
+                if arg.direction == "out":
+                    funcpassdict[arg.name].append({})
                 else:
-                    group = arg.role[: arg.role.find("-")]
-                    if group not in instancedict.keys():
-                        instancedict[group] = []
-                    instancedict[group].append(arg.name)
-                    if group not in testdata.keys() and group[:-1] in testdata.keys():
-                        pseudogroup = copy.copy(group[:-1])
-                    elif group in testdata.keys():
-                        pseudogroup = copy.copy(group)
-                    role = pseudogroup + arg.role[arg.role.find("-") :]
-                    for x in range(len(testdata[pseudogroup])):
-                        funcpassdict[arg.name].append(testdata[pseudogroup][x][role])
+                    funcpassdict[arg.name].append(testdata["num"])
+                assert len(funcpassdict[arg.name]) == 1
+                count += 1
+            else:
+                group = arg.role[: arg.role.find("-")]
+                if group not in instancedict.keys():
+                    instancedict[group] = []
+                instancedict[group].append(arg.name)
+                if group not in testdata.keys() and group[:-1] in testdata.keys():
+                    pseudogroup = copy.copy(group[:-1])
+                elif group in testdata.keys():
+                    pseudogroup = copy.copy(group)
+                role = pseudogroup + arg.role[arg.role.find("-") :]
+                for x in range(len(testdata[pseudogroup])):
+                    funcpassdict[arg.name].append(testdata[pseudogroup][x][role])
 
-            instancedictlist = list(instancedict.keys())
+        instancedictlist = list(instancedict.keys())
 
-            combinations = []
-            for name in instancedictlist:
-                temp = []
-                for arg in instancedict[name]:
-                    temp.append(funcpassdict[arg])
-                combinations.append(zip(*temp))
+        combinations = []
+        for name in instancedictlist:
+            temp = []
+            for arg in instancedict[name]:
+                temp.append(funcpassdict[arg])
+            combinations.append(zip(*temp))
 
-            for x in product(*combinations):
-                origtemp = OrderedDict()
-                for groupName, t in zip(instancedictlist, x):
-                    for key, value in zip(instancedict[groupName], t):
-                        origtemp[key] = value
+        for x in product(*combinations):
+            origtemp = OrderedDict()
+            for groupName, t in zip(instancedictlist, x):
+                for key, value in zip(instancedict[groupName], t):
+                    origtemp[key] = value
 
-                temp = copy.deepcopy(origtemp)
-                funcPy = wrap_eval(self.name, globals(), locals())
+            temp = copy.deepcopy(origtemp)
+            funcPy = eval(self.name, globals(), locals())
 
-                intests = OrderedDict()
-                outtests = OrderedDict()
-                tempdict = {}
-                try:
-                    funcPy(**temp)
-                    for arg in self.args:
-                        if arg.direction == "out":
-                            assert isinstance(temp[arg.name], dict)
-                            temparglist = self.dicttolist(temp[arg.name], arg.typename)
-                            intests[arg.name] = self.getdummyvalue(
-                                arg.typename, len(temparglist)
-                            )
-                            outtests[arg.name] = temparglist
-                        else:
-                            intests[arg.name] = temp[arg.name]
-                    tempdict["outargs"] = copy.deepcopy(outtests)
-                    tempdict["success"] = True
-                except ValueError:
-                    for arg in self.args:
-                        if arg.direction == "out":
-                            intests[arg.name] = self.getdummyvalue(
-                                arg.typename, len(temp[arg.name])
-                            )
-                        else:
-                            intests[arg.name] = temp[arg.name]
-                    tempdict["success"] = False
-                tempdict["inargs"] = copy.deepcopy(intests)
-                if self.typevalidates(
-                    tempdict["inargs"], self.args
-                ) and self.validateoverflow(tempdict):
-                    allvals.append(tempdict)
+            intests = OrderedDict()
+            outtests = OrderedDict()
+            tempdict = {}
+            try:
+                funcPy(**temp)
+                for arg in self.args:
+                    if arg.direction == "out":
+                        assert isinstance(temp[arg.name], dict)
+                        temparglist = self.dicttolist(temp[arg.name], arg.typename)
+                        intests[arg.name] = self.getdummyvalue(
+                            arg.typename, len(temparglist)
+                        )
+                        outtests[arg.name] = temparglist
+                    else:
+                        intests[arg.name] = temp[arg.name]
+                tempdict["outargs"] = copy.deepcopy(outtests)
+                tempdict["success"] = True
+            except ValueError:
+                for arg in self.args:
+                    if arg.direction == "out":
+                        intests[arg.name] = self.getdummyvalue(
+                            arg.typename, len(temp[arg.name])
+                        )
+                    else:
+                        intests[arg.name] = temp[arg.name]
+                tempdict["success"] = False
+            tempdict["inargs"] = copy.deepcopy(intests)
+            if self.typevalidates(
+                tempdict["inargs"], self.args
+            ) and self.validateoverflow(tempdict):
+                allvals.append(tempdict)
 
         return allvals
 
@@ -187,32 +184,23 @@ class Specification:
 def readspec():
     genpykernels()
     specdict = {}
-    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
-        loadfile = yaml.safe_load(specfile)
-        indspec = loadfile["kernels"]
-        print("LOAD0")
-        data = yaml.safe_load(
-            open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
-        )["tests"]
-        print("LOAD")
-        for spec in indspec:
-            if "def " in spec["definition"]:
-                for childfunc in spec["specializations"]:
-                    specdict[childfunc["name"]] = Specification(
-                        spec["name"],
-                        childfunc,
-                        data,
-                        not spec["automatic-tests"],
-                    )
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as f:
+        loadfile = yaml.load(f, Loader=yaml.CSafeLoader)
+
+    indspec = loadfile["kernels"]
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
+        data = json.load(f)["tests"]
+
+    for spec in indspec:
+        if "def " in spec["definition"]:
+            for childfunc in spec["specializations"]:
+                specdict[childfunc["name"]] = Specification(
+                    spec["name"],
+                    childfunc,
+                    data,
+                    not spec["automatic-tests"],
+                )
     return specdict
-
-
-def wrap_exec(string, globs, locs):
-    exec(string, globs, locs)
-
-
-def wrap_eval(string, globs, locs):
-    return eval(string, globs, locs)
 
 
 def gettypename(spectype):
@@ -225,7 +213,7 @@ def gettypename(spectype):
 def getfuncnames():
     funcs = {}
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
-        indspec = yaml.safe_load(specfile)["kernels"]
+        indspec = yaml.load(specfile, Loader=yaml.CSafeLoader)["kernels"]
         for spec in indspec:
             funcs[spec["name"]] = []
             for childfunc in spec["specializations"]:
@@ -269,7 +257,7 @@ kSliceNone = kMaxInt64 + 1
         with open(
             os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
         ) as specfile:
-            indspec = yaml.safe_load(specfile)["kernels"]
+            indspec = yaml.load(specfile, Loader=yaml.CSafeLoader)["kernels"]
             for spec in indspec:
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
@@ -783,8 +771,9 @@ def gencudakerneltests(specdict):
 
 def genunittests():
     print("Generating Unit Tests")
-    datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
-    data = yaml.safe_load(datayml)["unit-tests"]
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
+        data = json.load(f)["unit-tests"]
+
     for function in data:
         num = 0
         func = "test_" + function["name"] + ".py"
@@ -822,12 +811,12 @@ def genunittests():
 
 
 if __name__ == "__main__":
+    with open(
+        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py")
+    ) as kernelfile:
+        exec(kernelfile.read(), globals(), locals())
     specdict = readspec()
-    print("1")
     genspectests(specdict)
-    print("2")
     gencpukerneltests(specdict)
-    print("3")
     genunittests()
-    print("4")
     gencudakerneltests(specdict)
