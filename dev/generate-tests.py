@@ -813,7 +813,7 @@ def evalkernels():
     with open(
         os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py")
     ) as kernelfile:
-        exec(kernelfile.read(), globals(), locals())
+        exec(kernelfile.read(), globals())
 
 
 if __name__ == "__main__":
