@@ -81,15 +81,15 @@ def to_categorical(array, highlevel=True):
 def _impl(array, highlevel):
     def action(layout, **kwargs):
         if layout.purelist_depth == 1:
-            if layout.is_OptionType:
+            if layout.is_option:
                 layout = layout.simplify_optiontype()
-            if layout.is_IndexedType and layout.is_OptionType:
+            if layout.is_indexed and layout.is_option:
                 content = layout.content
                 cls = ak.contents.IndexedOptionArray
-            elif layout.is_IndexedType:
+            elif layout.is_indexed:
                 content = layout.content
                 cls = ak.contents.IndexedArray
-            elif layout.is_OptionType:
+            elif layout.is_option:
                 content = layout.content
                 cls = ak.contents.IndexedOptionArray
             else:
@@ -111,17 +111,17 @@ def _impl(array, highlevel):
                     lookup[x] = j = len(lookup)
                     mapping[i] = j
 
-            if layout.is_IndexedType and layout.is_OptionType:
+            if layout.is_indexed and layout.is_option:
                 original_index = ak.nplikes.numpy.asarray(layout.index)
                 index = mapping[original_index]
                 index[original_index < 0] = -1
                 index = ak.index.Index64(index)
 
-            elif layout.is_IndexedType:
+            elif layout.is_indexed:
                 original_index = ak.nplikes.numpy.asarray(layout.index)
                 index = ak.index.Index64(mapping[original_index])
 
-            elif layout.is_OptionType:
+            elif layout.is_option:
                 mask = ak.nplikes.numpy.asarray(layout.mask_as_bool(valid_when=False))
                 mapping[mask.view(np.bool_)] = -1
                 index = ak.index.Index64(mapping)

@@ -5,8 +5,8 @@ from awkward.forms.form import Form, _parameters_equal
 
 
 class RegularForm(Form):
-    is_ListType = True
-    is_RegularType = True
+    is_list = True
+    is_regular = True
 
     def __init__(self, content, size, parameters=None, form_key=None):
         if not isinstance(content, Form):

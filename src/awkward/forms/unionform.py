@@ -7,7 +7,7 @@ from awkward.forms.form import Form, _parameters_equal
 
 
 class UnionForm(Form):
-    is_UnionType = True
+    is_union = True
 
     def __init__(
         self,

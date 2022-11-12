@@ -12,7 +12,7 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class ListOffsetArray(Content):
-    is_ListType = True
+    is_list = True
 
     def copy(
         self,
@@ -1605,9 +1605,9 @@ class ListOffsetArray(Content):
             if keepdims and depth == negaxis + 1:
                 # Don't convert the `RegularArray()` to a `ListOffsetArray`,
                 # means this will be broadcastable
-                assert outcontent.is_RegularType
+                assert outcontent.is_regular
             elif depth >= negaxis + 2:
-                assert outcontent.is_ListType or outcontent.is_RegularType
+                assert outcontent.is_list or outcontent.is_regular
                 outcontent = outcontent.toListOffsetArray64(False)
 
             return ak.contents.ListOffsetArray(
@@ -1931,7 +1931,7 @@ class ListOffsetArray(Content):
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
-                akcontent.is_OptionType
+                akcontent.is_option
             )
 
             if issubclass(npoffsets.dtype.type, np.int32):

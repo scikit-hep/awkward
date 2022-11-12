@@ -101,7 +101,7 @@ def _impl(array, value, axis, highlevel, behavior):
         )
 
     def maybe_fillna(layout):
-        if layout.is_OptionType:
+        if layout.is_option:
             return layout.fill_none(valuelayout)
         else:
             return layout

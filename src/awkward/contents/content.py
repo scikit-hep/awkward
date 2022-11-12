@@ -42,14 +42,14 @@ unset = _Unset()
 
 
 class Content:
-    is_NumpyType = False
-    is_UnknownType = False
-    is_ListType = False
-    is_RegularType = False
-    is_OptionType = False
-    is_IndexedType = False
-    is_RecordType = False
-    is_UnionType = False
+    is_numpy = False
+    is_unknown = False
+    is_list = False
+    is_regular = False
+    is_option = False
+    is_indexed = False
+    is_record = False
+    is_union = False
 
     def _init(self, parameters: dict[str, Any] | None, nplike: NumpyLike | None):
         if parameters is not None and not isinstance(parameters, dict):
@@ -739,7 +739,7 @@ class Content:
 
     def mergeable(self, other: Content, mergebool: bool = True) -> bool:
         # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_UnionType:
+        if other.is_identity_like or other.is_union:
             return True
         # Otherwise, do the parameters match? If not, we can't merge.
         elif not (
@@ -1663,7 +1663,7 @@ class Content:
     def _to_list_custom(
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
     ):
-        if self.is_RecordType:
+        if self.is_record:
             getitem = ak._util.recordclass(self, behavior).__getitem__
             overloaded = getitem is not ak.highlevel.Record.__getitem__ and not getattr(
                 getitem, "ignore_in_to_list", False

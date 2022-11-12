@@ -12,7 +12,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 class ListArray(Content):
-    is_ListType = True
+    is_list = True
 
     def copy(
         self,

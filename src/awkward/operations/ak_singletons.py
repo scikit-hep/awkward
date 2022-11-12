@@ -37,7 +37,7 @@ def _impl(array, highlevel, behavior):
     def action(layout, **kwargs):
         nplike = ak.nplikes.nplike_of(layout)
 
-        if layout.is_OptionType:
+        if layout.is_option:
             nulls = nplike.index_nplike.asarray(
                 layout.mask_as_bool(valid_when=False)
             ).view(np.bool_)
