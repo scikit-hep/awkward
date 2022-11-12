@@ -13,9 +13,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 def parse_spec():
     specdict = OrderedDict()
-    with open(
-        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             specdict[spec["name"]] = []
@@ -69,9 +67,7 @@ def sort_specializations(keystring):
 def check_specorder(kerneldict):
     print("Checking kernel specification order...")
     kernelnames = []
-    with open(
-        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             kernelnames.append(spec["name"])
@@ -114,9 +110,7 @@ def check_specorder(kerneldict):
 
 def check_spec_implementation():
     count = 0
-    with open(
-        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             if "def awkward" not in spec["definition"]:

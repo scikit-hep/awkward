@@ -32,9 +32,7 @@ The functions are implemented in C with templates for integer specializations (c
     generated_dir = os.path.join(CURRENT_DIR, "..", "docs", "reference", "generated")
     os.makedirs(generated_dir, exist_ok=True)
 
-    with open(
-        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         with open(
             os.path.join(
                 generated_dir,

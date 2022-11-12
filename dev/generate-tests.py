@@ -187,14 +187,14 @@ class Specification:
 def readspec():
     genpykernels()
     specdict = {}
-    with open(
-        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         loadfile = yaml.safe_load(specfile)
         indspec = loadfile["kernels"]
+        print("LOAD0")
         data = yaml.safe_load(
-            open(os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-test-data.yml"))
+            open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
         )["tests"]
+        print("LOAD")
         for spec in indspec:
             if "def " in spec["definition"]:
                 for childfunc in spec["specializations"]:
@@ -224,9 +224,7 @@ def gettypename(spectype):
 
 def getfuncnames():
     funcs = {}
-    with open(
-        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             funcs[spec["name"]] = []
@@ -269,7 +267,7 @@ kSliceNone = kMaxInt64 + 1
     ) as outfile:
         outfile.write(prefix)
         with open(
-            os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
+            os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
         ) as specfile:
             indspec = yaml.safe_load(specfile)["kernels"]
             for spec in indspec:
@@ -785,9 +783,7 @@ def gencudakerneltests(specdict):
 
 def genunittests():
     print("Generating Unit Tests")
-    datayml = open(
-        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-test-data.yml")
-    )
+    datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
     data = yaml.safe_load(datayml)["unit-tests"]
     for function in data:
         num = 0
@@ -827,7 +823,11 @@ def genunittests():
 
 if __name__ == "__main__":
     specdict = readspec()
+    print("1")
     genspectests(specdict)
+    print("2")
     gencpukerneltests(specdict)
+    print("3")
     genunittests()
+    print("4")
     gencudakerneltests(specdict)

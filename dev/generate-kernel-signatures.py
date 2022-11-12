@@ -462,9 +462,7 @@ def by_signature(cuda_kernel_templates):
 
 
 if __name__ == "__main__":
-    with open(
-        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "kernel-specification.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         specification = yaml.safe_load(specfile)
     include_kernels_h(specification)
     kernel_signatures_py(specification)
