@@ -123,6 +123,14 @@ python -m pytest -vv -rs tests-cuda-kernels
 python -m pytest -vv -rs tests-cuda
 ```
 
+### Building wheels
+Sometimes it's convenient to build a wheel for the `awkward-cpp` package, so that subsequent re-installs do not require the package to be rebuilt. The `build` package can be used to do this, though care must be taken to specify the *current* Python interpreter:
+
+```bash
+pipx run --python=$(which python) build --wheel awkward-cpp
+```
+
+The built wheel will then be available in `awkward-cpp/dist`.
 
 ### Formatting
 
