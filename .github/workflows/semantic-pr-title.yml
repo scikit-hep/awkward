@@ -5,7 +5,6 @@ on:
     types:
       - opened
       - edited
-      - synchronize
   workflow_dispatch:
 
 concurrency:
