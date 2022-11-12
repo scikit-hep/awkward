@@ -103,7 +103,10 @@ def clean(session):
     clean_all = not session.posargs
 
     if args.headers or clean_all:
-        remove_if_found(pathlib.Path("awkward-cpp", "header-only"))
+        remove_if_found(
+            pathlib.Path("awkward-cpp", "header-only"),
+            pathlib.Path("src", "awkward", "_connect", "header-only"),
+        )
     if args.signatures or clean_all:
         remove_if_found(
             pathlib.Path("awkward-cpp", "include", "awkward", "kernels.h"),
