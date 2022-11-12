@@ -5,10 +5,9 @@ docs/demos/test-program.cpp
 
 .clangd/
 
-# Generated includes
-src/awkward/_kernel_signatures_cuda.py
+# Generated files
 src/awkward/_connect/cuda/_kernel_signatures.py
-
+src/awkward/_connect/header-only
 src/awkward/_version.py
 
 # Kernel tests
@@ -54,10 +53,6 @@ pyrightconfig.json
 _minted-*
 
 ############################################################# Python
-
-# Awkward directory at top-level is temporary
-/awkward/
-/localbuild/
 
 **/.mypy_cache
 
