@@ -73,4 +73,4 @@ def test_simplify_unionarray_with_name():
     outer = ak.contents.UnionArray(tags1, index1, [one, inner])
     one = ak.operations.with_name(outer, "James")
 
-    assert outer.contents[1].is_UnionType != one.layout.contents[1].is_UnionType
+    assert outer.contents[1].is_union != one.layout.contents[1].is_union

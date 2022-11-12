@@ -11,8 +11,8 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class EmptyArray(Content):
-    is_NumpyType = True
-    is_UnknownType = True
+    is_numpy = True
+    is_unknown = True
 
     def copy(
         self,

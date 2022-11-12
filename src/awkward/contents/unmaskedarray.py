@@ -11,7 +11,7 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class UnmaskedArray(Content):
-    is_OptionType = True
+    is_option = True
 
     def copy(
         self,

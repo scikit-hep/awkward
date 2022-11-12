@@ -165,7 +165,7 @@ def test_behavior_forwarding_structure(operation_behavior):
     )
 
     def transformer(layout, **kwargs):
-        if layout.is_NumpyType:
+        if layout.is_numpy:
             return ak.contents.NumpyArray(layout.data * 2)
 
     assert (

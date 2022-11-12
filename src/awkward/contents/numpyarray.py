@@ -12,7 +12,7 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class NumpyArray(Content):
-    is_NumpyType = True
+    is_numpy = True
 
     def copy(
         self,

@@ -464,11 +464,11 @@ def union_to_record(unionarray, anonymous):
 
     contents = []
     for layout in unionarray.contents:
-        if layout.is_IndexedType and not layout.is_OptionType:
+        if layout.is_indexed and not layout.is_option:
             contents.append(layout.project())
-        elif layout.is_UnionType:
+        elif layout.is_union:
             contents.append(union_to_record(layout, anonymous))
-        elif layout.is_OptionType:
+        elif layout.is_option:
             contents.append(
                 ak.operations.fill_none(layout, np.nan, axis=0, highlevel=False)
             )

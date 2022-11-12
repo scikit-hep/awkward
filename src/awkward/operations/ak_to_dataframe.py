@@ -160,7 +160,7 @@ or
         return out
 
     def recurse(layout, row_arrays, col_names):
-        if layout.is_IndexedType and not layout.is_OptionType:
+        if layout.is_indexed and not layout.is_option:
             return recurse(layout.project(), row_arrays, col_names)
 
         elif layout.parameter("__array__") in ("string", "bytestring"):
@@ -185,9 +185,9 @@ or
             )
             return recurse(flattened, newrows, col_names)
 
-        elif layout.is_UnionType:
+        elif layout.is_union:
             layout = ak._util.union_to_record(layout, anonymous)
-            if layout.is_UnionType:
+            if layout.is_union:
                 return [(ak.operations.to_numpy(layout), row_arrays, col_names)]
             else:
                 return sum(

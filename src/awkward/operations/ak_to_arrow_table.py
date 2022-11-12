@@ -107,12 +107,12 @@ def _impl(
         record_is_scalar = False
 
     check = [layout]
-    while check[-1].is_OptionType or check[-1].is_IndexedType:
+    while check[-1].is_option or check[-1].is_indexed:
         check.append(check[-1].content)
 
     parameters = None
     paarrays, pafields = [], []
-    if check[-1].is_RecordType and not check[-1].is_tuple:
+    if check[-1].is_record and not check[-1].is_tuple:
         optiontype_fields = []
         for name in check[-1].fields:
             paarrays.append(
@@ -129,10 +129,10 @@ def _impl(
             )
             pafields.append(
                 pyarrow.field(name, paarrays[-1].type).with_nullable(
-                    layout[name].is_OptionType
+                    layout[name].is_option
                 )
             )
-            if check[-1].contents[check[-1].field_to_index(name)].is_OptionType:
+            if check[-1].contents[check[-1].field_to_index(name)].is_option:
                 optiontype_fields.append(name)
 
         parameters = [
@@ -158,7 +158,7 @@ def _impl(
             )
         )
         pafields.append(
-            pyarrow.field("", paarrays[-1].type).with_nullable(layout.is_OptionType)
+            pyarrow.field("", paarrays[-1].type).with_nullable(layout.is_option)
         )
 
     batch = pyarrow.RecordBatch.from_arrays(paarrays, schema=pyarrow.schema(pafields))

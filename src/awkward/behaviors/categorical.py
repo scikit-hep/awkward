@@ -56,8 +56,8 @@ def _categorical_equal(one, two):
 
     one, two = one.layout, two.layout
 
-    assert one.is_IndexedType or (one.is_OptionType and one.is_IndexedType)
-    assert two.is_IndexedType or (two.is_OptionType and two.is_IndexedType)
+    assert one.is_indexed or (one.is_option and one.is_indexed)
+    assert two.is_indexed or (two.is_option and two.is_indexed)
     assert one.parameter("__array__") == "categorical"
     assert two.parameter("__array__") == "categorical"
 
@@ -93,7 +93,7 @@ def _categorical_equal(one, two):
 def _apply_ufunc(ufunc, method, inputs, kwargs):
     nextinputs = []
     for x in inputs:
-        if isinstance(x, ak.highlevel.Array) and x.layout.is_IndexedType:
+        if isinstance(x, ak.highlevel.Array) and x.layout.is_indexed:
             nextinputs.append(
                 ak.highlevel.Array(x.layout.project(), behavior=ak._util.behavior_of(x))
             )

@@ -38,7 +38,7 @@ def _impl(array, axis, highlevel, behavior):
 
         nplike = ak.nplikes.nplike_of(layout)
 
-        if layout.is_OptionType:
+        if layout.is_option:
             layout = layout.toIndexedOptionArray64()
 
             # Convert the option type into a union, using the mask
@@ -55,12 +55,7 @@ def _impl(array, axis, highlevel, behavior):
                 ],
             ).simplify_uniontype()
 
-        elif (
-            layout.is_UnknownType
-            or layout.is_ListType
-            or layout.is_RecordType
-            or layout.is_NumpyType
-        ):
+        elif layout.is_unknown or layout.is_list or layout.is_record or layout.is_numpy:
             return ak.contents.NumpyArray(nplike.zeros(len(layout), dtype=np.bool_))
 
     # Locate the axis

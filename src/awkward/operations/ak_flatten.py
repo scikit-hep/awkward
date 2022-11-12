@@ -114,15 +114,15 @@ def _impl(array, axis, highlevel, behavior):
     elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
         def apply(layout):
-            if layout.is_UnknownType:
+            if layout.is_unknown:
                 return apply(ak.contents.NumpyArray(nplike.array([])))
 
-            elif layout.is_IndexedType:
+            elif layout.is_indexed:
                 return apply(layout.project())
 
-            elif layout.is_UnionType:
+            elif layout.is_union:
                 if not any(
-                    x.is_OptionType and not isinstance(x, ak.contents.UnmaskedArray)
+                    x.is_option and not isinstance(x, ak.contents.UnmaskedArray)
                     for x in layout.contents
                 ):
                     return layout
@@ -133,7 +133,7 @@ def _impl(array, axis, highlevel, behavior):
                 )
                 bigmask = nplike.index_nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):
-                    if content.is_OptionType and not isinstance(
+                    if content.is_option and not isinstance(
                         content, ak.contents.UnmaskedArray
                     ):
                         bigmask[:] = False
@@ -149,7 +149,7 @@ def _impl(array, axis, highlevel, behavior):
                     layout.contents,
                 )
 
-            elif layout.is_OptionType:
+            elif layout.is_option:
                 return layout.project()
 
             else:

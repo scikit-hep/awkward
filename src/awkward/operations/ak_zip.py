@@ -222,7 +222,7 @@ def _impl(
             )
         ):
             # If we want to zip after option types at this depth
-            if optiontype_outside_record and any(x.is_OptionType for x in inputs):
+            if optiontype_outside_record and any(x.is_option for x in inputs):
                 return None
 
             return (

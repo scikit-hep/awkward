@@ -97,7 +97,7 @@ def transform(
     regardless of what lists or other structures they're embedded in.
 
         >>> def rounder(layout, **kwargs):
-        ...     if layout.is_NumpyType:
+        ...     if layout.is_numpy:
         ...         return np.round(layout.data).astype(np.int32)
         ...
         >>> array = ak.Array(
@@ -118,7 +118,7 @@ def transform(
 
         >>> def combine(layouts, **kwargs):
         ...     assert len(layouts) == 2
-        ...     if layouts[0].is_NumpyType and layouts[1].is_NumpyType:
+        ...     if layouts[0].is_numpy and layouts[1].is_numpy:
         ...         return layouts[0].data + 10 * layouts[1].data
         ...
         >>> array1 = ak.Array([[1, 2, 3], [], None, [4, 5]])
