@@ -141,10 +141,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
 
         if ufunc is numpy.matmul:
-            raise ak._errors.wrap_error(NotImplementedError)
-            # custom_matmul = action_for_matmul(inputs)
-            # if custom_matmul is not None:
-            #     return custom_matmul()
+            raise ak._errors.wrap_error(
+                NotImplementedError(
+                    "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
+                )
+            )
 
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
