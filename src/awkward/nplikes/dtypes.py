@@ -4,22 +4,13 @@
 The known dtypes supported by Awkward's internals, and a type-promotion table
 """
 import numpy
-from numpy import (  # Categories
-    bool_,
+from numpy import (
     bytes_,
-    complex64,
-    complex128,
     complexfloating,
     datetime64,
     dtype,
-    float32,
-    float64,
     floating,
     generic,
-    int8,
-    int16,
-    int32,
-    int64,
     integer,
     intp,
     longlong,
@@ -28,10 +19,6 @@ from numpy import (  # Categories
     signedinteger,
     str_,
     timedelta64,
-    uint8,
-    uint16,
-    uint32,
-    uint64,
     unsignedinteger,
 )
 
@@ -65,6 +52,20 @@ __all__ = [
     "datetime64",
     "timedelta64",
 ]
+
+int8 = dtype("int8")
+int16 = dtype("int16")
+int32 = dtype("int32")
+int64 = dtype("int64")
+uint8 = dtype("uint8")
+uint16 = dtype("uint16")
+uint32 = dtype("uint32")
+uint64 = dtype("uint64")
+float32 = dtype("float32")
+float64 = dtype("float64")
+complex64 = dtype("complex64")
+complex128 = dtype("complex128")
+bool_ = dtype("bool")
 
 
 # The Array API implements special promotion rules, let's emulate them here
