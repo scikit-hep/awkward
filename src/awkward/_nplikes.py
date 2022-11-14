@@ -503,7 +503,7 @@ class Cupy(NumpyLike):
 
     def frombuffer(self, *args, **kwargs):
         np_array = numpy.frombuffer(*args, **kwargs)
-        return self._module.array(np_array)
+        return self._module.asarray(np_array)
 
     def array_equal(self, array1, array2):
         # CuPy issue?

@@ -15,7 +15,7 @@ def globalstring(context, builder, pyvalue):
     import llvmlite.ir.types
 
     if pyvalue not in dynamic_addrs:
-        buf = dynamic_addrs[pyvalue] = numpy.array(pyvalue.encode("utf-8") + b"\x00")
+        buf = dynamic_addrs[pyvalue] = numpy.asarray(pyvalue.encode("utf-8") + b"\x00")
         context.add_dynamic_addr(builder, buf.ctypes.data, info=f"str({repr(pyvalue)})")
     ptr = context.get_constant(numba.types.uintp, dynamic_addrs[pyvalue].ctypes.data)
     return builder.inttoptr(ptr, llvmlite.ir.PointerType(llvmlite.ir.IntType(8)))
