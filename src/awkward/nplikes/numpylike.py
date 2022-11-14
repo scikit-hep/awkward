@@ -163,15 +163,7 @@ class NumpyLike(Protocol):
     ############################ set functions
 
     @abstractmethod
-    def unique_all(self, x):
-        ...
-
-    @abstractmethod
     def unique_counts(self, x):
-        ...
-
-    @abstractmethod
-    def unique_inverse(self, x):
         ...
 
     @abstractmethod
@@ -293,7 +285,7 @@ class NumpyLike(Protocol):
     ############################ extensions to Array API
 
     @abstractmethod
-    def ascontiguousarray(self, x, *, dtype: DTypeT | None = None):
+    def ascontiguousarray(self, x):
         ...
 
     @abstractmethod
@@ -301,15 +293,11 @@ class NumpyLike(Protocol):
         ...
 
     @abstractmethod
-    def isscalar(self, x) -> bool:
-        ...
-
-    @abstractmethod
     def frombuffer(self, buffer, *, dtype=None):  # TODO dtype: float?`
         ...
 
     @abstractmethod
-    def array_equal(self, x1, x2, *, equal_nan: bool = False):
+    def array_equal(self, x1, x2, *, equal_nan: bool = False) -> bool:
         ...
 
     @abstractmethod
@@ -320,7 +308,7 @@ class NumpyLike(Protocol):
 
     # TODO
     @abstractmethod
-    def repeat(self, *args, **kwargs):
+    def repeat(self, x, repeats, *, axis=None):
         ...
 
     @abstractmethod
@@ -383,10 +371,6 @@ class NumpyLike(Protocol):
         precision: int | None = None,
         suppress_small: bool | None = None,
     ):
-        ...
-
-    @abstractmethod
-    def promote_types(self, dtype1: DTypeT, dtype2: DTypeT) -> DTypeT:
         ...
 
     @abstractmethod
