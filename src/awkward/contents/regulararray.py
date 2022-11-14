@@ -1185,7 +1185,7 @@ class RegularArray(Content):
     def _to_numpy(self, allow_missing):
         array_param = self.parameter("__array__")
         if array_param in {"bytestring", "string"}:
-            return self._backend.nplike.array(self.to_list())
+            return self._backend.nplike.asarray(self.to_list())
 
         out = self._content.to_numpy(allow_missing)
         shape = (self._length, self._size) + out.shape[1:]

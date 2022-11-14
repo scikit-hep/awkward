@@ -695,7 +695,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
 def to_arraylib(module, array, allow_missing):
     def _impl(array):
         if isinstance(array, (bool, numbers.Number)):
-            return module.array(array)
+            return module.asarray(array)
 
         elif isinstance(array, module.ndarray):
             return array
@@ -726,7 +726,7 @@ def to_arraylib(module, array, allow_missing):
             )
 
         elif isinstance(array, ak.contents.EmptyArray):
-            return module.array([])
+            return module.asarray([])
 
         elif isinstance(array, ak.contents.IndexedArray):
             return _impl(array.project())
@@ -785,7 +785,7 @@ def to_arraylib(module, array, allow_missing):
 
         else:
             raise ak._errors.wrap_error(
-                ValueError(f"cannot convert {array} into {type(module.array([]))}")
+                ValueError(f"cannot convert {array} into {type(module.asarray([]))}")
             )
 
     if module.__name__ in ("jax.numpy", "cupy"):

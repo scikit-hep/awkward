@@ -1299,7 +1299,7 @@ class UnionArray(Content):
                     content = content[this_index]
                     if not copied_index:
                         copied_index = True
-                        npindex = numpy.array(npindex, copy=True)
+                        npindex = numpy.asarray(npindex, copy=True)
                     npindex[selected_tags] = numpy.arange(
                         this_index.shape[0], dtype=npindex.dtype
                     )

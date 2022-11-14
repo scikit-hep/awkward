@@ -545,7 +545,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     def raw(self, array, nplike):
         if isinstance(nplike, TypeTracer):
-            return self.array(array)
+            return self.asarray(array)
         elif isinstance(array, TypeTracerArray):
             return self
         elif hasattr(nplike, "known_data") and nplike.known_data:
@@ -638,7 +638,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     def ascontiguousarray(self, array, dtype=None, **kwargs):
         # array[, dtype=]
-        return self.array(array, dtype=dtype)
+        return self.asarray(array, dtype=dtype)
 
     def isscalar(self, element):
         return numpy.isscalar(element) or isinstance(element, UnknownScalar)
@@ -660,17 +660,17 @@ class TypeTracer(ak.nplikes.NumpyLike):
         return TypeTracerArray(dtype, shape)
 
     def full(self, shape, value, dtype=None, **kwargs):
-        value_array = self.array(value, dtype=dtype)
+        value_array = self.asarray(value, dtype=dtype)
         return TypeTracerArray(value_array.dtype, shape)
 
     def zeros_like(self, a, dtype=None, **kwargs):
-        return self.array(a, dtype=dtype)
+        return self.asarray(a, dtype=dtype)
 
     def ones_like(self, a, dtype=None, **kwargs):
-        return self.array(a, dtype=dtype)
+        return self.asarray(a, dtype=dtype)
 
     def full_like(self, a, fill_value, dtype=None, **kwargs):
-        return self.array(a, dtype=dtype)
+        return self.asarray(a, dtype=dtype)
 
     def arange(self, *args, **kwargs):
         # stop[, dtype=]

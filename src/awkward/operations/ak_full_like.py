@@ -89,7 +89,7 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
         # converting the fill avoids a ValueError.
         dtype = np.dtype(dtype)
         nplike = ak.nplikes.nplike_of(array)
-        fill_value = nplike.array([fill_value], dtype=dtype)[0]
+        fill_value = nplike.asarray([fill_value], dtype=dtype)[0]
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
         if dtype == np.dtype(np.bool_):

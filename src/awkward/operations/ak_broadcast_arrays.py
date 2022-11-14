@@ -167,7 +167,7 @@ def _impl(arrays, kwargs):
     for x in arrays:
         y = ak.operations.to_layout(x, allow_record=True, allow_other=True)
         if not isinstance(y, (ak.contents.Content, ak.Record)):
-            y = ak.contents.NumpyArray(ak.nplikes.nplike_of(*arrays).array([y]))
+            y = ak.contents.NumpyArray(ak.nplikes.nplike_of(*arrays).asarray([y]))
         inputs.append(y)
 
     def action(inputs, depth, **kwargs):

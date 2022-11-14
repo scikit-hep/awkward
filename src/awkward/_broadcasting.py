@@ -532,7 +532,7 @@ def apply_step(
 
                 combos = backend.index_nplike.stack(tagslist, axis=-1)
 
-                all_combos = backend.index_nplike.array(
+                all_combos = backend.index_nplike.asarray(
                     list(itertools.product(*[range(x) for x in numtags])),
                     dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
                 )

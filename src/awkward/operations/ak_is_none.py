@@ -53,7 +53,7 @@ def _impl(array, axis, highlevel, behavior):
                 [
                     layout.content.recursively_apply(getfunction_inner, behavior),
                     ak.contents.NumpyArray(
-                        backend.nplike.array([True], dtype=np.bool_)
+                        backend.nplike.asarray([True], dtype=np.bool_)
                     ),
                 ],
             ).simplify_uniontype()

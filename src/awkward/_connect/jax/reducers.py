@@ -184,7 +184,7 @@ class Min(Reducer):
 
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result.view(array.dtype), array.dtype),
+                array.backend.nplike.asarray(result.view(array.dtype), array.dtype),
                 backend=array.backend,
             )
         else:
@@ -230,7 +230,7 @@ class Max(Reducer):
         result = jax.numpy.maximum(result, cls._max_initial(cls.initial, array.dtype))
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result.view(array.dtype), array.dtype),
+                array.backend.nplike.asarray(result.view(array.dtype), array.dtype),
                 backend=array.backend,
             )
         else:

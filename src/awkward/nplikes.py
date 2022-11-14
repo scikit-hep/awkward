@@ -96,11 +96,14 @@ class NumpyLike(Singleton):
     ############################ array creation
 
     def array(self, *args, **kwargs):
+        raise NotImplementedError
         # data[, dtype=[, copy=]]
         return self._module.array(*args, **kwargs)
 
-    def asarray(self, *args, **kwargs):
+    def asarray(self, *args, copy=None, **kwargs):
         # array[, dtype=][, order=]
+        if copy:
+            return self._module.array(*args, copy=True, **kwargs)
         return self._module.asarray(*args, **kwargs)
 
     def ascontiguousarray(self, *args, **kwargs):
@@ -614,7 +617,7 @@ class Cupy(NumpyLike):
 
     def frombuffer(self, *args, **kwargs):
         np_array = numpy.frombuffer(*args, **kwargs)
-        return self._module.array(np_array)
+        return self._module.asarray(np_array)
 
     def array_equal(self, array1, array2):
         # CuPy issue?

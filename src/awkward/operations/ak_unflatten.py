@@ -120,7 +120,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             position = (
                 backend.index_nplike.searchsorted(
                     current_offsets[0],
-                    backend.index_nplike.array([len(layout)]),
+                    backend.index_nplike.asarray([len(layout)]),
                     side="right",
                 )[0]
                 - 1

@@ -9,7 +9,7 @@ import awkward as ak  # noqa: F401
 def test_list_array_pad_none_option():
     layout = ak.contents.ListArray(
         ak.index.Index64(np.array([0, 3, 6, 9], dtype=np.int64)),
-        ak.index.Index64(np.array([3, 6, 9, 11], type=np.int64)),
+        ak.index.Index64(np.array([3, 6, 9, 11], dtype=np.int64)),
         ak.contents.NumpyArray(np.arange(11, dtype=np.int64)),
     )
     result = layout.pad_none(1, axis=-1, clip=False)

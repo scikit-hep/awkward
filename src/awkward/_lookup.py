@@ -19,7 +19,7 @@ class Lookup:
         self.nplike = layout.backend.nplike
         self.generator = generator
         self.positions = positions
-        self.arrayptrs = self.nplike.array(
+        self.arrayptrs = self.nplike.asarray(
             [arrayptr(x) for x in positions], dtype=np.intp
         )
 

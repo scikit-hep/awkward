@@ -9,6 +9,7 @@ import awkward as ak
 def test():
     data = np.array([0, 2, 2, 3], dtype="i8")
     offsets = ak.index.Index64(data)
+    assert np.shares_memory(offsets.data, data)
 
     assert np.asarray(offsets).tolist() == [0, 2, 2, 3]
     assert offsets[0] == 0

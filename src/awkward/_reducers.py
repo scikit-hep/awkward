@@ -567,11 +567,11 @@ class Min(Reducer):
             )
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result.view(array.dtype), array.dtype)
+                array.backend.nplike.asarray(result.view(array.dtype), array.dtype)
             )
         else:
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result, array.dtype)
+                array.backend.nplike.asarray(result, array.dtype)
             )
 
 
@@ -664,9 +664,9 @@ class Max(Reducer):
             )
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result.view(array.dtype), array.dtype)
+                array.backend.nplike.asarray(result.view(array.dtype), array.dtype)
             )
         else:
             return ak.contents.NumpyArray(
-                array.backend.nplike.array(result, array.dtype)
+                array.backend.nplike.asarray(result, array.dtype)
             )
