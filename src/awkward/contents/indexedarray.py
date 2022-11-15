@@ -12,7 +12,7 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class IndexedArray(Content):
-    is_IndexedType = True
+    is_indexed = True
 
     def copy(
         self,

@@ -5,7 +5,7 @@ from awkward.forms.form import Form, _parameters_equal
 
 
 class ListOffsetForm(Form):
-    is_ListType = True
+    is_list = True
 
     def __init__(self, offsets, content, parameters=None, form_key=None):
         if not isinstance(offsets, str):

@@ -253,14 +253,14 @@ def _parameters_is_empty(parameters: dict[str, Any] | None) -> bool:
 
 
 class Form:
-    is_NumpyType = False
-    is_UnknownType = False
-    is_ListType = False
-    is_RegularType = False
-    is_OptionType = False
-    is_IndexedType = False
-    is_RecordType = False
-    is_UnionType = False
+    is_numpy = False
+    is_unknown = False
+    is_list = False
+    is_regular = False
+    is_option = False
+    is_indexed = False
+    is_record = False
+    is_union = False
 
     def _init(self, parameters, form_key):
         if parameters is not None and not isinstance(parameters, dict):

@@ -14,8 +14,8 @@ def test():
         for x in inputs:
             if (
                 isinstance(x, ak.highlevel.Array)
-                and x.layout.is_IndexedType
-                and not x.layout.is_OptionType
+                and x.layout.is_indexed
+                and not x.layout.is_option
             ):
                 nextinputs.append(
                     ak.highlevel.Array(

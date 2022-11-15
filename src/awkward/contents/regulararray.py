@@ -11,8 +11,8 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class RegularArray(Content):
-    is_ListType = True
-    is_RegularType = True
+    is_list = True
+    is_regular = True
 
     def copy(
         self,
@@ -671,7 +671,7 @@ class RegularArray(Content):
         if len(others) == 0:
             return self
 
-        if any(x.is_OptionType for x in others):
+        if any(x.is_option for x in others):
             return ak.contents.UnmaskedArray(self).mergemany(others)
 
         # Regularize NumpyArray into RegularArray (or NumpyArray if 1D)
@@ -680,7 +680,7 @@ class RegularArray(Content):
             for o in others
         ]
 
-        if all(x.is_RegularType and x.size == self.size for x in others):
+        if all(x.is_regular and x.size == self.size for x in others):
             parameters = self._parameters
             tail_contents = []
             zeros_length = self._length
@@ -1091,13 +1091,13 @@ class RegularArray(Content):
             # _dimensional_ types should return `RegularArray` for `keepdims=True`, so we don't need
             # to convert `outcontent` to a `RegularArray`
             if keepdims and depth == negaxis + 1:
-                assert outcontent.is_RegularType
+                assert outcontent.is_regular
             # At `depth >= negaxis + 2`, we are wrapping at _least_ one other list type. This list-type
             # may return a ListOffsetArray, which we need to convert to a `RegularArray`. We know that
             # the result can be reinterpreted as a `RegularArray`, because it's not the immediate parent
             # of the reduction, so it must exist in the type.
             elif depth >= negaxis + 2:
-                if outcontent.is_ListType:
+                if outcontent.is_list:
                     # Let's only deal with ListOffsetArray
                     outcontent = outcontent.toListOffsetArray64(False)
                     # Fast-path to convert data that we know should be regular (avoid a kernel call)
@@ -1115,7 +1115,7 @@ class RegularArray(Content):
                         zeros_length=len(self),
                     )
                 else:
-                    assert outcontent.is_RegularType
+                    assert outcontent.is_regular
 
             outoffsets = ak.index.Index64.empty(outlength + 1, self._nplike)
             assert outoffsets.nplike is self._nplike and parents.nplike is self._nplike
@@ -1239,7 +1239,7 @@ class RegularArray(Content):
             )
 
             content_type = pyarrow.list_(paarray.type).value_field.with_nullable(
-                akcontent.is_OptionType
+                akcontent.is_option
             )
 
             return pyarrow.Array.from_buffers(

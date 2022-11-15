@@ -12,8 +12,8 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class IndexedOptionArray(Content):
-    is_OptionType = True
-    is_IndexedType = True
+    is_option = True
+    is_indexed = True
 
     def copy(
         self,
@@ -1350,9 +1350,9 @@ class IndexedOptionArray(Content):
         if not branch and negaxis == depth:
             return out
         else:
-            if out.is_ListType:
+            if out.is_list:
                 out_content = out.content[out.starts[0] :]
-            elif out.is_RegularType:
+            elif out.is_regular:
                 out_content = out.content
             else:
                 raise ak._errors.wrap_error(

@@ -49,7 +49,7 @@ def _impl(array, to, highlevel, behavior):
     to_dtype = np.dtype(to)
 
     def action(layout, **kwargs):
-        if layout.is_ListType and (
+        if layout.is_list and (
             layout.parameter("__array__") == "string"
             or layout.parameter("__array__") == "bytestring"
         ):

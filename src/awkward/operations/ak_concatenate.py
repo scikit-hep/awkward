@@ -126,11 +126,11 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
         def action(inputs, depth, **kwargs):
             if depth == posaxis and any(
-                isinstance(x, ak.contents.Content) and x.is_OptionType for x in inputs
+                isinstance(x, ak.contents.Content) and x.is_option for x in inputs
             ):
                 nextinputs = []
                 for x in inputs:
-                    if x.is_OptionType and x.content.is_ListType:
+                    if x.is_option and x.content.is_list:
                         nextinputs.append(fill_none(x, [], axis=0, highlevel=False))
                     else:
                         nextinputs.append(x)
@@ -154,7 +154,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
             if depth == posaxis and all(
                 isinstance(x, ak.contents.Content)
-                and x.is_RegularType
+                and x.is_regular
                 or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)
                 or not isinstance(x, ak.contents.Content)
                 for x in inputs
@@ -197,7 +197,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
             elif depth == posaxis and all(
                 isinstance(x, ak.contents.Content)
-                and x.is_ListType
+                and x.is_list
                 or (isinstance(x, ak.contents.NumpyArray) and x.data.ndim > 1)
                 or not isinstance(x, ak.contents.Content)
                 for x in inputs

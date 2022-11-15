@@ -14,7 +14,7 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class ByteMaskedArray(Content):
-    is_OptionType = True
+    is_option = True
 
     def copy(
         self,
@@ -877,9 +877,9 @@ class ByteMaskedArray(Content):
         if not branch and negaxis == depth:
             return out
         else:
-            if out.is_ListType:
+            if out.is_list:
                 out_content = out.content[out.starts[0] :]
-            elif out.is_RegularType:
+            elif out.is_regular:
                 out_content = out.content
             else:
                 raise ak._errors.wrap_error(
@@ -1052,7 +1052,7 @@ class ByteMaskedArray(Content):
             raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
-        if self._content.is_RecordType:
+        if self._content.is_record:
             next = self.toIndexedOptionArray64()
             content = next._content.packed()
             if content.length > self._mask.length:

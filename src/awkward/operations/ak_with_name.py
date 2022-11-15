@@ -55,7 +55,7 @@ def _impl(array, name, highlevel, behavior):
     out = layout.recursively_apply(action, behavior)
 
     def action2(layout, **ignore):
-        if layout.is_UnionType:
+        if layout.is_union:
             return layout.simplify_uniontype(merge=True, mergebool=False)
         else:
             return None

@@ -5,7 +5,7 @@ from awkward.forms.form import Form, _parameters_equal
 
 
 class ListForm(Form):
-    is_ListType = True
+    is_list = True
 
     def __init__(
         self,

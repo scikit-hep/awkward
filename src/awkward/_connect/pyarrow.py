@@ -873,7 +873,7 @@ def to_awkwardarrow_type(
 
 
 def remove_optiontype(akarray):
-    assert type(akarray).is_OptionType
+    assert type(akarray).is_option
     if isinstance(akarray, ak.contents.IndexedOptionArray):
         return ak.contents.IndexedArray(
             akarray.index, akarray.content, akarray.parameters
@@ -883,7 +883,7 @@ def remove_optiontype(akarray):
 
 
 def form_remove_optiontype(akform):
-    assert type(akform).is_OptionType
+    assert type(akform).is_option
     if isinstance(akform, ak.forms.IndexedOptionForm):
         return ak.forms.IndexedForm(
             akform.index,

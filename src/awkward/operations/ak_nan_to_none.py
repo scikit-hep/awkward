@@ -41,7 +41,7 @@ def _impl(array, highlevel, behavior):
                 valid_when=False,
             )
 
-        elif (layout.is_OptionType or layout.is_IndexedType) and (
+        elif (layout.is_option or layout.is_indexed) and (
             isinstance(layout.content, ak.contents.NumpyArray)
             and issubclass(layout.content.dtype.type, np.floating)
         ):

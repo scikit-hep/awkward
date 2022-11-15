@@ -141,9 +141,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             return _array_ufunc_adjust(custom, inputs, kwargs, behavior)
 
         if ufunc is numpy.matmul:
-            custom_matmul = action_for_matmul(inputs)
-            if custom_matmul is not None:
-                return custom_matmul()
+            raise ak._errors.wrap_error(
+                NotImplementedError(
+                    "matrix multiplication (`@` or `np.matmul`) is not yet implemented for Awkward Arrays"
+                )
+            )
 
         if all(
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
@@ -256,129 +258,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     return ak._util.wrap(out, behavior)
 
 
-# def matmul_for_numba(lefts, rights, dtype):
-#     total_outer = 0
-#     total_inner = 0
-#     total_content = 0
-
-#     for A, B in zip(lefts, rights):
-#         first = -1
-#         for Ai in A:
-#             if first == -1:
-#                 first = len(Ai)
-#             elif first != len(Ai):
-#                 raise ak._errors.wrap_error(ValueError(
-#                     "one of the left matrices in np.matmul is not rectangular"
-#                 ))
-#         if first == -1:
-#             first = 0
-#         rowsA = len(A)
-#         colsA = first
-
-#         first = -1
-#         for Bi in B:
-#             if first == -1:
-#                 first = len(Bi)
-#             elif first != len(Bi):
-#                 raise ak._errors.wrap_error(ValueError(
-#                     "one of the right matrices in np.matmul is not rectangular"
-#                 ))
-#         if first == -1:
-#             first = 0
-#         rowsB = len(B)
-#         colsB = first
-
-#         if colsA != rowsB:
-#             raise ak._errors.wrap_error(ValueError(
-#                 u"one of the pairs of matrices in np.matmul do not match shape: "
-#                 u"(n \u00d7 k) @ (k \u00d7 m)"
-#             ))
-
-#         total_outer += 1
-#         total_inner += rowsA
-#         total_content += rowsA * colsB
-
-#     outer = numpy.empty(total_outer + 1, numpy.int64)
-#     inner = numpy.empty(total_inner + 1, numpy.int64)
-#     content = numpy.zeros(total_content, dtype)
-
-#     outer[0] = 0
-#     inner[0] = 0
-#     outer_i = 1
-#     inner_i = 1
-#     content_i = 0
-#     for A, B in zip(lefts, rights):
-#         rows = len(A)
-#         cols = 0
-#         if len(B) > 0:
-#             cols = len(B[0])
-#         mids = 0
-#         if len(A) > 0:
-#             mids = len(A[0])
-
-#         for i in range(rows):
-#             for j in range(cols):
-#                 for v in range(mids):
-#                     pos = content_i + i * cols + j
-#                     content[pos] += A[i][v] * B[v][j]
-
-#         outer[outer_i] = outer[outer_i - 1] + rows
-#         outer_i += 1
-#         for _ in range(rows):
-#             inner[inner_i] = inner[inner_i - 1] + cols
-#             inner_i += 1
-#         content_i += rows * cols
-
-#     return outer, inner, content
-
-
-# matmul_for_numba.numbafied = None
-
-
 def action_for_matmul(inputs):
     raise ak._errors.wrap_error(NotImplementedError)
-
-
-# def action_for_matmul(inputs):
-#     inputs = [
-#         ak._util.recursively_apply(
-#             x, (lambda _: _), pass_depth=False, numpy_to_regular=True
-#         )
-#         if isinstance(x, (ak.contents.Content, ak.record.Record))
-#         else x
-#         for x in inputs
-#     ]
-
-#     if len(inputs) == 2 and all(
-#         isinstance(x, ak._util.listtypes)
-#         and isinstance(x.content, ak._util.listtypes)
-#         and isinstance(x.content.content, NumpyArray)
-#         for x in inputs
-#     ):
-#         ak._connect.numba.register_and_check()
-#         import numba
-
-#         if matmul_for_numba.numbafied is None:
-#             matmul_for_numba.numbafied = numba.njit(matmul_for_numba)
-
-#         lefts = ak.highlevel.Array(inputs[0])
-#         rights = ak.highlevel.Array(inputs[1])
-#         dtype = numpy.asarray(lefts[0:0, 0:0, 0:0] + rights[0:0, 0:0, 0:0]).dtype
-
-#         outer, inner, content = matmul_for_numba.numbafied(lefts, rights, dtype)
-
-#         return lambda: (
-#             ak.contents.ListOffsetArray64(
-#                 ak.index.Index64(outer),
-#                 ak.contents.ListOffsetArray64(
-#                     ak.index.Index64(inner),
-#                     NumpyArray(content),
-#                 ),
-#             ),
-#         )
-
-#     else:
-#         return None
 
 
 try:

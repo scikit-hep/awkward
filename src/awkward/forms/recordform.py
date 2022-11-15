@@ -8,7 +8,7 @@ from awkward.forms.form import Form, _parameters_equal
 
 
 class RecordForm(Form):
-    is_RecordType = True
+    is_record = True
 
     def __init__(
         self,

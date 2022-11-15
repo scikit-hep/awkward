@@ -16,7 +16,7 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class UnionArray(Content):
-    is_UnionType = True
+    is_union = True
 
     def copy(
         self,
@@ -1240,7 +1240,7 @@ class UnionArray(Content):
         types = pyarrow.union(
             [
                 pyarrow.field(str(i), values[i].type).with_nullable(
-                    mask_node is not None or self._contents[i].is_OptionType
+                    mask_node is not None or self._contents[i].is_option
                 )
                 for i in range(len(values))
             ],

@@ -85,11 +85,11 @@ def _impl(array, counts, axis, highlevel, behavior):
     else:
         counts = ak.operations.to_layout(counts, allow_record=False, allow_other=False)
 
-        if counts.is_OptionType:
+        if counts.is_option:
             mask = counts.mask_as_bool(valid_when=False)
             counts = counts.to_numpy(allow_missing=True)
             counts = ak.nplikes.numpy.ma.filled(counts, 0)
-        elif counts.is_NumpyType or counts.is_UnknownType:
+        elif counts.is_numpy or counts.is_unknown:
             counts = counts.to_numpy(allow_missing=False)
             mask = False
 
@@ -153,7 +153,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             layout = layout.packed()
 
             posaxis = layout.axis_wrap_if_negative(posaxis)
-            if posaxis == depth and layout.is_ListType:
+            if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.toListOffsetArray64(True)
                 outeroffsets = nplike.index_nplike.asarray(listoffsetarray.offsets)

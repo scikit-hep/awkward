@@ -14,7 +14,7 @@ numpy = ak.nplikes.Numpy.instance()
 
 
 class RecordArray(Content):
-    is_RecordType = True
+    is_record = True
 
     def copy(
         self,
@@ -860,7 +860,7 @@ class RecordArray(Content):
         types = pyarrow.struct(
             [
                 pyarrow.field(self.index_to_field(i), values[i].type).with_nullable(
-                    x.is_OptionType
+                    x.is_option
                 )
                 for i, x in enumerate(self._contents)
             ]

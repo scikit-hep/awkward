@@ -34,7 +34,7 @@ def from_dtype(dtype, parameters=None):
 
 
 class NumpyForm(Form):
-    is_NumpyType = True
+    is_numpy = True
 
     def __init__(
         self,

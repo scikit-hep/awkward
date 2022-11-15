@@ -137,7 +137,7 @@ def _impl(array, highlevel, behavior):
 
     def action(layout, **kwargs):
         if layout.branch_depth == (False, 1):
-            if layout.is_IndexedType:
+            if layout.is_indexed:
                 layout = layout.project()
 
             if (
@@ -156,10 +156,10 @@ def _impl(array, highlevel, behavior):
             return ak.contents.NumpyArray(nextcontent)
 
         elif layout.branch_depth == (False, 2):
-            if layout.is_IndexedType:
+            if layout.is_indexed:
                 layout = layout.project()
 
-            if not layout.is_ListType:
+            if not layout.is_list:
                 raise ak._errors.wrap_error(
                     NotImplementedError("run_lengths on " + type(layout).__name__)
                 )
@@ -174,7 +174,7 @@ def _impl(array, highlevel, behavior):
                 offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
                 content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
-                if content.is_IndexedType:
+                if content.is_indexed:
                     content = content.project()
 
                 nextcontent, nextoffsets = lengths_of(
@@ -189,7 +189,7 @@ def _impl(array, highlevel, behavior):
             offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
             content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
-            if content.is_IndexedType:
+            if content.is_indexed:
                 content = content.project()
 
             if not isinstance(
