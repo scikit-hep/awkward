@@ -56,6 +56,9 @@ Chat = "https://gitter.im/Scikit-HEP/awkward-array"
 Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 
+[tool.scikit-build]
+minimum-version = "0.0"
+
 [tool.scikit-build.sdist]
 include = [
     "header-only",
