@@ -58,9 +58,8 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 
 [tool.scikit-build]
 minimum-version = "0.0"
-
-[tool.scikit-build.sdist]
-include = [
+sdist.reproducible = true
+sdist.include = [
     "header-only",
     "include/awkward/kernels.h",
     "src/awkward_cpp/_kernel_signatures.py",
