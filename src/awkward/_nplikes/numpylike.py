@@ -20,7 +20,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import Any, Literal, Protocol, TypeVar, runtime_checkable
 
-from awkward.nplikes.dtypes import dtype
+from awkward._nplikes.dtypes import dtype
 
 NumpyLikeSelf = TypeVar("NumpyLikeSelf", bound="NumpyLike")
 
@@ -419,7 +419,7 @@ class NumpyLike(Protocol[T]):
     ############################ extensions to T API
 
     @abstractmethod
-    def ascontiguousarray(self, x: T) -> T:
+    def as_contiguous(self, x: T) -> T:
         ...
 
     @abstractmethod
