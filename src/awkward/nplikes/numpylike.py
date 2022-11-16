@@ -25,7 +25,7 @@ from awkward.nplikes.dtypes import dtype
 NumpyLikeSelf = TypeVar("NumpyLikeSelf", bound="NumpyLike")
 
 ShapeItem = Any
-Shape = tuple[ShapeItem]
+Shape = tuple[ShapeItem, ...]
 
 
 @runtime_checkable
