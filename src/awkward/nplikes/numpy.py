@@ -713,7 +713,7 @@ class NumpyModuleLike(numpylike.NumpyLike[NumpyModuleArray]):
         return x._array.flags["C_CONTIGUOUS"]
 
     def to_rectilinear(self, array):
-        raise NotImplementedError
+        raise _errors.wrap_error(NotImplementedError)
 
     @classmethod
     def is_own_array(cls, x) -> bool:
@@ -724,10 +724,7 @@ class NumpyModuleLike(numpylike.NumpyLike[NumpyModuleArray]):
         Return `True` if the given object is a numpy buffer, otherwise `False`.
 
         """
-        import numpy
-
-        # TODO
-        return isinstance(x, numpy.ndarray)
+        raise _errors.wrap_error(NotImplementedError)
 
 
 class Numpy(NumpyModuleLike):
