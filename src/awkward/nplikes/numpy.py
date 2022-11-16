@@ -13,7 +13,7 @@ from awkward.nplikes import dtypes, numpylike
 # How will CuPy work? Same Array object? what about typetracer?
 
 ShapeItem = int
-Shape = tuple[ShapeItem]
+Shape = tuple[ShapeItem, ...]
 RawArray = TypeVar("RawArray")
 
 
