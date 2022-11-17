@@ -749,17 +749,32 @@ class TypeTracer(numpylike.NumpyLike):
         raise _errors.wrap_error(NotImplementedError)
 
     @classmethod
-    def shapes_are_compatible(cls, s1: Shape, s2: Shape, *, strict=False) -> bool:
+    def shapes_are_compatible(
+        cls, s1: Shape, s2: Shape, *, assume_unknown_compatible=True
+    ) -> bool | TypeTracerArray:
+        """
+        Args:
+            s1: first shape
+            s2: second shape
+            assume_unknown_compatible: whether to consider unknown values as compatible
+
+        Return
+        """
         if len(s1) != len(s2):
             return False
 
+        result_is_known = True
         for this, that in zip(s1, s2):
             components_are_equal = this == that
             if is_unknown_scalar(components_are_equal):
-                continue
+                result_is_known = False
             elif not components_are_equal:
                 return False
-        return unknown_scalar(dtypes.bool_) if strict else True
+
+        if result_is_known or assume_unknown_compatible:
+            return True
+        else:
+            return unknown_scalar(dtypes.bool_)
 
     @classmethod
     def broadcast_shapes(cls, *shapes: Shape) -> TypeTracerShape:

@@ -15,39 +15,39 @@ def is_true_or_unknown(x):
 
 
 def test_broadcast_shapes():
+    nplike = typetracer.TypeTracer.instance()
+
+    assert is_true_or_unknown(nplike.broadcast_shapes((1, 2, 3), (2, 3)) == (1, 2, 3))
     assert is_true_or_unknown(
-        typetracer.broadcast_shapes((1, 2, 3), (2, 3)) == (1, 2, 3)
-    )
-    assert is_true_or_unknown(
-        typetracer.broadcast_shapes(
+        nplike.broadcast_shapes(
             (1, typetracer.unknown_scalar(dtypes.int64), 3),
             (2, 3),
         )
         == (1, typetracer.unknown_scalar(dtypes.int64), 3)
     )
     assert is_true_or_unknown(
-        typetracer.broadcast_shapes(
+        nplike.broadcast_shapes(
             (1, typetracer.unknown_scalar(dtypes.int64), 3),
             (3,),
         )
         == (1, typetracer.unknown_scalar(dtypes.int64), 3)
     )
     assert is_true_or_unknown(
-        typetracer.broadcast_shapes(
+        nplike.broadcast_shapes(
             (typetracer.unknown_scalar(dtypes.int64), 2, 3),
             (2, 3),
         )
         == (typetracer.unknown_scalar(dtypes.int64), 2, 3)
     )
     assert is_true_or_unknown(
-        typetracer.broadcast_shapes(
+        nplike.broadcast_shapes(
             (typetracer.unknown_scalar(dtypes.int64),),
             (2,),
         )
         == (typetracer.unknown_scalar(dtypes.int64),)
     )
     assert is_true_or_unknown(
-        typetracer.broadcast_shapes(
+        nplike.broadcast_shapes(
             (
                 typetracer.unknown_scalar(dtypes.int64),
                 typetracer.unknown_scalar(dtypes.int64),
