@@ -5,6 +5,7 @@ import numbers
 from functools import reduce
 
 import numpy
+from numpy.lib import stride_tricks
 
 import awkward as ak
 from awkward import index, nplikes
@@ -433,15 +434,15 @@ class TypeTracerArray:
             for j in range(num_basic, len(where)):
                 wh = where[j]
                 if ak._util.is_integer(wh):
-                    shapes.append(numpy.array(0))
+                    shapes.append(numpy.asarray(0))
                 elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
                     sh = [
                         1 if isinstance(x, UnknownLengthType) else int(x)
                         for x in wh.shape
                     ]
                     shapes.append(
-                        numpy.lib.stride_tricks.as_strided(
-                            numpy.array(0), shape=sh, strides=[0] * len(sh)
+                        stride_tricks.as_strided(
+                            numpy.asarray(0), shape=sh, strides=[0] * len(sh)
                         )
                     )
                 else:
@@ -563,12 +564,12 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
     ############################ array creation
 
-    def array(self, data, dtype=None, **kwargs):
+    def asarray(self, data, dtype=None, **kwargs):
         if isinstance(data, UnknownScalar):
             array_shape = ()
             array_dtype = data.dtype
         elif numpy.isscalar(data):
-            data = numpy.array(data)
+            data = numpy.asarray(data)
             array_shape = ()
             array_dtype = data.dtype
         elif isinstance(data, index.Index):
@@ -597,7 +598,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
 
             # Find dtype of unknown-type scalars (Python scalars)
             if len(untyped_scalars):
-                non_scalar_array = numpy.array(untyped_scalars)
+                non_scalar_array = numpy.asarray(untyped_scalars)
                 dtypes.append(non_scalar_array.dtype)
 
             if not dtypes:
@@ -631,10 +632,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
             dtype = array_dtype
 
         return TypeTracerArray(dtype, shape=array_shape)
-
-    def asarray(self, array, dtype=None, **kwargs):
-        # array[, dtype=][, order=]
-        return self.array(array, dtype=dtype)
 
     def ascontiguousarray(self, array, dtype=None, **kwargs):
         # array[, dtype=]
@@ -737,7 +734,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
         maxdim = 0
         for x in arrays:
             if not hasattr(x, "shape"):
-                next.append(numpy.array(x))
+                next.append(numpy.asarray(x))
             else:
                 next.append(x)
                 maxdim = max(maxdim, len(x.shape))
