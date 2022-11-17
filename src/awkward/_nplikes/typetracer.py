@@ -5,33 +5,84 @@ from __future__ import annotations
 import enum
 import operator
 from functools import reduce
-from typing import Any, Callable, Literal, TypeVar, Union, cast
+from typing import Any, Callable, Iterable, Literal, Sized, TypeVar, Union, cast
 
 import numpy
 
 from awkward import _errors
 from awkward._nplikes import dtypes, numpylike
 
+
+def unknown_value(dtype: dtypes.dtype) -> TypeTracerArray:
+    nplike = TypeTracer.instance()
+    return TypeTracerArray._new_as_scalar(numpy.zeros(1, dtype=dtype), nplike=nplike)
+
+
 ShapeItem = Union[int, "TypeTracerArray"]
-Shape = tuple[ShapeItem, ...]
+Shape = numpylike.Shape[ShapeItem]
+
+
+class TypeTracerShape:
+    _items: tuple[ShapeItem, ...]
+
+    def __init__(self, items: Iterable[ShapeItem]):
+        self._items = tuple(items)
+
+    def __add__(self, other) -> TypeTracerShape:
+        if isinstance(other, tuple):
+            return self.__class__(self._items + other)
+        else:
+            return NotImplemented
+
+    def __radd__(self, other) -> TypeTracerShape:
+        if isinstance(other, tuple):
+            return self.__class__(other + self._items)
+        else:
+            return NotImplemented
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return self.__class__(*self._items[index])
+        else:
+            return self._items[operator.index(index)]
+
+    def __len__(self) -> int:
+        return len(self._items)
+
+    def __iter__(self):
+        return iter(self._items)
+
+    def __eq__(self, other) -> bool | TypeTracerArray:
+        if isinstance(other, Iterable) and isinstance(other, Sized):
+            return shapes_are_compatible(self, other)
+        else:
+            return NotImplemented
+
+    def __str__(self):
+        return str(self._items)
 
 
 def is_unknown_scalar(x) -> bool:
-    return isinstance(x, TypeTracerArray) and x.shape == ()
+    if isinstance(x, TypeTracerArray):
+        return x.ndim == 0
+    else:
+        return False
 
 
-def shapes_are_compatible(self: Shape, other: Shape) -> bool:
+def shapes_are_compatible(self: Shape, other: Shape, *, strict=False) -> bool:
     if len(self) != len(other):
         return False
 
     for this, that in zip(self, other):
         components_are_equal = this == that
-        if not (is_unknown_scalar(components_are_equal) or components_are_equal):
+        if is_unknown_scalar(components_are_equal):
+            continue
+        elif not components_are_equal:
             return False
-    return True
+    return unknown_value(dtypes.bool_) if strict else True
 
 
-def broadcast_shapes(*shapes: Shape):
+def broadcast_shapes(*shapes: Shape) -> TypeTracerShape:
     ndim = max([len(s) for s in shapes], default=0)
     result = [1] * ndim
 
@@ -62,19 +113,17 @@ def broadcast_shapes(*shapes: Shape):
                         "known component of shape does not match broadcast result"
                     )
                 )
-    return tuple(result)
+    return TypeTracerShape(result)
 
 
 K = TypeVar("K")
-
-
-ScalarTraitInitialiser = Callable[[bool | int | float | complex], tuple[str]]
+ScalarTraitInitialiser = Callable[[Union[bool, int, float, complex]], tuple[str, ...]]
 
 
 class TypeTracerArray:
     _array: numpy.ndarray
     _nplike: TypeTracer
-    _shape: Shape
+    _shape: TypeTracerShape
     _traits: set[str]
 
     _operator_drop_traits: dict[Any, set[str]] = {}
@@ -102,7 +151,7 @@ class TypeTracerArray:
         return len(self._shape)
 
     @property
-    def shape(self) -> Shape:
+    def shape(self) -> TypeTracerShape:
         return self._shape
 
     @property
@@ -148,7 +197,7 @@ class TypeTracerArray:
                 )
             )
         self._array = x
-        self._shape = shape
+        self._shape = TypeTracerShape(shape)
         self._nplike = nplike
         self._traits = traits
         return self
@@ -164,7 +213,7 @@ class TypeTracerArray:
 
     @classmethod
     def _promote_scalar(
-        cls: type[TypeTracerArray],
+        cls,
         self: TypeTracerArray,
         x: bool | int | float | complex | TypeTracerArray,
     ) -> TypeTracerArray:
@@ -201,7 +250,7 @@ class TypeTracerArray:
 
     @classmethod
     def _new_as_scalar(
-        cls: type[TypeTracerArray],
+        cls,
         array,
         nplike: TypeTracer,
         *,
@@ -211,7 +260,7 @@ class TypeTracerArray:
 
     @classmethod
     def _new_from_binary_op(
-        cls: type[TypeTracerArray],
+        cls,
         self: TypeTracerArray,
         other: TypeTracerArray,
         op: Callable[[K, K], K],
@@ -225,7 +274,7 @@ class TypeTracerArray:
 
     @classmethod
     def _new_from_unary_op(
-        cls: type[TypeTracerArray], self: TypeTracerArray, op: Callable[[K], K]
+        cls, self: TypeTracerArray, op: Callable[[K], K]
     ) -> TypeTracerArray:
         new_traits = self._traits - self._operator_drop_traits.get(op, set())
         array = op(self._array)
