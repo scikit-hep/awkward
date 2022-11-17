@@ -66,6 +66,29 @@ def get_field(data, field):
         return out
 
 
+def custom_str(current):
+    if (
+        issubclass(type(current), ak.highlevel.Record)
+        and not type(current).__str__ is ak.highlevel.Record.__str__
+    ) or (
+        issubclass(type(current), ak.highlevel.Array)
+        and not type(current).__str__ is ak.highlevel.Array.__str__
+    ):
+        return str(current)
+
+    elif (
+        issubclass(type(current), ak.highlevel.Record)
+        and not type(current).__repr__ is ak.highlevel.Record.__repr__
+    ) or (
+        issubclass(type(current), ak.highlevel.Array)
+        and not type(current).__repr__ is ak.highlevel.Array.__repr__
+    ):
+        return repr(current)
+
+    else:
+        return None
+
+
 def valuestr_horiz(data, limit_cols):
     original_limit_cols = limit_cols
 
@@ -89,12 +112,9 @@ def valuestr_horiz(data, limit_cols):
                     for_comma = 0 if which == 0 else 2
                     cols_taken, strs = valuestr_horiz(current, limit_cols - for_comma)
 
-                    if (
-                        ak.highlevel.Record in current.__class__.__bases__
-                        or ak.highlevel.Array in current.__class__.__bases__
-                        and not type(current).__repr__ is ak.highlevel.Array.__repr__
-                    ):
-                        strs = type(current).__repr__(current)
+                    custom = custom_str(current)
+                    if custom is not None:
+                        strs = custom
 
                     if limit_cols - (for_comma + cols_taken) >= 0:
                         if which != 0:
@@ -107,12 +127,9 @@ def valuestr_horiz(data, limit_cols):
                 else:
                     cols_taken, strs = valuestr_horiz(current, limit_cols - 2)
 
-                    if (
-                        ak.highlevel.Record in current.__class__.__bases__
-                        or ak.highlevel.Array in current.__class__.__bases__
-                        and not type(current).__repr__ is ak.highlevel.Array.__repr__
-                    ):
-                        strs = type(current).__repr__(current)
+                    custom = custom_str(current)
+                    if custom is not None:
+                        strs = custom
 
                     if limit_cols - (2 + cols_taken) >= 0:
                         back[:0] = strs

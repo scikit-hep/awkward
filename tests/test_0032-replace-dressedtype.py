@@ -63,15 +63,15 @@ def test_types_with_parameters():
 
 def test_dress():
     class Dummy(ak.highlevel.Array):
-        def __repr__(self):
-            return f"<Dummy {str(self)}>"
+        def __str__(self):
+            return f"<Dummy {super().__str__()}>"
 
     ns = {"Dummy": Dummy}
 
     x = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     x.parameters["__array__"] = "Dummy"
     a = ak.highlevel.Array(x, behavior=ns, check_valid=True)
-    assert repr(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
+    assert str(a) == "<Dummy [1.1, 2.2, 3.3, 4.4, 5.5]>"
 
     x2 = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 3, 5], dtype=np.int64)),
@@ -85,9 +85,9 @@ def test_dress():
         repr(a2)
         == "<Array [<Dummy [1.1, 2.2, 3.3]>, <Dummy []>, <Dummy [4.4, 5.5]>] type='3 * ...'>"
     )
-    assert repr(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
-    assert repr(a2[1]) == "<Dummy []>"
-    assert repr(a2[2]) == "<Dummy [4.4, 5.5]>"
+    assert str(a2[0]) == "<Dummy [1.1, 2.2, 3.3]>"
+    assert str(a2[1]) == "<Dummy []>"
+    assert str(a2[2]) == "<Dummy [4.4, 5.5]>"
 
 
 def test_record_name():
