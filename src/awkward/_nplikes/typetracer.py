@@ -12,17 +12,20 @@ import numpy
 from awkward import _errors
 from awkward._nplikes import dtypes, numpylike
 
-
-def unknown_value(dtype: dtypes.dtype) -> TypeTracerArray:
-    nplike = TypeTracer.instance()
-    return TypeTracerArray._new_as_scalar(numpy.zeros(1, dtype=dtype), nplike=nplike)
-
-
 ShapeItem = Union[int, "TypeTracerArray"]
+
+
 Shape = numpylike.Shape[ShapeItem]
 
 
-class TypeTracerShape:
+class TypeTracerShape(numpylike.Shape):
+    """
+    A `shape` interface for `TypeTracerArray`. Unlike Numpy arrays, `TypeTracerArray.shape`
+    can contain unknown values. Therefore, evaluating `shape == (...,)` is not safe if relied
+    upon within Awkward internals. Therefore, we want to ensure that shape comparisons fail
+    if a concrete value is required.
+    """
+
     _items: tuple[ShapeItem, ...]
 
     def __init__(self, items: Iterable[ShapeItem]):
@@ -54,7 +57,7 @@ class TypeTracerShape:
 
     def __eq__(self, other) -> bool | TypeTracerArray:
         if isinstance(other, Iterable) and isinstance(other, Sized):
-            return shapes_are_compatible(self, other)
+            return TypeTracer.shapes_are_compatible(self, other)
         else:
             return NotImplemented
 
@@ -62,58 +65,16 @@ class TypeTracerShape:
         return str(self._items)
 
 
+def unknown_scalar(dtype: dtypes.dtype) -> TypeTracerArray:
+    nplike = TypeTracer.instance()
+    return TypeTracerArray._new_as_scalar(numpy.zeros(1, dtype=dtype), nplike=nplike)
+
+
 def is_unknown_scalar(x) -> bool:
     if isinstance(x, TypeTracerArray):
         return x.ndim == 0
     else:
         return False
-
-
-def shapes_are_compatible(self: Shape, other: Shape, *, strict=False) -> bool:
-    if len(self) != len(other):
-        return False
-
-    for this, that in zip(self, other):
-        components_are_equal = this == that
-        if is_unknown_scalar(components_are_equal):
-            continue
-        elif not components_are_equal:
-            return False
-    return unknown_value(dtypes.bool_) if strict else True
-
-
-def broadcast_shapes(*shapes: Shape) -> TypeTracerShape:
-    ndim = max([len(s) for s in shapes], default=0)
-    result = [1] * ndim
-
-    for shape in shapes:
-        # Right broadcasting
-        missing_dim = ndim - len(shape)
-        if missing_dim > 0:
-            shape = (1,) * missing_dim + shape
-
-        # Fail if we absolutely know the shapes aren't compatible
-        for i, item in enumerate(shape):
-            # Unknown values always broadcast
-            # and if existing item is 1, also broadcast
-            if is_unknown_scalar(item):
-                result[i] = item
-            # Existing item is unknown
-            elif is_unknown_scalar(result[i]):
-                continue
-            # Items match
-            elif result[i] == item:
-                continue
-            # Existing is broadcastable
-            elif result[i] == 1:
-                result[i] = item
-            else:
-                raise _errors.wrap_error(
-                    ValueError(
-                        "known component of shape does not match broadcast result"
-                    )
-                )
-    return TypeTracerShape(result)
 
 
 K = TypeVar("K")
@@ -180,6 +141,7 @@ class TypeTracerArray:
         self = super().__new__(cls)
         if isinstance(x, numpy.generic):
             x = numpy.asarray(x)
+
         if not isinstance(x, numpy.ndarray):
             raise _errors.wrap_error(
                 TypeError(
@@ -188,6 +150,7 @@ class TypeTracerArray:
                     type(x),
                 )
             )
+
         if not x.shape == (1,):
             raise _errors.wrap_error(
                 TypeError(
@@ -269,7 +232,7 @@ class TypeTracerArray:
             op, set()
         )
         array = op(self._array, other._array)
-        shape = broadcast_shapes(self.shape, other.shape)
+        shape = self._nplike.broadcast_shapes(self.shape, other.shape)
         return cls._new(array, shape=shape, nplike=self._nplike, traits=new_traits)
 
     @classmethod
@@ -784,3 +747,50 @@ class TypeTracer(numpylike.NumpyLike):
     @classmethod
     def is_own_array(cls, x) -> bool:
         raise _errors.wrap_error(NotImplementedError)
+
+    @classmethod
+    def shapes_are_compatible(cls, s1: Shape, s2: Shape, *, strict=False) -> bool:
+        if len(s1) != len(s2):
+            return False
+
+        for this, that in zip(s1, s2):
+            components_are_equal = this == that
+            if is_unknown_scalar(components_are_equal):
+                continue
+            elif not components_are_equal:
+                return False
+        return unknown_scalar(dtypes.bool_) if strict else True
+
+    @classmethod
+    def broadcast_shapes(cls, *shapes: Shape) -> TypeTracerShape:
+        ndim = max([len(s) for s in shapes], default=0)
+        result = [1] * ndim
+
+        for shape in shapes:
+            # Right broadcasting
+            missing_dim = ndim - len(shape)
+            if missing_dim > 0:
+                shape = (1,) * missing_dim + shape
+
+            # Fail if we absolutely know the shapes aren't compatible
+            for i, item in enumerate(shape):
+                # Unknown values always broadcast
+                # and if existing item is 1, also broadcast
+                if is_unknown_scalar(item):
+                    result[i] = item
+                # Existing item is unknown
+                elif is_unknown_scalar(result[i]):
+                    continue
+                # Items match
+                elif result[i] == item:
+                    continue
+                # Existing is broadcastable
+                elif result[i] == 1:
+                    result[i] = item
+                else:
+                    raise _errors.wrap_error(
+                        ValueError(
+                            "known component of shape does not match broadcast result"
+                        )
+                    )
+        return TypeTracerShape(result)
