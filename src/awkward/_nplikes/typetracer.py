@@ -26,7 +26,7 @@ def shapes_are_compatible(self: Shape, other: Shape) -> bool:
 
     for this, that in zip(self, other):
         components_are_equal = this == that
-        if is_unknown_scalar(components_are_equal) or components_are_equal:
+        if not (is_unknown_scalar(components_are_equal) or components_are_equal):
             return False
     return True
 
@@ -103,7 +103,7 @@ class TypeTracerArray:
 
     @property
     def T(self) -> TypeTracerArray:
-        return self._new(self._array.T, nplike=self._nplike)
+        return self._new(self._array, shape=self._shape[::-1], nplike=self._nplike)
 
     def has_trait(self, trait: str) -> bool:
         return trait in self._traits
