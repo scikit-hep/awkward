@@ -5,7 +5,7 @@ from __future__ import annotations
 import enum
 import operator
 from functools import reduce
-from typing import Any, Callable, TypeVar, Union, cast
+from typing import Any, Callable, Literal, TypeVar, Union, cast
 
 import numpy
 
@@ -43,9 +43,20 @@ def broadcast_shapes(*shapes: Shape):
 
         # Fail if we absolutely know the shapes aren't compatible
         for i, item in enumerate(shape):
+            # Unknown values always broadcast
+            # and if existing item is 1, also broadcast
             if is_unknown_scalar(item):
                 result[i] = item
-            elif result[i] != 1 != item:
+            # Existing item is unknown
+            elif is_unknown_scalar(result[i]):
+                continue
+            # Items match
+            elif result[i] == item:
+                continue
+            # Existing is broadcastable
+            elif result[i] == 1:
+                result[i] = item
+            else:
                 raise _errors.wrap_error(
                     ValueError(
                         "known component of shape does not match broadcast result"
@@ -370,5 +381,357 @@ def _initialise_scalar_trait(value):
 
 
 class TypeTracer(numpylike.NumpyLike):
-    def _broadcast_shapes(self):
-        ...
+    is_eager = True
+    known_data = False
+    known_shape = False
+
+    def asarray(
+        self,
+        obj,
+        *,
+        dtype: dtypes.dtype | None = None,
+        copy: bool | None = None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def zeros(
+        self,
+        shape: int | tuple[int, ...],
+        *,
+        dtype: dtypes.dtype | None = None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def ones(
+        self,
+        shape: int | tuple[int, ...],
+        *,
+        dtype: dtypes.dtype | None = None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def empty(
+        self,
+        shape: int | tuple[int, ...],
+        *,
+        dtype: dtypes.dtype | None = None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def full(
+        self,
+        shape: int | tuple[int, ...],
+        fill_value,
+        *,
+        dtype: dtypes.dtype | None = None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def zeros_like(
+        self, x: TypeTracerArray, *, dtype: dtypes.dtype | None = None
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def ones_like(
+        self, x: TypeTracerArray, *, dtype: dtypes.dtype | None = None
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def full_like(
+        self, x: TypeTracerArray, fill_value, *, dtype: dtypes.dtype | None = None
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def arange(
+        self,
+        start: float | int,
+        stop: float | int | None = None,
+        step: float | int = 1,
+        *,
+        dtype: dtypes.dtype | None = None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def meshgrid(
+        self, *arrays: TypeTracerArray, indexing: Literal["xy", "ij"] = "xy"
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    ############################ data type functions
+
+    def astype(
+        self, x: TypeTracerArray, dtype: dtypes.dtype, *, copy: bool = True
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def broadcast_arrays(self, *arrays: TypeTracerArray) -> list[TypeTracerArray]:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def broadcast_to(self, x: TypeTracerArray, shape: Shape) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def result_type(
+        self, *arrays_and_dtypes: TypeTracerArray | dtypes.dtype
+    ) -> dtypes.dtype:
+        all_dtypes: list[dtypes.dtype] = []
+        for item in arrays_and_dtypes:
+            if hasattr(item, "shape") and hasattr(item, "dtype"):
+                item = item.dtype
+            if isinstance(item, dtypes.dtype):
+                all_dtypes.append(item)
+            else:
+                raise TypeError(
+                    "result_type() inputs must be array_api arrays or dtypes"
+                )
+
+        return numpy.result_type(*all_dtypes)
+
+    ############################ searching functions
+
+    def nonzero(self, x: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def where(
+        self, condition: TypeTracerArray, x1: TypeTracerArray, x2: TypeTracerArray
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    ############################ set functions
+
+    def unique_counts(self, x: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def unique_values(self, x: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    ############################ manipulation functions
+
+    def concat(
+        self,
+        arrays: list[TypeTracerArray] | tuple[TypeTracerArray, ...],
+        *,
+        axis: int | None = 0,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def stack(
+        self,
+        arrays: list[TypeTracerArray] | tuple[TypeTracerArray, ...],
+        *,
+        axis: int = 0,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    ############################ ufuncs
+
+    def add(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def multiply(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def logical_or(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def logical_and(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def logical_not(self, x: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def sqrt(self, x: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def exp(self, x: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def divide(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def equal(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def isnan(self, x: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    ############################ Utility functions
+
+    def all(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def any(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    ############################ Statistical functions
+
+    def sum(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        dtype: dtypes.dtype | None = None,
+        keepdims: bool = False,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def prod(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        dtype: dtypes.dtype | None = None,
+        keepdims: bool = False,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def min(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def max(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | tuple[int, ...] | None = None,
+        keepdims: bool = False,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    ############################ Searching functions
+
+    def argmin(
+        self, x: TypeTracerArray, *, axis: int | None = None, keepdims: bool = False
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def argmax(
+        self, x: TypeTracerArray, *, axis: int | None = None, keepdims: bool = False
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    ############################ extensions to Array API
+
+    def as_contiguous(self, x: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def cumsum(self, x: TypeTracerArray, *, axis: int | None = None) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def from_buffer(self, buffer, *, dtype=None) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def array_equal(
+        self, x1: TypeTracerArray, x2: TypeTracerArray, *, equal_nan: bool = False
+    ) -> bool:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def search_sorted(
+        self,
+        x: TypeTracerArray,
+        values: TypeTracerArray,
+        *,
+        side: Literal["left", "right"] = "left",
+        sorter=None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def repeat(
+        self,
+        x: TypeTracerArray,
+        repeats: TypeTracerArray | int,
+        *,
+        axis: int | None = None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def tile(self, x: TypeTracerArray, reps: int) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def pack_bits(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | None = None,
+        bitorder: Literal["big", "little"] = "big -> Array",
+    ):
+        raise _errors.wrap_error(NotImplementedError)
+
+    def unpack_bits(
+        self,
+        x: TypeTracerArray,
+        *,
+        axis: int | None = None,
+        count: int | None = None,
+        bitorder: Literal["big", "little"] = "big",
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def minimum(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def maximum(self, x1: TypeTracerArray, x2: TypeTracerArray) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def nan_to_num(
+        self,
+        x: TypeTracerArray,
+        *,
+        copy: bool = True,
+        nan: int | float | None = 0.0,
+        posinf: int | float | None = None,
+        neginf: int | float | None = None,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def is_close(
+        self,
+        x1: TypeTracerArray,
+        x2: TypeTracerArray,
+        *,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
+        equal_nan: bool = False,
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def count_nonzero(
+        self, x: TypeTracerArray, *, axis: int | None = None, keepdims: bool = False
+    ) -> TypeTracerArray:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def array_str(
+        self,
+        x: TypeTracerArray,
+        *,
+        max_line_width: int | None = None,
+        precision: int | None = None,
+        suppress_small: bool | None = None,
+    ):
+        raise _errors.wrap_error(NotImplementedError)
+
+    def is_c_contiguous(self, x: TypeTracerArray) -> bool:
+        raise _errors.wrap_error(NotImplementedError)
+
+    def to_rectilinear(self, array):
+        raise _errors.wrap_error(NotImplementedError)
+
+    @classmethod
+    def is_own_array(cls, x) -> bool:
+        raise _errors.wrap_error(NotImplementedError)
