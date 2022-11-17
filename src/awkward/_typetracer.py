@@ -5,6 +5,7 @@ import numbers
 from functools import reduce
 
 import numpy
+from numpy.lib import stride_tricks
 
 import awkward as ak
 from awkward import _nplikes, index
@@ -606,15 +607,15 @@ class TypeTracerArray(NDArrayOperatorsMixin):
             for j in range(num_basic, len(where)):
                 wh = where[j]
                 if ak._util.is_integer(wh):
-                    shapes.append(numpy.array(0))
+                    shapes.append(numpy.asarray(0))
                 elif hasattr(wh, "dtype") and hasattr(wh, "shape"):
                     sh = [
                         1 if isinstance(x, UnknownLengthType) else int(x)
                         for x in wh.shape
                     ]
                     shapes.append(
-                        numpy.lib.stride_tricks.as_strided(
-                            numpy.array(0), shape=sh, strides=[0] * len(sh)
+                        stride_tricks.as_strided(
+                            numpy.asarray(0), shape=sh, strides=[0] * len(sh)
                         )
                     )
                 else:
@@ -986,7 +987,7 @@ class TypeTracer(ak._nplikes.NumpyLike):
         maxdim = 0
         for x in arrays:
             if not hasattr(x, "shape"):
-                next.append(numpy.array(x))
+                next.append(numpy.asarray(x))
             else:
                 next.append(x)
                 maxdim = max(maxdim, len(x.shape))
