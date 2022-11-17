@@ -18,13 +18,13 @@ We don't implement Device support, as it is not used in Awkward.
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Literal, Protocol, TypeVar, runtime_checkable
+from typing import Literal, Protocol, TypeVar, runtime_checkable
 
 from awkward._nplikes.dtypes import dtype
 
 NumpyLikeSelf = TypeVar("NumpyLikeSelf", bound="NumpyLike")
 
-ShapeItem = Any
+ShapeItem = TypeVar("ShapeItem")
 Shape = tuple[ShapeItem, ...]
 
 
