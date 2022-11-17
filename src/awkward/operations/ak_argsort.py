@@ -36,7 +36,7 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavio
     same shape:
 
         >>> data = ak.Array([[7, 5, 7], [], [2], [8, 2]])
-        >>> index = ak.argsort(index)
+        >>> index = ak.argsort(data)
         >>> index
         <Array [[1, 0, 2], [], [0], [1, 0]] type='4 * var * int64'>
         >>> data[index]
