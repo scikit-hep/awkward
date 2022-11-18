@@ -58,7 +58,7 @@ html_context = {
     "github_repo": "awkward",
     # TODO: set this
     "github_version": os.environ.get("READTHEDOCS_VERSION", "main"),
-    "doc_path": "docs-sphinx",
+    "doc_path": "docs",
 }
 html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = True
@@ -150,16 +150,8 @@ jupyterlite_contents = ["getting-started/demo/*"]
 
 HERE = pathlib.Path(__file__).parent
 
-# Generate C++ bindings
-subprocess.check_call(
-    ["doxygen", str(HERE.parent / "docs-doxygen" / "Doxyfile")], cwd=HERE.parent
-)
-
 # Generate Python docstrings
 runpy.run_path(HERE / "prepare_docstrings.py", run_name="__main__")
-
-# Generate kernel docs
-runpy.run_path(HERE.parent / "dev" / "generate-kerneldocs.py", run_name="__main__")
 
 
 # Sphinx doesn't usually want content to fit the screen, so we hack the styles for this page

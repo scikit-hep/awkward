@@ -3,6 +3,8 @@
 import copy
 import numbers
 
+from awkward_cpp.lib import _ext
+
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -42,7 +44,7 @@ def _impl(array):
         form = ak.forms.from_json(array._layout.form())
         return form.parameters
 
-    elif isinstance(array, ak._ext.ArrayBuilder):
+    elif isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
         return form.parameters
 

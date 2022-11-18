@@ -1,7 +1,7 @@
 version: 2
 
 sphinx:
-  configuration: docs-sphinx/conf.py
+  configuration: docs/conf.py
 
 build:
   os: ubuntu-22.04
@@ -9,11 +9,21 @@ build:
     python: "3.10"
   jobs:
     pre_build:
-      - pip install requests
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 jupyter-cache -d docs-sphinx/_build/.jupyter_cache
-      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 awkward-wasm-wheel -d docs-sphinx/lite/pypi
+      - pip install requests pyyaml
+      # Generate required code / metadata
+      - python3 dev/generate-kernel-docs.py
+      - python3 dev/copy-cpp-headers.py
+      # Download built artefacts
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^jupyter-cache$" -d docs/_build/.jupyter_cache
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^awkward-cpp-wasm$" -d docs/lite/pypi
+      - python3 dev/download-github-artefact.py scikit-hep/awkward-1.0 "^awkward$" -d docs/lite/pypi
+      # Build Doxygen
+      - env --chdir=awkward-cpp/docs -- doxygen
+      # Copy doxygen to static
+      - mkdir -p docs/_static/doxygen
+      - cp -r awkward-cpp/docs/html/ docs/_static/doxygen
 
 python:
   install:
     # Don't install the conda env, as we won't run any notebooks!
-    - requirements: docs-sphinx/requirements.txt
+    - requirements: docs/requirements.txt

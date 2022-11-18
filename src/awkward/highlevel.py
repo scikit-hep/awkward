@@ -7,6 +7,8 @@ import re
 import sys
 from collections.abc import Iterable, Mapping, Sized
 
+from awkward_cpp.lib import _ext
+
 import awkward as ak
 from awkward._connect.numpy import NDArrayOperatorsMixin
 
@@ -2167,7 +2169,7 @@ class ArrayBuilder(Sized):
     """
 
     def __init__(self, behavior=None, initial=1024, resize=1.5):
-        self._layout = ak._ext.ArrayBuilder(initial=initial, resize=resize)
+        self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
         self.behavior = behavior
 
     @classmethod
@@ -2185,7 +2187,7 @@ class ArrayBuilder(Sized):
         with no accumulated data, but Numba needs to wrap existing data
         when returning from a lowered function.
         """
-        assert isinstance(layout, ak._ext.ArrayBuilder)
+        assert isinstance(layout, _ext.ArrayBuilder)
         out = cls.__new__(cls)
         out._layout = layout
         out.behavior = behavior

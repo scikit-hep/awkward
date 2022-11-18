@@ -17,7 +17,6 @@ numpy>=1.13.1
 numba>=0.50.0
 pandas>=0.24.0
 numexpr
-autograd
 pyarrow>=7.0.0
 fsspec
 s3fs

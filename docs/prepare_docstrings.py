@@ -303,7 +303,6 @@ for filename in glob.glob("../src/awkward/**/*.py", recursive=True):
                 "ak.numba.register.rst",
                 "ak.numexpr.evaluate.rst",
                 "ak.numexpr.re_evaluate.rst",
-                "ak.autograd.elementwise_grad.rst",
                 "awkwardforth.rst",
             ]
         )

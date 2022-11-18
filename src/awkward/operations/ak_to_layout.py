@@ -2,6 +2,8 @@
 
 from collections.abc import Iterable
 
+from awkward_cpp.lib import _ext
+
 import awkward as ak
 from awkward import _errors
 
@@ -71,7 +73,7 @@ def _impl(array, allow_record, allow_other, numpytype):
     elif isinstance(array, ak.highlevel.ArrayBuilder):
         return array.snapshot().layout
 
-    elif isinstance(array, ak._ext.ArrayBuilder):
+    elif isinstance(array, _ext.ArrayBuilder):
         return array.snapshot()
 
     elif numpy.is_own_array(array):

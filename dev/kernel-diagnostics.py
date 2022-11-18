@@ -124,11 +124,23 @@ def check_cpu_implementation(kerneldict):
     count = 0
     for kernelname, specializations in kerneldict.items():
         if os.path.isfile(
-            os.path.join(CURRENT_DIR, "..", "src", "cpu-kernels", kernelname + ".cpp")
+            os.path.join(
+                CURRENT_DIR,
+                "..",
+                "awkward-cpp",
+                "src",
+                "cpu-kernels",
+                kernelname + ".cpp",
+            )
         ):
             with open(
                 os.path.join(
-                    CURRENT_DIR, "..", "src", "cpu-kernels", kernelname + ".cpp"
+                    CURRENT_DIR,
+                    "..",
+                    "awkward-cpp",
+                    "src",
+                    "cpu-kernels",
+                    kernelname + ".cpp",
                 )
             ) as kernelfile:
                 contents = kernelfile.read()
@@ -151,13 +163,19 @@ def check_cuda_implementation(kerneldict):
         if not (
             os.path.isfile(
                 os.path.join(
-                    CURRENT_DIR, "..", "src", "cuda-kernels", kernelname + ".cu"
+                    CURRENT_DIR,
+                    "..",
+                    "awkward-cpp",
+                    "src",
+                    "cuda-kernels",
+                    kernelname + ".cu",
                 )
             )
             or os.path.isfile(
                 os.path.join(
                     CURRENT_DIR,
                     "..",
+                    "awkward-cpp",
                     "src",
                     "cuda-kernels",
                     "manual_" + kernelname + ".cu",

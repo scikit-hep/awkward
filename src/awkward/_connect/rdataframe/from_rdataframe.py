@@ -37,9 +37,16 @@ cppyy.add_include_path(
     os.path.abspath(
         os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
-            os.pardir,
-            os.pardir,
-            "cpp-headers",
+            "include",
+        )
+    )
+)
+cppyy.add_include_path(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            os.path.pardir,
+            "header-only",
         )
     )
 )

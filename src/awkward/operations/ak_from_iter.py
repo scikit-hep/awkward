@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from awkward_cpp.lib import _ext
+
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -85,7 +87,7 @@ def _impl(iterable, highlevel, behavior, allow_record, initial, resize):
     if isinstance(iterable, tuple):
         iterable = list(iterable)
 
-    builder = ak._ext.ArrayBuilder(initial=initial, resize=resize)
+    builder = _ext.ArrayBuilder(initial=initial, resize=resize)
     builder.fromiter(iterable)
 
     formstr, length, buffers = builder.to_buffers()

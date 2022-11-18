@@ -3,8 +3,10 @@
 
 import copy
 import datetime
+import json
 import os
 import shutil
+import time
 from collections import OrderedDict
 from itertools import product
 
@@ -12,6 +14,13 @@ import yaml
 from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def reproducible_datetime():
+    build_date = datetime.datetime.utcfromtimestamp(
+        int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
+    )
+    return build_date.isoformat().replace("T", " AT ")[:22]
 
 
 class Argument:
@@ -91,118 +100,106 @@ class Specification:
 
     def gettests(self, testdata):
         allvals = []
-        with open(
-            os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")
-        ) as kernelfile:
-            wrap_exec(kernelfile.read(), globals(), locals())
-            instancedict = {}
-            funcpassdict = OrderedDict()
-            count = 0
-            for arg in self.args:
-                funcpassdict[arg.name] = []
-                if arg.role == "default":
-                    group = str(count)
-                    assert group not in instancedict.keys()
-                    instancedict[group] = [arg.name]
-                    if arg.direction == "out":
-                        funcpassdict[arg.name].append({})
-                    else:
-                        funcpassdict[arg.name].append(testdata["num"])
-                    assert len(funcpassdict[arg.name]) == 1
-                    count += 1
+        instancedict = {}
+        funcpassdict = OrderedDict()
+        count = 0
+        for arg in self.args:
+            funcpassdict[arg.name] = []
+            if arg.role == "default":
+                group = str(count)
+                assert group not in instancedict.keys()
+                instancedict[group] = [arg.name]
+                if arg.direction == "out":
+                    funcpassdict[arg.name].append({})
                 else:
-                    group = arg.role[: arg.role.find("-")]
-                    if group not in instancedict.keys():
-                        instancedict[group] = []
-                    instancedict[group].append(arg.name)
-                    if group not in testdata.keys() and group[:-1] in testdata.keys():
-                        pseudogroup = copy.copy(group[:-1])
-                    elif group in testdata.keys():
-                        pseudogroup = copy.copy(group)
-                    role = pseudogroup + arg.role[arg.role.find("-") :]
-                    for x in range(len(testdata[pseudogroup])):
-                        funcpassdict[arg.name].append(testdata[pseudogroup][x][role])
+                    funcpassdict[arg.name].append(testdata["num"])
+                assert len(funcpassdict[arg.name]) == 1
+                count += 1
+            else:
+                group = arg.role[: arg.role.find("-")]
+                if group not in instancedict.keys():
+                    instancedict[group] = []
+                instancedict[group].append(arg.name)
+                if group not in testdata.keys() and group[:-1] in testdata.keys():
+                    pseudogroup = copy.copy(group[:-1])
+                elif group in testdata.keys():
+                    pseudogroup = copy.copy(group)
+                role = pseudogroup + arg.role[arg.role.find("-") :]
+                for x in range(len(testdata[pseudogroup])):
+                    funcpassdict[arg.name].append(testdata[pseudogroup][x][role])
 
-            instancedictlist = list(instancedict.keys())
+        instancedictlist = list(instancedict.keys())
 
-            combinations = []
-            for name in instancedictlist:
-                temp = []
-                for arg in instancedict[name]:
-                    temp.append(funcpassdict[arg])
-                combinations.append(zip(*temp))
+        combinations = []
+        for name in instancedictlist:
+            temp = []
+            for arg in instancedict[name]:
+                temp.append(funcpassdict[arg])
+            combinations.append(zip(*temp))
 
-            for x in product(*combinations):
-                origtemp = OrderedDict()
-                for groupName, t in zip(instancedictlist, x):
-                    for key, value in zip(instancedict[groupName], t):
-                        origtemp[key] = value
+        for x in product(*combinations):
+            origtemp = OrderedDict()
+            for groupName, t in zip(instancedictlist, x):
+                for key, value in zip(instancedict[groupName], t):
+                    origtemp[key] = value
 
-                temp = copy.deepcopy(origtemp)
-                funcPy = wrap_eval(self.name, globals(), locals())
+            temp = copy.deepcopy(origtemp)
+            funcPy = eval(self.name, globals(), locals())
 
-                intests = OrderedDict()
-                outtests = OrderedDict()
-                tempdict = {}
-                try:
-                    funcPy(**temp)
-                    for arg in self.args:
-                        if arg.direction == "out":
-                            assert isinstance(temp[arg.name], dict)
-                            temparglist = self.dicttolist(temp[arg.name], arg.typename)
-                            intests[arg.name] = self.getdummyvalue(
-                                arg.typename, len(temparglist)
-                            )
-                            outtests[arg.name] = temparglist
-                        else:
-                            intests[arg.name] = temp[arg.name]
-                    tempdict["outargs"] = copy.deepcopy(outtests)
-                    tempdict["success"] = True
-                except ValueError:
-                    for arg in self.args:
-                        if arg.direction == "out":
-                            intests[arg.name] = self.getdummyvalue(
-                                arg.typename, len(temp[arg.name])
-                            )
-                        else:
-                            intests[arg.name] = temp[arg.name]
-                    tempdict["success"] = False
-                tempdict["inargs"] = copy.deepcopy(intests)
-                if self.typevalidates(
-                    tempdict["inargs"], self.args
-                ) and self.validateoverflow(tempdict):
-                    allvals.append(tempdict)
+            intests = OrderedDict()
+            outtests = OrderedDict()
+            tempdict = {}
+            try:
+                funcPy(**temp)
+                for arg in self.args:
+                    if arg.direction == "out":
+                        assert isinstance(temp[arg.name], dict)
+                        temparglist = self.dicttolist(temp[arg.name], arg.typename)
+                        intests[arg.name] = self.getdummyvalue(
+                            arg.typename, len(temparglist)
+                        )
+                        outtests[arg.name] = temparglist
+                    else:
+                        intests[arg.name] = temp[arg.name]
+                tempdict["outargs"] = copy.deepcopy(outtests)
+                tempdict["success"] = True
+            except ValueError:
+                for arg in self.args:
+                    if arg.direction == "out":
+                        intests[arg.name] = self.getdummyvalue(
+                            arg.typename, len(temp[arg.name])
+                        )
+                    else:
+                        intests[arg.name] = temp[arg.name]
+                tempdict["success"] = False
+            tempdict["inargs"] = copy.deepcopy(intests)
+            if self.typevalidates(
+                tempdict["inargs"], self.args
+            ) and self.validateoverflow(tempdict):
+                allvals.append(tempdict)
 
         return allvals
 
 
 def readspec():
-    genpykernels()
     specdict = {}
-    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
-        loadfile = yaml.safe_load(specfile)
-        indspec = loadfile["kernels"]
-        data = yaml.safe_load(
-            open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
-        )["tests"]
-        for spec in indspec:
-            if "def " in spec["definition"]:
-                for childfunc in spec["specializations"]:
-                    specdict[childfunc["name"]] = Specification(
-                        spec["name"],
-                        childfunc,
-                        data,
-                        not spec["automatic-tests"],
-                    )
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as f:
+        loadfile = yaml.load(f, Loader=yaml.CSafeLoader)
+
+    indspec = loadfile["kernels"]
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
+        data = json.load(f)["tests"]
+
+    for spec in indspec:
+        if "def " in spec["definition"]:
+            for childfunc in spec["specializations"]:
+                specdict[childfunc["name"]] = Specification(
+                    spec["name"],
+                    childfunc,
+                    data,
+                    not spec["automatic-tests"],
+                )
     return specdict
-
-
-def wrap_exec(string, globs, locs):
-    exec(string, globs, locs)
-
-
-def wrap_eval(string, globs, locs):
-    return eval(string, globs, locs)
 
 
 def gettypename(spectype):
@@ -215,7 +212,7 @@ def gettypename(spectype):
 def getfuncnames():
     funcs = {}
     with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
-        indspec = yaml.safe_load(specfile)["kernels"]
+        indspec = yaml.load(specfile, Loader=yaml.CSafeLoader)["kernels"]
         for spec in indspec:
             funcs[spec["name"]] = []
             for childfunc in spec["specializations"]:
@@ -231,7 +228,7 @@ kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
 """
 
-    tests_spec = os.path.join(CURRENT_DIR, "..", "tests-spec")
+    tests_spec = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec")
     if os.path.exists(tests_spec):
         shutil.rmtree(tests_spec)
     os.mkdir(tests_spec)
@@ -248,18 +245,18 @@ kSliceNone = kMaxInt64 + 1
 # fmt: off
 
 """.format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                reproducible_datetime()
             )
         )
 
     with open(
-        os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w"
+        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py"), "w"
     ) as outfile:
         outfile.write(prefix)
         with open(
             os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
         ) as specfile:
-            indspec = yaml.safe_load(specfile)["kernels"]
+            indspec = yaml.load(specfile, Loader=yaml.CSafeLoader)["kernels"]
             for spec in indspec:
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
@@ -269,12 +266,14 @@ kSliceNone = kMaxInt64 + 1
                         )
                     outfile.write("\n\n")
 
-    unit_tests = os.path.join(CURRENT_DIR, "..", "tests-spec-explicit")
+    unit_tests = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit")
     if os.path.exists(unit_tests):
         shutil.rmtree(unit_tests)
     os.mkdir(unit_tests)
-    final_dest = os.path.join(CURRENT_DIR, "..", "tests-spec-explicit")
-    copy_dest = os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")
+    final_dest = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit")
+    copy_dest = os.path.join(
+        CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py"
+    )
     shutil.copy(copy_dest, final_dest)
 
 
@@ -315,7 +314,11 @@ def genspectests(specdict):
     for spec in specdict.values():
         with open(
             os.path.join(
-                CURRENT_DIR, "..", "tests-spec", "test_py" + spec.name + ".py"
+                CURRENT_DIR,
+                "..",
+                "awkward-cpp",
+                "tests-spec",
+                "test_py" + spec.name + ".py",
             ),
             "w",
         ) as f:
@@ -331,7 +334,7 @@ def genspectests(specdict):
 # fmt: off
 
 """.format(
-                    datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                    reproducible_datetime()
                 )
             )
             f.write("import pytest\nimport kernels\n\n")
@@ -426,7 +429,9 @@ def getctypelist(arglist):
 def gencpukerneltests(specdict):
     print("Generating files for testing CPU kernels")
 
-    tests_cpu_kernels = os.path.join(CURRENT_DIR, "..", "tests-cpu-kernels")
+    tests_cpu_kernels = os.path.join(
+        CURRENT_DIR, "..", "awkward-cpp", "tests-cpu-kernels"
+    )
     if os.path.exists(tests_cpu_kernels):
         shutil.rmtree(tests_cpu_kernels)
     os.mkdir(tests_cpu_kernels)
@@ -443,7 +448,7 @@ def gencpukerneltests(specdict):
 # fmt: off
 
 """.format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                reproducible_datetime()
             )
         )
 
@@ -463,12 +468,12 @@ def gencpukerneltests(specdict):
 # fmt: off
 
 """.format(
-                    datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                    reproducible_datetime()
                 )
             )
 
             f.write(
-                "import ctypes\nimport pytest\n\nfrom awkward._cpu_kernels import lib\n\n"
+                "import ctypes\nimport pytest\n\nfrom awkward_cpp.cpu_kernels import lib\n\n"
             )
             num = 1
             if spec.tests == []:
@@ -648,7 +653,7 @@ def gencudakerneltests(specdict):
 # fmt: off
 
 """.format(
-                datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                reproducible_datetime()
             )
         )
 
@@ -669,7 +674,7 @@ def gencudakerneltests(specdict):
 # fmt: off
 
 """.format(
-                        datetime.datetime.now().isoformat().replace("T", " AT ")[:22]
+                        reproducible_datetime()
                     )
                 )
 
@@ -765,13 +770,15 @@ def gencudakerneltests(specdict):
 
 def genunittests():
     print("Generating Unit Tests")
-    datayml = open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.yml"))
-    data = yaml.safe_load(datayml)["unit-tests"]
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-test-data.json")) as f:
+        data = json.load(f)["unit-tests"]
+
     for function in data:
         num = 0
         func = "test_" + function["name"] + ".py"
         with open(
-            os.path.join(CURRENT_DIR, "..", "tests-spec-explicit", func), "w"
+            os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit", func),
+            "w",
         ) as file:
             file.write("import pytest\nimport kernels\n\n")
             for test in function["tests"]:
@@ -802,7 +809,16 @@ def genunittests():
                 file.write("\n\n")
 
 
+def evalkernels():
+    with open(
+        os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec", "kernels.py")
+    ) as kernelfile:
+        exec(kernelfile.read(), globals())
+
+
 if __name__ == "__main__":
+    genpykernels()
+    evalkernels()
     specdict = readspec()
     genspectests(specdict)
     gencpukerneltests(specdict)

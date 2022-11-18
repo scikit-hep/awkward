@@ -14,9 +14,11 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.10.6"
+  # Ensure predictable hash
+  SOURCE_DATE_EPOCH: "1667773939"
 
 jobs:
-  awkward-wasm:
+  awkward-cpp-wasm:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
@@ -28,58 +30,50 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --headers --signatures
+
+    - name: Cache wheel
+      id: cache-awkward-cpp-wasm-wheel
+      uses: actions/cache@v3
+      with:
+        path: ./awkward-cpp/dist
+        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-cpp-wasm-${{ hashFiles('awkward-cpp/**') }}
+
     - name: Install EMSDK
       uses: mymindstorm/setup-emsdk@v11
+      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       with:
         version: 3.1.14
 
-    - name: Install ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: awkward-wasm-${{ github.job }}
-        verbose: 2
-
-    - name: Setup ccache
-      run: |
-        echo "/usr/lib/ccache" >> $GITHUB_PATH
-        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-
     - name: Build wheel
+      if: steps.cache-awkward-cpp-wasm-wheel.outputs.cache-hit != 'true'
       run: |
         # pyodide-build doesn't work out of the box with pipx
-        python3 -m pip install pyodide-build==0.21.0
-        export CMAKE_ARGS="-DEMSCRIPTEN=1 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+        python3 -m pip install pyyaml pyodide-build==0.21.0
+        export CMAKE_ARGS="-DEMSCRIPTEN=1"
         pyodide build --exports whole_archive
+      working-directory: awkward-cpp
 
     - name: Upload wheel
       uses: actions/upload-artifact@v3
       with:
-        name: awkward-wasm-wheel
-        path: dist/awkward*wasm32.whl
+        name: awkward-cpp-wasm
+        path: awkward-cpp/dist/awkward*wasm32.whl
 
-  awkward-x86-64:
+  awkward-cpp-x86-64:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
 
-    - name: Install ccache
-      uses: hendrikmuhs/ccache-action@v1.2
-      with:
-        key: awkward-${{ github.job }}
-
-    - name: Setup ccache
-      run: |
-        echo "/usr/lib/ccache" >> $GITHUB_PATH
-        echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-
       # TODO: remove this once mamba-org/mamba#1726 is fixed
       #       and replace with `-r requirements.txt` in a
       #       non-template `environment.yml`
     - name: Template environment.yml
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
-      working-directory: docs-sphinx
+      working-directory: docs
 
       # Technically this give us an environment that is incompatible with
       # the wheel built in the awkward-x86-64 job if the environments
@@ -90,10 +84,40 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
-        environment-file: docs-sphinx/environment.yml
+        environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
            doxygen
+
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --headers --signatures
+
+    - name: Cache wheel
+      id: cache-awkward-cpp-x86-64-wheel
+      uses: actions/cache@v3
+      with:
+        path: ./awkward-cpp/dist
+        key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
+
+    - name: Build wheel
+      if: steps.cache-awkward-cpp-x86-64-wheel.outputs.cache-hit != 'true'
+      run: pipx run build -w ./awkward-cpp
+
+    - name: Upload wheel
+      uses: actions/upload-artifact@v3
+      with:
+        name: awkward-cpp-x86-64
+        path: awkward-cpp/dist/awkward*.whl
+
+  awkward:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --headers --signatures
 
     - name: Build wheel
       run: pipx run build -w
@@ -101,12 +125,12 @@ jobs:
     - name: Upload wheel
       uses: actions/upload-artifact@v3
       with:
-        name: awkward-x86-64-wheel
+        name: awkward
         path: dist/awkward*.whl
 
   build-docs:
     runs-on: ubuntu-22.04
-    needs: [awkward-wasm, awkward-x86-64]
+    needs: [awkward-cpp-wasm, awkward-cpp-x86-64, awkward]
     defaults:
       run:
         # Ensure conda env is activated
@@ -119,7 +143,7 @@ jobs:
       #       non-template `environment.yml`
     - name: Template environment.yml
       run: pipx run --spec cogapp cog -o environment.yml environment.yml.cog
-      working-directory: docs-sphinx
+      working-directory: docs
 
       # Technically this give us an environment that is incompatible with
       # the wheel built in the awkward-x86-64 job if the environments
@@ -130,41 +154,62 @@ jobs:
       with:
         # Cache invalidates daily by default
         cache-env: true
-        environment-file: docs-sphinx/environment.yml
+        environment-file: docs/environment.yml
         extra-specs: |
            python=${{ env.PYTHON_VERSION }}
            doxygen
 
-    - name: Download WASM wheel
+    - name: Download awkward wheel
       uses: actions/download-artifact@v3
       with:
-        name: awkward-wasm-wheel
-        path: docs-sphinx/lite/pypi
-
-    - name: Download x86_64 wheel
-      uses: actions/download-artifact@v3
-      with:
-        name: awkward-x86-64-wheel
+        name: awkward
         path: dist
 
-    - name: Install Awkward
-      run: python3 -m pip install dist/awkward*.whl
+    - name: Copy awkward wheel to JupyterLite
+      run: |
+        mkdir -p docs/lite/pypi/
+        cp dist/awkward*.whl docs/lite/pypi/
 
-    - name: Generate documentation
+    - name: Download & copy awkward-cpp WASM wheel to JupyterLite
+      uses: actions/download-artifact@v3
+      with:
+        name: awkward-cpp-wasm
+        path: docs/lite/pypi
+
+    - name: Download awkward-cpp x86_64 wheel
+      uses: actions/download-artifact@v3
+      with:
+        name: awkward-cpp-x86-64
+        path: dist
+
+    - name: Install awkward and awkward-cpp wheels
+      run: python -m pip install dist/awkward*.whl
+
+    - name: Generate build files
+      run: pipx run nox -s prepare -- --docs --headers
+
+    - name: Generate C++ documentation
+      run: doxygen
+      working-directory: awkward-cpp/docs
+
+    - name: Copy C++ documentation
+      run: cp -r awkward-cpp/docs/html/ docs/_static/doxygen
+
+    - name: Generate Python documentation
       run: sphinx-build -M html . _build/
-      working-directory: docs-sphinx
+      working-directory: docs
 
     - name: Upload documentation
       uses: actions/upload-artifact@v3
       with:
         name: docs
-        path: docs-sphinx/_build/html
+        path: docs/_build/html
 
     - name: Upload Jupyter Book cache
       uses: actions/upload-artifact@v3
       with:
         name: jupyter-cache
-        path: docs-sphinx/_build/.jupyter_cache
+        path: docs/_build/.jupyter_cache
 
   deploy-docs:
     runs-on: ubuntu-22.04
@@ -178,7 +223,7 @@ jobs:
       run: |
         # Sanitise ref name
         # NB: head_ref is only valid for PR triggers
-        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@")
+        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@g")
         # Export for subsequent steps
         echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
         # Activate version
@@ -187,7 +232,8 @@ jobs:
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
               "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/" \
           -H "Content-Type: application/json" \
-          -d '{"active":true,"hidden":true}'
+          -d '{"active":true,"hidden":true}' \
+          --fail
 
     - name: Trigger RTD build
       run: |
@@ -195,7 +241,8 @@ jobs:
         curl \
           -X POST \
           -H "Authorization: Token ${{ secrets.RTD_TOKEN }}" \
-              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/"
+              "https://readthedocs.org/api/v3/projects/awkward-array/versions/$VERSION_SLUG/builds/" \
+          --fail
 
     - name: Edit PR description
       if: github.event_name == 'pull_request'
