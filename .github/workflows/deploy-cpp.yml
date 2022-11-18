@@ -1,4 +1,4 @@
-name: Wheels
+name: Deploy C++
 
 on:
   workflow_dispatch:
