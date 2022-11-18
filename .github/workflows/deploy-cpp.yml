@@ -23,10 +23,15 @@ jobs:
         python-version: '3.10'
 
     - name: Compute SOURCE_DATE_EPOCH
+      shell: python
       run: |
-        # Set SOURCE_DATE_EPOCH to datetime of last change to awkward-cpp/pyproject.toml
-        SOURCE_DATE_EPOCH="$(git log -1 --format="%ad" --date=unix -- awkward-cpp/pyproject.toml)"
-        echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+        import os, subprocess
+        result = subprocess.run(
+          ["git", "log", "-1", '--format=%ad', '--date=unix', '--', 'pyproject.toml'],
+          cwd="awkward-cpp", capture_output=True, text=True, check=True
+        )
+        with open(os.environ["GITHUB_ENV"], "a") as env_file:
+          env_file.write(f"SOURCE_DATE_EPOCH={result.stdout.strip()}")
 
     - name: Prepare build files
       run: pipx run nox -s prepare
