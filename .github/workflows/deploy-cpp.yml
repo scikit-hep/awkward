@@ -78,15 +78,11 @@ jobs:
     - name: Compute SOURCE_DATE_EPOCH
       shell: python
       run: |
-        import subprocess
-        import os
+        import os, subprocess
         result = subprocess.run(
           ["git", "log", "-1", '--format=%ad', '--date=unix', '--', 'pyproject.toml'],
-          cwd="awkward-cpp",
-          capture_output=True,
-          text=True
+          cwd="awkward-cpp", capture_output=True, text=True, check=True
         )
-        result.check_returncode()
         with open(os.environ["GITHUB_ENV"], "a") as env_file:
           env_file.write(f"SOURCE_DATE_EPOCH={result.stdout.strip()}")
 
@@ -123,15 +119,11 @@ jobs:
     - name: Compute SOURCE_DATE_EPOCH
       shell: python
       run: |
-        import subprocess
-        import os
+        import os, subprocess
         result = subprocess.run(
           ["git", "log", "-1", '--format=%ad', '--date=unix', '--', 'pyproject.toml'],
-          cwd="awkward-cpp",
-          capture_output=True,
-          text=True
+          cwd="awkward-cpp", capture_output=True, text=True, check=True
         )
-        result.check_returncode()
         with open(os.environ["GITHUB_ENV"], "a") as env_file:
           env_file.write(f"SOURCE_DATE_EPOCH={result.stdout.strip()}")
 
