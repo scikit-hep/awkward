@@ -27,7 +27,7 @@ jobs:
 
     env:
       PIP_ONLY_BINARY: cmake
-      PYTHON_VERSION: "3.10"
+      PYTHON_VERSION: "3.9"
       # Ensure predictable hash
       SOURCE_DATE_EPOCH: "1667773939"
 
@@ -36,10 +36,10 @@ jobs:
         with:
           submodules: true
 
-      - name: 'Python ${{ matrix.python-version }}'
+      - name: 'Python ${{ env.PYTHON_VERSION }}'
         uses: actions/setup-python@v4
         with:
-          python-version: '${{ matrix.python-version }}'
+          python-version: '${{ env.PYTHON_VERSION }}'
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
@@ -49,13 +49,14 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: |
           python -m pip install build
           python -m build -w ./awkward-cpp
+          ls ./awkward-cpp/dist
 
       - name: Install awkward-cpp
         run: python -m pip install -v ./awkward-cpp/dist/*.whl
