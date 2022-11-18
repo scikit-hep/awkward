@@ -31,7 +31,7 @@ jobs:
       run: pipx run build --sdist awkward-cpp
 
     - name: Check metadata
-      run: pipx run twine check dist/*
+      run: pipx run twine check awkward-cpp/dist/*
 
     - uses: actions/upload-artifact@v3
       with:
