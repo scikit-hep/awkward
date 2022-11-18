@@ -223,7 +223,7 @@ jobs:
       run: |
         # Sanitise ref name
         # NB: head_ref is only valid for PR triggers
-        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@[_/]@-@g")
+        export VERSION_SLUG=$(echo "${{ github.head_ref || github.ref_name }}" | sed -E "s@/@-@g" | sed -E 's/.*/\L&/')
         # Export for subsequent steps
         echo "VERSION_SLUG=$VERSION_SLUG" >> $GITHUB_ENV
         # Activate version
