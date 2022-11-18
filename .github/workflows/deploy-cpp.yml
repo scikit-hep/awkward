@@ -2,9 +2,6 @@ name: Deploy C++
 
 on:
   workflow_dispatch:
-  release:
-    types:
-    - published
 
 
 jobs:
@@ -161,4 +158,4 @@ jobs:
 
     - uses: pypa/gh-action-pypi-publish@v1.5.1
       with:
-        password: ${{ secrets.pypi_password }}
+        password: ${{ secrets.PYPI_PASSWORD_CPP }}
