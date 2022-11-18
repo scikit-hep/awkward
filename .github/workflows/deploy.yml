@@ -41,7 +41,7 @@ jobs:
         run: pipx run build --sdist awkward-cpp
 
       - name: Check sdist matches PyPI
-        run: nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward-cpp*.tar.gz
+        run: pipx run nox -s check_cpp_sdist_released -- awkward-cpp/dist/awkward-cpp*.tar.gz
 
   build:
     name: "Build wheel & sdist"
@@ -79,7 +79,7 @@ jobs:
         submodules: true
 
     - name: Create archive
-      run: tar -czvf header-only.tar.gz -C src/awkward/_connect header-only
+      run: tar -czvf header-only.tar.gz header-only
 
     - uses: actions/upload-artifact@v3
       with:
