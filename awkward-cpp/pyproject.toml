@@ -11,6 +11,7 @@ version = "1"
 dependencies = [
     "numpy>=1.13.1"
 ]
+readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
 authors = [
     {name = "Jim Pivarski", email = "pivarski@princeton.edu"},

@@ -101,6 +101,15 @@ jobs:
         config-file: cibuildwheel.toml
         package-dir: awkward-cpp
 
+    - name: Check metadata
+      shell: python
+      run: |
+        import subprocess, glob
+        subprocess.run(
+          ["pipx", "run", "twine", "check", *glob.glob("wheelhouse/*.whl")],
+          check=True
+        )
+
     - name: Upload wheels
       uses: actions/upload-artifact@v3
       with:
@@ -143,6 +152,15 @@ jobs:
       with:
         config-file: cibuildwheel.toml
         package-dir: awkward-cpp
+
+    - name: Check metadata
+      shell: python
+      run: |
+        import subprocess, glob
+        subprocess.run(
+          ["pipx", "run", "twine", "check", *glob.glob("wheelhouse/*.whl")],
+          check=True
+        )
 
     - name: Upload wheels
       uses: actions/upload-artifact@v3
