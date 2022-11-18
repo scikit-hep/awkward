@@ -27,7 +27,7 @@ jobs:
 
     env:
       PIP_ONLY_BINARY: cmake
-      PYTHON_VERSION: "3.10"
+      PYTHON_VERSION: "3.9"
       # Ensure predictable hash
       SOURCE_DATE_EPOCH: "1667773939"
 
