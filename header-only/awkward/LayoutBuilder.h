@@ -35,7 +35,7 @@ namespace awkward {
       /// @brief Converts index as field string.
       std::string
       index_as_field() const {
-        return std::to_string(reinterpret_cast<size_t>(index));
+        return std::to_string(index);
       }
 
       /// @brief The index of a Record field.

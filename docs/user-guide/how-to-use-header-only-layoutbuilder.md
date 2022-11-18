@@ -18,7 +18,7 @@ How to use the header-only LayoutBuilder in C++
 :tags: [hide-cell]
 
 // Make Awkward headers available in this notebook
-#pragma cling add_include_path("../../src/awkward/cpp-headers")
+#pragma cling add_include_path("../../src/awkward/_connect/header-only")
 ```
 
 What is header-only Layout Builder?
@@ -41,14 +41,14 @@ The code is minimal; it does not include all of the code needed to use Awkward A
 How to use Layout Builders?
 -----------------------------
 
-The following cpp-headers which reside in this [directory](https://github.com/scikit-hep/awkward/tree/main/src/awkward/cpp-headers/awkward) are needed to use Layout Builders and can be included in an external project as a git submodule.
+The following cpp-headers are needed to use Layout Builders to use the header-only `LayoutBuilder`.
 
 1. BuilderOptions.h
 2. GrowableBuffer.h
 3. LayoutBuilder.h
 4. utils.h
 
-It is recommended to use an awkward installation (e.g. a versioned set of files with pip install) and the config options described.
+It is recommended to download these headers from the [release artifacts on GitHub](https://github.com/scikit-hep/awkward/releases)
 
 Awkward Array can be installed from PyPI using pip:
 

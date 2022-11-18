@@ -1,22 +1,15 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-cmake_minimum_required(VERSION 3.14...3.18)
-
-# VERSION_INFO is the version stamp for everything (all C++, all Python).
-file(READ "VERSION_INFO" VERSION_INFO)
-string(STRIP ${VERSION_INFO} VERSION_INFO)
-string(REPLACE "rc" "." VERSION_INFO_SIMPLE "${VERSION_INFO}")
+cmake_minimum_required(VERSION 3.15...3.24)
 
 # Project must be near the top
 project(
-  awkward
+  ${SKBUILD_PROJECT_NAME}
   LANGUAGES CXX
-  VERSION ${VERSION_INFO_SIMPLE})
+  VERSION ${SKBUILD_PROJECT_VERSION})
 
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
-
-include(CMakeDependentOption)
 
 # Defaults for properties in this directory (and below)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -53,7 +46,7 @@ target_compile_features(awkward-parent INTERFACE cxx_std_11)
 target_include_directories(awkward-parent INTERFACE rapidjson/include)
 
 # C++ dependencies (header-only): GrowableBuffer
-target_include_directories(awkward-parent INTERFACE src/awkward/cpp-headers/)
+target_include_directories(awkward-parent INTERFACE header-only)
 
 # First tier: cpu-kernels (object files, static library, and dynamic library).
 add_library(awkward-cpu-kernels-objects OBJECT ${CPU_KERNEL_SOURCES})
@@ -97,45 +90,21 @@ add_library(awkward SHARED $<TARGET_OBJECTS:awkward-objects>)
 target_link_libraries(awkward PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
 target_link_libraries(awkward PUBLIC awkward-parent)
 
-# Tests Macro to add C++ tests (part of CMake build, distinct from pytests in Python).
-include(CTest)
-
-if(BUILD_TESTING)
-  add_subdirectory(tests-cpp)
-  add_subdirectory(tests)
-
-  addtest_nolibs(test_1494-layout-builder tests-cpp/test_1494-layout-builder.cpp)
-  addtest_nolibs(test_1542-growable-buffer tests-cpp/test_1542-growable-buffer.cpp)
-  addtest(test_1542-array-builder tests-cpp/test_1542-array-builder.cpp)
-  addtest_nolibs(test_1560-builder-options tests-cpp/test_1560-builder-options.cpp)
-
-endif()
-
-option(PYBUILD "Build Python modules")
-cmake_dependent_option(AWKWARD_EXTERNAL_PYBIND11 "Build against an external pybind11" OFF
-                       "PYBUILD" OFF)
-
 # Third tier: Python modules.
-if(PYBUILD)
-  if(AWKWARD_EXTERNAL_PYBIND11)
-    find_package(pybind11 CONFIG REQUIRED)
-  else()
-    add_subdirectory(pybind11)
-  endif()
+find_package(pybind11 CONFIG REQUIRED)
 
-  file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
-  pybind11_add_module(_ext ${LAYOUT_SOURCES})
-  target_link_libraries(_ext PRIVATE awkward-static)
+# Install python bindings
+file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
+pybind11_add_module(_ext ${LAYOUT_SOURCES})
+target_link_libraries(_ext PRIVATE awkward-static)
 
-  install(
-    TARGETS awkward awkward-parent awkward-cpu-kernels _ext
-    LIBRARY DESTINATION awkward
-    ARCHIVE DESTINATION awkward)
+# Install pure-python files
+file(GLOB_RECURSE PYTHON_SOURCES "src/${SKBUILD_PROJECT_NAME}/*.py")
 
-  # Third tier: install without Python modules.
-else()
-  install(
-    TARGETS awkward-static awkward awkward-parent awkward-cpu-kernels awkward-cpu-kernels-static
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
-endif()
+install(
+  TARGETS awkward awkward-parent awkward-cpu-kernels _ext
+  LIBRARY DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
+  RUNTIME DESTINATION "${SKBUILD_PROJECT_NAME}/lib"
+  ARCHIVE DESTINATION "${SKBUILD_PROJECT_NAME}/lib")
+
+install(FILES ${PYTHON_SOURCES} DESTINATION ${SKBUILD_PROJECT_NAME})
