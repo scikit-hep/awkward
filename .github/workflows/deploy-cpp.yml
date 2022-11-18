@@ -8,21 +8,33 @@ on:
 
 
 jobs:
-  make_sdist:
-    name: "Make SDist"
+
+  make_sdists:
+    name: "Make SDists"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
 
-    - name: Build SDist
-      run: pipx run build --sdist
+    - name: Compute SOURCE_DATE_EPOCH
+      run: |
+        # Set SOURCE_DATE_EPOCH to datetime of last change to awkward-cpp/pyproject.toml
+        SOURCE_DATE_EPOCH="$(git log -1 --format="%ad" --date=unix -- awkward-cpp/pyproject.toml)"
+        echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+
+    - name: Prepare build files
+      run: pipx run nox -s prepare
+
+    - name: Build awkward-cpp sdist
+      run: pipx run build --sdist awkward-cpp
+
+    - name: Check metadata
+      run: pipx run twine check dist/*
 
     - uses: actions/upload-artifact@v3
       with:
-        path: dist/*.tar.gz
-
+        path: awkward-cpp/dist/*.tar.gz
 
   build_wheels:
     name: "Wheel: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }}"
@@ -47,16 +59,26 @@ jobs:
           arch: auto32
           build: "cp{37,38,39}-*"
 
-
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
 
+    - name: Compute SOURCE_DATE_EPOCH
+      run: |
+        SOURCE_DATE_EPOCH="$(git log -1 --format="%ad" --date=unix -- awkward-cpp/pyproject.toml)"
+        echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+
+    - name: Prepare build files
+      run: pipx run nox -s prepare
+
     - uses: pypa/cibuildwheel@v2.11.2
       env:
         CIBW_BUILD: ${{ matrix.build }}
         CIBW_ARCHS: ${{ matrix.arch }}
+      with:
+        config-file: cibuildwheel.toml
+        package-dir: awkward-cpp
 
     - name: Upload wheels
       uses: actions/upload-artifact@v3
@@ -77,12 +99,23 @@ jobs:
       with:
         submodules: true
 
+    - name: Compute SOURCE_DATE_EPOCH
+      run: |
+        SOURCE_DATE_EPOCH="$(git log -1 --format="%ad" --date=unix -- awkward-cpp/pyproject.toml)"
+        echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+
+    - name: Prepare build files
+      run: pipx run nox -s prepare
+
     - uses: docker/setup-qemu-action@v2.1.0
 
     - uses: pypa/cibuildwheel@v2.11.2
       env:
         CIBW_BUILD: cp${{ matrix.python }}-*
         CIBW_ARCHS: ${{ matrix.arch }}
+      with:
+        config-file: cibuildwheel.toml
+        package-dir: awkward-cpp
 
     - name: Upload wheels
       uses: actions/upload-artifact@v3
