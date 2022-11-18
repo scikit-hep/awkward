@@ -4,6 +4,8 @@ import builtins
 import numbers
 from datetime import datetime, timedelta
 
+from awkward_cpp.lib import _ext
+
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -115,7 +117,7 @@ def _impl(array):
                 out = ak.types.RegularType(out, x)
             return ak.types.ArrayType(out, array.shape[0])
 
-    elif isinstance(array, ak._ext.ArrayBuilder):
+    elif isinstance(array, _ext.ArrayBuilder):
         form = ak.forms.from_json(array.form())
         return ak.types.ArrayType(form.type_from_behavior(None), len(array))
 

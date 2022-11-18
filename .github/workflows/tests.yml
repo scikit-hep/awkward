@@ -26,23 +26,31 @@ jobs:
         pipx run nox -s pylint
 
 
-  make_sdist:
-    name: "Make SDist"
+  make_sdists:
+    name: "Make SDists"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
 
-    - name: Build SDist
+    - name: Prepare build files
+      run: pipx run nox -s prepare
+
+    - name: Build awkward SDist
       run: pipx run build --sdist
+
+    - name: Build awkward-cpp SDist
+      run: pipx run build --sdist awkward-cpp
 
     - name: Check metadata
       run: pipx run twine check dist/*
 
     - uses: actions/upload-artifact@v3
       with:
-        path: dist/*.tar.gz
+        path: |
+          dist/*.tar.gz
+          awkward-cpp/dist/*.tar.gz
 
 
   build_wheels:
@@ -58,17 +66,31 @@ jobs:
       with:
         submodules: true
 
+    - name: Prepare build files
+      run: pipx run nox -s prepare
+
     - uses: pypa/cibuildwheel@v2.11.2
       env:
         CIBW_ARCHS_MACOS: universal2
         CIBW_BUILD: cp39-win_amd64 cp37-manylinux_x86_64 cp38-macosx_universal2
+      with:
+        config-file: cibuildwheel.toml
+        package-dir: awkward-cpp
 
     - uses: pypa/cibuildwheel@v2.11.2
       if: matrix.os == 'ubuntu-latest'
       env:
         CIBW_BUILD: cp311-manylinux_x86_64
+      with:
+        config-file: cibuildwheel.toml
+        package-dir: awkward-cpp
+
+    - name: Build awkward wheel
+      run: pipx run build --wheel .
 
     - name: Upload wheels
       uses: actions/upload-artifact@v3
       with:
-        path: wheelhouse/*.whl
+        path: |
+          wheelhouse/*.whl
+          dist/*.whl

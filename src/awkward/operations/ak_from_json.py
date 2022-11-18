@@ -5,6 +5,8 @@ import pathlib
 from collections.abc import Iterable, Sized
 from urllib.parse import urlparse
 
+from awkward_cpp.lib import _ext
+
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -469,13 +471,13 @@ def _no_schema(
     highlevel,
     behavior,
 ):
-    builder = ak._ext.ArrayBuilder(initial=initial, resize=resize)
+    builder = _ext.ArrayBuilder(initial=initial, resize=resize)
 
     read_one = not line_delimited
 
     with _get_reader(source)() as obj:
         try:
-            ak._ext.fromjsonobj(
+            _ext.fromjsonobj(
                 obj,
                 builder,
                 read_one,
@@ -552,7 +554,7 @@ def _yes_schema(
 
     with _get_reader(source)() as obj:
         try:
-            length = ak._ext.fromjsonobj_schema(
+            length = _ext.fromjsonobj_schema(
                 obj,
                 container,
                 read_one,
