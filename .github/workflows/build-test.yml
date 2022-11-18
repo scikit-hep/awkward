@@ -4,12 +4,13 @@ on:
   pull_request:
     paths-ignore:
       - README.md
-      - VERSION_INFO
-      - .ci/**
+      - CONTRIBUTING.md
+      - CITATION.cff
+      - LICENSE
       - .readthedocs.yml
       - docs-img/**
-      - docs-doxygen/**
-      - docs-sphinx/**
+      - docs/**
+      - awkward-cpp/docs/**
       - studies/**
 
   schedule:
@@ -20,6 +21,12 @@ on:
 concurrency:
   group: 'build-test-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
+
+env:
+  # Leverage reproducible builds by setting a constant SOURCE_DATE_EPOCH
+  # This will ensure that the hash of the awkward-cpp directory remains
+  # constant for unchanged files, meaning that it can be used for caching
+  SOURCE_DATE_EPOCH: "1667773939"
 
 jobs:
   Windows:
@@ -55,23 +62,48 @@ jobs:
           python-version: '${{ matrix.python-version }}'
           architecture: '${{ matrix.python-architecture }}'
 
-      - name: Build
-        run: 'python -m pip install -v .[test,dev]'
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
+        with:
+          path: awkward-cpp/dist
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w awkward-cpp
+
+      - name: Install awkward-cpp
+        run: python -m pip install -v @(get-childitem -path awkward-cpp/dist/*.whl)
+
+      - name: Build & install awkward
+        run: python -m pip install -v .
+
+      - name: Print versions
+        run: python -m pip list
 
       - name: Check if kernel specification is sorted
-        run: python dev/kernel-diagnostics.py --check-spec-sorted
+        run: pipx run nox -s diagnostics -- --check-spec-sorted
 
-      - name: Generate Kernel tests
-        run: python dev/generate-tests.py
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
 
       - name: Test specification
-        run: python -m pytest -vv -rs tests-spec
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        run: python -m pytest -vv -rs tests-spec-explicit
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        run: python -m pytest -vv -rs tests-cpu-kernels
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 
       - name: Test
         run: python -m pytest -vv -rs tests
@@ -96,38 +128,53 @@ jobs:
         with:
           submodules: true
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: '${{ github.job }}-${{matrix.python-version}}'
-
-      - name: Use ccache
-        run: |
-          echo "/usr/lib/ccache" >> $GITHUB_PATH
-          echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-
       - name: 'Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v4
         with:
           python-version: '${{ matrix.python-version }}'
 
-      - name: Build
-        run: 'python -m pip install -v .[test,dev]'
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w ./awkward-cpp
+
+      - name: Install awkward-cpp
+        run: python -m pip install -v ./awkward-cpp/dist/*.whl
+
+      - name: Build & install awkward
+        run: python -m pip install -v .
+
+      - name: Print versions
+        run: python -m pip list
 
       - name: Check if kernel specification is sorted
-        run: python dev/kernel-diagnostics.py --check-spec-sorted
+        run: pipx run nox -s diagnostics -- --check-spec-sorted
 
-      - name: Generate Kernel tests
-        run: python dev/generate-tests.py
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
 
       - name: Test specification
-        run: python -m pytest -vv -rs tests-spec
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        run: python -m pytest -vv -rs tests-spec-explicit
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        run: python -m pytest -vv -rs tests-cpu-kernels
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 
       - name: Test
         run: python -m pytest -vv -rs tests
@@ -145,7 +192,7 @@ jobs:
           - "numpy"
         include:
           - python-version: '3.7'
-            numpy-package: "oldest-supported-numpy"
+            numpy-package: "numpy>=1.17"
 
     runs-on: ubuntu-20.04
 
@@ -158,46 +205,53 @@ jobs:
         with:
           submodules: true
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: >-
-            ${{ github.job
-            }}-${{matrix.python-version}}-${{matrix.numpy-package}}
-
-      - name: Use ccache
-        run: |
-          echo "/usr/lib/ccache" >> $GITHUB_PATH
-          echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
-
       - name: 'Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v4
         with:
           python-version: '${{ matrix.python-version }}'
 
-      - name: Install NumPy
-        run: python -m pip install "${{ matrix.numpy-package }}"
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
-      - name: Build
-        run: 'python -m pip install -v .[test,dev]'
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w ./awkward-cpp
+
+      - name: Install awkward-cpp
+        run: python -m pip install -v ./awkward-cpp/dist/*.whl "${{ matrix.numpy-package }}"
+
+      - name: Build & install awkward
+        run: python -m pip install -v .
 
       - name: Print versions
         run: python -m pip list
 
       - name: Check if kernel specification is sorted
-        run: python dev/kernel-diagnostics.py --check-spec-sorted
+        run: pipx run nox -s diagnostics -- --check-spec-sorted
 
-      - name: Generate Kernel tests
-        run: python dev/generate-tests.py
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
 
       - name: Test specification
-        run: python -m pytest -vv -rs tests-spec
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec
 
       - name: Test specification with explicitly defined values
-        run: python -m pytest -vv -rs tests-spec-explicit
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
 
       - name: Test CPU kernels
-        run: python -m pytest -vv -rs tests-cpu-kernels
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 
       - name: Test
         run: >-
@@ -231,43 +285,46 @@ jobs:
         with:
           submodules: true
 
-      - name: "Get conda"
-        uses: "conda-incubator/setup-miniconda@v2"
+      - name: Setup Python via Conda
+        uses: mamba-org/provision-with-micromamba@main
         with:
-          auto-update-conda: true
-          python-version: "${{ matrix.python-version }}"
-          miniforge-variant: Mambaforge
-          use-mamba: true
+          # Cache invalidates daily by default
+          cache-env: true
+          environment-file: false
+          environment-name: awkward
+          channels: conda-forge
+          extra-specs: |
+            python=${{ env.PYTHON_VERSION }}
+            numpy
+            root
 
-      - name: "Install ROOT"
-        run: |
-          mamba env list
-          mamba install root
-          mamba list
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@v3
         with:
-          key: >-
-            ${{ github.job}}-${{matrix.python-version}}
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ matrix.python-version }}-${{ hashFiles('awkward-cpp/**') }}
 
-      - name: Use ccache
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
         run: |
-          echo "/usr/lib/ccache" >> $GITHUB_PATH
-          echo "/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+          python3 -m pip install build
+          python3 -m build -w ./awkward-cpp
 
-      - name: Install NumPy
-        run: |
-          conda env list
-          mamba install numpy
-          conda list
+      - name: Install awkward-cpp
+        run: python3 -m pip install -v ./awkward-cpp/dist/*.whl
 
-      - name: Build
-        run: 'python -m pip install -v .[test,dev]'
+      - name: Build & install awkward
+        run: python3 -m pip install -v .
 
       - name: Print versions
         run: python -m pip list
 
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test.txt
+
       - name: Test
-        run: >-
-          python -m pytest -vv -rs tests
+        run: python -m pytest -vv -rs tests

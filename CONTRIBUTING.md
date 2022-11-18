@@ -2,11 +2,11 @@
 
 Thank you for your interest in contributing! We're eager to see your ideas and look forward to working with you.
 
-This document describes the technical procedures we follow in this project. I should also stress that as members of the Scikit-HEP community, we are all obliged to maintaining a welcoming, harassment-free environment. See the [Code of Conduct](https://scikit-hep.org/code-of-conduct) for details.
+This document describes the technical procedures we follow in this project. Yet, it should also be stressed that as members of the Scikit-HEP community, we are all obliged to maintaining a welcoming, harassment-free environment. See the [Code of Conduct](https://scikit-hep.org/code-of-conduct) for details.
 
 ### Where to start
 
-The front page for the Awkward Array project is its [GitHub README](https://github.com/scikit-hep/awkward-1.0#readme). This leads directly to tutorials and reference documentation that I assume you've already seen. It also includes instructions for [compiling for development](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), using the localbuild.py script.
+The front page for the Awkward Array project is its [GitHub README](https://github.com/scikit-hep/awkward-1.0#readme). This leads directly to tutorials and reference documentation that you may have already seen. It also includes instructions for [compiling for development](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), using the localbuild.py script.
 
 ### Reporting issues
 
@@ -52,30 +52,85 @@ It is unnecessary to manually edit (rebase) your commit history. If, however, yo
 
 ### Building and testing locally
 
-As described in [the README](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), you can build locally using
+As described in [the README](readme.md), Awkward Array is shipped as two packages: `awkward` and `awkward-cpp`. The `awkward-cpp` package contains the compiled C++ components required for performance. If you do not need to frequently modify this code, then it can simply be installed using `pip`.
 
+Subsequent steps require the generation of code and datafiles (kernel specification, header-only includes). This can be done with the `prepare` nox session:
 ```bash
-python localbuild.py --pytest tests
+nox -s prepare
 ```
 
-The `--pytest tests` runs the integration tests from the `tests` directory (drop it to build only).
+<details>
+
+The `prepare` session accepts flags to specify exact generation targets, e.g.
+```bash
+nox -s prepare -- --tests --docs
+```
+This can reduce the time taken to perform the preparation step in the event that only the package-building step is needed.
+
+`nox` also lets us re-use the virtualenvs that it creates for each session with the `-R` flag, eliminating the dependency reinstall time:
+```bash
+nox -R -s prepare
+```
+
+</details>
+
+#### Installing the `awkward-cpp` package
+
+The C++ components can be installed by building the `awkward-cpp` package:
+```bash
+python -m pip install ./awkward-cpp
+```
+
+<details>
+
+If you are working on the C++ components of Awkward Array, it might be more convenient to skip the build isolation step, which involves creating an isolated build environment. First, you must install the build requirements:
+```bash
+python -m pip install "scikit-build-core[pyproject,color]" pybind11 ninja cmake
+```
+
+Then the installation can be performed without build isolation:
+```bash
+python -m pip install --no-build-isolation --check-build-dependencies ./awkward-cpp
+```
+
+ </details>
+
+#### Installing the `awkward` package
+With `awkward-cpp` installed, an editable installation of the pure-python `awkward` package can be performed with
+```bash
+python -m pip install -e .
+```
+
+#### Testing the installed packages
+Finally, let's run the integration test suite to ensure that everything's working as expected:
+```bash
+python -m pytest tests -n auto
+```
 
 For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
 
 ```bash
-python dev/generate-kernelspec.py
-python dev/generate-tests.py
-python -m pytest -vv -rs tests-spec
-python -m pytest -vv -rs tests-cpu-kernels
+python -m pytest -vv -rs awkward-cpp/tests-spec
+python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 ```
+
+This assumes that the `nox -s prepare` session ran the `--tests` target.
 
 Furthermore, if you have an Nvidia GPU and CuPy installed, you can run the CUDA tests with
 
 ```bash
-python dev/generate-tests.py
 python -m pytest -vv -rs tests-cuda-kernels
 python -m pytest -vv -rs tests-cuda
 ```
+
+### Building wheels
+Sometimes it's convenient to build a wheel for the `awkward-cpp` package, so that subsequent re-installs do not require the package to be rebuilt. The `build` package can be used to do this, though care must be taken to specify the *current* Python interpreter:
+
+```bash
+pipx run --python=$(which python) build --wheel awkward-cpp
+```
+
+The built wheel will then be available in `awkward-cpp/dist`.
 
 ### Formatting
 
@@ -98,10 +153,23 @@ You need some additional packages installed on your system to build the document
 * [sphinx](https://pypi.org/project/sphinx/)
 * [sphinx-rtd-theme](https://pypi.org/project/sphinx-rtd-theme/)
 
-To build documentation locally, execute the following command from the root directory of the project.
-
+To build documentation locally, first prepare the generated data files with
 ```bash
-sphinx-build docs-sphinx docs-sphinx/_build
+nox -s prepare
+```
+
+<details>
+
+Only the `--headers` and `--docs` flags are actually required at the time of writing. These can be passed with:
+```bash
+nox -s prepare -- --docs --headers
+```
+
+ </details>
+
+Then, use `nox` to run the various documentation build steps
+```bash
+nox -s docs
 ```
 
 this command executes multiple custom Python scripts(some require a working internet connection), in addition to using Sphinx and Doxygen to generate the required browser viewable documentation.
@@ -109,16 +177,22 @@ this command executes multiple custom Python scripts(some require a working inte
 To view the built documentation, open
 
 ```bash
-docs-sphinx/_build/index.html
+docs/_build/html/index.html
 ```
 
-from the root directory of the project in your preferred web browser.
+from the root directory of the project in your preferred web browser, e.g.
+
+```bash
+python -m http.server 8080 --directory docs/_build/html/
+```
 
 Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is
 
 ```bash
-rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
+rm -rf docs/reference/generated docs/_build docs/_static/doxygen
 ```
+
+There is also a cache in the `docs/_build/.jupyter_cache` directory for Jupyter Book, which can be removed.
 
 ### Continuous testing
 
@@ -132,7 +206,7 @@ The `main` branch is also never far from the latest released version. The [relea
 
 Committing directly to `main` is not allowed except for
 
-   * updating the `VERSION_INFO` file, which should be independent of pull requests
+   * updating the `pyproject.toml` file  to bump the version number, which should be independent of pull requests
    * updating documentation or non-code files
    * unprecedented emergencies
 
@@ -140,7 +214,7 @@ and only by me.
 
 ### The main-v1 branch
 
-The `main-v1` branch was split from `main` just before Awkward 1.x code was removed, so it exists to make 1.10.x bug-fix releases. These commits must be be drawn from `main-v1`, not `main`, and pull requests must target `main-v1` (not the GitHub default). A single commit cannot be applied to both `main` and `main-v1` because they have diverged too much. If a bug-fix needs to be applied to both (unlikely), it will have to be reimplemented on both.
+The `main-v1` branch was split from `main` just before Awkward 1.x code was removed, so it exists to make 1.10.x bug-fix releases. These commits must be drawn from `main-v1`, not `main`, and pull requests must target `main-v1` (not the GitHub default). A single commit cannot be applied to both `main` and `main-v1` because they have diverged too much. If a bug-fix needs to be applied to both (unlikely), it will have to be reimplemented on both.
 
 ### Releases
 

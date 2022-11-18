@@ -1,4 +1,6 @@
-<img src="docs-img/logo/logo-300px.png">
+<!-- begin-logo -->
+![](docs-img/logo/logo-300px.png)
+<!-- end-logo -->
 
 [![PyPI version](https://badge.fury.io/py/awkward.svg)](https://pypi.org/project/awkward)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
@@ -77,7 +79,7 @@ Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward) usi
 pip install awkward
 ```
 
-You will likely get a precompiled binary (wheel), depending on your operating system and Python version. If not, pip attempts to compile from source (which requires a C++ compiler, make, and CMake).
+This will usually download and install a pure-Python wheel for the core `awkward` package, and a compiled binary wheel for the `awkward-cpp` C++ components, depending on your operating system and Python version. If not, pip attempts to compile from source (which requires a C++ compiler).
 
 Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward), which always installs a binary:
 ```bash
@@ -98,6 +100,8 @@ conda update --all
    * Alternatively, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
    * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) chat room.
 
+<!-- readme-pypi-ignore-after -->
+
 # Installation for developers
 
 Be sure to clone this repository recursively to get the header-only C++ dependencies.
@@ -108,26 +112,22 @@ git clone --recursive https://github.com/scikit-hep/awkward.git
 
 Also be aware that the default branch is named `main`, not `master`, which could be important for pull requests from forks.
 
-You can install it on your system with pip, which uses exactly the same procedure as deployment. This is recommended if you **do not** expect to change the code.
+You can install it on your system with pip, which uses exactly the same procedure as deployment. There are two packages to build and install, `awkward` and `awkward-cpp`. These can be build and installed in three steps:
 
+1. Prepare the generated code files: `nox -s prepare`
+2. Build and install `awkward-cpp`: `python -m pip install -v ./awkward-cpp`
+3. Build and install `awkward` in editable mode: `python -m pip install -e .`
+
+The installed packages can then be tested against our integration test suite:
 ```bash
-pip install .[test,dev]
+python -m pytest -n auto tests
 ```
-
-Or you can build it locally for incremental development. The following reuses a local directory so that you only recompile what you've changed. This is recommended if you **do** expect to change the code.
-
-```bash
-python localbuild.py --pytest tests
-```
-
-The `--pytest tests` runs the integration tests from the `tests` directory (drop it to build only).
 
 For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
 
 ```bash
-python dev/generate-tests.py
-python -m pytest -vv -rs tests-spec
-python -m pytest -vv -rs tests-cpu-kernels
+python -m pytest -vv -rs awkward-cpp/tests-spec
+python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
 ```
 
    * [Continuous integration](https://github.com/scikit-hep/awkward/actions/workflows/build-test.yml) and [continuous deployment](https://github.com/scikit-hep/awkward/actions/workflows/wheels.yml) are hosted by [GitHub Actions](https://github.com/features/actions/).

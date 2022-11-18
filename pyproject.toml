@@ -1,163 +1,214 @@
 [build-system]
 requires = [
-    "setuptools>=42.0",
-    "cmake>=3.13",
-    "PyYAML",
+    "hatchling>=1.10.0",
+    "hatch-fancy-pypi-readme"
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "awkward"
+version = "2.0.0rc3"
+description = "Manipulate JSON-like data with NumPy-like idioms."
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.7"
+authors = [
+    { name = "Jim Pivarski", email = "pivarski@princeton.edu" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "awkward_cpp>=1rc0,<=1",
+    "importlib_resources;python_version < \"3.9\"",
+    "numpy>=1.13.1",
+    "packaging",
+]
+dynamic = [
+    "readme"
 ]
 
-build-backend = "setuptools.build_meta"
+[project.entry-points.numba_extensions]
+init = "awkward.numba:_register"
 
+[project.urls]
+"Bug Tracker" = "https://github.com/scikit-hep/awkward-1.0/issues"
+"Chat" = "https://gitter.im/Scikit-HEP/awkward-array"
+"Discussions" = "https://github.com/scikit-hep/awkward-1.0/discussions"
+"Documentation" = "https://awkward-array.org"
+"Homepage" = "https://github.com/scikit-hep/awkward-1.0"
+"Releases" = "https://github.com/scikit-hep/awkward-1.0/releases"
+"Source Code" = "https://github.com/scikit-hep/awkward-1.0"
 
-[tool.check-manifest]
-ignore = [
-    # Hidden files
-    ".*",
-    ".*/**",
-    "**/.*",
-    "**/.*/**",
-
-    # Local files
-    "docs*/**",
-    "dev/**",
-    "studies/**",
-
-    "cuda-build.sh",
-    "kernel-specification.yml",
-    "localbuild.py",
-
-    # Extern files
-    "pybind11/*.*",
-    "pybind11/pybind11/**",
-    "*/example/**",
-    "*/doc/**",
-    "*/tests/**",
-    "*/test/**",
-    "*/bin/**",
-    "**/Makefile",
-    "rapidjson/*.md",
-    "rapidjson/docker/*",
-    "rapidjson/**/*.json",
-    "rapidjson/**/*.yml",
-    "rapidjson/**/*.js",
-    "rapidjson/**/*.sh",
-    "rapidjson/**/*.autopkg",
-    "rapidjson/thirdparty/**",
-    "rapidjson/docker/**",
+[tool.hatch.build]
+artifacts = [
+    "src/awkward/_connect/header-only"
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/awkward"]
 
-[tool.cibuildwheel]
-test-extras = ["test"]
-test-command = "pytest {project}/tests"
-skip = ["pp*win*", "pp*-manylinux_i686"]
-test-skip = ["*universal2:arm64", "pp*", "*musllinux*"]
-manylinux-x86_64-image = "manylinux2014"
-build-verbosity = 1
+[tool.hatch.build.targets.wheel.hooks.version]
+path = "src/awkward/_version.py"
 
-[tool.cibuildwheel.environment]
-PIP_ONLY_BINARY = "cmake,numpy"
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/tests-cuda",
+    "/tests-cuda-kernels",
+    "/docs-img",
+    "/docs",
+    "/CITATION.cff",
+    "/CONTRIBUTING.md",
+    "/README.md",
+    "/requirements-test.txt"
+]
 
-[[tool.cibuildwheel.overrides]]
-select = "cp3?-*"
-manylinux-x86_64-image = "manylinux2014"
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
 
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+text = """
+<a href="https://github.com/scikit-hep/awkward-1.0">
+    <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/logo/logo-300px.png">
+</a>
+"""
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+start-after = "<!-- end-logo -->"
+end-before = "<!-- readme-pypi-ignore-after -->"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-norecursedirs = ["src", "pybind11", "rapidjson", "studies"]
-addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+norecursedirs = [
+    "src",
+    "pybind11",
+    "rapidjson",
+    "studies",
+]
+addopts = [
+    "-ra",
+    "--showlocals",
+    "--strict-markers",
+    "--strict-config",
+]
 xfail_strict = true
 filterwarnings = [
-  "error",
-  "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning",  # due to a transient setuptools dependency
-  "ignore:The NumPy module was reloaded:UserWarning",
-  "ignore:.*np\\.MachAr.*:DeprecationWarning",  # until https://github.com/numba/numba/issues/7758 is fixed
-  "ignore:module 'sre_.*' is deprecated:DeprecationWarning", # From lark & Python 3.11
+    "error",
+    "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning",
+    "ignore:The NumPy module was reloaded:UserWarning",
+    "ignore:.*np\\.MachAr.*:DeprecationWarning",
+    "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
 ]
 log_cli_level = "info"
-
 
 [tool.isort]
 profile = "black"
 
+[tool.pylint.master]
+py-version = "3.7"
+jobs = "0"
+ignore-paths = [
+    "src/awkward/_typeparser/generated_parser.py",
+]
 
-[tool.pylint]
-master.py-version = "3.7"
-master.jobs = "0"
-master.ignore-paths = [
-  "src/awkward/_typeparser/generated_parser.py"
+[tool.pylint.reports]
+output-format = "colorized"
+
+[tool.pylint.messages_control]
+enable = [
+    "useless-suppression",
 ]
-reports.output-format = "colorized"
-messages_control.enable = [
-  "useless-suppression",
-]
-messages_control.disable = [
-  "abstract-method",  # TODO: check but might need to keep disabled
-  "arguments-differ",  # TODO: some of these can be cleaned up
-  "attribute-defined-outside-init",  # TODO: These should be avoided!
-  "bad-super-call",  # TODO: investigate!
-  "broad-except", # TODO: investigate
-  "cell-var-from-loop",  # TODO: investigate and locally disable if needed (unlikely)
-  "chained-comparison", # TODO
-  "consider-using-f-string",  # TODO
-  "consider-using-max-builtin",  # TODO
-  "consider-using-min-builtin",  # TODO
-  "duplicate-code",  # Hahahaha
-  "exec-used",  # TODO: locally disable
-  "fixme",
-  "global-statement",  # TODO: locally disable if really required
-  "import-error",
-  "import-outside-toplevel", # Could be done per-use to discourage
-  "inconsistent-return-statements",  # TODO: probably fix
-  "invalid-class-object",  # TODO: investigate!
-  "invalid-name",
-  "invalid-unary-operand-type",  # TODO: investigate!
-  "keyword-arg-before-vararg",  # TODO: investigate
-  "line-too-long",
-  "missing-class-docstring",
-  "missing-function-docstring",
-  "missing-module-docstring",
-  "no-else-break",  # TODO perhaps?
-  "no-else-raise",  # TODO perhaps?
-  "no-else-return",  # TODO perhaps?
-  "no-member",
-  "no-name-in-module",
-  "no-self-use",  # TODO: investigate and locally disable
-  "no-value-for-parameter",  # TODO: investigate
-  "property-with-parameters",  # TODO: investigate
-  "protected-access",
-  "raise-missing-from",  # TODO
-  "redefined-builtin",  # TODO: fix or locally disable if in a signature
-  "redefined-outer-name",  # TODO: fix
-  "simplifiable-if-expression",  # TODO
-  "super-init-not-called",  # TODO: probably fix
-  "too-few-public-methods",
-  "too-many-arguments",
-  "too-many-boolean-expressions",
-  "too-many-branches",
-  "too-many-function-args",
-  "too-many-instance-attributes",
-  "too-many-lines",
-  "too-many-locals",
-  "too-many-nested-blocks",
-  "too-many-public-methods",
-  "too-many-return-statements",
-  "too-many-statements",
-  "unbalanced-tuple-unpacking",  # TODO: investigate!
-  "undefined-loop-variable", # TODO: fix if possible
-  "ungrouped-imports",
-  "unidiomatic-typecheck",  # TODO
-  "unnecessary-comprehension", # TODO
-  "unnecessary-lambda",  # TODO
-  "unreachable",  # TODO
-  "unsubscriptable-object",  # TODO: check, but possibly a false positive
-  "unused-argument",  # TODO: investigate and locally disable
-  "unused-import", # TODO: remove
-  "unused-variable",  # TODO
-  "use-a-generator",  # TODO
-  "use-implicit-booleaness-not-len", # TODO perhaps?
-  "wrong-import-order",  # Could use isort
-  "wrong-import-position",
+disable = [
+    "abstract-method",
+    "arguments-differ",
+    "attribute-defined-outside-init",
+    "bad-super-call",
+    "broad-except",
+    "cell-var-from-loop",
+    "chained-comparison",
+    "consider-using-f-string",
+    "consider-using-max-builtin",
+    "consider-using-min-builtin",
+    "duplicate-code",
+    "exec-used",
+    "fixme",
+    "global-statement",
+    "import-error",
+    "import-outside-toplevel",
+    "inconsistent-return-statements",
+    "invalid-class-object",
+    "invalid-name",
+    "invalid-unary-operand-type",
+    "keyword-arg-before-vararg",
+    "line-too-long",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "missing-module-docstring",
+    "no-else-break",
+    "no-else-raise",
+    "no-else-return",
+    "no-member",
+    "no-name-in-module",
+    "no-self-use",
+    "no-value-for-parameter",
+    "property-with-parameters",
+    "protected-access",
+    "raise-missing-from",
+    "redefined-builtin",
+    "redefined-outer-name",
+    "simplifiable-if-expression",
+    "super-init-not-called",
+    "too-few-public-methods",
+    "too-many-arguments",
+    "too-many-boolean-expressions",
+    "too-many-branches",
+    "too-many-function-args",
+    "too-many-instance-attributes",
+    "too-many-lines",
+    "too-many-locals",
+    "too-many-nested-blocks",
+    "too-many-public-methods",
+    "too-many-return-statements",
+    "too-many-statements",
+    "unbalanced-tuple-unpacking",
+    "undefined-loop-variable",
+    "ungrouped-imports",
+    "unidiomatic-typecheck",
+    "unnecessary-comprehension",
+    "unnecessary-lambda",
+    "unreachable",
+    "unsubscriptable-object",
+    "unused-argument",
+    "unused-import",
+    "unused-variable",
+    "use-a-generator",
+    "use-implicit-booleaness-not-len",
+    "wrong-import-order",
+    "wrong-import-position",
 ]
 
 [tool.mypy]

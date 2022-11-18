@@ -1,14 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+# Versioning
+from awkward._version import __version__
+
 # NumPy-like alternatives
 import awkward.nplikes
-
-# shims for C++ (now everything is compiled into one 'awkward._ext' module)
-import awkward._ext
-
-# Compiled dynamic modules
-import awkward._cpu_kernels
-import awkward._libawkward
 
 # layout classes; functionality that used to be in C++ (in Awkward 1.x)
 import awkward.index
@@ -41,6 +37,10 @@ import awkward.behaviors.categorical
 import awkward.behaviors.string
 from awkward.behaviors.mixins import mixin_class, mixin_class_method
 
+# exports
+import awkward.builder
+import awkward.forth
+
 behavior: dict = {}
 awkward.behaviors.string.register(behavior)  # noqa: F405
 awkward.behaviors.categorical.register(behavior)  # noqa: F405
@@ -49,7 +49,6 @@ awkward.behaviors.categorical.register(behavior)  # noqa: F405
 from awkward.operations import *
 
 # version
-__version__ = awkward._ext.__version__
 __all__ = [x for x in globals() if not x.startswith("_")]
 
 

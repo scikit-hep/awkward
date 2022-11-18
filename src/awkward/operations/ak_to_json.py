@@ -5,6 +5,8 @@ import pathlib
 from numbers import Number
 from urllib.parse import urlparse
 
+from awkward_cpp.lib import _ext
+
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -165,7 +167,7 @@ def _impl(
     elif isinstance(array, ak.record.Record):
         out = array.array[array.at : array.at + 1]
 
-    elif isinstance(array, ak._ext.ArrayBuilder):
+    elif isinstance(array, _ext.ArrayBuilder):
         formstr, length, buffers = array.to_buffers()
         form = ak.forms.from_json(formstr)
 

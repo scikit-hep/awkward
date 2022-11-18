@@ -3,6 +3,7 @@
 import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
+from awkward_cpp import libawkward
 
 import awkward as ak
 
@@ -127,7 +128,7 @@ def lower_len(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_length,
+        libawkward.ArrayBuilder_length,
         (proxyin.rawptr, result),
     )
     return ak._connect.numba.layout.castint(
@@ -410,7 +411,7 @@ def lower_clear(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, ak._libawkward.ArrayBuilder_clear, (proxyin.rawptr,))
+    call(context, builder, libawkward.ArrayBuilder_clear, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -419,7 +420,7 @@ def lower_null(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, ak._libawkward.ArrayBuilder_null, (proxyin.rawptr,))
+    call(context, builder, libawkward.ArrayBuilder_null, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -429,7 +430,7 @@ def lower_boolean(context, builder, sig, args):
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     x = builder.zext(xval, context.get_value_type(numba.uint8))
-    call(context, builder, ak._libawkward.ArrayBuilder_boolean, (proxyin.rawptr, x))
+    call(context, builder, libawkward.ArrayBuilder_boolean, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 
@@ -439,7 +440,7 @@ def lower_integer(context, builder, sig, args):
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     x = ak._connect.numba.layout.castint(context, builder, xtype, numba.int64, xval)
-    call(context, builder, ak._libawkward.ArrayBuilder_integer, (proxyin.rawptr, x))
+    call(context, builder, libawkward.ArrayBuilder_integer, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 
@@ -459,7 +460,7 @@ def lower_real(context, builder, sig, args):
         x = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
     else:
         x = xval
-    call(context, builder, ak._libawkward.ArrayBuilder_real, (proxyin.rawptr, x))
+    call(context, builder, libawkward.ArrayBuilder_real, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 
@@ -487,7 +488,7 @@ def lower_complex_from_integer_or_float(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_complex,
+        libawkward.ArrayBuilder_complex,
         (proxyin.rawptr, z_real, z_imag),
     )
     return context.get_dummy_value()
@@ -505,7 +506,7 @@ def lower_complex(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_complex,
+        libawkward.ArrayBuilder_complex,
         (proxyin.rawptr, z_real, z_imag),
     )
     return context.get_dummy_value()
@@ -520,7 +521,7 @@ def lower_datetime(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_datetime,
+        libawkward.ArrayBuilder_datetime,
         (proxyin.rawptr, xval, unit),
     )
     return context.get_dummy_value()
@@ -535,7 +536,7 @@ def lower_timedelta(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_timedelta,
+        libawkward.ArrayBuilder_timedelta,
         (proxyin.rawptr, xval, unit),
     )
     return context.get_dummy_value()
@@ -557,7 +558,7 @@ def lower_string(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_string_length,
+        libawkward.ArrayBuilder_string_length,
         (proxyin.rawptr, out, length),
     )
 
@@ -571,7 +572,7 @@ def lower_beginlist(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,))
+    call(context, builder, libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -580,7 +581,7 @@ def lower_endlist(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, ak._libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
+    call(context, builder, libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -595,7 +596,7 @@ def lower_begintuple(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_begintuple,
+        libawkward.ArrayBuilder_begintuple,
         (proxyin.rawptr, numfields),
     )
     return context.get_dummy_value()
@@ -612,7 +613,7 @@ def lower_index(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_index,
+        libawkward.ArrayBuilder_index,
         (proxyin.rawptr, index),
     )
     return arraybuilderval
@@ -623,7 +624,7 @@ def lower_endtuple(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, ak._libawkward.ArrayBuilder_endtuple, (proxyin.rawptr,))
+    call(context, builder, libawkward.ArrayBuilder_endtuple, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -635,7 +636,7 @@ def lower_beginrecord(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_beginrecord,
+        libawkward.ArrayBuilder_beginrecord,
         (proxyin.rawptr,),
     )
     return context.get_dummy_value()
@@ -652,7 +653,7 @@ def lower_beginrecord_field(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_beginrecord_fast,
+        libawkward.ArrayBuilder_beginrecord_fast,
         (proxyin.rawptr, name),
     )
     return context.get_dummy_value()
@@ -667,7 +668,7 @@ def lower_field(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_field_fast,
+        libawkward.ArrayBuilder_field_fast,
         (proxyin.rawptr, key),
     )
     return arraybuilderval
@@ -678,7 +679,7 @@ def lower_endrecord(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, ak._libawkward.ArrayBuilder_endrecord, (proxyin.rawptr,))
+    call(context, builder, libawkward.ArrayBuilder_endrecord, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -690,11 +691,11 @@ def lower_append_array(context, builder, sig, args):
     arraybuilderval, viewval = args
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,))
+    call(context, builder, libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,))
 
     lower_extend_array(context, builder, sig, args)
 
-    call(context, builder, ak._libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
+    call(context, builder, libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
 
     return context.get_dummy_value()
 
@@ -723,7 +724,7 @@ def lower_append_record(context, builder, sig, args):
     call(
         context,
         builder,
-        ak._libawkward.ArrayBuilder_append_nowrap,
+        libawkward.ArrayBuilder_append_nowrap,
         (
             proxyin.rawptr,
             builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)),
@@ -855,7 +856,7 @@ def lower_extend_array(context, builder, sig, args):
         call(
             context,
             builder,
-            ak._libawkward.ArrayBuilder_append_nowrap,
+            libawkward.ArrayBuilder_append_nowrap,
             (
                 proxyin.rawptr,
                 builder.inttoptr(

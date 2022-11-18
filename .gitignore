@@ -2,20 +2,16 @@ studies/**/sample-*
 docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
-.ci/logs/
+
 .clangd/
 
-# Generated includes
-include/awkward/kernels.h
-src/awkward/_kernel_signatures.py
-src/awkward/_kernel_signatures_cuda.py
+# Generated files
 src/awkward/_connect/cuda/_kernel_signatures.py
+src/awkward/_connect/header-only
+src/awkward/_version.py
 
 # Kernel tests
-tests-cpu-kernels
 tests-cuda-kernels
-tests-spec
-tests-spec-explicit
 
 # to use all-contributors-cli without adding it to the project
 node_modules
@@ -25,18 +21,20 @@ yarn.lock
 array*.parquet
 
 ############################################################# Sphinx & Doxygen
+docs/_build
+docs/reference/generated
 
-docs/.sass-cache
-docs/_site
-docs-mkdocs/docs
-docs-sphinx/_build
-docs-sphinx/_static/doxygen
-docs-sphinx/reference/generated
-docs-sphinx/release/*
-!docs-sphinx/release/.gitignore
-docs-sphinx/.jupyter_cache
-docs-sphinx/jupyter_execute
-docs-sphinx/environment.yml
+# Jupyter Book
+docs/.jupyter_cache
+docs/jupyter_execute
+docs/environment.yml
+
+# Pyodide / JupyterLite
+docs/lite/
+docs/_contents/
+**/.pyodide-xbuildenv
+
+docs/_static/doxygen
 
 ############################################################# IDEs
 .idea
@@ -56,9 +54,7 @@ _minted-*
 
 ############################################################# Python
 
-# Awkward directory at top-level is temporary
-/awkward/
-/localbuild/
+**/.mypy_cache
 
 # Byte-compiled / optimized / DLL files
 __pycache__
