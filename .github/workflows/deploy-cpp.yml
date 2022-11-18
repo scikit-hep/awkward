@@ -70,7 +70,6 @@ jobs:
       run: |
         import subprocess
         import os
-        import pathlib
         result = subprocess.run(
           ["git", "log", "-1", '--format=%ad', '--date=unix', '--', 'pyproject.toml'],
           cwd="awkward-cpp",
@@ -112,9 +111,19 @@ jobs:
         submodules: true
 
     - name: Compute SOURCE_DATE_EPOCH
+      shell: python
       run: |
-        SOURCE_DATE_EPOCH="$(git log -1 --format="%ad" --date=unix -- awkward-cpp/pyproject.toml)"
-        echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+        import subprocess
+        import os
+        result = subprocess.run(
+          ["git", "log", "-1", '--format=%ad', '--date=unix', '--', 'pyproject.toml'],
+          cwd="awkward-cpp",
+          capture_output=True,
+          text=True
+        )
+        result.check_returncode()
+        with open(os.environ["GITHUB_ENV"], "a") as env_file:
+          env_file.write(f"SOURCE_DATE_EPOCH={result.stdout.strip()}")
 
     - name: Prepare build files
       run: pipx run nox -s prepare
