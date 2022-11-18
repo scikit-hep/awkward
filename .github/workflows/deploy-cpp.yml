@@ -2,7 +2,10 @@ name: Deploy C++
 
 on:
   workflow_dispatch:
-
+    inputs:
+        publish-pypi:
+            type: boolean
+            description: Publish to PyPI
 
 jobs:
 
@@ -149,7 +152,7 @@ jobs:
   upload_all:
     needs: [build_wheels, build_alt_wheels, make_sdist]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: ${{ inputs.publish-pypi }}
     steps:
     - uses: actions/download-artifact@v3
       with:
