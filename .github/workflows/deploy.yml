@@ -84,8 +84,8 @@ jobs:
       run: pipx run twine check dist/*
 
     - uses: actions/upload-artifact@v3
-      name: distributions
       with:
+        name: distributions
         path: dist/*
 
   bundle-headers:
@@ -100,8 +100,8 @@ jobs:
       run: tar -czvf header-only.tar.gz header-only
 
     - uses: actions/upload-artifact@v3
-      name: headers
       with:
+        name: headers
         path: header-only.tar.gz
 
   upload:
