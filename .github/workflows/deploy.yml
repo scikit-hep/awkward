@@ -2,6 +2,10 @@ name: Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+        publish-pypi:
+            type: boolean
+            description: Publish to PyPI
   release:
     types:
     - published
@@ -94,7 +98,7 @@ jobs:
   upload:
     needs: [build, check-requirements, check-cpp-on-pypi]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: (github.event_name == 'release' && github.event.action == 'published') || inputs.publish-pypi
     steps:
     - uses: actions/download-artifact@v3
       with:
