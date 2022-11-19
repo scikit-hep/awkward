@@ -170,7 +170,7 @@ jobs:
   upload_all:
     needs: [build_wheels, build_alt_wheels, make_sdist]
     runs-on: ubuntu-latest
-    if: ${{ inputs.publish-pypi }}
+    if: inputs.publish-pypi
     steps:
     - uses: actions/download-artifact@v3
       with:
