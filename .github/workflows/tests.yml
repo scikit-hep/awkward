@@ -9,6 +9,8 @@ concurrency:
   group: wheels-${{ github.head_ref }}
   cancel-in-progress: true
 
+env:
+  SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
   pylint:

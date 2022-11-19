@@ -7,6 +7,9 @@ on:
             type: boolean
             description: Publish to PyPI
 
+env:
+  SOURCE_DATE_EPOCH: "1668811211"
+
 jobs:
 
   make_sdist:
@@ -16,22 +19,6 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: true
-
-    - name: Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-
-    - name: Compute SOURCE_DATE_EPOCH
-      shell: python
-      run: |
-        import os, subprocess
-        result = subprocess.run(
-          ["git", "log", "-1", '--format=%at', '--', 'pyproject.toml'],
-          cwd="awkward-cpp", capture_output=True, text=True, check=True
-        )
-        with open(os.environ["GITHUB_ENV"], "a") as env_file:
-          env_file.write(f"SOURCE_DATE_EPOCH={result.stdout.strip()}")
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -79,17 +66,6 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Compute SOURCE_DATE_EPOCH
-      shell: python
-      run: |
-        import os, subprocess
-        result = subprocess.run(
-          ["git", "log", "-1", '--format=%at', '--', 'pyproject.toml'],
-          cwd="awkward-cpp", capture_output=True, text=True, check=True
-        )
-        with open(os.environ["GITHUB_ENV"], "a") as env_file:
-          env_file.write(f"SOURCE_DATE_EPOCH={result.stdout.strip()}")
-
     - name: Prepare build files
       run: pipx run nox -s prepare
 
@@ -129,16 +105,10 @@ jobs:
       with:
         submodules: true
 
-    - name: Compute SOURCE_DATE_EPOCH
-      shell: python
-      run: |
-        import os, subprocess
-        result = subprocess.run(
-          ["git", "log", "-1", '--format=%at', '--', 'pyproject.toml'],
-          cwd="awkward-cpp", capture_output=True, text=True, check=True
-        )
-        with open(os.environ["GITHUB_ENV"], "a") as env_file:
-          env_file.write(f"SOURCE_DATE_EPOCH={result.stdout.strip()}")
+    - name: Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
     - name: Prepare build files
       run: pipx run nox -s prepare
