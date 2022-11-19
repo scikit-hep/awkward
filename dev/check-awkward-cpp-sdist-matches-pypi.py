@@ -14,8 +14,14 @@ THIS_FILE = pathlib.Path(__file__)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("sdist", type=pathlib.Path)
-    parser.add_argument("--endpoint", default="https://pypi.org/pypi")
+    parser.add_argument("--endpoint", default="https://pypi.org/pypi/")
     args = parser.parse_args()
+
+    if not args.endpoint.endswith("/"):
+        raise ValueError(
+            "provided endpoint URL will lose the trailing component when "
+            "joined with the relative version URL"
+        )
 
     awkward_cpp_path = THIS_FILE.parents[1] / "awkward-cpp"
 
@@ -24,12 +30,11 @@ def main():
     project = metadata["project"]
 
     # Load version information from PyPI
+    version_url = urllib.parse.urljoin(
+        args.endpoint, "{name}/{version}/json".format_map(project)
+    )
     try:
-        with urllib.request.urlopen(
-            urllib.parse.urljoin(
-                args.endpoint, "{name}/{version}/json".format_map(project)
-            )
-        ) as response:
+        with urllib.request.urlopen(version_url) as response:
             data = json.load(response)
     except urllib.error.HTTPError as err:
         raise SystemExit(err.status) from err
