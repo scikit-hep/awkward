@@ -7,14 +7,33 @@ on:
             type: boolean
             description: Publish to PyPI
 
-env:
-  SOURCE_DATE_EPOCH: "1668811211"
-
 jobs:
+  determine-source-date-epoch:
+    name: "Determine SOURCE_DATE_EPOCH"
+    runs-on: ubuntu-latest
+    outputs:
+      source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - id: log
+        name: Compute SOURCE_DATE_EPOCH
+        run: |
+          # Find latest unix timestamp in awkward-cpp, and the kernel generation files
+          epoch=$( git log -1 --format=%at -- awkward-cpp kernel-specification.yml kernel-test-data.json )
+          echo "source-date-epoch=$epoch" >> $GITHUB_OUTPUT
 
   make_sdist:
     name: Make SDist
     runs-on: ubuntu-latest
+    needs: [determine-source-date-epoch]
+    env:
+      SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
+
     steps:
     - uses: actions/checkout@v3
       with:
@@ -34,8 +53,11 @@ jobs:
         path: awkward-cpp/dist/*.tar.gz
 
   build_wheels:
+    needs: [determine-source-date-epoch]
     name: "Wheel: ${{ matrix.type }} ${{ matrix.arch }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
+    env:
+      SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -93,8 +115,11 @@ jobs:
 
 
   build_alt_wheels:
+    needs: [determine-source-date-epoch]
     name: "Wheel: ${{ matrix.python }} on ${{ matrix.arch }}"
     runs-on: ubuntu-latest
+    env:
+      SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     strategy:
       matrix:
         python: [37, 38, 39, 310, 311]

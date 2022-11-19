@@ -21,6 +21,12 @@ concurrency:
   group: 'coverage-${{ github.head_ref || github.run_id }}'
   cancel-in-progress: true
 
+env:
+  # Leverage reproducible builds by setting a constant SOURCE_DATE_EPOCH
+  # This will ensure that the hash of the awkward-cpp directory remains
+  # constant for unchanged files, meaning that it can be used for caching
+  SOURCE_DATE_EPOCH: "1668811211"
+
 jobs:
   coverage:
     runs-on: ubuntu-20.04
@@ -28,7 +34,6 @@ jobs:
     env:
       PIP_ONLY_BINARY: cmake
       PYTHON_VERSION: "3.9"
-      SOURCE_DATE_EPOCH: "1668811211"
 
     steps:
       - uses: actions/checkout@v3
