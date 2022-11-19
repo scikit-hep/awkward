@@ -84,6 +84,7 @@ jobs:
       run: pipx run twine check dist/*
 
     - uses: actions/upload-artifact@v3
+      name: distributions
       with:
         path: dist/*
 
@@ -99,6 +100,7 @@ jobs:
       run: tar -czvf header-only.tar.gz header-only
 
     - uses: actions/upload-artifact@v3
+      name: headers
       with:
         path: header-only.tar.gz
 
@@ -109,7 +111,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v3
       with:
-        name: artifact
+        name: distributions
         path: dist
 
     - uses: pypa/gh-action-pypi-publish@v1.5.1
