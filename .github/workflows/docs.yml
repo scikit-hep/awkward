@@ -14,8 +14,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.10.6"
-  # Ensure predictable hash
-  SOURCE_DATE_EPOCH: "1667773939"
+  SOURCE_DATE_EPOCH: "1668811211"
 
 jobs:
   awkward-cpp-wasm:
