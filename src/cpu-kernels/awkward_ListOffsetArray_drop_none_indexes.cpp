@@ -9,12 +9,12 @@ ERROR awkward_ListOffsetArray_drop_none_indexes(
   T* tooffsets,
   const C* noneindexes,
   const T* fromoffsets,
-  int64_t length_offsets, 
+  int64_t length_offsets,
   int64_t length_indexes) {
   T nr_of_nones = 0;
   int64_t offset1 = 0;
   int64_t offset2 = 0;
-   
+
   for (int64_t i = 0; i < length_offsets; i++) {
     offset2 = fromoffsets[i];
     for (int j = offset1; j < offset2; j++) {
@@ -32,13 +32,13 @@ ERROR awkward_ListOffsetArray_drop_none_indexes_64(
   int64_t* tooffsets,
   const int64_t* noneindexes,
   const int64_t* fromoffsets,
-  int64_t length_offsets, 
+  int64_t length_offsets,
   int64_t length_indexes) {
   return awkward_ListOffsetArray_drop_none_indexes<int64_t, int64_t>(
     tooffsets,
     noneindexes,
     fromoffsets,
-    length_offsets, 
+    length_offsets,
     length_indexes);
 }
 
@@ -46,13 +46,12 @@ ERROR awkward_ListOffsetArray_drop_none_indexes_32(
   int64_t* tooffsets,
   const int32_t* noneindexes,
   const int64_t* fromoffsets,
-  int64_t length_offsets, 
+  int64_t length_offsets,
   int64_t length_indexes) {
   return awkward_ListOffsetArray_drop_none_indexes<int64_t, int32_t>(
     tooffsets,
     noneindexes,
     fromoffsets,
-    length_offsets, 
+    length_offsets,
     length_indexes);
 }
-

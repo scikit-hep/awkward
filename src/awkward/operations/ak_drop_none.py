@@ -10,10 +10,10 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
     Args:
         array: Data in which to remove Nones.
         axis (None or int): If None, the operation drops Nones at all levels of
-            nesting, returning an array of the same dimension, but without Nones. 
-            Otherwise, it drops Nones at a specified depth. 
-            The outermost dimension is `0`, followed by `1`, etc., 
-            and negative values count backward from the innermost: `-1` is the 
+            nesting, returning an array of the same dimension, but without Nones.
+            Otherwise, it drops Nones at a specified depth.
+            The outermost dimension is `0`, followed by `1`, etc.,
+            and negative values count backward from the innermost: `-1` is the
             innermost dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
@@ -46,7 +46,7 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
 
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
-    
+
     if layout.is_NumpyType:
         return array
 
@@ -59,13 +59,15 @@ def _impl(array, axis, highlevel, behavior):
     if axis is None:
         if layout.is_OptionType:
             return layout.project()
+
         def action(layout, continuation, **kwargs):
-           return maybe_drop_none(continuation())
-   
+            return maybe_drop_none(continuation())
+
     else:
+
         def action(layout, depth, depth_context, **kwargs):
             posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
-           
+
             if posaxis == depth and layout.is_OptionType:
                 return layout.project()
             elif posaxis == depth and layout.is_ListType:
