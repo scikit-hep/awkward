@@ -8,7 +8,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def with_field(base, what, where=None, highlevel=True, behavior=None):
+def with_field(base, what, where=None, *, highlevel=True, behavior=None):
     """
     Args:
         base: Data containing records or tuples.

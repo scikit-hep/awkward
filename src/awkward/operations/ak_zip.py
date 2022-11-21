@@ -8,6 +8,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 def zip(
     arrays,
     depth_limit=None,
+    *,
     parameters=None,
     with_name=None,
     highlevel=True,

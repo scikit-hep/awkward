@@ -6,7 +6,7 @@ from awkward.types.type import Type
 
 
 class UnknownType(Type):
-    def __init__(self, parameters=None, typestr=None):
+    def __init__(self, parameters=None, *, typestr=None):
         if parameters is not None and not isinstance(parameters, dict):
             raise ak._errors.wrap_error(
                 TypeError(

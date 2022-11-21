@@ -8,6 +8,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 def argcombinations(
     array,
     n,
+    *,
     replacement=False,
     axis=1,
     fields=None,

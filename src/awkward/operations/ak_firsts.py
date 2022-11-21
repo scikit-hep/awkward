@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def firsts(array, axis=1, highlevel=True, behavior=None):
+def firsts(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data from which to select the first elements from nested lists.

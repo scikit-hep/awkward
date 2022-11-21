@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def nan_to_none(array, highlevel=True, behavior=None):
+def nan_to_none(array, *, highlevel=True, behavior=None):
 
     """
     Args:

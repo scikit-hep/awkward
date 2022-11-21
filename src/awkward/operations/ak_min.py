@@ -9,6 +9,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 def min(
     array,
     axis=None,
+    *,
     keepdims=False,
     initial=None,
     mask_identity=True,
@@ -69,6 +70,7 @@ def min(
 def nanmin(
     array,
     axis=None,
+    *,
     keepdims=False,
     initial=None,
     mask_identity=True,

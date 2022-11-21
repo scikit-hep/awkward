@@ -6,7 +6,9 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("sum")
-def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
+def sum(
+    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -196,7 +198,7 @@ def sum(array, axis=None, keepdims=False, mask_identity=False, flatten_records=F
 
 @ak._connect.numpy.implements("nansum")
 def nansum(
-    array, axis=None, keepdims=False, mask_identity=False, flatten_records=False
+    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
 ):
     """
     Args:

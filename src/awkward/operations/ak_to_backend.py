@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def to_backend(array, backend, highlevel=True, behavior=None):
+def to_backend(array, backend, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data to convert to a specified `backend` set.

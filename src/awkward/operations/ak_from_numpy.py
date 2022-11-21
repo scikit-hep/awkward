@@ -4,7 +4,7 @@ import awkward as ak
 
 
 def from_numpy(
-    array, regulararray=False, recordarray=True, highlevel=True, behavior=None
+    array, *, regulararray=False, recordarray=True, highlevel=True, behavior=None
 ):
     """
     Args:

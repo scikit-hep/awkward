@@ -93,7 +93,7 @@ for primitive, dtype in _primitive_to_dtype_dict.items():
 
 
 class NumpyType(Type):
-    def __init__(self, primitive, parameters=None, typestr=None):
+    def __init__(self, primitive, parameters=None, *, typestr=None):
         primitive = dtype_to_primitive(primitive_to_dtype(primitive))
         if parameters is not None and not isinstance(parameters, dict):
             raise ak._errors.wrap_error(

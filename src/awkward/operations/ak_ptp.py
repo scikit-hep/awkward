@@ -6,7 +6,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("ptp")
-def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
+def ptp(array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=False):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -69,8 +69,10 @@ def ptp(array, axis=None, keepdims=False, mask_identity=True, flatten_records=Fa
 
 
 def _impl(array, axis, keepdims, mask_identity, flatten_records):
+    behavior = ak._util.behavior_of(array)
     array = ak.highlevel.Array(
-        ak.operations.to_layout(array, allow_record=False, allow_other=False)
+        ak.operations.to_layout(array, allow_record=False, allow_other=False),
+        behavior=behavior,
     )
 
     with np.errstate(invalid="ignore", divide="ignore"):

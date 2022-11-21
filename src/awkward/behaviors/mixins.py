@@ -63,7 +63,7 @@ def mixin_class(registry, name=None):
     return register
 
 
-def mixin_class_method(ufunc, rhs=None, transpose=True):
+def mixin_class_method(ufunc, rhs=None, *, transpose=True):
     """
     Args:
         ufunc (numpy.ufunc): A universal function (or NEP18 callable) that is

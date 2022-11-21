@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def local_index(array, axis=-1, highlevel=True, behavior=None):
+def local_index(array, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array to index.

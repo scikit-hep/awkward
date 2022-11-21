@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
+def pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None):
     """
     Args:
         array: Data containing nested lists to pad to a target length.

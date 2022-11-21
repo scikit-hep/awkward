@@ -11,6 +11,7 @@ def std(
     weight=None,
     ddof=0,
     axis=None,
+    *,
     keepdims=False,
     mask_identity=False,
     flatten_records=False,
@@ -81,6 +82,7 @@ def nanstd(
     weight=None,
     ddof=0,
     axis=None,
+    *,
     keepdims=False,
     mask_identity=True,
     flatten_records=False,
@@ -141,14 +143,15 @@ def nanstd(
 
 
 def _impl(x, weight, ddof, axis, keepdims, mask_identity, flatten_records):
-    behavior = ak._util.behavior_of(x)
+    behavior = ak._util.behavior_of(x, weight)
     x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False), behavior
+        ak.operations.to_layout(x, allow_record=False, allow_other=False),
+        behavior=behavior,
     )
     if weight is not None:
         weight = ak.highlevel.Array(
             ak.operations.to_layout(weight, allow_record=False, allow_other=False),
-            behavior,
+            behavior=behavior,
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):

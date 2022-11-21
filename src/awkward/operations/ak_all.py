@@ -6,7 +6,9 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("all")
-def all(array, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
+def all(
+    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).

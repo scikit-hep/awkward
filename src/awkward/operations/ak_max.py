@@ -9,6 +9,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 def max(
     array,
     axis=None,
+    *,
     keepdims=False,
     initial=None,
     mask_identity=True,
@@ -69,6 +70,7 @@ def max(
 def nanmax(
     array,
     axis=None,
+    *,
     keepdims=False,
     initial=None,
     mask_identity=True,

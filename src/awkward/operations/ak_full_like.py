@@ -7,17 +7,17 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("full_like")
-def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
+def full_like(array, fill_value, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only
             `fill_value`.
         fill_value: Value to fill new new array with.
+        dtype (None or NumPy dtype)): Overrides the data type of the result.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        dtype (None or NumPy dtype)): Overrides the data type of the result.
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
@@ -75,9 +75,9 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
         dict(
             array=array,
             fill_value=fill_value,
+            dtype=dtype,
             highlevel=highlevel,
             behavior=behavior,
-            dtype=dtype,
         ),
     ):
         return _impl(array, fill_value, highlevel, behavior, dtype)
@@ -192,7 +192,12 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
 
     out = layout.recursively_apply(action, behavior)
     if dtype is not None:
-        out = ak.operations.strings_astype(out, dtype, highlevel, behavior)
-        out = ak.operations.values_astype(out, dtype, highlevel, behavior)
+        out = ak.operations.strings_astype(
+            out, dtype, highlevel=highlevel, behavior=behavior
+        )
+        out = ak.operations.values_astype(
+            out, dtype, highlevel=highlevel, behavior=behavior
+        )
         return out
-    return ak._util.wrap(out, behavior, highlevel)
+    else:
+        return ak._util.wrap(out, behavior, highlevel)

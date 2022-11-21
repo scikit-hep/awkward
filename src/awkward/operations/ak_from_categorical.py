@@ -3,7 +3,7 @@
 import awkward as ak
 
 
-def from_categorical(array, highlevel=True, behavior=None):
+def from_categorical(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Awkward Array from which to remove the 'categorical' parameter.

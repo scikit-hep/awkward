@@ -5,7 +5,9 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def softmax(x, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
+def softmax(
+    x, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
+):
     """
     Args:
         x: The data on which to compute the softmax (anything #ak.to_layout recognizes).
@@ -56,7 +58,8 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False, flatten_records=F
 def _impl(x, axis, keepdims, mask_identity, flatten_records):
     behavior = ak._util.behavior_of(x)
     x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False), behavior
+        ak.operations.to_layout(x, allow_record=False, allow_other=False),
+        behavior=behavior,
     )
 
     with np.errstate(invalid="ignore", divide="ignore"):

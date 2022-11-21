@@ -8,6 +8,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 def argcartesian(
     arrays,
     axis=1,
+    *,
     nested=None,
     parameters=None,
     with_name=None,

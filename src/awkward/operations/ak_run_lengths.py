@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def run_lengths(array, highlevel=True, behavior=None):
+def run_lengths(array, *, highlevel=True, behavior=None):
 
     """
     Args:

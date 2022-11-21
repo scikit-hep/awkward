@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def without_parameters(array, highlevel=True, behavior=None):
+def without_parameters(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data convertible into an Awkward Array.

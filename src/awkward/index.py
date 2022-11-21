@@ -18,7 +18,7 @@ _dtype_to_form = {
 class Index:
     _expected_dtype = None
 
-    def __init__(self, data, metadata=None, nplike=None):
+    def __init__(self, data, *, metadata=None, nplike=None):
         if nplike is None:
             nplike = ak.nplikes.nplike_of(data)
         self._nplike = nplike
@@ -111,7 +111,7 @@ class Index:
             data = self._data
         else:
             data = self.raw(tt)
-        return type(self)(data.forget_length(), self._metadata, tt)
+        return type(self)(data.forget_length(), metadata=self._metadata, nplike=tt)
 
     def raw(self, nplike):
         return self.nplike.index_nplike.raw(self.data, nplike.index_nplike)
@@ -186,8 +186,8 @@ class Index:
     def __deepcopy__(self, memo):
         return type(self)(
             copy.deepcopy(self._data, memo),
-            copy.deepcopy(self._metadata, memo),
-            self._nplike,
+            metadata=copy.deepcopy(self._metadata, memo),
+            nplike=self._nplike,
         )
 
     def _nbytes_part(self):

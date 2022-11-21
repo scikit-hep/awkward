@@ -21,7 +21,7 @@ class EmptyForm(Form):
     def _type(self, typestrs):
         return ak.types.UnknownType(
             self._parameters,
-            ak._util.gettypestr(self._parameters, typestrs),
+            typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
     def __eq__(self, other):

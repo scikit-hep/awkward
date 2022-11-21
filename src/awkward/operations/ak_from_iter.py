@@ -8,18 +8,24 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 def from_iter(
-    iterable, highlevel=True, behavior=None, allow_record=True, initial=1024, resize=1.5
+    iterable,
+    *,
+    allow_record=True,
+    highlevel=True,
+    behavior=None,
+    initial=1024,
+    resize=1.5
 ):
     """
     Args:
         iterable (Python iterable): Data to convert into an Awkward Array.
+        allow_record (bool): If True, the outermost element may be a record
+            (returning #ak.Record or #ak.record.Record type, depending on
+            `highlevel`); if False, the outermost element must be an array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        allow_record (bool): If True, the outermost element may be a record
-            (returning #ak.Record or #ak.record.Record type, depending on
-            `highlevel`); if False, the outermost element must be an array.
         initial (int): Initial size (in bytes) of buffers used by the
             [ak::ArrayBuilder](_static/classawkward_1_1ArrayBuilder.html).
         resize (float): Resize multiplier for buffers used by the
@@ -56,9 +62,9 @@ def from_iter(
         "ak.from_iter",
         dict(
             iterable=iterable,
+            allow_record=allow_record,
             highlevel=highlevel,
             behavior=behavior,
-            allow_record=allow_record,
             initial=initial,
             resize=resize,
         ),

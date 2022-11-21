@@ -412,7 +412,7 @@ def behavior_of(*arrays, **kwargs):
     highs = (
         ak.highlevel.Array,
         ak.highlevel.Record,
-        #        ak.highlevel.ArrayBuilder,
+        # ak.highlevel.ArrayBuilder,
     )
     for x in arrays[::-1]:
         if isinstance(x, highs) and x.behavior is not None:
@@ -429,7 +429,6 @@ def behavior_of(*arrays, **kwargs):
     return behavior
 
 
-# maybe_wrap and maybe_wrap_like go here
 def wrap(content, behavior=None, highlevel=True, like=None):
     assert content is None or isinstance(
         content, (ak.contents.Content, ak.record.Record)

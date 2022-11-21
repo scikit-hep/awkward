@@ -184,6 +184,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __init__(
         self,
         data,
+        *,
         behavior=None,
         with_name=None,
         check_valid=False,
@@ -1475,6 +1476,7 @@ class Record(NDArrayOperatorsMixin):
     def __init__(
         self,
         data,
+        *,
         behavior=None,
         with_name=None,
         check_valid=False,
@@ -2168,7 +2170,7 @@ class ArrayBuilder(Sized):
     be considered the "least effort" approach.
     """
 
-    def __init__(self, behavior=None, initial=1024, resize=1.5):
+    def __init__(self, *, behavior=None, initial=1024, resize=1.5):
         self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
         self.behavior = behavior
 

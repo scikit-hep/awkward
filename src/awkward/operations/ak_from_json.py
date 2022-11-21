@@ -15,6 +15,7 @@ numpy = ak.nplikes.Numpy.instance()
 
 def from_json(
     source,
+    *,
     line_delimited=False,
     schema=None,
     nan_string=None,

@@ -9,6 +9,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 def to_arrow_table(
     array,
+    *,
     list_to32=False,
     string_to32=False,
     bytestring_to32=False,

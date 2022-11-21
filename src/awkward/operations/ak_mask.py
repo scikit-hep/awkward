@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
+def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None):
     """
     Args:
         array: Data to mask, rather than filter.

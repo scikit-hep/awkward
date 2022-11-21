@@ -5,6 +5,7 @@ import awkward as ak
 
 def from_parquet(
     path,
+    *,
     columns=None,
     row_groups=None,
     storage_options=None,

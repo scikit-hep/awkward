@@ -425,7 +425,7 @@ def test_ByteMaskedArray():
         [0, 1, 2, 3],
     ]
 
-    assert to_list(ak.operations.sort(array, 1, False, False)) == [
+    assert to_list(ak.operations.sort(array, 1, ascending=False, stable=False)) == [
         [2.2, 1.1, 0.0],
         [],
         None,

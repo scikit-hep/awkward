@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def packed(array, highlevel=True, behavior=None):
+def packed(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array whose internal structure will be packed.

@@ -6,7 +6,9 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("argmax")
-def argmax(array, axis=None, keepdims=False, mask_identity=True, flatten_records=False):
+def argmax(
+    array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=False
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -59,7 +61,7 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True, flatten_records
 
 @ak._connect.numpy.implements("nanargmax")
 def nanargmax(
-    array, axis=None, keepdims=False, mask_identity=True, flatten_records=False
+    array, axis=None, *, keepdims=False, mask_identity=True, flatten_records=False
 ):
     """
     Args:

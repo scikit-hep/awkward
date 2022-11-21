@@ -6,7 +6,7 @@ from awkward.types.type import Type
 
 
 class ListType(Type):
-    def __init__(self, content, parameters=None, typestr=None):
+    def __init__(self, content, parameters=None, *, typestr=None):
         if not isinstance(content, Type):
             raise ak._errors.wrap_error(
                 TypeError(

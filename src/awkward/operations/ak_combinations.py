@@ -8,6 +8,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 def combinations(
     array,
     n,
+    *,
     replacement=False,
     axis=1,
     fields=None,

@@ -16,6 +16,7 @@ numpy = ak.nplikes.Numpy.instance()
 def to_json(
     array,
     file=None,
+    *,
     line_delimited=False,
     num_indent_spaces=None,
     num_readability_spaces=0,

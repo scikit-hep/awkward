@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def fill_none(array, value, axis=-1, highlevel=True, behavior=None):
+def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data in which to replace None with a given value.
