@@ -1575,6 +1575,10 @@ class IndexedOptionArray(Content):
         else:
             return [self.simplify_optiontype()]
 
+    def _drop_none(self):
+        _, _, outindex = self._nextcarry_outindex(self._nplike)
+        return (outindex, self.project())
+
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):

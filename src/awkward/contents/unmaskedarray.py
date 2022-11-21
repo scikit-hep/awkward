@@ -520,6 +520,9 @@ class UnmaskedArray(Content):
         else:
             return [self.simplify_optiontype()]
 
+    def _drop_none(self):
+        return self.toByteMaskedArray()._drop_none()
+
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):

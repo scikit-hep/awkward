@@ -1573,6 +1573,9 @@ class Content:
     ) -> list:
         raise ak._util.error(NotImplementedError)
 
+    def drop_none(self):
+        return self._drop_none()
+
     def recursively_apply(
         self,
         action: ActionType,

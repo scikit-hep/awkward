@@ -1975,6 +1975,35 @@ class ListOffsetArray(Content):
             flat = self._content[self._offsets[0] : self._offsets[-1]]
             return flat._completely_flatten(nplike, options)
 
+    def _drop_none(self):
+        if self._content.is_OptionType:
+
+            index, new_content = self._content._drop_none()
+            new_offsets = ak.index.Index64.empty(self._offsets.length, self._nplike)
+
+            assert (
+                new_offsets.nplike is self._nplike
+                and self._offsets.nplike is self._nplike
+                and index.nplike is self._nplike
+            )
+            self._handle_error(
+                self._nplike[
+                    "awkward_ListOffsetArray_drop_none_indexes",
+                    new_offsets.dtype.type,
+                    index.dtype.type,
+                    self._offsets.dtype.type,
+                ](
+                    new_offsets.data,
+                    index.data,
+                    self._offsets.data,
+                    self._offsets.length,
+                    index.length,
+                )
+            )
+            return ak.contents.ListOffsetArray(new_offsets, new_content)
+        else:
+            return self
+
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):

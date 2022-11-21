@@ -1270,6 +1270,9 @@ class RegularArray(Content):
             flat = self._content[: self._length * self._size]
             return flat._completely_flatten(nplike, options)
 
+    def _drop_none(self):
+        return self.toListOffsetArray64()._drop_none()
+
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):

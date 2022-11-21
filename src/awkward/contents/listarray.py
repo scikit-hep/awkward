@@ -1377,6 +1377,9 @@ class ListArray(Content):
             flat = next.content[next.offsets[0] : next.offsets[-1]]
             return flat._completely_flatten(nplike, options)
 
+    def _drop_none(self):
+        return self.toListOffsetArray64()._drop_none()
+
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
