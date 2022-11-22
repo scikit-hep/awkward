@@ -47,17 +47,17 @@ def drop_none(array, axis=None, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
 
-    if layout.is_NumpyType:
+    if layout.is_numpy:
         return array
 
     def maybe_drop_none(layout):
-        if layout.is_ListType:
+        if layout.is_list:
             return layout.drop_none()
         else:
             return layout
 
     if axis is None:
-        if layout.is_OptionType:
+        if layout.is_option:
             return layout.project()
 
         def action(layout, continuation, **kwargs):
@@ -68,10 +68,10 @@ def _impl(array, axis, highlevel, behavior):
         def action(layout, depth, depth_context, **kwargs):
             posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
 
-            if posaxis == depth and layout.is_OptionType:
+            if posaxis == depth and layout.is_option:
                 return layout.project()
-            elif posaxis == depth and layout.is_ListType:
-                if layout.content.is_OptionType:
+            elif posaxis == depth and layout.is_list:
+                if layout.content.is_option:
                     return layout.drop_none()
 
             depth_context["posaxis"] = posaxis

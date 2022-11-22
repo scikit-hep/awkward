@@ -1976,7 +1976,7 @@ class ListOffsetArray(Content):
             return flat._completely_flatten(nplike, options)
 
     def _drop_none(self):
-        if self._content.is_OptionType:
+        if self._content.is_option:
 
             index, new_content = self._content._drop_none()
             new_offsets = ak.index.Index64.empty(self._offsets.length, self._nplike)
