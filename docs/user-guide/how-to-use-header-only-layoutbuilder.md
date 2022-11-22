@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.14.1
+    jupytext_version: 1.14.0
 kernelspec:
   display_name: ROOT C++
   language: c++
@@ -18,7 +18,7 @@ How to use the header-only LayoutBuilder in C++
 :tags: [hide-cell]
 
 // Make Awkward headers available in this notebook
-#pragma cling add_include_path("../../src/awkward/_connect/header-only")
+#pragma cling add_include_path("../../header-only")
 ```
 
 What is header-only Layout Builder?
