@@ -1977,27 +1977,28 @@ class ListOffsetArray(Content):
 
     def _drop_none(self):
         if self._content.is_option:
-
-            index, new_content = self._content._drop_none()
+            _, _, none_indexes = self._content._nextcarry_outindex(self._nplike)
+            new_content = self._content._drop_none()
             new_offsets = ak.index.Index64.empty(self._offsets.length, self._nplike)
 
             assert (
                 new_offsets.nplike is self._nplike
                 and self._offsets.nplike is self._nplike
-                and index.nplike is self._nplike
+                and none_indexes.nplike is self._nplike
             )
+            
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_drop_none_indexes",
                     new_offsets.dtype.type,
-                    index.dtype.type,
+                    none_indexes.dtype.type,
                     self._offsets.dtype.type,
                 ](
                     new_offsets.data,
-                    index.data,
+                    none_indexes.data,
                     self._offsets.data,
                     self._offsets.length,
-                    index.length,
+                    none_indexes.length,
                 )
             )
             return ak.contents.ListOffsetArray(new_offsets, new_content)

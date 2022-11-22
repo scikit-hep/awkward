@@ -2240,9 +2240,9 @@ kernels:
     specializations:
       - name: awkward_ListOffsetArray_drop_none_indexes_32
         args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
+          - {name: tooffsets, type: "List[int32_t]", dir: out}
           - {name: noneindexes, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
-          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: fromoffsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: length_offsets, type: "int64_t", dir: in, role: default}
           - {name: length_indexes, type: "int64_t", dir: in, role: default}
       - name: awkward_ListOffsetArray_drop_none_indexes_64

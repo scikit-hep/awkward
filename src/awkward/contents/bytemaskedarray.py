@@ -992,9 +992,7 @@ class ByteMaskedArray(Content):
             return [self.simplify_optiontype()]
 
     def _drop_none(self):
-        numnull = ak.index.Index64.empty(1, self._nplike)
-        _, outindex = self._nextcarry_outindex(numnull)
-        return (outindex, self.project())
+        return self.project()
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options

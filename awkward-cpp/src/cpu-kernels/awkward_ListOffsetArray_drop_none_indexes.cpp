@@ -4,10 +4,10 @@
 
 #include "awkward/kernels.h"
 
-template <typename T, typename C>
+template <typename T>
 ERROR awkward_ListOffsetArray_drop_none_indexes(
   T* tooffsets,
-  const C* noneindexes,
+  const T* noneindexes,
   const T* fromoffsets,
   int64_t length_offsets,
   int64_t length_indexes) {
@@ -34,7 +34,7 @@ ERROR awkward_ListOffsetArray_drop_none_indexes_64(
   const int64_t* fromoffsets,
   int64_t length_offsets,
   int64_t length_indexes) {
-  return awkward_ListOffsetArray_drop_none_indexes<int64_t, int64_t>(
+  return awkward_ListOffsetArray_drop_none_indexes<int64_t>(
     tooffsets,
     noneindexes,
     fromoffsets,
@@ -43,12 +43,12 @@ ERROR awkward_ListOffsetArray_drop_none_indexes_64(
 }
 
 ERROR awkward_ListOffsetArray_drop_none_indexes_32(
-  int64_t* tooffsets,
+  int32_t* tooffsets,
   const int32_t* noneindexes,
-  const int64_t* fromoffsets,
+  const int32_t* fromoffsets,
   int64_t length_offsets,
   int64_t length_indexes) {
-  return awkward_ListOffsetArray_drop_none_indexes<int64_t, int32_t>(
+  return awkward_ListOffsetArray_drop_none_indexes<int32_t>(
     tooffsets,
     noneindexes,
     fromoffsets,
