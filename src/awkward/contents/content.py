@@ -8,6 +8,7 @@ from numbers import Complex, Real
 
 import awkward as ak
 from awkward._backends import Backend
+from awkward._nplikes import NumpyLike
 from awkward.forms.form import Form, _parameters_equal
 from awkward.typing import Any, AxisMaybeNone, Literal, Self, TypeAlias, TypedDict
 
@@ -27,6 +28,15 @@ ActionType: TypeAlias = """Callable[
     ],
     Content | None,
 ]"""
+
+
+# FIXME: introduce sentinel type for this
+class _Unset:
+    def __repr__(self):
+        return f"{__name__}.unset"
+
+
+unset = _Unset()
 
 
 class RecursivelyApplyOptionsType(TypedDict):
@@ -1046,7 +1056,7 @@ class Content:
     def _drop_none(self) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _completely_flatten(self, backend, options):
+    def _completely_flatten(self, backend: ak._backends.Backend, options: dict[str, Any]) -> list[Content]:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _recursively_apply(
