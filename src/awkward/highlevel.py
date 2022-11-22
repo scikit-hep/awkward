@@ -352,7 +352,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             with ak._errors.OperationErrorContext(
                 "ak.Array.mask", {0: self._array, 1: where}
             ):
-                return ak.operations.mask(self._array, where, True)
+                return ak.operations.mask(self._array, where, valid_when=True)
 
     @property
     def mask(self):
