@@ -121,6 +121,8 @@ nb_ipywidgets_js = {
         "crossorigin": "anonymous",
     },
 }
+nb_execution_show_tb = True
+    
 # Additional stuff
 master_doc = "index"
 
