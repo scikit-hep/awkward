@@ -5,6 +5,7 @@ import copy
 import math
 from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
 from numbers import Complex, Integral, Real
+from typing import Any, TypeVar
 
 import awkward as ak
 import awkward._reducers
@@ -1591,7 +1592,7 @@ class Content:
         )
         return tuple(arrays)
 
-    def _completely_flatten(self, backend, options):
+    def _completely_flatten(self, backend: ak._backends.Backend, options: dict[str, Any]) -> list[Content]:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def recursively_apply(
