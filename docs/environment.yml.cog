@@ -5,6 +5,7 @@ dependencies:
   - pip
   - cxx-compiler
   - root
+  - ipykernel!=6.18.0
   - pip:
     # [[[cog
     # import cog
