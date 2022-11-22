@@ -73,7 +73,6 @@ def _impl(array, axis, highlevel, behavior):
 
             depth_context["posaxis"] = posaxis
 
-    
     depth_context = {"posaxis": axis}
     out = layout.recursively_apply(action, behavior, depth_context)
 

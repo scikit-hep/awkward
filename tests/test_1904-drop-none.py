@@ -74,9 +74,15 @@ def test_from_iter():
     )
 
     a = ak.Array([[{"x": [1], "y": [[2]]}], [{"x": [None], "y": [[None]]}]])
-    assert to_list(a) == [[{'x': [1], 'y': [[2]]}], [{'x': [None], 'y': [[None]]}]]
-    assert to_list(ak.drop_none(a)) == [[{'x': [1], 'y': [[2]]}], [{'x': [], 'y': [[]]}]]
-    assert to_list(ak.drop_none(a, axis=2)) == [[{'x': [1], 'y': [[2]]}], [{'x': [], 'y': [[None]]}]]
+    assert to_list(a) == [[{"x": [1], "y": [[2]]}], [{"x": [None], "y": [[None]]}]]
+    assert to_list(ak.drop_none(a)) == [
+        [{"x": [1], "y": [[2]]}],
+        [{"x": [], "y": [[]]}],
+    ]
+    assert to_list(ak.drop_none(a, axis=2)) == [
+        [{"x": [1], "y": [[2]]}],
+        [{"x": [], "y": [[None]]}],
+    ]
 
 
 def test_List_ByteMaskedArray_NumpyArray():
@@ -407,7 +413,10 @@ def test_ByteMaskedArray_RecordArray_NumpyArray():
     assert to_list(a) == [{"nest": 1.1}, None, {"nest": 3.3}, None, {"nest": 5.5}]
     assert to_list(ak.drop_none(a)) == [{"nest": 1.1}, {"nest": 3.3}, {"nest": 5.5}]
 
+
 def test_highlevel_return():
-    assert isinstance(ak.drop_none(ak.Array([1, 2, 3])), ak.Array) 
-    assert isinstance(ak.drop_none(ak.Array([1, 2, 3]), highlevel=True), ak.Array) 
-    assert isinstance(ak.drop_none(ak.Array([1, 2, 3]), highlevel=False), ak.contents.Content) 
+    assert isinstance(ak.drop_none(ak.Array([1, 2, 3])), ak.Array)
+    assert isinstance(ak.drop_none(ak.Array([1, 2, 3]), highlevel=True), ak.Array)
+    assert isinstance(
+        ak.drop_none(ak.Array([1, 2, 3]), highlevel=False), ak.contents.Content
+    )

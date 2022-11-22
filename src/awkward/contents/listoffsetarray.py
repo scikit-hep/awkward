@@ -1986,7 +1986,7 @@ class ListOffsetArray(Content):
                 and self._offsets.nplike is self._nplike
                 and none_indexes.nplike is self._nplike
             )
-            
+
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_drop_none_indexes",
