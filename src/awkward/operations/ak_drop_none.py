@@ -61,16 +61,18 @@ def _impl(array, axis, highlevel, behavior):
             return maybe_drop_none(continuation())
 
     else:
+        max_axis = layout.branch_depth[1] - 1
+        if axis > max_axis:
+            raise ak._errors.wrap_error(
+                np.AxisError(
+                    f"axis={axis} exceeds the depth ({max_axis}) of this array"
+                )
+            )
 
         def action(layout, depth, depth_context, **kwargs):
             posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
-
-            if posaxis == depth and layout.is_option:
-                return layout.project()
-            elif posaxis == depth and layout.is_list:
-                if layout.content.is_option:
-                    return layout.drop_none()
-
+            if posaxis == depth and (layout.is_option or layout.is_list):
+                return layout.drop_none()
             depth_context["posaxis"] = posaxis
 
     depth_context = {"posaxis": axis}
