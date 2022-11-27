@@ -72,3 +72,8 @@ repos:
   rev: "v0.8.0.4"
   hooks:
   - id: shellcheck
+
+- repo: https://github.com/asottile/yesqa
+  rev: v1.4.0
+  hooks:
+  - id: yesqa
