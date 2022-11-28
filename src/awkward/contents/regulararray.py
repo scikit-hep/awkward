@@ -170,7 +170,7 @@ class RegularArray(Content):
         if isinstance(self._content, ak.contents.NumpyArray):
             content = self._content[: self._length * self._size]
         elif isinstance(self._content, RegularArray):
-            content = self._content[: self._length * self._size].maybe_toNumpyArray()
+            content = self._content[: self._length * self._size].maybe_to_NumpyArray()
 
         if isinstance(content, ak.contents.NumpyArray):
             shape = (self._length, self._size) + content.data.shape[1:]
