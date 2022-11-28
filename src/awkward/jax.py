@@ -12,7 +12,7 @@ numpy = nplikes.Numpy()
 
 
 def assert_never(arg) -> None:
-    raise AssertionError(f"this should never be run: {arg}")
+    raise ak._errors.wrap_error(AssertionError(f"this should never be run: {arg}"))
 
 
 class _RegistrationState(enum.Enum):
