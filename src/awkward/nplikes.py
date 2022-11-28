@@ -93,6 +93,10 @@ class NumpyLike(Singleton):
     known_dtype = True
     is_eager = True
 
+    @property
+    def index_nplike(self) -> NumpyLike:
+        raise ak._errors.wrap_error(NotImplementedError)
+
     ############################ array creation
 
     def array(self, *args, **kwargs):
