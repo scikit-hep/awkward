@@ -72,11 +72,11 @@ class IndexedOptionArray(Content):
     def content(self):
         return self._content
 
-    Form = IndexedOptionForm
+    form_cls = IndexedOptionForm
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._index.form,
             self._content._form_with_key(getkey),
             parameters=self._parameters,
@@ -84,7 +84,7 @@ class IndexedOptionArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, nplike):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key = getkey(self, form, "index")
         container[key] = ak._util.little_endian(self._index.raw(nplike))
         self._content._to_buffers(form.content, getkey, container, nplike)

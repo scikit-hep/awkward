@@ -84,11 +84,11 @@ class ListOffsetArray(Content):
     def content(self):
         return self._content
 
-    Form = ListOffsetForm
+    form_cls = ListOffsetForm
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._offsets.form,
             self._content._form_with_key(getkey),
             parameters=self._parameters,
@@ -96,7 +96,7 @@ class ListOffsetArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, nplike):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key = getkey(self, form, "offsets")
         container[key] = ak._util.little_endian(self._offsets.raw(nplike))
         self._content._to_buffers(form.content, getkey, container, nplike)

@@ -97,11 +97,11 @@ class ListArray(Content):
     def content(self):
         return self._content
 
-    Form = ListForm
+    form_cls = ListForm
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._starts.form,
             self._stops.form,
             self._content._form_with_key(getkey),
@@ -110,7 +110,7 @@ class ListArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, nplike):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "starts")
         key2 = getkey(self, form, "stops")
         container[key1] = ak._util.little_endian(self._starts.raw(nplike))

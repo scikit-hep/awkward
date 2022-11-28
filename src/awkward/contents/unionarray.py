@@ -144,11 +144,11 @@ class UnionArray(Content):
     def contents(self):
         return self._contents
 
-    Form = UnionForm
+    form_cls = UnionForm
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._tags.form,
             self._index.form,
             [x._form_with_key(getkey) for x in self._contents],
@@ -157,7 +157,7 @@ class UnionArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, nplike):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key1 = getkey(self, form, "tags")
         key2 = getkey(self, form, "index")
         container[key1] = ak._util.little_endian(self._tags.raw(nplike))

@@ -38,13 +38,13 @@ class EmptyArray(Content):
             backend = ak._backends.NumpyBackend.instance()
         self._init(parameters, backend)
 
-    Form = EmptyForm
+    form_cls = EmptyForm
 
     def _form_with_key(self, getkey):
-        return self.Form(parameters=self._parameters, form_key=getkey(self))
+        return self.form_cls(parameters=self._parameters, form_key=getkey(self))
 
     def _to_buffers(self, form, getkey, container, nplike):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
 
     @property
     def typetracer(self):

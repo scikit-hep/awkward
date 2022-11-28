@@ -79,11 +79,11 @@ class RegularArray(Content):
     def content(self):
         return self._content
 
-    Form = RegularForm
+    form_cls = RegularForm
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._content._form_with_key(getkey),
             self._size,
             parameters=self._parameters,
@@ -91,7 +91,7 @@ class RegularArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, nplike):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property

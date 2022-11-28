@@ -98,10 +98,10 @@ class NumpyArray(Content):
     def raw(self, nplike):
         return self._backend.nplike.raw(self.data, nplike)
 
-    Form = NumpyForm
+    form_cls = NumpyForm
 
     def _form_with_key(self, getkey):
-        return self.Form(
+        return self.form_cls(
             ak.types.numpytype.dtype_to_primitive(self._data.dtype),
             self._data.shape[1:],
             parameters=self._parameters,
@@ -109,7 +109,7 @@ class NumpyArray(Content):
         )
 
     def _to_buffers(self, form, getkey, container, nplike):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         key = getkey(self, form, "data")
         container[key] = ak._util.little_endian(self.raw(nplike))
 

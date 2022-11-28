@@ -47,18 +47,18 @@ class UnmaskedArray(Content):
     def content(self):
         return self._content
 
-    Form = UnmaskedForm
+    form_cls = UnmaskedForm
 
     def _form_with_key(self, getkey):
         form_key = getkey(self)
-        return self.Form(
+        return self.form_cls(
             self._content._form_with_key(getkey),
             parameters=self._parameters,
             form_key=form_key,
         )
 
     def _to_buffers(self, form, getkey, container, nplike):
-        assert isinstance(form, self.Form)
+        assert isinstance(form, self.form_cls)
         self._content._to_buffers(form.content, getkey, container, nplike)
 
     @property
