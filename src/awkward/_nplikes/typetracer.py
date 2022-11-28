@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import enum
 import operator
 from functools import reduce
-from typing import Any, Callable, Iterable, Literal, Sized, TypeVar, Union, cast
+from typing import Callable, Iterable, Literal, Sized, TypeVar, Union, cast
 
 import numpy
 
@@ -80,30 +79,12 @@ def is_unknown_scalar(x) -> bool:
 
 
 K = TypeVar("K")
-ScalarTraitInitialiser = Callable[[Union[bool, int, float, complex]], tuple[str, ...]]
 
 
 class TypeTracerArray:
     _array: numpy.ndarray
     _nplike: TypeTracer
     _shape: TypeTracerShape
-    _traits: set[str]
-
-    _operator_drop_traits: dict[Any, set[str]] = {}
-    _scalar_trait_initialisers: list[ScalarTraitInitialiser] = []
-
-    @classmethod
-    def drop_trait_for(cls, trait: str, *ops):
-        for op in ops:
-            op_traits = cls._operator_drop_traits.setdefault(op, set())
-            op_traits.add(trait)
-
-    @classmethod
-    def initialises_scalar_trait(
-        cls, func: ScalarTraitInitialiser
-    ) -> ScalarTraitInitialiser:
-        cls._scalar_trait_initialisers.append(func)
-        return func
 
     @property
     def dtype(self) -> dtypes.dtype:
@@ -128,17 +109,12 @@ class TypeTracerArray:
     def T(self) -> TypeTracerArray:
         return self._new(self._array, shape=self._shape[::-1], nplike=self._nplike)
 
-    def has_trait(self, trait: str) -> bool:
-        return trait in self._traits
-
     @classmethod
     def _new(
         cls,
         x: numpy.generic | numpy.ndarray,
         shape: Shape,
         nplike: TypeTracer,
-        *,
-        traits: frozenset[str] = frozenset(),
     ) -> TypeTracerArray:
         self = super().__new__(cls)
         if isinstance(x, numpy.generic):
@@ -164,17 +140,7 @@ class TypeTracerArray:
         self._array = x
         self._shape = TypeTracerShape(shape)
         self._nplike = nplike
-        self._traits = traits
         return self
-
-    @classmethod
-    def _initialise_traits_from_scalar(
-        cls, value: bool | int | float | complex
-    ) -> frozenset[str]:
-        traits = frozenset()
-        for func in cls._scalar_trait_initialisers:
-            traits |= func(value)
-        return traits
 
     @classmethod
     def _promote_scalar(
@@ -196,8 +162,7 @@ class TypeTracerArray:
             )
         else:
             return x
-        traits = self._initialise_traits_from_scalar(x)
-        return cls._new_as_scalar(array, self._nplike, traits=traits)
+        return cls._new_as_scalar(array, self._nplike)
 
     def _handles_operand(self, other) -> bool:
         return isinstance(
@@ -218,10 +183,8 @@ class TypeTracerArray:
         cls,
         array,
         nplike: TypeTracer,
-        *,
-        traits: frozenset[str] = frozenset(),
     ) -> TypeTracerArray:
-        return cls._new(array, (), nplike=nplike, traits=traits)
+        return cls._new(array, (), nplike=nplike)
 
     @classmethod
     def _new_from_binary_op(
@@ -230,22 +193,14 @@ class TypeTracerArray:
         other: TypeTracerArray,
         op: Callable[[K, K], K],
     ) -> TypeTracerArray:
-        new_traits = (self._traits & other._traits) - self._operator_drop_traits.get(
-            op, set()
-        )
-        array = op(self._array, other._array)
         shape = self._nplike.broadcast_shapes(self.shape, other.shape)
-        return cls._new(array, shape=shape, nplike=self._nplike, traits=new_traits)
+        return cls._new(op(self._array, other._array), shape=shape, nplike=self._nplike)
 
     @classmethod
     def _new_from_unary_op(
         cls, self: TypeTracerArray, op: Callable[[K], K]
     ) -> TypeTracerArray:
-        new_traits = self._traits - self._operator_drop_traits.get(op, set())
-        array = op(self._array)
-        return cls._new(
-            array, shape=self._shape, nplike=self._nplike, traits=new_traits
-        )
+        return cls._new(op(self._array), shape=self._shape, nplike=self._nplike)
 
     def __new__(cls, *args, **kwargs):
         raise _errors.wrap_error(
@@ -367,31 +322,6 @@ class TypeTracerArray:
 
     def __index__(self) -> int:
         raise _errors.wrap_error(RuntimeError("cannot realise an unknown value"))
-
-
-class TypeTracerTraits(str, enum.Enum):
-    POSITIVE = "POSITIVE"
-
-
-# Don't preserve positivity between positive arrays under these operations
-TypeTracerArray.drop_trait_for(
-    TypeTracerTraits.POSITIVE,
-    operator.sub,
-    operator.inv,
-    operator.neg,
-    operator.ge,
-    operator.le,
-    operator.gt,
-    operator.lt,
-    operator.eq,
-    operator.ne,
-)
-
-
-@TypeTracerArray.initialises_scalar_trait
-def _initialise_scalar_trait(value):
-    if isinstance(value, (int, float)) and value >= 0:
-        return TypeTracerTraits.POSITIVE
 
 
 class TypeTracer(numpylike.NumpyLike):
