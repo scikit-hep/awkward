@@ -108,7 +108,7 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self):
         arange = self._nplike.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(arange, nplike=self.nplike),
@@ -117,7 +117,7 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def toByteMaskedArray(self, valid_when):
+    def to_ByteMaskedArray(self, valid_when):
         return ak.contents.ByteMaskedArray(
             ak.index.Index8(
                 self.mask_as_bool(valid_when).view(np.int8), nplike=self.nplike
@@ -128,7 +128,7 @@ class UnmaskedArray(Content):
             self._nplike,
         )
 
-    def toBitMaskedArray(self, valid_when, lsb_order):
+    def to_BitMaskedArray(self, valid_when, lsb_order):
         bitlength = int(numpy.ceil(self._content.length / 8.0))
         if valid_when:
             bitmask = self._nplike.full(bitlength, np.uint8(255), dtype=np.uint8)
@@ -308,7 +308,7 @@ class UnmaskedArray(Content):
             return self._content.mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
-        return self.toIndexedOptionArray64()._reverse_merge(other)
+        return self.to_IndexedOptionArray64()._reverse_merge(other)
 
     def mergemany(self, others):
         if len(others) == 0:
@@ -328,7 +328,7 @@ class UnmaskedArray(Content):
             )
 
         else:
-            return self.toIndexedOptionArray64().mergemany(others)
+            return self.to_IndexedOptionArray64().mergemany(others)
 
     def fill_none(self, value):
         return self._content.fill_none(value)

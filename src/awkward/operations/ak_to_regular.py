@@ -56,7 +56,7 @@ def _impl(array, axis, highlevel, behavior):
 
         def action(layout, continuation, **kwargs):
             if layout.is_list:
-                return continuation().toRegularArray()
+                return continuation().to_RegularArray()
 
         out = layout.recursively_apply(action, behavior)
 
@@ -68,7 +68,7 @@ def _impl(array, axis, highlevel, behavior):
         def action(layout, depth, depth_context, **kwargs):
             posaxis = layout.axis_wrap_if_negative(depth_context["posaxis"])
             if posaxis == depth and layout.is_list:
-                return layout.toRegularArray()
+                return layout.to_RegularArray()
             elif posaxis == 0:
                 raise ak._errors.wrap_error(
                     np.AxisError(

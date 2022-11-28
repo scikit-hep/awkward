@@ -672,7 +672,7 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                             attach(x.content), x.size, len(x)
                         )
 
-                return attach(data.toRegularArray())
+                return attach(data.to_RegularArray())
 
         else:
             # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
@@ -776,7 +776,7 @@ def to_arraylib(module, array, allow_missing):
             return out[: shape[0] * array.size].reshape(shape)
 
         elif isinstance(array, (ak.contents.ListArray, ak.contents.ListOffsetArray)):
-            return _impl(array.toRegularArray())
+            return _impl(array.to_RegularArray())
 
         elif isinstance(array, ak.contents.RecordArray):
             raise ak._errors.wrap_error(

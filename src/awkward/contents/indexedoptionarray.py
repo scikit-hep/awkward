@@ -141,7 +141,7 @@ class IndexedOptionArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self):
         if self._index.dtype == np.dtype(np.int64):
             return self
         else:
@@ -152,7 +152,7 @@ class IndexedOptionArray(Content):
                 self._nplike,
             )
 
-    def toByteMaskedArray(self, valid_when):
+    def to_ByteMaskedArray(self, valid_when):
         mask = ak.index.Index8(self.mask_as_bool(valid_when, self._nplike))
 
         carry = self._index.data
@@ -175,8 +175,8 @@ class IndexedOptionArray(Content):
             self._nplike,
         )
 
-    def toBitMaskedArray(self, valid_when, lsb_order):
-        return self.toByteMaskedArray(valid_when).toBitMaskedArray(
+    def to_BitMaskedArray(self, valid_when, lsb_order):
+        return self.to_ByteMaskedArray(valid_when).to_BitMaskedArray(
             valid_when, lsb_order
         )
 
@@ -481,7 +481,7 @@ class IndexedOptionArray(Content):
                     ak.contents.UnmaskedArray,
                 ),
             ):
-                rawcontent = self._content.toIndexedOptionArray64()
+                rawcontent = self._content.to_IndexedOptionArray64()
                 inner = rawcontent.index
                 result = ak.index.Index64.empty(self.index.length, self._nplike)
             assert (
@@ -693,7 +693,7 @@ class IndexedOptionArray(Content):
                     ak.contents.UnmaskedArray,
                 ),
             ):
-                array = array.toIndexedOptionArray64()
+                array = array.to_IndexedOptionArray64()
 
             if isinstance(array, ak.contents.IndexedOptionArray):
                 contents.append(array.content)

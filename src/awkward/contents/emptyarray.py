@@ -74,7 +74,7 @@ class EmptyArray(Content):
             ak._util.merge_parameters(self._parameters, parameters), self._nplike
         )
 
-    def toNumpyArray(self, dtype, nplike=None):
+    def to_NumpyArray(self, dtype, nplike=None):
         if nplike is None:
             nplike = self._nplike
         if nplike is None:
@@ -224,7 +224,7 @@ class EmptyArray(Content):
         kind,
         order,
     ):
-        as_numpy = self.toNumpyArray(np.float64)
+        as_numpy = self.to_NumpyArray(np.float64)
         return as_numpy._argsort_next(
             negaxis,
             starts,
@@ -257,7 +257,7 @@ class EmptyArray(Content):
         keepdims,
         behavior,
     ):
-        as_numpy = self.toNumpyArray(reducer.preferred_dtype)
+        as_numpy = self.to_NumpyArray(reducer.preferred_dtype)
         return as_numpy._reduce_next(
             reducer,
             negaxis,

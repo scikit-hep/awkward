@@ -219,7 +219,7 @@ class BitMaskedArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self):
         index = ak.index.Index64.empty(self._mask.length * 8, self._nplike)
         assert index.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
@@ -242,7 +242,7 @@ class BitMaskedArray(Content):
             self._nplike,
         )
 
-    def toByteMaskedArray(self):
+    def to_ByteMaskedArray(self):
         bytemask = ak.index.Index8.empty(self._mask.length * 8, self._nplike)
         assert bytemask.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
@@ -266,7 +266,7 @@ class BitMaskedArray(Content):
             self._nplike,
         )
 
-    def toBitMaskedArray(self, valid_when, lsb_order):
+    def to_BitMaskedArray(self, valid_when, lsb_order):
         if lsb_order == self._lsb_order:
             if valid_when == self._valid_when:
                 return self
@@ -346,7 +346,7 @@ class BitMaskedArray(Content):
             return None
 
     def _getitem_range(self, where):
-        return self.toByteMaskedArray()._getitem_range(where)
+        return self.to_ByteMaskedArray()._getitem_range(where)
 
     def _getitem_field(self, where, only_fields=()):
         return BitMaskedArray(
@@ -372,10 +372,10 @@ class BitMaskedArray(Content):
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
-        return self.toByteMaskedArray()._carry(carry, allow_lazy)
+        return self.to_ByteMaskedArray()._carry(carry, allow_lazy)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        return self.toByteMaskedArray()._getitem_next_jagged(
+        return self.to_ByteMaskedArray()._getitem_next_jagged(
             slicestarts, slicestops, slicecontent, tail
         )
 
@@ -386,7 +386,7 @@ class BitMaskedArray(Content):
         elif isinstance(
             head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
-            return self.toByteMaskedArray()._getitem_next(head, tail, advanced)
+            return self.to_ByteMaskedArray()._getitem_next(head, tail, advanced)
 
         elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
@@ -407,7 +407,7 @@ class BitMaskedArray(Content):
             raise ak._errors.wrap_error(AssertionError(repr(head)))
 
     def project(self, mask=None):
-        return self.toByteMaskedArray().project(mask)
+        return self.to_ByteMaskedArray().project(mask)
 
     def simplify_optiontype(self):
         if isinstance(
@@ -420,15 +420,15 @@ class BitMaskedArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.toIndexedOptionArray64().simplify_optiontype()
+            return self.to_IndexedOptionArray64().simplify_optiontype()
         else:
             return self
 
     def num(self, axis, depth=0):
-        return self.toByteMaskedArray().num(axis, depth)
+        return self.to_ByteMaskedArray().num(axis, depth)
 
     def _offsets_and_flattened(self, axis, depth):
-        return self.toByteMaskedArray._offsets_and_flattened(axis, depth)
+        return self.to_ByteMaskedArray._offsets_and_flattened(axis, depth)
 
     def _mergeable(self, other, mergebool):
         if isinstance(
@@ -447,13 +447,13 @@ class BitMaskedArray(Content):
             return self._content.mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
-        return self.toIndexedOptionArray64()._reverse_merge(other)
+        return self.to_IndexedOptionArray64()._reverse_merge(other)
 
     def mergemany(self, others):
         if len(others) == 0:
             return self
 
-        out = self.toIndexedOptionArray64().mergemany(others)
+        out = self.to_IndexedOptionArray64().mergemany(others)
 
         if all(
             isinstance(x, BitMaskedArray)
@@ -461,30 +461,32 @@ class BitMaskedArray(Content):
             and x._lsb_order == self._lsb_order
             for x in others
         ):
-            return out.toBitMaskedArray(self._valid_when, self._lsb_order)
+            return out.to_BitMaskedArray(self._valid_when, self._lsb_order)
         else:
             return out
 
     def fill_none(self, value):
-        return self.toIndexedOptionArray64().fill_none(value)
+        return self.to_IndexedOptionArray64().fill_none(value)
 
     def _local_index(self, axis, depth):
-        return self.toByteMaskedArray()._local_index(axis, depth)
+        return self.to_ByteMaskedArray()._local_index(axis, depth)
 
     def numbers_to_type(self, name):
-        return self.toByteMaskedArray().numbers_to_type(name)
+        return self.to_ByteMaskedArray().numbers_to_type(name)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self._mask.length == 0:
             return True
-        return self.toIndexedOptionArray64()._is_unique(
+        return self.to_IndexedOptionArray64()._is_unique(
             negaxis, starts, parents, outlength
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self._mask.length == 0:
             return self
-        out = self.toIndexedOptionArray64()._unique(negaxis, starts, parents, outlength)
+        out = self.to_IndexedOptionArray64()._unique(
+            negaxis, starts, parents, outlength
+        )
         if negaxis is None:
             return out
         else:
@@ -502,7 +504,7 @@ class BitMaskedArray(Content):
         kind,
         order,
     ):
-        return self.toIndexedOptionArray64()._argsort_next(
+        return self.to_IndexedOptionArray64()._argsort_next(
             negaxis,
             starts,
             shifts,
@@ -517,7 +519,7 @@ class BitMaskedArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        return self.toIndexedOptionArray64()._sort_next(
+        return self.to_IndexedOptionArray64()._sort_next(
             negaxis,
             starts,
             parents,
@@ -529,7 +531,7 @@ class BitMaskedArray(Content):
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return self.toByteMaskedArray()._combinations(
+        return self.to_ByteMaskedArray()._combinations(
             n, replacement, recordlookup, parameters, axis, depth
         )
 
@@ -545,7 +547,7 @@ class BitMaskedArray(Content):
         keepdims,
         behavior,
     ):
-        return self.toByteMaskedArray()._reduce_next(
+        return self.to_ByteMaskedArray()._reduce_next(
             reducer,
             negaxis,
             starts,
@@ -580,15 +582,15 @@ class BitMaskedArray(Content):
         return self.mask._nbytes_part() + self.content._nbytes_part()
 
     def _pad_none(self, target, axis, depth, clip):
-        return self.toByteMaskedArray()._pad_none(target, axis, depth, clip)
+        return self.to_ByteMaskedArray()._pad_none(target, axis, depth, clip)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
-        return self.toByteMaskedArray()._to_arrow(
+        return self.to_ByteMaskedArray()._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
 
     def _to_numpy(self, allow_missing):
-        return self.toByteMaskedArray()._to_numpy(allow_missing)
+        return self.to_ByteMaskedArray()._to_numpy(allow_missing)
 
     def _completely_flatten(self, nplike, options):
         branch, depth = self.branch_depth
@@ -657,7 +659,7 @@ class BitMaskedArray(Content):
 
     def packed(self):
         if self._content.is_record:
-            next = self.toIndexedOptionArray64()
+            next = self.to_IndexedOptionArray64()
 
             content = next._content.packed()
             if content.length > self._length:

@@ -155,7 +155,7 @@ def _impl(array, counts, axis, highlevel, behavior):
             posaxis = layout.axis_wrap_if_negative(posaxis)
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
-                listoffsetarray = layout.toListOffsetArray64(True)
+                listoffsetarray = layout.to_ListOffsetArray64(True)
                 outeroffsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
 
                 content = doit(listoffsetarray.content[: outeroffsets[-1]])
@@ -163,7 +163,7 @@ def _impl(array, counts, axis, highlevel, behavior):
                     inneroffsets = nplike.index_nplike.asarray(content.content.offsets)
                 elif isinstance(content, ak.contents.RegularArray):
                     inneroffsets = nplike.index_nplike.asarray(
-                        content.toListOffsetArray64(True).offsets
+                        content.to_ListOffsetArray64(True).offsets
                     )
                 else:
                     inneroffsets = nplike.index_nplike.asarray(content.offsets)

@@ -170,7 +170,7 @@ def _impl(array, highlevel, behavior):
             ):
                 # We also want to trim the _upper_ bound of content,
                 # so we manually convert the list type to zero-based
-                listoffsetarray = layout.toListOffsetArray64(False)
+                listoffsetarray = layout.to_ListOffsetArray64(False)
                 offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
                 content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
@@ -185,7 +185,7 @@ def _impl(array, highlevel, behavior):
                     ak.contents.NumpyArray(nextcontent),
                 )
 
-            listoffsetarray = layout.toListOffsetArray64(False)
+            listoffsetarray = layout.to_ListOffsetArray64(False)
             offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
             content = listoffsetarray.content[offsets[0] : offsets[-1]]
 

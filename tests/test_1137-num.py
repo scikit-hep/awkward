@@ -62,7 +62,7 @@ def test_numpyarray():
 def test_regulararray():
     array = ak.contents.NumpyArray(
         np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
-    ).toRegularArray()
+    ).to_RegularArray()
 
     assert array.num(0) == 2
     assert to_list(array.num(1)) == [3, 3]

@@ -153,7 +153,7 @@ class ListOffsetArray(Content):
             self._nplike,
         )
 
-    def toListOffsetArray64(self, start_at_zero=False):
+    def to_ListOffsetArray64(self, start_at_zero=False):
         if issubclass(self._offsets.dtype.type, np.int64):
             if (
                 not self._nplike.known_data
@@ -177,7 +177,7 @@ class ListOffsetArray(Content):
             offsets = self._compact_offsets64(start_at_zero)
             return self._broadcast_tooffsets64(offsets)
 
-    def toRegularArray(self):
+    def to_RegularArray(self):
         start, stop = self._offsets[0], self._offsets[self._offsets.length - 1]
         content = self._content._getitem_range(slice(start, stop))
         size = ak.index.Index64.empty(1, self._nplike)
@@ -648,7 +648,7 @@ class ListOffsetArray(Content):
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
 
         elif posaxis == depth + 1:
-            listoffsetarray = self.toListOffsetArray64(True)
+            listoffsetarray = self.to_ListOffsetArray64(True)
             stop = listoffsetarray.offsets[-1]
             content = listoffsetarray.content._getitem_range(slice(0, stop))
             return (listoffsetarray.offsets, content)
@@ -744,7 +744,7 @@ class ListOffsetArray(Content):
             isinstance(x, ListOffsetArray) and x._offsets.dtype == self._offsets.dtype
             for x in others
         ):
-            return out.toListOffsetArray64(False)
+            return out.to_ListOffsetArray64(False)
         else:
             return out
 
@@ -1406,7 +1406,7 @@ class ListOffsetArray(Content):
                 offsets, recordarray, self._parameters, self._nplike
             )
         else:
-            compact = self.toListOffsetArray64(True)
+            compact = self.to_ListOffsetArray64(True)
             next = compact._content._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth + 1
             )
@@ -1429,7 +1429,7 @@ class ListOffsetArray(Content):
         if self._offsets.dtype != np.dtype(np.int64) or (
             self._offsets.nplike.known_data and self._offsets[0] != 0
         ):
-            next = self.toListOffsetArray64(True)
+            next = self.to_ListOffsetArray64(True)
             return next._reduce_next(
                 reducer,
                 negaxis,
@@ -1608,7 +1608,7 @@ class ListOffsetArray(Content):
                 assert outcontent.is_regular
             elif depth >= negaxis + 2:
                 assert outcontent.is_list or outcontent.is_regular
-                outcontent = outcontent.toListOffsetArray64(False)
+                outcontent = outcontent.to_ListOffsetArray64(False)
 
             return ak.contents.ListOffsetArray(
                 outoffsets,
@@ -1881,7 +1881,7 @@ class ListOffsetArray(Content):
                     self._parameters,
                     self._nplike,
                 )
-                return next.toListOffsetArray64(True)._to_arrow(
+                return next.to_ListOffsetArray64(True)._to_arrow(
                     pyarrow, mask_node, validbytes, length, options
                 )
 
@@ -1964,7 +1964,7 @@ class ListOffsetArray(Content):
             return self._nplike.array(self.to_list())
 
         return ak.operations.to_numpy(
-            self.toRegularArray(), allow_missing=allow_missing
+            self.to_RegularArray(), allow_missing=allow_missing
         )
 
     def _completely_flatten(self, nplike, options):
@@ -2037,7 +2037,7 @@ class ListOffsetArray(Content):
             raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
-        next = self.toListOffsetArray64(True)
+        next = self.to_ListOffsetArray64(True)
         content = next._content.packed()
         if content.length != next._offsets[-1]:
             content = content[: next._offsets[-1]]
@@ -2141,7 +2141,7 @@ class ListOffsetArray(Content):
                     return ak.contents.UnionArray(
                         tags=union_tags,
                         index=union_index,
-                        contents=[content, self.toListOffsetArray64(True)],
+                        contents=[content, self.to_ListOffsetArray64(True)],
                     )
 
                 return content
