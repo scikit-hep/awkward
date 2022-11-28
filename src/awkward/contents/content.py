@@ -663,7 +663,9 @@ class Content:
     def _getitem_field(self, where: str):
         raise ak._errors.wrap_error(NotImplementedError)
 
-    def _getitem_fields(self, where: list[str], only_fields: tuple[str, ...] = ()):
+    def _getitem_fields(
+        self, where: list[str], only_fields: tuple[str | list[str], ...] = ()
+    ):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_next(self, head, tail, advanced: ak.index.Index | None):
