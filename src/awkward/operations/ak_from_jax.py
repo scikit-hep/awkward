@@ -3,7 +3,7 @@
 from awkward import _errors, _util, jax
 
 
-def from_jax(array, regulararray=False, highlevel=True, behavior=None):
+def from_jax(array, *, regulararray=False, highlevel=True, behavior=None):
     """
     Args:
         array (jax.numpy.DeviceArray): The JAX DeviceArray to convert into an Awkward Array.

@@ -3,7 +3,7 @@
 import awkward as ak
 
 
-def is_valid(array, exception=False):
+def is_valid(array, *, exception=False):
     """
     Args:
         array (#ak.Array, #ak.Record, #ak.contents.Content, #ak.record.Record, #ak.ArrayBuilder):

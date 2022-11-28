@@ -10,6 +10,7 @@ def mean(
     x,
     weight=None,
     axis=None,
+    *,
     keepdims=False,
     mask_identity=False,
     flatten_records=False,
@@ -94,7 +95,13 @@ def mean(
 
 @ak._connect.numpy.implements("nanmean")
 def nanmean(
-    x, weight=None, axis=None, keepdims=False, mask_identity=True, flatten_records=False
+    x,
+    weight=None,
+    axis=None,
+    *,
+    keepdims=False,
+    mask_identity=True,
+    flatten_records=False,
 ):
     """
     Args:
@@ -148,12 +155,15 @@ def nanmean(
 
 
 def _impl(x, weight, axis, keepdims, mask_identity, flatten_records):
+    behavior = ak._util.behavior_of(x, weight)
     x = ak.highlevel.Array(
-        ak.operations.to_layout(x, allow_record=False, allow_other=False)
+        ak.operations.to_layout(x, allow_record=False, allow_other=False),
+        behavior=behavior,
     )
     if weight is not None:
         weight = ak.highlevel.Array(
-            ak.operations.to_layout(weight, allow_record=False, allow_other=False)
+            ak.operations.to_layout(weight, allow_record=False, allow_other=False),
+            behavior=behavior,
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):

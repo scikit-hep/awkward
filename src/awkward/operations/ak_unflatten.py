@@ -7,7 +7,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
+def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data to create an array with an additional level from.

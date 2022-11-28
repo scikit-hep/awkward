@@ -8,6 +8,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 def cartesian(
     arrays,
     axis=1,
+    *,
     nested=None,
     parameters=None,
     with_name=None,
@@ -320,7 +321,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
             ak.index.Index64(x.reshape(-1), nplike=nplike)
             for x in nplike.index_nplike.meshgrid(
                 *[nplike.index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
-                indexing="ij"
+                indexing="ij",
             )
         ]
         outs = [

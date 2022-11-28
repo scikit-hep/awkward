@@ -5,7 +5,7 @@ from collections.abc import Mapping
 import awkward as ak
 
 
-def to_rdataframe(arrays, flatlist_as_rvec=True):
+def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """
     Args:
         arrays (dict of str \u2192 arrays): A dictionary of Array-like data (anything

@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def num(array, axis=1, highlevel=True, behavior=None):
+def num(array, axis=1, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data containing nested lists to count.

@@ -9,15 +9,15 @@ _ZEROS = object()
 
 
 @ak._connect.numpy.implements("zeros_like")
-def zeros_like(array, highlevel=True, behavior=None, dtype=None):
+def zeros_like(array, *, dtype=None, highlevel=True, behavior=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only `0`.
+        dtype (None or NumPy dtype)): Overrides the data type of the result.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
-        dtype (None or NumPy dtype)): Overrides the data type of the result.
 
     This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
 
@@ -28,7 +28,7 @@ def zeros_like(array, highlevel=True, behavior=None, dtype=None):
     """
     with ak._errors.OperationErrorContext(
         "ak.zeros_like",
-        dict(array=array, highlevel=highlevel, behavior=behavior, dtype=dtype),
+        dict(array=array, dtype=dtype, highlevel=highlevel, behavior=behavior),
     ):
         return _impl(array, highlevel, behavior, dtype)
 

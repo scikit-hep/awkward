@@ -6,7 +6,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("sort")
-def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
+def sort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:
         array: Data to sort, possibly within nested lists.

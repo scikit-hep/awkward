@@ -10,6 +10,7 @@ import awkward as ak
 def to_parquet(
     data,
     destination,
+    *,
     list_to32=False,
     string_to32=True,
     bytestring_to32=True,

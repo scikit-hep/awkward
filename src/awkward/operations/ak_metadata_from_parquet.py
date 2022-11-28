@@ -14,7 +14,12 @@ ParquetMetadata = collections.namedtuple(
 
 
 def metadata_from_parquet(
-    path, storage_options=None, row_groups=None, ignore_metadata=False, scan_files=True
+    path,
+    *,
+    storage_options=None,
+    row_groups=None,
+    ignore_metadata=False,
+    scan_files=True
 ):
     """
     This function differs from ak.from_parquet._metadata as follows:

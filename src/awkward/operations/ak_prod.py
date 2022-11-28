@@ -6,7 +6,9 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("prod")
-def prod(array, axis=None, keepdims=False, mask_identity=False, flatten_records=False):
+def prod(
+    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
+):
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -52,7 +54,7 @@ def prod(array, axis=None, keepdims=False, mask_identity=False, flatten_records=
 
 @ak._connect.numpy.implements("nanprod")
 def nanprod(
-    array, axis=None, keepdims=False, mask_identity=False, flatten_records=False
+    array, axis=None, *, keepdims=False, mask_identity=False, flatten_records=False
 ):
     """
     Args:

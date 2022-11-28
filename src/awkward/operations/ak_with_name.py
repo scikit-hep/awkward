@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def with_name(array, name, highlevel=True, behavior=None):
+def with_name(array, name, *, highlevel=True, behavior=None):
     """
     Args:
         base: Data containing records or tuples.

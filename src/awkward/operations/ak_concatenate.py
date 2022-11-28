@@ -8,7 +8,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 @ak._connect.numpy.implements("concatenate")
 def concatenate(
-    arrays, axis=0, merge=True, mergebool=True, highlevel=True, behavior=None
+    arrays, axis=0, *, merge=True, mergebool=True, highlevel=True, behavior=None
 ):
     """
     Args:

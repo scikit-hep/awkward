@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def is_none(array, axis=0, highlevel=True, behavior=None):
+def is_none(array, axis=0, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data to check for missing values (None).

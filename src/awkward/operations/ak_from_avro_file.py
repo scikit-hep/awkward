@@ -9,13 +9,13 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 def from_avro_file(
-    file, debug_forth=False, limit_entries=None, highlevel=True, behavior=None
+    file, limit_entries=None, *, debug_forth=False, highlevel=True, behavior=None
 ):
     """
     Args:
         file (string or fileobject): Avro file to be read as Awkward Array.
-        debug_forth (bool): If True, prints the generated Forth code for debugging.
         limit_entries (int): The number of rows of the Avro file to be read into the Awkward Array.
+        debug_forth (bool): If True, prints the generated Forth code for debugging.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -33,8 +33,8 @@ def from_avro_file(
             file=file,
             highlevel=highlevel,
             behavior=behavior,
-            debug_forth=debug_forth,
             limit_entries=limit_entries,
+            debug_forth=debug_forth,
         ),
     ):
 

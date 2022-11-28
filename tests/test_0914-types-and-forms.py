@@ -12,8 +12,11 @@ def test_UnknownType():
         str(ak.types.unknowntype.UnknownType({"x": 123}))
         == 'unknown[parameters={"x": 123}]'
     )
-    assert str(ak.types.unknowntype.UnknownType(None, "override")) == "override"
-    assert str(ak.types.unknowntype.UnknownType({"x": 123}, "override")) == "override"
+    assert str(ak.types.unknowntype.UnknownType(None, typestr="override")) == "override"
+    assert (
+        str(ak.types.unknowntype.UnknownType({"x": 123}, typestr="override"))
+        == "override"
+    )
     assert (
         str(ak.types.unknowntype.UnknownType({"__categorical__": True}))
         == "categorical[type=unknown]"
@@ -23,7 +26,11 @@ def test_UnknownType():
         == 'categorical[type=unknown[parameters={"x": 123}]]'
     )
     assert (
-        str(ak.types.unknowntype.UnknownType({"__categorical__": True}, "override"))
+        str(
+            ak.types.unknowntype.UnknownType(
+                {"__categorical__": True}, typestr="override"
+            )
+        )
         == "categorical[type=override]"
     )
 
@@ -66,9 +73,13 @@ def test_NumpyType():
         str(ak.types.numpytype.NumpyType("bool", {"x": 123}))
         == 'bool[parameters={"x": 123}]'
     )
-    assert str(ak.types.numpytype.NumpyType("bool", None, "override")) == "override"
     assert (
-        str(ak.types.numpytype.NumpyType("bool", {"x": 123}, "override")) == "override"
+        str(ak.types.numpytype.NumpyType("bool", None, typestr="override"))
+        == "override"
+    )
+    assert (
+        str(ak.types.numpytype.NumpyType("bool", {"x": 123}, typestr="override"))
+        == "override"
     )
     assert (
         str(ak.types.numpytype.NumpyType("bool", {"__categorical__": True}))
@@ -79,7 +90,11 @@ def test_NumpyType():
         == 'categorical[type=bool[parameters={"x": 123}]]'
     )
     assert (
-        str(ak.types.numpytype.NumpyType("bool", {"__categorical__": True}, "override"))
+        str(
+            ak.types.numpytype.NumpyType(
+                "bool", {"__categorical__": True}, typestr="override"
+            )
+        )
         == "categorical[type=override]"
     )
     assert str(ak.types.numpytype.NumpyType("datetime64")) == "datetime64"
@@ -281,7 +296,7 @@ def test_RegularType():
     assert (
         str(
             ak.types.regulartype.RegularType(
-                ak.types.unknowntype.UnknownType(), 10, None, "override"
+                ak.types.unknowntype.UnknownType(), 10, None, typestr="override"
             )
         )
         == "override"
@@ -289,7 +304,7 @@ def test_RegularType():
     assert (
         str(
             ak.types.regulartype.RegularType(
-                ak.types.unknowntype.UnknownType(), 10, {"x": 123}, "override"
+                ak.types.unknowntype.UnknownType(), 10, {"x": 123}, typestr="override"
             )
         )
         == "override"
@@ -318,7 +333,7 @@ def test_RegularType():
                 ak.types.unknowntype.UnknownType(),
                 10,
                 {"__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -401,7 +416,7 @@ def test_ListType():
     assert (
         str(
             ak.types.listtype.ListType(
-                ak.types.unknowntype.UnknownType(), None, "override"
+                ak.types.unknowntype.UnknownType(), None, typestr="override"
             )
         )
         == "override"
@@ -409,7 +424,7 @@ def test_ListType():
     assert (
         str(
             ak.types.listtype.ListType(
-                ak.types.unknowntype.UnknownType(), {"x": 123}, "override"
+                ak.types.unknowntype.UnknownType(), {"x": 123}, typestr="override"
             )
         )
         == "override"
@@ -436,7 +451,7 @@ def test_ListType():
             ak.types.listtype.ListType(
                 ak.types.unknowntype.UnknownType(),
                 {"__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -558,7 +573,7 @@ def test_RecordType():
                 ],
                 None,
                 None,
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -572,7 +587,7 @@ def test_RecordType():
                 ],
                 ["x", "y"],
                 None,
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -586,7 +601,7 @@ def test_RecordType():
                 ],
                 None,
                 {"__record__": "Name"},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -600,7 +615,7 @@ def test_RecordType():
                 ],
                 ["x", "y"],
                 {"__record__": "Name"},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -666,7 +681,7 @@ def test_RecordType():
                 ],
                 None,
                 {"x": 123},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -680,7 +695,7 @@ def test_RecordType():
                 ],
                 ["x", "y"],
                 {"x": 123},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -694,7 +709,7 @@ def test_RecordType():
                 ],
                 None,
                 {"__record__": "Name", "x": 123},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -708,7 +723,7 @@ def test_RecordType():
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "x": 123},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -774,7 +789,7 @@ def test_RecordType():
                 ],
                 None,
                 {"__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -788,7 +803,7 @@ def test_RecordType():
                 ],
                 ["x", "y"],
                 {"__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -802,7 +817,7 @@ def test_RecordType():
                 ],
                 None,
                 {"__record__": "Name", "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -816,7 +831,7 @@ def test_RecordType():
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -882,7 +897,7 @@ def test_RecordType():
                 ],
                 None,
                 {"x": 123, "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -896,7 +911,7 @@ def test_RecordType():
                 ],
                 ["x", "y"],
                 {"x": 123, "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -910,7 +925,7 @@ def test_RecordType():
                 ],
                 None,
                 {"__record__": "Name", "x": 123, "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -924,7 +939,7 @@ def test_RecordType():
                 ],
                 ["x", "y"],
                 {"__record__": "Name", "x": 123, "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1049,7 +1064,7 @@ def test_OptionType():
     assert (
         str(
             ak.types.optiontype.OptionType(
-                ak.types.unknowntype.UnknownType(), None, "override"
+                ak.types.unknowntype.UnknownType(), None, typestr="override"
             )
         )
         == "override"
@@ -1059,7 +1074,7 @@ def test_OptionType():
             ak.types.optiontype.OptionType(
                 ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 None,
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -1071,7 +1086,7 @@ def test_OptionType():
                     ak.types.unknowntype.UnknownType(), 10
                 ),
                 None,
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -1079,7 +1094,7 @@ def test_OptionType():
     assert (
         str(
             ak.types.optiontype.OptionType(
-                ak.types.unknowntype.UnknownType(), {"x": 123}, "override"
+                ak.types.unknowntype.UnknownType(), {"x": 123}, typestr="override"
             )
         )
         == "override"
@@ -1089,7 +1104,7 @@ def test_OptionType():
             ak.types.optiontype.OptionType(
                 ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"x": 123},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -1101,7 +1116,7 @@ def test_OptionType():
                     ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"x": 123},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -1168,7 +1183,7 @@ def test_OptionType():
             ak.types.optiontype.OptionType(
                 ak.types.unknowntype.UnknownType(),
                 {"__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1178,7 +1193,7 @@ def test_OptionType():
             ak.types.optiontype.OptionType(
                 ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1190,7 +1205,7 @@ def test_OptionType():
                     ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1200,7 +1215,7 @@ def test_OptionType():
             ak.types.optiontype.OptionType(
                 ak.types.unknowntype.UnknownType(),
                 {"x": 123, "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1210,7 +1225,7 @@ def test_OptionType():
             ak.types.optiontype.OptionType(
                 ak.types.listtype.ListType(ak.types.unknowntype.UnknownType()),
                 {"x": 123, "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1222,7 +1237,7 @@ def test_OptionType():
                     ak.types.unknowntype.UnknownType(), 10
                 ),
                 {"x": 123, "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1286,7 +1301,7 @@ def test_UnionType():
                     ak.types.numpytype.NumpyType("bool"),
                 ],
                 None,
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -1299,7 +1314,7 @@ def test_UnionType():
                     ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"x": 123},
-                "override",
+                typestr="override",
             )
         )
         == "override"
@@ -1336,7 +1351,7 @@ def test_UnionType():
                     ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1349,7 +1364,7 @@ def test_UnionType():
                     ak.types.numpytype.NumpyType("bool"),
                 ],
                 {"x": 123, "__categorical__": True},
-                "override",
+                typestr="override",
             )
         )
         == "categorical[type=override]"
@@ -1398,7 +1413,7 @@ def test_ArrayType():
         ak.types.arraytype.ArrayType(ak.types.unknowntype.UnknownType(), 10, {"x": 123})
     with pytest.raises(TypeError):
         ak.types.arraytype.ArrayType(
-            ak.types.unknowntype.UnknownType(), 10, None, "override"
+            ak.types.unknowntype.UnknownType(), 10, None, typestr="override"
         )
 
     assert (

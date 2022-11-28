@@ -3,7 +3,7 @@
 import awkward as ak
 
 
-def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
+def from_cupy(array, *, regulararray=False, highlevel=True, behavior=None):
     """
     Args:
         array (cp.ndarray): The CuPy array to convert into an Awkward Array.

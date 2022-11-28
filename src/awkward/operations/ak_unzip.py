@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def unzip(array, highlevel=True, behavior=None):
+def unzip(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array to unzip into individual fields.

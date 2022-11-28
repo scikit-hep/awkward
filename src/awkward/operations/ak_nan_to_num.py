@@ -7,7 +7,14 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 @ak._connect.numpy.implements("nan_to_num")
 def nan_to_num(
-    array, copy=True, nan=0.0, posinf=None, neginf=None, highlevel=True, behavior=None
+    array,
+    copy=True,
+    nan=0.0,
+    posinf=None,
+    neginf=None,
+    *,
+    highlevel=True,
+    behavior=None
 ):
 
     """

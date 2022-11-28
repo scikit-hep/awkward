@@ -8,7 +8,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 def to_dataframe(
-    array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
+    array, *, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
 ):
     """
     Args:

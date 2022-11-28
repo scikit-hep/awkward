@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def from_arrow(array, generate_bitmasks=False, highlevel=True, behavior=None):
+def from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None):
     """
     Args:
         array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`,

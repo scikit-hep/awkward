@@ -6,7 +6,9 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("argsort")
-def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
+def argsort(
+    array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None
+):
     """
     Args:
         array: Data for which to get a sorting index, possibly within nested

@@ -6,7 +6,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 
 
 @ak._connect.numpy.implements("ravel")
-def ravel(array, highlevel=True, behavior=None):
+def ravel(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data containing nested lists to flatten

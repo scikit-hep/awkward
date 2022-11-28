@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def values_astype(array, to, highlevel=True, behavior=None):
+def values_astype(array, to, *, highlevel=True, behavior=None):
     """
     Args:
         array: Array whose numbers should be converted to a new numeric type.

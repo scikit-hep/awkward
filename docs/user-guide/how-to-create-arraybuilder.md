@@ -376,7 +376,7 @@ new_array
 new_array.layout
 ```
 
-Above, we see that `new_array` is just making references ({class}`ak.layout.IndexedArray`) of an {classY}`ak.layout.RecordArray` with `x = [1, 2, 3]` and `y = [1.1, 2.2, 3.3]`.
+Above, we see that `new_array` is just making references ({class}`ak.layout.IndexedArray`) of an {class}`ak.layout.RecordArray` with `x = [1, 2, 3]` and `y = [1.1, 2.2, 3.3]`.
 
 +++
 

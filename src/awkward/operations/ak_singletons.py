@@ -5,7 +5,7 @@ import awkward as ak
 np = ak.nplikes.NumpyMetadata.instance()
 
 
-def singletons(array, highlevel=True, behavior=None):
+def singletons(array, *, highlevel=True, behavior=None):
     """
     Args:
         array: Data to wrap in lists of length 1 if present and length 0

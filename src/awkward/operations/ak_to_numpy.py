@@ -5,7 +5,7 @@ import numpy
 import awkward as ak
 
 
-def to_numpy(array, allow_missing=True):
+def to_numpy(array, *, allow_missing=True):
     """
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a NumPy array, if possible.
