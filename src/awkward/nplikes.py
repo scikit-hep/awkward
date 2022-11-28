@@ -96,7 +96,7 @@ class NumpyLike(Singleton):
     ############################ array creation
 
     def array(self, *args, **kwargs):
-        raise NotImplementedError
+        raise ak._errors.wrap_error(NotImplementedError)
         # data[, dtype=[, copy=]]
         return self._module.array(*args, **kwargs)
 
