@@ -871,7 +871,7 @@ class Content:
 
     def _reduce(
         self,
-        reducer: type[ak._reducers.Reducer],
+        reducer: ak._reducers.Reducer,
         axis: int = -1,
         mask: bool = True,
         keepdims: bool = False,
@@ -930,7 +930,7 @@ class Content:
 
     def _reduce_next(
         self,
-        reducer: type[ak._reducers.Reducer],
+        reducer: ak._reducers.Reducer,
         negaxis: int,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
@@ -949,7 +949,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.ArgMin, axis, mask, keepdims, behavior)
+        return self._reduce(awkward._reducers.ArgMin(), axis, mask, keepdims, behavior)
 
     def argmax(
         self,
@@ -958,7 +958,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.ArgMax, axis, mask, keepdims, behavior)
+        return self._reduce(awkward._reducers.ArgMax(), axis, mask, keepdims, behavior)
 
     def count(
         self,
@@ -967,7 +967,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.Count, axis, mask, keepdims, behavior)
+        return self._reduce(awkward._reducers.Count(), axis, mask, keepdims, behavior)
 
     def count_nonzero(
         self,
@@ -977,7 +977,7 @@ class Content:
         behavior: dict | None = None,
     ):
         return self._reduce(
-            awkward._reducers.CountNonzero, axis, mask, keepdims, behavior
+            awkward._reducers.CountNonzero(), axis, mask, keepdims, behavior
         )
 
     def sum(
@@ -987,7 +987,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.Sum, axis, mask, keepdims, behavior)
+        return self._reduce(awkward._reducers.Sum(), axis, mask, keepdims, behavior)
 
     def prod(
         self,
@@ -996,7 +996,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.Prod, axis, mask, keepdims, behavior)
+        return self._reduce(awkward._reducers.Prod(), axis, mask, keepdims, behavior)
 
     def any(
         self,
@@ -1005,7 +1005,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.Any, axis, mask, keepdims, behavior)
+        return self._reduce(awkward._reducers.Any(), axis, mask, keepdims, behavior)
 
     def all(
         self,
@@ -1014,7 +1014,7 @@ class Content:
         keepdims: bool = False,
         behavior: dict | None = None,
     ):
-        return self._reduce(awkward._reducers.All, axis, mask, keepdims, behavior)
+        return self._reduce(awkward._reducers.All(), axis, mask, keepdims, behavior)
 
     def min(
         self,
@@ -1393,7 +1393,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def purelist_parameter(self, key: str):
-        return self.form_cls.purelist_parameter(self, key)
+        return self.form_cls.purelist_parameter(self, key)  # type: ignore
 
     def is_unique(self, axis: int | None = None) -> bool:
         negaxis = axis if axis is None else -axis
@@ -1647,10 +1647,10 @@ class Content:
             isinstance(complex_record_fields, Sized)
             and isinstance(complex_record_fields, Iterable)
             and len(complex_record_fields) == 2
-            and isinstance(complex_record_fields[0], str)
-            and isinstance(complex_record_fields[1], str)
+            and isinstance(complex_record_fields[0], str)  # type: ignore
+            and isinstance(complex_record_fields[1], str)  # type: ignore
         ):
-            complex_real_string, complex_imag_string = complex_record_fields
+            complex_real_string, complex_imag_string = complex_record_fields  # type: ignore
         else:
             complex_real_string, complex_imag_string = None, None
 
