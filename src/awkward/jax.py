@@ -109,7 +109,7 @@ def _register():
                 jax_connect.register_pytree_class(cls)
         except Exception:
             _registration_state = _RegistrationState.FAILED
-            raise
+            raise  # noqa: AK101
         else:
             _registration_state = _RegistrationState.SUCCESS
 
