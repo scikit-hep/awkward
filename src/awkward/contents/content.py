@@ -1497,10 +1497,6 @@ class Content:
     def is_tuple(self) -> bool:
         return self.form_cls.is_tuple.__get__(self)
 
-    @property
-    def dimension_optiontype(self) -> bool:
-        return self.form_cls.dimension_optiontype.__get__(self)
-
     def pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and target < self.length:
             index = ak.index.Index64(
@@ -1700,11 +1696,11 @@ class Content:
 
         if overloaded:
             array = ak._util.wrap(self, behavior=behavior)
-            out = [None] * self.length
+            out: list = [None] * self.length
             for i in range(self.length):
                 out[i] = array[i]
                 if isinstance(out[i], (ak.highlevel.Array, ak.highlevel.Record)):
-                    out[i] = out[i]._layout._to_list(behavior, json_conversions)
+                    out[i] = out[i]._layout._to_list(behavior, json_conversions)  # type: ignore
                 elif hasattr(out[i], "tolist"):
                     out[i] = out[i].tolist()
 
