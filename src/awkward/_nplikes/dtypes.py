@@ -5,7 +5,7 @@ The known dtypes supported by Awkward's internals, and a type-promotion table
 """
 
 import numpy
-from numpy import bytes_, datetime64, dtype, intp, longlong, str_, timedelta64
+from numpy import dtype
 
 __all__ = [
     "bool_",
@@ -17,17 +17,11 @@ __all__ = [
     "uint16",
     "uint32",
     "uint64",
-    "longlong",
     "float32",
     "float64",
     "complex64",
     "complex128",
-    "str_",
-    "bytes_",
-    "intp",
     "dtype",
-    "datetime64",
-    "timedelta64",
 ]
 
 # DTypes ###############################################################################################################
@@ -68,9 +62,9 @@ all_dtypes = numeric_dtypes + (bool_,)
 # (Awkward code can't rely on these beign available)
 # we can still allow our code to test for them
 if hasattr(numpy, "float16"):
-    numeric_dtypes = (*numeric_dtypes, dtype(numpy.float16))
+    numeric_dtypes = (*numeric_dtypes, dtype(numpy.float16))  # type: ignore
 if hasattr(numpy, "complex256"):
-    numeric_dtypes = (*numeric_dtypes, dtype(numpy.complex256))
+    numeric_dtypes = (*numeric_dtypes, dtype(numpy.complex256))  # type: ignore
 
 
 def is_datetime(dtype: dtype) -> bool:
@@ -87,3 +81,11 @@ def is_timelike(dtype: dtype) -> bool:
 
 def is_known_dtype(dtype: dtype) -> bool:
     return dtype in all_dtypes or is_timelike(dtype)
+
+
+def is_string(dtype: dtype) -> bool:
+    return dtype.type == numpy.string_
+
+
+def is_bytes(dtype: dtype) -> bool:
+    return dtype.type == numpy.bytes_
