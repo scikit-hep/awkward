@@ -492,6 +492,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
                 numpy.frombuffer(pacontent, dtype=np.uint8),
                 parameters=sub_parameters,
                 nplike=ak.nplikes.Numpy.instance(),
+                index_nplike=ak.nplikes.Numpy.instance(),
             ),
             storage_type.byte_width,
             parameters=parameters,
@@ -528,6 +529,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
                 numpy.frombuffer(pacontent, dtype=np.uint8),
                 parameters=sub_parameters,
                 nplike=ak.nplikes.Numpy.instance(),
+                index_nplike=ak.nplikes.Numpy.instance(),
             ),
             parameters=parameters,
         )
@@ -628,6 +630,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             bytedata.view(np.bool_),
             parameters=node_parameters(awkwardarrow_type),
             nplike=ak.nplikes.Numpy.instance(),
+            index_nplike=ak.nplikes.Numpy.instance(),
         )
         return popbuffers_finalize(
             out, paarray, validbits, awkwardarrow_type, generate_bitmasks
@@ -648,6 +651,7 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
             numpy.frombuffer(data, dtype=dt),
             parameters=node_parameters(awkwardarrow_type),
             nplike=ak.nplikes.Numpy.instance(),
+            index_nplike=ak.nplikes.Numpy.instance(),
         )
         return popbuffers_finalize(
             out, paarray, validbits, awkwardarrow_type, generate_bitmasks

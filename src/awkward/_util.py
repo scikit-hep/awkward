@@ -43,6 +43,15 @@ def regularize_backend(backend):
         )
 
 
+def is_buffer(obj) -> bool:
+    try:
+        memoryview(obj)
+    except TypeError:
+        return False
+    else:
+        return True
+
+
 def parse_version(version):
     return packaging.version.parse(version)
 
@@ -625,7 +634,10 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
                 ak.contents.NumpyArray(
-                    asbytes.view("u1"), parameters={"__array__": "byte"}, nplike=numpy
+                    asbytes.view("u1"),
+                    parameters={"__array__": "byte"},
+                    nplike=numpy,
+                    index_nplike=ak.nplikes.index_nplike_for(numpy),
                 ),
                 parameters={"__array__": "bytestring"},
             )
@@ -643,7 +655,10 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
                 ak.contents.NumpyArray(
-                    asbytes.view("u1"), parameters={"__array__": "char"}, nplike=numpy
+                    asbytes.view("u1"),
+                    parameters={"__array__": "char"},
+                    nplike=numpy,
+                    index_nplike=ak.nplikes.index_nplike_for(numpy),
                 ),
                 parameters={"__array__": "string"},
             )

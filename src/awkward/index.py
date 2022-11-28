@@ -202,7 +202,9 @@ class Index:
     def _to_nplike(self, nplike):
         # if isinstance(nplike, ak.nplikes.Jax):
         #     print("YES OFFICER, this nplike right here")
-        return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
+        return Index(
+            self.raw(nplike.index_nplike), metadata=self.metadata, nplike=nplike
+        )
 
     def layout_equal(self, other, index_dtype=True, numpyarray=True):
         if index_dtype:

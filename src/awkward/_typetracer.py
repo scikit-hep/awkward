@@ -593,7 +593,8 @@ class TypeTracer(ak.nplikes.NumpyLike):
             and ak._util.is_integer(step)
         ):
             length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
-
+        else:
+            length = UnknownLength
         return TypeTracerArray(kwargs["dtype"], (length,))
 
     def meshgrid(self, *args, **kwargs):

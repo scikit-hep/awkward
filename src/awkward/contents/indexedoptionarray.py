@@ -20,13 +20,11 @@ class IndexedOptionArray(Content):
         index=unset,
         content=unset,
         parameters=unset,
-        nplike=unset,
     ):
         return IndexedOptionArray(
             self._index if index is unset else index,
             self._content if content is unset else content,
             self._parameters if parameters is unset else parameters,
-            self._nplike if nplike is unset else nplike,
         )
 
     def __copy__(self):
@@ -39,7 +37,7 @@ class IndexedOptionArray(Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
-    def __init__(self, index, content, parameters=None, nplike=None):
+    def __init__(self, index, content, parameters=None):
         if not (
             isinstance(index, Index)
             and index.dtype
@@ -62,14 +60,10 @@ class IndexedOptionArray(Content):
                     )
                 )
             )
-        if nplike is None:
-            nplike = content.nplike
-        if nplike is None:
-            nplike = index.nplike
 
         self._index = index
         self._content = content
-        self._init(parameters, nplike)
+        self._init(parameters, nplike=content.nplike, index_nplike=content.index_nplike)
 
     @property
     def index(self):
@@ -103,7 +97,6 @@ class IndexedOptionArray(Content):
             ak.index.Index(self._index.raw(tt)),
             self._content.typetracer,
             self._parameters,
-            tt,
         )
 
     @property
@@ -115,7 +108,6 @@ class IndexedOptionArray(Content):
             self._index.forget_length(),
             self._content,
             self._parameters,
-            self._nplike,
         )
 
     def __repr__(self):
@@ -138,7 +130,6 @@ class IndexedOptionArray(Content):
             self._index,
             self._content,
             ak._util.merge_parameters(self._parameters, parameters),
-            self._nplike,
         )
 
     def to_IndexedOptionArray64(self):
@@ -149,7 +140,6 @@ class IndexedOptionArray(Content):
                 self._index.astype(np.int64),
                 self._content,
                 self._parameters,
-                self._nplike,
             )
 
     def to_ByteMaskedArray(self, valid_when):
@@ -172,7 +162,6 @@ class IndexedOptionArray(Content):
             content,
             valid_when,
             self._parameters,
-            self._nplike,
         )
 
     def to_BitMaskedArray(self, valid_when, lsb_order):
@@ -215,7 +204,6 @@ class IndexedOptionArray(Content):
             self._index[start:stop],
             self._content,
             self._parameters,
-            self._nplike,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -223,7 +211,6 @@ class IndexedOptionArray(Content):
             self._index,
             self._content._getitem_field(where, only_fields),
             None,
-            self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -231,7 +218,6 @@ class IndexedOptionArray(Content):
             self._index,
             self._content._getitem_fields(where, only_fields),
             None,
-            self._nplike,
         )
 
     def _carry(self, carry, allow_lazy):
@@ -246,7 +232,6 @@ class IndexedOptionArray(Content):
             nextindex,
             self._content,
             self._parameters,
-            self._nplike,
         )
 
     def _nextcarry_outindex(self, nplike):
@@ -296,9 +281,7 @@ class IndexedOptionArray(Content):
         if self._nplike.known_shape and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
-                ak.contents.ListArray(
-                    slicestarts, slicestops, slicecontent, None, self._nplike
-                ),
+                ak.contents.ListArray(slicestarts, slicestops, slicecontent, None),
                 "cannot fit jagged slice with length {} into {} of size {}".format(
                     slicestarts.length, type(self).__name__, self.length
                 ),
@@ -336,9 +319,7 @@ class IndexedOptionArray(Content):
         next = self._content._carry(nextcarry, True)
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
 
-        out2 = ak.contents.IndexedOptionArray(
-            outindex, out, self._parameters, self._nplike
-        )
+        out2 = ak.contents.IndexedOptionArray(outindex, out, self._parameters)
         return out2.simplify_optiontype()
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
@@ -359,7 +340,7 @@ class IndexedOptionArray(Content):
 
             next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
-            out2 = IndexedOptionArray(outindex, out, self._parameters, self._nplike)
+            out2 = IndexedOptionArray(outindex, out, self._parameters)
             return out2.simplify_optiontype()
 
         elif isinstance(head, str):
@@ -413,7 +394,6 @@ class IndexedOptionArray(Content):
                 nextindex,
                 self._content,
                 self._parameters,
-                self._nplike,
             )
             return next.project()
         else:
@@ -507,7 +487,6 @@ class IndexedOptionArray(Content):
                 result,
                 self._content.content,
                 self._parameters,
-                self._nplike,
             )
 
         else:
@@ -524,9 +503,7 @@ class IndexedOptionArray(Content):
         _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
         next = self._content._carry(nextcarry, False)
         out = next.num(posaxis, depth)
-        out2 = ak.contents.IndexedOptionArray(
-            outindex, out, self.parameters, self._nplike
-        )
+        out2 = ak.contents.IndexedOptionArray(outindex, out, self.parameters)
         return out2.simplify_optiontype()
 
     def _offsets_and_flattened(self, axis, depth):
@@ -543,7 +520,7 @@ class IndexedOptionArray(Content):
                 return (
                     offsets,
                     ak.contents.IndexedOptionArray(
-                        outindex, flattened, self._parameters, self._nplike
+                        outindex, flattened, self._parameters
                     ),
                 )
 
@@ -642,7 +619,7 @@ class IndexedOptionArray(Content):
             )
         )
         reinterpreted_index = ak.index.Index(
-            self._nplike.index_nplike.asarray(self.index.data), nplike=self.nplike
+            self._index_nplike.asarray(self.index.data), nplike=self.nplike
         )
 
         assert (
@@ -663,7 +640,7 @@ class IndexedOptionArray(Content):
         )
         parameters = ak._util.merge_parameters(self._parameters, other._parameters)
 
-        return ak.contents.IndexedOptionArray(index, content, parameters, self._nplike)
+        return ak.contents.IndexedOptionArray(index, content, parameters)
 
     def mergemany(self, others):
         if len(others) == 0:
@@ -739,9 +716,7 @@ class IndexedOptionArray(Content):
 
         tail_contents = contents[1:]
         nextcontent = contents[0].mergemany(tail_contents)
-        next = ak.contents.IndexedOptionArray(
-            nextindex, nextcontent, parameters, self._nplike
-        )
+        next = ak.contents.IndexedOptionArray(nextindex, nextcontent, parameters)
 
         if len(tail) == 0:
             return next
@@ -775,7 +750,7 @@ class IndexedOptionArray(Content):
             ](index.data, self._index.data, tags.length)
         )
         out = ak.contents.UnionArray(
-            tags, index, contents, self._parameters, self._nplike
+            tags, index, contents, self._parameters, self._nplike, self._index_nplike
         )
         return out.simplify_uniontype(True, True)
 
@@ -792,7 +767,6 @@ class IndexedOptionArray(Content):
                 outindex,
                 out,
                 self._parameters,
-                self._nplike,
             )
             return out2
 
@@ -865,7 +839,6 @@ class IndexedOptionArray(Content):
             self._index,
             self._content.numbers_to_type(name),
             self._parameters,
-            self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -922,7 +895,6 @@ class IndexedOptionArray(Content):
                 nextoutindex,
                 out,
                 self._parameters,
-                self._nplike,
             ).simplify_optiontype()
 
         if isinstance(out, ak.contents.ListOffsetArray):
@@ -977,14 +949,12 @@ class IndexedOptionArray(Content):
                 newindex[: newoffsets[-1]],
                 out._content,
                 self._parameters,
-                self._nplike,
             ).simplify_optiontype()
 
             return ak.contents.ListOffsetArray(
                 newoffsets,
                 out,
                 self._parameters,
-                self._nplike,
             )
 
         if isinstance(out, ak.contents.NumpyArray):
@@ -1008,7 +978,6 @@ class IndexedOptionArray(Content):
                 nextoutindex,
                 out,
                 self._parameters,
-                self._nplike,
             ).simplify_optiontype()
 
         if inject_nones:
@@ -1017,16 +986,12 @@ class IndexedOptionArray(Content):
                 out.length,
                 0,
                 self._parameters,
-                self._nplike,
             )
 
         return out
 
     def _rearrange_nextshifts(self, nextparents, shifts):
-        nextshifts = ak.index.Index64.empty(
-            nextparents.length,
-            self._nplike,
-        )
+        nextshifts = ak.index.Index64.empty(nextparents.length, self._nplike)
         assert nextshifts.nplike is self._nplike
 
         if shifts is None:
@@ -1177,7 +1142,9 @@ class IndexedOptionArray(Content):
         # We can test for this condition by seeing whether the NumpyArray of indices
         # is mergeable with our content (`out = next._argsort_next result`).
         # If so, try to concatenate them at the end of `out`.`
-        nulls_index_content = ak.contents.NumpyArray(nulls_index, None, self._nplike)
+        nulls_index_content = ak.contents.NumpyArray(
+            nulls_index, None, self._nplike, self._index_nplike
+        )
         if out.mergeable(nulls_index_content, True):
             out = out.merge(nulls_index_content)
             nulls_merged = True
@@ -1224,7 +1191,6 @@ class IndexedOptionArray(Content):
             nextoutindex,
             out,
             self._parameters,
-            self._nplike,
         ).simplify_optiontype()
 
         inject_nones = (
@@ -1240,7 +1206,6 @@ class IndexedOptionArray(Content):
                 outindex,
                 out,
                 self._parameters,
-                self._nplike,
             ).simplify_optiontype()
         # Otherwise, if we are rearranging (e.g sorting) the contents of this layout,
         # then we do NOT want to return an optional layout,
@@ -1290,7 +1255,6 @@ class IndexedOptionArray(Content):
             nextoutindex,
             out,
             self._parameters,
-            self._nplike,
         ).simplify_optiontype()
 
         inject_nones = True if not branch and negaxis != depth else False
@@ -1304,7 +1268,6 @@ class IndexedOptionArray(Content):
                 outindex,
                 out,
                 self._parameters,
-                self._nplike,
             ).simplify_optiontype()
         # Otherwise, if we are rearranging (e.g sorting) the contents of this layout,
         # then we do NOT want to return an optional layout
@@ -1401,7 +1364,6 @@ class IndexedOptionArray(Content):
                 outindex,
                 out_content,
                 self._parameters,
-                self._nplike,
             ).simplify_optiontype()
 
             # Re-wrap content
@@ -1409,7 +1371,6 @@ class IndexedOptionArray(Content):
                 outoffsets,
                 inner,
                 self._parameters,
-                self._nplike,
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -1422,9 +1383,7 @@ class IndexedOptionArray(Content):
             out = next._combinations(
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
-            out2 = ak.contents.IndexedOptionArray(
-                outindex, out, parameters, self._nplike
-            )
+            out2 = ak.contents.IndexedOptionArray(outindex, out, parameters)
             return out2.simplify_optiontype()
 
     def _validity_error(self, path):
@@ -1481,14 +1440,12 @@ class IndexedOptionArray(Content):
                 index,
                 next,
                 self._parameters,
-                self._nplike,
             ).simplify_optiontype()
         else:
             return ak.contents.IndexedOptionArray(
                 self._index,
                 self._content._pad_none(target, posaxis, depth, clip),
                 self._parameters,
-                self._nplike,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -1507,7 +1464,6 @@ class IndexedOptionArray(Content):
             ak.index.Index(index),
             self._content,
             next_parameters,
-            self._nplike,
         )
         return next._to_arrow(
             pyarrow,
@@ -1585,7 +1541,7 @@ class IndexedOptionArray(Content):
         ):
             npindex = self._index.data
             npselect = npindex >= 0
-            if self._nplike.index_nplike.any(npselect):
+            if self._index_nplike.any(npselect):
                 indexmin = npindex[npselect].min()
                 index = ak.index.Index(npindex - indexmin, nplike=self._nplike)
                 content = self._content[indexmin : npindex.max() + 1]
@@ -1608,7 +1564,6 @@ class IndexedOptionArray(Content):
                         options,
                     ),
                     self._parameters if options["keep_parameters"] else None,
-                    self._nplike,
                 )
 
         else:
@@ -1644,7 +1599,7 @@ class IndexedOptionArray(Content):
     def packed(self):
         original_index = self._index.raw(self._nplike)
         is_none = original_index < 0
-        num_none = self._nplike.index_nplike.count_nonzero(is_none)
+        num_none = self._index_nplike.count_nonzero(is_none)
         if self.parameter("__array__") == "categorical" or self._content.length <= (
             len(original_index) - num_none
         ):
@@ -1652,15 +1607,14 @@ class IndexedOptionArray(Content):
                 self._index,
                 self._content.packed(),
                 self._parameters,
-                self._nplike,
             )
 
         else:
-            new_index = self._nplike.index_nplike.empty(
+            new_index = self._index_nplike.empty(
                 len(original_index), dtype=original_index.dtype
             )
             new_index[is_none] = -1
-            new_index[~is_none] = self._nplike.index_nplike.arange(
+            new_index[~is_none] = self._index_nplike.arange(
                 len(original_index) - num_none,
                 dtype=original_index.dtype,
             )
@@ -1668,7 +1622,6 @@ class IndexedOptionArray(Content):
                 ak.index.Index(new_index, nplike=self.nplike),
                 self.project().packed(),
                 self._parameters,
-                self._nplike,
             )
 
     def _to_list(self, behavior, json_conversions):
@@ -1691,7 +1644,7 @@ class IndexedOptionArray(Content):
     def _to_nplike(self, nplike):
         index = self._index._to_nplike(nplike)
         content = self._content._to_nplike(nplike)
-        return IndexedOptionArray(index, content, self.parameters, nplike=nplike)
+        return IndexedOptionArray(index, content, self.parameters)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):
         return self.index.layout_equal(

@@ -19,11 +19,13 @@ class NumpyArray(Content):
         data=unset,
         parameters=unset,
         nplike=unset,
+        index_nplike=unset,
     ):
         return NumpyArray(
             self._data if data is unset else data,
             self._parameters if parameters is unset else parameters,
             self._nplike if nplike is unset else nplike,
+            self._index_nplike if index_nplike is unset else index_nplike,
         )
 
     def __copy__(self):
@@ -35,9 +37,17 @@ class NumpyArray(Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
-    def __init__(self, data, parameters=None, nplike=None):
-        if nplike is None:
+    def __init__(self, data, parameters=None, nplike=None, index_nplike=None):
+        if nplike is None and index_nplike is None:
             nplike = ak.nplikes.nplike_of(data)
+            index_nplike = ak.nplikes.index_nplike_for(nplike)
+        elif nplike is None or index_nplike is None:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "`nplike` and `index_nplike` must both be non-None or None, i.e. not mixed."
+                )
+            )
+
         if isinstance(data, ak.index.Index):
             data = data.data
         self._data = nplike.asarray(data)
@@ -53,7 +63,7 @@ class NumpyArray(Content):
                 )
             )
 
-        self._init(parameters, nplike)
+        self._init(parameters, nplike=nplike, index_nplike=index_nplike)
 
     @property
     def data(self):
@@ -115,6 +125,7 @@ class NumpyArray(Content):
             self.raw(tt),
             self._parameters,
             tt,
+            ak.nplikes.index_nplike_for(tt),
         )
 
     @property
@@ -126,6 +137,7 @@ class NumpyArray(Content):
             self._data.forget_length(),
             self._parameters,
             self._nplike,
+            self._index_nplike,
         )
 
     def __repr__(self):
@@ -170,6 +182,7 @@ class NumpyArray(Content):
             self._data,
             ak._util.merge_parameters(self._parameters, parameters),
             self._nplike,
+            self._index_nplike,
         )
 
     def to_RegularArray(self):
@@ -178,11 +191,9 @@ class NumpyArray(Content):
         for x in shape:
             zeroslen.append(zeroslen[-1] * x)
 
-        out = NumpyArray(self._data.reshape(-1), None, self._nplike)
+        out = NumpyArray(self._data.reshape(-1), None, self._nplike, self._index_nplike)
         for i in range(len(shape) - 1, 0, -1):
-            out = ak.contents.RegularArray(
-                out, shape[i], zeroslen[i], None, self._nplike
-            )
+            out = ak.contents.RegularArray(out, shape[i], zeroslen[i], None)
         out._parameters = self._parameters
         return out
 
@@ -198,9 +209,7 @@ class NumpyArray(Content):
     def _getitem_nothing(self):
         tmp = self._data[0:0]
         return NumpyArray(
-            tmp.reshape((0,) + tmp.shape[2:]),
-            None,
-            self._nplike,
+            tmp.reshape((0,) + tmp.shape[2:]), None, self._nplike, self._index_nplike
         )
 
     def _getitem_at(self, where):
@@ -213,7 +222,7 @@ class NumpyArray(Content):
             raise ak._errors.index_error(self, where, str(err)) from err
 
         if hasattr(out, "shape") and len(out.shape) != 0:
-            return NumpyArray(out, None, self._nplike)
+            return NumpyArray(out, None, self._nplike, self._index_nplike)
         else:
             return out
 
@@ -229,11 +238,7 @@ class NumpyArray(Content):
         except IndexError as err:
             raise ak._errors.index_error(self, where, str(err)) from err
 
-        return NumpyArray(
-            out,
-            self._parameters,
-            self._nplike,
-        )
+        return NumpyArray(out, self._parameters, self._nplike, self._index_nplike)
 
     def _getitem_field(self, where, only_fields=()):
         raise ak._errors.index_error(self, where, "not an array of records")
@@ -249,19 +254,13 @@ class NumpyArray(Content):
             nextdata = self._data[carry.data]
         except IndexError as err:
             raise ak._errors.index_error(self, carry.data, str(err)) from err
-        return NumpyArray(
-            nextdata,
-            self._parameters,
-            self._nplike,
-        )
+        return NumpyArray(nextdata, self._parameters, self._nplike, self._index_nplike)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         if self._data.ndim == 1:
             raise ak._errors.index_error(
                 self,
-                ak.contents.ListArray(
-                    slicestarts, slicestops, slicecontent, None, self._nplike
-                ),
+                ak.contents.ListArray(slicestarts, slicestops, slicecontent, None),
                 "too many jagged slice dimensions for array",
             )
         else:
@@ -283,7 +282,7 @@ class NumpyArray(Content):
                 raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
 
             if hasattr(out, "shape") and len(out.shape) != 0:
-                return NumpyArray(out, None, self._nplike)
+                return NumpyArray(out, None, self._nplike, self._index_nplike)
             else:
                 return out
 
@@ -293,8 +292,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
-            out2 = NumpyArray(out, self._parameters, self._nplike)
-            return out2
+            return NumpyArray(out, self._parameters, self._nplike, self._index_nplike)
 
         elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
@@ -307,7 +305,7 @@ class NumpyArray(Content):
                 where = (slice(None), head.data) + tail
             else:
                 where = (
-                    self._nplike.index_nplike.asarray(advanced.data),
+                    self._index_nplike.asarray(advanced.data),
                     head.data,
                 ) + tail
 
@@ -316,7 +314,7 @@ class NumpyArray(Content):
             except IndexError as err:
                 raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
 
-            return NumpyArray(out, self._parameters, self._nplike)
+            return NumpyArray(out, self._parameters, self._nplike, self._index_nplike)
 
         elif isinstance(head, ak.contents.ListOffsetArray):
             where = (slice(None), head) + tail
@@ -324,8 +322,7 @@ class NumpyArray(Content):
                 out = self._data[where]
             except IndexError as err:
                 raise ak._errors.index_error(self, (head,) + tail, str(err)) from err
-            out2 = NumpyArray(out, self._parameters, self._nplike)
-            return out2
+            return NumpyArray(out, self._parameters, self._nplike, self._index_nplike)
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
             next = self.to_RegularArray()
@@ -365,7 +362,7 @@ class NumpyArray(Content):
             )
         )
         return ak.contents.NumpyArray(
-            tonum.data.reshape(shape), self.parameters, self._nplike
+            tonum.data.reshape(shape), self.parameters, self._nplike, self._index_nplike
         )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -468,7 +465,9 @@ class NumpyArray(Content):
 
         contiguous_arrays = self._nplike.concatenate(contiguous_arrays)
 
-        next = NumpyArray(contiguous_arrays, parameters, self._nplike)
+        next = NumpyArray(
+            contiguous_arrays, parameters, self._nplike, self._index_nplike
+        )
 
         if len(tail) == 0:
             return next
@@ -501,6 +500,7 @@ class NumpyArray(Content):
                 self._nplike.ascontiguousarray(self._data),
                 self._parameters,
                 self._nplike,
+                self._index_nplike,
             )
 
     @property
@@ -510,7 +510,7 @@ class NumpyArray(Content):
     def _subranges_equal(self, starts, stops, length, sorted=True):
         is_equal = ak.index.Index64.zeros(1, self._nplike)
 
-        tmp = self._nplike.index_nplike.empty(length, self.dtype)
+        tmp = self._index_nplike.empty(length, self.dtype)
         self._handle_error(
             self._nplike[
                 "awkward_NumpyArray_fill",
@@ -618,7 +618,7 @@ class NumpyArray(Content):
                 outlength.data,
             )
         )
-        out2 = NumpyArray(out, self._parameters, self._nplike)
+        out2 = NumpyArray(out, self._parameters, self._nplike, self._index_nplike)
 
         return out2, nextoffsets[: outlength[0]]
 
@@ -636,6 +636,7 @@ class NumpyArray(Content):
                 self._nplike.asarray(self._data, dtype=dtype),
                 self._parameters,
                 self._nplike,
+                self._index_nplike,
             )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -716,6 +717,7 @@ class NumpyArray(Content):
                 self._nplike.asarray(out[: nextlength[0]], self.dtype),
                 None,
                 self._nplike,
+                self._index_nplike,
             )
 
         # axis is not None
@@ -821,10 +823,7 @@ class NumpyArray(Content):
             )
 
             return ak.contents.ListOffsetArray(
-                outoffsets,
-                ak.contents.NumpyArray(out),
-                self._parameters,
-                self._nplike,
+                outoffsets, ak.contents.NumpyArray(out), self._parameters
             )
 
     def _argsort_next(
@@ -943,7 +942,7 @@ class NumpyArray(Content):
                         starts.length,
                     )
                 )
-            out = NumpyArray(nextcarry, None, self._nplike)
+            out = NumpyArray(nextcarry, None, self._nplike, self._index_nplike)
             return out
 
     def _sort_next(
@@ -1026,7 +1025,10 @@ class NumpyArray(Content):
                 )
             )
             return ak.contents.NumpyArray(
-                self._nplike.asarray(out, self.dtype), None, self._nplike
+                self._nplike.asarray(out, self.dtype),
+                None,
+                self._nplike,
+                self._index_nplike,
             )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -1153,7 +1155,6 @@ class NumpyArray(Content):
                 out,
                 False,
                 None,
-                self._nplike,
             )
 
         if keepdims:
@@ -1162,7 +1163,6 @@ class NumpyArray(Content):
                 1,
                 self.length,
                 None,
-                self._nplike,
             )
 
         return out
@@ -1239,7 +1239,13 @@ class NumpyArray(Content):
             return out
 
     def _completely_flatten(self, nplike, options):
-        return [ak.contents.NumpyArray(self.raw(nplike).reshape(-1), nplike=nplike)]
+        return [
+            ak.contents.NumpyArray(
+                self.raw(nplike).reshape(-1),
+                nplike=nplike,
+                index_nplike=self._index_nplike,
+            )
+        ]
 
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
@@ -1255,7 +1261,9 @@ class NumpyArray(Content):
                 if options["keep_parameters"]:
                     return self
                 else:
-                    return NumpyArray(self._data, None, self._nplike)
+                    return NumpyArray(
+                        self._data, None, self._nplike, self._index_nplike
+                    )
 
         else:
 
@@ -1309,16 +1317,21 @@ class NumpyArray(Content):
                         return ak.contents.RecordArray(
                             [
                                 ak.contents.NumpyArray(
-                                    self._data.real, nplike=self._nplike
+                                    self._data.real,
+                                    nplike=self._nplike,
+                                    index_nplike=self._index_nplike,
                                 ),
                                 ak.contents.NumpyArray(
-                                    self._data.imag, nplike=self._nplike
+                                    self._data.imag,
+                                    nplike=self._nplike,
+                                    index_nplike=self._index_nplike,
                                 ),
                             ],
                             [complex_real_string, complex_imag_string],
                             self.length,
                             parameters=self._parameters,
                             nplike=self._nplike,
+                            index_nplike=self._index_nplike,
                         )._to_list(behavior, json_conversions)
 
             out = self._data.tolist()
@@ -1342,10 +1355,12 @@ class NumpyArray(Content):
             return out
 
     def _to_nplike(self, nplike):
+        index_nplike = ak.nplikes.index_nplike_for(nplike)
         return NumpyArray(
             self.raw(nplike),
             parameters=self.parameters,
             nplike=nplike,
+            index_nplike=index_nplike,
         )
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

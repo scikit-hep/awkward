@@ -987,7 +987,7 @@ def nplike_of(*arrays, default=_UNSET):
     if any(isinstance(x, ak._typetracer.TypeTracer) for x in nplikes):
         return ak._typetracer.TypeTracer.instance()
 
-    if nplikes == set():
+    if len(nplikes) == 0:
         if default is _UNSET:
             return Numpy.instance()
         else:
@@ -1005,3 +1005,14 @@ def nplike_of(*arrays, default=_UNSET):
 to move one or the other to main memory or the GPU(s)."""
             )
         )
+
+
+def index_nplike_for(nplike: NumpyLike) -> NumpyLike:
+    if isinstance(nplike, ak.nplikes.Jax):
+        return ak.nplikes.Numpy.instance()
+    elif isinstance(
+        nplike, (ak.nplikes.Numpy, ak.nplikes.Cupy, ak._typetracer.TypeTracer)
+    ):
+        return nplike
+    else:
+        raise ak._errors.wrap_error(TypeError(f"Unknown typetracer {type(nplike)}"))

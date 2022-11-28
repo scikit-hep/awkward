@@ -14,7 +14,6 @@ def from_buffers(
     container,
     buffer_key="{form_key}-{attribute}",
     *,
-    nplike=numpy,
     highlevel=True,
     behavior=None,
 ):
@@ -31,10 +30,6 @@ def from_buffers(
             `"{form_key}"` and/or `"{attribute}"` or a function that takes these
             as keyword arguments and returns a string to use as a key for a buffer
             in the `container`.
-        nplike (#ak.nplikes.NumpyLike): Library to use to generate values that are
-            put into the new array. The default, #ak.nplikes.Numpy, makes NumPy
-            arrays, which are in main memory (e.g. not GPU). If all the values in
-            `container` have the same `nplike` as this, they won't be copied.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -66,15 +61,14 @@ def from_buffers(
             length=length,
             container=container,
             buffer_key=buffer_key,
-            nplike=nplike,
             highlevel=highlevel,
             behavior=behavior,
         ),
     ):
-        return _impl(form, length, container, buffer_key, nplike, highlevel, behavior)
+        return _impl(form, length, container, buffer_key, highlevel, behavior)
 
 
-def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
+def _impl(form, length, container, buffer_key, highlevel, behavior):
     if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):
             form = ak.forms.NumpyForm(form)
@@ -112,7 +106,10 @@ def _impl(form, length, container, buffer_key, nplike, highlevel, behavior):
             )
         )
 
-    out = reconstitute(form, length, container, getkey, nplike)
+    nplike = ak.nplikes.nplike_of(*container.values())
+    index_nplike = ak.nplikes.index_nplike_for(nplike)
+
+    out = reconstitute(form, length, container, getkey, nplike, index_nplike)
     return ak._util.wrap(out, behavior, highlevel)
 
 
@@ -125,7 +122,18 @@ _index_to_dtype = {
 }
 
 
-def reconstitute(form, length, container, getkey, nplike):
+def from_buffer_or_array(
+    nplike: ak.nplikes.NumpyLike, raw_array, dtype, real_length: int
+):
+    if ak._util.is_buffer(raw_array):
+        return nplike.frombuffer(raw_array, dtype=dtype, count=real_length)
+    else:
+        data = nplike.asarray(raw_array, dtype=dtype)
+        assert len(data) == real_length
+        return data
+
+
+def reconstitute(form, length, container, getkey, nplike, index_nplike):
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
             raise ak._errors.wrap_error(
@@ -139,27 +147,32 @@ def reconstitute(form, length, container, getkey, nplike):
         real_length = length
         for x in form.inner_shape:
             real_length *= x
-        data = nplike.frombuffer(raw_array, dtype=dtype, count=real_length)
+
+        data = from_buffer_or_array(nplike, raw_array, dtype, real_length)
+
         if form.inner_shape != ():
             if len(data) == 0:
                 data = data.reshape((length,) + form.inner_shape)
             else:
                 data = data.reshape((-1,) + form.inner_shape)
-        return ak.contents.NumpyArray(data, form.parameters, nplike)
+        return ak.contents.NumpyArray(data, form.parameters, nplike, index_nplike)
 
     elif isinstance(form, ak.forms.UnmaskedForm):
-        content = reconstitute(form.content, length, container, getkey, nplike)
+        content = reconstitute(
+            form.content, length, container, getkey, nplike, index_nplike
+        )
         return ak.contents.UnmaskedArray(content, form.parameters)
 
     elif isinstance(form, ak.forms.BitMaskedForm):
         raw_array = container[getkey(form, "mask")]
         excess_length = int(math.ceil(length / 8.0))
-        mask = nplike.index_nplike.frombuffer(
-            raw_array, dtype=_index_to_dtype[form.mask], count=excess_length
+
+        mask = from_buffer_or_array(
+            index_nplike, raw_array, _index_to_dtype[form.mask], excess_length
         )
         return ak.contents.BitMaskedArray(
             ak.index.Index(mask),
-            reconstitute(form.content, length, container, getkey, nplike),
+            reconstitute(form.content, length, container, getkey, nplike, index_nplike),
             form.valid_when,
             length,
             form.lsb_order,
@@ -168,76 +181,86 @@ def reconstitute(form, length, container, getkey, nplike):
 
     elif isinstance(form, ak.forms.ByteMaskedForm):
         raw_array = container[getkey(form, "mask")]
-        mask = nplike.index_nplike.frombuffer(
-            raw_array, dtype=_index_to_dtype[form.mask], count=length
+        mask = from_buffer_or_array(
+            index_nplike, raw_array, _index_to_dtype[form.mask], length
         )
         return ak.contents.ByteMaskedArray(
             ak.index.Index(mask),
-            reconstitute(form.content, length, container, getkey, nplike),
+            reconstitute(form.content, length, container, getkey, nplike, index_nplike),
             form.valid_when,
             form.parameters,
         )
 
     elif isinstance(form, ak.forms.IndexedOptionForm):
         raw_array = container[getkey(form, "index")]
-        index = nplike.index_nplike.frombuffer(
-            raw_array, dtype=_index_to_dtype[form.index], count=length
+        index = from_buffer_or_array(
+            index_nplike, raw_array, _index_to_dtype[form.index], length
         )
         next_length = (
             0 if len(index) == 0 else max(0, nplike.index_nplike.max(index) + 1)
         )
         return ak.contents.IndexedOptionArray(
             ak.index.Index(index),
-            reconstitute(form.content, next_length, container, getkey, nplike),
+            reconstitute(
+                form.content, next_length, container, getkey, nplike, index_nplike
+            ),
             form.parameters,
         )
 
     elif isinstance(form, ak.forms.IndexedForm):
         raw_array = container[getkey(form, "index")]
-        index = nplike.index_nplike.frombuffer(
-            raw_array, dtype=_index_to_dtype[form.index], count=length
+        index = from_buffer_or_array(
+            index_nplike, raw_array, _index_to_dtype[form.index], length
         )
         next_length = 0 if len(index) == 0 else nplike.index_nplike.max(index) + 1
         return ak.contents.IndexedArray(
             ak.index.Index(index),
-            reconstitute(form.content, next_length, container, getkey, nplike),
+            reconstitute(
+                form.content, next_length, container, getkey, nplike, index_nplike
+            ),
             form.parameters,
         )
 
     elif isinstance(form, ak.forms.ListForm):
-        raw_array1 = container[getkey(form, "starts")]
-        raw_array2 = container[getkey(form, "stops")]
-        starts = nplike.index_nplike.frombuffer(
-            raw_array1, dtype=_index_to_dtype[form.starts], count=length
+        raw_starts = container[getkey(form, "starts")]
+        raw_stops = container[getkey(form, "stops")]
+        starts = from_buffer_or_array(
+            index_nplike, raw_starts, _index_to_dtype[form.starts], length
         )
-        stops = nplike.index_nplike.frombuffer(
-            raw_array2, dtype=_index_to_dtype[form.stops], count=length
+        stops = from_buffer_or_array(
+            index_nplike, raw_stops, _index_to_dtype[form.starts], length
         )
         reduced_stops = stops[starts != stops]
         next_length = 0 if len(starts) == 0 else nplike.index_nplike.max(reduced_stops)
         return ak.contents.ListArray(
             ak.index.Index(starts),
             ak.index.Index(stops),
-            reconstitute(form.content, next_length, container, getkey, nplike),
+            reconstitute(
+                form.content, next_length, container, getkey, nplike, index_nplike
+            ),
             form.parameters,
         )
 
     elif isinstance(form, ak.forms.ListOffsetForm):
         raw_array = container[getkey(form, "offsets")]
-        offsets = nplike.index_nplike.frombuffer(
-            raw_array, dtype=_index_to_dtype[form.offsets], count=length + 1
+        offsets = from_buffer_or_array(
+            index_nplike, raw_array, _index_to_dtype[form.offsets], length + 1
         )
         next_length = 0 if len(offsets) == 1 else offsets[-1]
         return ak.contents.ListOffsetArray(
             ak.index.Index(offsets),
-            reconstitute(form.content, next_length, container, getkey, nplike),
+            reconstitute(
+                form.content, next_length, container, getkey, nplike, index_nplike
+            ),
             form.parameters,
         )
 
     elif isinstance(form, ak.forms.RegularForm):
         next_length = length * form.size
         return ak.contents.RegularArray(
-            reconstitute(form.content, next_length, container, getkey, nplike),
+            reconstitute(
+                form.content, next_length, container, getkey, nplike, index_nplike
+            ),
             form.size,
             length,
             form.parameters,
@@ -246,7 +269,7 @@ def reconstitute(form, length, container, getkey, nplike):
     elif isinstance(form, ak.forms.RecordForm):
         return ak.contents.RecordArray(
             [
-                reconstitute(content, length, container, getkey, nplike)
+                reconstitute(content, length, container, getkey, nplike, index_nplike)
                 for content in form.contents
             ],
             None if form.is_tuple else form.fields,
@@ -255,13 +278,13 @@ def reconstitute(form, length, container, getkey, nplike):
         )
 
     elif isinstance(form, ak.forms.UnionForm):
-        raw_array1 = container[getkey(form, "tags")]
-        raw_array2 = container[getkey(form, "index")]
-        tags = nplike.index_nplike.frombuffer(
-            raw_array1, dtype=_index_to_dtype[form.tags], count=length
+        raw_tags = container[getkey(form, "tags")]
+        raw_index = container[getkey(form, "index")]
+        tags = from_buffer_or_array(
+            index_nplike, raw_tags, _index_to_dtype[form.tags], length
         )
-        index = nplike.index_nplike.frombuffer(
-            raw_array2, dtype=_index_to_dtype[form.index], count=length
+        index = from_buffer_or_array(
+            index_nplike, raw_index, _index_to_dtype[form.index], length
         )
         lengths = []
         for tag in range(len(form.contents)):
@@ -274,7 +297,9 @@ def reconstitute(form, length, container, getkey, nplike):
             ak.index.Index(tags),
             ak.index.Index(index),
             [
-                reconstitute(content, lengths[i], container, getkey, nplike)
+                reconstitute(
+                    content, lengths[i], container, getkey, nplike, index_nplike
+                )
                 for i, content in enumerate(form.contents)
             ],
             form.parameters,

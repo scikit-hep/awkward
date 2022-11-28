@@ -159,6 +159,8 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 or not isinstance(x, ak.contents.Content)
                 for x in inputs
             ):
+                nplike = ak.nplikes.nplike_of(*inputs)
+                index_nplike = ak.nplikes.index_nplike_for(nplike)
                 regulararrays = []
                 sizes = []
                 for x in inputs:
@@ -170,7 +172,9 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         regulararrays.append(
                             ak.contents.RegularArray(
                                 ak.contents.NumpyArray(
-                                    nplike.broadcast_to(nplike.array([x]), (length,))
+                                    nplike.broadcast_to(nplike.array([x]), (length,)),
+                                    nplike=nplike,
+                                    index_nplike=index_nplike,
                                 ),
                                 1,
                             )

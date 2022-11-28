@@ -51,7 +51,12 @@ class Content:
     is_record = False
     is_union = False
 
-    def _init(self, parameters: dict[str, Any] | None, nplike: NumpyLike | None):
+    def _init(
+        self,
+        parameters: dict[str, Any] | None,
+        nplike: NumpyLike,
+        index_nplike: NumpyLike,
+    ):
         if parameters is not None and not isinstance(parameters, dict):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -61,17 +66,29 @@ class Content:
                 )
             )
 
-        if nplike is not None and not isinstance(nplike, NumpyLike):
+        if not isinstance(nplike, NumpyLike):
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'nplike' must be an NumpyLike or None, not {}".format(
+                    "{} 'nplike' must be a NumpyLike, not {}".format(
                         type(self).__name__, repr(nplike)
                     )
                 )
             )
 
+        if not isinstance(index_nplike, NumpyLike):
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "{} 'index_nplike' must be a NumpyLike, not {}".format(
+                        type(self).__name__, repr(index_nplike)
+                    )
+                )
+            )
+
+        assert ak.nplikes.index_nplike_for(nplike) is index_nplike
+
         self._parameters = parameters
         self._nplike = nplike
+        self._index_nplike = index_nplike
 
     @property
     def parameters(self) -> dict[str, Any]:
@@ -86,8 +103,12 @@ class Content:
             return self._parameters.get(key)
 
     @property
-    def nplike(self) -> NumpyLike | None:
+    def nplike(self) -> NumpyLike:
         return self._nplike
+
+    @property
+    def index_nplike(self) -> NumpyLike:
+        return self._index_nplike
 
     @property
     def form(self) -> form.Form:
@@ -334,7 +355,6 @@ class Content:
             1,  # size
             0,  # zeros_length is irrelevant when the size is 1 (!= 0)
             None,
-            self._nplike,
         )
 
     def _getitem_next_ellipsis(self, tail, advanced: ak.index.Index | None):
@@ -382,16 +402,13 @@ class Content:
             slicer=head,
         )
 
-        out = ak.contents.IndexedOptionArray(
-            outindex, raw.content, self._parameters, self._nplike
-        )
+        out = ak.contents.IndexedOptionArray(outindex, raw.content, self._parameters)
 
         return ak.contents.RegularArray(
             out.simplify_optiontype(),
             indexlength,
             1,
             self._parameters,
-            self._nplike,
         )
 
     def _getitem_next_missing_jagged(
@@ -442,15 +459,12 @@ class Content:
         )
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
-        out = ak.contents.IndexedOptionArray(
-            outputmask, tmp, self._parameters, self._nplike
-        )
+        out = ak.contents.IndexedOptionArray(outputmask, tmp, self._parameters)
         return ak.contents.RegularArray(
             out.simplify_optiontype(),
             index.length,
             1,
             self._parameters,
-            self._nplike,
         )
 
     def _getitem_next_missing(
@@ -514,6 +528,7 @@ class Content:
                 None,
                 self._parameters,
                 self._nplike,
+                self._index_nplike,
             )
 
         else:
@@ -555,11 +570,7 @@ class Content:
             nextwhere = ak._slicing.prepare_advanced_indexing(items)
 
             next = ak.contents.RegularArray(
-                self,
-                self.length if self._nplike.known_shape else 1,
-                1,
-                None,
-                self._nplike,
+                self, self.length if self._nplike.known_shape else 1, 1, None
             )
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
@@ -631,13 +642,17 @@ class Content:
             return self._getitem_fields(where)
 
         elif ak._util.is_sized_iterable(where):
-            layout = ak.operations.to_layout(where)
+            layout = ak.operations.to_layout(where)._to_nplike(self._nplike)
+            assert layout.nplike is self._nplike
+            assert layout.index_nplike is self._index_nplike
             as_array = layout.maybe_to_array(layout.nplike)
             if as_array is None:
                 return self._getitem(layout)
             else:
                 return self._getitem(
-                    ak.contents.NumpyArray(as_array, None, layout.nplike)
+                    ak.contents.NumpyArray(
+                        as_array, None, layout.nplike, layout.index_nplike
+                    )
                 )
 
         else:
@@ -672,7 +687,7 @@ class Content:
     def _carry_asrange(self, carry: ak.index.Index):
         assert isinstance(carry, ak.index.Index)
 
-        result = self._nplike.index_nplike.empty(1, dtype=np.bool_)
+        result = self._index_nplike.empty(1, dtype=np.bool_)
         assert carry.nplike is self._nplike
         self._handle_error(
             self._nplike[
@@ -731,7 +746,9 @@ class Content:
                 localindex.length,
             )
         )
-        return ak.contents.NumpyArray(localindex, None, self._nplike)
+        return ak.contents.NumpyArray(
+            localindex, None, self._nplike, self._index_nplike
+        )
 
     def merge(self, other: Content) -> Content:
         others = [other]
@@ -787,7 +804,9 @@ class Content:
             )
         )
 
-        return ak.contents.UnionArray(tags, index, contents, None, self._nplike)
+        return ak.contents.UnionArray(
+            tags, index, contents, None, self._nplike, self._index_nplike
+        )
 
     def _merging_strategy(
         self, others: list[Content]
@@ -1177,7 +1196,7 @@ class Content:
                 combinationslen = combinationslen * (size - j + 1)
                 combinationslen = combinationslen // j
 
-        tocarryraw = self._nplike.index_nplike.empty(n, dtype=np.intp)
+        tocarryraw = self._index_nplike.empty(n, dtype=np.intp)
         tocarry = []
         for i in range(n):
             ptr = ak.index.Index64.empty(combinationslen, self._nplike, dtype=np.int64)
@@ -1208,11 +1227,11 @@ class Content:
         contents = []
         length = None
         for ptr in tocarry:
-            contents.append(ak.contents.IndexedArray(ptr, self, None, self._nplike))
+            contents.append(ak.contents.IndexedArray(ptr, self, None))
             length = contents[-1].length
         assert length is not None
         return ak.contents.RecordArray(
-            contents, recordlookup, length, parameters, self._nplike
+            contents, recordlookup, length, parameters, self._nplike, self._index_nplike
         )
 
     def combinations(
@@ -1471,7 +1490,7 @@ class Content:
     def pad_none_axis0(self, target: Integral, clip: bool) -> Content:
         if not clip and target < self.length:
             index = ak.index.Index64(
-                self._nplike.index_nplike.arange(self.length, dtype=np.int64),
+                self._index_nplike.arange(self.length, dtype=np.int64),
                 nplike=self.nplike,
             )
 
@@ -1486,12 +1505,7 @@ class Content:
                 ](index.data, target, self.length)
             )
 
-        next = ak.contents.IndexedOptionArray(
-            index,
-            self,
-            self._parameters,
-            self._nplike,
-        )
+        next = ak.contents.IndexedOptionArray(index, self, self._parameters)
         return next.simplify_optiontype()
 
     def pad_none(self, length: Integral, axis: Integral, clip: bool = False) -> Content:

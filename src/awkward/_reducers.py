@@ -82,7 +82,9 @@ class ArgMin(Reducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result)
+        return ak.contents.NumpyArray(
+            result, nplike=array.nplike, index_nplike=array.index_nplike
+        )
 
 
 class ArgMax(Reducer):
@@ -131,7 +133,9 @@ class ArgMax(Reducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result)
+        return ak.contents.NumpyArray(
+            result, nplike=array.nplike, index_nplike=array.index_nplike
+        )
 
 
 class Count(Reducer):
@@ -157,7 +161,9 @@ class Count(Reducer):
                 outlength,
             )
         )
-        return ak.contents.NumpyArray(result)
+        return ak.contents.NumpyArray(
+            result, nplike=array.nplike, index_nplike=array.index_nplike
+        )
 
 
 class CountNonzero(Reducer):
@@ -205,7 +211,9 @@ class CountNonzero(Reducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result)
+        return ak.contents.NumpyArray(
+            result, nplike=array.nplike, index_nplike=array.index_nplike
+        )
 
 
 class Sum(Reducer):
@@ -295,11 +303,21 @@ class Sum(Reducer):
             )
 
         if array.dtype.kind == "m":
-            return ak.contents.NumpyArray(array.nplike.asarray(result, array.dtype))
+            return ak.contents.NumpyArray(
+                array.nplike.asarray(result, array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
+            )
         elif array.dtype.type in (np.complex128, np.complex64):
-            return ak.contents.NumpyArray(result.view(array.dtype))
+            return ak.contents.NumpyArray(
+                result.view(array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
+            )
         else:
-            return ak.contents.NumpyArray(result)
+            return ak.contents.NumpyArray(
+                result, nplike=array.nplike, index_nplike=array.index_nplike
+            )
 
 
 class Prod(Reducer):
@@ -375,9 +393,15 @@ class Prod(Reducer):
                 )
             )
         if array.dtype.type in (np.complex128, np.complex64):
-            return ak.contents.NumpyArray(result.view(array.dtype))
+            return ak.contents.NumpyArray(
+                result.view(array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
+            )
         else:
-            return ak.contents.NumpyArray(result)
+            return ak.contents.NumpyArray(
+                result, nplike=array.nplike, index_nplike=array.index_nplike
+            )
 
 
 class Any(Reducer):
@@ -425,7 +449,9 @@ class Any(Reducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result)
+        return ak.contents.NumpyArray(
+            result, nplike=array.nplike, index_nplike=array.index_nplike
+        )
 
 
 class All(Reducer):
@@ -473,7 +499,9 @@ class All(Reducer):
                     outlength,
                 )
             )
-        return ak.contents.NumpyArray(result)
+        return ak.contents.NumpyArray(
+            result, nplike=array.nplike, index_nplike=array.index_nplike
+        )
 
 
 class Min(Reducer):
@@ -565,10 +593,16 @@ class Min(Reducer):
             )
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.nplike.array(result.view(array.dtype), array.dtype)
+                array.nplike.array(result.view(array.dtype), array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
             )
         else:
-            return ak.contents.NumpyArray(array.nplike.array(result, array.dtype))
+            return ak.contents.NumpyArray(
+                array.nplike.array(result, array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
+            )
 
 
 class Max(Reducer):
@@ -660,7 +694,13 @@ class Max(Reducer):
             )
         if array.dtype.type in (np.complex128, np.complex64):
             return ak.contents.NumpyArray(
-                array.nplike.array(result.view(array.dtype), array.dtype)
+                array.nplike.array(result.view(array.dtype), array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
             )
         else:
-            return ak.contents.NumpyArray(array.nplike.array(result, array.dtype))
+            return ak.contents.NumpyArray(
+                array.nplike.array(result, array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
+            )

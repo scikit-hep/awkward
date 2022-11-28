@@ -82,11 +82,21 @@ class Sum(Reducer):
         result = jax.ops.segment_sum(array.data, parents.data)
 
         if array.dtype.kind == "m":
-            return ak.contents.NumpyArray(array.nplike.asarray(result, array.dtype))
+            return ak.contents.NumpyArray(
+                array.nplike.asarray(result, array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
+            )
         elif array.dtype.type in (np.complex128, np.complex64):
-            return ak.contents.NumpyArray(result.view(array.dtype))
+            return ak.contents.NumpyArray(
+                result.view(array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
+            )
         else:
-            return ak.contents.NumpyArray(result, nplike=array.nplike)
+            return ak.contents.NumpyArray(
+                result, nplike=array.nplike, index_nplike=array.index_nplike
+            )
 
 
 class Prod(Reducer):
@@ -102,9 +112,15 @@ class Prod(Reducer):
         )
 
         if array.dtype.type in (np.complex128, np.complex64):
-            return ak.contents.NumpyArray(result.view(array.dtype), nplike=array.nplike)
+            return ak.contents.NumpyArray(
+                result.view(array.dtype),
+                nplike=array.nplike,
+                index_nplike=array.index_nplike,
+            )
         else:
-            return ak.contents.NumpyArray(result, nplike=array.nplike)
+            return ak.contents.NumpyArray(
+                result, nplike=array.nplike, index_nplike=array.index_nplike
+            )
 
 
 class Any(Reducer):
@@ -121,7 +137,9 @@ class Any(Reducer):
         result = jax.ops.segment_max(array.data, parents.data)
         result = jax.numpy.asarray(result, dtype=bool)
 
-        return ak.contents.NumpyArray(result, nplike=array.nplike)
+        return ak.contents.NumpyArray(
+            result, nplike=array.nplike, index_nplike=array.index_nplike
+        )
 
 
 class All(Reducer):
@@ -138,7 +156,9 @@ class All(Reducer):
         result = jax.ops.segment_min(array.data, parents.data)
         result = jax.numpy.asarray(result, dtype=bool)
 
-        return ak.contents.NumpyArray(result, nplike=array.nplike)
+        return ak.contents.NumpyArray(
+            result, nplike=array.nplike, index_nplike=array.index_nplike
+        )
 
 
 class Min(Reducer):
@@ -182,9 +202,12 @@ class Min(Reducer):
             return ak.contents.NumpyArray(
                 array.nplike.array(result.view(array.dtype), array.dtype),
                 nplike=array.nplike,
+                index_nplike=array.index_nplike,
             )
         else:
-            return ak.contents.NumpyArray(result, nplike=array.nplike)
+            return ak.contents.NumpyArray(
+                result, nplike=array.nplike, index_nplike=array.index_nplike
+            )
 
 
 class Max(Reducer):
@@ -228,9 +251,12 @@ class Max(Reducer):
             return ak.contents.NumpyArray(
                 array.nplike.array(result.view(array.dtype), array.dtype),
                 nplike=array.nplike,
+                index_nplike=array.index_nplike,
             )
         else:
-            return ak.contents.NumpyArray(result, nplike=array.nplike)
+            return ak.contents.NumpyArray(
+                result, nplike=array.nplike, index_nplike=array.index_nplike
+            )
 
 
 def get_jax_reducer(reducer: Reducer) -> Reducer:

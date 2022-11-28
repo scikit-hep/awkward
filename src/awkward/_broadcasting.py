@@ -53,9 +53,7 @@ def broadcast_pack(inputs, isscalar):
             isscalar.append(True)
         elif isinstance(x, Content):
             nextinputs.append(
-                RegularArray(
-                    x, x.length if x.nplike.known_shape else 1, 1, None, x.nplike
-                )
+                RegularArray(x, x.length if x.nplike.known_shape else 1, 1, None)
             )
             isscalar.append(False)
         else:
