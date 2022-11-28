@@ -64,41 +64,6 @@ class ArrayModuleArray(numpylike.Array):
         obj._nplike = nplike
         return obj
 
-    def _promote_scalar(
-        self, x: bool | int | float | complex | ArrayModuleArray
-    ) -> ArrayModuleArray:
-        if isinstance(x, float):
-            return ArrayModuleArray._new(
-                self.array_module.array(x, dtype=numpy.float64), nplike=self
-            )
-        elif isinstance(x, bool):
-            return ArrayModuleArray._new(
-                self.array_module.array(x, dtype=numpy.bool_), nplike=self
-            )
-        elif isinstance(x, int):
-            return ArrayModuleArray._new(
-                self.array_module.array(x, dtype=numpy.int64), nplike=self
-            )
-        elif isinstance(x, complex):
-            return ArrayModuleArray._new(
-                self.array_module.array(x, dtype=numpy.complex128), nplike=self
-            )
-        elif not isinstance(x, ArrayModuleArray):
-            raise _errors.wrap_error(TypeError("Expected bool, int, float, or Array"))
-        else:
-            return x
-
-    def _normalise_binary_arguments(
-        self,
-        left: ArrayModuleArray,
-        right: ArrayModuleArray,
-    ) -> tuple[ArrayModuleArray, ArrayModuleArray]:
-        if left.ndim == 0 and right.ndim != 0:
-            left = ArrayModuleArray._new(left._array[numpy.newaxis], nplike=self)
-        elif right.ndim != 0 and right.ndim == 0:
-            right = ArrayModuleArray._new(right._array[numpy.newaxis], nplike=self)
-        return left, right
-
     def __add__(self, other: int | float | ArrayModuleArray) -> ArrayModuleArray:
         other = self._nplike._promote_scalar(other)
         left, right = self._nplike._normalise_binary_arguments(self, other)
@@ -209,6 +174,41 @@ class ArrayModuleNumpyLike(numpylike.NumpyLike[ArrayModuleArray]):
     known_data: bool
     known_shape: bool
     is_eager: bool
+
+    def _promote_scalar(
+        self, x: bool | int | float | complex | ArrayModuleArray
+    ) -> ArrayModuleArray:
+        if isinstance(x, float):
+            return ArrayModuleArray._new(
+                self.array_module.array(x, dtype=numpy.float64), nplike=self
+            )
+        elif isinstance(x, bool):
+            return ArrayModuleArray._new(
+                self.array_module.array(x, dtype=numpy.bool_), nplike=self
+            )
+        elif isinstance(x, int):
+            return ArrayModuleArray._new(
+                self.array_module.array(x, dtype=numpy.int64), nplike=self
+            )
+        elif isinstance(x, complex):
+            return ArrayModuleArray._new(
+                self.array_module.array(x, dtype=numpy.complex128), nplike=self
+            )
+        elif not isinstance(x, ArrayModuleArray):
+            raise _errors.wrap_error(TypeError("Expected bool, int, float, or Array"))
+        else:
+            return x
+
+    def _normalise_binary_arguments(
+        self,
+        left: ArrayModuleArray,
+        right: ArrayModuleArray,
+    ) -> tuple[ArrayModuleArray, ArrayModuleArray]:
+        if left.ndim == 0 and right.ndim != 0:
+            left = ArrayModuleArray._new(left._array[numpy.newaxis], nplike=self)
+        elif right.ndim != 0 and right.ndim == 0:
+            right = ArrayModuleArray._new(right._array[numpy.newaxis], nplike=self)
+        return left, right
 
     ############################ array creation
 
