@@ -721,17 +721,16 @@ class TypeTracer(numpylike.NumpyLike):
 
             # Fail if we absolutely know the shapes aren't compatible
             for i, item in enumerate(shape):
-                # Unknown values always broadcast
-                # and if existing item is 1, also broadcast
+                # Item is unknown, take it
                 if is_unknown_scalar(item):
                     result[i] = item
-                # Existing item is unknown
+                # Existing item is unknown, keep it
                 elif is_unknown_scalar(result[i]):
                     continue
-                # Items match
+                # Items match, continue
                 elif result[i] == item:
                     continue
-                # Existing is broadcastable
+                # Existing is broadcastable, take it
                 elif result[i] == 1:
                     result[i] = item
                 else:
