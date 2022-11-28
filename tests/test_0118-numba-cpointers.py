@@ -3,10 +3,10 @@
 import operator
 import sys
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 numba = pytest.importorskip("numba")
 

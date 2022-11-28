@@ -5,8 +5,8 @@ import threading
 import ROOT
 
 import awkward as ak
-import awkward._connect.cling  # noqa: E402
-import awkward._lookup  # noqa: E402
+import awkward._connect.cling
+import awkward._lookup
 
 compiler_lock = threading.Lock()
 

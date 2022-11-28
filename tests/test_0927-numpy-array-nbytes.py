@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test():
@@ -91,7 +91,7 @@ def test_EmptyArray_nbytes():
 def test_IndexedArray_nbytes():
     np_index = np.array([2, 2, 0, 1, 4, 5, 4])
     np_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-    array = ak.contents.indexedarray.IndexedArray(  # noqa: F841
+    array = ak.contents.indexedarray.IndexedArray(
         ak.index.Index(np_index),
         ak.contents.numpyarray.NumpyArray(np_content),
     )
@@ -101,7 +101,7 @@ def test_IndexedArray_nbytes():
 def test_IndexedOptionArray_nbytes():
     np_index = np.array([2, 2, -1, 1, -1, 5, 4])
     np_content = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])
-    array = ak.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
+    array = ak.contents.indexedoptionarray.IndexedOptionArray(
         ak.index.Index(np_index),
         ak.contents.numpyarray.NumpyArray(np_content),
     )
@@ -112,7 +112,7 @@ def test_ListArray_nbytes():
     np_starts = np.array([4, 100, 1])
     np_stops = np.array([7, 100, 3, 200])
     np_content = np.array([6.6, 4.4, 5.5, 7.7, 3.3, 2.2, 1.1, 8.8])
-    array = ak.contents.listarray.ListArray(  # noqa: F841
+    array = ak.contents.listarray.ListArray(
         ak.index.Index(np_starts),
         ak.index.Index(np_stops),
         ak.contents.numpyarray.NumpyArray(np_content),
@@ -141,7 +141,7 @@ def test_RecordArray_nbytes():
 
 def test_RegularArray_nbytes():
     np_content = np.array([0.0, 1.1, 2.2, 33.33, 4.4, 5.5, -6.6])
-    array = ak.contents.regulararray.RegularArray(  # noqa: F841
+    array = ak.contents.regulararray.RegularArray(
         ak.contents.recordarray.RecordArray(
             [ak.contents.numpyarray.NumpyArray(np_content)],
             ["nest"],
