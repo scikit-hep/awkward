@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 ROOT = pytest.importorskip("ROOT")
 
@@ -170,7 +170,7 @@ def test_data_frame_vec_of_vec():
     )
     assert rdf4.GetColumnType("output2") == "vector<vector<vector<double> > >"
 
-    out = ak.from_rdataframe(  # noqa: F841
+    out = ak.from_rdataframe(
         rdf4,
         columns=(
             "output",

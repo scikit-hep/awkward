@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -1172,7 +1172,7 @@ def test_EmptyArray():
 
 
 def test_RecordArray():
-    v2_array = ak.contents.listarray.ListArray(  # noqa: F841
+    v2_array = ak.contents.listarray.ListArray(
         ak.index.Index(np.array([4, 100, 1])),
         ak.index.Index(np.array([7, 100, 3, 200])),
         ak.contents.recordarray.RecordArray(
@@ -1227,7 +1227,7 @@ def test_RecordArray():
 
 
 def test_UnionArray():
-    v2_array = ak.contents.unionarray.UnionArray(  # noqa: F841
+    v2_array = ak.contents.unionarray.UnionArray(
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [

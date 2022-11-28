@@ -4,9 +4,9 @@ import base64
 import os
 
 import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 
 def test_without_control():

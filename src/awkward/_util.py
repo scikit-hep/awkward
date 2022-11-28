@@ -38,7 +38,7 @@ def regularize_backend(backend):
     if backend in _backends:
         return _backends[backend].instance()
     else:
-        raise ak._errors.wrap_error(  # noqa: AK101
+        raise ak._errors.wrap_error(
             ValueError("The available backends for now are `cpu` and `cuda`.")
         )
 

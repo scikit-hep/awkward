@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import numpy as np  # noqa: F401
-import pytest  # noqa: F401
+import numpy as np
+import pytest
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 to_list = ak.operations.to_list
 
@@ -610,7 +610,7 @@ def test_unionarray_localindex():
 
 
 def test_recordarray_localindex():
-    v2_array = ak.contents.regulararray.RegularArray(  # noqa: F841
+    v2_array = ak.contents.regulararray.RegularArray(
         ak.contents.recordarray.RecordArray(
             [
                 ak.contents.numpyarray.NumpyArray(
@@ -635,7 +635,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(2)
 
-    v2_array = ak.contents.regulararray.RegularArray(  # noqa: F841
+    v2_array = ak.contents.regulararray.RegularArray(
         ak.contents.recordarray.RecordArray(
             [ak.contents.emptyarray.EmptyArray()], ["nest"]
         ),
@@ -699,7 +699,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(-3)
 
-    v2_array = ak.contents.listarray.ListArray(  # noqa: F841
+    v2_array = ak.contents.listarray.ListArray(
         ak.index.Index(np.array([4, 100, 1])),
         ak.index.Index(np.array([7, 100, 3, 200])),
         ak.contents.recordarray.RecordArray(
@@ -726,7 +726,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(2)
 
-    v2_array = ak.contents.listoffsetarray.ListOffsetArray(  # noqa: F841
+    v2_array = ak.contents.listoffsetarray.ListOffsetArray(
         ak.index.Index(np.array([1, 4, 4, 6])),
         ak.contents.recordarray.RecordArray(
             [ak.contents.numpyarray.NumpyArray([6.6, 1.1, 2.2, 3.3, 4.4, 5.5, 7.7])],
@@ -747,7 +747,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(2)
 
-    v2_array = ak.contents.indexedarray.IndexedArray(  # noqa: F841
+    v2_array = ak.contents.indexedarray.IndexedArray(
         ak.index.Index(np.array([2, 2, 0, 1, 4, 5, 4])),
         ak.contents.recordarray.RecordArray(
             [
@@ -768,7 +768,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(1)
 
-    v2_array = ak.contents.indexedoptionarray.IndexedOptionArray(  # noqa: F841
+    v2_array = ak.contents.indexedoptionarray.IndexedOptionArray(
         ak.index.Index(np.array([2, 2, -1, 1, -1, 5, 4])),
         ak.contents.recordarray.RecordArray(
             [
@@ -789,7 +789,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(1)
 
-    v2_array = ak.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
+    v2_array = ak.contents.bytemaskedarray.ByteMaskedArray(
         ak.index.Index(np.array([1, 0, 1, 0, 1], dtype=np.int8)),
         ak.contents.recordarray.RecordArray(
             [
@@ -812,7 +812,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(1)
 
-    v2_array = ak.contents.bytemaskedarray.ByteMaskedArray(  # noqa: F841
+    v2_array = ak.contents.bytemaskedarray.ByteMaskedArray(
         ak.index.Index(np.array([0, 1, 0, 1, 0], dtype=np.int8)),
         ak.contents.recordarray.RecordArray(
             [
@@ -924,7 +924,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(1)
 
-    v2_array = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+    v2_array = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
             np.packbits(
                 np.array(
@@ -1015,7 +1015,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(1)
 
-    v2_array = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+    v2_array = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
             np.packbits(
                 np.array(
@@ -1109,7 +1109,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(1)
 
-    v2_array = ak.contents.bitmaskedarray.BitMaskedArray(  # noqa: F841
+    v2_array = ak.contents.bitmaskedarray.BitMaskedArray(
         ak.index.Index(
             np.packbits(
                 np.array(
@@ -1203,7 +1203,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(1)
 
-    v2_array = ak.contents.unmaskedarray.UnmaskedArray(  # noqa: F841
+    v2_array = ak.contents.unmaskedarray.UnmaskedArray(
         ak.contents.recordarray.RecordArray(
             [
                 ak.contents.numpyarray.NumpyArray(
@@ -1224,7 +1224,7 @@ def test_recordarray_localindex():
     with pytest.raises(IndexError):
         v2_array.local_index(1)
 
-    v2_array = ak.contents.unionarray.UnionArray(  # noqa: F841
+    v2_array = ak.contents.unionarray.UnionArray(
         ak.index.Index(np.array([1, 1, 0, 0, 1, 0, 1], dtype=np.int8)),
         ak.index.Index(np.array([4, 3, 0, 1, 2, 2, 4, 100])),
         [

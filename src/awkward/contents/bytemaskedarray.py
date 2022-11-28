@@ -312,7 +312,9 @@ class ByteMaskedArray(Content):
             self._nplike,
         )
 
-    def _nextcarry_outindex(self, numnull):
+    def _nextcarry_outindex(self, nplike):
+        numnull = ak.index.Index64.empty(1, nplike)
+
         assert numnull.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
             self._nplike[
@@ -347,7 +349,7 @@ class ByteMaskedArray(Content):
                 self._valid_when,
             )
         )
-        return nextcarry, outindex
+        return numnull[0], nextcarry, outindex
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         if (
@@ -365,11 +367,10 @@ class ByteMaskedArray(Content):
                 ),
             )
 
-        numnull = ak.index.Index64.empty(1, self._nplike)
-        nextcarry, outindex = self._nextcarry_outindex(numnull)
+        numnull, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
 
-        reducedstarts = ak.index.Index64.empty(self.length - numnull[0], self._nplike)
-        reducedstops = ak.index.Index64.empty(self.length - numnull[0], self._nplike)
+        reducedstarts = ak.index.Index64.empty(self.length - numnull, self._nplike)
+        reducedstops = ak.index.Index64.empty(self.length - numnull, self._nplike)
 
         assert (
             outindex.nplike is self._nplike
@@ -418,8 +419,7 @@ class ByteMaskedArray(Content):
             head, (int, slice, ak.index.Index64, ak.contents.ListOffsetArray)
         ):
             nexthead, nexttail = ak._slicing.headtail(tail)
-            numnull = ak.index.Index64.empty(1, self._nplike)
-            nextcarry, outindex = self._nextcarry_outindex(numnull)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
 
             next = self._content._carry(nextcarry, True)
             out = next._getitem_next(head, tail, advanced)
@@ -550,8 +550,7 @@ class ByteMaskedArray(Content):
             else:
                 return out
         else:
-            numnull = ak.index.Index64.empty(1, self._nplike, dtype=np.int64)
-            nextcarry, outindex = self._nextcarry_outindex(numnull)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
 
             next = self._content._carry(nextcarry, False)
             out = next.num(posaxis, depth)
@@ -566,8 +565,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             raise ak._errors.wrap_error(np.AxisError("axis=0 not allowed for flatten"))
         else:
-            numnull = ak.index.Index64.empty(1, self._nplike)
-            nextcarry, outindex = self._nextcarry_outindex(numnull)
+            numnull, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
 
             next = self._content._carry(nextcarry, False)
 
@@ -583,7 +581,7 @@ class ByteMaskedArray(Content):
 
             else:
                 outoffsets = ak.index.Index64.empty(
-                    offsets.length + numnull[0], self._nplike, dtype=np.int64
+                    offsets.length + numnull, self._nplike, dtype=np.int64
                 )
 
                 assert (
@@ -663,8 +661,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self._local_index_axis0()
         else:
-            numnull = ak.index.Index64.empty(1, self._nplike)
-            nextcarry, outindex = self._nextcarry_outindex(numnull)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
 
             next = self._content._carry(nextcarry, False)
             out = next._local_index(posaxis, depth)
@@ -746,8 +743,7 @@ class ByteMaskedArray(Content):
         if posaxis == depth:
             return self._combinations_axis0(n, replacement, recordlookup, parameters)
         else:
-            numnull = ak.index.Index64.empty(1, self._nplike, dtype=np.int64)
-            nextcarry, outindex = self._nextcarry_outindex(numnull)
+            _, nextcarry, outindex = self._nextcarry_outindex(self._nplike)
 
             next = self._content._carry(nextcarry, True)
             out = next._combinations(

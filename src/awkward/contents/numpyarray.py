@@ -512,7 +512,7 @@ class NumpyArray(Content):
 
         tmp = self._nplike.index_nplike.empty(length, self.dtype)
         self._handle_error(
-            self._nplike[  # noqa: E231
+            self._nplike[
                 "awkward_NumpyArray_fill",
                 self.dtype.type,
                 self._data.dtype.type,
@@ -681,7 +681,7 @@ class NumpyArray(Content):
             out = self._nplike.empty(offsets[1], dtype)
             assert offsets.nplike is self._nplike
             self._handle_error(
-                self._nplike[  # noqa: E231
+                self._nplike[
                     "awkward_sort",
                     dtype.type,
                     dtype.type,
@@ -701,11 +701,11 @@ class NumpyArray(Content):
             nextlength = ak.index.Index64.empty(1, self._nplike)
             assert nextlength.nplike is self._nplike
             self._handle_error(
-                self._nplike[  # noqa: E231
+                self._nplike[
                     "awkward_unique",
                     out.dtype.type,
                     nextlength.dtype.type,
-                ](
+                ](  # noqa: E231
                     out,
                     out.shape[0],
                     nextlength.data,
@@ -749,7 +749,7 @@ class NumpyArray(Content):
             offsets = ak.index.Index64.empty(offsets_length[0], self._nplike)
             assert offsets.nplike is self._nplike and parents.nplike is self._nplike
             self._handle_error(
-                self._nplike[  # noqa: E231
+                self._nplike[
                     "awkward_sorting_ranges",
                     offsets.dtype.type,
                     parents.dtype.type,
@@ -1009,7 +1009,7 @@ class NumpyArray(Content):
             out = self._nplike.empty(self.length, dtype)
             assert offsets.nplike is self._nplike
             self._handle_error(
-                self._nplike[  # noqa: E231
+                self._nplike[
                     "awkward_sort",
                     dtype.type,
                     dtype.type,
@@ -1084,7 +1084,7 @@ class NumpyArray(Content):
         assert self._data.ndim == 1
 
         if isinstance(self.nplike, ak.nplikes.Jax):
-            from awkward._connect.jax.reducers import get_jax_reducer  # noqa: F401
+            from awkward._connect.jax.reducers import get_jax_reducer
 
             reducer = get_jax_reducer(reducer)
         out = reducer.apply(self, parents, outlength)
