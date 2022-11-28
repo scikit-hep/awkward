@@ -34,6 +34,8 @@ class TypeTracerShape(numpylike.Shape):
     def __add__(self, other) -> TypeTracerShape:
         if isinstance(other, tuple):
             return self.__class__(self._items + other)
+        elif isinstance(other, TypeTracerShape):
+            return self.__class__(self._items + other._items)
         else:
             return NotImplemented
 
@@ -45,7 +47,7 @@ class TypeTracerShape(numpylike.Shape):
 
     def __getitem__(self, index):
         if isinstance(index, slice):
-            return self.__class__(*self._items[index])
+            return self.__class__(self._items[index])
         else:
             return self._items[operator.index(index)]
 
