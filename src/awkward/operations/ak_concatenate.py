@@ -50,17 +50,15 @@ def concatenate(
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
-    single_nplike = ak.nplikes.nplike_of(arrays)
     behavior = ak._util.behavior_of(*arrays, behavior=behavior)
     numpy = ak.nplikes.Numpy.instance()
-
     if (
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
         # Is a NumPy Array
         or numpy.is_own_array(arrays)
         # Is an array with a known NumpyLike
-        or single_nplike is not numpy
+        or ak.nplikes.nplike_of(arrays, default=None) is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
@@ -125,6 +123,9 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     else:
 
         def action(inputs, depth, **kwargs):
+            nplike = ak.nplikes.nplike_of(*inputs)
+            index_nplike = ak.nplikes.index_nplike_for(nplike)
+
             if depth == posaxis and any(
                 isinstance(x, ak.contents.Content) and x.is_option for x in inputs
             ):
@@ -138,6 +139,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
             if depth == posaxis:
                 nplike = ak.nplikes.nplike_of(*inputs)
+                index_nplike = ak.nplikes.index_nplike_for(nplike)
 
                 length = ak._typetracer.UnknownLength
                 for x in inputs:
@@ -159,8 +161,6 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 or not isinstance(x, ak.contents.Content)
                 for x in inputs
             ):
-                nplike = ak.nplikes.nplike_of(*inputs)
-                index_nplike = ak.nplikes.index_nplike_for(nplike)
                 regulararrays = []
                 sizes = []
                 for x in inputs:
@@ -214,7 +214,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         nextinputs.append(
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
-                                    nplike.index_nplike.arange(
+                                    index_nplike.arange(
                                         length + 1, dtype=np.int64
                                     ),
                                     nplike=nplike,
@@ -231,17 +231,17 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
                 for x in nextinputs:
                     o, f = x._offsets_and_flattened(1, 0)
-                    o = nplike.index_nplike.asarray(o)
+                    o = index_nplike.asarray(o)
                     c = o[1:] - o[:-1]
                     nplike.add(counts, c, out=counts)
                     all_counts.append(c)
                     all_flatten.append(f)
 
-                offsets = nplike.index_nplike.empty(
+                offsets = index_nplike.empty(
                     len(nextinputs[0]) + 1, dtype=np.int64
                 )
                 offsets[0] = 0
-                nplike.index_nplike.cumsum(counts, out=offsets[1:])
+                index_nplike.cumsum(counts, out=offsets[1:])
 
                 offsets = ak.index.Index64(offsets, nplike=nplike)
 

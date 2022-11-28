@@ -388,7 +388,7 @@ class Content:
         index = index._to_nplike(self.nplike)
         outindex = ak.index.Index64.empty(index.length * length, self._nplike)
 
-        assert outindex.nplike is self._nplike and index.nplike is self._nplike
+        assert outindex.index_nplike is self._index_nplike and index.index_nplike is self._index_nplike
         self._handle_error(
             self._nplike[
                 "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
@@ -433,11 +433,11 @@ class Content:
         stops = ak.index.Index64.empty(index.length, self._nplike)
 
         assert (
-            index.nplike is self._nplike
-            and jagged._offsets.nplike is self._nplike
-            and outputmask.nplike is self._nplike
-            and starts.nplike is self._nplike
-            and stops.nplike is self._nplike
+            index.index_nplike is self._index_nplike
+            and jagged._offsets.index_nplike is self._index_nplike
+            and outputmask.index_nplike is self._index_nplike
+            and starts.index_nplike is self._index_nplike
+            and stops.index_nplike is self._index_nplike
         )
         self._handle_error(
             self._nplike[
@@ -688,7 +688,7 @@ class Content:
         assert isinstance(carry, ak.index.Index)
 
         result = self._index_nplike.empty(1, dtype=np.bool_)
-        assert carry.nplike is self._nplike
+        assert carry.index_nplike is self._index_nplike
         self._handle_error(
             self._nplike[
                 "awkward_Index_iscontiguous",  # badly named
@@ -781,13 +781,13 @@ class Content:
         tags = ak.index.Index8.empty((mylength + theirlength), self._nplike)
         index = ak.index.Index64.empty((mylength + theirlength), self._nplike)
         contents = [self, other]
-        assert tags.nplike is self._nplike
+        assert tags.index_nplike is self._index_nplike
         self._handle_error(
             self._nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
                 tags.data, 0, mylength, 0
             )
         )
-        assert index.nplike is self._nplike
+        assert index.index_nplike is self._index_nplike
         self._handle_error(
             self._nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
                 index.data, 0, mylength
@@ -1207,7 +1207,7 @@ class Content:
         toindex = ak.index.Index64.empty(n, self._nplike, dtype=np.int64)
         fromindex = ak.index.Index64.empty(n, self._nplike, dtype=np.int64)
 
-        assert toindex.nplike is self._nplike and fromindex.nplike is self._nplike
+        assert toindex.index_nplike is self._index_nplike and fromindex.index_nplike is self._index_nplike
         self._handle_error(
             self._nplike[
                 "awkward_RegularArray_combinations_64",
@@ -1497,7 +1497,7 @@ class Content:
         else:
             index = ak.index.Index64.empty(target, self._nplike)
 
-            assert index.nplike is self._nplike
+            assert index.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_index_rpad_and_clip_axis0",

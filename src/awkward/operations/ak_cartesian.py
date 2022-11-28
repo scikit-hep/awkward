@@ -250,6 +250,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
                 ak.operations.to_layout(x, allow_record=False, allow_other=False)
             )
 
+    index_nplike = ak.nplikes.index_nplike_for(nplike)
+
     if with_name is not None:
         if parameters is None:
             parameters = {}
@@ -319,8 +321,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
 
         indexes = [
             ak.index.Index64(x.reshape(-1), nplike=nplike)
-            for x in nplike.index_nplike.meshgrid(
-                *[nplike.index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
+            for x in index_nplike.meshgrid(
+                *[index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
                 indexing="ij",
             )
         ]

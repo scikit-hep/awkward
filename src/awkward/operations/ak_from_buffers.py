@@ -197,7 +197,7 @@ def reconstitute(form, length, container, getkey, nplike, index_nplike):
             index_nplike, raw_array, _index_to_dtype[form.index], length
         )
         next_length = (
-            0 if len(index) == 0 else max(0, nplike.index_nplike.max(index) + 1)
+            0 if len(index) == 0 else max(0, index_nplike.max(index) + 1)
         )
         return ak.contents.IndexedOptionArray(
             ak.index.Index(index),
@@ -212,7 +212,7 @@ def reconstitute(form, length, container, getkey, nplike, index_nplike):
         index = from_buffer_or_array(
             index_nplike, raw_array, _index_to_dtype[form.index], length
         )
-        next_length = 0 if len(index) == 0 else nplike.index_nplike.max(index) + 1
+        next_length = 0 if len(index) == 0 else index_nplike.max(index) + 1
         return ak.contents.IndexedArray(
             ak.index.Index(index),
             reconstitute(
@@ -231,7 +231,7 @@ def reconstitute(form, length, container, getkey, nplike, index_nplike):
             index_nplike, raw_stops, _index_to_dtype[form.starts], length
         )
         reduced_stops = stops[starts != stops]
-        next_length = 0 if len(starts) == 0 else nplike.index_nplike.max(reduced_stops)
+        next_length = 0 if len(starts) == 0 else index_nplike.max(reduced_stops)
         return ak.contents.ListArray(
             ak.index.Index(starts),
             ak.index.Index(stops),
@@ -292,7 +292,7 @@ def reconstitute(form, length, container, getkey, nplike, index_nplike):
             if len(selected_index) == 0:
                 lengths.append(0)
             else:
-                lengths.append(nplike.index_nplike.max(selected_index) + 1)
+                lengths.append(index_nplike.max(selected_index) + 1)
         return ak.contents.UnionArray(
             ak.index.Index(tags),
             ak.index.Index(index),

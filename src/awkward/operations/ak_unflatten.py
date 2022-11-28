@@ -76,6 +76,7 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None):
 
 def _impl(array, counts, axis, highlevel, behavior):
     nplike = ak.nplikes.nplike_of(array)
+    index_nplike = ak.nplikes.index_nplike_for(nplike)
 
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
@@ -98,9 +99,9 @@ def _impl(array, counts, axis, highlevel, behavior):
         if not issubclass(counts.dtype.type, np.integer):
             raise ak._errors.wrap_error(ValueError("counts must be integers"))
 
-        current_offsets = [nplike.index_nplike.empty(len(counts) + 1, np.int64)]
+        current_offsets = [index_nplike.empty(len(counts) + 1, np.int64)]
         current_offsets[0][0] = 0
-        nplike.index_nplike.cumsum(counts, out=current_offsets[0][1:])
+        index_nplike.cumsum(counts, out=current_offsets[0][1:])
 
     def doit(layout):
         if isinstance(counts, (numbers.Integral, np.integer)):
@@ -112,9 +113,9 @@ def _impl(array, counts, axis, highlevel, behavior):
 
         else:
             position = (
-                nplike.index_nplike.searchsorted(
+                index_nplike.searchsorted(
                     current_offsets[0],
-                    nplike.index_nplike.array([len(layout)]),
+                    index_nplike.array([len(layout)]),
                     side="right",
                 )[0]
                 - 1
@@ -156,25 +157,25 @@ def _impl(array, counts, axis, highlevel, behavior):
             if posaxis == depth and layout.is_list:
                 # We are one *above* the level where we want to apply this.
                 listoffsetarray = layout.to_ListOffsetArray64(True)
-                outeroffsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
+                outeroffsets = index_nplike.asarray(listoffsetarray.offsets)
 
                 content = doit(listoffsetarray.content[: outeroffsets[-1]])
                 if isinstance(content, ak.contents.ByteMaskedArray):
-                    inneroffsets = nplike.index_nplike.asarray(content.content.offsets)
+                    inneroffsets = index_nplike.asarray(content.content.offsets)
                 elif isinstance(content, ak.contents.RegularArray):
-                    inneroffsets = nplike.index_nplike.asarray(
+                    inneroffsets = index_nplike.asarray(
                         content.to_ListOffsetArray64(True).offsets
                     )
                 else:
-                    inneroffsets = nplike.index_nplike.asarray(content.offsets)
+                    inneroffsets = index_nplike.asarray(content.offsets)
 
                 positions = (
-                    nplike.index_nplike.searchsorted(
+                    index_nplike.searchsorted(
                         inneroffsets, outeroffsets, side="right"
                     )
                     - 1
                 )
-                if not nplike.index_nplike.array_equal(
+                if not index_nplike.array_equal(
                     inneroffsets[positions], outeroffsets
                 ):
                     raise ak._errors.wrap_error(

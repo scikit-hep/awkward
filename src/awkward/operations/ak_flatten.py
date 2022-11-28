@@ -100,6 +100,7 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None):
 def _impl(array, axis, highlevel, behavior):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
     nplike = ak.nplikes.nplike_of(layout)
+    index_nplike = ak.nplikes.index_nplike_for(nplike)
 
     if axis is None:
         out = layout.completely_flatten(function_name="ak.flatten")
@@ -127,17 +128,17 @@ def _impl(array, axis, highlevel, behavior):
                 ):
                     return layout
 
-                tags = nplike.index_nplike.asarray(layout.tags)
-                index = nplike.index_nplike.array(
+                tags = index_nplike.asarray(layout.tags)
+                index = index_nplike.array(
                     nplike.asarray(layout.index), copy=True
                 )
-                bigmask = nplike.index_nplike.empty(len(index), dtype=np.bool_)
+                bigmask = index_nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):
                     if content.is_option and not isinstance(
                         content, ak.contents.UnmaskedArray
                     ):
                         bigmask[:] = False
-                        bigmask[tags == tag] = nplike.index_nplike.asarray(
+                        bigmask[tags == tag] = index_nplike.asarray(
                             content.mask_as_bool(valid_when=False)
                         ).view(np.bool_)
                         index[bigmask] = -1

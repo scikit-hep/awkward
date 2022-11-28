@@ -107,14 +107,15 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
     if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
     nplike = ak.nplikes.nplike_of(*good_arrays)
+    index_nplike = ak.nplikes.index_nplike_for(nplike)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
         if isinstance(akcondition, ak.contents.NumpyArray):
-            npcondition = nplike.index_nplike.asarray(akcondition)
+            npcondition = index_nplike.asarray(akcondition)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
-                nplike.index_nplike.arange(len(tags), dtype=np.int64), nplike=nplike
+                index_nplike.arange(len(tags), dtype=np.int64), nplike=nplike
             )
             if not isinstance(left, ak.contents.Content):
                 left = ak.contents.NumpyArray(nplike.repeat(left, len(tags)))

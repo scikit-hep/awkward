@@ -96,10 +96,11 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     nplike = ak.nplikes.nplike_of(array)
+    index_nplike = ak.nplikes.index_nplike_for(nplike)
 
     def lengths_of(data, offsets):
         if len(data) == 0:
-            return nplike.index_nplike.empty(0, np.int64), offsets
+            return index_nplike.empty(0, np.int64), offsets
         else:
             diffs = data[1:] != data[:-1]
 
@@ -120,8 +121,8 @@ def _impl(array, highlevel, behavior):
                 is_interior = nplike.logical_and(0 < offsets, offsets < len(data) - 1)
                 interior_offsets = offsets[is_interior]
                 diffs[interior_offsets - 1] = True
-            positions = nplike.index_nplike.nonzero(diffs)[0]
-            full_positions = nplike.index_nplike.empty(len(positions) + 2, np.int64)
+            positions = index_nplike.nonzero(diffs)[0]
+            full_positions = index_nplike.empty(len(positions) + 2, np.int64)
             full_positions[0] = 0
             full_positions[-1] = len(data)
             full_positions[1:-1] = positions + 1
@@ -130,7 +131,7 @@ def _impl(array, highlevel, behavior):
             if offsets is None:
                 nextoffsets = None
             else:
-                nextoffsets = nplike.index_nplike.searchsorted(
+                nextoffsets = index_nplike.searchsorted(
                     full_positions, offsets, side="left"
                 )
             return nextcontent, nextoffsets
@@ -171,7 +172,7 @@ def _impl(array, highlevel, behavior):
                 # We also want to trim the _upper_ bound of content,
                 # so we manually convert the list type to zero-based
                 listoffsetarray = layout.to_ListOffsetArray64(False)
-                offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
+                offsets = index_nplike.asarray(listoffsetarray.offsets)
                 content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
                 if content.is_indexed:
@@ -186,7 +187,7 @@ def _impl(array, highlevel, behavior):
                 )
 
             listoffsetarray = layout.to_ListOffsetArray64(False)
-            offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
+            offsets = index_nplike.asarray(listoffsetarray.offsets)
             content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
             if content.is_indexed:

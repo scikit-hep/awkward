@@ -303,14 +303,14 @@ def normalise_item_nested(item):
         ),
     ):
         is_valid = item.mask_as_bool(valid_when=True)
-        positions_where_valid = item.nplike.index_nplike.nonzero(is_valid)[0]
+        positions_where_valid = item.index_nplike.nonzero(is_valid)[0]
 
         nextcontent = normalise_item_nested(
             item.content._carry(ak.index.Index64(positions_where_valid), False)
         )
 
-        nextindex = item.nplike.index_nplike.full(is_valid.shape[0], -1, np.int64)
-        nextindex[positions_where_valid] = item.nplike.index_nplike.arange(
+        nextindex = item.index_nplike.full(is_valid.shape[0], -1, np.int64)
+        nextindex[positions_where_valid] = item.index_nplike.arange(
             positions_where_valid.shape[0], dtype=np.int64
         )
 
@@ -357,11 +357,11 @@ def normalise_item_bool_to_int(item):
             localindex = item.local_index(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
-            cumsum = item.nplike.index_nplike.empty(
+            cumsum = item.index_nplike.empty(
                 item.content.data.shape[0] + 1, np.int64
             )
             cumsum[0] = 0
-            cumsum[1:] = item.nplike.index_nplike.asarray(
+            cumsum[1:] = item.index_nplike.asarray(
                 item.nplike.cumsum(item.content.data)
             )
             nextoffsets = cumsum[item.offsets]
@@ -392,7 +392,7 @@ def normalise_item_bool_to_int(item):
                 )
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
-            if item.nplike.index_nplike.any(item.content.index.data < -1):
+            if item.index_nplike.any(item.content.index.data < -1):
                 safeindex = item.content.index.data.copy()
                 safeindex[isnegative] = -1
             else:
@@ -420,8 +420,8 @@ def normalise_item_bool_to_int(item):
             nextoffsets = cumsum[item.offsets]
 
             # outindex fits into the lists; non-missing are sequential
-            outindex = item.nplike.index_nplike.full(nextoffsets[-1], -1, np.int64)
-            outindex[~isnegative[expanded]] = item.nplike.index_nplike.arange(
+            outindex = item.index_nplike.full(nextoffsets[-1], -1, np.int64)
+            outindex[~isnegative[expanded]] = item.index_nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
             )
 
@@ -463,7 +463,7 @@ def normalise_item_bool_to_int(item):
                     )
                 # missing values as any integer other than -1 are extremely rare
                 isnegative = item.index.data < 0
-                if item.nplike.index_nplike.any(item.index.data < -1):
+                if item.index_nplike.any(item.index.data < -1):
                     safeindex = item.index.data.copy()
                     safeindex[isnegative] = -1
                 else:

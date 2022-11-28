@@ -237,7 +237,7 @@ class RegularArray(Content):
 
         nextcarry = ak.index.Index64.empty(where.shape[0] * self._size, self._nplike)
 
-        assert nextcarry.nplike is self._nplike
+        assert nextcarry.index_nplike is self._index_nplike
         self._handle_error(
             self._nplike[
                 "awkward_RegularArray_getitem_carry",
@@ -261,7 +261,7 @@ class RegularArray(Content):
 
     def _compact_offsets64(self, start_at_zero):
         out = ak.index.Index64.empty(self._length + 1, self._nplike)
-        assert out.nplike is self._nplike
+        assert out.index_nplike is self._index_nplike
         self._handle_error(
             self._nplike["awkward_RegularArray_compact_offsets", out.dtype.type](
                 out.data,
@@ -293,7 +293,7 @@ class RegularArray(Content):
         if self._size == 1:
             carrylen = offsets[-1]
             nextcarry = ak.index.Index64.empty(carrylen, self._nplike)
-            assert nextcarry.nplike is self._nplike and offsets.nplike is self._nplike
+            assert nextcarry.index_nplike is self._index_nplike and offsets.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_broadcast_tooffsets_size1",
@@ -309,7 +309,7 @@ class RegularArray(Content):
             return ak.contents.ListOffsetArray(offsets, nextcontent, self._parameters)
 
         else:
-            assert offsets.nplike is self._nplike
+            assert offsets.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_broadcast_tooffsets", offsets.dtype.type
@@ -339,7 +339,7 @@ class RegularArray(Content):
         elif isinstance(head, int):
             nexthead, nexttail = ak._slicing.headtail(tail)
             nextcarry = ak.index.Index64.empty(self._length, self._nplike)
-            assert nextcarry.nplike is self._nplike
+            assert nextcarry.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_getitem_next_at", nextcarry.dtype.type
@@ -371,7 +371,7 @@ class RegularArray(Content):
                     nextsize += 1
 
             nextcarry = ak.index.Index64.empty(self._length * nextsize, self._nplike)
-            assert nextcarry.nplike is self._nplike
+            assert nextcarry.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_getitem_next_range",
@@ -402,8 +402,8 @@ class RegularArray(Content):
                 )
                 advanced = advanced._to_nplike(self._nplike)
                 assert (
-                    nextadvanced.nplike is self._nplike
-                    and advanced.nplike is self._nplike
+                    nextadvanced.index_nplike is self._index_nplike
+                    and advanced.index_nplike is self._index_nplike
                 )
                 self._handle_error(
                     self._nplike[
@@ -443,7 +443,7 @@ class RegularArray(Content):
             flathead = self._index_nplike.asarray(head.data.reshape(-1))
 
             regular_flathead = ak.index.Index64.empty(flathead.shape[0], self._nplike)
-            assert regular_flathead.nplike is self._nplike
+            assert regular_flathead.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_getitem_next_array_regularize",
@@ -466,9 +466,9 @@ class RegularArray(Content):
                     self._length * flathead.shape[0], self._nplike
                 )
                 assert (
-                    nextcarry.nplike is self._nplike
-                    and nextadvanced.nplike is self._nplike
-                    and regular_flathead.nplike is self._nplike
+                    nextcarry.index_nplike is self._index_nplike
+                    and nextadvanced.index_nplike is self._index_nplike
+                    and regular_flathead.index_nplike is self._index_nplike
                 )
                 self._handle_error(
                     self._nplike[
@@ -507,10 +507,10 @@ class RegularArray(Content):
                 nextadvanced = ak.index.Index64.empty(self._length, self._nplike)
                 advanced = advanced._to_nplike(self._nplike)
                 assert (
-                    nextcarry.nplike is self._nplike
-                    and nextadvanced.nplike is self._nplike
-                    and advanced.nplike is self._nplike
-                    and regular_flathead.nplike is self._nplike
+                    nextcarry.index_nplike is self._index_nplike
+                    and nextadvanced.index_nplike is self._index_nplike
+                    and advanced.index_nplike is self._index_nplike
+                    and regular_flathead.index_nplike is self._index_nplike
                 )
                 self._handle_error(
                     self._nplike[
@@ -563,7 +563,7 @@ class RegularArray(Content):
                 head.length * regularlength, self._nplike
             )
 
-            assert singleoffsets.nplike is self._nplike
+            assert singleoffsets.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_getitem_jagged_expand",
@@ -601,7 +601,7 @@ class RegularArray(Content):
                 return out
         elif posaxis == depth + 1:
             tonum = ak.index.Index64.empty(self._length, self._nplike)
-            assert tonum.nplike is self._nplike
+            assert tonum.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike["awkward_RegularArray_num", tonum.dtype.type](
                     tonum.data, self._size, self._length
@@ -865,7 +865,7 @@ class RegularArray(Content):
 
             if self._size != 0:
                 assert (
-                    toindex.nplike is self._nplike and fromindex.nplike is self._nplike
+                    toindex.index_nplike is self._index_nplike and fromindex.index_nplike is self._index_nplike
                 )
                 self._handle_error(
                     self._nplike[
@@ -943,9 +943,9 @@ class RegularArray(Content):
             nextcarry = ak.index.Index64.empty(nextlen, nplike=self._nplike)
             nextparents = ak.index.Index64.empty(nextlen, nplike=self._nplike)
             assert (
-                parents.nplike is self._nplike
-                and nextcarry.nplike is self._nplike
-                and nextparents.nplike is self._nplike
+                parents.index_nplike is self._index_nplike
+                and nextcarry.index_nplike is self._index_nplike
+                and nextparents.index_nplike is self._index_nplike
             )
             self._handle_error(
                 self._nplike[
@@ -1001,7 +1001,7 @@ class RegularArray(Content):
         else:
             nextparents = ak.index.Index64.empty(nextlen, self._nplike)
 
-            assert nextparents.nplike is self._nplike
+            assert nextparents.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_RegularArray_reduce_local_nextparents",
@@ -1090,7 +1090,7 @@ class RegularArray(Content):
                     assert outcontent.is_regular
 
             outoffsets = ak.index.Index64.empty(outlength + 1, self._nplike)
-            assert outoffsets.nplike is self._nplike and parents.nplike is self._nplike
+            assert outoffsets.index_nplike is self._index_nplike and parents.index_nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
@@ -1138,7 +1138,7 @@ class RegularArray(Content):
 
             else:
                 index = ak.index.Index64.empty(self._length * target, self._nplike)
-                assert index.nplike is self._nplike
+                assert index.index_nplike is self._index_nplike
                 self._handle_error(
                     self._nplike[
                         "awkward_RegularArray_rpad_and_clip_axis1", index.dtype.type

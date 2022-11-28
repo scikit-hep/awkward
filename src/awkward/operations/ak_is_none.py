@@ -37,14 +37,15 @@ def _impl(array, axis, highlevel, behavior):
             return
 
         nplike = ak.nplikes.nplike_of(layout)
+        index_nplike = ak.nplikes.index_nplike_for(nplike)
 
         if layout.is_option:
             layout = layout.to_IndexedOptionArray64()
 
             # Convert the option type into a union, using the mask
             # as a tag.
-            tag = nplike.index_nplike.asarray(layout.mask_as_bool(valid_when=False))
-            index = nplike.index_nplike.where(tag, 0, nplike.asarray(layout.index))
+            tag = index_nplike.asarray(layout.mask_as_bool(valid_when=False))
+            index = index_nplike.where(tag, 0, nplike.asarray(layout.index))
 
             return ak.contents.UnionArray(
                 ak.index.Index8(tag),
