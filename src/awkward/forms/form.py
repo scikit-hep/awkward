@@ -406,7 +406,7 @@ class Form:
         raise _errors.wrap_error(NotImplementedError)
 
     def _to_dict_part(self, verbose, toplevel):
-        raise _errors._errors(NotImplementedError)
+        raise _errors.wrap_error(NotImplementedError)
 
     def _type(self, typestrs):
         raise _errors.wrap_error(NotImplementedError)

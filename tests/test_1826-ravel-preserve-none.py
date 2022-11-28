@@ -3,9 +3,9 @@
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
-import awkward._connect.cling  # noqa: E402
-import awkward._lookup  # noqa: E402
+import awkward as ak
+import awkward._connect.cling
+import awkward._lookup
 
 
 def test():

@@ -10,25 +10,25 @@ from collections.abc import Sequence
 from typing import Any, Callable, Dict, List, Union
 
 import awkward as ak
-from awkward.contents.bitmaskedarray import BitMaskedArray  # noqa: F401
-from awkward.contents.bytemaskedarray import ByteMaskedArray  # noqa: F401
-from awkward.contents.content import Content  # noqa: F401
-from awkward.contents.emptyarray import EmptyArray  # noqa: F401
-from awkward.contents.indexedarray import IndexedArray  # noqa: F401
-from awkward.contents.indexedoptionarray import IndexedOptionArray  # noqa: F401
-from awkward.contents.listarray import ListArray  # noqa: F401
-from awkward.contents.listoffsetarray import ListOffsetArray  # noqa: F401
-from awkward.contents.numpyarray import NumpyArray  # noqa: F401
-from awkward.contents.recordarray import RecordArray  # noqa: F401
-from awkward.contents.regulararray import RegularArray  # noqa: F401
-from awkward.contents.unionarray import UnionArray  # noqa: F401
-from awkward.contents.unmaskedarray import UnmaskedArray  # noqa: F401
-from awkward.index import Index  # noqa: F401
-from awkward.index import Index8  # noqa: F401
-from awkward.index import (  # IndexU8,  # noqa: F401; Index32,  # noqa: F401; IndexU32,  # noqa: F401; noqa: F401
+from awkward.contents.bitmaskedarray import BitMaskedArray
+from awkward.contents.bytemaskedarray import ByteMaskedArray
+from awkward.contents.content import Content
+from awkward.contents.emptyarray import EmptyArray
+from awkward.contents.indexedarray import IndexedArray
+from awkward.contents.indexedoptionarray import IndexedOptionArray
+from awkward.contents.listarray import ListArray
+from awkward.contents.listoffsetarray import ListOffsetArray
+from awkward.contents.numpyarray import NumpyArray
+from awkward.contents.recordarray import RecordArray
+from awkward.contents.regulararray import RegularArray
+from awkward.contents.unionarray import UnionArray
+from awkward.contents.unmaskedarray import UnmaskedArray
+from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
+    Index,
+    Index8,
     Index64,
 )
-from awkward.record import Record  # noqa: F401
+from awkward.record import Record
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()

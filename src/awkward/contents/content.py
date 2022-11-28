@@ -130,19 +130,19 @@ class Content:
         self,
         getkey: Callable[[Content], form.Form],
     ) -> form.Form:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def Form(self) -> type[form.Form]:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def typetracer(self) -> Self:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def length(self) -> int:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def forget_length(self) -> Self:
         if not isinstance(self._nplike, ak._typetracer.TypeTracer):
@@ -151,7 +151,7 @@ class Content:
             return self._forget_length()
 
     def _forget_length(self) -> Self:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def to_buffers(
         self,
@@ -214,7 +214,7 @@ class Content:
         container: MutableMapping[str, Any] | None,
         nplike: NumpyLike | None,
     ) -> tuple[form.Form, int, Mapping[str, Any]]:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def __len__(self) -> int:
         return self.length
@@ -652,22 +652,22 @@ class Content:
             )
 
     def _getitem_at(self, where: Integral):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_range(self, where: slice):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_field(self, where: str):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_fields(self, where: list[str], only_fields: tuple[str, ...] = ()):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_next(self, head, tail, advanced: ak.index.Index | None):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _carry(self, carry: ak.index.Index, allow_lazy: bool):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _carry_asrange(self, carry: ak.index.Index):
         assert isinstance(carry, ak.index.Index)
@@ -848,7 +848,7 @@ class Content:
         return self._local_index(axis, 0)
 
     def _local_index(self, axis: Integral, depth: Integral):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _reduce(
         self,
@@ -921,7 +921,7 @@ class Content:
         keepdims: bool,
         behavior: dict | None,
     ):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def argmin(
         self,
@@ -1086,7 +1086,7 @@ class Content:
         kind: Any,
         order: Any,
     ):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def sort(
         self,
@@ -1151,7 +1151,7 @@ class Content:
         kind: Any,
         order: Any,
     ):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _combinations_axis0(
         self,
@@ -1246,7 +1246,7 @@ class Content:
         axis: Integral,
         depth: Integral,
     ):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def validity_error_parameters(self, path: str) -> str:
         if self.parameter("__array__") == "string":
@@ -1355,7 +1355,7 @@ class Content:
         return self._validity_error(path)
 
     def _validity_error(self, path: str) -> str:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def nbytes(self) -> int:
@@ -1377,7 +1377,7 @@ class Content:
         parents: ak.index.Index,
         outlength: Integral,
     ) -> bool:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def unique(self, axis=None):
         if axis == -1 or axis is None:
@@ -1434,7 +1434,7 @@ class Content:
         parents: ak.index.Index,
         outlength: Integral,
     ):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     def is_identity_like(self) -> bool:
@@ -1500,7 +1500,7 @@ class Content:
     def _pad_none(
         self, target: Integral, axis: Integral, depth: Integral, clip: bool
     ) -> Content:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def to_arrow(
         self,
@@ -1541,13 +1541,13 @@ class Content:
         length: Integral,
         options: dict[str, Any],
     ):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def to_numpy(self, allow_missing: bool):
         return self._to_numpy(allow_missing)
 
     def _to_numpy(self, allow_missing: bool):
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def completely_flatten(
         self,
@@ -1571,7 +1571,7 @@ class Content:
     def _completely_flatten(
         self, nplike: NumpyLike | None, options: dict[str, Any]
     ) -> list:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def recursively_apply(
         self,
@@ -1609,7 +1609,7 @@ class Content:
         lateral_context: dict | None,
         options: dict[str, Any],
     ) -> Content | None:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def to_json(
         self,
@@ -1647,7 +1647,7 @@ class Content:
         )
 
     def packed(self) -> Content:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def tolist(self, behavior: dict | None = None) -> list:
         return self.to_list(behavior)
@@ -1658,7 +1658,7 @@ class Content:
     def _to_list(
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
     ) -> list:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _to_list_custom(
         self, behavior: dict | None, json_conversions: dict[str, Any] | None
@@ -1767,7 +1767,7 @@ class Content:
     def _offsets_and_flattened(
         self, axis: Integral, depth: Integral
     ) -> tuple[ak.index.Index, Content]:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def to_backend(self, backend: str) -> Self:
         if self.nplike is ak._util.regularize_backend(backend):
@@ -1776,7 +1776,7 @@ class Content:
             return self._to_nplike(ak._util.regularize_backend(backend))
 
     def _to_nplike(self, nplike: NumpyLike) -> Self:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def with_parameter(self, key: str, value: Any) -> Self:
         out = copy.copy(self)
@@ -1811,7 +1811,7 @@ class Content:
     def _layout_equal(
         self, other: Self, index_dtype: bool = True, numpyarray: bool = True
     ) -> bool:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def _repr(self, indent: str, pre: str, post: str) -> str:
-        raise ak._util.error(NotImplementedError)
+        raise ak._errors.wrap_error(NotImplementedError)

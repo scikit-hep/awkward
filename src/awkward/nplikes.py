@@ -374,7 +374,7 @@ class NumpyLike(Singleton):
         Return `True` if the given object is a numpy buffer, otherwise `False`.
 
         """
-        raise NotImplementedError
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def is_c_contiguous(self, array) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
@@ -499,7 +499,9 @@ class Numpy(NumpyLike):
             return [self.to_rectilinear(x, *args, **kwargs) for x in array]
 
         else:
-            raise TypeError("to_rectilinear argument must be iterable")
+            raise ak._errors.wrap_error(
+                TypeError("to_rectilinear argument must be iterable")
+            )
 
     def __getitem__(self, name_and_types):
         return NumpyKernel(
@@ -533,8 +535,10 @@ class Numpy(NumpyLike):
             jax = Jax.instance()
             return jax.asarray(array, dtype=array.dtype)
         else:
-            raise TypeError(
-                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
+                )
             )
 
     @classmethod
@@ -564,15 +568,17 @@ class Cupy(NumpyLike):
 
     def __getitem__(self, name_and_types):
         cupy = ak._connect.cuda.import_cupy("Awkward Arrays with CUDA")
-        _cuda_kernels = ak._connect.cuda.initialize_cuda_kernels(cupy)  # noqa: F401
+        _cuda_kernels = ak._connect.cuda.initialize_cuda_kernels(cupy)
 
         func = _cuda_kernels[name_and_types]
         if func is not None:
             return CupyKernel(func, name_and_types)
         else:
-            raise NotImplementedError(
-                f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
-                "continue the operation."
+            raise ak._errors.wrap_error(
+                NotImplementedError(
+                    f"{name_and_types[0]} is not implemented for CUDA. Please transfer the array back to the Main Memory to "
+                    "continue the operation."
+                )
             )
 
     def __init__(self):
@@ -582,16 +588,20 @@ class Cupy(NumpyLike):
 
     @property
     def ma(self):
-        raise ValueError(
-            "CUDA arrays cannot have missing values until CuPy implements "
-            "numpy.ma.MaskedArray"
+        raise ak._errors.wrap_error(
+            ValueError(
+                "CUDA arrays cannot have missing values until CuPy implements "
+                "numpy.ma.MaskedArray"
+            )
         )
 
     @property
     def char(self):
-        raise ValueError(
-            "CUDA arrays cannot do string manipulations until CuPy implements "
-            "numpy.char"
+        raise ak._errors.wrap_error(
+            ValueError(
+                "CUDA arrays cannot do string manipulations until CuPy implements "
+                "numpy.char"
+            )
         )
 
     @property
@@ -628,8 +638,10 @@ class Cupy(NumpyLike):
             jax = Jax.instance()
             return jax.asarray(array.get(), dtype=array.dtype)
         else:
-            raise TypeError(
-                "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
+            raise ak._errors.wrap_error(
+                TypeError(
+                    "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax"
+                )
             )
 
     def ascontiguousarray(self, array, dtype=None):
@@ -862,7 +874,7 @@ class Jax(NumpyLike):
         elif isinstance(nplike, ak._typetracer.TypeTracer):
             return ak._typetracer.TypeTracerArray(dtype=array.dtype, shape=array.shape)
         else:
-            ak._errors.wrap_error(
+            raise ak._errors.wrap_error(
                 TypeError(
                     "Invalid nplike, choose between nplike.Numpy, nplike.Cupy, Typetracer or Jax",
                 )
@@ -983,12 +995,13 @@ def nplike_of(*arrays, default=_UNSET):
     elif len(nplikes) == 1:
         return next(iter(nplikes))
     else:
-        raise ValueError(
-            """attempting to use both a 'cpu' array and a 'cuda' array in the """
-            """same operation; use one of
+        raise ak._errors.wrap_error(
+            ValueError(
+                """attempting to use both a 'cpu' array and a 'cuda' array in the same operation; use one of
 
     ak.to_backend(array, 'cpu')
     ak.to_backend(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
+            )
         )

@@ -2,10 +2,10 @@
 
 import pickle
 
-import numpy as np  # noqa: F401
+import numpy as np
 import pytest  # noqa: F401
 
-import awkward as ak  # noqa: F401
+import awkward as ak
 
 ak_Array = ak.highlevel.Array
 ak_Record = ak.highlevel.Record
