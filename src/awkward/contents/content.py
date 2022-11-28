@@ -1091,10 +1091,10 @@ class Content:
             isinstance(complex_record_fields, Sized)
             and isinstance(complex_record_fields, Iterable)
             and len(complex_record_fields) == 2
-            and isinstance(complex_record_fields[0], str)
-            and isinstance(complex_record_fields[1], str)
+            and isinstance(complex_record_fields[0], str)  # type: ignore
+            and isinstance(complex_record_fields[1], str)  # type: ignore
         ):
-            complex_real_string, complex_imag_string = complex_record_fields
+            complex_real_string, complex_imag_string = complex_record_fields  # type: ignore
         else:
             complex_real_string, complex_imag_string = None, None
 
