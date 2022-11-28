@@ -911,6 +911,9 @@ class Content:
     def nbytes(self) -> int:
         return self._nbytes_part()
 
+    def _nbytes_part(self) -> int:
+        raise ak._errors.wrap_error(NotImplementedError)
+
     def purelist_parameter(self, key: str):
         return self.form_cls.purelist_parameter(self, key)
 
