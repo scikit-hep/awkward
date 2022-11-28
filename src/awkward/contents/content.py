@@ -4,7 +4,7 @@ from __future__ import annotations
 import copy
 import math
 from collections.abc import Callable, Iterable, Mapping, MutableMapping, Sized
-from numbers import Complex, Integral, Real
+from numbers import Complex, Real
 
 import awkward as ak
 import awkward._reducers
@@ -158,7 +158,7 @@ class Content:
         container: MutableMapping[str, Any] | None = None,
         buffer_key="{form_key}-{attribute}",
         form_key: str | None = "node{id}",
-        id_start: Integral = 0,
+        id_start: int = 0,
         nplike: NumpyLike | None = None,
     ) -> tuple[Form, int, Mapping[str, Any]]:
         if container is None:
@@ -360,7 +360,7 @@ class Content:
         tail,
         advanced: ak.index.Index | None,
         raw: Content,
-        length: Integral,
+        length: int,
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
@@ -654,7 +654,7 @@ class Content:
                 )
             )
 
-    def _getitem_at(self, where: Integral):
+    def _getitem_at(self, where: int):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _getitem_range(self, where: slice):
@@ -863,16 +863,16 @@ class Content:
             )
         )
 
-    def local_index(self, axis: Integral):
+    def local_index(self, axis: int):
         return self._local_index(axis, 0)
 
-    def _local_index(self, axis: Integral, depth: Integral):
+    def _local_index(self, axis: int, depth: int):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _reduce(
         self,
         reducer: type[ak._reducers.Reducer],
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = True,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -931,11 +931,11 @@ class Content:
     def _reduce_next(
         self,
         reducer: type[ak._reducers.Reducer],
-        negaxis: Integral,
+        negaxis: int,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         parents: ak.index.Index,
-        outlength: Integral,
+        outlength: int,
         mask: bool,
         keepdims: bool,
         behavior: dict | None,
@@ -944,7 +944,7 @@ class Content:
 
     def argmin(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = True,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -953,7 +953,7 @@ class Content:
 
     def argmax(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = True,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -962,7 +962,7 @@ class Content:
 
     def count(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -971,7 +971,7 @@ class Content:
 
     def count_nonzero(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -982,7 +982,7 @@ class Content:
 
     def sum(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -991,7 +991,7 @@ class Content:
 
     def prod(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1000,7 +1000,7 @@ class Content:
 
     def any(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1009,7 +1009,7 @@ class Content:
 
     def all(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = False,
         keepdims: bool = False,
         behavior: dict | None = None,
@@ -1018,7 +1018,7 @@ class Content:
 
     def min(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = True,
         keepdims: bool = False,
         initial: dict | None = None,
@@ -1030,7 +1030,7 @@ class Content:
 
     def max(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         mask: bool = True,
         keepdims: bool = False,
         initial: dict | None = None,
@@ -1042,7 +1042,7 @@ class Content:
 
     def argsort(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         ascending: bool = True,
         stable: bool = False,
         kind: Any = None,
@@ -1095,11 +1095,11 @@ class Content:
 
     def _argsort_next(
         self,
-        negaxis: Integral,
+        negaxis: int,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         parents: ak.index.Index,
-        outlength: Integral,
+        outlength: int,
         ascending: bool,
         stable: bool,
         kind: Any,
@@ -1109,7 +1109,7 @@ class Content:
 
     def sort(
         self,
-        axis: Integral = -1,
+        axis: int = -1,
         ascending: bool = True,
         stable: bool = False,
         kind: Any = None,
@@ -1161,10 +1161,10 @@ class Content:
 
     def _sort_next(
         self,
-        negaxis: Integral,
+        negaxis: int,
         starts: ak.index.Index,
         parents: ak.index.Index,
-        outlength: Integral,
+        outlength: int,
         ascending: bool,
         stable: bool,
         kind: Any,
@@ -1174,7 +1174,7 @@ class Content:
 
     def _combinations_axis0(
         self,
-        n: Integral,
+        n: int,
         replacement: bool,
         recordlookup: list[str] | None,
         parameters: dict | None,
@@ -1245,9 +1245,9 @@ class Content:
 
     def combinations(
         self,
-        n: Integral,
+        n: int,
         replacement: bool = False,
-        axis: Integral = 1,
+        axis: int = 1,
         fields: list[str] | None = None,
         parameters: dict | None = None,
     ):
@@ -1267,12 +1267,12 @@ class Content:
 
     def _combinations(
         self,
-        n: Integral,
+        n: int,
         replacement: bool,
         recordlookup: list[str] | None,
         parameters: dict[str, Any] | None,
-        axis: Integral,
-        depth: Integral,
+        axis: int,
+        depth: int,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -1392,7 +1392,7 @@ class Content:
     def purelist_parameter(self, key: str):
         return self.form_cls.purelist_parameter(self, key)
 
-    def is_unique(self, axis: Integral | None = None) -> bool:
+    def is_unique(self, axis: int | None = None) -> bool:
         negaxis = axis if axis is None else -axis
         starts = ak.index.Index64.zeros(1, nplike=self._backend.index_nplike)
         parents = ak.index.Index64.zeros(self.length, nplike=self._backend.index_nplike)
@@ -1400,10 +1400,10 @@ class Content:
 
     def _is_unique(
         self,
-        negaxis: Integral | None,
+        negaxis: int | None,
         starts: ak.index.Index,
         parents: ak.index.Index,
-        outlength: Integral,
+        outlength: int,
     ) -> bool:
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -1459,10 +1459,10 @@ class Content:
 
     def _unique(
         self,
-        negaxis: Integral | None,
+        negaxis: int | None,
         starts: ak.index.Index,
         parents: ak.index.Index,
-        outlength: Integral,
+        outlength: int,
     ):
         raise ak._errors.wrap_error(NotImplementedError)
 
@@ -1498,7 +1498,7 @@ class Content:
     def dimension_optiontype(self) -> bool:
         return self.form_cls.dimension_optiontype.__get__(self)
 
-    def pad_none_axis0(self, target: Integral, clip: bool) -> Content:
+    def pad_none_axis0(self, target: int, clip: bool) -> Content:
         if not clip and target < self.length:
             index = ak.index.Index64(
                 self._backend.index_nplike.arange(self.length, dtype=np.int64),
@@ -1519,12 +1519,10 @@ class Content:
         next = ak.contents.IndexedOptionArray(index, self, parameters=self._parameters)
         return next.simplify_optiontype()
 
-    def pad_none(self, length: Integral, axis: Integral, clip: bool = False) -> Content:
+    def pad_none(self, length: int, axis: int, clip: bool = False) -> Content:
         return self._pad_none(length, axis, 0, clip)
 
-    def _pad_none(
-        self, target: Integral, axis: Integral, depth: Integral, clip: bool
-    ) -> Content:
+    def _pad_none(self, target: int, axis: int, depth: int, clip: bool) -> Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def to_arrow(
@@ -1563,7 +1561,7 @@ class Content:
         pyarrow: Any,
         mask_node: Any,
         validbytes: Any,
-        length: Integral,
+        length: int,
         options: dict[str, Any],
     ):
         raise ak._errors.wrap_error(NotImplementedError)
@@ -1627,7 +1625,7 @@ class Content:
         self,
         action: ActionType,
         behavior: dict | None,
-        depth: Integral,
+        depth: int,
         depth_context: dict | None,
         lateral_context: dict | None,
         options: dict[str, Any],
@@ -1783,12 +1781,12 @@ class Content:
 
             return out
 
-    def flatten(self, axis: Integral = 1, depth: Integral = 0) -> Content:
+    def flatten(self, axis: int = 1, depth: int = 0) -> Content:
         offsets, flattened = self._offsets_and_flattened(axis, depth)
         return flattened
 
     def _offsets_and_flattened(
-        self, axis: Integral, depth: Integral
+        self, axis: int, depth: int
     ) -> tuple[ak.index.Index, Content]:
         raise ak._errors.wrap_error(NotImplementedError)
 
