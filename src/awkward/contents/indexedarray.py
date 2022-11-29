@@ -14,13 +14,7 @@ numpy = ak.nplikes.Numpy.instance()
 class IndexedArray(Content):
     is_indexed = True
 
-    def copy(
-        self,
-        index=unset,
-        content=unset,
-        *,
-        parameters=unset
-    ):
+    def copy(self, index=unset, content=unset, *, parameters=unset):
         return IndexedArray(
             self._index if index is unset else index,
             self._content if content is unset else content,

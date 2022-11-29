@@ -13,12 +13,7 @@ numpy = ak.nplikes.Numpy.instance()
 class UnmaskedArray(Content):
     is_option = True
 
-    def copy(
-        self,
-        content=unset,
-        *,
-        parameters=unset
-    ):
+    def copy(self, content=unset, *, parameters=unset):
         return UnmaskedArray(
             self._content if content is unset else content,
             parameters=self._parameters if parameters is unset else parameters,

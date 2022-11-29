@@ -14,13 +14,7 @@ numpy = ak.nplikes.Numpy.instance()
 class ListOffsetArray(Content):
     is_list = True
 
-    def copy(
-        self,
-        offsets=unset,
-        content=unset,
-        *,
-        parameters=unset
-    ):
+    def copy(self, offsets=unset, content=unset, *, parameters=unset):
         return ListOffsetArray(
             self._offsets if offsets is unset else offsets,
             self._content if content is unset else content,

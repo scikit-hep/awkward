@@ -14,14 +14,7 @@ np = ak.nplikes.NumpyMetadata.instance()
 class ListArray(Content):
     is_list = True
 
-    def copy(
-        self,
-        starts=unset,
-        stops=unset,
-        content=unset,
-        *,
-        parameters=unset
-    ):
+    def copy(self, starts=unset, stops=unset, content=unset, *, parameters=unset):
         return ListArray(
             self._starts if starts is unset else starts,
             self._stops if stops is unset else stops,
