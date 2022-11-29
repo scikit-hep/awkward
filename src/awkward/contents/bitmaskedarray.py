@@ -24,6 +24,7 @@ class BitMaskedArray(Content):
         valid_when=unset,
         length=unset,
         lsb_order=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

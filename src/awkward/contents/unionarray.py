@@ -23,6 +23,7 @@ class UnionArray(Content):
         tags=unset,
         index=unset,
         contents=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

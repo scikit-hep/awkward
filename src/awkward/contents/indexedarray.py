@@ -18,6 +18,7 @@ class IndexedArray(Content):
         self,
         index=unset,
         content=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

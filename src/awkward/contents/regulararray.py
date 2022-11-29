@@ -19,6 +19,7 @@ class RegularArray(Content):
         content=unset,
         size=unset,
         zeros_length=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

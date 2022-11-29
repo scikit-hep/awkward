@@ -18,6 +18,7 @@ class ListOffsetArray(Content):
         self,
         offsets=unset,
         content=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

@@ -19,6 +19,7 @@ class ListArray(Content):
         starts=unset,
         stops=unset,
         content=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

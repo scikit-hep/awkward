@@ -21,6 +21,7 @@ class RecordArray(Content):
         contents=unset,
         fields=unset,
         length=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

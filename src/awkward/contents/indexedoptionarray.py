@@ -19,6 +19,7 @@ class IndexedOptionArray(Content):
         self,
         index=unset,
         content=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

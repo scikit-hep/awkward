@@ -17,6 +17,7 @@ class NumpyArray(Content):
     def copy(
         self,
         data=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

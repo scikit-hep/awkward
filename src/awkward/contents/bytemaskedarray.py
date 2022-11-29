@@ -21,6 +21,7 @@ class ByteMaskedArray(Content):
         mask=unset,
         content=unset,
         valid_when=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

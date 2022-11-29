@@ -16,6 +16,7 @@ class UnmaskedArray(Content):
     def copy(
         self,
         content=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):

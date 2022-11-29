@@ -16,6 +16,7 @@ class EmptyArray(Content):
 
     def copy(
         self,
+        *,
         parameters=unset,
         nplike=unset,
     ):
