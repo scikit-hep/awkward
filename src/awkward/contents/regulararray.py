@@ -67,7 +67,7 @@ class RegularArray(Content):
             self._length = content.length // size  # floor division
         else:
             self._length = zeros_length
-        self._init(parameters, content.nplike)
+        self._init(parameters, content.backend)
 
     @property
     def size(self):
@@ -158,7 +158,7 @@ class RegularArray(Content):
                 parameters=ak._util.merge_parameters(
                     self._parameters, content.parameters, True
                 ),
-                nplike=self._nplike,
+                backend=self._backend,
             )
 
     def _getitem_nothing(self):
@@ -249,7 +249,7 @@ class RegularArray(Content):
         )
 
     def _compact_offsets64(self, start_at_zero):
-        out = ak.index.Index64.empty(self._length + 1, self._nplike)
+        out = ak.index.Index64.empty((self._length + 1), self._nplike)
         assert out.nplike is self._nplike
         self._handle_error(
             self._nplike["awkward_RegularArray_compact_offsets", out.dtype.type](
@@ -601,7 +601,7 @@ class RegularArray(Content):
                     tonum.data, self._size, self._length
                 )
             )
-            return ak.contents.NumpyArray(tonum, parameters=None, nplike=self._nplike)
+            return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
             next = self._content.num(posaxis, depth + 1)
             return ak.contents.RegularArray(
@@ -888,7 +888,7 @@ class RegularArray(Content):
                 recordlookup,
                 length,
                 parameters=parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
             return ak.contents.RegularArray(
                 recordarray, combinationslen, self._length, parameters=self._parameters
@@ -1259,7 +1259,7 @@ class RegularArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 

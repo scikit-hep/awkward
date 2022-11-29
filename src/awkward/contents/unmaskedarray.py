@@ -38,7 +38,7 @@ class UnmaskedArray(Content):
                 )
             )
         self._content = content
-        self._init(parameters, content.nplike)
+        self._init(parameters, content.backend)
 
     @property
     def content(self):
@@ -504,7 +504,7 @@ class UnmaskedArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 

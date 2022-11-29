@@ -58,7 +58,7 @@ class IndexedOptionArray(Content):
 
         self._index = index
         self._content = content
-        self._init(parameters, content.nplike)
+        self._init(parameters, content.backend)
 
     @property
     def index(self):
@@ -734,7 +734,7 @@ class IndexedOptionArray(Content):
             ](index.data, self._index.data, tags.length)
         )
         out = ak.contents.UnionArray(
-            tags, index, contents, parameters=self._parameters, nplike=self._nplike
+            tags, index, contents, parameters=self._parameters, backend=self._backend
         )
         return out.simplify_uniontype(True, True)
 
@@ -1117,7 +1117,7 @@ class IndexedOptionArray(Content):
         # is mergeable with our content (`out = next._argsort_next result`).
         # If so, try to concatenate them at the end of `out`.`
         nulls_index_content = ak.contents.NumpyArray(
-            nulls_index, parameters=None, nplike=self._nplike
+            nulls_index, parameters=None, backend=self._backend
         )
         if out.mergeable(nulls_index_content, True):
             out = out.merge(nulls_index_content)
@@ -1543,7 +1543,7 @@ class IndexedOptionArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 

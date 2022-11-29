@@ -625,7 +625,9 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
                 ak.contents.NumpyArray(
-                    asbytes.view("u1"), parameters={"__array__": "byte"}, nplike=numpy
+                    asbytes.view("u1"),
+                    parameters={"__array__": "byte"},
+                    backend=ak._backends.NumpyBackend.instance(),
                 ),
                 parameters={"__array__": "bytestring"},
             )
@@ -643,7 +645,9 @@ def from_arraylib(array, regulararray, recordarray, highlevel, behavior):
                 ak.index.Index64(starts),
                 ak.index.Index64(stops),
                 ak.contents.NumpyArray(
-                    asbytes.view("u1"), parameters={"__array__": "char"}, nplike=numpy
+                    asbytes.view("u1"),
+                    parameters={"__array__": "char"},
+                    backend=ak._backends.NumpyBackend.instance(),
                 ),
                 parameters={"__array__": "string"},
             )

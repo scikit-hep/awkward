@@ -62,7 +62,7 @@ class ListOffsetArray(Content):
 
         self._offsets = offsets
         self._content = content
-        self._init(parameters, content.nplike)
+        self._init(parameters, content.backend)
 
     @property
     def starts(self):
@@ -593,7 +593,7 @@ class ListOffsetArray(Content):
                     self.length,
                 )
             )
-            return ak.contents.NumpyArray(tonum, parameters=None, nplike=self._nplike)
+            return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
             next = self._content.num(posaxis, depth + 1)
             offsets = self._compact_offsets64(True)
@@ -971,7 +971,7 @@ class ListOffsetArray(Content):
                     )
                 )
                 return ak.contents.NumpyArray(
-                    nextcarry, parameters=None, nplike=self._nplike
+                    nextcarry, parameters=None, backend=self._backend
                 )
 
         if not branch and (negaxis == depth):
@@ -1329,7 +1329,11 @@ class ListOffsetArray(Content):
                 contents.append(self._content._carry(ptr, True))
 
             recordarray = ak.contents.RecordArray(
-                contents, recordlookup, None, parameters=parameters, nplike=self._nplike
+                contents,
+                recordlookup,
+                None,
+                parameters=parameters,
+                backend=self._backend,
             )
             return ak.contents.ListOffsetArray(
                 offsets, recordarray, parameters=self._parameters
@@ -1926,7 +1930,7 @@ class ListOffsetArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 

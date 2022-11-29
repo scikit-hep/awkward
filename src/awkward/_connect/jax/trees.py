@@ -30,7 +30,7 @@ def find_all_buffers(
 def replace_all_buffers(
     layout: contents.Content | record.Record,
     buffers: list,
-    nplike: nplikes.NumpyLike,
+    backend: ak._backends.Backend,
 ):
     jax = nplikes.Jax.instance()
     numpy = nplikes.Numpy.instance()
@@ -43,7 +43,7 @@ def replace_all_buffers(
                 return
             else:
                 return ak.contents.NumpyArray(
-                    buffer, parameters=node.parameters, nplike=nplike
+                    buffer, parameters=node.parameters, backend=backend
                 )
 
     return layout.recursively_apply(action=action, numpy_to_regular=False)
@@ -135,7 +135,7 @@ class AuxData(Generic[T]):
 
         # Replace the mixed NumPy-JAX layout leaves with the given buffers (and use the JAX nplike)
         layout = replace_all_buffers(
-            self._layout, list(buffers), nplike=nplikes.Jax.instance()
+            self._layout, list(buffers), backend=ak._backends.JaxBackend.instance()
         )
         return ak._util.wrap(
             layout, behavior=self._behavior, highlevel=self._is_highlevel

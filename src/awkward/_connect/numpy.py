@@ -151,7 +151,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            nplike = ak.nplikes.nplike_of(*inputs)
+            backend = ak._backends.backend_for(*inputs)
+            nplike = backend.nplike
 
             # Broadcast parameters against one another
             parameters_factory = ak._broadcasting.intersection_parameters_factory(
@@ -186,7 +187,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 assert shape is not None
                 tmp = getattr(ufunc, method)(*args, **kwargs)
                 result = nplike.empty((shape[0],) + tmp.shape[1:], tmp.dtype)
-            return (NumpyArray(result, nplike=nplike, parameters=parameters),)
+            return (NumpyArray(result, backend=backend, parameters=parameters),)
 
         for x in inputs:
             if isinstance(x, ak.contents.Content):

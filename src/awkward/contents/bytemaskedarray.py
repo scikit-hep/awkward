@@ -75,7 +75,7 @@ class ByteMaskedArray(Content):
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
-        self._init(parameters, content.nplike)
+        self._init(parameters, content.backend)
 
     @property
     def mask(self):
@@ -987,7 +987,7 @@ class ByteMaskedArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 

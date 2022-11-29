@@ -181,7 +181,7 @@ class Index:
         return Index(self._data.astype(np.int64))
 
     def __copy__(self):
-        return type(self)(self._data, self._metadata, self._nplike)
+        return type(self)(self._data, metadata=self._metadata, nplike=self._nplike)
 
     def __deepcopy__(self, memo):
         return type(self)(

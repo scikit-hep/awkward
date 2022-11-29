@@ -219,7 +219,7 @@ def normalise_item_nested(item):
             next = ak.contents.NumpyArray(
                 item.data.astype(np.int64),
                 parameters=item.parameters,
-                nplike=item.nplike,
+                backend=item.backend,
             )
         next = next.to_RegularArray()
         next = normalise_item_RegularArray_to_ListOffsetArray64(next)
@@ -373,7 +373,7 @@ def normalise_item_bool_to_int(item):
 
         return ak.contents.ListOffsetArray(
             ak.index.Index64(nextoffsets),
-            ak.contents.NumpyArray(nextcontent, nplike=item.nplike),
+            ak.contents.NumpyArray(nextcontent, backend=item.backend),
         )
 
     elif (
@@ -433,7 +433,7 @@ def normalise_item_bool_to_int(item):
             ak.index.Index64(nextoffsets, nplike=item.nplike),
             ak.contents.IndexedOptionArray(
                 ak.index.Index(outindex, nplike=item.nplike),
-                ak.contents.NumpyArray(nextcontent, nplike=item.nplike),
+                ak.contents.NumpyArray(nextcontent, backend=item.backend),
             ),
         )
 
@@ -492,7 +492,7 @@ def normalise_item_bool_to_int(item):
 
             return ak.contents.IndexedOptionArray(
                 ak.index.Index(outindex, nplike=item.nplike),
-                ak.contents.NumpyArray(nextcontent, nplike=item.nplike),
+                ak.contents.NumpyArray(nextcontent, backend=item.backend),
             )
 
         else:

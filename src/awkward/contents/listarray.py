@@ -78,7 +78,7 @@ class ListArray(Content):
         self._starts = starts
         self._stops = stops
         self._content = content
-        self._init(parameters, content.nplike)
+        self._init(parameters, content.backend)
 
     @property
     def starts(self):
@@ -876,7 +876,7 @@ class ListArray(Content):
                     self.length,
                 )
             )
-            return ak.contents.NumpyArray(tonum, parameters=None, nplike=self._nplike)
+            return ak.contents.NumpyArray(tonum, parameters=None, backend=self._backend)
         else:
             return self.to_ListOffsetArray64(True).num(posaxis, depth)
 
@@ -1390,7 +1390,7 @@ class ListArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 

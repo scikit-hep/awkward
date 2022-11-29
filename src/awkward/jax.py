@@ -8,7 +8,7 @@ from typing import TypeVar
 import awkward as ak
 from awkward import _errors, highlevel, nplikes
 
-numpy = nplikes.Numpy()
+numpy = nplikes.Numpy.instance()
 
 
 def assert_never(arg) -> None:

@@ -112,7 +112,7 @@ class BitMaskedArray(Content):
         self._valid_when = valid_when
         self._length = length
         self._lsb_order = lsb_order
-        self._init(parameters, content.nplike)
+        self._init(parameters, content.backend)
 
     @property
     def mask(self):
@@ -622,7 +622,7 @@ class BitMaskedArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 

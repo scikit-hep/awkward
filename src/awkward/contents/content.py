@@ -9,6 +9,7 @@ from typing import Any, TypeVar
 
 import awkward as ak
 import awkward._reducers
+from awkward._backends import Backend, TypeTracerBackend
 from awkward.forms import form
 from awkward.nplikes import NumpyLike
 from awkward.typing import Self, TypeAlias
@@ -51,7 +52,7 @@ class Content:
     is_record = False
     is_union = False
 
-    def _init(self, parameters: dict[str, Any] | None, nplike: NumpyLike):
+    def _init(self, parameters: dict[str, Any] | None, backend: Backend):
         if parameters is not None and not isinstance(parameters, dict):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -61,17 +62,18 @@ class Content:
                 )
             )
 
-        if not isinstance(nplike, NumpyLike):
+        if not isinstance(backend, Backend):
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'nplike' must be a NumpyLike, not {}".format(
-                        type(self).__name__, repr(nplike)
+                    "{} 'backend' must be a Backend, not {}".format(
+                        type(self).__name__, repr(backend)
                     )
                 )
             )
 
         self._parameters = parameters
-        self._nplike = nplike
+        self._nplike = backend.nplike
+        self._backend = backend
 
     @property
     def parameters(self) -> dict[str, Any]:
@@ -86,8 +88,12 @@ class Content:
             return self._parameters.get(key)
 
     @property
-    def nplike(self) -> NumpyLike | None:
+    def nplike(self) -> NumpyLike:
         return self._nplike
+
+    @property
+    def backend(self) -> Backend:
+        return self._backend
 
     @property
     def form(self) -> form.Form:
@@ -145,7 +151,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def forget_length(self) -> Self:
-        if not isinstance(self._nplike, ak._typetracer.TypeTracer):
+        if not isinstance(self._backend, TypeTracerBackend):
             return self.typetracer._forget_length()
         else:
             return self._forget_length()
@@ -501,7 +507,7 @@ class Content:
                 nextcontent._fields,
                 None,
                 parameters=self._parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
 
         else:
@@ -622,7 +628,7 @@ class Content:
             else:
                 return self._getitem(
                     ak.contents.NumpyArray(
-                        as_array, parameters=None, nplike=layout.nplike
+                        as_array, parameters=None, backend=layout.backend
                     )
                 )
 
@@ -717,7 +723,9 @@ class Content:
                 localindex.length,
             )
         )
-        return ak.contents.NumpyArray(localindex, parameters=None, nplike=self._nplike)
+        return ak.contents.NumpyArray(
+            localindex, parameters=None, backend=self._backend
+        )
 
     def merge(self, other: Content) -> Content:
         others = [other]
@@ -774,7 +782,7 @@ class Content:
         )
 
         return ak.contents.UnionArray(
-            tags, index, contents, parameters=None, nplike=self._nplike
+            tags, index, contents, parameters=None, backend=self._backend
         )
 
     def _merging_strategy(
@@ -1200,7 +1208,7 @@ class Content:
             length = contents[-1].length
         assert length is not None
         return ak.contents.RecordArray(
-            contents, recordlookup, length, parameters=parameters, nplike=self._nplike
+            contents, recordlookup, length, parameters=parameters, backend=self._backend
         )
 
     def combinations(
