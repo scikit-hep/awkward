@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 from typing import Any, Callable, Protocol, TypeVar, runtime_checkable
 
@@ -14,6 +16,8 @@ from awkward.nplikes import (
     NumpyKernel,
     NumpyLike,
     NumpyMetadata,
+    Singleton,
+    nplike_of,
 )
 
 np = NumpyMetadata.instance()
@@ -40,7 +44,7 @@ class Backend(Protocol[T]):
         ...
 
 
-class NumpyBackend(Backend[Any]):
+class NumpyBackend(Backend[Any], Singleton):
     _numpy: Numpy
 
     @property
@@ -58,7 +62,7 @@ class NumpyBackend(Backend[Any]):
         return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
-class CupyBackend(Backend[Any]):
+class CupyBackend(Backend[Any], Singleton):
     _cupy: Cupy
 
     @property
@@ -83,7 +87,7 @@ class CupyBackend(Backend[Any]):
         return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
-class JaxBackend(Backend[Any]):
+class JaxBackend(Backend[Any], Singleton):
     _jax: Jax
     _numpy: Numpy
 
@@ -104,7 +108,7 @@ class JaxBackend(Backend[Any]):
         return JaxKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
-class TypeTracerBackend(Backend[Any]):
+class TypeTracerBackend(Backend[Any], Singleton):
     _typetracer: TypeTracer
 
     @property
@@ -120,3 +124,23 @@ class TypeTracerBackend(Backend[Any]):
 
     def __getitem__(self, index: KernelKeyType) -> KernelType[Any]:
         return NoKernel(index)
+
+
+_UNSET = object()
+D = TypeVar("D")
+
+
+def backend_for(*arrays, default: T = _UNSET) -> Backend | D:
+    nplike = nplike_of(*arrays)
+    if isinstance(nplike, Numpy):
+        return NumpyBackend.instance()
+    elif isinstance(nplike, Cupy):
+        return CupyBackend.instance()
+    elif isinstance(nplike, Jax):
+        return JaxBackend.instance()
+    elif isinstance(nplike, TypeTracer):
+        return TypeTracerBackend.instance()
+    elif default is _UNSET:
+        return NumpyBackend.instance()
+    else:
+        return default
