@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Callable, Protocol, TypeVar, runtime_checkable
+from typing import Any, Callable, TypeVar
 
 import awkward_cpp
-from typing_extensions import TypeAlias, Unpack
+from typing_extensions import Protocol, TypeAlias, Unpack, runtime_checkable
 
 from awkward._typetracer import NoKernel, TypeTracer
 from awkward.nplikes import (
