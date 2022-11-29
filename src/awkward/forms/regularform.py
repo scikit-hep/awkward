@@ -56,7 +56,7 @@ class RegularForm(Form):
         return ak.types.RegularType(
             self._content._type(typestrs),
             self._size,
-            self._parameters,
+            parameters=self._parameters,
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 

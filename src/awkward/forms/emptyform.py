@@ -20,7 +20,7 @@ class EmptyForm(Form):
 
     def _type(self, typestrs):
         return ak.types.UnknownType(
-            self._parameters,
+            parameters=self._parameters,
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 

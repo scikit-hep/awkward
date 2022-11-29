@@ -80,7 +80,7 @@ class ListForm(Form):
     def _type(self, typestrs):
         return ak.types.ListType(
             self._content._type(typestrs),
-            self._parameters,
+            parameters=self._parameters,
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 

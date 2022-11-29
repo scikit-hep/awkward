@@ -150,7 +150,7 @@ class RecordForm(Form):
         return ak.types.RecordType(
             [x._type(typestrs) for x in self._contents],
             self._fields,
-            self._parameters,
+            parameters=self._parameters,
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 

@@ -9,7 +9,7 @@ from awkward.types.uniontype import UnionType
 
 
 class OptionType(Type):
-    def __init__(self, content, parameters=None, *, typestr=None):
+    def __init__(self, content, *, parameters=None, typestr=None):
         if not isinstance(content, Type):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -103,7 +103,7 @@ class OptionType(Type):
                     contents.append(
                         OptionType(
                             content.content,
-                            ak._util.merge_parameters(
+                            parameters=ak._util.merge_parameters(
                                 self._parameters, content._parameters
                             ),
                             typestr=typestr,
@@ -112,11 +112,15 @@ class OptionType(Type):
 
                 else:
                     contents.append(
-                        OptionType(content, self._parameters, typestr=self._typestr)
+                        OptionType(
+                            content, parameters=self._parameters, typestr=self._typestr
+                        )
                     )
 
             return UnionType(
-                contents, self._content.parameters, typestr=self._content.typestr
+                contents,
+                parameters=self._content.parameters,
+                typestr=self._content.typestr,
             )
 
         else:

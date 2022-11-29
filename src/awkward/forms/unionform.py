@@ -97,7 +97,7 @@ class UnionForm(Form):
     def _type(self, typestrs):
         return ak.types.UnionType(
             [x._type(typestrs) for x in self._contents],
-            self._parameters,
+            parameters=self._parameters,
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
