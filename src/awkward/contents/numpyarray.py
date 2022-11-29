@@ -347,7 +347,7 @@ class NumpyArray(Content):
         tonum = ak.index.Index64.empty(reps, self._backend.nplike)
         assert tonum.nplike is self._backend.nplike
         self._handle_error(
-            self._backend.nplike["awkward_RegularArray_num", tonum.dtype.type](
+            self._backend["awkward_RegularArray_num", tonum.dtype.type](
                 tonum.data, size, reps
             )
         )
@@ -501,7 +501,7 @@ class NumpyArray(Content):
 
         tmp = self._backend.index_nplike.empty(length, self.dtype)
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_NumpyArray_fill",
                 self.dtype.type,
                 self._data.dtype.type,
@@ -528,7 +528,7 @@ class NumpyArray(Content):
                 and stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_quick_sort",
                     self.dtype.type,
                     tmp_beg_ptr.dtype.type,
@@ -551,7 +551,7 @@ class NumpyArray(Content):
             and stops.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_NumpyArray_subrange_equal",
                 self.dtype.type,
                 starts.dtype.type,
@@ -578,7 +578,7 @@ class NumpyArray(Content):
             and outoffsets.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_NumpyArray_sort_asstrings_uint8",
                 self.dtype.type,
                 self._data.dtype.type,
@@ -603,7 +603,7 @@ class NumpyArray(Content):
             and outlength.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_NumpyArray_unique_strings",
                 self.dtype.type,
                 outoffsets.dtype.type,
@@ -680,7 +680,7 @@ class NumpyArray(Content):
             out = self._backend.nplike.empty(offsets[1], dtype)
             assert offsets.nplike is self._backend.nplike
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sort",
                     dtype.type,
                     dtype.type,
@@ -700,7 +700,7 @@ class NumpyArray(Content):
             nextlength = ak.index.Index64.empty(1, self._backend.nplike)
             assert nextlength.nplike is self._backend.nplike
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_unique",
                     out.dtype.type,
                     nextlength.dtype.type,
@@ -735,7 +735,7 @@ class NumpyArray(Content):
                 and parents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sorting_ranges_length",
                     offsets_length.dtype.type,
                     parents.dtype.type,
@@ -752,7 +752,7 @@ class NumpyArray(Content):
                 and parents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sorting_ranges",
                     offsets.dtype.type,
                     parents.dtype.type,
@@ -767,7 +767,7 @@ class NumpyArray(Content):
             out = self._backend.nplike.empty(self.length, self.dtype)
             assert offsets.nplike is self._backend.nplike
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sort",
                     out.dtype.type,
                     self._data.dtype.type,
@@ -790,7 +790,7 @@ class NumpyArray(Content):
                 and nextoffsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_unique_ranges",
                     out.dtype.type,
                     offsets.dtype.type,
@@ -812,7 +812,7 @@ class NumpyArray(Content):
                 and starts.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_unique_offsets",
                     outoffsets.dtype.type,
                     nextoffsets.dtype.type,
@@ -868,7 +868,7 @@ class NumpyArray(Content):
                 and parents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sorting_ranges_length",
                     offsets_length.dtype.type,
                     parents.dtype.type,
@@ -886,7 +886,7 @@ class NumpyArray(Content):
                 and parents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sorting_ranges",
                     offsets.dtype.type,
                     parents.dtype.type,
@@ -909,7 +909,7 @@ class NumpyArray(Content):
                 and offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_argsort",
                     nextcarry.dtype.type,
                     dtype.type,
@@ -934,7 +934,7 @@ class NumpyArray(Content):
                     and starts.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_NumpyArray_rearrange_shifted",
                         nextcarry.dtype.type,
                         shifts.dtype.type,
@@ -985,7 +985,7 @@ class NumpyArray(Content):
                 and parents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sorting_ranges_length",
                     offsets_length.dtype.type,
                     parents.dtype.type,
@@ -1003,7 +1003,7 @@ class NumpyArray(Content):
                 and parents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sorting_ranges",
                     offsets.dtype.type,
                     parents.dtype.type,
@@ -1023,7 +1023,7 @@ class NumpyArray(Content):
             out = self._backend.nplike.empty(self.length, dtype)
             assert offsets.nplike is self._backend.nplike
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sort",
                     dtype.type,
                     dtype.type,
@@ -1113,7 +1113,7 @@ class NumpyArray(Content):
                     and starts.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_NumpyArray_reduce_adjust_starts_64",
                         out.data.dtype.type,
                         parents.dtype.type,
@@ -1133,7 +1133,7 @@ class NumpyArray(Content):
                     and shifts.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
                         out.data.dtype.type,
                         parents.dtype.type,
@@ -1155,7 +1155,7 @@ class NumpyArray(Content):
                 and parents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                     outmask.dtype.type,
                     parents.dtype.type,

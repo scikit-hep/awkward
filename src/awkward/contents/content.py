@@ -374,7 +374,7 @@ class Content:
             and index.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
             ](
                 outindex.data,
@@ -423,7 +423,7 @@ class Content:
             and stops.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
                 index.dtype.type,
                 jagged._offsets.dtype.type,
@@ -674,7 +674,7 @@ class Content:
         result = self._backend.index_nplike.empty(1, dtype=np.bool_)
         assert carry.nplike is self._backend.nplike
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_Index_iscontiguous",  # badly named
                 np.bool_,
                 carry.dtype.type,
@@ -725,7 +725,7 @@ class Content:
     def _local_index_axis0(self) -> ak.contents.NumpyArray:
         localindex = ak.index.Index64.empty(self.length, self._backend.nplike)
         self._handle_error(
-            self._backend.nplike["awkward_localindex", np.int64](
+            self._backend["awkward_localindex", np.int64](
                 localindex.data,
                 localindex.length,
             )
@@ -767,25 +767,25 @@ class Content:
         contents = [self, other]
         assert tags.nplike is self._backend.nplike
         self._handle_error(
-            self._backend.nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
+            self._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
                 tags.data, 0, mylength, 0
             )
         )
         assert index.nplike is self._backend.nplike
         self._handle_error(
-            self._backend.nplike[
-                "awkward_UnionArray_fillindex_count", index.dtype.type
-            ](index.data, 0, mylength)
+            self._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.data, 0, mylength
+            )
         )
         self._handle_error(
-            self._backend.nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
+            self._backend["awkward_UnionArray_filltags_const", tags.dtype.type](
                 tags.data, mylength, theirlength, 1
             )
         )
         self._handle_error(
-            self._backend.nplike[
-                "awkward_UnionArray_fillindex_count", index.dtype.type
-            ](index.data, mylength, theirlength)
+            self._backend["awkward_UnionArray_fillindex_count", index.dtype.type](
+                index.data, mylength, theirlength
+            )
         )
 
         return ak.contents.UnionArray(
@@ -1198,7 +1198,7 @@ class Content:
             and fromindex.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_RegularArray_combinations_64",
                 np.int64,
                 toindex.data.dtype.type,
@@ -1488,7 +1488,7 @@ class Content:
 
             assert index.nplike is self._backend.nplike
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_index_rpad_and_clip_axis0",
                     index.dtype.type,
                 ](index.data, target, self.length)

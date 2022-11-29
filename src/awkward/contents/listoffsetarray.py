@@ -170,7 +170,7 @@ class ListOffsetArray(Content):
             and self._offsets.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ListOffsetArray_toRegularArray",
                 size.dtype.type,
                 self._offsets.dtype.type,
@@ -247,7 +247,7 @@ class ListOffsetArray(Content):
             and self._offsets.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ListOffsetArray_compact_offsets",
                 out.dtype.type,
                 self._offsets.dtype.type,
@@ -284,7 +284,7 @@ class ListOffsetArray(Content):
             and stops.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ListArray_broadcast_tooffsets",
                 nextcarry.dtype.type,
                 offsets.dtype.type,
@@ -328,7 +328,7 @@ class ListOffsetArray(Content):
                 and stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_next_at",
                     nextcarry.dtype.type,
                     starts.dtype.type,
@@ -361,7 +361,7 @@ class ListOffsetArray(Content):
                 and self.stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_next_range_carrylength",
                     carrylength.dtype.type,
                     self.starts.dtype.type,
@@ -399,7 +399,7 @@ class ListOffsetArray(Content):
                 and self.stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_next_range",
                     nextoffsets.dtype.type,
                     nextcarry.dtype.type,
@@ -434,7 +434,7 @@ class ListOffsetArray(Content):
                     and nextoffsets.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_getitem_next_range_counts",
                         total.dtype.type,
                         nextoffsets.dtype.type,
@@ -453,7 +453,7 @@ class ListOffsetArray(Content):
                     and nextoffsets.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_getitem_next_range_spreadadvanced",
                         nextadvanced.dtype.type,
                         advanced.dtype.type,
@@ -503,7 +503,7 @@ class ListOffsetArray(Content):
                     and regular_flathead.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_getitem_next_array",
                         nextcarry.dtype.type,
                         nextadvanced.dtype.type,
@@ -542,7 +542,7 @@ class ListOffsetArray(Content):
                     and advanced.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_getitem_next_array_advanced",
                         nextcarry.dtype.type,
                         nextadvanced.dtype.type,
@@ -594,7 +594,7 @@ class ListOffsetArray(Content):
                 and self.stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_num",
                     tonum.dtype.type,
                     self.starts.dtype.type,
@@ -656,7 +656,7 @@ class ListOffsetArray(Content):
                     and inneroffsets.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListOffsetArray_flatten_offsets",
                         tooffsets.dtype.type,
                         self._offsets.dtype.type,
@@ -737,7 +737,7 @@ class ListOffsetArray(Content):
                 and offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_localindex",
                     localindex.dtype.type,
                     offsets.dtype.type,
@@ -805,7 +805,7 @@ class ListOffsetArray(Content):
                 and self._offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
@@ -877,7 +877,7 @@ class ListOffsetArray(Content):
                 and nextcarry.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_local_preparenext_64",
                     outcarry.dtype.type,
                     nextcarry.dtype.type,
@@ -904,7 +904,7 @@ class ListOffsetArray(Content):
                 and self._offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
@@ -970,7 +970,7 @@ class ListOffsetArray(Content):
                     and self_stops.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListOffsetArray_argsort_strings",
                         nextcarry.dtype.type,
                         parents.dtype.type,
@@ -1028,7 +1028,7 @@ class ListOffsetArray(Content):
             )
 
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
                     nummissing.dtype.type,
                     missing.dtype.type,
@@ -1070,7 +1070,7 @@ class ListOffsetArray(Content):
                 and nextcarry.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_local_preparenext_64",
                     outcarry.dtype.type,
                     nextcarry.dtype.type,
@@ -1096,7 +1096,7 @@ class ListOffsetArray(Content):
                 and self._offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
@@ -1154,7 +1154,7 @@ class ListOffsetArray(Content):
                     and stops.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListOffsetArray_argsort_strings",
                         nextcarry.dtype.type,
                         parents.dtype.type,
@@ -1214,7 +1214,7 @@ class ListOffsetArray(Content):
                 and nextcarry.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_local_preparenext_64",
                     outcarry.dtype.type,
                     nextcarry.dtype.type,
@@ -1240,7 +1240,7 @@ class ListOffsetArray(Content):
                 and self._offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
@@ -1295,7 +1295,7 @@ class ListOffsetArray(Content):
                 and stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_combinations_length",
                     totallen.data.dtype.type,
                     offsets.data.dtype.type,
@@ -1334,7 +1334,7 @@ class ListOffsetArray(Content):
                 and stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_combinations",
                     np.int64,
                     toindex.data.dtype.type,
@@ -1425,7 +1425,7 @@ class ListOffsetArray(Content):
                 and distincts.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
                     outstarts.dtype.type,
                     outstops.dtype.type,
@@ -1458,7 +1458,7 @@ class ListOffsetArray(Content):
                 )
 
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
                         nummissing.dtype.type,
                         missing.dtype.type,
@@ -1514,7 +1514,7 @@ class ListOffsetArray(Content):
                 and self._offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_reduce_local_nextparents_64",
                     nextparents.dtype.type,
                     self._offsets.dtype.type,
@@ -1546,7 +1546,7 @@ class ListOffsetArray(Content):
                 and parents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
                     outoffsets.dtype.type,
                     parents.dtype.type,
@@ -1581,7 +1581,7 @@ class ListOffsetArray(Content):
             and self._offsets.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
                 maxcount.dtype.type,
                 offsetscopy.dtype.type,
@@ -1609,7 +1609,7 @@ class ListOffsetArray(Content):
             and parents.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
                 nextcarry.dtype.type,
                 nextparents.dtype.type,
@@ -1638,7 +1638,7 @@ class ListOffsetArray(Content):
             and nextparents.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
                 nextstarts.dtype.type,
                 nextparents.dtype.type,
@@ -1664,7 +1664,7 @@ class ListOffsetArray(Content):
             self.starts.nplike is self._backend.nplike
             and self.stops.nplike is self._backend.nplike
         )
-        error = self._backend.nplike[
+        error = self._backend[
             "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
         ](
             self.starts.data,
@@ -1711,7 +1711,7 @@ class ListOffsetArray(Content):
                     and tolength.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListOffsetArray_rpad_length_axis1",
                         offsets_.dtype.type,
                         self._offsets.dtype.type,
@@ -1731,7 +1731,7 @@ class ListOffsetArray(Content):
                     and self._offsets.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListOffsetArray_rpad_axis1",
                         outindex.dtype.type,
                         self._offsets.dtype.type,
@@ -1760,7 +1760,7 @@ class ListOffsetArray(Content):
                     and stops_.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_index_rpad_and_clip_axis1",
                         starts_.dtype.type,
                         stops_.dtype.type,
@@ -1780,7 +1780,7 @@ class ListOffsetArray(Content):
                     and self._offsets.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListOffsetArray_rpad_and_clip_axis1",
                         outindex.dtype.type,
                         self._offsets.dtype.type,

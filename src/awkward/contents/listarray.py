@@ -260,7 +260,7 @@ class ListArray(Content):
             and self._stops.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ListArray_compact_offsets",
                 out.dtype.type,
                 self._starts.dtype.type,
@@ -303,7 +303,7 @@ class ListArray(Content):
                 and self._stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_jagged_descend",
                     outoffsets.dtype.type,
                     slicestarts.dtype.type,
@@ -344,7 +344,7 @@ class ListArray(Content):
                 and slicestops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_jagged_carrylen",
                     carrylen.dtype.type,
                     slicestarts.dtype.type,
@@ -373,7 +373,7 @@ class ListArray(Content):
                 and self._stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_jagged_apply",
                     outoffsets.dtype.type,
                     nextcarry.dtype.type,
@@ -424,7 +424,7 @@ class ListArray(Content):
                 and missing.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_jagged_numvalid",
                     numvalid.dtype.type,
                     slicestarts.dtype.type,
@@ -459,7 +459,7 @@ class ListArray(Content):
                 and missing.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_jagged_shrink",
                     nextcarry.dtype.type,
                     smalloffsets.dtype.type,
@@ -551,7 +551,7 @@ class ListArray(Content):
                 and self._stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_next_at",
                     nextcarry.dtype.type,
                     self._starts.dtype.type,
@@ -587,7 +587,7 @@ class ListArray(Content):
                     and self._stops.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_getitem_next_range_carrylength",
                         carrylength.dtype.type,
                         self._starts.dtype.type,
@@ -629,7 +629,7 @@ class ListArray(Content):
                 and self._stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_next_range",
                     nextoffsets.dtype.type,
                     nextcarry.dtype.type,
@@ -664,7 +664,7 @@ class ListArray(Content):
                         and nextoffsets.nplike is self._backend.nplike
                     )
                     self._handle_error(
-                        self._backend.nplike[
+                        self._backend[
                             "awkward_ListArray_getitem_next_range_counts",
                             total.dtype.type,
                             nextoffsets.dtype.type,
@@ -689,7 +689,7 @@ class ListArray(Content):
                     and nextoffsets.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_getitem_next_range_spreadadvanced",
                         nextadvanced.dtype.type,
                         advanced.dtype.type,
@@ -741,7 +741,7 @@ class ListArray(Content):
                     and regular_flathead.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_getitem_next_array",
                         nextcarry.dtype.type,
                         nextadvanced.dtype.type,
@@ -783,7 +783,7 @@ class ListArray(Content):
                     and advanced.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_getitem_next_array_advanced",
                         nextcarry.dtype.type,
                         nextadvanced.dtype.type,
@@ -838,7 +838,7 @@ class ListArray(Content):
                 and self._stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_getitem_jagged_expand",
                     multistarts.dtype.type,
                     multistops.dtype.type,
@@ -889,7 +889,7 @@ class ListArray(Content):
                 and self._stops.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_num",
                     tonum.dtype.type,
                     self._starts.dtype.type,
@@ -1000,7 +1000,7 @@ class ListArray(Content):
                     and array_stops.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_fill",
                         nextstarts.dtype.type,
                         nextstops.dtype.type,
@@ -1033,7 +1033,7 @@ class ListArray(Content):
                     and array_stops.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_fill",
                         nextstarts.dtype.type,
                         nextstops.dtype.type,
@@ -1093,7 +1093,7 @@ class ListArray(Content):
                 and offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ListArray_localindex",
                     localindex.dtype.type,
                     offsets.dtype.type,
@@ -1213,7 +1213,7 @@ class ListArray(Content):
             self.starts.nplike is self._backend.nplike
             and self.stops.nplike is self._backend.nplike
         )
-        error = self._backend.nplike[
+        error = self._backend[
             "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
         ](
             self.starts.data,
@@ -1261,7 +1261,7 @@ class ListArray(Content):
                     and self._stops.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ListArray_min_range",
                         min_.dtype.type,
                         self._starts.dtype.type,
@@ -1285,7 +1285,7 @@ class ListArray(Content):
                         and self._stops.nplike is self._backend.nplike
                     )
                     self._handle_error(
-                        self._backend.nplike[
+                        self._backend[
                             "awkward_ListArray_rpad_and_clip_length_axis1",
                             tolength.dtype.type,
                             self._starts.dtype.type,
@@ -1314,7 +1314,7 @@ class ListArray(Content):
                         and stops_.nplike is self._backend.nplike
                     )
                     self._handle_error(
-                        self._backend.nplike[
+                        self._backend[
                             "awkward_ListArray_rpad_axis1",
                             index.dtype.type,
                             self._starts.dtype.type,

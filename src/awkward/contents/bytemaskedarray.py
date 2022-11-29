@@ -161,7 +161,7 @@ class ByteMaskedArray(Content):
             and self._mask.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ByteMaskedArray_toIndexedOptionArray",
                 index.dtype.type,
                 self._mask.dtype.type,
@@ -305,7 +305,7 @@ class ByteMaskedArray(Content):
             and self._mask.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ByteMaskedArray_numnull",
                 numnull.dtype.type,
                 self._mask.dtype.type,
@@ -326,7 +326,7 @@ class ByteMaskedArray(Content):
             and self._mask.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
                 nextcarry.dtype.type,
                 outindex.dtype.type,
@@ -374,7 +374,7 @@ class ByteMaskedArray(Content):
             and reducedstops.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_MaskedArray_getitem_next_jagged_project",
                 outindex.dtype.type,
                 slicestarts.dtype.type,
@@ -461,7 +461,7 @@ class ByteMaskedArray(Content):
                 and self._mask.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ByteMaskedArray_overlay_mask",
                     nextmask.dtype.type,
                     mask.dtype.type,
@@ -486,7 +486,7 @@ class ByteMaskedArray(Content):
                 and self._mask.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ByteMaskedArray_numnull",
                     numnull.dtype.type,
                     self._mask.dtype.type,
@@ -505,7 +505,7 @@ class ByteMaskedArray(Content):
                 and self._mask.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_ByteMaskedArray_getitem_nextcarry",
                     nextcarry.dtype.type,
                     self._mask.dtype.type,
@@ -585,7 +585,7 @@ class ByteMaskedArray(Content):
                     and offsets.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_IndexedArray_flatten_none2empty",
                         outoffsets.dtype.type,
                         outindex.dtype.type,
@@ -762,7 +762,7 @@ class ByteMaskedArray(Content):
             and self._mask.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ByteMaskedArray_numnull",
                 numnull.dtype.type,
                 self._mask.dtype.type,
@@ -786,7 +786,7 @@ class ByteMaskedArray(Content):
             and parents.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_ByteMaskedArray_reduce_next_64",
                 nextcarry.dtype.type,
                 nextparents.dtype.type,
@@ -814,7 +814,7 @@ class ByteMaskedArray(Content):
                     and self._mask.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
                         nextshifts.dtype.type,
                         self._mask.dtype.type,
@@ -831,7 +831,7 @@ class ByteMaskedArray(Content):
                     and self._mask.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
                         nextshifts.dtype.type,
                         self._mask.dtype.type,
@@ -880,7 +880,7 @@ class ByteMaskedArray(Content):
             outoffsets = ak.index.Index64.empty(starts.length + 1, self._backend.nplike)
             assert outoffsets.nplike is self._backend.nplike
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_IndexedArray_reduce_next_fix_offsets_64",
                     outoffsets.dtype.type,
                     starts.dtype.type,
@@ -930,7 +930,7 @@ class ByteMaskedArray(Content):
                 and self._mask.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,
                     self._mask.dtype.type,

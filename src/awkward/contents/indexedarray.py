@@ -201,7 +201,7 @@ class IndexedArray(Content):
             and self._index.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_IndexedArray_getitem_nextcarry",
                 nextcarry.dtype.type,
                 self._index.dtype.type,
@@ -237,7 +237,7 @@ class IndexedArray(Content):
                 and self._index.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_IndexedArray_getitem_nextcarry",
                     nextcarry.dtype.type,
                     self._index.dtype.type,
@@ -288,7 +288,7 @@ class IndexedArray(Content):
                 and self._index.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_IndexedArray_overlay_mask",
                     nextindex.dtype.type,
                     mask.dtype.type,
@@ -312,7 +312,7 @@ class IndexedArray(Content):
                 and self._index.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_IndexedArray_getitem_nextcarry",
                     nextcarry.dtype.type,
                     self._index.dtype.type,
@@ -364,7 +364,7 @@ class IndexedArray(Content):
                 and inner.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_IndexedArray_simplify",
                     result.dtype.type,
                     self._index.dtype.type,
@@ -479,7 +479,7 @@ class IndexedArray(Content):
         # Fill `index` with a range starting at zero, up to `theirlength`
         assert index.nplike is self._backend.nplike
         self._handle_error(
-            self._backend.nplike["awkward_IndexedArray_fill_count", index.dtype.type](
+            self._backend["awkward_IndexedArray_fill_count", index.dtype.type](
                 index.data,
                 0,
                 theirlength,
@@ -490,7 +490,7 @@ class IndexedArray(Content):
         # Fill remaining indices
         assert index.nplike is self._backend.nplike
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_IndexedArray_fill",
                 index.dtype.type,
                 self.index.dtype.type,
@@ -543,7 +543,7 @@ class IndexedArray(Content):
                     and array_index.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_IndexedArray_fill",
                         nextindex.dtype.type,
                         array_index.dtype.type,
@@ -564,7 +564,7 @@ class IndexedArray(Content):
                 contents.append(array)
                 assert nextindex.nplike is self._backend.nplike
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_IndexedArray_fill_count",
                         nextindex.dtype.type,
                     ](
@@ -626,7 +626,7 @@ class IndexedArray(Content):
                 and offsets.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_sort",
                     next.dtype.type,
                     next.dtype.type,
@@ -648,9 +648,7 @@ class IndexedArray(Content):
                 and length.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
-                    "awkward_unique", next.dtype.type, length.dtype.type
-                ](
+                self._backend["awkward_unique", next.dtype.type, length.dtype.type](
                     next.data,
                     self._index.length,
                     length.data,
@@ -664,7 +662,7 @@ class IndexedArray(Content):
                 and length.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_unique_copy",
                     self._index.dtype.type,
                     next.dtype.type,
@@ -719,7 +717,7 @@ class IndexedArray(Content):
             and parents.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_IndexedArray_reduce_next_64",
                 nextcarry.dtype.type,
                 nextparents.dtype.type,
@@ -752,7 +750,7 @@ class IndexedArray(Content):
                 and nextparents.nplike is self._backend.nplike
             )
             self._handle_error(
-                self._backend.nplike[
+                self._backend[
                     "awkward_IndexedArray_local_preparenext",
                     nextoutindex.dtype.type,
                     starts.dtype.type,
@@ -797,7 +795,7 @@ class IndexedArray(Content):
                     and starts.nplike is self._backend.nplike
                 )
                 self._handle_error(
-                    self._backend.nplike[
+                    self._backend[
                         "awkward_IndexedArray_reduce_next_fix_offsets_64",
                         outoffsets.dtype.type,
                         starts.dtype.type,
@@ -911,9 +909,9 @@ class IndexedArray(Content):
         )
 
     def _validity_error(self, path):
-        error = self._backend.nplike[
-            "awkward_IndexedArray_validity", self.index.dtype.type
-        ](self.index.data, self.index.length, self._content.length, False)
+        error = self._backend["awkward_IndexedArray_validity", self.index.dtype.type](
+            self.index.data, self.index.length, self._content.length, False
+        )
         if error.str is not None:
             if error.filename is None:
                 filename = ""

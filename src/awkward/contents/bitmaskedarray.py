@@ -211,7 +211,7 @@ class BitMaskedArray(Content):
             and self._mask.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_BitMaskedArray_to_IndexedOptionArray",
                 index.dtype.type,
                 self._mask.dtype.type,
@@ -234,7 +234,7 @@ class BitMaskedArray(Content):
             and self._mask.nplike is self._backend.nplike
         )
         self._handle_error(
-            self._backend.nplike[
+            self._backend[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,
                 self._mask.dtype.type,
