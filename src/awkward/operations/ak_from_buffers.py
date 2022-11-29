@@ -163,7 +163,7 @@ def reconstitute(form, length, container, getkey, nplike):
             form.valid_when,
             length,
             form.lsb_order,
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.ByteMaskedForm):

@@ -217,8 +217,8 @@ class ByteMaskedArray(Content):
                 valid_when,
                 self.length,
                 lsb_order,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
         else:
@@ -233,8 +233,8 @@ class ByteMaskedArray(Content):
                 valid_when,
                 self.length,
                 lsb_order,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def mask_as_bool(self, valid_when=None, nplike=None):
