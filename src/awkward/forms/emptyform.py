@@ -27,7 +27,7 @@ class EmptyForm(Form):
     def __eq__(self, other):
         return isinstance(other, EmptyForm) and self._form_key == other._form_key
 
-    def toNumpyForm(self, dtype):
+    def to_NumpyForm(self, dtype):
         return ak.forms.numpyform.from_dtype(dtype, self._parameters)
 
     def purelist_parameter(self, key):

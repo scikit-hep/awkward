@@ -61,7 +61,7 @@ def _impl(array, highlevel, behavior):
             )
 
         elif isinstance(layout, ak.contents.EmptyArray):
-            return action(ak.contents.UnmaskedArray(layout.toNumpyArray(np.int64)))
+            return action(ak.contents.UnmaskedArray(layout.to_NumpyArray(np.int64)))
 
         elif isinstance(layout, ak.contents.NumpyArray):
             return action(ak.contents.UnmaskedArray(layout))

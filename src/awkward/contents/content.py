@@ -398,7 +398,7 @@ class Content:
         self, head, tail, advanced: ak.index.Index | None, that
     ):
         head = head._to_nplike(self._nplike)
-        jagged = head.content.toListOffsetArray64()
+        jagged = head.content.to_ListOffsetArray64()
 
         index = ak.index.Index64(head._index, nplike=self.nplike)
         content = that._getitem_at(0)
@@ -583,7 +583,7 @@ class Content:
             return self._getitem_fields(ak.operations.to_list(where))
 
         elif isinstance(where, ak.contents.EmptyArray):
-            return where.toNumpyArray(np.int64)
+            return where.to_NumpyArray(np.int64)
 
         elif isinstance(where, ak.contents.NumpyArray):
             if issubclass(where.dtype.type, np.int64):

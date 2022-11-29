@@ -141,7 +141,7 @@ class IndexedArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self):
         return ak.contents.IndexedOptionArray(
             self._index, self._content, self._parameters, self._nplike
         )
@@ -378,7 +378,7 @@ class IndexedArray(Content):
                     ak.contents.UnmaskedArray,
                 ),
             ):
-                rawcontent = self._content.toIndexedOptionArray64()
+                rawcontent = self._content.to_IndexedOptionArray64()
                 inner = rawcontent.index
                 result = ak.index.Index64.empty(self.index.length, self._nplike)
 
@@ -563,7 +563,7 @@ class IndexedArray(Content):
                     ak.contents.UnmaskedArray,
                 ),
             ):
-                array = array.toIndexedOptionArray64()
+                array = array.to_IndexedOptionArray64()
 
             if isinstance(array, ak.contents.IndexedArray):
                 contents.append(array.content)
@@ -807,7 +807,7 @@ class IndexedArray(Content):
             return unique
         else:
             if isinstance(unique, ak.contents.RegularArray):
-                unique = unique.toListOffsetArray64(True)
+                unique = unique.to_ListOffsetArray64(True)
 
             if isinstance(unique, ak.contents.ListOffsetArray):
                 if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:

@@ -145,7 +145,7 @@ def normalise_item(item, nplike):
         return normalise_item(item.layout, nplike)
 
     elif isinstance(item, ak.contents.EmptyArray):
-        return normalise_item(item.toNumpyArray(np.int64), nplike)
+        return normalise_item(item.to_NumpyArray(np.int64), nplike)
 
     elif isinstance(item, ak.contents.NumpyArray):
         return item.data
@@ -188,13 +188,13 @@ def normalise_items(where, nplike):
     return [normalise_item(x, nplike) for x in where]
 
 
-def normalise_item_RegularArray_toListOffsetArray64(item):
+def normalise_item_RegularArray_to_ListOffsetArray64(item):
     if isinstance(item, ak.contents.RegularArray):
 
-        next = item.toListOffsetArray64()
+        next = item.to_ListOffsetArray64()
         return ak.contents.ListOffsetArray(
             next.offsets,
-            normalise_item_RegularArray_toListOffsetArray64(next.content),
+            normalise_item_RegularArray_to_ListOffsetArray64(next.content),
             parameters=item.parameters,
         )
 
@@ -208,7 +208,7 @@ def normalise_item_RegularArray_toListOffsetArray64(item):
 def normalise_item_nested(item):
     if isinstance(item, ak.contents.EmptyArray):
         # policy: unknown -> int
-        return normalise_item_nested(item.toNumpyArray(np.int64))
+        return normalise_item_nested(item.to_NumpyArray(np.int64))
 
     elif isinstance(item, ak.contents.NumpyArray) and issubclass(
         item.dtype.type, (bool, np.bool_, np.integer)
@@ -221,8 +221,8 @@ def normalise_item_nested(item):
                 parameters=item.parameters,
                 nplike=item.nplike,
             )
-        next = next.toRegularArray()
-        next = normalise_item_RegularArray_toListOffsetArray64(next)
+        next = next.to_RegularArray()
+        next = normalise_item_RegularArray_to_ListOffsetArray64(next)
         return next
 
     elif isinstance(
@@ -243,7 +243,7 @@ def normalise_item_nested(item):
             ak.contents.RegularArray,
         ),
     ):
-        next = item.toListOffsetArray64(False)
+        next = item.to_ListOffsetArray64(False)
         return normalise_item_nested(next)
 
     elif isinstance(

@@ -22,13 +22,13 @@ def code_to_function(code, function_name, externals=None, debug=False):
 
 def tonumbatype(form):
     if isinstance(form, ak.forms.EmptyForm):
-        return tonumbatype(form.toNumpyForm(np.dtype(np.float64)))
+        return tonumbatype(form.to_NumpyForm(np.dtype(np.float64)))
 
     elif isinstance(form, ak.forms.NumpyForm):
         if len(form.inner_shape) == 0:
             return ak._connect.numba.layout.NumpyArrayType.from_form(form)
         else:
-            return tonumbatype(form.toRegularForm())
+            return tonumbatype(form.to_RegularForm())
 
     elif isinstance(form, ak.forms.RegularForm):
         return ak._connect.numba.layout.RegularArrayType.from_form(form)

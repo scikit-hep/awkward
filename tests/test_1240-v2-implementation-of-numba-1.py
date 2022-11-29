@@ -84,7 +84,7 @@ def memoryleak(array, function):
 
 
 def test_EmptyArray():
-    v2a = ak.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64))
+    v2a = ak.contents.emptyarray.EmptyArray().to_NumpyArray(np.dtype(np.float64))
     roundtrip(v2a)
     array = ak.highlevel.Array(v2a)
     memoryleak(array, swallow)
@@ -128,7 +128,7 @@ def test_RegularArray_NumpyArray():
     memoryleak(array, digest2)
 
     v2b = ak.contents.regulararray.RegularArray(
-        ak.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64)),
+        ak.contents.emptyarray.EmptyArray().to_NumpyArray(np.dtype(np.float64)),
         0,
         zeros_length=10,
     )
@@ -497,7 +497,7 @@ def test_RegularArray_RecordArray_NumpyArray():
 
     v2b = ak.contents.regulararray.RegularArray(
         ak.contents.recordarray.RecordArray(
-            [ak.contents.emptyarray.EmptyArray().toNumpyArray(np.dtype(np.float64))],
+            [ak.contents.emptyarray.EmptyArray().to_NumpyArray(np.dtype(np.float64))],
             ["nest"],
         ),
         0,

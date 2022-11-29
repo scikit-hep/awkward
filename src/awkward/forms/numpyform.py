@@ -123,7 +123,7 @@ class NumpyForm(Form):
         else:
             return False
 
-    def toRegularForm(self):
+    def to_RegularForm(self):
         out = NumpyForm(self._primitive, (), None, None)
         for x in self._inner_shape[::-1]:
             out = ak.forms.RegularForm(out, x, None, None)

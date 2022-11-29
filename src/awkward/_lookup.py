@@ -26,13 +26,13 @@ class Lookup:
 
 def tolookup(layout, positions):
     if isinstance(layout, ak.contents.EmptyArray):
-        return tolookup(layout.toNumpyArray(np.dtype(np.float64)), positions)
+        return tolookup(layout.to_NumpyArray(np.dtype(np.float64)), positions)
 
     elif isinstance(layout, ak.contents.NumpyArray):
         if len(layout.shape) == 1:
             return NumpyLookup.tolookup(layout, positions)
         else:
-            return tolookup(layout.toRegularArray(), positions)
+            return tolookup(layout.to_RegularArray(), positions)
 
     elif isinstance(layout, ak.contents.RegularArray):
         return RegularLookup.tolookup(layout, positions)

@@ -165,7 +165,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                     if isinstance(x, ak.contents.RegularArray):
                         regulararrays.append(x)
                     elif isinstance(x, ak.contents.NumpyArray):
-                        regulararrays.append(x.toRegularArray())
+                        regulararrays.append(x.to_RegularArray())
                     else:
                         regulararrays.append(
                             ak.contents.RegularArray(

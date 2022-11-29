@@ -158,19 +158,19 @@ class RegularArray(Content):
             self._nplike,
         )
 
-    def toListOffsetArray64(self, start_at_zero=False):
+    def to_ListOffsetArray64(self, start_at_zero=False):
         offsets = self._compact_offsets64(start_at_zero)
         return self._broadcast_tooffsets64(offsets)
 
-    def toRegularArray(self):
+    def to_RegularArray(self):
         return self
 
-    def maybe_toNumpyArray(self):
+    def maybe_to_NumpyArray(self):
         content = None
         if isinstance(self._content, ak.contents.NumpyArray):
             content = self._content[: self._length * self._size]
         elif isinstance(self._content, RegularArray):
-            content = self._content[: self._length * self._size].maybe_toNumpyArray()
+            content = self._content[: self._length * self._size].maybe_to_NumpyArray()
 
         if isinstance(content, ak.contents.NumpyArray):
             shape = (self._length, self._size) + content.data.shape[1:]
@@ -338,7 +338,7 @@ class RegularArray(Content):
             )
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        out = self.toListOffsetArray64(True)
+        out = self.to_ListOffsetArray64(True)
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def maybe_to_array(self, nplike):
@@ -634,7 +634,7 @@ class RegularArray(Content):
             )
 
     def _offsets_and_flattened(self, axis, depth):
-        return self.toListOffsetArray64(True)._offsets_and_flattened(axis, depth)
+        return self.to_ListOffsetArray64(True)._offsets_and_flattened(axis, depth)
 
     def _mergeable(self, other, mergebool):
         if isinstance(
@@ -663,7 +663,7 @@ class RegularArray(Content):
         # We could add a special case that tries to first convert self to NumpyArray
         # and merge conventionally, but it's not worth it at this stage.
         elif isinstance(other, ak.contents.NumpyArray) and other.purelist_depth > 1:
-            return self._content.mergeable(other.toRegularArray().content, mergebool)
+            return self._content.mergeable(other.to_RegularArray().content, mergebool)
         else:
             return False
 
@@ -676,7 +676,7 @@ class RegularArray(Content):
 
         # Regularize NumpyArray into RegularArray (or NumpyArray if 1D)
         others = [
-            o.toRegularArray() if isinstance(o, ak.contents.NumpyArray) else o
+            o.to_RegularArray() if isinstance(o, ak.contents.NumpyArray) else o
             for o in others
         ]
 
@@ -697,7 +697,7 @@ class RegularArray(Content):
             )
 
         else:
-            return self.toListOffsetArray64(True).mergemany(others)
+            return self.to_ListOffsetArray64(True).mergemany(others)
 
     def fill_none(self, value):
         return RegularArray(
@@ -750,7 +750,7 @@ class RegularArray(Content):
         if self._length == 0:
             return True
 
-        return self.toListOffsetArray64(True)._is_unique(
+        return self.to_ListOffsetArray64(True)._is_unique(
             negaxis,
             starts,
             parents,
@@ -760,7 +760,7 @@ class RegularArray(Content):
     def _unique(self, negaxis, starts, parents, outlength):
         if self._length == 0:
             return self
-        out = self.toListOffsetArray64(True)._unique(
+        out = self.to_ListOffsetArray64(True)._unique(
             negaxis,
             starts,
             parents,
@@ -770,7 +770,7 @@ class RegularArray(Content):
         if isinstance(out, ak.contents.RegularArray):
             if isinstance(out._content, ak.contents.ListOffsetArray):
                 return ak.contents.RegularArray(
-                    out._content.toRegularArray(),
+                    out._content.to_RegularArray(),
                     out._size,
                     out._length,
                     out._parameters,
@@ -791,7 +791,7 @@ class RegularArray(Content):
         kind,
         order,
     ):
-        next = self.toListOffsetArray64(True)
+        next = self.to_ListOffsetArray64(True)
         out = next._argsort_next(
             negaxis,
             starts,
@@ -807,7 +807,7 @@ class RegularArray(Content):
         if isinstance(out, ak.contents.RegularArray):
             if isinstance(out._content, ak.contents.ListOffsetArray):
                 return ak.contents.RegularArray(
-                    out._content.toRegularArray(),
+                    out._content.to_RegularArray(),
                     out._size,
                     out._length,
                     out._parameters,
@@ -819,7 +819,7 @@ class RegularArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        out = self.toListOffsetArray64(True)._sort_next(
+        out = self.to_ListOffsetArray64(True)._sort_next(
             negaxis,
             starts,
             parents,
@@ -834,7 +834,7 @@ class RegularArray(Content):
         # if isinstance(out, ak.contents.RegularArray):
         #     if isinstance(out._content, ak.contents.ListOffsetArray):
         #         return ak.contents.RegularArray(
-        #             out._content.toRegularArray(),
+        #             out._content.to_RegularArray(),
         #             out._size,
         #             out._length,
         #             None,
@@ -1099,7 +1099,7 @@ class RegularArray(Content):
             elif depth >= negaxis + 2:
                 if outcontent.is_list:
                     # Let's only deal with ListOffsetArray
-                    outcontent = outcontent.toListOffsetArray64(False)
+                    outcontent = outcontent.to_ListOffsetArray64(False)
                     # Fast-path to convert data that we know should be regular (avoid a kernel call)
                     start, stop = (
                         outcontent.offsets[0],
@@ -1207,7 +1207,7 @@ class RegularArray(Content):
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         if self.parameter("__array__") == "string":
-            return self.toListOffsetArray64(False)._to_arrow(
+            return self.to_ListOffsetArray64(False)._to_arrow(
                 pyarrow, mask_node, validbytes, length, options
             )
 

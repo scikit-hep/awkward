@@ -169,7 +169,7 @@ class ByteMaskedArray(Content):
             self._nplike,
         )
 
-    def toIndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self):
         index = ak.index.Index64.empty(self._mask.length, self._nplike)
         assert index.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
@@ -189,7 +189,7 @@ class ByteMaskedArray(Content):
             index, self._content, self._parameters, self._nplike
         )
 
-    def toByteMaskedArray(self, valid_when):
+    def to_ByteMaskedArray(self, valid_when):
         if valid_when == self._valid_when:
             return self
         else:
@@ -205,7 +205,7 @@ class ByteMaskedArray(Content):
                 self._nplike,
             )
 
-    def toBitMaskedArray(self, valid_when, lsb_order):
+    def to_BitMaskedArray(self, valid_when, lsb_order):
         if not self._nplike.known_data:
             if self._nplike.known_shape:
                 excess_length = int(math.ceil(self.length / 8.0))
@@ -537,7 +537,7 @@ class ByteMaskedArray(Content):
                 ak.contents.UnmaskedArray,
             ),
         ):
-            return self.toIndexedOptionArray64().simplify_optiontype()
+            return self.to_IndexedOptionArray64().simplify_optiontype()
         else:
             return self
 
@@ -622,7 +622,7 @@ class ByteMaskedArray(Content):
             return self._content.mergeable(other, mergebool)
 
     def _reverse_merge(self, other):
-        return self.toIndexedOptionArray64()._reverse_merge(other)
+        return self.to_IndexedOptionArray64()._reverse_merge(other)
 
     def mergemany(self, others):
         if len(others) == 0:
@@ -651,10 +651,10 @@ class ByteMaskedArray(Content):
             )
 
         else:
-            return self.toIndexedOptionArray64().mergemany(others)
+            return self.to_IndexedOptionArray64().mergemany(others)
 
     def fill_none(self, value):
-        return self.toIndexedOptionArray64().fill_none(value)
+        return self.to_IndexedOptionArray64().fill_none(value)
 
     def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -685,14 +685,14 @@ class ByteMaskedArray(Content):
     def _is_unique(self, negaxis, starts, parents, outlength):
         if self._mask.length == 0:
             return True
-        return self.toIndexedOptionArray64()._is_unique(
+        return self.to_IndexedOptionArray64()._is_unique(
             negaxis, starts, parents, outlength
         )
 
     def _unique(self, negaxis, starts, parents, outlength):
         if self._mask.length == 0:
             return self
-        return self.toIndexedOptionArray64()._unique(
+        return self.to_IndexedOptionArray64()._unique(
             negaxis, starts, parents, outlength
         )
 
@@ -708,7 +708,7 @@ class ByteMaskedArray(Content):
         kind,
         order,
     ):
-        return self.toIndexedOptionArray64()._argsort_next(
+        return self.to_IndexedOptionArray64()._argsort_next(
             negaxis,
             starts,
             shifts,
@@ -723,7 +723,7 @@ class ByteMaskedArray(Content):
     def _sort_next(
         self, negaxis, starts, parents, outlength, ascending, stable, kind, order
     ):
-        return self.toIndexedOptionArray64()._sort_next(
+        return self.to_IndexedOptionArray64()._sort_next(
             negaxis,
             starts,
             parents,
@@ -982,7 +982,7 @@ class ByteMaskedArray(Content):
         )
 
     def _to_numpy(self, allow_missing):
-        return self.toIndexedOptionArray64()._to_numpy(allow_missing)
+        return self.to_IndexedOptionArray64()._to_numpy(allow_missing)
 
     def _completely_flatten(self, nplike, options):
         branch, depth = self.branch_depth
@@ -1049,7 +1049,7 @@ class ByteMaskedArray(Content):
 
     def packed(self):
         if self._content.is_record:
-            next = self.toIndexedOptionArray64()
+            next = self.to_IndexedOptionArray64()
             content = next._content.packed()
             if content.length > self._mask.length:
                 content = content[: self._mask.length]
