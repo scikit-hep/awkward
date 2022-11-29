@@ -51,7 +51,7 @@ class Content:
     is_record = False
     is_union = False
 
-    def _init(self, parameters: dict[str, Any] | None, nplike: NumpyLike | None):
+    def _init(self, parameters: dict[str, Any] | None, nplike: NumpyLike):
         if parameters is not None and not isinstance(parameters, dict):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -61,10 +61,10 @@ class Content:
                 )
             )
 
-        if nplike is not None and not isinstance(nplike, NumpyLike):
+        if not isinstance(nplike, NumpyLike):
             raise ak._errors.wrap_error(
                 TypeError(
-                    "{} 'nplike' must be an NumpyLike or None, not {}".format(
+                    "{} 'nplike' must be a NumpyLike, not {}".format(
                         type(self).__name__, repr(nplike)
                     )
                 )
