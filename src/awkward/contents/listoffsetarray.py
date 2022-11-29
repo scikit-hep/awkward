@@ -635,7 +635,7 @@ class ListOffsetArray(Content):
                     self.length,
                 )
             )
-            return ak.contents.NumpyArray(tonum, None, self._nplike)
+            return ak.contents.NumpyArray(tonum, parameters=None, nplike=self._nplike)
         else:
             next = self._content.num(posaxis, depth + 1)
             offsets = self._compact_offsets64(True)
@@ -1038,7 +1038,9 @@ class ListOffsetArray(Content):
                         True,
                     )
                 )
-                return ak.contents.NumpyArray(nextcarry, None, self._nplike)
+                return ak.contents.NumpyArray(
+                    nextcarry, parameters=None, nplike=self._nplike
+                )
 
         if not branch and (negaxis == depth):
             if (

@@ -637,7 +637,9 @@ class Content:
                 return self._getitem(layout)
             else:
                 return self._getitem(
-                    ak.contents.NumpyArray(as_array, None, layout.nplike)
+                    ak.contents.NumpyArray(
+                        as_array, parameters=None, nplike=layout.nplike
+                    )
                 )
 
         else:
@@ -731,7 +733,7 @@ class Content:
                 localindex.length,
             )
         )
-        return ak.contents.NumpyArray(localindex, None, self._nplike)
+        return ak.contents.NumpyArray(localindex, parameters=None, nplike=self._nplike)
 
     def merge(self, other: Content) -> Content:
         others = [other]

@@ -80,7 +80,9 @@ class EmptyArray(Content):
             nplike = self._nplike
         if nplike is None:
             nplike = numpy
-        return ak.contents.NumpyArray(nplike.empty(0, dtype), self._parameters, nplike)
+        return ak.contents.NumpyArray(
+            nplike.empty(0, dtype), parameters=self._parameters, nplike=nplike
+        )
 
     def __array__(self, **kwargs):
         return numpy.empty((0,))
@@ -174,7 +176,7 @@ class EmptyArray(Content):
                 return out
         else:
             out = ak.index.Index64.empty(0, self._nplike)
-            return ak.contents.NumpyArray(out, None, self._nplike)
+            return ak.contents.NumpyArray(out, parameters=None, nplike=self._nplike)
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -208,7 +210,7 @@ class EmptyArray(Content):
 
     def _local_index(self, axis, depth):
         return ak.contents.NumpyArray(
-            self._nplike.empty(0, np.int64), None, self._nplike
+            self._nplike.empty(0, np.int64), parameters=None, nplike=self._nplike
         )
 
     def numbers_to_type(self, name):

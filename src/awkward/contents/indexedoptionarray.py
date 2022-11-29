@@ -1188,7 +1188,9 @@ class IndexedOptionArray(Content):
         # We can test for this condition by seeing whether the NumpyArray of indices
         # is mergeable with our content (`out = next._argsort_next result`).
         # If so, try to concatenate them at the end of `out`.`
-        nulls_index_content = ak.contents.NumpyArray(nulls_index, None, self._nplike)
+        nulls_index_content = ak.contents.NumpyArray(
+            nulls_index, parameters=None, nplike=self._nplike
+        )
         if out.mergeable(nulls_index_content, True):
             out = out.merge(nulls_index_content)
             nulls_merged = True

@@ -450,7 +450,9 @@ class RecordArray(Content):
         if posaxis == depth:
             npsingle = self._nplike.index_nplike.full((1,), self.length, np.int64)
             single = ak.index.Index64(npsingle, nplike=self._nplike)
-            singleton = ak.contents.NumpyArray(single, None, self._nplike)
+            singleton = ak.contents.NumpyArray(
+                single, parameters=None, nplike=self._nplike
+            )
             contents = [singleton] * len(self._contents)
             record = ak.contents.RecordArray(
                 contents, self._fields, 1, self._parameters, self._nplike
@@ -736,7 +738,9 @@ class RecordArray(Content):
     ):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
-                self._nplike.instance().empty(0, np.int64), None, self._nplike
+                self._nplike.instance().empty(0, np.int64),
+                parameters=None,
+                nplike=self._nplike,
             )
 
         contents = []

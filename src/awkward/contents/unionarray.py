@@ -1064,7 +1064,7 @@ class UnionArray(Content):
         simplified = self.simplify_uniontype(mergebool=True)
         if simplified.length == 0:
             return ak.contents.NumpyArray(
-                self._nplike.empty(0, np.int64), None, self._nplike
+                self._nplike.empty(0, np.int64), parameters=None, nplike=self._nplike
             )
 
         if isinstance(simplified, ak.contents.UnionArray):

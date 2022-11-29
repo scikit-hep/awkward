@@ -176,8 +176,10 @@ class RegularArray(Content):
             shape = (self._length, self._size) + content.data.shape[1:]
             return ak.contents.NumpyArray(
                 content.data.reshape(shape),
-                ak._util.merge_parameters(self._parameters, content.parameters, True),
-                self._nplike,
+                parameters=ak._util.merge_parameters(
+                    self._parameters, content.parameters, True
+                ),
+                nplike=self._nplike,
             )
 
     def _getitem_nothing(self):
@@ -626,7 +628,7 @@ class RegularArray(Content):
                     tonum.data, self._size, self._length
                 )
             )
-            return ak.contents.NumpyArray(tonum, None, self._nplike)
+            return ak.contents.NumpyArray(tonum, parameters=None, nplike=self._nplike)
         else:
             next = self._content.num(posaxis, depth + 1)
             return ak.contents.RegularArray(

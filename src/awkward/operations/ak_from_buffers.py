@@ -145,7 +145,7 @@ def reconstitute(form, length, container, getkey, nplike):
                 data = data.reshape((length,) + form.inner_shape)
             else:
                 data = data.reshape((-1,) + form.inner_shape)
-        return ak.contents.NumpyArray(data, form.parameters, nplike)
+        return ak.contents.NumpyArray(data, parameters=form.parameters, nplike=nplike)
 
     elif isinstance(form, ak.forms.UnmaskedForm):
         content = reconstitute(form.content, length, container, getkey, nplike)

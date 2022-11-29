@@ -919,7 +919,7 @@ class ListArray(Content):
                     self.length,
                 )
             )
-            return ak.contents.NumpyArray(tonum, None, self._nplike)
+            return ak.contents.NumpyArray(tonum, parameters=None, nplike=self._nplike)
         else:
             return self.to_ListOffsetArray64(True).num(posaxis, depth)
 
