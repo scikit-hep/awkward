@@ -15,6 +15,10 @@ import awkward as ak
 class Singleton:
     _instance = None
 
+    def __new__(cls, *args, **kwargs):
+        assert cls._instance is None
+        return super().__new__(cls, *args, **kwargs)
+
     @classmethod
     def instance(cls):
         if cls._instance is None:
