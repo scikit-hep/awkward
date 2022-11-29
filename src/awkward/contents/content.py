@@ -789,7 +789,9 @@ class Content:
             )
         )
 
-        return ak.contents.UnionArray(tags, index, contents, None, self._nplike)
+        return ak.contents.UnionArray(
+            tags, index, contents, parameters=None, nplike=self._nplike
+        )
 
     def _merging_strategy(
         self, others: list[Content]

@@ -277,7 +277,7 @@ def reconstitute(form, length, container, getkey, nplike):
                 reconstitute(content, lengths[i], container, getkey, nplike)
                 for i, content in enumerate(form.contents)
             ],
-            form.parameters,
+            parameters=form.parameters,
         )
 
     else:
