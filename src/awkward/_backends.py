@@ -25,7 +25,7 @@ np = NumpyMetadata.instance()
 
 T = TypeVar("T")
 KernelKeyType: TypeAlias = "tuple[str, Unpack[tuple[np.dtype, ...]]]"
-KernelType: TypeAlias = "Callable[[tuple[T, ...]], None]"
+KernelType: TypeAlias = "Callable[[...], None]"
 
 
 @runtime_checkable
@@ -130,8 +130,7 @@ _UNSET = object()
 D = TypeVar("D")
 
 
-def backend_for(*arrays, default: T = _UNSET) -> Backend | D:
-    nplike = nplike_of(*arrays)
+def backend_for_nplike(nplike, default: T = _UNSET) -> Backend | D:
     if isinstance(nplike, Numpy):
         return NumpyBackend.instance()
     elif isinstance(nplike, Cupy):
@@ -144,3 +143,8 @@ def backend_for(*arrays, default: T = _UNSET) -> Backend | D:
         return NumpyBackend.instance()
     else:
         return default
+
+
+def backend_for(*arrays, default: T = _UNSET) -> Backend | D:
+    nplike = nplike_of(*arrays, default=None)
+    return backend_for_nplike(nplike, default)
