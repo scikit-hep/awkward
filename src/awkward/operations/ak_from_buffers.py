@@ -251,7 +251,7 @@ def reconstitute(form, length, container, getkey, nplike):
             ],
             None if form.is_tuple else form.fields,
             length,
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.UnionForm):

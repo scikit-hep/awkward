@@ -917,7 +917,11 @@ class RegularArray(Content):
                 length = contents[-1].length
             assert length is not None
             recordarray = ak.contents.RecordArray(
-                contents, recordlookup, length, parameters, self._nplike
+                contents,
+                recordlookup,
+                length,
+                parameters=parameters,
+                nplike=self._nplike,
             )
             return ak.contents.RegularArray(
                 recordarray,

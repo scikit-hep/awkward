@@ -512,8 +512,8 @@ class Content:
                 contents,
                 nextcontent._fields,
                 None,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
         else:
@@ -1218,7 +1218,7 @@ class Content:
             length = contents[-1].length
         assert length is not None
         return ak.contents.RecordArray(
-            contents, recordlookup, length, parameters, self._nplike
+            contents, recordlookup, length, parameters=parameters, nplike=self._nplike
         )
 
     def combinations(

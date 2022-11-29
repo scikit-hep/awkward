@@ -1398,7 +1398,7 @@ class ListOffsetArray(Content):
                 contents.append(self._content._carry(ptr, True))
 
             recordarray = ak.contents.RecordArray(
-                contents, recordlookup, None, parameters, self._nplike
+                contents, recordlookup, None, parameters=parameters, nplike=self._nplike
             )
             return ak.contents.ListOffsetArray(
                 offsets, recordarray, parameters=self._parameters, nplike=self._nplike
