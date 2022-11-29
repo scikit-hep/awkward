@@ -20,8 +20,8 @@ class EmptyArray(Content):
         nplike=unset,
     ):
         return EmptyArray(
-            self._parameters if parameters is unset else parameters,
-            self._nplike if nplike is unset else nplike,
+            parameters=self._parameters if parameters is unset else parameters,
+            nplike=self._nplike if nplike is unset else nplike,
         )
 
     def __copy__(self):
@@ -30,7 +30,7 @@ class EmptyArray(Content):
     def __deepcopy__(self, memo):
         return self.copy(parameters=copy.deepcopy(self._parameters, memo))
 
-    def __init__(self, parameters=None, nplike=None):
+    def __init__(self, *, parameters=None, nplike=None):
         if nplike is None:
             nplike = numpy
         self._init(parameters, nplike)
@@ -46,14 +46,14 @@ class EmptyArray(Content):
     @property
     def typetracer(self):
         tt = ak._typetracer.TypeTracer.instance()
-        return EmptyArray(self._parameters, tt)
+        return EmptyArray(parameters=self._parameters, nplike=tt)
 
     @property
     def length(self):
         return 0
 
     def _forget_length(self):
-        return EmptyArray(self._parameters, self._nplike)
+        return EmptyArray(parameters=self._parameters, nplike=self._nplike)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -71,7 +71,8 @@ class EmptyArray(Content):
 
     def merge_parameters(self, parameters):
         return EmptyArray(
-            ak._util.merge_parameters(self._parameters, parameters), self._nplike
+            parameters=ak._util.merge_parameters(self._parameters, parameters),
+            nplike=self._nplike,
         )
 
     def to_NumpyArray(self, dtype, nplike=None):
@@ -179,7 +180,10 @@ class EmptyArray(Content):
             )
         else:
             offsets = ak.index.Index64.zeros(1, self._nplike)
-            return (offsets, EmptyArray(self._parameters, self._nplike))
+            return (
+                offsets,
+                EmptyArray(parameters=self._parameters, nplike=self._nplike),
+            )
 
     def _mergeable(self, other, mergebool):
         return True
@@ -196,7 +200,7 @@ class EmptyArray(Content):
             return others[0].mergemany(tail_others)
 
     def fill_none(self, value):
-        return EmptyArray(self._parameters, self._nplike)
+        return EmptyArray(parameters=self._parameters, nplike=self._nplike)
 
     def _local_index(self, axis, depth):
         return ak.contents.NumpyArray(
@@ -204,7 +208,7 @@ class EmptyArray(Content):
         )
 
     def numbers_to_type(self, name):
-        return ak.contents.EmptyArray(self._parameters, self._nplike)
+        return ak.contents.EmptyArray(parameters=self._parameters, nplike=self._nplike)
 
     def _is_unique(self, negaxis, starts, parents, outlength):
         return True
@@ -243,7 +247,7 @@ class EmptyArray(Content):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
-        return ak.contents.EmptyArray(self._parameters, self._nplike)
+        return ak.contents.EmptyArray(parameters=self._parameters, nplike=self._nplike)
 
     def _reduce_next(
         self,
@@ -326,7 +330,7 @@ class EmptyArray(Content):
                 if options["keep_parameters"]:
                     return self
                 else:
-                    return EmptyArray(None, self._nplike)
+                    return EmptyArray(parameters=None, nplike=self._nplike)
 
         else:
 
