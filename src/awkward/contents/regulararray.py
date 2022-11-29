@@ -319,7 +319,7 @@ class RegularArray(Content):
             )
             nextcontent = self._content._carry(nextcarry, True)
             return ak.contents.ListOffsetArray(
-                offsets, nextcontent, self._parameters, self._nplike
+                offsets, nextcontent, parameters=self._parameters, nplike=self._nplike
             )
 
         else:
@@ -334,7 +334,7 @@ class RegularArray(Content):
                 )
             )
             return ak.contents.ListOffsetArray(
-                offsets, self._content, self._parameters, self._nplike
+                offsets, self._content, parameters=self._parameters, nplike=self._nplike
             )
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
@@ -1133,10 +1133,7 @@ class RegularArray(Content):
             )
 
             return ak.contents.ListOffsetArray(
-                outoffsets,
-                outcontent,
-                None,
-                self._nplike,
+                outoffsets, outcontent, parameters=None, nplike=self._nplike
             )
 
     def _validity_error(self, path):

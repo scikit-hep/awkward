@@ -916,10 +916,7 @@ class ByteMaskedArray(Content):
             ).simplify_optiontype()
 
             return ak.contents.ListOffsetArray(
-                outoffsets,
-                tmp,
-                None,
-                self._nplike,
+                outoffsets, tmp, parameters=None, nplike=self._nplike
             )
 
     def _validity_error(self, path):

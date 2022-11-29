@@ -827,8 +827,8 @@ class NumpyArray(Content):
             return ak.contents.ListOffsetArray(
                 outoffsets,
                 ak.contents.NumpyArray(out),
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def _argsort_next(

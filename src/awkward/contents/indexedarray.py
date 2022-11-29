@@ -845,10 +845,7 @@ class IndexedArray(Content):
                 )
 
                 return ak.contents.ListOffsetArray(
-                    outoffsets,
-                    tmp,
-                    None,
-                    self._nplike,
+                    outoffsets, tmp, parameters=None, nplike=self._nplike
                 )
 
             elif isinstance(unique, ak.contents.NumpyArray):
