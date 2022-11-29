@@ -81,27 +81,28 @@ class AuxData(Generic[T]):
         # Now pull out the Jax tracers / arrays
         buffers = find_all_buffers(layout)
 
-        # Drop the references to the existing buffers by replacing them with empty buffers
-        # FIXME: This works-around the fact that AuxData should probably contain only a form and length,
-        # rather than the actual layout (which holds references to the buffers that we're returning)
-        # We use NumPy buffers here to ensure that we don't create any new tracers (they're just placeholders)
-        # This is particularly unpleasant, because we're mixing nplikes here (deliberately)
-        # We should use `to_buffers`.
-        import numpy as _numpy
-
-        def create_placeholder_like(array) -> _numpy.ndarray:
-            data = _numpy.empty(1, dtype=array.dtype)
-            strides = tuple(0 for _ in array.shape)
-            return _numpy.lib.stride_tricks.as_strided(
-                data, array.shape, strides=strides, writeable=False
-            )
+        # # Drop the references to the existing buffers by replacing them with empty buffers
+        # # FIXME: This works-around the fact that AuxData should probably contain only a form and length,
+        # # rather than the actual layout (which holds references to the buffers that we're returning)
+        # # We use NumPy buffers here to ensure that we don't create any new tracers (they're just placeholders)
+        # # This is particularly unpleasant, because we're mixing nplikes here (deliberately)
+        # # We should use `to_buffers`.
+        # import numpy as _numpy
+        #
+        # def create_placeholder_like(array) -> _numpy.ndarray:
+        #     data = _numpy.empty(1, dtype=array.dtype)
+        #     strides = tuple(0 for _ in array.shape)
+        #     return _numpy.lib.stride_tricks.as_strided(
+        #         data, array.shape, strides=strides, writeable=False
+        #     )
+        # layout = replace_all_buffers(
+        #     layout,
+        #     [create_placeholder_like(n) for n in buffers],
+        #     nplike=nplikes.Numpy.instance(),
+        # )
 
         return buffers, AuxData(
-            layout=replace_all_buffers(
-                layout,
-                [create_placeholder_like(n) for n in buffers],
-                nplike=nplikes.Numpy.instance(),
-            ),
+            layout=layout,
             is_highlevel=is_highlevel,
             behavior=ak._util.behavior_of(obj),
         )
