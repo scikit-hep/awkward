@@ -175,7 +175,7 @@ class NumpyArray(Content):
         out = NumpyArray(self._data.reshape(-1), parameters=None, nplike=self._nplike)
         for i in range(len(shape) - 1, 0, -1):
             out = ak.contents.RegularArray(
-                out, shape[i], zeroslen[i], None, self._nplike
+                out, shape[i], zeroslen[i], parameters=None, nplike=self._nplike
             )
         out._parameters = self._parameters
         return out
@@ -1144,11 +1144,7 @@ class NumpyArray(Content):
 
         if keepdims:
             out = ak.contents.RegularArray(
-                out,
-                1,
-                self.length,
-                None,
-                self._nplike,
+                out, 1, self.length, parameters=None, nplike=self._nplike
             )
 
         return out

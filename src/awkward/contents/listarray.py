@@ -882,7 +882,7 @@ class ListArray(Content):
             )
 
             return ak.contents.RegularArray(
-                down, headlength, 1, self._parameters, self._nplike
+                down, headlength, 1, parameters=self._parameters, nplike=self._nplike
             )
 
         elif isinstance(head, ak.contents.IndexedOptionArray):

@@ -331,10 +331,10 @@ class Content:
         nexthead, nexttail = ak._slicing.headtail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced),
-            1,  # size
-            0,  # zeros_length is irrelevant when the size is 1 (!= 0)
-            None,
-            self._nplike,
+            1,
+            0,
+            parameters=None,
+            nplike=self._nplike,
         )
 
     def _getitem_next_ellipsis(self, tail, advanced: ak.index.Index | None):
@@ -390,8 +390,8 @@ class Content:
             out.simplify_optiontype(),
             indexlength,
             1,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_next_missing_jagged(
@@ -449,8 +449,8 @@ class Content:
             out.simplify_optiontype(),
             index.length,
             1,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_next_missing(
@@ -558,8 +558,8 @@ class Content:
                 self,
                 self.length if self._nplike.known_shape else 1,
                 1,
-                None,
-                self._nplike,
+                parameters=None,
+                nplike=self._nplike,
             )
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)

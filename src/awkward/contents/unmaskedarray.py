@@ -393,11 +393,7 @@ class UnmaskedArray(Content):
             ).simplify_optiontype()
 
             return ak.contents.RegularArray(
-                tmp,
-                out._size,
-                out._length,
-                None,
-                self._nplike,
+                tmp, out._size, out._length, parameters=None, nplike=self._nplike
             )
 
         else:
@@ -428,8 +424,8 @@ class UnmaskedArray(Content):
                 tmp,
                 out._size,
                 out._length,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
         else:

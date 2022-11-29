@@ -240,7 +240,7 @@ def reconstitute(form, length, container, getkey, nplike):
             reconstitute(form.content, next_length, container, getkey, nplike),
             form.size,
             length,
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.RecordForm):

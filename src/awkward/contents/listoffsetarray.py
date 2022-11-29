@@ -200,8 +200,8 @@ class ListOffsetArray(Content):
             content,
             size[0],
             self._offsets.length - 1,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_nothing(self):
@@ -1534,11 +1534,7 @@ class ListOffsetArray(Content):
 
             if keepdims:
                 out = ak.contents.RegularArray(
-                    out,
-                    1,
-                    self.length,
-                    None,
-                    self._nplike,
+                    out, 1, self.length, parameters=None, nplike=self._nplike
                 )
 
             return out
@@ -1827,8 +1823,8 @@ class ListOffsetArray(Content):
                     next.simplify_optiontype(),
                     target,
                     self.length,
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
         else:
             return ak.contents.ListOffsetArray(
