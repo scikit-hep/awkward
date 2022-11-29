@@ -15,13 +15,7 @@ class IndexedOptionArray(Content):
     is_option = True
     is_indexed = True
 
-    def copy(
-        self,
-        index=unset,
-        content=unset,
-        *,
-        parameters=unset
-    ):
+    def copy(self, index=unset, content=unset, *, parameters=unset):
         return IndexedOptionArray(
             self._index if index is unset else index,
             self._content if content is unset else content,

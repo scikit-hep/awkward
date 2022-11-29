@@ -16,14 +16,7 @@ numpy = ak.nplikes.Numpy.instance()
 class ByteMaskedArray(Content):
     is_option = True
 
-    def copy(
-        self,
-        mask=unset,
-        content=unset,
-        valid_when=unset,
-        *,
-        parameters=unset
-    ):
+    def copy(self, mask=unset, content=unset, valid_when=unset, *, parameters=unset):
         return ByteMaskedArray(
             self._mask if mask is unset else mask,
             self._content if content is unset else content,

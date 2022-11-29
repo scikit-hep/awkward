@@ -14,14 +14,7 @@ class RegularArray(Content):
     is_list = True
     is_regular = True
 
-    def copy(
-        self,
-        content=unset,
-        size=unset,
-        zeros_length=unset,
-        *,
-        parameters=unset
-    ):
+    def copy(self, content=unset, size=unset, zeros_length=unset, *, parameters=unset):
         return RegularArray(
             self._content if content is unset else content,
             self._size if size is unset else size,
