@@ -14,6 +14,7 @@ class RecordForm(Form):
         self,
         contents,
         fields,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -245,8 +246,8 @@ class RecordForm(Form):
         return RecordForm(
             contents,
             fields,
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

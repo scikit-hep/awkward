@@ -8,7 +8,7 @@ class RegularForm(Form):
     is_list = True
     is_regular = True
 
-    def __init__(self, content, size, parameters=None, form_key=None):
+    def __init__(self, content, size, *, parameters=None, form_key=None):
         if not isinstance(content, Form):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -134,8 +134,8 @@ class RegularForm(Form):
         return RegularForm(
             self._content._select_columns(index, specifier, matches, output),
             self._size,
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

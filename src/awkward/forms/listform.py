@@ -12,6 +12,7 @@ class ListForm(Form):
         starts,
         stops,
         content,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -159,8 +160,8 @@ class ListForm(Form):
             self._starts,
             self._stops,
             self._content._select_columns(index, specifier, matches, output),
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

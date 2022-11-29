@@ -40,6 +40,7 @@ class NumpyForm(Form):
         self,
         primitive,
         inner_shape=(),
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -124,9 +125,9 @@ class NumpyForm(Form):
             return False
 
     def to_RegularForm(self):
-        out = NumpyForm(self._primitive, (), None, None)
+        out = NumpyForm(self._primitive, (), parameters=None, form_key=None)
         for x in self._inner_shape[::-1]:
-            out = ak.forms.RegularForm(out, x, None, None)
+            out = ak.forms.RegularForm(out, x, parameters=None, form_key=None)
         out._parameters = self._parameters
         return out
 

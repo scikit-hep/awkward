@@ -12,6 +12,7 @@ class ByteMaskedForm(Form):
         mask,
         content,
         valid_when,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -162,8 +163,8 @@ class ByteMaskedForm(Form):
             self._mask,
             self._content._select_columns(index, specifier, matches, output),
             self._valid_when,
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

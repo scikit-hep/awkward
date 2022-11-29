@@ -25,10 +25,12 @@ def from_dict(input: dict) -> Form:
     if input["class"] == "NumpyArray":
         primitive = input["primitive"]
         inner_shape = input.get("inner_shape", [])
-        return ak.forms.NumpyForm(primitive, inner_shape, parameters, form_key)
+        return ak.forms.NumpyForm(
+            primitive, inner_shape, parameters=parameters, form_key=form_key
+        )
 
     elif input["class"] == "EmptyArray":
-        return ak.forms.EmptyForm(parameters, form_key)
+        return ak.forms.EmptyForm(parameters=parameters, form_key=form_key)
 
     elif input["class"] == "RegularArray":
         return ak.forms.RegularForm(

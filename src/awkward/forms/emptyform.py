@@ -8,7 +8,7 @@ class EmptyForm(Form):
     is_numpy = True
     is_unknown = True
 
-    def __init__(self, parameters=None, form_key=None):
+    def __init__(self, *, parameters=None, form_key=None):
         self._init(parameters, form_key)
 
     def __repr__(self):
@@ -28,7 +28,7 @@ class EmptyForm(Form):
         return isinstance(other, EmptyForm) and self._form_key == other._form_key
 
     def to_NumpyForm(self, dtype):
-        return ak.forms.numpyform.from_dtype(dtype, self._parameters)
+        return ak.forms.numpyform.from_dtype(dtype, parameters=self._parameters)
 
     def purelist_parameter(self, key):
         if self._parameters is None or key not in self._parameters:

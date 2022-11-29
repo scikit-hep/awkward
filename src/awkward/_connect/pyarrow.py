@@ -888,8 +888,8 @@ def form_remove_optiontype(akform):
         return ak.forms.IndexedForm(
             akform.index,
             akform.content,
-            akform.parameters,
-            akform.form_key,
+            parameters=akform.parameters,
+            form_key=akform.form_key,
         )
     else:
         return akform.content

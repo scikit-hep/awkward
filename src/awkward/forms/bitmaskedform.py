@@ -13,6 +13,7 @@ class BitMaskedForm(Form):
         content,
         valid_when,
         lsb_order,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -180,8 +181,8 @@ class BitMaskedForm(Form):
             self._content._select_columns(index, specifier, matches, output),
             self._valid_when,
             self._lsb_order,
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

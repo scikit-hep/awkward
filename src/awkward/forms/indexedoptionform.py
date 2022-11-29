@@ -12,6 +12,7 @@ class IndexedOptionForm(Form):
         self,
         index,
         content,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -149,8 +150,8 @@ class IndexedOptionForm(Form):
         return IndexedOptionForm(
             self._index,
             self._content._select_columns(index, specifier, matches, output),
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):
