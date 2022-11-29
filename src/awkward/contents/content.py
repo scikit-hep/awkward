@@ -330,11 +330,7 @@ class Content:
     def _getitem_next_newaxis(self, tail, advanced: ak.index.Index | None):
         nexthead, nexttail = ak._slicing.headtail(tail)
         return ak.contents.RegularArray(
-            self._getitem_next(nexthead, nexttail, advanced),
-            1,
-            0,
-            parameters=None,
-            nplike=self._nplike,
+            self._getitem_next(nexthead, nexttail, advanced), 1, 0, parameters=None
         )
 
     def _getitem_next_ellipsis(self, tail, advanced: ak.index.Index | None):
@@ -383,15 +379,11 @@ class Content:
         )
 
         out = ak.contents.IndexedOptionArray(
-            outindex, raw.content, parameters=self._parameters, nplike=self._nplike
+            outindex, raw.content, parameters=self._parameters
         )
 
         return ak.contents.RegularArray(
-            out.simplify_optiontype(),
-            indexlength,
-            1,
-            parameters=self._parameters,
-            nplike=self._nplike,
+            out.simplify_optiontype(), indexlength, 1, parameters=self._parameters
         )
 
     def _getitem_next_missing_jagged(
@@ -443,14 +435,10 @@ class Content:
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
         out = ak.contents.IndexedOptionArray(
-            outputmask, tmp, parameters=self._parameters, nplike=self._nplike
+            outputmask, tmp, parameters=self._parameters
         )
         return ak.contents.RegularArray(
-            out.simplify_optiontype(),
-            index.length,
-            1,
-            parameters=self._parameters,
-            nplike=self._nplike,
+            out.simplify_optiontype(), index.length, 1, parameters=self._parameters
         )
 
     def _getitem_next_missing(
@@ -555,11 +543,7 @@ class Content:
             nextwhere = ak._slicing.prepare_advanced_indexing(items)
 
             next = ak.contents.RegularArray(
-                self,
-                self.length if self._nplike.known_shape else 1,
-                1,
-                parameters=None,
-                nplike=self._nplike,
+                self, self.length if self._nplike.known_shape else 1, 1, parameters=None
             )
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
@@ -1212,11 +1196,7 @@ class Content:
         contents = []
         length = None
         for ptr in tocarry:
-            contents.append(
-                ak.contents.IndexedArray(
-                    ptr, self, parameters=None, nplike=self._nplike
-                )
-            )
+            contents.append(ak.contents.IndexedArray(ptr, self, parameters=None))
             length = contents[-1].length
         assert length is not None
         return ak.contents.RecordArray(
@@ -1494,12 +1474,7 @@ class Content:
                 ](index.data, target, self.length)
             )
 
-        next = ak.contents.IndexedOptionArray(
-            index,
-            self,
-            parameters=self._parameters,
-            nplike=self._nplike,
-        )
+        next = ak.contents.IndexedOptionArray(index, self, parameters=self._parameters)
         return next.simplify_optiontype()
 
     def pad_none(self, length: Integral, axis: Integral, clip: bool = False) -> Content:

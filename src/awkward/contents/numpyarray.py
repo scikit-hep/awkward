@@ -175,9 +175,7 @@ class NumpyArray(Content):
 
         out = NumpyArray(self._data.reshape(-1), parameters=None, nplike=self._nplike)
         for i in range(len(shape) - 1, 0, -1):
-            out = ak.contents.RegularArray(
-                out, shape[i], zeroslen[i], parameters=None, nplike=self._nplike
-            )
+            out = ak.contents.RegularArray(out, shape[i], zeroslen[i], parameters=None)
         out._parameters = self._parameters
         return out
 
@@ -245,11 +243,7 @@ class NumpyArray(Content):
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
-                    slicestarts,
-                    slicestops,
-                    slicecontent,
-                    parameters=None,
-                    nplike=self._nplike,
+                    slicestarts, slicestops, slicecontent, parameters=None
                 ),
                 "too many jagged slice dimensions for array",
             )
@@ -810,10 +804,7 @@ class NumpyArray(Content):
             )
 
             return ak.contents.ListOffsetArray(
-                outoffsets,
-                ak.contents.NumpyArray(out),
-                parameters=self._parameters,
-                nplike=self._nplike,
+                outoffsets, ak.contents.NumpyArray(out), parameters=self._parameters
             )
 
     def _argsort_next(
@@ -1139,14 +1130,10 @@ class NumpyArray(Content):
                 )
             )
 
-            out = ak.contents.ByteMaskedArray(
-                outmask, out, False, parameters=None, nplike=self._nplike
-            )
+            out = ak.contents.ByteMaskedArray(outmask, out, False, parameters=None)
 
         if keepdims:
-            out = ak.contents.RegularArray(
-                out, 1, self.length, parameters=None, nplike=self._nplike
-            )
+            out = ak.contents.RegularArray(out, 1, self.length, parameters=None)
 
         return out
 

@@ -19,14 +19,12 @@ class IndexedArray(Content):
         index=unset,
         content=unset,
         *,
-        parameters=unset,
-        nplike=unset,
+        parameters=unset
     ):
         return IndexedArray(
             self._index if index is unset else index,
             self._content if content is unset else content,
             parameters=self._parameters if parameters is unset else parameters,
-            nplike=self._nplike if nplike is unset else nplike,
         )
 
     def __copy__(self):
@@ -39,7 +37,7 @@ class IndexedArray(Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
-    def __init__(self, index, content, *, parameters=None, nplike=None):
+    def __init__(self, index, content, *, parameters=None):
         if not (
             isinstance(index, Index)
             and index.dtype
@@ -63,14 +61,10 @@ class IndexedArray(Content):
                     )
                 )
             )
-        if nplike is None:
-            nplike = content.nplike
-        if nplike is None:
-            nplike = index.nplike
 
         self._index = index
         self._content = content
-        self._init(parameters, nplike)
+        self._init(parameters, content.nplike)
 
     @property
     def index(self):
@@ -104,7 +98,6 @@ class IndexedArray(Content):
             ak.index.Index(self._index.raw(tt)),
             self._content.typetracer,
             parameters=self._parameters,
-            nplike=tt,
         )
 
     @property
@@ -113,10 +106,7 @@ class IndexedArray(Content):
 
     def _forget_length(self):
         return IndexedArray(
-            self._index.forget_length(),
-            self._content,
-            parameters=self._parameters,
-            nplike=self._nplike,
+            self._index.forget_length(), self._content, parameters=self._parameters
         )
 
     def __repr__(self):
@@ -139,12 +129,11 @@ class IndexedArray(Content):
             self._index,
             self._content,
             parameters=ak._util.merge_parameters(self._parameters, parameters),
-            nplike=self._nplike,
         )
 
     def to_IndexedOptionArray64(self):
         return ak.contents.IndexedOptionArray(
-            self._index, self._content, parameters=self._parameters, nplike=self._nplike
+            self._index, self._content, parameters=self._parameters
         )
 
     def mask_as_bool(self, valid_when=True):
@@ -173,10 +162,7 @@ class IndexedArray(Content):
         start, stop, step = where.indices(self.length)
         assert step == 1
         return IndexedArray(
-            self._index[start:stop],
-            self._content,
-            parameters=self._parameters,
-            nplike=self._nplike,
+            self._index[start:stop], self._content, parameters=self._parameters
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -184,7 +170,6 @@ class IndexedArray(Content):
             self._index,
             self._content._getitem_field(where, only_fields),
             parameters=None,
-            nplike=self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -192,7 +177,6 @@ class IndexedArray(Content):
             self._index,
             self._content._getitem_fields(where, only_fields),
             parameters=None,
-            nplike=self._nplike,
         )
 
     def _carry(self, carry, allow_lazy):
@@ -203,20 +187,14 @@ class IndexedArray(Content):
         except IndexError as err:
             raise ak._errors.index_error(self, carry.data, str(err)) from err
 
-        return IndexedArray(
-            nextindex, self._content, parameters=self._parameters, nplike=self._nplike
-        )
+        return IndexedArray(nextindex, self._content, parameters=self._parameters)
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
         if self._nplike.known_shape and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
-                    slicestarts,
-                    slicestops,
-                    slicecontent,
-                    parameters=None,
-                    nplike=self._nplike,
+                    slicestarts, slicestops, slicecontent, parameters=None
                 ),
                 "cannot fit jagged slice with length {} into {} of size {}".format(
                     slicestarts.length, type(self).__name__, self.length
@@ -325,10 +303,7 @@ class IndexedArray(Content):
                 )
             )
             next = ak.contents.IndexedOptionArray(
-                nextindex,
-                self._content,
-                parameters=self._parameters,
-                nplike=self._nplike,
+                nextindex, self._content, parameters=self._parameters
             )
             return next.project()
 
@@ -405,10 +380,7 @@ class IndexedArray(Content):
             )
             if isinstance(self._content, ak.contents.IndexedArray):
                 return IndexedArray(
-                    result,
-                    self._content.content,
-                    parameters=self._parameters,
-                    nplike=self._nplike,
+                    result, self._content.content, parameters=self._parameters
                 )
 
             if isinstance(
@@ -421,10 +393,7 @@ class IndexedArray(Content):
                 ),
             ):
                 return ak.contents.IndexedOptionArray(
-                    result,
-                    self._content.content,
-                    parameters=self._parameters,
-                    nplike=self._nplike,
+                    result, self._content.content, parameters=self._parameters
                 )
 
         else:
@@ -536,9 +505,7 @@ class IndexedArray(Content):
         )
         parameters = ak._util.merge_parameters(self._parameters, other._parameters)
 
-        return ak.contents.IndexedArray(
-            index, content, parameters=parameters, nplike=self._nplike
-        )
+        return ak.contents.IndexedArray(index, content, parameters=parameters)
 
     def mergemany(self, others):
         if len(others) == 0:
@@ -613,9 +580,7 @@ class IndexedArray(Content):
 
         tail_contents = contents[1:]
         nextcontent = contents[0].mergemany(tail_contents)
-        next = ak.contents.IndexedArray(
-            nextindex, nextcontent, parameters=parameters, nplike=self._nplike
-        )
+        next = ak.contents.IndexedArray(nextindex, nextcontent, parameters=parameters)
 
         if len(tail) == 0:
             return next
@@ -638,10 +603,7 @@ class IndexedArray(Content):
                 ValueError(f"fill_none value length ({value.length}) is not equal to 1")
             )
         return IndexedArray(
-            self._index,
-            self._content.fill_none(value),
-            parameters=self._parameters,
-            nplike=self._nplike,
+            self._index, self._content.fill_none(value), parameters=self._parameters
         )
 
     def _local_index(self, axis, depth):
@@ -715,7 +677,6 @@ class IndexedArray(Content):
             self._index,
             self._content.numbers_to_type(name),
             parameters=self._parameters,
-            nplike=self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -801,10 +762,7 @@ class IndexedArray(Content):
             )
 
             return ak.contents.IndexedOptionArray(
-                nextoutindex,
-                unique,
-                parameters=self._parameters,
-                nplike=self._nplike,
+                nextoutindex, unique, parameters=self._parameters
             ).simplify_optiontype()
 
         if not branch and negaxis == depth:
@@ -842,12 +800,10 @@ class IndexedArray(Content):
                 )
 
                 tmp = ak.contents.IndexedArray(
-                    outindex, unique._content, parameters=None, nplike=self._nplike
+                    outindex, unique._content, parameters=None
                 )
 
-                return ak.contents.ListOffsetArray(
-                    outoffsets, tmp, parameters=None, nplike=self._nplike
-                )
+                return ak.contents.ListOffsetArray(outoffsets, tmp, parameters=None)
 
             elif isinstance(unique, ak.contents.NumpyArray):
                 nextoutindex = ak.index.Index64(
@@ -855,10 +811,7 @@ class IndexedArray(Content):
                     nplike=self.nplike,
                 )
                 out = ak.contents.IndexedOptionArray(
-                    nextoutindex,
-                    unique,
-                    parameters=self._parameters,
-                    nplike=self._nplike,
+                    nextoutindex, unique, parameters=self._parameters
                 ).simplify_optiontype()
 
                 return out
@@ -991,7 +944,6 @@ class IndexedArray(Content):
                 self._index,
                 self._content._pad_none(target, posaxis, depth, clip),
                 parameters=self._parameters,
-                nplike=self._nplike,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -1001,12 +953,7 @@ class IndexedArray(Content):
         ):
             next_parameters = dict(self._parameters)
             del next_parameters["__array__"]
-            next = IndexedArray(
-                self._index,
-                self._content,
-                parameters=next_parameters,
-                nplike=self._nplike,
-            )
+            next = IndexedArray(self._index, self._content, parameters=next_parameters)
             return next._to_arrow(pyarrow, mask_node, validbytes, length, options)
 
         index = self._index.raw(numpy)
@@ -1082,7 +1029,6 @@ class IndexedArray(Content):
                         options,
                     ),
                     parameters=self._parameters if options["keep_parameters"] else None,
-                    nplike=self._nplike,
                 )
 
         else:
@@ -1118,10 +1064,7 @@ class IndexedArray(Content):
     def packed(self):
         if self.parameter("__array__") == "categorical":
             return IndexedArray(
-                self._index,
-                self._content.packed(),
-                parameters=self._parameters,
-                nplike=self._nplike,
+                self._index, self._content.packed(), parameters=self._parameters
             )
         else:
             return self.project().packed()
@@ -1138,12 +1081,7 @@ class IndexedArray(Content):
     def _to_nplike(self, nplike):
         index = self._index._to_nplike(nplike)
         content = self._content._to_nplike(nplike)
-        return IndexedArray(
-            index,
-            content,
-            parameters=self._parameters,
-            nplike=nplike,
-        )
+        return IndexedArray(index, content, parameters=self._parameters)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):
         return self.index.layout_equal(

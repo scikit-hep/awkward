@@ -120,11 +120,7 @@ class EmptyArray(Content):
         raise ak._errors.index_error(
             self,
             ak.contents.ListArray(
-                slicestarts,
-                slicestops,
-                slicecontent,
-                parameters=None,
-                nplike=self._nplike,
+                slicestarts, slicestops, slicecontent, parameters=None
             ),
             "too many jagged slice dimensions for array",
         )

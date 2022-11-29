@@ -26,7 +26,6 @@ class BitMaskedArray(Content):
         lsb_order=unset,
         *,
         parameters=unset,
-        nplike=unset,
     ):
         return BitMaskedArray(
             self._mask if mask is unset else mask,
@@ -35,7 +34,6 @@ class BitMaskedArray(Content):
             self._length if length is unset else length,
             self._lsb_order if lsb_order is unset else lsb_order,
             parameters=self._parameters if parameters is unset else parameters,
-            nplike=self._nplike if nplike is unset else nplike,
         )
 
     def __copy__(self):
@@ -49,15 +47,7 @@ class BitMaskedArray(Content):
         )
 
     def __init__(
-        self,
-        mask,
-        content,
-        valid_when,
-        length,
-        lsb_order,
-        *,
-        parameters=None,
-        nplike=None,
+        self, mask, content, valid_when, length, lsb_order, *, parameters=None
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise ak._errors.wrap_error(
@@ -116,17 +106,13 @@ class BitMaskedArray(Content):
                     )
                 )
             )
-        if nplike is None:
-            nplike = content.nplike
-        if nplike is None:
-            nplike = mask.nplike
 
         self._mask = mask
         self._content = content
         self._valid_when = valid_when
         self._length = length
         self._lsb_order = lsb_order
-        self._init(parameters, nplike)
+        self._init(parameters, content.nplike)
 
     @property
     def mask(self):
@@ -173,7 +159,6 @@ class BitMaskedArray(Content):
             self._length,
             self._lsb_order,
             parameters=self._parameters,
-            nplike=tt,
         )
 
     @property
@@ -188,7 +173,6 @@ class BitMaskedArray(Content):
             ak._typetracer.UnknownLength,
             self._lsb_order,
             parameters=self._parameters,
-            nplike=self._nplike,
         )
 
     def __repr__(self):
@@ -218,7 +202,6 @@ class BitMaskedArray(Content):
             self._length,
             self._lsb_order,
             parameters=ak._util.merge_parameters(self._parameters, parameters),
-            nplike=self._nplike,
         )
 
     def to_IndexedOptionArray64(self):
@@ -238,10 +221,7 @@ class BitMaskedArray(Content):
             ),
         )
         return ak.contents.IndexedOptionArray(
-            index[0 : self._length],
-            self._content,
-            parameters=self._parameters,
-            nplike=self._nplike,
+            index[0 : self._length], self._content, parameters=self._parameters
         )
 
     def to_ByteMaskedArray(self):
@@ -265,7 +245,6 @@ class BitMaskedArray(Content):
             self._content,
             self._valid_when,
             parameters=self._parameters,
-            nplike=self._nplike,
         )
 
     def to_BitMaskedArray(self, valid_when, lsb_order):
@@ -280,7 +259,6 @@ class BitMaskedArray(Content):
                     self._length,
                     lsb_order,
                     parameters=self._parameters,
-                    nplike=self._nplike,
                 )
 
         else:
@@ -301,7 +279,6 @@ class BitMaskedArray(Content):
                 self._length,
                 lsb_order,
                 parameters=self._parameters,
-                nplike=self._nplike,
             )
 
     def mask_as_bool(self, valid_when=None, nplike=None):
@@ -358,7 +335,6 @@ class BitMaskedArray(Content):
             self._length,
             self._lsb_order,
             parameters=None,
-            nplike=self._nplike,
         ).simplify_optiontype()
 
     def _getitem_fields(self, where, only_fields=()):
@@ -369,7 +345,6 @@ class BitMaskedArray(Content):
             self._length,
             self._lsb_order,
             parameters=None,
-            nplike=self._nplike,
         ).simplify_optiontype()
 
     def _carry(self, carry, allow_lazy):
@@ -626,7 +601,6 @@ class BitMaskedArray(Content):
                     self._length,
                     self._lsb_order,
                     parameters=self._parameters if options["keep_parameters"] else None,
-                    nplike=self._nplike,
                 )
 
         else:
@@ -668,10 +642,7 @@ class BitMaskedArray(Content):
                 content = content[: self._length]
 
             return ak.contents.IndexedOptionArray(
-                next._index,
-                content,
-                parameters=next._parameters,
-                nplike=self._nplike,
+                next._index, content, parameters=next._parameters
             )
 
         else:
@@ -692,7 +663,6 @@ class BitMaskedArray(Content):
                 self._length,
                 self._lsb_order,
                 parameters=self._parameters,
-                nplike=self._nplike,
             )
 
     def _to_list(self, behavior, json_conversions):
@@ -721,7 +691,6 @@ class BitMaskedArray(Content):
             length=len(self),
             lsb_order=self._lsb_order,
             parameters=self._parameters,
-            nplike=nplike,
         )
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):
