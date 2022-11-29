@@ -131,7 +131,7 @@ def reconstitute(form, length, container, getkey, nplike):
             raise ak._errors.wrap_error(
                 ValueError(f"EmptyForm node, but the expected length is {length}")
             )
-        return ak.contents.EmptyArray(form.parameters)
+        return ak.contents.EmptyArray(parameters=form.parameters)
 
     elif isinstance(form, ak.forms.NumpyForm):
         dtype = ak.types.numpytype.primitive_to_dtype(form.primitive)
@@ -145,11 +145,11 @@ def reconstitute(form, length, container, getkey, nplike):
                 data = data.reshape((length,) + form.inner_shape)
             else:
                 data = data.reshape((-1,) + form.inner_shape)
-        return ak.contents.NumpyArray(data, form.parameters, nplike)
+        return ak.contents.NumpyArray(data, parameters=form.parameters, nplike=nplike)
 
     elif isinstance(form, ak.forms.UnmaskedForm):
         content = reconstitute(form.content, length, container, getkey, nplike)
-        return ak.contents.UnmaskedArray(content, form.parameters)
+        return ak.contents.UnmaskedArray(content, parameters=form.parameters)
 
     elif isinstance(form, ak.forms.BitMaskedForm):
         raw_array = container[getkey(form, "mask")]
@@ -163,7 +163,7 @@ def reconstitute(form, length, container, getkey, nplike):
             form.valid_when,
             length,
             form.lsb_order,
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.ByteMaskedForm):
@@ -175,7 +175,7 @@ def reconstitute(form, length, container, getkey, nplike):
             ak.index.Index(mask),
             reconstitute(form.content, length, container, getkey, nplike),
             form.valid_when,
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.IndexedOptionForm):
@@ -189,7 +189,7 @@ def reconstitute(form, length, container, getkey, nplike):
         return ak.contents.IndexedOptionArray(
             ak.index.Index(index),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.IndexedForm):
@@ -201,7 +201,7 @@ def reconstitute(form, length, container, getkey, nplike):
         return ak.contents.IndexedArray(
             ak.index.Index(index),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.ListForm):
@@ -219,7 +219,7 @@ def reconstitute(form, length, container, getkey, nplike):
             ak.index.Index(starts),
             ak.index.Index(stops),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.ListOffsetForm):
@@ -231,7 +231,7 @@ def reconstitute(form, length, container, getkey, nplike):
         return ak.contents.ListOffsetArray(
             ak.index.Index(offsets),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.RegularForm):
@@ -240,7 +240,7 @@ def reconstitute(form, length, container, getkey, nplike):
             reconstitute(form.content, next_length, container, getkey, nplike),
             form.size,
             length,
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.RecordForm):
@@ -251,7 +251,7 @@ def reconstitute(form, length, container, getkey, nplike):
             ],
             None if form.is_tuple else form.fields,
             length,
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.UnionForm):
@@ -277,7 +277,7 @@ def reconstitute(form, length, container, getkey, nplike):
                 reconstitute(content, lengths[i], container, getkey, nplike)
                 for i, content in enumerate(form.contents)
             ],
-            form.parameters,
+            parameters=form.parameters,
         )
 
     else:

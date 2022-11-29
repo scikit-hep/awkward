@@ -44,10 +44,7 @@ def _impl(array, name, highlevel, behavior):
             parameters = dict(layout.parameters)
             parameters["__record__"] = name
             return ak.contents.RecordArray(
-                layout.contents,
-                layout.fields,
-                len(layout),
-                parameters,
+                layout.contents, layout.fields, len(layout), parameters=parameters
             )
         else:
             return None

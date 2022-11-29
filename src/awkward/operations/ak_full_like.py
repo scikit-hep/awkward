@@ -174,18 +174,15 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
 
             if fill_value == 0 or fill_value is _ZEROS:
                 return ak.contents.NumpyArray(
-                    nplike.zeros_like(original),
-                    layout.parameters,
+                    nplike.zeros_like(original), parameters=layout.parameters
                 )
             elif fill_value == 1:
                 return ak.contents.NumpyArray(
-                    nplike.ones_like(original),
-                    layout.parameters,
+                    nplike.ones_like(original), parameters=layout.parameters
                 )
             else:
                 return ak.contents.NumpyArray(
-                    nplike.full_like(original, fill_value),
-                    layout.parameters,
+                    nplike.full_like(original, fill_value), parameters=layout.parameters
                 )
         else:
             return None

@@ -14,6 +14,7 @@ class RecordForm(Form):
         self,
         contents,
         fields,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -149,7 +150,7 @@ class RecordForm(Form):
         return ak.types.RecordType(
             [x._type(typestrs) for x in self._contents],
             self._fields,
-            self._parameters,
+            parameters=self._parameters,
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
@@ -245,8 +246,8 @@ class RecordForm(Form):
         return RecordForm(
             contents,
             fields,
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

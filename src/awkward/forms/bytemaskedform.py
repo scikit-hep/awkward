@@ -12,6 +12,7 @@ class ByteMaskedForm(Form):
         mask,
         content,
         valid_when,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -83,7 +84,7 @@ class ByteMaskedForm(Form):
     def _type(self, typestrs):
         return ak.types.OptionType(
             self._content._type(typestrs),
-            self._parameters,
+            parameters=self._parameters,
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         ).simplify_option_union()
 
@@ -162,8 +163,8 @@ class ByteMaskedForm(Form):
             self._mask,
             self._content._select_columns(index, specifier, matches, output),
             self._valid_when,
-            self._parameters,
-            self._form_key,
+            parameters=self._parameters,
+            form_key=self._form_key,
         )
 
     def _column_types(self):

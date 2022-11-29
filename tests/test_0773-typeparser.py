@@ -455,27 +455,29 @@ def test_numpytype_datetime64_10s():
 
 
 def test_numpytype_int32_parameter():
-    t = NumpyType("int32", {"__array__": "Something"})
+    t = NumpyType("int32", parameters={"__array__": "Something"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_numpytype_datetime64_parameter():
-    t = NumpyType("datetime64", {"__array__": "Something"})
+    t = NumpyType("datetime64", parameters={"__array__": "Something"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_numpytype_datetime64_10s_parameter():
-    t = NumpyType("datetime64[10s]", {"__array__": "Something"})
+    t = NumpyType("datetime64[10s]", parameters={"__array__": "Something"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_numpytype_int32_categorical():
-    t = NumpyType("int32", {"__categorical__": True})
+    t = NumpyType("int32", parameters={"__categorical__": True})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_numpytype_int32_parameters_categorical():
-    t = NumpyType("int32", {"__array__": "Something", "__categorical__": True})
+    t = NumpyType(
+        "int32", parameters={"__array__": "Something", "__categorical__": True}
+    )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
@@ -485,17 +487,17 @@ def test_unknowntype():
 
 
 def test_unknowntype_parameter():
-    t = UnknownType({"__array__": "Something"})
+    t = UnknownType(parameters={"__array__": "Something"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_unknowntype_categorical():
-    t = UnknownType({"__categorical__": True})
+    t = UnknownType(parameters={"__categorical__": True})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_unknowntype_categorical_parameter():
-    t = UnknownType({"__array__": "Something", "__categorical__": True})
+    t = UnknownType(parameters={"__array__": "Something", "__categorical__": True})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
@@ -505,18 +507,20 @@ def test_regulartype_numpytype():
 
 
 def test_regulartype_numpytype_parameter():
-    t = RegularType(NumpyType("int32"), 5, {"__array__": "Something"})
+    t = RegularType(NumpyType("int32"), 5, parameters={"__array__": "Something"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_regulartype_numpytype_categorical():
-    t = RegularType(NumpyType("int32"), 5, {"__categorical__": True})
+    t = RegularType(NumpyType("int32"), 5, parameters={"__categorical__": True})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_regulartype_numpytype_categorical_parameter():
     t = RegularType(
-        NumpyType("int32"), 5, {"__categorical__": True, "__array__": "Something"}
+        NumpyType("int32"),
+        5,
+        parameters={"__categorical__": True, "__array__": "Something"},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
@@ -527,53 +531,64 @@ def test_listtype_numpytype():
 
 
 def test_listtype_numpytype_parameter():
-    t = ListType(NumpyType("int32"), {"__array__": "Something"})
+    t = ListType(NumpyType("int32"), parameters={"__array__": "Something"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_listtype_numpytype_categorical():
-    t = ListType(NumpyType("int32"), {"__categorical__": True})
+    t = ListType(NumpyType("int32"), parameters={"__categorical__": True})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_listtype_numpytype_categorical_parameter():
     t = ListType(
-        NumpyType("int32"), {"__categorical__": True, "__array__": "Something"}
+        NumpyType("int32"),
+        parameters={"__categorical__": True, "__array__": "Something"},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_varlen_string():
-    t = ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "string"})
+    t = ListType(
+        NumpyType("uint8", parameters={"__array__": "char"}),
+        parameters={"__array__": "string"},
+    )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_varlen_bytestring():
-    t = ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "bytestring"})
+    t = ListType(
+        NumpyType("uint8", parameters={"__array__": "char"}),
+        parameters={"__array__": "bytestring"},
+    )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_fixedlen_string():
     t = RegularType(
-        NumpyType("uint8", {"__array__": "char"}), 5, {"__array__": "string"}
+        NumpyType("uint8", parameters={"__array__": "char"}),
+        5,
+        parameters={"__array__": "string"},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_fixedlen_bytestring():
     t = RegularType(
-        NumpyType("uint8", {"__array__": "byte"}), 5, {"__array__": "bytestring"}
+        NumpyType("uint8", parameters={"__array__": "byte"}),
+        5,
+        parameters={"__array__": "bytestring"},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_char():
-    t = NumpyType("uint8", {"__array__": "char"})
+    t = NumpyType("uint8", parameters={"__array__": "char"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_byte():
-    t = NumpyType("uint8", {"__array__": "byte"})
+    t = NumpyType("uint8", parameters={"__array__": "byte"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
@@ -583,33 +598,40 @@ def test_optiontype_numpytype_int32():
 
 
 def test_optiontype_numpytype_int32_parameters():
-    t = OptionType(NumpyType("int32"), {"__array__": "Something"})
+    t = OptionType(NumpyType("int32"), parameters={"__array__": "Something"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_optiontype_numpytype_int32_categorical():
-    t = OptionType(NumpyType("int32"), {"__categorical__": True})
+    t = OptionType(NumpyType("int32"), parameters={"__categorical__": True})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_optiontype_numpytype_int32_categorical_parameters():
     t = OptionType(
-        NumpyType("int32"), {"__array__": "Something", "__categorical__": True}
+        NumpyType("int32"),
+        parameters={"__array__": "Something", "__categorical__": True},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_option_varlen_string():
     t = OptionType(
-        ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "string"})
+        ListType(
+            NumpyType("uint8", parameters={"__array__": "char"}),
+            parameters={"__array__": "string"},
+        )
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_option_varlen_string_parameters():
     t = OptionType(
-        ListType(NumpyType("uint8", {"__array__": "char"}), {"__array__": "string"}),
-        {"__array__": "Something"},
+        ListType(
+            NumpyType("uint8", parameters={"__array__": "char"}),
+            parameters={"__array__": "string"},
+        ),
+        parameters={"__array__": "Something"},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
@@ -645,56 +667,62 @@ def test_record_fields_int32_float64():
 
 
 def test_record_empty_parameters():
-    t = RecordType([], None, {"p": [123]})
+    t = RecordType([], None, parameters={"p": [123]})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_record_fields_empty_parameters():
-    t = RecordType([], [], {"p": [123]})
+    t = RecordType([], [], parameters={"p": [123]})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_record_int32_parameters():
-    t = RecordType([NumpyType("int32")], None, {"p": [123]})
+    t = RecordType([NumpyType("int32")], None, parameters={"p": [123]})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_record_int32_float64_parameters():
-    t = RecordType([NumpyType("int32"), NumpyType("float64")], None, {"p": [123]})
+    t = RecordType(
+        [NumpyType("int32"), NumpyType("float64")], None, parameters={"p": [123]}
+    )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_record_fields_int32_parameters():
-    t = RecordType([NumpyType("int32")], ["one"], {"p": [123]})
+    t = RecordType([NumpyType("int32")], ["one"], parameters={"p": [123]})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_record_fields_int32_float64_parameters():
     t = RecordType(
-        [NumpyType("int32"), NumpyType("float64")], ["one", "t w o"], {"p": [123]}
+        [NumpyType("int32"), NumpyType("float64")],
+        ["one", "t w o"],
+        parameters={"p": [123]},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_named_record_empty():
-    t = RecordType([], None, {"__record__": "Name"})
+    t = RecordType([], None, parameters={"__record__": "Name"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_named_record_int32():
-    t = RecordType([NumpyType("int32")], None, {"__record__": "Name"})
+    t = RecordType([NumpyType("int32")], None, parameters={"__record__": "Name"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_named_record_int32_float64():
     t = RecordType(
-        [NumpyType("int32"), NumpyType("float64")], None, {"__record__": "Name"}
+        [NumpyType("int32"), NumpyType("float64")],
+        None,
+        parameters={"__record__": "Name"},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_named_record_fields_int32():
-    t = RecordType([NumpyType("int32")], ["one"], {"__record__": "Name"})
+    t = RecordType([NumpyType("int32")], ["one"], parameters={"__record__": "Name"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
@@ -702,18 +730,20 @@ def test_named_record_fields_int32_float64():
     t = RecordType(
         [NumpyType("int32"), NumpyType("float64")],
         ["one", "t w o"],
-        {"__record__": "Name"},
+        parameters={"__record__": "Name"},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_named_record_empty_parameters():
-    t = RecordType([], None, {"__record__": "Name", "p": [123]})
+    t = RecordType([], None, parameters={"__record__": "Name", "p": [123]})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_named_record_int32_parameters():
-    t = RecordType([NumpyType("int32")], None, {"__record__": "Name", "p": [123]})
+    t = RecordType(
+        [NumpyType("int32")], None, parameters={"__record__": "Name", "p": [123]}
+    )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
@@ -721,13 +751,15 @@ def test_named_record_int32_float64_parameters():
     t = RecordType(
         [NumpyType("int32"), NumpyType("float64")],
         None,
-        {"__record__": "Name", "p": [123]},
+        parameters={"__record__": "Name", "p": [123]},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_named_record_fields_int32_parameters():
-    t = RecordType([NumpyType("int32")], ["one"], {"__record__": "Name", "p": [123]})
+    t = RecordType(
+        [NumpyType("int32")], ["one"], parameters={"__record__": "Name", "p": [123]}
+    )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
@@ -735,7 +767,7 @@ def test_named_record_fields_int32_float64_parameters():
     t = RecordType(
         [NumpyType("int32"), NumpyType("float64")],
         ["one", "t w o"],
-        {"__record__": "Name", "p": [123]},
+        parameters={"__record__": "Name", "p": [123]},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
@@ -758,13 +790,13 @@ def test_union_float64_datetime64():
 
 
 def test_union_float64_parameters():
-    t = UnionType([NumpyType("float64")], {"__array__": "Something"})
+    t = UnionType([NumpyType("float64")], parameters={"__array__": "Something"})
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)
 
 
 def test_union_float64_datetime64_parameters():
     t = UnionType(
         [NumpyType("float64"), NumpyType("datetime64")],
-        {"__array__": "Something"},
+        parameters={"__array__": "Something"},
     )
     assert str(ak.types.from_datashape(str(t), highlevel=False)) == str(t)

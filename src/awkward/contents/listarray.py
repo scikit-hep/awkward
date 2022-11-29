@@ -19,6 +19,7 @@ class ListArray(Content):
         starts=unset,
         stops=unset,
         content=unset,
+        *,
         parameters=unset,
         nplike=unset,
     ):
@@ -26,8 +27,8 @@ class ListArray(Content):
             self._starts if starts is unset else starts,
             self._stops if stops is unset else stops,
             self._content if content is unset else content,
-            self._parameters if parameters is unset else parameters,
-            self._nplike if nplike is unset else nplike,
+            parameters=self._parameters if parameters is unset else parameters,
+            nplike=self._nplike if nplike is unset else nplike,
         )
 
     def __copy__(self):
@@ -41,7 +42,7 @@ class ListArray(Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
-    def __init__(self, starts, stops, content, parameters=None, nplike=None):
+    def __init__(self, starts, stops, content, *, parameters=None, nplike=None):
         if not isinstance(starts, Index) and starts.dtype in (
             np.dtype(np.int32),
             np.dtype(np.uint32),
@@ -131,8 +132,8 @@ class ListArray(Content):
             ak.index.Index(self._starts.raw(tt)),
             ak.index.Index(self._stops.raw(tt)),
             self._content.typetracer,
-            self._parameters,
-            tt,
+            parameters=self._parameters,
+            nplike=tt,
         )
 
     @property
@@ -144,8 +145,8 @@ class ListArray(Content):
             self._starts.forget_length(),
             self._stops,
             self._content,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def __repr__(self):
@@ -169,8 +170,8 @@ class ListArray(Content):
             self._starts,
             self._stops,
             self._content,
-            ak._util.merge_parameters(self._parameters, parameters),
-            self._nplike,
+            parameters=ak._util.merge_parameters(self._parameters, parameters),
+            nplike=self._nplike,
         )
 
     def to_ListOffsetArray64(self, start_at_zero=False):
@@ -184,8 +185,8 @@ class ListArray(Content):
             return ListOffsetArray(
                 ak.index.Index(offsets, nplike=self._nplike),
                 self._content,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
         elif self._nplike.index_nplike.array_equal(starts[1:], stops[:-1]):
@@ -200,8 +201,8 @@ class ListArray(Content):
             return ListOffsetArray(
                 ak.index.Index(offsets, nplike=self._nplike),
                 self._content,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             ).to_ListOffsetArray64(start_at_zero=start_at_zero)
 
         else:
@@ -236,8 +237,8 @@ class ListArray(Content):
             self._starts[start:stop],
             self._stops[start:stop],
             self._content,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -245,8 +246,8 @@ class ListArray(Content):
             self._starts,
             self._stops,
             self._content._getitem_field(where, only_fields),
-            None,
-            self._nplike,
+            parameters=None,
+            nplike=self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
@@ -254,8 +255,8 @@ class ListArray(Content):
             self._starts,
             self._stops,
             self._content._getitem_fields(where, only_fields),
-            None,
-            self._nplike,
+            parameters=None,
+            nplike=self._nplike,
         )
 
     def _carry(self, carry, allow_lazy):
@@ -271,8 +272,8 @@ class ListArray(Content):
             nextstarts,
             nextstops,
             self._content,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _compact_offsets64(self, start_at_zero):
@@ -308,7 +309,11 @@ class ListArray(Content):
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
-                    slicestarts, slicestops, slicecontent, None, self._nplike
+                    slicestarts,
+                    slicestops,
+                    slicecontent,
+                    parameters=None,
+                    nplike=self._nplike,
                 ),
                 "cannot fit jagged slice with length {} into {} of size {}".format(
                     slicestarts.length, type(self).__name__, self.length
@@ -355,7 +360,7 @@ class ListArray(Content):
             )
 
             return ak.contents.ListOffsetArray(
-                outoffsets, outcontent, self._parameters, self._nplike
+                outoffsets, outcontent, parameters=self._parameters, nplike=self._nplike
             )
 
         elif isinstance(slicecontent, ak.contents.NumpyArray):
@@ -421,7 +426,7 @@ class ListArray(Content):
             outcontent = nextcontent._getitem_next(nexthead, nexttail, None)
 
             return ak.contents.ListOffsetArray(
-                outoffsets, outcontent, None, self._nplike
+                outoffsets, outcontent, parameters=None, nplike=self._nplike
             )
 
         elif isinstance(slicecontent, ak.contents.IndexedOptionArray):
@@ -429,7 +434,11 @@ class ListArray(Content):
                 raise ak._errors.index_error(
                     self,
                     ak.contents.ListArray(
-                        slicestarts, slicestops, slicecontent, None, self._nplike
+                        slicestarts,
+                        slicestops,
+                        slicecontent,
+                        parameters=None,
+                        nplike=self._nplike,
                     ),
                     "jagged slice length differs from array length",
                 )
@@ -503,7 +512,10 @@ class ListArray(Content):
                 as_list_offset_array = self.to_ListOffsetArray64(True)
                 nextcontent = as_list_offset_array._content._carry(nextcarry, True)
                 next = ak.contents.ListOffsetArray(
-                    smalloffsets, nextcontent, self._parameters, self._nplike
+                    smalloffsets,
+                    nextcontent,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
                 out = next._getitem_next_jagged(
                     smalloffsets[:-1], smalloffsets[1:], slicecontent._content, tail
@@ -521,15 +533,18 @@ class ListArray(Content):
                 else:
                     missing_trim = missing
                 indexedoptionarray = ak.contents.IndexedOptionArray(
-                    missing_trim, content, self._parameters, self._nplike
+                    missing_trim,
+                    content,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
                 if isinstance(self._nplike, ak._typetracer.TypeTracer):
                     indexedoptionarray = indexedoptionarray.typetracer
                 return ak.contents.ListOffsetArray(
                     largeoffsets,
                     indexedoptionarray.simplify_optiontype(),
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
             else:
                 raise ak._errors.wrap_error(
@@ -664,8 +679,8 @@ class ListArray(Content):
                 return ak.contents.ListOffsetArray(
                     nextoffsets,
                     nextcontent._getitem_next(nexthead, nexttail, advanced),
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
             else:
                 if self._nplike.known_shape:
@@ -714,8 +729,8 @@ class ListArray(Content):
                 return ak.contents.ListOffsetArray(
                     nextoffsets,
                     nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
 
         elif isinstance(head, str):
@@ -868,7 +883,7 @@ class ListArray(Content):
             )
 
             return ak.contents.RegularArray(
-                down, headlength, 1, self._parameters, self._nplike
+                down, headlength, 1, parameters=self._parameters, nplike=self._nplike
             )
 
         elif isinstance(head, ak.contents.IndexedOptionArray):
@@ -905,7 +920,7 @@ class ListArray(Content):
                     self.length,
                 )
             )
-            return ak.contents.NumpyArray(tonum, None, self._nplike)
+            return ak.contents.NumpyArray(tonum, parameters=None, nplike=self._nplike)
         else:
             return self.to_ListOffsetArray64(True).num(posaxis, depth)
 
@@ -1061,7 +1076,11 @@ class ListArray(Content):
                 pass
 
         next = ak.contents.ListArray(
-            nextstarts, nextstops, nextcontent, parameters, self._nplike
+            nextstarts,
+            nextstops,
+            nextcontent,
+            parameters=parameters,
+            nplike=self._nplike,
         )
 
         if len(tail) == 0:
@@ -1078,8 +1097,8 @@ class ListArray(Content):
             self._starts,
             self._stops,
             self._content.fill_none(value),
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _local_index(self, axis, depth):
@@ -1108,16 +1127,16 @@ class ListArray(Content):
             return ak.contents.ListOffsetArray(
                 offsets,
                 ak.contents.NumpyArray(localindex),
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
         else:
             return ak.contents.ListArray(
                 self._starts,
                 self._stops,
                 self._content._local_index(posaxis, depth + 1),
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def numbers_to_type(self, name):
@@ -1125,8 +1144,8 @@ class ListArray(Content):
             self._starts,
             self._stops,
             self._content.numbers_to_type(name),
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -1334,24 +1353,24 @@ class ListArray(Content):
                     next = ak.contents.IndexedOptionArray(
                         index,
                         self._content,
-                        None,
-                        self._nplike,
+                        parameters=None,
+                        nplike=self._nplike,
                     )
 
                     return ak.contents.ListArray(
                         starts_,
                         stops_,
                         next.simplify_optiontype(),
-                        self._parameters,
-                        self._nplike,
+                        parameters=self._parameters,
+                        nplike=self._nplike,
                     )
             else:
                 return ak.contents.ListArray(
                     self._starts,
                     self._stops,
                     self._content._pad_none(target, posaxis, depth + 1, clip),
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
         else:
             return self.to_ListOffsetArray64(True)._pad_none(
@@ -1408,8 +1427,8 @@ class ListArray(Content):
                         lateral_context,
                         options,
                     ),
-                    self._parameters if options["keep_parameters"] else None,
-                    self._nplike,
+                    parameters=self._parameters if options["keep_parameters"] else None,
+                    nplike=self._nplike,
                 )
 
         else:

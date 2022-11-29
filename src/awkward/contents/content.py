@@ -331,10 +331,10 @@ class Content:
         nexthead, nexttail = ak._slicing.headtail(tail)
         return ak.contents.RegularArray(
             self._getitem_next(nexthead, nexttail, advanced),
-            1,  # size
-            0,  # zeros_length is irrelevant when the size is 1 (!= 0)
-            None,
-            self._nplike,
+            1,
+            0,
+            parameters=None,
+            nplike=self._nplike,
         )
 
     def _getitem_next_ellipsis(self, tail, advanced: ak.index.Index | None):
@@ -383,15 +383,15 @@ class Content:
         )
 
         out = ak.contents.IndexedOptionArray(
-            outindex, raw.content, self._parameters, self._nplike
+            outindex, raw.content, parameters=self._parameters, nplike=self._nplike
         )
 
         return ak.contents.RegularArray(
             out.simplify_optiontype(),
             indexlength,
             1,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_next_missing_jagged(
@@ -443,14 +443,14 @@ class Content:
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
         out = ak.contents.IndexedOptionArray(
-            outputmask, tmp, self._parameters, self._nplike
+            outputmask, tmp, parameters=self._parameters, nplike=self._nplike
         )
         return ak.contents.RegularArray(
             out.simplify_optiontype(),
             index.length,
             1,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_next_missing(
@@ -512,8 +512,8 @@ class Content:
                 contents,
                 nextcontent._fields,
                 None,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
         else:
@@ -558,8 +558,8 @@ class Content:
                 self,
                 self.length if self._nplike.known_shape else 1,
                 1,
-                None,
-                self._nplike,
+                parameters=None,
+                nplike=self._nplike,
             )
 
             out = next._getitem_next(nextwhere[0], nextwhere[1:], None)
@@ -637,7 +637,9 @@ class Content:
                 return self._getitem(layout)
             else:
                 return self._getitem(
-                    ak.contents.NumpyArray(as_array, None, layout.nplike)
+                    ak.contents.NumpyArray(
+                        as_array, parameters=None, nplike=layout.nplike
+                    )
                 )
 
         else:
@@ -731,7 +733,7 @@ class Content:
                 localindex.length,
             )
         )
-        return ak.contents.NumpyArray(localindex, None, self._nplike)
+        return ak.contents.NumpyArray(localindex, parameters=None, nplike=self._nplike)
 
     def merge(self, other: Content) -> Content:
         others = [other]
@@ -787,7 +789,9 @@ class Content:
             )
         )
 
-        return ak.contents.UnionArray(tags, index, contents, None, self._nplike)
+        return ak.contents.UnionArray(
+            tags, index, contents, parameters=None, nplike=self._nplike
+        )
 
     def _merging_strategy(
         self, others: list[Content]
@@ -1208,11 +1212,15 @@ class Content:
         contents = []
         length = None
         for ptr in tocarry:
-            contents.append(ak.contents.IndexedArray(ptr, self, None, self._nplike))
+            contents.append(
+                ak.contents.IndexedArray(
+                    ptr, self, parameters=None, nplike=self._nplike
+                )
+            )
             length = contents[-1].length
         assert length is not None
         return ak.contents.RecordArray(
-            contents, recordlookup, length, parameters, self._nplike
+            contents, recordlookup, length, parameters=parameters, nplike=self._nplike
         )
 
     def combinations(
@@ -1489,8 +1497,8 @@ class Content:
         next = ak.contents.IndexedOptionArray(
             index,
             self,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
         return next.simplify_optiontype()
 
@@ -1814,4 +1822,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _repr(self, indent: str, pre: str, post: str) -> str:
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    def numbers_to_type(self, name: str) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)

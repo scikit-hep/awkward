@@ -14,6 +14,7 @@ class UnionForm(Form):
         tags,
         index,
         contents,
+        *,
         parameters=None,
         form_key=None,
     ):
@@ -96,7 +97,7 @@ class UnionForm(Form):
     def _type(self, typestrs):
         return ak.types.UnionType(
             [x._type(typestrs) for x in self._contents],
-            self._parameters,
+            parameters=self._parameters,
             typestr=ak._util.gettypestr(self._parameters, typestrs),
         )
 
@@ -203,7 +204,9 @@ class UnionForm(Form):
                 contents.append(next_content)
 
         if len(contents) == 0:
-            return ak.forms.EmptyForm(self._parameters, self._form_key)
+            return ak.forms.EmptyForm(
+                parameters=self._parameters, form_key=self._form_key
+            )
         elif len(contents) == 1:
             return contents[0]
         else:
@@ -211,8 +214,8 @@ class UnionForm(Form):
                 self._tags,
                 self._index,
                 contents,
-                self._parameters,
-                self._form_key,
+                parameters=self._parameters,
+                form_key=self._form_key,
             )
 
     def _column_types(self):

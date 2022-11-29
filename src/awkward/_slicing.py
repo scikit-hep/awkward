@@ -514,5 +514,5 @@ def getitem_next_array_wrap(outcontent, shape, outer_length=0):
         size = shape[i]
         if isinstance(size, ak._typetracer.UnknownLengthType):
             size = 1
-        outcontent = ak.contents.RegularArray(outcontent, size, length, None)
+        outcontent = ak.contents.RegularArray(outcontent, size, length, parameters=None)
     return outcontent
