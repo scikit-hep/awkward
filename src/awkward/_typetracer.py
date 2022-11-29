@@ -21,8 +21,18 @@ class NoError:
 
 
 class NoKernel:
+    def __init__(self, index):
+        self._name_and_types = index
+
     def __call__(self, *args):
         return NoError()
+
+    def __repr__(self):
+        return "<{} {}{}>".format(
+            type(self).__name__,
+            self._name_and_types[0],
+            "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
+        )
 
 
 class UnknownLengthType:
@@ -488,7 +498,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def __getitem__(self, name_and_types):
-        return NoKernel()
+        return NoKernel(name_and_types)
 
     @property
     def ma(self):

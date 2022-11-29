@@ -392,34 +392,36 @@ class NumpyKernel:
             "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
         )
 
-    @staticmethod
-    def _cast(x, t):
+    @classmethod
+    def _cast(cls, x, t):
         if issubclass(t, ctypes._Pointer):
-
+            # Do we have a NumPy-owned array?
             if Numpy.is_own_array(x):
                 return ctypes.cast(x.ctypes.data, t)
-            elif Cupy.is_own_array(x):
+            # Or, do we have a ctypes type
+            elif hasattr(x, "_b_base_"):
+                return ctypes.cast(x, t)
+            else:
                 raise ak._errors.wrap_error(
                     AssertionError("CuPy buffers shouldn't be passed to Numpy Kernels.")
                 )
-            elif Jax.is_own_array(x):
-                raise ak._errors.wrap_error(
-                    ValueError(
-                        "JAX Buffers can't be passed as function args for the C Kernels"
-                    )
-                )
-            else:
-                return ctypes.cast(x, t)
         else:
             return x
 
     def __call__(self, *args):
         assert len(args) == len(self._kernel.argtypes)
 
+        return self._kernel(
+            *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
+        )
+
+
+class JaxKernel(NumpyKernel):
+    def __call__(self, *args):
+        assert len(args) == len(self._kernel.argtypes)
+
         if not any(Jax.is_tracer(arg) for arg in args):
-            return self._kernel(
-                *(self._cast(x, t) for x, t in zip(args, self._kernel.argtypes))
-            )
+            return super().__call__(*args)
 
 
 class CupyKernel(NumpyKernel):
@@ -811,9 +813,7 @@ class Jax(NumpyLike):
             )
 
     def __getitem__(self, name_and_types):
-        return NumpyKernel(
-            awkward_cpp.cpu_kernels.kernel[name_and_types], name_and_types
-        )
+        return JaxKernel(awkward_cpp.cpu_kernels.kernel[name_and_types], name_and_types)
 
     def __init__(self):
         jax = ak.jax.import_jax()
