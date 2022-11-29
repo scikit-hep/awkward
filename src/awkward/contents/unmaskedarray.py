@@ -21,8 +21,8 @@ class UnmaskedArray(Content):
     ):
         return UnmaskedArray(
             self._content if content is unset else content,
-            self._parameters if parameters is unset else parameters,
-            self._nplike if nplike is unset else nplike,
+            parameters=self._parameters if parameters is unset else parameters,
+            nplike=self._nplike if nplike is unset else nplike,
         )
 
     def __copy__(self):
@@ -34,7 +34,7 @@ class UnmaskedArray(Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
-    def __init__(self, content, parameters=None, nplike=None):
+    def __init__(self, content, *, parameters=None, nplike=None):
         if not isinstance(content, Content):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -71,9 +71,7 @@ class UnmaskedArray(Content):
     def typetracer(self):
         tt = ak._typetracer.TypeTracer.instance()
         return UnmaskedArray(
-            self._content.typetracer,
-            self._parameters,
-            tt,
+            self._content.typetracer, parameters=self._parameters, nplike=tt
         )
 
     @property
@@ -83,8 +81,8 @@ class UnmaskedArray(Content):
     def _forget_length(self):
         return UnmaskedArray(
             self._content._forget_length(),
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def __repr__(self):
@@ -104,8 +102,8 @@ class UnmaskedArray(Content):
     def merge_parameters(self, parameters):
         return UnmaskedArray(
             self._content,
-            ak._util.merge_parameters(self._parameters, parameters),
-            self._nplike,
+            parameters=ak._util.merge_parameters(self._parameters, parameters),
+            nplike=self._nplike,
         )
 
     def to_IndexedOptionArray64(self):
@@ -171,29 +169,29 @@ class UnmaskedArray(Content):
         assert step == 1
         return UnmaskedArray(
             self._content._getitem_range(slice(start, stop)),
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_field(self, where, only_fields=()):
         return UnmaskedArray(
             self._content._getitem_field(where, only_fields),
-            None,
-            self._nplike,
+            parameters=None,
+            nplike=self._nplike,
         )
 
     def _getitem_fields(self, where, only_fields=()):
         return UnmaskedArray(
             self._content._getitem_fields(where, only_fields),
-            None,
-            self._nplike,
+            parameters=None,
+            nplike=self._nplike,
         )
 
     def _carry(self, carry, allow_lazy):
         return UnmaskedArray(
             self._content._carry(carry, allow_lazy),
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
@@ -201,8 +199,8 @@ class UnmaskedArray(Content):
             self._content._getitem_next_jagged(
                 slicestarts, slicestops, slicecontent, tail
             ),
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_next(self, head, tail, advanced):
@@ -214,8 +212,8 @@ class UnmaskedArray(Content):
         ):
             return UnmaskedArray(
                 self._content._getitem_next(head, tail, advanced),
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             ).simplify_optiontype()
 
         elif isinstance(head, str):
@@ -273,7 +271,9 @@ class UnmaskedArray(Content):
                 return out
         else:
             return ak.contents.UnmaskedArray(
-                self._content.num(posaxis, depth), self._parameters, self._nplike
+                self._content.num(posaxis, depth),
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -285,7 +285,9 @@ class UnmaskedArray(Content):
             if offsets.length == 0:
                 return (
                     offsets,
-                    UnmaskedArray(flattened, self._parameters, self._nplike),
+                    UnmaskedArray(
+                        flattened, parameters=self._parameters, nplike=self._nplike
+                    ),
                 )
 
             else:
@@ -323,8 +325,8 @@ class UnmaskedArray(Content):
 
             return UnmaskedArray(
                 self._content.mergemany(tail_contents),
-                parameters,
-                self._nplike,
+                parameters=parameters,
+                nplike=self._nplike,
             )
 
         else:
@@ -340,15 +342,15 @@ class UnmaskedArray(Content):
         else:
             return UnmaskedArray(
                 self._content._local_index(posaxis, depth),
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def numbers_to_type(self, name):
         return ak.contents.UnmaskedArray(
             self._content.numbers_to_type(name),
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -387,9 +389,7 @@ class UnmaskedArray(Content):
 
         if isinstance(out, ak.contents.RegularArray):
             tmp = ak.contents.UnmaskedArray(
-                out._content,
-                None,
-                self._nplike,
+                out._content, parameters=None, nplike=self._nplike
             ).simplify_optiontype()
 
             return ak.contents.RegularArray(
@@ -415,9 +415,7 @@ class UnmaskedArray(Content):
 
         if isinstance(out, ak.contents.RegularArray):
             tmp = ak.contents.UnmaskedArray(
-                out._content,
-                self._parameters,
-                self._nplike,
+                out._content, parameters=self._parameters, nplike=self._nplike
             ).simplify_optiontype()
 
             return ak.contents.RegularArray(
@@ -440,8 +438,8 @@ class UnmaskedArray(Content):
                 self._content._combinations(
                     n, replacement, recordlookup, parameters, posaxis, depth
                 ),
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def _reduce_next(
@@ -495,8 +493,8 @@ class UnmaskedArray(Content):
         else:
             return ak.contents.UnmaskedArray(
                 self._content._pad_none(target, posaxis, depth, clip),
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -531,8 +529,8 @@ class UnmaskedArray(Content):
                         lateral_context,
                         options,
                     ),
-                    self._parameters if options["keep_parameters"] else None,
-                    self._nplike,
+                    parameters=self._parameters if options["keep_parameters"] else None,
+                    nplike=self._nplike,
                 )
 
         else:
@@ -566,7 +564,9 @@ class UnmaskedArray(Content):
             raise ak._errors.wrap_error(AssertionError(result))
 
     def packed(self):
-        return UnmaskedArray(self._content.packed(), self._parameters, self._nplike)
+        return UnmaskedArray(
+            self._content.packed(), parameters=self._parameters, nplike=self._nplike
+        )
 
     def _to_list(self, behavior, json_conversions):
         out = self._to_list_custom(behavior, json_conversions)

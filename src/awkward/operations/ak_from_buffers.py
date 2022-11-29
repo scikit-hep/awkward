@@ -149,7 +149,7 @@ def reconstitute(form, length, container, getkey, nplike):
 
     elif isinstance(form, ak.forms.UnmaskedForm):
         content = reconstitute(form.content, length, container, getkey, nplike)
-        return ak.contents.UnmaskedArray(content, form.parameters)
+        return ak.contents.UnmaskedArray(content, parameters=form.parameters)
 
     elif isinstance(form, ak.forms.BitMaskedForm):
         raw_array = container[getkey(form, "mask")]
