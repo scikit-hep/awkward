@@ -178,7 +178,7 @@ class EmptyArray(Content):
             else:
                 return out
         else:
-            out = ak.index.Index64.empty(0, self._nplike)
+            out = ak.index.Index64.empty(0, self._index_nplike)
             return ak.contents.NumpyArray(out, None, self._nplike, self._index_nplike)
 
     def _offsets_and_flattened(self, axis, depth):
@@ -188,7 +188,7 @@ class EmptyArray(Content):
                 np.AxisError(self, "axis=0 not allowed for flatten")
             )
         else:
-            offsets = ak.index.Index64.zeros(1, self._nplike)
+            offsets = ak.index.Index64.zeros(1, self._index_nplike)
             return (
                 offsets,
                 EmptyArray(self._parameters, self._nplike, self._index_nplike),

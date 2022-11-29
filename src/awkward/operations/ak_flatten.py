@@ -129,9 +129,7 @@ def _impl(array, axis, highlevel, behavior):
                     return layout
 
                 tags = index_nplike.asarray(layout.tags)
-                index = index_nplike.array(
-                    nplike.asarray(layout.index), copy=True
-                )
+                index = index_nplike.array(nplike.asarray(layout.index), copy=True)
                 bigmask = index_nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):
                     if content.is_option and not isinstance(

@@ -214,9 +214,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         nextinputs.append(
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
-                                    index_nplike.arange(
-                                        length + 1, dtype=np.int64
-                                    ),
+                                    index_nplike.arange(length + 1, dtype=np.int64),
                                     nplike=nplike,
                                 ),
                                 ak.contents.NumpyArray(
@@ -237,9 +235,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                     all_counts.append(c)
                     all_flatten.append(f)
 
-                offsets = index_nplike.empty(
-                    len(nextinputs[0]) + 1, dtype=np.int64
-                )
+                offsets = index_nplike.empty(len(nextinputs[0]) + 1, dtype=np.int64)
                 offsets[0] = 0
                 index_nplike.cumsum(counts, out=offsets[1:])
 

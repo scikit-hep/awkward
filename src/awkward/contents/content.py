@@ -383,12 +383,14 @@ class Content:
     ):
         # if this is in a tuple-slice and really should be 0, it will be trimmed later
         length = 1 if length == 0 else length
-        index = ak.index.Index64(head.index, nplike=self.nplike)
+        index = ak.index.Index64(head.index, nplike=self._index_nplike)
         indexlength = index.length
         index = index._to_nplike(self.nplike)
-        outindex = ak.index.Index64.empty(index.length * length, self._nplike)
+        outindex = ak.index.Index64.empty(index.length * length, self._index_nplike)
 
-        assert outindex.index_nplike is self._index_nplike and index.index_nplike is self._index_nplike
+        assert (
+            outindex.nplike is self._index_nplike and index.nplike is self._index_nplike
+        )
         self._handle_error(
             self._nplike[
                 "awkward_missing_repeat", outindex.dtype.type, index.dtype.type
@@ -417,7 +419,7 @@ class Content:
         head = head._to_nplike(self._nplike)
         jagged = head.content.to_ListOffsetArray64()
 
-        index = ak.index.Index64(head._index, nplike=self.nplike)
+        index = ak.index.Index64(head._index, nplike=self._index_nplike)
         content = that._getitem_at(0)
         if self._nplike.known_shape and content.length < index.length:
             raise ak._errors.index_error(
@@ -428,16 +430,16 @@ class Content:
                 ),
             )
 
-        outputmask = ak.index.Index64.empty(index.length, self._nplike)
-        starts = ak.index.Index64.empty(index.length, self._nplike)
-        stops = ak.index.Index64.empty(index.length, self._nplike)
+        outputmask = ak.index.Index64.empty(index.length, self._index_nplike)
+        starts = ak.index.Index64.empty(index.length, self._index_nplike)
+        stops = ak.index.Index64.empty(index.length, self._index_nplike)
 
         assert (
-            index.index_nplike is self._index_nplike
-            and jagged._offsets.index_nplike is self._index_nplike
-            and outputmask.index_nplike is self._index_nplike
-            and starts.index_nplike is self._index_nplike
-            and stops.index_nplike is self._index_nplike
+            index.nplike is self._index_nplike
+            and jagged._offsets.nplike is self._index_nplike
+            and outputmask.nplike is self._index_nplike
+            and starts.nplike is self._index_nplike
+            and stops.nplike is self._index_nplike
         )
         self._handle_error(
             self._nplike[
@@ -608,7 +610,7 @@ class Content:
             elif issubclass(where.dtype.type, (np.bool_, bool)):
                 if len(where.data.shape) == 1:
                     where = self._nplike.nonzero(where.data)[0]
-                    carry = ak.index.Index64(where, nplike=self.nplike)
+                    carry = ak.index.Index64(where, nplike=self._index_nplike)
                     allow_lazy = "copied"  # True, but also can be modified in-place
                 else:
                     wheres = self._nplike.nonzero(where.data)
@@ -644,7 +646,7 @@ class Content:
         elif ak._util.is_sized_iterable(where):
             layout = ak.operations.to_layout(where)._to_nplike(self._nplike)
             assert layout.nplike is self._nplike
-            assert layout.index_nplike is self._index_nplike
+            assert layout.nplike is self._index_nplike
             as_array = layout.maybe_to_array(layout.nplike)
             if as_array is None:
                 return self._getitem(layout)
@@ -688,7 +690,7 @@ class Content:
         assert isinstance(carry, ak.index.Index)
 
         result = self._index_nplike.empty(1, dtype=np.bool_)
-        assert carry.index_nplike is self._index_nplike
+        assert carry.nplike is self._index_nplike
         self._handle_error(
             self._nplike[
                 "awkward_Index_iscontiguous",  # badly named
@@ -739,7 +741,7 @@ class Content:
         return axis
 
     def _local_index_axis0(self) -> ak.contents.NumpyArray:
-        localindex = ak.index.Index64.empty(self.length, self._nplike)
+        localindex = ak.index.Index64.empty(self.length, self._index_nplike)
         self._handle_error(
             self._nplike["awkward_localindex", np.int64](
                 localindex.data,
@@ -781,13 +783,13 @@ class Content:
         tags = ak.index.Index8.empty((mylength + theirlength), self._nplike)
         index = ak.index.Index64.empty((mylength + theirlength), self._nplike)
         contents = [self, other]
-        assert tags.index_nplike is self._index_nplike
+        assert tags.nplike is self._index_nplike
         self._handle_error(
             self._nplike["awkward_UnionArray_filltags_const", tags.dtype.type](
                 tags.data, 0, mylength, 0
             )
         )
-        assert index.index_nplike is self._index_nplike
+        assert index.nplike is self._index_nplike
         self._handle_error(
             self._nplike["awkward_UnionArray_fillindex_count", index.dtype.type](
                 index.data, 0, mylength
@@ -911,8 +913,8 @@ class Content:
                     )
                 )
 
-        starts = ak.index.Index64.zeros(1, self._nplike)
-        parents = ak.index.Index64.zeros(self.length, self._nplike)
+        starts = ak.index.Index64.zeros(1, self._index_nplike)
+        parents = ak.index.Index64.zeros(self.length, self._index_nplike)
         shifts = None
         next = self._reduce_next(
             reducer,
@@ -1079,8 +1081,8 @@ class Content:
                     )
                 )
 
-        starts = ak.index.Index64.zeros(1, self._nplike)
-        parents = ak.index.Index64.zeros(self.length, self._nplike)
+        starts = ak.index.Index64.zeros(1, self._index_nplike)
+        parents = ak.index.Index64.zeros(self.length, self._index_nplike)
         return self._argsort_next(
             negaxis,
             starts,
@@ -1146,8 +1148,8 @@ class Content:
                     )
                 )
 
-        starts = ak.index.Index64.zeros(1, self._nplike)
-        parents = ak.index.Index64.zeros(self.length, self._nplike)
+        starts = ak.index.Index64.zeros(1, self._index_nplike)
+        parents = ak.index.Index64.zeros(self.length, self._index_nplike)
         return self._sort_next(
             negaxis,
             starts,
@@ -1207,7 +1209,10 @@ class Content:
         toindex = ak.index.Index64.empty(n, self._nplike, dtype=np.int64)
         fromindex = ak.index.Index64.empty(n, self._nplike, dtype=np.int64)
 
-        assert toindex.index_nplike is self._index_nplike and fromindex.index_nplike is self._index_nplike
+        assert (
+            toindex.nplike is self._index_nplike
+            and fromindex.nplike is self._index_nplike
+        )
         self._handle_error(
             self._nplike[
                 "awkward_RegularArray_combinations_64",
@@ -1385,8 +1390,8 @@ class Content:
 
     def is_unique(self, axis: Integral | None = None) -> bool:
         negaxis = axis if axis is None else -axis
-        starts = ak.index.Index64.zeros(1, self._nplike)
-        parents = ak.index.Index64.zeros(self.length, self._nplike)
+        starts = ak.index.Index64.zeros(1, self._index_nplike)
+        parents = ak.index.Index64.zeros(self.length, self._index_nplike)
         return self._is_unique(negaxis, starts, parents, 1)
 
     def _is_unique(
@@ -1433,8 +1438,8 @@ class Content:
                             )
                         )
 
-            starts = ak.index.Index64.zeros(1, self._nplike)
-            parents = ak.index.Index64.zeros(self.length, self._nplike)
+            starts = ak.index.Index64.zeros(1, self._index_nplike)
+            parents = ak.index.Index64.zeros(self.length, self._index_nplike)
 
             return self._unique(negaxis, starts, parents, 1)
 
@@ -1495,9 +1500,9 @@ class Content:
             )
 
         else:
-            index = ak.index.Index64.empty(target, self._nplike)
+            index = ak.index.Index64.empty(target, self._index_nplike)
 
-            assert index.index_nplike is self._index_nplike
+            assert index.nplike is self._index_nplike
             self._handle_error(
                 self._nplike[
                     "awkward_index_rpad_and_clip_axis0",

@@ -39,9 +39,9 @@ def _impl(array, highlevel, behavior):
         index_nplike = ak.nplikes.index_nplike_for(nplike)
 
         if layout.is_option:
-            nulls = index_nplike.asarray(
-                layout.mask_as_bool(valid_when=False)
-            ).view(np.bool_)
+            nulls = index_nplike.asarray(layout.mask_as_bool(valid_when=False)).view(
+                np.bool_
+            )
             offsets = index_nplike.ones(len(layout) + 1, dtype=np.int64)
             offsets[0] = 0
             offsets[1:][nulls] = 0

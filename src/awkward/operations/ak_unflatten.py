@@ -170,14 +170,10 @@ def _impl(array, counts, axis, highlevel, behavior):
                     inneroffsets = index_nplike.asarray(content.offsets)
 
                 positions = (
-                    index_nplike.searchsorted(
-                        inneroffsets, outeroffsets, side="right"
-                    )
+                    index_nplike.searchsorted(inneroffsets, outeroffsets, side="right")
                     - 1
                 )
-                if not index_nplike.array_equal(
-                    inneroffsets[positions], outeroffsets
-                ):
+                if not index_nplike.array_equal(inneroffsets[positions], outeroffsets):
                     raise ak._errors.wrap_error(
                         ValueError(
                             "structure imposed by 'counts' does not fit in the array or partition "

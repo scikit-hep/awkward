@@ -357,9 +357,7 @@ def normalise_item_bool_to_int(item):
             localindex = item.local_index(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
-            cumsum = item.index_nplike.empty(
-                item.content.data.shape[0] + 1, np.int64
-            )
+            cumsum = item.index_nplike.empty(item.content.data.shape[0] + 1, np.int64)
             cumsum[0] = 0
             cumsum[1:] = item.index_nplike.asarray(
                 item.nplike.cumsum(item.content.data)

@@ -27,9 +27,7 @@ class Index:
                 TypeError("Index metadata must be None or a dict")
             )
         self._metadata = metadata
-        self._data = self._nplike.asarray(
-            data, dtype=self._expected_dtype, order="C"
-        )
+        self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
         if len(self._data.shape) != 1:
             raise ak._errors.wrap_error(TypeError("Index data must be one-dimensional"))
 
@@ -66,10 +64,6 @@ class Index:
                         "while developing, we want to catch these errors"
                     )
                 )
-
-    @property
-    def index_nplike(self):
-        return self.nplike
 
     @classmethod
     def zeros(cls, length, nplike, dtype=None):
@@ -135,9 +129,9 @@ class Index:
         out.append(" len=")
         out.append(repr(str(self._data.shape[0])))
 
-        arraystr_lines = self._nplike.array_str(
-            self._data, max_line_width=30
-        ).split("\n")
+        arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
+            "\n"
+        )
         if len(arraystr_lines) > 1 or self._metadata is not None:
             arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
@@ -206,9 +200,7 @@ class Index:
     def _to_nplike(self, nplike):
         # if isinstance(nplike, ak.nplikes.Jax):
         #     print("YES OFFICER, this nplike right here")
-        return Index(
-            self.raw(nplike), metadata=self.metadata, nplike=nplike
-        )
+        return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
     def layout_equal(self, other, index_dtype=True, numpyarray=True):
         if index_dtype:

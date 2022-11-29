@@ -196,9 +196,7 @@ def reconstitute(form, length, container, getkey, nplike, index_nplike):
         index = from_buffer_or_array(
             index_nplike, raw_array, _index_to_dtype[form.index], length
         )
-        next_length = (
-            0 if len(index) == 0 else max(0, index_nplike.max(index) + 1)
-        )
+        next_length = 0 if len(index) == 0 else max(0, index_nplike.max(index) + 1)
         return ak.contents.IndexedOptionArray(
             ak.index.Index(index),
             reconstitute(
