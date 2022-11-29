@@ -1513,8 +1513,8 @@ class IndexedOptionArray(Content):
         next = ak.contents.IndexedArray(
             ak.index.Index(index),
             self._content,
-            next_parameters,
-            self._nplike,
+            parameters=next_parameters,
+            nplike=self._nplike,
         )
         return next._to_arrow(
             pyarrow,

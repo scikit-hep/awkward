@@ -201,7 +201,7 @@ def reconstitute(form, length, container, getkey, nplike):
         return ak.contents.IndexedArray(
             ak.index.Index(index),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.ListForm):

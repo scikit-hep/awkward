@@ -876,7 +876,7 @@ def remove_optiontype(akarray):
     assert type(akarray).is_option
     if isinstance(akarray, ak.contents.IndexedOptionArray):
         return ak.contents.IndexedArray(
-            akarray.index, akarray.content, akarray.parameters
+            akarray.index, akarray.content, parameters=akarray.parameters
         )
     else:
         return akarray.content

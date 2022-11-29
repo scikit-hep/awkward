@@ -374,10 +374,7 @@ class RecordArray(Content):
 
             nextindex = ak.index.Index64(where, nplike=self.nplike)
             return ak.contents.IndexedArray(
-                nextindex,
-                self,
-                None,
-                self._nplike,
+                nextindex, self, parameters=None, nplike=self._nplike
             )
 
         else:

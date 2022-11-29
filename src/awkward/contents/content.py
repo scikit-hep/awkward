@@ -1208,7 +1208,11 @@ class Content:
         contents = []
         length = None
         for ptr in tocarry:
-            contents.append(ak.contents.IndexedArray(ptr, self, None, self._nplike))
+            contents.append(
+                ak.contents.IndexedArray(
+                    ptr, self, parameters=None, nplike=self._nplike
+                )
+            )
             length = contents[-1].length
         assert length is not None
         return ak.contents.RecordArray(
