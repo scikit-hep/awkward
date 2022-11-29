@@ -143,7 +143,7 @@ class IndexedArray(Content):
 
     def to_IndexedOptionArray64(self):
         return ak.contents.IndexedOptionArray(
-            self._index, self._content, self._parameters, self._nplike
+            self._index, self._content, parameters=self._parameters, nplike=self._nplike
         )
 
     def mask_as_bool(self, valid_when=True):
@@ -325,8 +325,8 @@ class IndexedArray(Content):
             next = ak.contents.IndexedOptionArray(
                 nextindex,
                 self._content,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
             return next.project()
 
@@ -421,8 +421,8 @@ class IndexedArray(Content):
                 return ak.contents.IndexedOptionArray(
                     result,
                     self._content.content,
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
 
         else:
@@ -799,8 +799,8 @@ class IndexedArray(Content):
             return ak.contents.IndexedOptionArray(
                 nextoutindex,
                 unique,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             ).simplify_optiontype()
 
         if not branch and negaxis == depth:
@@ -859,8 +859,8 @@ class IndexedArray(Content):
                 out = ak.contents.IndexedOptionArray(
                     nextoutindex,
                     unique,
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 ).simplify_optiontype()
 
                 return out

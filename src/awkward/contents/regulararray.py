@@ -1176,8 +1176,8 @@ class RegularArray(Content):
                 next = ak.contents.IndexedOptionArray(
                     index,
                     self._content,
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
                 return ak.contents.RegularArray(
                     next.simplify_optiontype(),

@@ -56,7 +56,7 @@ def _impl(array, highlevel, behavior):
                 ak.contents.IndexedOptionArray(
                     layout.index,
                     layout.content,
-                    layout.parameters,
+                    parameters=layout.parameters,
                 )
             )
 

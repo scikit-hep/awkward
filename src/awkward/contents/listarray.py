@@ -521,7 +521,10 @@ class ListArray(Content):
                 else:
                     missing_trim = missing
                 indexedoptionarray = ak.contents.IndexedOptionArray(
-                    missing_trim, content, self._parameters, self._nplike
+                    missing_trim,
+                    content,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
                 if isinstance(self._nplike, ak._typetracer.TypeTracer):
                     indexedoptionarray = indexedoptionarray.typetracer
@@ -1334,8 +1337,8 @@ class ListArray(Content):
                     next = ak.contents.IndexedOptionArray(
                         index,
                         self._content,
-                        None,
-                        self._nplike,
+                        parameters=None,
+                        nplike=self._nplike,
                     )
 
                     return ak.contents.ListArray(

@@ -1781,8 +1781,8 @@ class ListOffsetArray(Content):
                 next = ak.contents.IndexedOptionArray(
                     outindex,
                     self._content,
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
                 return ak.contents.ListOffsetArray(
                     offsets_,
@@ -1829,8 +1829,8 @@ class ListOffsetArray(Content):
                 next = ak.contents.IndexedOptionArray(
                     outindex,
                     self._content,
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
                 return ak.contents.RegularArray(
                     next.simplify_optiontype(),

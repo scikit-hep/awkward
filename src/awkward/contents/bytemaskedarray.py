@@ -186,7 +186,7 @@ class ByteMaskedArray(Content):
         )
 
         return ak.contents.IndexedOptionArray(
-            index, self._content, self._parameters, self._nplike
+            index, self._content, parameters=self._parameters, nplike=self._nplike
         )
 
     def to_ByteMaskedArray(self, valid_when):
@@ -402,7 +402,7 @@ class ByteMaskedArray(Content):
         out = next._getitem_next_jagged(reducedstarts, reducedstops, slicecontent, tail)
 
         out2 = ak.contents.IndexedOptionArray(
-            outindex, out, self._parameters, self._nplike
+            outindex, out, parameters=self._parameters, nplike=self._nplike
         )
         return out2.simplify_optiontype()
 
@@ -426,8 +426,8 @@ class ByteMaskedArray(Content):
             out2 = ak.contents.IndexedOptionArray(
                 outindex,
                 out,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
             return out2.simplify_optiontype()
 
@@ -556,7 +556,7 @@ class ByteMaskedArray(Content):
             out = next.num(posaxis, depth)
 
             out2 = ak.contents.IndexedOptionArray(
-                outindex, out, self.parameters, self._nplike
+                outindex, out, parameters=self.parameters, nplike=self._nplike
             )
             return out2.simplify_optiontype()
 
@@ -575,7 +575,10 @@ class ByteMaskedArray(Content):
                 return (
                     offsets,
                     ak.contents.IndexedOptionArray(
-                        outindex, flattened, self._parameters, self._nplike
+                        outindex,
+                        flattened,
+                        parameters=self._parameters,
+                        nplike=self._nplike,
                     ),
                 )
 
@@ -668,8 +671,8 @@ class ByteMaskedArray(Content):
             out2 = ak.contents.IndexedOptionArray(
                 outindex,
                 out,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
             return out2.simplify_optiontype()
 
@@ -750,7 +753,7 @@ class ByteMaskedArray(Content):
                 n, replacement, recordlookup, parameters, posaxis, depth
             )
             out2 = ak.contents.IndexedOptionArray(
-                outindex, out, parameters, self._nplike
+                outindex, out, parameters=parameters, nplike=self._nplike
             )
             return out2.simplify_optiontype()
 
@@ -904,8 +907,8 @@ class ByteMaskedArray(Content):
             tmp = ak.contents.IndexedOptionArray(
                 outindex,
                 out_content,
-                None,
-                self._nplike,
+                parameters=None,
+                nplike=self._nplike,
             ).simplify_optiontype()
 
             return ak.contents.ListOffsetArray(
@@ -958,8 +961,8 @@ class ByteMaskedArray(Content):
             return ak.contents.IndexedOptionArray(
                 index,
                 next,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             ).simplify_optiontype()
         else:
             return ak.contents.ByteMaskedArray(
@@ -1057,8 +1060,8 @@ class ByteMaskedArray(Content):
             return ak.contents.IndexedOptionArray(
                 next._index,
                 content,
-                next._parameters,
-                self._nplike,
+                parameters=next._parameters,
+                nplike=self._nplike,
             )
 
         else:

@@ -113,8 +113,8 @@ class UnmaskedArray(Content):
         return ak.contents.IndexedOptionArray(
             ak.index.Index64(arange, nplike=self.nplike),
             self._content,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def to_ByteMaskedArray(self, valid_when):

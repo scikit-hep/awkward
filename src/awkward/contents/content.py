@@ -383,7 +383,7 @@ class Content:
         )
 
         out = ak.contents.IndexedOptionArray(
-            outindex, raw.content, self._parameters, self._nplike
+            outindex, raw.content, parameters=self._parameters, nplike=self._nplike
         )
 
         return ak.contents.RegularArray(
@@ -443,7 +443,7 @@ class Content:
 
         tmp = content._getitem_next_jagged(starts, stops, jagged.content, tail)
         out = ak.contents.IndexedOptionArray(
-            outputmask, tmp, self._parameters, self._nplike
+            outputmask, tmp, parameters=self._parameters, nplike=self._nplike
         )
         return ak.contents.RegularArray(
             out.simplify_optiontype(),
@@ -1489,8 +1489,8 @@ class Content:
         next = ak.contents.IndexedOptionArray(
             index,
             self,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
         return next.simplify_optiontype()
 
@@ -1814,4 +1814,7 @@ class Content:
         raise ak._errors.wrap_error(NotImplementedError)
 
     def _repr(self, indent: str, pre: str, post: str) -> str:
+        raise ak._errors.wrap_error(NotImplementedError)
+
+    def numbers_to_type(self, name: str) -> Self:
         raise ak._errors.wrap_error(NotImplementedError)

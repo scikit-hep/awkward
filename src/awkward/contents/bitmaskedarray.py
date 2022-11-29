@@ -238,8 +238,8 @@ class BitMaskedArray(Content):
         return ak.contents.IndexedOptionArray(
             index[0 : self._length],
             self._content,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def to_ByteMaskedArray(self):
@@ -668,8 +668,8 @@ class BitMaskedArray(Content):
             return ak.contents.IndexedOptionArray(
                 next._index,
                 content,
-                next._parameters,
-                self._nplike,
+                parameters=next._parameters,
+                nplike=self._nplike,
             )
 
         else:
