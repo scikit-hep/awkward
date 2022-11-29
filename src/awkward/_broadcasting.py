@@ -118,9 +118,7 @@ def all_same_offsets(nplike, inputs):
                 return False
 
             elif offsets is None:
-                offsets = index_nplike.empty(
-                    starts.shape[0] + 1, dtype=starts.dtype
-                )
+                offsets = index_nplike.empty(starts.shape[0] + 1, dtype=starts.dtype)
                 if offsets.shape[0] == 1:
                     offsets[0] = 0
                 else:
@@ -600,9 +598,7 @@ def apply_step(
                 )
                 index = Index64(index)
                 if any(not isinstance(x, optiontypes) for x in inputs):
-                    nextindex = index_nplike.arange(
-                        mask.shape[0], dtype=np.int64
-                    )
+                    nextindex = index_nplike.arange(mask.shape[0], dtype=np.int64)
                     nextindex[mask] = -1
                     nextindex = Index64(nextindex)
 
@@ -622,9 +618,7 @@ def apply_step(
                 nextinputs = []
                 for x in inputs:
                     if isinstance(x, optiontypes):
-                        index = Index64(
-                            index_nplike.empty((x.length,), np.int64)
-                        )
+                        index = Index64(index_nplike.empty((x.length,), np.int64))
                         nextinputs.append(x.content)
                     else:
                         nextinputs.append(x)
@@ -662,9 +656,7 @@ def apply_step(
                             if maxsize > 1 and x.size == 1:
                                 tmpindex = Index64(
                                     index_nplike.repeat(
-                                        index_nplike.arange(
-                                            x.length, dtype=np.int64
-                                        ),
+                                        index_nplike.arange(x.length, dtype=np.int64),
                                         maxsize,
                                     ),
                                     nplike=nplike,
@@ -733,17 +725,13 @@ def apply_step(
                 for x in inputs:
                     if isinstance(x, ListOffsetArray):
                         offsets = Index64(
-                            index_nplike.empty(
-                                (x.offsets.data.shape[0],), np.int64
-                            ),
+                            index_nplike.empty((x.offsets.data.shape[0],), np.int64),
                             nplike=nplike,
                         )
                         nextinputs.append(x.content)
                     elif isinstance(x, ListArray):
                         offsets = Index64(
-                            index_nplike.empty(
-                                (x.starts.data.shape[0] + 1,), np.int64
-                            ),
+                            index_nplike.empty((x.starts.data.shape[0] + 1,), np.int64),
                             nplike=nplike,
                         )
                         nextinputs.append(x.content)
