@@ -279,7 +279,7 @@ class RecordArray(Content):
         return self._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if self._nplike.known_data and where < 0:
+        if self._backend.nplike.known_data and where < 0:
             where += self.length
 
         if where < 0 or where >= self.length:
@@ -287,7 +287,7 @@ class RecordArray(Content):
         return Record(self, where)
 
     def _getitem_range(self, where):
-        if not self._nplike.known_shape:
+        if not self._backend.nplike.known_shape:
             return self
 
         start, stop, step = where.indices(self.length)
@@ -359,13 +359,13 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._nplike.index_nplike.any(negative, prefer=False):
+            if self._backend.index_nplike.any(negative, prefer=False):
                 where[negative] += self._length
 
-            if self._nplike.index_nplike.any(where >= self._length, prefer=False):
+            if self._backend.index_nplike.any(where >= self._length, prefer=False):
                 raise ak._errors.index_error(self, where)
 
-            nextindex = ak.index.Index64(where, nplike=self.nplike)
+            nextindex = ak.index.Index64(where, nplike=self._backend.nplike)
             return ak.contents.IndexedArray(nextindex, self, parameters=None)
 
         else:
@@ -447,8 +447,8 @@ class RecordArray(Content):
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            npsingle = self._nplike.index_nplike.full((1,), self.length, np.int64)
-            single = ak.index.Index64(npsingle, nplike=self._nplike)
+            npsingle = self._backend.index_nplike.full((1,), self.length, np.int64)
+            single = ak.index.Index64(npsingle, nplike=self._backend.nplike)
             singleton = ak.contents.NumpyArray(
                 single, parameters=None, backend=self._backend
             )
@@ -490,14 +490,14 @@ class RecordArray(Content):
             for content in self._contents:
                 trimmed = content._getitem_range(slice(0, self.length))
                 offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
-                if self._nplike.known_shape and offsets.length != 0:
+                if self._backend.nplike.known_shape and offsets.length != 0:
                     raise ak._errors.wrap_error(
                         AssertionError(
                             "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
                         )
                     )
                 contents.append(flattened)
-            offsets = ak.index.Index64.zeros(1, self._nplike, dtype=np.int64)
+            offsets = ak.index.Index64.zeros(1, self._backend.nplike, dtype=np.int64)
             return (
                 offsets,
                 RecordArray(
@@ -745,7 +745,7 @@ class RecordArray(Content):
     ):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
-                self._nplike.instance().empty(0, np.int64),
+                self._backend.nplike.instance().empty(0, np.int64),
                 parameters=None,
                 backend=self._backend,
             )
@@ -893,21 +893,21 @@ class RecordArray(Content):
 
     def _to_numpy(self, allow_missing):
         if self.fields is None:
-            return self._nplike.empty(self.length, dtype=[])
+            return self._backend.nplike.empty(self.length, dtype=[])
         contents = [x._to_numpy(allow_missing) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ak._errors.wrap_error(
                 ValueError(f"cannot convert {self} into np.ndarray")
             )
-        out = self._nplike.empty(
+        out = self._backend.nplike.empty(
             contents[0].shape[0],
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
         )
         mask = None
         for n, x in zip(self.fields, contents):
-            if isinstance(x, self._nplike.ma.MaskedArray):
+            if isinstance(x, self._backend.nplike.ma.MaskedArray):
                 if mask is None:
-                    mask = self._nplike.index_nplike.ma.zeros(
+                    mask = self._backend.index_nplike.ma.zeros(
                         self.length, [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
@@ -915,7 +915,7 @@ class RecordArray(Content):
             out[n] = x
 
         if mask is not None:
-            out = self._nplike.ma.MaskedArray(out, mask)
+            out = self._backend.nplike.ma.MaskedArray(out, mask)
 
         return out
 
@@ -940,7 +940,7 @@ class RecordArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._nplike.known_shape:
+        if self._backend.nplike.known_shape:
             contents = [x[: self._length] for x in self._contents]
         else:
             contents = self._contents

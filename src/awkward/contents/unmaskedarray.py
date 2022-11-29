@@ -92,9 +92,9 @@ class UnmaskedArray(Content):
         )
 
     def to_IndexedOptionArray64(self):
-        arange = self._nplike.index_nplike.arange(self._content.length, dtype=np.int64)
+        arange = self._backend.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(arange, nplike=self.nplike),
+            ak.index.Index64(arange, nplike=self._backend.nplike),
             self._content,
             parameters=self._parameters,
         )
@@ -102,7 +102,7 @@ class UnmaskedArray(Content):
     def to_ByteMaskedArray(self, valid_when):
         return ak.contents.ByteMaskedArray(
             ak.index.Index8(
-                self.mask_as_bool(valid_when).view(np.int8), nplike=self.nplike
+                self.mask_as_bool(valid_when).view(np.int8), nplike=self._backend.nplike
             ),
             self._content,
             valid_when,
@@ -112,9 +112,11 @@ class UnmaskedArray(Content):
     def to_BitMaskedArray(self, valid_when, lsb_order):
         bitlength = int(numpy.ceil(self._content.length / 8.0))
         if valid_when:
-            bitmask = self._nplike.full(bitlength, np.uint8(255), dtype=np.uint8)
+            bitmask = self._backend.nplike.full(
+                bitlength, np.uint8(255), dtype=np.uint8
+            )
         else:
-            bitmask = self._nplike.zeros(bitlength, dtype=np.uint8)
+            bitmask = self._backend.nplike.zeros(bitlength, dtype=np.uint8)
 
         return ak.contents.BitMaskedArray(
             ak.index.IndexU8(bitmask),
@@ -127,7 +129,7 @@ class UnmaskedArray(Content):
 
     def mask_as_bool(self, valid_when=True, nplike=None):
         if nplike is None:
-            nplike = self._nplike
+            nplike = self._backend.nplike
 
         if valid_when:
             return nplike.index_nplike.ones(self._content.length, dtype=np.bool_)
@@ -138,13 +140,13 @@ class UnmaskedArray(Content):
         return self._content._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if not self._nplike.known_data:
+        if not self._backend.nplike.known_data:
             return ak._typetracer.MaybeNone(self._content._getitem_at(where))
 
         return self._content._getitem_at(where)
 
     def _getitem_range(self, where):
-        if not self._nplike.known_shape:
+        if not self._backend.nplike.known_shape:
             return self
 
         start, stop, step = where.indices(self.length)
@@ -456,7 +458,7 @@ class UnmaskedArray(Content):
     def _to_numpy(self, allow_missing):
         content = ak.operations.to_numpy(self.content, allow_missing=allow_missing)
         if allow_missing:
-            return self._nplike.ma.MaskedArray(content)
+            return self._backend.nplike.ma.MaskedArray(content)
         else:
             return content
 
