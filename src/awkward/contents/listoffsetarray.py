@@ -263,8 +263,8 @@ class ListOffsetArray(Content):
             nextstarts,
             nextstops,
             self._content,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _compact_offsets64(self, start_at_zero):
@@ -334,8 +334,8 @@ class ListOffsetArray(Content):
             self.starts,
             self.stops,
             self._content,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
@@ -595,8 +595,8 @@ class ListOffsetArray(Content):
                 self.starts,
                 self.stops,
                 self._content,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
             return listarray._getitem_next(head, tail, advanced)
 
@@ -736,7 +736,11 @@ class ListOffsetArray(Content):
         if len(others) == 0:
             return self
         listarray = ak.contents.ListArray(
-            self.starts, self.stops, self._content, self._parameters, self._nplike
+            self.starts,
+            self.stops,
+            self._content,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
         out = listarray.mergemany(others)
 
@@ -1531,11 +1535,7 @@ class ListOffsetArray(Content):
             )
 
             out = ak.contents.ListArray(
-                outstarts,
-                outstops,
-                outcontent,
-                None,
-                self._nplike,
+                outstarts, outstops, outcontent, parameters=None, nplike=self._nplike
             )
 
             if keepdims:
@@ -1878,8 +1878,8 @@ class ListOffsetArray(Content):
                     ak.index.Index(new_starts),
                     ak.index.Index(new_stops),
                     self._content,
-                    self._parameters,
-                    self._nplike,
+                    parameters=self._parameters,
+                    nplike=self._nplike,
                 )
                 return next.to_ListOffsetArray64(True)._to_arrow(
                     pyarrow, mask_node, validbytes, length, options

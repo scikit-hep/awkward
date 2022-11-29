@@ -219,7 +219,7 @@ def reconstitute(form, length, container, getkey, nplike):
             ak.index.Index(starts),
             ak.index.Index(stops),
             reconstitute(form.content, next_length, container, getkey, nplike),
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.ListOffsetForm):

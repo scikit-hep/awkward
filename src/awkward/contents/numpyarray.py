@@ -260,7 +260,11 @@ class NumpyArray(Content):
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
-                    slicestarts, slicestops, slicecontent, None, self._nplike
+                    slicestarts,
+                    slicestops,
+                    slicecontent,
+                    parameters=None,
+                    nplike=self._nplike,
                 ),
                 "too many jagged slice dimensions for array",
             )
