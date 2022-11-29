@@ -28,8 +28,8 @@ class ByteMaskedArray(Content):
             self._mask if mask is unset else mask,
             self._content if content is unset else content,
             self._valid_when if valid_when is unset else valid_when,
-            self._parameters if parameters is unset else parameters,
-            self._nplike if nplike is unset else nplike,
+            parameters=self._parameters if parameters is unset else parameters,
+            nplike=self._nplike if nplike is unset else nplike,
         )
 
     def __copy__(self):
@@ -42,7 +42,7 @@ class ByteMaskedArray(Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
-    def __init__(self, mask, content, valid_when, parameters=None, nplike=None):
+    def __init__(self, mask, content, valid_when, *, parameters=None, nplike=None):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.int8)):
             raise ak._errors.wrap_error(
                 TypeError(
@@ -126,8 +126,8 @@ class ByteMaskedArray(Content):
             ak.index.Index(self._mask.raw(tt)),
             self._content.typetracer,
             self._valid_when,
-            self._parameters,
-            tt,
+            parameters=self._parameters,
+            nplike=tt,
         )
 
     @property
@@ -139,8 +139,8 @@ class ByteMaskedArray(Content):
             self._mask.forget_length(),
             self._content,
             self._valid_when,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def __repr__(self):
@@ -165,8 +165,8 @@ class ByteMaskedArray(Content):
             self._mask,
             self._content,
             self._valid_when,
-            ak._util.merge_parameters(self._parameters, parameters),
-            self._nplike,
+            parameters=ak._util.merge_parameters(self._parameters, parameters),
+            nplike=self._nplike,
         )
 
     def to_IndexedOptionArray64(self):
@@ -201,8 +201,8 @@ class ByteMaskedArray(Content):
                 ),
                 self._content,
                 valid_when,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def to_BitMaskedArray(self, valid_when, lsb_order):
@@ -274,8 +274,8 @@ class ByteMaskedArray(Content):
             self._mask[start:stop],
             self._content._getitem_range(slice(start, stop)),
             self._valid_when,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _getitem_field(self, where, only_fields=()):
@@ -283,8 +283,8 @@ class ByteMaskedArray(Content):
             self._mask,
             self._content._getitem_field(where, only_fields),
             self._valid_when,
-            None,
-            self._nplike,
+            parameters=None,
+            nplike=self._nplike,
         ).simplify_optiontype()
 
     def _getitem_fields(self, where, only_fields=()):
@@ -292,8 +292,8 @@ class ByteMaskedArray(Content):
             self._mask,
             self._content._getitem_fields(where, only_fields),
             self._valid_when,
-            None,
-            self._nplike,
+            parameters=None,
+            nplike=self._nplike,
         ).simplify_optiontype()
 
     def _carry(self, carry, allow_lazy):
@@ -308,8 +308,8 @@ class ByteMaskedArray(Content):
             nextmask,
             self._content._carry(carry, allow_lazy),
             self._valid_when,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _nextcarry_outindex(self, nplike):
@@ -488,8 +488,8 @@ class ByteMaskedArray(Content):
                 nextmask,
                 self._content,
                 valid_when,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
             return next.project()
 
@@ -649,8 +649,8 @@ class ByteMaskedArray(Content):
                 ak.index.Index8(self._nplike.concatenate(masks)),
                 self._content[: self.length].mergemany(tail_contents),
                 self._valid_when,
-                parameters,
-                self._nplike,
+                parameters=parameters,
+                nplike=self._nplike,
             )
 
         else:
@@ -681,8 +681,8 @@ class ByteMaskedArray(Content):
             self._mask,
             self._content.numbers_to_type(name),
             self._valid_when,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -969,8 +969,8 @@ class ByteMaskedArray(Content):
                 self._mask,
                 self._content._pad_none(target, posaxis, depth, clip),
                 self._valid_when,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -1016,8 +1016,8 @@ class ByteMaskedArray(Content):
                         options,
                     ),
                     self._valid_when,
-                    self._parameters if options["keep_parameters"] else None,
-                    self._nplike,
+                    parameters=self._parameters if options["keep_parameters"] else None,
+                    nplike=self._nplike,
                 )
 
         else:
@@ -1073,8 +1073,8 @@ class ByteMaskedArray(Content):
                 self._mask,
                 content,
                 self._valid_when,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             )
 
     def _to_list(self, behavior, json_conversions):

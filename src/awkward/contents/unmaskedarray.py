@@ -124,8 +124,8 @@ class UnmaskedArray(Content):
             ),
             self._content,
             valid_when,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def to_BitMaskedArray(self, valid_when, lsb_order):
@@ -242,8 +242,8 @@ class UnmaskedArray(Content):
                 mask,
                 self._content,
                 False,
-                self._parameters,
-                self._nplike,
+                parameters=self._parameters,
+                nplike=self._nplike,
             ).project()
         else:
             return self._content

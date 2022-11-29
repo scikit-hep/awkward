@@ -262,8 +262,8 @@ class BitMaskedArray(Content):
             bytemask[: self._length],
             self._content,
             self._valid_when,
-            self._parameters,
-            self._nplike,
+            parameters=self._parameters,
+            nplike=self._nplike,
         )
 
     def to_BitMaskedArray(self, valid_when, lsb_order):

@@ -175,7 +175,7 @@ def reconstitute(form, length, container, getkey, nplike):
             ak.index.Index(mask),
             reconstitute(form.content, length, container, getkey, nplike),
             form.valid_when,
-            form.parameters,
+            parameters=form.parameters,
         )
 
     elif isinstance(form, ak.forms.IndexedOptionForm):

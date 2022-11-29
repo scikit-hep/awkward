@@ -1149,11 +1149,7 @@ class NumpyArray(Content):
             )
 
             out = ak.contents.ByteMaskedArray(
-                outmask,
-                out,
-                False,
-                None,
-                self._nplike,
+                outmask, out, False, parameters=None, nplike=self._nplike
             )
 
         if keepdims:
