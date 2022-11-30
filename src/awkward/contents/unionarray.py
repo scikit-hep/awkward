@@ -119,6 +119,9 @@ class UnionArray(Content):
         if backend is None:
             backend = ak._backends.NumpyBackend.instance()
 
+        assert tags.nplike is backend.index_nplike
+        assert index.nplike is backend.index_nplike
+
         self._tags = tags
         self._index = index
         self._contents = contents

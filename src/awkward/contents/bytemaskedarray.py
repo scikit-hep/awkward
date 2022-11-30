@@ -74,6 +74,8 @@ class ByteMaskedArray(Content):
                 )
             )
 
+        assert mask.nplike is content.backend.index_nplike
+
         self._mask = mask
         self._content = content
         self._valid_when = valid_when

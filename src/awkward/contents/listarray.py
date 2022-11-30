@@ -77,6 +77,9 @@ class ListArray(Content):
                 )
             )
 
+        assert starts.nplike is content.backend.index_nplike
+        assert stops.nplike is content.backend.index_nplike
+
         self._starts = starts
         self._stops = stops
         self._content = content

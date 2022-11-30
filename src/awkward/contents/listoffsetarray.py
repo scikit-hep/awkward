@@ -62,6 +62,8 @@ class ListOffsetArray(Content):
                 )
             )
 
+        assert offsets.nplike is content.backend.index_nplike
+
         self._offsets = offsets
         self._content = content
         self._init(parameters, content.backend)

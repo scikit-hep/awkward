@@ -58,6 +58,8 @@ class IndexedArray(Content):
                 )
             )
 
+        assert index.nplike is content.backend.index_nplike
+
         self._index = index
         self._content = content
         self._init(parameters, content.backend)
