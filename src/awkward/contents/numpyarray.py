@@ -187,8 +187,8 @@ class NumpyArray(Content):
         out._parameters = self._parameters
         return out
 
-    def maybe_to_array(self, nplike):
-        return nplike.asarray(self._data)
+    def maybe_to_array(self):
+        return self._backend.nplike.asarray(self._data)
 
     def __array__(self, *args, **kwargs):
         return self._backend.nplike.asarray(self._data, *args, **kwargs)

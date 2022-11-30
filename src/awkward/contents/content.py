@@ -236,7 +236,7 @@ class Content:
                 )
         return out
 
-    def maybe_to_array(self, nplike):
+    def maybe_to_array(self):
         return None
 
     def _handle_error(self, error, slicer=None):

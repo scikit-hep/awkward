@@ -167,7 +167,7 @@ def normalise_item(item, backend: ak._backends.Backend):
 
     elif ak._util.is_sized_iterable(item):
         layout = ak.operations.to_layout(item)
-        as_array = layout.maybe_to_array(layout.nplike)
+        as_array = layout.maybe_to_array()
         if as_array is None:
             return normalise_item(layout, backend)
         else:

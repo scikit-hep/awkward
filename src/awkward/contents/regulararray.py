@@ -325,8 +325,8 @@ class RegularArray(Content):
         out = self.to_ListOffsetArray64(True)
         return out._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
-    def maybe_to_array(self, nplike):
-        out = self._content.maybe_to_array(nplike)
+    def maybe_to_array(self):
+        out = self._content.maybe_to_array()
         if out is None:
             return out
         else:
