@@ -95,7 +95,7 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    backend = ak._backends.backend_for(
+    backend = ak._backends.backend_of(
         array, default=ak._backends.NumpyBackend.instance()
     )
 

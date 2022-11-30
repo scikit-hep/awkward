@@ -40,7 +40,7 @@ class NumpyArray(Content):
 
     def __init__(self, data, *, parameters=None, backend=None):
         if backend is None:
-            backend = ak._backends.backend_for(
+            backend = ak._backends.backend_of(
                 data, default=ak._backends.NumpyBackend.instance()
             )
         if isinstance(data, ak.index.Index):

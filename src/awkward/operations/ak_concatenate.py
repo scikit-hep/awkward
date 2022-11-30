@@ -132,7 +132,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                backend = ak._backends.backend_for(*inputs)
+                backend = ak._backends.backend_of(*inputs)
 
                 length = ak._typetracer.UnknownLength
                 for x in inputs:

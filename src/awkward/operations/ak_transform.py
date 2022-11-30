@@ -441,7 +441,7 @@ def _impl(
     more_layouts = [
         ak.to_layout(x, allow_record=False, allow_other=False) for x in more_arrays
     ]
-    backend = ak._backends.backend_for(layout, *more_layouts)
+    backend = ak._backends.backend_of(layout, *more_layouts)
 
     options = {
         "allow_records": allow_records,

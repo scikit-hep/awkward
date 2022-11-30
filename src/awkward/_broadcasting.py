@@ -1017,7 +1017,7 @@ def broadcast_and_apply(
     function_name=None,
     broadcast_parameters_rule=BroadcastParameterRule.INTERSECT,
 ):
-    backend = ak._backends.backend_for(*inputs)
+    backend = ak._backends.backend_of(*inputs)
     isscalar = []
     out = apply_step(
         backend,

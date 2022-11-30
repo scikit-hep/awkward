@@ -151,7 +151,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             isinstance(x, NumpyArray) or not isinstance(x, ak.contents.Content)
             for x in inputs
         ):
-            backend = ak._backends.backend_for(*inputs)
+            backend = ak._backends.backend_of(*inputs)
             nplike = backend.nplike
 
             # Broadcast parameters against one another

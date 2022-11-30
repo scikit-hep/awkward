@@ -163,7 +163,7 @@ _UNSET = object()
 D = TypeVar("D")
 
 
-def backend_for(*objects, default: D = _UNSET) -> Backend | D:
+def backend_of(*objects, default: D = _UNSET) -> Backend | D:
     """
     Args:
         objects: objects for which to find a suitable backend
