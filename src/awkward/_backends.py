@@ -100,7 +100,9 @@ class CupyBackend(Singleton, Backend[Any]):
         if func is not None:
             return CupyKernel(func, index)
         else:
-            raise ak._errors.wrap_error(AssertionError(f"CuPyKernel not found: {index!r}"))
+            raise ak._errors.wrap_error(
+                AssertionError(f"CuPyKernel not found: {index!r}")
+            )
 
 
 class JaxBackend(Singleton, Backend[Any]):
