@@ -985,7 +985,7 @@ class ListOffsetArray(Content):
                 assert (
                     nextcarry.nplike is self._backend.index_nplike
                     and parents.nplike is self._backend.index_nplike
-                    and self._content.nplike is self._backend.index_nplike
+                    and self._content.backend is self._backend
                     and self_starts.nplike is self._backend.index_nplike
                     and self_stops.nplike is self._backend.index_nplike
                 )
@@ -1175,7 +1175,7 @@ class ListOffsetArray(Content):
                 assert (
                     nextcarry.nplike is self._backend.index_nplike
                     and parents.nplike is self._backend.index_nplike
-                    and self._content.nplike is self._backend.index_nplike
+                    and self._content.backend is self._backend
                     and starts.nplike is self._backend.index_nplike
                     and stops.nplike is self._backend.index_nplike
                 )

@@ -1124,7 +1124,7 @@ class NumpyArray(Content):
         if reducer.needs_position:
             if shifts is None:
                 assert (
-                    out.nplike is self._backend.index_nplike
+                    out.backend is self._backend
                     and parents.nplike is self._backend.index_nplike
                     and starts.nplike is self._backend.index_nplike
                 )
@@ -1143,7 +1143,7 @@ class NumpyArray(Content):
                 )
             else:
                 assert (
-                    out.nplike is self._backend.index_nplike
+                    out.backend is self._backend
                     and parents.nplike is self._backend.index_nplike
                     and starts.nplike is self._backend.index_nplike
                     and shifts.nplike is self._backend.index_nplike

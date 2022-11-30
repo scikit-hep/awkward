@@ -386,7 +386,7 @@ def normalise_item_bool_to_int(item):
         and issubclass(item.content.content.dtype.type, (bool, np.bool_))
     ):
         if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-            if isinstance(item.nplike, ak.nplikes.Jax):
+            if isinstance(item.backend.nplike, ak.nplikes.Jax):
                 raise ak._errors.wrap_error(
                     "This slice is not supported for JAX differentiation."
                 )
@@ -455,7 +455,7 @@ def normalise_item_bool_to_int(item):
             item.content.dtype.type, (bool, np.bool_)
         ):
             if item.backend.nplike.known_data or item.backend.nplike.known_shape:
-                if isinstance(item.nplike, ak.nplikes.Jax):
+                if isinstance(item.backend.nplike, ak.nplikes.Jax):
                     raise ak._errors.wrap_error(
                         "This slice is not supported for JAX differentiation."
                     )
