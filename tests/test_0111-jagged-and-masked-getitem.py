@@ -17,7 +17,7 @@ def test_array_slice_with_union():
     content1 = ak.contents.NumpyArray(np.array([3, 9, 0, 1]))
     tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
     index2 = ak.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak.contents.UnionArray(tags, index2, [content0, content1])
+    unionarray = ak.contents.UnionArray.simplified(tags, index2, [content0, content1])
 
     assert to_list(array[ak.highlevel.Array(unionarray, check_valid=True)]) == [
         5.5,
@@ -195,7 +195,7 @@ def test_array_slice_2():
     content1 = ak.contents.NumpyArray(np.array([3, 9, 0, 1]))
     tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
     index2 = ak.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak.contents.UnionArray(tags, index2, [content0, content1])
+    unionarray = ak.contents.UnionArray.simplified(tags, index2, [content0, content1])
 
     assert to_list(array[unionarray]) == [5.5, 2.2, 2.2, 3.3, 9.9, 0.0, 1.1]
     assert array.typetracer[unionarray].form == array[unionarray].form
@@ -1144,7 +1144,7 @@ def test_union_2():
     )
     tags = ak.index.Index8(np.array([0, 0, 0, 1, 1, 1, 1], dtype=np.int8))
     index = ak.index.Index64(np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.int64))
-    unionarray = ak.contents.UnionArray(tags, index, [one, two])
+    unionarray = ak.contents.UnionArray.simplified(tags, index, [one, two])
     array = ak.highlevel.Array(
         [[0, -1], [], [1, 1], [], [-1], [], [1, -2, -1]], check_valid=True
     ).layout

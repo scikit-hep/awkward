@@ -178,6 +178,7 @@ class UnionArray(Content):
 
         self_index = index
         self_tags = tags
+        self_contents = contents
 
         if backend.nplike.known_shape and self_index.length < self_tags.length:
             raise ak._errors.wrap_error(
@@ -189,7 +190,7 @@ class UnionArray(Content):
         index = ak.index.Index64.empty(length, backend.index_nplike)
         contents = []
 
-        for i, self_cont in enumerate(contents):
+        for i, self_cont in enumerate(self_contents):
             if isinstance(self_cont, UnionArray):
                 innertags = self_cont._tags
                 innerindex = self_cont._index
@@ -442,22 +443,22 @@ class UnionArray(Content):
         )
 
     def _getitem_field(self, where, only_fields=()):
-        return UnionArray(
+        return UnionArray.simplified(
             self._tags,
             self._index,
             [x._getitem_field(where, only_fields) for x in self._contents],
             parameters=None,
             backend=self._backend,
-        ).simplify_uniontype()
+        )
 
     def _getitem_fields(self, where, only_fields=()):
-        return UnionArray(
+        return UnionArray.simplified(
             self._tags,
             self._index,
             [x._getitem_fields(where, only_fields) for x in self._contents],
             parameters=None,
             backend=self._backend,
-        ).simplify_uniontype()
+        )
 
     def _carry(self, carry, allow_lazy):
         assert isinstance(carry, ak.index.Index)
@@ -614,8 +615,7 @@ class UnionArray(Content):
         )
 
     def _getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail):
-        simplified = self.simplify_uniontype()
-        if isinstance(simplified, ak.contents.UnionArray):
+        if isinstance(self, ak.contents.UnionArray):
             raise ak._errors.index_error(
                 self,
                 ak.contents.ListArray(
@@ -623,9 +623,7 @@ class UnionArray(Content):
                 ),
                 "cannot apply jagged slices to irreducible union arrays",
             )
-        return simplified._getitem_next_jagged(
-            slicestarts, slicestops, slicecontent, tail
-        )
+        return self._getitem_next_jagged(slicestarts, slicestops, slicecontent, tail)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
         return self._getitem_next_jagged_generic(
@@ -645,14 +643,13 @@ class UnionArray(Content):
                 outcontents.append(projection._getitem_next(head, tail, advanced))
             outindex = self._regular_index(self._tags)
 
-            out = UnionArray(
+            return UnionArray.simplified(
                 self._tags,
                 outindex,
                 outcontents,
                 parameters=self._parameters,
                 backend=self._backend,
             )
-            return out.simplify_uniontype()
 
         elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
@@ -880,14 +877,15 @@ class UnionArray(Content):
             contents = []
             for content in self._contents:
                 contents.append(content.num(posaxis, depth))
-            out = UnionArray(
+            return UnionArray.simplified(
                 self._tags,
                 self._index,
                 contents,
                 parameters=self._parameters,
                 backend=self._backend,
+                merge=True,
+                mergebool=False,
             )
-            return out.simplify_uniontype(True, False)
 
     def _offsets_and_flattened(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -1235,14 +1233,15 @@ class UnionArray(Content):
         contents = []
         for content in self._contents:
             contents.append(content.fill_none(value))
-        out = UnionArray(
+        return UnionArray.simplified(
             self._tags,
             self._index,
             contents,
             parameters=self._parameters,
             backend=self._backend,
+            merge=True,
+            mergebool=False,
         )
-        return out.simplify_uniontype(True, False)
 
     def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)
@@ -1293,7 +1292,15 @@ class UnionArray(Content):
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
-        simplified = self.simplify_uniontype(True, True)
+        simplified = type(self).simplified(
+            self._tags,
+            self._index,
+            self._contents,
+            parameters=self._parameters,
+            backend=self._backend,
+            merge=True,
+            mergebool=True,
+        )
         if isinstance(simplified, ak.contents.UnionArray):
             raise ak._errors.wrap_error(
                 ValueError("cannot check if an irreducible UnionArray is unique")
@@ -1302,7 +1309,15 @@ class UnionArray(Content):
         return simplified._is_unique(negaxis, starts, parents, outlength)
 
     def _unique(self, negaxis, starts, parents, outlength):
-        simplified = self.simplify_uniontype(True, True)
+        simplified = type(self).simplified(
+            self._tags,
+            self._index,
+            self._contents,
+            parameters=self._parameters,
+            backend=self._backend,
+            merge=True,
+            mergebool=True,
+        )
         if isinstance(simplified, ak.contents.UnionArray):
             raise ak._errors.wrap_error(
                 ValueError("cannot make a unique irreducible UnionArray")
@@ -1322,7 +1337,14 @@ class UnionArray(Content):
         kind,
         order,
     ):
-        simplified = self.simplify_uniontype(mergebool=True)
+        simplified = type(self).simplified(
+            self._tags,
+            self._index,
+            self._contents,
+            parameters=self._parameters,
+            backend=self._backend,
+            mergebool=True,
+        )
         if simplified.length == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.empty(0, np.int64),
@@ -1345,7 +1367,14 @@ class UnionArray(Content):
         if self.length == 0:
             return self
 
-        simplified = self.simplify_uniontype(mergebool=True)
+        simplified = type(self).simplified(
+            self._tags,
+            self._index,
+            self._contents,
+            parameters=self._parameters,
+            backend=self._backend,
+            mergebool=True,
+        )
         if simplified.length == 0:
             return simplified
 
@@ -1370,7 +1399,14 @@ class UnionArray(Content):
         keepdims,
         behavior,
     ):
-        simplified = self.simplify_uniontype(mergebool=True)
+        simplified = type(self).simplified(
+            self._tags,
+            self._index,
+            self._contents,
+            parameters=self._parameters,
+            backend=self._backend,
+            mergebool=True,
+        )
         if isinstance(simplified, UnionArray):
             raise ak._errors.wrap_error(
                 ValueError(
@@ -1455,14 +1491,15 @@ class UnionArray(Content):
             contents = []
             for content in self._contents:
                 contents.append(content._pad_none(target, posaxis, depth, clip))
-            out = ak.contents.UnionArray(
+            return ak.contents.UnionArray.simplified(
                 self.tags,
                 self.index,
                 contents,
                 parameters=self._parameters,
                 backend=self._backend,
+                merge=True,
+                mergebool=False,
             )
-            return out.simplify_uniontype(True, False)
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
         nptags = self._tags.raw(numpy)

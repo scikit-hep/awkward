@@ -808,10 +808,15 @@ class IndexedOptionArray(Content):
                 "awkward_UnionArray_fillna", index.dtype.type, self._index.dtype.type
             ](index.data, self._index.data, tags.length)
         )
-        out = ak.contents.UnionArray(
-            tags, index, contents, parameters=self._parameters, backend=self._backend
+        return ak.contents.UnionArray.simplified(
+            tags,
+            index,
+            contents,
+            parameters=self._parameters,
+            backend=self._backend,
+            merge=True,
+            mergebool=True,
         )
-        return out.simplify_uniontype(True, True)
 
     def _local_index(self, axis, depth):
         posaxis = self.axis_wrap_if_negative(axis)

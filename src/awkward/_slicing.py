@@ -322,15 +322,11 @@ def normalise_item_nested(item):
         )
 
     elif isinstance(item, ak.contents.UnionArray):
-        attempt = item.simplify_uniontype()
-        if isinstance(attempt, ak.contents.UnionArray):
-            raise ak._errors.wrap_error(
-                TypeError(
-                    "irreducible unions (different types at the same level in an array) can't be used as slices"
-                )
+        raise ak._errors.wrap_error(
+            TypeError(
+                "irreducible unions (different types at the same level in an array) can't be used as slices"
             )
-
-        return normalise_item_nested(attempt)
+        )
 
     elif isinstance(item, ak.contents.RecordArray):
         raise ak._errors.wrap_error(TypeError("record arrays can't be used as slices"))

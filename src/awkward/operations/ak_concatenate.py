@@ -115,7 +115,15 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
         out = batch[0].mergemany(batch[1:])
         if isinstance(out, ak.contents.UnionArray):
-            out = out.simplify_uniontype(merge=merge, mergebool=mergebool)
+            out = type(out).simplified(
+                out._tags,
+                out._index,
+                out._contents,
+                parameters=out._parameters,
+                backend=out._backend,
+                merge=merge,
+                mergebool=mergebool,
+            )
 
     else:
 
@@ -182,15 +190,15 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
 
                 tags = ak.index.Index8(backend.index_nplike.tile(prototype, length))
                 index = ak.contents.UnionArray.regular_index(tags, backend=backend)
-                inner = ak.contents.UnionArray(
-                    tags, index, [x._content for x in regulararrays]
+                inner = ak.contents.UnionArray.simplified(
+                    tags,
+                    index,
+                    [x._content for x in regulararrays],
+                    merge=merge,
+                    mergebool=mergebool,
                 )
 
-                out = ak.contents.RegularArray(
-                    inner.simplify_uniontype(merge=merge, mergebool=mergebool),
-                    len(prototype),
-                )
-                return (out,)
+                return (ak.contents.RegularArray(inner, len(prototype)),)
 
             elif depth == posaxis and all(
                 isinstance(x, ak.contents.Content)
@@ -255,14 +263,11 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                     [ak.index.Index64(x) for x in all_counts],
                 )
 
-                inner = ak.contents.UnionArray(tags, index, all_flatten)
-
-                out = ak.contents.ListOffsetArray(
-                    offsets,
-                    inner.simplify_uniontype(merge=merge, mergebool=mergebool),
+                inner = ak.contents.UnionArray.simplified(
+                    tags, index, all_flatten, merge=merge, mergebool=mergebool
                 )
 
-                return (out,)
+                return (ak.contents.ListOffsetArray(offsets, inner),)
 
             elif any(
                 x.minmax_depth == (1, 1)

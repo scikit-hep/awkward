@@ -581,12 +581,12 @@ def apply_step(
 
             parameters = parameters_factory(numoutputs)
             return tuple(
-                UnionArray(
+                UnionArray.simplified(
                     Index8(tags),
                     Index64(index),
                     [x[i] for x in outcontents],
                     parameters=p,
-                ).simplify_uniontype()
+                )
                 for i, p in enumerate(parameters)
             )
 
