@@ -34,7 +34,7 @@ np = NumpyMetadata.instance()
 
 T = TypeVar("T")
 KernelKeyType: TypeAlias = Tuple[str, Unpack[Tuple[np.dtype, ...]]]
-KernelType: TypeAlias = Callable[[...], None]
+KernelType: TypeAlias = Callable[..., None]
 
 
 @runtime_checkable

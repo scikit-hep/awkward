@@ -28,7 +28,7 @@ from awkward.index import (  # IndexU8,  ; Index32,  ; IndexU32,  ; noqa: F401
     Index64,
 )
 from awkward.record import Record
-from awkward.typing import Any, Callable, Dict, List, TypeAlias
+from awkward.typing import Any, Callable, Dict, List, TypeAlias, Union
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()
@@ -182,7 +182,9 @@ class BroadcastParameterRule(str, enum.Enum):
     NONE = "none"
 
 
-BroadcastParameterFactory: TypeAlias = Callable[[int], List[Dict[str, Any] | None]]
+BroadcastParameterFactory: TypeAlias = Callable[
+    [int], List[Union[Dict[str, Any], None]]
+]
 
 
 def _parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> Any:
