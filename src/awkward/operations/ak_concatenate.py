@@ -50,17 +50,12 @@ def concatenate(
 
 def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
     # Simple single-array, axis=0 fast-path
-    single_nplike = ak.nplikes.nplike_of(arrays)
     behavior = ak._util.behavior_of(*arrays, behavior=behavior)
-    numpy = ak.nplikes.Numpy.instance()
-
     if (
         # Is an Awkward Content
         isinstance(arrays, ak.contents.Content)
-        # Is a NumPy Array
-        or numpy.is_own_array(arrays)
         # Is an array with a known NumpyLike
-        or single_nplike is not numpy
+        or ak.nplikes.nplike_of(arrays, default=None) is not None
     ):
         # Convert the array to a layout object
         content = ak.operations.to_layout(arrays, allow_record=False, allow_other=False)
@@ -137,7 +132,7 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                 inputs = nextinputs
 
             if depth == posaxis:
-                nplike = ak.nplikes.nplike_of(*inputs)
+                backend = ak._backends.backend_of(*inputs)
 
                 length = ak._typetracer.UnknownLength
                 for x in inputs:
@@ -170,21 +165,23 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         regulararrays.append(
                             ak.contents.RegularArray(
                                 ak.contents.NumpyArray(
-                                    nplike.broadcast_to(nplike.array([x]), (length,))
+                                    backend.nplike.broadcast_to(
+                                        backend.nplike.array([x]), (length,)
+                                    )
                                 ),
                                 1,
                             )
                         )
                     sizes.append(regulararrays[-1].size)
 
-                prototype = nplike.empty(sum(sizes), np.int8)
+                prototype = backend.index_nplike.empty(sum(sizes), np.int8)
                 start = 0
                 for tag, size in enumerate(sizes):
                     prototype[start : start + size] = tag
                     start += size
 
-                tags = ak.index.Index8(nplike.tile(prototype, length))
-                index = ak.contents.UnionArray.regular_index(tags)
+                tags = ak.index.Index8(backend.index_nplike.tile(prototype, length))
+                index = ak.contents.UnionArray.regular_index(tags, backend=backend)
                 inner = ak.contents.UnionArray(
                     tags, index, [x._content for x in regulararrays]
                 )
@@ -210,40 +207,46 @@ def _impl(arrays, axis, merge, mergebool, highlevel, behavior):
                         nextinputs.append(
                             ak.contents.ListOffsetArray(
                                 ak.index.Index64(
-                                    nplike.index_nplike.arange(
+                                    backend.index_nplike.arange(
                                         length + 1, dtype=np.int64
                                     ),
-                                    nplike=nplike,
+                                    nplike=backend.index_nplike,
                                 ),
                                 ak.contents.NumpyArray(
-                                    nplike.broadcast_to(nplike.array([x]), (length,))
+                                    backend.nplike.broadcast_to(
+                                        backend.nplike.array([x]), (length,)
+                                    )
                                 ),
                             )
                         )
 
-                counts = nplike.zeros(len(nextinputs[0]), dtype=np.int64)
+                counts = backend.index_nplike.zeros(len(nextinputs[0]), dtype=np.int64)
                 all_counts = []
                 all_flatten = []
 
                 for x in nextinputs:
                     o, f = x._offsets_and_flattened(1, 0)
-                    o = nplike.index_nplike.asarray(o)
+                    o = backend.index_nplike.asarray(o)
                     c = o[1:] - o[:-1]
-                    nplike.add(counts, c, out=counts)
+                    backend.index_nplike.add(counts, c, out=counts)
                     all_counts.append(c)
                     all_flatten.append(f)
 
-                offsets = nplike.index_nplike.empty(
+                offsets = backend.index_nplike.empty(
                     len(nextinputs[0]) + 1, dtype=np.int64
                 )
                 offsets[0] = 0
-                nplike.index_nplike.cumsum(counts, out=offsets[1:])
+                backend.index_nplike.cumsum(counts, out=offsets[1:])
 
-                offsets = ak.index.Index64(offsets, nplike=nplike)
+                offsets = ak.index.Index64(offsets, nplike=backend.index_nplike)
 
                 inner = ak.contents.UnionArray(
-                    ak.index.Index8.empty(len(offsets) - 1, nplike),
-                    ak.index.Index64.empty(len(offsets) - 1, nplike),
+                    ak.index.Index8.empty(
+                        len(offsets) - 1, nplike=backend.index_nplike
+                    ),
+                    ak.index.Index64.empty(
+                        len(offsets) - 1, nplike=backend.index_nplike
+                    ),
                     all_flatten,
                 )
 

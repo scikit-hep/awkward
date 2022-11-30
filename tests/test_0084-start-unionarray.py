@@ -17,9 +17,16 @@ def test_getitem():
     )
     tags = ak.index.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
 
-    array32 = ak.contents.UnionArray.regular_index(tags, ak.index.Index32)
-    arrayU32 = ak.contents.UnionArray.regular_index(tags, ak.index.IndexU32)
-    array64 = ak.contents.UnionArray.regular_index(tags, ak.index.Index64)
+    backend = ak._backends.NumpyBackend.instance()
+    array32 = ak.contents.UnionArray.regular_index(
+        tags, index_cls=ak.index.Index32, backend=backend
+    )
+    arrayU32 = ak.contents.UnionArray.regular_index(
+        tags, index_cls=ak.index.IndexU32, backend=backend
+    )
+    array64 = ak.contents.UnionArray.regular_index(
+        tags, index_cls=ak.index.Index64, backend=backend
+    )
 
     assert np.asarray(array32).tolist() == [
         0,

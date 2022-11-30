@@ -44,13 +44,13 @@ def _impl(a, b, rtol, atol, equal_nan, highlevel, behavior):
     one = ak.operations.to_layout(a)
     two = ak.operations.to_layout(b)
 
-    def action(inputs, nplike, **kwargs):
+    def action(inputs, backend, **kwargs):
         if all(isinstance(x, ak.contents.NumpyArray) for x in inputs):
             return (
                 ak.contents.NumpyArray(
-                    nplike.isclose(
-                        inputs[0].raw(nplike),
-                        inputs[1].raw(nplike),
+                    backend.nplike.isclose(
+                        inputs[0].raw(backend.nplike),
+                        inputs[1].raw(backend.nplike),
                         rtol=rtol,
                         atol=atol,
                         equal_nan=equal_nan,

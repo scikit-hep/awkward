@@ -1,12 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import numbers
-from typing import TypeVar
 
 import numpy
 
 import awkward as ak
 from awkward import index, nplikes
+from awkward.typing import TypeVar
 
 np = nplikes.NumpyMetadata.instance()
 
@@ -21,8 +21,18 @@ class NoError:
 
 
 class NoKernel:
+    def __init__(self, index):
+        self._name_and_types = index
+
     def __call__(self, *args):
         return NoError()
+
+    def __repr__(self):
+        return "<{} {}{}>".format(
+            type(self).__name__,
+            self._name_and_types[0],
+            "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
+        )
 
 
 class UnknownLengthType:
@@ -488,7 +498,7 @@ class TypeTracer(ak.nplikes.NumpyLike):
         raise ak._errors.wrap_error(NotImplementedError)
 
     def __getitem__(self, name_and_types):
-        return NoKernel()
+        return NoKernel(name_and_types)
 
     @property
     def ma(self):
@@ -503,8 +513,6 @@ class TypeTracer(ak.nplikes.NumpyLike):
         return TypeTracerArray
 
     def raw(self, array, nplike):
-        assert isinstance(array.nplike, TypeTracer)
-
         if isinstance(nplike, TypeTracer):
             return TypeTracerArray.from_array(array)
         elif isinstance(array, TypeTracerArray):

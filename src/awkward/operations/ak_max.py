@@ -126,9 +126,10 @@ def nanmax(
 
 def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
     layout = ak.operations.to_layout(array, allow_record=False, allow_other=False)
+    backend = layout.backend
 
     if axis is None:
-        if not layout.nplike.known_data or not layout.nplike.known_shape:
+        if not backend.nplike.known_data or not backend.nplike.known_shape:
             reducer_cls = ak._reducers.Max
 
             def map(x):
@@ -141,7 +142,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
         else:
 
             def map(x):
-                return layout.nplike.max(x.data)
+                return backend.nplike.max(x.data)
 
         def reduce(xs):
             if len(xs) == 0:
@@ -149,7 +150,7 @@ def _impl(array, axis, keepdims, initial, mask_identity, flatten_records):
             elif len(xs) == 1:
                 return xs[0]
             else:
-                return layout.nplike.maximum(xs[0], reduce(xs[1:]))
+                return backend.nplike.maximum(xs[0], reduce(xs[1:]))
 
         tmp = layout.completely_flatten(
             function_name="ak.max", flatten_records=flatten_records

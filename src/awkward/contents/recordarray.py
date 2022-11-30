@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
 import json
@@ -8,6 +9,7 @@ import awkward as ak
 from awkward.contents.content import Content, unset
 from awkward.forms.recordform import RecordForm
 from awkward.record import Record
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
 numpy = ak.nplikes.Numpy.instance()
@@ -23,14 +25,14 @@ class RecordArray(Content):
         length=unset,
         *,
         parameters=unset,
-        nplike=unset,
+        backend=unset,
     ):
         return RecordArray(
             self._contents if contents is unset else contents,
             self._fields if fields is unset else fields,
             self._length if length is unset else length,
             parameters=self._parameters if parameters is unset else parameters,
-            nplike=self._nplike if nplike is unset else nplike,
+            backend=self._backend if backend is unset else backend,
         )
 
     def __copy__(self):
@@ -50,7 +52,7 @@ class RecordArray(Content):
         length=None,
         *,
         parameters=None,
-        nplike=None,
+        backend=None,
     ):
         if not isinstance(contents, Iterable):
             raise ak._errors.wrap_error(
@@ -132,28 +134,27 @@ class RecordArray(Content):
                     )
                 )
             )
-        if nplike is None:
-            for content in contents:
-                if nplike is None:
-                    nplike = content.nplike
-                    break
-                elif nplike is not content.nplike:
-                    raise ak._errors.wrap_error(
-                        TypeError(
-                            "{} 'contents' must use the same array library (nplike): {} vs {}".format(
-                                type(self).__name__,
-                                type(nplike).__name__,
-                                type(content.nplike).__name__,
-                            )
+        for content in contents:
+            if backend is None:
+                backend = content.backend
+                break
+            elif backend is not content.backend:
+                raise ak._errors.wrap_error(
+                    TypeError(
+                        "{} 'contents' must use the same array library (backend): {} vs {}".format(
+                            type(self).__name__,
+                            type(backend).__name__,
+                            type(content.backend).__name__,
                         )
                     )
-        if nplike is None:
-            nplike = numpy
+                )
+        if backend is None:
+            backend = ak._backends.NumpyBackend.instance()
 
         self._contents = contents
         self._fields = fields
         self._length = length
-        self._init(parameters, nplike)
+        self._init(parameters, backend)
 
     @property
     def contents(self):
@@ -173,7 +174,7 @@ class RecordArray(Content):
     @property
     def as_tuple(self):
         return RecordArray(
-            self._contents, None, self._length, parameters=None, nplike=self._nplike
+            self._contents, None, self._length, parameters=None, backend=self._backend
         )
 
     Form = RecordForm
@@ -198,13 +199,13 @@ class RecordArray(Content):
 
     @property
     def typetracer(self):
-        tt = ak._typetracer.TypeTracer.instance()
+        backend = ak._backends.TypeTracerBackend.instance()
         return RecordArray(
             [x.typetracer for x in self._contents],
             self._fields,
             self._length,
             parameters=self._parameters,
-            nplike=tt,
+            backend=backend,
         )
 
     @property
@@ -217,7 +218,7 @@ class RecordArray(Content):
             self._fields,
             ak._typetracer.UnknownLength,
             parameters=self._parameters,
-            nplike=self._nplike,
+            backend=self._backend,
         )
 
     def __repr__(self):
@@ -257,7 +258,7 @@ class RecordArray(Content):
             self._fields,
             self._length,
             parameters=ak._util.merge_parameters(self._parameters, parameters),
-            nplike=self._nplike,
+            backend=self._backend,
         )
 
     def index_to_field(self, index):
@@ -280,7 +281,7 @@ class RecordArray(Content):
         return self._getitem_range(slice(0, 0))
 
     def _getitem_at(self, where):
-        if self._nplike.known_data and where < 0:
+        if self._backend.nplike.known_data and where < 0:
             where += self.length
 
         if where < 0 or where >= self.length:
@@ -288,7 +289,7 @@ class RecordArray(Content):
         return Record(self, where)
 
     def _getitem_range(self, where):
-        if not self._nplike.known_shape:
+        if not self._backend.nplike.known_shape:
             return self
 
         start, stop, step = where.indices(self.length)
@@ -303,7 +304,7 @@ class RecordArray(Content):
                 self._fields,
                 stop - start,
                 parameters=self._parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
         else:
             nextslice = slice(start, stop)
@@ -312,7 +313,7 @@ class RecordArray(Content):
                 self._fields,
                 stop - start,
                 parameters=self._parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
 
     def _getitem_field(self, where, only_fields=()):
@@ -347,7 +348,7 @@ class RecordArray(Content):
                 ]
 
         return RecordArray(
-            contents, fields, self._length, parameters=None, nplike=self._nplike
+            contents, fields, self._length, parameters=None, backend=self._backend
         )
 
     def _carry(self, carry, allow_lazy):
@@ -360,16 +361,14 @@ class RecordArray(Content):
                 where = where.copy()
 
             negative = where < 0
-            if self._nplike.index_nplike.any(negative, prefer=False):
+            if self._backend.index_nplike.any(negative, prefer=False):
                 where[negative] += self._length
 
-            if self._nplike.index_nplike.any(where >= self._length, prefer=False):
+            if self._backend.index_nplike.any(where >= self._length, prefer=False):
                 raise ak._errors.index_error(self, where)
 
-            nextindex = ak.index.Index64(where, nplike=self.nplike)
-            return ak.contents.IndexedArray(
-                nextindex, self, parameters=None, nplike=self._nplike
-            )
+            nextindex = ak.index.Index64(where, nplike=self._backend.index_nplike)
+            return ak.contents.IndexedArray(nextindex, self, parameters=None)
 
         else:
             contents = [
@@ -389,7 +388,7 @@ class RecordArray(Content):
                 self._fields,
                 length,
                 parameters=self._parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
@@ -401,7 +400,7 @@ class RecordArray(Content):
                 )
             )
         return RecordArray(
-            contents, self._fields, self._length, parameters=None, nplike=self._nplike
+            contents, self._fields, self._length, parameters=None, backend=self._backend
         )
 
     def _getitem_next(self, head, tail, advanced):
@@ -439,17 +438,21 @@ class RecordArray(Content):
             ):
                 parameters = self._parameters
             next = RecordArray(
-                contents, self._fields, None, parameters=parameters, nplike=self._nplike
+                contents,
+                self._fields,
+                None,
+                parameters=parameters,
+                backend=self._backend,
             )
             return next._getitem_next(nexthead, nexttail, advanced)
 
     def num(self, axis, depth=0):
         posaxis = self.axis_wrap_if_negative(axis)
         if posaxis == depth:
-            npsingle = self._nplike.index_nplike.full((1,), self.length, np.int64)
-            single = ak.index.Index64(npsingle, nplike=self._nplike)
+            npsingle = self._backend.index_nplike.full((1,), self.length, np.int64)
+            single = ak.index.Index64(npsingle, nplike=self._backend.index_nplike)
             singleton = ak.contents.NumpyArray(
-                single, parameters=None, nplike=self._nplike
+                single, parameters=None, backend=self._backend
             )
             contents = [singleton] * len(self._contents)
             record = ak.contents.RecordArray(
@@ -457,7 +460,7 @@ class RecordArray(Content):
                 self._fields,
                 1,
                 parameters=self._parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
             return record[0]
         else:
@@ -469,7 +472,7 @@ class RecordArray(Content):
                 self._fields,
                 self._length,
                 parameters=self._parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -489,14 +492,18 @@ class RecordArray(Content):
             for content in self._contents:
                 trimmed = content._getitem_range(slice(0, self.length))
                 offsets, flattened = trimmed._offsets_and_flattened(posaxis, depth)
-                if self._nplike.known_shape and offsets.length != 0:
+                if self._backend.nplike.known_shape and offsets.length != 0:
                     raise ak._errors.wrap_error(
                         AssertionError(
                             "RecordArray content with axis > depth + 1 returned a non-empty offsets from offsets_and_flattened"
                         )
                     )
                 contents.append(flattened)
-            offsets = ak.index.Index64.zeros(1, self._nplike, dtype=np.int64)
+            offsets = ak.index.Index64.zeros(
+                1,
+                nplike=self._backend.index_nplike,
+                dtype=np.int64,
+            )
             return (
                 offsets,
                 RecordArray(
@@ -504,7 +511,7 @@ class RecordArray(Content):
                     self._fields,
                     self._length,
                     parameters=None,
-                    nplike=self._nplike,
+                    backend=self._backend,
                 ),
             )
 
@@ -658,7 +665,7 @@ class RecordArray(Content):
             self._fields,
             minlength,
             parameters=parameters,
-            nplike=self._nplike,
+            backend=self._backend,
         )
 
         if len(tail) == 0:
@@ -676,7 +683,7 @@ class RecordArray(Content):
             )
         )
 
-    def fill_none(self, value):
+    def fill_none(self, value: Content) -> Content:
         contents = []
         for content in self._contents:
             contents.append(content.fill_none(value))
@@ -685,7 +692,7 @@ class RecordArray(Content):
             self._fields,
             self._length,
             parameters=self._parameters,
-            nplike=self._nplike,
+            backend=self._backend,
         )
 
     def _local_index(self, axis, depth):
@@ -701,7 +708,7 @@ class RecordArray(Content):
                 self._fields,
                 self.length,
                 parameters=self._parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
 
     def numbers_to_type(self, name):
@@ -713,7 +720,7 @@ class RecordArray(Content):
             self._fields,
             self._length,
             parameters=self._parameters,
-            nplike=self._nplike,
+            backend=self._backend,
         )
 
     def _is_unique(self, negaxis, starts, parents, outlength):
@@ -744,9 +751,9 @@ class RecordArray(Content):
     ):
         if self._fields is None or len(self._fields) == 0:
             return ak.contents.NumpyArray(
-                self._nplike.instance().empty(0, np.int64),
+                self._backend.nplike.instance().empty(0, np.int64),
                 parameters=None,
-                nplike=self._nplike,
+                backend=self._backend,
             )
 
         contents = []
@@ -768,7 +775,7 @@ class RecordArray(Content):
             self._fields,
             self._length,
             parameters=self._parameters,
-            nplike=self._nplike,
+            backend=self._backend,
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -788,7 +795,7 @@ class RecordArray(Content):
                 recordlookup,
                 self.length,
                 parameters=self._parameters,
-                nplike=self._nplike,
+                backend=self._backend,
             )
 
     def _reduce_next(
@@ -849,7 +856,7 @@ class RecordArray(Content):
                     self._fields,
                     self._length,
                     parameters=self._parameters,
-                    nplike=self._nplike,
+                    backend=self._backend,
                 )
             else:
                 return ak.contents.RecordArray(
@@ -857,7 +864,7 @@ class RecordArray(Content):
                     self._fields,
                     self._length,
                     parameters=self._parameters,
-                    nplike=self._nplike,
+                    backend=self._backend,
                 )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):
@@ -892,21 +899,21 @@ class RecordArray(Content):
 
     def _to_numpy(self, allow_missing):
         if self.fields is None:
-            return self._nplike.empty(self.length, dtype=[])
+            return self._backend.nplike.empty(self.length, dtype=[])
         contents = [x._to_numpy(allow_missing) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ak._errors.wrap_error(
                 ValueError(f"cannot convert {self} into np.ndarray")
             )
-        out = self._nplike.empty(
+        out = self._backend.nplike.empty(
             contents[0].shape[0],
             dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
         )
         mask = None
         for n, x in zip(self.fields, contents):
-            if isinstance(x, self._nplike.ma.MaskedArray):
+            if isinstance(x, self._backend.nplike.ma.MaskedArray):
                 if mask is None:
-                    mask = self._nplike.index_nplike.ma.zeros(
+                    mask = self._backend.index_nplike.ma.zeros(
                         self.length, [(n, np.bool_) for n in self.fields]
                     )
                 if x.mask is not None:
@@ -914,15 +921,17 @@ class RecordArray(Content):
             out[n] = x
 
         if mask is not None:
-            out = self._nplike.ma.MaskedArray(out, mask)
+            out = self._backend.nplike.ma.MaskedArray(out, mask)
 
         return out
 
-    def _completely_flatten(self, nplike, options):
+    def _completely_flatten(self, backend, options):
         if options["flatten_records"]:
             out = []
             for content in self._contents:
-                out.extend(content[: self._length]._completely_flatten(nplike, options))
+                out.extend(
+                    content[: self._length]._completely_flatten(backend, options)
+                )
             return out
         else:
             in_function = ""
@@ -939,7 +948,7 @@ class RecordArray(Content):
     def _recursively_apply(
         self, action, behavior, depth, depth_context, lateral_context, options
     ):
-        if self._nplike.known_shape:
+        if self._backend.nplike.known_shape:
             contents = [x[: self._length] for x in self._contents]
         else:
             contents = self._contents
@@ -968,7 +977,7 @@ class RecordArray(Content):
                     self._fields,
                     self._length,
                     parameters=self._parameters if options["keep_parameters"] else None,
-                    nplike=self._nplike,
+                    backend=self._backend,
                 )
 
         else:
@@ -991,7 +1000,7 @@ class RecordArray(Content):
             lateral_context=lateral_context,
             continuation=continuation,
             behavior=behavior,
-            nplike=self._nplike,
+            backend=self._backend,
             options=options,
         )
 
@@ -1011,7 +1020,7 @@ class RecordArray(Content):
             self._fields,
             self._length,
             parameters=self._parameters,
-            nplike=self._nplike,
+            backend=self._backend,
         )
 
     def _to_list(self, behavior, json_conversions):
@@ -1038,14 +1047,14 @@ class RecordArray(Content):
                 out[i] = dict(zip(fields, [x[i] for x in contents]))
             return out
 
-    def _to_nplike(self, nplike):
-        contents = [content._to_nplike(nplike) for content in self._contents]
+    def to_backend(self, backend: ak._backends.Backend) -> Self:
+        contents = [content.to_backend(backend) for content in self._contents]
         return RecordArray(
             contents,
             self._fields,
             length=self._length,
             parameters=self._parameters,
-            nplike=nplike,
+            backend=backend,
         )
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

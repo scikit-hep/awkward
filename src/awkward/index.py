@@ -1,10 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import annotations
 
 import copy
 
 import awkward as ak
+from awkward.typing import Self
 
 np = ak.nplikes.NumpyMetadata.instance()
+
 
 _dtype_to_form = {
     np.dtype(np.int8): "i8",
@@ -27,9 +30,7 @@ class Index:
                 TypeError("Index metadata must be None or a dict")
             )
         self._metadata = metadata
-        self._data = self._nplike.index_nplike.asarray(
-            data, dtype=self._expected_dtype, order="C"
-        )
+        self._data = self._nplike.asarray(data, dtype=self._expected_dtype, order="C")
         if len(self._data.shape) != 1:
             raise ak._errors.wrap_error(TypeError("Index data must be one-dimensional"))
 
@@ -71,13 +72,13 @@ class Index:
     def zeros(cls, length, nplike, dtype=None):
         if dtype is None:
             dtype = cls._expected_dtype
-        return Index(nplike.index_nplike.zeros(length, dtype=dtype), nplike=nplike)
+        return Index(nplike.zeros(length, dtype=dtype), nplike=nplike)
 
     @classmethod
     def empty(cls, length, nplike, dtype=None):
         if dtype is None:
             dtype = cls._expected_dtype
-        return Index(nplike.index_nplike.empty(length, dtype=dtype), nplike=nplike)
+        return Index(nplike.empty(length, dtype=dtype), nplike=nplike)
 
     @property
     def data(self):
@@ -114,13 +115,13 @@ class Index:
         return type(self)(data.forget_length(), metadata=self._metadata, nplike=tt)
 
     def raw(self, nplike):
-        return self.nplike.index_nplike.raw(self.data, nplike.index_nplike)
+        return self.nplike.raw(self.data, nplike)
 
     def __len__(self):
         return self.length
 
     def __array__(self, *args, **kwargs):
-        return self._nplike.index_nplike.asarray(self._data, *args, **kwargs)
+        return self._nplike.asarray(self._data, *args, **kwargs)
 
     def __repr__(self):
         return self._repr("", "", "")
@@ -131,11 +132,11 @@ class Index:
         out.append(" len=")
         out.append(repr(str(self._data.shape[0])))
 
-        arraystr_lines = self._nplike.index_nplike.array_str(
-            self._data, max_line_width=30
-        ).split("\n")
+        arraystr_lines = self._nplike.array_str(self._data, max_line_width=30).split(
+            "\n"
+        )
         if len(arraystr_lines) > 1 or self._metadata is not None:
-            arraystr_lines = self._nplike.index_nplike.array_str(
+            arraystr_lines = self._nplike.array_str(
                 self._data, max_line_width=max(80 - len(indent) - 4, 40)
             ).split("\n")
             if len(arraystr_lines) > 5:
@@ -166,7 +167,7 @@ class Index:
         out = self._data[where]
 
         if hasattr(out, "shape") and len(out.shape) != 0:
-            return Index(out, metadata=self.metadata, nplike=self.nplike)
+            return Index(out, metadata=self.metadata, nplike=self._nplike)
         elif (
             ak.nplikes.Jax.is_own_array(out) or ak.nplikes.Cupy.is_own_array(out)
         ) and len(out.shape) == 0:
@@ -181,7 +182,7 @@ class Index:
         return Index(self._data.astype(np.int64))
 
     def __copy__(self):
-        return type(self)(self._data, self._metadata, self._nplike)
+        return type(self)(self._data, metadata=self._metadata, nplike=self._nplike)
 
     def __deepcopy__(self, memo):
         return type(self)(
@@ -193,25 +194,17 @@ class Index:
     def _nbytes_part(self):
         return self.data.nbytes
 
-    def to_backend(self, backend):
-        if self.nplike is ak._util.regularize_backend(backend):
-            return self
-        else:
-            return self._to_nplike(ak._util.regularize_backend(backend))
-
-    def _to_nplike(self, nplike):
-        # if isinstance(nplike, ak.nplikes.Jax):
-        #     print("YES OFFICER, this nplike right here")
-        return Index(self.raw(nplike), metadata=self.metadata, nplike=nplike)
+    def to_nplike(self, nplike: ak._nplikes.NumpyLike) -> Self:
+        return type(self)(self.raw(nplike), metadata=self.metadata, nplike=nplike)
 
     def layout_equal(self, other, index_dtype=True, numpyarray=True):
         if index_dtype:
             return (
-                self.nplike.index_nplike.array_equal(self.data, other.data)
+                self.nplike.array_equal(self.data, other.data)
                 and self._data.dtype == other.data.dtype
             )
         else:
-            return self.nplike.index_nplike.array_equal(self.data, other.data)
+            return self.nplike.array_equal(self.data, other.data)
 
 
 class Index8(Index):

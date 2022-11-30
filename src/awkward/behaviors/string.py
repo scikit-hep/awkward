@@ -146,6 +146,8 @@ def _string_notequal(one, two):
 
 def _string_broadcast(layout, offsets):
     nplike = ak.nplikes.nplike_of(offsets)
+    assert nplike is layout.backend.index_nplike
+
     offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if ak._util.win or ak._util.bits32:

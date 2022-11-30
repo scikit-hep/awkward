@@ -1,12 +1,18 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# pylint: disable=wildcard-import, unused-wildcard-import
+from __future__ import annotations
 
+import sys
 import typing
+from typing import *  # noqa: F401, F403
 
-if typing.TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+__all__ = typing.__all__
 
-    # from typing_extensions import Self
-    Self = typing.Any
-else:
-    TypeAlias = object
-    Self = object
+if sys.version_info < (3, 11):
+    import typing_extensions
+    from typing_extensions import *  # noqa: F401, F403
+
+    __all__ += typing_extensions.__all__
+
+
+def __dir__() -> tuple[str, ...]:
+    return __all__

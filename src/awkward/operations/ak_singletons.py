@@ -35,16 +35,16 @@ def singletons(array, *, highlevel=True, behavior=None):
 
 def _impl(array, highlevel, behavior):
     def action(layout, **kwargs):
-        nplike = ak.nplikes.nplike_of(layout)
+        backend = layout.backend
 
         if layout.is_option:
-            nulls = nplike.index_nplike.asarray(
+            nulls = backend.index_nplike.asarray(
                 layout.mask_as_bool(valid_when=False)
             ).view(np.bool_)
-            offsets = nplike.index_nplike.ones(len(layout) + 1, dtype=np.int64)
+            offsets = backend.index_nplike.ones(len(layout) + 1, dtype=np.int64)
             offsets[0] = 0
             offsets[1:][nulls] = 0
-            nplike.index_nplike.cumsum(offsets, out=offsets)
+            backend.index_nplike.cumsum(offsets, out=offsets)
             return ak.contents.ListOffsetArray(
                 ak.index.Index64(offsets), layout.project()
             )

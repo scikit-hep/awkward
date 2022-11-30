@@ -60,7 +60,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None):
 def _impl(array, value, axis, highlevel, behavior):
     arraylayout = ak.operations.to_layout(array, allow_record=True, allow_other=False)
     behavior = ak._util.behavior_of(array, behavior=behavior)
-    nplike = ak.nplikes.nplike_of(arraylayout)
+    backend = ak._backends.backend_of(arraylayout)
 
     # Convert value type to appropriate layout
     if (
@@ -69,14 +69,16 @@ def _impl(array, value, axis, highlevel, behavior):
         and len(value.shape) != 0
     ):
         valuelayout = ak.operations.to_layout(
-            nplike.asarray(value)[np.newaxis], allow_record=False, allow_other=False
+            backend.nplike.asarray(value)[np.newaxis],
+            allow_record=False,
+            allow_other=False,
         )
     elif isinstance(value, (bool, numbers.Number, np.bool_, np.number)) or (
         isinstance(value, np.ndarray)
         and issubclass(value.dtype.type, (np.bool_, np.number))
     ):
         valuelayout = ak.operations.to_layout(
-            nplike.asarray(value), allow_record=False, allow_other=False
+            backend.nplike.asarray(value), allow_record=False, allow_other=False
         )
     elif (
         ak._util.is_sized_iterable(value)
@@ -90,7 +92,7 @@ def _impl(array, value, axis, highlevel, behavior):
             valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
         elif len(valuelayout) == 0:
             offsets = ak.index.Index64(
-                nplike.array([0, 0], dtype=np.int64), nplike=nplike
+                backend.index_nplike.array([0, 0], dtype=np.int64)
             )
             valuelayout = ak.contents.ListOffsetArray(offsets, valuelayout)
         else:

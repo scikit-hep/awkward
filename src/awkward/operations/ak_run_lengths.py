@@ -95,16 +95,18 @@ def run_lengths(array, *, highlevel=True, behavior=None):
 
 
 def _impl(array, highlevel, behavior):
-    nplike = ak.nplikes.nplike_of(array)
+    backend = ak._backends.backend_of(
+        array, default=ak._backends.NumpyBackend.instance()
+    )
 
     def lengths_of(data, offsets):
         if len(data) == 0:
-            return nplike.index_nplike.empty(0, np.int64), offsets
+            return backend.index_nplike.empty(0, np.int64), offsets
         else:
             diffs = data[1:] != data[:-1]
 
             if isinstance(diffs, ak.highlevel.Array):
-                diffs = nplike.asarray(diffs)
+                diffs = backend.nplike.asarray(diffs)
             # Do we have list boundaries to consider?
             if offsets is not None:
                 # When checking to see whether one element equals its following neighbour
@@ -117,11 +119,13 @@ def _impl(array, highlevel, behavior):
                 #                                      boundary diff ^
                 # To consider only the interior boundaries, we ignore the start and end
                 # offset values. These can be repeated with empty sublists, so we mask them out.
-                is_interior = nplike.logical_and(0 < offsets, offsets < len(data) - 1)
+                is_interior = backend.nplike.logical_and(
+                    0 < offsets, offsets < len(data) - 1
+                )
                 interior_offsets = offsets[is_interior]
                 diffs[interior_offsets - 1] = True
-            positions = nplike.index_nplike.nonzero(diffs)[0]
-            full_positions = nplike.index_nplike.empty(len(positions) + 2, np.int64)
+            positions = backend.index_nplike.nonzero(diffs)[0]
+            full_positions = backend.index_nplike.empty(len(positions) + 2, np.int64)
             full_positions[0] = 0
             full_positions[-1] = len(data)
             full_positions[1:-1] = positions + 1
@@ -130,7 +134,7 @@ def _impl(array, highlevel, behavior):
             if offsets is None:
                 nextoffsets = None
             else:
-                nextoffsets = nplike.index_nplike.searchsorted(
+                nextoffsets = backend.index_nplike.searchsorted(
                     full_positions, offsets, side="left"
                 )
             return nextcontent, nextoffsets
@@ -152,7 +156,7 @@ def _impl(array, highlevel, behavior):
                     NotImplementedError("run_lengths on " + type(layout).__name__)
                 )
 
-            nextcontent, _ = lengths_of(nplike.asarray(layout), None)
+            nextcontent, _ = lengths_of(backend.nplike.asarray(layout), None)
             return ak.contents.NumpyArray(nextcontent)
 
         elif layout.branch_depth == (False, 2):
@@ -171,7 +175,7 @@ def _impl(array, highlevel, behavior):
                 # We also want to trim the _upper_ bound of content,
                 # so we manually convert the list type to zero-based
                 listoffsetarray = layout.to_ListOffsetArray64(False)
-                offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
+                offsets = backend.index_nplike.asarray(listoffsetarray.offsets)
                 content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
                 if content.is_indexed:
@@ -186,7 +190,7 @@ def _impl(array, highlevel, behavior):
                 )
 
             listoffsetarray = layout.to_ListOffsetArray64(False)
-            offsets = nplike.index_nplike.asarray(listoffsetarray.offsets)
+            offsets = backend.index_nplike.asarray(listoffsetarray.offsets)
             content = listoffsetarray.content[offsets[0] : offsets[-1]]
 
             if content.is_indexed:
@@ -205,7 +209,7 @@ def _impl(array, highlevel, behavior):
                 )
 
             nextcontent, nextoffsets = lengths_of(
-                nplike.asarray(content), offsets - offsets[0]
+                backend.nplike.asarray(content), offsets - offsets[0]
             )
             return ak.contents.ListOffsetArray(
                 ak.index.Index64(nextoffsets),
