@@ -976,12 +976,10 @@ def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
         # Layout objects
         if hasattr(array, "backend"):
             nplikes.add(array.backend.nplike)
-            continue
 
         # Index objects
         elif hasattr(array, "nplike"):
             nplikes.add(array.nplike)
-            continue
 
         # Other e.g. nplike arrays
         else:
