@@ -67,9 +67,7 @@ class NumpyBackend(Backend[Any], Singleton):
     def __init__(self):
         self._numpy = Numpy.instance()
 
-    def __getitem__(
-        self, index: KernelKeyType
-    ) -> KernelType[Any]:  # pylint: disable=invalid-sequence-index
+    def __getitem__(self, index: KernelKeyType) -> KernelType[Any]:
         return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
@@ -87,9 +85,7 @@ class CupyBackend(Backend[Any], Singleton):
     def __init__(self):
         self._cupy = Cupy.instance()
 
-    def __getitem__(
-        self, index: KernelKeyType
-    ) -> KernelType[Any]:  # pylint: disable=invalid-sequence-index
+    def __getitem__(self, index: KernelKeyType) -> KernelType[Any]:
         from awkward._connect import cuda
 
         cupy = cuda.import_cupy("Awkward Arrays with CUDA")
@@ -116,9 +112,7 @@ class JaxBackend(Backend[Any], Singleton):
         self._jax = Jax.instance()
         self._numpy = Numpy.instance()
 
-    def __getitem__(
-        self, index: KernelKeyType
-    ) -> KernelType[Any]:  # pylint: disable=invalid-sequence-index
+    def __getitem__(self, index: KernelKeyType) -> KernelType[Any]:
         # JAX uses Awkward's C++ kernels for index-only operations
         return JaxKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
@@ -137,9 +131,7 @@ class TypeTracerBackend(Backend[Any], Singleton):
     def __init__(self):
         self._typetracer = TypeTracer.instance()
 
-    def __getitem__(
-        self, index: KernelKeyType
-    ) -> KernelType[Any]:  # pylint: disable=invalid-sequence-index
+    def __getitem__(self, index: KernelKeyType) -> KernelType[Any]:
         return NoKernel(index)
 
 
