@@ -146,13 +146,15 @@ def _string_notequal(one, two):
 
 def _string_broadcast(layout, offsets):
     nplike = ak.nplikes.nplike_of(offsets)
+    assert nplike is layout.backend.index_nplike
+
     offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if ak._util.win or ak._util.bits32:
         counts = counts.astype(np.int32)
     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
     return ak.contents.IndexedArray(
-        ak.index.Index64(parents, nplike=nplike), layout
+        ak.index.Index64(parents, nplike=nplike, index_is_fixed=True), layout
     ).project()
 
 

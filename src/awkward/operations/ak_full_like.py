@@ -100,24 +100,27 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
     behavior = ak._util.behavior_of(array, behavior=behavior)
 
     def action(layout, **kwargs):
+        nplike = layout.backend.nplike
+        index_nplike = layout.backend.index_nplike
+
         if layout.parameter("__array__") == "bytestring" and fill_value is _ZEROS:
-            nplike = ak.nplikes.nplike_of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64),
+                    nplike=index_nplike,
+                    index_is_fixed=True,
                 ),
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64),
+                    nplike=index_nplike,
+                    index_is_fixed=True,
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
             )
 
         elif layout.parameter("__array__") == "bytestring":
-            nplike = ak.nplikes.nplike_of(layout)
             if isinstance(fill_value, bytes):
                 asbytes = fill_value
             else:
@@ -126,50 +129,51 @@ def _impl(array, fill_value, highlevel, behavior, dtype):
 
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64),
+                    nplike=index_nplike,
+                    index_is_fixed=True,
                 ),
                 ak.index.Index64(
-                    nplike.index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
+                    index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
             )
 
         elif layout.parameter("__array__") == "string" and fill_value is _ZEROS:
-            nplike = ak.nplikes.nplike_of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64),
+                    nplike=index_nplike,
+                    index_is_fixed=True,
                 ),
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64),
+                    nplike=index_nplike,
+                    index_is_fixed=True,
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
             )
 
         elif layout.parameter("__array__") == "string":
-            nplike = ak.nplikes.nplike_of(layout)
             asstr = str(fill_value).encode("utf-8", "surrogateescape")
             asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
             return ak.contents.ListArray(
                 ak.index.Index64(
-                    nplike.index_nplike.zeros(len(layout), dtype=np.int64),
-                    nplike=nplike,
+                    index_nplike.zeros(len(layout), dtype=np.int64),
+                    nplike=index_nplike,
+                    index_is_fixed=True,
                 ),
                 ak.index.Index64(
-                    nplike.index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
+                    index_nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
                 ak.contents.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
             )
 
         elif isinstance(layout, ak.contents.NumpyArray):
-            nplike = ak.nplikes.nplike_of(layout)
             original = nplike.asarray(layout.data)
 
             if fill_value == 0 or fill_value is _ZEROS:

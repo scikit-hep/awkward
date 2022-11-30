@@ -94,7 +94,9 @@ class UnmaskedArray(Content):
     def to_IndexedOptionArray64(self):
         arange = self._backend.index_nplike.arange(self._content.length, dtype=np.int64)
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(arange, nplike=self._backend.nplike),
+            ak.index.Index64(
+                arange, nplike=self._backend.index_nplike, index_is_fixed=True
+            ),
             self._content,
             parameters=self._parameters,
         )
@@ -102,7 +104,9 @@ class UnmaskedArray(Content):
     def to_ByteMaskedArray(self, valid_when):
         return ak.contents.ByteMaskedArray(
             ak.index.Index8(
-                self.mask_as_bool(valid_when).view(np.int8), nplike=self._backend.nplike
+                self.mask_as_bool(valid_when).view(np.int8),
+                nplike=self._backend.index_nplike,
+                index_is_fixed=True,
             ),
             self._content,
             valid_when,
@@ -112,11 +116,11 @@ class UnmaskedArray(Content):
     def to_BitMaskedArray(self, valid_when, lsb_order):
         bitlength = int(numpy.ceil(self._content.length / 8.0))
         if valid_when:
-            bitmask = self._backend.nplike.full(
+            bitmask = self._backend.index_nplike.full(
                 bitlength, np.uint8(255), dtype=np.uint8
             )
         else:
-            bitmask = self._backend.nplike.zeros(bitlength, dtype=np.uint8)
+            bitmask = self._backend.index_nplike.zeros(bitlength, dtype=np.uint8)
 
         return ak.contents.BitMaskedArray(
             ak.index.IndexU8(bitmask),

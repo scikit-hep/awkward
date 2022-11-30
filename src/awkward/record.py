@@ -34,6 +34,14 @@ class Record:
         return self._array
 
     @property
+    def nplike(self):
+        return self._array.nplike
+
+    @property
+    def backend(self):
+        return self._array.backend
+
+    @property
     def at(self):
         return self._at
 

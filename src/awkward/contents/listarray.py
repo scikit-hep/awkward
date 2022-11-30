@@ -167,7 +167,9 @@ class ListArray(Content):
                 starts.shape[0] + 1, dtype=starts.dtype
             )
             return ListOffsetArray(
-                ak.index.Index(offsets, nplike=self._backend.nplike),
+                ak.index.Index(
+                    offsets, nplike=self._backend.index_nplike, index_is_fixed=True
+                ),
                 self._content,
                 parameters=self._parameters,
             )
@@ -182,7 +184,9 @@ class ListArray(Content):
                 offsets[:-1] = starts
                 offsets[-1] = stops[-1]
             return ListOffsetArray(
-                ak.index.Index(offsets, nplike=self._backend.nplike),
+                ak.index.Index(
+                    offsets, nplike=self._backend.index_nplike, index_is_fixed=True
+                ),
                 self._content,
                 parameters=self._parameters,
             ).to_ListOffsetArray64(start_at_zero=start_at_zero)
@@ -253,11 +257,13 @@ class ListArray(Content):
 
     def _compact_offsets64(self, start_at_zero):
         starts_len = self._starts.length
-        out = ak.index.Index64.empty(starts_len + 1, self._backend.nplike)
+        out = ak.index.Index64.empty(
+            starts_len + 1, self._backend.index_nplike, index_is_fixed=True
+        )
         assert (
-            out.nplike is self._backend.nplike
-            and self._starts.nplike is self._backend.nplike
-            and self._stops.nplike is self._backend.nplike
+            out.nplike is self._backend.index_nplike
+            and self._starts.nplike is self._backend.index_nplike
+            and self._stops.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -278,8 +284,12 @@ class ListArray(Content):
         return ListOffsetArray._broadcast_tooffsets64(self, offsets)
 
     def _getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail):
-        slicestarts = slicestarts._to_nplike(self._backend.nplike)
-        slicestops = slicestops._to_nplike(self._backend.nplike)
+        slicestarts = slicestarts._to_nplike(
+            self._backend.index_nplike, index_is_fixed=True
+        )
+        slicestops = slicestops._to_nplike(
+            self._backend.index_nplike, index_is_fixed=True
+        )
         if self._backend.nplike.known_shape and slicestarts.length != self.length:
             raise ak._errors.index_error(
                 self,
@@ -293,14 +303,14 @@ class ListArray(Content):
 
         if isinstance(slicecontent, ak.contents.ListOffsetArray):
             outoffsets = ak.index.Index64.empty(
-                slicestarts.length + 1, self._backend.nplike
+                slicestarts.length + 1, self._backend.index_nplike, index_is_fixed=True
             )
             assert (
-                outoffsets.nplike is self._backend.nplike
-                and slicestarts.nplike is self._backend.nplike
-                and slicestops.nplike is self._backend.nplike
-                and self._starts.nplike is self._backend.nplike
-                and self._stops.nplike is self._backend.nplike
+                outoffsets.nplike is self._backend.index_nplike
+                and slicestarts.nplike is self._backend.index_nplike
+                and slicestops.nplike is self._backend.index_nplike
+                and self._starts.nplike is self._backend.index_nplike
+                and self._stops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -337,11 +347,13 @@ class ListArray(Content):
             )
 
         elif isinstance(slicecontent, ak.contents.NumpyArray):
-            carrylen = ak.index.Index64.empty(1, self._backend.nplike)
+            carrylen = ak.index.Index64.empty(
+                1, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                carrylen.nplike is self._backend.nplike
-                and slicestarts.nplike is self._backend.nplike
-                and slicestops.nplike is self._backend.nplike
+                carrylen.nplike is self._backend.index_nplike
+                and slicestarts.nplike is self._backend.index_nplike
+                and slicestops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -359,18 +371,20 @@ class ListArray(Content):
             )
             sliceindex = ak.index.Index64(slicecontent._data)
             outoffsets = ak.index.Index64.empty(
-                slicestarts.length + 1, self._backend.nplike
+                slicestarts.length + 1, self._backend.index_nplike, index_is_fixed=True
             )
-            nextcarry = ak.index.Index64.empty(carrylen[0], self._backend.nplike)
+            nextcarry = ak.index.Index64.empty(
+                carrylen[0], self._backend.index_nplike, index_is_fixed=True
+            )
 
             assert (
-                outoffsets.nplike is self._backend.nplike
-                and nextcarry.nplike is self._backend.nplike
-                and slicestarts.nplike is self._backend.nplike
-                and slicestops.nplike is self._backend.nplike
-                and sliceindex.nplike is self._backend.nplike
-                and self._starts.nplike is self._backend.nplike
-                and self._stops.nplike is self._backend.nplike
+                outoffsets.nplike is self._backend.index_nplike
+                and nextcarry.nplike is self._backend.index_nplike
+                and slicestarts.nplike is self._backend.index_nplike
+                and slicestops.nplike is self._backend.index_nplike
+                and sliceindex.nplike is self._backend.index_nplike
+                and self._starts.nplike is self._backend.index_nplike
+                and self._stops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -416,12 +430,14 @@ class ListArray(Content):
                 )
 
             missing = ak.index.Index64(slicecontent._index)
-            numvalid = ak.index.Index64.empty(1, self._backend.nplike)
+            numvalid = ak.index.Index64.empty(
+                1, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                numvalid.nplike is self._backend.nplike
-                and slicestarts.nplike is self._backend.nplike
-                and slicestops.nplike is self._backend.nplike
-                and missing.nplike is self._backend.nplike
+                numvalid.nplike is self._backend.index_nplike
+                and slicestarts.nplike is self._backend.index_nplike
+                and slicestops.nplike is self._backend.index_nplike
+                and missing.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -441,22 +457,24 @@ class ListArray(Content):
                 slicer=ak.contents.ListArray(slicestarts, slicestops, slicecontent),
             )
 
-            nextcarry = ak.index.Index64.empty(numvalid[0], self._backend.nplike)
+            nextcarry = ak.index.Index64.empty(
+                numvalid[0], self._backend.index_nplike, index_is_fixed=True
+            )
 
             smalloffsets = ak.index.Index64.empty(
-                slicestarts.length + 1, self._backend.nplike
+                slicestarts.length + 1, self._backend.index_nplike, index_is_fixed=True
             )
             largeoffsets = ak.index.Index64.empty(
-                slicestarts.length + 1, self._backend.nplike
+                slicestarts.length + 1, self._backend.index_nplike, index_is_fixed=True
             )
 
             assert (
-                nextcarry.nplike is self._backend.nplike
-                and smalloffsets.nplike is self._backend.nplike
-                and largeoffsets.nplike is self._backend.nplike
-                and slicestarts.nplike is self._backend.nplike
-                and slicestops.nplike is self._backend.nplike
-                and missing.nplike is self._backend.nplike
+                nextcarry.nplike is self._backend.index_nplike
+                and smalloffsets.nplike is self._backend.index_nplike
+                and largeoffsets.nplike is self._backend.index_nplike
+                and slicestarts.nplike is self._backend.index_nplike
+                and slicestops.nplike is self._backend.index_nplike
+                and missing.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -544,11 +562,13 @@ class ListArray(Content):
             assert advanced is None
             nexthead, nexttail = ak._slicing.headtail(tail)
             lenstarts = self._starts.length
-            nextcarry = ak.index.Index64.empty(lenstarts, self._backend.nplike)
+            nextcarry = ak.index.Index64.empty(
+                lenstarts, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                nextcarry.nplike is self._backend.nplike
-                and self._starts.nplike is self._backend.nplike
-                and self._stops.nplike is self._backend.nplike
+                nextcarry.nplike is self._backend.index_nplike
+                and self._starts.nplike is self._backend.index_nplike
+                and self._stops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -580,11 +600,13 @@ class ListArray(Content):
             stop = ak._util.kSliceNone if stop is None else stop
 
             if self._backend.nplike.known_shape:
-                carrylength = ak.index.Index64.empty(1, self._backend.nplike)
+                carrylength = ak.index.Index64.empty(
+                    1, self._backend.index_nplike, index_is_fixed=True
+                )
                 assert (
-                    carrylength.nplike is self._backend.nplike
-                    and self._starts.nplike is self._backend.nplike
-                    and self._stops.nplike is self._backend.nplike
+                    carrylength.nplike is self._backend.index_nplike
+                    and self._starts.nplike is self._backend.index_nplike
+                    and self._stops.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -603,30 +625,34 @@ class ListArray(Content):
                     ),
                     slicer=head,
                 )
-                nextcarry = ak.index.Index64.empty(carrylength[0], self._backend.nplike)
+                nextcarry = ak.index.Index64.empty(
+                    carrylength[0], self._backend.index_nplike, index_is_fixed=True
+                )
             else:
                 nextcarry = ak.index.Index64.empty(
-                    ak._typetracer.UnknownLength, self._backend.nplike
+                    ak._typetracer.UnknownLength,
+                    self._backend.index_nplike,
+                    index_is_fixed=True,
                 )
 
             if self._starts.dtype == "int64":
                 nextoffsets = ak.index.Index64.empty(
-                    lenstarts + 1, self._backend.nplike
+                    lenstarts + 1, self._backend.index_nplike, index_is_fixed=True
                 )
             elif self._starts.dtype == "int32":
                 nextoffsets = ak.index.Index32.empty(
-                    lenstarts + 1, self._backend.nplike
+                    lenstarts + 1, self._backend.index_nplike, index_is_fixed=True
                 )
             elif self._starts.dtype == "uint32":
                 nextoffsets = ak.index.IndexU32.empty(
-                    lenstarts + 1, self._backend.nplike
+                    lenstarts + 1, self._backend.index_nplike, index_is_fixed=True
                 )
 
             assert (
-                nextoffsets.nplike is self._backend.nplike
-                and nextcarry.nplike is self._backend.nplike
-                and self._starts.nplike is self._backend.nplike
-                and self._stops.nplike is self._backend.nplike
+                nextoffsets.nplike is self._backend.index_nplike
+                and nextcarry.nplike is self._backend.index_nplike
+                and self._starts.nplike is self._backend.index_nplike
+                and self._stops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -658,10 +684,12 @@ class ListArray(Content):
                 )
             else:
                 if self._backend.nplike.known_shape:
-                    total = ak.index.Index64.empty(1, self._backend.nplike)
+                    total = ak.index.Index64.empty(
+                        1, self._backend.index_nplike, index_is_fixed=True
+                    )
                     assert (
-                        total.nplike is self._backend.nplike
-                        and nextoffsets.nplike is self._backend.nplike
+                        total.nplike is self._backend.index_nplike
+                        and nextoffsets.nplike is self._backend.index_nplike
                     )
                     self._handle_error(
                         self._backend[
@@ -676,17 +704,21 @@ class ListArray(Content):
                         slicer=head,
                     )
                     nextadvanced = ak.index.Index64.empty(
-                        total[0], self._backend.nplike
+                        total[0], self._backend.index_nplike, index_is_fixed=True
                     )
                 else:
                     nextadvanced = ak.index.Index64.empty(
-                        ak._typetracer.UnknownLength, self._backend.nplike
+                        ak._typetracer.UnknownLength,
+                        self._backend.index_nplike,
+                        index_is_fixed=True,
                     )
-                advanced = advanced._to_nplike(self._backend.nplike)
+                advanced = advanced._to_nplike(
+                    self._backend.index_nplike, index_is_fixed=True
+                )
                 assert (
-                    nextadvanced.nplike is self._backend.nplike
-                    and advanced.nplike is self._backend.nplike
-                    and nextoffsets.nplike is self._backend.nplike
+                    nextadvanced.nplike is self._backend.index_nplike
+                    and advanced.nplike is self._backend.index_nplike
+                    and nextoffsets.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -725,20 +757,26 @@ class ListArray(Content):
 
             nexthead, nexttail = ak._slicing.headtail(tail)
             flathead = self._backend.index_nplike.asarray(head.data.reshape(-1))
-            regular_flathead = ak.index.Index64(flathead, nplike=self._backend.nplike)
+            regular_flathead = ak.index.Index64(
+                flathead, nplike=self._backend.index_nplike, index_is_fixed=True
+            )
             if advanced is None or advanced.length == 0:
                 nextcarry = ak.index.Index64.empty(
-                    lenstarts * flathead.shape[0], self._backend.nplike
+                    lenstarts * flathead.shape[0],
+                    self._backend.index_nplike,
+                    index_is_fixed=True,
                 )
                 nextadvanced = ak.index.Index64.empty(
-                    lenstarts * flathead.shape[0], self._backend.nplike
+                    lenstarts * flathead.shape[0],
+                    self._backend.index_nplike,
+                    index_is_fixed=True,
                 )
                 assert (
-                    nextcarry.nplike is self._backend.nplike
-                    and nextadvanced.nplike is self._backend.nplike
-                    and self._starts.nplike is self._backend.nplike
-                    and self._stops.nplike is self._backend.nplike
-                    and regular_flathead.nplike is self._backend.nplike
+                    nextcarry.nplike is self._backend.index_nplike
+                    and nextadvanced.nplike is self._backend.index_nplike
+                    and self._starts.nplike is self._backend.index_nplike
+                    and self._stops.nplike is self._backend.index_nplike
+                    and regular_flathead.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -771,16 +809,22 @@ class ListArray(Content):
                     return out
 
             else:
-                nextcarry = ak.index.Index64.empty(lenstarts, self._backend.nplike)
-                nextadvanced = ak.index.Index64.empty(lenstarts, self._backend.nplike)
-                advanced = advanced._to_nplike(self._backend.nplike)
+                nextcarry = ak.index.Index64.empty(
+                    lenstarts, self._backend.index_nplike, index_is_fixed=True
+                )
+                nextadvanced = ak.index.Index64.empty(
+                    lenstarts, self._backend.index_nplike, index_is_fixed=True
+                )
+                advanced = advanced._to_nplike(
+                    self._backend.index_nplike, index_is_fixed=True
+                )
                 assert (
-                    nextcarry.nplike is self._backend.nplike
-                    and nextadvanced.nplike is self._backend.nplike
-                    and self._starts.nplike is self._backend.nplike
-                    and self._stops.nplike is self._backend.nplike
-                    and regular_flathead.nplike is self._backend.nplike
-                    and advanced.nplike is self._backend.nplike
+                    nextcarry.nplike is self._backend.index_nplike
+                    and nextadvanced.nplike is self._backend.index_nplike
+                    and self._starts.nplike is self._backend.index_nplike
+                    and self._stops.nplike is self._backend.index_nplike
+                    and regular_flathead.nplike is self._backend.index_nplike
+                    and advanced.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -820,22 +864,22 @@ class ListArray(Content):
             length = self.length
             singleoffsets = ak.index.Index64(head.offsets.data)
             multistarts = ak.index.Index64.empty(
-                head.length * length, self._backend.nplike
+                head.length * length, self._backend.index_nplike, index_is_fixed=True
             )
             multistops = ak.index.Index64.empty(
-                head.length * length, self._backend.nplike
+                head.length * length, self._backend.index_nplike, index_is_fixed=True
             )
             nextcarry = ak.index.Index64.empty(
-                head.length * length, self._backend.nplike
+                head.length * length, self._backend.index_nplike, index_is_fixed=True
             )
 
             assert (
-                multistarts.nplike is self._backend.nplike
-                and multistops.nplike is self._backend.nplike
-                and singleoffsets.nplike is self._backend.nplike
-                and nextcarry.nplike is self._backend.nplike
-                and self._starts.nplike is self._backend.nplike
-                and self._stops.nplike is self._backend.nplike
+                multistarts.nplike is self._backend.index_nplike
+                and multistops.nplike is self._backend.index_nplike
+                and singleoffsets.nplike is self._backend.index_nplike
+                and nextcarry.nplike is self._backend.index_nplike
+                and self._starts.nplike is self._backend.index_nplike
+                and self._stops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -882,11 +926,13 @@ class ListArray(Content):
             else:
                 return out
         elif posaxis == depth + 1:
-            tonum = ak.index.Index64.empty(self.length, self._backend.nplike)
+            tonum = ak.index.Index64.empty(
+                self.length, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                tonum.nplike is self._backend.nplike
-                and self._starts.nplike is self._backend.nplike
-                and self._stops.nplike is self._backend.nplike
+                tonum.nplike is self._backend.index_nplike
+                and self._starts.nplike is self._backend.index_nplike
+                and self._stops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -976,8 +1022,12 @@ class ListArray(Content):
         tail_contents = contents[1:]
         nextcontent = contents[0].mergemany(tail_contents)
 
-        nextstarts = ak.index.Index64.empty(total_length, self._backend.nplike)
-        nextstops = ak.index.Index64.empty(total_length, self._backend.nplike)
+        nextstarts = ak.index.Index64.empty(
+            total_length, self._backend.index_nplike, index_is_fixed=True
+        )
+        nextstops = ak.index.Index64.empty(
+            total_length, self._backend.index_nplike, index_is_fixed=True
+        )
 
         contentlength_so_far = 0
         length_so_far = 0
@@ -994,10 +1044,10 @@ class ListArray(Content):
                 array_stops = ak.index.Index(array.stops)
 
                 assert (
-                    nextstarts.nplike is self._backend.nplike
-                    and nextstops.nplike is self._backend.nplike
-                    and array_starts.nplike is self._backend.nplike
-                    and array_stops.nplike is self._backend.nplike
+                    nextstarts.nplike is self._backend.index_nplike
+                    and nextstops.nplike is self._backend.index_nplike
+                    and array_starts.nplike is self._backend.index_nplike
+                    and array_stops.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -1027,10 +1077,10 @@ class ListArray(Content):
                 array_stops = ak.index.Index64(listoffsetarray.stops)
 
                 assert (
-                    nextstarts.nplike is self._backend.nplike
-                    and nextstops.nplike is self._backend.nplike
-                    and array_starts.nplike is self._backend.nplike
-                    and array_stops.nplike is self._backend.nplike
+                    nextstarts.nplike is self._backend.index_nplike
+                    and nextstops.nplike is self._backend.index_nplike
+                    and array_starts.nplike is self._backend.index_nplike
+                    and array_stops.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -1087,10 +1137,12 @@ class ListArray(Content):
                 innerlength = offsets[offsets.length - 1]
             else:
                 innerlength = ak._typetracer.UnknownLength
-            localindex = ak.index.Index64.empty(innerlength, self._backend.nplike)
+            localindex = ak.index.Index64.empty(
+                innerlength, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                localindex.nplike is self._backend.nplike
-                and offsets.nplike is self._backend.nplike
+                localindex.nplike is self._backend.index_nplike
+                and offsets.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -1210,8 +1262,8 @@ class ListArray(Content):
         if self._backend.nplike.known_shape and self.stops.length < self.starts.length:
             return f'at {path} ("{type(self)}"): len(stops) < len(starts)'
         assert (
-            self.starts.nplike is self._backend.nplike
-            and self.stops.nplike is self._backend.nplike
+            self.starts.nplike is self._backend.index_nplike
+            and self.stops.nplike is self._backend.index_nplike
         )
         error = self._backend[
             "awkward_ListArray_validity", self.starts.dtype.type, self.stops.dtype.type
@@ -1254,11 +1306,13 @@ class ListArray(Content):
             if posaxis == depth:
                 return self.pad_none_axis0(target, clip)
             elif posaxis == depth + 1:
-                min_ = ak.index.Index64.empty(1, self._backend.nplike)
+                min_ = ak.index.Index64.empty(
+                    1, self._backend.index_nplike, index_is_fixed=True
+                )
                 assert (
-                    min_.nplike is self._backend.nplike
-                    and self._starts.nplike is self._backend.nplike
-                    and self._stops.nplike is self._backend.nplike
+                    min_.nplike is self._backend.index_nplike
+                    and self._starts.nplike is self._backend.index_nplike
+                    and self._stops.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -1278,11 +1332,13 @@ class ListArray(Content):
                 if target < min_[0]:
                     return self
                 else:
-                    tolength = ak.index.Index64.empty(1, self._backend.nplike)
+                    tolength = ak.index.Index64.empty(
+                        1, self._backend.index_nplike, index_is_fixed=True
+                    )
                     assert (
-                        tolength.nplike is self._backend.nplike
-                        and self._starts.nplike is self._backend.nplike
-                        and self._stops.nplike is self._backend.nplike
+                        tolength.nplike is self._backend.index_nplike
+                        and self._starts.nplike is self._backend.index_nplike
+                        and self._stops.nplike is self._backend.index_nplike
                     )
                     self._handle_error(
                         self._backend[
@@ -1299,19 +1355,25 @@ class ListArray(Content):
                         )
                     )
 
-                    index = ak.index.Index64.empty(tolength[0], self._backend.nplike)
+                    index = ak.index.Index64.empty(
+                        tolength[0], self._backend.index_nplike, index_is_fixed=True
+                    )
                     starts_ = ak.index.Index64.empty(
-                        self._starts.length, self._backend.nplike
+                        self._starts.length,
+                        self._backend.index_nplike,
+                        index_is_fixed=True,
                     )
                     stops_ = ak.index.Index64.empty(
-                        self._stops.length, self._backend.nplike
+                        self._stops.length,
+                        self._backend.index_nplike,
+                        index_is_fixed=True,
                     )
                     assert (
-                        index.nplike is self._backend.nplike
-                        and self._starts.nplike is self._backend.nplike
-                        and self._stops.nplike is self._backend.nplike
-                        and starts_.nplike is self._backend.nplike
-                        and stops_.nplike is self._backend.nplike
+                        index.nplike is self._backend.index_nplike
+                        and self._starts.nplike is self._backend.index_nplike
+                        and self._stops.nplike is self._backend.index_nplike
+                        and starts_.nplike is self._backend.index_nplike
+                        and stops_.nplike is self._backend.index_nplike
                     )
                     self._handle_error(
                         self._backend[
@@ -1384,10 +1446,14 @@ class ListArray(Content):
         ):
             startsmin = self._starts.data.min()
             starts = ak.index.Index(
-                self._starts.data - startsmin, nplike=self._backend.nplike
+                self._starts.data - startsmin,
+                nplike=self._backend.index_nplike,
+                index_is_fixed=True,
             )
             stops = ak.index.Index(
-                self._stops.data - startsmin, nplike=self._backend.nplike
+                self._stops.data - startsmin,
+                nplike=self._backend.index_nplike,
+                index_is_fixed=True,
             )
             content = self._content[startsmin : self._stops.data.max()]
         else:
@@ -1447,9 +1513,10 @@ class ListArray(Content):
         return ListOffsetArray._to_list(self, behavior, json_conversions)
 
     def _to_nplike(self, nplike):
-        starts = self._starts._to_nplike(nplike)
-        stops = self._stops._to_nplike(nplike)
-        content = self._content._to_nplike(nplike)
+        backend = ak._backends.backend_for_nplike(nplike)
+        starts = self._starts._to_nplike(backend.index_nplike, index_is_fixed=True)
+        stops = self._stops._to_nplike(backend.index_nplike, index_is_fixed=True)
+        content = self._content._to_nplike(backend.nplike)
         return ListArray(starts, stops, content, parameters=self._parameters)
 
     def _layout_equal(self, other, index_dtype=True, numpyarray=True):

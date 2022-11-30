@@ -155,10 +155,12 @@ class ByteMaskedArray(Content):
         )
 
     def to_IndexedOptionArray64(self):
-        index = ak.index.Index64.empty(self._mask.length, self._backend.nplike)
+        index = ak.index.Index64.empty(
+            self._mask.length, nplike=self._backend.index_nplike, index_is_fixed=True
+        )
         assert (
-            index.nplike is self._backend.nplike
-            and self._mask.nplike is self._backend.nplike
+            index.nplike is self._backend.index_nplike
+            and self._mask.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -298,11 +300,14 @@ class ByteMaskedArray(Content):
         )
 
     def _nextcarry_outindex(self, nplike):
-        numnull = ak.index.Index64.empty(1, nplike)
+        backend = ak._backends.backend_for_nplike(nplike)
+        numnull = ak.index.Index64.empty(
+            1, nplike=backend.index_nplike, index_is_fixed=True
+        )
 
         assert (
-            numnull.nplike is self._backend.nplike
-            and self._mask.nplike is self._backend.nplike
+            numnull.nplike is self._backend.index_nplike
+            and self._mask.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -317,13 +322,15 @@ class ByteMaskedArray(Content):
             )
         )
         nextcarry = ak.index.Index64.empty(
-            self.length - numnull[0], self._backend.nplike
+            self.length - numnull[0], nplike=backend.index_nplike, index_is_fixed=True
         )
-        outindex = ak.index.Index64.empty(self.length, self._backend.nplike)
+        outindex = ak.index.Index64.empty(
+            self.length, nplike=backend.index_nplike, index_is_fixed=True
+        )
         assert (
-            nextcarry.nplike is self._backend.nplike
-            and outindex.nplike is self._backend.nplike
-            and self._mask.nplike is self._backend.nplike
+            nextcarry.nplike is self._backend.index_nplike
+            and outindex.nplike is self._backend.index_nplike
+            and self._mask.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -360,16 +367,20 @@ class ByteMaskedArray(Content):
         numnull, nextcarry, outindex = self._nextcarry_outindex(self._backend.nplike)
 
         reducedstarts = ak.index.Index64.empty(
-            self.length - numnull, self._backend.nplike
+            self.length - numnull,
+            nplike=self._backend.index_nplike,
+            index_is_fixed=True,
         )
         reducedstops = ak.index.Index64.empty(
-            self.length - numnull, self._backend.nplike
+            self.length - numnull,
+            nplike=self._backend.index_nplike,
+            index_is_fixed=True,
         )
 
         assert (
-            outindex.nplike is self._backend.nplike
-            and slicestarts.nplike is self._backend.nplike
-            and slicestops.nplike is self._backend.nplike
+            outindex.nplike is self._backend.index_nplike
+            and slicestarts.nplike is self._backend.index_nplike
+            and slicestops.nplike is self._backend.index_nplike
             and reducedstarts.nplike is self._backend.nplike
             and reducedstops.nplike is self._backend.nplike
         )
@@ -442,7 +453,9 @@ class ByteMaskedArray(Content):
 
     def project(self, mask=None):
         mask_length = self._mask.length
-        numnull = ak.index.Index64.zeros(1, self._backend.nplike)
+        numnull = ak.index.Index64.zeros(
+            1, nplike=self._backend.index_nplike, index_is_fixed=True
+        )
 
         if mask is not None:
             if self._backend.nplike.known_shape and mask_length != mask.length:
@@ -454,11 +467,13 @@ class ByteMaskedArray(Content):
                     )
                 )
 
-            nextmask = ak.index.Index8.empty(mask_length, self._backend.nplike)
+            nextmask = ak.index.Index8.empty(
+                mask_length, nplike=self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                nextmask.nplike is self._backend.nplike
-                and mask.nplike is self._backend.nplike
-                and self._mask.nplike is self._backend.nplike
+                nextmask.nplike is self._backend.index_nplike
+                and mask.nplike is self._backend.index_nplike
+                and self._mask.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -482,8 +497,8 @@ class ByteMaskedArray(Content):
 
         else:
             assert (
-                numnull.nplike is self._backend.nplike
-                and self._mask.nplike is self._backend.nplike
+                numnull.nplike is self._backend.index_nplike
+                and self._mask.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -498,11 +513,13 @@ class ByteMaskedArray(Content):
                 )
             )
             nextcarry = ak.index.Index64.empty(
-                mask_length - numnull[0], self._backend.nplike
+                mask_length - numnull[0],
+                nplike=self._backend.index_nplike,
+                index_is_fixed=True,
             )
             assert (
-                nextcarry.nplike is self._backend.nplike
-                and self._mask.nplike is self._backend.nplike
+                nextcarry.nplike is self._backend.index_nplike
+                and self._mask.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -576,13 +593,16 @@ class ByteMaskedArray(Content):
 
             else:
                 outoffsets = ak.index.Index64.empty(
-                    offsets.length + numnull, self._backend.nplike, dtype=np.int64
+                    offsets.length + numnull,
+                    nplike=self._backend.index_nplike,
+                    index_is_fixed=True,
+                    dtype=np.int64,
                 )
 
                 assert (
-                    outoffsets.nplike is self._backend.nplike
-                    and outindex.nplike is self._backend.nplike
-                    and offsets.nplike is self._backend.nplike
+                    outoffsets.nplike is self._backend.index_nplike
+                    and outindex.nplike is self._backend.index_nplike
+                    and offsets.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -756,10 +776,12 @@ class ByteMaskedArray(Content):
     ):
         mask_length = self._mask.length
 
-        numnull = ak.index.Index64.empty(1, self._backend.nplike)
+        numnull = ak.index.Index64.empty(
+            1, nplike=self._backend.index_nplike, index_is_fixed=True
+        )
         assert (
-            numnull.nplike is self._backend.nplike
-            and self._mask.nplike is self._backend.nplike
+            numnull.nplike is self._backend.index_nplike
+            and self._mask.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -775,15 +797,21 @@ class ByteMaskedArray(Content):
         )
 
         next_length = mask_length - numnull[0]
-        nextcarry = ak.index.Index64.empty(next_length, self._backend.nplike)
-        nextparents = ak.index.Index64.empty(next_length, self._backend.nplike)
-        outindex = ak.index.Index64.empty(mask_length, self._backend.nplike)
+        nextcarry = ak.index.Index64.empty(
+            next_length, nplike=self._backend.index_nplike, index_is_fixed=True
+        )
+        nextparents = ak.index.Index64.empty(
+            next_length, nplike=self._backend.index_nplike, index_is_fixed=True
+        )
+        outindex = ak.index.Index64.empty(
+            mask_length, nplike=self._backend.index_nplike, index_is_fixed=True
+        )
         assert (
-            nextcarry.nplike is self._backend.nplike
-            and nextparents.nplike is self._backend.nplike
-            and outindex.nplike is self._backend.nplike
-            and self._mask.nplike is self._backend.nplike
-            and parents.nplike is self._backend.nplike
+            nextcarry.nplike is self._backend.index_nplike
+            and nextparents.nplike is self._backend.index_nplike
+            and outindex.nplike is self._backend.index_nplike
+            and self._mask.nplike is self._backend.index_nplike
+            and parents.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -807,11 +835,13 @@ class ByteMaskedArray(Content):
         branch, depth = self.branch_depth
 
         if reducer.needs_position and (not branch and negaxis == depth):
-            nextshifts = ak.index.Index64.empty(next_length, self._backend.nplike)
+            nextshifts = ak.index.Index64.empty(
+                next_length, nplike=self._backend.index_nplike, index_is_fixed=True
+            )
             if shifts is None:
                 assert (
-                    nextshifts.nplike is self._backend.nplike
-                    and self._mask.nplike is self._backend.nplike
+                    nextshifts.nplike is self._backend.index_nplike
+                    and self._mask.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -827,8 +857,8 @@ class ByteMaskedArray(Content):
                 )
             else:
                 assert (
-                    nextshifts.nplike is self._backend.nplike
-                    and self._mask.nplike is self._backend.nplike
+                    nextshifts.nplike is self._backend.index_nplike
+                    and self._mask.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -877,7 +907,11 @@ class ByteMaskedArray(Content):
                     )
                 )
 
-            outoffsets = ak.index.Index64.empty(starts.length + 1, self._backend.nplike)
+            outoffsets = ak.index.Index64.empty(
+                starts.length + 1,
+                nplike=self._backend.index_nplike,
+                index_is_fixed=True,
+            )
             assert outoffsets.nplike is self._backend.nplike
             self._handle_error(
                 self._backend[
@@ -924,10 +958,12 @@ class ByteMaskedArray(Content):
             return self.pad_none_axis0(target, clip)
         elif posaxis == depth + 1:
             mask = ak.index.Index8(self.mask_as_bool(valid_when=False))
-            index = ak.index.Index64.empty(mask.length, self._backend.nplike)
+            index = ak.index.Index64.empty(
+                mask.length, nplike=self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                index.nplike is self._backend.nplike
-                and self._mask.nplike is self._backend.nplike
+                index.nplike is self._backend.index_nplike
+                and self._mask.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -1065,8 +1101,9 @@ class ByteMaskedArray(Content):
         return out
 
     def _to_nplike(self, nplike):
-        content = self._content._to_nplike(nplike)
-        mask = self._mask._to_nplike(nplike)
+        backend = ak._backends.backend_for_nplike(nplike)
+        content = self._content._to_nplike(backend.nplike)
+        mask = self._mask._to_nplike(backend.index_nplike, index_is_fixed=True)
         return ByteMaskedArray(
             mask, content, valid_when=self._valid_when, parameters=self._parameters
         )

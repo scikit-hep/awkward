@@ -101,19 +101,23 @@ def _impl(base, what, where, highlevel, behavior):
         else:
 
             def action(inputs, **kwargs):
-                nplike = ak.nplikes.nplike_of(*inputs)
                 base, what = inputs
+                backend = base.backend
+
                 if isinstance(base, ak.contents.RecordArray):
                     if what is None:
                         what = ak.contents.IndexedOptionArray(
                             ak.index.Index64(
-                                nplike.index_nplike.full(len(base), -1, np.int64),
-                                nplike=nplike,
+                                backend.index_nplike.full(len(base), -1, np.int64),
+                                nplike=backend.index_nplike,
+                                index_is_fixed=True,
                             ),
                             ak.contents.EmptyArray(),
                         )
                     elif not isinstance(what, ak.contents.Content):
-                        what = ak.contents.NumpyArray(nplike.repeat(what, len(base)))
+                        what = ak.contents.NumpyArray(
+                            backend.nplike.repeat(what, len(base))
+                        )
                     if base.is_tuple and where is None:
                         fields = None
                     elif base.is_tuple:

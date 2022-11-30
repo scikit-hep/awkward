@@ -77,10 +77,10 @@ def _impl1(condition, mergebool, highlevel, behavior):
     akcondition = ak.operations.to_layout(
         condition, allow_record=False, allow_other=False
     )
-    nplike = ak.nplikes.nplike_of(akcondition)
+    backend = ak._backends.backend_for(akcondition)
 
     akcondition = ak.contents.NumpyArray(ak.operations.to_numpy(akcondition))
-    out = nplike.nonzero(ak.operations.to_numpy(akcondition))
+    out = backend.nplike.nonzero(ak.operations.to_numpy(akcondition))
     if highlevel:
         return tuple(
             ak._util.wrap(
@@ -106,20 +106,22 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior):
         good_arrays.append(left)
     if isinstance(right, ak.contents.Content):
         good_arrays.append(right)
-    nplike = ak.nplikes.nplike_of(*good_arrays)
+    backend = ak._backends.backend_for(*good_arrays)
 
     def action(inputs, **kwargs):
         akcondition, left, right = inputs
         if isinstance(akcondition, ak.contents.NumpyArray):
-            npcondition = nplike.index_nplike.asarray(akcondition)
+            npcondition = backend.index_nplike.asarray(akcondition)
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
-                nplike.index_nplike.arange(len(tags), dtype=np.int64), nplike=nplike
+                backend.index_nplike.arange(len(tags), dtype=np.int64),
+                nplike=backend.index_nplike,
+                index_is_fixed=True,
             )
             if not isinstance(left, ak.contents.Content):
-                left = ak.contents.NumpyArray(nplike.repeat(left, len(tags)))
+                left = ak.contents.NumpyArray(backend.nplike.repeat(left, len(tags)))
             if not isinstance(right, ak.contents.Content):
-                right = ak.contents.NumpyArray(nplike.repeat(right, len(tags)))
+                right = ak.contents.NumpyArray(backend.nplike.repeat(right, len(tags)))
             tmp = ak.contents.UnionArray(tags, index, [left, right])
             return (tmp.simplify_uniontype(mergebool=mergebool),)
         else:

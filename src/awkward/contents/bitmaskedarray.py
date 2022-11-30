@@ -205,7 +205,9 @@ class BitMaskedArray(Content):
         )
 
     def to_IndexedOptionArray64(self):
-        index = ak.index.Index64.empty(self._mask.length * 8, self._backend.nplike)
+        index = ak.index.Index64.empty(
+            self._mask.length * 8, self._backend.index_nplike, index_is_fixed=True
+        )
         assert (
             index.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
@@ -228,7 +230,9 @@ class BitMaskedArray(Content):
         )
 
     def to_ByteMaskedArray(self):
-        bytemask = ak.index.Index8.empty(self._mask.length * 8, self._backend.nplike)
+        bytemask = ak.index.Index8.empty(
+            self._mask.length * 8, self._backend.index_nplike, index_is_fixed=True
+        )
         assert (
             bytemask.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
@@ -290,16 +294,20 @@ class BitMaskedArray(Content):
     def mask_as_bool(self, valid_when=None, nplike=None):
         if valid_when is None:
             valid_when = self._valid_when
-        if nplike is None:
-            nplike = self._backend.nplike
 
-        bytemask = ak.index.Index8.empty(self._mask.length * 8, nplike)
+        backend = (
+            self._backend if nplike is None else ak._backends.backend_for_nplike(nplike)
+        )
+
+        bytemask = ak.index.Index8.empty(
+            self._mask.length * 8, backend.index_nplike, index_is_fixed=True
+        )
         assert (
             bytemask.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
         )
         self._handle_error(
-            nplike[
+            backend[
                 "awkward_BitMaskedArray_to_ByteMaskedArray",
                 bytemask.dtype.type,
                 self._mask.dtype.type,
@@ -693,8 +701,9 @@ class BitMaskedArray(Content):
         return out
 
     def _to_nplike(self, nplike):
-        content = self._content._to_nplike(nplike)
-        mask = self._mask._to_nplike(nplike)
+        backend = ak._backends.backend_for_nplike(nplike)
+        content = self._content._to_nplike(backend.nplike)
+        mask = self._mask._to_nplike(backend.index_nplike, index_is_fixed=True)
         return BitMaskedArray(
             mask,
             content,

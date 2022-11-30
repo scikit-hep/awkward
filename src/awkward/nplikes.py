@@ -977,16 +977,23 @@ def nplike_of(*arrays, default=_UNSET):
     """
     nplikes = set()
     nplike_classes = (Numpy, Cupy, Jax, ak._typetracer.TypeTracer)
-
+    # TODO fixme - we should prohibit high-level objects here,
+    # as it's an internal function that needs to be fast
+    arrays = [getattr(x, "layout", x) for x in arrays]
     for array in arrays:
         nplike = getattr(array, "nplike", None)
         if nplike is not None:
             nplikes.add(nplike)
-        else:
-            for cls in nplike_classes:
-                if cls.is_own_array(array):
-                    nplikes.add(cls.instance())
-                    break
+            continue
+        backend = getattr(array, "backend", None)
+        if backend is not None:
+            nplikes.add(backend.nplike)
+            continue
+
+        for cls in nplike_classes:
+            if cls.is_own_array(array):
+                nplikes.add(cls.instance())
+                break
 
     if any(isinstance(x, ak._typetracer.TypeTracer) for x in nplikes):
         return ak._typetracer.TypeTracer.instance()

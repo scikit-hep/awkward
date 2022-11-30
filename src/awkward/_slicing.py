@@ -288,7 +288,9 @@ def normalise_item_nested(item):
         nextindex[nonnull] = item.nplike.arange(projected.length, dtype=np.int64)
 
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(nextindex, nplike=item.nplike),
+            ak.index.Index64(
+                nextindex, nplike=item.backend.index_nplike, index_is_fixed=True
+            ),
             normalise_item_nested(projected),
             parameters=item.parameters,
         )
@@ -314,7 +316,9 @@ def normalise_item_nested(item):
         )
 
         return ak.contents.IndexedOptionArray(
-            ak.index.Index64(nextindex, nplike=item.nplike),
+            ak.index.Index64(
+                nextindex, nplike=item.backend.index_nplike, index_is_fixed=True
+            ),
             nextcontent,
             parameters=item.parameters,
         )
@@ -430,9 +434,13 @@ def normalise_item_bool_to_int(item):
             )
 
         return ak.contents.ListOffsetArray(
-            ak.index.Index64(nextoffsets, nplike=item.nplike),
+            ak.index.Index64(
+                nextoffsets, nplike=item.backend.index_nplike, index_is_fixed=True
+            ),
             ak.contents.IndexedOptionArray(
-                ak.index.Index(outindex, nplike=item.nplike),
+                ak.index.Index(
+                    outindex, nplike=item.backend.index_nplike, index_is_fixed=True
+                ),
                 ak.contents.NumpyArray(nextcontent, backend=item.backend),
             ),
         )
@@ -491,7 +499,9 @@ def normalise_item_bool_to_int(item):
                 )
 
             return ak.contents.IndexedOptionArray(
-                ak.index.Index(outindex, nplike=item.nplike),
+                ak.index.Index(
+                    outindex, nplike=item.backend.index_nplike, index_is_fixed=True
+                ),
                 ak.contents.NumpyArray(nextcontent, backend=item.backend),
             )
 

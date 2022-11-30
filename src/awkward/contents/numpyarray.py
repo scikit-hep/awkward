@@ -38,7 +38,9 @@ class NumpyArray(Content):
 
     def __init__(self, data, *, parameters=None, backend=None):
         if backend is None:
-            backend = ak._backends.backend_for(data)
+            backend = ak._backends.backend_for(
+                data, default=ak._backends.NumpyBackend.instance()
+            )
         if isinstance(data, ak.index.Index):
             data = data.data
         self._data = backend.nplike.asarray(data)
@@ -344,8 +346,10 @@ class NumpyArray(Content):
                 np.AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
             )
 
-        tonum = ak.index.Index64.empty(reps, self._backend.nplike)
-        assert tonum.nplike is self._backend.nplike
+        tonum = ak.index.Index64.empty(
+            reps, self._backend.index_nplike, index_is_fixed=True
+        )
+        assert tonum.nplike is self._backend.index_nplike
         self._handle_error(
             self._backend["awkward_RegularArray_num", tonum.dtype.type](
                 tonum.data, size, reps
@@ -497,9 +501,11 @@ class NumpyArray(Content):
         return self._backend.nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
-        is_equal = ak.index.Index64.zeros(1, self._backend.nplike)
+        is_equal = ak.index.Index64.zeros(
+            1, nplike=self._backend.nplike, index_is_fixed=True
+        )
 
-        tmp = self._backend.index_nplike.empty(length, self.dtype)
+        tmp = self._backend.nplike.empty(length, self.dtype)
         self._handle_error(
             self._backend[
                 "awkward_NumpyArray_fill",
@@ -515,17 +521,21 @@ class NumpyArray(Content):
 
         if not sorted:
             tmp_beg_ptr = ak.index.Index64.empty(
-                ak._util.kMaxLevels, self._backend.nplike
+                ak._util.kMaxLevels,
+                nplike=self._backend.index_nplike,
+                index_is_fixed=True,
             )
             tmp_end_ptr = ak.index.Index64.empty(
-                ak._util.kMaxLevels, self._backend.nplike
+                ak._util.kMaxLevels,
+                nplike=self._backend.index_nplike,
+                index_is_fixed=True,
             )
 
             assert (
-                tmp_beg_ptr.nplike is self._backend.nplike
-                and tmp_end_ptr.nplike is self._backend.nplike
-                and starts.nplike is self._backend.nplike
-                and stops.nplike is self._backend.nplike
+                tmp_beg_ptr.nplike is self._backend.index_nplike
+                and tmp_end_ptr.nplike is self._backend.index_nplike
+                and starts.nplike is self._backend.index_nplike
+                and stops.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -547,8 +557,8 @@ class NumpyArray(Content):
                 )
             )
         assert (
-            starts.nplike is self._backend.nplike
-            and stops.nplike is self._backend.nplike
+            starts.nplike is self._backend.index_nplike
+            and stops.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -569,13 +579,17 @@ class NumpyArray(Content):
         return True if is_equal[0] == 1 else False
 
     def _as_unique_strings(self, offsets):
-        offsets = ak.index.Index64(offsets.data, nplike=offsets.nplike)
-        outoffsets = ak.index.Index64.empty(offsets.length, self._backend.nplike)
+        offsets = ak.index.Index64(
+            offsets.data, nplike=offsets.nplike, index_is_fixed=True
+        )
+        outoffsets = ak.index.Index64.empty(
+            offsets.length, nplike=self._backend.index_nplike, index_is_fixed=True
+        )
         out = self._backend.nplike.empty(self.shape[0], self.dtype)
 
         assert (
-            offsets.nplike is self._backend.nplike
-            and outoffsets.nplike is self._backend.nplike
+            offsets.nplike is self._backend.index_nplike
+            and outoffsets.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -595,12 +609,16 @@ class NumpyArray(Content):
             )
         )
 
-        outlength = ak.index.Index64.empty(1, self._backend.nplike)
-        nextoffsets = ak.index.Index64.empty(offsets.length, self._backend.nplike)
+        outlength = ak.index.Index64.empty(
+            1, self._backend.index_nplike, index_is_fixed=True
+        )
+        nextoffsets = ak.index.Index64.empty(
+            offsets.length, self._backend.index_nplike, index_is_fixed=True
+        )
         assert (
-            outoffsets.nplike is self._backend.nplike
-            and nextoffsets.nplike is self._backend.nplike
-            and outlength.nplike is self._backend.nplike
+            outoffsets.nplike is self._backend.index_nplike
+            and nextoffsets.nplike is self._backend.index_nplike
+            and outlength.nplike is self._backend.index_nplike
         )
         self._handle_error(
             self._backend[
@@ -670,7 +688,9 @@ class NumpyArray(Content):
             for s in contiguous_self.shape:
                 flattened_shape = flattened_shape * s
 
-            offsets = ak.index.Index64.zeros(2, self._backend.nplike)
+            offsets = ak.index.Index64.zeros(
+                2, self._backend.index_nplike, index_is_fixed=True
+            )
             offsets[1] = flattened_shape
             dtype = (
                 np.dtype(np.int64)
@@ -678,7 +698,7 @@ class NumpyArray(Content):
                 else self._data.dtype
             )
             out = self._backend.nplike.empty(offsets[1], dtype)
-            assert offsets.nplike is self._backend.nplike
+            assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
                     "awkward_sort",
@@ -697,8 +717,10 @@ class NumpyArray(Content):
                 )
             )
 
-            nextlength = ak.index.Index64.empty(1, self._backend.nplike)
-            assert nextlength.nplike is self._backend.nplike
+            nextlength = ak.index.Index64.empty(
+                1, self._backend.index_nplike, index_is_fixed=True
+            )
+            assert nextlength.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
                     "awkward_unique",
@@ -729,10 +751,12 @@ class NumpyArray(Content):
         else:
 
             parents_length = parents.length
-            offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
+            offsets_length = ak.index.Index64.empty(
+                1, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                offsets_length.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
+                offsets_length.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -746,10 +770,12 @@ class NumpyArray(Content):
                 )
             )
 
-            offsets = ak.index.Index64.empty(offsets_length[0], self._backend.nplike)
+            offsets = ak.index.Index64.empty(
+                offsets_length[0], self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
+                offsets.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -765,7 +791,7 @@ class NumpyArray(Content):
             )
 
             out = self._backend.nplike.empty(self.length, self.dtype)
-            assert offsets.nplike is self._backend.nplike
+            assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
                     "awkward_sort",
@@ -784,10 +810,12 @@ class NumpyArray(Content):
                 )
             )
 
-            nextoffsets = ak.index.Index64.empty(offsets.length, self._backend.nplike)
+            nextoffsets = ak.index.Index64.empty(
+                offsets.length, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                offsets.nplike is self._backend.nplike
-                and nextoffsets.nplike is self._backend.nplike
+                offsets.nplike is self._backend.index_nplike
+                and nextoffsets.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -804,12 +832,14 @@ class NumpyArray(Content):
                 )
             )
 
-            outoffsets = ak.index.Index64.empty(starts.length + 1, self._backend.nplike)
+            outoffsets = ak.index.Index64.empty(
+                starts.length + 1, self._backend.index_nplike, index_is_fixed=True
+            )
 
             assert (
-                outoffsets.nplike is self._backend.nplike
-                and nextoffsets.nplike is self._backend.nplike
-                and starts.nplike is self._backend.nplike
+                outoffsets.nplike is self._backend.index_nplike
+                and nextoffsets.nplike is self._backend.index_nplike
+                and starts.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -862,10 +892,12 @@ class NumpyArray(Content):
 
         else:
             parents_length = parents.length
-            offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
+            offsets_length = ak.index.Index64.empty(
+                1, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                offsets_length.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
+                offsets_length.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -880,10 +912,12 @@ class NumpyArray(Content):
             )
             offsets_length = offsets_length[0]
 
-            offsets = ak.index.Index64.empty(offsets_length, self._backend.nplike)
+            offsets = ak.index.Index64.empty(
+                offsets_length, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
+                offsets.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -903,10 +937,12 @@ class NumpyArray(Content):
                 if self._data.dtype.kind.upper() == "M"
                 else self._data.dtype
             )
-            nextcarry = ak.index.Index64.empty(self.__len__(), self._backend.nplike)
+            nextcarry = ak.index.Index64.empty(
+                self.__len__(), self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                nextcarry.nplike is self._backend.nplike
-                and offsets.nplike is self._backend.nplike
+                nextcarry.nplike is self._backend.index_nplike
+                and offsets.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -927,11 +963,11 @@ class NumpyArray(Content):
 
             if shifts is not None:
                 assert (
-                    nextcarry.nplike is self._backend.nplike
-                    and shifts.nplike is self._backend.nplike
-                    and offsets.nplike is self._backend.nplike
-                    and parents.nplike is self._backend.nplike
-                    and starts.nplike is self._backend.nplike
+                    nextcarry.nplike is self._backend.index_nplike
+                    and shifts.nplike is self._backend.index_nplike
+                    and offsets.nplike is self._backend.index_nplike
+                    and parents.nplike is self._backend.index_nplike
+                    and starts.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -979,10 +1015,12 @@ class NumpyArray(Content):
 
         else:
             parents_length = parents.length
-            offsets_length = ak.index.Index64.empty(1, self._backend.nplike)
+            offsets_length = ak.index.Index64.empty(
+                1, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                offsets_length.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
+                offsets_length.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -996,11 +1034,13 @@ class NumpyArray(Content):
                 )
             )
 
-            offsets = ak.index.Index64.empty(offsets_length[0], self._backend.nplike)
+            offsets = ak.index.Index64.empty(
+                offsets_length[0], self._backend.index_nplike, index_is_fixed=True
+            )
 
             assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
+                offsets.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[
@@ -1021,7 +1061,7 @@ class NumpyArray(Content):
                 else self._data.dtype
             )
             out = self._backend.nplike.empty(self.length, dtype)
-            assert offsets.nplike is self._backend.nplike
+            assert offsets.nplike is self._backend.index_nplike
             self._handle_error(
                 self._backend[
                     "awkward_sort",
@@ -1108,9 +1148,9 @@ class NumpyArray(Content):
         if reducer.needs_position:
             if shifts is None:
                 assert (
-                    out.nplike is self._backend.nplike
-                    and parents.nplike is self._backend.nplike
-                    and starts.nplike is self._backend.nplike
+                    out.nplike is self._backend.index_nplike
+                    and parents.nplike is self._backend.index_nplike
+                    and starts.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -1127,10 +1167,10 @@ class NumpyArray(Content):
                 )
             else:
                 assert (
-                    out.nplike is self._backend.nplike
-                    and parents.nplike is self._backend.nplike
-                    and starts.nplike is self._backend.nplike
-                    and shifts.nplike is self._backend.nplike
+                    out.nplike is self._backend.index_nplike
+                    and parents.nplike is self._backend.index_nplike
+                    and starts.nplike is self._backend.index_nplike
+                    and shifts.nplike is self._backend.index_nplike
                 )
                 self._handle_error(
                     self._backend[
@@ -1149,10 +1189,12 @@ class NumpyArray(Content):
                 )
 
         if mask:
-            outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
+            outmask = ak.index.Index8.empty(
+                outlength, self._backend.index_nplike, index_is_fixed=True
+            )
             assert (
-                outmask.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
+                outmask.nplike is self._backend.index_nplike
+                and parents.nplike is self._backend.index_nplike
             )
             self._handle_error(
                 self._backend[

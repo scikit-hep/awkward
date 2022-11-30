@@ -233,7 +233,7 @@ def cartesian(
 def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     if isinstance(arrays, dict):
         behavior = ak._util.behavior_of(*arrays.values(), behavior=behavior)
-        nplike = ak.nplikes.nplike_of(*arrays.values())
+        backend = ak._backends.backend_for(*arrays.values())
         new_arrays = {}
         for n, x in arrays.items():
             new_arrays[n] = ak.operations.to_layout(
@@ -243,7 +243,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
     else:
         arrays = list(arrays)
         behavior = ak._util.behavior_of(*arrays, behavior=behavior)
-        nplike = ak.nplikes.nplike_of(*arrays)
+        backend = ak._backends.backend_for(*arrays)
         new_arrays = []
         for x in arrays:
             new_arrays.append(
@@ -318,9 +318,9 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior):
         layouts = [x for x in layouts]
 
         indexes = [
-            ak.index.Index64(x.reshape(-1), nplike=nplike)
-            for x in nplike.index_nplike.meshgrid(
-                *[nplike.index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
+            ak.index.Index64(x.reshape(-1))
+            for x in backend.index_nplike.meshgrid(
+                *[backend.index_nplike.arange(len(x), dtype=np.int64) for x in layouts],
                 indexing="ij",
             )
         ]

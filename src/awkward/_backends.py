@@ -6,6 +6,7 @@ from typing import Any, Callable, TypeVar
 import awkward_cpp
 from typing_extensions import Protocol, TypeAlias, Unpack, runtime_checkable
 
+import awkward as ak
 from awkward._typetracer import NoKernel, TypeTracer
 from awkward.nplikes import (
     Cupy,
@@ -130,7 +131,7 @@ _UNSET = object()
 D = TypeVar("D")
 
 
-def backend_for_nplike(nplike, default: T = _UNSET) -> Backend | D:
+def backend_for_nplike(nplike) -> Backend:
     if isinstance(nplike, Numpy):
         return NumpyBackend.instance()
     elif isinstance(nplike, Cupy):
@@ -139,12 +140,18 @@ def backend_for_nplike(nplike, default: T = _UNSET) -> Backend | D:
         return JaxBackend.instance()
     elif isinstance(nplike, TypeTracer):
         return TypeTracerBackend.instance()
-    elif default is _UNSET:
-        return NumpyBackend.instance()
     else:
-        return default
+        raise ak._errors.wrap_error(ValueError("unrecognised nplike", nplike))
 
 
 def backend_for(*arrays, default: T = _UNSET) -> Backend | D:
     nplike = nplike_of(*arrays, default=None)
-    return backend_for_nplike(nplike, default)
+    if nplike is None:
+        if default is _UNSET:
+            raise ak._errors.wrap_error(
+                ValueError("could not find backend for", arrays)
+            )
+        else:
+            return default
+    else:
+        return backend_for_nplike(nplike)
