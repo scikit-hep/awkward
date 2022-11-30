@@ -32,31 +32,36 @@ def _impl(array, axis, highlevel, behavior):
 
     # Determine the (potentially nested) bytemask
     def getfunction_inner(layout, depth, **kwargs):
-
         if not isinstance(layout, ak.contents.Content):
             return
 
-        nplike = ak.nplikes.nplike_of(layout)
+        backend = layout.backend
 
         if layout.is_option:
             layout = layout.to_IndexedOptionArray64()
 
             # Convert the option type into a union, using the mask
             # as a tag.
-            tag = nplike.index_nplike.asarray(layout.mask_as_bool(valid_when=False))
-            index = nplike.index_nplike.where(tag, 0, nplike.asarray(layout.index))
+            tag = backend.index_nplike.asarray(layout.mask_as_bool(valid_when=False))
+            index = backend.index_nplike.where(
+                tag, 0, backend.nplike.asarray(layout.index)
+            )
 
             return ak.contents.UnionArray(
                 ak.index.Index8(tag),
                 ak.index.Index64(index),
                 [
                     layout.content.recursively_apply(getfunction_inner, behavior),
-                    ak.contents.NumpyArray(nplike.array([True], dtype=np.bool_)),
+                    ak.contents.NumpyArray(
+                        backend.nplike.array([True], dtype=np.bool_)
+                    ),
                 ],
             ).simplify_uniontype()
 
         elif layout.is_unknown or layout.is_list or layout.is_record or layout.is_numpy:
-            return ak.contents.NumpyArray(nplike.zeros(len(layout), dtype=np.bool_))
+            return ak.contents.NumpyArray(
+                backend.nplike.zeros(len(layout), dtype=np.bool_)
+            )
 
     # Locate the axis
     def getfunction_outer(layout, depth, depth_context, **kwargs):

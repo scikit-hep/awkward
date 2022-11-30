@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from typing import Sequence
+
 import awkward as ak
 
 np = ak.nplikes.NumpyMetadata.instance()
@@ -125,7 +127,7 @@ def prepare_advanced_indexing(items):
     return tuple(prepared)
 
 
-def normalise_item(item, nplike):
+def normalise_item(item, backend: ak._backends.Backend):
     if ak._util.is_integer(item):
         return int(item)
 
@@ -142,10 +144,10 @@ def normalise_item(item, nplike):
         return item
 
     elif isinstance(item, ak.highlevel.Array):
-        return normalise_item(item.layout, nplike)
+        return normalise_item(item.layout, backend)
 
     elif isinstance(item, ak.contents.EmptyArray):
-        return normalise_item(item.to_NumpyArray(np.int64), nplike)
+        return normalise_item(item.to_NumpyArray(np.int64), backend)
 
     elif isinstance(item, ak.contents.NumpyArray):
         return item.data
@@ -158,7 +160,7 @@ def normalise_item(item, nplike):
             return out
 
     elif ak._util.is_sized_iterable(item) and len(item) == 0:
-        return nplike.empty(0, dtype=np.int64)
+        return backend.index_nplike.empty(0, dtype=np.int64)
 
     elif ak._util.is_sized_iterable(item) and all(isinstance(x, str) for x in item):
         return list(item)
@@ -167,7 +169,7 @@ def normalise_item(item, nplike):
         layout = ak.operations.to_layout(item)
         as_array = layout.maybe_to_array(layout.nplike)
         if as_array is None:
-            return normalise_item(layout, nplike)
+            return normalise_item(layout, backend)
         else:
             return as_array
 
@@ -183,9 +185,9 @@ def normalise_item(item, nplike):
         )
 
 
-def normalise_items(where, nplike):
+def normalise_items(where: Sequence, backend: ak._backends.Backend) -> list:
     # First prepare items for broadcasting into like-types
-    return [normalise_item(x, nplike) for x in where]
+    return [normalise_item(x, backend) for x in where]
 
 
 def normalise_item_RegularArray_to_ListOffsetArray64(item):
@@ -304,14 +306,14 @@ def normalise_item_nested(item):
         ),
     ):
         is_valid = item.mask_as_bool(valid_when=True)
-        positions_where_valid = item.nplike.index_nplike.nonzero(is_valid)[0]
+        positions_where_valid = item.backend.index_nplike.nonzero(is_valid)[0]
 
         nextcontent = normalise_item_nested(
             item.content._carry(ak.index.Index64(positions_where_valid), False)
         )
 
-        nextindex = item.nplike.index_nplike.full(is_valid.shape[0], -1, np.int64)
-        nextindex[positions_where_valid] = item.nplike.index_nplike.arange(
+        nextindex = item.backend.index_nplike.full(is_valid.shape[0], -1, np.int64)
+        nextindex[positions_where_valid] = item.backend.index_nplike.arange(
             positions_where_valid.shape[0], dtype=np.int64
         )
 
@@ -360,11 +362,11 @@ def normalise_item_bool_to_int(item):
             localindex = item.local_index(axis=1)
             nextcontent = localindex.content.data[item.content.data]
 
-            cumsum = item.nplike.index_nplike.empty(
+            cumsum = item.backend.index_nplike.empty(
                 item.content.data.shape[0] + 1, np.int64
             )
             cumsum[0] = 0
-            cumsum[1:] = item.nplike.index_nplike.asarray(
+            cumsum[1:] = item.backend.index_nplike.asarray(
                 item.nplike.cumsum(item.content.data)
             )
             nextoffsets = cumsum[item.offsets]
@@ -393,7 +395,7 @@ def normalise_item_bool_to_int(item):
                 )
             # missing values as any integer other than -1 are extremely rare
             isnegative = item.content.index.data < 0
-            if item.nplike.index_nplike.any(item.content.index.data < -1):
+            if item.backend.index_nplike.any(item.content.index.data < -1):
                 safeindex = item.content.index.data.copy()
                 safeindex[isnegative] = -1
             else:
@@ -421,8 +423,8 @@ def normalise_item_bool_to_int(item):
             nextoffsets = cumsum[item.offsets]
 
             # outindex fits into the lists; non-missing are sequential
-            outindex = item.nplike.index_nplike.full(nextoffsets[-1], -1, np.int64)
-            outindex[~isnegative[expanded]] = item.nplike.index_nplike.arange(
+            outindex = item.backend.index_nplike.full(nextoffsets[-1], -1, np.int64)
+            outindex[~isnegative[expanded]] = item.backend.index_nplike.arange(
                 nextcontent.shape[0], dtype=np.int64
             )
 
@@ -466,7 +468,7 @@ def normalise_item_bool_to_int(item):
                     )
                 # missing values as any integer other than -1 are extremely rare
                 isnegative = item.index.data < 0
-                if item.nplike.index_nplike.any(item.index.data < -1):
+                if item.backend.index_nplike.any(item.index.data < -1):
                     safeindex = item.index.data.copy()
                     safeindex[isnegative] = -1
                 else:

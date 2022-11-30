@@ -80,10 +80,8 @@ class EmptyArray(Content):
             backend=self._backend,
         )
 
-    def to_NumpyArray(self, dtype, nplike=None):
-        backend = (
-            self._backend if nplike is None else ak._backends.backend_for_nplike(nplike)
-        )
+    def to_NumpyArray(self, dtype, backend=None):
+        backend = backend or self._backend
         return ak.contents.NumpyArray(
             backend.nplike.empty(0, dtype), parameters=self._parameters, backend=backend
         )

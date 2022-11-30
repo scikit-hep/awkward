@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+from __future__ import annotations
+
 import math
 
 import awkward as ak
@@ -14,7 +16,7 @@ def from_buffers(
     container,
     buffer_key="{form_key}-{attribute}",
     *,
-    nplike=numpy,
+    backend: str = "cpu",
     highlevel=True,
     behavior=None,
 ):
@@ -31,8 +33,8 @@ def from_buffers(
             `"{form_key}"` and/or `"{attribute}"` or a function that takes these
             as keyword arguments and returns a string to use as a key for a buffer
             in the `container`.
-        nplike (#ak.nplikes.NumpyLike): Library to use to generate values that are
-            put into the new array. The default, #ak.nplikes.Numpy, makes NumPy
+        backend (str): Library to use to generate values that are
+            put into the new array. The default, cpu, makes NumPy
             arrays, which are in main memory (e.g. not GPU). If all the values in
             `container` have the same `nplike` as this, they won't be copied.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -59,7 +61,6 @@ def from_buffers(
 
     See #ak.to_buffers for examples.
     """
-    backend = ak._backends.backend_for_nplike(nplike)
     with ak._errors.OperationErrorContext(
         "ak.from_buffers",
         dict(
@@ -76,6 +77,8 @@ def from_buffers(
 
 
 def _impl(form, length, container, buffer_key, backend, highlevel, behavior):
+    backend = ak._util.regularize_backend(backend)
+
     if isinstance(form, str):
         if ak.types.numpytype.is_primitive(form):
             form = ak.forms.NumpyForm(form)
@@ -127,7 +130,6 @@ _index_to_dtype = {
 
 
 def reconstitute(form, length, container, getkey, backend):
-    nplike = backend.nplike
     if isinstance(form, ak.forms.EmptyForm):
         if length != 0:
             raise ak._errors.wrap_error(
@@ -141,7 +143,7 @@ def reconstitute(form, length, container, getkey, backend):
         real_length = length
         for x in form.inner_shape:
             real_length *= x
-        data = nplike.frombuffer(raw_array, dtype=dtype, count=real_length)
+        data = backend.nplike.frombuffer(raw_array, dtype=dtype, count=real_length)
         if form.inner_shape != ():
             if len(data) == 0:
                 data = data.reshape((length,) + form.inner_shape)
@@ -156,7 +158,7 @@ def reconstitute(form, length, container, getkey, backend):
     elif isinstance(form, ak.forms.BitMaskedForm):
         raw_array = container[getkey(form, "mask")]
         excess_length = int(math.ceil(length / 8.0))
-        mask = nplike.index_nplike.frombuffer(
+        mask = backend.index_nplike.frombuffer(
             raw_array, dtype=_index_to_dtype[form.mask], count=excess_length
         )
         return ak.contents.BitMaskedArray(
@@ -170,7 +172,7 @@ def reconstitute(form, length, container, getkey, backend):
 
     elif isinstance(form, ak.forms.ByteMaskedForm):
         raw_array = container[getkey(form, "mask")]
-        mask = nplike.index_nplike.frombuffer(
+        mask = backend.index_nplike.frombuffer(
             raw_array, dtype=_index_to_dtype[form.mask], count=length
         )
         return ak.contents.ByteMaskedArray(
@@ -182,11 +184,11 @@ def reconstitute(form, length, container, getkey, backend):
 
     elif isinstance(form, ak.forms.IndexedOptionForm):
         raw_array = container[getkey(form, "index")]
-        index = nplike.index_nplike.frombuffer(
+        index = backend.index_nplike.frombuffer(
             raw_array, dtype=_index_to_dtype[form.index], count=length
         )
         next_length = (
-            0 if len(index) == 0 else max(0, nplike.index_nplike.max(index) + 1)
+            0 if len(index) == 0 else max(0, backend.index_nplike.max(index) + 1)
         )
         return ak.contents.IndexedOptionArray(
             ak.index.Index(index),
@@ -196,10 +198,10 @@ def reconstitute(form, length, container, getkey, backend):
 
     elif isinstance(form, ak.forms.IndexedForm):
         raw_array = container[getkey(form, "index")]
-        index = nplike.index_nplike.frombuffer(
+        index = backend.index_nplike.frombuffer(
             raw_array, dtype=_index_to_dtype[form.index], count=length
         )
-        next_length = 0 if len(index) == 0 else nplike.index_nplike.max(index) + 1
+        next_length = 0 if len(index) == 0 else backend.index_nplike.max(index) + 1
         return ak.contents.IndexedArray(
             ak.index.Index(index),
             reconstitute(form.content, next_length, container, getkey, backend),
@@ -209,14 +211,14 @@ def reconstitute(form, length, container, getkey, backend):
     elif isinstance(form, ak.forms.ListForm):
         raw_array1 = container[getkey(form, "starts")]
         raw_array2 = container[getkey(form, "stops")]
-        starts = nplike.index_nplike.frombuffer(
+        starts = backend.index_nplike.frombuffer(
             raw_array1, dtype=_index_to_dtype[form.starts], count=length
         )
-        stops = nplike.index_nplike.frombuffer(
+        stops = backend.index_nplike.frombuffer(
             raw_array2, dtype=_index_to_dtype[form.stops], count=length
         )
         reduced_stops = stops[starts != stops]
-        next_length = 0 if len(starts) == 0 else nplike.index_nplike.max(reduced_stops)
+        next_length = 0 if len(starts) == 0 else backend.index_nplike.max(reduced_stops)
         return ak.contents.ListArray(
             ak.index.Index(starts),
             ak.index.Index(stops),
@@ -226,7 +228,7 @@ def reconstitute(form, length, container, getkey, backend):
 
     elif isinstance(form, ak.forms.ListOffsetForm):
         raw_array = container[getkey(form, "offsets")]
-        offsets = nplike.index_nplike.frombuffer(
+        offsets = backend.index_nplike.frombuffer(
             raw_array, dtype=_index_to_dtype[form.offsets], count=length + 1
         )
         next_length = 0 if len(offsets) == 1 else offsets[-1]
@@ -259,10 +261,10 @@ def reconstitute(form, length, container, getkey, backend):
     elif isinstance(form, ak.forms.UnionForm):
         raw_array1 = container[getkey(form, "tags")]
         raw_array2 = container[getkey(form, "index")]
-        tags = nplike.index_nplike.frombuffer(
+        tags = backend.index_nplike.frombuffer(
             raw_array1, dtype=_index_to_dtype[form.tags], count=length
         )
-        index = nplike.index_nplike.frombuffer(
+        index = backend.index_nplike.frombuffer(
             raw_array2, dtype=_index_to_dtype[form.index], count=length
         )
         lengths = []
@@ -271,7 +273,7 @@ def reconstitute(form, length, container, getkey, backend):
             if len(selected_index) == 0:
                 lengths.append(0)
             else:
-                lengths.append(nplike.index_nplike.max(selected_index) + 1)
+                lengths.append(backend.index_nplike.max(selected_index) + 1)
         return ak.contents.UnionArray(
             ak.index.Index(tags),
             ak.index.Index(index),
