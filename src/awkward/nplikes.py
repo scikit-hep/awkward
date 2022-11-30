@@ -384,7 +384,7 @@ class NumpyLike(Singleton):
         raise ak._errors.wrap_error(NotImplementedError)
 
 
-class NumpyKernel:
+class Kernel:
     def __init__(self, kernel, name_and_types):
         self._kernel = kernel
         self._name_and_types = name_and_types
@@ -396,6 +396,8 @@ class NumpyKernel:
             "".join(", " + str(numpy.dtype(x)) for x in self._name_and_types[1:]),
         )
 
+
+class NumpyKernel(Kernel):
     @classmethod
     def _cast(cls, x, t):
         if issubclass(t, ctypes._Pointer):
@@ -428,7 +430,7 @@ class JaxKernel(NumpyKernel):
             return super().__call__(*args)
 
 
-class CupyKernel(NumpyKernel):
+class CupyKernel(Kernel):
     def max_length(self, args):
         cupy = ak._connect.cuda.import_cupy("Awkward Arrays with CUDA")
         max_length = numpy.iinfo(numpy.int64).min
