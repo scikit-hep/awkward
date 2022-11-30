@@ -525,6 +525,36 @@ class ByteMaskedArray(Content):
 
             return self._content._carry(nextcarry, False)
 
+    @classmethod
+    def simplified(
+        cls,
+        mask,
+        content,
+        valid_when,
+        *,
+        parameters=None,
+    ):
+        if content.is_indexed or content.is_option:
+            backend = content.backend
+            index = ak.index.Index64.empty(mask.length, nplike=backend.index_nplike)
+            Content._selfless_handle_error(
+                backend[
+                    "awkward_ByteMaskedArray_toIndexedOptionArray",
+                    index.dtype.type,
+                    mask.dtype.type,
+                ](
+                    index.data,
+                    mask.data,
+                    mask.length,
+                    valid_when,
+                ),
+            )
+            return ak.contents.IndexedOptionArray.simplified(
+                index, content, parameters=parameters
+            )
+        else:
+            return ByteMaskedArray(mask, content, valid_when, parameters=parameters)
+
     def simplify_optiontype(self):
         if isinstance(
             self._content,

@@ -221,13 +221,13 @@ class UnmaskedArray(Content):
             return self._content
 
     @classmethod
-    def simplified(cls, content, *, parameters=None, nplike=None):
+    def simplified(cls, content, *, parameters=None):
         if content.is_indexed or content.is_option:
             return content.copy(
                 parameters=ak._util.merge_parameters(content._parameters, parameters)
             )
         else:
-            return cls(content, parameters=parameters, nplike=nplike)
+            return cls(content, parameters=parameters)
 
     def simplify_optiontype(self):
         if isinstance(

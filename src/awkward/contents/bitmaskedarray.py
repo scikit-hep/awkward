@@ -414,10 +414,26 @@ class BitMaskedArray(Content):
         lsb_order,
         *,
         parameters=None,
-        nplike=None,
     ):
         if content.is_indexed or content.is_option:
-            HERE
+            backend = content.backend
+            index = ak.index.Index64.empty(mask.length * 8, backend.index_nplike)
+            Content._selfless_handle_error(
+                backend[
+                    "awkward_BitMaskedArray_to_IndexedOptionArray",
+                    index.dtype.type,
+                    mask.dtype.type,
+                ](
+                    index.raw(backend.nplike),
+                    mask.data,
+                    mask.length,
+                    valid_when,
+                    lsb_order,
+                ),
+            )
+            return ak.contents.IndexedOptionArray.simplified(
+                index[0:length], content, parameters=parameters
+            )
         else:
             return BitMaskedArray(
                 mask,
@@ -426,7 +442,6 @@ class BitMaskedArray(Content):
                 length,
                 lsb_order,
                 parameters=parameters,
-                nplike=nplike,
             )
 
     def simplify_optiontype(self):
