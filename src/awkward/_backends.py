@@ -136,6 +136,8 @@ class TypeTracerBackend(Backend[Any], Singleton):
 
 
 def _backend_for_nplike(nplike: ak.nplikes.NumpyLike) -> Backend:
+    # Currently there exists a one-to-one relationship between the nplike
+    # and the backend. In future, this might need refactoring
     if isinstance(nplike, Numpy):
         return NumpyBackend.instance()
     elif isinstance(nplike, Cupy):
@@ -152,17 +154,23 @@ _UNSET = object()
 D = TypeVar("D")
 
 
-def backend_for(*arrays, default: D = _UNSET) -> Backend | D:
-    nplike = nplike_of(*arrays, default=None)
-    if nplike is None:
-        if default is _UNSET:
-            raise ak._errors.wrap_error(
-                ValueError("could not find backend for", arrays)
-            )
-        else:
-            return default
-    else:
+def backend_for(*objects, default: D = _UNSET) -> Backend | D:
+    """
+    Args:
+        objects: objects for which to find a suitable backend
+        default: value to return if no backend is found.
+
+    Return the most suitable backend for the given objects (e.g. arrays, layouts). If no
+    suitable backend is found, return the `default` value, or raise a `ValueError` if
+    no default is given.
+    """
+    nplike = nplike_of(*objects, default=None)
+    if nplike is not None:
         return _backend_for_nplike(nplike)
+    elif default is _UNSET:
+        raise ak._errors.wrap_error(ValueError("could not find backend for", objects))
+    else:
+        return default
 
 
 _backends = {

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
-
-# v2: keep this file, but modernize the 'of' function; ptr_lib is gone.
+from __future__ import annotations
 
 import ctypes
 from collections.abc import Iterable
@@ -10,6 +9,7 @@ import numpy
 from awkward_cpp.lib import _ext
 
 import awkward as ak
+from awkward.typing import TypeVar
 
 
 class Singleton:
@@ -952,8 +952,10 @@ class Jax(NumpyLike):
 # Temporary sentinel marking "argument not given"
 _UNSET = object()
 
+D = TypeVar("D")
 
-def nplike_of(*arrays, default=_UNSET):
+
+def nplike_of(*arrays, default: D = _UNSET) -> NumpyLike | D:
     """
     Args:
         *arrays: iterable of possible array objects
@@ -963,28 +965,28 @@ def nplike_of(*arrays, default=_UNSET):
     iterable of arrays. Return an instance of the `default_cls` if no known array types
     are found.
     """
-    nplikes = set()
+    nplikes: set[NumpyLike] = set()
     nplike_classes = (Numpy, Cupy, Jax, ak._typetracer.TypeTracer)
-    # TODO fixme - we should prohibit high-level objects here,
-    # as it's an internal function that needs to be fast
-    arrays = [getattr(x, "layout", x) for x in arrays]
     for array in arrays:
-        nplike = getattr(array, "nplike", None)
-        if nplike is not None:
-            nplikes.add(nplike)
-            continue
-        backend = getattr(array, "backend", None)
-        if backend is not None:
-            nplikes.add(backend.nplike)
+        if hasattr(array, "layout"):
+            array = array.layout
+
+        # Layout objects
+        if hasattr(array, "backend"):
+            nplikes.add(array.backend.nplike)
             continue
 
-        for cls in nplike_classes:
-            if cls.is_own_array(array):
-                nplikes.add(cls.instance())
-                break
+        # Index objects
+        elif hasattr(array, "nplike"):
+            nplikes.add(array.nplike)
+            continue
 
-    if any(isinstance(x, ak._typetracer.TypeTracer) for x in nplikes):
-        return ak._typetracer.TypeTracer.instance()
+        # Other e.g. nplike arrays
+        else:
+            for cls in nplike_classes:
+                if cls.is_own_array(array):
+                    nplikes.add(cls.instance())
+                    break
 
     if nplikes == set():
         if default is _UNSET:
@@ -994,6 +996,11 @@ def nplike_of(*arrays, default=_UNSET):
     elif len(nplikes) == 1:
         return next(iter(nplikes))
     else:
+        # We allow typetracers to mix with other nplikes, and take precedence
+        for nplike in nplikes:
+            if not (nplike.known_data and nplike.known_shape):
+                return nplike
+
         raise ak._errors.wrap_error(
             ValueError(
                 """attempting to use both a 'cpu' array and a 'cuda' array in the same operation; use one of
