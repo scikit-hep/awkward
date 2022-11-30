@@ -883,8 +883,6 @@ class UnionArray(Content):
                 contents,
                 parameters=self._parameters,
                 backend=self._backend,
-                merge=True,
-                mergebool=False,
             )
 
     def _offsets_and_flattened(self, axis, depth):
@@ -1239,8 +1237,6 @@ class UnionArray(Content):
             contents,
             parameters=self._parameters,
             backend=self._backend,
-            merge=True,
-            mergebool=False,
         )
 
     def _local_index(self, axis, depth):
@@ -1497,8 +1493,6 @@ class UnionArray(Content):
                 contents,
                 parameters=self._parameters,
                 backend=self._backend,
-                merge=True,
-                mergebool=False,
             )
 
     def _to_arrow(self, pyarrow, mask_node, validbytes, length, options):

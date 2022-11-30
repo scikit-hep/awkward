@@ -59,8 +59,6 @@ def _impl(array, name, highlevel, behavior):
                 layout._contents,
                 parameters=layout._parameters,
                 backend=layout._backend,
-                merge=True,
-                mergebool=False,
             )
         else:
             return None
