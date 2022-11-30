@@ -86,10 +86,6 @@ class Content:
             return self._parameters.get(key)
 
     @property
-    def nplike(self) -> NumpyLike:
-        return self._backend.nplike
-
-    @property
     def backend(self) -> Backend:
         return self._backend
 

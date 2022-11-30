@@ -16,7 +16,7 @@ class Lookup:
             else:
                 return x.ctypes.data
 
-        self.nplike = layout.nplike
+        self.nplike = layout.backend.nplike
         self.generator = generator
         self.positions = positions
         self.arrayptrs = self.nplike.array(
