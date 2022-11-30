@@ -91,9 +91,16 @@ def _impl(array, counts, axis, highlevel, behavior):
         elif counts.is_numpy or counts.is_unknown:
             counts = counts.to_numpy(allow_missing=False)
             mask = False
+        else:
+            raise ak._errors.wrap_error(
+                ValueError(
+                    "counts must be an integer or a one-dimensional array of integers"
+                )
+            )
 
         if counts.ndim != 1:
             raise ak._errors.wrap_error(ValueError("counts must be one-dimensional"))
+
         if not issubclass(counts.dtype.type, np.integer):
             raise ak._errors.wrap_error(ValueError("counts must be integers"))
 
