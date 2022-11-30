@@ -43,23 +43,23 @@ class Backend(Protocol[T]):
     @property
     @abstractmethod
     def nplike(self) -> NumpyLike:
-        ...
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @property
     @abstractmethod
     def index_nplike(self) -> NumpyLike:
-        ...
+        raise ak._errors.wrap_error(NotImplementedError)
 
     @classmethod
     @abstractmethod
     def instance(cls) -> Self:
-        ...
+        raise ak._errors.wrap_error(NotImplementedError)
 
     def __getitem__(self, key: KernelKeyType) -> KernelType:
-        ...
+        raise ak._errors.wrap_error(NotImplementedError)
 
 
-class NumpyBackend(Backend[Any], Singleton):
+class NumpyBackend(Singleton, Backend[Any]):
     _numpy: Numpy
 
     @property
@@ -77,7 +77,7 @@ class NumpyBackend(Backend[Any], Singleton):
         return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
-class CupyBackend(Backend[Any], Singleton):
+class CupyBackend(Singleton, Backend[Any]):
     _cupy: Cupy
 
     @property
@@ -102,7 +102,7 @@ class CupyBackend(Backend[Any], Singleton):
         return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
-class JaxBackend(Backend[Any], Singleton):
+class JaxBackend(Singleton, Backend[Any]):
     _jax: Jax
     _numpy: Numpy
 
@@ -123,7 +123,7 @@ class JaxBackend(Backend[Any], Singleton):
         return JaxKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 
 
-class TypeTracerBackend(Backend[Any], Singleton):
+class TypeTracerBackend(Singleton, Backend[Any]):
     _typetracer: TypeTracer
 
     @property
