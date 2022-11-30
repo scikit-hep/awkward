@@ -222,7 +222,7 @@ class BitMaskedArray(Content):
             nplike=self._nplike,
         )
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self, simplified=False):
         index = ak.index.Index64.empty(self._mask.length * 8, self._nplike)
         assert index.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
@@ -238,12 +238,20 @@ class BitMaskedArray(Content):
                 self._lsb_order,
             ),
         )
-        return ak.contents.IndexedOptionArray(
-            index[0 : self._length],
-            self._content,
-            parameters=self._parameters,
-            nplike=self._nplike,
-        )
+        if simplified:
+            return ak.contents.IndexedOptionArray.simplified(
+                index[0 : self._length],
+                self._content,
+                parameters=self._parameters,
+                nplike=self._nplike,
+            )
+        else:
+            return ak.contents.IndexedOptionArray(
+                index[0 : self._length],
+                self._content,
+                parameters=self._parameters,
+                nplike=self._nplike,
+            )
 
     def to_ByteMaskedArray(self):
         bytemask = ak.index.Index8.empty(self._mask.length * 8, self._nplike)
@@ -411,6 +419,31 @@ class BitMaskedArray(Content):
 
     def project(self, mask=None):
         return self.to_ByteMaskedArray().project(mask)
+
+    @classmethod
+    def simplified(
+        cls,
+        mask,
+        content,
+        valid_when,
+        length,
+        lsb_order,
+        *,
+        parameters=None,
+        nplike=None,
+    ):
+        if content.is_indexed or content.is_option:
+            HERE
+        else:
+            return BitMaskedArray(
+                mask,
+                content,
+                valid_when,
+                length,
+                lsb_order,
+                parameters=parameters,
+                nplike=nplike,
+            )
 
     def simplify_optiontype(self):
         if isinstance(

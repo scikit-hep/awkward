@@ -171,7 +171,7 @@ class ByteMaskedArray(Content):
             nplike=self._nplike,
         )
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self, simplified=False):
         index = ak.index.Index64.empty(self._mask.length, self._nplike)
         assert index.nplike is self._nplike and self._mask.nplike is self._nplike
         self._handle_error(
@@ -186,10 +186,14 @@ class ByteMaskedArray(Content):
                 self._valid_when,
             ),
         )
-
-        return ak.contents.IndexedOptionArray(
-            index, self._content, parameters=self._parameters, nplike=self._nplike
-        )
+        if simplified:
+            return ak.contents.IndexedOptionArray.simplified(
+                index, self._content, parameters=self._parameters, nplike=self._nplike
+            )
+        else:
+            return ak.contents.IndexedOptionArray(
+                index, self._content, parameters=self._parameters, nplike=self._nplike
+            )
 
     def to_ByteMaskedArray(self, valid_when):
         if valid_when == self._valid_when:

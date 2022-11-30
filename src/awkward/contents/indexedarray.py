@@ -143,10 +143,15 @@ class IndexedArray(Content):
             nplike=self._nplike,
         )
 
-    def to_IndexedOptionArray64(self):
-        return ak.contents.IndexedOptionArray(
-            self._index, self._content, parameters=self._parameters, nplike=self._nplike
-        )
+    def to_IndexedOptionArray64(self, simplified=False):
+        if simplified:
+            return ak.contents.IndexedOptionArray.simplified(
+                self._index, self._content, parameters=self._parameters, nplike=self._nplike
+            )
+        else:
+            return ak.contents.IndexedOptionArray(
+                self._index, self._content, parameters=self._parameters, nplike=self._nplike
+            )
 
     def mask_as_bool(self, valid_when=True):
         if valid_when:

@@ -143,8 +143,15 @@ class IndexedOptionArray(Content):
             nplike=self._nplike,
         )
 
-    def to_IndexedOptionArray64(self):
-        if self._index.dtype == np.dtype(np.int64):
+    def to_IndexedOptionArray64(self, simplified=False):
+        if simplified:
+            return IndexedOptionArray.simplified(
+                self._index.astype(np.int64),
+                self._content,
+                parameters=self._parameters,
+                nplike=self._nplike,
+            )
+        elif self._index.dtype == np.dtype(np.int64):
             return self
         else:
             return IndexedOptionArray(

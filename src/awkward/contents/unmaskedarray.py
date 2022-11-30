@@ -108,14 +108,23 @@ class UnmaskedArray(Content):
             nplike=self._nplike,
         )
 
-    def to_IndexedOptionArray64(self):
+    def to_IndexedOptionArray64(self, simplified=False):
+        index = ak.index.Index64(arange, nplike=self.nplike)
         arange = self._nplike.index_nplike.arange(self._content.length, dtype=np.int64)
-        return ak.contents.IndexedOptionArray(
-            ak.index.Index64(arange, nplike=self.nplike),
-            self._content,
-            parameters=self._parameters,
-            nplike=self._nplike,
-        )
+        if simplified:
+            return ak.contents.IndexedOptionArray.simplified(
+                index,
+                self._content,
+                parameters=self._parameters,
+                nplike=self._nplike,
+            )
+        else:
+            return ak.contents.IndexedOptionArray(
+                index,
+                self._content,
+                parameters=self._parameters,
+                nplike=self._nplike,
+            )
 
     def to_ByteMaskedArray(self, valid_when):
         return ak.contents.ByteMaskedArray(
@@ -247,6 +256,15 @@ class UnmaskedArray(Content):
             ).project()
         else:
             return self._content
+
+    @classmethod
+    def simplified(cls, content, *, parameters=None, nplike=None):
+        if content.is_indexed or content.is_option:
+            return content.copy(
+                parameters=ak._util.merge_parameters(content._parameters, parameters)
+            )
+        else:
+            return cls(content, parameters=parameters, nplike=nplike)
 
     def simplify_optiontype(self):
         if isinstance(
